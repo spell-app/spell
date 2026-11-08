@@ -80,6 +80,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - through `spell/app/spaces`
     - through our disk reader (below)
     - or `spell/app/spaces/models/projectGroups` alone:  `<spell-viewer>` does that, to stay light
+  - An org's own programs, `@rs/OrgAdmin`, are a group found by address (`orgProgramGroup()`):  orgs can't be listed
+    up front, and the editor lists none of them.
   - Spell NEVER imports us.
 - Each group is named by its ADDRESS, and its folder comes from that (`SP.SpellUrls.folderFor()`):
 
@@ -311,6 +313,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     [PersonInbox.ts](server/node/places/PersonInbox.ts)):  `ana@rs/__inbox`, where Spell writes what people send her.
     - Its list is worked out (`SpaceMembers`):  Ana an editor, the org's Board and Admins viewers, who read it;
       the inbox page says so plainly.  Nobody else reads or writes it.
+    - Someone in the org by their Spell account (`owen@spell`, J163) has theirs at their id there, `owen@rs/__inbox`:
+      `PeopleStore.memberCalled()` says who that is;  their feed and thread list are read as `owen@spell` (I16).
     - SENDING is adding a message to her own inbox's `messages` (`INBOX_MESSAGES`), `{ text, recipients, thread? }`:
       Spell then writes a copy into each inbox it's to, the same id in each, as itself, and fills in hers
       (`from`, `thread`, `sent`).  Deleting hers leaves theirs.
@@ -680,7 +684,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - What it serves, and nothing else:
       - the sign-in, the project data folders, `/terms`, `/element/`
       - the built-in programs' pages (`/apps/<project>`, `cloudApp.html`) and files
-      - never the mail catcher's page, nor anyone's own projects
+      - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
+        - someone who can't yet gets `cloudSignIn.html` at its address, whatever the name:
+          a program's files are the org's, so it can't load to draw its own sign-in bar
+        - `spell space org create` copies the Admin, Inbox, Feed and Chat programs there, each naming the org (`OrgSetup`)
+      - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
+    - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
+      it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
       - sessions, caught mail, its read key

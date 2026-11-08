@@ -36,7 +36,7 @@ and in the app's build folder, `app/` at the app folder's root.
 - `src/` is the app:
   - `solid/`:  the UI
   - `pages/`:  the pages and the router;  among them a site's editor, `/site/<project>` (`SiteEditorPage`, epic
-    `mockup` P4), which changes the site's file through `SiteWrites`;  a page's jobs, `PageJobs` (P6)
+    `mockup` P4), which changes the site's file through `SiteWrites`;  a page's stories, `PageStories` (P6)
   - `ui/`:  `UI`, shared UI types, Monaco's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)

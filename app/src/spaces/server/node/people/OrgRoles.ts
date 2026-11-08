@@ -161,7 +161,7 @@ export class OrgRoles {
     const account = SP.SpellLocation.accountParts(head)
     if (!account || !(await this.people.roster(account.org))) return undefined
     if (await this.spaceAt(address)) return undefined
-    return { org: account.org, person: head }
+    return { org: account.org, person: await this.people.memberCalled(account.org, head) }
   }
 
   /**

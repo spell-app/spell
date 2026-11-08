@@ -662,6 +662,8 @@ Here the org's roles are kept once, in its Admin space (`@rs/__admin`), and ever
 - Each member has a space of their own in the org (`ana@rs`), handed to them when they leave (`spell space org leave`).
 - If the Admins are gone, the Board names new ones.
   If the Board is lost too, recovery codes bring it back (`spell space org codes`, then `recover`).
+- `spell space org create` gives each org its own copies of the Admin, Inbox, Feed and Chat programs, on Spell's cloud
+  at `/apps/@rs/OrgAdmin` and so on:  only people the org has let in can open them.
 - The built-in programs for an org ([README-examples](README-examples.md)):
   - Org Admin, and its Spanish twin Administración de la Org:  people, teams, who manages and designs what,
     approved apps, event stages, the log

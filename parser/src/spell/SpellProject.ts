@@ -936,11 +936,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * What project file `contents` says that changes the code (`P.WriterOptions`):
    * - where its lists start, `listsStartAt`
-   * - the types it `exports`, which another project may extend:  `extendable` (epic `language` P26)
+   * - the types another project may extend, `extendable` (epic `language` P26, J29):
+   *   the ones it `exports`;  with no list, every one of them if it has a `version`, as it's made to be imported
    */
-  static writerOptionsFor(contents: Pick<SP.ProjectManifestJSON5, "exports" | "listsStartAt">): P.WriterOptions {
-    const { exports, listsStartAt } = contents
-    return { ...(listsStartAt !== undefined && { listsStartAt }), ...(exports && { extendable: exports }) }
+  static writerOptionsFor(
+    contents: Pick<SP.ProjectManifestJSON5, "exports" | "listsStartAt" | "version">
+  ): P.WriterOptions {
+    const { exports, listsStartAt, version } = contents
+    const extendable = exports ?? (version ? true : undefined)
+    return { ...(listsStartAt !== undefined && { listsStartAt }), ...(extendable && { extendable }) }
   }
 
   /** A source file's name in a map, its name in the project:  `Card.spell` for its path. */

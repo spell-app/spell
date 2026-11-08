@@ -11,7 +11,7 @@ import { EpicProgram } from "spell/epic/cli/EpicProgram"
 import { EpicGuide } from "spell/epic/command/EpicGuide"
 
 /** The topics the guide must have:  the loop's steps, and the Claude-only tools the next phase's skills point at. */
-const TOPICS = ["workflow", "find", "plan", "build", "review", "turn", "done", "claude-only-tools"]
+const TOPICS = ["workflow", "find", "plan", "build", "review", "turn", "done", "tidy", "claude-only-tools"]
 
 const guide = new EpicGuide()
 

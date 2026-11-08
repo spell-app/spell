@@ -113,3 +113,32 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
 ]
 
 for (const group of PROJECT_GROUPS) SpellSetup.addProjectRoot(group)
+
+/** An org's group, `@rs`, or a program in its shared space, `@rs/OrgAdmin`:  never Spell's own folders, `@rs/__admin`. */
+const ORG_PROGRAM = /^(@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
+
+/** Orgs with an address of their own that isn't a project group:  Spell's built-ins, and an editor's local folders. */
+const NOT_AN_ORG_GROUP = new Set([`@${HOME_ORG}`, "@local"])
+
+/**
+ * The project group of an org's own programs, `@rs` for `@rs/OrgAdmin` (epic `atmosphere` I14):
+ * found by its address, as orgs can't be listed up front;  `undefined` for anything else.
+ * - Not one of `PROJECT_GROUPS`, so the editor doesn't list it.
+ * - Only their programs:  a data folder's address reads the same, and never asks.
+ */
+function orgProgramGroup(place: string): SP.ProjectRootSpec | undefined {
+  const org = ORG_PROGRAM.exec(place)?.[1] as SP.ProjectRootPath | undefined
+  if (!org || NOT_AN_ORG_GROUP.has(org)) return undefined
+  return {
+    path: org,
+    space: org,
+    domain: "org",
+    title: "Org programs",
+    Type: "Program",
+    type: "program",
+    description: "An org's own programs, in its shared space",
+    icon: "building"
+  }
+}
+
+SpellSetup.addProjectRootFinder(orgProgramGroup)

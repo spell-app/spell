@@ -24,8 +24,13 @@ const PAGE = `<!doctype html><html><head><title>T</title></head><body><main>
 
 /** In the page, before anything else:  how it came in (`window.came`). */
 function logArrival() {
-  const came = { transition: false, heldAtStart: false, finished: false }
+  const came = { transition: false, heldAtStart: false, finished: false, drawnHidden: false }
   Object.assign(window, { came })
+  const watchHidden = () => {
+    if (document.documentElement?.style.opacity === "0") came.drawnHidden = true
+    else requestAnimationFrame(watchHidden)
+  }
+  watchHidden()
   addEventListener("pagereveal", (event) => {
     const transition = (event as Event & { viewTransition?: ViewTransition | null }).viewTransition
     if (!transition) return
@@ -72,6 +77,35 @@ function came(page: Page) {
   return page.evaluate(() => (window as unknown as { came: Record<string, boolean> }).came)
 }
 
+describe("liveClient's reload in a frame (VS Code's side bar):  no view transition, faded in", () => {
+  it("draws the new page hidden, at its place, then shows it", async () => {
+    const host = await browser.newPage({ viewport: { width: 800, height: 600 } })
+    await host.addInitScript(logArrival)
+    const url = `http://127.0.0.1:${server.info.port}/docs/page.html`
+    await host.setContent(`<iframe src="${url}" style="width:700px;height:500px"></iframe>`)
+    const frame = await (await host.waitForSelector("iframe")).contentFrame()
+    await frame!.waitForFunction(() => !!(window as { SPELL_SERVER?: { reloadNow?: unknown } }).SPELL_SERVER?.reloadNow)
+    await frame!.evaluate(() => {
+      scrollTo(0, 900)
+      Object.assign(window, { isOld: true })
+      ;(window as unknown as { SPELL_SERVER: { reloadNow(): void } }).SPELL_SERVER.reloadNow()
+    })
+    await frame!.waitForFunction(
+      () =>
+        !(window as { isOld?: boolean }).isOld &&
+        document.readyState === "complete" &&
+        !document.documentElement.style.opacity &&
+        !document.documentElement.style.transition
+    )
+    const state = await frame!.evaluate(() => ({
+      y: scrollY,
+      ...(window as unknown as { came: Record<string, boolean> }).came
+    }))
+    expect(state).toMatchObject({ y: 900, transition: false, drawnHidden: true })
+    await host.close()
+  })
+})
+
 describe("liveClient's reload:  the new page held behind the old one (holdReveal())", () => {
   it("cross-fades in through a view transition, held until it's ready, its scroll and `#id` kept", async () => {
     const page = await opened("#more", 1234)
@@ -80,7 +114,7 @@ describe("liveClient's reload:  the new page held behind the old one (holdReveal
       page.evaluate(() => (window as unknown as { SPELL_SERVER: { reloadNow(): void } }).SPELL_SERVER.reloadNow())
     ])
     await page.waitForFunction(() => (window as unknown as { came: { finished: boolean } }).came.finished)
-    expect(await came(page)).toEqual({ transition: true, heldAtStart: true, finished: true })
+    expect(await came(page)).toMatchObject({ transition: true, heldAtStart: true, finished: true })
     expect(await page.evaluate(() => [Math.round(scrollY), location.hash])).toEqual([1234, "#more"])
     await page.close()
   })
@@ -92,7 +126,7 @@ describe("liveClient's reload:  the new page held behind the old one (holdReveal
       page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
     ])
     await page.waitForFunction(() => (window as unknown as { came: { finished: boolean } }).came.finished)
-    expect(await came(page)).toEqual({ transition: true, heldAtStart: true, finished: true })
+    expect(await came(page)).toMatchObject({ transition: true, heldAtStart: true, finished: true })
     expect(await page.evaluate(() => Math.round(scrollY))).toBe(1234)
     expect(await page.locator("body > button").count()).toBe(0)
     await page.close()

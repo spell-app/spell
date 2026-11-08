@@ -768,10 +768,10 @@ export type SpellxDeclarationKind =
  * A spellx block of prose:  a member's long description, a comment among its lines,
  * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
  * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
- * - Or a page's JOBS, `<spell-jobs>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
- *   `<jobs>` block, compiled to its `static jobs`.
+ * - Or a page's STORIES, `<spell-stories>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
+ *   `<stories>` block, compiled to its `static stories`.
  */
-export type SpellxNoteKind = "description" | "comment" | "property editor" | "jobs"
+export type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"
 
 /**
  * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);

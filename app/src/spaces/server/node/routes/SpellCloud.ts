@@ -14,6 +14,7 @@ import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
+import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR } from "./EditorServer"
@@ -32,6 +33,12 @@ const RECORD_FILE = "cloud.json"
 
 /** The page every program is served on (`/apps/<project>`). */
 const APP_PAGE = fileURLToPath(new URL("cloudApp.html", import.meta.url))
+
+/** The page someone gets at an org's program they can't read yet:  signing in, or who they're signed in as. */
+const SIGN_IN_PAGE = fileURLToPath(new URL("cloudSignIn.html", import.meta.url))
+
+/** The file that makes a folder a program. */
+const PROJECT_FILE = "__project.json5"
 
 /** Spell's terms page (epic `atmosphere` P7). */
 const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
@@ -63,8 +70,11 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *   - every project data folder, as the page server serves them (`SpaceFolders`):
  *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`, and their live rooms,
  *     `/api/rooms/spaces/...` (epic `atmosphere` T38)
- *   - `/apps/<project>`:  a built-in program's page (`cloudApp.html`), and its files under `/spaces/`,
- *     for `@spell/examples` and `@spell/guides` alone
+ *   - `/apps/<project>`:  a program's page (`cloudApp.html`), and its files under `/spaces/`:
+ *     - the built-in ones, `@spell/examples` and `@spell/guides`, for anyone
+ *     - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
+ *       - someone who can't yet gets `cloudSignIn.html` at its address:  a program can't load to draw its own sign-in bar
+ *       - never a private space or the Admin space, nor anyone's own projects
  *   - `/element/...`:  `<spell-viewer>` and the runtime
  *   - `/terms`;  `/hello`, liveness
  *   - AT Protocol's handle look-up, on a handle's own host (epic `atmosphere` P16):
@@ -99,6 +109,8 @@ export class SpellCloud {
   private readonly folders: SpaceFolders
   /** Where it keeps its own files. */
   private readonly dir: string
+  /** Where an address's folder is on disk. */
+  private readonly folderFor: (address: string) => string
   /** Spell accounts:  who signs in, and whose handle is whose. */
   private readonly accounts: SpellAccounts
   /** Each org's own domain, to its id, as `listen()` read them:  their handles' hosts. */
@@ -110,11 +122,12 @@ export class SpellCloud {
     address,
     dir = environment.cloudDir,
     people = peopleStore(),
-    folderFor,
+    folderFor = folderForPlace,
     abuseContact = environment.abuseContact
   }: SpellCloudProps = {}) {
     this.address = address?.replace(/\/+$/, "")
     this.dir = dir
+    this.folderFor = folderFor
     mkdirSync(dir, { recursive: true })
     this.server = new SRV.WebServer({ live: false })
     if (this.address) this.server.guard.allowAddress(this.address)
@@ -127,7 +140,7 @@ export class SpellCloud {
       personFor: signedInPerson,
       people,
       abuseContact,
-      ...(folderFor && { folderFor })
+      folderFor
     })
     this.accounts = new SpellAccounts(people, { takedowns: this.folders.takedowns })
     this.server.guard.allowHosts((host) => this.isHandleHost(host))
@@ -207,11 +220,17 @@ export class SpellCloud {
     })
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
     router.get("/hello", (_request, reply) => reply.set("Cache-Control", "no-store").json({ message: "Spell's cloud" }))
-    router.get(`${CLOUD_APPS_PREFIX}/:project*`, (request, reply) => {
-      if (!SERVED_GROUPS.test(`/${request.params.project ?? ""}/`)) throw new SRV.HttpError(404, "no such program here")
-      return reply.set("Cache-Control", "no-store").sendFile(APP_PAGE)
+    router.get(`${CLOUD_APPS_PREFIX}/:project*`, async (request, reply) => {
+      reply.set("Cache-Control", "no-store")
+      const path = `/${request.params.project ?? ""}/`
+      if (SERVED_GROUPS.test(path)) return reply.sendFile(APP_PAGE)
+      const program = await this.sharedProgramAt(path)
+      if (!program) throw new SRV.HttpError(404, "no such program here")
+      if (!(await this.folders.mayReadSpace(program.space, request.person))) return reply.sendFile(SIGN_IN_PAGE)
+      if (!program.exists) throw new SRV.HttpError(404, "no such program here")
+      return reply.sendFile(APP_PAGE)
     })
-    router.use("/spaces", onlyServedGroups, spaceFiles)
+    router.use("/spaces", this.onlyServedPrograms, spaceFiles)
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
   }
 
@@ -227,6 +246,52 @@ export class SpellCloud {
     const did = await this.accounts.didForHandle(host)
     if (!did) throw new SRV.HttpError(404, `no account has the handle ${host}`)
     reply.type("text/plain; charset=utf-8").set("Cache-Control", "no-store").send(did)
+  }
+
+  /**
+   * The program a path is in, `/@rs/OrgAdmin/...`, when it's one in an org's own SHARED space:  `undefined` for
+   * anything else, a team's space among them (programs are a project group's, and only the org's own is one).
+   * - A program is a folder straight in the shared space, with a project file (`exists`).
+   *   - `exists` is the caller's to act on only for someone who reads the space:
+   *     to anyone else, every name there answers the same, so a stranger can't find out what an org has.
+   * - Never a private space, the Admin space or an attendees' space:  `OrgRoles.spaceAt()` says which side it's on.
+   * - Never a folder of Spell's own in a program (`__draft/` ...), a dot file, a `..`, or a bad escape.
+   */
+  private async sharedProgramAt(path: string): Promise<SharedProgram | undefined> {
+    let decoded: string
+    try {
+      decoded = decodeURIComponent(path)
+    } catch {
+      return undefined
+    }
+    const parts = decoded.split("/").filter((each) => each !== "")
+    if (parts.some((each) => each.startsWith(".") || each.includes("\\"))) return undefined
+    const space = await this.folders.orgRoles.spaceAt(parts.join("/"))
+    if (space?.side !== "shared" || space.of.kind !== "the-org") return undefined
+    const [program, ...inside] = parts.slice(space.address.split("/").length)
+    if (!program || program.startsWith("__")) return undefined
+    if (
+      inside.some((each, index) => each.startsWith("__") && !(each === PROJECT_FILE && index === inside.length - 1))
+    ) {
+      return undefined
+    }
+    return {
+      space: space.address,
+      exists: existsSync(join(this.folderFor(`${space.address}/${program}`), PROJECT_FILE))
+    }
+  }
+
+  /**
+   * Middleware:  `/spaces/...` for the built-in groups, and a program in a shared space for whoever reads the space;
+   * 404 for anything else, a person's own projects above all.
+   */
+  private onlyServedPrograms = async (request: SRV.Request, _reply: SRV.Reply, next: SRV.Next): Promise<void> => {
+    if (SERVED_GROUPS.test(request.path)) return next()
+    const program = await this.sharedProgramAt(request.path)
+    if (!program?.exists || !(await this.folders.mayReadSpace(program.space, request.person))) {
+      throw new SRV.HttpError(404, "no such file here")
+    }
+    next()
   }
 
   /** Is `host` (its port left on or not) one of an account's handles, a host the handle look-up answers? */
@@ -252,6 +317,14 @@ export type SpellCloudProps = {
   folderFor?: (address: string) => string
   /** Where people report abuse:  default the server's (`environment.abuseContact`). */
   abuseContact?: string
+}
+
+/** A program in an org's shared space (`SpellCloud.sharedProgramAt()`). */
+type SharedProgram = {
+  /** The shared space it's in:  `@rs`. */
+  space: string
+  /** Is there a program of that name? */
+  exists: boolean
 }
 
 /** What `SpellCloud.listen()` takes. */
@@ -283,12 +356,6 @@ export type CloudRecord = {
 export function signedInPerson(request: SRV.Request): string {
   if (!request.person) throw new SRV.HttpError(401, "Sign in with your Spell account first.")
   return request.person
-}
-
-/** Middleware:  `/spaces/...` for the built-in groups alone;  404 for anything else, a person's own projects above all. */
-function onlyServedGroups(request: SRV.Request, _reply: SRV.Reply, next: SRV.Next): void {
-  if (!SERVED_GROUPS.test(request.path)) throw new SRV.HttpError(404, "no such file here")
-  next()
 }
 
 /** Middleware:  every cookie this reply sets is `Secure`, as the cloud's address is `https`. */

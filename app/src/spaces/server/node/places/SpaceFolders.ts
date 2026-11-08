@@ -303,7 +303,7 @@ export class SpaceFolders {
           mailer,
           people,
           placeAt: async (at) => (await this.placeFor(at, undefined)) as FolderPlace | undefined,
-          inboxOf: (person) => this.inboxOf(person),
+          inboxOf: (person, org) => this.inboxOf(person, org),
           credentials,
           address,
           queueStorage: (this.queue ??= new SRV.FileStorage(queueFile))
@@ -491,9 +491,9 @@ export class SpaceFolders {
     const rolesOf = OrgRolesPlace.orgAt(address)
     if (rolesOf !== undefined) return this.rolesPlaceOf(rolesOf)
     const feedOf = PersonFeed.personAt(address)
-    if (feedOf !== undefined) return this.feedOf(feedOf)
+    if (feedOf !== undefined) return this.feedOf(identity ?? feedOf, orgOfAccount(feedOf))
     const threadsOf = PersonThreads.personAt(address)
-    if (threadsOf !== undefined) return this.threadsOf(threadsOf)
+    if (threadsOf !== undefined) return this.threadsOf(identity ?? threadsOf, orgOfAccount(threadsOf))
     const known = this.places.get(address)
     if (known) return known
     const folder = this.folderAt(address)
@@ -511,7 +511,7 @@ export class SpaceFolders {
             storage,
             members,
             membersAt: (at) => this.spaceFolderAt(at)?.members,
-            inboxOf: (person) => this.inboxOf(person)
+            inboxOf: (person) => this.inboxOf(person, orgOfAccount(address.split("/")[0] ?? ""))
           })
         : undefined
     // a shared space's new things reach its subscribers as updates (P30)
@@ -676,15 +676,19 @@ export class SpaceFolders {
     return made
   }
 
-  /** `person`'s inbox (`ana@rs`):  `undefined` for someone with none, outside an org with an Admin space. */
-  inboxOf(person: string): Promise<PersonInbox | undefined> {
-    return this.inboxAt(PersonInbox.addressOf(person))
+  /**
+   * `person`'s inbox (`ana@rs`) in org `org`, default their own:  `undefined` for someone with none, outside an org
+   * with an Admin space.
+   */
+  inboxOf(person: string, org?: string): Promise<PersonInbox | undefined> {
+    return this.inboxAt(PersonInbox.addressOf(person, org))
   }
 
   /** The inbox at `address`, made:  see `inboxAt()`. */
   private async makeInbox(address: string): Promise<PersonInbox | undefined> {
     const owner = await this.orgRoles.inboxAt(address)
-    const folder = owner && address === PersonInbox.addressOf(owner.person) ? this.spaceFolderAt(address) : undefined
+    const isTheirs = owner && address === PersonInbox.addressOf(owner.person, owner.org)
+    const folder = isTheirs ? this.spaceFolderAt(address) : undefined
     if (!owner || !folder) return undefined
     this.queue ??= new SRV.FileStorage(this.queueFile)
     return new PersonInbox({
@@ -868,6 +872,18 @@ export class SpaceFolders {
   }
 
   /** The folder at `address`, if it's a space's own, read direct:  never a program's own data, or no address at all. */
+  /**
+   * May `person` (`undefined`:  nobody signed in) read the space at `address`?
+   * - By its own list and settings (`SpaceMembers.mayRead()`), and not while the space, or their account, is taken down.
+   * - `false` for an address that's no space's.
+   * - NEVER throws.
+   */
+  async mayReadSpace(address: string, person: string | undefined): Promise<boolean> {
+    const folder = this.spaceFolderAt(address)
+    if (!folder || !(await folder.members.mayRead(person))) return false
+    return !(await this.takedowns.takenDownIn(address, person)).isWhole
+  }
+
   private spaceFolderAt(address: string): SpaceFolder | undefined {
     if (!SP.SpellLocation.isAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
     return this.folderAt(address)
@@ -890,38 +906,42 @@ export class SpaceFolders {
   }
 
   /**
-   * `person`'s feed in their org (`PersonFeed`, epic `atmosphere` P33):  what's new across every space of it they may
+   * `person`'s feed in org `org` (`PersonFeed`, epic `atmosphere` P33):  what's new across every space of it they may
    * read, each read as them;  made once.
    */
-  private feedOf(person: string): PersonFeed {
-    const known = this.feeds.get(person)
+  private feedOf(person: string, org: string): PersonFeed {
+    const key = `${person} in ${org}`
+    const known = this.feeds.get(key)
     if (known) return known
     const feed = new PersonFeed({
       person,
+      org,
       spacesOf: (org) => this.lists.spacesOf(org, [`${FEED_POSTS}.list.json`]),
       placeAt: (address) => this.placeFor(address, undefined),
       isQuietAt: (address) => this.events.isQuietAt(address)
     })
-    this.feeds.set(person, feed)
+    this.feeds.set(key, feed)
     return feed
   }
 
   /**
-   * `person`'s list of threads in their org (`PersonThreads`, epic `atmosphere` P37):  every chat thread of it they may
+   * `person`'s list of threads in org `org` (`PersonThreads`, epic `atmosphere` P37):  every chat thread of it they may
    * read;  made once.
    */
-  private threadsOf(person: string): PersonThreads {
-    const known = this.threadLists.get(person)
+  private threadsOf(person: string, org: string): PersonThreads {
+    const key = `${person} in ${org}`
+    const known = this.threadLists.get(key)
     if (known) return known
     const roles = this.orgRoles
     const threads = new PersonThreads({
       person,
+      org,
       spacesOf: (org) => roles.pairedSpacesOf(org),
       isInOrg: (org, who) => roles.isInOrg(org, who),
       managersOf: (space) => roles.managersOfSpace(space),
       placeAt: (address) => this.placeFor(address, undefined)
     })
-    this.threadLists.set(person, threads)
+    this.threadLists.set(key, threads)
     return threads
   }
 
@@ -977,6 +997,11 @@ export class SpaceFolders {
       return undefined
     }
   }
+}
+
+/** The org of an account or a space's first part:  `bo@rs` => `rs`. */
+function orgOfAccount(account: string): string {
+  return account.slice(account.indexOf("@") + 1)
 }
 
 /** Constructor props of `SpaceFolders`:  each one's default is the app's own, so a test hands in its own. */

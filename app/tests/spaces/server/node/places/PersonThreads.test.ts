@@ -37,7 +37,12 @@ beforeAll(async () => {
   for (const id of [...RS, "zed"]) {
     await storage.write(personFile(id, "rs"), JSON.stringify({ $type: "Person", id, names: id }))
   }
-  const members = RS.map((id) => ({ $type: "Membership", person: { $ref: `Person#${id}@rs` }, role: "editor" }))
+  await storage.write(personFile("owen", "spell"), JSON.stringify({ $type: "Person", id: "owen", names: "Owen" }))
+  const members = [...RS.map((id) => `${id}@rs`), "owen@spell"].map((address) => ({
+    $type: "Membership",
+    person: { $ref: `Person#${address}` },
+    role: "editor"
+  }))
   await storage.write(orgFile("rs"), JSON.stringify({ $type: "Org", id: "rs", name: "RS", members }))
   const roles = folders.orgRoles
   await roles.setUp("rs", { board: "ana@rs" })
@@ -80,6 +85,13 @@ describe("whose threads", () => {
 
   test("Zed, outside RS, sees none", async () => {
     expect(await threadsOf("zed")).toEqual([])
+  })
+
+  test("someone in RS by their Spell account sees its open threads, not an empty list (I16)", async () => {
+    const place = await folders.placeFor("@rs/__threads", "owen@spell")
+    const { rows } = await place!.list(THREADS_COLLECTION, {}, { identity: "owen@spell" })
+    expect(rows.map((row) => row.thread)).toContain("events_team@rs/messages")
+    expect(rows.map((row) => row.thread)).not.toContain("events_team@rs/__private/messages")
   })
 
   test("each row names whose it is, and links to the page showing it", async () => {

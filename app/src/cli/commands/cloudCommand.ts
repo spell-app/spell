@@ -11,6 +11,37 @@ import { CLOUD_PORT, SpellCloud } from "spell/app/spaces/server/node/routes/Spel
 const SERVICE_NAME = "spell.cloud"
 
 /**
+ * What every program on the cloud runs on, `<spell-viewer>` and the runtime (`yarn build:element`):
+ * git-ignored, so nothing else keeps a checkout's current.
+ * - Its `sources`:  more than it needs, on purpose:  a needless build costs a minute, a stale one breaks every page.
+ */
+const BROWSER_BUNDLE: SRV.BundleSpec = {
+  name: "app-element",
+  title: "the browser bundle programs run on",
+  package: "spell-app",
+  cwd: ".",
+  run: ["yarn", "build:element"],
+  output: "app/dist-element",
+  entry: "spell-viewer.js",
+  sources: [
+    "spell/src/util",
+    "spell/src/places",
+    "spell/src/element",
+    "spell/parser/src",
+    "spell/ui/src",
+    "spell/app/src/app",
+    "spell/app/src/spaces/models",
+    "spell/app/app/static",
+    "spell/app/app/vite.shared.ts",
+    "spell/app/app/vite.solid.config.ts",
+    "spell/app/app/vite.element.config.ts",
+    "spell/app/app/vite.editor.config.ts",
+    "spell/app/app/vite.code.config.ts",
+    "yarn.lock"
+  ]
+}
+
+/**
  * `spell space cloud serve | status | invite | mail | service` (epic `atmosphere` P8, Q8 B):
  * Spell's server for people outside this machine (`SpellCloud`),
  * the cloud a program's `... is saved in the cloud` keeps its things in.
@@ -42,6 +73,7 @@ export type CloudOptions = {
 
 /** `serve`:  until `Ctrl-C`. */
 async function serve({ address, port = CLOUD_PORT }: CloudOptions): Promise<number> {
+  browserBundleCurrentOrDie()
   const cloud = new SpellCloud({ ...(address && { address }) })
   const { url } = await cloud.listen({ port })
   console.log(
@@ -51,6 +83,25 @@ async function serve({ address, port = CLOUD_PORT }: CloudOptions): Promise<numb
   console.log(`Its mail, until a mail service is picked:  spell space cloud mail`)
   await SRV.untilInterrupted(cloud.server.server, () => cloud.close())
   return 0
+}
+
+/**
+ * SIDE EFFECT:  build the browser bundle if it's stale, so the cloud never serves pages an old one can't run.
+ * - Built when a server starts, and not after:  a merge while it runs needs a restart.
+ * - throws `CliError` when the build fails, naming how to see why:  it starts on no stale bundle.
+ */
+export function browserBundleCurrentOrDie(bundle = new SRV.Bundle(environment.repoDir, BROWSER_BUNDLE)): void {
+  const { stale } = bundle.check()
+  if (!stale) return
+  console.log(`Spell's browser bundle is out of date (${stale}):  building it first, which takes a minute or two.`)
+  try {
+    bundle.build()
+  } catch (error) {
+    throw new CLI.CliError(
+      `Spell's browser bundle didn't build, so the cloud won't start on a stale one:  ${(error as Error).message}\n` +
+        `To see why:  cd ${bundle.packageDir} && ${BROWSER_BUNDLE.run.join(" ")}`
+    )
+  }
 }
 
 /** `status`:  see `cloudCommand()`. */

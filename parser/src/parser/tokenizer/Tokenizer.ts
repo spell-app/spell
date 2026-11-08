@@ -24,7 +24,7 @@ export class Tokenizer {
   rawTextTags: string[] = []
   /**
    * Tags that are never drawn, so never part of an implicit fragment:  a block of their own, whatever follows them
-   * (`matchJSXElements()`).  Spell's:  `<jobs>`, a page's jobs (epic `mockup` P14, T26).
+   * (`matchJSXElements()`).  Spell's:  `<stories>`, a page's stories (epic `mockup` P14, T26).
    */
   standAloneTags: string[] = []
 
@@ -460,7 +460,7 @@ export class Tokenizer {
    * - "Right after":  on the same line, or the NEXT line, indented at least as far as the line the first one
    *   starts on.  Not after a blank line, nor a less indented one:  that's the next statement's.
    * - Only at the top level:  inside an element, elements side by side are its children anyway.
-   * - Never a tag that's never drawn (`standAloneTags`:  spell's `<jobs>`):  it's a block of its own, so a `<markdown>`
+   * - Never a tag that's never drawn (`standAloneTags`:  spell's `<stories>`):  it's a block of its own, so a `<markdown>`
    *   on the line after it reads as the next block (epic `mockup` P14, T26).
    */
   matchJSXElements = (text: string, start = 0, end?: number): P.JSXElementToken | P.JSXFragmentToken | undefined => {

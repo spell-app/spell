@@ -178,7 +178,7 @@ export class SpellxTwin {
    * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
    */
   private template(): SpellxTwinLine {
-    const regrouped = this.block && (SpellxTwin.withGroupsOpened(this.block) ?? SpellxTwin.withJobsAsBlocks(this.block))
+    const regrouped = this.block && (SpellxTwin.withGroupsOpened(this.block) ?? SpellxTwin.withStoriesAsBlocks(this.block))
     if (regrouped)
       return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
@@ -253,8 +253,8 @@ export class SpellxTwin {
       const isMember =
         (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
         (first instanceof SP.SpellxProseToken && !!first.note) ||
-        // its jobs, `<spell-jobs>`, as `withJobsAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
-        (first instanceof P.JSXElementToken && first.tagName === JOBS && item.tokens.length === 1)
+        // its stories, `<spell-stories>`, as `withStoriesAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
+        (first instanceof P.JSXElementToken && first.tagName === STORIES && item.tokens.length === 1)
       // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
       if (isCloser) {
         if (last === members) members.push(item)
@@ -541,21 +541,21 @@ export class SpellxTwin {
   }
 
   /**
-   * Template `block` with each `<spell-jobs>` note written as code spell's `<jobs>` block, its twin (epic `mockup` P6):
+   * Template `block` with each `<spell-stories>` note written as code spell's `<stories>` block, its twin (epic `mockup` P6):
    * ONE line, a raw-text element holding the note's markdown, which `markdown_description` compiles to the
-   * template's `static jobs`.
+   * template's `static stories`.
    * - `undefined` when it has none:  `block` as it is.
    * - Its text:  the note's lines as written, less the indent its first line has, so a nested list stays nested;
-   *   a job on the head's own line, `<spell-jobs>- [ ] see the films</>`, first.
+   *   a job on the head's own line, `<spell-stories>- [ ] see the films</>`, first.
    */
-  private static withJobsAsBlocks(block: P.BlockToken): P.BlockToken | undefined {
+  private static withStoriesAsBlocks(block: P.BlockToken): P.BlockToken | undefined {
     const items = block.tokens
     let changed = false
     const out: Array<P.LineToken | P.BlockToken> = []
     for (let index = 0; index < items.length; index++) {
       const item = items[index]!
       const head = item instanceof P.LineToken ? item.tokens[0] : undefined
-      if (!(head instanceof SP.SpellxProseToken) || head.note !== "jobs" || (item as P.LineToken).tokens.length !== 1) {
+      if (!(head instanceof SP.SpellxProseToken) || head.note !== "stories" || (item as P.LineToken).tokens.length !== 1) {
         out.push(item)
         continue
       }
@@ -578,7 +578,7 @@ export class SpellxTwin {
       const text = prose.map((token) => indentOf(token) + `${token.value}`).join("\n")
       const end = (prose.at(-1) ?? head).end
       const element = new P.JSXElementToken({
-        tagName: JOBS,
+        tagName: STORIES,
         start: head.start,
         raw: text,
         children: [
@@ -587,7 +587,7 @@ export class SpellxTwin {
             raw: text,
             start: first?.start ?? head.start
           }) as unknown as P.JSXElementToken,
-          new P.JSXEndTagToken({ raw: `</${JOBS}>`, tagName: JOBS, start: end }) as unknown as P.JSXElementToken
+          new P.JSXEndTagToken({ raw: `</${STORIES}>`, tagName: STORIES, start: end }) as unknown as P.JSXElementToken
         ]
       })
       out.push(new P.LineToken({ ...(item as P.LineToken).record, tokens: [element] }))
@@ -1129,8 +1129,8 @@ function childrenOf(token: P.Token): P.Token[] {
   return token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
 }
 
-/** A page's jobs' tag in code spell, `<jobs>`:  `JOBS_TAG` (the rules' own;  spellx doesn't import them). */
-const JOBS = "jobs"
+/** A page's stories' tag in code spell, `<stories>`:  `STORIES_TAG` (the rules' own;  spellx doesn't import them). */
+const STORIES = "stories"
 
 /** A tag's attributes that are never an event's parameters. */
 const NOT_PARAMS = new Set(["name", "description", "group"])

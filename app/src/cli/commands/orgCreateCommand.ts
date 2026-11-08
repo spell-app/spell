@@ -36,9 +36,6 @@ export async function orgCreateCommand(org: string, options: OrgCreateOptions): 
     await inviteAll(report.admins.map((each) => each.email))
     console.log(`\nStill to do:`)
     for (const line of report.next) console.log(`  ${line}`)
-    console.log(
-      `  its Admin page:  the built-in program Org Admin, its first line naming "@${report.org}/__admin/roles"`
-    )
     return 0
   } catch (error) {
     if (error instanceof SRV.HttpError) throw new CLI.CliError(error.message)

@@ -31,6 +31,11 @@ export const LIBRARY_CORE_MODULE = "spell/parser/core/model"
  * - A project that draws can't be a library:  its target says it can't draw (`SP.TARGETS`).
  ****************/
 export class LibraryWriter extends TSWriter {
+  /** A library's core has no running program to ask, so each `new` is its own class. */
+  protected override makesByName(): boolean {
+    return false
+  }
+
   /** The writer with no project. */
   static readonly instance = new LibraryWriter()
 
