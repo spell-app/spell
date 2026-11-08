@@ -109,6 +109,8 @@ export { SPELL_TAG_NAMES, isBareComponentName }
 
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }
+// a site's lines naming its parts, for an editor's rename (epic `mockup` P6)
+export { ShowSitePart, SiteAddressOf } from "./sites"
 /**
  * Export so a `<spell-viewer>` layout's `<markdown>` splits its holes as a drawing's does
  * -- see `MarkdownBlock.partsOf()`.

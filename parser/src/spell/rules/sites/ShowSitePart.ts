@@ -39,4 +39,14 @@ export class ShowSitePart extends SpellStatement<"part|thing?"> {
     if (thing) args.push(P.asAST<P.ASTExpression>(thing.AST))
     return new P.ASTCoreMethodInvocation(match, { methodName: "showSitePart", args })
   }
+
+  /**
+   * The part `match` names, and the words naming it, if it's one of this rule's:  `films page` in
+   * `go to the films page`.  For an editor renaming a page (epic `mockup` P6, T13).
+   */
+  static partNamedBy(match: P.Match): { name: string; words: P.Match } | undefined {
+    if (!match.is(ShowSitePart)) return undefined
+    const { part } = match.groups
+    return part ? { name: textIn(part), words: part } : undefined
+  }
 }

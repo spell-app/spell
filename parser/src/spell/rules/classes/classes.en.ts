@@ -538,6 +538,21 @@ classes.addRule(MarkdownDescription, {
           ["a card is a thing:", "\t<markdown>", "\t\tA playing card:  **{rank}** of *suit*.", "\t</markdown>"],
           ["export class Card extends Thing {", '  static description = "A playing card:  **{rank}** of *suit*."', "}"]
         ],
+        // a page's jobs (epic `mockup` P6):  what it must let people do, its `static jobs`
+        [
+          [
+            "a card is a thing:",
+            "\t<jobs>",
+            "\t\t- [ ] deal a card",
+            "\t\t- [x] As a player, I want to turn a card over",
+            "\t</jobs>"
+          ],
+          [
+            "export class Card extends Thing {",
+            '  static jobs = "- [ ] deal a card\\n- [x] As a player, I want to turn a card over"',
+            "}"
+          ]
+        ],
         // not in an outline:  says where it goes
         [
           ["<markdown>", "\tHello", "</markdown>"],

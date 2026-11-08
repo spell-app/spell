@@ -1,44 +1,106 @@
 <!--
   The whole Star Wars example as a site (epic `mockup` P1):  each of its collections, films, people, planets, species,
   vehicles and starships, as a list page and a page for one of them.
-  Its pages are empty for now:  the click-through mockups draw them.
+  Its pages draw nothing yet:  the click-through mockups draw them.
+  Each page says first what it must let people do, its jobs (epic `mockup` P6), plain lines or Agile stories.
   The site says where each page is, and fills what an address names:  "/films/:film" shows the film page, its film
   the one the address names.
 -->
-<spell-page "films page"/>
+<spell-page "films page">
+	<spell-jobs>
+		- [ ] see every film, in the order they came out
+		- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order
+			- done when:  a switch flips the list between release and story order
+		- [ ] open a film's page from its row
+	</>
+</>
 
 <spell-page "film page">
+	<spell-jobs>
+		- [ ] read the film's opening crawl
+		- [ ] As a fan, I want to see who's in a film, so that I can find their other films
+			- done when:  its people are listed, each a link to their page
+		- [ ] see the planets, starships and vehicles it shows
+	</>
 	<property "film" type="film" description="The film the address names:  /films/:film"/>
 </>
 
-<spell-page "people page"/>
+<spell-page "people page">
+	<spell-jobs>
+		- [ ] find a person by name as I type
+		- [ ] see each person's home planet and species at a glance
+		- [ ] open a person in the side panel without leaving the list
+	</>
+</>
 
 <spell-page "person page">
+	<spell-jobs>
+		- [ ] see a person's height, birth year and home planet
+		- [ ] As a fan, I want to see every film a person is in, so that I can follow their story
+			- done when:  their films are listed in release order, each a link
+	</>
 	<property "person" type="character" description="The person the address names:  /people/:person"/>
 </>
 
-<spell-page "planets page"/>
+<spell-page "planets page">
+	<spell-jobs>
+		- [ ] see every planet, with its climate and terrain
+		- [ ] sort the planets by how many people live there
+	</>
+</>
 
 <spell-page "planet page">
+	<spell-jobs>
+		- [ ] see who comes from a planet
+		- [ ] see the films a planet appears in
+	</>
 	<property "planet" type="planet" description="The planet the address names:  /planets/:planet"/>
 </>
 
 <!-- "species" is one and many:  so the list's page is "species list page" -->
-<spell-page "species list page"/>
+<spell-page "species list page">
+	<spell-jobs>
+		- [ ] see every species, with its classification and language
+		- [ ] filter the species by how long they live
+	</>
+</>
 
 <spell-page "species page">
+	<spell-jobs>
+		- [ ] see the people of a species
+		- [ ] see a species' home world
+	</>
 	<property "species" type="species" description="The species the address names:  /species/:species"/>
 </>
 
-<spell-page "vehicles page"/>
+<spell-page "vehicles page">
+	<spell-jobs>
+		- [ ] see every vehicle, with its class and crew
+		- [ ] sort the vehicles by speed
+	</>
+</>
 
 <spell-page "vehicle page">
+	<spell-jobs>
+		- [ ] see who has piloted a vehicle
+		- [ ] see the films it appears in
+	</>
 	<property "vehicle" type="vehicle" description="The vehicle the address names:  /vehicles/:vehicle"/>
 </>
 
-<spell-page "starships page"/>
+<spell-page "starships page">
+	<spell-jobs>
+		- [ ] see every starship, with its class and hyperdrive rating
+		- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one
+			- done when:  picking two starships shows their numbers in two columns
+	</>
+</>
 
 <spell-page "starship page">
+	<spell-jobs>
+		- [ ] see a starship's pilots
+		- [ ] see its length, crew and cost
+	</>
 	<property "starship" type="starship" description="The starship the address names:  /starships/:starship"/>
 </>
 

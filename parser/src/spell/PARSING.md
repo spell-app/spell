@@ -1771,6 +1771,7 @@ sidebars any of them opens.
 - Running:  the template's class extends the core's hand-written `SiteBase` (`HAND_WRITTEN_BASES`, in
   `builtInTemplateFiles.ts`), which shows the page an address names;  a program with a site starts its site, not its first
   page (`SpellProject.startedByItself()`).
+- A page's jobs (epic `mockup` P6) are the page's own, `<jobs>` / `<spell-jobs>` in its outline:  "Markdown" below.
 - Spellx:  `<spell-site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
   `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
   (`<sidebar>` is Spell UI's).
@@ -2338,6 +2339,12 @@ sidebars any of them opens.
   - in a type's outline:  [`markdown_description`](rules/classes/MarkdownDescription.ts), the type's description
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
+  - a page's JOBS, `<jobs>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static jobs`
+    - what the page must let people do, a markdown list, `- [x]` for one done;  nothing draws them
+    - spellx writes it `<spell-jobs>` (Spanish `<encanto-tareas>`), a note whose twin is the `<jobs>` block
+      (`SpellxTwin.withJobsAsBlocks()`)
+    - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between
+      a `<jobs>` and a `<markdown>` keeps them apart
   - in a `<spell-viewer>` layout:  the app's `LayoutSpell`
     - it splits holes as `markdown_block` does
   - no diagnostics inside

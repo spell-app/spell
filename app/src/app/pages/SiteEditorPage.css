@@ -69,6 +69,83 @@
     margin: 0;
     color: var(--ui-text-muted);
   }
+
+  /* a page's jobs, under its form (P6):  a row each, its box, its words and details, its buttons */
+  .SitePageJobs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--spell-pane-border-color);
+
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: var(--ui-font-weight-bold);
+    }
+    ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    li {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: start;
+      gap: 6px;
+    }
+    li > input[type="checkbox"] {
+      margin-top: 7px;
+    }
+    .words {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    textarea {
+      field-sizing: content;
+      resize: none;
+      min-height: 0;
+      width: 100%;
+      padding: 4px 6px;
+      font: inherit;
+      color: inherit;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--ui-radius-s, 4px);
+    }
+    textarea:hover,
+    textarea:focus {
+      border-color: var(--spell-pane-border-color);
+      background: var(--ui-background-color);
+    }
+    textarea.details {
+      font-size: 12px;
+      color: var(--ui-text-muted);
+    }
+    /* an empty details field shows only on the job being pointed at or typed in:  not a hint under every job */
+    li:not(:hover, :focus-within) textarea.details:placeholder-shown {
+      display: none;
+    }
+    /* a job done:  its words struck, quiet */
+    li.done textarea.text {
+      text-decoration: line-through;
+      color: var(--ui-text-muted);
+    }
+    .actions {
+      flex-wrap: nowrap;
+      gap: 2px;
+    }
+    .add {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
 }
 
 /* a project that isn't a site:  what it says, where the page would be */

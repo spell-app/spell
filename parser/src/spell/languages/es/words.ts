@@ -194,7 +194,9 @@ export const spanishWords: SP.LanguageWords = {
       descripción: "description",
       descripcion: "description",
       comentario: "comment",
-      "editor-de-propiedades": "property editor"
+      "editor-de-propiedades": "property editor",
+      // las tareas de una página (épica `mockup` P6):  `<encanto-tareas>`
+      tareas: "jobs"
     },
     handlers: {
       al: "on",

@@ -106,8 +106,8 @@ export class SiteEdits {
 
   /**
    * `text` with the part `name` called `newName`:  in its site's list, and in its own declaration.
-   * - Lines elsewhere naming it (`go to the films page`) are left as they are:  the editor marks each as a name the
-   *   site doesn't list (epic `mockup` P3), so nothing changes behind the person's back.
+   * - Lines elsewhere naming it (`go to the films page`) aren't this text edit's:  `SiteWrites.renamePart()` finds
+   *   them by the project's parse, in every file, and renames them in the same step (epic `mockup` P6, T13).
    * - throws `TypeError` when `newName` is taken, or isn't one the language reads as this kind of part
    */
   static withPartRenamed(text: string, name: string, newName: string): string {
@@ -159,6 +159,14 @@ export class SiteEdits {
    * no `before`:  last in the site.
    * - throws `TypeError` for a move into its own pages
    */
+  /**
+   * Where page `name`'s own declaration is written in `text`, with its body:  `<spell-page "x">...</>` or
+   * `a "x" is a page:` and its lines;  none for a page `text` doesn't declare (another file's, another project's).
+   */
+  static declarationOf(text: string, name: string): TextSpan | undefined {
+    return declarationOf(text, name)
+  }
+
   static withPartMoved(text: string, name: string, before?: string): string {
     const part = SiteEdits.partNamed(text, name)
     if (before === name) return text
@@ -265,7 +273,7 @@ export type SitePart = {
 export type SitePartKind = "page" | "dialog" | "sidebar"
 
 /** Where something is in a text:  from `start` up to `end`, as offsets. */
-type TextSpan = { start: number; end: number }
+export type TextSpan = { start: number; end: number }
 
 /** One of a text's lines:  its offsets, its line break included. */
 type TextLine = { text: string; start: number; end: number }

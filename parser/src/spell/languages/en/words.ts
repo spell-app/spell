@@ -183,7 +183,8 @@ export const englishWords: SP.LanguageWords = {
     // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
     // `<spell-description>`, `<spell-comment>`,
     // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
-    notes: { description: "description", comment: "comment", "property-editor": "property editor" },
+    // and a page's jobs, `<spell-jobs>` (epic `mockup` P6):  what it must let people do
+    notes: { description: "description", comment: "comment", "property-editor": "property editor", jobs: "jobs" },
     handlers: {
       on: "on",
       when: "when",
