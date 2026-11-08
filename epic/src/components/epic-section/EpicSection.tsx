@@ -5,7 +5,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 
-import { PageStages } from "spell/epic/phases"
+import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
@@ -1194,7 +1194,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     // an item Owen marked in this pass is with Claude (the blue badge), as its section's chips leave it out (P43)
     const states = children.map((child) =>
       child.localName === "epic-phase"
-        ? child.id && child.getAttribute("status") !== "done" && this.reviewState.isMarked(child.id)
+        ? child.id && !PhaseStatuses.isFinished(child.getAttribute("status")) && this.reviewState.isMarked(child.id)
           ? "marked"
           : this.phaseStateOf(child)
         : child.localName !== "epic-item"

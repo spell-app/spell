@@ -14,7 +14,7 @@ import {
 } from "spell/epic/definitions"
 import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
-import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
@@ -335,7 +335,8 @@ export class PlanDoc extends PlanReader {
     if (!Number.isInteger(n) || n < 1 || n > phases.length) {
       throw new PlanDocError(`--before ${n}:  no such phase (${phases.length ? `1-${phases.length}` : "none yet"})`)
     }
-    const started = phases.find((phase) => phase.n >= n && phase.status !== "todo")
+    // a dropped phase may move down a number too:  nothing was built under it (I228)
+    const started = phases.find((phase) => phase.n >= n && !PlanDoc.canRenumber(phase.status))
     if (started) throw new PlanDocError(`--before ${n}:  P${started.number} has started;  only to-do phases move down`)
     return n
   }
@@ -444,7 +445,10 @@ export class PlanDoc extends PlanReader {
       return
     }
     const total = PlanTime.sumRanges(estimated.map((phase) => phase.range!))
-    const left = PlanTime.sumRanges(estimated.filter((phase) => phase.status !== "done").map((phase) => phase.range!))
+    // what's left:  the phases not finished (a dropped one is never built:  I228)
+    const left = PlanTime.sumRanges(
+      estimated.filter((phase) => !PhaseStatuses.isFinished(phase.status)).map((phase) => phase.range!)
+    )
     const missing = counted.filter((phase) => !phase.range).map((phase) => `P${phase.number}`)
     let text = `${PlanTime.formatRange(total)} in all, ${PlanTime.formatRange(left)} left`
     if (missing.length) text += ` (${missing.join(", ")} not estimated)`
@@ -469,7 +473,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Set phase `n` to `status` (`todo` / `active` / `done`).
+   * Set phase `n` to `status` (`todo` / `active` / `done` / `dropped`).
    * - `done` removes the phase's UPDATE markers (`removeUpdateMarkers()`):  the bare labels on items, and the
    *   updates to prose outside a phase;  once it's finished, those changes are just the plan.
    *   A phase's own plan changes stay.
@@ -477,26 +481,87 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
-   * - `done` stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other status
-   *   removes it
+   * - `dropped` (epic `epic-engine` I228):  never built, and won't be;  finished, as `done` is (`PhaseStatuses`)
+   *   - its UPDATE markers go, as `done`'s;  its plan is NOT accepted:  nothing was built
+   *   - with `{ why }` (HTML:  `Moved to P38`):  its Dropped field, in place of Done (a Done field goes);  each bare
+   *     phase number in it (`P38`) becomes a link to that phase (`linkPhases()`);  the log line says it
+   * - a finished status stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other
+   *   status removes it;  any status but `dropped` removes a Dropped field
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
-  setPhase(n: number, status: string, { done, minutes }: { done?: string; minutes?: number } = {}): void {
+  setPhase(
+    n: number,
+    status: string,
+    { done, why, minutes }: { done?: string; why?: string; minutes?: number } = {}
+  ): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
-    const doneAt = status === "done" ? PlanTime.isoMinutes(this.now) : undefined
+    const finished = PhaseStatuses.isFinished(status)
+    const doneAt = finished ? PlanTime.isoMinutes(this.now) : undefined
     Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
+    if (finished) this.removeUpdateMarkers(n)
     if (status === "done") {
-      this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
       // built, so its plan was accepted:  a plan rewritten after the Accept (or held, I221) never leaves a done phase
       // "waiting"
       if (PLAN_ASKED.has(this.phase(n).getAttribute("plan") ?? "")) this.acceptPlan(this.phase(n))
       if (took) Markup.set<"epic-phase">(this.phase(n), { took })
     }
+    if (status !== "dropped") this.setField(this.phase(n), "dropped", "")
+    let said = ""
+    if (status === "dropped" && why?.trim()) {
+      this.setField(this.phase(n), "done", "")
+      this.setField(this.phase(n), "dropped", why)
+      const field = this.phase(n).querySelector(':scope > epic-field[name="dropped"]')!
+      this.linkPhases(field, this.phase(n))
+      said = `:  ${PlanMarkup.squeeze(field.textContent ?? "")}`
+    }
     this.updateEstimate()
-    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : ""}`)
+    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : said}`)
+  }
+
+  /**
+   * Each bare phase number in `root`'s words (`P38`, outside a link) made a link to that phase:
+   * `<a href="#p-real-sign-in-mail-2">P38 · Real Sign-In Mail</a>`, eating the ` · Real Sign-In Mail` already after it.
+   * - not `self`, nor a number no phase has:  left as written
+   */
+  private linkPhases(root: Element, self: Element): void {
+    const phases = this.phaseElements
+    const walker = this.document.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */)
+    const texts: Text[] = []
+    for (let node = walker.nextNode(); node; node = walker.nextNode())
+      if (!node.parentElement?.closest("a")) texts.push(node as Text)
+    for (const text of texts) {
+      const words = text.data
+      const parts: (string | Element)[] = []
+      let from = 0
+      for (const match of words.matchAll(/\bP(\d+)\b/g)) {
+        const phase = PhaseIds.find(phases, match[1]!)
+        if (!phase || phase === self) continue
+        const title = PhaseIds.titleOf(phase)
+        const named = ` · ${title}`
+        const end = match.index + match[0].length
+        const eats = words.startsWith(named, end) ? named.length : 0
+        const link = this.document.createElement("a")
+        link.setAttribute("href", `#${phase.id}`)
+        link.textContent = `${PhaseIds.labelOf(phase)} · ${title}`
+        parts.push(words.slice(from, match.index), link)
+        from = end + eats
+      }
+      if (!parts.length) continue
+      parts.push(words.slice(from))
+      text.replaceWith(...parts.filter((part) => part !== ""))
+    }
+  }
+
+  /**
+   * May a phase of `status` take another number (an insert before it, a phase moved past it)?  To do, or dropped
+   * (epic `epic-engine` I228):  nothing was built under it, so no commit says its number;  a done or active one keeps
+   * its own.
+   */
+  private static canRenumber(status: string): boolean {
+    return status === "todo" || status === "dropped"
   }
 
   /**
@@ -2309,8 +2374,8 @@ export class PlanDoc extends PlanReader {
   /**
    * Move the phase at place `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);
    * returns `to`.
-   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do (a done or
-   *   active one keeps its number:  its commits and log say it)
+   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do, or dropped
+   *   (epic `epic-engine` I228:  never built);  a done or active one keeps its number:  its commits and log say it
    * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, every
    *   bare `P5` in the page's words, and every `P5 · <its name>` (`relabelPhaseNames()`);  the record keeps its own
    * - SIDE EFFECT:  logs it
@@ -2323,7 +2388,13 @@ export class PlanDoc extends PlanReader {
         throw new PlanDocError(`move ${from} to ${to}:  no place ${n} (1-${phases.length})`)
     if (from === to) return to
     const [low, high] = from < to ? [from, to] : [to, from]
-    const started = phases.find((phase) => phase.n >= low && phase.n <= high && phase.status !== "todo")
+    // the one moved is to do;  the ones it passes to do or dropped (a dropped phase may be moved past:  I228)
+    const started = phases.find(
+      (phase) =>
+        phase.n >= low &&
+        phase.n <= high &&
+        (phase.n === from ? phase.status !== "todo" : !PlanDoc.canRenumber(phase.status))
+    )
     const said = `move P${phases[from - 1]!.number} to P${phases[to - 1]!.number}`
     if (started) throw new PlanDocError(`${said}:  P${started.number} has started;  only to-do phases move`)
     const before = PhaseNumbers.snapshot(this.document)
@@ -2503,7 +2574,8 @@ export class PlanDoc extends PlanReader {
       return element
     }
     const body: Node[] = summary.lead.map((text) => html("p", text))
-    const finished = summary.done.filter((done) => done.status === "done")
+    // done and dropped (I228) alike:  each line says which
+    const finished = summary.done.filter((done) => done.status !== "under way")
     const running = summary.done.filter((done) => done.status === "under way")
     if (finished.length) {
       body.push(heading("done", "What was done"))

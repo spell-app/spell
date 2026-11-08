@@ -66,9 +66,12 @@ export const epicPhaseVocabulary = {
     {
       name: "status",
       kind: "enum",
-      values: ["todo", "active", "done"],
+      values: ["todo", "active", "done", "dropped"],
       required: true,
-      description: "`todo`, `active` (one at a time, blue:  under way) or `done` (green)."
+      description:
+        "`todo`, `active` (one at a time, blue:  under way), `done` (green) or `dropped` (never built, and won't be:  " +
+        "its title struck through and grey, a crossed circle, its Dropped field saying why;  finished, as `done` is:  " +
+        "epic `epic-engine` I228)."
     },
     {
       name: "estimate",
@@ -233,6 +236,7 @@ export const epicPhaseVocabulary = {
     { key: "statusTodo", text: "To do", description: "The status icon's name:  `todo`." },
     { key: "statusActive", text: "Under way", description: "The status icon's name:  `active`." },
     { key: "statusDone", text: "Done", description: "The status icon's name:  `done`." },
+    { key: "statusDropped", text: "Dropped", description: "The status icon's name:  `dropped` (I228)." },
     {
       key: "workingPlan",
       text: "Claude is writing this phase's plan",
@@ -367,6 +371,14 @@ export const epicPhaseVocabulary = {
       where: { attribute: "name", values: ["done"] },
       max: 1,
       description: "Done:  what was built, once done."
+    },
+    {
+      tag: "epic-field",
+      where: { attribute: "name", values: ["dropped"] },
+      max: 1,
+      description:
+        "Dropped:  why a dropped phase was never built (`Moved to P38`, a link to that phase), in place of Done " +
+        "(epic `epic-engine` I228;  `epic phase <epic>#P18 dropped --why`)."
     },
     { tag: "epic-commit", description: "Its commits, oldest first." },
     {

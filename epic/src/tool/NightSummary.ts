@@ -1,3 +1,5 @@
+import { PhaseStatuses } from "spell/epic/phases"
+
 import type { PlanDoc } from "./PlanDoc"
 import { PlanItem } from "./PlanItem"
 
@@ -57,7 +59,9 @@ export class NightSummary {
       const element = plan.phase(phase.n)
       const doneAt = Date.parse(element.getAttribute("done-at") ?? "")
       const window = phase.status === "active" ? plan.activeWindow(phase.n) : undefined
-      const isDone = phase.status === "done" && doneAt >= from
+      // finished:  done, or dropped (epic `epic-engine` I228), in the same part:  "P18 · ... dropped:  Moved to P38"
+      const dropped = phase.status === "dropped"
+      const isDone = PhaseStatuses.isFinished(phase.status) && doneAt >= from
       const isUnderWay = phase.status === "active" && !!window && window.from >= from
       if (!isDone && !isUnderWay) continue
       const changedAt = isDone ? doneAt : window!.from
@@ -68,8 +72,10 @@ export class NightSummary {
       done.push({
         id: phase.id,
         label: `P${phase.number} · ${phase.name}`,
-        status: isDone ? "done" : "under way",
-        built: NightSummary.firstLine(element.querySelector(":scope > epic-field[name='done']")),
+        status: isDone ? (dropped ? "dropped" : "done") : "under way",
+        built: NightSummary.firstLine(
+          element.querySelector(`:scope > epic-field[name='${dropped ? "dropped" : "done"}']`)
+        ),
         sha: sha ? sha.slice(0, 9) : undefined,
         merged: sha ? isMerged?.(sha) : undefined,
         at: isDone ? doneAt : Infinity
@@ -137,9 +143,9 @@ export type DoneLine = {
   id: string
   /** `P61 · Formatting While You Edit` */
   label: string
-  /** `done`, or `under way` (left part done, or still running) */
-  status: "done" | "under way"
-  /** what it built, in a phrase:  its Done list's first line;  "" while it has none */
+  /** `done`, `dropped` (never built, I228;  listed with the done), or `under way` (left part done, or still running) */
+  status: "done" | "dropped" | "under way"
+  /** what it built, in a phrase:  its Done list's first line (a dropped one's:  its Dropped field's);  "" for none */
   built: string
   /** its last commit, short;  `undefined` for none */
   sha: string | undefined

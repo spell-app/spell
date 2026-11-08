@@ -1531,6 +1531,7 @@ file <name>#P<N> <rN>                               a request into phase N's Req
 file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
+phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck through, finished as done;  why in place of Done
 phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (T3)

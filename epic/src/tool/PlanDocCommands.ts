@@ -7,7 +7,7 @@ import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { Markup } from "spell/epic/markup"
-import { PageStages } from "spell/epic/phases"
+import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
   OPEN_KINDS,
@@ -194,11 +194,17 @@ export class PlanDocCommands {
         if (status === "took") return this.tookAgain(name, file, phase, Boolean(flags.dryRun))
         // `phase seo#P20 planning [off]`:  Claude is writing its plan, on the page (epic `epic-engine` I147)
         if (status === "planning") return this.planning(file, phase, rest[2] !== "off")
+        if (flags.why !== undefined && status !== "dropped")
+          throw new PlanDocError(`phase ${phase} ${status}:  --why is for dropped (why it was never built)`)
         const minutes = status === "done" ? this.minutesFor(name, file, phase) : undefined
         // done:  the branch's commits so far, into their phases and items (epic `epic-engine` I135)
         const history = status === "done" ? this.historyOrNone(file) : undefined
         const added = await this.edit(file, (plan) => {
-          plan.setPhase(plan.phasePlace(phase), status, { done: flags.done as string | undefined, minutes })
+          plan.setPhase(plan.phasePlace(phase), status, {
+            done: flags.done as string | undefined,
+            why: stringFlag(flags.why),
+            minutes
+          })
           return history ? plan.backfillCommits(history.log, history) : []
         })
         // and each into the Log (epic `epic-engine` P52)
@@ -206,8 +212,8 @@ export class PlanDocCommands {
         const listed = added.length - logged
         if (added.length)
           this.print(`${listed} commit${listed === 1 ? "" : "s"} listed on the page, ${logged} added to the Log`)
-        // done:  nobody works on it any more (I147)
-        if (status === "done") this.inbox.setWorking(file, this.phaseIdOf(file, phase), false)
+        // finished (done or dropped, I228):  nobody works on it any more (I147)
+        if (PhaseStatuses.isFinished(status)) this.inbox.setWorking(file, this.phaseIdOf(file, phase), false)
         this.files.reindex()
         // a new stage:  bring the doc forward, unless told not to.
         // No reload, nor a second one:  the edit reaches the page by the live client
@@ -1341,12 +1347,16 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests
                                                    field (epic file writes it;  epic epic-workflow)
   estimate <name> <N> "1-2h"                       set a phase's estimate;  the Overview's total follows
-  phase <name> <N> todo|active|done [--done html] [--no-open]
+  phase <name> <N> todo|active|done|dropped [--done html] [--why html] [--no-open]
                                                    set a phase's status;  done drops its UPDATE markers
                                                    (labels, prose updates;  its plan changes stay), and
                                                    --done writes its Done field (a <ul> of what was built);
                                                    done also writes the time Claude took (took, from the
                                                    transcripts:  epic epic-engine P41);
+                                                   dropped (never built, and won't be:  struck through,
+                                                   finished as done is) drops them too, and --why writes its
+                                                   Dropped field in place of Done ("Moved to P38":  the P38
+                                                   becomes a link to it;  epic epic-engine I228);
                                                    brings the doc forward in VS Code (it updates itself)
   phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
   phase <name> <N> planning [off]                  Claude is writing its plan:  a blue spinner on its page (off
@@ -1511,7 +1521,7 @@ const LOG_LABEL = "Log"
 /** How many review lines `log <name>` prints with no `--last`. */
 const LOG_LAST = 20
 
-const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]" }
+const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }
 
 /**
  * `bedtime <name> start|done ...`:  a `/bedtime` run's mode (`PlanDoc.startBedtime()`), logged.

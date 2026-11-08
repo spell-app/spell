@@ -120,6 +120,42 @@ describe("<epic-phase>", () => {
     expect([pill(open!).textContent, pill(open!).classList.contains("took")]).toEqual(["1h", false])
   })
 
+  // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")
+  test("dropped:  its title struck through and grey, a crossed circle, its Dropped field;  grey in the chips, not open", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-mail" title="Mail" status="dropped" estimate="1-2h" plan="waiting" ` +
+        `done-at="2099-01-01T09:00-05:00">` +
+        `<epic-field name="dropped"><p>Moved to <a href="#p-mail-2">P2 · Mail</a>.</p></epic-field></epic-phase>` +
+        `<epic-phase id="p-mail-2" title="Mail" status="todo"></epic-phase>` +
+        `</epic-section>`,
+      "#p-mail"
+    )
+    const status = host.shadowRoot!.querySelector('[part~="status"]')!
+    expect({
+      classes: status.className,
+      label: status.getAttribute("aria-label"),
+      state: status.getAttribute("data-state")
+    }).toEqual({ classes: "icon dropped", label: "Dropped", state: "old" })
+    // the crossed circle's glyph, loaded with the icon set
+    await vi.waitFor(() => expect(status.querySelector("svg")).not.toBeNull())
+    const words = host.shadowRoot!.querySelector(".header > .words")!
+    expect(getComputedStyle(words).textDecorationLine).toBe("line-through")
+    // the done phase's quieter title colour, and the to-do one beside it not struck
+    const [, todo] = Array.from(host.parentElement!.children)
+    expect(getComputedStyle(todo!.shadowRoot!.querySelector(".header > .words")!).textDecorationLine).toBe("none")
+    // its body:  the Dropped field, labelled, its link kept
+    inner(host).setAttribute("open", "")
+    await ElementFixture.tick()
+    const field = host.querySelector<E.DOMElement>('epic-field[name="dropped"]')!
+    await field.ready
+    expect(flatText(field.shadowRoot!.querySelector('[part~="label"]')!).trim()).toBe("Dropped:")
+    expect(field.querySelector("a")!.getAttribute("href")).toBe("#p-mail-2")
+    // finished:  its waiting plan asks nothing
+    expect(host.shadowRoot!.querySelector("epic-review")?.getAttribute("buttons") ?? "phase").not.toBe("plan")
+    await expectAccessible(host)
+  })
+
   // r32 (Owen, 2026-10-25):  "Clicking accept or Revisit should collapse like it does for questions"
   test("an action chosen on its own review controls (`epic-chosen`) folds it, as an item's", async () => {
     const host = await render(`<epic-phase id="p1" title="One" status="todo" open><p>Body</p></epic-phase>`)

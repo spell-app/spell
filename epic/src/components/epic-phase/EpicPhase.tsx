@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
-import { PageStages, PhaseIds } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseStatuses } from "spell/epic/phases"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
@@ -33,13 +33,15 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-phase>`:  one phase of the plan, in the Phases section --
  * a fold (`EpicFold`) titled `P3 · <title>`.
  * - Its title line:
- *   - the status icon, its shape by its status (an outline to do, a still load indicator under way, a check done), its COLOUR
+ *   - the status icon, its shape by its status (an outline to do, a still load indicator under way, a check done, a
+ *     crossed circle dropped), its COLOUR
  *     by where it stands, as its Phases chip (`PhaseState.of()`, epic `epic-engine` I170;  Owen, 2026-10-29):  red
  *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a grey PAUSE
  *     held by him (`plan="held"`, I221), a DOTTED blue circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
  *     inbox's `working`, I147), a turning spinner in that colour (blue, unless red or orange come first), its tooltip
  *     "Claude is writing this phase's plan" or "Claude is working on it"
- *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
+ *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter;  a DROPPED one's is struck
+ *     through and grey (`status="dropped"`, epic `epic-engine` I228:  never built), its Dropped field saying why
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
  *   - while it isn't done and has NEW updates (`to-see`, written by the tool, less the ones quiet or marked Seen since;
@@ -97,6 +99,11 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   get shownStatus(): PhaseStatus {
     const status = this.status
     return status && status in STATUS_ICONS ? status : "todo"
+  }
+
+  /** Is it over:  done, or dropped (`PhaseStatuses.isFinished()`, epic `epic-engine` I228)?  Asks nothing, works on nothing. */
+  get isFinished(): boolean {
+    return PhaseStatuses.isFinished(this.shownStatus)
   }
 
   /** Its status icon. */
@@ -201,7 +208,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    */
   get isProposed(): boolean {
     void this.layout
-    return this.shownStatus !== "done" && PageStages.of(this.page) === "phases"
+    return !this.isFinished && PageStages.of(this.page) === "phases"
   }
 
   /**
@@ -248,7 +255,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    */
   @E.cssState("working")
   get isWorkedOn(): boolean {
-    return this.shownStatus !== "done" && this.reviewState.workedOn()
+    return !this.isFinished && this.reviewState.workedOn()
   }
 
   /**
@@ -435,7 +442,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   private changedMark(): JSX.Element {
     return (
       <>
-        <Show when={Number(this.choicesOpen) > 0 && this.shownStatus !== "done"}>
+        <Show when={Number(this.choicesOpen) > 0 && !this.isFinished}>
           <span class={CHOICES_OPEN} part={this.partForName("choices-open")}>
             {this.translationForKey(Number(this.choicesOpen) === 1 ? "choiceOpen" : "choicesOpenCount", {
               count: Number(this.choicesOpen)
@@ -545,7 +552,9 @@ const STATUS_ICONS = {
   // a load indicator, standing still (epic `epic-engine` I226;  Owen, 2026-11-07:  "While a phase is running, show as
   // non-rotating load indicator"):  the half circle before
   active: "circle notch",
-  done: "circle check"
+  done: "circle check",
+  // never built (epic `epic-engine` I228;  Owen, 2026-11-08:  "crossed out somehow"):  a crossed circle, as its title
+  dropped: "circle xmark"
 } as const
 
 /** A held phase's icon (epic `epic-engine` I221):  paused. */
@@ -558,7 +567,8 @@ type PhaseStatus = keyof typeof STATUS_ICONS
 const STATUS_TEXTS = {
   todo: "statusTodo",
   active: "statusActive",
-  done: "statusDone"
+  done: "statusDone",
+  dropped: "statusDropped"
 } as const satisfies Record<PhaseStatus, string>
 
 /** Its gear's entry for its commits. */
