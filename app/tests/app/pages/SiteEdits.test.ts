@@ -157,13 +157,89 @@ describe("SiteEdits", () => {
   test.each([
     ["spellx", SPELLX],
     ["code spell", CODE]
-  ])("%s:  a part moved before another, at its depth;  and last", (_form, text) => {
-    const moved = SiteEdits.withPartMoved(text, "settings dialog", "films page")
+  ])("%s:  a part moved before or after another, at its depth", (_form, text) => {
+    const moved = SiteEdits.withPartMoved(text, "settings dialog", { where: "before", part: "films page" })
     expect(SiteEdits.partsIn(moved)!.map((part) => part.name)).toEqual(["settings dialog", "films page"])
-    const out = SiteEdits.withPartMoved(text, "film page")
+    const out = SiteEdits.withPartMoved(text, "film page", { where: "after", part: "settings dialog" })
     const parts = SiteEdits.partsIn(out)!
     expect(parts.map((part) => part.name)).toEqual(["films page", "settings dialog", "film page"])
     expect(parts[0]!.parts).toEqual([])
-    expect(() => SiteEdits.withPartMoved(text, "films page", "film page")).toThrow(/one of its own pages/)
+    expect(() => SiteEdits.withPartMoved(text, "films page", { where: "before", part: "film page" })).toThrow(
+      /one of its own pages/
+    )
+  })
+
+  test.each([
+    ["spellx", SPELLX],
+    ["code spell", CODE]
+  ])("%s:  after a page goes below its own pages too", (_form, text) => {
+    const moved = SiteEdits.withPartMoved(text, "settings dialog", { where: "before", part: "films page" })
+    const back = SiteEdits.withPartMoved(moved, "settings dialog", { where: "after", part: "films page" })
+    expect(SiteEdits.partsIn(back)!.map((part) => part.name)).toEqual(["films page", "settings dialog"])
+    expect(SiteEdits.partNamed(back, "films page").parts.map((part) => part.name)).toEqual(["film page"])
+    expect(SiteEdits.partNamed(back, "film page").span.end).toBeLessThanOrEqual(
+      SiteEdits.partNamed(back, "settings dialog").line.start
+    )
+  })
+
+  test.each([
+    ["spellx", SPELLX],
+    ["code spell", CODE]
+  ])("%s:  a page moved into another, as its first page, keeping its address, and back out", (_form, text) => {
+    const added = SiteEdits.withPageAdded(text, "about page", "/about")
+    const inside = SiteEdits.withPartMoved(added, "about page", { where: "into", part: "films page" })
+    const films = SiteEdits.partNamed(inside, "films page")
+    expect(films.parts.map((part) => part.name)).toEqual(["about page", "film page"])
+    expect(films.parts[0]!.address).toBe("/about")
+    expect(films.parts[0]!.indent).toBe("\t\t")
+    const out = SiteEdits.withPartMoved(inside, "about page", { where: "after", part: "settings dialog" })
+    expect(out).toBe(added)
+  })
+
+  test.each([
+    ["spellx", SPELLX],
+    ["code spell", CODE]
+  ])("%s:  a page moved into one with no pages yet, and the one it left", (_form, text) => {
+    const added = SiteEdits.withPageAdded(text, "about page", "/about")
+    const moved = SiteEdits.withPartMoved(added, "films page", { where: "into", part: "about page" })
+    const about = SiteEdits.partNamed(moved, "about page")
+    expect(about.parts.map((part) => part.name)).toEqual(["films page"])
+    expect(about.parts[0]!.parts.map((part) => part.name)).toEqual(["film page"])
+    expect(about.parts[0]!.parts[0]!.indent).toBe("\t\t\t")
+    const left = SiteEdits.withPartMoved(added, "film page", { where: "into", part: "about page" })
+    expect(SiteEdits.partNamed(left, "films page").parts).toEqual([])
+    expect(SiteEdits.partNamed(left, "about page").parts.map((part) => part.name)).toEqual(["film page"])
+  })
+
+  test("spellx:  a page that closes itself opens to hold one;  one left with none closes itself again", () => {
+    const added = SiteEdits.withPageAdded(SPELLX, "about page", "/about")
+    const left = SiteEdits.withPartMoved(added, "film page", { where: "into", part: "about page" })
+    expect(left).toContain(
+      [
+        '\t<page "about page" address="/about">',
+        '\t\t<page "film page" address="/films/:film" title="Film"/>',
+        "\t</>"
+      ].join("\n")
+    )
+    expect(left).toContain('\t<page "films page" address="/films" title="Films"/>\n')
+  })
+
+  test.each([
+    ["spellx", SPELLX],
+    ["code spell", CODE]
+  ])("%s:  what can't go inside what", (_form, text) => {
+    const into = (name: string, part: string) => SiteEdits.withPartMoved(text, name, { where: "into", part })
+    expect(() => into("films page", "films page")).toThrow(/inside itself/)
+    expect(() => into("films page", "film page")).toThrow(/one of its own pages/)
+    expect(() => into("film page", "settings dialog")).toThrow(/only a page with an address/)
+    expect(() => into("settings dialog", "films page")).toThrow(/only a page with an address/)
+  })
+
+  test("code spell:  a file ending without a line break", () => {
+    const text = CODE.trimEnd()
+    const moved = SiteEdits.withPartMoved(text, "settings dialog", { where: "before", part: "films page" })
+    expect(SiteEdits.partsIn(moved)!.map((part) => part.name)).toEqual(["settings dialog", "films page"])
+    const after = SiteEdits.withPartMoved(moved, "settings dialog", { where: "after", part: "films page" })
+    expect(SiteEdits.partsIn(after)!.map((part) => part.name)).toEqual(["films page", "settings dialog"])
   })
 })

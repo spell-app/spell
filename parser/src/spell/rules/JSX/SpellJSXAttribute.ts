@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { fillInsAST, noteFillInWarnings, parseFillIns } from "spell/parser/spell/rules/core"
 // Import directly to avoid circular import
 import { commitStatement } from "spell/parser/spell/rules/Statement"
+import { loopItemsInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/places.shared"
 import { SPELL_ATTRIBUTE_WORDS, webWordFor } from "./JSX.shared"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -69,6 +70,7 @@ export class SpellJSXAttribute extends SpellJSXContent {
         const expression = scope.parse(input, "expression")
         if (expression && (!inputIsExpression || expression.inputText.length === input.length)) {
           match.data.expression = expression
+          match.data.loopItems = loopItemsInDrawing(scope)
         }
       }
       // if neither worked, parse error
@@ -84,13 +86,14 @@ export class SpellJSXAttribute extends SpellJSXContent {
    * - `statement` value becomes an inline `P.ASTMethodDefinition` (with an `event` arg for `on*` names).
    * - Missing `value` (bare attribute, e.g. `<input disabled/>`) becomes `true`.
    * - Spell's own attribute words as the web's, found by `parse()`:  `in` => `slot` (`SPELL_ATTRIBUTE_WORDS`).
+   * - A read of a place, in a drawing:  a value it can read, `rows={every review}` (`readableInDrawing()`).
    */
   getAST(match: P.MatchFor<this>) {
-    const { attribute, webAttribute, expression, statement, error, fillIns } = match.data
+    const { attribute, webAttribute, expression, statement, error, fillIns, loopItems } = match.data
     const { value } = match
     let valueAST: P.ASTExpression | undefined
     if (fillIns) valueAST = fillInsAST(match, fillIns)
-    else if (expression) valueAST = P.asAST<P.ASTExpression>(expression.AST)
+    else if (expression) valueAST = readableInDrawing(expression, P.asAST<P.ASTExpression>(expression.AST), loopItems)
     else if (statement) {
       valueAST = new P.ASTMethodDefinition(match, {
         inline: true,

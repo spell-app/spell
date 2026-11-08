@@ -11,9 +11,10 @@
  *     - the list, a `<ui-site-nav appearance="nav">` (epic `mockup` P5):  its groups heading bands, its topics
  *       subheading bands, its rows the tree's own;  this sheet hands it the panel's colours, through the tree's
  *       `--ui-tree-nav-*` tokens
- *     - `<p class="note">` for loading / no matches, `<ui-message class="problem">` for a load error
+ *       - inside its Components band, `<div slot="components-notes">`:  `<p class="note">` for loading / no matches,
+ *         `<ui-message class="problem">` for a load error
  *     - `<div class="slotted footer">`
- * - Folds open and shut at once:  the tree draws a closed row's rows only while it's open, so nothing eases.
+ * - Folds ease open and shut:  the tree's `appearance="nav"` does it;  a search's folds change at once.
  * - Colours default to the THEME's tokens, so the panel reads in every theme:
  *   `--ui-brown-*` (Polished Ivory in the Spell theme), `--ui-primary-*`, `--ui-text-*`.
  *   Only the panel's ivory fill has no theme token.
@@ -201,9 +202,15 @@
     --ui-tree-nav-current-color: var(--_ui-docs-nav-current-color);
     --ui-tree-hover-background: var(--_ui-docs-nav-row-hover-background);
   }
+  /* a search opens and shuts its folds at once, as it filters */
+  :host(:state(searching)) ui-site-nav {
+    --ui-tree-nav-open-duration: 0s;
+    --ui-tree-nav-close-duration: 0s;
+  }
 
+  /* inside the Components band, the room above and below its rows isn't a note's:  taken back, in the note's smaller text */
   .note {
-    margin: 0;
+    margin-block: calc(-0.375em / 0.875);
     padding: 0.5em 1.75em;
     color: var(--ui-text-muted);
     font-size: 0.875em;
@@ -213,7 +220,7 @@
   }
   .problem {
     display: block;
-    margin: 0.5em;
+    margin: 0.125em 0.5em;
   }
   .slotted.footer {
     padding: 0.75em 1em 0.25em;

@@ -8313,7 +8313,7 @@
           "ruleNames": ["jsxExpression"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXExpression.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "Match a `{...}` JSX expression container (a `jsxChild`, e.g. `<div>{1 + 2}</div>`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]
@@ -8333,7 +8333,7 @@
           "ruleNames": ["jsxAttribute"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXAttribute.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Match a single JSX attribute (`name`, `name=value`, or `name={expression}`).",
           "syntaxes": [],
           "aliases": []

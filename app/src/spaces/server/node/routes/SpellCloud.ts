@@ -7,7 +7,7 @@ import { fileURLToPath } from "url"
 
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
@@ -91,6 +91,10 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *   - It listens on this machine alone (`127.0.0.1`).
  *   - Its host is let in, writes from its origin;  its mails' links start with it.
  *   - An `https` address marks every cookie it sets `Secure`.
+ *   - It may have more than one (`alsoAt`):  `address` is the main one, and each other is let in the same way.
+ *     - A sign-in begun at one finishes at that one, its mail's link and Bluesky's return alike.
+ *     - A browser keeps a cookie per host, so someone signs in once at each.
+ *     - What no request asked for, the inbox's mail, links to the main one.
  * - THE DAILY ROUND (`spacesDailyRound()`, epic `atmosphere` P24), as the main checkout's page server runs it:
  *   - BACKUPS:  every space, each night, a week kept (`SpaceBackups`)
  *   - each real Space's member list, in step with its org's roles (`MemberLists`)
@@ -120,6 +124,7 @@ export class SpellCloud {
 
   constructor({
     address,
+    alsoAt = [],
     dir = environment.cloudDir,
     people = peopleStore(),
     folderFor = folderForPlace,
@@ -131,8 +136,9 @@ export class SpellCloud {
     mkdirSync(dir, { recursive: true })
     this.server = new SRV.WebServer({ live: false })
     if (this.address) this.server.guard.allowAddress(this.address)
-    // the ONE mail seam:  sign-in mail and inbox mail (P30), to the local catcher until P18's sender
-    const mailer = new MailCatcher({ folder: join(dir, "mail") })
+    for (const each of alsoAt) this.server.guard.allowAddress(each)
+    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go through it
+    const mailer = mailerFor({ folder: join(dir, "mail"), ...environment.mail })
     this.folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(dir, "space-reads.key") }),
       mailer,
@@ -150,7 +156,7 @@ export class SpellCloud {
       accounts: this.accounts,
       abuseContact,
       caughtMail: "hidden",
-      ...(this.address && { address: this.address }),
+      ...(this.address && { address: this.address, alsoAt }),
       // a linked Bluesky account (epic `atmosphere` P19):  its host sends the browser back to the cloud's address
       atProto: new AtProtoIdentity({ address: () => this.address ?? `http://127.0.0.1:${this.server.port}` })
     })
@@ -309,6 +315,8 @@ function hostName(host: string): string {
 export type SpellCloudProps = {
   /** Where people reach it, `https://spell.example.org`:  left out, this machine alone (a test, a try). */
   address?: string
+  /** The other addresses people reach it at, `https://spell.space`:  all `https`, or none, as `address` is. */
+  alsoAt?: string[]
   /** Where it keeps its own files:  default `environment.cloudDir`. */
   dir?: string
   /** People and orgs, the accounts among them:  default spell.spaces' (`peopleStore()`). */

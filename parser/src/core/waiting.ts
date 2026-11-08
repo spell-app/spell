@@ -43,6 +43,9 @@ type Answering = {
 /** Each thing's waited values, by name. */
 const WAITED_VALUES = new WeakMap<object, Map<string, WaitedValue>>()
 
+/** What `waitedValueKeyFor()` handed out, by what it was handed. */
+const WAITED_VALUE_KEYS = new WeakMap<object, Map<unknown, object>>()
+
 /**
  * What owns every waited value:  never disposed, as each lives with its thing, not with what first read it.
  * - Made here, as a read may come from anywhere, even an effect's apply, where a new root with no owner is refused.
@@ -79,6 +82,24 @@ export const waitingMethods = defineCoreModule({
     if (answering.answers.has(value)) return answering.answers.get(value) as Value
     answering.needed.push(value)
     throw NOT_ANSWERED
+  },
+
+  /**
+   * ONE object for `thing` and each of `parts`, the `thing` of a `waitedValue()` with a loop's item in it:
+   * `rows={every review where its film is film}` is another read for each film, in the same words.
+   * - The same object every time it's asked, so each read keeps its one value.
+   * - A part may be a text or a number, as a loop's item may.
+   */
+  waitedValueKeyFor(thing: object, ...parts: unknown[]): object {
+    let key = thing
+    for (const part of parts) {
+      let byPart = WAITED_VALUE_KEYS.get(key)
+      if (!byPart) WAITED_VALUE_KEYS.set(key, (byPart = new Map()))
+      let next = byPart.get(part)
+      if (!next) byPart.set(part, (next = {}))
+      key = next
+    }
+    return key
   },
 
   /** `read`'s drawing, or a "…" until its first answer:  a value in a drawing that waits, `{the total}`. */

@@ -125,6 +125,17 @@ const signInMinutes = Number(process.env.SPELL_SIGN_IN_MINUTES) || 20
 const abuseContact = process.env.SPELL_ABUSE_CONTACT || "abuse@spell.spaces"
 
 /**
+ * How this server sends its mail (epic `atmosphere` T55), for `mailerFor()`.
+ * - `SPELL_MAIL=sendmail`:  through this machine's own `sendmail`, from `SPELL_MAIL_FROM`.
+ * - Unset:  only into the local mail catcher.
+ * - NEVER in a test:  whatever its shell says, a test sends no real mail.
+ */
+const mail = {
+  via: process.env.VITEST ? undefined : process.env.SPELL_MAIL,
+  from: process.env.SPELL_MAIL_FROM
+}
+
+/**
  * Where every space's nightly backups go (epic `atmosphere` P7, Q8 B:  the server runs on a machine you run).
  * - Name a second disk, or a folder on one, with `SPELL_BACKUPS_DIR`:  a copy on the same disk is lost with it.
  * - Default `~/.spell/backups`, and `spell space backup status` says it's on the same disk.
@@ -203,6 +214,7 @@ const environment = {
   signInMinutes,
   cloudDir,
   abuseContact,
+  mail,
   backupsDir,
   packageFolder,
   spaceFolders,

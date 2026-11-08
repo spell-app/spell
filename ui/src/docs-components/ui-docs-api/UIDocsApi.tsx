@@ -173,7 +173,9 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           )}
         </Show>
         <For each={this.shownItems}>{(item) => this.item(item)}</For>
-        <Show when={this.tagsSection}>{(section) => this.table(section(), this.tagsOwner)}</Show>
+        <Show when={this.tagsSection} keyed>
+          {(section) => this.table(section, this.tagsOwner)}
+        </Show>
       </section>
     )
   }
@@ -264,7 +266,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     const id = this.onlyId ? `${owner.anchor()}-${TocIndex.slug(row.name)}` : undefined
     return (
       <tr class={{ [LANDED_CLASS]: !!id && this.landedId === id }}>
-        <For each={row.cells}>{(cell, at) => this.cell(cell, columns[at()], id && { id, name: row.name })}</For>
+        <For each={row.cells}>{(cell, at) => this.cell(cell, () => columns[at()], id && { id, name: row.name })}</For>
       </tr>
     )
   }
@@ -277,7 +279,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
    */
   private cell(
     cell: ApiCell,
-    column: DocsApiTextKey | undefined,
+    column: () => DocsApiTextKey | undefined,
     member?: { id: string; name: string } | ""
   ): JSX.Element {
     if (cell.type === "name") {
@@ -312,7 +314,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
       )
     }
     if (cell.type === "text") {
-      return <td class={column === DESCRIPTION_COLUMN ? DESCRIPTION_CLASS : undefined}>{this.inline(cell.text)}</td>
+      return <td class={column() === DESCRIPTION_COLUMN ? DESCRIPTION_CLASS : undefined}>{this.inline(cell.text)}</td>
     }
     return (
       <td class={VALUES_CLASS}>

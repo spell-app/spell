@@ -406,7 +406,9 @@ export class DiagramLayout {
       }
       const background = spec.legend ? (spec.bg ?? LEGEND_BACKGROUND) : (spec.bg ?? DiagramLayout.tint(color, 0.12))
       if (background !== "none") {
-        this.rect("back", "group", { x: x0, y: y0, width: x1 - x0, height: y1 - y0, rx: 10, fill: background })
+        // a legend group with no `bg` of its own is drawn as a legend box:  the page's theme colours it, not the spec
+        const kind = spec.legend && !spec.bg ? "legend" : "group"
+        this.rect("back", kind, { x: x0, y: y0, width: x1 - x0, height: y1 - y0, rx: 10, fill: background })
       }
       if (spec.legend) this.legendRows(x0, y0)
       if (label)

@@ -31,6 +31,8 @@ export class FakeAtProtoIdentity implements AtProtoIdentities {
   private readonly host: string
   /** Who signs in on its page, asked who:  a handle. */
   asks: string | undefined
+  /** Which of the server's addresses the last `start()` and `finish()` were at. */
+  lastAt: { started?: string; finished?: string } = {}
 
   constructor(dids: Record<string, string>, { host = FAKE_HOST }: { host?: string } = {}) {
     this.dids = dids
@@ -47,14 +49,16 @@ export class FakeAtProtoIdentity implements AtProtoIdentities {
   }
 
   /** See `AtProtoIdentities`.  - throws for a handle it has no account for */
-  async start(who: string, state: string): Promise<string> {
+  async start(who: string, state: string, at?: string): Promise<string> {
+    this.lastAt.started = at
     const did = who.startsWith("did:") ? who : (this.dids[who] ?? (who.startsWith("https://") ? "asks" : undefined))
     if (!did) throw new Error(`no account is called ${who}`)
     return `${this.host}?${new URLSearchParams({ who, state })}`
   }
 
   /** See `AtProtoIdentities`.  - throws for an `error` answer, as a host's refusal */
-  async finish(params: URLSearchParams): Promise<{ did: string; handle?: string; state: string }> {
+  async finish(params: URLSearchParams, at?: string): Promise<{ did: string; handle?: string; state: string }> {
+    this.lastAt.finished = at
     if (params.get("error")) throw new Error(`the host said no:  ${params.get("error")}`)
     const did = params.get("code")!
     const handle = Object.entries(this.dids).find(([, each]) => each === did)?.[0]

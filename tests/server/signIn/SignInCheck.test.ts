@@ -325,6 +325,69 @@ describe("signing in with a Bluesky account (epic `atmosphere` P19)", () => {
   })
 })
 
+describe("a server at several addresses", () => {
+  const MAIN = "https://spell.app"
+  const OTHER = "https://spell.space"
+  const identity = new FakeAtProtoIdentity({ "ana.bsky.social": "did:plc:ana" })
+  let several: Served
+  let catcher: MailCatcher
+
+  beforeAll(async () => {
+    catcher = new MailCatcher({ folder: join(folder, "several-mail") })
+    const check = new SignInCheck({
+      signIns: new SignIns(),
+      mailer: catcher,
+      accounts: new FakeAccounts(),
+      address: MAIN,
+      alsoAt: [`${OTHER}/`],
+      atProto: identity
+    })
+    const guard = new SRV.Guard({ token: TOKEN })
+    guard.allowAddress(MAIN).allowAddress(OTHER)
+    const router = new SRV.Router()
+    router.use(check.check)
+    check.route(router, guard)
+    several = await serveHandler(router.handle)
+    guard.allowPort(several.port)
+  })
+
+  afterAll(() => several?.close())
+
+  /** `POST <path>` with `body`, as a browser at `address`. */
+  const postedAt = (address: string, path: string, body: object) =>
+    ask(several.port, "POST", path, {
+      body: JSON.stringify(body),
+      headers: { host: new URL(address).host, origin: address, "content-type": "application/json" }
+    })
+
+  test("a mail's link starts with the address it was asked at", async () => {
+    for (const address of [MAIN, OTHER]) {
+      expect((await postedAt(address, "/api/sign-in/ask", { email: "ana@example.com" })).status).toBe(200)
+      expect((await catcher.newestTo("ana@example.com"))!.text).toContain(`${address}/sign-in/confirm?key=`)
+    }
+  })
+
+  test("a Bluesky sign-in starts, and comes back, at the address it was asked at", async () => {
+    const { text } = await postedAt(OTHER, "/api/sign-in/atproto", {
+      who: "ana.bsky.social",
+      mode: "sign in",
+      back: "/"
+    })
+    expect(identity.lastAt.started).toBe(OTHER)
+    await ask(several.port, "GET", identity.backFor(JSON.parse(text).url), {
+      headers: { host: new URL(OTHER).host }
+    })
+    expect(identity.lastAt.finished).toBe(OTHER)
+  })
+
+  test("any page at any of its addresses is a page to come back to;  nowhere else is", async () => {
+    const ask = (back: string) =>
+      postedAt(MAIN, "/api/sign-in/atproto", { who: "ana.bsky.social", mode: "sign in", back })
+    expect((await ask(`${OTHER}/apps/x`)).status).toBe(200)
+    expect((await ask("https://elsewhere.example/x")).status).toBe(400)
+  })
+})
+
 describe("a room's socket", () => {
   /** How a socket to the room fares, offering `protocols`, sending `cookie`. */
   const statusOf = (protocols: string[] = [], headers: Record<string, string> = {}) =>

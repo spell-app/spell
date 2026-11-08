@@ -783,7 +783,7 @@ For a project that is a site, View › Site opens its own page, `/site/<project>
 - Every change is one undo step in the site file;  renaming a page renames every `go to` naming it, in every file.
 - Adding a page doesn't restart the running site:  the editor takes a newly added type as the program runs.
 - The code:  [SiteEditorPage.tsx](src/app/pages/SiteEditorPage.tsx), its writes [SiteWrites.ts](src/app/pages/SiteWrites.ts).
-- **The catch:**  cards show tiles, not pictures of the pages, and a row drops only before another.
+- **The catch:**  cards show tiles, not pictures of the pages, and only the tree's rows can be dragged, not the cards.
 
 ## The public preview:  the editor as plain files
 

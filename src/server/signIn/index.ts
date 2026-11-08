@@ -5,6 +5,7 @@
  *   and its routes, under `/api/sign-in/`, with the link's confirm page.
  * - `SignIns`:  the rules:  one-time requests, codes, links, the signed-in devices.
  * - `MailCatcher`:  the local mail catcher, a file per mail, behind the one mail seam (`Mailer`).
+ * - `SendmailSender`:  real mail through this machine's `sendmail`;  `mailerFor()` says which a server uses.
  * - `AtProtoIdentity`:  who someone is on the atmosphere, asked of their own host:  signing in with an atmosphere
  *   (Bluesky) account linked to a Spell account (epic `atmosphere` P19).
  * - `ReadCredentials`:  credentials to read a whole space straight from its files,
@@ -17,6 +18,7 @@
 export * from "./signIn.types"
 export * from "./SignIns"
 export * from "./MailCatcher"
+export * from "./SendmailSender"
 export * from "./SignInCheck"
 export * from "./ReadCredentials"
 export * from "./AtProtoIdentity"
