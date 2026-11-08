@@ -285,7 +285,7 @@
     {
       path: "type:Page/property:lock",
       detail: "text",
-      description: "Whether whoever can't write its file may change it:  `unlocked` (the default) or `locked`.\n- A locked page's other readers only try things out:  the editor saves none of their edits.\n- Say it on its tag, `<spell-page \"guide\" locked>`, or in its body, `- its lock is \"locked\"`."
+      description: "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.\n- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.\n- Say it on its tag, `<spell-page \"guide\" locked>`, or in its body, `- its lock is \"locked\"`."
     },
     {
       path: "type:TwoSidedView", line: [4, 23],

@@ -10,7 +10,7 @@ export type Lock = (typeof Page.Locks)[number]
  * `Page`:  a `View` people reach by its own address -- what `a home is a page` extends.
  * - NOTE:  its address, and moving from page to page, aren't built yet:  for now it's drawn as any view is.
  * - It hears what the program triggers by its own handler, as its app does:  see `trigger()`.
- * - Its `lock`:  whether whoever can't write its file may change it (epic `notebook` P1, Q8).
+ * - Its `lock`:  whether what's changed on the page is saved (epic `notebook` P1, Q8).
  * - Its element shows its drawing as its CHILDREN, as an app's does (`drawsInItsChildren`).
  * - Everything else as a `View`.
  */

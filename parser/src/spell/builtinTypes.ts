@@ -427,8 +427,8 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         stored: true,
         declarable: true,
         docstring: md(
-          "Whether whoever can't write its file may change it:  `unlocked` (the default) or `locked`.",
-          "- A locked page's other readers only try things out:  the editor saves none of their edits.",
+          "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.",
+          "- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.",
           '- Say it on its tag, `<spell-page "guide" locked>`, or in its body, `- its lock is "locked"`.'
         )
       }
