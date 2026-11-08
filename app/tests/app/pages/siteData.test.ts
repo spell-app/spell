@@ -28,7 +28,7 @@ describe.skipIf(!SERVING)("the site editor's Data tab", { timeout: 120_000 }, ()
     browser = await chromium.launch()
     page = await (await browser.newContext({ viewport: { width: 1500, height: 1100 } })).newPage()
     await page.goto(`${EDITOR}site/${PROJECT}`)
-    await page.locator(".SiteEditorPage .TileCard").first().waitFor({ timeout: 30_000 })
+    await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
     await page.evaluate(() => localStorage.clear())
     await page.locator("ui-button", { hasText: "Data" }).click()
     await page.locator("ui-diagram.nerd svg text").first().waitFor({ timeout: 20_000 })
@@ -45,7 +45,7 @@ describe.skipIf(!SERVING)("the site editor's Data tab", { timeout: 120_000 }, ()
     expect(texts).toContain("films[]")
     // plain fields are the ERD's
     expect(texts).not.toContain("height")
-    expect(await page.locator(".TileCard").count()).toBe(0)
+    expect(await page.locator(".SiteCard").count()).toBe(0)
   })
 
   test("a box clicked turns over to its ERD, and shows its sample rows", async () => {
@@ -78,7 +78,7 @@ describe.skipIf(!SERVING)("the site editor's Data tab", { timeout: 120_000 }, ()
       [`spell-samples:${PROJECT}/star_wars`]
     )
     await page.reload()
-    await page.locator(".SiteEditorPage .TileCard").first().waitFor({ timeout: 30_000 })
+    await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
     await page.locator("ui-button", { hasText: "Data" }).click()
     await page
       .locator("ui-diagram.nerd svg text", { hasText: /^Character$/ })

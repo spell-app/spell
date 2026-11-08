@@ -10,23 +10,36 @@ import { SpellPage } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
+import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
 import type { ProjectIndex } from "./SitePlaces"
+import { SiteGroupPage } from "./SiteGroupPage"
 import { SiteWrites } from "./SiteWrites"
 import { EditorToolbar } from "./SpellEditor"
-import { TileCard } from "./TileCard"
 
 import "./SiteEditorPage.css"
 
 /****************
  * ### `<SiteEditorRoute>`
- * The site editor's route, `/site/<project>` (epic `mockup` P4):
- * it shows the project its address names, then `<SiteEditorPage>`.
- * - The project loads as it does for Edit and Run (`followRoute()`), with the page `site`:
- *   the URL stays the project's, whichever file the editor shows.
+ * The site editor's route, `/site/<address>` (epic `mockup` P4):
+ * a group's address shows its sites (`<SiteGroupPage>`), a project's its site's editor.
  ****************/
 export function SiteEditorRoute(props: RouteSectionProps) {
+  const group = createMemo(() => SiteGroupPage.groupAt(props.params.address as string | undefined))
+  return (
+    <Show when={group()} fallback={<SiteProjectRoute params={props.params} />}>
+      {(path) => <SiteGroupPage group={path()} />}
+    </Show>
+  )
+}
+
+/**
+ * The project `/site/<project>` names, in `<SiteEditorPage>`.
+ * - It loads as it does for Edit and Run (`followRoute()`), with the page `site`:
+ *   the URL stays the project's, whichever file the editor shows.
+ */
+function SiteProjectRoute(props: { params: RouteSectionProps["params"] }) {
   followRoute(
     () => props.params,
     () => "site"
@@ -40,8 +53,9 @@ export function SiteEditorRoute(props: RouteSectionProps) {
  * - Its own page in the editor app, as the theme editor is:  the editor itself is untouched.
  * - The tree, on the left:  the site's pages as its side navigation nests them;  drag a row to move it, with its
  *   pages, before or after another row, or into a page as its first page (below the last row:  to the end).
- * - The board, in the middle:  a card per page, dialog and sidebar;  a click picks it, a double click opens it in
- *   Edit, at the line that declares it, with "Back to the site" in the editor's bar.
+ * - The board, in the middle:  a block per section, a card per page, dialog and sidebar (`<SiteBoardView>`);
+ *   a click picks it, a double click opens it in Edit, at the line that declares it, with "Back to the site" in the
+ *   editor's bar;  dragging moves it.
  * - The form, on the right:  the picked part's name, title and address;  its address's parameters, read only.
  *   - A page's STORIES under it (epic `mockup` P6):  what it must let people do, plain lines or Agile stories,
  *     to add, tick off, change, reorder and delete (`<SitePageStories>`);  each card counts them.
@@ -90,7 +104,17 @@ export function SiteEditorPage() {
           </aside>
           <main class="board">
             <header>
-              <h1>{appTexts.text("siteEditorTitle", { project: editor.project?.projectName ?? "" })}</h1>
+              <span class="title">
+                <ui-button
+                  size="small"
+                  appearance="basic"
+                  icon="arrow left"
+                  onClick={() => editor.showSiteEditor(editor.projectRoot?.path)}
+                >
+                  {appTexts.text("siteGroupBack")}
+                </ui-button>
+                <h1>{appTexts.text("siteEditorTitle", { project: editor.project?.projectName ?? "" })}</h1>
+              </span>
               <ui-buttons size="small" class="tabs">
                 <ui-button
                   appearance={tab() === "pages" ? undefined : "basic"}
@@ -121,20 +145,15 @@ export function SiteEditorPage() {
             </Show>
             <Show when={tab() === "pages"}>
               <div class="cards">
-                <For each={all()}>
-                  {(part) => (
-                    <TileCard
-                      title={SiteEditorPage.titleOf(part)}
-                      line={SiteEditorPage.lineOf(part)}
-                      hueFrom={part.name}
-                      picture={part.picture && SP.SpellUrls.fileUrl(`${editor.project?.path}/${part.picture}`)}
-                      selected={picked() === part.name}
-                      class={`depth-${Math.min(part.depth, 2)}`}
-                      onClick={() => setPicked(part.name)}
-                      onDblClick={() => SiteEditorPage.openInEdit(part.name)}
-                    />
-                  )}
-                </For>
+                <SiteBoardView
+                  parts={parts()}
+                  picked={picked()}
+                  titleOf={SiteEditorPage.cardTitleOf}
+                  lineOf={SiteEditorPage.lineOf}
+                  pictureOf={SiteEditorPage.pictureOf}
+                  onPick={setPicked}
+                  onOpen={SiteEditorPage.openInEdit}
+                />
               </div>
             </Show>
           </main>
@@ -191,6 +210,21 @@ SiteEditorPage.lineOf = (part: SitePart): string => {
 /** What a part's card and row say:  its title, else its name. */
 SiteEditorPage.titleOf = (part: SitePart): string => part.title ?? part.name
 
+/**
+ * What a part's card says:  its title, else its name;  a dialog's or sidebar's, without the word for its kind,
+ * which the card's line and shape say already:  `settings dialog` => `Settings`.
+ */
+SiteEditorPage.cardTitleOf = (part: SitePart): string => {
+  const title = SiteEditorPage.titleOf(part)
+  if (part.title || part.kind === "page") return title
+  const words = title.replace(/\s+(?:dialog|modal|sidebar|flyout)$/i, "")
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+/** A part's picture, as the address of its file;  none when its line names none. */
+SiteEditorPage.pictureOf = (part: SitePart): string | undefined =>
+  part.picture && SP.SpellUrls.fileUrl(`${editor.project?.path}/${part.picture}`)
+
 /** An address no page has yet, for a new page:  `/new-page`, then `/new-page-2` ... */
 SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {
   const taken = new Set(parts.map((part) => part.address))
@@ -246,7 +280,7 @@ function safely<T>(read: () => T): T | undefined {
  *   one step of the editor's history (`SiteWrites.movePart()`).
  *   - On a row's top or bottom edge:  before or after it, at its depth;  a line shows where.
  *   - On the middle of a page's row:  inside it, as its first page;  the whole row lights up.
- *     A row that can't nest (`SiteEdits.canNest()`) has only its two halves, before and after.
+ *     A row that can't hold it (`SiteEdits.canNest()`, `canGoUnder()`) has only its two halves, before and after.
  *   - Below the last row:  to the end of the site, shown as after that row.
  *   - On itself, on one of its own pages, or anywhere else:  no mark, and the drop moves nothing.
  ****************/
@@ -274,6 +308,7 @@ function SitePartRows(props: { parts: readonly SitePart[]; picked?: string }) {
           open=""
           selected={props.picked === part.name ? "" : undefined}
           data-can-nest={SiteEdits.canNest(part) ? "" : undefined}
+          data-can-go-under={SiteEdits.canGoUnder(part) ? "" : undefined}
           onPointerDown={(event: PointerEvent) => startMove(event, part.name)}
         >
           <SitePartRows parts={part.parts} picked={props.picked} />
@@ -291,6 +326,9 @@ const DROP_MARK = "data-drop"
 
 /** The attribute on a row whose part can nest (`SiteEdits.canNest()`). */
 const CAN_NEST = "data-can-nest"
+
+/** The attribute on a row whose part can go under a page (`SiteEdits.canGoUnder()`). */
+const CAN_GO_UNDER = "data-can-go-under"
 
 /** How much of a page's row, from its top and from its bottom, means before and after;  the rest means into it. */
 const DROP_EDGE = 0.25
@@ -333,7 +371,7 @@ function dropSpotAt(dragged: HTMLElement, x: number, y: number): DropSpot | unde
     | undefined
   if (under) {
     if (under === dragged || dragged.contains(under)) return undefined
-    const where = whereOnRow(under, y, dragged.hasAttribute(CAN_NEST) && under.hasAttribute(CAN_NEST))
+    const where = whereOnRow(under, y, dragged.hasAttribute(CAN_GO_UNDER) && under.hasAttribute(CAN_NEST))
     return where && { row: under, where }
   }
   const tree = dragged.closest("ui-tree")

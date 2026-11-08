@@ -697,7 +697,7 @@ export type ListSelectDetail = {
  * when it doesn't set the attribute itself (Fomantic's `.ui.raised.cards > .card`).
  * - Read through `UICards.variationFor()`.
  */
-export type CardSharedVariation = "size" | "color" | "direction" | "appearance" | "inverted"
+export type CardSharedVariation = "size" | "color" | "background" | "direction" | "appearance" | "inverted"
 
 ////////////////
 // ## Popup

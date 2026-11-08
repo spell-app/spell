@@ -510,23 +510,39 @@ export class SpellxTwin {
       // a site's parts (epic `mockup` P1):  a page, at its address;  a dialog or a sidebar
       // ... with no address:  its not found or error page, `<page "not found page"/>` (P2)
       case "page":
-        if (!this.attribute("address")) return this.lineAndBlock(this.expand(words.siteOverlay))
+        if (!this.attribute("address"))
+          return this.lineAndBlock(this.expand(`${words.siteOverlay} ${this.siteCardWords()}`))
         return this.lineAndBlock(
           this.expand(
             [
               this.attribute("title") ? words.sitePageTitled : words.sitePage,
               // the state is a word of the line, not a text:  `state="old"` is `, old`
               this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
-              this.attribute("picture") ? words.sitePagePicture : ""
+              this.attribute("picture") ? words.sitePagePicture : "",
+              this.siteCardWords()
             ].join(" ")
           )
         )
       case "dialog":
       case "sidebar":
-        return this.lineAndBlock(this.expand(words.siteOverlay))
+        return this.lineAndBlock(this.expand(`${words.siteOverlay} ${this.siteCardWords()}`))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
+  }
+
+  /**
+   * What a site part's `row=`, `column=` and `color=` add to its line:  `, in row 2 column 3, colored blue`.
+   * - All words of the line, as a page's `state=` is.
+   * - One of row and column without the other leaves a line that doesn't read, so it's an error at that tag.
+   */
+  private siteCardWords(): string {
+    const { words } = this
+    const row = this.attribute("row")?.text
+    const column = this.attribute("column")?.text
+    const color = this.attribute("color")?.text
+    const place = row || column ? words.siteCardPlace.replace("{row}", row ?? "").replace("{column}", column ?? "") : ""
+    return [place, color ? words.siteCardColor.replace("{color}", color) : ""].join(" ")
   }
 
   /**

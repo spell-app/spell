@@ -5410,6 +5410,66 @@
           ]
         },
         {
+          "name": "background",
+          "description": {
+            "kind": "markdown",
+            "value": "Fills the card with a light tint of this colour, its text dark enough to read in the light and dark schemes;  `--ui-card-tint-lightness` and `--ui-card-tint-chroma` set how light and how strong.\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
           "name": "direction",
           "description": {
             "kind": "markdown",
@@ -5875,6 +5935,66 @@
           "description": {
             "kind": "markdown",
             "value": "Colour of every card in the group.\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
+          "name": "background",
+          "description": {
+            "kind": "markdown",
+            "value": "Fills every card in the group with a light tint of this colour, as a card's `background` does.\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
           },
           "values": [
             {

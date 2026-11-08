@@ -1,10 +1,19 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { textIn } from "spell/parser/spell/rules/places"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { overlayKindOf, siteOf, specialPageOf, typeNamed, type SiteOverlayEntry } from "./sites.shared"
+import {
+  cardDetailsOf,
+  cardPlaceMessage,
+  overlayKindOf,
+  siteOf,
+  specialPageOf,
+  typeNamed,
+  type SiteOverlayEntry
+} from "./sites.shared"
 
 /**
  * `site_overlay` rule:  one of a site's dialogs or sidebars (epic `mockup` P1).
@@ -18,10 +27,17 @@ import { overlayKindOf, siteOf, specialPageOf, typeNamed, type SiteOverlayEntry 
  *   - pages with no address, shown in place of one
  *   - the program's own when it declares a page of that name, else a plain built-in one
  *   - every new site lists them;  one deleted still shows the built-in one
+ * - Under a page, one line in from it, it belongs to that page's section of the site editor's board;
+ *   it's opened from any page all the same.
+ * - Its line may end with where its card sits in its section, and its colour (epic `mockup` T31):
+ *   `- it has a settings dialog, in row 1 column 3, colored blue`.
  * - Only in a site's body;  anywhere else, `it has a ...` is a property.
  * - Compiles to nothing by itself:  `create_site` lists them in its class, `static dialogs = [...]`.
  */
-export class SiteOverlay extends SpellStatement<"type|part", { kind?: SiteOverlayKind; entry?: SiteOverlayEntry }> {
+export class SiteOverlay extends SpellStatement<
+  "type|part|row?|column?|color?",
+  { kind?: SiteOverlayKind; entry?: SiteOverlayEntry }
+> {
   @proto static priority = Priority.declaration + 1
   @proto static alias = "statement"
 
@@ -36,8 +52,10 @@ export class SiteOverlay extends SpellStatement<"type|part", { kind?: SiteOverla
     const kind = specialPageOf(scope, name) ?? overlayKindOf(scope, words.at(-1)) ?? overlayKindOf(scope, words[0])
     if (!kind) return undefined
     const view = typeNamed(scope, name)
+    const card = cardDetailsOf(match.groups)
+    if (!card) return SpellStatement.refuse(match, cardPlaceMessage(SP.Language.of(scope), match.groups))
     match.data.kind = kind
-    match.data.entry = { name, ...(view?.isA("View") && { view: view.name }) }
+    match.data.entry = { name, ...(view?.isA("View") && { view: view.name }), ...card }
     return match
   }
 

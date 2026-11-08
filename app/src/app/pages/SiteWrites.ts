@@ -3,6 +3,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { PageStories, type PageStory } from "./PageStories"
+import { SiteBoard, type CardDrop } from "./SiteBoard"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
 
 /****************
@@ -155,6 +156,16 @@ export class SiteWrites {
   static movePart(name: string, place: SitePartPlace): boolean {
     return SiteWrites.change(appTexts.text("siteMovePart", { name }), undefined, (text) =>
       SiteEdits.withPartMoved(text, name, place)
+    )
+  }
+
+  /**
+   * Put card `name` where it was dropped on the board:  ONE step of the editor's history, its move and its place together.
+   * - NEVER throws:  a drop `SiteBoard` refuses shows in the error banner.
+   */
+  static dropCard(name: string, drop: CardDrop): boolean {
+    return SiteWrites.change(appTexts.text("siteMovePart", { name }), undefined, (text) =>
+      SiteBoard.withCardDropped(text, name, drop)
     )
   }
 

@@ -1630,6 +1630,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "singular_identifier · variables · 1",
     "singular_type · types · 1",
     "site_address_of · sites · 1",
+    "site_card_color · sites · 1",
     "site_dialog · sites · 1",
     "site_error_page · sites · 1",
     "site_not_found_page · sites · 1",

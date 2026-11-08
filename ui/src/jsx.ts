@@ -4765,6 +4765,50 @@ export interface UICardAttributes {
     | "positive"
     | "negative"
   /**
+   * Fills the card with a light tint of this colour, its text dark enough to read in the light and dark schemes;  `--ui-card-tint-lightness` and `--ui-card-tint-chroma` set how light and how strong.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  background?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `background`, as the DOM element's property.
+   * @deprecated write `background` -- `prop:` stays only for compiled spell
+   */
+  "prop:background"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
    * `horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
@@ -5175,6 +5219,50 @@ export interface UICardsAttributes {
    * @deprecated write `color` -- `prop:` stays only for compiled spell
    */
   "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Fills every card in the group with a light tint of this colour, as a card's `background` does.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  background?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `background`, as the DOM element's property.
+   * @deprecated write `background` -- `prop:` stays only for compiled spell
+   */
+  "prop:background"?:
     | "primary"
     | "secondary"
     | "red"

@@ -232,7 +232,6 @@ describe("SiteEdits", () => {
     expect(() => into("films page", "films page")).toThrow(/inside itself/)
     expect(() => into("films page", "film page")).toThrow(/one of its own pages/)
     expect(() => into("film page", "settings dialog")).toThrow(/only a page with an address/)
-    expect(() => into("settings dialog", "films page")).toThrow(/only a page with an address/)
   })
 
   test("code spell:  a file ending without a line break", () => {
