@@ -168,7 +168,7 @@ export class Issue extends Thing {
   get assignee() { return this.getProp("assignee") }
   set assignee(value) { this.setProp("assignee", value) }
 
-  static savedIn = { place: "github", collection: "issues", select: ["htmlUrl", "title", "comments", "body"] }
+  static savedIn = { place: "github", collection: "issues", select: ["htmlUrl", "title", "comments", "createdAt", "body"] }
 }
 
 export class Contributor extends Thing {
@@ -461,33 +461,47 @@ export class User extends Thing {
       onClick: core.pressed(this, async () => await this.lookAtUser()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
-      h("ui-image", { src: () => this.avatarUrl, alt: "" }),
       h("ui-content",
-        h("ui-header",
-          () => this.login,
-          h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
-            h("ui-icon", { name: "github" })
+        h("ui-stack", { direction: "horizontal", align: "center", spacing: "sm" },
+          h("ui-image", { src: () => this.avatarUrl, alt: "", size: "mini", appearance: "circular" }),
+          h("ui-stack", { spacing: "none", align: "start" },
+            h("ui-header",
+              () => this.login,
+              h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
+                h("ui-icon", { name: "github" })
+              )
+            ),
+            h("ui-meta", () => this.kind)
           )
-        ),
-        h("ui-meta", () => this.kind)
+        )
       )
     )
   }
 
   drawPage() {
-    return [
-      h("ui-stack", { direction: "horizontal", wrap: true, align: "start" },
+    return h("ui-stack", { spacing: "xl", part: "page" },
+      h("ui-stack", { direction: "horizontal", align: "center", spacing: "sm" },
+        h("ui-button", {
+          icon: "arrow left",
+          appearance: "basic",
+          "aria-label": "Back",
+          title: "Back",
+          onClick: core.pressed(this, async () => await this.lookAwayFromUser()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }),
+        h("ui-header", { size: "large" },
+          () => this.name ? this.name : this.login,
+          h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
+            h("ui-icon", { name: "github" })
+          )
+        )
+      ),
+      h("ui-stack", { direction: "horizontal", wrap: true, align: "start", spacing: "md" },
         h("ui-image", { src: () => this.avatarUrl, alt: "", size: "small", appearance: "rounded" }),
-        h("ui-stack",
-          h("ui-header", { size: "large" },
-            () => this.name,
-            h("ui-link", { link: () => this.htmlUrl, target: "_blank", "aria-label": "On GitHub" },
-              h("ui-icon", { name: "github" })
-            )
-          ),
+        h("ui-stack", { spacing: "sm" },
           h("ui-text", { color: "grey" }, () => this.login, " · ", () => this.kind),
-          h("ui-text", () => this.bio),
-          h("ui-text", { size: "small", color: "grey" },
+          h("ui-text", { hidden: () => this.bio ? undefined : true }, () => this.bio),
+          h("ui-text", { size: "small", color: "grey", hidden: () => core.dateShown(this.createdAt) ? undefined : true },
             () => this.publicRepos,
             " public repositories · ",
             () => this.followers,
@@ -495,27 +509,48 @@ export class User extends Thing {
           )
         )
       ),
-      h("ui-header", { size: "medium" }, "Most popular"),
-      core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository) => core.drawThing(repository), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "page" }, "Asking GitHub"),
-        none: () => h("ui-text", { part: "page" }, "Nothing public yet."),
-        failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
-        paging: () => "pages",
-        items: () => h("ui-cards", { columns: "3", doubling: true, part: "page" })
-      })
-    ]
+      h("ui-stack", { spacing: "sm" },
+        h("ui-header", { size: "medium" }, "Most popular"),
+        () => this.drawMostPopular()
+      )
+    )
+  }
+
+  drawMostPopular() {
+    return core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository) => core.drawThing(repository), {
+      waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "most_popular" }, "Asking GitHub"),
+      none: () => h("ui-text", { part: "most_popular" }, "Nothing public yet."),
+      paging: () => "pages",
+      items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "most_popular" }),
+      failed: () => h("ui-stack", { direction: "horizontal", wrap: true, align: "center", spacing: "sm", part: "most_popular" },
+        h("ui-text", { color: "orange" },
+          h("ui-icon", { name: "clock outline" }),
+          " GitHub takes 10 searches a minute:  try again in a minute."
+        ),
+        h("ui-button", {
+          size: "small",
+          appearance: "basic",
+          onClick: core.pressed(this, () => core.reloadSaved()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Try again")
+      )
+    })
   }
 
   //////////////////////////////////////////////////
   // ## What someone on GitHub can do, from anywhere
   //////////////////////////////////////////////////
-  // Shown on their own page, in the GitHub tab of the public servers.
+  // Shown on their own page, and put away again by its Back button, in the GitHub tab of the public servers.
 
   async lookAtUser() {
     publicServers.github.showing = this
   }
 
-  static savedIn = { place: "github", collection: "users", select: ["login", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "bio"] }
+  async lookAwayFromUser() {
+    publicServers.github.showing = undefined
+  }
+
+  static savedIn = { place: "github", collection: "users", select: ["login", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "createdAt", "bio"] }
 }
 
 export class IssueUser extends Thing {
@@ -1478,13 +1513,17 @@ export class Repository extends Thing {
             h("ui-icon", { name: "github" })
           )
         ),
-        h("ui-meta", "★ ", () => this.stargazersCount, " · ", () => this.language),
+        h("ui-meta",
+          "★ ",
+          () => this.stargazersCount,
+          h("span", { hidden: () => this.language ? undefined : "until-found" }, " · ", () => this.language)
+        ),
         h("ui-description", () => this.description)
       )
     )
   }
 
-  static savedIn = { place: "github", collection: "repositories", select: ["name", "fullName", "htmlUrl", "description", "stargazersCount", "language"] }
+  static savedIn = { place: "github", collection: "repositories", select: ["name", "fullName", "htmlUrl", "description", "createdAt", "stargazersCount", "language"] }
 }
 
 export class Assignee extends Thing {
@@ -1688,86 +1727,105 @@ export class GithubPage extends Thing {
     this.search = words
   }
 
-  static drawsWaiting = true
   draw() {
-    return [
+    return h("ui-stack", { spacing: "xl" },
       h("ui-form", { value: this },
-        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between" },
-          h("ui-header", { size: "large" }, "People and code, on GitHub"),
-          h("ui-search", {
-            name: "search",
-            parameter: "who",
-            icon: "search",
-            placeholder: "A person, an organization, a repository",
-            "aria-label": "Search GitHub"
-          })
-        ),
-        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", spacing: "xs" },
-          h("ui-text", { size: "small", color: "grey" }, "Try"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("ryansolid")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "ryansolid"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("solidjs")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "solidjs"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("vite")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "vite"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("torvalds")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "torvalds"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("spreadsheet")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "spreadsheet")
+        h("ui-stack", { spacing: "sm" },
+          h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
+            h("ui-header", { size: "large" }, "People and code, on GitHub"),
+            h("ui-search", {
+              name: "search",
+              parameter: "who",
+              icon: "search",
+              placeholder: "A person, an organization, a repository",
+              "aria-label": "Search GitHub"
+            })
+          ),
+          h("ui-toolbar", { appearance: "secondary", size: "small", "aria-label": "Try a search" },
+            h("ui-text", { slot: "title", size: "small", color: "grey" }, "Try"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("ryansolid")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "ryansolid"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("solidjs")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "solidjs"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("vite")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "vite"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("torvalds")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "torvalds"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("spreadsheet")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "spreadsheet")
+          )
         )
       ),
-      this.showing ? [
-        h("ui-button", {
-          appearance: "basic",
-          icon: "arrow left",
-          onClick: core.pressed(this, async () => (this.showing = undefined)),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Back"),
-        core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login)).drawPage(), undefined, { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking GitHub"), failed: () => h("ui-text", "GitHub can't find that login just now.") })
-      ] : [
-        h("ui-header", { size: "medium" }, "People and organizations"),
-        core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user) => core.drawThing(user), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking GitHub"),
-          none: () => h("ui-text", "Nobody on GitHub goes by that."),
-          failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
-          paging: () => "pages",
-          items: () => h("ui-cards", { columns: "6", doubling: true })
-        }),
-        h("ui-header", { size: "medium" }, "Repositories"),
-        core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository) => core.drawThing(repository), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking GitHub"),
-          none: () => h("ui-text", "No repository matches that."),
-          failedSay: () => "GitHub can't be searched just now:  it takes 10 searches a minute.",
-          paging: () => "pages",
-          items: () => h("ui-cards", { columns: "3", doubling: true })
-        })
-      ],
+      () => this.drawFound(),
       h("ui-text", { size: "small", paragraph: true },
         "From ",
         h("ui-link", { link: "https://docs.github.com/en/rest" }, "GitHub's REST API"),
         ", asked for as you look."
       )
-    ]
+    )
+  }
+
+  // Someone's own page, while one is picked;  else what the search finds
+  static drawsWaiting = true
+  drawFound() {
+    if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login)).drawPage(), undefined, { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "found" }, "Asking GitHub"), failed: () => h("ui-text", { part: "found" }, "GitHub can't find that login just now.") })
+    else {
+      return h("ui-stack", { spacing: "xl", part: "found" },
+        h("ui-stack", { spacing: "sm" },
+          h("ui-header", { size: "medium" }, "People and organizations"),
+          () => this.drawPeopleFound()
+        ),
+        h("ui-stack", { spacing: "sm" },
+          h("ui-header", { size: "medium" }, "Repositories"),
+          () => this.drawRepositoriesFound()
+        )
+      )
+    }
+  }
+
+  drawPeopleFound() {
+    return core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user) => core.drawThing(user), {
+      waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "people_found" }, "Asking GitHub"),
+      none: () => h("ui-text", { part: "people_found" }, "Nobody on GitHub goes by that."),
+      paging: () => "pages",
+      items: () => h("ui-cards", { columns: "4", doubling: true, stackable: true, part: "people_found" }),
+      failed: () => h("ui-stack", { direction: "horizontal", wrap: true, align: "center", spacing: "sm", part: "people_found" },
+        h("ui-text", { color: "orange" },
+          h("ui-icon", { name: "clock outline" }),
+          " GitHub takes 10 searches a minute:  try again in a minute."
+        ),
+        h("ui-button", {
+          size: "small",
+          appearance: "basic",
+          onClick: core.pressed(this, () => core.reloadSaved()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Try again")
+      )
+    })
+  }
+
+  drawRepositoriesFound() {
+    return core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository) => core.drawThing(repository), {
+      waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "repositories_found" },
+        "Asking GitHub"
+      ),
+      none: () => h("ui-text", { part: "repositories_found" }, "No repository matches that."),
+      paging: () => "pages",
+      items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "repositories_found" }),
+      failed: () => h("ui-text", { size: "small", color: "grey", part: "repositories_found" },
+        "These wait for the same minute."
+      )
+    })
   }
 }
 
@@ -1908,7 +1966,7 @@ export class Book extends Thing {
   set subtitle(value) { this.setProp("subtitle", value) }
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1781, end: 1917 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1927, end: 2063 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -1928,18 +1986,30 @@ export class Book extends Thing {
   }
 
   drawPage() {
-    return h("ui-stack", { direction: "horizontal", wrap: true, align: "start", part: "page" },
-      h("ui-image", { src: () => this.coverI, alt: "" }),
-      h("ui-stack",
-        h("ui-header", { size: "large" }, () => this.title),
-        h("ui-text",
-          "First published in ",
-          () => this.firstPublishYear,
-          " · ",
-          () => this.editionCount,
-          " editions"
-        ),
-        () => this.drawWriting()
+    return h("ui-stack", { spacing: "xl", part: "page" },
+      h("ui-stack", { direction: "horizontal", align: "center", spacing: "sm" },
+        h("ui-button", {
+          icon: "arrow left",
+          appearance: "basic",
+          "aria-label": "Back",
+          title: "Back",
+          onClick: core.pressed(this, async () => await this.close()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }),
+        h("ui-header", { size: "large" }, () => this.title)
+      ),
+      h("ui-stack", { direction: "horizontal", wrap: true, align: "start", spacing: "md" },
+        h("ui-image", { src: () => this.coverI, alt: "", size: "small" }),
+        h("ui-stack", { spacing: "sm" },
+          h("ui-text",
+            "First published in ",
+            () => this.firstPublishYear,
+            " · ",
+            () => this.editionCount,
+            " editions"
+          ),
+          () => this.drawWriting()
+        )
       )
     )
   }
@@ -1961,6 +2031,10 @@ export class Book extends Thing {
 
   async open() {
     publicServers.library.showing = this
+  }
+
+  async close() {
+    publicServers.library.showing = undefined
   }
 
   static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "title"] }
@@ -2368,11 +2442,10 @@ export class OpenLibraryPage extends Thing {
     return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book) => core.includes(book.title, this.search))
   }, () => [this.search]) }
 
-  static drawsWaiting = true
   draw() {
-    return [
+    return h("ui-stack", { spacing: "xl" },
       h("ui-form", { value: this },
-        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between" },
+        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
           h("ui-header", { size: "large" }, "Books, from Open Library"),
           h("ui-search", {
             name: "search",
@@ -2383,27 +2456,30 @@ export class OpenLibraryPage extends Thing {
           })
         )
       ),
-      this.showing ? [
-        h("ui-button", {
-          appearance: "basic",
-          icon: "arrow left",
-          onClick: core.pressed(this, async () => (this.showing = undefined)),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Back"),
-        this.showing?.drawPage()
-      ] : core.drawRead(() => this.found, (book) => core.drawThing(book), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking Open Library"),
-        none: () => h("ui-text", "No book is called that."),
-        failedSay: () => "Open Library can't be reached just now.",
-        paging: () => "pages",
-        items: () => h("ui-cards", { columns: "5", doubling: true })
-      }),
+      () => this.drawShelf(),
       h("ui-text", { size: "small", paragraph: true },
         "From ",
         h("ui-link", { link: "https://openlibrary.org/developers/api" }, "Open Library's API"),
         ", asked for as you look;  its covers from its covers server."
       )
-    ]
+    )
+  }
+
+  // A book's own page, while one is open;  else what the search finds
+  static drawsWaiting = true
+  drawShelf() {
+    if (this.showing) return this.showing.drawPage()
+    else return this.drawBookList()
+  }
+
+  drawBookList() {
+    return core.drawRead(() => this.found, (book) => core.drawThing(book), {
+      waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "book_list" }, "Asking Open Library"),
+      none: () => h("ui-text", { part: "book_list" }, "No book is called that."),
+      failedSay: () => "Open Library can't be reached just now.",
+      paging: () => "pages",
+      items: () => h("ui-cards", { columns: "5", doubling: true, part: "book_list" })
+    })
   }
 }
 
@@ -2561,7 +2637,7 @@ export class Todo extends Thing {
 
   draw() {
     return h("ui-form", { value: this },
-      h("ui-stack", { direction: "horizontal", align: "center" },
+      h("ui-stack", { direction: "horizontal", align: "center", justify: "between", spacing: "sm" },
         h("ui-checkbox", { name: "completed", label: () => this.title }),
         h("ui-button", {
           icon: "close",
@@ -2685,42 +2761,63 @@ export class JsonplaceholderPage extends Thing {
   }
 
   draw() {
-    return [
-      h("ui-header", { size: "large" }, "Practice, on JSONPlaceholder"),
-      h("ui-text", { color: "grey" },
-        "Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."
+    return h("ui-stack", { spacing: "xl" },
+      h("ui-stack", { spacing: "sm" },
+        h("ui-header", { size: "large" }, "Practice, on JSONPlaceholder"),
+        h("ui-text", { color: "grey" },
+          "Tick a todo, add one, remove one:  each goes to the server, which answers as if it saved it, and keeps nothing."
+        )
       ),
-      h("ui-header", { size: "medium" }, "Their todos"),
-      h("slot", { name: "checklist" }, () => this.drawChecklist()),
-      h("ui-header", { size: "medium" }, "What they wrote"),
-      core.drawRead(() => this.person?.posts, (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking JSONPlaceholder"), failedSay: () => "JSONPlaceholder can't be reached just now." }),
+      h("ui-stack", { spacing: "sm" },
+        h("ui-header", { size: "medium" }, "Their todos"),
+        () => this.drawChecklist()
+      ),
+      h("ui-stack", { spacing: "sm" },
+        h("ui-header", { size: "medium" }, "What they wrote"),
+        () => this.drawPostList()
+      ),
       h("ui-text", { size: "small", paragraph: true },
         "From ",
         h("ui-link", { link: "https://jsonplaceholder.typicode.com" }, "JSONPlaceholder"),
         ", asked for as you look."
       )
-    ]
+    )
   }
 
   static drawsWaiting = true
   drawChecklist() {
-    return [
+    return h("ui-stack", { spacing: "sm", part: "checklist" },
       h("ui-form", { "prop:value": () => this.newTodo },
-        h("ui-field", { label: "Something to do" },
-          h("ui-input", { name: "title", placeholder: "Water the plants" })
+        h("ui-input", {
+          name: "title",
+          placeholder: "Water the plants",
+          "aria-label": "Something to do",
+          fluid: true,
+          action: true
+        },
+          h("ui-button", {
+            slot: "action",
+            color: "primary",
+            disabled: () => this.newTodo.title === "",
+            onClick: core.pressed(this, async () => await this.addTheNewTodo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Add")
         )
       ),
-      h("ui-button", {
-        size: "small",
-        color: "primary",
-        disabled: () => this.newTodo.title === "",
-        onClick: core.pressed(this, async () => await this.addTheNewTodo()),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      }, "Add"),
-      core.drawRead(() => this.todos, (todo) => core.drawThing(todo), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "checklist" },
-        "Asking JSONPlaceholder"
-      ), failedSay: () => "JSONPlaceholder can't be reached just now." })
-    ]
+      () => this.drawTodoList()
+    )
+  }
+
+  drawTodoList() {
+    return core.drawRead(() => this.todos, (todo) => core.drawThing(todo), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "todo_list" },
+      "Asking JSONPlaceholder"
+    ), failedSay: () => "JSONPlaceholder can't be reached just now." })
+  }
+
+  drawPostList() {
+    return core.drawRead(() => this.person?.posts, (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "post_list" },
+      "Asking JSONPlaceholder"
+    ), failedSay: () => "JSONPlaceholder can't be reached just now." })
   }
 }
 
@@ -2793,6 +2890,32 @@ export class Forecast extends Thing {
   get hours() { return this.getProp("hours") }
   set hours(value) { this.setProp("hours", value) }
 
+  drawHourTable() {
+    return core.drawRead(() => this.hours, (hour) => [
+      h("ui-cell", { "data-column": "Day" },
+        h("span", { hidden: () => hour.time.getHours() === 0 ? undefined : "until-found" },
+          () => core.dateShown(hour.time)
+        )
+      ),
+      h("ui-cell", { "data-column": "Hour", align: "right" }, () => hour.time.getHours(), ":00"),
+      h("ui-cell", { "data-column": "Temperature", align: "right" },
+        () => core.measureShown(hour.temperature, "Temperature", "celsius")
+      ),
+      h("ui-cell", { "data-column": "Rain", align: "right" },
+        () => core.measureShown(hour.precipitation, "Length", "millimeter")
+      ),
+      h("ui-cell", { "data-column": "Wind", align: "right" },
+        () => core.measureShown(hour.windSpeed, "Speed", "kilometerPerHour")
+      )
+    ], { items: () => h("ui-table", {
+      appearance: "very-basic",
+      padding: "compact",
+      collapsing: true,
+      unstackable: true,
+      part: "hour_table"
+    }, h("ui-row")) })
+  }
+
   static savedIn = { place: "open_meteo", collection: "forecasts", select: ["latitude", "longitude", "timezone", "hours"] }
 }
 
@@ -2816,20 +2939,6 @@ export class Hour extends Thing {
   static { this.declareProp("windSpeed", { type: "number", storedAs: "wind_speed_10m" }) }
   get windSpeed() { return this.getProp("windSpeed") }
   set windSpeed(value) { this.setProp("windSpeed", value) }
-
-  draw() {
-    return h("ui-row",
-      h("ui-cell", { header: true },
-        () => core.dateShown(this.time),
-        " · ",
-        () => this.time.getHours(),
-        ":00"
-      ),
-      h("ui-cell", () => core.measureShown(this.temperature, "Temperature", "celsius")),
-      h("ui-cell", () => core.measureShown(this.precipitation, "Length", "millimeter")),
-      h("ui-cell", () => core.measureShown(this.windSpeed, "Speed", "kilometerPerHour"))
-    )
-  }
 }
 
 export class OpenMeteo extends Place {}
@@ -2900,37 +3009,39 @@ export class OpenMeteoPage extends Thing {
   }
 
   draw() {
-    return [
-      h("ui-header", { size: "large" }, "The weather, from Open-Meteo"),
-      h("ui-toolbar", { appearance: "secondary", "aria-label": "Cities" },
-        () => core.drawItems(this.cities)
+    return h("ui-stack", { spacing: "xl" },
+      h("ui-stack", { spacing: "sm" },
+        h("ui-header", { size: "large" }, "The weather, from Open-Meteo"),
+        h("ui-toolbar", { appearance: "secondary", "aria-label": "Cities" },
+          () => core.drawItems(this.cities)
+        )
       ),
-      h("slot", { name: "hours" }, () => this.drawHours()),
+      () => this.drawForecastTable(),
       h("ui-text", { size: "small", paragraph: true },
         "From ",
         h("ui-link", { link: "https://open-meteo.com/en/docs" }, "Open-Meteo's API"),
         ", asked for as you look;  each measure in your own units."
       )
-    ]
+    )
   }
 
   static drawsWaiting = true
-  drawHours() {
+  drawForecastTable() {
     if (this.forecast) {
-      return [
+      return h("ui-stack", { spacing: "sm", part: "forecast_table" },
         h("ui-text", { color: "grey" },
           "The next two days in ",
           () => core.whileWaiting(() => this.forecast.timezone),
           ", hour by hour."
         ),
-        h("ui-table", { appearance: "very-basic", unstackable: true },
-          () => core.whileWaiting(() => core.drawItems(this.forecast.hours))
-        )
-      ]
+        () => core.whileWaiting(() => this.forecast.drawHourTable())
+      )
     }
 
-    core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "hours" }, "Asking Open-Meteo"))
-    core.readRider("failed", () => h("ui-text", { part: "hours" }, "Open-Meteo can't be reached just now."))
+    core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "forecast_table" },
+      "Asking Open-Meteo"
+    ))
+    core.readRider("failed", () => h("ui-text", { part: "forecast_table" }, "Open-Meteo can't be reached just now."))
   }
 }
 
@@ -2969,11 +3080,11 @@ export class City extends Thing {
   }
 }
 
-core.heading("An hour")
-/////////////
-// ## An hour
-/////////////
-// Its day and hour, and each measure:  in the units the reader's region reads, °F and inches in the US.
+core.heading("Its hours")
+///////////////
+// ## Its hours
+///////////////
+// A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
 
 // -----------
 core.heading("The Met Museum:  every artwork in its collection, and a search of all of it")
@@ -3277,39 +3388,38 @@ export class Artwork extends Thing {
   set galleryNumber(value) { this.setProp("galleryNumber", value) }
 
   draw() {
-    if (this.title) {
+    if (this.title && this.primaryImageSmall) {
       return h("ui-shape", { class: "artwork", direction: "over", "flip-on": "click", "aria-label": () => this.title },
         h("ui-side",
           h("ui-card", { fluid: true },
-            h("ui-image", {
-              src: () => this.primaryImageSmall,
-              alt: () => this.title,
-              hidden: () => this.primaryImageSmall ? undefined : true
-            }),
+            h("ui-image", { src: () => this.primaryImageSmall, alt: () => this.title }),
             h("ui-content",
               h("ui-header", () => this.title),
               h("ui-meta", () => this.artistDisplayName)
             )
           )
         ),
-        h("ui-side",
-          h("ui-card", { fluid: true },
-            h("ui-content",
-              h("ui-header", () => this.title),
-              h("ui-meta", () => this.artistDisplayName, " · ", () => this.objectDate),
-              h("ui-description",
-                h("ui-text", { paragraph: true }, () => this.medium),
-                h("ui-text", { paragraph: true }, () => this.dimensions),
-                h("ui-text", { paragraph: true, color: "grey" }, () => this.department, " · ", () => this.creditLine)
-              )
-            ),
-            h("ui-extra",
-              h("ui-link", { link: () => this.objectUrl, target: "_blank" }, "On the Met's own pages")
-            )
-          )
-        )
+        h("ui-side", () => this.drawAboutCard())
       )
-    }
+    } else if (this.title) return h("slot", { name: "about_card" }, () => this.drawAboutCard())
+  }
+
+  // What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
+  drawAboutCard() {
+    return h("ui-card", { fluid: true, part: "about_card" },
+      h("ui-content",
+        h("ui-header", () => this.title),
+        h("ui-meta", () => this.artistDisplayName, " · ", () => this.objectDate),
+        h("ui-description",
+          h("ui-text", { paragraph: true }, () => this.medium),
+          h("ui-text", { paragraph: true }, () => this.dimensions),
+          h("ui-text", { paragraph: true, color: "grey" }, () => this.department, " · ", () => this.creditLine)
+        )
+      ),
+      h("ui-extra",
+        h("ui-link", { link: () => this.objectUrl, target: "_blank" }, "On the Met's own pages")
+      )
+    )
   }
 
   static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "region", "objectUrl"] }
@@ -3456,59 +3566,49 @@ export class MetMuseumPage extends Thing {
   }
 
   draw() {
-    return [
+    return h("ui-stack", { spacing: "xl" },
       h("ui-form", { class: "find", value: this },
-        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between" },
-          h("ui-header", { size: "large" }, "Artworks, from the Met"),
-          h("ui-search", {
-            name: "search",
-            parameter: "art",
-            icon: "search",
-            placeholder: "A title, an artist, a subject",
-            "aria-label": "Search the Met"
-          })
-        ),
-        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", spacing: "xs" },
-          h("ui-text", { size: "small", color: "grey" }, "Try"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("sunflowers")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Sunflowers"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("van gogh")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Van Gogh"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("armor")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Armor"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("egypt")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Egypt"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("cats")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Cats"),
-          h("ui-button", {
-            size: "small",
-            appearance: "basic pill",
-            onClick: core.pressed(this, async () => await this.tryWords("hokusai")),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Hokusai")
+        h("ui-stack", { spacing: "sm" },
+          h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
+            h("ui-header", { size: "large" }, "Artworks, from the Met"),
+            h("ui-search", {
+              name: "search",
+              parameter: "art",
+              icon: "search",
+              placeholder: "A title, an artist, a subject",
+              "aria-label": "Search the Met"
+            })
+          ),
+          h("ui-toolbar", { appearance: "secondary", size: "small", "aria-label": "Try a search" },
+            h("ui-text", { slot: "title", size: "small", color: "grey" }, "Try"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("sunflowers")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Sunflowers"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("van gogh")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Van Gogh"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("armor")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Armor"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("egypt")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Egypt"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("cats")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Cats"),
+            h("ui-item", {
+              onClick: core.pressed(this, async () => await this.tryWords("hokusai")),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Hokusai")
+          )
         )
       ),
-      core.drawRead(() => this.found, (artwork) => core.drawThing(artwork), {
+      () => core.drawRead(() => this.found, (artwork) => core.drawThing(artwork), {
         waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking the Met"),
         none: () => h("ui-text", "The Met has nothing for that."),
         failedSay: () => "The Met can't be reached just now.",
@@ -3520,7 +3620,7 @@ export class MetMuseumPage extends Thing {
         h("ui-link", { link: "https://metmuseum.github.io" }, "the Met Museum's API"),
         ", each artwork asked for as it's shown.  Press a picture to turn it over."
       )
-    ]
+    )
   }
 }
 
@@ -3530,7 +3630,7 @@ core.heading("An artwork")
 ////////////////
 // A card that turns over:  its picture on the front, what the Met knows of it on the back.
 // Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
-// Only what's in the public domain has a picture:  the rest show their title alone.
+// Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
 // -----------
 core.heading("REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names")
@@ -3667,19 +3767,6 @@ export class Country extends Thing {
   get demonyms() { return this.getProp("demonyms") }
   set demonyms(value) { this.setProp("demonyms", value) }
 
-  draw() {
-    return h("ui-row",
-      h("ui-cell", () => this.flag),
-      h("ui-cell", { header: true }, () => this.name?.common),
-      h("ui-cell",
-        () => core.getItemAt(core.filter(this.translations, (translation) => translation.code === publicServers.atlas.language), 0)?.common
-      ),
-      h("ui-cell", () => core.getItemAt(this.capital, 0)),
-      h("ui-cell", h("ui-stack", () => core.drawItems(this.currencies))),
-      h("ui-cell", h("ui-stack", () => core.drawItems(this.languages)))
-    )
-  }
-
   static savedIn = { place: "rest_countries", collection: "countries", select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
 }
 
@@ -3739,7 +3826,7 @@ export class Currency extends Thing {
       " (",
       () => this.symbol,
       ") ",
-      h("ui-label", { size: "mini" }, () => this.code)
+      h("ui-text", { color: "grey" }, () => this.code)
     )
   }
 }
@@ -3850,6 +3937,7 @@ export class RestCountriesPage extends Thing {
   get region() { return this.getProp("region") }
   set region(value) { this.setProp("region", value) }
 
+  /** its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn` */
   // - its "language" is text
   static { this.declareProp("language", { type: "text" }) }
   get language() { return this.getProp("language") }
@@ -3861,7 +3949,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 635, end: 819 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 722, end: 906 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item) => item.name?.common)
   }, () => [this.region]) }
@@ -3870,98 +3958,92 @@ export class RestCountriesPage extends Thing {
     this.region = region
   }
 
-  /** Its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`. */
-  pickLanguageLanguage(language) {
-    this.language = language
-  }
-
   draw() {
-    return [
-      h("ui-header", { size: "large" }, "The world's countries, from REST Countries"),
-      h("ui-toolbar", { appearance: "secondary", "aria-label": "Regions" },
-        h("ui-item", {
-          active: () => this.region === "Africa",
-          onClick: core.pressed(this, () => this.pickRegionRegion("Africa")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Africa"),
-        h("ui-item", {
-          active: () => this.region === "Americas",
-          onClick: core.pressed(this, () => this.pickRegionRegion("Americas")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "The Americas"),
-        h("ui-item", {
-          active: () => this.region === "Asia",
-          onClick: core.pressed(this, () => this.pickRegionRegion("Asia")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Asia"),
-        h("ui-item", {
-          active: () => this.region === "Europe",
-          onClick: core.pressed(this, () => this.pickRegionRegion("Europe")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Europe"),
-        h("ui-item", {
-          active: () => this.region === "Oceania",
-          onClick: core.pressed(this, () => this.pickRegionRegion("Oceania")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Oceania"),
-        h("ui-item", {
-          active: () => this.region === "Antarctic",
-          onClick: core.pressed(this, () => this.pickRegionRegion("Antarctic")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "The Antarctic")
+    return h("ui-stack", { spacing: "xl" },
+      h("ui-stack", { spacing: "sm" },
+        h("ui-form", { value: this },
+          h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
+            h("ui-header", { size: "large" }, "The world's countries, from REST Countries"),
+            h("ui-select", { name: "language", "aria-label": "Names in" },
+              h("ui-item", { value: "fra" }, "Français"),
+              h("ui-item", { value: "spa" }, "Español"),
+              h("ui-item", { value: "deu" }, "Deutsch"),
+              h("ui-item", { value: "jpn" }, "日本語")
+            )
+          )
+        ),
+        h("ui-toolbar", { appearance: "secondary", "aria-label": "Regions" },
+          h("ui-item", {
+            active: () => this.region === "Africa",
+            onClick: core.pressed(this, () => this.pickRegionRegion("Africa")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Africa"),
+          h("ui-item", {
+            active: () => this.region === "Americas",
+            onClick: core.pressed(this, () => this.pickRegionRegion("Americas")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "The Americas"),
+          h("ui-item", {
+            active: () => this.region === "Asia",
+            onClick: core.pressed(this, () => this.pickRegionRegion("Asia")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Asia"),
+          h("ui-item", {
+            active: () => this.region === "Europe",
+            onClick: core.pressed(this, () => this.pickRegionRegion("Europe")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Europe"),
+          h("ui-item", {
+            active: () => this.region === "Oceania",
+            onClick: core.pressed(this, () => this.pickRegionRegion("Oceania")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Oceania"),
+          h("ui-item", {
+            active: () => this.region === "Antarctic",
+            onClick: core.pressed(this, () => this.pickRegionRegion("Antarctic")),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "The Antarctic")
+        )
       ),
-      h("ui-toolbar", { appearance: "secondary", "aria-label": "Names in" },
-        h("ui-item", {
-          active: () => this.language === "fra",
-          onClick: core.pressed(this, () => this.pickLanguageLanguage("fra")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Français"),
-        h("ui-item", {
-          active: () => this.language === "spa",
-          onClick: core.pressed(this, () => this.pickLanguageLanguage("spa")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Español"),
-        h("ui-item", {
-          active: () => this.language === "deu",
-          onClick: core.pressed(this, () => this.pickLanguageLanguage("deu")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Deutsch"),
-        h("ui-item", {
-          active: () => this.language === "jpn",
-          onClick: core.pressed(this, () => this.pickLanguageLanguage("jpn")),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "日本語")
-      ),
-      h("slot", { name: "countries_table" }, () => this.drawCountriesTable()),
+      () => this.drawCountriesTable(),
       h("ui-text", { size: "small", paragraph: true },
         "From ",
         h("ui-link", { link: "https://github.com/mledoze/countries" }, "the data REST Countries serves"),
         ", every country in one request."
       )
-    ]
+    )
   }
 
-  static drawsWaiting = true
+  // A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code
   drawCountriesTable() {
-    if (this.countries) {
-      return h("ui-table", { appearance: "very-basic", unstackable: true, part: "countries_table" },
-        () => core.whileWaiting(() => core.drawItems(this.countries))
+    return core.drawRead(() => this.countries, (country) => [
+      h("ui-cell", { "data-column": "Flag", align: "center" },
+        h("ui-text", { size: "big" }, () => country.flag)
+      ),
+      h("ui-cell", { "data-column": "Country", header: true }, () => country.name?.common),
+      h("ui-cell", { "data-column": "Its name there" },
+        () => core.getItemAt(core.filter(country.translations, (translation) => translation.code === publicServers.atlas.language), 0)?.common
+      ),
+      h("ui-cell", { "data-column": "Capital" }, () => core.getItemAt(country.capital, 0)),
+      h("ui-cell", { "data-column": "Money" },
+        h("ui-stack", { spacing: "none" }, () => core.drawItems(country.currencies))
+      ),
+      h("ui-cell", { "data-column": "Languages" },
+        h("ui-stack", { direction: "horizontal", wrap: true, spacing: "xs" },
+          () => core.drawItems(country.languages)
+        )
       )
-    }
-
-    core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "countries_table" },
-      "Asking REST Countries"
-    ))
-    core.readRider("failed", () => h("ui-text", { part: "countries_table" }, "REST Countries can't be reached just now."))
+    ], {
+      waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "countries_table" },
+        "Asking REST Countries"
+      ),
+      failedSay: () => "REST Countries can't be reached just now.",
+      items: () => h("ui-table", { appearance: "very-basic", padding: "compact", "vertical-align": "top", part: "countries_table" },
+        h("ui-row")
+      )
+    })
   }
 }
-
-core.heading("A country")
-///////////////
-// ## A country
-///////////////
-// Its flag and name, its name in the language picked, its capital, its money and its languages.
-// Its money, its languages and its names come keyed by a code, `EUR`, `fra`:  each is a list of things, each with its code.
 
 core.heading("Its money")
 ///////////////
@@ -3980,7 +4062,7 @@ core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
-// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab.
+// Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab, in one centred column.
 // The tab chosen, and each page's search, are kept in the page's address (`?server=met&art=van+gogh`), so Back steps through them.
 // GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
@@ -4022,19 +4104,31 @@ export class PublicServer extends App {
   }
 
   draw() {
-    return [
-      h("ui-form", { value: this },
-        h("ui-tabs", { name: "tab", parameter: "server", appearance: "secondary pointing basic", "aria-label": "Servers" },
-          h("ui-tab", { label: "GitHub", value: "github" }),
-          h("ui-tab", { label: "Open Library", value: "library" }),
-          h("ui-tab", { label: "JSONPlaceholder", value: "jsonplaceholder" }),
-          h("ui-tab", { label: "Open-Meteo", value: "weather" }),
-          h("ui-tab", { label: "The Met", value: "met" }),
-          h("ui-tab", { label: "REST Countries", value: "countries" })
-        )
-      ),
-      this.tab === "github" ? core.drawThing(this.github) : this.tab === "library" ? core.drawThing(this.library) : this.tab === "jsonplaceholder" ? core.drawThing(new JsonplaceholderPage()) : this.tab === "weather" ? core.drawThing(this.weather) : this.tab === "met" ? core.drawThing(this.museum) : this.tab === "countries" ? core.drawThing(this.atlas) : undefined
-    ]
+    return h("ui-container",
+      h("ui-stack", { spacing: "lg" },
+        h("ui-form", { value: this },
+          h("ui-tabs", { name: "tab", parameter: "server", appearance: "secondary pointing basic", "aria-label": "Servers" },
+            h("ui-tab", { label: "GitHub", value: "github" }),
+            h("ui-tab", { label: "Open Library", value: "library" }),
+            h("ui-tab", { label: "JSONPlaceholder", value: "jsonplaceholder" }),
+            h("ui-tab", { label: "Open-Meteo", value: "weather" }),
+            h("ui-tab", { label: "The Met", value: "met" }),
+            h("ui-tab", { label: "REST Countries", value: "countries" })
+          )
+        ),
+        () => this.drawServer()
+      )
+    )
+  }
+
+  // The tab's page:  its own drawing, so its `if` picks just one, and only that one asks its server
+  drawServer() {
+    if (this.tab === "github") return core.drawThing(this.github)
+    else if (this.tab === "library") return core.drawThing(this.library)
+    else if (this.tab === "jsonplaceholder") return core.drawThing(new JsonplaceholderPage())
+    else if (this.tab === "weather") return core.drawThing(this.weather)
+    else if (this.tab === "met") return core.drawThing(this.museum)
+    else if (this.tab === "countries") return core.drawThing(this.atlas)
   }
 }
 export const publicServers = new PublicServer()

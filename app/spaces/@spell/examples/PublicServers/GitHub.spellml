@@ -18,36 +18,68 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 	</action>
 
 	<draw>
-		<form value={it}>
-			<stack direction="horizontal" wrap align="center" justify="between">
-				<header size="large">People and code, on GitHub</header>
-				<ui-search name="search" parameter="who" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
-			</stack>
-			<stack direction="horizontal" wrap align="center" spacing="xs">
-				<text size="small" color="grey">Try</text>
-				<button size="small" appearance="basic pill" onClick={try "ryansolid"}>ryansolid</button>
-				<button size="small" appearance="basic pill" onClick={try "solidjs"}>solidjs</button>
-				<button size="small" appearance="basic pill" onClick={try "vite"}>vite</button>
-				<button size="small" appearance="basic pill" onClick={try "torvalds"}>torvalds</button>
-				<button size="small" appearance="basic pill" onClick={try "spreadsheet"}>spreadsheet</button>
-			</stack>
-		</form>
+		<stack spacing="xl">
+			<form value={it}>
+				<stack spacing="sm">
+					<stack direction="horizontal" wrap align="center" justify="between" spacing="sm">
+						<header size="large">People and code, on GitHub</header>
+						<ui-search name="search" parameter="who" icon="search" placeholder="A person, an organization, a repository" aria-label="Search GitHub" />
+					</stack>
+					<toolbar appearance="secondary" size="small" aria-label="Try a search">
+						<text slot="title" size="small" color="grey">Try</text>
+						<item onClick={try "ryansolid"}>ryansolid</item>
+						<item onClick={try "solidjs"}>solidjs</item>
+						<item onClick={try "vite"}>vite</item>
+						<item onClick={try "torvalds"}>torvalds</item>
+						<item onClick={try "spreadsheet"}>spreadsheet</item>
+					</toolbar>
+				</stack>
+			</form>
+			{draw the found of it}
+			<text size="small" paragraph>
+				From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
+			</text>
+		</stack>
+	</draw>
+
+	<draw "found" description="Someone's own page, while one is picked;  else what the search finds">
 		<if its showing>
-			<button appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
 			draw the page of (the user whose id is the login of its showing)
 			while waiting:
 				<loader visible inline text>Asking GitHub</loader>
 			if that fails:
 				<text>GitHub can't find that login just now.</text>
 		<otherwise>
-			<header size="medium">People and organizations</header>
-			<for every user matching its search as="cards" columns="6" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="Nobody on GitHub goes by that." />
-			<header size="medium">Repositories</header>
-			<for every repository matching its search as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="No repository matches that." />
+			<stack spacing="xl">
+				<stack spacing="sm">
+					<header size="medium">People and organizations</header>
+					{draw the people found of it}
+				</stack>
+				<stack spacing="sm">
+					<header size="medium">Repositories</header>
+					{draw the repositories found of it}
+				</stack>
+			</stack>
 		</>
-		<text size="small" paragraph>
-			From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
-		</text>
+	</draw>
+
+	<draw "people found">
+		<for every user matching its search as="cards" columns="4" doubling stackable paging="pages" loading="Asking GitHub" empty="Nobody on GitHub goes by that.">
+			<failed>
+				<stack direction="horizontal" wrap align="center" spacing="sm">
+					<text color="orange"><icon name="clock outline" /> GitHub takes 10 searches a minute:  try again in a minute.</text>
+					<button size="small" appearance="basic" onClick={try again}>Try again</button>
+				</stack>
+			</failed>
+		</for>
+	</draw>
+
+	<draw "repositories found">
+		<for every repository matching its search as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="No repository matches that.">
+			<failed>
+				<text size="small" color="grey">These wait for the same minute.</text>
+			</failed>
+		</for>
 	</draw>
 </spell-thing>
 
@@ -59,30 +91,57 @@ A search gives only a little of each:  their page reads them whole, by their log
 <spell-more-of "user">
 	<draw>
 		<ui-card onClick={look at it}>
-			<image src={its avatar url} alt="" />
 			<content>
-				<header>
-					{its login} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
-				</header>
-				<meta>{its kind}</meta>
+				<stack direction="horizontal" align="center" spacing="sm">
+					<image src={its avatar url} alt="" size="mini" appearance="circular" />
+					<stack spacing="none" align="start">
+						<header>
+							{its login} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+						</header>
+						<meta>{its kind}</meta>
+					</stack>
+				</stack>
 			</content>
 		</ui-card>
 	</draw>
 
 	<draw "page">
-		<stack direction="horizontal" wrap align="start">
-			<image src={its avatar url} alt="" size="small" appearance="rounded" />
-			<stack>
+		<stack spacing="xl">
+			<stack direction="horizontal" align="center" spacing="sm">
+				<button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={look away from it} />
 				<header size="large">
-					{its name} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+					{its name if its name otherwise its login} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
 				</header>
-				<text color="grey">{its login} · {its kind}</text>
-				<text>{its bio}</text>
-				<text size="small" color="grey">{its public repos} public repositories · {its followers} followers</text>
+			</stack>
+			<stack direction="horizontal" wrap align="start" spacing="md">
+				<image src={its avatar url} alt="" size="small" appearance="rounded" />
+				<stack spacing="sm">
+					<text color="grey">{its login} · {its kind}</text>
+					<if its bio>
+						<text>{its bio}</text>
+					</if>
+					<!-- A search gives no counts:  only the record read by its login has them, and its date with them -->
+					<if its created at>
+						<text size="small" color="grey">{its public repos} public repositories · {its followers} followers</text>
+					</if>
+				</stack>
+			</stack>
+			<stack spacing="sm">
+				<header size="medium">Most popular</header>
+				{draw the most popular of it}
 			</stack>
 		</stack>
-		<header size="medium">Most popular</header>
-		<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling paging="pages" loading="Asking GitHub" failed="GitHub can't be searched just now:  it takes 10 searches a minute." empty="Nothing public yet." />
+	</draw>
+
+	<draw "most popular">
+		<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="Nothing public yet.">
+			<failed>
+				<stack direction="horizontal" wrap align="center" spacing="sm">
+					<text color="orange"><icon name="clock outline" /> GitHub takes 10 searches a minute:  try again in a minute.</text>
+					<button size="small" appearance="basic" onClick={try again}>Try again</button>
+				</stack>
+			</failed>
+		</for>
 	</draw>
 </spell-more-of>
 
@@ -97,7 +156,7 @@ Its name, what it's for, and how many people starred it;  its GitHub icon opens 
 				<header>
 					{its full name} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
 				</header>
-				<meta>★ {its stargazers count} · {its language}</meta>
+				<meta>★ {its stargazers count}<if its language> · {its language}</if></meta>
 				<description>{its description}</description>
 			</content>
 		</ui-card>
@@ -106,9 +165,12 @@ Its name, what it's for, and how many people starred it;  its GitHub icon opens 
 
 
 # What someone on GitHub can do, from anywhere
-Shown on their own page, in the GitHub tab of the public servers.
+Shown on their own page, and put away again by its Back button, in the GitHub tab of the public servers.
 
 <spell>
 	to look at (a user):
 		set the showing of the github of the public servers to it
+
+	to look away from (a user):
+		set the showing of the github of the public servers to nothing
 </spell>

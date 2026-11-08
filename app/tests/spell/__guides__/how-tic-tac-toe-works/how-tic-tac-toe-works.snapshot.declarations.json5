@@ -101,6 +101,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/HowTicTacToeWorks.spellml:1323-1456"
     },
     {
@@ -114,6 +115,7 @@
       ],
       "kind": "method",
       "name": "start a new game",
+      "returns": "nothing",
       "defined": "/HowTicTacToeWorks.spellml:1469-1630"
     },
     {
@@ -155,6 +157,7 @@
       ],
       "kind": "method",
       "name": "check for a winner",
+      "returns": "nothing",
       "defined": "/HowTicTacToeWorks.spellml:1995-2205"
     },
     {

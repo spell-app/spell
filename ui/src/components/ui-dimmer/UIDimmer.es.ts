@@ -11,7 +11,7 @@ export const dimmerEs = {
   tag: "ui-dimmer",
   name: "atenuador",
   aka: ["atenuador", "superposición", "fondo oscuro", "máscara", "capa"],
-  attributes: { shade: "sombra", page: "pagina", "show-on": "mostrar-al" },
+  attributes: { shade: "tono", page: "pagina", "show-on": "mostrar-al" },
   values: { closedby: { none: "none" } },
   parts: { dimmer: "atenuador" },
   texts: { dimmedPage: "Página atenuada" }

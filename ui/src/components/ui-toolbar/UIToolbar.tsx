@@ -7,15 +7,18 @@ import { E } from "spell/ui/core"
 // (SIDE EFFECT:  defines `<ui-menu>` and `<ui-item>`, which a toolbar extends and holds)
 import { UIMenu } from "spell/ui/components/ui-menu"
 import type { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
+// The menu family's, beside its sheet (below):  `<ui-tabs>`' tab list scrolls the same way
+import { ScrollingRow, START, END } from "spell/ui/components/ui-menu/ScrollingRow"
 import { toolbarVocabulary } from "./UIToolbar.en"
 
+import scrollingRowCSS from "spell/ui/components/ui-menu/ScrollingRow.css?inline"
 import toolbarCSS from "./UIToolbar.css?inline"
 
 /****************
  * ### `<ui-toolbar>`
  * The component behind `<ui-toolbar>`:  a horizontal menu whose items scroll sideways when they don't fit.
  *
- *     <div class="ui toolbar" part="toolbar">
+ *     <div class="ui toolbar scrolling-row" part="toolbar">
  *       <div class="icon" part="icon">  <slot name="icon">  </div>        (each slot's box only while it has content)
  *       <div class="title" part="title">  <slot name="title">  </div>
  *       <div class="center" part="center">  <slot name="center">  </div>    (takes the room left)
@@ -36,6 +39,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - Neither shows when everything fits;  the one at an end the row has reached is hidden.
  *   - Out of the Tab order:  the items themselves are what a keyboard reaches, and focusing one scrolls it in.
  * - It follows the box's size and its items' (`ResizeObserver`), and the scroll.
+ *   - The scrolling, its keys and their look are the menu family's `ScrollingRow`, `<ui-tabs>`' too.
  * - `shrinkable` (the menu's):  it never scrolls with `‹` / `›`;  its titles fit the row instead, down to the menu's
  *   overflow button (epic `epic-engine` Q38).  Only a row too narrow for even that button scrolls, with no keys.
  *   - `scroll-first`, without a `segmented` look:  once only its icons are left, it scrolls with them, no overflow button.
@@ -50,23 +54,24 @@ export class UIToolbar extends UIMenu {
   // the menu's names under the toolbar's tag:  same shape, but TypeScript only knows the menu's literals
   @E.proto static vocabulary = toolbarVocabulary as unknown as typeof menuVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { ...UIMenu.prototype.elementSetup.styleSheets, toolbar: toolbarCSS }
+    styleSheets: { ...UIMenu.prototype.elementSetup.styleSheets, scrollingRow: scrollingRowCSS, toolbar: toolbarCSS }
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
   // ## Scrolling
   ////////////////
 
-  /** There's more to scroll back to (the `‹` button shows). */
-  @E.state accessor canScrollStart = false
-
-  /** There's more to scroll on to (the `›` button shows). */
-  @E.state accessor canScrollEnd = false
+  /** The row that scrolls:  its menu's box, with a `‹` / `›` key at each end. */
+  readonly scrolling = new ScrollingRow({
+    owner: this,
+    // a shrinkable one fits its titles instead:  no keys, no fades;  unless it scrolls first, and is still whole
+    canScroll: () => !this.shrinkable || (!!this.scrollFirst && !this.isDropdown)
+  })
 
   /** The items don't all fit:  the box scrolls. */
   @E.cssState("overflowing")
   get isOverflowing(): boolean {
-    return this.canScrollStart || this.canScrollEnd
+    return this.scrolling.isOverflowing
   }
 
   /** `scroll-first`:  the row scrolls before it's a dropdown. */
@@ -79,32 +84,7 @@ export class UIToolbar extends UIMenu {
   protected onReadyToScroll(isReady: boolean) {
     const box = this.box
     if (!isReady || !box) return
-    const stop = new AbortController()
-    box.addEventListener("scroll", () => this.measure(), { passive: true, signal: stop.signal })
-    const resizes = new ResizeObserver(() => this.measure())
-    resizes.observe(box)
-    const slot = box.querySelector("slot")
-    const watchItems = () => {
-      for (const item of slot?.assignedElements() ?? []) resizes.observe(item)
-    }
-    watchItems()
-    slot?.addEventListener("slotchange", watchItems, { signal: stop.signal })
-    this.measure()
-    return () => {
-      stop.abort()
-      resizes.disconnect()
-    }
-  }
-
-  /** Read where the box is scrolled to, and how far it can go. */
-  private measure() {
-    const box = this.box
-    if (!box) return
-    // a shrinkable one fits its titles instead:  no keys, no fades;  unless it scrolls first, and is still whole
-    const canScroll = !this.shrinkable || (!!this.scrollFirst && !this.isDropdown)
-    const { start, end } = E.scrollEnds(box)
-    this.canScrollStart = canScroll && start
-    this.canScrollEnd = canScroll && end
+    return this.scrolling.follow(box)
   }
 
   /**
@@ -113,7 +93,7 @@ export class UIToolbar extends UIMenu {
    */
   @E.untracked
   scrollByPage(direction: -1 | 1) {
-    if (this.box) E.scrollByRow(this.box, direction)
+    this.scrolling.scrollByPage(direction)
   }
 
   ////////////////
@@ -125,13 +105,16 @@ export class UIToolbar extends UIMenu {
 
   render(): JSX.Element {
     return (
-      <div class={[TOOLBAR_CLASS, { [EMPTY]: !this.slots.hasContent("") }]} part={this.toolbarPart("toolbar")}>
+      <div
+        class={[TOOLBAR_CLASS, SCROLLING_ROW, { [EMPTY]: !this.slots.hasContent("") }]}
+        part={this.toolbarPart("toolbar")}
+      >
         {this.barSlot(ICON)}
         {this.barSlot(TITLE)}
         {this.barSlot(CENTER)}
-        {this.scrollButton(START)}
+        {this.scrolling.key(START)}
         {super.render()}
-        {this.scrollButton(END)}
+        {this.scrolling.key(END)}
         {this.barSlot(RIGHT)}
       </div>
     )
@@ -153,28 +136,6 @@ export class UIToolbar extends UIMenu {
   private toolbarPart(name: "toolbar" | "scroll-start" | "scroll-end" | BarSlot): string {
     return this.partForName(name as never)
   }
-
-  /** The `‹` (`start`) or `›` (`end`) button:  in the layout only while the items overflow, shown while it can go. */
-  private scrollButton(end: typeof START | typeof END): JSX.Element {
-    const isStart = end === START
-    const label = () => this.translationForKey((isStart ? "scrollStart" : "scrollEnd") as never)
-    const glyph = new E.IconGlyph({ owner: this, name: () => (isStart ? CHEVRON_START : CHEVRON_END) })
-    return (
-      <button
-        type="button"
-        class={`${SCROLL} ${end}`}
-        part={this.toolbarPart(isStart ? "scroll-start" : "scroll-end")}
-        tabindex="-1"
-        aria-label={label()}
-        title={label()}
-        hidden={!this.isOverflowing}
-        data-can={(isStart ? this.canScrollStart : this.canScrollEnd) ? "" : undefined}
-        onClick={() => this.scrollByPage(isStart ? -1 : 1)}
-      >
-        <Show when={glyph.svg}>{(svg) => svg()}</Show>
-      </button>
-    )
-  }
 }
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UIToolbar extends E.AttributeValues<typeof toolbarVocabulary> {}
@@ -186,20 +147,8 @@ export interface UIToolbar extends E.AttributeValues<typeof toolbarVocabulary> {
 /** Classes of the box around the menu and its buttons. */
 const TOOLBAR_CLASS = "ui toolbar"
 
-/** Class word of the two scroll buttons. */
-const SCROLL = "scroll"
-
-/** The `‹` button's end. */
-const START = "start"
-
-/** The `›` button's end. */
-const END = "end"
-
-/** The `‹` button's icon. */
-const CHEVRON_START = "chevron left"
-
-/** The `›` button's icon. */
-const CHEVRON_END = "chevron right"
+/** Class word of a row that scrolls (`ScrollingRow.css`). */
+const SCROLLING_ROW = "scrolling-row"
 
 /** Class word of a toolbar with no items:  its menu box takes no room. */
 const EMPTY = "empty"

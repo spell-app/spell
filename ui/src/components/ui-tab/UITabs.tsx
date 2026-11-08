@@ -6,10 +6,13 @@ import { tabsVocabulary } from "./UITabs.en"
 import { tabVocabulary } from "./UITab.en"
 import { UITab } from "./UITab"
 import { BASIC, MENU, type TabOwner, type TabPaneState } from "./UITab.types"
-// The menu family's, beside its sheet (below):  the tab list draws a segmented menu's thumb
+// The menu family's, beside its sheets (below):  the tab list draws a segmented menu's thumb,
+// and scrolls sideways as a toolbar's row does
 import { SegmentedThumb } from "spell/ui/components/ui-menu/SegmentedThumb"
+import { ScrollingRow, START, END } from "spell/ui/components/ui-menu/ScrollingRow"
 
 import menuCSS from "spell/ui/components/ui-menu/UIMenu.css?inline"
+import scrollingRowCSS from "spell/ui/components/ui-menu/ScrollingRow.css?inline"
 import tabCSS from "./UITab.css?inline"
 
 /****************
@@ -17,10 +20,12 @@ import tabCSS from "./UITab.css?inline"
  * The component behind `<ui-tabs>`:  a tab set (WAI-ARIA APG tabs) over `<ui-tab>` panes,
  * Fomantic's tab MENU plus its `.ui.tab` panes, as one element:
  *
- *     <div class="ui … tabs" part="tabs">
+ *     <div class="ui … tabs [scrolling-row]" part="tabs">            (`scrolling-row` while its tabs overflow)
+ *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>   (shown only then)
  *       <div class="ui … menu" part="menu" role="tablist" aria-label aria-orientation>
  *         <button type="button" class="[active] [disabled] item" part="tab" role="tab" aria-selected>label</button>
  *       </div>
+ *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
  *       <slot></slot>                                   (the panes;  before the menu when `attached="bottom"`)
  *     </div>
  *
@@ -35,6 +40,13 @@ import tabCSS from "./UITab.css?inline"
  *   - A click (or, `automatic`, an arrow key) dispatches the cancelable `ui-changing` first.
  *   - Without a `value`:  the first `selected` pane, else the first enabled one;
  *     a `value` that names no pane falls back the same way.
+ * - A row of tabs too wide for its box scrolls sideways, with a `‹` / `›` key at each end (`:state(overflowing)`):
+ *   the menu family's `ScrollingRow`, as `<ui-toolbar>`'s row does.
+ *   - Only while they overflow:  a row that scrolls clips what reaches past its box (a pointing tab's arrow,
+ *     a focus ring), so a row that fits doesn't scroll.
+ *   - The chosen tab is scrolled into view as it's drawn, and smoothly whenever another is chosen.
+ * - A chosen pane with nothing in it (tabs that only choose, a program drawing the page beside them):
+ *   the set is only a bar (`:state(bar-only)`), with room under it before what follows (`--ui-tabs-bar-gap`).
  * - Keyboard (APG):  ONE Tab stop, the selected tab (`UI.focus.roving`);
  *   ArrowLeft / ArrowRight (ArrowUp / ArrowDown when vertical), Home, End;  disabled tabs are skipped.
  *   - `activation="manual"`:  the arrows move focus only, Enter / Space select;
@@ -55,7 +67,7 @@ import tabCSS from "./UITab.css?inline"
 export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabOwner {
   @E.proto static vocabulary = tabsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { menu: menuCSS, tab: tabCSS },
+    styleSheets: { menu: menuCSS, scrollingRow: scrollingRowCSS, tab: tabCSS },
     // a native form sees named tabs' `value` (`FormData`, `form.elements`);  unnamed ones send nothing
     isAFormControl: true,
     // the tabs are the focus targets;  a click on a pane must not jump to one
@@ -335,6 +347,58 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return this.bar ? [...this.bar.querySelectorAll<HTMLElement>(TAB_SELECTOR)] : []
   }
 
+  /**
+   * The chosen pane has nothing to show:  the set is only its bar of tabs,
+   * with room under it before what follows (`:state(bar-only)`).
+   */
+  @E.cssState("bar-only")
+  get isBarOnly(): boolean {
+    const pane = this.tabs[this.values.indexOf(this.displayedValue ?? NO_VALUE)]
+    return !!pane && !UITabs.componentOf(pane).hasContent
+  }
+
+  ////////////////
+  // ## Scrolling sideways
+  ////////////////
+
+  /** The tab list as a row that scrolls sideways, with a `‹` / `›` key at each end;  never while vertical. */
+  readonly scrolling = new ScrollingRow({ owner: this })
+
+  /** The tabs don't all fit in their row:  it scrolls. */
+  @E.cssState("overflowing")
+  get isOverflowing(): boolean {
+    return this.scrolling.isOverflowing
+  }
+
+  /** SIDE EFFECT:  follows the tab list's scroll and sizes while it's a row, drawn and connected;  the cleanup stops. */
+  @E.onChange("isReady", "isConnected", "isVertical")
+  protected onScrollingChanged(isReady: boolean, isConnected: boolean, isVertical: boolean) {
+    const bar = this.bar
+    if (!isReady || !isConnected || isVertical || !bar) return
+    return this.scrolling.follow(bar)
+  }
+
+  /** The chosen tab has been brought into view once:  later choices scroll to theirs smoothly. */
+  private hasShownChosenTab = false
+
+  /**
+   * The chosen tab in view, once drawn:  at once the first time, smoothly after.
+   * - On a phone the chosen tab of a long row was out of sight (design pass, epic `data` P41).
+   */
+  @E.onChange("selectedIndex", "isReady", "isConnected")
+  protected onChosenTabToView(index: number, isReady: boolean, isConnected: boolean) {
+    if (!isReady || !isConnected || index < 0) return
+    const smoothly = this.hasShownChosenTab
+    this.hasShownChosenTab = true
+    // once the tab has redrawn as chosen, and been laid out
+    E.afterSolidUpdate(() => {
+      E.beforeNextPaint(() => {
+        const tab = this.buttons()[index]
+        if (tab && !this.isVertical) this.scrolling.bringIntoView(tab, { smoothly })
+      })
+    })
+  }
+
   ////////////////
   // ## The sliding thumb
   ////////////////
@@ -512,10 +576,11 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
         <For each={this.tabs}>{(pane, index) => this.tab(pane, index)}</For>
       </div>
     )
+    const row = [this.scrolling.key(START), menu, this.scrolling.key(END)]
     const panes = <slot onSlotChange={() => this.refreshPanes()} />
     return (
-      <div class={this.rootClass} part={this.partForName("tabs")}>
-        {this.menuEdge === UIT.BOTTOM ? [panes, menu] : [menu, panes]}
+      <div class={[this.rootClass, { [SCROLLING_ROW]: this.isOverflowing }]} part={this.partForName("tabs")}>
+        {this.menuEdge === UIT.BOTTOM ? [panes, ...row] : [...row, panes]}
       </div>
     )
   }
@@ -585,6 +650,9 @@ const SEGMENTED: UIT.MenuAppearance = "segmented"
 
 /** The `direction` of tabs stacked in a column. */
 const VERTICAL = "vertical"
+
+/** Class word of a row that scrolls sideways (`ScrollingRow.css`):  the tab set's, while its tabs overflow. */
+const SCROLLING_ROW = "scrolling-row"
 
 /** A value no pane has. */
 const NO_VALUE = "\u0000"

@@ -42,6 +42,7 @@ describe("<ui-image> classes", () => {
     ['spacing="md"', "ui spaced image"],
     ['spacing="left"', "ui left spaced image"],
     ['vertical-align="middle"', "ui middle aligned image"],
+    ['background="yellow"', "ui yellow background image"],
     [
       'size="tiny" appearance="circular" floated="left" vertical-align="top"',
       "ui tiny left floated circular top aligned image"
@@ -50,6 +51,27 @@ describe("<ui-image> classes", () => {
     const { root } = await image(`<ui-image src="${SRC}" alt="x" ${attributes}></ui-image>`)
     expect(root.localName).toBe("img")
     expect(root.className).toBe(classes)
+  })
+})
+
+////////////////
+// ## Background
+////////////////
+
+describe("<ui-image background>", () => {
+  it("draws the hue's light tint behind the picture, with room round it", async () => {
+    const { root } = await image(`<ui-image src="${SRC}" alt="" background="yellow"></ui-image>`)
+    const style = getComputedStyle(root)
+    expect([style.backgroundColor === "rgba(0, 0, 0, 0)", Number.parseFloat(style.paddingTop) > 0]).toEqual([
+      false,
+      true
+    ])
+  })
+
+  it("with `circular`, a disc behind the whole picture:  never cropped", async () => {
+    const { root } = await image(`<ui-image src="${SRC}" alt="" appearance="circular" background="yellow"></ui-image>`)
+    const style = getComputedStyle(root)
+    expect([style.borderTopLeftRadius, style.backgroundImage.startsWith("radial-gradient")]).toEqual(["0px", true])
   })
 })
 

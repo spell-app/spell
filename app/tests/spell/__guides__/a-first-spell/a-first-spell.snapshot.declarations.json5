@@ -51,6 +51,7 @@
       ],
       "kind": "method",
       "name": "wave back",
+      "returns": "nothing",
       "defined": "/YourFirstSpell.spell:1270-1316"
     },
     {

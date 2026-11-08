@@ -524,6 +524,9 @@ export const sharedEs = {
   },
   words: {
     stack: "apilado",
+    // past `massive`:  a header's and a button's own size (`PosterSizes`;  the rest are the shared `sizes`)
+    poster: "cartel",
+    "when stacked": "al apilar",
     drawer: "cajón",
     very: "muy",
     left: "izquierda",
@@ -647,7 +650,13 @@ export const sharedEs = {
     basic: "básico",
     attached: "unido",
     image: "imagen",
-    square: "cuadrado"
+    square: "cuadrado",
+    // a segment's looks (`<es-segmento apariencia="elevado apilado">`), and a button's, card's and section's `raised`
+    raised: "elevado",
+    stacked: "apilado",
+    "tall-stacked": "apilado-alto",
+    piled: "amontonado",
+    tertiary: "terciario"
   },
   texts: {
     close: "Cerrar",

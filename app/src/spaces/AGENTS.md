@@ -280,8 +280,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       its viewers post there only once she turns `viewersPost` on;  a folder's own `__members/` doesn't count, and
       adding or removing someone is refused.
     - Only she writes;  the Board and the Admins delete what's in it, never edit it (`boardAndAdmins()`).
-    - It holds documents and approved apps, never code:  a page runs as whoever views it (`ProjectRoles.mayHoldOrDie()`:
-      a program, a script, a web page or an SVG, or a page with its own `<action>` or `<script>`, refused).
+    - It takes any file, code included, by the same rules as any space (J130, Owen:  "don't limit for now";  P28
+      refused code there until then).
     - Once she's left the org it's hers alone;  `spell space org leave rs ana@rs --to ana@spell/from-rs` copies it into
       another space of hers (`SpaceFolders.takeOwnSpace()`), or `spell space export` writes it as files.
     - Her INBOX is a space of its own beside it, `ana@rs/__inbox` (below), never part of what she takes with her.
@@ -306,6 +306,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `@rs/__inbox`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
       `PERSON_INBOX_ADDRESS`, never read direct):  one program, each person's inbox, the built-in
       `@spell/examples/Inbox`.
+    - Two more collections only she writes (epic `atmosphere` P30):  `mail_choices` (`INBOX_MAIL`), how she hears of
+      it by mail, the first one counting;  `subscriptions` (`INBOX_SUBSCRIPTIONS`), each a shared space of the org
+      she follows, `{ space: "events_team@rs" }`, a private one refused.
+  - MAIL AND SUBSCRIPTIONS ([InboxMail.ts](server/node/places/InboxMail.ts), epic `atmosphere` P30):  how people hear
+    of their inbox, and of the spaces they follow.
+    - Each person's MAIL CHOICE (`MAIL_CHOICES`):  one mail per message (`"each"`), a daily digest (`"digest"`, the
+      default), or none;  a copy landing in her inbox (`PersonInbox`'s `onArrived`) is mailed, kept for the digest,
+      or nothing.
+    - The DIGEST:  one mail a day with every message since the last, from `DIGEST_HOUR` (7, the server's clock), a job
+      of the daily round (`sendDigestsIfDue()`).
+    - SUBSCRIBING:  a new thing someone makes in a shared space reaches each subscriber's inbox as an UPDATE (Q24 A),
+      from the space, as Spell (`PersonInbox.sendAsSpell()`):  a post, a row or a file, never an app;  the one who made
+      it hears nothing.
+    - Who hears of what is ONE look-up, [Followers.ts](server/node/places/Followers.ts) (P38's phone alerts ask it too).
+    - Every mail has a STOP LINK, signed by the server (`ReadCredentials.sign()`), at `/api/mail/stop`:  it sets the
+      inbox's choice to none, or ends that subscription.
+    - Through the ONE mail seam (`Mailer`), the same catcher as the sign-in's (`environment.signInDir`'s `mail/`), until
+      P18's sender;  through the ONE retry queue (Q19 A), on the server's disk.
+    - Made by `SpaceFolders` when it's handed a `mailer` (the page server and the cloud);  without one, no mail.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.

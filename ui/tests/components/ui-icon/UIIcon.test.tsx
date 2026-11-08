@@ -41,6 +41,7 @@ describe("<ui-icon> classes", () => {
     ['flipped="vertically"', "ui vertically flipped icon"],
     ["rotated", "ui rotated icon"],
     ['rotated="counterclockwise"', "ui counterclockwise rotated icon"],
+    ['rotated="when stacked"', "ui when stacked rotated icon"],
     ["corner", "ui corner icon"],
     ['corner="top left"', "ui top left corner icon"],
     ['size="huge" color="blue" rotated="halfway"', "ui huge blue halfway rotated icon"]

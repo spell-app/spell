@@ -1002,6 +1002,8 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     // in a loop's body, written from a function per item:  ends that turn only
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
+    if (this.givesNothing(node.value)) return this.bare(node.value)
     this.returnsInPlace.set(node, this.mayBeNothing(node.value))
     return this.testBlock(node.value) ?? `return ${this.bare(node.value)}`
   }
@@ -1219,7 +1221,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   returnHint(method: P.ASTMethodDefinition): string | undefined {
     const returns: P.ASTReturnStatement[] = []
     forEachReturn(method.body, (node) => returns.push(node))
-    if (!returns.some((it) => it.value)) return "None"
+    if (!returns.some((it) => it.value && !this.givesNothing(it.value))) return "None"
     if (returns.every((it) => it.value && isTestCall(it.value))) return "None"
     const isDrawing = returns.every((it) => it.value && unwrapped(it.value) instanceof P.ASTJSXElement)
     // a class of the program's may take the name

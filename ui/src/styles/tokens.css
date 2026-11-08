@@ -26,6 +26,7 @@
     --ui-font-weight-normal: 400;
     --ui-font-weight-semibold: 600;
     --ui-font-weight-bold: 700;
+    --ui-font-weight-heavy: 900;
     --ui-line-height: 1.5;
     --ui-line-height-heading: 1.25;
     --ui-line-height-tight: 1.2;
@@ -194,6 +195,7 @@
       --ui-font-weight-normal: 400;
       --ui-font-weight-semibold: 600;
       --ui-font-weight-bold: 700;
+      --ui-font-weight-heavy: 900;
       --ui-line-height: 1.5;
       --ui-line-height-heading: 1.25;
       --ui-line-height-tight: 1.2;

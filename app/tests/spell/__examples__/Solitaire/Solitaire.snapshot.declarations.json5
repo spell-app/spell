@@ -381,6 +381,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/Deck.spellml:233-636"
     },
     {
@@ -644,6 +645,7 @@
       "group": "piles",
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/Solitaire.spellml:1930-2048"
     },
     {
@@ -659,6 +661,7 @@
       "groupDescription": "Each pauses a moment, so a deal animates",
       "kind": "method",
       "name": "reset the stock",
+      "returns": "nothing",
       "defined": "/Solitaire.spellml:2137-2373"
     },
     {
@@ -673,6 +676,7 @@
       "group": "dealing",
       "kind": "method",
       "name": "play from the stock",
+      "returns": "nothing",
       "waits": true,
       "defined": "/Solitaire.spellml:2386-2750"
     },
@@ -688,6 +692,7 @@
       "group": "dealing",
       "kind": "method",
       "name": "deal the cards",
+      "returns": "nothing",
       "waits": true,
       "defined": "/Solitaire.spellml:2763-3420"
     },
@@ -718,6 +723,7 @@
       "groupDescription": "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three",
       "kind": "method",
       "name": "start a new game",
+      "returns": "nothing",
       "waits": true,
       "title": "Restart",
       "defined": "/Solitaire.spellml:3590-3728"
@@ -734,6 +740,7 @@
       "group": "game",
       "kind": "method",
       "name": "auto play",
+      "returns": "nothing",
       "waits": true,
       "title": "Auto play",
       "defined": "/Solitaire.spellml:3741-4871"

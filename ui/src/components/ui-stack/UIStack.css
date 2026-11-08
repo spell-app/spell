@@ -9,6 +9,8 @@
 
 @layer ui.components.stack.types {
   :host {
+    /* turned by a `stackable` row while it's a column (`UIStack.hostLayout`);  never an outer stack's */
+    --_ui-stack-turn: 0deg;
     display: flex;
     flex-direction: column;
     gap: var(--ui-space-m);
@@ -21,7 +23,8 @@
      its row, between its checkbox and its priority.  (A column already stretches it across.) */
   :host(:state(horizontal)) ::slotted(:state(fluid)) {
     flex: 1 1 0;
-    min-inline-size: 0;
+    /* down to nothing, unless it has a shared `min-width` (`reset.css`):  this rule would beat its own */
+    min-inline-size: var(--_ui-min-width, 0);
   }
   /* a Spell UI child drops its own outside margins too (`reset.css`, "A child of a `<ui-stack>`") */
   ::slotted(*) {

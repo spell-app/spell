@@ -88,7 +88,8 @@ export const words = {
       updatedAt: "updated at",
       bio: "bio",
       draw: "draw it",
-      lookAtUser: "look at (a user)"
+      lookAtUser: "look at (a user)",
+      lookAwayFromUser: "look away from (a user)"
     },
     IssueUser: {
       login: "login",
@@ -342,7 +343,8 @@ export const words = {
       subtitle: "subtitle",
       writer: "writer",
       draw: "draw it",
-      open: "open (a book)"
+      open: "open (a book)",
+      close: "close (a book)"
     },
     Author: {
       links: "links",
@@ -502,8 +504,7 @@ export const words = {
       time: "time",
       temperature: "temperature",
       precipitation: "precipitation",
-      windSpeed: "wind speed",
-      draw: "draw it"
+      windSpeed: "wind speed"
     },
     OpenMeteoPage: {
       cities: "cities",
@@ -634,8 +635,7 @@ export const words = {
       borders: "borders",
       area: "area",
       flag: "flag",
-      demonyms: "demonyms",
-      draw: "draw it"
+      demonyms: "demonyms"
     },
     Name: {
       common: "common",
@@ -685,7 +685,6 @@ export const words = {
       create: "create it",
       countries: "countries",
       pickRegionRegion: "pick region (region as text)",
-      pickLanguageLanguage: "pick language (language as text)",
       draw: "draw it"
     },
     PublicServer: {
@@ -701,10 +700,10 @@ export const words = {
   },
   groups: {
     User: [
-      { name: "What someone on GitHub can do, from anywhere", members: ["lookAtUser"] }
+      { name: "What someone on GitHub can do, from anywhere", members: ["lookAtUser", "lookAwayFromUser"] }
     ],
     Book: [
-      { name: "What a book and a city can do, from anywhere", members: ["open"] }
+      { name: "What a book and a city can do, from anywhere", members: ["open", "close"] }
     ],
     City: [
       { name: "What a book and a city can do, from anywhere", members: ["pick"] }

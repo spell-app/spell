@@ -116,6 +116,28 @@
   p.ui.text > a:hover {
     color: var(--ui-color-text, var(--_ui-text-link-hover-color));
   }
+  /*
+   * An icon-only link (`<ui-link>`'s `:state(icon-only)`) after a word:  kept on the word's line, never wrapping alone
+   * (a word joiner, U+2060, before it);  in a header, a small gap from the word (`--_link-icon-gap`, which a header
+   * sets:  `UIParts.css`), where it pressed against a name
+   */
+  :host(:state(icon-only)) > a.ui.text {
+    margin-inline-start: var(--_link-icon-gap, 0);
+    white-space: nowrap;
+  }
+  /*
+   * A link's icons are part of its text:  the link is their owner, never the header or label around it
+   * (a header's icon is 1.5em with a gap after it, its lead icon's look)
+   */
+  a.ui.text {
+    --_ui-icon-owner-size: initial;
+    --_ui-icon-owner-margin: 0;
+    --_ui-icon-owner-display: initial;
+    --_ui-icon-owner-align: initial;
+  }
+  :host(:state(icon-only)) > a.ui.text::before {
+    content: "\2060";
+  }
   /* The text's line is only as tall as its letters:  a ring a little away from them, lightly rounded. */
   a.ui.text:focus-visible,
   p.ui.text > a:focus-visible {

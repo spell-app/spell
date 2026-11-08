@@ -382,7 +382,7 @@ export class Deck extends List {
   /** One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does */
   /*! SPELL: DECLARES {
     syntax: "create {thisArg:expression}", output: "create", rule: "method_call", of: "Deck",
-    alias: ["statement", "expression"], kind: "method", name: "create it",
+    alias: ["statement", "expression"], kind: "method", name: "create it", returns: "nothing",
     defined: "/Deck.spellml:233-636",
   } */
   create() {
@@ -902,6 +902,7 @@ export class Solitaire extends App {
   /*! SPELL: DECLARES {
     syntax: "create {thisArg:expression}", output: "create", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], group: "piles", kind: "method", name: "create it",
+    returns: "nothing",
     defined: "/Solitaire.spellml:1930-2048",
   } */
   create() {
@@ -913,7 +914,7 @@ export class Solitaire extends App {
     syntax: "reset the stock (of {thisArg:expression})?", output: "reset_the_stock",
     rule: "method_call", of: "Solitaire", alias: ["statement", "expression"], group: "dealing",
     groupDescription: "Each pauses a moment, so a deal animates", kind: "method",
-    name: "reset the stock",
+    name: "reset the stock", returns: "nothing",
     defined: "/Solitaire.spellml:2137-2373",
   } */
   resetTheStock() {
@@ -929,7 +930,7 @@ export class Solitaire extends App {
   /*! SPELL: DECLARES {
     syntax: "play from the stock (of {thisArg:expression})?", output: "play_from_the_stock",
     rule: "method_call", of: "Solitaire", alias: ["statement", "expression"], group: "dealing",
-    kind: "method", name: "play from the stock", waits: true,
+    kind: "method", name: "play from the stock", returns: "nothing", waits: true,
     defined: "/Solitaire.spellml:2386-2750",
   } */
   async playFromTheStock() {
@@ -945,7 +946,7 @@ export class Solitaire extends App {
   /*! SPELL: DECLARES {
     syntax: "deal the cards (of {thisArg:expression})?", output: "deal_the_cards",
     rule: "method_call", of: "Solitaire", alias: ["statement", "expression"], group: "dealing",
-    kind: "method", name: "deal the cards", waits: true,
+    kind: "method", name: "deal the cards", returns: "nothing", waits: true,
     defined: "/Solitaire.spellml:2763-3420",
   } */
   async dealTheCards() {
@@ -1068,7 +1069,7 @@ export const solitaire = new Solitaire()
   syntax: "start a new game (of {thisArg:expression})?", output: "start_a_new_game",
   rule: "method_call", of: "Solitaire", alias: ["statement", "expression"], group: "game",
   groupDescription: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three",
-  kind: "method", name: "start a new game", waits: true, title: "Restart",
+  kind: "method", name: "start a new game", returns: "nothing", waits: true, title: "Restart",
   defined: "/Solitaire.spellml:3590-3728",
 } */
 core.describeAction(Solitaire, "startANewGame", { title: "Restart", shortcuts: ["N"], icon: "redo" })
@@ -1077,7 +1078,7 @@ core.describeAction(Solitaire, "startANewGame", { title: "Restart", shortcuts: [
 /*! SPELL: DECLARES {
   syntax: "auto play (of {thisArg:expression})?", output: "auto_play", rule: "method_call",
   of: "Solitaire", alias: ["statement", "expression"], group: "game", kind: "method",
-  name: "auto play", waits: true, title: "Auto play",
+  name: "auto play", returns: "nothing", waits: true, title: "Auto play",
   defined: "/Solitaire.spellml:3741-4871",
 } */
 core.describeAction(Solitaire, "autoPlay", { title: "Auto play", shortcuts: ["A"], icon: "fast forward" })

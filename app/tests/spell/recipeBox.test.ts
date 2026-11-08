@@ -160,13 +160,15 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     spaces = mkdtempSync(join(tmpdir(), "spell-recipe-box-spaces-"))
     const people = new PeopleStore(new DiskStorage(spaces))
     // who's asking:  whoever's signed in, else this machine's person, as the page server's own
+    mailer = new MailCatcher({ folder: join(spaces, ".mail") })
     spaceFolders = new SpaceFolders({
       folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
       people,
       abuseContact: ABUSE,
-      queueFile: join(spaces, ".queue.json")
+      queueFile: join(spaces, ".queue.json"),
+      // inbox mail (epic `atmosphere` P30) goes to the same catcher as the sign-in's
+      mailer
     })
-    mailer = new MailCatcher({ folder: join(spaces, ".mail") })
     accounts = new SpellAccounts(people)
     // Bluesky's host, on this server:  its sign-in page sends the browser straight back (epic `atmosphere` P19)
     blueskyHost = new FakeAtProtoIdentity(
@@ -2120,6 +2122,65 @@ the published sheet is a projection of the sign up sheet:
         await cy.page.screenshot({ path: join(shots, "inbox.png"), fullPage: true })
 
         for (const one of [ana, bo, cy]) {
+          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          await one.close()
+        }
+      }
+    )
+
+    test(
+      "Bo picks one mail per message on the page:  Ana's next message reaches his mail;  Cy follows a space (P30)",
+      { timeout: 120_000 },
+      async () => {
+        const bo = await deviceOn("inbox-mail-bo", inbox())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await bo.page.locator("ui-segment.mail ui-button.choose").click()
+        const how = bo.page.locator("ui-segment.mail ui-form.mail-choice ui-select")
+        await expect.poll(() => how.count(), WAITING).toBe(1)
+        await how.evaluate((select) => {
+          const element = select as HTMLElement & { value: string }
+          element.value = "each"
+          element.dispatchEvent(new Event("change", { bubbles: true }))
+        })
+        await expect.poll(() => spaceFolders.mail!.followers.mailChoiceOf(address.bo!), WAITING).toBe("each")
+
+        const text = "The chairs are in the shed"
+        const before = (await mailer.newestTo(EMAILS.bo))?.sentAt ?? 0
+        await spaceFolders
+          .placeFor(`${address.ana}/__inbox`, address.ana)
+          .then((place) =>
+            place!.apply!(
+              [
+                {
+                  kind: "insert",
+                  collection: "messages",
+                  id: "p30-1",
+                  fields: { id: "p30-1", text, recipients: address.bo! }
+                }
+              ],
+              { identity: address.ana! }
+            )
+          )
+        await expect.poll(async () => (await mailer.newestTo(EMAILS.bo))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
+        const mailed = (await mailer.newestTo(EMAILS.bo))!
+        expect(mailed.subject).toBe(`${address.ana} wrote to you`)
+        expect(mailed.text).toContain(text)
+        expect(mailed.text).toMatch(/Stop these mails:  /)
+
+        const cy = await deviceOn("inbox-mail-cy", inbox())
+        await signIn(cy.bar, EMAILS.cy)
+        await cy.page.reload()
+        await cy.page.locator("ui-segment.subscriptions ui-input input").fill("@spell")
+        await cy.page.locator("ui-segment.subscriptions ui-button").first().click()
+        await expect.poll(() => spaceFolders.mail!.followers.subscribersOf("@spell"), WAITING).toContain(address.cy)
+        await expect
+          .poll(() => cy.page.locator("ui-segment.subscriptions .subscription ui-text").allTextContents(), WAITING)
+          .toEqual(["@spell"])
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        await bo.page.screenshot({ path: join(shots, "inbox-mail.png"), fullPage: true })
+
+        for (const one of [bo, cy]) {
           expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
           await one.close()
         }

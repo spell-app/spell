@@ -6,6 +6,12 @@
     "where": "@spell/examples/Solitario"
   },
   {
+    "spell": "from",
+    "python": "from_",
+    "kind": "property",
+    "where": "@spell/examples/Inbox"
+  },
+  {
     "spell": "list",
     "python": "list_",
     "kind": "variable",

@@ -573,10 +573,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a link confirmed on another device signs both in
       - a device stays signed in for 30 days, only its token's hash kept, in a file
     - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);
-      a real sender waits on the epic's Q12
+      a real sender waits on the epic's P18 (Postmark, Q12 A);  sign-in mail and inbox mail (P30) both go through it
     - `ReadCredentials`:  credentials to read a whole space straight from its files (epic `atmosphere` P5)
       - signed by this server's key, kept in a file, so a restart keeps them good
       - good 30 days;  `DirectReads` checks them
+      - `sign()` / `isSigned()`:  the same key signs anything else the server hands out and must know again,
+        as a mail's stop link (the app's `InboxMail`, epic `atmosphere` P30)
     - `cookiesOf()`:  the ONE reader of a request's cookies, every one of a name (each space's credential has its own path)
     - OR A LINKED BLUESKY (atmosphere) ACCOUNT, given `atProto` (epic `atmosphere` P19, Q26 A):
       - `AtProtoIdentity`:  who someone is, asked of their own host by the server, on AT Protocol's server sign-in

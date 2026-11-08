@@ -79,6 +79,9 @@
             },
             "bold": {
               "$ref": "#/definitions/value"
+            },
+            "heavy": {
+              "$ref": "#/definitions/value"
             }
           }
         },
