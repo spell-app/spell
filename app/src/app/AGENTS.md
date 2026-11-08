@@ -26,7 +26,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - `app:node`, for most tests:  there Solid is its SERVER build
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
-    - `app:editor`, for `tests/app/pages/*.test.ts`:  headless Playwright over this checkout's running editor,
+    - `app:integration`, for `tests/app/pages/*.test.ts`:  headless Playwright over this checkout's running editor,
       one file at a time
   - `spell/app/app/solid` is the app's UI, all Solid (P8).
     - the pages' shell (`SpellPage`, `AppRoot`)

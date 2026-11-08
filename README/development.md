@@ -137,7 +137,7 @@ Spell UI and the `epic/` folder split theirs by where the tests run instead.
 | `parser/` | `parser`, `markdown`, `core`, `py`, `spell`, `cli` |
 | `ui/` | `ssr` (node, Solid's server build), then `browser` |
 | `epic/` | `node`, `browser` |
-| `app/` | `spaces`, `lsp`, `cli`, `app:node`, `app:editor`, `app:browser` |
+| `app/` | `spaces`, `lsp`, `cli`, `app:node`, `app:integration`, `app:browser` |
 
 </details>
 

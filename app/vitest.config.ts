@@ -16,25 +16,26 @@ const BROWSER_TESTS = ["**/*.browser.test.{ts,tsx}"]
 const APP_TESTS = "tests/app"
 
 /**
- * The app's tests that open the running editor, in headless Playwright:  the whole folder, from `APP_TESTS`.
- * - The folder's few plain unit tests come along:  they cost nothing there.
+ * The app's integration tests, which open the running editor in headless Playwright:  the folder, from `APP_TESTS`,
+ * less its plain unit tests, which need no editor and stay in `app:node`.
+ * - The usual `yarn test` leaves these out:  they take about 15 minutes;  `yarn test:integration` runs them.
  */
-const EDITOR_TESTS = ["pages/*.test.ts"]
+const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits).test.ts"]
 
 /**
  * spell-app's Vitest config:  one project per folder of `src/`,
  * each over its tests in `tests/<folder>/`, at the same paths as the code.
- * - `yarn vp test run --project spaces` runs one;  the app's are `app:node`, `app:editor` and `app:browser`.
+ * - `yarn vp test run --project spaces` runs one;  the app's are `app:node`, `app:integration` and `app:browser`.
  * - `standardDecorators()` lowers standard decorators (spell's, which most of them load):
  *   vite 8's own transform (oxc) doesn't.
  * - The app's three each have their OWN `appConfig()` (decorator lowering, the Solid plugin, Lightning CSS),
  *   not this file's plugins (`extends: false`):
- *   - `app:node`:  every app test but `BROWSER_TESTS` and `EDITOR_TESTS`.
+ *   - `app:node`:  every app test but `BROWSER_TESTS` and `INTEGRATION_TESTS`.
  *     - `solid-js` is its SERVER build there:  `renderToString`, writes NOT staged (`solid.test.tsx` pins it).
  *     - It SAYS `environment: "node"`:
  *       the Solid plugin reads it from the config it's created in to pick the server build
  *       (without it, the client build).
- *   - `app:editor`:  `EDITOR_TESTS`, ONE FILE AT A TIME.
+ *   - `app:integration`:  `INTEGRATION_TESTS`, ONE FILE AT A TIME.
  *     - They all drive this checkout's one running editor, so they get in each other's way:
  *       `fullEditor` breaks the editor bar's file on purpose, which every open editor then shows,
  *       and many browsers at once are too much for one dev server.
@@ -67,7 +68,7 @@ export default defineConfig({
   }
 })
 
-/** The app's three projects, `app:node`, `app:editor` and `app:browser` (above). */
+/** The app's three projects, `app:node`, `app:integration` and `app:browser` (above). */
 function appProjects(): TestProjectConfiguration[] {
   return [
     {
@@ -77,17 +78,17 @@ function appProjects(): TestProjectConfiguration[] {
         name: "app:node",
         dir: APP_TESTS,
         environment: "node",
-        exclude: [...configDefaults.exclude, ...BROWSER_TESTS, ...EDITOR_TESTS]
+        exclude: [...configDefaults.exclude, ...BROWSER_TESTS, ...INTEGRATION_TESTS]
       }
     },
     {
       ...appConfig(),
       extends: false,
       test: {
-        name: "app:editor",
+        name: "app:integration",
         dir: APP_TESTS,
         environment: "node",
-        include: EDITOR_TESTS,
+        include: INTEGRATION_TESTS,
         fileParallelism: false
       }
     },

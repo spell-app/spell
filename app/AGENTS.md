@@ -68,9 +68,10 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
   - With their snapshots and test data;  the folder's `yarn test`, `yarn ts`, lint and format cover them.
   - They import by package name too:  `import { SPACES } from "spell/app/spaces"`.
   - [vitest.config.ts](vitest.config.ts) has a project per folder, over its tests:
-    the app's three are `app:node`, `app:editor` and `app:browser`;  and `spell`, below.
-    - `app:editor`:  [tests/app/pages/](tests/app/pages/), which open this checkout's running editor,
+    the app's three are `app:node`, `app:integration` and `app:browser`;  and `spell`, below.
+    - `app:integration`:  [tests/app/pages/](tests/app/pages/), which open this checkout's running editor,
       ONE FILE AT A TIME, because they share it.
+      - The folder's `yarn test` and `yarn review` leave them out (about 15 minutes):  `yarn test:integration` runs them.
       - Start it first:  `spell server start all`.
       - A file skips itself when no editor is noted, as in CI.
       - One is noted but doesn't answer:  the file fails and says so.
@@ -378,7 +379,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Toolchain:  Vite+"), plus:
   - `lint`:  oxlint over `src`, `tests`, `scripts` and `app`, then ruff;  `format`:  oxfmt, then ruff format.
     - spaces' Python is a uv project, `src/spaces/server/py/`:  `uv run --directory src/spaces/server/py ...`.
   - One folder's tests:  `yarn vp test run --project spaces`.
-    - The projects:  `spaces`, `lsp`, `app:node`, `app:editor`, `app:browser`, `cli`, `spell`, `vscode`;
+    - The projects:  `spaces`, `lsp`, `app:node`, `app:integration`, `app:browser`, `cli`, `spell`, `vscode`;
       and `vscode:elements`, the extension's elements help, by its own [config](vscode/vitest.config.ts).
   - No more `yarn workspaces foreach`, nor `vp run -F`:  the folder is one workspace of the kit's install.
 - `yarn vitest` here (and the VS Code vitest extension) reads the same [vitest.config.ts](vitest.config.ts).

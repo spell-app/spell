@@ -946,7 +946,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
 
   ```sh
   cd ~/www/spell/app
-  yarn vp test run --project app:node --project app:editor --project app:browser
+  yarn vp test run --project app:node --project app:integration --project app:browser
   ```
 
 - Two rules that bite:
