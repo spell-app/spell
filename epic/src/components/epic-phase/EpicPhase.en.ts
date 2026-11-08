@@ -89,6 +89,14 @@ export const epicPhaseVocabulary = {
         "estimate, the estimate in its tooltip (`~3-4h`)."
     },
     {
+      name: "span",
+      kind: "string",
+      description:
+        "How long it was under way by the clock, from going active to done, waits on you included, written beside " +
+        "`took` from the page's log (epic `epic-engine` I127):  `4h`, `1h 30m`.  A done phase's pill then reads " +
+        "`34m / 4h`.  None when the log has no start for it:  the pill shows only `took`."
+    },
+    {
       name: "source",
       kind: "string",
       description: "Its body's part file (`parts/p2.html`), loaded into its children when it opens."
@@ -203,7 +211,8 @@ export const epicPhaseVocabulary = {
       name: "estimate",
       description:
         "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and " +
-        "timed, what it `took` (`21m`), the estimate its tooltip."
+        "timed, what it `took` (`21m`), the estimate its tooltip;  with a `span` too, `34m / 4h`, its tooltip in " +
+        "words (`34m of work over 4h, estimated ~3-4h`)."
     },
     {
       name: "gear",
@@ -267,6 +276,16 @@ export const epicPhaseVocabulary = {
       key: "tookTip",
       text: "~{estimate}",
       description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
+    },
+    {
+      key: "spanTip",
+      text: "{took} of work over {span}",
+      description: "A done phase's time pill with its clock time, no estimate:  its tooltip (I127)."
+    },
+    {
+      key: "spanEstimateTip",
+      text: "{took} of work over {span}, estimated ~{estimate}",
+      description: "A done phase's time pill with its clock time and an estimate:  its tooltip (I127)."
     },
     {
       key: "choiceOpen",

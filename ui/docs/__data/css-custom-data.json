@@ -10306,6 +10306,27 @@
       }
     },
     {
+      "name": "--ui-tree-nav-open-duration",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `320ms`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-close-duration",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `140ms`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-ease",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-ease-out)`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",

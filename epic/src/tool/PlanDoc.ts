@@ -29,6 +29,7 @@ import {
   ITEM_STATUSES,
   KINDS,
   OBSOLETE_ID,
+  PROMISED_CARD,
   OLD_DECISION,
   PHASE_FIELDS,
   PHASE_STATUSES,
@@ -196,7 +197,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Every phase, in order:  `{ n, number, id, name, status, estimate, took }`, from each `<epic-phase>`.
+   * Every phase, in order:  `{ n, number, id, name, status, estimate, took, span }`, from each `<epic-phase>`.
    * - `n`:  its place in the list, from 1:  what this class's methods take (`phase(n)`)
    * - `number`:  the number people see and say (`7`, `11.1`;  `PhaseIds.numberOf()`), not its id
    */
@@ -210,7 +211,8 @@ export class PlanDoc extends PlanReader {
         name: PlanItem.titleOf(phase),
         status: phase.getAttribute("status") ?? "todo",
         estimate: estimate && estimate !== "TBD" ? estimate : undefined,
-        took: phase.getAttribute("took") ?? undefined
+        took: phase.getAttribute("took") ?? undefined,
+        span: phase.getAttribute("span") ?? undefined
       }
     })
   }
@@ -437,7 +439,7 @@ export class PlanDoc extends PlanReader {
    * done):  `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
    * - an estimate that won't parse (`TBD`, "a day") is named as not counted;  no phase estimated:  no total
    * - then, once done phases have a measured time (`took`, epic `epic-engine` P41), what they took against their
-   *   estimate:  `;  3 done took 1h 9m, estimated 4h-6h`
+   *   estimate, and the clock time they ran over:  `;  3 done took 1h 9m / 9h, estimated 4h-6h` (`tookSummary()`)
    */
   updateEstimate(): void {
     const counted = this.phases.map((phase) => ({ ...phase, range: PlanTime.parseDuration(phase.estimate) }))
@@ -462,16 +464,30 @@ export class PlanDoc extends PlanReader {
    * What the done phases with a measured time took, against their estimates:  `;  3 done took 1h 9m, estimated
    * 4h-6h`;  `""` when none has one.
    * - only the phases with BOTH, so the two numbers are about the same work
+   * - their clock time beside it, added up (`span`, epic `epic-engine` I127):  `3 done took 1h 9m / 9h, ...`
+   *   - some without one (done before spans were written):  said apart, so `/` always compares the same phases:
+   *     `...;  2 of them took 41m / 5h`
    */
   private static tookSummary(phases: (Phase & { range?: Duration })[]): string {
     const timed = phases.flatMap((phase) => {
       const took = PlanTime.parseDuration(phase.took)
-      return phase.status === "done" && took && phase.range ? [{ took: took.min, range: phase.range }] : []
+      if (phase.status !== "done" || !took || !phase.range) return []
+      return [{ took: took.min, range: phase.range, span: PlanTime.parseDuration(phase.span)?.min }]
     })
     if (!timed.length) return ""
-    const took = timed.reduce((total, phase) => total + phase.took, 0)
+    const addUp = (phases: typeof timed) => {
+      const took = phases.reduce((total, phase) => total + phase.took, 0)
+      const span = phases.reduce((total, phase) => total + (phase.span ?? 0), 0)
+      return { took: PlanTime.formatMinutes(took), span: PlanTime.formatMinutes(span) }
+    }
     const estimate = PlanTime.formatRange(PlanTime.sumRanges(timed.map((phase) => phase.range)))
-    return `;  ${timed.length} done took ${PlanTime.formatMinutes(took)}, estimated ${estimate}`
+    const { took, span } = addUp(timed)
+    const spanned = timed.filter((phase) => phase.span !== undefined)
+    if (spanned.length === timed.length) return `;  ${timed.length} done took ${took} / ${span}, estimated ${estimate}`
+    const summary = `;  ${timed.length} done took ${took}, estimated ${estimate}`
+    if (!spanned.length) return summary
+    const some = addUp(spanned)
+    return `${summary};  ${spanned.length} of them took ${some.took} / ${some.span}`
   }
 
   /**
@@ -483,6 +499,7 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
+   *   - beside it, `span`:  how long it was under way by the clock (`spanOf()`, epic `epic-engine` I127)
    * - `dropped` (epic `epic-engine` I228):  never built, and won't be;  finished, as `done` is (`PhaseStatuses`)
    *   - its UPDATE markers go, as `done`'s;  its plan is NOT accepted:  nothing was built
    *   - with `{ why }` (HTML:  `Moved to P38`):  its Dropped field, in place of Done (a Done field goes);  each bare
@@ -500,15 +517,17 @@ export class PlanDoc extends PlanReader {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
     const finished = PhaseStatuses.isFinished(status)
     const doneAt = finished ? PlanTime.isoMinutes(this.now) : undefined
-    Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
+    // read before `status` is written:  until it says done, the window runs to now (the log has no `done` line yet)
+    const span = took ? this.spanOf(n) : undefined
+    Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     if (finished) this.removeUpdateMarkers(n)
     if (status === "done") {
       if (done) this.setDone(n, done)
       // built, so its plan was accepted:  a plan rewritten after the Accept (or held, I221) never leaves a done phase
       // "waiting"
       if (PLAN_ASKED.has(this.phase(n).getAttribute("plan") ?? "")) this.acceptPlan(this.phase(n))
-      if (took) Markup.set<"epic-phase">(this.phase(n), { took })
+      if (took) Markup.set<"epic-phase">(this.phase(n), { took, span })
     }
     if (status !== "dropped") this.setField(this.phase(n), "dropped", "")
     let said = ""
@@ -568,11 +587,11 @@ export class PlanDoc extends PlanReader {
 
   /**
    * Phase `n` took `minutes` of Claude's time (`epic phase seo#P3 took`, worked out again for a phase done before):
-   * `<epic-phase took>`, then the Overview's total;  logged.
+   * `<epic-phase took>`, and `span` from the log again (`spanOf()`), then the Overview's total;  logged.
    */
   setTook(n: number, minutes: number): void {
     const took = PlanTime.formatMinutes(minutes)
-    Markup.set<"epic-phase">(this.phase(n), { took })
+    Markup.set<"epic-phase">(this.phase(n), { took, span: this.spanOf(n) })
     this.updateEstimate()
     this.log(`${this.phaseLabel(n)} took:  ${took}`)
   }
@@ -596,6 +615,17 @@ export class PlanDoc extends PlanReader {
     if (to === undefined) return undefined
     const from = events.findLast((event) => event.status === "active" && event.at <= to)?.at
     return from === undefined ? undefined : { from, to }
+  }
+
+  /**
+   * How long phase `n` was under way by the clock (`activeWindow()`), as `<epic-phase span>` writes it:  `4h`;
+   * waits on Owen included, so against `took` it shows how fast the epic really moves (epic `epic-engine` I127).
+   * - `undefined`:  the log has no start for it, or it ran under a minute
+   */
+  private spanOf(n: number): string | undefined {
+    const window = this.activeWindow(n)
+    const minutes = window && Math.round((window.to - window.from) / 60_000)
+    return minutes ? PlanTime.formatMinutes(minutes) : undefined
   }
 
   /** Phase `n`'s Done field (`<epic-field name="done">`):  what was built, as HTML;  replaces an earlier one. */
@@ -2133,6 +2163,7 @@ export class PlanDoc extends PlanReader {
    * - only an open judgement call, issue or todo (`OBSOLETE_ID`):  a question is decided, a manual test run
    * - never one Owen wants (`urgent`), one fixed and waiting for his review (`fixed`), one waiting for his pick,
    *   one Claude is at work on or that has work queued
+   * - never one he asked to have done lately (`recentAsk()`), one a tidy found promised and not delivered
    * - `marked`:  the ids (lower case) holding a mark of his not taken yet:  never those
    * - `epic stale` reports this same answer, so an agent needn't try
    */
@@ -2148,22 +2179,82 @@ export class PlanDoc extends PlanReader {
     if (marked.has(facts.id)) return "Owen's mark on it hasn't been taken"
     if (facts.underway || facts.working) return "being worked on"
     if (facts.queued !== undefined) return "queued work:  `epic unqueue` it first"
-    return undefined
+    if (this.hasPromisedCard(this.item(id))) return "promised, not delivered:  Owen decides"
+    return this.recentAsk(this.item(id), facts)
   }
 
   /**
-   * Close item `id` as obsolete:  done, `why` (HTML, as a status card's reading) a Done card on it and in the log's
-   * line;  returns its title.
+   * Why `item` counts as something Owen asked for lately and that's still being acted on, or `undefined`:
+   * a Do Now (`review-as="now"`), or his reply the last on it, within `RECENT_ASK_DAYS`.
+   * - his reply's date, else the day he reviewed it;  a Do Now with neither counts as recent
+   * - an old review is no ask:  it never refuses for that alone
+   */
+  private recentAsk(item: Element, facts: ItemFacts): string | undefined {
+    const replies = Array.from(item.querySelectorAll(":scope > epic-reply"))
+    const his = replies.findLast((reply) => !ThreadFacts.isAgents(reply))
+    if (facts.reviewAs !== "now" && (his === undefined || his !== replies.at(-1))) return undefined
+    const when = his?.getAttribute("at") ?? facts.reviewed
+    if (when !== undefined && !this.isWithinDays(when, RECENT_ASK_DAYS)) return undefined
+    return "Owen asked for it lately, and it's still being acted on"
+  }
+
+  /** Whether `when`, a date or time as the page writes it, is within `days` of `now`;  an unreadable one isn't. */
+  private isWithinDays(when: string, days: number): boolean {
+    const at = Date.parse(when.replace(" ", "T"))
+    return !Number.isNaN(at) && this.now.getTime() - at <= days * 86_400_000
+  }
+
+  /** Whether a tidy left `item` a `Promised, not delivered:` card. */
+  private hasPromisedCard(item: Element): boolean {
+    return Array.from(item.querySelectorAll(":scope > epic-status")).some((card) =>
+      (card.textContent ?? "").trim().startsWith(PROMISED_CARD)
+    )
+  }
+
+  /**
+   * Item `id` says it waits for work that's finished, and what it promised never came
+   * (`epic update <name>#<id> promised "<what>"`, `/epic tidy`):  a Noted card starting `Promised, not delivered:`,
+   * and back on Owen's list, for him to decide.  Returns its title.
+   * - not calm, not reviewed, so it's red;  a todo marked `urgent`, which turns a todo red the same way
+   * - `closeRefusal()` won't close it while the card is there
+   * - `what`:  HTML, as a status card's reading
+   * - throws on anything but an open judgement call, issue or todo
+   */
+  promiseUnkept(id: string, what: string): string {
+    const item = this.item(id)
+    if (!OBSOLETE_ID.test(item.id) || item.getAttribute("status") !== "open")
+      throw new PlanDocError(
+        `${item.id.toUpperCase()}:  only an open judgement call, issue or todo can wait on a promise`
+      )
+    const title = this.addStatus(id, `${PROMISED_CARD}  ${what}`, { state: "noted" })
+    const urgent = CALM_ID.test(item.id) ? {} : { urgent: true }
+    Markup.set<"epic-item">(item, { calm: undefined, reviewed: undefined, ...urgent })
+    this.log(`${item.id.toUpperCase()} promised, not delivered:  ${title}`)
+    return title
+  }
+
+  /**
+   * Close item `id` as obsolete:  done, `why` (plain TEXT, escaped:  a tag in it shows as typed) on a Done card and in
+   * the log's line;  returns its title.
+   * - a Done card already on it ("Obviated by ..."):  `why` goes under that one, never a second card
    * - not taken up by the active phase (`setItem()`'s `taken-in`):  nothing was built for it
    * - throws when `closeRefusal()` says no (the caller has checked;  this is the guard)
    */
   closeObsolete(id: string, why: string, { marked }: { marked?: ReadonlySet<string> } = {}): string {
     const refusal = this.closeRefusal(id, { marked })
     if (refusal) throw new PlanDocError(`${id.toUpperCase()} can't close as obsolete:  ${refusal}`)
-    this.addStatus(id, why, { state: "done" })
+    const reading = PlanMarkup.text(why)
+    const item = this.item(id)
+    const doneCard = Array.from(item.querySelectorAll(DONE_CARD)).at(-1)
+    if (doneCard)
+      for (const block of this.statusBlocks(reading)) {
+        block.setAttribute("slot", SUMMARY_SLOT)
+        doneCard.append(block)
+      }
+    else this.addStatus(id, reading, { state: "done" })
     const title = this.setItem(id, "done")
-    Markup.set<"epic-item">(this.item(id), { takenIn: undefined })
-    this.log(`${id.toUpperCase()} closed:  ${title} -- ${why.replace(/<[^>]+>/g, "")}`)
+    Markup.set<"epic-item">(item, { takenIn: undefined })
+    this.log(`${id.toUpperCase()} closed:  ${title} -- ${why}`)
     return title
   }
 
@@ -3390,6 +3481,12 @@ function filedDid({ id, hasFix }: FiledFollowUp): string {
   const made = `to todo ${id.toUpperCase()}`
   return hasFix ? made : `${made}:  no fix proposed yet, write one in its "${FIX_LABEL}" field`
 }
+
+/** A Done status card, among an item's children. */
+const DONE_CARD = ':scope > epic-status[state="done"]'
+
+/** How long Owen's ask keeps an item from closing as obsolete (`recentAsk()`). */
+const RECENT_ASK_DAYS = 14
 
 /** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {

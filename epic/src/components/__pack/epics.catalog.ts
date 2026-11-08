@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  4ee22211c972a55f
+// sources:  60f57c0e138f6bfd
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -39,7 +39,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","away-read","away-seen","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
-  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
+  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","span","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","agent","at","re"]},

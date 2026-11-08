@@ -24,6 +24,7 @@ import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
+import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 
 import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicGroups"
 
@@ -277,7 +278,7 @@ export class EpicProgram {
         "(spinner on), done, fixed, or noted"
     )
       .usage(
-        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted ["<html>"]'
+        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted | promised ["<html>"]'
       )
       .addHelpText("after", UPDATE_HELP)
     this.page(
@@ -288,8 +289,8 @@ export class EpicProgram {
     ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."] [--for <item ids>]')
     this.page(
       epic.command("phase"),
-      "set a phase's status;  done:  --done writes what was built, and the time Claude took (took, from the " +
-        "transcripts);  dropped:  never built, and won't be (struck through, finished as done is), --why writes why " +
+      "set a phase's status;  done:  --done writes what was built, the time Claude took (took, from the " +
+        "transcripts) and how long by the clock (span, from the log);  dropped:  never built, and won't be (struck through, finished as done is), --why writes why " +
         "in place of Done, a phase it names (P38) linked;  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
         "its plan, a blue spinner on its page (off:  ends it;  writing --plan ends it by itself)",
       'epic phase seo#P3 done --done "<ul><li>the sitemap, written on build</li></ul>"'
@@ -363,8 +364,8 @@ export class EpicProgram {
     this.page(
       epic.command("close"),
       "close items:  done;  --why closes them as obsolete, the reason saved on each, some refused (its help)",
-      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"'
-    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]')
+      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"  |  epic close seo --why-file reasons.json5'
+    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]  |  <epic> --why-file <file>')
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
       epic.command("cancel"),
@@ -634,6 +635,11 @@ export class EpicProgram {
       .usage("[<key>] [--json]")
       .addHelpText("after", CONFIG_HELP)
 
+    this.verb(epic.command("settings"), (args) => EpicProgram.settings(args))
+      .description("how the epic tooling behaves for you (epic_settings.json5):  each value and which file set it")
+      .usage("[<key>] [--json]")
+      .addHelpText("after", SETTINGS_HELP)
+
     this.verb(epic.command("voice"), (args) => EpicProgram.voice(args))
       .description(
         "the VOICE a kind of page is written in (readme, code ...):  its file, for a skill to read;  or every voice"
@@ -843,6 +849,43 @@ export class EpicProgram {
     if (!(key in values))
       throw new EpicCommandError(`epic config ${key}?  no such key.  The keys:  ${Object.keys(values).join(", ")}`)
     process.stdout.write(json ? `${JSON.stringify(values[key])}\n` : `${values[key]}\n`)
+    return EXIT.OK
+  }
+
+  /**
+   * `epic settings [<key>] [--json]`:  how the epic tooling behaves for you, its three layers merged
+   * (`LayeredSettings`, epic `epic-engine` I235).
+   * - `<key>`:  that value alone (`epic settings away.finishedPhaseDays`), for a skill
+   * - no key:  each value with the layer that set it, then the layers' files and what was wrong with them;
+   *   `--json`:  all of it
+   * - Returns 0.
+   * - Throws `EpicCommandError`:  exit 2 for an unknown key, listing the keys
+   * - static:  needs no tree
+   */
+  static async settings(args: string[]): Promise<number> {
+    const json = args.includes("--json")
+    const [key] = args.filter((arg) => !arg.startsWith("--"))
+    const settings = LayeredSettings.read(EpicConfig.of(EpicCheckout.nearest({ marker: ".git" })).contentFolder)
+    const { entries, layers } = settings
+    if (key !== undefined) {
+      const entry = entries.find((each) => each.key === key)
+      if (!entry)
+        throw new EpicCommandError(
+          `epic settings ${key}?  no such key.  The keys:  ${entries.map((each) => each.key).join(", ")}`
+        )
+      process.stdout.write(json ? `${JSON.stringify(entry.value)}\n` : `${entry.value}\n`)
+      return EXIT.OK
+    }
+    if (json) {
+      process.stdout.write(`${JSON.stringify({ values: settings.values, entries, layers }, null, 2)}\n`)
+      return EXIT.OK
+    }
+    const lines = entries.map(({ key: name, value, source }) => `${name}:  ${value}  (${source})`)
+    for (const { name, file, found, problems } of layers) {
+      lines.push(`${name}:  ${file}${found ? "" : "  (none)"}`)
+      lines.push(...problems.map((problem) => `  ${problem}`))
+    }
+    process.stdout.write(`${lines.join("\n")}\n`)
     return EXIT.OK
   }
 
@@ -1076,6 +1119,20 @@ this repo.
 Examples:
   epic config contentFolder
   epic config --json`
+
+/** After `epic settings --help`. */
+const SETTINGS_HELP = `
+Three files of the same name and shape, epic_settings.json5, merged key by key, the later winning:
+  default    the kit's own, epic/epic_settings.json5, every key with its value
+  org        at the root of the epic repo, checked in there;  optional
+  developer  ~/.spell/epic_settings.json5, in no repo;  optional
+A file that won't read, or a bad value in one, is said on stderr, and the layer below stands.
+Where a repo keeps things is .epic/config.json5 (epic config), the same for everyone.
+
+Examples:
+  epic settings
+  epic settings away.finishedPhaseDays
+  epic settings --json`
 
 /** After `epic voice --help`. */
 const VOICE_HELP = `

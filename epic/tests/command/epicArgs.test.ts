@@ -60,6 +60,7 @@ const OWENS_ROWS: [string[], string[][]][] = [
     [["close", "seo", "J3", "I7", "T2", "--why", "P9 did it"]]
   ],
   [["close", "--why", "gone", "seo#J3"], [["close", "seo", "J3", "--why", "gone"]]],
+  [["close", "seo", "--why-file", "r.json5"], [["close", "seo", "--why-file", "r.json5"]]],
   [["reopen", "seo#J3"], [["reopen", "seo", "J3"]]],
   [["cancel", "seo#J3", "why"], [["cancel", "seo", "J3", "why"]]],
   [
@@ -68,6 +69,7 @@ const OWENS_ROWS: [string[], string[][]][] = [
   ],
   // Claude's status card is `update`'s (epic `repo-split` J140:  `epic status` takes stock)
   [["update", "seo#J3", "underway", "reading"], [["status", "seo", "J3", "underway", "reading"]]],
+  [["update", "seo#I3", "fixed", "what changed"], [["status", "seo", "I3", "fixed", "what changed"]]],
   [["update", "seo#J3", "done"], [["status", "seo", "J3", "done"]]],
   [["update", "seo#o3", "noted", "kept"], [["status", "seo", "o3", "noted", "kept"]]],
   [["update", "seo#P3", "done", "--filed", "B"], [["status", "seo", "P3", "done", "--filed", "B"]]],
@@ -237,7 +239,7 @@ describe("planDocArgs():  update", () => {
     expect(() => planDocArgs("update", ["seo#J3", "done", "--title", "T"])).toThrow(
       "update:  a card (done) or fields (--title), not both"
     )
-    expect(() => planDocArgs("update", ["seo#J3", "finished"])).toThrow(/a card:  underway \| done \| noted/)
+    expect(() => planDocArgs("update", ["seo#J3", "finished"])).toThrow(/a card:  underway \| done \| fixed \| noted/)
   })
 
   test("a phase:  body fields in one phase-body, then estimate, then rename", () => {

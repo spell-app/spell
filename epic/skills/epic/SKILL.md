@@ -615,8 +615,9 @@ than just being able to move on").
    - It drops that phase's UPDATE markers, writes its Done field, and brings the doc forward.
    - It writes how long Claude worked on it, `took` (epic `epic-engine` P41):  its own agents' time from their
      transcripts (named `<epic>-p<N>`, or saying `P<N>`), else the epic's sessions' while it was active, never the
-     time waiting on the person.  The title row then shows `21m`, the estimate its tooltip.
-     A phase done before:  `epic phase <name>#P<N> took`.
+     time waiting on the person.  Beside it, `span`:  how long it was under way by the clock, from the log
+     (epic `epic-engine` I127).  The title row then shows `21m / 4h`, the rest in its tooltip.
+     A phase done before:  `epic phase <name>#P<N> took` writes both.
    - Then `epic summary <name>`.
    - With the phase's items, this runs in a background `<name>-plan-doc` agent ("4. Fill the doc"),
      while the reply below goes out.
@@ -1498,26 +1499,59 @@ No `<epic>`:  this session's epic.
 Only when the person (or that epic's session) asks:  it never starts by itself.
 
 1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
-   - One entry per open call, issue and todo:  age, its phase and whether that's done, the files and code names it
-     mentions and whether they still exist, commits since it was written, commits naming it, later items and phases
-     that mention it.
+   - One entry per open call, issue, todo and limit:  age from when it was written, its phase and whether that's done,
+     the files and code names it mentions and whether they still exist (in its worktree or on `main`;  only what
+     git's history has can be gone), commits since it was written, commits naming it, later items and phases that
+     mention it, the todo made to follow it up (`madeTodo`), the done phases it says it waits for (`waitsOnDone`),
+     every status card already on it (`statusCards`).
    - It decides nothing.  A file gone or a name missing is a reason to look, not a verdict.
-   - Skip an entry with `closeRefused` (a wanted item, a fix waiting for review, a pick or mark of the person's,
-     work under way):  those are never closed here.
+   - Skip an entry with `closeRefused` (a wanted item, one the person asked for lately, a fix waiting for review, a
+     pick or mark of the person's, work under way):  those are never closed here.
+   - Skip an entry with `settled`:  a judgement call the person has reviewed.  Don't re-read it.
+     A call that only records something ("formatting only", "nothing changed") stays open until they've seen it, and
+     their Approve is what finishes it;  tidy doesn't close it.
 2. Hand the rest to background agents, up to 5 in all, each a batch of ids:
    - named and listed as the kit's `CLAUDE.md` says (`epic agents add <name> "<task>"`, `epic agents done <name>`).
    - In Codex:  ask for sub-agents, one per batch, and wait for them;  else work the batches one at a time, here.
    - Each reads its items (the page, the part files) against the current code and the recent commits, and sorts each:
-     - CLEAR:  something named did it.  A commit, a phase or a later item made it moot, and you can point at it.
-       `epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete, naming the commit, phase or item>"`
+     - CLEAR:  something named did ALL of it.
+       - List each thing the item asked for.  Close only if every one is done or moot;  half done is never clear
+         (data T110, three gaps and a commit fixing two, was closed and wrong).
+       - The reason says what did it, names the commit, phase or later item that actually did the work, and says where
+         anything left over went.
+         Check the one you name:  open the commit, see that it touched this.  Not the nearest one in the list
+         (language I12's credited commit never touched the file;  editor T16's credit was another epic's, ids repeat).
+       - `epic close <epic>#J3 <epic>#I7 --why "<reason>"`;  a reason per item, ONE command (one process per id took
+         15-20s each):  write a JSON5 file of id => reason, `epic close <epic> --why-file <file>`.
+       - Reasons are plain text:  a tag in one shows as typed.
+       - An entry with `madeTodo`:  the follow-up exists.  Clear only if the todo covers ALL of what's left;
+         say so, naming it.
+       - An entry with a Done card already in `statusCards` ("Obviated by ..."):  the reason joins that card.
+         Read it first:  a leftover Done card that contradicts the item's note is not a reason.
+     - HALF DONE or HALF OBSOLETE:  a note that doesn't overstate.
+       `epic update <epic>#J3 noted "Partly obsolete:  <what's moot, what's still wanted>" --quiet`
      - DOUBTFUL:  it might be obsolete.
        `epic update <epic>#J3 noted "Maybe obsolete:  <why, in a line>" --quiet`, last on the line.
-       - An entry with `tidyNoted` has one already:  never a second card;  close it only if it's now clear.
-       - Without a `Maybe obsolete:` start, a later run can't tell and notes it again.
+       - Write `&lt;` for a `<` in a card:  a live tag eats the text.
+       - An entry with `tidyNoted` has a card already:  never a second;  close it only if it's now clear.
+       - Without a `Maybe obsolete:` or `Partly obsolete:` start, a later run can't tell and notes it again.
+     - PROMISED, NOT DELIVERED:  the item says it waits for a phase or later work ("until P35", `waitsOnDone` is the
+       hint), that phase is done, and the promised thing never arrived (atmosphere J60:  nothing calls `keepIn`;
+       J139:  no Spanish Inbox).  Never close it, however old:  it's a gap.
+       `epic update <epic>#J60 promised "<what was promised, and what's there instead>"`
+       - Its card starts `Promised, not delivered:`, it goes back on the person's list (red), and `epic close --why`
+         refuses it from then on.
      - STILL LIVE:  leave it alone, no card.
-   - **Unsure:  leave it open.**  A wrong close hides work;  a stale item only costs a reading.
+   - The rules:
+     - **Unsure:  leave it open.**  A wrong close hides work;  a stale item only costs a reading.
+     - Age alone never closes anything.
+     - A judgement call carried out as decided stays open:  it's a record of a choice, for the person.
+       It closes only when a named commit, phase or later item made the choice itself moot.
+     - A `limit` (a todo that only notes something) is obsolete when the limit no longer holds, and not before.
+     - Near-identical follow-ups are judged together:  both close or neither (mockup T17 was closed, its twin T25 left).
    - A refusal from `epic close` (exit 1, one line per id, the others closed):  leave that item as it is.
-3. Reply:  how many closed, how many left noted, how many left alone, and the epic page's link pair.
+3. Reply:  how many closed, how many left noted, how many left alone, every "promised, not delivered" by id with what's
+   missing (the person decides those), and the epic page's link pair.
 
 ## Migrations:  bringing epic pages up to today's markup
 
@@ -1582,6 +1616,7 @@ commits <name> --backfill                           every phase / item commit (`
 update <name> --standing [on|off]                   a standing epic:  each phase merges on its own, never done
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
 close <name>#J3 <name>#I7 --why "<text>"            close as obsolete, the reason on each;  some refused ("14. Tidy")
+close <name> --why-file <file>                       a reason per item (JSON5 of id => reason), one write of the page
 stale <name> [--json]                               the facts for judging which open items are stale;  decides nothing
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,

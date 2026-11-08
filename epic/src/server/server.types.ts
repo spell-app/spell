@@ -233,3 +233,10 @@ export type AppStatus = {
   failed?: string
   log: string
 }
+
+/**
+ * The title of the tiny page a clicked link gets back from the show route (`/api/docs/show`):
+ * the VS Code tab it opened in is closed by that title (`WindowBridge.closeShownTab()`, epic `epic-engine` r61).
+ * - here, not in the extension's `docUrls`:  plain `tsx` reads the `vscode/` folder as CommonJS, and can't name its exports
+ */
+export const SHOWN_TAB_TITLE = "Shown in VS Code"

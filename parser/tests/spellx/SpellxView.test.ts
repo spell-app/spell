@@ -349,7 +349,9 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
     expect(word).toMatch(
       /"<xyz>" isn't a spellx word:  here, use one of <property>, <alias>, .*<on>, <when>, <while>, <draggable>, <clickable>, <selectable>, <droppable>$/
     )
-    expect(attribute).toMatch(/<property> has no "zzz":  it takes "name", "aka", .*"group", "at", "cloud", "address", "state", "picture"$/)
+    expect(attribute).toMatch(
+      /<property> has no "zzz":  it takes "name", "aka", .*"group", "at", "cloud", "address", "state", "picture"$/
+    )
   })
 
   test("an unknown attribute names the closest;  an event's attributes are its parameters", () => {

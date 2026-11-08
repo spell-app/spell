@@ -76,6 +76,11 @@ export type Phase = {
   estimate: string | undefined
   /** how long Claude worked on it (`21m`, `<epic-phase took>`, epic `epic-engine` P41);  `undefined` until measured */
   took: string | undefined
+  /**
+   * how long it was under way by the clock, from going active to done, waits on Owen included (`4h`,
+   * `<epic-phase span>`, epic `epic-engine` I127);  `undefined` when `took` is, or the log has no start
+   */
+  span: string | undefined
 }
 
 /**
@@ -185,6 +190,12 @@ export const CALM_ID = /^[ij]\d+$/
  * - never a question (it's decided) or a manual test (a run closes it)
  */
 export const OBSOLETE_ID = /^[ijt]\d+$/
+
+/**
+ * How a status card starts when an item says it waits for finished work, and the promised thing never came
+ * (`PlanDoc.promiseUnkept()`):  a later `/epic tidy` knows it by this.
+ */
+export const PROMISED_CARD = "Promised, not delivered:"
 
 /**
  * Item statuses that are closed:  not counted open, not on a "To review" line.

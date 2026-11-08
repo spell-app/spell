@@ -19,6 +19,8 @@ import awayLineCSS from "./EpicAwayLine.css?inline"
  *   `epic inbox apply` writes when he read it into the page (`<epic-page away-seen>`), and the section is drawn again
  *   without it.  A heading's (`done`, `todo`) takes its whole part.
  * - Read and not applied yet:  faded at once (`:state(read)`), as an update block goes quiet.
+ *   - and the same the moment Owen marks the item the line is about (Do this, Approve ...):  it leaves the section
+ *     when that's applied (`NightSummary.isAddressed()`, epic `epic-engine` I235)
  * - The epic tool writes every one (`PlanDoc.refreshAway()`);  no one writes it by hand.
  ****************/
 export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
@@ -39,10 +41,10 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     return this.review.connect()
   }
 
-  /** Its Read mark is in the inbox:  faded until it's applied. */
+  /** Its Read mark is in the inbox, or a mark on the item it's about:  faded until it's applied. */
   @E.cssState("read")
   get isRead(): boolean {
-    return this.review.mark()?.action === "seen"
+    return this.review.mark()?.action === "seen" || (!!this.line && this.review.isMarked(this.line))
   }
 
   /** Read shows:  a line to key it by, the page reviewed, and not still under way. */

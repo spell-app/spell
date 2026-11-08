@@ -750,14 +750,18 @@ start the box
   }
 
   /** Sign in on `bar` by the code mailed to `email`. */
-  async function signIn(bar: ReturnType<Page["locator"]>, email: string): Promise<void> {
+  async function signIn(
+    bar: ReturnType<Page["locator"]>,
+    email: string,
+    signedIn = "with your Spell account"
+  ): Promise<void> {
     const before = (await mailer.newestTo(email))?.sentAt ?? 0
     await bar.locator("input").fill(email)
     await bar.locator("ui-button").first().click()
     await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
     await bar.locator("input").fill(/^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0])
     await bar.locator("ui-button").first().click()
-    await expect.poll(() => bar.textContent(), WAITING).toContain("with your Spell account")
+    await expect.poll(() => bar.textContent(), WAITING).toContain(signedIn)
   }
 
   describe("Ana's story:  the family cookbook, saved in the cloud (epic `atmosphere` P8)", () => {
@@ -1831,10 +1835,22 @@ iniciar la caja que publica`
       withPlace(
         shipped("OrgAdmin/OrgAdmin.api.spell"),
         `admin roles is a data folder at "@spell/__admin/roles":
-	- check it every 2 seconds`
+	- check it every 2 seconds
+	- stages live at "event_stages"`
       )
-    /** What the page's section `name` says. */
-    const section = (page: Page, name: string) => page.locator(`ui-segment.${name}`).textContent()
+    /** Open the section labelled `label`, down the side. */
+    const open = (page: Page, label: string) => page.locator("ui-tabs [role=tab]", { hasText: label }).click()
+    /** What the section showing says. */
+    const showing = (page: Page) => page.locator("ui-tab:visible").textContent()
+    /** Pick `label` in the add form's select named `name`. */
+    const pick = (page: Page, name: string, label: string) =>
+      page.locator(`ui-select[name="${name}"] select`).selectOption({ label })
+    /** Sign in from the page's person menu. */
+    const signInByMenu = async (page: Page, email: string) => {
+      const menu = page.locator("span.spell-sign-in-menu")
+      await menu.locator("> ui-button").click()
+      await signIn(menu.locator("ui-popup"), email, "Signed in as")
+    }
 
     beforeAll(async () => {
       for (const [who, email] of Object.entries({ ...EMAILS, ...MORE })) address[who] = await accounts.invite(email)
@@ -1863,40 +1879,56 @@ iniciar la caja que publica`
       async () => {
         // 1. Ada, an Admin:  Eve joins, the Finance Team, Eve its Manager until June
         const ada = await deviceOn("admin-ada", admin())
-        await signIn(ada.bar, EMAILS.ada)
-        await expect.poll(() => section(ada.page, "people"), WAITING).toContain(address.bo!)
-        await ada.page.locator("ui-segment.people ui-input input").fill(address.eve!)
-        await ada.page.locator("ui-segment.people ui-button.add").click()
-        await ada.page.locator("ui-segment.teams ui-form.new-team input").fill("Finance Team")
-        await ada.page.locator("ui-segment.teams ui-button.add").click()
-        const term = ada.page.locator("ui-segment.roles ui-input input")
-        await term.nth(0).fill(address.eve!)
-        await term.nth(1).fill("team-manager")
-        await term.nth(2).fill("finance_team")
-        await term.nth(3).fill("2027-06-30")
-        await ada.page.locator("ui-segment.roles ui-button.give").click()
-        await expect.poll(() => section(ada.page, "log"), { timeout: 15_000 }).toContain("finance_team")
-        const log = (await section(ada.page, "log")) ?? ""
+        expect(await ada.bar.count()).toBe(0)
+        await signInByMenu(ada.page, EMAILS.ada)
+        await expect.poll(() => showing(ada.page), WAITING).toContain(address.bo!)
+        await ada.page.locator("ui-stack.people ui-form.add input").fill(address.eve!)
+        await ada.page.locator("ui-stack.people ui-button.add").click()
+        await expect.poll(() => showing(ada.page), WAITING).toContain(address.eve!)
+        await open(ada.page, "Teams and projects")
+        await ada.page.locator("ui-form.new-team input").fill("Finance Team")
+        await ada.page.locator("ui-form.new-team ui-button.add").click()
+        await expect.poll(() => showing(ada.page), WAITING).toContain("Finance Team")
+        await open(ada.page, "Who manages what")
+        await pick(ada.page, "holder", "eve.admin")
+        await pick(ada.page, "role", "Team Manager")
+        await pick(ada.page, "manages", "Finance Team")
+        await ada.page.locator('ui-input[name="ends"] input').fill("2027-06-30")
+        await ada.page.locator("ui-stack.roles ui-button.give").click()
+        await expect.poll(() => showing(ada.page), { timeout: 15_000 }).toContain("Finance Team")
+        expect(await showing(ada.page)).toContain("Team Manager")
+        await open(ada.page, "Log")
+        await expect.poll(() => showing(ada.page), { timeout: 15_000 }).toContain("Team Manager of Finance Team")
+        const log = (await showing(ada.page)) ?? ""
         expect(log).toContain("join")
-        expect(log).toContain(`${address.eve} team-manager of finance_team`)
+        expect(log).toContain("eve.admin Team Manager of Finance Team")
         expect((await spaceFolders.orgRoles.terms("spell")).find((each) => each.person === address.eve)).toMatchObject({
           of: "finance_team",
           end: expect.stringMatching(/^2027-06-30/)
         })
+        // the section picked comes back after a reload
+        await ada.page.reload()
+        await expect.poll(() => showing(ada.page), { timeout: 15_000 }).toContain("Finance Team")
+        await open(ada.page, "Who manages what")
+        await expect.poll(() => showing(ada.page), WAITING).toContain("Team Manager")
+        await ada.page.setViewportSize({ width: 1280, height: 800 })
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        await ada.page.screenshot({ path: join(shots, "org-admin.png") })
 
         // 2. Bo, the Events Team's Manager:  the 2026 Q4 project under it, Dee its Manager
         const bo = await deviceOn("admin-bo", admin())
-        await signIn(bo.bar, EMAILS.bo)
-        await expect.poll(() => section(bo.page, "teams"), WAITING).toContain("Finance Team")
-        const project = bo.page.locator("ui-segment.teams ui-form.new-project input")
-        await project.nth(0).fill("2026 Q4")
-        await project.nth(1).fill("events_team")
-        await bo.page.locator("ui-segment.teams ui-button.add-project").click()
-        const boTerm = bo.page.locator("ui-segment.roles ui-input input")
-        await boTerm.nth(0).fill(address.dee!)
-        await boTerm.nth(1).fill("project-manager")
-        await boTerm.nth(2).fill("2026_q4")
-        await bo.page.locator("ui-segment.roles ui-button.give").click()
+        await signInByMenu(bo.page, EMAILS.bo)
+        await open(bo.page, "Teams and projects")
+        await expect.poll(() => showing(bo.page), WAITING).toContain("Finance Team")
+        await bo.page.locator("ui-form.new-project input").first().fill("2026 Q4")
+        await pick(bo.page, "team", "Events Team")
+        await bo.page.locator("ui-stack.teams ui-button.add-project").click()
+        await expect.poll(() => showing(bo.page), WAITING).toContain("2026 Q4")
+        await open(bo.page, "Who manages what")
+        await pick(bo.page, "holder", "dee.admin")
+        await pick(bo.page, "role", "Project Manager")
+        await pick(bo.page, "manages", "2026 Q4")
+        await bo.page.locator("ui-stack.roles ui-button.give").click()
         await expect
           .poll(async () => (await spaceFolders.orgRoles.managersOf("spell", "2026_q4")).includes(address.dee!), {
             timeout: 15_000
@@ -1905,9 +1937,11 @@ iniciar la caja que publica`
 
         // 3. Dee, the project's Manager:  ending Bo's term is refused, and changes nothing
         const dee = await deviceOn("admin-dee", admin())
-        await signIn(dee.bar, MORE.dee)
-        await expect.poll(() => section(dee.page, "roles"), WAITING).toContain(address.bo!)
-        const bosRow = dee.page.locator("ui-segment.roles .term", { hasText: address.bo! })
+        await signInByMenu(dee.page, MORE.dee)
+        await open(dee.page, "Who manages what")
+        await expect.poll(() => showing(dee.page), WAITING).toContain("bo.admin")
+        const bosRow = dee.page.locator("ui-stack.roles ui-row", { hasText: "bo.admin" })
+        await bosRow.hover()
         await bosRow.locator("ui-button.end").click()
         await dee.page.waitForTimeout(3_000)
         expect(await spaceFolders.orgRoles.managersOf("spell", "events_team")).toContain(address.bo)

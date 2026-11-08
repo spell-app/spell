@@ -208,6 +208,7 @@ export type TestCheck = {
  * | `sign-in-signing` | what shows while they sign in | `place` |
  * | `sign-in-as` | what shows with someone signed in, to an atmosphere account | `place`, `name` |
  * | `sign-in-as-spell` | the same, to a Spell account | `place`, `name` |
+ * | `sign-in-menu-as` | a person menu's:  who it is, signed in | `name` |
  * | `sign-in-spell-signed-out` | what shows with nobody signed in to a Spell account, on a place that takes them to be this machine's person | `place` |
  * | `sign-in-cloud-signed-out` | what shows with nobody signed in, on the cloud:  what's changed is kept in this browser until someone is | `place` |
  * | `sign-in-check-email` | what shows while it waits for the emailed link or code | `email` |
@@ -279,6 +280,7 @@ export const CORE_MESSAGES = {
   "sign-in-abuse": "To report abuse on Spell:  {contact}",
   "sign-in-who": "Your handle, e.g. alice.bsky.social",
   "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+  "sign-in-menu-as": "Signed in as {name}",
   "sign-in-spell-signed-out":
     "You aren't signed in to {place} with a Spell account:  until you are, it takes you to be this computer's person.",
   "sign-in-cloud-signed-out":

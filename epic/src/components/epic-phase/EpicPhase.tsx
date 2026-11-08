@@ -51,6 +51,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     - an older page's `changes` (every plan change) until the tool's next write
  *   - the estimate as a badge;  once done and timed, what it took instead (`21m`), the estimate its tooltip
  *     (`~3-4h`;  Owen, M1 and M3 on epic `epic-engine` P41)
+ *     - with its clock time too, `34m / 4h`, its tooltip in words (`span`, epic `epic-engine` I127)
  * - Its children, in order (the vocabulary's):
  *   - `<epic-field>`s (Symptom, Changes, Requests, Goal), Owen's kept notes (`<epic-reply>`)
  *   - its PLAN CHANGES, `<epic-update at summary>` blocks, at the end of its description, after Goal
@@ -187,18 +188,33 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return this.shownStatus === "done" ? this.took || undefined : undefined
   }
 
-  /** Its time pill's words:  what it took, once done and timed;  else its estimate;  none:  no pill. */
+  /** How long it ran by the clock (`span`), shown with what it took;  `undefined` without both. */
+  get spanShown(): string | undefined {
+    return this.tookShown ? this.span || undefined : undefined
+  }
+
+  /**
+   * Its time pill's words:  what it took, once done and timed, over how long by the clock (`34m / 4h`;  Owen, epic
+   * `epic-engine` I127:  "shorter is good");  else its estimate;  none:  no pill.
+   * - no clock time on it (no start in the log, or done before it was written):  only what it took
+   */
   get timeShown(): string | undefined {
+    if (this.spanShown) return `${this.tookShown} / ${this.spanShown}`
     return this.tookShown ?? (this.estimate || undefined)
   }
 
   /**
-   * Its time pill's tooltip while it says what it took:  the estimate it had, `~3-4h` (Owen, M3 on P41);
-   * none without one, or while the pill is the estimate itself.
+   * Its time pill's tooltip while it says what it took:
+   * - with its clock time, in words (I127):  `34m of work over 4h, estimated ~3-4h`
+   * - without:  the estimate it had, `~3-4h` (Owen, M3 on P41)
+   * - neither, or while the pill is the estimate itself:  none
    */
   get tookTip(): string | undefined {
     const estimate = this.estimate?.replace(/^~\s*/, "")
-    return this.tookShown && estimate ? this.translationForKey("tookTip", { estimate }) : undefined
+    const { tookShown: took, spanShown: span } = this
+    if (took && span && estimate) return this.translationForKey("spanEstimateTip", { took, span, estimate })
+    if (took && span) return this.translationForKey("spanTip", { took, span })
+    return took && estimate ? this.translationForKey("tookTip", { estimate }) : undefined
   }
 
   /**

@@ -5,155 +5,142 @@ core.heading("Administración de la org:  dónde se guardan los roles de una org
 // ## Administración de la org:  dónde se guardan los roles de una org
 //////////////////////////////////////////////////////////////////////
 
+/** La org misma, para el título de la página y como espacio que diseñar. */
+export class Perfil extends Thing {
+  // su "nombre" es texto, guardado como "name"
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1082, end: 1124 } }) }
+  get nombre() { return this.getProp("nombre") }
+  set nombre(value) { this.setProp("nombre", value) }
+
+  // su "espacio" es texto, guardado como "space"
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1128, end: 1172 } }) }
+  get espacio() { return this.getProp("espacio") }
+  set espacio(value) { this.setProp("espacio", value) }
+
+  static savedIn = { place: "roles_de_la_org", collection: "perfiles" }
+}
+
+/** Un rol de la org, por su nombre. */
+export class Función extends Thing {
+  // su "nombre" es texto, guardado como "name"
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1267, end: 1309 } }) }
+  get nombre() { return this.getProp("nombre") }
+  set nombre(value) { this.setProp("nombre", value) }
+
+  static savedIn = { place: "roles_de_la_org", collection: "funciones" }
+}
+
 export class Miembro extends Thing {
   // su "persona" es texto, guardado como "person"
-  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 932, end: 977 } }) }
+  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1367, end: 1412 } }) }
   get persona() { return this.getProp("persona") }
   set persona(value) { this.setProp("persona", value) }
 
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 981, end: 1023 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1416, end: 1458 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "rol" es texto, guardado como "role"
-  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1027, end: 1066 } }) }
+  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1462, end: 1501 } }) }
   get rol() { return this.getProp("rol") }
   set rol(value) { this.setProp("rol", value) }
 
-  draw() {
-    return h("ui-stack", { class: "member", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.nombre),
-      h("ui-text", { color: "grey" }, () => this.persona),
-      h("ui-text", () => this.rol),
-      h("ui-button", {
-        class: "remove",
-        icon: "close",
-        size: "mini",
-        appearance: "transparent",
-        "aria-label": "Sacarle de la org",
-        title: "Sacarle de la org",
-        onClick: core.pressed(this, () => core.removeSaved(this)),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      })
-    )
-  }
+  // su "cargo" es texto, guardado como "roleName"
+  static { this.declareProp("cargo", { type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1505, end: 1550 } }) }
+  get cargo() { return this.getProp("cargo") }
+  set cargo(value) { this.setProp("cargo", value) }
 
   static savedIn = { place: "roles_de_la_org", collection: "miembros" }
 }
 
 export class Equipo extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1123, end: 1165 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1607, end: 1649 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
-  draw() {
-    return h("ui-stack", { class: "team", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.nombre)
-    )
-  }
+  // su "espacio" es texto, guardado como "space"
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1653, end: 1697 } }) }
+  get espacio() { return this.getProp("espacio") }
+  set espacio(value) { this.setProp("espacio", value) }
 
   static savedIn = { place: "roles_de_la_org", collection: "equipos" }
 }
 
 export class Proyecto extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1224, end: 1266 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1756, end: 1798 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "equipo" es texto, guardado como "team"
-  static { this.declareProp("equipo", { type: "text", storedAs: "team", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1270, end: 1312 } }) }
+  static { this.declareProp("equipo", { type: "text", storedAs: "team", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1802, end: 1844 } }) }
   get equipo() { return this.getProp("equipo") }
   set equipo(value) { this.setProp("equipo", value) }
 
-  draw() {
-    return h("ui-stack", { class: "project", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.nombre),
-      h("ui-text", () => this.equipo)
-    )
-  }
+  // su "espacio" es texto, guardado como "space"
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1848, end: 1892 } }) }
+  get espacio() { return this.getProp("espacio") }
+  set espacio(value) { this.setProp("espacio", value) }
 
   static savedIn = { place: "roles_de_la_org", collection: "proyectos" }
 }
 
 export class Mandato extends Thing {
   // su "rol" es texto, guardado como "role"
-  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1370, end: 1409 } }) }
+  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1950, end: 1989 } }) }
   get rol() { return this.getProp("rol") }
   set rol(value) { this.setProp("rol", value) }
 
   // su "titular" es texto, guardado como "holder"
-  static { this.declareProp("titular", { type: "text", storedAs: "holder", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1413, end: 1458 } }) }
+  static { this.declareProp("titular", { type: "text", storedAs: "holder", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1993, end: 2038 } }) }
   get titular() { return this.getProp("titular") }
   set titular(value) { this.setProp("titular", value) }
 
   // su "ámbito" es texto, guardado como "manages"
-  static { this.declareProp("ámbito", { type: "text", storedAs: "manages", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1462, end: 1507 } }) }
+  static { this.declareProp("ámbito", { type: "text", storedAs: "manages", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2042, end: 2087 } }) }
   get ámbito() { return this.getProp("ámbito") }
   set ámbito(value) { this.setProp("ámbito", value) }
 
+  // su "cargo" es texto, guardado como "roleName"
+  static { this.declareProp("cargo", { type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2091, end: 2136 } }) }
+  get cargo() { return this.getProp("cargo") }
+  set cargo(value) { this.setProp("cargo", value) }
+
+  // su "nombre titular" es texto, guardado como "holderName"
+  static { this.declareProp("nombreTitular", { type: "text", storedAs: "holderName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2140, end: 2196 } }) }
+  get nombreTitular() { return this.getProp("nombreTitular") }
+  set nombreTitular(value) { this.setProp("nombreTitular", value) }
+
+  // su "nombre ámbito" es texto, guardado como "managesName"
+  static { this.declareProp("nombreÁmbito", { type: "text", storedAs: "managesName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2200, end: 2256 } }) }
+  get nombreÁmbito() { return this.getProp("nombreÁmbito") }
+  set nombreÁmbito(value) { this.setProp("nombreÁmbito", value) }
+
   // su "inicio" es texto, guardado como "starts"
-  static { this.declareProp("inicio", { type: "text", storedAs: "starts", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1511, end: 1555 } }) }
+  static { this.declareProp("inicio", { type: "text", storedAs: "starts", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2260, end: 2304 } }) }
   get inicio() { return this.getProp("inicio") }
   set inicio(value) { this.setProp("inicio", value) }
 
   // su "fin" es texto, guardado como "ends"
-  static { this.declareProp("fin", { type: "text", storedAs: "ends", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1559, end: 1598 } }) }
+  static { this.declareProp("fin", { type: "text", storedAs: "ends", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2308, end: 2347 } }) }
   get fin() { return this.getProp("fin") }
   set fin(value) { this.setProp("fin", value) }
-
-  draw() {
-    return h("ui-stack", { class: "term", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.titular),
-      h("ui-text", () => this.rol),
-      h("ui-text", () => this.ámbito),
-      h("ui-text", () => this.inicio),
-      h("ui-text", () => this.fin),
-      h("ui-button", {
-        class: "end",
-        icon: "close",
-        size: "mini",
-        appearance: "transparent",
-        "aria-label": "Terminar este mandato",
-        title: "Terminar este mandato:  su registro se queda",
-        onClick: core.pressed(this, () => core.removeSaved(this)),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      })
-    )
-  }
 
   static savedIn = { place: "roles_de_la_org", collection: "mandatos" }
 }
 
 export class Aprobación extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1660, end: 1702 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2409, end: 2451 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "versión" es texto, guardado como "version"
-  static { this.declareProp("versión", { type: "text", storedAs: "version", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1706, end: 1752 } }) }
+  static { this.declareProp("versión", { type: "text", storedAs: "version", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2455, end: 2501 } }) }
   get versión() { return this.getProp("versión") }
   set versión(value) { this.setProp("versión", value) }
-
-  draw() {
-    return h("ui-stack", { class: "app", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.nombre),
-      h("ui-text", () => this.versión),
-      h("ui-button", {
-        class: "unapprove",
-        icon: "close",
-        size: "mini",
-        appearance: "transparent",
-        "aria-label": "Quitarla de la lista",
-        title: "Quitarla de la lista",
-        onClick: core.pressed(this, () => core.removeSaved(this)),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      })
-    )
-  }
 
   static savedIn = { place: "roles_de_la_org", collection: "aprobaciones" }
 }
@@ -161,31 +148,19 @@ export class Aprobación extends Thing {
 /** Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica. */
 export class Diseñador extends Thing {
   // su "persona" es texto, guardado como "person"
-  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1925, end: 1970 } }) }
+  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2674, end: 2719 } }) }
   get persona() { return this.getProp("persona") }
   set persona(value) { this.setProp("persona", value) }
 
   // su "espacio" es texto, guardado como "space"
-  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1974, end: 2018 } }) }
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2723, end: 2767 } }) }
   get espacio() { return this.getProp("espacio") }
   set espacio(value) { this.setProp("espacio", value) }
 
-  draw() {
-    return h("ui-stack", { class: "designer", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.persona),
-      h("ui-text", () => this.espacio),
-      h("ui-button", {
-        class: "undesign",
-        icon: "close",
-        size: "mini",
-        appearance: "transparent",
-        "aria-label": "Ya no lo diseña",
-        title: "Ya no lo diseña:  sus borradores se quedan, para un Manager",
-        onClick: core.pressed(this, () => core.removeSaved(this)),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      })
-    )
-  }
+  // su "nombre persona" es texto, guardado como "personName"
+  static { this.declareProp("nombrePersona", { type: "text", storedAs: "personName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2771, end: 2827 } }) }
+  get nombrePersona() { return this.getProp("nombrePersona") }
+  set nombrePersona(value) { this.setProp("nombrePersona", value) }
 
   static savedIn = { place: "roles_de_la_org", collection: "diseñadores" }
 }
@@ -193,76 +168,48 @@ export class Diseñador extends Thing {
 /** Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers". */
 export class Etapa extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2165, end: 2207 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2974, end: 3016 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "siguiente" es texto, guardado como "movesTo"
-  static { this.declareProp("siguiente", { type: "text", storedAs: "movesTo", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2211, end: 2259 } }) }
+  static { this.declareProp("siguiente", { type: "text", storedAs: "movesTo", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3020, end: 3068 } }) }
   get siguiente() { return this.getProp("siguiente") }
   set siguiente(value) { this.setProp("siguiente", value) }
 
   // su "quién mueve" es texto, guardado como "movedBy"
-  static { this.declareProp("quiénMueve", { type: "text", storedAs: "movedBy", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2263, end: 2313 } }) }
+  static { this.declareProp("quiénMueve", { type: "text", storedAs: "movedBy", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3072, end: 3122 } }) }
   get quiénMueve() { return this.getProp("quiénMueve") }
   set quiénMueve(value) { this.setProp("quiénMueve", value) }
-
-  draw() {
-    return h("ui-stack", { class: "stage", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", () => this.nombre),
-      h("ui-text", { color: "grey" }, () => this.siguiente),
-      h("ui-text", () => this.quiénMueve),
-      h("ui-button", {
-        class: "unstage",
-        icon: "close",
-        size: "mini",
-        appearance: "transparent",
-        "aria-label": "Quitar esta etapa",
-        title: "Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella",
-        onClick: core.pressed(this, () => core.removeSaved(this)),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      })
-    )
-  }
 
   static savedIn = { place: "roles_de_la_org", collection: "etapas" }
 }
 
 export class Cambio extends Thing {
   // su "cuándo" es texto, guardado como "at"
-  static { this.declareProp("cuándo", { type: "text", storedAs: "at", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2370, end: 2410 } }) }
+  static { this.declareProp("cuándo", { type: "text", storedAs: "at", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3179, end: 3219 } }) }
   get cuándo() { return this.getProp("cuándo") }
   set cuándo(value) { this.setProp("cuándo", value) }
 
   // su "quién" es texto, guardado como "who"
-  static { this.declareProp("quién", { type: "text", storedAs: "who", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2414, end: 2454 } }) }
+  static { this.declareProp("quién", { type: "text", storedAs: "who", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3223, end: 3263 } }) }
   get quién() { return this.getProp("quién") }
   set quién(value) { this.setProp("quién", value) }
 
   // su "hecho" es texto, guardado como "did"
-  static { this.declareProp("hecho", { type: "text", storedAs: "did", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2458, end: 2498 } }) }
+  static { this.declareProp("hecho", { type: "text", storedAs: "did", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3267, end: 3307 } }) }
   get hecho() { return this.getProp("hecho") }
   set hecho(value) { this.setProp("hecho", value) }
 
   // su "qué" es texto, guardado como "what"
-  static { this.declareProp("qué", { type: "text", storedAs: "what", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2502, end: 2541 } }) }
+  static { this.declareProp("qué", { type: "text", storedAs: "what", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3311, end: 3350 } }) }
   get qué() { return this.getProp("qué") }
   set qué(value) { this.setProp("qué", value) }
 
   // su "por qué" es texto, guardado como "why"
-  static { this.declareProp("porQué", { type: "text", storedAs: "why", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2545, end: 2587 } }) }
+  static { this.declareProp("porQué", { type: "text", storedAs: "why", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3354, end: 3396 } }) }
   get porQué() { return this.getProp("porQué") }
   set porQué(value) { this.setProp("porQué", value) }
-
-  draw() {
-    return h("ui-stack", { class: "change", direction: "horizontal", spacing: "md", align: "center", wrap: true },
-      h("ui-text", { color: "grey" }, () => this.cuándo),
-      h("ui-text", () => this.quién),
-      h("ui-text", () => this.hecho),
-      h("ui-text", () => this.qué),
-      h("ui-text", () => this.porQué)
-    )
-  }
 
   static savedIn = { place: "roles_de_la_org", collection: "cambios" }
 }
@@ -280,6 +227,8 @@ export const rolesDeLaOrg = core.place(new RolDeLaOrg(), {
   at: "/api/places/spaces/@rs/__admin/roles",
   checkedEvery: 30,
   collections: {
+    perfiles: { at: "org_profiles" },
+    funciones: { at: "org_roles" },
     miembros: { at: "members" },
     equipos: { at: "teams" },
     proyectos: { at: "projects" },
@@ -289,7 +238,7 @@ export const rolesDeLaOrg = core.place(new RolDeLaOrg(), {
     etapas: { at: "event_stages" },
     cambios: { at: "role_changes" }
   },
-  unclearNumbers: ",", firstReads: () => [[Miembro], [Equipo], [Proyecto], [Mandato], [Diseñador], [Aprobación], [Etapa], [Cambio]] })
+  unclearNumbers: ",", firstReads: () => [[Perfil], [Cambio, { sort: [{ field: "cuándo", descending: true }] }], [Etapa], [Aprobación], [Miembro, { sort: [{ field: "nombre" }] }], [Equipo, { sort: [{ field: "nombre" }] }], [Proyecto, { sort: [{ field: "nombre" }] }], [Diseñador], [Función], [Mandato]] })
 
 // -----------
 core.heading("Administración de la org")
@@ -298,14 +247,12 @@ core.heading("Administración de la org")
 //////////////////////////////
 // La página de administración de una org:  quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué
 // aplicaciones pueden instalar sus espacios, las etapas de sus eventos y el registro de cada cambio.
+// Una barra con quién ha iniciado sesión, las secciones a un lado, y una sección cada vez junto a ellas.
 // Dónde se guardan está en AdministracionDeLaOrg.api.es.spell, y solo su primera línea lo sabe.
 // Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que no puedes hacer dice por qué, y no cambia nada.
 
-core.heading("Una fila para cada uno:  qué es, y un botón para quitarlo")
-//## Una fila para cada uno:  qué es, y un botón para quitarlo
-
-core.heading("La página:  una sección para cada uno, con un formulario para agregar uno arriba")
-//## La página:  una sección para cada uno, con un formulario para agregar uno arriba
+core.heading("La página:  una barra arriba, las secciones al lado, y la elegida")
+//## La página:  una barra arriba, las secciones al lado, y la elegida
 
 export class AdministraciónDeLaOrg extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -385,172 +332,398 @@ export class AdministraciónDeLaOrg extends App {
     this.etapaNueva = new Etapa()
   }
 
+  // La sección elegida queda en la dirección de la página, y al recargar vuelve a ella
   draw() {
-    return h("ui-container", { class: "org-admin" },
-      h("ui-stack",
-        h("ui-header", { size: "large" }, "Administración de la org"),
-        h("ui-text", { color: "grey" },
-          "Quién está en la org, quién dirige qué, y cada cambio, con quién lo hizo."
+    return h("ui-stack", { class: "org-admin", spacing: "none" },
+      h("ui-toolbar", { class: "top-bar", "aria-label": "Administración de la org" },
+        () => core.drawRead(async () => await core.savedThings(Perfil, {}, "as drawn"), (org) => h("ui-text", { slot: "title", size: "large" }, "Administración de ", () => org.nombre)),
+        h("ui-stack", { slot: "right", direction: "horizontal" }, () => core.signInMenu())
+      ),
+      h("ui-tabs", {
+        class: "body",
+        parameter: "sección",
+        direction: "vertical",
+        appearance: "secondary",
+        "aria-label": "Secciones"
+      },
+        h("ui-tab", { label: "Personas", icon: "users", value: "personas" },
+          h("slot", { name: "sección_personas" }, () => this.drawSecciónPersonas())
         ),
-        h("ui-segment", { class: "people" },
-          h("ui-header", { size: "medium" }, "Personas"),
-          h("ui-form", { "prop:value": () => this.miembroNuevo },
-            h("ui-input", {
-              name: "persona",
-              placeholder: "ana@rs",
-              "aria-label": "Agrega a alguien, por su dirección",
-              fluid: true,
-              action: true
-            },
-              h("ui-button", {
-                class: "add",
-                slot: "action",
-                color: "primary",
-                disabled: () => this.miembroNuevo.persona === "",
-                onClick: core.pressed(this, () => this.agregarElMiembroNuevo()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Agregar")
-            )
-          ),
-          h("ui-stack", { class: "members", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Miembro, {}, "as drawn"), (miembro) => core.drawThing(miembro), {
-              waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando a la gente de la org"),
-              none: () => h("ui-text", { class: "none", color: "grey" }, "Nadie todavía."),
-              failed: () => h("ui-text", { color: "red" }, "No podemos leer a la gente de la org ahora mismo.")
-            })
-          )
+        h("ui-tab", { label: "Equipos y proyectos", icon: "sitemap", value: "equipos" },
+          h("slot", { name: "sección_equipos" }, () => this.drawSecciónEquipos())
         ),
-        h("ui-segment", { class: "teams" },
-          h("ui-header", { size: "medium" }, "Equipos y proyectos"),
-          h("ui-form", { class: "new-team", "prop:value": () => this.equipoNuevo },
-            h("ui-input", {
-              name: "nombre",
-              placeholder: "Equipo de eventos",
-              "aria-label": "Un equipo nuevo",
-              fluid: true,
-              action: true
-            },
-              h("ui-button", {
-                class: "add",
-                slot: "action",
-                color: "primary",
-                disabled: () => this.equipoNuevo.nombre === "",
-                onClick: core.pressed(this, () => this.agregarElEquipoNuevo()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Agregar equipo")
-            )
-          ),
-          h("ui-form", { class: "new-project", "prop:value": () => this.proyectoNuevo },
-            h("ui-stack", { direction: "horizontal" },
-              h("ui-input", { name: "nombre", placeholder: "2026 T4", "aria-label": "Un proyecto nuevo", fluid: true }),
-              h("ui-input", { name: "equipo", placeholder: "events_team", "aria-label": "Bajo el equipo" })
-            )
-          ),
-          h("ui-button", {
-            class: "add-project",
-            color: "primary",
-            disabled: () => this.proyectoNuevo.nombre === "",
-            onClick: core.pressed(this, () => this.agregarElProyectoNuevo()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Agregar proyecto"),
-          h("ui-header", { size: "small" }, "Equipos"),
-          h("ui-stack", { class: "teams", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Equipo, {}, "as drawn"), (equipo) => core.drawThing(equipo), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando los equipos") })
-          ),
-          h("ui-header", { size: "small" }, "Proyectos"),
-          h("ui-stack", { class: "projects", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Proyecto, {}, "as drawn"), (proyecto) => core.drawThing(proyecto), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando los proyectos") })
-          )
+        h("ui-tab", { label: "Quién dirige qué", icon: "user tie", value: "roles" },
+          h("slot", { name: "sección_roles" }, () => this.drawSecciónRoles())
         ),
-        h("ui-segment", { class: "roles" },
-          h("ui-header", { size: "medium" }, "Quién dirige qué"),
-          h("ui-form", { "prop:value": () => this.mandatoNuevo },
-            h("ui-stack", { direction: "horizontal", wrap: true },
-              h("ui-input", { name: "titular", placeholder: "bo@rs", "aria-label": "Quién:  una persona, o un equipo" }),
-              h("ui-input", { name: "rol", placeholder: "team-manager", "aria-label": "Rol" }),
-              h("ui-input", { name: "ámbito", placeholder: "events_team", "aria-label": "De" }),
-              h("ui-input", { name: "fin", placeholder: "2027-06-30", "aria-label": "Hasta" })
-            )
-          ),
-          h("ui-button", {
-            class: "give",
-            color: "primary",
-            disabled: () => this.mandatoNuevo.titular === "",
-            onClick: core.pressed(this, () => this.darElMandatoNuevo()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Nombrarle"),
-          h("ui-stack", { class: "terms", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Mandato, {}, "as drawn"), (mandato) => core.drawThing(mandato), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando quién dirige qué") })
-          )
+        h("ui-tab", { label: "Quién diseña qué", icon: "paint brush", value: "diseñadores" },
+          h("slot", { name: "sección_diseñadores" }, () => this.drawSecciónDiseñadores())
         ),
-        h("ui-segment", { class: "designers" },
-          h("ui-header", { size: "medium" }, "Quién diseña qué"),
-          h("ui-form", { "prop:value": () => this.diseñadorNuevo },
-            h("ui-stack", { direction: "horizontal" },
-              h("ui-input", { name: "persona", placeholder: "ana@rs", "aria-label": "Quién" }),
-              h("ui-input", { name: "espacio", placeholder: "picnic@rs", "aria-label": "Qué espacio" })
-            )
-          ),
-          h("ui-button", {
-            class: "design",
-            color: "primary",
-            disabled: () => this.diseñadorNuevo.persona === "",
-            onClick: core.pressed(this, () => this.agregarElDiseñadorNuevo()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Puede diseñarlo"),
-          h("ui-stack", { class: "designers", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Diseñador, {}, "as drawn"), (diseñador) => core.drawThing(diseñador), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando quién diseña qué") })
-          )
+        h("ui-tab", { label: "Aplicaciones aprobadas", icon: "check circle outline", value: "aplicaciones" },
+          h("slot", { name: "sección_aplicaciones" }, () => this.drawSecciónAplicaciones())
         ),
-        h("ui-segment", { class: "apps" },
-          h("ui-header", { size: "medium" }, "Aplicaciones aprobadas"),
-          h("ui-form", { "prop:value": () => this.aprobaciónNueva },
-            h("ui-stack", { direction: "horizontal" },
-              h("ui-input", { name: "nombre", placeholder: "@spell/sign-up-sheet", "aria-label": "Aplicación", fluid: true }),
-              h("ui-input", { name: "versión", placeholder: "1.0.0", "aria-label": "Versión" })
-            )
-          ),
-          h("ui-button", {
-            class: "approve",
-            color: "primary",
-            disabled: () => this.aprobaciónNueva.nombre === "",
-            onClick: core.pressed(this, () => this.aprobarLaAprobaciónNueva()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Aprobar"),
-          h("ui-stack", { class: "approved", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Aprobación, {}, "as drawn"), (aprobación) => core.drawThing(aprobación), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando las aplicaciones aprobadas") })
-          )
+        h("ui-tab", { label: "Etapas de los eventos", icon: "stream", value: "etapas" },
+          h("slot", { name: "sección_etapas" }, () => this.drawSecciónEtapas())
         ),
-        h("ui-segment", { class: "stages" },
-          h("ui-header", { size: "medium" }, "Etapas de los eventos"),
-          h("ui-form", { "prop:value": () => this.etapaNueva },
-            h("ui-stack", { direction: "horizontal" },
-              h("ui-input", { name: "nombre", placeholder: "Ensayo", "aria-label": "Etapa" }),
-              h("ui-input", { name: "siguiente", placeholder: "open", "aria-label": "Lleva a" }),
-              h("ui-input", { name: "quién mueve", placeholder: "its organizers", "aria-label": "La mueve" })
-            )
-          ),
-          h("ui-button", {
-            class: "stage-it",
-            color: "primary",
-            disabled: () => this.etapaNueva.nombre === "",
-            onClick: core.pressed(this, () => this.agregarLaEtapaNueva()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Agregar o cambiar"),
-          h("ui-stack", { class: "stages", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Etapa, {}, "as drawn"), (etapa) => core.drawThing(etapa), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando las etapas de los eventos") })
-          )
-        ),
-        h("ui-segment", { class: "log" },
-          h("ui-header", { size: "medium" }, "Registro"),
-          h("ui-stack", { class: "changes", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Cambio, {}, "as drawn"), (cambio) => core.drawThing(cambio), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Leyendo el registro") })
-          )
+        h("ui-tab", { label: "Registro", icon: "history", value: "registro" },
+          h("slot", { name: "sección_registro" }, () => this.drawSecciónRegistro())
         )
       )
     )
   }
+
+  drawSecciónPersonas() {
+    return h("ui-stack", { class: "people", part: "sección_personas" },
+      h("ui-header", { size: "medium" }, "Personas"),
+      h("ui-form", { class: "add", "prop:value": () => this.miembroNuevo },
+        h("ui-input", {
+          name: "persona",
+          placeholder: "Agrega a alguien, por su dirección:  ana@rs",
+          "aria-label": "Agrega a alguien, por su dirección",
+          fluid: true,
+          action: true
+        },
+          h("ui-button", {
+            class: "add",
+            slot: "action",
+            color: "primary",
+            title: "Agregarle a la org",
+            disabled: () => this.miembroNuevo.persona === "",
+            onClick: core.pressed(this, () => this.agregarElMiembroNuevo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Agregar")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Miembro, { sort: [{ field: "nombre" }] }, "as drawn"), (miembro) => [
+        h("es-celda", { "data-column": "Nombre" }, () => miembro.nombre),
+        h("es-celda", { "data-column": "Dirección" }, h("ui-text", { color: "grey" }, () => miembro.persona)),
+        h("es-celda", { "data-column": "Rol" }, h("ui-label", { size: "small" }, () => miembro.cargo)),
+        h("es-celda", { "data-column": "" },
+          h("ui-button", {
+            class: "remove",
+            icon: "close",
+            size: "mini",
+            appearance: "transparent",
+            "aria-label": "Sacarle de la org",
+            title: "Sacarle de la org",
+            onClick: core.pressed(this, () => core.removeSaved(miembro)),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          })
+        )
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_personas" },
+          "Buscando a la gente de la org"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_personas" },
+          h("es-fila")
+        ),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_personas" }, "Nadie todavía."),
+        failed: () => h("ui-text", { color: "red", part: "sección_personas" },
+          "No podemos leer a la gente de la org ahora mismo."
+        )
+      })
+    )
+  }
+
+  drawSecciónEquipos() {
+    return h("ui-stack", { class: "teams", part: "sección_equipos" },
+      h("ui-header", { size: "medium" }, "Equipos"),
+      h("ui-form", { class: "add new-team", "prop:value": () => this.equipoNuevo },
+        h("ui-input", {
+          name: "nombre",
+          placeholder: "Un equipo nuevo:  Equipo de eventos",
+          "aria-label": "Un equipo nuevo",
+          fluid: true,
+          action: true
+        },
+          h("ui-button", {
+            class: "add",
+            slot: "action",
+            color: "primary",
+            title: "Agregar este equipo",
+            disabled: () => this.equipoNuevo.nombre === "",
+            onClick: core.pressed(this, () => this.agregarElEquipoNuevo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Agregar equipo")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Equipo, { sort: [{ field: "nombre" }] }, "as drawn"), (equipo) => [
+        h("es-celda", { "data-column": "Nombre" }, () => equipo.nombre),
+        h("es-celda", { "data-column": "Espacio" }, h("ui-text", { color: "grey" }, () => equipo.espacio))
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_equipos" },
+          "Buscando los equipos"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_equipos" },
+          h("es-fila")
+        ),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_equipos" }, "Ningún equipo todavía.")
+      }),
+      h("ui-header", { size: "medium" }, "Proyectos"),
+      h("ui-form", { class: "add new-project", "prop:value": () => this.proyectoNuevo },
+        h("ui-stack", { class: "row", direction: "horizontal", align: "center", wrap: true },
+          h("ui-input", {
+            name: "nombre",
+            placeholder: "Un proyecto nuevo:  2026 T4",
+            "aria-label": "Un proyecto nuevo",
+            fluid: true
+          }),
+          h("ui-select", { name: "equipo", placeholder: "Bajo la org misma", "aria-label": "Bajo el equipo" },
+            () => core.drawRead(async () => await core.savedThings(Equipo, { sort: [{ field: "nombre" }] }, "as drawn"), (equipo) => h("ui-item", { value: () => equipo.id, part: "sección_equipos" }, () => equipo.nombre))
+          ),
+          h("ui-button", {
+            class: "add-project",
+            color: "primary",
+            title: "Agregar este proyecto",
+            disabled: () => this.proyectoNuevo.nombre === "",
+            onClick: core.pressed(this, () => this.agregarElProyectoNuevo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Agregar proyecto")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Proyecto, { sort: [{ field: "nombre" }] }, "as drawn"), (proyecto) => [
+        h("es-celda", { "data-column": "Nombre" }, () => proyecto.nombre),
+        h("es-celda", { "data-column": "Bajo" }, () => proyecto.equipo),
+        h("es-celda", { "data-column": "Espacio" }, h("ui-text", { color: "grey" }, () => proyecto.espacio))
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_equipos" },
+          "Buscando los proyectos"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_equipos" },
+          h("es-fila")
+        ),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_equipos" }, "Ningún proyecto todavía.")
+      })
+    )
+  }
+
+  drawSecciónRoles() {
+    return h("ui-stack", { class: "roles", part: "sección_roles" },
+      h("ui-header", { size: "medium" }, "Quién dirige qué"),
+      h("ui-form", { class: "add", "prop:value": () => this.mandatoNuevo },
+        h("ui-stack", { class: "row", direction: "horizontal", align: "center", wrap: true },
+          h("ui-select", { name: "titular", placeholder: "Quién", "aria-label": "Quién:  una persona, o un equipo" },
+            () => core.drawRead(async () => await core.savedThings(Miembro, { sort: [{ field: "nombre" }] }, "as drawn"), (miembro) => h("ui-item", { value: () => miembro.persona, part: "sección_roles" }, () => miembro.nombre)),
+            () => core.drawRead(async () => await core.savedThings(Equipo, { sort: [{ field: "nombre" }] }, "as drawn"), (equipo) => h("ui-item", { value: () => equipo.id, part: "sección_roles" }, () => equipo.nombre))
+          ),
+          h("ui-select", { name: "rol", placeholder: "Rol", "aria-label": "Rol" },
+            () => core.drawRead(async () => await core.savedThings(Función, {}, "as drawn"), (función) => h("ui-item", { value: () => función.id, part: "sección_roles" }, () => función.nombre))
+          ),
+          h("ui-select", { name: "ámbito", placeholder: "Toda la org", "aria-label": "De" },
+            () => core.drawRead(async () => await core.savedThings(Equipo, { sort: [{ field: "nombre" }] }, "as drawn"), (equipo) => h("ui-item", { value: () => equipo.id, part: "sección_roles" }, () => equipo.nombre)),
+            () => core.drawRead(async () => await core.savedThings(Proyecto, { sort: [{ field: "nombre" }] }, "as drawn"), (proyecto) => h("ui-item", { value: () => proyecto.id, part: "sección_roles" }, () => proyecto.nombre))
+          ),
+          h("ui-input", { name: "fin", type: "date", "aria-label": "Hasta" }),
+          h("ui-button", {
+            class: "give",
+            color: "primary",
+            title: "Darle este rol",
+            disabled: () => this.mandatoNuevo.titular === "",
+            onClick: core.pressed(this, () => this.darElMandatoNuevo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Nombrarle")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Mandato, {}, "as drawn"), (mandato) => [
+        h("es-celda", { "data-column": "Quién", title: () => mandato.titular }, () => mandato.nombreTitular),
+        h("es-celda", { "data-column": "Rol" }, h("ui-label", { size: "small" }, () => mandato.cargo)),
+        h("es-celda", { "data-column": "De" }, () => mandato.nombreÁmbito),
+        h("es-celda", { "data-column": "Desde" }, () => mandato.inicio),
+        h("es-celda", { "data-column": "Hasta" }, () => mandato.fin),
+        h("es-celda", { "data-column": "" },
+          h("ui-button", {
+            class: "end",
+            icon: "close",
+            size: "mini",
+            appearance: "transparent",
+            "aria-label": "Terminar este mandato",
+            title: "Terminar este mandato:  su registro se queda",
+            onClick: core.pressed(this, () => core.removeSaved(mandato)),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          })
+        )
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_roles" },
+          "Buscando quién dirige qué"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_roles" },
+          h("es-fila")
+        ),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_roles" }, "Nadie nombrado todavía.")
+      })
+    )
+  }
+
+  drawSecciónDiseñadores() {
+    return h("ui-stack", { class: "designers", part: "sección_diseñadores" },
+      h("ui-header", { size: "medium" }, "Quién diseña qué"),
+      h("ui-text", { color: "grey" },
+        "Cambian las páginas de un espacio, sea cual sea su rol allí;  sus Managers las publican."
+      ),
+      h("ui-form", { class: "add", "prop:value": () => this.diseñadorNuevo },
+        h("ui-stack", { class: "row", direction: "horizontal", align: "center", wrap: true },
+          h("ui-select", { name: "persona", placeholder: "Quién", "aria-label": "Quién" },
+            () => core.drawRead(async () => await core.savedThings(Miembro, { sort: [{ field: "nombre" }] }, "as drawn"), (miembro) => h("ui-item", { value: () => miembro.persona, part: "sección_diseñadores" }, () => miembro.nombre))
+          ),
+          h("ui-select", { name: "espacio", placeholder: "Qué espacio", "aria-label": "Qué espacio" },
+            () => core.drawRead(async () => await core.savedThings(Perfil, {}, "as drawn"), (org) => h("ui-item", { value: () => org.espacio, part: "sección_diseñadores" }, () => org.nombre)),
+            () => core.drawRead(async () => await core.savedThings(Equipo, { sort: [{ field: "nombre" }] }, "as drawn"), (equipo) => h("ui-item", { value: () => equipo.espacio, part: "sección_diseñadores" }, () => equipo.nombre)),
+            () => core.drawRead(async () => await core.savedThings(Proyecto, { sort: [{ field: "nombre" }] }, "as drawn"), (proyecto) => h("ui-item", { value: () => proyecto.espacio, part: "sección_diseñadores" }, () => proyecto.nombre))
+          ),
+          h("ui-button", {
+            class: "design",
+            color: "primary",
+            title: "Dejarle cambiar las páginas de este espacio",
+            disabled: () => this.diseñadorNuevo.persona === "",
+            onClick: core.pressed(this, () => this.agregarElDiseñadorNuevo()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Puede diseñarlo")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Diseñador, {}, "as drawn"), (diseñador) => [
+        h("es-celda", { "data-column": "Quién", title: () => diseñador.persona },
+          () => diseñador.nombrePersona
+        ),
+        h("es-celda", { "data-column": "Diseña" }, h("ui-text", { color: "grey" }, () => diseñador.espacio)),
+        h("es-celda", { "data-column": "" },
+          h("ui-button", {
+            class: "undesign",
+            icon: "close",
+            size: "mini",
+            appearance: "transparent",
+            "aria-label": "Ya no lo diseña",
+            title: "Ya no lo diseña:  sus borradores se quedan, para un Manager",
+            onClick: core.pressed(this, () => core.removeSaved(diseñador)),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          })
+        )
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_diseñadores" },
+          "Buscando quién diseña qué"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_diseñadores" },
+          h("es-fila")
+        ),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_diseñadores" },
+          "Solo los Managers de cada espacio, por ahora."
+        )
+      })
+    )
+  }
+
+  drawSecciónAplicaciones() {
+    return h("ui-stack", { class: "apps", part: "sección_aplicaciones" },
+      h("ui-header", { size: "medium" }, "Aplicaciones aprobadas"),
+      h("ui-form", { class: "add", "prop:value": () => this.aprobaciónNueva },
+        h("ui-stack", { class: "row", direction: "horizontal", align: "center", wrap: true },
+          h("ui-input", { name: "nombre", placeholder: "@spell/sign-up-sheet", "aria-label": "Aplicación", fluid: true }),
+          h("ui-input", { name: "versión", placeholder: "1.0.0", "aria-label": "Versión" }),
+          h("ui-button", {
+            class: "approve",
+            color: "primary",
+            title: "Dejar que los espacios de la org la instalen",
+            disabled: () => this.aprobaciónNueva.nombre === "",
+            onClick: core.pressed(this, () => this.aprobarLaAprobaciónNueva()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Aprobar")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Aprobación, {}, "as drawn"), (aprobación) => [
+        h("es-celda", { "data-column": "Aplicación" }, () => aprobación.nombre),
+        h("es-celda", { "data-column": "Versión" }, () => aprobación.versión),
+        h("es-celda", { "data-column": "" },
+          h("ui-button", {
+            class: "unapprove",
+            icon: "close",
+            size: "mini",
+            appearance: "transparent",
+            "aria-label": "Quitarla de la lista",
+            title: "Quitarla de la lista",
+            onClick: core.pressed(this, () => core.removeSaved(aprobación)),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          })
+        )
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_aplicaciones" },
+          "Buscando las aplicaciones aprobadas"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_aplicaciones" },
+          h("es-fila")
+        ),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_aplicaciones" },
+          "Ninguna aplicación aprobada todavía."
+        )
+      })
+    )
+  }
+
+  drawSecciónEtapas() {
+    return h("ui-stack", { class: "stages", part: "sección_etapas" },
+      h("ui-header", { size: "medium" }, "Etapas de los eventos"),
+      h("ui-form", { class: "add", "prop:value": () => this.etapaNueva },
+        h("ui-stack", { class: "row", direction: "horizontal", align: "center", wrap: true },
+          h("ui-input", { name: "nombre", placeholder: "Una etapa:  Ensayo", "aria-label": "Etapa", fluid: true }),
+          h("ui-select", { name: "siguiente", placeholder: "Lleva a", "aria-label": "Lleva a" },
+            () => core.drawRead(async () => await core.savedThings(Etapa, {}, "as drawn"), (etapa) => h("ui-item", { value: () => etapa.id, part: "sección_etapas" }, () => etapa.nombre))
+          ),
+          h("ui-select", { name: "quién mueve", placeholder: "La mueve", "aria-label": "La mueve" },
+            h("ui-item", { value: "the team" }, "El equipo"),
+            h("ui-item", { value: "its organizers" }, "Sus organizadores")
+          ),
+          h("ui-button", {
+            class: "stage-it",
+            color: "primary",
+            title: "Agregar esta etapa, o cambiar la de ese nombre",
+            disabled: () => this.etapaNueva.nombre === "",
+            onClick: core.pressed(this, () => this.agregarLaEtapaNueva()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          }, "Agregar o cambiar")
+        )
+      ),
+      () => core.drawRead(async () => await core.savedThings(Etapa, {}, "as drawn"), (etapa) => [
+        h("es-celda", { "data-column": "Etapa" }, () => etapa.nombre),
+        h("es-celda", { "data-column": "Lleva a" }, h("ui-text", { color: "grey" }, () => etapa.siguiente)),
+        h("es-celda", { "data-column": "La mueve" }, () => etapa.quiénMueve),
+        h("es-celda", { "data-column": "" },
+          h("ui-button", {
+            class: "unstage",
+            icon: "close",
+            size: "mini",
+            appearance: "transparent",
+            "aria-label": "Quitar esta etapa",
+            title: "Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella",
+            onClick: core.pressed(this, () => core.removeSaved(etapa)),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          })
+        )
+      ], { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_etapas" },
+        "Buscando las etapas de los eventos"
+      ), items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_etapas" },
+        h("es-fila")
+      ) })
+    )
+  }
+
+  drawSecciónRegistro() {
+    return h("ui-stack", { class: "log", part: "sección_registro" },
+      h("ui-header", { size: "medium" }, "Registro"),
+      () => core.drawRead(async () => await core.savedThings(Cambio, { sort: [{ field: "cuándo", descending: true }] }, "as drawn"), (cambio) => [
+        h("es-celda", { "data-column": "Cuándo" }, h("ui-text", { color: "grey" }, () => cambio.cuándo)),
+        h("es-celda", { "data-column": "Quién" }, () => cambio.quién),
+        h("es-celda", { "data-column": "Hizo" }, h("ui-label", { size: "small" }, () => cambio.hecho)),
+        h("es-celda", { "data-column": "Qué" }, () => cambio.qué),
+        h("es-celda", { "data-column": "Por qué" }, () => cambio.porQué)
+      ], {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_registro" },
+          "Leyendo el registro"
+        ),
+        items: () => h("es-tabla", { appearance: "very-basic", unstackable: true, part: "sección_registro" }, h("es-fila")),
+        none: () => h("ui-text", { class: "none", color: "grey", part: "sección_registro" }, "Nada ha cambiado todavía.")
+      })
+    )
+  }
 }
 export const administraciónDeLaOrg = new AdministraciónDeLaOrg()
+// -----------
+core.installStyles(undefined, `/* The page takes the theme's colours and type, light or dark, as its controls do. */¬.org-admin {¬  min-height: 100%;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬/* The section showing stands a little apart from the list of them. */¬.org-admin ui-tab {¬  margin-inline-start: 1rem;¬}¬¬/* The toolbar:  a rule below it, its title over the sections' labels. */¬.org-admin .top-bar {¬  padding-inline: 15px 0;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  margin-block-end: 0.75rem;¬}¬¬/* Tables scroll inside themselves on a narrow page, rather than breaking a date in two. */¬.org-admin es-fila > es-celda {¬  color: CanvasText;¬  white-space: nowrap;¬  min-inline-size: max-content;¬}¬¬/* An add form:  its button keeps its size as the row wraps. */¬.org-admin .add .row > ui-button {¬  flex: none;¬}¬¬/* A row's take-away button stays quiet until the row is pointed at, or the button has the keyboard. */¬.org-admin es-tabla ui-button[icon="close"] {¬  opacity: 0;¬}¬.org-admin es-tabla es-fila:hover ui-button[icon="close"],¬.org-admin es-tabla ui-button[icon="close"]:focus-within {¬  opacity: 1;¬}¬¬/* A phone has nothing to point with. */¬@media (hover: none) {¬  .org-admin es-tabla ui-button[icon="close"] {¬    opacity: 1;¬  }¬}¬¬/* Too narrow for the sections to sit beside what they show:  they go above it. */¬@media (max-width: 640px) {¬  .org-admin ui-tab {¬    min-width: 100%;¬    margin-inline-start: 0;¬    margin-block-start: 0.75rem;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) administraciónDeLaOrg.start()

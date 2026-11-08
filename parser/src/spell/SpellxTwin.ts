@@ -178,7 +178,8 @@ export class SpellxTwin {
    * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
    */
   private template(): SpellxTwinLine {
-    const regrouped = this.block && (SpellxTwin.withGroupsOpened(this.block) ?? SpellxTwin.withStoriesAsBlocks(this.block))
+    const regrouped =
+      this.block && (SpellxTwin.withGroupsOpened(this.block) ?? SpellxTwin.withStoriesAsBlocks(this.block))
     if (regrouped)
       return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
@@ -555,7 +556,11 @@ export class SpellxTwin {
     for (let index = 0; index < items.length; index++) {
       const item = items[index]!
       const head = item instanceof P.LineToken ? item.tokens[0] : undefined
-      if (!(head instanceof SP.SpellxProseToken) || head.note !== "stories" || (item as P.LineToken).tokens.length !== 1) {
+      if (
+        !(head instanceof SP.SpellxProseToken) ||
+        head.note !== "stories" ||
+        (item as P.LineToken).tokens.length !== 1
+      ) {
         out.push(item)
         continue
       }

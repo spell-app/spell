@@ -11,7 +11,7 @@ import { SRV } from "spell/server"
 import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
 import { pageServerSettings } from "spell/server/page/settings"
-import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -81,8 +81,8 @@ const appRoutes: RouteModule = {
   setup({ router, guard, web, root, info, live, addPageConfig, onListening, onStop }) {
     // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
     // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
-    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go to the local catcher until P18's sender
-    const mailer = new MailCatcher({ folder: join(environment.signInDir, "mail") })
+    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go through it
+    const mailer = mailerFor({ folder: join(environment.signInDir, "mail"), ...environment.mail })
     const folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") }),
       mailer,

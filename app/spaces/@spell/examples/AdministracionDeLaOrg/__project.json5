@@ -9,6 +9,10 @@
     {
       "path": "/AdministracionDeLaOrg.es.spellml",
       "active": true
+    },
+    {
+      "path": "/AdministracionDeLaOrg.css",
+      "active": true
     }
   ]
 }

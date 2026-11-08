@@ -40,8 +40,8 @@ export class AtProtoIdentity implements AtProtoIdentities {
   private readonly addressNow: () => string
   /** What turns a handle into an account. */
   private readonly handleResolver: string
-  /** The library's client, once something's asked for it. */
-  private client: Promise<ServerClient> | undefined
+  /** The library's client for each address, once something's asked for it:  a host knows a client by its address. */
+  private readonly clients = new Map<string, Promise<ServerClient>>()
 
   constructor({ address, handleResolver = DEFAULT_HANDLE_RESOLVER }: AtProtoIdentityProps) {
     this.addressNow = typeof address === "string" ? () => address : address
@@ -49,14 +49,14 @@ export class AtProtoIdentity implements AtProtoIdentities {
   }
 
   /** See `AtProtoIdentities`. */
-  async start(who: string, state: string): Promise<string> {
-    const client = await this.clientNow()
+  async start(who: string, state: string, at?: string): Promise<string> {
+    const client = await this.clientAt(at)
     return `${await client.authorize(who, { scope: IDENTITY_SCOPE, state })}`
   }
 
   /** See `AtProtoIdentities`. */
-  async finish(params: URLSearchParams): Promise<{ did: string; handle?: string; state: string }> {
-    const client = await this.clientNow()
+  async finish(params: URLSearchParams, at?: string): Promise<{ did: string; handle?: string; state: string }> {
+    const client = await this.clientAt(at)
     const { session, state } = await client.callback(params)
     const { did } = session
     // nothing kept that could write:  the host's told, and it's forgotten here
@@ -72,48 +72,33 @@ export class AtProtoIdentity implements AtProtoIdentities {
   }
 
   /** What goes at `ATPROTO_CLIENT_FILE` on an `https` address:  how a host knows who's asking.  `undefined` locally. */
-  clientFile(): object | undefined {
-    return isLocal(this.address) ? undefined : this.metadata()
+  clientFile(at?: string): object | undefined {
+    const address = this.addressFor(at)
+    return isLocal(address) ? undefined : metadataFor(address)
   }
 
-  /** Where people reach this server:  the address its host sends them back to starts with it. */
-  private get address(): string {
-    return withLoopbackHost(this.addressNow().replace(/\/+$/, ""))
+  /** The address its host sends people back to:  `at`, else where people reach this server. */
+  private addressFor(at: string | undefined): string {
+    return withLoopbackHost((at ?? this.addressNow()).replace(/\/+$/, ""))
   }
 
-  /** Where the browser comes back to. */
-  private get backAddress(): string {
-    return `${this.address}${ATPROTO_BACK_PAGE}`
+  /** The library's client for address `at`:  loads the library the first time.  - throws if it can't be loaded */
+  private clientAt(at: string | undefined): Promise<ServerClient> {
+    const address = this.addressFor(at)
+    const known = this.clients.get(address)
+    if (known) return known
+    const client = this.makeClient(address)
+    this.clients.set(address, client)
+    return client
   }
 
-  /** Who the server is, to a host. */
-  private metadata() {
-    return {
-      client_id: `${this.address}${ATPROTO_CLIENT_FILE}`,
-      client_name: "Spell",
-      client_uri: this.address,
-      application_type: "web" as const,
-      grant_types: ["authorization_code"] as ["authorization_code"],
-      response_types: ["code"] as ["code"],
-      redirect_uris: [this.backAddress] as [string],
-      scope: IDENTITY_SCOPE,
-      token_endpoint_auth_method: "none" as const,
-      dpop_bound_access_tokens: true
-    }
-  }
-
-  /** The library's client:  loads the library the first time.  - throws if it can't be loaded */
-  private clientNow(): Promise<ServerClient> {
-    return (this.client ??= this.makeClient())
-  }
-
-  /** Load the library, and make its client. */
-  private async makeClient(): Promise<ServerClient> {
+  /** Load the library, and make its client for `address`. */
+  private async makeClient(address: string): Promise<ServerClient> {
     const { NodeOAuthClient, buildAtprotoLoopbackClientMetadata, requestLocalLock } =
       await import("@atproto/oauth-client-node")
-    const clientMetadata = isLocal(this.address)
-      ? buildAtprotoLoopbackClientMetadata({ scope: IDENTITY_SCOPE, redirect_uris: [this.backAddress] })
-      : this.metadata()
+    const clientMetadata = isLocal(address)
+      ? buildAtprotoLoopbackClientMetadata({ scope: IDENTITY_SCOPE, redirect_uris: [backAddressOf(address)] })
+      : metadataFor(address)
     return new NodeOAuthClient({
       clientMetadata,
       handleResolver: this.handleResolver,
@@ -155,6 +140,27 @@ class PendingStore<T> {
 
   async del(key: string): Promise<void> {
     this.kept.delete(key)
+  }
+}
+
+/** Where the browser comes back to, at `address`. */
+function backAddressOf(address: string): string {
+  return `${address}${ATPROTO_BACK_PAGE}`
+}
+
+/** Who the server at `address` is, to a host. */
+function metadataFor(address: string) {
+  return {
+    client_id: `${address}${ATPROTO_CLIENT_FILE}`,
+    client_name: "Spell",
+    client_uri: address,
+    application_type: "web" as const,
+    grant_types: ["authorization_code"] as ["authorization_code"],
+    response_types: ["code"] as ["code"],
+    redirect_uris: [backAddressOf(address)] as [string],
+    scope: IDENTITY_SCOPE,
+    token_endpoint_auth_method: "none" as const,
+    dpop_bound_access_tokens: true
   }
 }
 

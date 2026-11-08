@@ -1649,14 +1649,14 @@
 
   /* Light DOM:  rows span every column, as subgrids;  cells are its items. */
   /* `container: none`:  the grid's sheet makes a row a size container, and a contained box can't be a subgrid */
-  .ui.table:state(rows) > ui-row {
+  .ui.table:state(rows) > :is(ui-row, es-fila) {
     container: none;
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
     --_table-mark-shadow: 0 0 transparent;
   }
-  .ui.table:state(rows) > ui-row > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     --ui-color: initial;
     --ui-color-text: initial;
     --ui-color-header: initial;
@@ -1676,13 +1676,13 @@
       background var(--_ui-table-duration) var(--ui-ease),
       color var(--_ui-table-duration) var(--ui-ease);
   }
-  .ui.table:state(rows) > ui-row:first-child > ui-cell,
-  .ui.table:state(rows) > ui-row:state(header) + ui-row > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila):first-child > :is(ui-cell, es-celda),
+  .ui.table:state(rows) > :is(ui-row, es-fila):state(header) + ui-row > :is(ui-cell, es-celda) {
     border-block-start: none;
   }
 
   /* Header row:  the column headers. */
-  .ui.table:state(rows) > ui-row:state(header) > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda) {
     padding-block: var(--_ui-table-header-padding-block);
     border-block-end: var(--_ui-table-header-border);
     background: var(--_ui-table-header-background);
@@ -1691,20 +1691,20 @@
     /* a column is never narrower than its heading's longest word:  "Temperature" ran into "Rain" at phone width */
     min-inline-size: min-content;
   }
-  .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:first-child {
+  .ui.table:state(rows):not(:state(captioned)) > :is(ui-row, es-fila):state(header):first-child > :is(ui-cell, es-celda):first-child {
     border-start-start-radius: var(--_ui-table-radius);
   }
-  .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:last-child {
+  .ui.table:state(rows):not(:state(captioned)) > :is(ui-row, es-fila):state(header):first-child > :is(ui-cell, es-celda):last-child {
     border-start-end-radius: var(--_ui-table-radius);
   }
 
   /* A header cell in a body row:  its row's name. */
-  .ui.table:state(rows) > ui-row:not(:state(header)) > ui-cell:state(header) {
+  .ui.table:state(rows) > :is(ui-row, es-fila):not(:state(header)) > :is(ui-cell, es-celda):state(header) {
     font-weight: var(--ui-font-weight-bold);
   }
 
   /* Footer row */
-  .ui.table:state(rows) > ui-row:state(footer) > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila):state(footer) > :is(ui-cell, es-celda) {
     border-block-start: var(--_ui-table-footer-border);
     background: var(--_ui-table-footer-background);
     color: var(--_ui-table-footer-color);
@@ -1713,86 +1713,86 @@
 
 @layer ui.components.table.variations {
   /* Celled */
-  .ui.celled.table:state(rows) > ui-row > ui-cell + ui-cell {
+  .ui.celled.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) + ui-cell {
     border-inline-start: var(--_ui-table-cell-border);
   }
 
   /* Striped:  every other body row. */
-  .ui.striped.table:state(rows) > ui-row:nth-child(2n of :not(:state(header), :state(footer))) {
+  .ui.striped.table:state(rows) > :is(ui-row, es-fila):nth-child(2n of :not(:state(header), :state(footer))) {
     background-color: var(--_ui-table-striped-background);
   }
-  .ui.inverted.striped.table:state(rows) > ui-row:nth-child(2n of :not(:state(header), :state(footer))) {
+  .ui.inverted.striped.table:state(rows) > :is(ui-row, es-fila):nth-child(2n of :not(:state(header), :state(footer))) {
     background-color: var(--_ui-table-inverted-striped-background);
   }
 
   /* Basic */
-  .ui.basic.table:state(rows) > ui-row:state(header) > ui-cell {
+  .ui.basic.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda) {
     background: transparent;
   }
 
   /* Very basic:  no padding at the edges. */
-  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > ui-row > ui-cell:first-child {
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):first-child {
     padding-inline-start: 0;
   }
-  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > ui-row > ui-cell:last-child {
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):last-child {
     padding-inline-end: 0;
   }
 
   /* Padding */
-  .ui.padded.table:state(rows) > ui-row > ui-cell {
+  .ui.padded.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-padded);
   }
-  .ui[class*="very padded"].table:state(rows) > ui-row > ui-cell {
+  .ui[class*="very padded"].table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-very-padded);
   }
-  .ui.compact.table:state(rows) > ui-row > ui-cell {
+  .ui.compact.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-compact-padding-block) var(--_ui-table-compact-padding-inline);
   }
-  .ui[class*="very compact"].table:state(rows) > ui-row > ui-cell {
+  .ui[class*="very compact"].table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-very-compact-padding-block) var(--_ui-table-very-compact-padding-inline);
   }
 
   /* Single line */
-  .ui[class*="single line"].table:state(rows) > ui-row > ui-cell {
+  .ui[class*="single line"].table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     white-space: nowrap;
   }
 }
 
 @layer ui.components.table.states {
   /* Selectable:  body rows light up on hover. */
-  .ui.selectable.table:state(rows) > ui-row:not(:state(header), :state(footer)):hover {
+  .ui.selectable.table:state(rows) > :is(ui-row, es-fila):not(:state(header), :state(footer)):hover {
     background: var(--_ui-table-selectable-background);
     color: var(--_ui-table-selectable-color);
   }
-  .ui.inverted.selectable.table:state(rows) > ui-row:not(:state(header), :state(footer)):hover {
+  .ui.inverted.selectable.table:state(rows) > :is(ui-row, es-fila):not(:state(header), :state(footer)):hover {
     background: var(--_ui-table-inverted-selectable-background);
   }
 
   /* Sortable:  a header cell is a control. */
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]) {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda):not([data-sortable="false"]) {
     cursor: var(--ui-control-cursor);
     user-select: none;
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]):hover {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda):not([data-sortable="false"]):hover {
     background: var(--_ui-table-sortable-hover-background);
     color: var(--_ui-table-sortable-hover-color);
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort] {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort] {
     background: var(--_ui-table-sortable-active-background);
     color: var(--_ui-table-sortable-active-color);
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[tabindex]:focus-visible {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[tabindex]:focus-visible {
     outline: var(--ui-focus-width) solid var(--ui-focus-color);
     outline-offset: calc(-1 * var(--ui-focus-width));
   }
   /* The direction caret, drawn only on the sorted header:  the native table's. */
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort="ascending"] {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort="ascending"] {
     --_table-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 2l4 6H1z'/%3E%3C/svg%3E");
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort="descending"] {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort="descending"] {
     --_table-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8L1 2h8z'/%3E%3C/svg%3E");
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort]::after {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort]::after {
     content: "";
     display: inline-block;
     inline-size: 0.8em;
@@ -1809,17 +1809,17 @@
     :host(:state(rows)) > .scroller {
       display: block;
     }
-    .ui.table:state(rows) > ui-row {
+    .ui.table:state(rows) > :is(ui-row, es-fila) {
       display: block;
       padding-block: var(--_ui-table-responsive-row-padding);
       box-shadow: var(--_ui-table-responsive-row-shadow);
     }
-    .ui.table:state(rows) > ui-row > ui-cell {
+    .ui.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
       padding: var(--_ui-table-responsive-cell-padding);
       border: none;
       background: none;
     }
-    .ui.table:state(rows) > ui-row > ui-cell:first-child {
+    .ui.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):first-child {
       font-weight: var(--ui-font-weight-bold);
     }
   }

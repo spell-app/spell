@@ -45,7 +45,7 @@ const BROWSER_BUNDLE: SRV.BundleSpec = {
  * `spell space cloud serve | status | invite | mail | service` (epic `atmosphere` P8, Q8 B):
  * Spell's server for people outside this machine (`SpellCloud`),
  * the cloud a program's `... is saved in the cloud` keeps its things in.
- * - `serve [--address <url>] [--port <n>]`:  run it, on this machine alone, until `Ctrl-C`
+ * - `serve [--address <url>]... [--port <n>]`:  run it, on this machine alone, until `Ctrl-C`
  * - `status`:  is it running, where, and its backups;  exits 1 when it isn't, or a night was missed
  * - `invite <email>`:  an account for `email`, and its mail;  the running cloud's own invite, with its token
  * - `mail [<email>]`:  the newest mail the cloud caught, its link and code (until Q12 picks a mail service)
@@ -65,19 +65,20 @@ export async function cloudCommand(verb: string, target: string | undefined, opt
 
 /** Options of `spell space cloud`. */
 export type CloudOptions = {
-  /** Where people reach it, `https://spell.example.org`. */
-  address?: string
+  /** Where people reach it, `https://spell.example.org`:  the first is its main address. */
+  address?: string[]
   /** Its port on this machine. */
   port?: number
 }
 
 /** `serve`:  until `Ctrl-C`. */
-async function serve({ address, port = CLOUD_PORT }: CloudOptions): Promise<number> {
+async function serve({ address: addresses = [], port = CLOUD_PORT }: CloudOptions): Promise<number> {
   browserBundleCurrentOrDie()
-  const cloud = new SpellCloud({ ...(address && { address }) })
+  const [address, ...alsoAt] = addresses
+  const cloud = new SpellCloud({ ...(address && { address, alsoAt }) })
   const { url } = await cloud.listen({ port })
   console.log(
-    `Spell's cloud is up on ${url}${address ? `, reached at ${address}` : " (this machine only:  no --address)"}.`
+    `Spell's cloud is up on ${url}${address ? `, reached at ${addresses.join(" and ")}` : " (this machine only:  no --address)"}.`
   )
   console.log(`Its programs:  ${address ?? url}/apps/@spell/examples/FamilyCookbook`)
   console.log(`Its mail, until a mail service is picked:  spell space cloud mail`)
@@ -155,10 +156,11 @@ async function mail(email: string | undefined): Promise<number> {
 }
 
 /** `service`:  launchd's file on a Mac, systemd's on Linux, running `spell space cloud serve` from this checkout. */
-function serviceFile({ address, port = CLOUD_PORT }: CloudOptions): string {
-  if (!address) throw new CLI.CliError("say where people reach it:  --address https://spell.example.org")
+function serviceFile({ address: addresses = [], port = CLOUD_PORT }: CloudOptions): string {
+  if (!addresses.length) throw new CLI.CliError("say where people reach it:  --address https://spell.example.org")
   const spell = join(environment.repoDir, "..", "bin", "spell.mjs")
-  const args = [process.execPath, spell, "app", "cloud", "serve", "--address", address, "--port", `${port}`]
+  const addressArgs = addresses.flatMap((address) => ["--address", address])
+  const args = [process.execPath, spell, "space", "cloud", "serve", ...addressArgs, "--port", `${port}`]
   const logs = join(environment.cloudDir, "cloud.log")
   if (process.platform === "darwin") {
     return [

@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { isInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/places.shared"
+import { loopItemsInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/places.shared"
 
 /**
  * `list_count` rule:  length of something KNOWN to be a list, without naming its items,
@@ -12,7 +12,7 @@ import { isInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/
  *   else `the number of x` stays a property read, `x.number`.
  * - `Priority.mostSpecific`, as `list_length`, which wins when it names the items:  it's longer.
  */
-export class ListCount extends SpellExpression<"list", { inDrawing?: boolean }> {
+export class ListCount extends SpellExpression<"list", { loopItems?: string[] }> {
   @proto static priority = Priority.mostSpecific
   @proto static datatype = "number"
 
@@ -20,7 +20,7 @@ export class ListCount extends SpellExpression<"list", { inDrawing?: boolean }> 
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match || !scope.getType(match.groups.list.datatype)?.isA("list")) return undefined
-    match.data.inDrawing = isInDrawing(scope)
+    match.data.loopItems = loopItemsInDrawing(scope)
     return match
   }
   /** A count;  of a read of a place, in a drawing, as a value it can read:  `readableInDrawing()`. */
@@ -29,6 +29,6 @@ export class ListCount extends SpellExpression<"list", { inDrawing?: boolean }> 
       methodName: "itemCountOf",
       args: [P.matchAST(match.groups.list)]
     })
-    return readableInDrawing(match, count, match.data.inDrawing)
+    return readableInDrawing(match, count, match.data.loopItems)
   }
 }

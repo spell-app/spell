@@ -380,6 +380,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Its bar shows only once the program first reads or writes the place (`startSignIn()`, epic `language` T67):
         a program that picks among places (Task List) shows none for a place it hasn't picked.
       - [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
+        - A program with a toolbar of its own draws it there:  `{the sign in menu}`, `signInMenu()` (epic `atmosphere` T56),
+          a button naming who it is and a drop-down with the way in and out;  it takes the program's first sign-in, and a
+          bar already up goes.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.

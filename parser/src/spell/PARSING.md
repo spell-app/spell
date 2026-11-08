@@ -1728,6 +1728,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       Python's and a library's wait too (`readsThroughSolid`).
     - In a drawing:  a child value alone, `core.whileWaiting()` (`spotsThatWait`);  anywhere else, the class says
       `drawsWaiting`, and its boundary holds the whole thing (`heldDrawings`, `drawInBoundary()`).
+      A loop's function, `core.drawEach()`'s and `core.drawRead()`'s, is part of the drawing (`drawnLoopFunctions`):  it never waits.
     - `createDeferred()`, never an async `createMemo()`, which freezes what else draws;  `lazy`, so nobody's slow work
       runs unread.
     - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);
@@ -1761,6 +1762,8 @@ What a program's lines about where data lives compile to, and what reads the res
   - `there are less than 2 recipes where ...` (`there_are_things`):  a count of that same read, or of the program's own list, with no type needed.
     - The rider `if there are none:` is a statement with no noun, under a read:  `none` is never a type, so one never reads as the other.
   - A drawing can't wait, so a question about a read in one is a waited value (`readableInDrawing()`):  it holds the whole thing, or draws "…", until its answer.
+    - So is a read written right in an element, an attribute's or a child value, `<table rows={every review}/>` (epic `mockup` I4).
+    - One that names a loop's item is a value per item, `core.waitedValueKeyFor(this, film)`:  the same words are another read for each film.
 - `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
 - What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
   into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.

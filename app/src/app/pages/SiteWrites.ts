@@ -3,7 +3,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { PageStories, type PageStory } from "./PageStories"
-import { SiteEdits, type SitePart } from "./SiteEdits"
+import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
 
 /****************
  * ### `SiteWrites`
@@ -148,10 +148,13 @@ export class SiteWrites {
     )
   }
 
-  /** Move part `name`, with its pages, to just before part `before`;  none:  last in the site. */
-  static movePart(name: string, before?: string): boolean {
+  /**
+   * Move part `name`, with its pages, to `place`:  before or after another part, or inside a page, as its first.
+   * - NEVER throws:  a move `SiteEdits` refuses shows in the error banner.
+   */
+  static movePart(name: string, place: SitePartPlace): boolean {
     return SiteWrites.change(appTexts.text("siteMovePart", { name }), undefined, (text) =>
-      SiteEdits.withPartMoved(text, name, before)
+      SiteEdits.withPartMoved(text, name, place)
     )
   }
 

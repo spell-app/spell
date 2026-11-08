@@ -1,23 +1,28 @@
 import { existsSync, readFileSync, statSync } from "node:fs"
-import { basename, join } from "node:path"
+import { basename, dirname, join } from "node:path"
 
 import { SRV } from "spell/server"
 
 import { PlanCommits } from "./PlanCommits"
 import type { PlanDoc } from "./PlanDoc"
-import type { ItemKind, Phase } from "./planDoc.types"
+import { PROMISED_CARD, SETTLED_AS, type ItemKind, type Phase } from "./planDoc.types"
 
 /****************
  * ### `StaleFacts`
  * The FACTS for judging which of an epic's open judgement calls, issues and todos have gone stale (`epic stale`,
  * epic `epic-engine` Q69):  it decides nothing.  `/epic tidy`'s agents read them against the code.
- * - each item's age, its phase and whether that's done
- * - the files and code names it mentions, and whether they still exist in the checkout
- * - the commits that touched those files since it was written, and the commits naming it
- * - later items and phases that mention it
- * - whether `epic close --why` would refuse it (`PlanDoc.closeRefusal()`), and whether a tidy already left a card
- * - Fast for 300 items:  git runs twice for the whole page (`ls-files`, one `log`), never per item;  names are looked
- *   up in one pass over the tracked code files.
+ * - each item's age (from when it was WRITTEN, never its `changed` stamp), its phase and whether that's done
+ * - the files and code names it mentions, and whether they still exist, in the epic's worktree OR on `main`
+ *   (a worktree can be far behind);  something that was never in the repo isn't reported at all:  only what git's
+ *   history has can be gone
+ * - the commits that touched those files since it was written, and the commits naming it (this epic's only)
+ * - later items and phases that mention it, the todo made to follow it up, the done phases it says it waits for
+ * - every status card already on it
+ * - whether `epic close --why` would refuse it (`PlanDoc.closeRefusal()`), whether a tidy already left a card,
+ *   whether Owen has settled it
+ * - Fast for 300 items:  git runs a fixed few times for the whole page (`ls-files` per checkout, one `log` for the
+ *   commits and one for what was deleted, one `grep` of a few old trees), never per item;  names are looked up in one
+ *   pass over the tracked code files.
  *   - All of it best effort:  without git, every file reads as missing and no commit is listed.
  * - Node only (git, the checkout's files);  imported by `PlanDocCommands`, by path.
  ****************/
@@ -34,11 +39,23 @@ export class StaleFacts {
   /** ids (lower case) holding a mark of Owen's not yet taken (`closeRefusal()`) */
   readonly marked: ReadonlySet<string>
 
-  constructor({ plan, epic, checkout, marked = new Set() }: StaleFactsOptions) {
+  /** the main checkout, when `checkout` is a worktree:  a name or file there counts as still existing */
+  readonly main: string | undefined
+
+  /** the page's file:  the epic repo's history of its part files says when each item was written */
+  readonly file: string | undefined
+
+  /** every epic's name:  `data T16` in this page's text is another epic's item, not this one's */
+  readonly epics: ReadonlySet<string>
+
+  constructor({ plan, epic, checkout, marked = new Set(), main, file, epics = new Set() }: StaleFactsOptions) {
     this.plan = plan
     this.epic = epic
     this.checkout = checkout
     this.marked = marked
+    this.main = main === checkout ? undefined : main
+    this.file = file
+    this.epics = epics
   }
 
   /**
@@ -53,16 +70,23 @@ export class StaleFacts {
         .filter((item) => (item.getAttribute("status") ?? "open") === "open")
         .map((element) => ({ kind, element, mentions: StaleFacts.mentionsIn(element) }))
     )
-    const tracked = this.trackedFiles()
-    const found = this.codeWords(tracked)
+    const files = this.trackedFiles()
+    const tracked = StaleFacts.byBaseName(files)
+    const found = this.codeWords(files)
     const oldest = Math.min(...open.map(({ element }) => written.get(element.id) ?? Infinity))
     const history = this.history(oldest)
+    const deleted = this.deletedFiles()
+    const once = this.namesOnceInCode(
+      [...new Set(open.flatMap(({ mentions }) => mentions.names))].filter((name) => !found.has(name)),
+      oldest
+    )
     const later = this.laterMentions(written)
+    const followUps = this.followUps()
     const now = this.plan.now.getTime()
     const items = open.map(({ kind, element, mentions }): StaleItem => {
       const facts = this.plan.facts(element)
       const at = written.get(facts.id)
-      const paths = mentions.paths.map((path) => StaleFacts.pathFacts(path, tracked, this.checkout))
+      const paths = mentions.paths.flatMap((path) => this.pathFacts(path, tracked, deleted) ?? [])
       const commits = StaleFacts.commitsFor(paths, history, at)
       return {
         id: facts.id,
@@ -73,15 +97,21 @@ export class StaleFacts {
         ageDays: at === undefined ? undefined : Math.floor((now - at) / DAY),
         phase: this.phaseFacts(element),
         paths,
-        names: mentions.names.map((name) => ({ name, found: found.has(name) })),
+        names: mentions.names
+          .filter((name) => found.has(name) || once.has(name))
+          .map((name) => ({ name, found: found.has(name) })),
         commits: { count: commits.length, latest: commits.slice(0, LATEST_COMMITS).map(StaleFacts.commitLine) },
         namedInCommits: (history.byItem.get(facts.id) ?? []).slice(0, LATEST_COMMITS).map(StaleFacts.commitLine),
         laterMentions: later.get(facts.id) ?? [],
+        madeTodo: followUps.get(facts.id),
+        waitsOnDone: this.waitsOnDone(element, facts.title),
+        statusCards: StaleFacts.statusCards(element),
         closeRefused: this.plan.closeRefusal(facts.id, { marked: this.marked }),
-        tidyNoted: StaleFacts.tidyNoted(element)
+        tidyNoted: StaleFacts.tidyNoted(element),
+        settled: StaleFacts.isSettled(kind, facts)
       }
     })
-    return { epic: this.epic, checkout: this.checkout, items }
+    return { epic: this.epic, checkout: this.checkout, main: this.main, items }
   }
 
   /** `report` as lines to read, one per item. */
@@ -98,8 +128,14 @@ export class StaleFacts {
         `names ${item.names.length - missing}/${item.names.length}`,
         `${item.commits.count} commits since`,
         ...(item.laterMentions.length ? [`later:  ${item.laterMentions.map((each) => each.id).join(" ")}`] : []),
+        ...(item.madeTodo ? [`todo ${item.madeTodo.id} ${item.madeTodo.status}`] : []),
+        ...(item.waitsOnDone.length
+          ? [`waits on done:  ${item.waitsOnDone.map((each) => `P${each.number}`).join(" ")}`]
+          : []),
+        ...(item.statusCards.length ? [`${item.statusCards.length} card(s)`] : []),
         ...(item.closeRefused ? [`refused:  ${item.closeRefused}`] : []),
-        ...(item.tidyNoted ? ["tidy noted"] : [])
+        ...(item.tidyNoted ? ["tidy noted"] : []),
+        ...(item.settled ? ["settled"] : [])
       ]
       return `${item.id.toUpperCase().padEnd(6)}${item.title}\n      ${facts.join("  ·  ")}`
     }
@@ -108,26 +144,128 @@ export class StaleFacts {
 
   /** `<epic-status>` text:  a tidy's doubtful note on `item` already, its time;  `undefined` for none. */
   private static tidyNoted(item: Element): string | undefined {
-    const cards = Array.from(item.querySelectorAll("epic-status"))
-    const card = cards.find((each) => TIDY_NOTE.test((each.textContent ?? "").trim()))
+    const card = StaleFacts.cardsOf(item).find((each) => TIDY_NOTE.test((each.textContent ?? "").trim()))
     return card ? (card.getAttribute("at") ?? "") : undefined
   }
 
-  /** When each item was written:  its first log line, else its `changed` stamp (ms). */
-  private writtenTimes(): Map<string, number> {
-    const written = new Map<string, number>()
-    for (const { at, text } of this.plan.reviewLines()) {
-      for (const [, id] of text.matchAll(ITEM_WORD)) {
-        const key = id!.toLowerCase()
-        if (!written.has(key)) written.set(key, StaleFacts.timeOf(at))
-      }
+  /** `item`'s own status cards. */
+  private static cardsOf(item: Element): Element[] {
+    return Array.from(item.querySelectorAll(":scope > epic-status"))
+  }
+
+  /** Every status card on `item`, oldest first:  "Obviated by ..." and a leftover Done card are facts too. */
+  private static statusCards(item: Element): StaleCard[] {
+    return StaleFacts.cardsOf(item).map((card) => ({
+      state: card.getAttribute("state") ?? "",
+      at: card.getAttribute("at") ?? "",
+      text: (card.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, CARD_TEXT)
+    }))
+  }
+
+  /**
+   * A judgement call Owen has settled:  approved as it stands, followed up by a todo, or reviewed with no ask.
+   * - `/epic tidy` doesn't read these again:  a call that only records something is finished with once he's seen it
+   */
+  private static isSettled(kind: ItemKind, facts: { reviewed: string | undefined; reviewAs: string | undefined }) {
+    if (kind !== "judgement") return false
+    return SETTLED_AS.has(facts.reviewAs ?? "") || (facts.reviewed !== undefined && facts.reviewAs === undefined)
+  }
+
+  /**
+   * The todo made to follow each item up, by the item's id:  its "Made todo T23" card, else a todo's "From I7" line.
+   * - status included:  a follow-up that exists is usually what makes an issue moot
+   */
+  private followUps(): Map<string, StaleItem["madeTodo"]> {
+    const made = new Map<string, StaleItem["madeTodo"]>()
+    const facts = (todo: string) => {
+      const item = this.plan.findItem(todo)
+      return item ? { id: item.id, status: item.getAttribute("status") ?? "open" } : undefined
     }
     for (const item of Array.from(this.plan.document.querySelectorAll("epic-item[id]"))) {
-      if (written.has(item.id)) continue
-      const changed = StaleFacts.timeOf(item.getAttribute("changed"))
-      if (changed > -Infinity) written.set(item.id, changed)
+      const fromLine = Array.from(item.querySelectorAll("p")).find((each) => FROM_LINE.test(each.textContent ?? ""))
+      const from = fromLine?.querySelector('a[href^="#"]')?.getAttribute("href")?.slice(1).toLowerCase()
+      if (from && item.id.startsWith("t") && !made.has(from)) made.set(from, facts(item.id))
     }
+    for (const item of Array.from(this.plan.document.querySelectorAll("epic-item[id]"))) {
+      for (const card of StaleFacts.cardsOf(item)) {
+        const todo = MADE_TODO.exec((card.textContent ?? "").trim())?.[1]
+        if (todo) made.set(item.id, facts(todo) ?? made.get(item.id))
+      }
+    }
+    return made
+  }
+
+  /**
+   * The DONE phases `item` says it waits for ("until P35", "comes with P35's setup"):  a promise to check.
+   * - its own words:  title and text, not cards, replies or commits
+   */
+  private waitsOnDone(item: Element, title: string): StaleItem["waitsOnDone"] {
+    const copy = item.cloneNode(true) as Element
+    for (const each of Array.from(copy.querySelectorAll(NOT_ITS_WORDS))) each.remove()
+    const numbers = new Set(
+      Array.from(`${title} ${copy.textContent ?? ""}`.matchAll(WAITS_ON_PHASE), (match) => match[1]!)
+    )
+    return this.plan.phases
+      .filter((phase) => phase.status === "done" && numbers.has(phase.number))
+      .map(({ id, number, name }) => ({ id, number, name }))
+  }
+
+  /**
+   * When each item was written (ms):  the earliest of the facts that can't be moved by a later edit.
+   * - its part file first appearing in the epic repo's history
+   * - the first log line naming it (another epic's id doesn't count)
+   * - the earliest dated thing inside it (a status card, a reply)
+   * - NEVER its `changed` stamp, which any edit moves;  none of these:  unknown
+   */
+  private writtenTimes(): Map<string, number> {
+    const written = new Map<string, number>()
+    const earliest = (id: string, at: number) => {
+      if (at > -Infinity) written.set(id, Math.min(written.get(id) ?? Infinity, at))
+    }
+    for (const [id, at] of this.partFilesAdded()) earliest(id, at)
+    for (const { at, text } of this.plan.reviewLines())
+      for (const id of this.idsIn(text)) earliest(id, StaleFacts.timeOf(at))
+    for (const item of Array.from(this.plan.document.querySelectorAll("epic-item[id]")))
+      for (const dated of Array.from(item.querySelectorAll("[at]")))
+        earliest(item.id, StaleFacts.timeOf(dated.getAttribute("at")))
     return written
+  }
+
+  /** When each item's part file was added to the epic repo, by item id;  best effort, none without git. */
+  private partFilesAdded(): Map<string, number> {
+    const added = new Map<string, number>()
+    if (!this.file) return added
+    const folder = dirname(this.file)
+    const out = SRV.Git.out(
+      ["log", "--diff-filter=A", "--no-renames", "--name-only", "--format=%x01%at", "--", "parts"],
+      folder,
+      { timeout: GIT_TIMEOUT }
+    )
+    // newest first:  a file added twice keeps its first adding
+    for (const record of (out ?? "").split("\x01").filter(Boolean)) {
+      const [seconds, ...files] = record.split("\n").filter(Boolean)
+      for (const file of files) added.set(basename(file, ".html"), Number(seconds) * 1000)
+    }
+    return added
+  }
+
+  /**
+   * The item ids (lower case) `text` names as this epic's.
+   * - not one written after another epic's name:  `data T16`, ````data`` T16, T17`
+   */
+  private idsIn(text: string): Set<string> {
+    const ids = new Set<string>()
+    let foreign = false
+    let end = 0
+    for (const match of text.matchAll(ITEM_WORD)) {
+      const before = text.slice(end, match.index)
+      const word = /([a-z][a-z0-9-]*)`?\s+$/.exec(before)?.[1]
+      foreign =
+        word !== undefined && word !== this.epic && this.epics.has(word) ? true : foreign && LIST_JOIN.test(before)
+      if (!foreign) ids.add(match[1]!.toLowerCase())
+      end = match.index + match[0].length
+    }
+    return ids
   }
 
   /** `text`, a time as the page writes it, in ms;  `-Infinity` for none. */
@@ -165,7 +303,8 @@ export class StaleFacts {
       const text = (element.textContent ?? "").trim()
       const path = StaleFacts.pathOf(text)
       if (path) paths.add(path)
-      const name = StaleFacts.codeName(text)
+      // a file's span isn't a name too:  `saved.ts` would look for `ts`
+      const name = path ? undefined : StaleFacts.codeName(text)
       if (name) names.add(name)
     }
     return { paths: [...paths], names: [...names] }
@@ -197,53 +336,139 @@ export class StaleFacts {
   }
 
   /**
-   * Every word in the checkout's tracked code files, one pass:  a code name is found when it's among them.
+   * Every word in the tracked code files of the checkout and `main`, one pass:  a code name is found when it's among
+   * them.
    * - generated files and files past `MAX_SEARCHED` left out
+   * - a file the same in both is read once (by its git blob)
    * - NOT `git grep -f`:  its `-F -w` with hundreds of patterns took over a minute on this repo
    */
-  private codeWords(tracked: Map<string, string[]>): Set<string> {
+  private codeWords(files: TrackedFile[]): Set<string> {
     const words = new Set<string>()
-    for (const files of tracked.values())
-      for (const file of files) {
-        if (!CODE_FILE.test(file) || NOT_SEARCHED.test(file)) continue
-        try {
-          const path = join(this.checkout, file)
-          if (statSync(path).size > MAX_SEARCHED) continue
-          for (const word of readFileSync(path, "utf8").matchAll(CODE_WORD)) words.add(word[0])
-        } catch {
-          // deleted in the working tree, or unreadable:  nothing to find there
-        }
+    const seen = new Set<string>()
+    for (const { root, file, blob } of files) {
+      if (seen.has(blob) || !CODE_FILE.test(file) || NOT_SEARCHED.test(file)) continue
+      seen.add(blob)
+      try {
+        const path = join(root, file)
+        if (statSync(path).size > MAX_SEARCHED) continue
+        for (const word of readFileSync(path, "utf8").matchAll(CODE_WORD)) words.add(word[0])
+      } catch {
+        // deleted in the working tree, or unreadable:  nothing to find there
       }
+    }
     return words
   }
 
-  /** The checkout's tracked files, by base name;  a missing git:  none. */
-  private trackedFiles(): Map<string, string[]> {
-    const byName = new Map<string, string[]>()
-    for (const file of SRV.Git.lines(["ls-files"], this.checkout, { timeout: GIT_TIMEOUT })) {
+  /** The checkouts to look in:  the epic's own, then `main` when that's another. */
+  private get roots(): string[] {
+    return this.main ? [this.checkout, this.main] : [this.checkout]
+  }
+
+  /** The tracked files of each checkout;  a missing git:  none. */
+  private trackedFiles(): TrackedFile[] {
+    return this.roots.flatMap((root) =>
+      SRV.Git.lines(["ls-files", "-s"], root, { timeout: GIT_TIMEOUT }).flatMap((line) => {
+        const [head, file] = line.split("\t")
+        const blob = head?.split(" ")[1]
+        return file && blob ? [{ root, file, blob }] : []
+      })
+    )
+  }
+
+  /** `files` by base name, each path once. */
+  private static byBaseName(files: TrackedFile[]): Map<string, string[]> {
+    const byName = new Map<string, Set<string>>()
+    for (const { file } of files) {
       const name = basename(file)
-      byName.set(name, [...(byName.get(name) ?? []), file])
+      byName.set(name, (byName.get(name) ?? new Set()).add(file))
     }
-    return byName
+    return new Map(Array.from(byName, ([name, paths]) => [name, [...paths]]))
   }
 
   /**
-   * What `path` (as an item wrote it) is in the checkout:  tracked as written, by its end, or by its base name;
-   * else on disk at that path;  else gone.
+   * Every file ever deleted, by base name:  only these can be "gone".
+   * - one `git log`, the whole history
    */
-  private static pathFacts(path: string, tracked: Map<string, string[]>, checkout: string): StalePath {
+  private deletedFiles(): Map<string, Set<string>> {
+    const out = SRV.Git.out(
+      ["log", "--no-renames", "--diff-filter=D", "--name-only", "--format=", ...this.revisions()],
+      this.checkout,
+      { timeout: GIT_TIMEOUT }
+    )
+    const deleted = new Map<string, Set<string>>()
+    for (const file of (out ?? "").split("\n").filter(Boolean)) {
+      const name = basename(file)
+      deleted.set(name, (deleted.get(name) ?? new Set()).add(file))
+    }
+    return deleted
+  }
+
+  /**
+   * Which of `names` (missing from the code now) were in the code at some point since `since`:  only those can be
+   * "gone".  A word that only looks like code, or that an item's prose coined, is in no old tree.
+   * - `git grep` over a few trees spread across the window:  a name that came and went between two of them is missed,
+   *   which only loses a hint
+   */
+  private namesOnceInCode(names: string[], since: number): Set<string> {
+    const once = new Set<string>()
+    if (!names.length) return once
+    const after = Number.isFinite(since) ? [`--since=${new Date(since - DAY).toISOString()}`] : []
+    const commits = SRV.Git.lines(["rev-list", ...after, ...this.revisions()], this.checkout, { timeout: GIT_TIMEOUT })
+    if (!commits.length) return once
+    const trees = Array.from(
+      { length: OLD_TREES },
+      (_, at) => commits[Math.round(((commits.length - 1) * at) / Math.max(1, OLD_TREES - 1))]!
+    )
+    const patterns = names.flatMap((name) => ["-e", name])
+    const out = SRV.Git.out(
+      ["grep", "-h", "-o", "-w", "-F", ...patterns, ...new Set(trees), "--", ...NOT_GREPPED],
+      this.checkout,
+      { timeout: GIT_TIMEOUT }
+    )
+    for (const word of (out ?? "").split("\n")) if (word) once.add(word)
+    return once
+  }
+
+  /** The commits to read:  this checkout's, and `main`'s when that's another. */
+  private revisions(): string[] {
+    const mainHead = this.main
+      ? SRV.Git.out(["rev-parse", "HEAD"], this.main, { timeout: GIT_TIMEOUT })?.trim()
+      : undefined
+    return mainHead ? ["HEAD", mainHead] : ["HEAD"]
+  }
+
+  /**
+   * What `path` (as an item wrote it) is:  tracked as written, by its end, or by its base name;  else on disk;
+   * else gone, when git's history deleted it;  else `undefined`:  it was never a repo file
+   * (a runtime path, an example:  `__members/owen@spell.json5`, `recipes/<id>.json`).
+   */
+  private pathFacts(
+    path: string,
+    tracked: Map<string, string[]>,
+    deleted: Map<string, Set<string>>
+  ): StalePath | undefined {
     const candidates = tracked.get(basename(path)) ?? []
     const at = candidates.filter((file) => file === path || file.endsWith(`/${path}`))
     if (at.length) return { path, exists: true, at }
     if (candidates.length && !path.includes("/")) return { path, exists: true, at: candidates }
-    return { path, exists: existsSync(join(checkout, path)), at: [] }
+    if (this.roots.some((root) => existsSync(join(root, path)))) return { path, exists: true, at: [] }
+    const was = [...(deleted.get(basename(path)) ?? [])]
+    return was.some((file) => file === path || file.endsWith(`/${path}`)) ? { path, exists: false, at: [] } : undefined
   }
 
   /** The commits since `since` (ms), newest first, by file and by the item they name;  empty without git. */
   private history(since: number): CommitHistory {
     const after = Number.isFinite(since) ? [`--since=${new Date(since - DAY).toISOString()}`] : []
     const out = SRV.Git.out(
-      ["log", "--no-merges", "--no-renames", "--name-only", `--format=%x01%h%x09%at%x09%s`, ...after],
+      [
+        "log",
+        "--no-merges",
+        "--no-renames",
+        "--name-only",
+        `--format=%x01%h%x09%at%x09%s`,
+        ...after,
+        ...this.revisions()
+      ],
       this.checkout,
       { timeout: GIT_TIMEOUT }
     )
@@ -260,14 +485,21 @@ export class StaleFacts {
     return history
   }
 
-  /** The commits, newest first, touching any of `paths` (a file gone included, by its end) since `written`. */
+  /**
+   * The commits, newest first, touching any of `paths` (a file gone included, by its end) since `written`.
+   * - a bare base name that several files share (`index.ts`, `places.ts`) says nothing:  left out, or every commit
+   *   to any of them would count (data J69 had 48)
+   */
   private static commitsFor(paths: StalePath[], history: CommitHistory, written: number | undefined): StaleCommit[] {
-    const files = new Set(paths.flatMap(({ path, at }) => (at.length ? at : [path])))
+    const files = new Set(
+      paths.flatMap(({ path, at }) => (at.length === 0 ? [path] : path.includes("/") || at.length === 1 ? at : []))
+    )
     const seen = new Map<string, StaleCommit>()
     for (const file of files) {
       const direct = history.byFile.get(file)
-      const commits =
-        direct ?? [...history.byFile].filter(([each]) => each.endsWith(`/${file}`)).flatMap(([, list]) => list)
+      const ends = direct ? [] : [...history.byFile].filter(([each]) => each.endsWith(`/${file}`))
+      if (!file.includes("/") && ends.length > 1) continue
+      const commits = direct ?? ends.flatMap(([, list]) => list)
       for (const commit of commits) if (written === undefined || commit.at >= written) seen.set(commit.sha, commit)
     }
     return [...seen.values()].sort((a, b) => b.at - a.at)
@@ -282,25 +514,29 @@ export class StaleFacts {
 
   /**
    * For each item:  the items and phases written after it that mention it (`<a href="#i7">`, `<epic-link item>`, `I7`
-   * in their text);  a phase not finished counts as later.  May name another epic's `I7` too:  a fact to weigh.
+   * in their text);  a phase not finished counts as later.  Another epic's `data I7` doesn't count.
    */
   private laterMentions(written: Map<string, number>): Map<string, StaleMention[]> {
     const ids = new Set(Array.from(this.plan.document.querySelectorAll("epic-item[id]"), (item) => item.id))
     const later = new Map<string, StaleMention[]>()
     const add = (mentioner: StaleMention, at: number, text: Element) => {
-      const named = new Set<string>()
-      for (const [, id] of (text.textContent ?? "").matchAll(ITEM_WORD)) named.add(id!.toLowerCase())
-      for (const link of Array.from(text.querySelectorAll('a[href^="#"], epic-link[item], epic-mark[item]')))
+      const named = this.idsIn(text.textContent ?? "")
+      for (const link of Array.from(text.querySelectorAll('a[href^="#"], epic-link[item], epic-mark[item]'))) {
+        const other = link.getAttribute("epic")
+        if (other && other !== this.epic) continue
         named.add((link.getAttribute("href")?.slice(1) ?? link.getAttribute("item") ?? "").toLowerCase())
+      }
       for (const id of named) {
-        if (id === mentioner.id || !ids.has(id) || at <= (written.get(id) ?? -Infinity)) continue
+        // not `<=`:  a todo made in the same minute as what it follows up is still later
+        if (id === mentioner.id || !ids.has(id) || at < (written.get(id) ?? -Infinity)) continue
         later.set(id, [...(later.get(id) ?? []), mentioner])
       }
     }
     for (const item of Array.from(this.plan.document.querySelectorAll("epic-item[id]"))) {
       add(
         { id: item.id, status: item.getAttribute("status") ?? "open", title: this.plan.facts(item).title },
-        written.get(item.id) ?? -Infinity,
+        // no date on it:  it may be later, so it counts
+        written.get(item.id) ?? Infinity,
         item
       )
     }
@@ -323,6 +559,12 @@ export type StaleFactsOptions = {
   epic: string
   checkout: string
   marked?: ReadonlySet<string>
+  /** the main checkout, when `checkout` is a worktree */
+  main?: string
+  /** the page's file:  its part files' history says when items were written */
+  file?: string
+  /** every epic's name:  to tell another epic's `T16` from this one's */
+  epics?: ReadonlySet<string>
 }
 
 /** What `epic stale --json` prints. */
@@ -331,6 +573,8 @@ export type StaleReport = {
   epic: string
   /** the checkout the files and commits were read from */
   checkout: string
+  /** `main`, read too when `checkout` is a worktree;  `undefined` when `checkout` is it */
+  main: string | undefined
   /** one per open item, page order */
   items: StaleItem[]
 }
@@ -344,26 +588,44 @@ export type StaleItem = {
   title: string
   /** its colour's state, as the page draws it (`PlanReader.itemState()`) */
   state: string
-  /** when it was written, ISO:  its first log line, else its last change;  `undefined` for neither */
+  /** when it was written, ISO, from what no later edit moves (`writtenTimes()`);  `undefined` for unknown */
   written: string | undefined
   /** whole days since `written` */
   ageDays: number | undefined
   /** the phase it's filed in, and whether that's done;  `undefined` for none */
   phase: { id: string; number: string; name: string; status: string; done: boolean } | undefined
-  /** the files it mentions, and whether each still exists */
+  /** the files it mentions that are or were in the repo, and whether each still exists */
   paths: StalePath[]
-  /** the code names it mentions, and whether each is still in the code */
+  /** the code names it mentions that are or were in the code, and whether each still is */
   names: { name: string; found: boolean }[]
   /** the commits touching those files since it was written:  how many, and the latest few */
   commits: { count: number; latest: { sha: string; date: string; subject: string }[] }
-  /** commits whose subject names it (`<epic> I7:  ...`) */
+  /** commits whose subject names it, as this epic's (`<epic> I7:  ...`) */
   namedInCommits: { sha: string; date: string; subject: string }[]
   /** later items and phases that mention it */
   laterMentions: StaleMention[]
+  /** the todo made to follow it up, and that todo's status */
+  madeTodo: { id: string; status: string } | undefined
+  /** the done phases it says it waits for ("until P35"):  check the promised thing arrived */
+  waitsOnDone: { id: string; number: string; name: string }[]
+  /** every status card already on it, oldest first */
+  statusCards: StaleCard[]
   /** why `epic close --why` would refuse it;  `undefined` when it wouldn't */
   closeRefused: string | undefined
-  /** a tidy already noted it might be obsolete:  that card's time */
+  /** a tidy already left its card (`Maybe obsolete:`, `Partly obsolete:`, `Promised, not delivered:`):  that card's time */
   tidyNoted: string | undefined
+  /** a judgement call Owen has settled:  tidy doesn't read it again */
+  settled: boolean
+}
+
+/** A status card already on an item. */
+export type StaleCard = {
+  /** `underway`, `done` or `noted` */
+  state: string
+  /** its time, as the page writes it */
+  at: string
+  /** its words, cut short */
+  text: string
 }
 
 /** A file an item mentions. */
@@ -381,6 +643,9 @@ export type StaleMention = { id: string; status: string; title: string }
 
 /** A commit found by `StaleFacts`. */
 type StaleCommit = { sha: string; at: number; subject: string }
+
+/** A file git tracks in a checkout. */
+type TrackedFile = { root: string; file: string; blob: string }
 
 /** The commits since the oldest item, by file and by the item a subject names. */
 type CommitHistory = { byFile: Map<string, StaleCommit[]>; byItem: Map<string, StaleCommit[]> }
@@ -407,7 +672,32 @@ const PAGE_FOLDERS = /^(?:spell\.epics|epics|guides|pages|brand|sagas|goals|agen
 const ITEM_WORD = /\b([QTJIM]\d+)\b/g
 
 /** A tidy's card for an item it couldn't settle (`/epic tidy`):  not written twice. */
-const TIDY_NOTE = /^Maybe obsolete:/
+const TIDY_NOTE = new RegExp(`^(?:Maybe obsolete:|Partly obsolete:|${PROMISED_CARD})`)
+
+/** Between two ids of one list:  `data T16, T17`, `T16 and T17`. */
+const LIST_JOIN = /^\s*(?:,|and|,\s*and)\s*$/
+
+/** A status card's start, saying a follow-up was made:  its todo's id. */
+const MADE_TODO = /^Made todo (T\d+)\b/
+
+/** A follow-up todo's line naming what it came from (`PlanDoc.followUp()`). */
+const FROM_LINE = /^\s*From [A-Z]\d+\b/
+
+/** Inside an item, what isn't its own words:  for what it says it's waiting for. */
+const NOT_ITS_WORDS = "epic-status, epic-reply, epic-original, epic-commit, epic-choices"
+
+/** Words saying an item waits for a phase:  "until P35", "needs P28", "comes with P35's setup". */
+const WAITS_ON_PHASE =
+  /\b(?:until|till|waits?\s+(?:for|on)|waiting\s+(?:for|on)|needs|comes?\s+with|left\s+(?:to|for)|deferred\s+to|once)\s+(?:phase\s+)?P(\d+)\b/gi
+
+/** The most of a card's words a report holds. */
+const CARD_TEXT = 240
+
+/** How many old trees `namesOnceInCode()` searches. */
+const OLD_TREES = 4
+
+/** Left out of that search:  bundles, as `NOT_SEARCHED`. */
+const NOT_GREPPED = [":!*/_assets/*", ":!*/__pack/*", ":!*/dist/*", ":!*.lock"]
 
 /** Generated files and vendored bundles, left out of the search for names. */
 const NOT_SEARCHED = /(?:^|\/)(?:_assets|__pack|dist|node_modules)\/|\.lock$/
