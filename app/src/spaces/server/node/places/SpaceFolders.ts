@@ -868,6 +868,18 @@ export class SpaceFolders {
   }
 
   /** The folder at `address`, if it's a space's own, read direct:  never a program's own data, or no address at all. */
+  /**
+   * May `person` (`undefined`:  nobody signed in) read the space at `address`?
+   * - By its own list and settings (`SpaceMembers.mayRead()`), and not while the space, or their account, is taken down.
+   * - `false` for an address that's no space's.
+   * - NEVER throws.
+   */
+  async mayReadSpace(address: string, person: string | undefined): Promise<boolean> {
+    const folder = this.spaceFolderAt(address)
+    if (!folder || !(await folder.members.mayRead(person))) return false
+    return !(await this.takedowns.takenDownIn(address, person)).isWhole
+  }
+
   private spaceFolderAt(address: string): SpaceFolder | undefined {
     if (!SP.SpellLocation.isAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
     return this.folderAt(address)

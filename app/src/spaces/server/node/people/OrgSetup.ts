@@ -1,4 +1,6 @@
-import { mkdir } from "fs/promises"
+import { existsSync } from "fs"
+import { mkdir, readdir, readFile, writeFile } from "fs/promises"
+import { join } from "path"
 
 import { SRV } from "spell/server"
 import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
@@ -10,6 +12,16 @@ import type { PeopleStore } from "./PeopleStore"
 
 /** An org's id:  a folder's name, lower case, as `rs` or `rock_society`. */
 const ORG_ID = /^[a-z][a-z0-9_]*$/
+
+/** The built-in programs every org gets its own copy of, in its shared space. */
+const ORG_PAGES = ["OrgAdmin", "Inbox", "OrgFeed", "OrgChat"]
+
+/** Where the built-in programs are, by name. */
+const PAGE_GROUP = "@spell/examples"
+
+/** How the built-in programs name the org they're written for:  its address, and its name in their comments. */
+const SAMPLE_ORG = /@rs\b/g
+const SAMPLE_NAME = /\b(?:the Rock Society|Rock Society|RS)\b/g
 
 /** The role an org's first Admins hold in its own file:  they manage its shared space. */
 const ADMIN_MEMBERSHIP = "manager"
@@ -25,6 +37,8 @@ const ADMIN_MEMBERSHIP = "manager"
  *   - every first Admin holding the Admins role
  *   - each standing team asked for (`--team "Events Team"`)
  *   - the folders of its paired spaces:  the org's own, the Admins', each team's, shared and private
+ *   - its own copies of the Admin, Inbox, Feed and Chat programs, in its shared space, each naming the org:
+ *     `/apps/@rs/OrgAdmin` on Spell's cloud;  a copy that's there already is left as it is, edited or not
  * - Nobody needs to know anything of AT Protocol:  every space is a folder on Spell's server.
  * - What it leaves for people to do, as `next`:
  *   - recovery codes (`spell space org codes`):  they need at least two holders, and the first Admin alone is one
@@ -39,11 +53,14 @@ export class OrgSetup {
   private readonly roles: OrgRoles
   /** Where an address's folder is on disk. */
   private readonly folderFor: (address: string) => string
+  /** Where a built-in program's folder is on disk:  always the real ones, a test's org or not. */
+  private readonly builtInAt: (name: string) => string
 
   constructor({ people, roles, folderFor = folderForPlace }: OrgSetupProps) {
     this.people = people
     this.roles = roles
     this.folderFor = folderFor
+    this.builtInAt = (name) => folderForPlace(`${PAGE_GROUP}/${name}`)
   }
 
   /**
@@ -128,6 +145,15 @@ export class OrgSetup {
       report.spaces = [...(report.spaces ?? []), address]
     }
 
+    //////
+    // Its own copies of the org's pages
+    //////
+    const orgName = file.name || name || org
+    for (const page of ORG_PAGES) {
+      said(await this.copyPage(page, org, orgName), `@${org}/${page}, its own copy of the built-in program`)
+    }
+    report.next.push(`its pages, on Spell's cloud:  ${ORG_PAGES.map((page) => `/apps/@${org}/${page}`).join("  ")}`)
+
     const holders = report.admins.length
     report.next.push(
       holders > 1
@@ -136,6 +162,23 @@ export class OrgSetup {
     )
     await this.roles.changed(org)
     return report
+  }
+
+  /**
+   * SIDE EFFECT:  the built-in program `page` copied into org `org`'s shared space, naming the org instead of its sample:
+   * `true`.  `false`, changing nothing, when the org has one of that name already:  it may have been edited.
+   */
+  private async copyPage(page: string, org: string, orgName: string): Promise<boolean> {
+    const to = this.folderFor(`@${org}/${page}`)
+    if (existsSync(to)) return false
+    const from = this.builtInAt(page)
+    await mkdir(to, { recursive: true })
+    for (const entry of await readdir(from, { withFileTypes: true })) {
+      if (!entry.isFile() || entry.name.startsWith(".")) continue
+      const text = await readFile(join(from, entry.name), "utf8")
+      await writeFile(join(to, entry.name), text.replace(SAMPLE_ORG, `@${org}`).replace(SAMPLE_NAME, orgName))
+    }
+    return true
   }
 }
 
