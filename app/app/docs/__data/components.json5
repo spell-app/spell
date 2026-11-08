@@ -1162,6 +1162,33 @@
       "href": "AppRoot.html#AppToolbar"
     },
     {
+      "tag": "BackToSite",
+      "name": "BackToSite",
+      "folder": "Notice",
+      "mainTag": "Notice",
+      "main": false,
+      "page": false,
+      "topics": [
+        "notices"
+      ],
+      "aka": [],
+      "description": "A small \"Back to the site\" button, low on the left, while Edit shows a page the site editor opened (`editor.cameFromSite`, epic `mockup` P4):  it goes back to the site editor.",
+      "noun": "BackToSite",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "index",
+          "file": "src/app/index.tsx"
+        }
+      ],
+      "href": "Notice.html#BackToSite"
+    },
+    {
       "tag": "Chooser",
       "name": "Chooser",
       "folder": "Chooser",
@@ -2885,6 +2912,10 @@
           "file": "src/app/pages/ProjectChooser.tsx"
         },
         {
+          "name": "SiteEditorPage",
+          "file": "src/app/pages/SiteEditorPage.tsx"
+        },
+        {
           "name": "SpellEditor",
           "file": "src/app/pages/SpellEditor.tsx"
         },
@@ -3551,7 +3582,8 @@
       "docs": false,
       "tags": [
         "Notice",
-        "RestartNeeded"
+        "RestartNeeded",
+        "BackToSite"
       ],
       "tokens": []
     },
