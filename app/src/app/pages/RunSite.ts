@@ -1,9 +1,8 @@
 import { SP } from "spell/parser/spell"
 import type { SiteHost } from "spell/parser/core/core.types"
 import { editor } from "spell/app/app/editor"
-import { appTexts } from "spell/app/app/ui/AppTexts"
 import { navigate } from "./navigation"
-import { SiteEdits } from "./SiteEdits"
+import { SiteWrites } from "./SiteWrites"
 
 /****************
  * ### `RunSite`
@@ -55,30 +54,17 @@ export class RunSite implements SiteHost {
 
   /**
    * Make a page at `address`, which the site has none for:  declared beside the site and listed in it, as one step
-   * of the editor's history, then compiled and run afresh, so the running site shows it.
-   * - Its name from the address, `/planets/tatooine` => `tatooine page` (`SiteEdits.pageNameFor()`).
+   * of the editor's history (`SiteWrites.addPage()`).
+   * - The running site takes the new page as it runs (epic `mockup` J15, A), and shows it, at the same address.
+   * - A run that can't take it (`editor.restartNeededBecause`, e.g. an import changed too) starts afresh instead.
    * - NEVER throws:  a project with no site file, or one whose site can't be written to, is said in a notice.
    */
   createPage = (address: string): void => {
-    const file = editor.project?.files.find((each) => SiteEdits.hasSite(each.contents ?? ""))
-    if (!file) return editor.showNotice(appTexts.text("siteNoSiteFile"))
-    const before = file.contents ?? ""
-    let after: string
-    try {
-      const name = SiteEdits.pageNameFor(address, pageNamesIn(before))
-      after = SiteEdits.withPageAdded(before, name, address)
-    } catch (error) {
-      return editor.showError(error as Error)
-    }
-    let at = 0
-    while (at < before.length && before[at] === after[at]) at++
-    let end = 0
-    while (end < before.length - at && before.at(-1 - end) === after.at(-1 - end)) end++
-    editor.history.change(
-      { file, at, before: before.slice(at, before.length - end), after: after.slice(at, after.length - end) },
-      { title: appTexts.text("siteCreatePage", { address }), live: () => runAfresh() }
-    )
-    runAfresh()
+    SiteWrites.addPage(address, undefined, () => {
+      if (editor.restartNeededBecause)
+        return void editor.restartApp().catch((error: unknown) => editor.showError(error))
+      this.showAddress?.(this.here)
+    })
   }
 
   /** The editor's Run URL of a site's `address`, in project `projectPath`:  `/run/<project>/films/4`. */
@@ -121,19 +107,3 @@ function safelyDecoded(path: string): string {
 
 /** The one `RunSite` for the page. */
 export const runSite = new RunSite()
-
-/** Every page name a site file lists already:  `<page "film page" ...>`, `- it has a film page at ...`. */
-function pageNamesIn(text: string): string[] {
-  return [...text.matchAll(PAGE_NAMES)].map(([, tagged, written]) => (tagged ?? written ?? "").trim())
-}
-
-/** A page a site lists, in either form. */
-const PAGE_NAMES = /<page "([^"]+)"|- it has an? (.+?) at "/g
-
-/**
- * Compile now, after the edit, and run it afresh:  a new page is a new type, which a running program can't take as
- * it runs (`LiveEdit`), so the site starts again, at the new page's address.
- */
-function runAfresh(): void {
-  void editor.restartApp().catch((error: unknown) => editor.showError(error as Error))
-}

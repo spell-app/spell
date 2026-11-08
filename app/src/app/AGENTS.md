@@ -35,7 +35,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - `tracked()` is a memo over such a read.
 - `src/` is the app:
   - `solid/`:  the UI
-  - `pages/`:  the pages and the router
+  - `pages/`:  the pages and the router;  among them a site's editor, `/site/<project>` (`SiteEditorPage`, epic
+    `mockup` P4), which changes the site's file through `SiteWrites`
   - `ui/`:  `UI`, shared UI types, Monaco's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
@@ -178,8 +179,10 @@ and in the app's build folder, `app/` at the app folder's root.
     - No import map:  `runCompiled()` links each program's imports.
     - A recompile of the same program with an app on the page takes the edit as it runs ([LiveEdit](runner/LiveEdit.ts),
       epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
-      - What it can't take (a new type, a line at the top level) waits for Restart, and the editor says so
+      - What it can't take (a type removed or renamed, a line at the top level) waits for Restart, and the editor says so
         (`editor.restartNeededBecause`, `<RestartNeeded>`):  never a surprise reload.
+      - A type ADDED is taken as it runs, with its top-level thing (epic `mockup` P4, J15):
+        nothing running can be one of it yet, e.g. a site's new page.
       - A program that imports other projects takes it too, each import weighed the same way, deepest first
         (epic `editor`, Live Edit Everywhere);  one whose imports become other projects runs again.
       - A program with no app runs again instead:  nothing is drawn to keep.

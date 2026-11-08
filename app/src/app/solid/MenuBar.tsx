@@ -28,6 +28,7 @@ import {
   type Mode
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
+import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
 import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spellml"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
@@ -450,7 +451,7 @@ function ThemeSubMenu(): JSX.Element {
  * - What each item does is here, by the item's name;  so is a title that follows the editor's state
  *   (Undo's, New Example's, Duplicate's, More Examples'), and View's Inspector cards, one row per card.
  * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
- * - View:  Run, Edit, ─, Code, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
+ * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
  * - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own.
  * - `mode`:  the page's, ticked in View.
@@ -466,7 +467,8 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
     inspectorOpen: Inspector.isOpen,
     lineNumbersShowing: LineNumbers.isShowing,
-    inspecting: Inspector.isInspecting
+    inspecting: Inspector.isInspecting,
+    siteReady: !!editor.project?.files.some((file) => SiteEdits.hasSite(file.contents ?? ""))
   }))
   const bar = spellMenu("bar menu")
   const editItem = (item: SpellMenuAction): JSX.Element => {
@@ -492,6 +494,8 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         return <Action {...titled(item)} active={item.isSelected} onClick={() => EditorMode.show("run")} />
       case "editMode":
         return <Action {...titled(item)} active={item.isSelected} onClick={() => EditorMode.show("edit")} />
+      case "siteView":
+        return <Action {...titled(item)} disabled={!item.isEnabled} onClick={() => editor.showSiteEditor()} />
       case "showCode":
         return (
           <Action
@@ -805,6 +809,7 @@ type AppMenusThing = {
   inspectorOpen: boolean
   lineNumbersShowing: boolean
   inspecting: boolean
+  siteReady: boolean
 }
 
 /** The tag of a menu's items. */

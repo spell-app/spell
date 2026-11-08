@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 /**
  * A SITE in the editor's Run (epic `mockup` P2):  the page its address names, a button going to another page, the
- * browser's back button, and making a page an address had none for.
+ * browser's back button, and making a page an address had none for, which the running site takes as it runs (P4).
  * - The Star Wars site's file is answered here with a small site of its own:  nothing reaches the disk.
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
@@ -61,6 +61,21 @@ const SITE = `<spell-page "home page">
 \t<page "error page"/>
 </>
 `
+
+/**
+ * The running site's thing, found from what it draws, up through the elements around it:  `mark` marks it,
+ * `read` says whether it's still marked, i.e. still the same thing, so the run went on.
+ */
+function siteThing(action: string): boolean {
+  let element: Node | null = document.querySelector(".spell-site")
+  while (element && !(element as { thing?: object }).thing) {
+    element = element.parentNode instanceof ShadowRoot ? element.parentNode.host : element.parentNode
+  }
+  const thing = (element as { thing?: Record<string, unknown> } | null)?.thing
+  if (!thing) return false
+  if (action === "mark") thing.keptAcrossTheEdit = true
+  return thing.keptAcrossTheEdit === true
+}
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 3000
@@ -138,6 +153,8 @@ describe.skipIf(!SERVING)("a site in Run", { timeout: 180_000 }, () => {
   test("an address with no page offers to make one, which the site then shows", async () => {
     await open("/tatooine")
     expect(await shown()).toContain("No such page")
+    // the run goes on:  the program's app is the same element after, not a fresh one (epic `mockup` P4, J15 A)
+    await page.evaluate(siteThing, "mark")
     await page.locator(".spell-site-missing ui-button").click()
     await page.waitForTimeout(SETTLE_MS * 2)
     const after = await text()
@@ -145,5 +162,6 @@ describe.skipIf(!SERVING)("a site in Run", { timeout: 180_000 }, () => {
     expect(after).toContain('<page "tatooine page" address="/tatooine"/>')
     expect(await shown()).not.toContain("No such page")
     expect(address()).toBe("/tatooine")
+    expect(await page.evaluate(siteThing, "read")).toBe(true)
   })
 })

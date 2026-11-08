@@ -170,11 +170,13 @@ export class SiteBase extends App {
    * - Each parameter fills the page's property of its name, looked up by its type:  a thing of the program, or one in
    *   the place its type is saved in (`core.savedThingWithId()`).
    * - A lookup that fails shows the error page.
-   * - The same address again does nothing.
+   * - The same address again does nothing, unless it showed no page:  a page made for it since shows
+   *   (the editor's "Create it", epic `mockup` P4).
    * - NEVER throws:  what goes wrong is shown on the page.
    */
   async showAddress(address: string, known: Record<string, unknown> = {}): Promise<void> {
-    if (address === this.currentAddressHere && this.getState("showing")) return
+    const showing = this.getState("showing") as Showing | undefined
+    if (address === this.currentAddressHere && showing && showing.kind === "page") return
     this.closeOverlay()
     this.setProp("currentAddress", address)
     // `/` with no page of its own is the site's first page:  where Run starts

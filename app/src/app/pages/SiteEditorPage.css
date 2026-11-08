@@ -1,0 +1,108 @@
+/*
+ * Look of the site editor, `<SiteEditorPage>` (`SiteEditorPage.tsx`, epic `mockup` P4):  the pages' tree, the board
+ * of cards and the picked part's form, side by side under the top bar, each on the editor's pane look.
+ */
+
+/* Spell UI's breakpoints (`@custom-media`), inlined at build time */
+@import "spell/ui/styles/media.css";
+.SiteEditorPage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr minmax(260px, 320px);
+  gap: 14px;
+  padding: 14px;
+  color: var(--ui-text-color);
+
+  > aside,
+  > main {
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: var(--spell-pane-radius, var(--ui-radius-l, 12px));
+    background: var(--spell-pane-background);
+    border: 1px solid var(--spell-pane-border-color);
+    box-shadow: var(--spell-pane-shadow);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  h1,
+  h2 {
+    margin: 0;
+    font-family: var(--ui-font-family-heading);
+    font-weight: var(--ui-font-weight-bold);
+  }
+  h1 {
+    font-size: 20px;
+  }
+  h2 {
+    font-size: 15px;
+  }
+
+  /* the board:  a card per part, pages under pages a little in */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    align-content: start;
+  }
+
+  /* the row a dragged part would go before */
+  ui-tree-item[data-drop-before]::part(row) {
+    box-shadow: inset 0 2px 0 var(--ui-primary-color, var(--ui-focus-color));
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .quiet {
+    margin: 0;
+    color: var(--ui-text-muted);
+  }
+}
+
+/* a project that isn't a site:  what it says, where the page would be */
+.SiteEditorPage-empty {
+  margin: 28px;
+  color: var(--ui-text-muted);
+}
+
+/* a middling window:  the form under the board, so the board keeps room for its cards */
+@media (width <= 1200px) {
+  .SiteEditorPage {
+    grid-template-columns: minmax(200px, 260px) 1fr;
+    grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+
+    > .pages {
+      grid-row: 1 / span 2;
+    }
+  }
+}
+
+/* a phone:  one column, the board first, the page scrolling as a whole */
+@media (--ui-mobile) {
+  .SiteEditorPage {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+
+    > aside,
+    > main {
+      flex: none;
+      overflow: visible;
+    }
+    > main {
+      order: -1;
+    }
+  }
+}
