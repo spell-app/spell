@@ -4,6 +4,7 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
 {
   "alert": "message|okButton?",
   "confirm": "message|okButton?|cancelButton?",
+  "load_sound": "sound",
   "notify": "kind?|message|title?|color?|inverted?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
   "play_sound": "sound",
   "print": "operator?|expressions",

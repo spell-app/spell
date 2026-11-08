@@ -38,7 +38,7 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 			add the pokedex's showing to the pokedex's trail
 		set the pokedex's search to ""
 		set the pokedex's showing to it
-		stop its sound  // its cry loads now, still, so Hear it plays it at once
+		load its sound  // so Hear it plays it at once
 		scroll to the top
 	</action>
 

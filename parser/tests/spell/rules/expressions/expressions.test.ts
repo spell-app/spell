@@ -123,6 +123,7 @@ describe("priority and precedence", () => {
         "list_sorted_by:  Precedence.ternary",
         "lists_give_only:  Priority.declaration",
         "lists_under:  Priority.declaration",
+        "load_sound:  Priority.overridable",
         "load_things:  Priority.overridable",
         "markdown_block:  Priority.preferred",
         "markdown_description:  Priority.declaration",
