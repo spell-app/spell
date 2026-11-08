@@ -8,7 +8,7 @@ import { PhaseIds } from "spell/epic/phases"
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the page's colour rules and the chips' event:  their files, not their families' barrels
 import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
-import { DrawnState, isTodo } from "spell/epic/components/epic-item/EpicItem.types"
+import { DrawnState, buttonsForItem } from "spell/epic/components/epic-item/EpicItem.types"
 import { PhaseState } from "spell/epic/components/epic-section/PhaseState"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 
@@ -632,11 +632,11 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
   }
 
   /**
-   * The buttons kind the page draws `item` with (`<epic-review buttons>`):  a todo's, an item's;  a phase's as its own
+   * The buttons kind the page draws `item` with (`<epic-review buttons>`):  a todo's, an issue's, an item's;  a phase's as its own
    * row has it (`EpicPhase.reviewKind`:  a waiting plan's, a proposal's ...).
    */
   static buttonsOf(item: FocusEntry): string {
-    if (item.kind !== "phases") return isTodo(item.id, item.element.hasAttribute("limit")) ? "todo" : "item"
+    if (item.kind !== "phases") return buttonsForItem(item.id, item.element.hasAttribute("limit"))
     const phase = item.element as Element & { component?: { reviewKind?: string } }
     return phase.component?.reviewKind ?? "phase"
   }

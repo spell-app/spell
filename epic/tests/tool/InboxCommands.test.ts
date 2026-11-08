@@ -133,11 +133,22 @@ test("apply:  a sent todo gets a status card born NOTED, saying what was recorde
   await commands().inbox.run("x", file, ["apply"], {})
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   const card = plan.findItem("j1")!.querySelector(':scope > epic-status[slot="status"]')!
-  expect([card.getAttribute("state"), card.innerHTML]).toEqual([
-    "noted",
-    '<p>Made todo <a href="#t1">T1</a> to follow this up.</p>'
-  ])
+  expect([card.getAttribute("state"), card.innerHTML]).toEqual(["noted", "<p>Go ahead: fix this here</p>"])
+  expect(plan.findItem("j1")!.hasAttribute("urgent")).toBe(true)
   expect(plan.findItem("j2")!.querySelector("epic-status")).toBeNull()
+})
+
+test("inbox:  an issue's or a call's Do this says what the agent does;  update ... fixed turns it orange", async () => {
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("j1", { action: "todo" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain("do this, in J1 itself (no todo):  no fix proposed yet:  write one first")
+  await commands().inbox.run("x", file, ["apply"], {})
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.fixedForReview("j1", "Done now")
+  expect(plan.itemState(plan.findItem("j1")!)).toBe("replied")
 })
 
 test("apply:  a todo's plane queues it into the first phase still to do, with a Noted card;  its x cancels it", async () => {
@@ -546,7 +557,7 @@ test("apply:  sent new items are made, a phase's todo a go-ahead (I181), the sum
     [
       "NEW1  made question Q1:  window or aisle?",
       "P1  go ahead:  build it (his note kept)",
-      "SUMMARY  to todo T1:  no fix proposed yet, write one in its \"Proposed fix\" field"
+      'SUMMARY  to todo T1:  no fix proposed yet, write one in its "Proposed fix" field'
     ].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))

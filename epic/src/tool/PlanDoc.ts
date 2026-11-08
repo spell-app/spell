@@ -20,7 +20,7 @@ import { ThreadFacts } from "spell/epic/comments"
 import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
-import { FIX_LABEL, FollowUpSummary, PROBLEM_LABEL } from "./FollowUpSummary"
+import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
 import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
 
 import {
@@ -884,6 +884,7 @@ export class PlanDoc extends PlanReader {
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
       urgent: Boolean(data.urgent),
+      fixed: Boolean(data.fixed),
       awaitsPick: PlanItem.awaitsPick(item),
       reviewAs: data.reviewAs,
       handled: data.handled
@@ -921,7 +922,8 @@ export class PlanDoc extends PlanReader {
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
-   * - `urgent`:  a todo that asks Owen to act, red until reviewed, as an open issue is (`followUp()`, I230)
+   * - `urgent`:  a todo that asks Owen to act, red until reviewed, as an open issue is (`followUp()`, I230);
+   *   `urgent` on an issue or a call is Owen's Do this (`doThis()`, I232), set by his mark, never by `add`
    * - no `details`:  its title's words are its body (`PlanItem.giveBody()`), so it opens and takes a comment
    * - stamped (`stamp()`)
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
@@ -1109,6 +1111,9 @@ export class PlanDoc extends PlanReader {
     Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
     // a test closed has passed:  its "failed → I12" goes (epic `epic-engine` I174)
     if (status === "done") Markup.set<"epic-item">(item, { failed: undefined })
+    // closed, it's neither wanted nor waiting for review any more (I232)
+    if (status !== "open")
+      Markup.set<"epic-item">(item, { fixed: undefined, ...(CALM_ID.test(item.id) && { urgent: undefined }) })
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
     else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
@@ -1463,11 +1468,16 @@ export class PlanDoc extends PlanReader {
           this.answerWith(item, option)
           return { applied: true, did: `approved:  answered ${option.letter} · ${option.title} (recommended)` }
         }
+        // Owen's accept of a fix waiting on him (orange, I232):  closed;  on a Do this not built yet:  no longer wanted
+        if (open && item.hasAttribute("fixed")) return { applied: true, did: this.acceptFix(item) }
+        if (CALM_ID.test(item.id)) Markup.set<"epic-item">(item, { urgent: undefined })
         return { applied: true, did: `approved:  ${this.approve(item, kind, open)}` }
       }
       case "pick":
         return new OptionSets(this).applyToItem(item, mark)
       case "todo": {
+        // an issue's or a call's first button is Do this (I232):  it stays where it is, wanted
+        if (CALM_ID.test(item.id)) return this.doThis(item, { note, at, shot })
         const from = { label: item.id.toUpperCase(), link: item.id, what: kind, title: PlanItem.titleOf(item) }
         const todo = this.followUp(from, item, note)
         this.review(item.id)
@@ -1501,6 +1511,30 @@ export class PlanDoc extends PlanReader {
       default:
         return this.leftForClaude({ action, when, note }, this.pickWords(item.id, mark))
     }
+  }
+
+  /**
+   * Owen's Do this on `item`, an issue or a judgement call (epic `epic-engine` I232;  Owen, 2026-11-08:  "stay in the
+   * issue as above.  When you've done the fix, make it orange so I know to go and review"):  a mark of its own, no todo.
+   * - it stays where it is, wanted (`urgent`):  RED until handled, reviewed or not (`PlanReader.itemState()`)
+   * - closed:  reopened;  `calm` and an earlier `fixed` go, so pressing it again on a fix he doesn't like turns it red
+   * - his note and picture kept on it, his words;  a Noted card says go ahead
+   * - `did`:  what the agent does next (`doThisSteps()`)
+   */
+  private doThis(item: Element, { note, at, shot }: Pick<PlanMark, "note" | "at" | "shot">): MarkResult {
+    if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
+    if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
+    Markup.set<"epic-item">(item, { urgent: true, calm: undefined, fixed: undefined })
+    this.review(item.id)
+    this.noteStatus(item.id, PlanMarkup.text("Go ahead:  fix this here"))
+    return { applied: true, did: this.doThisSteps(item) }
+  }
+
+  /** Owen's accept of the fix on `item` (orange):  closed, reviewed;  returns `inbox apply`'s line. */
+  private acceptFix(item: Element): string {
+    this.setItem(item.id, "done")
+    this.review(item.id)
+    return "approved:  closed (fix accepted)"
   }
 
   /**
@@ -1592,6 +1626,7 @@ export class PlanDoc extends PlanReader {
    * Approve `item` (of `kind`, `open` or not) as it stands;  returns what it did, for the log line.
    * - an open judgement call:  closed (accepted);  an open test:  closed (it passed);  both reviewed
    * - anything else (an open todo, limit or issue;  a closed item):  reviewed
+   * - NOT Owen's accept of a fix (orange):  `applyAction()`'s, `acceptFix()`
    */
   approve(item: Element, kind: string, open: boolean): string {
     if (open && (kind === "judgement" || kind === "test")) {
@@ -2023,18 +2058,58 @@ export class PlanDoc extends PlanReader {
    *     never turns green on Claude's word
    *   - a `limit` todo:  nothing to do
    *   - an Overview sub-section, a phase, the summary;  an item closed already
+   * - an issue or a call Owen asked for with Do this (`urgent`, I232):  it NEVER closes on Claude's word:
+   *   fixed, for his review (`fixedForReview()`), so an agent's `done` out of habit still turns it orange
    * - Before I148 it wrote only the card:  a fixed issue stayed red (repo-split's I65).
    *   The migration `done-cards-close` closes the ones left so.
    * - throws as `finishStatus()` does:  no underway card
    */
-  finishWork(id: string, summary?: string): { title: string; closed: boolean } {
+  finishWork(id: string, summary?: string): { title: string; closed: boolean; fixed?: boolean } {
     const title = this.finishStatus(id, summary)
     const host = this.statusHost(id)
+    if (
+      host.localName === "epic-item" &&
+      CALM_ID.test(host.id) &&
+      host.hasAttribute("urgent") &&
+      host.getAttribute("status") === "open"
+    ) {
+      this.markFixed(host, title)
+      return { title, closed: false, fixed: true }
+    }
     if (host.localName !== "epic-item" || host.getAttribute("status") !== "open" || !PhaseTakes.isWork(host))
       return { title, closed: false }
     this.setItem(host.id, "done")
     this.log(`${host.id.toUpperCase()} closed:  ${title}`)
     return { title, closed: true }
+  }
+
+  /**
+   * Claude has fixed issue or judgement call `id`:  ORANGE, Owen's turn to review it
+   * (`epic update <name>#<id> fixed ["<what changed>"]`;  epic `epic-engine` I232).  Returns its title.
+   * - stays open;  Owen's Approve closes it (`acceptFix()`), his Do this sends it back, red
+   * - its latest underway card turns Done with `summary` under it;  no underway card:  `summary` is a Done card
+   * - throws on anything but an open issue or call:  a todo's `done` closes it, a question is decided
+   */
+  fixedForReview(id: string, summary?: string): string {
+    const item = this.item(id)
+    if (!CALM_ID.test(item.id) || item.getAttribute("status") !== "open")
+      throw new PlanDocError(
+        `${item.id.toUpperCase()}:  only an open issue or judgement call waits for review of a fix`
+      )
+    const title = this.underwayCard(item)
+      ? this.finishStatus(item.id, summary)
+      : summary
+        ? this.addStatus(item.id, summary, { state: "done" })
+        : PlanItem.titleOf(item)
+    this.markFixed(item, title)
+    return title
+  }
+
+  /** `item` waits for Owen's review of its fix:  not "reviewed" any more, so it's on his list again;  logged. */
+  private markFixed(item: Element, title: string): void {
+    Markup.set<"epic-item">(item, { fixed: true, reviewed: undefined })
+    this.stamp(item)
+    this.log(`${item.id.toUpperCase()} fixed, for review:  ${title}`)
   }
 
   /**
@@ -3140,28 +3215,6 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Bring follow-up todo `id`, made before epic `epic-engine` I230, up to what `followUp()` writes today:
-   * its Problem and Proposed fix above its "From ..." line, and `urgent`.
-   * - leaves `changed` alone:  it's not news
-   * - what it did:  `filled`, `no-fix` (filled, nothing proposed), or why not:  `not-follow-up`, `has-fields`, `no-source`
-   */
-  fillFollowUp(id: string): "filled" | "no-fix" | "not-follow-up" | "has-fields" | "no-source" {
-    const item = this.item(id)
-    const line = Array.from(item.querySelectorAll(":scope > p")).find((p) => MADE_FROM.test(PlanMarkup.squeeze(p.textContent ?? "")))
-    if (!line) return "not-follow-up"
-    if (item.querySelector(`:scope > epic-field[label="${PROBLEM_LABEL}"], :scope > epic-field[label="${FIX_LABEL}"]`))
-      return "has-fields"
-    const link = line.querySelector("a")?.getAttribute("href")?.slice(1)
-    const source = link ? (this.findItem(link) ?? this.reviewPart(link)?.element) : undefined
-    if (!source) return "no-source"
-    const title = PlanMarkup.squeeze(line.textContent ?? "").replace(MADE_FROM, "")
-    const summary = FollowUpSummary.of(source, title)
-    for (const node of this.incoming(summary.html)) line.before(node)
-    Markup.set<"epic-item">(item, { urgent: true })
-    return summary.hasFix ? "filled" : "no-fix"
-  }
-
-  /**
    * A new todo or question Owen asked for from the page (`{ action: "new", kind, title, note?, near? }`, epic
    * `airplane` P2), made as `plan-doc add` makes one (`addItem()`):  his note its details, a line linking what it's
    * about (`near`), and a Noted status card saying where it came from;  one log line.
@@ -3286,11 +3339,6 @@ type ReviewPart = {
 
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
-
-/**
- * The "From ..." line of a follow-up todo, up to its source's title (`PlanDoc.followUp()`).
- */
-const MADE_FROM = /^From .* marked "Make Todo" on the page:\s*/
 
 /** What `PlanDoc.followUp()` made:  the new todo's id, and did its source propose a fix? */
 type FiledFollowUp = { id: string; hasFix: boolean }

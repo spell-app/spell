@@ -810,7 +810,10 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /** `revisit soon · sent 10:42`. */
   private what(mark: InboxMark): string {
-    const how = this.translationForKey(HOW_KEYS[mark.action] ?? (mark.when === "now" ? "howNow" : "howSoon"))
+    const doesThis = mark.action === "todo" && (this.buttons === "issue" || this.buttons === "phase")
+    const how = this.translationForKey(
+      doesThis ? "howDoThis" : (HOW_KEYS[mark.action] ?? (mark.when === "now" ? "howNow" : "howSoon"))
+    )
     if (!this.review.isSent()) return this.translationForKey("saidUnsent", { how })
     const sent = mark.when === "now" ? mark.at : this.review.client?.inbox.sent
     return this.translationForKey("saidSent", { how, time: clockOf(sent) })

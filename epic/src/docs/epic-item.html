@@ -532,7 +532,17 @@ holding its id (Q7).  Its colour says where the item stands."
                     <td>
                       A todo that asks Owen to act (Make Todo's follow-up): red (<code>attention</code>) until it's
                       reviewed, queued or done, as an open issue is. Its details say the Problem and the Proposed fix,
-                      read from what it came from. Its id chip flips it to yellow (<code>calm</code>) and back.
+                      read from what it came from. Its id chip flips it to yellow (<code>calm</code>) and back. On a
+                      judgement call or issue it's your Do this: red until handled, reviewed or not.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>fixed</code></td>
+                    <td>present or absent</td>
+                    <td>
+                      A judgement call or issue Claude has fixed (<code>epic update ... fixed</code>): orange
+                      (<code>replied</code>), your turn to review it. Approve closes it; Do this sends it back.
                     </td>
                     <td></td>
                   </tr>
@@ -884,7 +894,8 @@ holding its id (Q7).  Its colour says where the item stands."
               </p>
               <p>
                 Then the line ends with three buttons in one group: Make Todo (green), Revisit (blue), Approve
-                (green). No Do Now (the wand) since Owen, 2026-10-25: "In practice, I'm never using the wand." Each
+                (green); on an issue or a judgement call the first is Do this, a thumbs up, worked in the item itself
+                with no todo made. No Do Now (the wand) since Owen, 2026-10-25: "In practice, I'm never using the wand." Each
                 wears the fill rule, which says how far a mark has got:
               </p>
               <ul>
