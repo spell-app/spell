@@ -146,8 +146,9 @@ export class SpellxCommentToken extends P.CommentToken {}
  * - a member's long `<spell-description>`
  * - a `<spell-comment>` among its lines
  * - a `<spell-property-editor>`
+ * - a page's `<spell-stories>` (epic `mockup` P6)
  */
-type SpellxNoteKind = "description" | "comment" | "property editor"
+type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"
 
 /**
  * What's wrong at `token`, as the spellx tokenizer found it:  a word spellx doesn't know, a tag never closed ...

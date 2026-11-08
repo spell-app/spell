@@ -11,6 +11,7 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { URGENT_STATES } from "spell/epic/list/EpicState"
+import { PhaseStatuses } from "spell/epic/phases"
 
 import {
   EXIT,
@@ -507,14 +508,17 @@ export class Worktrees {
   }
 
   /**
-   * Epic page `name`:  its folder, and whether every phase is done, from `planSummaries()`.
+   * Epic page `name`:  its folder, and whether every phase is finished (done or dropped), from `planSummaries()`.
    * - its live copy:  the worktree's when it has one, else the main checkout's (`planFile()`)
    */
   planStatus(name: string, worktree: string): { folder: string | null; done: boolean } {
     const file = this.planFile(name, worktree)
     if (!file) return { folder: null, done: false }
     const phases = this.planSummaries([file]).get(file)?.phases ?? []
-    return { folder: dirname(file), done: phases.length > 0 && phases.every((phase) => phase.status === "done") }
+    return {
+      folder: dirname(file),
+      done: phases.length > 0 && phases.every((phase) => PhaseStatuses.isFinished(phase.status))
+    }
   }
 
   /**

@@ -68,6 +68,17 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 	</draw>
 </spell-more-of>
 
+<spell-more-of "stage">
+	<draw>
+		<stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+			<text color="grey">{its moves to}</text>
+			<text>{its moved by}</text>
+			<button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Remove this stage" title="Remove this stage:  not while an event is in it, or another moves to it" onClick={remove it from the stages}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
 <spell-more-of "role change">
 	<draw>
 		<stack class="change" direction="horizontal" spacing="md" align="center" wrap>
@@ -90,6 +101,7 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 	<property "new term">a new term</>
 	<property "new app">a new approved app</>
 	<property "new designer" description="Who designs which space's pages:  ana@rs, picnic@rs">a new designer</>
+	<property "new stage" description="A stage an event goes through:  its name changes the stage of that name, or adds one before the last">a new stage</>
 
 	<action "add the new member">
 		add the new member to the members
@@ -119,6 +131,11 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 	<action "add the new designer">
 		add the new designer to the designers
 		set its new designer to a new designer
+	</action>
+
+	<action "add the new stage">
+		add the new stage to the stages
+		set its new stage to a new stage
 	</action>
 
 	<draw>
@@ -208,6 +225,21 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 					<button class="approve" color="primary" disabled={the name of the new app is ""} onClick={approve the new app}>Approve</button>
 					<stack class="approved" spacing="sm">
 						<for app in every approved app loading="Finding the approved apps"/>
+					</stack>
+				</segment>
+
+				<segment class="stages">
+					<header size="medium">Event stages</header>
+					<form value={its new stage}>
+						<stack direction="horizontal">
+							<input name="name" placeholder="Rehearsal" aria-label="Stage"/>
+							<input name="moves to" placeholder="open" aria-label="Moves to"/>
+							<input name="moved by" placeholder="its organizers" aria-label="Moved by"/>
+						</stack>
+					</form>
+					<button class="stage-it" color="primary" disabled={the name of the new stage is ""} onClick={add the new stage}>Add or change</button>
+					<stack class="stages" spacing="sm">
+						<for stage in every stage loading="Finding the event stages"/>
 					</stack>
 				</segment>
 

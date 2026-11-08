@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { dirname, join, posix, relative } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
-import { PhaseIds } from "spell/epic/phases"
+import { PhaseIds, PhaseStatuses } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { CommentList, type IdentifiedComment } from "spell/epic/tool/CommentList"
@@ -130,7 +130,7 @@ export class GuideChanges {
       waiting.map((page): Gathered => {
         const link = this.hrefTo(page.page)
         const open = plan.phases.find(
-          (phase) => phase.status !== "done" && plan.phase(phase.n).querySelector(`a[href="${link}"]`)
+          (phase) => !PhaseStatuses.isFinished(phase.status) && plan.phase(phase.n).querySelector(`a[href="${link}"]`)
         )
         const list = `<ul>${[...page.comments.map((each) => this.commentItem(page.page, each)), ...page.notes.map((each) => this.noteItem(page.page, each))].join("")}</ul>`
         const count = page.comments.length + page.notes.length

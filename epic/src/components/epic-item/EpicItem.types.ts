@@ -29,7 +29,7 @@ export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied"
 
 /**
  * The items Owen may call urgent or not (`calm`, its id chip):
- * judgement calls and issues, the kinds red while open and not reviewed.
+ * judgement calls and issues, the kinds red while open and not reviewed;  a todo marked `urgent` too (`StateFields`).
  * - `PlanReader.itemState()`;  the tool's `CALM_ID`, the same rule
  */
 export const CALM_ID = /^[ij]\d+$/
@@ -87,6 +87,10 @@ export type StateFields = {
   queued?: string | null
   /** work on it under way */
   working?: boolean
+  /** a todo asking Owen to act:  red until reviewed;  an issue or call he wants done:  red until handled */
+  urgent?: boolean
+  /** fixed, waiting for Owen's review:  orange, its chip no button */
+  fixed?: boolean
 }
 
 /** What the page's review inbox says of an item now (`ReviewState.liveOf()`), for `DrawnState.of()`. */
@@ -130,11 +134,11 @@ export class DrawnState {
 
   /**
    * May Owen call it urgent or not (its id chip, while the page is reviewed)?
-   * - yes for an open judgement call or issue, not reviewed, nothing queued or under way:
-   *   the items red for want of a review (`PlanReader.itemState()`)
+   * - yes for an open judgement call, issue or `urgent` todo, not reviewed, nothing queued or under way:
+   *   the items red for want of a review (`PlanReader.itemState()`);  a fix waiting on him is his to accept, not calm
    */
-  static canCalm({ id, status, reviewed, queued, working }: StateFields): boolean {
-    return CALM_ID.test(id ?? "") && status === "open" && !reviewed && !queued && !working
+  static canCalm({ id, status, reviewed, queued, working, urgent, fixed }: StateFields): boolean {
+    return (CALM_ID.test(id ?? "") || !!urgent) && status === "open" && !reviewed && !queued && !working && !fixed
   }
 
   /**
@@ -149,7 +153,9 @@ export class DrawnState {
       changed: item.getAttribute("changed"),
       reviewed: item.getAttribute("reviewed"),
       queued: item.getAttribute("queued"),
-      working: item.hasAttribute("working")
+      working: item.hasAttribute("working"),
+      urgent: item.hasAttribute("urgent"),
+      fixed: item.hasAttribute("fixed")
     }
   }
 }
@@ -286,6 +292,15 @@ export const TODO_ID = /^t\d+$/i
 /** Is item `id` (`limit`:  its `limit`) work still to do:  a todo that's no limit (epic `epic-engine` P44)? */
 export function isTodo(id: string | undefined, limit: boolean | undefined): boolean {
   return TODO_ID.test(id ?? "") && !limit
+}
+
+/**
+ * Which review buttons item `id` draws (`<epic-review buttons>`):
+ * a todo's;  an issue's or a call's, whose first is Do this (I232);  else an item's, Make Todo first.
+ */
+export function buttonsForItem(id: string | undefined, limit: boolean | undefined): "todo" | "issue" | "item" {
+  if (isTodo(id, limit)) return "todo"
+  return CALM_ID.test(id ?? "") ? "issue" : "item"
 }
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */

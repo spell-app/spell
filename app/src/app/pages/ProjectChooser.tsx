@@ -18,6 +18,7 @@ import {
   trackProjectRoot,
   type ProjectRootState
 } from "spell/app/app/solid"
+import { EmptyCard, TileCard } from "./TileCard"
 
 import "./ProjectChooser.css"
 
@@ -196,17 +197,7 @@ const SOLITAIRE = "@spell/examples/Solitaire"
 
 /** One way to start:  a card like a project's. */
 function StartCard(props: { name: string; line: string; start: () => void }) {
-  return (
-    <button type="button" class="card" onClick={() => props.start()}>
-      <span class="tile" style={{ "--ProjectCards-hue": hueFor(props.name) }} aria-hidden="true">
-        {props.name.charAt(0)}
-      </span>
-      <span class="text">
-        <span class="title">{props.name}</span>
-        <span class="description">{props.line}</span>
-      </span>
-    </button>
-  )
+  return <TileCard title={props.name} line={props.line} hueFrom={props.name} onClick={() => props.start()} />
 }
 
 /****************
@@ -232,14 +223,14 @@ function ProjectCards(props: ProjectCardsProps) {
         <Show
           when={root().loaded}
           fallback={
-            <div class="card empty">
+            <EmptyCard>
               {root().failed ? appTexts.text("couldNotLoadGroup", root().words) : appTexts.text("loadingGroup")}
-            </div>
+            </EmptyCard>
           }
         >
           <For
             each={root().projects.filter((project) => !project.language)}
-            fallback={<div class="card empty">{props.empty ?? appTexts.text("nothingInGroup", root().words)}</div>}
+            fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
           >
             {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
           </For>
@@ -264,24 +255,16 @@ function ProjectCards(props: ProjectCardsProps) {
 function ProjectCard(props: { project: ProjectRootState["projects"][number]; useRunner?: boolean }) {
   const project = () => props.project
   return (
-    <a
-      class="card"
+    <TileCard
+      title={project().name}
+      line={firstPhrase(project().description)}
+      hueFrom={project().path}
       href={project().path}
       onClick={(event) => {
         event.preventDefault()
         openProject(project().path, props.useRunner)
       }}
-    >
-      <span class="tile" style={{ "--ProjectCards-hue": hueFor(project().path) }} aria-hidden="true">
-        {project().name.charAt(0)}
-      </span>
-      <span class="text">
-        <span class="title">{project().name}</span>
-        <Show when={firstPhrase(project().description)}>
-          <span class="description">{firstPhrase(project().description)}</span>
-        </Show>
-      </span>
-    </a>
+    />
   )
 }
 
@@ -319,13 +302,6 @@ type ProjectCardsProps = {
  */
 function firstPhrase(description: string | undefined): string | undefined {
   return description?.split(/[:;]\s|\.\s/)[0]?.trim() || undefined
-}
-
-/** A hue for a project's tile, the same every time:  from its address. */
-function hueFor(path: string): string {
-  let hash = 0
-  for (const char of path) hash = (hash * 31 + char.charCodeAt(0)) % 360
-  return `${hash}`
 }
 
 /****************

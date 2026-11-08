@@ -14,10 +14,13 @@ import {
 } from "spell/epic/definitions"
 import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
-import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
+import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
 import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
 
 import {
@@ -25,6 +28,7 @@ import {
   CLOSED,
   ITEM_STATUSES,
   KINDS,
+  OBSOLETE_ID,
   OLD_DECISION,
   PHASE_FIELDS,
   PHASE_STATUSES,
@@ -61,7 +65,7 @@ import {
   type PlanMark,
   type RenameResult,
   type ReviewAs,
-  type StatusState
+  type AddStatusOptions
 } from "./planDoc.types"
 
 import { AuthorWords } from "./AuthorWords"
@@ -79,7 +83,7 @@ import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
 import { OptionSets } from "./OptionSets"
-import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID } from "./ReviewInbox"
+import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -333,7 +337,8 @@ export class PlanDoc extends PlanReader {
     if (!Number.isInteger(n) || n < 1 || n > phases.length) {
       throw new PlanDocError(`--before ${n}:  no such phase (${phases.length ? `1-${phases.length}` : "none yet"})`)
     }
-    const started = phases.find((phase) => phase.n >= n && phase.status !== "todo")
+    // a dropped phase may move down a number too:  nothing was built under it (I228)
+    const started = phases.find((phase) => phase.n >= n && !PlanDoc.canRenumber(phase.status))
     if (started) throw new PlanDocError(`--before ${n}:  P${started.number} has started;  only to-do phases move down`)
     return n
   }
@@ -442,7 +447,10 @@ export class PlanDoc extends PlanReader {
       return
     }
     const total = PlanTime.sumRanges(estimated.map((phase) => phase.range!))
-    const left = PlanTime.sumRanges(estimated.filter((phase) => phase.status !== "done").map((phase) => phase.range!))
+    // what's left:  the phases not finished (a dropped one is never built:  I228)
+    const left = PlanTime.sumRanges(
+      estimated.filter((phase) => !PhaseStatuses.isFinished(phase.status)).map((phase) => phase.range!)
+    )
     const missing = counted.filter((phase) => !phase.range).map((phase) => `P${phase.number}`)
     let text = `${PlanTime.formatRange(total)} in all, ${PlanTime.formatRange(left)} left`
     if (missing.length) text += ` (${missing.join(", ")} not estimated)`
@@ -467,7 +475,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Set phase `n` to `status` (`todo` / `active` / `done`).
+   * Set phase `n` to `status` (`todo` / `active` / `done` / `dropped`).
    * - `done` removes the phase's UPDATE markers (`removeUpdateMarkers()`):  the bare labels on items, and the
    *   updates to prose outside a phase;  once it's finished, those changes are just the plan.
    *   A phase's own plan changes stay.
@@ -475,26 +483,87 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
-   * - `done` stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other status
-   *   removes it
+   * - `dropped` (epic `epic-engine` I228):  never built, and won't be;  finished, as `done` is (`PhaseStatuses`)
+   *   - its UPDATE markers go, as `done`'s;  its plan is NOT accepted:  nothing was built
+   *   - with `{ why }` (HTML:  `Moved to P38`):  its Dropped field, in place of Done (a Done field goes);  each bare
+   *     phase number in it (`P38`) becomes a link to that phase (`linkPhases()`);  the log line says it
+   * - a finished status stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other
+   *   status removes it;  any status but `dropped` removes a Dropped field
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
-  setPhase(n: number, status: string, { done, minutes }: { done?: string; minutes?: number } = {}): void {
+  setPhase(
+    n: number,
+    status: string,
+    { done, why, minutes }: { done?: string; why?: string; minutes?: number } = {}
+  ): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
-    const doneAt = status === "done" ? PlanTime.isoMinutes(this.now) : undefined
+    const finished = PhaseStatuses.isFinished(status)
+    const doneAt = finished ? PlanTime.isoMinutes(this.now) : undefined
     Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
+    if (finished) this.removeUpdateMarkers(n)
     if (status === "done") {
-      this.removeUpdateMarkers(n)
       if (done) this.setDone(n, done)
       // built, so its plan was accepted:  a plan rewritten after the Accept (or held, I221) never leaves a done phase
       // "waiting"
       if (PLAN_ASKED.has(this.phase(n).getAttribute("plan") ?? "")) this.acceptPlan(this.phase(n))
       if (took) Markup.set<"epic-phase">(this.phase(n), { took })
     }
+    if (status !== "dropped") this.setField(this.phase(n), "dropped", "")
+    let said = ""
+    if (status === "dropped" && why?.trim()) {
+      this.setField(this.phase(n), "done", "")
+      this.setField(this.phase(n), "dropped", why)
+      const field = this.phase(n).querySelector(':scope > epic-field[name="dropped"]')!
+      this.linkPhases(field, this.phase(n))
+      said = `:  ${PlanMarkup.squeeze(field.textContent ?? "")}`
+    }
     this.updateEstimate()
-    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : ""}`)
+    this.log(`${this.phaseLabel(n)} ${status}${took ? `:  took ${took}` : said}`)
+  }
+
+  /**
+   * Each bare phase number in `root`'s words (`P38`, outside a link) made a link to that phase:
+   * `<a href="#p-real-sign-in-mail-2">P38 · Real Sign-In Mail</a>`, eating the ` · Real Sign-In Mail` already after it.
+   * - not `self`, nor a number no phase has:  left as written
+   */
+  private linkPhases(root: Element, self: Element): void {
+    const phases = this.phaseElements
+    const walker = this.document.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */)
+    const texts: Text[] = []
+    for (let node = walker.nextNode(); node; node = walker.nextNode())
+      if (!node.parentElement?.closest("a")) texts.push(node as Text)
+    for (const text of texts) {
+      const words = text.data
+      const parts: (string | Element)[] = []
+      let from = 0
+      for (const match of words.matchAll(/\bP(\d+)\b/g)) {
+        const phase = PhaseIds.find(phases, match[1]!)
+        if (!phase || phase === self) continue
+        const title = PhaseIds.titleOf(phase)
+        const named = ` · ${title}`
+        const end = match.index + match[0].length
+        const eats = words.startsWith(named, end) ? named.length : 0
+        const link = this.document.createElement("a")
+        link.setAttribute("href", `#${phase.id}`)
+        link.textContent = `${PhaseIds.labelOf(phase)} · ${title}`
+        parts.push(words.slice(from, match.index), link)
+        from = end + eats
+      }
+      if (!parts.length) continue
+      parts.push(words.slice(from))
+      text.replaceWith(...parts.filter((part) => part !== ""))
+    }
+  }
+
+  /**
+   * May a phase of `status` take another number (an insert before it, a phase moved past it)?  To do, or dropped
+   * (epic `epic-engine` I228):  nothing was built under it, so no commit says its number;  a done or active one keeps
+   * its own.
+   */
+  private static canRenumber(status: string): boolean {
+    return status === "todo" || status === "dropped"
   }
 
   /**
@@ -815,6 +884,8 @@ export class PlanDoc extends PlanReader {
       underway: !!item.querySelector(UNDERWAY_CARD),
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
+      urgent: Boolean(data.urgent),
+      fixed: Boolean(data.fixed),
       awaitsPick: PlanItem.awaitsPick(item),
       reviewAs: data.reviewAs,
       handled: data.handled
@@ -852,11 +923,17 @@ export class PlanDoc extends PlanReader {
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
+   * - `urgent`:  a todo that asks Owen to act, red until reviewed, as an open issue is (`followUp()`, I230);
+   *   `urgent` on an issue or a call is Owen's Do this (`doThis()`, I232), set by his mark, never by `add`
    * - no `details`:  its title's words are its body (`PlanItem.giveBody()`), so it opens and takes a comment
    * - stamped (`stamp()`)
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
    */
-  addItem(kind: string, title: string, { details, titleHTML = false, calm = false }: AddItemOptions = {}): string {
+  addItem(
+    kind: string,
+    title: string,
+    { details, titleHTML = false, calm = false, urgent = false }: AddItemOptions = {}
+  ): string {
     const id = this.nextId(kind)
     const spec = KINDS[kind as ItemKind]
     if (calm && !CALM_ID.test(id)) throw new PlanDocError(`--calm is for a judgement call or an issue, not a ${kind}`)
@@ -870,7 +947,8 @@ export class PlanDoc extends PlanReader {
       answered: kind === "decision",
       ...((spec as { limit?: boolean }).limit && { limit: true }),
       ...(this.bedtime && { overnight: true }),
-      ...(calm && { calm: true })
+      ...(calm && { calm: true }),
+      ...(urgent && { urgent: true })
     }
     const item = this.make("epic-item", data, heading.slot ? [heading.slot] : [])
     for (const node of this.incoming(details, { question: kind === "question" })) Markup.place(item, node)
@@ -905,10 +983,15 @@ export class PlanDoc extends PlanReader {
    *   (`keepOriginal()`), never dropped;  an old decision's id (`d7`) stays on the new answer
    * - `option` (`A`):  that option is the chosen one (`chooseOption()`), of the question's own options or (`choices`,
    *   I8) of the card set at that position, a reply's say;  a question has ONE answer, so no other set stays chosen
+   * - `option` as people see it in a later set (`B2`:  `B` of the 2nd set, epic `epic-engine` I227) names that set,
+   *   unless `choices` does
    * - moves among the answered questions, in id order:  open ones stay on top
    * - throws when `questionId` isn't a question
    */
-  decide(questionId: string, answer: string, { details, option, choices }: DecideOptions = {}): string {
+  decide(questionId: string, answer: string, { details, option: given, choices: set }: DecideOptions = {}): string {
+    const typed = given === undefined ? undefined : parseSetLetter(given)
+    const option = typed ? typed.letter : given
+    const choices = set ?? typed?.choices
     const question = this.item(questionId)
     if (!QUESTION_ID.test(question.id)) throw new PlanDocError(`${questionId} isn't a question`)
     const old = question.querySelector(":scope > epic-answer")
@@ -953,6 +1036,21 @@ export class PlanDoc extends PlanReader {
    */
   optionCards(item: Element, choices?: number): OptionCard[] {
     return PlanItem.optionsIn(PlanItem.choiceSet(item, choices)).map(({ letter, title, recommended }) => ({
+      letter,
+      title,
+      recommended
+    }))
+  }
+
+  /**
+   * The options of set `choices` of what `id` names (`OptionSets.holderOf()`):  an item's (none given:  its own), a
+   * phase's (epic `epic-engine` I227:  its sets counted as the page counts them), a standing set's;  `[]` for none.
+   */
+  optionCardsOf(id: string, choices?: number): OptionCard[] {
+    const holder = new OptionSets(this).holderOf(id)
+    if (!holder) return []
+    if (holder.kind === "item") return this.optionCards(holder.element, choices)
+    return PlanItem.optionsIn(holder.sets[choices ?? 0] ?? null).map(({ letter, title, recommended }) => ({
       letter,
       title,
       recommended
@@ -1014,6 +1112,9 @@ export class PlanDoc extends PlanReader {
     Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
     // a test closed has passed:  its "failed → I12" goes (epic `epic-engine` I174)
     if (status === "done") Markup.set<"epic-item">(item, { failed: undefined })
+    // closed, it's neither wanted nor waiting for review any more (I232)
+    if (status !== "open")
+      Markup.set<"epic-item">(item, { fixed: undefined, ...(CALM_ID.test(item.id) && { urgent: undefined }) })
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
     else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
@@ -1069,12 +1170,13 @@ export class PlanDoc extends PlanReader {
   /**
    * Item `id` is urgent (`calm` false) or not (`calm` true):  Owen's click on its id chip, applied (`epic inbox
    * apply`);  returns what it did, for the log (`not urgent`), or `undefined` when it already was.
-   * - only a judgement call or an issue:  throws for any other item, or an id the doc doesn't have
+   * - only a judgement call, an issue, or a todo that asks Owen to act (`urgent`, I230):
+   *   throws for any other item, or an id the doc doesn't have
    */
   setCalm(id: string, calm: boolean): string | undefined {
     const item = this.item(id)
-    if (!CALM_ID.test(item.id))
-      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls and issues`)
+    if (!CALM_ID.test(item.id) && !item.hasAttribute("urgent"))
+      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and follow-up todos`)
     if (item.hasAttribute("calm") === calm) return undefined
     Markup.set(item, { calm: calm || undefined })
     this.stamp(item)
@@ -1280,6 +1382,9 @@ export class PlanDoc extends PlanReader {
     // an Approve or a Do this with a pick beside it (epic `epic-engine` I217):  the pick, then the rest
     const carried = carriedPick(mark)
     if (carried) return this.applyCarried(mark, carried)
+    // a pick changing several of its holder's sets (epic `epic-engine` I227):  each set's change on its own
+    const changes = mark.action === "pick" ? setPicksOf(mark) : []
+    if (changes.length > 1) return this.applyEachSet(mark, changes)
     // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
     const options = new OptionSets(this).applyToHolder(mark)
     if (options) return options
@@ -1314,11 +1419,29 @@ export class PlanDoc extends PlanReader {
   private applyCarried(mark: PlanMark, picked: PlanMark): MarkResult {
     const pick = this.applyMark(picked)
     if (mark.action === "approve" && this.findItem(mark.id)) return pick
-    const { pick: _p, choices: _c, multiple: _m, added: _a, edited: _e, removed: _r, ...rest } = mark
-    const result = this.applyMark(rest)
+    const result = this.applyMark(withoutSetChange(mark))
     if (!pick.applied)
       return result.applied ? { ...result, did: `${result.did};  its pick left:  ${pick.left}` } : result
     return result.applied ? { ...result, did: `${pick.did};  ${result.did}` } : pick
+  }
+
+  /**
+   * Pick mark `mark`, changing several of its holder's sets (`changes`, epic `epic-engine` I227):  each set's change
+   * applied as a pick mark of its own, in set order, each logging its own line.
+   * - applied when any is;  what's left of the others said after what was done
+   */
+  private applyEachSet(mark: PlanMark, changes: SetPick[]): MarkResult {
+    const base = withoutSetChange(mark)
+    const results = changes.map((change) => this.applyMark({ ...base, action: "pick", ...change }))
+    const did = results.flatMap((result) => (result.applied ? [result.did] : []))
+    const left = results.flatMap((result) => (result.applied ? [] : [result.left]))
+    if (!did.length)
+      return {
+        applied: false,
+        left: left.join(";  "),
+        ...(results.every((result) => !result.applied && result.gone) && { gone: true })
+      }
+    return { applied: true, did: [...did, ...left.map((each) => `left:  ${each}`)].join(";  ") }
   }
 
   /**
@@ -1335,7 +1458,7 @@ export class PlanDoc extends PlanReader {
 
   /** `applyMark()`'s work on `item`, the log line aside. */
   applyAction(item: Element, mark: PlanMark): MarkResult {
-    const { action, pick, choices, when, note, at, result, shot } = mark
+    const { action, when, note, at, result, shot } = mark
     const kind = PlanItem.kindOfItem(item)
     const open = item.getAttribute("status") === "open"
     switch (action) {
@@ -1346,16 +1469,21 @@ export class PlanDoc extends PlanReader {
           this.answerWith(item, option)
           return { applied: true, did: `approved:  answered ${option.letter} · ${option.title} (recommended)` }
         }
+        // Owen's accept of a fix waiting on him (orange, I232):  closed;  on a Do this not built yet:  no longer wanted
+        if (open && item.hasAttribute("fixed")) return { applied: true, did: this.acceptFix(item) }
+        if (CALM_ID.test(item.id)) Markup.set<"epic-item">(item, { urgent: undefined })
         return { applied: true, did: `approved:  ${this.approve(item, kind, open)}` }
       }
       case "pick":
         return new OptionSets(this).applyToItem(item, mark)
       case "todo": {
+        // an issue's or a call's first button is Do this (I232):  it stays where it is, wanted
+        if (CALM_ID.test(item.id)) return this.doThis(item, { note, at, shot })
         const from = { label: item.id.toUpperCase(), link: item.id, what: kind, title: PlanItem.titleOf(item) }
-        const todo = this.followUp(from, note)
+        const todo = this.followUp(from, item, note)
         this.review(item.id)
-        this.noteStatus(item.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        this.noteStatus(item.id, filedTodo(todo.id))
+        return { applied: true, did: filedDid(todo) }
       }
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
@@ -1382,10 +1510,32 @@ export class PlanDoc extends PlanReader {
       case "test":
         return this.applyTest(item, kind, { result, note, shot, at })
       default:
-        return this.leftForClaude({ action, pick, when, note }, () =>
-          this.optionCards(item, choices).find((card) => card.letter === pick)
-        )
+        return this.leftForClaude({ action, when, note }, this.pickWords(item.id, mark))
     }
+  }
+
+  /**
+   * Owen's Do this on `item`, an issue or a judgement call (epic `epic-engine` I232;  Owen, 2026-11-08:  "stay in the
+   * issue as above.  When you've done the fix, make it orange so I know to go and review"):  a mark of its own, no todo.
+   * - it stays where it is, wanted (`urgent`):  RED until handled, reviewed or not (`PlanReader.itemState()`)
+   * - closed:  reopened;  `calm` and an earlier `fixed` go, so pressing it again on a fix he doesn't like turns it red
+   * - his note and picture kept on it, his words;  a Noted card says go ahead
+   * - `did`:  what the agent does next (`doThisSteps()`)
+   */
+  private doThis(item: Element, { note, at, shot }: Pick<PlanMark, "note" | "at" | "shot">): MarkResult {
+    if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
+    if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
+    Markup.set<"epic-item">(item, { urgent: true, calm: undefined, fixed: undefined })
+    this.review(item.id)
+    this.noteStatus(item.id, PlanMarkup.text("Go ahead:  fix this here"))
+    return { applied: true, did: this.doThisSteps(item) }
+  }
+
+  /** Owen's accept of the fix on `item` (orange):  closed, reviewed;  returns `inbox apply`'s line. */
+  private acceptFix(item: Element): string {
+    this.setItem(item.id, "done")
+    this.review(item.id)
+    return "approved:  closed (fix accepted)"
   }
 
   /**
@@ -1477,6 +1627,7 @@ export class PlanDoc extends PlanReader {
    * Approve `item` (of `kind`, `open` or not) as it stands;  returns what it did, for the log line.
    * - an open judgement call:  closed (accepted);  an open test:  closed (it passed);  both reviewed
    * - anything else (an open todo, limit or issue;  a closed item):  reviewed
+   * - NOT Owen's accept of a fix (orange):  `applyAction()`'s, `acceptFix()`
    */
   approve(item: Element, kind: string, open: boolean): string {
     if (open && (kind === "judgement" || kind === "test")) {
@@ -1542,9 +1693,14 @@ export class PlanDoc extends PlanReader {
    * - the set:  `set` (from 1), else the item's LATEST (Claude's last reply's, often), never one in its Original
    *   Discussion
    * - `outcome`:  on the Noted card in place of what happens next, and in the log line
+   * - `letter` as people see it in a later set (`B2`:  `B` of the 2nd set, epic `epic-engine` I227) names that set,
+   *   unless `set` does
    * - throws when the item has no such set, or the set no such option;  nothing is changed then
    */
-  choose(id: string, letter: string, { outcome, set }: ChooseOptions = {}): string {
+  choose(id: string, typed: string, { outcome, set: given }: ChooseOptions = {}): string {
+    const shown = parseSetLetter(String(typed))
+    const letter = shown?.letter ?? typed
+    const set = given ?? (shown?.choices === undefined ? undefined : shown.choices + 1)
     const item = this.item(id)
     const label = item.id.toUpperCase()
     const sets = PlanItem.choiceSets(item)
@@ -1852,9 +2008,10 @@ export class PlanDoc extends PlanReader {
    *   plain text goes as it is (`&lt;` for a `<`)
    * - slotted, so never ordered (`Markup.place()`):  appended;  drawn under Owen's marked note, above the note box
    * - an item is stamped (`changed`), not flagged UPDATE:  a record of a mark, not a change to the item
+   * - `quiet`:  not stamped either (`/epic tidy`'s doubtful items)
    * - throws for an id the doc doesn't have, or a reading with no text
    */
-  addStatus(id: string, reading: string, { state = "underway" }: { state?: StatusState } = {}): string {
+  addStatus(id: string, reading: string, { state = "underway", quiet = false }: AddStatusOptions = {}): string {
     const host = this.statusHost(id)
     const blocks = this.statusBlocks(reading)
     if (!blocks.length) throw new PlanDocError(`${id.toUpperCase()}:  a status card needs a reading`)
@@ -1863,7 +2020,7 @@ export class PlanDoc extends PlanReader {
     const card = this.make("epic-status", { state, at, from: this.person, agent: this.agent }, blocks)
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
-    if (host.localName === "epic-item") this.stamp(host)
+    if (host.localName === "epic-item" && !quiet) this.stamp(host)
     return PlanItem.titleOf(host)
   }
 
@@ -1903,18 +2060,58 @@ export class PlanDoc extends PlanReader {
    *     never turns green on Claude's word
    *   - a `limit` todo:  nothing to do
    *   - an Overview sub-section, a phase, the summary;  an item closed already
+   * - an issue or a call Owen asked for with Do this (`urgent`, I232):  it NEVER closes on Claude's word:
+   *   fixed, for his review (`fixedForReview()`), so an agent's `done` out of habit still turns it orange
    * - Before I148 it wrote only the card:  a fixed issue stayed red (repo-split's I65).
    *   The migration `done-cards-close` closes the ones left so.
    * - throws as `finishStatus()` does:  no underway card
    */
-  finishWork(id: string, summary?: string): { title: string; closed: boolean } {
+  finishWork(id: string, summary?: string): { title: string; closed: boolean; fixed?: boolean } {
     const title = this.finishStatus(id, summary)
     const host = this.statusHost(id)
+    if (
+      host.localName === "epic-item" &&
+      CALM_ID.test(host.id) &&
+      host.hasAttribute("urgent") &&
+      host.getAttribute("status") === "open"
+    ) {
+      this.markFixed(host, title)
+      return { title, closed: false, fixed: true }
+    }
     if (host.localName !== "epic-item" || host.getAttribute("status") !== "open" || !PhaseTakes.isWork(host))
       return { title, closed: false }
     this.setItem(host.id, "done")
     this.log(`${host.id.toUpperCase()} closed:  ${title}`)
     return { title, closed: true }
+  }
+
+  /**
+   * Claude has fixed issue or judgement call `id`:  ORANGE, Owen's turn to review it
+   * (`epic update <name>#<id> fixed ["<what changed>"]`;  epic `epic-engine` I232).  Returns its title.
+   * - stays open;  Owen's Approve closes it (`acceptFix()`), his Do this sends it back, red
+   * - its latest underway card turns Done with `summary` under it;  no underway card:  `summary` is a Done card
+   * - throws on anything but an open issue or call:  a todo's `done` closes it, a question is decided
+   */
+  fixedForReview(id: string, summary?: string): string {
+    const item = this.item(id)
+    if (!CALM_ID.test(item.id) || item.getAttribute("status") !== "open")
+      throw new PlanDocError(
+        `${item.id.toUpperCase()}:  only an open issue or judgement call waits for review of a fix`
+      )
+    const title = this.underwayCard(item)
+      ? this.finishStatus(item.id, summary)
+      : summary
+        ? this.addStatus(item.id, summary, { state: "done" })
+        : PlanItem.titleOf(item)
+    this.markFixed(item, title)
+    return title
+  }
+
+  /** `item` waits for Owen's review of its fix:  not "reviewed" any more, so it's on his list again;  logged. */
+  private markFixed(item: Element, title: string): void {
+    Markup.set<"epic-item">(item, { fixed: true, reviewed: undefined })
+    this.stamp(item)
+    this.log(`${item.id.toUpperCase()} fixed, for review:  ${title}`)
   }
 
   /**
@@ -1924,10 +2121,50 @@ export class PlanDoc extends PlanReader {
    *   the session took the mark, and recording it was all there was to do
    * - else a card born noted (`addStatus()`)
    * - NOT for work done (an answer written, code changed):  that's `finishStatus()`'s Done
+   * - `quiet`:  a card born noted leaves the item's `changed` stamp alone (`addStatus()`)
    */
-  noteStatus(id: string, what: string): string {
+  noteStatus(id: string, what: string, { quiet = false }: { quiet?: boolean } = {}): string {
     if (this.underwayCard(this.statusHost(id))) return this.finishStatus(id, what, { state: "noted" })
-    return this.addStatus(id, what, { state: "noted" })
+    return this.addStatus(id, what, { state: "noted", quiet })
+  }
+
+  /**
+   * Why item `id` may NOT be closed as obsolete (`epic close --why`, `/epic tidy`);  `undefined` when it may.
+   * - only an open judgement call, issue or todo (`OBSOLETE_ID`):  a question is decided, a manual test run
+   * - never one Owen wants (`urgent`), one fixed and waiting for his review (`fixed`), one waiting for his pick,
+   *   one Claude is at work on or that has work queued
+   * - `marked`:  the ids (lower case) holding a mark of his not taken yet:  never those
+   * - `epic stale` reports this same answer, so an agent needn't try
+   */
+  closeRefusal(id: string, { marked = new Set<string>() }: { marked?: ReadonlySet<string> } = {}): string | undefined {
+    if (!this.hasItem(id)) return "no such item"
+    const facts = this.facts(this.item(id))
+    if (QUESTION_ID.test(facts.id)) return "a question:  decide it (`epic decide`)"
+    if (!OBSOLETE_ID.test(facts.id)) return "only judgement calls, issues and todos close this way"
+    if (facts.status !== "open") return `already ${facts.status}`
+    if (facts.urgent) return "Owen asked for it (urgent)"
+    if (facts.fixed) return "fixed, waiting for Owen's review"
+    if (facts.awaitsPick) return "waiting for Owen's pick"
+    if (marked.has(facts.id)) return "Owen's mark on it hasn't been taken"
+    if (facts.underway || facts.working) return "being worked on"
+    if (facts.queued !== undefined) return "queued work:  `epic unqueue` it first"
+    return undefined
+  }
+
+  /**
+   * Close item `id` as obsolete:  done, `why` (HTML, as a status card's reading) a Done card on it and in the log's
+   * line;  returns its title.
+   * - not taken up by the active phase (`setItem()`'s `taken-in`):  nothing was built for it
+   * - throws when `closeRefusal()` says no (the caller has checked;  this is the guard)
+   */
+  closeObsolete(id: string, why: string, { marked }: { marked?: ReadonlySet<string> } = {}): string {
+    const refusal = this.closeRefusal(id, { marked })
+    if (refusal) throw new PlanDocError(`${id.toUpperCase()} can't close as obsolete:  ${refusal}`)
+    this.addStatus(id, why, { state: "done" })
+    const title = this.setItem(id, "done")
+    Markup.set<"epic-item">(this.item(id), { takenIn: undefined })
+    this.log(`${id.toUpperCase()} closed:  ${title} -- ${why.replace(/<[^>]+>/g, "")}`)
+    return title
   }
 
   /**
@@ -2263,8 +2500,8 @@ export class PlanDoc extends PlanReader {
   /**
    * Move the phase at place `from` to place `to` (epic `epic-engine` P34:  Owen drags it there, or `epic move`);
    * returns `to`.
-   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do (a done or
-   *   active one keeps its number:  its commits and log say it)
+   * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do, or dropped
+   *   (epic `epic-engine` I228:  never built);  a done or active one keeps its number:  its commits and log say it
    * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, every
    *   bare `P5` in the page's words, and every `P5 · <its name>` (`relabelPhaseNames()`);  the record keeps its own
    * - SIDE EFFECT:  logs it
@@ -2277,7 +2514,13 @@ export class PlanDoc extends PlanReader {
         throw new PlanDocError(`move ${from} to ${to}:  no place ${n} (1-${phases.length})`)
     if (from === to) return to
     const [low, high] = from < to ? [from, to] : [to, from]
-    const started = phases.find((phase) => phase.n >= low && phase.n <= high && phase.status !== "todo")
+    // the one moved is to do;  the ones it passes to do or dropped (a dropped phase may be moved past:  I228)
+    const started = phases.find(
+      (phase) =>
+        phase.n >= low &&
+        phase.n <= high &&
+        (phase.n === from ? phase.status !== "todo" : !PlanDoc.canRenumber(phase.status))
+    )
     const said = `move P${phases[from - 1]!.number} to P${phases[to - 1]!.number}`
     if (started) throw new PlanDocError(`${said}:  P${started.number} has started;  only to-do phases move`)
     const before = PhaseNumbers.snapshot(this.document)
@@ -2457,7 +2700,8 @@ export class PlanDoc extends PlanReader {
       return element
     }
     const body: Node[] = summary.lead.map((text) => html("p", text))
-    const finished = summary.done.filter((done) => done.status === "done")
+    // done and dropped (I228) alike:  each line says which
+    const finished = summary.done.filter((done) => done.status !== "under way")
     const running = summary.done.filter((done) => done.status === "under way")
     if (finished.length) {
       body.push(heading("done", "What was done"))
@@ -2676,7 +2920,8 @@ export class PlanDoc extends PlanReader {
    * - pick isn't for them
    * - revisit and details are Claude's, as for an item
    */
-  private applyToPart(part: ReviewPart, { action, pick, when, note, at, to }: PlanMark): MarkResult {
+  private applyToPart(part: ReviewPart, mark: PlanMark): MarkResult {
+    const { action, when, note, at, to } = mark
     switch (action) {
       case "approve":
         // a phase whose build plan waits, or is held (I221):  Accept plan (P33)
@@ -2694,12 +2939,12 @@ export class PlanDoc extends PlanReader {
           this.noteStatus(part.id, PlanMarkup.text("Go ahead:  Owen wants this phase built"))
           return { applied: true, did: `go ahead:  build it${note ? " (his note kept)" : ""}` }
         }
-        const todo = this.followUp(part, note)
-        this.noteStatus(part.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        const todo = this.followUp(part, part.element, note)
+        this.noteStatus(part.id, filedTodo(todo.id))
+        return { applied: true, did: filedDid(todo) }
       }
       case "pick":
-        return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
+        return { applied: false, left: `${part.label} (${part.what}):  can't pick ${mark.pick}` }
       case "move": {
         if (part.kind !== "phase" || !to)
           return { applied: false, left: `${part.label} (${part.what}):  only a phase moves` }
@@ -2728,7 +2973,7 @@ export class PlanDoc extends PlanReader {
         }
       }
       default:
-        return this.leftForClaude({ action, pick, when, note }, () => undefined)
+        return this.leftForClaude({ action, when, note }, this.pickWords(part.element.id, mark))
     }
   }
 
@@ -2991,15 +3236,24 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * A new todo, "Follow up:  <title>", linking back to what it's from (`from`:  its label, link and what it is),
-   * Owen's note in his words;  its id.
+   * A new todo, "Follow up:  <title>", red until Owen reviews it (`urgent`):  it asks him to act (I230).
+   * - says what's wrong and the fix proposed, read from `source`, the item or part it's from (`FollowUpSummary`)
+   * - then links back to it (`from`:  its label, link and what it is), then Owen's note in his words
+   * - returns its id, and whether a fix was found:  none, and `inbox apply` tells the agent to write one
    */
-  private followUp(from: Pick<ReviewPart, "label" | "link" | "what" | "title">, note: string | undefined): string {
+  private followUp(
+    from: Pick<ReviewPart, "label" | "link" | "what" | "title">,
+    source: Element,
+    note: string | undefined
+  ): FiledFollowUp {
     // Owen's note (Make Todo's box, epic `windows-and-review` P2) goes in as his words
     const said = note ? `<p>${AuthorWords.said(PlanMarkup.text(this.person))}  ${PlanMarkup.text(note)}</p>` : ""
     const link = `<a href="#${from.link}">${PlanMarkup.text(from.label)}</a>`
-    const details = `<p>From ${link} (${from.what}), marked "Make Todo" on the page:  ${PlanMarkup.text(from.title)}</p>${said}`
-    return this.addItem("todo", `Follow up:  ${from.title}`, { details })
+    const summary = FollowUpSummary.of(source, from.title)
+    const made = `<p>From ${link} (${from.what}), marked "Make Todo" on the page:  ${PlanMarkup.text(from.title)}</p>`
+    const details = `${summary.html}${made}${said}`
+    const id = this.addItem("todo", `Follow up:  ${from.title}`, { details, urgent: true })
+    return { id, hasFix: summary.hasFix }
   }
 
   /**
@@ -3049,17 +3303,17 @@ export class PlanDoc extends PlanReader {
     return more
   }
 
-  /** What's left for Claude:  revisits (with or without a pick), Add Details, and actions there are none of. */
-  private leftForClaude(
-    { action, pick, when, note }: Omit<PlanMark, "id">,
-    optionFor: () => OptionCard | undefined
-  ): MarkResult & { applied: false } {
+  /**
+   * What's left for Claude:  revisits (with or without a pick), Add Details, and actions there are none of.
+   * - `picked`:  the mark's picks in words (`pickWords()`), `""` for none
+   */
+  private leftForClaude({ action, when, note }: Omit<PlanMark, "id">, picked: string): MarkResult & { applied: false } {
     switch (action) {
       case "revisit": {
         if (when === "now") return { applied: false, left: "revisit now:  an agent's (`inbox done` once answered)" }
-        if (!pick) return { applied: false, left: `to talk over${note ? `:  "${note}"` : ""}` }
+        if (!picked) return { applied: false, left: `to talk over${note ? `:  "${note}"` : ""}` }
         // "pick B, but ...":  never applied, the remark may change the pick
-        return { applied: false, left: `to talk over:  ${PlanItem.pickAsks(pick, optionFor(), note)}` }
+        return { applied: false, left: `to talk over:  ${PlanItem.pickAsks(picked, note)}` }
       }
       case "details":
         return { applied: false, left: "Add Details:  an agent's (`inbox done` once written)" }
@@ -3128,6 +3382,15 @@ type ReviewPart = {
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 
+/** What `PlanDoc.followUp()` made:  the new todo's id, and did its source propose a fix? */
+type FiledFollowUp = { id: string; hasFix: boolean }
+
+/** A mark's outcome for a new follow-up, as `inbox apply` prints it:  with no fix found, the agent's to write one. */
+function filedDid({ id, hasFix }: FiledFollowUp): string {
+  const made = `to todo ${id.toUpperCase()}`
+  return hasFix ? made : `${made}:  no fix proposed yet, write one in its "${FIX_LABEL}" field`
+}
+
 /** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
   return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
@@ -3143,6 +3406,12 @@ function carriedPick(mark: PlanMark): PlanMark | undefined {
   if (mark.action !== "approve" && mark.action !== "todo") return undefined
   const fields = ReviewInbox.pickOf(mark)
   return Object.keys(fields).length ? { id: mark.id, action: "pick", at: mark.at, ...fields } : undefined
+}
+
+/** `mark` without its option set changes (`PickFields`, every set's):  what's left of it to apply by itself. */
+function withoutSetChange(mark: PlanMark): PlanMark {
+  const { pick: _p, choices: _c, multiple: _m, added: _a, edited: _e, removed: _r, sets: _s, ...rest } = mark
+  return rest
 }
 
 /**

@@ -72,8 +72,15 @@ export type RecipeServersProps = {
   keys?: PlaceKeys
   /** Adds its own routes, first. */
   routes?: (router: SRV.Router) => void
-  /** Adds its own routes behind the demo's guard, once it's listening:  the app's project data folders, for a test. */
-  guardedRoutes?: (router: SRV.Router, guard: SRV.Guard) => void
+  /**
+   * Adds its own routes behind the demo's guard, once it's listening:  the app's project data folders, for a test.
+   * - `upgrade`:  claims the websockets under a prefix, a space's live rooms (epic `atmosphere` P36)
+   */
+  guardedRoutes?: (
+    router: SRV.Router,
+    guard: SRV.Guard,
+    upgrade: (prefix: string, handle: SRV.UpgradeHandler) => void
+  ) => void
   /** Must it have that port?  A demo says so on its page. */
   fixedPort?: boolean
   /** Where a fake of AT Protocol's network listens, its hosts on the next two ports:  left out, it isn't started. */
@@ -152,7 +159,8 @@ export async function startRecipeServers({
     ? SRV.listenPreferred(server, { port, fallback: false })
     : new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve)))
   const { port: at } = server.address() as { port: number }
-  guardedRoutes?.(router, guardFor(at))
+  const upgrades: { prefix: string; handle: SRV.UpgradeHandler }[] = []
+  guardedRoutes?.(router, guardFor(at), (prefix, handle) => upgrades.push({ prefix, handle }))
   new PlaceServer({ places, keys }).route(router, guardFor(at))
   const referee = new Referee({
     path: ROOM_PATH,
@@ -162,7 +170,9 @@ export async function startRecipeServers({
   })
   await referee.open()
   server.on("upgrade", (raw, socket, head) => {
-    if (new URL(raw.url ?? "/", "http://localhost").pathname === ROOM_PATH) void referee.upgrade(raw, socket, head)
+    const claim = upgrades.find(({ prefix }) => raw.url?.startsWith(`${prefix}/`))
+    if (claim) void claim.handle(raw, socket, head)
+    else if (new URL(raw.url ?? "/", "http://localhost").pathname === ROOM_PATH) void referee.upgrade(raw, socket, head)
     else socket.destroy()
   })
   return {

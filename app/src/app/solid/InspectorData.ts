@@ -257,7 +257,8 @@ const WHY_NOT_TEXTS: Record<WhyNotWritable, AppTextKey> = {
   role: "inspectorDataWhyNotRole",
   "taken down": "inspectorDataWhyNotTakenDown",
   full: "inspectorDataWhyNotFull",
-  "not listed": "inspectorDataWhyNotNotListed"
+  "not listed": "inspectorDataWhyNotNotListed",
+  "used up": "inspectorDataWhyNotUsedUp"
 }
 
 /** What the side bar says above a thing kept in a place, by what's behind it. */

@@ -67,12 +67,27 @@ describe("NightSummary", () => {
   })
 
   // epic `epic-engine` r57, I224 (🚧 language:  issues made into todos stayed "open issue" under Still to do)
-  test("an issue Owen made a todo leaves Still to do:  it waits on the todo, not on him", () => {
+  // epic `epic-engine` I228:  a phase dropped since Owen read it is news, with the done, saying why
+  test("a phase dropped since Owen read it:  listed with the done, its why its line", () => {
+    const plan = readPage()
+    plan.now = NIGHT
+    plan.setPhase(1, "dropped", { why: "<p>Moved to P2</p>" })
+    const summary = NightSummary.of(plan, READ)
+    expect(summary.done.map(({ label, status, built }) => [label, status, built])).toEqual([
+      ["P1 · Build it", "dropped", "Moved to P2 · Polish it"]
+    ])
+    plan.refreshAway()
+    const line = plan.document.querySelector('epic-away-line[line="p-build-it"]')!
+    expect(line.textContent).toBe("P1 · Build it dropped:  Moved to P2 · Polish it")
+  })
+
+  test("an issue Owen said Do this on leaves Still to do until it's fixed:  it waits on Claude, then on him", () => {
     const plan = readPage()
     night(plan)
     expect(plan.applyMark({ id: "i1", action: "todo" } as Parameters<PlanDoc["applyMark"]>[0]).applied).toBe(true)
-    const summary = NightSummary.of(plan, READ)
-    expect(summary.needs.map(({ label }) => label)).toEqual(["Q1", "M1"])
+    expect(NightSummary.of(plan, READ).needs.map(({ label }) => label)).toEqual(["Q1", "M1"])
+    plan.fixedForReview("i1", "Fixed")
+    expect(NightSummary.of(plan, READ).needs.map(({ label }) => label)).toContain("I1")
   })
 
   test("nothing since Owen read it:  empty", () => {

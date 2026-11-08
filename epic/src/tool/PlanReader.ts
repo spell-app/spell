@@ -1,3 +1,6 @@
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
+
 import {
   CALM_ID,
   CANCELED,
@@ -29,6 +32,9 @@ import {
   type ReviewStatus
 } from "./planDoc.types"
 
+import type { PickFields } from "./ReviewInbox"
+
+import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
 import { OptionSets } from "./OptionSets"
 import { PlanItem } from "./PlanItem"
 import { PlanTime } from "./PlanTime"
@@ -161,6 +167,33 @@ export abstract class PlanReader {
    */
   abstract optionCards(item: Element, choices?: number): OptionCard[]
 
+  /**
+   * The options of set `choices` (by position, as a pick names it) of what `id` names:  an item (none given:  its
+   * own), a phase, a standing set (`s-upgrades`);  `[]` when there's no such holder or set.
+   */
+  abstract optionCardsOf(id: string, choices?: number): OptionCard[]
+
+  /**
+   * `mark`'s picks on `id`'s sets, as the inbox prints them (epic `epic-engine` I227):  each letter as people see it
+   * (`B` in the first set, `B2` in the 2nd:  `setLetter()`) with its card's title, `B · Bananas, B2 · Cherries`;
+   * `""` with no pick.
+   * - a letter with no card:  `B2 (no such option card)`;  an added option (`+1`):  its title from the mark
+   */
+  pickWords(id: string, mark: PickFields | null | undefined): string {
+    return setPicksOf(mark)
+      .flatMap((change) => {
+        const cards = change.pick ? this.optionCardsOf(id, change.choices) : []
+        return pickedLetters(change.pick).map((letter) => {
+          const shown = setLetter(letter, change.choices)
+          const title =
+            change.added?.find((each) => each.key === letter)?.title ??
+            cards.find((card) => card.letter === letter)?.title
+          return title === undefined ? `${shown} (no such option card)` : `${shown} · ${title}`
+        })
+      })
+      .join(", ")
+  }
+
   /** Structural problems, as text:  duplicate ids, `#id` links to nowhere, phases without a valid status ... */
   abstract check(): string[]
 
@@ -254,11 +287,13 @@ export abstract class PlanReader {
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
+   * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  `replied`, orange, Owen's turn
    * - work a review queued, not started (`queued`):  `open`, still to do (Q20:  no longer `progress`)
    * - Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`):  `replied`, Owen's
    *   turn to pick (Owen, 2026-10-09);  a pick, a newer reply from Owen, or closing it ends that
-   * - waiting on Owen:  `attention`:  an open question;  an open judgement call or issue not reviewed, unless it's
-   *   `calm` (not urgent:  it wouldn't surprise Owen, or he said so from its id chip):  then `open`
+   * - waiting on Owen:  `attention`:  an open question;  an open judgement call, issue or `urgent` todo not reviewed,
+   *   unless it's `calm` (not urgent:  it wouldn't surprise Owen, or he said so from its id chip):  then `open`
+   *   - a judgement call or issue he asked for with Do this (`urgent`, I232):  red whether reviewed or not, until handled
    * - settled by a review, though still open (`SETTLED_AS`:  approved, made a todo):  `recent`
    * - else `open`:  a revisit or Do Now Claude answered leaves it open, yellow (J10)
    */
@@ -269,12 +304,32 @@ export abstract class PlanReader {
     // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
     if (facts.handled) return "handled"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
+    if (facts.fixed) return "replied"
     if (facts.queued !== undefined) return "open"
     if (facts.awaitsPick) return "replied"
     if (QUESTION_ID.test(facts.id)) return "attention"
-    if (CALM_ID.test(facts.id) && facts.reviewed === undefined) return facts.calm ? "open" : "attention"
+    const wanted = facts.urgent && CALM_ID.test(facts.id)
+    if (wanted || ((CALM_ID.test(facts.id) || facts.urgent) && facts.reviewed === undefined))
+      return facts.calm ? "open" : "attention"
     if (SETTLED_AS.has(facts.reviewAs ?? "")) return "recent"
     return "open"
+  }
+
+  /**
+   * What the agent working `item` does with its Do this, as `inbox apply` and `epic inbox` print it:
+   * work in the item itself, writing a proposed fix first when it has none, and turn it orange when it's done.
+   * - a proposed fix:  `FollowUpSummary`'s reading of the item, its "Proposed fix" field first
+   */
+  doThisSteps(item: Element): string {
+    const label = item.id.toUpperCase()
+    const { hasFix } = FollowUpSummary.of(item, PlanItem.titleOf(item))
+    const first = hasFix
+      ? "build its proposed fix"
+      : `no fix proposed yet:  write one first, in ${label}'s "${FIX_LABEL}" field, then build it`
+    return (
+      `do this, in ${label} itself (no todo):  ${first};  commits named "<epic> ${label}:  ...";  ` +
+      `done:  \`epic update <epic>#${label} fixed "<what changed>"\` turns it orange, for his review`
+    )
   }
 
   ////////////////

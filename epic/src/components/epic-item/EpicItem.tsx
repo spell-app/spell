@@ -5,13 +5,13 @@ import { E } from "spell/ui/core"
 
 import { PlanDates } from "spell/epic/dates"
 import { PhaseIds } from "spell/epic/phases"
+import { hasPick, pickLabel } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import {
   CHOSEN,
-  REVIEW_BUTTONS,
+  BUTTONS_OF,
   SHOW_NOTE,
-  TODO_BUTTONS,
   stopIfOwn,
   type ReviewShows
 } from "spell/epic/components/epic-review/EpicReview.types"
@@ -60,7 +60,7 @@ import {
   type StateFields,
   type ItemState,
   type ReviewLabel,
-  isTodo
+  buttonsForItem
 } from "./EpicItem.types"
 
 import itemCSS from "./EpicItem.css?inline"
@@ -83,6 +83,9 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
  * - `calm`:  an open judgement call or issue not reviewed yet is yellow (`open`), not red (`attention`).
+ * - `urgent`:  a todo that asks Owen to act (Make Todo's follow-up, I230):  red until reviewed, as an issue is;
+ *   a judgement call or issue Owen wants done (Do this, I232):  red until handled, reviewed or not.
+ * - `fixed`:  a judgement call or issue Claude has fixed:  orange, Owen's turn to review it (I232).
  * - Its COMMITS (`<epic-commit>` children, or `commits` while its part isn't in):
  *   - hidden until the page's git toggle shows every commit
  *   - its git icon shows just its own, opening it first, and hides them again
@@ -97,6 +100,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  * - REVIEW (P9), three `<epic-review>`s:  its buttons, its note box, a marked note.
  *   - only while the page is reviewed (served with a token, its inbox answering:  `ReviewState`)
  *   - at the line's end:  Make Todo, Revisit, Approve, one group (no Do Now wand since 2026-10-25)
+ *     - an issue's or a judgement call's:  Do this, Revisit, Approve:  worked in the item itself (I232)
  *     - a todo's:  the plane (do it in the next phase), Revisit, the x (drop it:  Owen, 2026-10-09)
  *     - the review label in their tooltips, not beside them (Owen, 2026-10-07)
  *   - Revisit and Edit unfold it to show the box (`epic-note-showing`)
@@ -218,7 +222,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * a todo's three (the plane, Revisit, the x:  Owen, 2026-10-09), else an item's four.
    * - declared before `chipMark`, which reads it (memos compute as they're made)
    */
-  readonly reviewButtons = createMemo(() => (isTodo(this.id, this.limit) ? TODO_BUTTONS : REVIEW_BUTTONS))
+  readonly reviewButtons = createMemo(() => BUTTONS_OF[buttonsForItem(this.id, this.limit)])
 
   /**
    * May Owen call it urgent or not (its id chip, while the page is reviewed)?
@@ -237,8 +241,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /** Its attributes its drawn state reads (`DrawnState.of()`), tracked. */
   private stateFields(): StateFields {
-    const { id, state, status, changed, reviewed, queued, working } = this
-    return { id, state, status, changed, reviewed, queued, working }
+    const { id, state, status, changed, reviewed, queued, working, urgent, fixed } = this
+    return { id, state, status, changed, reviewed, queued, working, urgent, fixed }
   }
 
   /**
@@ -264,10 +268,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const mark = this.reviewState.mark()
     const fill = this.reviewState.isSent() ? "outline" : "dashed"
     if (mark?.action === "skip") return { fill, label: "boxSkip" }
-    if (mark?.pick) return { fill, label: { pick: mark.pick } }
+    // each set's letters as people see them:  `B2` in the 2nd set (`pickLabel()`, epic `epic-engine` I227)
+    if (hasPick(mark)) return { fill, label: { pick: pickLabel(mark) } }
     // read plainly:  the doc's `chosen` lands with the item's own attributes changing
     // (`reviewed`, `state` ...), which re-run this
-    const taken = this.reviewState.takenPick()?.pick
+    const taken = pickLabel(this.reviewState.takenPick())
     if (taken && !this.domElement.querySelector(CHOSEN_SET))
       return { color: "green", fill: "outline", label: { pick: taken } }
     if (this.itemState() === "progress") return { color: "blue", fill: "outline" }
@@ -393,7 +398,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const { queued, work, reviewed, deferred, status } = this
     // greyed with age (`ItemAge`), it's still decided or done, not "no longer relevant"
     const aged = this.itemState() === "old" && this.status !== "canceled"
-    const parts = [this.translationForKey(STATE_TIP_KEYS[aged ? "recent" : this.itemState()])]
+    const parts = [
+      this.translationForKey(this.fixed ? "stateFixed" : STATE_TIP_KEYS[aged ? "recent" : this.itemState()])
+    ]
     const mark = this.chipMark()
     // a mark with no label (work still due:  queued, Claude on it):  the state's words and `to do` say it
     if (mark?.label) {
@@ -689,7 +696,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       <epic-review
         of={this.id}
         shows={shows}
-        buttons={isTodo(this.id, this.limit) ? "todo" : "item"}
+        buttons={buttonsForItem(this.id, this.limit)}
         label={this.label()}
         tip={this.reviewTip()}
         under-line={shows === "note" && !this.hasDetails() ? "" : undefined}

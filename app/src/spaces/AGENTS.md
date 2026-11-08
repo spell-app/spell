@@ -80,6 +80,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - through `spell/app/spaces`
     - through our disk reader (below)
     - or `spell/app/spaces/models/projectGroups` alone:  `<spell-viewer>` does that, to stay light
+  - An org's own programs, `@rs/OrgAdmin`, are a group found by address (`orgProgramGroup()`):  orgs can't be listed
+    up front, and the editor lists none of them.
   - Spell NEVER imports us.
 - Each group is named by its ADDRESS, and its folder comes from that (`SP.SpellUrls.folderFor()`):
 
@@ -260,10 +262,32 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
     ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
     - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
-      `approved_apps`, `designers` (T47), `role_changes` (the log).
+      `approved_apps`, `designers` (T47), `event_stages` (T50), `role_changes` (the log).
+    - Its event stages (T50, J153):  the Board and the Admins add, change and remove the org's event stages there
+      (`OrgEvents.setProgram()`);  a new one goes in before the last, and one an event is in, or another moves to,
+      can't be removed.
+    - In Spanish too:  `@spell/examples/AdministracionDeLaOrg` (T46, J114), the same place, each field `guardado como`
+      its English name.
     - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
       joins the org (`"join"`), a term removed ends.
     - Anyone outside the org reads none of it;  never read direct (the kit's `ORG_ROLES_ADDRESS`).
+  - AN ORG'S EVENTS ([OrgEvents.ts](server/node/people/OrgEvents.ts), epic `atmosphere` P32):  each from someone's
+    idea to a quiet record, through the stages of the org's EVENT PROGRAM.
+    - Anyone in the org PROPOSES one, naming its organizers (`propose()`);  it then MOVES stage by stage (`move()`),
+      each move by whoever the stage says:  the team's Managers (`"the team"`) or its organizers (`"its organizers"`);
+      the Board and the Admins always.
+    - RS's program, every org's until it says its own (`RS_EVENT_PROGRAM`):  Proposed, Approved (the Events Team says
+      yes), Planning, Open, Analysis, Quiet.
+    - APPROVING it (a stage that `approves`) makes it a project under its team (`addProject()`), its organizers its
+      Project Managers (`give()`), and copies the program's template project into its shared space
+      (`events_team@rs/picnic/SignUpSheet/`).
+    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`);
+      P33's feed leaves it off too.
+    - Kept in the Admin space beside the roles, `@rs/__admin/events.json5`:  `{ program?, events }`;  the program the
+      Board's and the Admins' to change (`setProgram()`), every move in the org's log (`"event"`, its stage the name).
+    - Its page:  the built-in program `@spell/examples/OrgEvents`, reading the same place as the Admin page at
+      `@rs/__admin/events`, its collections `events` (an insert proposes, an update of `stage` moves) and
+      `event_stages`.
   - THE DESIGN RIGHT (epic `atmosphere` T47, J117):  who changes a space's PROGRAM, its projects' pages and source,
     apart from who changes its DATA.
     - A space's managers design it by their role;  the org lets anyone else design one, person by person
@@ -280,8 +304,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       its viewers post there only once she turns `viewersPost` on;  a folder's own `__members/` doesn't count, and
       adding or removing someone is refused.
     - Only she writes;  the Board and the Admins delete what's in it, never edit it (`boardAndAdmins()`).
-    - It holds documents and approved apps, never code:  a page runs as whoever views it (`ProjectRoles.mayHoldOrDie()`:
-      a program, a script, a web page or an SVG, or a page with its own `<action>` or `<script>`, refused).
+    - It takes any file, code included, by the same rules as any space (J130, Owen:  "don't limit for now";  P28
+      refused code there until then).
     - Once she's left the org it's hers alone;  `spell space org leave rs ana@rs --to ana@spell/from-rs` copies it into
       another space of hers (`SpaceFolders.takeOwnSpace()`), or `spell space export` writes it as files.
     - Her INBOX is a space of its own beside it, `ana@rs/__inbox` (below), never part of what she takes with her.
@@ -306,7 +330,49 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `@rs/__inbox`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
       `PERSON_INBOX_ADDRESS`, never read direct):  one program, each person's inbox, the built-in
       `@spell/examples/Inbox`.
+    - Two more collections only she writes (epic `atmosphere` P30):  `mail_choices` (`INBOX_MAIL`), how she hears of
+      it by mail, the first one counting;  `subscriptions` (`INBOX_SUBSCRIPTIONS`), each a shared space of the org
+      she follows, `{ space: "events_team@rs" }`, a private one refused.
+  - MAIL AND SUBSCRIPTIONS ([InboxMail.ts](server/node/places/InboxMail.ts), epic `atmosphere` P30):  how people hear
+    of their inbox, and of the spaces they follow.
+    - Each person's MAIL CHOICE (`MAIL_CHOICES`):  one mail per message (`"each"`), a daily digest (`"digest"`, the
+      default), or none;  a copy landing in her inbox (`PersonInbox`'s `onArrived`) is mailed, kept for the digest,
+      or nothing.
+    - The DIGEST:  one mail a day with every message since the last, from `DIGEST_HOUR` (7, the server's clock), a job
+      of the daily round (`sendDigestsIfDue()`).
+    - SUBSCRIBING:  a new thing someone makes in a shared space reaches each subscriber's inbox as an UPDATE (Q24 A),
+      from the space, as Spell (`PersonInbox.sendAsSpell()`):  a post, a row or a file, never an app;  the one who made
+      it hears nothing.
+    - Who hears of what is ONE look-up, [Followers.ts](server/node/places/Followers.ts) (P38's phone alerts ask it too).
+    - Every mail has a STOP LINK, signed by the server (`ReadCredentials.sign()`), at `/api/mail/stop`:  it sets the
+      inbox's choice to none, or ends that subscription.
+    - Through the ONE mail seam (`Mailer`), the same catcher as the sign-in's (`environment.signInDir`'s `mail/`), until
+      P18's sender;  through the ONE retry queue (Q19 A), on the server's disk.
+    - Made by `SpaceFolders` when it's handed a `mailer` (the page server and the cloud);  without one, no mail.
+  - A PERSON'S FEED in the org ([PersonFeed.ts](server/node/places/PersonFeed.ts), epic `atmosphere` P33):
+    `bo@rs/__feed`, what's new across every space of the org he may read, put together each time he asks.
+    - `@rs/__feed`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
+      `PERSON_FEED_ADDRESS`, never read direct):  one program, each person's feed, the built-in `@spell/examples/OrgFeed`.
+    - Every space's `posts` (`FEED_POSTS`), each read through its own place AS HIM:  its read check, takedowns and
+      public settings hold, and a space he can't read is left out;  every inbox left out, and a quiet event's spaces
+      (`OrgEvents.isQuietAt()`).
+      - Which spaces:  every folder under the org's holding posts (`MemberLists.spacesOf()`, by `posts.list.json`).
+    - Each row the post as its space has it, its id `<space>~<id>`, its `space` saying where it's from.
+    - Read only, and sorted by nothing:  the RANKING is the page's, a Spell property in its program
+      (the built-in's `weight`:  2 more of it, 1 as it comes, 0 none), changed by changing his own copy of the program.
+    - The second time, only what changed:  its version is each space's own, so `changesSince()` asks each space what
+      changed since (`FolderPlace.changesSince()`), a space new to him whole, and one gone from his feed removed.
+    - For communities of hundreds:  300 posts read well under a second, in its test.  Not a feed for millions,
+      worked out ahead of time.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
+- SETTING UP AN ORG ([OrgSetup.ts](server/node/people/OrgSetup.ts), epic `atmosphere` P35, Q29):
+  `spell space org create rs --name "RS" --admin ana@example.org [--team "Events Team"]`, in one go.
+  - Each first Admin's account by email (`ana@spell`), the org's file with them in it as managers, its Admin space
+    (`OrgRoles.setUp()`, the first Admin its first Board), every first Admin an Admin, each team, and its paired
+    spaces' folders.
+  - Run again, it makes only what's missing, and says what was there.
+  - Recovery codes are left for later (`spell space org codes`):  they need two holders.
+  - The invite's mail goes through the running cloud (`spell space cloud invite`);  `OrgSetup` itself sends nothing.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.
   - The Board's standing right needs nothing:  it manages the Admin space whatever happens, so it can always name
@@ -431,11 +497,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       collection (the kit's `thingKindOf()`), checked where a write lands (`SpaceMembers.changeOrDie()`, handed to the
       kit's `FolderPlace`):
 
-      | Role | a post (posts, comments, messages) | a row (any other collection) | a file (`__files`) | an app (`__apps`) |
-      | --- | --- | --- | --- | --- |
-      | viewer | makes;  changes and removes its own, where the space lets viewers post (`viewersPost`) | -- | -- | -- |
-      | editor | makes;  changes and removes its own | makes;  changes any;  removes its own | the same as a row | -- |
-      | manager | makes;  removes any;  changes only its own | makes, changes and removes any | the same | installs one the org's Admins approved |
+      | Role | a post (posts, comments, messages) | a row (any other collection) | a file (`__files`) | an app (`__apps`) | a thread (`threads`, P36) |
+      | --- | --- | --- | --- | --- | --- |
+      | viewer | makes;  changes and removes its own, where the space lets viewers post (`viewersPost`) | -- | -- | -- | -- |
+      | editor | makes;  changes and removes its own | makes;  changes any;  removes its own | the same as a row | -- | -- |
+      | manager | makes;  removes any;  changes only its own | makes, changes and removes any | the same | installs one the org's Admins approved | starts, changes and removes any |
 
       - "its own":  whose `by` is them;  nobody else ever changes a post, so its `by` is always its writer
       - a refusal is `"role"`, with the role it takes (`needs`:  `"editor"`, `"manager"`), so a page names it in its own
@@ -514,10 +580,44 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       last place, one gets it and the other is refused `"full"`;  someone the list doesn't name, `"not listed"`.
     - Every collection of the folder is a sheet but the list it names;  a manager isn't held to the list, but is to a
       shift's places.
+  - INVITATIONS (epic `atmosphere` P31):  a sign-up sheet's tickets, in the same master.
+    - `- at most 40 rows for each event`:  several `at most` lines each hold (`mostEach` takes a list).
+    - `- each person asks for at most their "invitations" tickets` (`allowance`):  as many as their row on the list
+      says, one more refused `"used up"`;  a manager isn't held to it.  The organizers' page works the number out
+      (`work out the invitations`:  one more than their shifts, two for a member).
+    - Each change to someone's tickets sends them their count, Spell's update in their inbox
+      (`PersonInbox.sendAsSpell()`, one message per sheet, written over):  "You have used 2 of your 3 available
+      invitations".
+    - `- confirmed tickets join "picnic@rs/__attendees"` (`joins`):  once a manager sets a ticket's `status` to
+      `"confirmed"`, its `guest` (else its `person`) goes on that space's list;  nobody else sets `status`.
+    - An event's ATTENDEES' SPACE, `picnic@rs/__attendees` (`ATTENDEES_SPACE`, one of spaces' own names):  a third side
+      of a paired space (`OrgRoles.spaceAt()`'s `side: "attendees"`), its Managers the pair's, the rest its own
+      `__members/` (at most editors);  its Managers add and take off anyone.
+    - The letter:  the built-in `@spell/examples/PicnicLetter`, one page every attendee opens, reading the published
+      sheet's shifts and their inbox's count as them;  the organizers send it as an inbox pointer (`send the letter`).
   - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder shared live, a room per collection,
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.
     - Only someone who may read the space joins.
+    - A program names one by its Spell address:  `team chat is a room at "events_team@rs/messages"`, the page server's
+      room of that space's `messages`, signed in by a Spell account as a data folder is (epic `atmosphere` P36).
+  - CHAT THREADS (epic `atmosphere` P36):  a live room of a space's `messages`, the built-in `@spell/examples/OrgChat`.
+    - Every team, project and event has two, with nothing to set up:  an open thread in its shared space
+      (`events_team@rs/messages`), everyone in the org writing there, and its organizers' in its private one
+      (`events_team@rs/__private/messages`), only its Managers.
+    - A message is a post:  everyone deletes their own, the space's Managers anyone's, and nobody changes another's.
+    - Ad-hoc threads in the org's shared space:  a record in its `threads` (the kit's `THREADS_COLLECTION`, kind
+      `"thread"`), which only a Manager makes, there the Board and the Admins;  its messages name it in their `thread`.
+    - A busy thread:  200 messages from one page, one after another, in about a second on this machine (its test).
+  - THE THREAD LIST (epic `atmosphere` P37, T53):  every thread a person may read, down the side of the built-in Chat,
+    like Slack's channels ([PersonThreads.ts](server/node/places/PersonThreads.ts)).
+    - `@rs/__threads`, the org's address with no person, is whoever's asking's own list (`SpaceFolders`;  the kit's
+      `PERSON_THREADS_ADDRESS`, never read direct):  each paired space's open thread (`OrgRoles.pairedSpacesOf()`), the
+      organizers' ones they manage, and the org's ad-hoc ones;  an org with no Admin space, its own open thread alone.
+    - Each row:  `name`, `side`, `thread` (its room), `topic` (an ad-hoc thread's id) and `link`, the page's address
+      showing it, `?thread=events_team@rs/messages`.
+    - The page's room is at `"@rs/__thread"`:  whichever thread its address names, else the one this browser showed
+      last, else the org's own (the kit's `roomForPage()`);  picking another is following its link.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
     - Each with a reason, by a Spell admin (`spell space takedown`).
@@ -582,7 +682,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - What it serves, and nothing else:
       - the sign-in, the project data folders, `/terms`, `/element/`
       - the built-in programs' pages (`/apps/<project>`, `cloudApp.html`) and files
-      - never the mail catcher's page, nor anyone's own projects
+      - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
+        - someone who can't yet gets `cloudSignIn.html` at its address, whatever the name:
+          a program's files are the org's, so it can't load to draw its own sign-in bar
+        - `spell space org create` copies the Admin, Inbox, Feed and Chat programs there, each naming the org (`OrgSetup`)
+      - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
+    - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
+      it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
       - sessions, caught mail, its read key

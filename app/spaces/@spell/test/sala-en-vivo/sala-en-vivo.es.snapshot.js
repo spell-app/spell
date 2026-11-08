@@ -33,12 +33,17 @@ export const words = {
     "write-refused-owner": "No se pudo guardar tu cambio en {thing}:  es de otra persona, y solo ella lo cambia",
     "write-refused-full": "No se pudo guardar tu cambio en {thing}:  alguien se llevó el último sitio antes",
     "write-refused-not-listed": "No se pudo guardar tu cambio en {thing}:  solo se apuntan aquí las personas de su lista",
+    "write-refused-used-up": "No se pudo guardar tu cambio en {thing}:  ya pediste todas las invitaciones que tienes",
     language: "es",
     "write-retry": "Reintentar",
     "page-previous": "Anterior",
     "page-next": "Siguiente",
     "page-number": "Página {page}",
     "read-failed": "No se puede leer ahora:  {why}",
+    "read-too-soon": "El servidor pide esperar:  vuelve a intentarlo dentro de un rato",
+    "read-too-soon-seconds": "El servidor pide esperar:  vuelve a intentarlo dentro de {seconds} segundos",
+    "read-too-soon-minute": "El servidor pide esperar:  vuelve a intentarlo dentro de un minuto",
+    "read-too-soon-minutes": "El servidor pide esperar:  vuelve a intentarlo dentro de {minutes} minutos",
     "saved-added": "Agregar",
     "saved-removed": "Quitar",
     "write-show-me": "Muéstrame",
@@ -71,6 +76,13 @@ export const words = {
     "sign-in-linked": "También puedes iniciar sesión con Bluesky, como {handle}.",
     "sign-in-not-linked": "Esa cuenta de Bluesky no está vinculada a ninguna cuenta de Encanto aquí.  Encanto es solo por invitación:  pide una invitación, inicia sesión por correo y luego vincúlala.",
     "sign-in-taken-down": "La cuenta de Encanto vinculada a esa cuenta de Bluesky fue retirada por Encanto.",
-    "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto."
+    "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto.",
+    "site-no-such-page": "No existe esa página",
+    "site-create-page": "¿Quieres crearla?",
+    "site-create-it": "Crearla",
+    "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",
+    "site-page-failed-why": "{page} falló:  {why}",
+    "site-menu": "Páginas",
+    "table-edit": "Editar tabla"
   }
 }

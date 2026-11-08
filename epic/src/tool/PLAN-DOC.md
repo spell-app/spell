@@ -198,7 +198,16 @@ As `plan-doc.md`, "Ids":
   - The migration `whole-phase-numbers` (every edit) removes it, numbering the phase by its place, the phases after
     it moving down one, and what names them following (`PhaseNumbers.makeWhole()`).
 - `title`:  2-4 words, WITHOUT `P2 · ` (drawn).
-- `status`:  `todo`, `active`, `done`.
+- `status`:  `todo`, `active`, `done`, `dropped`.
+  - `dropped` (epic `epic-engine` I228):  never built, and won't be, e.g. a phase moved later, re-added there (`epic
+    move` won't renumber a started one);  `phase <name>#P18 dropped --why "Moved to P38"`.
+    - FINISHED, as `done` is (`PhaseStatuses.isFinished()`):  never the next phase, counted done in `3/5`, out of what's
+      left of the estimate, an epic all of whose phases are finished is done, listed in "While you were out"
+    - `--why` writes its Dropped field (`<epic-field name="dropped">`) in place of Done, a Done field removed;  a bare
+      phase number in it (`P38`) becomes a link to that phase;  the log line says it
+    - its UPDATE markers go, as a done phase's;  its plan is not accepted;  `done-at` stamped
+    - another phase may move past it, or be inserted before it:  nothing was built, so no commit says its number
+    - drawn struck through and grey, a crossed circle (`circle xmark`), grey at once
 - `plan`:  CLAUDE'S BUILD PLAN for it (epic `epic-engine` P33, M1), `waiting` or `accepted`:  in the skeleton, so the
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
@@ -306,8 +315,8 @@ As `plan-doc.md`, "Ids":
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
   - Older phases have none, until asked.
-- `done-at`:  WHEN it was done, written as it's set done (`isoMinutes`, the log's time;  epic `epic-engine` I170),
-  removed when it's set to anything else.
+- `done-at`:  WHEN it was done (or dropped, I228), written as it's set so (`isoMinutes`, the log's time;  epic
+  `epic-engine` I170), removed when it's set to anything else.
   - A phase done before I170 takes its log's last `P3 done` line's time on the page's next write (`updateDoneAt()`);
     none, no attribute.
   - The page draws it green for 3 days after (`PlanDates.isQuiet()`), then grey:  its Phases chip and status circle.
@@ -364,7 +373,7 @@ As `plan-doc.md`, "Ids":
     - `open`
     - `decided`:  an answered question.
       Set by `decide`, or by `add <name>#D`, born answered with `answered`.
-    - `done`:  closed (fixed, passed, accepted)
+    - `done`:  closed (fixed, passed, accepted, or obsolete:  `close --why`, the reason a Done card on it)
     - `canceled`:  made moot (struck through)
   - `state`:  the first row below that applies.
     - The tool rewrites it on every edit;  its colours:  "Colours" below.
@@ -375,8 +384,8 @@ As `plan-doc.md`, "Ids":
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
     | `open`      | yellow | work a review queued (`queued`), not started                                       |
-    | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
-    | `attention` | red    | an open question;  an open judgement call or issue not reviewed, unless `calm`     |
+    | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  Owen reviews it), or Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
+    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue Owen asked for with Do this (`urgent`), reviewed or not |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a revisit or request for now answered |
 
@@ -486,6 +495,7 @@ As `plan-doc.md`, "Ids":
   - Its note box matches:  the plane, Revisit Later, the x.
     - The plane or the x takes the note in the box along.
     - `inbox apply` keeps it first, as Owen's `<epic-reply re="next phase">` (or `re="drop"`).
+  - An issue or a judgement call:  Do this, Revisit, Approve (epic `epic-engine` I232;  below, "Do this").
   - Every other kind keeps Make Todo, Revisit and Approve, a LIMIT todo (`limit`) too.
 - EVERY other note box (an item's, an Overview sub-section's, a phase's, the summary's):  Revisit Later, then the x.
   - The x is `skip`, grey:  "Skip this".
@@ -592,6 +602,16 @@ As `plan-doc.md`, "Ids":
   - The summary, keyed `summary` in the inbox (it has no id):
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
+- Do this on an issue or a judgement call (epic `epic-engine` I232;  Owen, 2026-11-08):  its first button, the phase's
+  word and thumbs up;  the same stored `todo` mark.  NO todo is made.
+  - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
+    his note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
+  - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
+  - Fixed:  `epic update <epic>#I3 fixed ["<what changed>"]` (also what `done` means on one):  still open, `fixed`,
+    ORANGE, on his list to review again.
+  - His Approve closes it;  his Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
+  - A mark already sent with `todo` applies the same way.
+  - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
 - NEW items from the page (epic `airplane` P2).
   - Asked for with a small form:  todo or question, title, note, what it's about.
   - Opened by the page toolbar's new-item button:  comment dots (Owen, 2026-10-10).
@@ -760,6 +780,7 @@ In Owen's words (2026-10-10):
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
 | an open question answered (Approve:  its recommended option;  or a pick) | green | as above | as above                  | green `decided` |
 | Make Todo                            | green  | pressed           | sent                                         | green:  settled;  the new todo is its own item (yellow until queued) |
+| Do this (an issue, a judgement call) | green  | pressed           | sent                                         | RED, and stays red, in the item, until Claude's fix turns it orange;  Approve closes it |
 | a todo's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  outlined until the todo is closed | green, once done |
 | a review's "do it" (`queue <id> "work"`) | green | --              | queued:  outlined until started and done     | green, once done                |
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
@@ -967,7 +988,7 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
 - Where they sit, and what keys their marks (`choices`, a set's position, counts as written):
   - an item's:  any of its sets, never one in its Original Discussion (`PlanItem.choiceSets()`)
   - a phase's:  `<epic-field name="choices">`, after Changes, before its Update blocks and Plan;  every set in its
-    body counts, keyed by the phase's id
+    body counts (not one inside an item in it:  `PlanItem.choiceSets()`, as the page counts), keyed by the phase's id
     - `epic update <epic>#P3 --choices "<epic-choices>...</epic-choices>"` writes or replaces it
     - the skeleton's `<epic-phase choices-open="1">`:  its sets neither `chosen` nor `closed` (every edit)
     - Accept plan takes an open set's recommended option, as an approval does on a question
@@ -975,7 +996,8 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
     that has one;  in the skeleton, never a part
     - each set `<epic-choices id="s-<slug>" title="..." standing [multiple]>`, keyed by its id
     - `epic add <epic>#choices "Title" [--multiple] [--note "..."]` makes the section the first time, then the set
-- ONE mark per set carries its whole change (`ReviewInbox`'s `PickFields`):
+- ONE mark per HOLDER carries each of its sets' whole change (`ReviewInbox`'s `PickFields`;  epic `epic-engine` I227):
+  the lowest set's at the top, the others in `sets`, each with its own `choices`;  each applies and prints on its own
 
   ```text
   { action: "pick", pick: "A C +1", choices: 0, multiple: true,
@@ -983,7 +1005,12 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
   ```
 
   - `pick` the whole pick list after the change;  `+1` names the first added option;  absent when only the set changes
-  - an old mark, `{ pick: "B" }`, reads as before
+  - an old mark, `{ pick: "B" }`, reads as before;  so does one from before I227, with no `sets`
+  - another set's change:  `sets: [{ pick: "B", choices: 1 }]`
+- How a set's letters are SHOWN (I227):  the holder's 1st set `A`, `B` ...;  its 2nd `A2`, `B2` ...;  its 3rd `A3` ...
+  (`setLetter()`):  the page's cards, its Chosen line, the inbox's printout (`picks B · Bananas, B2 · Cherries`)
+  - the markup's `letter`, and a mark's `pick`, stay `B`
+  - `epic choose seo#P4 B2` and `decide --option B2` take `B` of the 2nd set (`parseSetLetter()`)
 - What `epic inbox apply` does with it, in order:
   - the flip (`multiple` set or taken away), removals, edits, then each added option with the next free letter,
     `by="owen"`, its note as `<p>`s, its picture an `<img>`

@@ -1,7 +1,7 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | color <look>
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic done` is `/isolate done`.
+argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
 ---
 
 # /epic
@@ -102,6 +102,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `start`:  `/epic start <P1 | ids>` works a phase, or a block of items in it.
     Go to "11. Start".
   - `phase` and `start`:  epic `skillz` P4.
+  - `tidy`:  `/epic tidy [<epic>]` closes the items other work made obsolete, with a reason on each.
+    Go to "14. Tidy" (epic `epic-engine` Q69).
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session.
     Go to "12. Request" (epic `epic-workflow`).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -774,6 +776,8 @@ than just being able to move on").
 
 The person reviews ON THE PAGE:  the epic page in the side bar's Review tab, where they mark items.
 - Each item's buttons:  one group, Make Todo, Revisit, Approve (no wand on them since 2026-10-25).
+- An issue's or a judgement call's first button is Do this:  worked in the item itself, no todo
+  (`epic guide review`, "Do this").
 - A todo that's WORK (no `limit`) has these instead:
   the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
   `inbox apply` applies both.
@@ -849,7 +853,7 @@ epic pages link <ABS doc> --hash <id> --show   show the doc in its tab (an epic 
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
                                            In Codex:  run it in the foreground;  it returns with the work
-epic inbox apply <name> [ids]              approve / pick / Make Todo marks into the doc;  prints what's left
+epic inbox apply <name> [ids]              approve / pick / Make Todo / Do this marks into the doc;  prints what's left
                                            a pick on a PHASE's set ("P3's choices:  ...;  adjust its plan"):  rewrite
                                            that phase's plan to it;  on a STANDING set ("...:  act on this round"):
                                            act on the picked options, add new ones as they come (epic-engine P50)
@@ -923,6 +927,8 @@ Every card you finish says what REALLY happened, one of three
   - an answer or reply written, details added, the item condensed:  `"Answered their note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
+- `status ... fixed ["<what changed>"]`:  an issue or judgement call fixed, for the person to review
+  (`epic update <epic>#I3 fixed`):  orange, still open;  they close it.  `epic guide review`, "Do this".
 - `status ... done ["<summary>"]` ONLY when the item's work is FINISHED:  an issue fixed, a todo built.
   - An open issue or todo CLOSES with it (status done, green, its phase stamped, logged), as `epic close` does.
   - A question, judgement call or manual test keeps its status:  a question is decided (`decide`, `choose`), the
@@ -1484,6 +1490,35 @@ because its text and replies have grown too long to read (Owen, epic `repo-split
    `epic inbox done <name>#<id>`.
 5. Reply with its link pair (`epic pages link <doc> --hash <id> --review`).
 
+## 14. Tidy:  `/epic tidy [<epic>]`
+
+Close the open judgement calls, issues and todos that other work has made obsolete, leaving a reason on each
+(epic `epic-engine` Q69;  Owen:  "mark as done any that have been obviated by other changes").
+No `<epic>`:  this session's epic.
+Only when the person (or that epic's session) asks:  it never starts by itself.
+
+1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
+   - One entry per open call, issue and todo:  age, its phase and whether that's done, the files and code names it
+     mentions and whether they still exist, commits since it was written, commits naming it, later items and phases
+     that mention it.
+   - It decides nothing.  A file gone or a name missing is a reason to look, not a verdict.
+   - Skip an entry with `closeRefused` (a wanted item, a fix waiting for review, a pick or mark of the person's,
+     work under way):  those are never closed here.
+2. Hand the rest to background agents, up to 5 in all, each a batch of ids:
+   - named and listed as the kit's `CLAUDE.md` says (`epic agents add <name> "<task>"`, `epic agents done <name>`).
+   - In Codex:  ask for sub-agents, one per batch, and wait for them;  else work the batches one at a time, here.
+   - Each reads its items (the page, the part files) against the current code and the recent commits, and sorts each:
+     - CLEAR:  something named did it.  A commit, a phase or a later item made it moot, and you can point at it.
+       `epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete, naming the commit, phase or item>"`
+     - DOUBTFUL:  it might be obsolete.
+       `epic update <epic>#J3 noted "Maybe obsolete:  <why, in a line>" --quiet`, last on the line.
+       - An entry with `tidyNoted` has one already:  never a second card;  close it only if it's now clear.
+       - Without a `Maybe obsolete:` start, a later run can't tell and notes it again.
+     - STILL LIVE:  leave it alone, no card.
+   - **Unsure:  leave it open.**  A wrong close hides work;  a stale item only costs a reading.
+   - A refusal from `epic close` (exit 1, one line per id, the others closed):  leave that item as it is.
+3. Reply:  how many closed, how many left noted, how many left alone, and the epic page's link pair.
+
 ## Migrations:  bringing epic pages up to today's markup
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind
@@ -1531,6 +1566,7 @@ file <name>#P<N> <rN>                               a request into phase N's Req
 file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
+phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck through, finished as done;  why in place of Done
 phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (T3)
@@ -1545,6 +1581,8 @@ commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase 
 commits <name> --backfill                           every phase / item commit (`P3:`, `<name> I3:`), once
 update <name> --standing [on|off]                   a standing epic:  each phase merges on its own, never done
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
+close <name>#J3 <name>#I7 --why "<text>"            close as obsolete, the reason on each;  some refused ("14. Tidy")
+stale <name> [--json]                               the facts for judging which open items are stale;  decides nothing
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,
                                                     new first;  --for:  the item of marks naming none

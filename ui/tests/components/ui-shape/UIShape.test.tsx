@@ -35,9 +35,9 @@ async function shape(html: string) {
   return { wrapper, host, stage, box, sides }
 }
 
-/** Which sides show. */
+/** Which sides show:  a flip card's hidden sides keep their place, `visibility: hidden`. */
 function shown(sides: readonly Element[]): boolean[] {
-  return sides.map((side) => getComputedStyle(side).display !== "none")
+  return sides.map((side) => side.checkVisibility({ visibilityProperty: true }))
 }
 
 /** Collect `ui-animated` details. */
@@ -232,6 +232,24 @@ describe("<ui-shape> flipping", () => {
     await userEvent.keyboard("{Enter}")
     await expect.poll(() => details.length).toBe(2)
     expect(shown(sides)).toEqual([true, false])
+  })
+
+  it("flip-on=click:  as tall as its tallest side, whichever shows, so turning it moves nothing around it", async () => {
+    const { host, stage, sides } = await shape(
+      `<ui-shape flip-on="click"><ui-side>Front</ui-side>` +
+        `<ui-side><p>Back</p><p>with</p><p>more</p><p>lines</p></ui-side></ui-shape><p>After</p>`
+    )
+    const after = host.parentElement!.querySelector(":scope > p")!
+    const before = { height: stage.getBoundingClientRect().height, after: after.getBoundingClientRect().top }
+    expect(before.height).toBeCloseTo(sides[1]!.getBoundingClientRect().height, 0)
+    expect(sides.map((side) => side.matches(":state(in-flip-card)"))).toEqual([true, true])
+    // the hidden side keeps its place, out of sight and out of the accessibility tree
+    expect(shown(sides)).toEqual([true, false])
+    expect(getComputedStyle(sides[1]!).visibility).toBe("hidden")
+    await host.next()
+    expect(shown(sides)).toEqual([false, true])
+    expect(stage.getBoundingClientRect().height).toBeCloseTo(before.height, 0)
+    expect(after.getBoundingClientRect().top).toBeCloseTo(before.after, 0)
   })
 
   it("flip-on left out (manual):  a click does nothing, and it's no tab stop", async () => {

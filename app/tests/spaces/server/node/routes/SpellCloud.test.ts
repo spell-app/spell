@@ -10,7 +10,9 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { SESSION_COOKIE } from "spell/server/signIn"
 import { ask } from "spell/server/test/serve"
 import { SP } from "spell/parser/spell"
+import { OrgSetup } from "spell/app/spaces/server/node/people/OrgSetup"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
+import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { HANDLE_LOOKUP_PATH, SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { MailCatcher } from "spell/server/signIn"
@@ -31,13 +33,15 @@ describe("Spell's cloud", () => {
   let port: number
   /** Ana's session cookie, once she's signed in. */
   let anasCookie = ""
+  const people = new PeopleStore(new DiskStorage(spaces))
+  const folderFor = (address: string) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/"))
 
   beforeAll(async () => {
     cloud = new SpellCloud({
       address: ADDRESS,
       dir,
-      people: new PeopleStore(new DiskStorage(spaces)),
-      folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
+      people,
+      folderFor,
       abuseContact: "abuse@test.example"
     })
     await cloud.listen({ port: 0, backups: "off" })
@@ -120,6 +124,82 @@ describe("Spell's cloud", () => {
     const list = join(spaces, "@spell", "ana@", "__data", "family-cookbook", "recipes.list.json")
     expect(readFileSync(list, "utf8")).toContain("Soup")
     expect(readFileSync(list, "utf8")).toContain("ana@spell")
+  })
+
+  describe("a program in an org's shared space", () => {
+    /** GET `path` as a browser outside;  `cookie`:  signed in. */
+    const get = (path: string, cookie = "") =>
+      ask(port, "GET", path, { headers: { ...OUTSIDE, ...(cookie && { cookie }) } })
+    /** Bo, invited and signed in:  nobody in RS. */
+    let bosCookie = ""
+    const BO = "bo@example.com"
+
+    beforeAll(async () => {
+      const folders = new SpaceFolders({ folderFor, people })
+      await new OrgSetup({ people, roles: folders.orgRoles, folderFor }).create({ org: "rs", admins: [ANA] })
+      folders.close()
+      await ask(port, "POST", "/api/sign-in/invite", {
+        body: JSON.stringify({ email: BO }),
+        headers: {
+          host: `127.0.0.1:${port}`,
+          "content-type": "application/json",
+          "x-server-token": cloud.server.guard.token
+        }
+      })
+      await post("/api/sign-in/ask", { email: BO })
+      const mail = await new MailCatcher({ folder: join(dir, "mail") }).newestTo(BO)
+      const signedIn = await post("/api/sign-in/code", { email: BO, code: /^\d{6}$/m.exec(mail!.text)![0] })
+      bosCookie = /spell-session=[^;]+/.exec(`${signedIn.headers["set-cookie"]}`)![0]
+    })
+
+    test("someone in the org gets its page and its files", async () => {
+      const page = await get("/apps/@rs/OrgAdmin", anasCookie)
+      expect(page.status).toBe(200)
+      expect(page.text).toContain("<spell-viewer")
+      // past the cloud's own check;  the file is read from this machine's spell.spaces, not this test's
+      expect((await get("/spaces/@rs/OrgAdmin/OrgAdmin.api.spell", anasCookie)).text).not.toContain("no such file here")
+    })
+
+    test("nobody signed in, and someone not in the org, are asked to sign in:  no program, no files", async () => {
+      for (const cookie of ["", bosCookie]) {
+        const page = await get("/apps/@rs/OrgAdmin", cookie)
+        expect(page.status).toBe(200)
+        expect(page.text).toContain("Sign in to see this page")
+        expect(page.text).not.toContain("<spell-viewer")
+        const file = await get("/spaces/@rs/OrgAdmin/OrgAdmin.api.spell", cookie)
+        expect(file.status).toBe(404)
+        expect(file.text).toContain("no such file here")
+      }
+    })
+
+    test("a name that isn't there answers a stranger as one that is", async () => {
+      expect((await get("/apps/@rs/Nothing")).text).toContain("Sign in to see this page")
+      expect((await get("/apps/@rs/Nothing", anasCookie)).status).toBe(404)
+    })
+
+    test("never a private space, the Admin space, Spell's own folders, or a way out", async () => {
+      for (const path of [
+        "/apps/@rs/__private/Notes",
+        "/apps/@rs/__admin",
+        "/apps/@rs/__admin/roles",
+        "/apps/@rs/__inbox",
+        "/apps/@nobody/OrgAdmin",
+        "/apps/ana@spell/Mine",
+        "/spaces/@rs/__admin/roster.json5",
+        "/spaces/@rs/__private/Notes/__project.json5",
+        "/spaces/@rs/OrgAdmin/__draft/ana/OrgAdmin.spellml",
+        "/spaces/@rs/OrgAdmin/%2e%2e/__admin/roster.json5",
+        "/spaces/@rs/OrgAdmin/.hidden"
+      ]) {
+        expect((await get(path, anasCookie)).status, path).toBe(404)
+      }
+      expect(existsSync(folderFor("@rs/OrgAdmin"))).toBe(true)
+    })
+
+    test("its copy names its org, not the built-in's", () => {
+      const source = readFileSync(join(folderFor("@rs/OrgAdmin"), "OrgAdmin.api.spell"), "utf8")
+      expect(source).toContain('"@rs/__admin/roles"')
+    })
   })
 
   test("a built-in program's page, and its files;  nobody's own projects", async () => {

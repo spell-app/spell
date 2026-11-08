@@ -1230,6 +1230,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
+  stale: { "--json": "print them as JSON" },
   summaries: {},
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",
@@ -1256,6 +1257,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--before <phase>": "in that phase's place:  --before 4 makes it P4"
   },
   update: {
+    "--quiet": "a noted card:  leaves the item's change stamp alone",
     "--symptom <html>": "a phase's symptom",
     "--changes <html>": "a phase's changes",
     "--goal <html>": "a phase's goal",
@@ -1281,6 +1283,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
   phase: {
     "--done <html>": "done:  what was built, a <ul>",
+    "--why <html>": 'dropped:  why it was never built ("Moved to P38", the P38 linked), in place of Done',
     "--no-open": "done:  don't bring the page forward in VS Code",
     "--dry-run": "took:  only say the time"
   },
@@ -1317,7 +1320,11 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--title <title>": "edit:  the option's new title",
     "--note <html>": "edit:  the option's new text (HTML, or plain text)"
   },
-  close: {},
+  close: {
+    "--why <text>":
+      "close as obsolete:  the reason, naming the commit, phase or item that made it so, saved on the item and in " +
+      "the log;  refuses questions, tests, items Owen wants, fixes waiting for him, items waiting on his pick"
+  },
   reopen: {},
   cancel: {},
   details: {

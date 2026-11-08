@@ -145,8 +145,8 @@ export class Pokemon extends Thing {
     }
     pokedex.search = ""
     pokedex.showing = this
-    // its cry loads now, still, so Hear it plays it at once
-    core.stop(this.sound)
+    // so Hear it plays it at once
+    core.loadSound(this.sound)
     core.scrollToTop()
   }
 
@@ -360,7 +360,7 @@ export class PokemonSpecies extends Thing {
   accessor varieties!: List<Variety>
 
   /** The Pokémon it is, as the games show it first */
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7913, end: 8049 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7887, end: 8023 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.answerOf(core.getItemAt(this.varieties, 0), "pokemon")
   }, () => [this.varieties]) }
@@ -417,13 +417,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5345, end: 5520 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5319, end: 5494 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5533, end: 6239 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5507, end: 6213 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -1195,7 +1195,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8231, end: 8286 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8205, end: 8260 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }

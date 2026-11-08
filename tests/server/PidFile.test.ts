@@ -1,5 +1,14 @@
 import { spawn, type ChildProcess } from "node:child_process"
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, utimesSync, writeFileSync } from "node:fs"
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  utimesSync,
+  writeFileSync
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
@@ -27,6 +36,30 @@ describe("serverAt():  what the server at an address says of itself", () => {
       await other.close()
     }
     expect(await SRV.serverAt(server.base)).toBeUndefined()
+  })
+})
+
+describe("PidFile's write token (epic `data` P40)", () => {
+  it("kept beside the pid file for this machine's person only, read while its server lives, removed with it", () => {
+    const root = mkdtempSync(join(tmpdir(), "pid-token-"))
+    try {
+      const pidFile = new SRV.PidFile(root)
+      expect(pidFile.readToken()).toBeUndefined()
+      pidFile.write({ pid: process.pid, port: 1, root, started: new Date().toISOString() })
+      pidFile.writeToken("secret")
+      expect(pidFile.tokenFile).toBe(join(root, ".spell-server.token.json"))
+      expect(statSync(pidFile.tokenFile).mode & 0o777).toBe(0o600)
+      expect(pidFile.readToken()).toBe("secret")
+      // never in what `/api/server` answers
+      expect(readFileSync(pidFile.file, "utf8")).not.toContain("secret")
+      pidFile.removeIfOurs()
+      expect(pidFile.readToken()).toBeUndefined()
+      // one a server that's gone left:  no token
+      writeFileSync(pidFile.tokenFile, JSON.stringify({ pid: 999_999_999, token: "stale" }))
+      expect(pidFile.readToken()).toBeUndefined()
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })
 

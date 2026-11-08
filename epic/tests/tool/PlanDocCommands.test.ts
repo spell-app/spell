@@ -545,3 +545,78 @@ describe("PlanDocCommands stage", () => {
     expect(FILES.read(file).stage).toBe("building")
   })
 })
+
+// epic `epic-engine` Q69:  closing obsolete items, with the reason on each
+describe("PlanDocCommands close --why", () => {
+  const seed = (change: (plan: PlanDoc) => void) => FILES.edit(file, change)
+  const add = (plan: PlanDoc, kind: "judgement" | "issue" | "question" | "test" | "todo", title: string) =>
+    plan.addItem(kind, title)
+
+  test("several ids:  each done, the reason a Done card and in the log, the rest of the page untouched", async () => {
+    await seed((plan) => {
+      add(plan, "judgement", "An old call")
+      add(plan, "issue", "An old issue")
+      add(plan, "todo", "An old todo")
+    })
+    expect(await commands().run(["close", "x", "j1", "i1", "--why", "P2 removed it (abc123)"])).toBe(0)
+    const plan = FILES.read(file)
+    expect(plan.facts(plan.item("j1")).status).toBe("done")
+    expect(plan.facts(plan.item("i1")).status).toBe("done")
+    expect(plan.facts(plan.item("t1")).status).toBe("open")
+    const card = plan.item("i1").querySelector('epic-status[state="done"]')!
+    expect(card.textContent).toContain("P2 removed it (abc123)")
+    expect(plan.reviewLines().map((line) => line.text)).toContain("J1 closed: An old call -- P2 removed it (abc123)")
+    expect(printed).toEqual(["J1 closed:  An old call", "I1 closed:  An old issue"])
+  })
+
+  test("refused, the others still closed:  a question, a test, Owen's wanted, a fix for his review, his pick, his mark", async () => {
+    await seed((plan) => {
+      add(plan, "question", "Which?")
+      add(plan, "test", "Try it")
+      add(plan, "issue", "Wanted")
+      add(plan, "issue", "Fixed")
+      add(plan, "judgement", "Waits on a pick")
+      add(plan, "issue", "Marked")
+      add(plan, "todo", "Fine")
+      Markup.set<"epic-item">(plan.item("i1"), { urgent: true })
+      plan.fixedForReview("i2", "changed it")
+      const reply = plan.document.createElement("epic-reply")
+      reply.setAttribute("agent", "claude")
+      reply.setAttribute("from", "Owen")
+      reply.append(plan.document.createElement("epic-choices"))
+      plan.item("j1").append(reply)
+    })
+    ReviewInbox.update(ReviewInbox.pathFor(file), (inbox) => inbox.setMark("i3", { action: "revisit", note: "wait" }))
+    const code = await commands().run(["close", "x", "q1", "m1", "i1", "i2", "j1", "i3", "t1", "--why", "gone"])
+    expect(code).toBe(1)
+    const plan = FILES.read(file)
+    expect(plan.facts(plan.item("t1")).status).toBe("done")
+    for (const id of ["q1", "m1", "i1", "i2", "j1", "i3"]) expect(plan.facts(plan.item(id)).status).toBe("open")
+    expect(warned.join("\n")).toMatch(/Q1 not closed:  a question/)
+    expect(warned.join("\n")).toMatch(/I1 not closed:  Owen asked for it/)
+    expect(warned.join("\n")).toMatch(/I2 not closed:  fixed/)
+    expect(warned.join("\n")).toMatch(/J1 not closed:  waiting for Owen's pick/)
+    expect(warned.join("\n")).toMatch(/I3 not closed:  Owen's mark/)
+    expect(printed).toEqual(["T1 closed:  Fine"])
+  })
+
+  test("no --why:  as ever;  --why with no reason refused", async () => {
+    await seed((plan) => void add(plan, "question", "Which?"))
+    expect(await commands().run(["close", "x", "q1"])).toBe(0)
+    expect(FILES.read(file).facts(FILES.read(file).item("q1")).status).toBe("done")
+    expect(await commands().run(["close", "x", "q1", "--why"])).toBe(1)
+    expect(warned.join("")).toMatch(/--why needs the reason/)
+  })
+
+  test("a quiet noted card leaves the change stamp alone", async () => {
+    await seed((plan) => void add(plan, "issue", "Maybe"))
+    const changed = () => FILES.read(file).item("i1").getAttribute("changed")
+    const before = changed()
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+    expect(await commands().run(["status", "x", "i1", "noted", "Maybe obsolete:  check", "--quiet"])).toBe(0)
+    expect(changed()).toBe(before)
+    expect(FILES.read(file).item("i1").querySelector('epic-status[state="noted"]')!.textContent).toContain(
+      "Maybe obsolete"
+    )
+  })
+})

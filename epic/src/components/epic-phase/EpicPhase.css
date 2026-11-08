@@ -2,7 +2,8 @@
  * `<epic-phase>` (EpicPhase.tsx):  one phase, on top of the fold (`EpicFold.css`).
  * - A nested block:  its title on the row band, reaching past the Phases section's inset, edge to edge;  a small
  *   gap below it open, none folded (a rule instead).
- * - The status icon in its Phases chip's colour and fill (`data-state`, I170);  a done phase's title quieter.
+ * - The status icon in its Phases chip's colour and fill (`data-state`, I170);  a done phase's title quieter;  a
+ *   dropped one's struck through too (I228).
  * - Its plan changed:  the title's orange pen and count while it isn't done (the changes themselves are
  *   `<epic-update>` blocks among its children, which draw themselves).
  * - Public tokens (`--epic-phase-*`) are never declared here:  read through private aliases.
@@ -33,8 +34,15 @@
   ui-section::part(icon) {
     margin-inline-end: 2px;
   }
-  :host([status="done"]) {
+  :host(:is([status="done"], [status="dropped"])) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
+  }
+  /*
+   * DROPPED (epic `epic-engine` I228;  Owen, 2026-11-08:  "crossed out somehow"):  never built, so its title struck
+   * through, as a canceled item's (`EpicItem.css`);  its number too, its badge and body as any phase's
+   */
+  :host([status="dropped"]) .header > .words {
+    text-decoration: line-through;
   }
   ui-section {
     /*

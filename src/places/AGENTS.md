@@ -49,6 +49,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     A web server has one address per collection, so it can't:  its lists go one each, together.
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
+    - A filter asking for `""` finds a row without that field too, as an unset text reads in Spell (epic `atmosphere` P37).
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
     - `wholeRows`:  each key's value is a whole row, as JSON, for things:  `family cookbook is this device`.
@@ -164,7 +165,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a refusal for a role that can't write is `whyNot: "role"`, with the role it takes (`PlaceErrorCause.needs`,
         P23), which `PlaceServer` and `RemotePlace` pass on
       - what each thing is, for its write check:  `thingKindOf()` (`ThingKind`, `ThingChange`;  P23), a post, a row, a
-        file or an app;  and the setting `viewersPost`
+        file, an app or a chat thread (`THREADS_COLLECTION`, P36);  and the setting `viewersPost`
       - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
       - a SIGN-UP SHEET's rules (P27):  `SheetRules`, set through `SPACE_SHEET_OPERATIONS`;  its refusals `"full"` (the
         last place is taken) and `"not listed"` (its list doesn't name you)
@@ -178,8 +179,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so reading works while it can't write.
       - Its read address:  `spaceReadAddressFor()`, under `SPACE_READS_PREFIX`.
       - A program's own data is read through the server;
-        so are an org's roles and whoever's asking's inbox, `@rs/__inbox`, whose one address is everyone's
-        (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`;  epic `atmosphere` P25, P29).
+        so are an org's roles and whoever's asking's inbox and feed, `@rs/__inbox` and `@rs/__feed`, whose one
+        address is everyone's (`ORG_ROLES_ADDRESS`, its roles and events, `PERSON_INBOX_ADDRESS`,
+        `PERSON_FEED_ADDRESS`;  epic `atmosphere` P25, P29, P32, P33).
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
@@ -188,6 +190,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `readsAt` (epic `atmosphere` P5):  its lists are read straight from the files, and written through the server side.
       - The reading is a `ChunkedPlace` on `WebChunks`.
       - Refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.
+    - `deviceCopy` (`- keep a copy on this device`, epic `atmosphere` T51):  each list it read whole is kept on this
+      device with its version, and the next read (opening again, or a check) asks only what changed (`changesSince()`),
+      put on the copy.
+      - Only a list the place did nothing to (no filter, sort or page of its own);  one that can't say what changed is
+        read whole.
+      - Its own copy, by list:  its reads are POSTs, which `WebPlace`'s copy of GET answers never keeps.
     - `can.identifiesBy: "a sign-in"` (the cloud, epic `atmosphere` P8, `cloudCapabilities()`):
       - nobody signed in:  it asks nothing and reads no rows;
         a write fails as no answer would, so it stays pending in this browser
@@ -245,6 +253,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       a page signed in to a Spell account is that account.
     - Its run token goes as the socket's sub-protocol, never in its address (`ROOM_TOKEN_PROTOCOL`).
       A page signed in needs none, its cookie riding along (epic `atmosphere` P3).
+    - A space's room on Spell's server takes the page's `SpellSignIn` as its `signIn` (epic `atmosphere` P36):  its bar
+      shows, and the room opens again once someone signs in or out, so the new cookie rides on the new socket.
+    - A room at `@rs/__thread` is the thread its PAGE picks (epic `atmosphere` P37):  `roomForPage()`, from the page's
+      `?thread=` (and an ad-hoc thread's `&topic=`), else this browser's last in that org, else `@rs/messages`;
+      `withPickedThread()` marks that one `current` in a person's thread list (`PERSON_THREADS_ADDRESS`).
     - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
   - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1).

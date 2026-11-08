@@ -11,6 +11,8 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
  *   where a click goes, how its letters look, the browser's tooltip, its accessible name
  * - `shadow`, and `width`, `min-width` and `max-width` (epic `language` P35, I63):
  *   a hard shadow behind its letters, and how wide its box is where it sits
+ * - `movable` and `resizable` (epic `mockup` P14, J35):  people drag it to a new place, or its corner to resize it
+ *   (`MoveAndResize`, in `spell/element`)
  * - `UIComponent` reads them ("Shared states", "Shown or hidden"):
  *   so `<ui-menu disabled>`, `<ui-table loading>`, `<ui-message visible="false">`
  *   and `<ui-modal animation="fly down">` work, though those vocabularies never name them.
@@ -233,6 +235,24 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     description:
       "Its name for screen readers (`aria-label`), where it has no words of its own.  " +
       "A family whose `label` is something else (a field's, a statistic's) keeps its own."
+  },
+  {
+    name: "movable",
+    group: "behaviour",
+    kind: "string",
+    description:
+      "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` " +
+      "for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  " +
+      "With an `id`, where each person put it is remembered."
+  },
+  {
+    name: "resizable",
+    group: "behaviour",
+    kind: "string",
+    description:
+      "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  " +
+      "Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it " +
+      "is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
   }
 ]
 

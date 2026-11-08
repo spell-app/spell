@@ -84,6 +84,10 @@ Then, for what it printed:
    (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details),
    `epic update <epic>#J3 noted "<what was written>"`, then `epic inbox done <epic>#J3`.
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
+   Do this, on an issue or a judgement call:  NO todo;  it stays in the item, red, and `apply` prints your steps.
+   Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
+   `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange, for the person to review;
+   their Approve closes it.  Never `epic close` it yourself.
    A revisit left "to talk over" (a pick "B, but ...", a picture, their comments in its text):  answer its note into
    the item, as above, then `epic inbox clear <epic>#J3`.
    A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
@@ -111,6 +115,21 @@ epic turn end
 2. Merge the worktree's branch into the base branch, when the person says so, and remove the worktree:
    `epic worktree remove <epic>`, never a bare `git worktree remove`.
 3. Say what shipped, with the page's links (`epic pages link <page> --show`).
+
+## tidy -- Close what other work made obsolete
+
+Only when the person asks (the skill's word:  `$epic tidy`).
+
+```sh
+epic stale <epic> --json     # the facts per open call, issue and todo;  it decides nothing
+epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete:  the commit, phase or item>"
+epic update <epic>#J3 noted "Maybe obsolete:  <why>" --quiet     # doubtful:  stays open
+```
+
+- Skip an entry with `closeRefused`;  an entry with `tidyNoted` never gets a second card.
+- Read each against the current code and recent commits.  Close only when you can name what did it;  unsure, leave it open.
+- `--why` refuses questions, tests, and anything the person wants, is reviewing, or must pick:  the others still close.
+- Then say how many closed, how many noted.
 
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 

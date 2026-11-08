@@ -57,8 +57,14 @@ export const EXAMPLES_GROUP = "@spell/examples"
 /** The Spell guides' group, `@spell/guides`:  where `GUIDE_PROJECTS` are read from. */
 export const GUIDES_GROUP = "@spell/guides"
 
-/** Every group a test project is in:  the fixtures', the examples', the Spell guides'. */
-const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
+/**
+ * Spell UI's component notebooks' group, `@spell/notebooks`:  read only as an example imports one, never tested on
+ * their own here (epic `mockup` P1:  the Spell UI site imports four).
+ */
+export const NOTEBOOKS_GROUP = "@spell/notebooks"
+
+/** Every group a test project is in, or one imports:  the fixtures', the examples', the Spell guides', the notebooks'. */
+const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP, NOTEBOOKS_GROUP]
 
 /**
  * Every built-in example, by its name with its group:  `@spell/examples/Solitaire` (epic `spanish` P21).
@@ -154,6 +160,8 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "counter",
   "counter-app",
   "fizzbuzz",
+  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40):  Task List names the Atmosphere too
+  "kept-in-places",
   "lists-from-zero",
   "people",
   "sending-events",
@@ -280,7 +288,8 @@ function compileFixture(
   // each file's language, by its name:  `Carta.es.spell` is Spanish (epic `spanish` P19)
   const languages = [...new Set(sources.map(({ path }) => SP.Language.forFile(path).lang))]
   // at its own address, as the editor compiles it:  a line may read it (`a sheet at "tasks.csv"`, its own CSV file)
-  const { scope, files } = parseSpellProject(sources, { parentScope, projectPath: projectName })
+  // - a frozen fixture's too, `@spell/test/kept-in-places`, not its bare name (epic `data` P40)
+  const { scope, files } = parseSpellProject(sources, { parentScope, projectPath: fixtureProjectId(projectName) })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
     // never a property editors file, `Card.editor.spellml` (epic `editor` P25):  it isn't compiled

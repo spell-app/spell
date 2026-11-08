@@ -293,7 +293,14 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.loadSpellUIFamilies()
     this.numberItems()
     this.onChildrenDrawn()
-    return super.onMount()
+    const mounted = super.onMount()
+    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):  that sheet reaches in,
+    // once the runtime is loaded (a Python app's page draws before it is);  un-awaited on purpose
+    const root = this.domElement.renderRoot
+    void UI.load()
+      .then(() => UI.styles.adoptPageSheetsInto(root))
+      .catch((error: unknown) => console.error(error))
+    return mounted
   }
 
   /** The thing we draw is drawn HERE now:  if it was moving, it glides here (`Glides`). */
@@ -1806,7 +1813,18 @@ const DRAG_EVENT_ENDINGS: Record<string, string> = {
 }
 
 /** The core's classes a program's types stand on:  their methods are no program's events. */
-const CORE_BASE_NAMES = new Set(["Thing", "View", "List", "ViewableList", "TwoSidedView", "App", "Page", "Object"])
+const CORE_BASE_NAMES = new Set([
+  "Thing",
+  "View",
+  "List",
+  "ViewableList",
+  "TwoSidedView",
+  "App",
+  "Page",
+  "SiteBase",
+  "Site",
+  "Object"
+])
 
 /** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]

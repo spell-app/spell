@@ -1,0 +1,8 @@
+## Un sitio:  páginas entre las que la gente se mueve por su dirección, y los diálogos y paneles que abre cualquiera
+// Integrado en spell (épica `mockup` P1):  compilado una vez, en el `Site` del núcleo.
+// Un sitio hecho de él nombra sus partes en su cuerpo, `- tiene una página de película en "/peliculas/:pelicula"`,
+// `- tiene un diálogo de ajustes`:  el sitio guarda la dirección y el nombre de cada página, nunca la página,
+// así que una página cambia de dirección, o de nombre en otro idioma, sin que cambie su propio archivo.
+un "sitio" es una aplicación donde:
+	// la dirección de la página que muestra:  "/" al empezar
+	- su "dirección actual" es un texto empezando en "/"

@@ -147,6 +147,14 @@ describe("<epic-item>", () => {
     expect([getComputedStyle(chip).backgroundColor, getComputedStyle(chip).color]).toEqual([orange, ink])
   })
 
+  test("`fixed` (I232):  orange, its tooltip says it's his to review, its chip no toggle", async () => {
+    const { host, chip } = await item(
+      `<epic-item id="i7" title="An issue" status="open" state="replied" fixed></epic-item>`
+    )
+    expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("replied item")
+    expect(chip.title).toMatch(/^Claude fixed it:  your turn to review/)
+  })
+
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked", async () => {
     const labels = []
     for (const marks of [`queued="2026-10-06" work="Skip it"`, `deferred="2026-10-05"`, `reviewed="2026-10-06"`, ""]) {

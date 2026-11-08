@@ -6,6 +6,7 @@
  *   - `PY.ElementsWriter`:  a Python program's drawing half in javascript, `<Project>.elements.spell.js`
  *   - `PY.pyText`:  Python's punctuation
  *   - `PY.quartApp()`:  a program's web app, `<Project>.app.py`
+ *   - `PY.PLACE_KINDS`:  the kinds of place a Python program keeps things in
  * - Beside it, a uv project of its own, `core/`:  `spell_core`, what compiled Python imports.
  *   - `spell_quart`, which serves a program on Quart, is spell-app's, in its spaces' Python side.
  * - Imports `spell/parser/parser` (`P`) only:  `spell` imports this, for its targets.
@@ -17,3 +18,4 @@ export * from "./PyWriter"
 export * from "./ElementsWriter"
 export * as pyText from "./pyText"
 export * from "./quartApp"
+export * from "./places"

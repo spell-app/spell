@@ -8,7 +8,7 @@ import { parseSpellProject, type SpellSourceFile } from "spell/parser/spell/test
 import { SX } from "spell/parser/spellx"
 import { projectFileFor } from "spell/parser/spell/node/projectFile"
 import environment from "spell/app/spaces/server/node/environment"
-import { CODE_SPELL_TWINS_DIR } from "spell/app/spaces/test"
+import { CODE_SPELL_TWINS_DIR, importScopeIn } from "spell/app/spaces/test"
 
 // Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
 import "spell/app/spaces"
@@ -61,7 +61,11 @@ const SLOWEST_EXAMPLE_MSEC = 30_000
 /** Example `name`, converted, compiles to the same javascript, file by file, with no errors. */
 function convertsTheSame(name: string) {
   const sources = sourcesOf(resolve(EXAMPLES_DIR, name))
-  const parentScope = SP.Language.rootScopeFor([...new Set(sources.map(({ path }) => SP.Language.forFile(path)))])
+  // its languages' root, under what it imports:  the Spell UI site, its component notebooks (epic `mockup` P1)
+  const parentScope = importScopeIn(
+    resolve(EXAMPLES_DIR, name),
+    sources.map(({ path }) => path)
+  )
   const projectPath = `@spell/examples/${name}`
   const before = parseSpellProject(sources, { parentScope, projectPath }).files
   expect(before.flatMap((file) => file.errors)).toEqual([])
@@ -124,7 +128,11 @@ test("no example keeps a template in both forms:  no `Card.spellml` beside `Card
 /** Example `name`'s fixtures compile to the same javascript as its own files, file by file. */
 function fixtureCompilesTheSame(name: string) {
   const sources = sourcesOf(resolve(EXAMPLES_DIR, name))
-  const parentScope = SP.Language.rootScopeFor([...new Set(sources.map(({ path }) => SP.Language.forFile(path)))])
+  // its languages' root, under what it imports:  the Spell UI site, its component notebooks (epic `mockup` P1)
+  const parentScope = importScopeIn(
+    resolve(EXAMPLES_DIR, name),
+    sources.map(({ path }) => path)
+  )
   // its own address, as in the editor:  a line may read it (`a sheet at "tasks.csv"`, the project's own CSV file)
   const projectPath = `@spell/examples/${name}`
   const before = parseSpellProject(sources, { parentScope, projectPath }).files

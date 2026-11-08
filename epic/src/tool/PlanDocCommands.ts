@@ -7,7 +7,7 @@ import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { Markup } from "spell/epic/markup"
-import { PageStages } from "spell/epic/phases"
+import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
   OPEN_KINDS,
@@ -39,6 +39,7 @@ import type { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { ReviewBackfill } from "./ReviewBackfill"
 import { ReviewInbox } from "./ReviewInbox"
+import { StaleFacts } from "./StaleFacts"
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
@@ -50,7 +51,7 @@ import { TestCommands } from "./TestCommands"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
- * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`,
+ * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`, `stale`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
@@ -194,11 +195,17 @@ export class PlanDocCommands {
         if (status === "took") return this.tookAgain(name, file, phase, Boolean(flags.dryRun))
         // `phase seo#P20 planning [off]`:  Claude is writing its plan, on the page (epic `epic-engine` I147)
         if (status === "planning") return this.planning(file, phase, rest[2] !== "off")
+        if (flags.why !== undefined && status !== "dropped")
+          throw new PlanDocError(`phase ${phase} ${status}:  --why is for dropped (why it was never built)`)
         const minutes = status === "done" ? this.minutesFor(name, file, phase) : undefined
         // done:  the branch's commits so far, into their phases and items (epic `epic-engine` I135)
         const history = status === "done" ? this.historyOrNone(file) : undefined
         const added = await this.edit(file, (plan) => {
-          plan.setPhase(plan.phasePlace(phase), status, { done: flags.done as string | undefined, minutes })
+          plan.setPhase(plan.phasePlace(phase), status, {
+            done: flags.done as string | undefined,
+            why: stringFlag(flags.why),
+            minutes
+          })
           return history ? plan.backfillCommits(history.log, history) : []
         })
         // and each into the Log (epic `epic-engine` P52)
@@ -206,8 +213,8 @@ export class PlanDocCommands {
         const listed = added.length - logged
         if (added.length)
           this.print(`${listed} commit${listed === 1 ? "" : "s"} listed on the page, ${logged} added to the Log`)
-        // done:  nobody works on it any more (I147)
-        if (status === "done") this.inbox.setWorking(file, this.phaseIdOf(file, phase), false)
+        // finished (done or dropped, I228):  nobody works on it any more (I147)
+        if (PhaseStatuses.isFinished(status)) this.inbox.setWorking(file, this.phaseIdOf(file, phase), false)
         this.files.reindex()
         // a new stage:  bring the doc forward, unless told not to.
         // No reload, nor a second one:  the edit reaches the page by the live client
@@ -331,11 +338,14 @@ export class PlanDocCommands {
         if (!flags.backfill) throw new PlanDocError(`commits what?  --backfill  (${USAGE_HINT})`)
         return this.backfillCommits(file, flags.merged)
       case "close":
+        return this.closeItems(file, rest, flags)
       case "reopen":
         return this.edit(file, (plan) => {
-          const title = plan.setItem(need(rest[0], "an item id"), command === "close" ? "done" : "open")
-          plan.log(`${rest[0].toUpperCase()} ${command === "close" ? "closed" : "reopened"}:  ${title}`)
+          const title = plan.setItem(need(rest[0], "an item id"), "open")
+          plan.log(`${rest[0].toUpperCase()} reopened:  ${title}`)
         })
+      case "stale":
+        return this.printStale(name, file, Boolean(flags.json))
       case "cancel":
         return this.edit(file, (plan) => {
           const title = plan.setItem(need(rest[0], "an item id"), "canceled")
@@ -821,7 +831,7 @@ export class PlanDocCommands {
   }
 
   /**
-   * `status <name> <id> underway "<reading>"` / `done ["<summary>"]` / `noted "<what>"`:
+   * `status <name> <id> underway "<reading>"` / `done ["<summary>"]` / `fixed ["<what changed>"]` / `noted "<what>"`:
    * Claude's status card on an item or an Overview sub-section (P13), and the page's spinner on it.
    * - `epic update <name>#<id> underway ...` runs it (Owen, epic `repo-split` J140:  `epic status` takes stock)
    * - `underway`:  a new blue card (`PlanDoc.addStatus()`), stamped now
@@ -832,6 +842,11 @@ export class PlanDocCommands {
    *     a question, judgement call or test keeps its status
    *   - the spinner off
    *   - refused on an item with no underway card
+   *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
+   * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
+   *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
+   *   - his Approve closes it;  his Do this sends it back, red (`PlanDoc.fixedForReview()`)
+   *   - the spinner off
    * - `noted`:  a STEP done that doesn't finish the item:  Claude RECORDED what Owen chose (Owen, 2026-10-10), or
    *   answered, added details, condensed it, called a request off
    *   - a calm Noted card, `what` saying what was recorded and what happens next
@@ -840,9 +855,12 @@ export class PlanDocCommands {
    *   - `inbox apply` writes these itself for picks, todos and new items (Q19)
    *   - `done --filed "<what>"`, the older spelling, means `noted` too:  what was filed is a record
    * - reading, summary:  HTML, as `updated` takes (plain text works as it is)
+   * - `--quiet`, on a noted card:  the item's change stamp left alone (`/epic tidy`'s doubtful items)
    * - NOT logged:  the mark it answers already is (`inbox apply`, `details`)
    */
   private async status(file: string, [id, state, text]: string[], flags: Flags): Promise<void> {
+    const quiet = Boolean(flags.quiet)
+    if (quiet && state !== "noted") throw new PlanDocError("--quiet goes with a noted card")
     need(id, "an item id")
     const filed = flags.filed
     if (filed === true) throw new PlanDocError(`--filed needs what was filed ("Chose B · Keep one file per template")`)
@@ -852,17 +870,75 @@ export class PlanDocCommands {
       title = await this.edit(file, (plan) => plan.addStatus(id, need(text, "the reading (html)")))
     else if (state === "noted" || (state === "done" && filed !== undefined)) {
       const what = state === "noted" ? need(text, "what was recorded (html)") : String(filed)
-      title = await this.edit(file, (plan) => plan.noteStatus(id, what))
+      title = await this.edit(file, (plan) => plan.noteStatus(id, what, { quiet }))
       said = "noted"
     } else if (state === "done") {
       const done = await this.edit(file, (plan) => plan.finishWork(id, text))
       title = done.title
       if (done.closed) said = "done, closed"
+      if (done.fixed) said = FIXED_WORDS
+    } else if (state === "fixed") {
+      title = await this.edit(file, (plan) => plan.fixedForReview(id, text))
+      said = FIXED_WORDS
     } else
-      throw new PlanDocError(`epic update <name>#${id} underway | done | noted, not '${state ?? ""}'  (${USAGE_HINT})`)
+      throw new PlanDocError(
+        `epic update <name>#${id} underway | done | fixed | noted, not '${state ?? ""}'  (${USAGE_HINT})`
+      )
     // a status card says Claude has the item's mark:  the page shows it taken (I190)
     this.inbox.setWorking(file, id, state === "underway", { took: true })
     this.print(`${id.toUpperCase()} ${said}:  ${title}`)
+  }
+
+  /**
+   * `close <name> <id>... [--why "<text>"]`:  each item done (epic `epic-engine` Q69).
+   * - no `--why`:  as ever, whatever the item
+   * - `--why`:  closed as OBSOLETE (`PlanDoc.closeObsolete()`):  the reason a Done card on it and in the log
+   *   - each id on its own:  a refused one (`closeRefusal()`) is said on stderr, the others still close;  exit 1 if any was
+   */
+  private async closeItems(file: string, ids: string[], flags: Flags): Promise<number | undefined> {
+    need(ids[0], "an item id")
+    if (flags.why === undefined) {
+      await this.edit(file, (plan) => {
+        for (const id of ids) plan.log(`${id.toUpperCase()} closed:  ${plan.setItem(id, "done")}`)
+      })
+      return undefined
+    }
+    const why = stringFlag(flags.why)?.trim()
+    if (!why) throw new PlanDocError('--why needs the reason:  --why "P9 removed it (abc123)"')
+    const marked = PlanDocCommands.pendingMarks(file)
+    const said = await this.edit(file, (plan) =>
+      ids.map((id) => {
+        const refused = plan.closeRefusal(id, { marked })
+        return refused ? { id, refused } : { id, title: plan.closeObsolete(id, why, { marked }) }
+      })
+    )
+    for (const line of said)
+      if (line.refused) this.warn(`${line.id.toUpperCase()} not closed:  ${line.refused}`)
+      else this.print(`${line.id.toUpperCase()} closed:  ${line.title}`)
+    return said.some((line) => line.refused) ? 1 : undefined
+  }
+
+  /** The item ids (lower case) holding a mark of Owen's nobody has taken yet, or taken and in hand. */
+  private static pendingMarks(file: string): Set<string> {
+    const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
+    return new Set([...Object.keys(inbox.marks), ...Object.keys(inbox.taken)].map((id) => id.toLowerCase()))
+  }
+
+  /**
+   * `stale <name> [--json]`:  the facts for judging which open items have gone stale (`StaleFacts`), decided by
+   * nobody here;  in the epic's own worktree, when it has one, else the main checkout.
+   */
+  private printStale(name: string, file: string, json: boolean): void {
+    const main = this.files.mainRoot()
+    const where = this.files.epicCheckout(name, main)
+    const checkout = where === PlanDocFiles.MAIN_CHECKOUT ? main : resolve(main, where)
+    const report = new StaleFacts({
+      plan: this.read(file),
+      epic: name,
+      checkout,
+      marked: PlanDocCommands.pendingMarks(file)
+    }).report()
+    this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
   }
 
   /**
@@ -1341,12 +1417,16 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests
                                                    field (epic file writes it;  epic epic-workflow)
   estimate <name> <N> "1-2h"                       set a phase's estimate;  the Overview's total follows
-  phase <name> <N> todo|active|done [--done html] [--no-open]
+  phase <name> <N> todo|active|done|dropped [--done html] [--why html] [--no-open]
                                                    set a phase's status;  done drops its UPDATE markers
                                                    (labels, prose updates;  its plan changes stay), and
                                                    --done writes its Done field (a <ul> of what was built);
                                                    done also writes the time Claude took (took, from the
                                                    transcripts:  epic epic-engine P41);
+                                                   dropped (never built, and won't be:  struck through,
+                                                   finished as done is) drops them too, and --why writes its
+                                                   Dropped field in place of Done ("Moved to P38":  the P38
+                                                   becomes a link to it;  epic epic-engine I228);
                                                    brings the doc forward in VS Code (it updates itself)
   phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
   phase <name> <N> planning [off]                  Claude is writing its plan:  a blue spinner on its page (off
@@ -1392,7 +1472,12 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    or the set closed (done);  on an item, a phase or a standing set
   add <name> choices "title" [--multiple] [--note "..."]
                                                    a standing option set (s-<slug>), in the Choices section
-  close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
+  close <name> <id>... [--why "<text>"]            close items (done);  --why closes them as obsolete:  the reason a
+                                                   Done card on each and in the log;  refused, the rest still closed:
+                                                   questions, tests, urgent, fixed, waiting on his pick or his mark
+  reopen <name> <id>                               open an item again
+  stale <name> [--json]                            the facts for judging which open calls, issues and todos have gone
+                                                   stale;  decides nothing (for /epic tidy)
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it
   commit <name> <sha> --phase N | --item <id> "sentence"
@@ -1488,6 +1573,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    summary under it when there's something worth saying;  an
                                                    open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
+  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange,
+                                                   still open;  Approve closes it.  A Do this's done means this too
   status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
                                                    an answer, details or a summary written, a request called
                                                    off:  a calm "Claude • Noted" card saying what was done and
@@ -1511,7 +1598,7 @@ const LOG_LABEL = "Log"
 /** How many review lines `log <name>` prints with no `--last`. */
 const LOG_LAST = 20
 
-const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]" }
+const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }
 
 /**
  * `bedtime <name> start|done ...`:  a `/bedtime` run's mode (`PlanDoc.startBedtime()`), logged.
@@ -1586,6 +1673,9 @@ function need(value: string | undefined, what: string): string {
 }
 
 /** Where a usage error points:  the whole `USAGE` is long, and every error printing it buried the message. */
+/** What `epic update ... fixed` says it did. */
+const FIXED_WORDS = "fixed, for review"
+
 const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name), an item `<epic>#J3`"
 
 /**

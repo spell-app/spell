@@ -14,21 +14,30 @@ Open Library has no list of every book, only a search:  so the page always searc
 	<property "found" description="What the search finds:  Open Library looks, by the title, and gives back the first hundred">every book where its title includes the search</property>
 
 	<draw>
-		<form value={it}>
-			<stack direction="horizontal" wrap align="center" justify="between">
-				<header size="large">Books, from Open Library</header>
-				<ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
-			</stack>
-		</form>
+		<stack spacing="xl">
+			<form value={it}>
+				<stack direction="horizontal" wrap align="center" justify="between" spacing="sm">
+					<header size="large">Books, from Open Library</header>
+					<ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
+				</stack>
+			</form>
+			{draw the shelf of it}
+			<text size="small" paragraph>
+				From <link link="https://openlibrary.org/developers/api">Open Library's API</link>, asked for as you look;  its covers from its covers server.
+			</text>
+		</stack>
+	</draw>
+
+	<draw "shelf" description="A book's own page, while one is open;  else what the search finds">
 		<if its showing>
-			<button appearance="basic" icon="arrow left" onClick={set its showing to nothing}>Back</button>
 			draw its showing's page
 		<otherwise>
-			<for its found as="cards" columns="5" doubling paging="pages" loading="Asking Open Library" failed="Open Library can't be reached just now." empty="No book is called that." />
+			draw the book list of it
 		</>
-		<text size="small" paragraph>
-			From <link link="https://openlibrary.org/developers/api">Open Library's API</link>, asked for as you look;  its covers from its covers server.
-		</text>
+	</draw>
+
+	<draw "book list">
+		<for its found as="cards" columns="5" doubling paging="pages" loading="Asking Open Library" failed="Open Library can't be reached just now." empty="No book is called that." />
 	</draw>
 </spell-thing>
 
@@ -50,12 +59,17 @@ Its cover, its title and who wrote it:  on its card, the first name the search g
 	</draw>
 
 	<draw "page">
-		<stack direction="horizontal" wrap align="start">
-			<image src={its cover i} alt="" />
-			<stack>
+		<stack spacing="xl">
+			<stack direction="horizontal" align="center" spacing="sm">
+				<button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={close it} />
 				<header size="large">{its title}</header>
-				<text>First published in {its first publish year} · {its edition count} editions</text>
-				{draw the writing of it}
+			</stack>
+			<stack direction="horizontal" wrap align="start" spacing="md">
+				<image src={its cover i} alt="" size="small" />
+				<stack spacing="sm">
+					<text>First published in {its first publish year} · {its edition count} editions</text>
+					{draw the writing of it}
+				</stack>
 			</stack>
 		</stack>
 	</draw>

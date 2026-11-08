@@ -436,6 +436,16 @@ describe("<ui-cards>", () => {
     expect(style(rootOf(cardsOf(group)[0]!)).breakInside).toBe("avoid")
   })
 
+  it("a mosaic never pulls what follows it up over its last row", async () => {
+    const tall = `<ui-card heading="Tall" description="${"A long description that wraps onto many lines. ".repeat(6)}"></ui-card>`
+    const wrapper = await ElementFixture.render(
+      `<div style="width: 1000px"><ui-cards layout="mosaic" columns="3">${tall}${THREE}</ui-cards><p style="margin: 0">After</p></div>`
+    )
+    const group = wrapper.querySelector("ui-cards")!
+    const lastRow = Math.max(...cardsOf(group).map((card) => rootOf(card).getBoundingClientRect().bottom))
+    expect(wrapper.querySelector("p")!.getBoundingClientRect().top).toBeGreaterThanOrEqual(lastRow)
+  })
+
   it("doubles and stacks by its OWN width (container queries)", async () => {
     const four = `${THREE}<ui-card heading="D"></ui-card>`
     const wrapper = await ElementFixture.render(

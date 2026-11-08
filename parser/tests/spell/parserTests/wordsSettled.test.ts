@@ -472,7 +472,14 @@ describe("reading", () => {
     ["every recipe sorted by title", 'core.savedThings(Recipe, { sort: [{ field: "title" }] })'],
     ["all recipes, sorted by title", 'core.savedThings(Recipe, { sort: [{ field: "title" }] })'],
     ["recipes sorted by title", 'core.savedThings(Recipe, { sort: [{ field: "title" }] })'],
-    ["recipes, sorted by its title", 'core.savedThings(Recipe, { sort: [{ field: "title" }] })']
+    ["recipes, sorted by its title", 'core.savedThings(Recipe, { sort: [{ field: "title" }] })'],
+    // `newest first`, `reversed` (epic `atmosphere` T48)
+    [
+      "recipes, sorted by title, reversed",
+      'core.savedThings(Recipe, { sort: [{ field: "title", descending: true }] })'
+    ],
+    ["every recipe sorted by its title newest first", 'sort: [{ field: "title", descending: true }]'],
+    ["every recipe, sorted by title, oldest first", 'core.savedThings(Recipe, { sort: [{ field: "title" }] })']
   ])("%s", (read, wanted) => {
     const { js, errors } = inAction(`print ${read}`)
     expect(errors).toEqual([])

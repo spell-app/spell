@@ -1252,6 +1252,9 @@ type LiveWindow = Window & {
  * - Every page opts in to cross-document view transitions (`@view-transition { navigation: auto }`), so the live
  *   client's `reload()` (a replace navigation to the page itself) runs one;  any other navigation skips it
  *   (`pageswap`):  links open as they always did
+ * - NOT in a frame (VS Code's side bar):  no view transition there (epic `epic-engine` I231;  Owen, 2026-11-08:  the side
+ *   bar's page came back after an auto-refresh zoomed way in, about twice its size, until reloaded by hand)
+ *   - the new page is drawn unseen instead, at its place again, then faded in:  the old page can't be held behind it
  * - the new page, after such a reload (`KeptPlace.hold`, for this path):
  *   - its address's `#id` is put back, before any runtime reads it
  *   - its view transition's animations wait at their start:  the old frame stays up, the new page draws behind it
@@ -1271,9 +1274,11 @@ export function holdReveal(scrollKey: string): void {
   const config = (window as unknown as LiveWindow).SPELL_SERVER
   if (!config) return
   try {
-    const style = document.createElement("style")
-    style.textContent = "@view-transition { navigation: auto; }"
-    ;(document.head ?? document.documentElement).append(style)
+    if (window.parent === window) {
+      const style = document.createElement("style")
+      style.textContent = "@view-transition { navigation: auto; }"
+      ;(document.head ?? document.documentElement).append(style)
+    }
   } catch {
     return
   }
@@ -1295,6 +1300,8 @@ export function holdReveal(scrollKey: string): void {
   let isAsked = false
   let isShown = false
   let held: ViewTransition | undefined
+  // in a frame:  the new page is hidden, to fade in by itself (no view transition there)
+  let isFading = false
   config.revealAfter = (ready) => {
     waits.push(Promise.resolve(ready).catch(() => undefined))
   }
@@ -1311,6 +1318,12 @@ export function holdReveal(scrollKey: string): void {
   const place = kept()
   if (!place?.hold || place.path !== location.pathname) return
   if (place.hash && !location.hash) history.replaceState(history.state, "", place.hash)
+  if (window.parent !== window) {
+    isFading = true
+    document.documentElement.style.opacity = "0"
+    setTimeout(show, HOLD_MS)
+    return
+  }
   addEventListener(
     "pagereveal",
     (event) => {
@@ -1335,9 +1348,21 @@ export function holdReveal(scrollKey: string): void {
   function show() {
     if (isShown) return
     isShown = true
+    if (isFading) return fadeIn()
     if (!held) return
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return held.skipTransition()
     for (const animation of fades()) animation.play()
+  }
+
+  /** A page drawn hidden in a frame, shown:  faded in, or with less motion asked for, at once. */
+  function fadeIn() {
+    const { style } = document.documentElement
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return style.removeProperty("opacity")
+    style.transition = `opacity ${FADE_MS}ms`
+    requestAnimationFrame(() => {
+      style.removeProperty("opacity")
+      setTimeout(() => style.removeProperty("transition"), FADE_MS * 2)
+    })
   }
 
   /** The view transition's animations:  its old and new snapshots, and their group. */

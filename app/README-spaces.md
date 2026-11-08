@@ -505,11 +505,12 @@ an org is a thing where:
 
 a membership is a thing where:
 	- it has a person as a person
-	- its "role" is one of guest, member, admin, spell-admin
+	- its "role" is one of viewer, editor, manager, spell-admin, guest, member, admin
 ```
 
-_From [People.spell](spaces/@spell/library/people/People.spell), the whole people library, 47 lines:
-it also declares the person ([the front page](README.md#spaces--every-project-has-an-owner-and-an-address) shows
+_From [People.spell](spaces/@spell/library/people/People.spell), the whole people library:
+older files' guest, member and admin are read as viewer, editor and manager.
+It also declares an org's roster (who manages what), the person ([the front page](README.md#spaces--every-project-has-an-owner-and-an-address) shows
 it), dated events, notes, relationships and friend lists._
 
 No schema file, no ORM:  those sentences are the schema.
@@ -598,7 +599,11 @@ A Firebase app keeps its rows in a database a console sets up.
 Here they're files in a space's folder, `@family/__data/cookbook`, one per thing, which you can open and read.
 
 - `"recipes"` alone is the program's own folder;  `personal "recipes"` is one per person.
-- A space's own folder is written by its MEMBERS:  guests read, members write, admins manage the list.
+- A space's own folder is written by its MEMBERS, each with a role:
+  - viewer:  reads, and posts and comments where the space allows it
+  - editor:  also adds rows and files, and changes any;  removes only their own
+  - manager:  also makes pages and apps, publishes, removes anything, and adds people
+  - a refusal names the role it takes:  "it takes an editor"
   - Every row is the space's (`owner: "@family"`), with `by` naming who saved it,
     so Ana and Bo editing one recipe keep one record.
   - Anyone else is refused:  "Your role can't write here:  you aren't a member of @family".
@@ -606,14 +611,14 @@ Here they're files in a space's folder, `@family/__data/cookbook`, one per thing
 - A program's own data is each row's owner's:  anyone else's change is refused.
 - Members read a space straight from its files, `/api/reads/spaces/<address>/`, with a credential good for 30 days;
   every read checks the member list again, so someone who leaves is cut off at once.
-- Each space can be read, or written, by anyone signed in:  `publicRead` and `publicWrite`, off until an admin turns them on.
+- Each space can be read, or written, by anyone signed in:  `publicRead` and `publicWrite`, off until a manager turns them on.
   They live in the space's own settings file, `__settings/space.json5`.
 - Limits:  1 MB a thing, 100 MB a space.  A save over either is refused, and stays on the page.
 - Spell's admins take a record, a space or an account down, and put it back,
   with [`spell space takedown`](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app);
   a refusal says "taken down" and where to ask:  `abuse@spell.spaces`, unless `SPELL_ABUSE_CONTACT` says otherwise.
 - Backups every night, a week kept;  a space exported as plain JSON;  a space or an account deleted.
-  Each is a `spell app` command:  `backup`, `export`, `delete`.
+  Each is a command of `spell space`, by that name.
 
 ### Sign-in:  an emailed code, invite only
 
@@ -633,19 +638,42 @@ Here they're files in a space's folder, `@family/__data/cookbook`, one per thing
 
 **Not yet:**
 - No public address, and no real mail:  codes are read with `spell space cloud mail`.
-- Drafts still belong to this machine's person, whoever's signed in;  pending sign-ins are lost on a restart.
+- Pending sign-ins are lost on a restart.
 - A hidden account stays signed in where it already was;  shared rooms don't check takedowns.
 - Backups cover the spaces only, not the sign-ins.
 
-## 🌱 Coming:  spaces for organizations
+## Orgs:  roles decide who reaches each space
 
-What's planned:  an organization's own spaces, a public and a private one for each team and project,
-on AT Protocol Spaces once it reaches its beta.
-Then sharing, several people in one project, which [the front page](README.md#-several-people-in-one-project)
-lays out in its two stages.
+```sh
+spell space org create rs --name "RS" --admin ana@example.org --team "Events Team"
+```
 
-Where it stands:  project data folders, members, sign-in and the cloud are built;
-organizations' spaces are planned, not started.
+_One command sets up an org on Spell's server;  run again, it makes nothing twice._
+
+A Slack or a Google Workspace keeps who's in what in an admin console, list by list.
+Here the org's roles are kept once, in its Admin space (`@rs/__admin`), and every space's list is worked out from them.
+
+- The roles:  the Board (the org's Org Managers), the Admins, and each team's and project's Managers,
+  held by a person or a whole team, from a day until a day.
+- Two spaces each:  the org, the Admins, every team and every project has a shared space everyone in the org reads
+  (`events_team@rs`) and a private one only its Managers reach (`events_team@rs/__private`).
+- A role that ends takes the person off every list at once;  `spell space org audit rs` says where a list differs.
+- Changing a program's pages is a right of its own, design:  managers have it, and the org gives it to anyone else.
+- Each member has a space of their own in the org (`ana@rs`), handed to them when they leave (`spell space org leave`).
+- If the Admins are gone, the Board names new ones.
+  If the Board is lost too, recovery codes bring it back (`spell space org codes`, then `recover`).
+- `spell space org create` gives each org its own copies of the Admin, Inbox, Feed and Chat programs, on Spell's cloud
+  at `/apps/@rs/OrgAdmin` and so on:  only people the org has let in can open them.
+- The built-in programs for an org ([README-examples](README-examples.md)):
+  - Org Admin, and its Spanish twin Administración de la Org:  people, teams, who manages and designs what,
+    approved apps, event stages, the log
+  - Inbox:  messages between people, a daily digest or a mail each, and following a space
+  - Feed, Chat, Org Events, Sign-Up Sheet and Picnic Letter
+
+**Not yet:**
+- real mail:  the catcher on this machine stands in
+- a public host, and the phone app
+- orgs on AT Protocol Spaces itself:  today they live on Spell's server, shaped like Spaces
 
 ## See also
 

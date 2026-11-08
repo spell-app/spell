@@ -11,6 +11,7 @@ import { buildTsx } from "spell/parser/spell/node/buildTsx"
 import { SP } from "spell/parser/spell"
 import {
   FIXTURES_GROUP,
+  NOTEBOOKS_GROUP,
   PYTHON_FIXTURES,
   bareNameOf,
   compiledFixture,
@@ -103,6 +104,11 @@ async function importedProjects(
   return projects
 }
 
+/** Does test project `name` import one of Spell UI's component notebooks? */
+function importsNotebooks(name: string): boolean {
+  return Object.values(fixtureImports(name)).some((project) => project.startsWith(`${NOTEBOOKS_GROUP}/`))
+}
+
 /** A file or variable name for imported project `imported`, a fixture's name or a library's address:  `counter`. */
 function moduleNameOf(imported: string): string {
   return imported.split("/").at(-1)!.replace(/\W/g, "_")
@@ -135,7 +141,10 @@ describe("the core contract:  every target prints the same", () => {
       name,
       async () => {
         // Python only where its writer writes the fixture so far -- see `PYTHON_FIXTURES`
-        const targets = RUNNING_TARGETS.filter((target) => !target.startsWith("py") || PYTHON_FIXTURES.has(name))
+        const possible = RUNNING_TARGETS.filter((target) => !target.startsWith("py") || PYTHON_FIXTURES.has(name))
+        // javascript only for one that imports Spell UI's notebooks:  their drawings' fragments don't build as TypeScript or
+        // Python yet (epic `mockup` P1, the Spell UI site)
+        const targets = importsNotebooks(name) ? possible.filter((target) => target === "js/solid") : possible
         const [js, ...others] = await Promise.all(targets.map((target) => printed(name, target)))
         for (const [index, other] of others.entries()) {
           expect(other!.split("\n"), `${name} on ${targets[index + 1]}`).toEqual(js!.split("\n"))

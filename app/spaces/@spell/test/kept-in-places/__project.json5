@@ -1,0 +1,10 @@
+{
+  "title": "Kept In Places",
+  "description": "A note kept in each kind of place a Python program keeps things in:  a database on this device, a data folder on the server and a CSV file on the server (epic data P40)",
+  "imports": [
+    {
+      "path": "/KeptInPlaces.spell",
+      "active": true
+    }
+  ]
+}

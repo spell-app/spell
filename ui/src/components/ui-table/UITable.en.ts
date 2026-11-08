@@ -64,6 +64,17 @@ export const tableVocabulary = {
     },
     { name: "selectable", group: "behaviour", kind: "keyOnly", description: "Body rows highlight on hover." },
     {
+      name: "editable",
+      group: "behaviour",
+      kind: "keyOnly",
+      description:
+        "Data mode:  people edit the cells like a spreadsheet.  A cell cursor (arrows, Tab, Enter, Home / End), " +
+        "typing or F2 opens the cell's editor (by its column's `type`), Escape puts it back;  the last, empty row " +
+        "adds one;  Delete clears a cell, ⌘ / Ctrl + Delete removes its row;  a pasted block of cells (from Excel or " +
+        "Sheets) fills from the cursor.  Each change is sent as `ui-editing` first:  square cells on a hairline grid " +
+        "while it's on, in every theme."
+    },
+    {
       name: "single-line",
       group: "appearance",
       kind: "keyOnly",
@@ -222,8 +233,8 @@ export const tableVocabulary = {
       kind: "json",
       reflect: false,
       description:
-        "Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first " +
-        "row's keys."
+        "Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`;  for `editable`, `type`, " +
+        "`choices`, `readOnly`);  default the first row's keys (its `toJSON()`'s, for a row that has one)."
     },
     {
       name: "caption",
@@ -239,11 +250,20 @@ export const tableVocabulary = {
       kind: "json",
       reflect: false,
       description:
-        "Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text " +
-        "only) into its light DOM."
+        "Data mode:  `Record<string, unknown>[]`, or any list of them (an iterable);  with no slotted `<table>`, " +
+        "the element renders one (text only) into its light DOM."
     }
   ],
   events: [
+    {
+      name: "ui-editing",
+      detail: "TableEditDetail",
+      cancelable: true,
+      description:
+        "`editable`:  cells were changed, a row added or removed, as `{ edits, originalEvent }` (`TableEdit[]`, " +
+        "one keystroke, paste or click together).  Not cancelled, the table shows them in new `rows` of its own;  " +
+        "`preventDefault()` when the page writes them itself (a Spell program's things), and hands the table its rows."
+    },
     {
       name: "ui-sorting",
       detail: '{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }',
@@ -289,6 +309,12 @@ export const tableVocabulary = {
     }
   ],
   texts: [
+    { key: "delete-row", text: "Delete row", description: "`editable`:  the button at a row's end that removes it." },
+    {
+      key: "new-row",
+      text: "New row:  type to add one",
+      description: "`editable`:  the empty last row's name, read out as the cursor reaches it."
+    },
     {
       key: "label",
       text: "Table",

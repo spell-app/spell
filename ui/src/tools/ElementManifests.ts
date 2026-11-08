@@ -693,6 +693,7 @@ const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
   ShapeFlip: "UIT.ShapeFlip",
   SidebarCloseReason: "UIT.SidebarCloseReason",
   StickyEdge: "UIT.StickyEdge",
+  TableEditDetail: "UIT.TableEditDetail",
   ThemeChoices: "UIT.ThemeChoices",
   ToastCloseReason: "UIT.ToastCloseReason",
   VisibilityCalculations: "E.VisibilityCalculations"

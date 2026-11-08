@@ -207,6 +207,12 @@ export class EpicProgram {
       "epic summary seo"
     ).usage("<epic> [--json]")
     this.page(
+      epic.command("stale"),
+      "the facts for judging which open calls, issues and todos have gone stale:  age, phase, whether the files and " +
+        "names they mention still exist, commits since, later mentions;  decides nothing (for /epic tidy)",
+      "epic stale seo --json"
+    ).usage("<epic> [--json]")
+    this.page(
       epic.command("summaries"),
       "`summary --json` of each page, by path (worktrees' too), for /epics",
       "epic summaries epics/seo/seo.plan.html"
@@ -268,9 +274,11 @@ export class EpicProgram {
     this.page(
       epic.command("update"),
       "set a phase's or an item's fields, or the page's flags;  or Claude's status card on an item:  underway " +
-        "(spinner on), done, or noted"
+        "(spinner on), done, fixed, or noted"
     )
-      .usage('<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | noted ["<html>"]')
+      .usage(
+        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted ["<html>"]'
+      )
       .addHelpText("after", UPDATE_HELP)
     this.page(
       epic.command("updated"),
@@ -281,11 +289,13 @@ export class EpicProgram {
     this.page(
       epic.command("phase"),
       "set a phase's status;  done:  --done writes what was built, and the time Claude took (took, from the " +
-        "transcripts);  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
+        "transcripts);  dropped:  never built, and won't be (struck through, finished as done is), --why writes why " +
+        "in place of Done, a phase it names (P38) linked;  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
         "its plan, a blue spinner on its page (off:  ends it;  writing --plan ends it by itself)",
       'epic phase seo#P3 done --done "<ul><li>the sitemap, written on build</li></ul>"'
     ).usage(
-      "<epic>#P3 todo | active | done [--done <html>] [--no-open]  |  <epic>#P3 took [--dry-run]  |  " +
+      "<epic>#P3 todo | active | done | dropped [--done <html>] [--why <html>] [--no-open]  |  " +
+        "<epic>#P3 took [--dry-run]  |  " +
         "<epic>#P3 planning [off]"
     )
     this.page(
@@ -350,7 +360,11 @@ export class EpicProgram {
       'add <epic>#Q4 "Title" ["note"] [--image <png>]  |  edit <epic>#Q4 B [--title "..."] [--note "..."]  |  ' +
         "remove <epic>#Q4 B  |  close <epic>#Q4  [--set N]"
     )
-    this.page(epic.command("close"), "close an item:  done", "epic close seo#J3").usage("<epic>#J3")
+    this.page(
+      epic.command("close"),
+      "close items:  done;  --why closes them as obsolete, the reason saved on each, some refused (its help)",
+      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"'
+    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]')
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
       epic.command("cancel"),
@@ -1163,6 +1177,8 @@ word after the target, never with fields:
   underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
+  fixed ["<what changed>"]                                an issue or judgement call fixed, for your review:  orange
+                                                          until Approve closes it;  a Do this's done means this too
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
 
@@ -1173,6 +1189,7 @@ Examples:
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"
+  epic update seo#I3 fixed "Writes the file on build now"
   epic update seo#J3 noted "Answered his note:  options A and B"`
 
 /** After `epic saga --help`. */

@@ -7,6 +7,7 @@ import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { DataFile } from "spell/epic/data/DataFile"
+import { PhaseStatuses } from "spell/epic/phases"
 import { SRV } from "spell/server"
 
 import { planDocIn } from "spell/epic/tools/pages.js"
@@ -506,7 +507,7 @@ function read(
   return {
     title: decode(title),
     phases: phases.map((phase) => phase.status),
-    done: phases.filter((phase) => phase.status === "done").length,
+    done: phases.filter((phase) => PhaseStatuses.isFinished(phase.status)).length,
     total: phases.length,
     ...(active && { active: decode(active) }),
     ...(updated && { updated }),

@@ -335,9 +335,28 @@ export type SheetRules = {
    * `"not listed"`.  A manager isn't held to it.
    */
   onlyFrom?: string
-  /** At most `most` rows with the same `field` (`{ field: "shift", most: 2 }`):  one more is refused, `"full"`. */
-  mostEach?: { field: string; most: number }
+  /**
+   * At most `most` rows with the same `field` (`{ field: "shift", most: 2 }`):  one more is refused, `"full"`.
+   * - Several, each line its own:  `[{ field: "shift", most: 2 }, { field: "event", most: 40 }]` (P31).
+   */
+  mostEach?: SheetMost | SheetMost[]
+  /**
+   * Each person's ALLOWANCE (epic `atmosphere` P31):  at most as many rows in `collection` as their row on the list
+   * (`onlyFrom`) says in its `field` (`{ collection: "tickets", field: "invitations" }`);  one more is refused,
+   * `"used up"`.  A manager isn't held to it.
+   * - Each change to their rows sends them their count, an update in their inbox:  "You've asked for 2 of your 3".
+   */
+  allowance?: { collection: string; field: string }
+  /**
+   * A CONFIRMED row joins a space (P31):  once a manager sets a row of `collection`'s `status` to `"confirmed"`, its
+   * `guest` (else its `person`) goes on the list of the space at `address`, an event's attendees' space
+   * (`{ collection: "tickets", address: "picnic@rs/__attendees" }`).  Only a manager confirms.
+   */
+  joins?: { collection: string; address: string }
 }
+
+/** At most `most` rows with the same `field`, a sheet's `mostEach`. */
+export type SheetMost = { field: string; most: number }
 
 /**
  * Part of a space's data, written into another space where its readers can see it (epic `atmosphere` P17):
@@ -741,7 +760,16 @@ export type WriteQuestion = {
 }
 
 /** Every reason a write isn't allowed. */
-export const WhyNotWritables = ["place", "owner", "field", "role", "taken down", "full", "not listed"] as const
+export const WhyNotWritables = [
+  "place",
+  "owner",
+  "field",
+  "role",
+  "taken down",
+  "full",
+  "not listed",
+  "used up"
+] as const
 /**
  * Why a write isn't allowed:
  * - `"place"`:  this place doesn't take this write from anyone
@@ -752,6 +780,7 @@ export const WhyNotWritables = ["place", "owner", "field", "role", "taken down",
  *   its message says where to ask about it (epic `atmosphere` P6)
  * - `"full"`:  a sign-up sheet's place is taken:  someone got the last one first (epic `atmosphere` P27)
  * - `"not listed"`:  a sign-up sheet takes rows only from the people its list names, and you aren't one (P27, J101)
+ * - `"used up"`:  you've asked for every row your allowance gives you, every invitation you have (P31)
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 
@@ -890,10 +919,10 @@ export const SPACE_LIMITS = { thing: 1024 * 1024, space: 100 * 1024 * 1024 } as 
 
 /**
  * An org's roles, the place its Admin page reads and writes (epic `atmosphere` P25):  `@rs/__admin/roles`, its org's id
- * the first part.
+ * the first part;  and its events, the same place at `@rs/__admin/events` (epic `atmosphere` P32).
  * - No folder, but the app's `OrgRolesPlace`:  read and written through Spell's server alone, never read direct.
  */
-export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/roles$/i
+export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/(?:roles|events)$/i
 
 /**
  * Whoever's asking's own INBOX in an org (epic `atmosphere` P29):  `@rs/__inbox`, the org's address with no person.
@@ -902,6 +931,14 @@ export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/roles$/i
  * - So it's never read direct (`spaceReadAddressFor()`):  one read address would be everyone's.
  */
 export const PERSON_INBOX_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__inbox(\/|$)/i
+
+/**
+ * Whoever's asking's own FEED in an org (epic `atmosphere` P33):  `@rs/__feed`, the org's address with no person.
+ * - What's new across every space of the org they may read, put together by the app's `PersonFeed`:  each space read as
+ *   them, so its own read check holds.
+ * - So it's never read direct (`spaceReadAddressFor()`):  one read address would be everyone's, and no folder holds it.
+ */
+export const PERSON_FEED_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__feed$/i
 
 /** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
 export const DATA_FOLDER = "__data"
@@ -975,6 +1012,85 @@ export const SPACE_READS_PREFIX = "/api/reads/spaces"
  */
 export const SPACE_ROOMS_PREFIX = "/api/rooms/spaces"
 
+/**
+ * Whoever's asking's list of THREADS in an org (epic `atmosphere` P37):  `@rs/__threads`, the org's address with no
+ * person, as `@rs/__feed` is.
+ * - Every chat thread they may read:  each team's, project's and event's open one, the organizers' ones they manage,
+ *   and the org's ad-hoc ones;  put together by the app's `PersonThreads`, so never read direct.
+ */
+export const PERSON_THREADS_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__threads$/i
+
+/**
+ * The thread a chat page SHOWS (epic `atmosphere` P37):  a room at `@rs/__thread` is whichever thread the page's own
+ * address names, `?thread=events_team@rs/messages`.
+ * - None named:  the one this browser showed last in that org, else the org's own, `@rs/messages`.
+ * - So one built-in Chat shows every thread:  its thread list links to the page with another `?thread=`.
+ */
+export const PICKED_THREAD_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__thread$/i
+
+/** The page address's parameter naming the thread a chat page shows:  `?thread=events_team@rs/messages`. */
+export const THREAD_PARAM = "thread"
+
+/** The page address's parameter naming an AD-HOC thread in its room:  `?thread=@rs/messages&topic=picnic-planning`. */
+export const THREAD_TOPIC_PARAM = "topic"
+
+/** The thread a chat page shows (`pickedThreadFor()`):  its room's Spell address, and an ad-hoc thread's id in it. */
+export type PickedThread = {
+  /** Its room, a Spell address and its collection:  `events_team@rs/messages`. */
+  thread: string
+  /** An ad-hoc thread's id, its messages naming it in their `thread`:  `""` for a team's, project's or event's own. */
+  topic: string
+}
+
+/**
+ * The thread a chat page in org `org` shows (epic `atmosphere` P37):  the one `pageAddress` names, else the one
+ * `remembered` there, else the org's own, `@rs/messages`.
+ * - `remembered`:  this browser's last thread per org (`"<thread>~<topic>"`), read and written by the caller;  the one
+ *   picked is written back.
+ * - A thread named that's no Spell address of this org with a collection (`picnic`) is ignored, as if none were named.
+ */
+export function pickedThreadFor(org: string, pageAddress: string, remembered: Map<string, string>): PickedThread {
+  const params = new URL(pageAddress, "http://page").searchParams
+  const named = params.get(THREAD_PARAM) ? `${params.get(THREAD_PARAM)}~${params.get(THREAD_TOPIC_PARAM) ?? ""}` : ""
+  const isThread = (text: string | undefined): text is string => {
+    const thread = text?.split("~")[0] ?? ""
+    return /^[^/@]*@[^/]+(\/[^/]+)+$/.test(thread) && thread.split("/")[0]!.endsWith(`@${org}`)
+  }
+  const picked = [named, remembered.get(org)].find(isThread) ?? `@${org}/messages~`
+  remembered.set(org, picked)
+  const [thread = "", topic = ""] = picked.split("~")
+  return { thread, topic }
+}
+
+/**
+ * The room a page opens for `url`, a room's address:  a room at the picked thread (`PICKED_THREAD_ADDRESS`) becomes
+ * the one `pickedThreadFor()` picks;  any other room is `url` itself.
+ */
+export function roomForPage(url: string, pageAddress: string, remembered: Map<string, string>): string {
+  const prefix = `${SPACE_ROOMS_PREFIX}/`
+  const at = url.indexOf(prefix)
+  if (at < 0) return url
+  const org = PICKED_THREAD_ADDRESS.exec(decodeURIComponent(url.slice(at + prefix.length)))?.[1]
+  if (!org) return url
+  const { thread } = pickedThreadFor(org, pageAddress, remembered)
+  const encoded = thread
+    .split("/")
+    .map((part) => encodeURIComponent(part).replace(/%40/g, "@"))
+    .join("/")
+  return `${url.slice(0, at)}${prefix}${encoded}`
+}
+
+/**
+ * `rows` of a person's threads (`PERSON_THREADS_ADDRESS`), each saying whether it's the one `picked`, `current`:
+ * so the chat page's list marks the thread it shows, and its messages show only an ad-hoc thread's own.
+ */
+export function withPickedThread(rows: PlaceRow[], picked: PickedThread): PlaceRow[] {
+  return rows.map((row) => ({
+    ...row,
+    current: row.thread === picked.thread && (row.topic ?? "") === picked.topic
+  }))
+}
+
 ////////////////
 // ## Files in a space
 ////////////////
@@ -1006,8 +1122,9 @@ export const FILE_BYTES_FOLDER = "__blobs"
  * - `"row"`:  a row of a sheet, a program's data:  `recipes`, `signups`
  * - `"file"`:  a page, a sheet or any other file (`FILES_COLLECTION`)
  * - `"app"`:  an app installed in the space (`APPS_COLLECTION`)
+ * - `"thread"`:  a chat thread someone started, its messages posts beside it (`THREADS_COLLECTION`, P36)
  */
-export type ThingKind = "post" | "row" | "file" | "app"
+export type ThingKind = "post" | "row" | "file" | "app" | "thread"
 
 /**
  * The collections whose things are people's own words:  `"post"`s.
@@ -1022,11 +1139,19 @@ export const POST_COLLECTIONS = ["posts", "comments", "messages"] as const
  */
 export const APPS_COLLECTION = "__apps"
 
+/**
+ * The collection a space's ad-hoc chat threads are in (epic `atmosphere` P36):  one record each, `{ name, about }`;
+ * each thread's messages are `messages`, naming it in their `thread`.
+ * - Starting one is a Manager's:  in the org's shared space, the Board's and the Admins'.
+ */
+export const THREADS_COLLECTION = "threads"
+
 /** What a thing in `collection` is:  `"posts"` => `"post"`, `"__files"` => `"file"`, `"recipes"` => `"row"`. */
 export function thingKindOf(collection: string): ThingKind {
   if ((POST_COLLECTIONS as readonly string[]).includes(collection)) return "post"
   if (collection === FILES_COLLECTION) return "file"
   if (collection === APPS_COLLECTION) return "app"
+  if (collection === THREADS_COLLECTION) return "thread"
   return "row"
 }
 
@@ -1137,15 +1262,16 @@ export const PLACE_CREDENTIAL = "credential"
 /**
  * Where the project data folder written at `address` is read directly:  `undefined` for one that's no space's own.
  * - Only a space's own folder (`"its members"`, `whoWritesFolderAt()`):  a program's own data stays read through
- *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox
- *   (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`).
+ *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox and
+ *   feed and threads (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`, `PERSON_FEED_ADDRESS`, `PERSON_THREADS_ADDRESS`).
  * - `/api/places/spaces/@family/cookbook` => `/api/reads/spaces/@family/cookbook`, its origin kept.
  */
 export function spaceReadAddressFor(address: string): string | undefined {
   if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
   const [path = ""] = address.split(/[?#]/)
   const name = path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1)
-  if (ORG_ROLES_ADDRESS.test(name) || PERSON_INBOX_ADDRESS.test(name)) return undefined
+  const isEveryones = [ORG_ROLES_ADDRESS, PERSON_INBOX_ADDRESS, PERSON_FEED_ADDRESS, PERSON_THREADS_ADDRESS]
+  if (isEveryones.some((each) => each.test(name))) return undefined
   return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
 }
 
@@ -1218,3 +1344,9 @@ export class PlaceError extends Error {
   }
 }
 PlaceError.prototype.name = "PlaceError"
+
+/**
+ * The store a sample's records are kept in on this device (`SamplePlace`):  `spell-samples:<program>/<place>`.
+ * - The site editor's Data tab reads and writes the same (epic `mockup` P14, T22).
+ */
+export const SAMPLE_STORE = "spell-samples"

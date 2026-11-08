@@ -77,6 +77,57 @@ export class Message extends Thing {
 }
 
 /**
+ * How you hear of your inbox by mail:  one mail per message, a daily digest, or none.  The first one counts;
+ * with none, a daily digest.  Every mail has a link that stops it.
+ */
+export class MailChoice extends Thing {
+  // - its "how" is text
+  static { this.declareProp("how", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1020, end: 1037 } }) }
+  get how() { return this.getProp("how") }
+  set how(value) { this.setProp("how", value) }
+
+  draw() {
+    return h("ui-form", { class: "mail-choice", value: this },
+      h("ui-field", { label: "Mail me", inline: true },
+        h("ui-select", { name: "how" },
+          h("ui-item", { value: "each" }, "One mail per message"),
+          h("ui-item", { value: "digest" }, "A daily digest"),
+          h("ui-item", { value: "none" }, "No mail")
+        )
+      )
+    )
+  }
+
+  static savedIn = { place: "my_inbox", collection: "mail_choices" }
+}
+
+/** A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update. */
+export class Subscription extends Thing {
+  // - its "space" is text
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1208, end: 1227 } }) }
+  get space() { return this.getProp("space") }
+  set space(value) { this.setProp("space", value) }
+
+  draw() {
+    return h("ui-stack", { class: "subscription", direction: "horizontal", spacing: "md", align: "center" },
+      h("ui-text", () => this.space),
+      h("ui-button", {
+        class: "unsubscribe",
+        icon: "close",
+        size: "mini",
+        appearance: "transparent",
+        "aria-label": "Stop following it",
+        title: "Stop following it",
+        onClick: core.pressed(this, () => core.removeSaved(this)),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      })
+    )
+  }
+
+  static savedIn = { place: "my_inbox", collection: "subscriptions" }
+}
+
+/**
  * Everyone in an org has an inbox there:  "@rs/__inbox" is yours in the Rock Society, whoever you are.
  * Sending a message is adding it to your messages:  Spell writes a copy into each inbox it's to,
  * so deleting yours leaves theirs.  A message can't be changed once it's sent.
@@ -87,8 +138,7 @@ export const myInbox = core.place(new MyInbox(), {
   name: "my_inbox",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__inbox",
-  checkedEvery: 30
-})
+  checkedEvery: 30, firstReads: () => [[MailChoice], [Subscription], [Message, { sort: [{ field: "sent", descending: true }] }]] })
 
 // -----------
 core.heading("Inbox")
@@ -102,8 +152,14 @@ core.heading("Inbox")
 core.heading("A row for each:  who it's from, what it says, and its conversation")
 //## A row for each:  who it's from, what it says, and its conversation
 
-core.heading("The page:  write one, then every conversation")
-//## The page:  write one, then every conversation
+core.heading("How you hear of it, by mail:  pick one")
+//## How you hear of it, by mail:  pick one
+
+core.heading("A space you follow, and a button to stop")
+//## A space you follow, and a button to stop
+
+core.heading("The page:  write one, then every message, newest first, each with a Reply")
+//## The page:  write one, then every message, newest first, each with a Reply
 
 export class InboxPage extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -113,9 +169,28 @@ export class InboxPage extends App {
   get newMessage() { return this.getProp("newMessage") }
   set newMessage(value) { this.setProp("newMessage", value) }
 
+  // - its "new subscription" is a new subscription
+  static { this.declareProp("newSubscription", { init: () => new Subscription(), early: true }) }
+  get newSubscription() { return this.getProp("newSubscription") }
+  set newSubscription(value) { this.setProp("newSubscription", value) }
+
   send() {
     core.saveThing(this.newMessage)
     this.newMessage = new Message()
+  }
+
+  replyToWhoInConversation(who, conversation) {
+    this.newMessage.recipients = who
+    this.newMessage.thread = conversation
+  }
+
+  chooseHow() {
+    core.saveThing(new MailChoice({ how: "digest" }))
+  }
+
+  subscribe() {
+    core.saveThing(this.newSubscription)
+    this.newSubscription = new Subscription()
   }
 
   draw() {
@@ -152,10 +227,58 @@ export class InboxPage extends App {
             )
           )
         ),
+        h("ui-segment", { class: "mail" },
+          h("ui-header", { size: "medium" }, "Mail"),
+          h("ui-stack", { class: "mail-choices", spacing: "sm" },
+            () => core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice) => core.drawThing(choice), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading how you hear of it"), none: () => h("ui-stack", { direction: "horizontal", spacing: "md", align: "center", wrap: true },
+              h("ui-text", { color: "grey" }, "A daily digest of what's new, each morning."),
+              h("ui-button", {
+                class: "choose",
+                size: "small",
+                onClick: core.pressed(this, () => this.chooseHow()),
+                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+              }, "Choose")
+            ) })
+          )
+        ),
+        h("ui-segment", { class: "subscriptions" },
+          h("ui-header", { size: "medium" }, "Spaces you follow"),
+          h("ui-form", { "prop:value": () => this.newSubscription },
+            h("ui-input", {
+              name: "space",
+              placeholder: "events_team@rs",
+              "aria-label": "A shared space of the org, by its address",
+              fluid: true,
+              action: true
+            },
+              h("ui-button", {
+                slot: "action",
+                color: "primary",
+                disabled: () => this.newSubscription.space === "",
+                onClick: core.pressed(this, () => this.subscribe()),
+                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+              }, "Follow")
+            )
+          ),
+          h("ui-stack", { class: "subscription-list", spacing: "sm" },
+            () => core.drawRead(async () => await core.savedThings(Subscription, {}, "as drawn"), (subscription) => core.drawThing(subscription), { none: () => h("ui-text", { color: "grey" }, "None yet.") })
+          )
+        ),
         h("ui-segment", { class: "messages" },
           h("ui-header", { size: "medium" }, "Conversations"),
           h("ui-stack", { class: "message-list", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "thread" }] }, "as drawn"), (message) => core.drawThing(message), {
+            () => core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "sent", descending: true }] }, "as drawn"), (message) => h("ui-stack", { class: "row", spacing: "xs" },
+              () => core.drawThing(message),
+              h("ui-button", {
+                class: "reply",
+                icon: "reply",
+                size: "small",
+                appearance: "basic",
+                title: "Answer in this conversation:  fills in who it's to and the conversation",
+                onClick: core.pressed(this, () => this.replyToWhoInConversation(message.from, message.thread)),
+                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+              }, "Reply")
+            ), {
               waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your inbox"),
               none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet."),
               failed: () => h("ui-text", { color: "red" }, "We can't read your inbox right now.")

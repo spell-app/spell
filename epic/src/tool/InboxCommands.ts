@@ -7,8 +7,17 @@ import { EpicCommandError, duration, stringFlag } from "spell/epic/command/comma
 import { ThreadFacts } from "spell/epic/comments"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
 
-import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
+import {
+  CALM_ID,
+  PlanDocError,
+  type ItemDescription,
+  type KeptNote,
+  type MarkResult,
+  type OptionCard
+} from "./planDoc.types"
 
 import { CommentList, CommentsError, type IdentifiedComment } from "./CommentList"
 import { GuideInbox, type GuideSend } from "./GuideInbox"
@@ -25,6 +34,7 @@ import {
   type DoingItem,
   type ListedMark,
   type ListedUrgency,
+  type PickFields,
   type TakenWork
 } from "./ReviewInbox"
 import { FEEDBACK, SeeAlso, epicNamed } from "./SeeAlso"
@@ -232,10 +242,13 @@ export class InboxCommands {
     for (const action of ACTIONS) {
       if (!marks[action].length) continue
       lines.push(`${action} (${marks[action].length}):`)
-      for (const mark of marks[action])
+      for (const mark of marks[action]) {
         lines.push(
           `  - ${mark.id.toUpperCase()}  ${mark.kind ? `${mark.kind}:  ` : ""}${mark.title ?? "(no such item)"}${extra(mark)}`
         )
+        const steps = doThisStepsOf(plan, mark)
+        if (steps) lines.push(`      ${steps}`)
+      }
     }
     const urgency = inbox.urgencyList
     if (urgency.length) lines.push(`urgency, from the id chips (${urgency.length}):`)
@@ -274,10 +287,18 @@ export class InboxCommands {
     /** A mark's own fields after its title:  the pick, a revisit's when and note, unsent. */
     function extra(mark: PrintedMark) {
       const parts: string[] = []
-      if (mark.pick) parts.push(`picks ${mark.pick}${mark.choices ? ` (card set ${mark.choices + 1})` : ""}`)
-      // an option set's other changes (epic `epic-engine` P50):  added, edited, removed, the flip
-      const change = OptionSets.markWords(mark)
-      if (change) parts.push(change)
+      // each of its sets' change (epic `epic-engine` I227):  its picks as people see them (`B2` in the 2nd set),
+      // then the set's other changes (P50):  added, edited, removed, the flip
+      for (const change of setPicksOf(mark)) {
+        if (change.pick)
+          parts.push(
+            `picks ${pickedLetters(change.pick)
+              .map((each) => setLetter(each, change.choices))
+              .join(" ")}`
+          )
+        const words = OptionSets.markWords(change)
+        if (words) parts.push(words)
+      }
       if (mark.when) parts.push(mark.when)
       if (mark.result) parts.push(TEST_WORDS[mark.result])
       if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)
@@ -412,8 +433,7 @@ export class InboxCommands {
             "      Start testing:  check the open tests you can, write out the rest (the epic skill's 7.3, " +
               `"Start testing");  \`epic inbox done ${name}#tests\` opens the first test on Owen's page`
           )
-        else if (each.pick)
-          lines.push(`      revisit now:  ${PlanItem.pickAsks(each.pick, each.option ?? undefined, each.note)}`)
+        else if (each.picked) lines.push(`      revisit now:  ${PlanItem.pickAsks(each.picked, each.note)}`)
         else lines.push(`      revisit now${each.note ? `:  "${each.note}"` : ""}`)
       }
     }
@@ -427,12 +447,15 @@ export class InboxCommands {
         lines.push(`  ${SENT_HEADINGS[action] ?? action} (${marks.length}):`)
         for (const mark of marks) {
           lines.push(`    - ${line(mark)}${mark.again ? "  (sent before)" : ""}`)
+          // an issue's or a call's Do this (I232):  what the agent does, with or without a fix proposed
+          const steps = doThisStepsOf(plan, mark)
+          if (steps) lines.push(`        ${steps}`)
           // a revisit with a pick:  "pick B, but ...", one line
-          if (mark.action === "revisit" && mark.pick)
-            lines.push(`        ${PlanItem.pickAsks(mark.pick, mark.option ?? undefined, mark.note)}`)
+          if (mark.action === "revisit" && mark.picked)
+            lines.push(`        ${PlanItem.pickAsks(mark.picked, mark.note)}`)
           else {
-            if (mark.option) lines.push(`        picks ${mark.pick} · ${mark.option.title}`)
-            else if (mark.pick) lines.push(`        picks ${mark.pick} (no such option card)`)
+            // every set's picks, each letter as people see it (`B2 · <title>` in the 2nd set, epic `epic-engine` I227)
+            if (mark.picked) lines.push(`        picks ${mark.picked}`)
             if (mark.result) lines.push(`        ${TEST_WORDS[mark.result]}`)
             // a test's note is Owen's COMMENT on it, with any result (it may still need work:  read every one)
             if (mark.note) lines.push(`        ${mark.action === "test" ? "comment" : "note"}:  "${mark.note}"`)
@@ -497,17 +520,28 @@ export class InboxCommands {
     }
     this.owner.print(lines.join("\n"))
 
-    /** `mark` (or a `now` request) with its item, upper-case id, and a pick's option card. */
-    function withItem<M extends { id: string; action?: string; pick?: string; choices?: number }>(mark: M) {
+    /**
+     * `mark` (or a `now` request) with its item, upper-case id, a pick's option card (`option`, its top-level pick's),
+     * and every set's picks in words (`picked`, `PlanReader.pickWords()`:  `B · <title>, B2 · <title>`).
+     * - the cards of what holds them:  an item, a phase, a standing set (epic `epic-engine` I227)
+     */
+    function withItem<M extends { id: string; action?: string } & PickFields>(mark: M) {
       const item = mark.action === "new" ? newItemOf(mark as M & ListedMark) : plan.describeItem(mark.id)
-      const element = item && plan.findItem(mark.id)
       const option: OptionCard | null | undefined =
-        mark.pick && element
-          ? (plan.optionCards(element, mark.choices).find((card) => card.letter === mark.pick) ?? null)
+        mark.pick && item
+          ? (plan.optionCardsOf(mark.id, mark.choices).find((card) => card.letter === mark.pick) ?? null)
           : undefined
-      return { ...mark, id: mark.id.toUpperCase(), item, ...(option !== undefined && { option }) } as M & {
+      const picked = item ? plan.pickWords(mark.id, mark) : ""
+      return {
+        ...mark,
+        id: mark.id.toUpperCase(),
+        item,
+        ...(option !== undefined && { option }),
+        ...(picked && { picked })
+      } as M & {
         item: typeof item
         option?: OptionCard | null
+        picked?: string
       }
     }
 
@@ -653,11 +687,13 @@ export class InboxCommands {
         if (mark && ReviewInbox.isImmediate(mark)) return [{ id, as: "now" }]
         return mark?.action === "revisit" ? [{ id, as: "revisit" }] : []
       })
-      // a pick riding on the mark ("pick B, but ..."):  Owen chose it, so it stays chosen on the page (P8)
-      picks = had.flatMap((id) => {
-        const pick = before[id]?.pick
-        return pick ? [{ id, pick, ...ReviewInbox.pickOf(before[id]) }] : []
-      })
+      // a pick riding on the mark ("pick B, but ..."):  Owen chose it, so it stays chosen on the page (P8);
+      // each set's (I227)
+      picks = had.flatMap((id) =>
+        setPicksOf(before[id]).flatMap(({ pick, choices }) =>
+          pick ? [{ id, pick, ...(choices !== undefined && { choices }) }] : []
+        )
+      )
       for (const id of keys) box.setWorking(id, null)
       // a request done before a `wait` took it (a session that saw it another way):  no longer queued either
       box.now = box.now.filter((each) => !keys.includes(each.id))
@@ -833,8 +869,8 @@ const SENT_HEADINGS: Partial<Record<string, string>> = {
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
   skip: "skip, nothing to do",
-  // a phase's todo is its Do this (epic `epic-engine` I181):  `apply` takes it as a go-ahead, an item's makes a todo
-  todo: "todo:  an item's makes a todo;  a phase's is Do this, a go-ahead to build it"
+  // Do this:  a phase's (epic `epic-engine` I181), a go-ahead;  an issue's or a call's (I232), worked in the item itself
+  todo: "todo:  a question's or a test's makes a todo;  a phase's is Do this, a go-ahead to build it;  an issue's or a call's is Do this, worked in the item"
 }
 
 /** A test answer's result in words, as `inbox` and `wait` print it. */
@@ -882,6 +918,12 @@ function markTitle(plan: PlanReader, mark: ListedMark): string | null {
 /** A new item's mark (`new1`), described as an item is (`describeItem()`):  kind `new todo`, not made yet. */
 function newItemOf(mark: ListedMark): ItemDescription {
   return { id: mark.id.toUpperCase(), kind: `new ${mark.kind}`, status: "not made yet", title: mark.title ?? "" }
+}
+
+/** What the agent does with `mark`, when it's an issue's or a call's Do this (I232);  else `undefined`. */
+function doThisStepsOf(plan: PlanReader, mark: { id: string; action: string }): string | undefined {
+  const item = mark.action === "todo" ? plan.findItem(mark.id) : null
+  return item && CALM_ID.test(item.id) ? plan.doThisSteps(item) : undefined
 }
 
 /** `not urgent` (calm) / `urgent`. */

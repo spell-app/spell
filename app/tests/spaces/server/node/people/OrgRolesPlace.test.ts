@@ -148,3 +148,43 @@ describe("an org's roles as a place", () => {
     await expect(rowsOf("budgets")).rejects.toMatchObject({ cause: { kind: "not found" } })
   })
 })
+
+describe("an org's event stages, from its Admin page (epic `atmosphere` T50, J153)", () => {
+  const keys = async () => (await rowsOf("event_stages")).map((each) => each.id)
+
+  test("an Admin adds one before the last, the one before it moving to it", async () => {
+    await apply("ada", { kind: "insert", collection: "event_stages", id: "r1", fields: { name: "Rehearsal" } })
+    expect(await keys()).toEqual(["proposed", "approved", "planning", "open", "analysis", "rehearsal", "quiet"])
+    const rows = await rowsOf("event_stages")
+    expect(rows.find((each) => each.id === "analysis")?.movesTo).toBe("rehearsal")
+    expect(rows.find((each) => each.id === "rehearsal")).toMatchObject({ movesTo: "quiet", movedBy: "its organizers" })
+  })
+
+  test("adding one by a name it has changes that one", async () => {
+    await apply("ana", {
+      kind: "insert",
+      collection: "event_stages",
+      id: "r2",
+      fields: { name: "Rehearsal", movedBy: "the team" }
+    })
+    expect((await rowsOf("event_stages")).filter((each) => each.id === "rehearsal")).toMatchObject([
+      { movedBy: "the team" }
+    ])
+  })
+
+  test("a stage another moves to can't be removed;  once nothing does, it can", async () => {
+    await expect(apply("ada", { kind: "delete", collection: "event_stages", id: "rehearsal" })).rejects.toThrow(
+      /Analysis moves to it/
+    )
+    await apply("ada", { kind: "update", collection: "event_stages", id: "analysis", fields: { movesTo: "quiet" } })
+    await apply("ada", { kind: "delete", collection: "event_stages", id: "rehearsal" })
+    expect(await keys()).toEqual(["proposed", "approved", "planning", "open", "analysis", "quiet"])
+  })
+
+  test("only the Board and the Admins change them", async () => {
+    await expect(
+      apply("bo", { kind: "insert", collection: "event_stages", id: "x", fields: { name: "Party" } })
+    ).rejects.toThrow(PlaceError)
+    expect(await keys()).not.toContain("party")
+  })
+})

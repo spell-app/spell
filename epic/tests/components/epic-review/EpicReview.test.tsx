@@ -554,7 +554,8 @@ describe("<epic-item> review controls", () => {
     )
     for (const host of [approved, answered]) {
       expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
-      for (const action of actions(host)) expect(button(host, action).getAttribute("aria-label")).not.toMatch(/done/)
+      for (const action of actions(host))
+        expect(button(host, action).getAttribute("aria-label")).not.toMatch(/\bdone\b/)
     }
     const look = (host: Element) => {
       const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
@@ -696,7 +697,14 @@ describe("<epic-item> review controls", () => {
     )
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
     expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
+    // a judgement call's first button is Do this (I232)
     expect(button(host, "todo").getAttribute("title")).toBe(
+      "Do this:  Yes:  fix this, right here, then I'll review it · reviewed 10/7/26"
+    )
+    const question = await render(
+      `<epic-item id="q5" title="A question" status="decided" reviewed="2026-10-07"><p>Text</p></epic-item>`
+    )
+    expect(button(question, "todo").getAttribute("title")).toBe(
       "Make Todo:  Follow it up later, as a todo:  work still to do · reviewed 10/7/26"
     )
   })
@@ -718,6 +726,22 @@ describe("<epic-item> review controls", () => {
     await settle()
     expect(routes.posts.at(-1)).toEqual(["urgency", { page: PAGE, id: "j6", calm: null }])
     expect(box().classList.contains("attention")).toBe(true)
+  })
+
+  // epic `epic-engine` I230:  Make Todo's follow-up asks Owen to act
+  test("an urgent todo's chip is red and a button;  a plain todo's stays a link", async () => {
+    await adoptClient()
+    const urgent = await render(
+      `<epic-item id="t9" title="Follow up:  x" status="open" state="attention" urgent></epic-item>`
+    )
+    const chip = deep(urgent).querySelector<HTMLElement>("[part~='id']")!
+    expect(deep(urgent).querySelector("[part~='base']")!.classList.contains("attention")).toBe(true)
+    expect(chip.localName).toBe("button")
+    chip.click()
+    await settle()
+    expect(routes.inbox.urgency.t9?.calm).toBe(true)
+    const plain = await render(`<epic-item id="t8" title="Work" status="open" state="open"></epic-item>`)
+    expect(deep(plain).querySelector<HTMLElement>("[part~='id']")!.localName).toBe("a")
   })
 
   test("a question's chip, or a reviewed call's, stays a link", async () => {

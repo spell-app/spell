@@ -51,6 +51,7 @@ export * from "./UIComponent"
 export * from "./SlotContent"
 export * from "./Disclosure"
 export * from "./OwnControls"
+export * from "./MoveAndResize"
 export * from "./ParentLink"
 
 /**

@@ -12,6 +12,7 @@ import {
   TESTS_ID,
   commentsOf,
   emptyInbox,
+  hasPick,
   hasSetChange,
   inboxOf,
   inlineCommentsNote,
@@ -19,7 +20,10 @@ import {
   isHeld,
   isImmediate,
   isSent,
+  pickFieldsOf,
   pickOf,
+  setPicksOf,
+  withSetPick,
   type Inbox,
   type InboxDoing,
   type InboxDraft,
@@ -32,6 +36,7 @@ import {
   type NowAction,
   type PickFields,
   type ReviewAction,
+  type SetPick,
   type ReviewClientOptions,
   type Running,
   type StartAnswer,
@@ -440,7 +445,7 @@ export class ReviewClient extends PageStore {
           ...pickOf(mark)
         })
       const pick = carriedPickOf(mark)
-      return void this.save(id, pick.pick ? { action: "pick", ...pick } : null)
+      return void this.save(id, hasPick(pick) ? { action: "pick", ...pick } : null)
     }
     if (action === "revisit") {
       const inline = this.commentsIn(id)
@@ -488,12 +493,16 @@ export class ReviewClient extends PageStore {
    *     (an immediate mark counts as sent:  Claude would never see the new pick)
    * - an Approve or a Do this stays pressed, the pick beside it (I217);  un-picked, it stays, plain
    * - anything else becomes a plain pick, or none
+   * - with `choices`, the holder's OTHER sets' changes stay as they are (`sets`, epic `epic-engine` I227)
    */
   choose(id: string, letter: string | null, choices?: number): Promise<boolean> {
     const mark = this.inbox.marks[id]
-    const pick = letter ? { pick: letter, ...(choices !== undefined && { choices }) } : {}
+    const own = letter ? { pick: letter, ...(choices !== undefined && { choices }) } : {}
+    // the holder's other sets' changes stay (I227);  no set named, the pick replaces them all, as before
+    const others = choices === undefined ? [] : setPicksOf(mark).filter((each) => (each.choices ?? 0) !== choices)
+    const pick = pickFieldsOf([...others, own])
     if (keepsAction(mark)) return this.save(id, { ...withoutPick(mark!), ...pick })
-    if (mark?.action !== "revisit") return this.save(id, letter ? { action: "pick", ...pick } : null)
+    if (mark?.action !== "revisit") return this.save(id, hasSetChange(pick) ? { action: "pick", ...pick } : null)
     return this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...pick })
   }
 
@@ -501,6 +510,8 @@ export class ReviewClient extends PageStore {
    * ONE option set's whole change, its mark's set fields (`SetChange`, epic `epic-engine` P50):  picks, the
    * pick-one / pick-any flip, options added, edited and removed;  `{}` drops them.
    * - `id`:  what holds the set, an item, a phase or a standing set (`s-upgrades`)
+   * - `index`:  which of its sets (`EpicChoices.setOf()`);  the mark keeps the OTHER sets' changes as they are
+   *   (`withSetPick()`, epic `epic-engine` I227:  a pick in a phase's 2nd set dropped its 1st set's)
    * - a revisit keeps its note and comments, its pick fields replaced ("pick B, but ...");  one asked NOW turns
    *   `soon`, as `choose()` does
    * - an Approve or a Do this stays pressed, the change beside it (I217)
@@ -509,9 +520,9 @@ export class ReviewClient extends PageStore {
    *   options added, edited or removed) answers with less than was sent:  said in a notice, false (epic
    *   `epic-engine` I178:  the switch flipped back by itself, and nothing said why)
    */
-  async changeSet(id: string, change: PickFields): Promise<boolean> {
+  async changeSet(id: string, index: number, change: SetPick): Promise<boolean> {
     const mark = this.inbox.marks[id]
-    const fields = pickOf(change)
+    const fields = withSetPick(mark, index, change)
     const changed = hasSetChange(fields)
     const saved = keepsAction(mark)
       ? await this.save(id, { ...withoutPick(mark!), ...fields })
@@ -574,7 +585,7 @@ export class ReviewClient extends PageStore {
     const base: MarkInput =
       made && made !== "draft" ? made : { action: "revisit", when: "soon", note: typed.trim(), ...pickOf(mark) }
     const { shot: _old, ...rest } = base
-    const empty = rest.action === "revisit" && !rest.note && !rest.pick && !rest.comments?.length
+    const empty = rest.action === "revisit" && !rest.note && !hasPick(rest) && !rest.comments?.length
     if (!shot && empty) return this.save(id, null)
     this.boxes.add(id)
     return this.save(id, { ...rest, ...(shot && { shot }) })
@@ -710,7 +721,7 @@ export class ReviewClient extends PageStore {
       if (mark?.action !== "revisit") return "draft"
       if (shot.shot) return { action: "revisit", when: "soon", note: "", ...pickOf(mark), ...commentsOf(mark), ...shot }
       const pick = pickOf(mark)
-      return pick.pick ? { action: "pick", ...pick } : null
+      return hasPick(pick) ? { action: "pick", ...pick } : null
     }
     if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note, ...shot, ...carriedPickOf(mark) }
     // his comments in its text stay its content (I140)
@@ -1038,7 +1049,7 @@ export class ReviewClient extends PageStore {
    */
   private replaceInbox(next: Inbox) {
     for (const [id, mark] of Object.entries(this.inbox.marks))
-      if (mark.pick && !next.marks[id] && this.isSent(mark)) this.taken.set(id, pickOf(mark))
+      if (hasPick(mark) && !next.marks[id] && this.isSent(mark)) this.taken.set(id, pickOf(mark))
     // a sent note that left (I200):  its box lets go of it (`changed()`)
     for (const [id, mark] of Object.entries(this.inbox.marks))
       if (mark.note && !next.marks[id] && this.isSent(mark)) this.goneNotes.set(id, mark.note)
@@ -1146,6 +1157,7 @@ function withoutPick(mark: InboxMark): MarkInput {
     added: _added,
     edited: _edited,
     removed: _removed,
+    sets: _sets,
     ...rest
   } = mark
   return rest

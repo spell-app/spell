@@ -302,3 +302,14 @@ def test_sorted_by_sorts_as_the_javascript_core_does(core: Core) -> None:
     items = [{"n": None}, {"n": 2}, {"n": 1}]
     assert core.sorted_by(items, lambda item: item["n"]) == [{"n": 1}, {"n": 2}, {"n": None}]
     assert core.sorted_by({"a": 2, "b": 1}, lambda value: value) == [1, 2]
+
+
+def test_descending_turns_a_sort_round_as_the_javascript_core_does(core: Core) -> None:
+    assert core.sorted_by(["b", "A", "c"], lambda word: core.descending(word)) == ["c", "b", "A"]
+    items = [{"n": None}, {"n": 2, "tag": "one"}, {"n": 1}, {"n": 2, "tag": "two"}]
+    assert core.sorted_by(items, lambda item: core.descending(item["n"])) == [
+        {"n": 2, "tag": "one"},
+        {"n": 2, "tag": "two"},
+        {"n": 1},
+        {"n": None},
+    ]

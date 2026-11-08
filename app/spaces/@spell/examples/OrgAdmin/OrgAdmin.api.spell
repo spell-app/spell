@@ -5,6 +5,7 @@
 // Your org's Admin page names its own org on the next line:  "@rs" is the Rock Society's.
 admin roles is a data folder at "@rs/__admin/roles":
 	- check it every 30 seconds
+	- stages live at "event_stages"
 
 a "member" is a thing:
 	- it lives in admin roles
@@ -44,6 +45,13 @@ a "designer" is a thing:
 	- it lives in admin roles
 	- its "person" is text
 	- its "space" is text
+
+// An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers".
+a "stage" is a thing:
+	- it lives in admin roles
+	- its "name" is text
+	- its "moves to" is text
+	- its "moved by" is text
 
 a "role change" is a thing:
 	- it lives in admin roles

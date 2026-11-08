@@ -413,6 +413,96 @@ describe("<ui-tabs parameter>", () => {
   })
 })
 
+describe("<ui-tabs> in a narrow row", () => {
+  /** Eight panes, too many for a 300px row;  the seventh chosen. */
+  const MANY = Array.from(
+    { length: 8 },
+    (_, index) =>
+      `<ui-tab label="Server number ${index + 1}" value="s${index + 1}"${index === 6 ? " selected" : ""}>${index}</ui-tab>`
+  ).join("")
+
+  /** Render the tabs in a 300px box. */
+  async function narrow(attributes = "", panes = MANY) {
+    const box = await ElementFixture.render(
+      `<div style="width: 300px"><ui-tabs aria-label="Test" ${attributes}>${panes}</ui-tabs></div>`
+    )
+    await ElementFixture.tick()
+    const host = box.querySelector<TabsHost>("ui-tabs")!
+    const keys = [...host.shadowRoot!.querySelectorAll<HTMLButtonElement>("button.scroll")]
+    return { host, keys, ...parts(host) }
+  }
+
+  /** `button` lies wholly inside the tab list's box. */
+  function inView(menu: Element, button: Element) {
+    const row = menu.getBoundingClientRect()
+    const box = button.getBoundingClientRect()
+    return box.left >= row.left - 1 && box.right <= row.right + 1
+  }
+
+  it("scrolls sideways with a `‹` / `›` key at each end, the toolbar's way", async () => {
+    const { host, menu, keys, root } = await narrow()
+    await expect.poll(() => host.matches(":state(overflowing)")).toBe(true)
+    expect(root.classList.contains("scrolling-row")).toBe(true)
+    expect(menu.scrollWidth).toBeGreaterThan(menu.clientWidth)
+    expect(keys.map((key) => key.getAttribute("part"))).toEqual(["scroll-start", "scroll-end"])
+    expect(keys.map((key) => key.getAttribute("aria-label"))).toEqual(["Scroll back", "Scroll on"])
+    expect(keys.every((key) => !key.hidden)).toBe(true)
+  })
+
+  it("scrolls the chosen tab into view as it's drawn, and when another is chosen", async () => {
+    const { menu, buttons } = await narrow()
+    await expect.poll(() => inView(menu, buttons[6]!)).toBe(true)
+    // the page itself never scrolls for it
+    expect(window.scrollX).toBe(0)
+    buttons[1]!.click()
+    await expect.poll(() => inView(menu, buttons[1]!)).toBe(true)
+  })
+
+  it("everything fits:  no keys, and the row doesn't scroll (it would clip a pointing arrow, a focus ring)", async () => {
+    const { host, keys, root, menu } = await narrow("", PANES)
+    await ElementFixture.settle()
+    expect(host.matches(":state(overflowing)")).toBe(false)
+    expect(keys.every((key) => key.hidden)).toBe(true)
+    expect(root.classList.contains("scrolling-row")).toBe(false)
+    expect(getComputedStyle(menu).overflowX).toBe("visible")
+  })
+
+  it("a tabular row that scrolls draws its rule inside its box, under the chosen tab, which it would clip", async () => {
+    const { host, menu, buttons } = await narrow(`appearance="tabular"`)
+    await expect.poll(() => host.matches(":state(overflowing)")).toBe(true)
+    expect(getComputedStyle(menu).boxShadow).toContain("inset")
+    expect(buttons[6]!.getBoundingClientRect().bottom).toBeCloseTo(menu.getBoundingClientRect().bottom, 0)
+  })
+
+  it("vertical:  a column, never a scrolling row", async () => {
+    const { host, root } = await narrow(`direction="vertical"`)
+    await ElementFixture.settle()
+    expect(root.classList.contains("scrolling-row")).toBe(false)
+    expect(host.matches(":state(overflowing)")).toBe(false)
+  })
+})
+
+describe("<ui-tabs> that only choose", () => {
+  it("only a bar (the chosen pane is empty):  room under it before what follows", async () => {
+    const box = await ElementFixture.render(
+      `<div><ui-tabs aria-label="Test"><ui-tab label="One" value="one"></ui-tab><ui-tab label="Two" value="two">` +
+        `</ui-tab></ui-tabs><p style="margin: 0">What the program draws</p></div>`
+    )
+    await ElementFixture.settle()
+    const host = box.querySelector("ui-tabs")!
+    const { menu } = parts(host)
+    expect(host.matches(":state(bar-only)")).toBe(true)
+    const room = box.querySelector("p")!.getBoundingClientRect().top - menu.getBoundingClientRect().bottom
+    expect(room).toBeCloseTo(16, 0)
+  })
+
+  it("a chosen pane with content:  not only a bar, the pane's own margin spaces it", async () => {
+    const { host } = await tabs()
+    await ElementFixture.settle()
+    expect(host.matches(":state(bar-only)")).toBe(false)
+  })
+})
+
 describe("<ui-tabs> transitions", () => {
   it("swaps panes inside a View Transition when the browser has them", async () => {
     const { buttons, panes } = await tabs()

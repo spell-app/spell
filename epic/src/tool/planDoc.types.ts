@@ -15,9 +15,10 @@
 // By file, with its extension:  plain `node` loads this file (`Sagas`, for the docs index), and the barrel too would load
 // every vocabulary
 import { ItemLetters, type ItemSectionKind } from "spell/epic/definitions/definitions.types.ts"
+import { PhaseStatuses, type PhaseStatus } from "spell/epic/phases/PhaseStatuses.ts"
 
 import type { ChoicesSummary } from "./OptionSets"
-import type { AddedOption, EditedOption } from "./ReviewInbox"
+import type { AddedOption, EditedOption, SetPick } from "./ReviewInbox"
 
 ////////////////
 // ## Errors
@@ -38,15 +39,15 @@ export const TITLE_PREFIX = "Epic: "
 // ## Phases
 ////////////////
 
-/** A phase's status:  `<epic-phase status>`. */
-export const PHASE_STATUSES = ["todo", "active", "done"] as const
+/** A phase's status:  `<epic-phase status>`;  `dropped` too (epic `epic-engine` I228).  The rule:  `PhaseStatuses`. */
+export const PHASE_STATUSES = PhaseStatuses.ALL
 
 /** One of `PHASE_STATUSES`. */
-export type PhaseStatus = (typeof PHASE_STATUSES)[number]
+export type { PhaseStatus }
 
 /** Whether `status` is one of `PHASE_STATUSES`:  a command line's word, checked. */
 export function isPhaseStatus(status: string): status is PhaseStatus {
-  return (PHASE_STATUSES as readonly string[]).includes(status)
+  return PhaseStatuses.isStatus(status)
 }
 
 /**
@@ -69,7 +70,7 @@ export type Phase = {
   id: string
   /** its short name, without `P3 · ` */
   name: string
-  /** `todo`, `active` or `done`;  any other text is a broken doc (`PlanReader.check()`) */
+  /** `todo`, `active`, `done` or `dropped`;  any other text is a broken doc (`PlanReader.check()`) */
   status: string
   /** its estimate's text (`1-2h`);  `undefined` while missing or `TBD` */
   estimate: string | undefined
@@ -172,9 +173,18 @@ export const QUESTION_ID = /^q\d+$/
 /**
  * The items red while open and not reviewed (`PlanReader.itemState()`), so the ones `calm` makes blue:
  * judgement calls and issues (`i3`, `j7`).
+ * - a todo marked `urgent` is too (`PlanDoc.followUp()`), whatever its id
+ * - and the kinds Owen's Do this leaves in place (`PlanDoc.doThis()`, I232):  `urgent` keeps them red after a review
  * - `ReviewInbox`'s and `<epic-item>`'s `CALM_ID`, the same rule
  */
 export const CALM_ID = /^[ij]\d+$/
+
+/**
+ * The items an agent may close because they've become obsolete (`epic close --why`, `PlanDoc.closeRefusal()`):
+ * judgement calls, issues and todos.
+ * - never a question (it's decided) or a manual test (a run closes it)
+ */
+export const OBSOLETE_ID = /^[ijt]\d+$/
 
 /**
  * Item statuses that are closed:  not counted open, not on a "To review" line.
@@ -248,6 +258,10 @@ export type ItemFacts = {
   bedtime: boolean
   /** not urgent:  blue while open and not reviewed, not red (`<epic-item calm>`) */
   calm: boolean
+  /** a todo asking Owen to act, red until reviewed;  an issue or call he wants done (Do this), red until handled */
+  urgent: boolean
+  /** fixed, waiting for his review:  orange (`<epic-item fixed>`, I232) */
+  fixed: boolean
   /** Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`) */
   awaitsPick: boolean
   /** how Claude handled Owen's last review mark (`<epic-item review-as>`, `REVIEW_AS`), or `undefined` */
@@ -279,6 +293,8 @@ export type AddItemOptions = {
   titleHTML?: boolean
   /** not urgent (`calm`):  a judgement call or issue that wouldn't surprise Owen;  `--calm` */
   calm?: boolean
+  /** a todo that asks Owen to act:  red until reviewed (`PlanDoc.followUp()`) */
+  urgent?: boolean
 }
 
 /** `PlanDoc.decide()`'s options. */
@@ -406,6 +422,14 @@ export const UNDERWAY_CARD = ':scope > epic-status[state="underway"]'
  *   (a pick, a todo made or queued, a new item made;  a calm outline:  Owen, 2026-10-10, epic `airplane` P8)
  */
 export type StatusState = "underway" | "done" | "noted"
+
+/** `PlanDoc.addStatus()`'s options. */
+export type AddStatusOptions = {
+  /** the card's state;  default `underway` */
+  state?: StatusState
+  /** leave the item's `changed` stamp alone */
+  quiet?: boolean
+}
 
 /** How an underway card finishes (`PlanDoc.finishStatus()`):  work `done`, or Owen's choice only `noted`. */
 export type FinishedState = Exclude<StatusState, "underway">
@@ -546,6 +570,11 @@ export type PlanMark = {
   edited?: EditedOption[]
   /** letters of options Owen removed (epic `epic-engine` P50) */
   removed?: string[]
+  /**
+   * the holder's OTHER sets' changes, each with its own `choices` (epic `epic-engine` I227):  each applies on its own
+   * (`PlanDoc.applyMark()`)
+   */
+  sets?: SetPick[]
   /** a revisit's:  `soon` or `now` */
   when?: string
   /** Owen's note */

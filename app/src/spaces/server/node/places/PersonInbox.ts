@@ -11,7 +11,13 @@ import { SaveQueue } from "spell/places/SaveQueue"
 import type { SRV } from "spell/server"
 import type { FolderPlace } from "spell/server/places"
 import { SP } from "spell/parser/spell"
-import { INBOX_MESSAGES, INBOX_SPACE } from "spell/app/spaces/models/spaceNames"
+import {
+  INBOX_MAIL,
+  INBOX_MESSAGES,
+  INBOX_SPACE,
+  INBOX_SUBSCRIPTIONS,
+  MAIL_CHOICES
+} from "spell/app/spaces/models/spaceNames"
 import type { MemberSpace, OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 
@@ -51,7 +57,9 @@ const RECIPIENTS = /[\s,;]+/
  *     retention says (`keepVersion`, the app's `ProjectDrafts.keepForGood()`).
  * - Who it's to, its `recipients`:  people in the inbox's org, each by their address;  anyone else is refused before anything's written.
  * - Who reads an inbox is its list's to say (`SpaceMembers`):  its person, and the org's Board and Admins.
- * - Spell sends too, with no person behind it (`sendAsSpell()`):  an invitation's pointer (P31).
+ * - Spell sends too, with no person behind it (`sendAsSpell()`):  an invitation's pointer (P31), a space's update (P30).
+ * - Two more collections its person writes (P30):  her mail choice (`mail_choices`) and what she subscribes to
+ *   (`subscriptions`), each checked here;  each copy landing tells her mail (`onArrived`, the app's `InboxMail`).
  * - Node only;  made by the app's `SpaceFolders`, one per inbox.  Knows nothing of where folders are:  its places
  *   are handed in (`placeAt`).
  ****************/
@@ -72,6 +80,8 @@ export class PersonInbox {
   private readonly keepVersion: (page: string, version: string, by: string) => Promise<void>
   /** Each copy not yet written, sent in order until each goes through. */
   private readonly queue: SaveQueue
+  /** Told of each copy written into someone's inbox but its sender's:  their mail (`InboxMail`, P30). */
+  private readonly onArrived: ((arrived: ArrivedMessage) => void) | undefined
 
   constructor({
     address,
@@ -82,7 +92,8 @@ export class PersonInbox {
     placeAt,
     keepVersion,
     queueStorage,
-    retry = RETRY_MS
+    retry = RETRY_MS,
+    onArrived
   }: PersonInboxProps) {
     this.address = address
     this.owner = owner
@@ -91,6 +102,7 @@ export class PersonInbox {
     this.orgRoles = orgRoles
     this.placeAt = placeAt
     this.keepVersion = keepVersion
+    this.onArrived = onArrived
     this.queue = new SaveQueue({
       key: `inbox:${address}`,
       storage: () => queueStorage,
@@ -123,11 +135,30 @@ export class PersonInbox {
 
   /**
    * The inbox's write check:  its members' (`SpaceMembers`, only its person sends, nothing's edited), then what a new
-   * message says (`sendOrDie()`).  What the space's `FolderPlace` is handed, in place of the members' own.
+   * message says (`sendOrDie()`), a mail choice (P30) or a subscription (P30).
+   * What the space's `FolderPlace` is handed, in place of the members' own.
    */
   changeOrDie = async (change: ThingChange): Promise<void> => {
     await this.members.changeOrDie(change)
-    if (change.action === "make") await this.sendOrDie(change.identity, change.fields ?? {})
+    if (change.action === "remove") return
+    const fields = change.fields ?? {}
+    if (change.collection === INBOX_MESSAGES) await this.sendOrDie(change.identity, fields)
+    else if (change.collection === INBOX_MAIL) mailChoiceOrDie(fields)
+    else if (change.collection === INBOX_SUBSCRIPTIONS) await this.subscriptionOrDie(fields)
+  }
+
+  /**
+   * - throws `PlaceError` `"refused"`, `"place"`, unless `fields.space` is a SHARED space of the inbox's org
+   *   (`events_team@rs`):  a team's or a project's, or the org's own;  a private one's news isn't for everyone
+   */
+  private async subscriptionOrDie(fields: PlaceRow): Promise<void> {
+    const space = textOf(fields.space)
+    const paired = SP.SpellLocation.isAddress(space) ? await this.orgRoles.spaceAt(space) : undefined
+    if (paired?.org !== this.owner.org || paired.side !== "shared") {
+      refuse(
+        `You subscribe to one of @${this.owner.org}'s shared spaces, as events_team@${this.owner.org}:  not ${JSON.stringify(space)}`
+      )
+    }
   }
 
   /**
@@ -233,12 +264,17 @@ export class PersonInbox {
     }
   }
 
-  /** One copy into its inbox, as Spell itself:  the whole message, written over a copy already there. */
+  /**
+   * One copy into its inbox, as Spell itself:  the whole message, written over a copy already there.
+   * - SIDE EFFECT:  its person told, unless it's the sender's own copy (`onArrived`)
+   */
   private async send({ into, id, fields }: QueuedCopy): Promise<void> {
     const inbox = await this.placeAt(into)
     if (!inbox) return console.error(`PersonInbox:  ${into} has no folder;  message ${id} dropped`)
     const change: PlaceChange = { kind: "insert", collection: INBOX_MESSAGES, id, fields }
     await inbox.apply([change])
+    const person = into.slice(0, -`/${INBOX_SPACE}`.length)
+    if (fields.from !== person) this.onArrived?.({ person, id, fields })
   }
 
   /** Everyone in the inbox's org, by address. */
@@ -268,6 +304,18 @@ export type PersonInboxProps = {
   queueStorage: SRV.FileStorage
   /** How long after a copy an inbox didn't take it tries again, ms:  default `RETRY_MS`. */
   retry?: number
+  /** Told of each copy written into someone's inbox but its sender's own (P30):  their mail.  NEVER throws. */
+  onArrived?: (arrived: ArrivedMessage) => void
+}
+
+/** A message just written into someone's inbox (`PersonInboxProps.onArrived`). */
+export type ArrivedMessage = {
+  /** Whose inbox, by address:  `bo@rs`. */
+  person: string
+  /** The message's id, the same in every inbox. */
+  id: string
+  /** What it says, whole:  `from`, `text`, `title`, `line`, `page` ... */
+  fields: PlaceRow
 }
 
 /** One copy waiting for its inbox. */
@@ -298,6 +346,13 @@ function textOf(value: unknown): string {
 /** A new message's id, when Spell sends one:  a time, then a random tail, so ids sort by when they were made. */
 function newMessageId(): string {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
+}
+
+/** - throws `PlaceError` `"refused"`, `"place"`, unless `fields.how` is one of `MAIL_CHOICES` */
+function mailChoiceOrDie(fields: PlaceRow): void {
+  if (!(MAIL_CHOICES as readonly unknown[]).includes(fields.how)) {
+    refuse(`How you hear of your inbox is one of ${MAIL_CHOICES.join(", ")}:  not ${JSON.stringify(fields.how)}`)
+  }
 }
 
 /** - throws `PlaceError` `"refused"`, `"place"`, saying `why` */

@@ -33,14 +33,29 @@ export const SpellSetup = {
     return (this.projectRoots[spec.path] ??= spec)
   },
 
+  /**
+   * Finders of the groups no list could hold, one for each org there may ever be (`addProjectRootFinder()`).
+   * - Asked only for a place no registered group holds.
+   */
+  projectRootFinders: [] as ((place: string) => SP.ProjectRootSpec | undefined)[],
+
+  /**
+   * Add a finder of project groups that can't be listed up front:  spaces' orgs, `@rs` (epic `atmosphere` I14).
+   * - Unlike `addProjectRoot()`, what it finds isn't in `projectRoots`, so nothing lists it.
+   * - SIDE EFFECT: `SpellLocation` accepts the addresses it finds from now on.
+   */
+  addProjectRootFinder(finder: (place: string) => SP.ProjectRootSpec | undefined): void {
+    if (!this.projectRootFinders.includes(finder)) this.projectRootFinders.push(finder)
+  },
+
   /** All registered groups' addresses, e.g. `["owen@spell", "@spell/examples", "@spell/guides", ...]`. */
   get projectRootPaths() {
     return Object.keys(this.projectRoots)
   },
 
-  /** Return `ProjectRootSpec` for `path` (`projectRoots[path]`); throws if `path` isn't a known group. */
+  /** Return `ProjectRootSpec` for `path` (`projectRoots[path]`, or what a finder says);  throws if `path` isn't a known group. */
   projectSpectForRootPath(path: SP.ProjectRootPath | undefined): SP.ProjectRootSpec {
-    const spec = SpellSetup.projectRoots[path!]
+    const spec = SpellSetup.projectRoots[path!] ?? (path && SpellSetup.groupFor(path))
     if (!spec) throw new TypeError(`Path '${path}' must be one of: "${this.projectRootPaths.join(`", "`)}"!`)
     return spec
   },
@@ -48,13 +63,20 @@ export const SpellSetup = {
   /**
    * The group `place` is in:  the one whose address is the LONGEST start of it, a whole part at a time.
    * - e.g. `@spell/examples/solitaire` => `@spell/examples`'s
+   * - none registered:  what a finder says (`addProjectRootFinder()`)
    * - `undefined` if none
    * - `place`:  an address;  a file's address too, since group addresses are whole parts.
    */
   groupFor(place: string): SP.ProjectRootSpec | undefined {
-    return Object.values(this.projectRoots)
+    const registered = Object.values(this.projectRoots)
       .filter((it) => place === it.path || place.startsWith(`${it.path}/`))
       .sort((a, b) => b.path.length - a.path.length)[0]
+    if (registered) return registered
+    for (const finder of this.projectRootFinders) {
+      const found = finder(place)
+      if (found) return found
+    }
+    return undefined
   }
 }
 /** `typeof SpellSetup`, exported so consumers can type a reference to it. */
