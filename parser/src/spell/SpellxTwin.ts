@@ -252,7 +252,9 @@ export class SpellxTwin {
       const isCloser = first instanceof SP.SpellxCloserToken && item.tokens.length === 1
       const isMember =
         (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
-        (first instanceof SP.SpellxProseToken && !!first.note)
+        (first instanceof SP.SpellxProseToken && !!first.note) ||
+        // its jobs, `<spell-jobs>`, as `withJobsAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
+        (first instanceof P.JSXElementToken && first.tagName === JOBS && item.tokens.length === 1)
       // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
       if (isCloser) {
         if (last === members) members.push(item)
