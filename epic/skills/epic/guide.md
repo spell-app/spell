@@ -123,13 +123,22 @@ Only when the person asks (the skill's word:  `$epic tidy`).
 ```sh
 epic stale <epic> --json     # the facts per open call, issue and todo;  it decides nothing
 epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete:  the commit, phase or item>"
+epic close <epic> --why-file reasons.json5                       # a reason per item (id => text), one write
 epic update <epic>#J3 noted "Maybe obsolete:  <why>" --quiet     # doubtful:  stays open
+epic update <epic>#J3 noted "Partly obsolete:  <what's moot, what's still wanted>" --quiet
+epic update <epic>#J3 promised "<what was promised, what's there instead>"   # waits on finished work that never delivered it
 ```
 
-- Skip an entry with `closeRefused`;  an entry with `tidyNoted` never gets a second card.
-- Read each against the current code and recent commits.  Close only when you can name what did it;  unsure, leave it open.
-- `--why` refuses questions, tests, and anything the person wants, is reviewing, or must pick:  the others still close.
-- Then say how many closed, how many noted.
+- Skip an entry with `closeRefused` or `settled`;  an entry with `tidyNoted` never gets a second card.
+- Read each against the current code and recent commits.
+- Close only when every thing the item asked for is done or moot, and you can name what did it:  check the commit really
+  touched it.  Say where anything left over went.  Half done:  a `Partly obsolete:` note.  Unsure:  leave it open.
+- Age alone never closes anything.  A judgement call carried out as decided stays open unless a named commit, phase or
+  later item made it moot.  A limit is obsolete only when it no longer holds.  Near-identical follow-ups are judged together.
+- An item waiting on a phase that's done (`waitsOnDone`) whose promised thing never came:  `promised`, never closed.
+- `--why` is plain text, and refuses questions, tests, and anything the person wants, asked for lately, is reviewing, or
+  must pick:  the others still close.
+- Then say how many closed, how many noted, and each promised item with what's missing.
 
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 

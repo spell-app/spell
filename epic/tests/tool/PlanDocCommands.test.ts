@@ -4,7 +4,7 @@
  */
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
@@ -615,6 +615,76 @@ describe("PlanDocCommands close --why", () => {
     expect(warned.join("\n")).toMatch(/J1 not closed:  waiting for Owen's pick/)
     expect(warned.join("\n")).toMatch(/I3 not closed:  Owen's mark/)
     expect(printed).toEqual(["T1 closed:  Fine"])
+  })
+
+  test("--why is text:  a live tag can't blank the card, or reach the log as markup", async () => {
+    await seed((plan) => void add(plan, "issue", "Tagged"))
+    expect(await commands().run(["close", "x", "i1", "--why", 'P2 made <ui-container width="1"> moot'])).toBe(0)
+    const plan = FILES.read(file)
+    const card = plan.item("i1").querySelector('epic-status[state="done"]')!
+    expect(card.querySelector("ui-container")).toBeNull()
+    expect(card.textContent).toContain('<ui-container width="1">')
+    expect(plan.reviewLines().at(-1)!.text).toContain('<ui-container width="1">')
+  })
+
+  test("--why-file:  a reason per item in one call;  a refused one said, the rest closed", async () => {
+    await seed((plan) => {
+      add(plan, "issue", "One")
+      add(plan, "issue", "Two")
+      add(plan, "todo", "Three")
+      Markup.set<"epic-item">(plan.item("i2"), { urgent: true })
+    })
+    const reasons = join(dirname(file), "reasons.json5")
+    writeFileSync(reasons, '{ I1: "P2 did it", "x#T1": "P3 did it", i2: "nope" }')
+    expect(await commands().run(["close", "x", "--why-file", reasons])).toBe(1)
+    const plan = FILES.read(file)
+    expect(plan.item("i1").querySelector('epic-status[state="done"]')!.textContent).toContain("P2 did it")
+    expect(plan.item("t1").querySelector('epic-status[state="done"]')!.textContent).toContain("P3 did it")
+    expect(plan.facts(plan.item("i2")).status).toBe("open")
+    expect(await commands().run(["close", "x", "t1", "--why-file", reasons])).toBe(1)
+    expect(warned.join("")).toMatch(/names its own ids/)
+  })
+
+  test("a Done card already there takes the reason:  never a second card", async () => {
+    await seed((plan) => {
+      add(plan, "issue", "Obviated")
+      plan.addStatus("i1", "Obviated by P9", { state: "done" })
+    })
+    expect(await commands().run(["close", "x", "i1", "--why", "P9 removed it"])).toBe(0)
+    const cards = FILES.read(file).item("i1").querySelectorAll("epic-status")
+    expect(cards.length).toBe(1)
+    expect(cards[0]!.textContent).toContain("P9 removed it")
+  })
+
+  test("refused:  a recent ask of his;  an old review isn't refused", async () => {
+    await seed((plan) => {
+      add(plan, "todo", "Do it now")
+      add(plan, "todo", "Reviewed long ago")
+      Markup.set<"epic-item">(plan.item("t1"), { reviewAs: "now" })
+      const reply = plan.document.createElement("epic-reply")
+      reply.setAttribute("from", "Owen")
+      reply.setAttribute("at", new Date().toISOString().slice(0, 16).replace("T", " "))
+      reply.textContent = "do it"
+      plan.item("t1").append(reply)
+      Markup.set<"epic-item">(plan.item("t2"), { reviewAs: "now", reviewed: "2020-01-01" })
+    })
+    expect(await commands().run(["close", "x", "t1", "t2", "--why", "gone"])).toBe(1)
+    expect(warned.join("\n")).toMatch(/T1 not closed:  Owen asked for it lately/)
+    expect(FILES.read(file).facts(FILES.read(file).item("t2")).status).toBe("done")
+  })
+
+  test("promised, not delivered:  a card a later run knows, back on his list, refused from closing", async () => {
+    await seed((plan) => {
+      add(plan, "judgement", "Until P35")
+      Markup.set<"epic-item">(plan.item("j1"), { calm: true, reviewed: "2026-11-01" })
+    })
+    expect(await commands().run(["status", "x", "j1", "promised", "the Spanish Inbox never came"])).toBe(0)
+    const plan = FILES.read(file)
+    const item = plan.item("j1")
+    expect(item.querySelector('epic-status[state="noted"]')!.textContent).toMatch(/^\s*Promised, not delivered:/)
+    expect(item.hasAttribute("calm")).toBe(false)
+    expect(item.hasAttribute("reviewed")).toBe(false)
+    expect(plan.closeRefusal("j1")).toMatch(/promised/)
   })
 
   test("no --why:  as ever;  --why with no reason refused", async () => {

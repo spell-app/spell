@@ -192,6 +192,12 @@ export const CALM_ID = /^[ij]\d+$/
 export const OBSOLETE_ID = /^[ijt]\d+$/
 
 /**
+ * How a status card starts when an item says it waits for finished work, and the promised thing never came
+ * (`PlanDoc.promiseUnkept()`):  a later `/epic tidy` knows it by this.
+ */
+export const PROMISED_CARD = "Promised, not delivered:"
+
+/**
  * Item statuses that are closed:  not counted open, not on a "To review" line.
  * - coloured `recent` (green, decided or done), but `canceled` is `old` (grey, no longer relevant)
  * - `done`:  finished (fixed, passed, accepted)

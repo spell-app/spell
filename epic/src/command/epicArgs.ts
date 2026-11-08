@@ -161,7 +161,8 @@ function optionArgs(args: string[]): string[] {
 }
 
 /**
- * `epic close <epic>#<id> ... [--why "<text>"]` as the tool takes it, `close <epic> <id>... [--why ...]` (epic `epic-engine` Q69):
+ * `epic close <epic>#<id> ... [--why "<text>"]` as the tool takes it, `close <epic> <id>... [--why ...]`
+ * (epic `epic-engine` Q69);  `epic close <epic> --why-file <file>`, its ids in the file (I237):
  * - each id may repeat its epic (`seo#J3 seo#I7`), or follow the first bare (`seo#J3 I7`)
  * - throws `EpicCommandError` (a usage error) for ids of two epics, and for no epic or no id, spelling it right
  */
@@ -170,6 +171,8 @@ function closeArgs(args: string[]): string[] {
   if (!positional.length) throw new EpicCommandError("close:  which epic?  epic close --help")
   const first = parseTarget(positional[0]!)
   if (first.ref === undefined) {
+    if (flags.whyFile !== undefined && positional.length === 1)
+      return ["close", first.epic, "--why-file", String(flags.whyFile)]
     refuseOldOrder("close", args, args.indexOf(positional[0]!), first.epic)
     throw new EpicCommandError(`close:  which item?  epic close ${first.epic}#J3`)
   }
@@ -341,7 +344,7 @@ function flagsOf(args: string[]): Record<string, string | true> {
   const { positional, flags } = parseVerbArgs(args)
   if (positional.length)
     throw new EpicCommandError(
-      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | fixed | noted`
+      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | fixed | noted | promised`
     )
   return flags
 }

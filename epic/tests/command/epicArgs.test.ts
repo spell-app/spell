@@ -60,6 +60,7 @@ const OWENS_ROWS: [string[], string[][]][] = [
     [["close", "seo", "J3", "I7", "T2", "--why", "P9 did it"]]
   ],
   [["close", "--why", "gone", "seo#J3"], [["close", "seo", "J3", "--why", "gone"]]],
+  [["close", "seo", "--why-file", "r.json5"], [["close", "seo", "--why-file", "r.json5"]]],
   [["reopen", "seo#J3"], [["reopen", "seo", "J3"]]],
   [["cancel", "seo#J3", "why"], [["cancel", "seo", "J3", "why"]]],
   [

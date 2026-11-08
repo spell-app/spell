@@ -29,6 +29,7 @@ import {
   ITEM_STATUSES,
   KINDS,
   OBSOLETE_ID,
+  PROMISED_CARD,
   OLD_DECISION,
   PHASE_FIELDS,
   PHASE_STATUSES,
@@ -2162,6 +2163,7 @@ export class PlanDoc extends PlanReader {
    * - only an open judgement call, issue or todo (`OBSOLETE_ID`):  a question is decided, a manual test run
    * - never one Owen wants (`urgent`), one fixed and waiting for his review (`fixed`), one waiting for his pick,
    *   one Claude is at work on or that has work queued
+   * - never one he asked to have done lately (`recentAsk()`), one a tidy found promised and not delivered
    * - `marked`:  the ids (lower case) holding a mark of his not taken yet:  never those
    * - `epic stale` reports this same answer, so an agent needn't try
    */
@@ -2177,22 +2179,82 @@ export class PlanDoc extends PlanReader {
     if (marked.has(facts.id)) return "Owen's mark on it hasn't been taken"
     if (facts.underway || facts.working) return "being worked on"
     if (facts.queued !== undefined) return "queued work:  `epic unqueue` it first"
-    return undefined
+    if (this.hasPromisedCard(this.item(id))) return "promised, not delivered:  Owen decides"
+    return this.recentAsk(this.item(id), facts)
   }
 
   /**
-   * Close item `id` as obsolete:  done, `why` (HTML, as a status card's reading) a Done card on it and in the log's
-   * line;  returns its title.
+   * Why `item` counts as something Owen asked for lately and that's still being acted on, or `undefined`:
+   * a Do Now (`review-as="now"`), or his reply the last on it, within `RECENT_ASK_DAYS`.
+   * - his reply's date, else the day he reviewed it;  a Do Now with neither counts as recent
+   * - an old review is no ask:  it never refuses for that alone
+   */
+  private recentAsk(item: Element, facts: ItemFacts): string | undefined {
+    const replies = Array.from(item.querySelectorAll(":scope > epic-reply"))
+    const his = replies.findLast((reply) => !ThreadFacts.isAgents(reply))
+    if (facts.reviewAs !== "now" && (his === undefined || his !== replies.at(-1))) return undefined
+    const when = his?.getAttribute("at") ?? facts.reviewed
+    if (when !== undefined && !this.isWithinDays(when, RECENT_ASK_DAYS)) return undefined
+    return "Owen asked for it lately, and it's still being acted on"
+  }
+
+  /** Whether `when`, a date or time as the page writes it, is within `days` of `now`;  an unreadable one isn't. */
+  private isWithinDays(when: string, days: number): boolean {
+    const at = Date.parse(when.replace(" ", "T"))
+    return !Number.isNaN(at) && this.now.getTime() - at <= days * 86_400_000
+  }
+
+  /** Whether a tidy left `item` a `Promised, not delivered:` card. */
+  private hasPromisedCard(item: Element): boolean {
+    return Array.from(item.querySelectorAll(":scope > epic-status")).some((card) =>
+      (card.textContent ?? "").trim().startsWith(PROMISED_CARD)
+    )
+  }
+
+  /**
+   * Item `id` says it waits for work that's finished, and what it promised never came
+   * (`epic update <name>#<id> promised "<what>"`, `/epic tidy`):  a Noted card starting `Promised, not delivered:`,
+   * and back on Owen's list, for him to decide.  Returns its title.
+   * - not calm, not reviewed, so it's red;  a todo marked `urgent`, which turns a todo red the same way
+   * - `closeRefusal()` won't close it while the card is there
+   * - `what`:  HTML, as a status card's reading
+   * - throws on anything but an open judgement call, issue or todo
+   */
+  promiseUnkept(id: string, what: string): string {
+    const item = this.item(id)
+    if (!OBSOLETE_ID.test(item.id) || item.getAttribute("status") !== "open")
+      throw new PlanDocError(
+        `${item.id.toUpperCase()}:  only an open judgement call, issue or todo can wait on a promise`
+      )
+    const title = this.addStatus(id, `${PROMISED_CARD}  ${what}`, { state: "noted" })
+    const urgent = CALM_ID.test(item.id) ? {} : { urgent: true }
+    Markup.set<"epic-item">(item, { calm: undefined, reviewed: undefined, ...urgent })
+    this.log(`${item.id.toUpperCase()} promised, not delivered:  ${title}`)
+    return title
+  }
+
+  /**
+   * Close item `id` as obsolete:  done, `why` (plain TEXT, escaped:  a tag in it shows as typed) on a Done card and in
+   * the log's line;  returns its title.
+   * - a Done card already on it ("Obviated by ..."):  `why` goes under that one, never a second card
    * - not taken up by the active phase (`setItem()`'s `taken-in`):  nothing was built for it
    * - throws when `closeRefusal()` says no (the caller has checked;  this is the guard)
    */
   closeObsolete(id: string, why: string, { marked }: { marked?: ReadonlySet<string> } = {}): string {
     const refusal = this.closeRefusal(id, { marked })
     if (refusal) throw new PlanDocError(`${id.toUpperCase()} can't close as obsolete:  ${refusal}`)
-    this.addStatus(id, why, { state: "done" })
+    const reading = PlanMarkup.text(why)
+    const item = this.item(id)
+    const doneCard = Array.from(item.querySelectorAll(DONE_CARD)).at(-1)
+    if (doneCard)
+      for (const block of this.statusBlocks(reading)) {
+        block.setAttribute("slot", SUMMARY_SLOT)
+        doneCard.append(block)
+      }
+    else this.addStatus(id, reading, { state: "done" })
     const title = this.setItem(id, "done")
-    Markup.set<"epic-item">(this.item(id), { takenIn: undefined })
-    this.log(`${id.toUpperCase()} closed:  ${title} -- ${why.replace(/<[^>]+>/g, "")}`)
+    Markup.set<"epic-item">(item, { takenIn: undefined })
+    this.log(`${id.toUpperCase()} closed:  ${title} -- ${why}`)
     return title
   }
 
@@ -3419,6 +3481,12 @@ function filedDid({ id, hasFix }: FiledFollowUp): string {
   const made = `to todo ${id.toUpperCase()}`
   return hasFix ? made : `${made}:  no fix proposed yet, write one in its "${FIX_LABEL}" field`
 }
+
+/** A Done status card, among an item's children. */
+const DONE_CARD = ':scope > epic-status[state="done"]'
+
+/** How long Owen's ask keeps an item from closing as obsolete (`recentAsk()`). */
+const RECENT_ASK_DAYS = 14
 
 /** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
