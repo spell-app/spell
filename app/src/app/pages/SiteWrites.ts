@@ -142,7 +142,7 @@ export class SiteWrites {
   }
 
   /** Change page `name`'s address or title. */
-  static changePart(name: string, change: { address?: string; title?: string }): boolean {
+  static changePart(name: string, change: { address?: string; title?: string; state?: string }): boolean {
     return SiteWrites.change(appTexts.text("siteChangePart", { name }), undefined, (text) =>
       SiteEdits.withPartChanged(text, name, change)
     )
