@@ -1252,6 +1252,8 @@ type LiveWindow = Window & {
  * - Every page opts in to cross-document view transitions (`@view-transition { navigation: auto }`), so the live
  *   client's `reload()` (a replace navigation to the page itself) runs one;  any other navigation skips it
  *   (`pageswap`):  links open as they always did
+ * - NOT in a frame (VS Code's side bar):  a plain reload there (epic `epic-engine` I231;  Owen, 2026-11-08:  the side bar's
+ *   page came back after an auto-refresh zoomed way in, about twice its size, until reloaded by hand)
  * - the new page, after such a reload (`KeptPlace.hold`, for this path):
  *   - its address's `#id` is put back, before any runtime reads it
  *   - its view transition's animations wait at their start:  the old frame stays up, the new page draws behind it
@@ -1271,9 +1273,11 @@ export function holdReveal(scrollKey: string): void {
   const config = (window as unknown as LiveWindow).SPELL_SERVER
   if (!config) return
   try {
-    const style = document.createElement("style")
-    style.textContent = "@view-transition { navigation: auto; }"
-    ;(document.head ?? document.documentElement).append(style)
+    if (window.parent === window) {
+      const style = document.createElement("style")
+      style.textContent = "@view-transition { navigation: auto; }"
+      ;(document.head ?? document.documentElement).append(style)
+    }
   } catch {
     return
   }
