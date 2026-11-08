@@ -50,21 +50,23 @@ Everyone in the org reads and writes a team's open thread;  you delete your own 
 						<failed><text color="red">We can't find your threads right now.</text></failed>
 					</for>
 				</list>
-				<stack>
-					<header size="large">{the name of its picked}</header>
-					<stack class="message-list" spacing="sm">
-						<for message in every message where its thread is the topic of the picked of the chat page sorted by its sent loading="Joining the thread">
-							<message/>
-							<empty><text class="none" color="grey">Nothing yet:  say hello.</text></empty>
-							<failed><text color="red">We can't join this thread right now.</text></failed>
-						</for>
+				<if its picked>
+					<stack>
+						<header size="large">{the name of its picked}</header>
+						<stack class="message-list" spacing="sm">
+							<for message in every message where its thread is the topic of the picked of the chat page sorted by its sent loading="Joining the thread">
+								<message/>
+								<empty><text class="none" color="grey">Nothing yet:  say hello.</text></empty>
+								<failed><text color="red">We can't join this thread right now.</text></failed>
+							</for>
+						</stack>
+						<form value={its new message}>
+							<input name="text" placeholder="Write to the thread" aria-label="Your message" fluid action>
+								<button slot="action" class="send" color="primary" disabled={the text of the new message is ""} onClick={send it}>Send</button>
+							</input>
+						</form>
 					</stack>
-					<form value={its new message}>
-						<input name="text" placeholder="Write to the thread" aria-label="Your message" fluid action>
-							<button slot="action" class="send" color="primary" disabled={the text of the new message is ""} onClick={send it}>Send</button>
-						</input>
-					</form>
-				</stack>
+				</if>
 			</stack>
 		</container>
 	</draw>

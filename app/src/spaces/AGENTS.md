@@ -313,6 +313,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     [PersonInbox.ts](server/node/places/PersonInbox.ts)):  `ana@rs/__inbox`, where Spell writes what people send her.
     - Its list is worked out (`SpaceMembers`):  Ana an editor, the org's Board and Admins viewers, who read it;
       the inbox page says so plainly.  Nobody else reads or writes it.
+    - Someone in the org by their Spell account (`owen@spell`, J163) has theirs at their id there, `owen@rs/__inbox`:
+      `PeopleStore.memberCalled()` says who that is;  their feed and thread list are read as `owen@spell` (I16).
     - SENDING is adding a message to her own inbox's `messages` (`INBOX_MESSAGES`), `{ text, recipients, thread? }`:
       Spell then writes a copy into each inbox it's to, the same id in each, as itself, and fills in hers
       (`from`, `thread`, `sent`).  Deleting hers leaves theirs.

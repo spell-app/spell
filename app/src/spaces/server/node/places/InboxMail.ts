@@ -72,7 +72,7 @@ export class InboxMail {
   /** A space's own place, by its address, opened as Spell. */
   private readonly placeAt: (address: string) => Promise<FolderPlace | undefined>
   /** A person's inbox, to send an update from. */
-  private readonly inboxOf: (person: string) => Promise<PersonInbox | undefined>
+  private readonly inboxOf: (person: string, org: string) => Promise<PersonInbox | undefined>
   /** Signs each stop link, and knows one again. */
   private readonly credentials: ReadCredentials
   /** This server's address, as a mail's links start:  `https://spell.app`. */
@@ -253,7 +253,7 @@ export class InboxMail {
     for (const { event, by } of made) {
       const recipients = subscribers.filter((each) => each !== by)
       const [first] = recipients
-      const inbox = first && (await this.inboxOf(first))
+      const inbox = first && (await this.inboxOf(first, space.org))
       if (!inbox) continue
       inbox.sendAsSpell(
         {
@@ -352,7 +352,9 @@ export class InboxMail {
 
   /** `person`'s email (`bo@rs`):  their file's first;  `undefined` for none, logged. */
   private async emailOf(person: string): Promise<string | undefined> {
-    const parts = SP.SpellLocation.accountParts(person)
+    const asked = SP.SpellLocation.accountParts(person)
+    const member = asked && (await this.people.memberCalled(asked.org, person))
+    const parts = member ? SP.SpellLocation.accountParts(member) : undefined
     const found = parts && (await this.people.person(parts.id, parts.org)).person
     const email = found?.emails.items[0]
     if (!email) console.warn(`InboxMail:  ${person} has no email in their file;  nothing mailed`)
@@ -374,7 +376,7 @@ export type InboxMailProps = {
   /** A space's own place, by its address, opened as Spell. */
   placeAt: (address: string) => Promise<FolderPlace | undefined>
   /** A person's inbox. */
-  inboxOf: (person: string) => Promise<PersonInbox | undefined>
+  inboxOf: (person: string, org: string) => Promise<PersonInbox | undefined>
   /** Signs each stop link:  the server's own, so a restart keeps them good. */
   credentials: ReadCredentials
   /** This server's address, as a mail's links start. */

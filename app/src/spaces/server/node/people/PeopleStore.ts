@@ -160,6 +160,19 @@ export class PeopleStore {
   }
 
   /**
+   * Who `account` (`owen@rs`, a person's spaces in org `org`) is, as the org's file names them.
+   * - An org's first Admins are Spell accounts in it (`OrgSetup`, J163):  `owen@spell`, whose spaces there are `owen@rs`.
+   * - `account` itself for anyone else, on the org's file or not.
+   */
+  async memberCalled(org: string, account: string): Promise<string> {
+    const [id] = account.split("@")
+    const members = (await this.org(org))?.members.items ?? []
+    const addresses = members.flatMap((each) => (each.person ? [this.addressOf(each.person)] : []))
+    const spellAccount = `${id}@${HOME_ORG}`
+    return !addresses.includes(account) && addresses.includes(spellAccount) ? spellAccount : account
+  }
+
+  /**
    * Org `id`'s roster (`rs`), who manages what in it (epic `atmosphere` P20), with every person it names:
    * `undefined` for an org with no Admin space.
    * - In its Admin space, `@rs/__admin/roster.json5` (`rosterFile()`);  `OrgRoles` reads and changes it.

@@ -98,7 +98,7 @@
     {
       "type": "ChatPage",
       "superType": "App",
-      "defined": "/OrgChat.spellml:1076-2926"
+      "defined": "/OrgChat.spellml:1076-2971"
     },
     {
       "property": "new_message",
@@ -139,7 +139,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spellml:1426-2917"
+      "defined": "/OrgChat.spellml:1426-2962"
     }
   ],
   "codeLines": [
