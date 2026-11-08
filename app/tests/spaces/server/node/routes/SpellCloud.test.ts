@@ -213,6 +213,65 @@ describe("Spell's cloud", () => {
     expect((await ask(port, "GET", "/spaces/owen@spell/errors/errors.spell", { headers: OUTSIDE })).status).toBe(404)
     expect((await ask(port, "GET", "/terms", { headers: OUTSIDE })).status).toBe(200)
   })
+  describe("at two addresses", () => {
+    const SECOND = "https://spell.space.test.example"
+    const secondDir = mkdtempSync(join(tmpdir(), "spell-cloud-second-"))
+    let two: SpellCloud
+    const at = (address: string) => ({ host: new URL(address).host, origin: address })
+
+    beforeAll(async () => {
+      two = new SpellCloud({ address: ADDRESS, alsoAt: [SECOND], dir: secondDir, people, folderFor })
+      await two.listen({ port: 0, backups: "off" })
+    })
+
+    afterAll(async () => {
+      await two?.close()
+      rmSync(secondDir, { recursive: true, force: true })
+    })
+
+    /** POST `path` with `body`, its `Host` and `Origin` from `headers`. */
+    const askTwo = (path: string, body: object, headers: Record<string, string>) =>
+      ask(two.server.port, "POST", path, {
+        body: JSON.stringify(body),
+        headers: { ...headers, "content-type": "application/json" }
+      })
+
+    test("both hosts answer pages;  an unknown host is refused", async () => {
+      for (const address of [ADDRESS, SECOND]) {
+        const page = await ask(two.server.port, "GET", "/apps/@spell/examples/RecipeBox", { headers: at(address) })
+        expect(page.status, address).toBe(200)
+        expect(page.text).toContain("<spell-viewer")
+      }
+      const unknown = await ask(two.server.port, "GET", "/hello", { headers: { host: "elsewhere.example" } })
+      expect(unknown.status).toBe(403)
+    })
+
+    test("a mail's link starts with the address it was asked at", async () => {
+      await askTwo("/api/sign-in/ask", { email: ANA }, at(SECOND))
+      const mail = await new MailCatcher({ folder: join(secondDir, "mail") }).newestTo(ANA)
+      expect(mail!.text).toContain(`${SECOND}/sign-in/confirm?key=`)
+    })
+
+    test("a forged Host picks no link:  the main address, or a refusal", async () => {
+      const local = { host: `127.0.0.1:${two.server.port}`, "x-server-token": two.server.guard.token }
+      expect((await askTwo("/api/sign-in/invite", { email: ANA }, local)).status).toBe(200)
+      const mail = await new MailCatcher({ folder: join(secondDir, "mail") }).newestTo(ANA)
+      expect(mail!.text).toContain(`${ADDRESS}/sign-in/confirm?key=`)
+      const forged = { host: "evil.example", origin: "https://evil.example" }
+      expect((await askTwo("/api/sign-in/ask", { email: ANA }, forged)).status).toBe(403)
+    })
+
+    test("each address is its own client to Bluesky's hosts:  its client file names it", async () => {
+      for (const address of [ADDRESS, SECOND]) {
+        const file = await ask(two.server.port, "GET", "/api/sign-in/atproto/client.json", { headers: at(address) })
+        expect(JSON.parse(file.text)).toMatchObject({
+          client_uri: address,
+          redirect_uris: [`${address}/api/sign-in/atproto/back`]
+        })
+      }
+    })
+  })
+
   test("AT Protocol's handle look-up, on a handle's own host:  the account's DID, as text (epic `atmosphere` P16)", async () => {
     const people = new PeopleStore(new DiskStorage(spaces))
     const { person } = await people.me("cy", "rs")

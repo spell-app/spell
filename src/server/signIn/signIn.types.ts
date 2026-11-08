@@ -145,17 +145,22 @@ export type AtProtoIdentities = {
   /**
    * Where to send the browser to sign in as `who` (a handle, a DID, or a host's address):  their host's sign-in page.
    * - `state`:  handed back to `finish()`, as it is
+   * - `at`:  which of the server's addresses it was asked at, so the browser comes back there;  left out, its own
    * - throws for a `who` nobody has, or a host that can't be reached
    */
-  start(who: string, state: string): Promise<string>
+  start(who: string, state: string, at?: string): Promise<string>
   /**
    * The browser came back to `ATPROTO_BACK_PAGE` with `params`:  who signed in, and the `state` `start()` was given.
    * - `handle`:  theirs, as their DID's document says, when it says one that holds
+   * - `at`:  which of the server's addresses it came back to, the one `start()` was given
    * - throws if their host refused, or the params are no answer to a `start()` of this one's
    */
-  finish(params: URLSearchParams): Promise<{ did: string; handle?: string; state: string }>
-  /** What goes at `ATPROTO_CLIENT_FILE`, for a host to read:  `undefined` where none's needed (a local address). */
-  clientFile?(): object | undefined
+  finish(params: URLSearchParams, at?: string): Promise<{ did: string; handle?: string; state: string }>
+  /**
+   * What goes at `ATPROTO_CLIENT_FILE`, for a host to read:  `undefined` where none's needed (a local address).
+   * - `at`:  which of the server's addresses it was asked for at
+   */
+  clientFile?(at?: string): object | undefined
 }
 
 /** One device's sign-in, as it's kept. */
