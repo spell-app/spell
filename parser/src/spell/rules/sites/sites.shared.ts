@@ -94,11 +94,20 @@ export function specialPageOf(scope: P.Scope, name: string): "notFound" | "error
  * - What the site really lists is checked once the project has parsed:  `refuseUnlistedPart()`.
  */
 export function namesSitePart(scope: P.Scope, words: string): boolean {
+  if (namesSitePage(scope, words)) return true
+  const all = words.trim().split(/\s+/)
+  return !!(overlayKindOf(scope, all.at(-1)) ?? overlayKindOf(scope, all[0]))
+}
+
+/**
+ * Do `words` name one of a site's PAGES:  one the program declares, its not found or error page, or (a page declared
+ * further down the file, not known yet) words whose last word (Spanish's first) says it's a page.
+ * - What `the address of the ...` takes (epic `mockup` P8):  a dialog or a sidebar has no address.
+ */
+export function namesSitePage(scope: P.Scope, words: string): boolean {
   if (pageNamed(scope, words) || specialPageOf(scope, words)) return true
   const all = words.trim().split(/\s+/)
-  // a page declared further down the file isn't known yet:  its last word (Spanish's first) says it's one
-  const saysPage = all.length > 1 && (SP.typeName(all.at(-1)!) === "page" || SP.typeName(all[0]!) === "page")
-  return saysPage || !!(overlayKindOf(scope, all.at(-1)) ?? overlayKindOf(scope, all[0]))
+  return all.length > 1 && (SP.typeName(all.at(-1)!) === "page" || SP.typeName(all[0]!) === "page")
 }
 
 /** Which kind of part `word` says, in the scope's language:  `dialog`, `sidebar`, or neither. */

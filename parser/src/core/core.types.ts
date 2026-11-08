@@ -373,4 +373,12 @@ export type SiteHost = {
    * - So its not found page offers it, and shows what went wrong on its error page;  a visitor sees neither.
    */
   createPage?(address: string): void
+  /**
+   * Theme `name`'s look, for the site alone, not the page around it:  CSS declarations its frame wears inline
+   * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
+   * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
+   * - None:  the site wears the page's theme.
+   * - Rejects on a theme the host doesn't have.
+   */
+  themeTokens?(name: string): Promise<string>
 }

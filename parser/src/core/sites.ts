@@ -1,7 +1,8 @@
 /**
  * Sites (epic `mockup` P2):  what compiled spell calls to move between a site's pages, and what the host hands in.
  * - `go to the film page for this film` => `core.showSitePart("film page", film)`
- * - `show the settings dialog` => `core.showSitePart("settings dialog")`
+ * - `show the settings dialog` => `core.showSitePart("settings dialog")`;  `close the settings dialog` =>
+ *   `core.closeSitePart("settings dialog")`
  * - `the address of the film page for this film` => `core.siteAddressOf("film page", film)`, for a link
  * - Each goes through the running program's site, `core.RUNTIME.site` (the first one made):  the site itself is
  *   `SiteBase`, under spell's built-in template `site`.
@@ -14,7 +15,8 @@ import { defineCoreModule, type SiteHost } from "./core.types"
 /** The running site's half that compiled spell calls:  `SiteBase`'s, without importing it. */
 type RunningSite = {
   show(name: string, thing?: unknown): void
-  addressWith(name: string, thing?: unknown): string
+  close(name: string): void
+  linkTo(name: string, thing?: unknown): string
 }
 
 /** `core`'s site methods. */
@@ -35,13 +37,22 @@ export const siteMethods = defineCoreModule({
   },
 
   /**
+   * Close the site's dialog or sidebar `name`, if it's open:  what `close the review dialog` compiles to.
+   * - throws `TypeError` when the program has no site, or its site no dialog or sidebar of that name
+   */
+  closeSitePart(name: string): void {
+    runningSite("closeSitePart").close(name)
+  },
+
+  /**
    * The address of the site's page `name`, its parameter filled with `thing`:  what
    * `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`.
    * - The thing goes in the parameter whose property is of its type, else the first.
+   * - `""` while the thing is nothing yet (a link still being followed):  see `SiteBase.linkTo()`.
    * - throws `TypeError` when the program has no site, or its site no page of that name
    */
   siteAddressOf(name: string, thing?: unknown): string {
-    return runningSite("siteAddressOf").addressWith(name, thing)
+    return runningSite("siteAddressOf").linkTo(name, thing)
   }
 })
 Object.assign(core, siteMethods)

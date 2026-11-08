@@ -2,26 +2,79 @@
 export const words = {
   lang: "en",
   types: {
+    Review: {
+      filmTitle: "film title",
+      stars: "stars",
+      words: "words"
+    },
+    PageTop: {
+      title: "title",
+      draw: "draw it"
+    },
+    PersonFact: {
+      person: "person",
+      draw: "draw it"
+    },
     PersonSidebar: {
-      person: "person"
+      person: "person",
+      draw: "draw it"
+    },
+    SettingsDialog: {
+      units: "units",
+      crawl: "crawl",
+      draw: "draw it"
+    },
+    ReviewDialog: {
+      film: "film",
+      draft: "draft",
+      saveTheReview: "save the review",
+      draw: "draw it"
+    },
+    FilmsPage: {
+      draw: "draw it"
     },
     FilmPage: {
-      film: "film"
+      film: "film",
+      reviews: "reviews",
+      draw: "draw it"
+    },
+    PeoplePage: {
+      draw: "draw it"
     },
     PersonPage: {
-      person: "person"
+      person: "person",
+      draw: "draw it"
+    },
+    PlanetsPage: {
+      draw: "draw it"
     },
     PlanetPage: {
-      planet: "planet"
+      planet: "planet",
+      draw: "draw it"
+    },
+    SpeciesListPage: {
+      draw: "draw it"
     },
     SpeciesPage: {
-      species: "species"
+      species: "species",
+      draw: "draw it"
+    },
+    VehiclesPage: {
+      draw: "draw it"
     },
     VehiclePage: {
-      vehicle: "vehicle"
+      vehicle: "vehicle",
+      draw: "draw it"
+    },
+    StarshipsPage: {
+      draw: "draw it"
     },
     StarshipPage: {
-      starship: "starship"
+      starship: "starship",
+      draw: "draw it"
+    },
+    GalaxyGuide: {
+      theme: "theme"
     }
   }
 }

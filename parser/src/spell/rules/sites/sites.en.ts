@@ -321,5 +321,9 @@ sites.addRule(ShowSitePart, { syntax: "go to the {part:quoted_member} ((for|with
 sites.addRule(ShowSitePart, { syntax: "show the {part:site_part_words} ((for|with) {thing:expression})?" })
 sites.addRule(ShowSitePart, { syntax: "show the {part:quoted_member} ((for|with) {thing:expression})?" })
 
+// close an open dialog or sidebar:  `close the review dialog` (epic `mockup` P8)
+sites.addRule(ShowSitePart, { syntax: "(close:close) the {part:site_part_words}" })
+sites.addRule(ShowSitePart, { syntax: "(close:close) the {part:quoted_member}" })
+
 // a page's address, for a link:  `the address of the film page for this film`
 sites.addRule(SiteAddressOf, { syntax: "the address of the {part:site_part_words} ((for|with) {thing:expression})?" })

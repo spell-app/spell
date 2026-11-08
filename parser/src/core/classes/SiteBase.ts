@@ -1,6 +1,7 @@
 import h from "@solidjs/h"
 
 import { schemaOf } from "spell/util"
+import { waitUntil } from "spell/util/timing"
 import { compilePattern, filledPattern, type AddressParams } from "spell/util/addressPattern"
 
 import { core } from "spell/parser/core/core"
@@ -157,6 +158,18 @@ export class SiteBase extends App {
   }
 
   /**
+   * What a LINK to page `name` says, `thing` in its parameter:  what `the address of the film page for this film`
+   * compiles to (`core.siteAddressOf()`).
+   * - `""` while `thing` is nothing yet, for a page that needs one:  a link followed as the page draws (a person's
+   *   home world) has no thing until it's read, and a drawing mustn't fail meanwhile (epic `mockup` P8).
+   * - throws `TypeError` for a page the site doesn't have
+   */
+  linkTo(name: string, thing?: unknown): string {
+    if (thing == null && this.entryNamed(name)?.params?.length) return ""
+    return this.addressWith(name, thing ?? undefined)
+  }
+
+  /**
    * Go to `address`:  through the host when there is one (the editor's Run puts it in its URL), and shown here at once.
    * - `known`:  a parameter's thing, when the program handed it over:  no need to look it up again.
    */
@@ -246,6 +259,17 @@ export class SiteBase extends App {
     this.setState("overlay", { kind, entry, view } satisfies OpenOverlay)
   }
 
+  /**
+   * Close dialog or sidebar `name`, if it's the one open:  what `close the review dialog` compiles to
+   * (`core.closeSitePart()`).
+   * - throws `TypeError` for a name that's none of the site's dialogs or sidebars:  a page isn't closed, it's left
+   */
+  close(name: string): void {
+    if (!this.overlayNamed(name))
+      throw new TypeError(`SiteBase.close():  ${this.constructor.name} has no dialog or sidebar "${name}";  list it`)
+    if (this.getState<OpenOverlay>("overlay")?.entry.name === name) this.closeOverlay()
+  }
+
   /** Close the open dialog or sidebar, if any. */
   closeOverlay(): void {
     this.setState("overlay", undefined)
@@ -263,7 +287,31 @@ export class SiteBase extends App {
     const host = core.siteHost
     void this.showAddress(host?.address() ?? this.currentAddressHere ?? "/")
     host?.listen((address) => void this.showAddress(address))
+    this.wearTheme()
     super.start()
+  }
+
+  /**
+   * The theme its pages wear:  its own `theme` property, `- its "theme" is "mockup"` (epic `mockup` P8);
+   * `undefined`:  the page's.
+   */
+  get themeName(): string | undefined {
+    const theme = (this as unknown as { theme?: unknown }).theme
+    return typeof theme === "string" && theme ? theme : undefined
+  }
+
+  /**
+   * Ask the host for its theme's look, worn by its frame alone (`SiteHost.themeTokens()`).
+   * - NEVER throws:  a theme the host can't give leaves the page's, said on the console.
+   */
+  private wearTheme(): void {
+    const name = this.themeName
+    const host = core.siteHost
+    if (!name || !host?.themeTokens) return
+    host.themeTokens(name).then(
+      (tokens) => this.setState("themeTokens", tokens),
+      (error: unknown) => console.warn(`SiteBase:  can't wear theme "${name}";  it wears the page's`, error)
+    )
   }
 
   /**
@@ -277,7 +325,16 @@ export class SiteBase extends App {
   draw(): Drawing {
     return h(
       "div",
-      { class: "spell-site-frame", onKeyDown: (event: KeyboardEvent) => this.closeNavOnEscape(event) },
+      {
+        class: "spell-site-frame",
+        // its theme's tokens, inline:  inherited by every page, dialog and sidebar inside, and nothing outside
+        style: () => {
+          const tokens = this.getState<string>("themeTokens")
+          return tokens ? `${tokens};  ${THEMED_FRAME}` : ""
+        },
+        "data-theme": () => this.themeName,
+        onKeyDown: (event: KeyboardEvent) => this.closeNavOnEscape(event)
+      },
       h("style", {}, NARROW_SITE_CSS),
       h("ui-button", {
         class: "spell-site-menu",
@@ -440,12 +497,15 @@ export class SiteBase extends App {
       tag,
       {
         visible: "",
+        // its close icon:  a mockup's dialog or sidebar always has a way out (epic `mockup` P8)
+        closable: "",
         heading: overlay.view ? undefined : overlay.entry.name,
         ...(overlay.kind === "sidebar" && { position: "right" }),
         // a getter handing over the handler:  `h()` reads any function on a dashed tag as a live value
         "on-ui-closed": () => (_event: Event) => this.closeOverlay()
       },
-      overlay.view ? core.drawThing(overlay.view) : null
+      // in the box's content part, which pads it as a dialog's or a sidebar's body
+      overlay.view ? h("ui-content", {}, core.drawThing(overlay.view)) : null
     )
   }
 
@@ -553,6 +613,14 @@ function made(drawing: unknown): unknown {
   return isElementThunk(drawing) ? drawing() : drawing
 }
 
+/**
+ * A themed site's own text and page:  its theme's font, colour and background, read from the tokens it wears.
+ * - Inherited text was worked out on the page around it, in the page's theme:  so it's said again here.
+ */
+const THEMED_FRAME =
+  "font-family: var(--ui-font-family);  font-size: var(--ui-font-size);  color: var(--ui-text-color);  " +
+  "background-color: var(--ui-background)"
+
 /** Each site class's matchers, made once. */
 const MATCHERS = new WeakMap<Function, { entry: SitePageEntry; match: ReturnType<typeof compilePattern> }[]>()
 
@@ -600,7 +668,14 @@ function isNamedBy(id: unknown, part: string): boolean {
 async function valueFor(page: object, property: string, id: string): Promise<unknown> {
   const type = schemaOf(page.constructor).typeOf(property)
   if (type === "number") return Number(id)
-  const Class = core.things.classNamed(type) as (Function & { savedIn?: unknown }) | undefined
+  // a class's name is capitalised (`Film`), a built-in type's isn't (`text`):  only a class is waited for
+  // a type another project declares is known once the runner hands over that project's classes, which it does just
+  // after the program first runs:  a site opened at a film's address asks for the film before then (epic `mockup` P8)
+  const isAClass = /^[A-Z]/.test(type)
+  const Class = (core.things.classNamed(type) ??
+    (isAClass ? await waitUntil(() => core.things.classNamed(type), { timeout: CLASS_WAIT }) : undefined)) as
+    | (Function & { savedIn?: unknown })
+    | undefined
   if (!Class) return id
   const known = core.things
     .all()
@@ -613,10 +688,16 @@ async function valueFor(page: object, property: string, id: string): Promise<unk
   return items.find((thing) => isNamedBy(core.savedIdOf(thing) ?? (thing as { id?: unknown }).id, id))
 }
 
+/** How long a parameter's lookup waits for its type's class to be known, in seconds:  see `valueFor()`. */
+const CLASS_WAIT = 5
+
 /** The first property `View` declares of `thing`'s type, for a dialog or sidebar opened with a thing. */
 function firstPropertyOf(View: Function, thing: unknown): string | undefined {
   const schema = schemaOf(View)
-  return schema.earlyProps().find((name) => {
+  // every prop it declares, its superclasses' first:  not only those made with it (a sidebar's `person` has no value)
+  const declared: string[] = []
+  for (let each: typeof schema | undefined = schema; each; each = each.parent) declared.unshift(...each.declared.keys())
+  return declared.find((name) => {
     const Class = core.things.classNamed(schema.typeOf(name))
     return Class && thing instanceof Class
   })

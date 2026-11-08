@@ -69,6 +69,22 @@ class SettingsDialog extends View {
   }
 }
 
+/** A sidebar's view, showing a film it's handed:  its `film` has no value of its own. */
+class FilmSidebar extends View {
+  static {
+    this.declareProp("film", { type: "Film" })
+  }
+  get film() {
+    return this.getProp("film") as Film | undefined
+  }
+  set film(value) {
+    this.setProp("film", value)
+  }
+  draw(): Drawing {
+    return h("p", null, () => this.film?.title ?? "?") as unknown as Drawing
+  }
+}
+
 /** The site, its lines compiled. */
 class GalaxyGuide extends Site {
   static pages = [
@@ -82,6 +98,7 @@ class GalaxyGuide extends Site {
     { name: "broken page", page: "BrokenPage", address: "/broken" }
   ]
   static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }]
+  static sidebars = [{ name: "film sidebar", view: "FilmSidebar" }]
 }
 
 ////////////////
@@ -110,6 +127,7 @@ describe("a running site", () => {
     core.appRoot = element
     core.things.addClass(Film)
     core.things.addClass(SettingsDialog)
+    core.things.addClass(FilmSidebar)
     new FilmsPage()
     new FilmPage()
     new BrokenPage()
@@ -245,6 +263,47 @@ describe("a running site", () => {
     site.closeOverlay()
     await shown()
     expect(element.querySelector("ui-modal")).toBeNull()
+  })
+
+  test("`close the settings dialog`:  closes it;  naming no dialog or sidebar throws (P8)", async () => {
+    drawSite()
+    await site.showAddress("/films")
+    core.showSitePart("settings dialog")
+    await shown()
+    core.closeSitePart("settings dialog")
+    await shown()
+    expect(element.querySelector("ui-modal")).toBeNull()
+    expect(() => core.closeSitePart("films page")).toThrow(TypeError)
+  })
+
+  test("`show the film sidebar for this film`:  its view's property with no value of its own takes the film (P8)", async () => {
+    drawSite()
+    await site.showAddress("/films")
+    core.showSitePart("film sidebar", hope)
+    await shown()
+    expect(element.querySelector("ui-flyout")?.textContent).toBe("A New Hope")
+  })
+
+  test("a link to a page whose thing isn't read yet goes nowhere, rather than failing (P8)", () => {
+    expect(core.siteAddressOf("film page", undefined)).toBe("")
+    expect(core.siteAddressOf("film page", hope)).toBe("/films/a-new-hope")
+  })
+
+  test("wears its `theme`, the tokens its host gives for it, on its frame (P8)", async () => {
+    Object.defineProperty(site, "theme", { value: "mockup" })
+    core.siteHost = {
+      address: () => "/films",
+      go: () => {},
+      listen: () => {},
+      themeTokens: async (name) => `--ui-font-family: ${name}`
+    }
+    site.start()
+    drawSite()
+    await site.showAddress("/films")
+    await shown()
+    const frame = element.querySelector(".spell-site-frame")!
+    expect(frame.getAttribute("data-theme")).toBe("mockup")
+    expect(frame.getAttribute("style")).toContain("--ui-font-family: mockup")
   })
 
   test("its navigation's pages are JSON text, which reads the same with or without Spell UI", async () => {

@@ -169,6 +169,10 @@ sitesEs.addRule(ShowSitePart, { syntax: "ir a (la|el) {part:quoted_member} ((par
 sitesEs.addRule(ShowSitePart, { syntax: "mostrar (la|el) {part:site_part_words} ((para|con) {thing:expression})?" })
 sitesEs.addRule(ShowSitePart, { syntax: "mostrar (la|el) {part:quoted_member} ((para|con) {thing:expression})?" })
 
+// cerrar un diálogo o una barra lateral abiertos:  `cerrar el diálogo de reseña`
+sitesEs.addRule(ShowSitePart, { syntax: "(close:cerrar) (la|el) {part:site_part_words}" })
+sitesEs.addRule(ShowSitePart, { syntax: "(close:cerrar) (la|el) {part:quoted_member}" })
+
 // la dirección de una página, para un enlace:  `la dirección de la página de película con esta película`
 sitesEs.addRule(SiteAddressOf, {
   syntax: "la (dirección|direccion) de (la|el) {part:site_part_words} ((para|con) {thing:expression})?"

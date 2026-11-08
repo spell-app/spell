@@ -3348,6 +3348,18 @@
     },
     {
       "kind": "method",
+      "name": "closeSitePart",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Close the site's dialog or sidebar `name`, if it's open:  what `close the review dialog` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "siteAddressOf",
       "of": "core",
       "module": "sites",

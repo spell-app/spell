@@ -10,6 +10,8 @@ import { namesSitePart, refuseUnlistedPart } from "./sites.shared"
  * `show_site_part` rule:  go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).
  * - e.g. `go to the films page`, `go to the film page for this film`, `show the film page with this film`
  * - e.g. `show the settings dialog`, `show the person sidebar for this person`
+ * - e.g. `close the review dialog`:  closes the dialog or sidebar if it's open (epic `mockup` P8);  `close` names
+ *   only a dialog or a sidebar, never a page
  * - It names the PAGE, never its address:  the site says where each page is, so a page moves without this line
  *   changing.
  * - What comes after `for` / `with` fills the page's parameter:  the one whose property is of its type, else the first.
@@ -19,9 +21,10 @@ import { namesSitePart, refuseUnlistedPart } from "./sites.shared"
  * - Not read at all for a name that's none of a site's parts:  a page the program declares, a dialog, a sidebar, or the
  *   not found or error page.  Anything else reading `show the ...` (a method of the program's own) is tried instead.
  * - A statement, and an expression for a handler:  `<ui-button onClick={go to the about page}>`.
- * - Compiles to `core.showSitePart("film page", film)`, which the running site carries out (`SiteBase.show()`).
+ * - Compiles to `core.showSitePart("film page", film)`, which the running site carries out (`SiteBase.show()`);
+ *   `close the review dialog` to `core.closeSitePart("review dialog")` (`SiteBase.close()`).
  */
-export class ShowSitePart extends SpellStatement<"part|thing?"> {
+export class ShowSitePart extends SpellStatement<"part|thing?|close?"> {
   // an expression too, for a handler:  `<ui-button onClick={go to the about page}>`
   @proto static alias = ["statement", "expression"]
   @proto static priority = Priority.preferred
@@ -34,8 +37,9 @@ export class ShowSitePart extends SpellStatement<"part|thing?"> {
   }
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
-    const { part, thing } = match.groups
+    const { part, thing, close } = match.groups
     const args = [plainValueAST(match, textIn(part))]
+    if (close) return new P.ASTCoreMethodInvocation(match, { methodName: "closeSitePart", args })
     if (thing) args.push(P.asAST<P.ASTExpression>(thing.AST))
     return new P.ASTCoreMethodInvocation(match, { methodName: "showSitePart", args })
   }

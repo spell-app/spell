@@ -1,21 +1,132 @@
-import { core, View, Page, Site, prop } from "@spell/core"
+import { core, Thing, View, Page, Site, Place, prop, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 import { Character, Planet, Film, Species, Vehicle, Starship, WikiPage, Namespace, Title, Thumbnail, Originalimage, ContentUrl, Desktop, Mobile, Card } from "@spell/project/@spell/examples/StarWars"
 
-export class SettingsDialog extends View {
-  static elementTag = core.defineElement(this, "test-project")
+core.heading("Reviews:  kept on this device")
+///////////////////////////////////
+// ## Reviews:  kept on this device
+///////////////////////////////////
+
+export class Review extends Thing {
+  // - its "film title" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 321, end: 345 } })
+  accessor filmTitle!: string
+
+  // - its "stars" is a number
+  @prop({ type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 349, end: 372 } })
+  accessor stars!: number
+
+  // - its "words" is text
+  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 376, end: 395 } })
+  accessor words!: string
+
+  static savedIn = { place: "galaxy_reviews", collection: "reviews" }
 }
 
 /**
- * `<test-project-settings-dialog>`:  a settings dialog, drawn in its own element, e.g. by `draw the settings dialog`.
- * - The page defines its tag with this class:  `core.useElement()`, below.
- * - Its attributes are its settings dialog's properties;  its methods call its settings dialog's.
- * - What every view's element does, e.g. drawing its settings dialog, is `SpellElement`'s.
+ * What people think of a film, written on the site's film pages (epic `mockup` P8).
+ * Kept in this browser:  change the next line to keep them somewhere else, and nothing else changes.
  */
-export class SettingsDialogElement extends SpellElement<SettingsDialog> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-settings-dialog", "settings dialog", [])
+export class GalaxyReview extends Place {}
+export const galaxyReviews = core.place(new GalaxyReview(), { name: "galaxy_reviews", kind: "database on this device" })
+
+// -----------
+//
+// The whole Star Wars example as a site (epic `mockup` P1), and its click-through mockup (P8):  each of its
+// collections, films, people, planets, species, vehicles and starships, as a list page and a page for one of them.
+// Each page says first what it must let people do, its jobs (epic `mockup` P6), plain lines or Agile stories,
+// ticked where the mockup does it.
+// The site says where each page is, and fills what an address names:  "/films/:film" shows the film page, its film
+// the one the address names.
+// It wears the Mockup theme, a hand-drawn sketch, so nobody takes it for the finished look.
+// Its people, planets and ships are read from swapi.py4e.com, as the Star Wars example's are;  its reviews are kept
+// on this device (StarWarsReviews.api.spell).
+//
+
+core.heading("Every page's top:  its title, and the settings")
+//# Every page's top:  its title, and the settings
+
+export class PageTop extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  // - its "title" is a text
+  @prop({ type: "text" })
+  accessor title!: string
+
+  @drawn draw() {
+    return (
+      <ui-stack direction="horizontal" align="center" justify="between">
+        <ui-header size="large">{this.title}</ui-header>
+        <ui-button class="settings" appearance="basic" icon="cog" onClick={core.pressed(this, () => core.showSitePart("settings dialog"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Settings
+        </ui-button>
+      </ui-stack>
+    )
+  }
 }
-core.useElement(SettingsDialog, SettingsDialogElement)
+
+/**
+ * `<test-project-page-top>`:  a page top, drawn in its own element, e.g. by `draw the page top`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its page top's properties;  its methods call its page top's.
+ * - What every view's element does, e.g. drawing its page top, is `SpellElement`'s.
+ */
+export class PageTopElement extends SpellElement<PageTop> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-page-top", "page top", [])
+}
+core.useElement(PageTop, PageTopElement)
+
+core.heading("The films")
+//# The films
+
+/** A person in a few lines:  the page and the sidebar both show them */
+export class PersonFact extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  // - its "person" is a character
+  @prop({ type: "Character" })
+  accessor person!: Character
+
+  @drawn draw() {
+    return (
+      <ui-table appearance="definition" celled={true} unstackable={true}>
+        <ui-row>
+          <ui-cell>Born</ui-cell>
+          <ui-cell>{this.person?.birthYear}</ui-cell>
+        </ui-row>
+        <ui-row>
+          <ui-cell>Height</ui-cell>
+          <ui-cell>{core.measureShown(this.person?.height!, "Length", "centimeter")}</ui-cell>
+        </ui-row>
+        <ui-row>
+          <ui-cell>Gender</ui-cell>
+          <ui-cell>{this.person?.gender}</ui-cell>
+        </ui-row>
+        <ui-row>
+          <ui-cell>Home</ui-cell>
+          <ui-cell>
+            <ui-link link={core.siteAddressOf("planet page", this.person?.homeworld!)}>
+              {this.person?.homeworld?.name}
+            </ui-link>
+          </ui-cell>
+        </ui-row>
+      </ui-table>
+    )
+  }
+}
+
+/**
+ * `<test-project-person-fact>`:  a person fact, drawn in its own element, e.g. by `draw the person fact`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its person fact's properties;  its methods call its person fact's.
+ * - What every view's element does, e.g. drawing its person fact, is `SpellElement`'s.
+ */
+export class PersonFactElement extends SpellElement<PersonFact> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-person-fact", "person fact", [
+    { name: "person", kind: "string", description: "Its person." }
+  ])
+}
+core.useElement(PersonFact, PersonFactElement)
 
 export class PersonSidebar extends View {
   static elementTag = core.defineElement(this, "test-project")
@@ -24,6 +135,14 @@ export class PersonSidebar extends View {
   // - its "person" is a character
   @prop({ type: "Character" })
   accessor person!: Character
+
+  @drawn draw() {
+    return [
+      <ui-header size="medium">{this.person?.name}</ui-header>,
+      core.drawThing(new PersonFact({ person: this.person })),
+      <ui-link class="whole-page" link={core.siteAddressOf("person page", this.person!)}>Their whole page</ui-link>
+    ]
+  }
 }
 
 /**
@@ -39,20 +158,140 @@ export class PersonSidebarElement extends SpellElement<PersonSidebar> {
 }
 core.useElement(PersonSidebar, PersonSidebarElement)
 
+export type Units = (typeof SettingsDialog.Units)[number]
+export type Crawl = (typeof SettingsDialog.Crawls)[number]
+
+export class SettingsDialog extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  // - its "units" is metric or imperial
+  static Units = ["metric", "imperial"] as const
+  @prop({ oneOf: () => SettingsDialog.Units })
+  accessor units!: Units
+
+  // - its "crawl" is shown or hidden
+  static Crawls = ["shown", "hidden"] as const
+  @prop({ oneOf: () => SettingsDialog.Crawls })
+  accessor crawl!: Crawl
+
+  @drawn draw() {
+    return (
+      <>
+        <ui-header size="medium">Settings</ui-header>
+        <ui-form value={this}>
+          <ui-field label="Lengths and weights in">
+            <ui-select name="units">
+              <ui-item value="metric">Metres and kilos</ui-item>
+              <ui-item value="imperial">Feet and pounds</ui-item>
+            </ui-select>
+          </ui-field>
+          <ui-field label="A film's opening crawl">
+            <ui-select name="crawl">
+              <ui-item value="shown">Shown</ui-item>
+              <ui-item value="hidden">Hidden</ui-item>
+            </ui-select>
+          </ui-field>
+        </ui-form>
+        <ui-button class="done" color="primary" onClick={core.pressed(this, () => core.closeSitePart("settings dialog"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Done
+        </ui-button>
+      </>
+    )
+  }
+}
+
 /**
- * 
- * The whole Star Wars example as a site (epic `mockup` P1):  each of its collections, films, people, planets, species,
- * vehicles and starships, as a list page and a page for one of them.
- * Its pages draw nothing yet:  the click-through mockups draw them.
- * Each page says first what it must let people do, its jobs (epic `mockup` P6), plain lines or Agile stories.
- * The site says where each page is, and fills what an address names:  "/films/:film" shows the film page, its film
- * the one the address names.
- * 
+ * `<test-project-settings-dialog>`:  a settings dialog, drawn in its own element, e.g. by `draw the settings dialog`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its settings dialog's properties;  its methods call its settings dialog's.
+ * - What every view's element does, e.g. drawing its settings dialog, is `SpellElement`'s.
  */
+export class SettingsDialogElement extends SpellElement<SettingsDialog> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-settings-dialog", "settings dialog", [
+    { name: "units", kind: "string", description: "Its units." },
+    { name: "crawl", kind: "string", description: "Its crawl." }
+  ])
+}
+core.useElement(SettingsDialog, SettingsDialogElement)
+
+export class ReviewDialog extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  /** The film it's a review of */
+  // - its "film" is a film
+  @prop({ type: "Film" })
+  accessor film!: Film
+
+  /** The review being written:  saved when it's done */
+  // - its "draft" is a new review with stars = 5
+  @prop({ init: () => new Review({ stars: 5 }), early: true })
+  accessor draft!: Review
+
+  saveTheReview() {
+    this.draft.filmTitle = this.film?.title
+    core.saveThing(this.draft)
+    this.draft = new Review({ stars: 5 })
+    core.closeSitePart("review dialog")
+  }
+
+  @drawn draw() {
+    return (
+      <>
+        <ui-header size="medium">Review {this.film?.title}</ui-header>
+        <ui-form prop:value={this.draft}>
+          <ui-field label="Stars">
+            <ui-input class="stars" name="stars" type="number" min="1" max="5" />
+          </ui-field>
+          <ui-field label="What did you think?">
+            <ui-textarea class="words" name="words" rows="4" />
+          </ui-field>
+        </ui-form>
+        <ui-button class="save-review" color="primary" disabled={this.draft.words === ""} onClick={core.pressed(this, () => this.saveTheReview())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Save the review
+        </ui-button>
+      </>
+    )
+  }
+}
+
+/**
+ * `<test-project-review-dialog>`:  a review dialog, drawn in its own element, e.g. by `draw the review dialog`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its review dialog's properties;  its methods call its review dialog's.
+ * - What every view's element does, e.g. drawing its review dialog, is `SpellElement`'s.
+ */
+export class ReviewDialogElement extends SpellElement<ReviewDialog> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-review-dialog", "review dialog", [
+    { name: "film", kind: "string", description: "Its film." },
+    { name: "draft", kind: "json", description: "Its draft." }
+  ])
+
+  saveTheReview() {
+    return this.currentThing?.saveTheReview()
+  }
+}
+core.useElement(ReviewDialog, ReviewDialogElement)
+
 export class FilmsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see every film, in the order they came out\n- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order\n  - done when:  a switch flips the list between release and story order\n- [ ] open a film's page from its row"
+  static jobs = "- [x] see every film, in the order they came out\n- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order\n  - done when:  a switch flips the list between release and story order\n- [x] open a film's page from its row"
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "Films" })),
+      core.drawRead(() => core.everyThing(Film), (film: Film) => <>
+        <ui-cell data-column="Episode">{film.episodeId}</ui-cell>
+        <ui-cell data-column="Title">
+          <ui-link class="film" link={core.siteAddressOf("film page", film)}>{film.title}</ui-link>
+        </ui-cell>
+        <ui-cell data-column="Directed by">{film.director}</ui-cell>
+        <ui-cell data-column="Released">{core.dateShown(film.releaseDate)}</ui-cell>
+      </>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the galaxy for its films"}</ui-loader>, items: () => <ui-table celled={true} selectable={true}>
+        <ui-row />
+      </ui-table> })
+    ]
+  }
 }
 
 /**
@@ -70,12 +309,55 @@ export const filmsPage = new FilmsPage()
 export class FilmPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] read the film's opening crawl\n- [ ] As a fan, I want to see who's in a film, so that I can find their other films\n  - done when:  its people are listed, each a link to their page\n- [ ] see the planets, starships and vehicles it shows"
+  static jobs = "- [x] read the film's opening crawl\n- [x] As a fan, I want to see who's in a film, so that I can find their other films\n  - done when:  its people are listed, each a link to their page\n- [x] see the planets, starships and vehicles it shows\n- [x] As a fan, I want to say what I thought of a film, so that I remember it\n  - done when:  \"Add a review\" asks for stars and words, and the film's page lists the reviews"
 
   /** The film the address names:  /films/:film */
   // - its "film" is a film
   @prop({ type: "Film" })
   accessor film!: Film
+
+  /** What's been said of it, on this device */
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 2458, end: 2615 }, readsFrom: ["galaxy_reviews"] }) }
+  get reviews() { return core.waitedValue(this, "reviews", async () => {
+    const title = this.film?.title
+    return await core.savedThings(Review, { filter: { filmTitle: title } })
+  }, () => [this.film]) }
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: this.film?.title })),
+      <ui-text color="grey">
+        {"Episode "}
+        {this.film?.episodeId}
+        {" · directed by "}
+        {this.film?.director}
+        {" · released "}
+        {core.dateShown(this.film?.releaseDate!)}
+      </ui-text>,
+      <ui-segment>
+        <ui-text paragraph={true}>{this.film?.openingCrawl}</ui-text>
+      </ui-segment>,
+      <ui-header size="small">Who's in it</ui-header>,
+      core.drawRead(() => this.film?.characters, (person: Character) => <ui-button class="person" appearance="basic" size="small" onClick={core.pressed(this, () => core.showSitePart("person sidebar", person))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        {person.name}
+      </ui-button>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> }),
+      <ui-header size="small">Where it happens</ui-header>,
+      core.drawRead(() => this.film?.planets, (planet: Planet) => <ui-link link={core.siteAddressOf("planet page", planet)}>{planet.name}</ui-link>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> }),
+      <ui-header size="small">What they fly</ui-header>,
+      core.drawRead(() => this.film?.starships, (starship: Starship) => <ui-link link={core.siteAddressOf("starship page", starship)}>{starship.name}</ui-link>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> }),
+      <ui-header size="small">What they drive</ui-header>,
+      core.drawRead(() => this.film?.vehicles, (vehicle: Vehicle) => <ui-link link={core.siteAddressOf("vehicle page", vehicle)}>{vehicle.name}</ui-link>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> }),
+      <ui-stack direction="horizontal" align="center" justify="between">
+        <ui-header size="small">Reviews</ui-header>
+        <ui-button class="add-review" color="primary" icon="pencil" onClick={core.pressed(this, () => core.showSitePart("review dialog", this.film!))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Add a review
+        </ui-button>
+      </ui-stack>,
+      core.drawRead(() => this.reviews, (review: Review) => <ui-segment class="review">
+        <ui-text>{review.stars} of 5 · {review.words}</ui-text>
+      </ui-segment>, { none: () => <ui-text>{"No reviews yet:  be the first."}</ui-text> })
+    ]
+  }
 }
 
 /**
@@ -92,10 +374,33 @@ export class FilmPageElement extends SpellElement<FilmPage> {
 core.useElement(FilmPage, FilmPageElement)
 export const filmPage = new FilmPage()
 
+core.heading("The people")
+//# The people
+
 export class PeoplePage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] find a person by name as I type\n- [ ] see each person's home planet and species at a glance\n- [ ] open a person in the side panel without leaving the list"
+  static jobs = "- [ ] find a person by name as I type\n- [x] see each person's home planet and species at a glance\n- [x] open a person in the side panel without leaving the list"
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "People" })),
+      core.drawRead(() => core.everyThing(Character), (person: Character) => <>
+        <ui-cell data-column="Name">
+          <ui-link link={core.siteAddressOf("person page", person)}>{person.name}</ui-link>
+        </ui-cell>
+        <ui-cell data-column="Born">{person.birthYear}</ui-cell>
+        <ui-cell data-column="Home">{person.homeworld.name}</ui-cell>
+        <ui-cell data-column="">
+          <ui-button appearance="basic" size="small" onClick={core.pressed(this, () => core.showSitePart("person sidebar", person))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            Glance
+          </ui-button>
+        </ui-cell>
+      </>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the galaxy for its people"}</ui-loader>, items: () => <ui-table celled={true} selectable={true}>
+        <ui-row />
+      </ui-table> })
+    ]
+  }
 }
 
 /**
@@ -113,12 +418,21 @@ export const peoplePage = new PeoplePage()
 export class PersonPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see a person's height, birth year and home planet\n- [ ] As a fan, I want to see every film a person is in, so that I can follow their story\n  - done when:  their films are listed in release order, each a link"
+  static jobs = "- [x] see a person's height, birth year and home planet\n- [x] As a fan, I want to see every film a person is in, so that I can follow their story\n  - done when:  their films are listed in release order, each a link"
 
   /** The person the address names:  /people/:person */
   // - its "person" is a character
   @prop({ type: "Character" })
   accessor person!: Character
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: this.person?.name })),
+      core.drawThing(new PersonFact({ person: this.person })),
+      <ui-header size="small">Films</ui-header>,
+      core.drawRead(() => this.person?.films, (film: Film) => <ui-link link={core.siteAddressOf("film page", film)}>{film.title}</ui-link>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> })
+    ]
+  }
 }
 
 /**
@@ -135,10 +449,29 @@ export class PersonPageElement extends SpellElement<PersonPage> {
 core.useElement(PersonPage, PersonPageElement)
 export const personPage = new PersonPage()
 
+core.heading("The planets")
+//# The planets
+
 export class PlanetsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see every planet, with its climate and terrain\n- [ ] sort the planets by how many people live there"
+  static jobs = "- [x] see every planet, with its climate and terrain\n- [ ] sort the planets by how many people live there"
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "Planets" })),
+      core.drawRead(() => core.everyThing(Planet), (planet: Planet) => <>
+        <ui-cell data-column="Name">
+          <ui-link link={core.siteAddressOf("planet page", planet)}>{planet.name}</ui-link>
+        </ui-cell>
+        <ui-cell data-column="Climate">{planet.climate}</ui-cell>
+        <ui-cell data-column="Terrain">{planet.terrain}</ui-cell>
+        <ui-cell data-column="Population">{planet.population}</ui-cell>
+      </>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the galaxy for its planets"}</ui-loader>, items: () => <ui-table celled={true} selectable={true}>
+        <ui-row />
+      </ui-table> })
+    ]
+  }
 }
 
 /**
@@ -156,12 +489,32 @@ export const planetsPage = new PlanetsPage()
 export class PlanetPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see who comes from a planet\n- [ ] see the films a planet appears in"
+  static jobs = "- [x] see who comes from a planet\n- [x] see the films a planet appears in"
 
   /** The planet the address names:  /planets/:planet */
   // - its "planet" is a planet
   @prop({ type: "Planet" })
   accessor planet!: Planet
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: this.planet?.name })),
+      <ui-text color="grey">
+        {this.planet?.climate}
+        {" · "}
+        {this.planet?.terrain}
+        {" · "}
+        {this.planet?.population}
+        {" people"}
+      </ui-text>,
+      <ui-header size="small">Who's from here</ui-header>,
+      core.drawRead(() => this.planet?.residents, (person: Character) => <ui-button appearance="basic" size="small" onClick={core.pressed(this, () => core.showSitePart("person sidebar", person))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        {person.name}
+      </ui-button>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> }),
+      <ui-header size="small">Seen in</ui-header>,
+      core.drawRead(() => this.planet?.films, (film: Film) => <ui-link link={core.siteAddressOf("film page", film)}>{film.title}</ui-link>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> })
+    ]
+  }
 }
 
 /**
@@ -178,11 +531,29 @@ export class PlanetPageElement extends SpellElement<PlanetPage> {
 core.useElement(PlanetPage, PlanetPageElement)
 export const planetPage = new PlanetPage()
 
-/** "species" is one and many:  so the list's page is "species list page" */
+core.heading("The species")
+//# The species
+
 export class SpeciesListPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see every species, with its classification and language\n- [ ] filter the species by how long they live"
+  static jobs = "- [x] see every species, with its classification and language\n- [ ] filter the species by how long they live"
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "Species" })),
+      core.drawRead(() => core.everyThing(Species), (one: Species) => <>
+        <ui-cell data-column="Name">
+          <ui-link link={core.siteAddressOf("species page", one)}>{one.name}</ui-link>
+        </ui-cell>
+        <ui-cell data-column="Classification">{one.classification}</ui-cell>
+        <ui-cell data-column="Language">{one.language}</ui-cell>
+        <ui-cell data-column="Lives">{one.averageLifespan}</ui-cell>
+      </>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the galaxy for its species"}</ui-loader>, items: () => <ui-table celled={true} selectable={true}>
+        <ui-row />
+      </ui-table> })
+    ]
+  }
 }
 
 /**
@@ -200,12 +571,23 @@ export const speciesListPage = new SpeciesListPage()
 export class SpeciesPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see the people of a species\n- [ ] see a species' home world"
+  static jobs = "- [x] see the people of a species\n- [ ] see a species' home world"
 
   /** The species the address names:  /species/:species */
   // - its "species" is a species
   @prop({ type: "Species" })
   accessor species!: Species
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: this.species?.name })),
+      <ui-text color="grey">{this.species?.classification} · speaks {this.species?.language}</ui-text>,
+      <ui-header size="small">Its people</ui-header>,
+      core.drawRead(() => this.species?.people, (person: Character) => <ui-button appearance="basic" size="small" onClick={core.pressed(this, () => core.showSitePart("person sidebar", person))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        {person.name}
+      </ui-button>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> })
+    ]
+  }
 }
 
 /**
@@ -222,10 +604,28 @@ export class SpeciesPageElement extends SpellElement<SpeciesPage> {
 core.useElement(SpeciesPage, SpeciesPageElement)
 export const speciesPage = new SpeciesPage()
 
+core.heading("The vehicles and starships")
+//# The vehicles and starships
+
 export class VehiclesPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see every vehicle, with its class and crew\n- [ ] sort the vehicles by speed"
+  static jobs = "- [x] see every vehicle, with its class and crew\n- [ ] sort the vehicles by speed"
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "Vehicles" })),
+      core.drawRead(() => core.everyThing(Vehicle), (vehicle: Vehicle) => <>
+        <ui-cell data-column="Name">
+          <ui-link link={core.siteAddressOf("vehicle page", vehicle)}>{vehicle.name}</ui-link>
+        </ui-cell>
+        <ui-cell data-column="Class">{vehicle.vehicleClass}</ui-cell>
+        <ui-cell data-column="Crew">{vehicle.crew}</ui-cell>
+      </>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the galaxy for its vehicles"}</ui-loader>, items: () => <ui-table celled={true} selectable={true}>
+        <ui-row />
+      </ui-table> })
+    ]
+  }
 }
 
 /**
@@ -243,12 +643,29 @@ export const vehiclesPage = new VehiclesPage()
 export class VehiclePage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see who has piloted a vehicle\n- [ ] see the films it appears in"
+  static jobs = "- [x] see who has piloted a vehicle\n- [x] see the films it appears in"
 
   /** The vehicle the address names:  /vehicles/:vehicle */
   // - its "vehicle" is a vehicle
   @prop({ type: "Vehicle" })
   accessor vehicle!: Vehicle
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: this.vehicle?.name })),
+      <ui-text color="grey">{this.vehicle?.model} · {this.vehicle?.manufacturer}</ui-text>,
+      <ui-header size="small">Piloted by</ui-header>,
+      core.drawRead(() => this.vehicle?.pilots, (person: Character) => <ui-button appearance="basic" size="small" onClick={core.pressed(this, () => core.showSitePart("person sidebar", person))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        {person.name}
+      </ui-button>, {
+        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>,
+        none: () => <ui-text>{"Nobody we know of."}</ui-text>,
+        items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" />
+      }),
+      <ui-header size="small">Seen in</ui-header>,
+      core.drawRead(() => this.vehicle?.films, (film: Film) => <ui-link link={core.siteAddressOf("film page", film)}>{film.title}</ui-link>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>, items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" /> })
+    ]
+  }
 }
 
 /**
@@ -268,7 +685,22 @@ export const vehiclePage = new VehiclePage()
 export class StarshipsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see every starship, with its class and hyperdrive rating\n- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one\n  - done when:  picking two starships shows their numbers in two columns"
+  static jobs = "- [x] see every starship, with its class and hyperdrive rating\n- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one\n  - done when:  picking two starships shows their numbers in two columns"
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: "Starships" })),
+      core.drawRead(() => core.everyThing(Starship), (starship: Starship) => <>
+        <ui-cell data-column="Name">
+          <ui-link link={core.siteAddressOf("starship page", starship)}>{starship.name}</ui-link>
+        </ui-cell>
+        <ui-cell data-column="Class">{starship.starshipClass}</ui-cell>
+        <ui-cell data-column="Hyperdrive">{starship.hyperdriveRating}</ui-cell>
+      </>, { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the galaxy for its starships"}</ui-loader>, items: () => <ui-table celled={true} selectable={true}>
+        <ui-row />
+      </ui-table> })
+    ]
+  }
 }
 
 /**
@@ -286,12 +718,34 @@ export const starshipsPage = new StarshipsPage()
 export class StarshipPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static jobs = "- [ ] see a starship's pilots\n- [ ] see its length, crew and cost"
+  static jobs = "- [x] see a starship's pilots\n- [x] see its length, crew and cost"
 
   /** The starship the address names:  /starships/:starship */
   // - its "starship" is a starship
   @prop({ type: "Starship" })
   accessor starship!: Starship
+
+  @drawn draw() {
+    return [
+      core.drawThing(new PageTop({ title: this.starship?.name })),
+      <ui-text color="grey">
+        {this.starship?.length}
+        {" m long · crew "}
+        {this.starship?.crew}
+        {" · "}
+        {this.starship?.costInCredits}
+        {" credits"}
+      </ui-text>,
+      <ui-header size="small">Piloted by</ui-header>,
+      core.drawRead(() => this.starship?.pilots, (person: Character) => <ui-button appearance="basic" size="small" onClick={core.pressed(this, () => core.showSitePart("person sidebar", person))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        {person.name}
+      </ui-button>, {
+        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Following the links"}</ui-loader>,
+        none: () => <ui-text>{"Nobody we know of."}</ui-text>,
+        items: () => <ui-stack direction="horizontal" wrap={true} spacing="xs" />
+      })
+    ]
+  }
 }
 
 /**
@@ -307,6 +761,12 @@ export class StarshipPageElement extends SpellElement<StarshipPage> {
 }
 core.useElement(StarshipPage, StarshipPageElement)
 export const starshipPage = new StarshipPage()
+
+core.heading("The dialogs:  the settings, and a review of a film")
+//# The dialogs:  the settings, and a review of a film
+
+core.heading("The site:  where each page is, its dialogs and sidebars, and the theme it wears")
+//# The site:  where each page is, its dialogs and sidebars, and the theme it wears
 
 export class GalaxyGuide extends Site {
   static elementTag = core.defineElement(this, "test-project")
@@ -383,10 +843,15 @@ export class GalaxyGuide extends Site {
       params: ["starship"]
     }]
   }]
-  static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }]
+  static dialogs = [{ name: "settings dialog", view: "SettingsDialog" }, { name: "review dialog", view: "ReviewDialog" }]
   static sidebars = [{ name: "person sidebar", view: "PersonSidebar" }]
   static notFoundPage = { name: "not found page" }
   static errorPage = { name: "error page" }
+
+  /** The theme its pages wear:  a hand-drawn sketch, while it's a mockup */
+  get theme() {
+    return "mockup"
+  }
 }
 
 /**
@@ -408,10 +873,16 @@ if (!core.isCarryingOver) galaxyGuide.start()
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      /** `SettingsDialogElement` */
-      "test-project-settings-dialog": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `PageTopElement` */
+      "test-project-page-top": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `PersonFactElement` */
+      "test-project-person-fact": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `PersonSidebarElement` */
       "test-project-person-sidebar": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `SettingsDialogElement` */
+      "test-project-settings-dialog": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `ReviewDialogElement` */
+      "test-project-review-dialog": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `FilmsPageElement` */
       "test-project-films-page": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `FilmPageElement` */

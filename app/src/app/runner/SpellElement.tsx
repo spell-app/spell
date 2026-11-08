@@ -293,7 +293,10 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.loadSpellUIFamilies()
     this.numberItems()
     this.onChildrenDrawn()
-    return super.onMount()
+    const mounted = super.onMount()
+    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):  that sheet reaches in
+    UI.styles.adoptPageSheetsInto(this.domElement.renderRoot)
+    return mounted
   }
 
   /** The thing we draw is drawn HERE now:  if it was moving, it glides here (`Glides`). */

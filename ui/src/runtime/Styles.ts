@@ -10,6 +10,7 @@ import { AppStylesheet } from "./AppStylesheet"
  * - Order inside every shadow root (`adoptInto()`):
  *   1. foundation sheets, in `setFoundation()` order (layers, tokens, reset ...)
  *   2. the component's own sheets, as passed
+ *   2b. the PAGE sheets, only in a root that draws `ui-*` elements in its own light content (`adoptPageSheetsInto()`)
  *   3. any sheets someone else put on the root (kept, not clobbered)
  *   4. utilities (`setUtilities()`, default `["utilities"]`)
  *   5. `shadow: true` sheets (themes), in registration order
@@ -40,6 +41,8 @@ export class Styles {
   private readonly roots = new Set<WeakRef<ShadowRoot>>()
   /** component sheet names per root */
   private readonly rootNames = new WeakMap<ShadowRoot, string[]>()
+  /** roots that also take the page sheets:  see `adoptPageSheetsInto()` */
+  private readonly pageSheetRoots = new WeakSet<ShadowRoot>()
   /** `load` listener armed, so page sheets get re-evaluated once late `<link>`s are in */
   private isWatchingLoad = false
 
@@ -95,6 +98,8 @@ export class Styles {
     if (isNewLinked) this.linkedNames.add(name)
     // a page sheet that just became `linked` may have to come OFF the page (epic `wwod-spell-ui`, I2)
     if (isNewPage || isNewLinked || (isSwapped && this.pageNames.has(name))) this.refreshPage()
+    // a root that takes the page sheets takes a new one too
+    if (isNewPage && !isAdded && !isSwapped) this.refreshRoots()
     const isNewShadow = shadow && !this.shadowNames.has(name)
     if (isNewShadow) this.shadowNames.add(name)
     if (isAdded || isSwapped || isNewShadow) this.refreshRoots()
@@ -169,6 +174,19 @@ export class Styles {
   }
 
   /**
+   * `root` takes the PAGE sheets too (`register(..., { page: true })`), now and as more register:  for a shadow root
+   * that draws `ui-*` elements whose light content a page sheet styles (epic `mockup` P8).
+   * - e.g. a drawn view's root holding `<ui-table>` in rows mode:  its `<ui-row>`s and `<ui-cell>`s are styled by the
+   *   table's page sheet, which the document's adopted sheets don't reach inside a shadow root.
+   * - Only for a root `adoptInto()` already knows:  call it after the component is set up.
+   */
+  adoptPageSheetsInto(root: ShadowRoot) {
+    if (this.pageSheetRoots.has(root)) return
+    this.pageSheetRoots.add(root)
+    if (this.rootNames.has(root)) this.push(root)
+  }
+
+  /**
    * Resolves once the app stylesheet reflects `#ui-app-stylesheet` as of its latest change.
    * - SIDE EFFECT:  starts watching it, if nothing has yet.
    */
@@ -218,6 +236,7 @@ export class Styles {
     const sheets = [
       ...this.lookup(this.foundation),
       ...this.lookup(names),
+      ...(this.pageSheetRoots.has(root) ? this.lookup(this.pageNames) : []),
       ...foreign,
       ...this.lookup(this.utilities),
       ...this.lookup(this.shadowNames),

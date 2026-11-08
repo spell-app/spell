@@ -7769,7 +7769,7 @@
           "ruleNames": ["show_site_part"],
           "internal": false,
           "file": "src/spell/rules/sites/ShowSitePart.ts",
-          "line": 24,
+          "line": 27,
           "purpose": "Go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).",
           "syntaxes": [
             {
@@ -7783,6 +7783,12 @@
             },
             {
               "syntax": "mostrar (la|el) {part:quoted_member} ((para|con) {thing:expression})?"
+            },
+            {
+              "syntax": "(close:cerrar) (la|el) {part:site_part_words}"
+            },
+            {
+              "syntax": "(close:cerrar) (la|el) {part:quoted_member}"
             }
           ],
           "aliases": ["statement", "expression"]
@@ -7792,7 +7798,7 @@
           "ruleNames": ["site_address_of"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteAddressOf.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "The address of one of the site's pages, for a link (epic `mockup` P2).",
           "syntaxes": [
             {

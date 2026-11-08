@@ -137,6 +137,31 @@ describe("going to a site's pages", () => {
     expect(code).toContain('core.siteAddressOf("film page", this.film)')
   })
 
+  test("`close the ...` closes a dialog or a sidebar (P8)", () => {
+    const { code, errors } = compiled(
+      [...CODE, 'a "film button" is a view where:', "\t- to finish:", "\t\tclose the settings dialog"],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.closeSitePart("settings dialog")')
+  })
+
+  test("`the address of the ...` names a page declared further down the file (P8)", () => {
+    const { code, errors } = compiled(
+      [
+        'a "film link" is a view where:',
+        '\t- its "link" is the address of the about page',
+        ...CODE,
+        'an "about page" is a page',
+        "galaxy extras is a site:",
+        '\t- it has an about page at "/about"'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.siteAddressOf("about page")')
+  })
+
   test("`go to the ...` naming no page, dialog or sidebar isn't ours", () => {
     const { errors } = compiled([...CODE, "to wander:", "\tgo to the kitchen"], "/Galaxy.spell")
     expect(errors).not.toEqual([])

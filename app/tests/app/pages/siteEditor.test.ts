@@ -73,8 +73,8 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
 
   test("shows every part of the site, as a tree and as cards", async () => {
     // six collections, a list and a page each, a dialog, a sidebar, the not found and error pages
-    expect(await page.locator(".SiteEditorPage .TileCard").count()).toBe(16)
-    expect(await page.locator("ui-tree-item").count()).toBe(16)
+    expect(await page.locator(".SiteEditorPage .TileCard").count()).toBe(17)
+    expect(await page.locator("ui-tree-item").count()).toBe(17)
     // the app isn't run here:  nothing of the site is drawn over the page
     expect(await page.locator(".spell-site").count()).toBe(0)
   })
@@ -96,7 +96,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await page.locator(".SiteEditorPage h1").click()
     await page.keyboard.press("Meta+z")
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).not.toContain("new page")
+    expect(await text()).not.toContain('"new page"')
   })
 
   test("a row dragged before another:  its part moves there", async () => {
@@ -118,7 +118,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await ask.waitFor({ timeout: 10_000 })
     await page.getByRole("button", { name: "Delete them all" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).not.toMatch(/planets? page/)
+    expect(await text()).not.toMatch(/(<page|<spell-page) "planets? page"/)
     await page.locator(".SiteEditorPage h1").click()
     await page.keyboard.press("Meta+z")
     await page.waitForTimeout(SETTLE_MS)
@@ -133,11 +133,11 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await jobs.locator("li").count()).toBe(3)
     await jobs.locator("ui-button", { hasText: "Add a job" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [ ] open a film's page from its row\n\t\t- [ ] New job\n\t</>")
+    expect(await text()).toContain("\t\t- [x] open a film's page from its row\n\t\t- [ ] New job\n\t</>")
     await jobs.locator("li").last().locator('input[type="checkbox"]').check()
     await page.waitForTimeout(SETTLE_MS)
     expect(await text()).toContain("\t\t- [x] New job\n")
-    expect(await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · 1 of 4 jobs" }).count()).toBe(1)
+    expect(await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · 3 of 4 jobs" }).count()).toBe(1)
   })
 
   test("a double click opens the page in Edit, and Back to the site comes back", async () => {
