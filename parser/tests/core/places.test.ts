@@ -967,6 +967,18 @@ describe("PlaceDraft", () => {
     expect(things.draftOf(recipe)).not.toBe(draft)
   })
 
+  test("what reads a thing's draft hears when it ends, and gets a new one:  a draft kept in a property (T135)", async () => {
+    const { things, recipe } = await writing()
+    const copies: unknown[] = []
+    const stop = observe(() => void copies.push(things.draftOf(recipe).thing))
+    const first = copies[0] as Recipe
+    first.title = "Half typed"
+    things.draftOf(recipe).cancel()
+    expect(copies).toHaveLength(2)
+    expect((copies[1] as Recipe).title).toBe("Soup")
+    stop()
+  })
+
   test("saved, its changes go out together, as one group", async () => {
     const { things, recipe, place, allSent, onPlace } = await writing()
     const draft = things.draftOf(recipe)

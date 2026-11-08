@@ -385,7 +385,7 @@ As `plan-doc.md`, "Ids":
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
     | `open`      | yellow | work a review queued (`queued`), not started                                       |
     | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
-    | `attention` | red    | an open question;  an open judgement call or issue not reviewed, unless `calm`     |
+    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm` |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a revisit or request for now answered |
 

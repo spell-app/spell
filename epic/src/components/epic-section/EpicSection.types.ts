@@ -261,6 +261,7 @@ export const COUNT_ATTRIBUTES = [
   "reviewed",
   "queued",
   "working",
+  "urgent",
   "plan",
   "to-see",
   "changes",

@@ -160,6 +160,13 @@ export const epicItemVocabulary = {
         "while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
     },
     {
+      name: "urgent",
+      kind: "boolean",
+      description:
+        "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until " +
+        "reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow."
+    },
+    {
       name: "failed",
       kind: "string",
       format: "item id",

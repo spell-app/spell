@@ -84,6 +84,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
  * - `calm`:  an open judgement call or issue not reviewed yet is yellow (`open`), not red (`attention`).
+ * - `urgent`:  a todo that asks Owen to act (Make Todo's follow-up, I230):  red until reviewed, as an issue is.
  * - Its COMMITS (`<epic-commit>` children, or `commits` while its part isn't in):
  *   - hidden until the page's git toggle shows every commit
  *   - its git icon shows just its own, opening it first, and hides them again
@@ -238,8 +239,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /** Its attributes its drawn state reads (`DrawnState.of()`), tracked. */
   private stateFields(): StateFields {
-    const { id, state, status, changed, reviewed, queued, working } = this
-    return { id, state, status, changed, reviewed, queued, working }
+    const { id, state, status, changed, reviewed, queued, working, urgent } = this
+    return { id, state, status, changed, reviewed, queued, working, urgent }
   }
 
   /**

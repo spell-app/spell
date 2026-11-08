@@ -513,8 +513,11 @@ class PlaceMethods:
         """A copy of `thing` to change, sending nothing until `save_draft()`:  `a draft of the note`.
 
         - Asked again before it's saved:  the same copy.
+        - `None` is `None`:  a view's `its draft`, before it has its thing.
         - throws `TypeError` for a thing kept in no place
         """
+        if thing is None:
+            return thing
         places = self._places
         if not isinstance(thing, SpellObject) or thing not in places.homes:
             raise TypeError("core.draft_of():  that isn't kept in a place, so it has no draft")

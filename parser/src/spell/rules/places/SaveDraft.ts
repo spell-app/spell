@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { DRAFT_DATATYPE } from "./DraftOf"
 
@@ -17,7 +18,11 @@ export class SaveDraft extends SpellStatement<"draft"> {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { draft } = match.groups
-    if (draft.datatype === DRAFT_DATATYPE) return match
+    if (draft.datatype === DRAFT_DATATYPE) {
+      // over a view's own `to save it:`, which a form's Save button would be called (epic `data` T135)
+      match.priority = Priority.preferred
+      return match
+    }
     const text = draft.inputText.trim()
     return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("no-save-step", { text }))
   }

@@ -1383,13 +1383,15 @@ export const savedMethods = defineCoreModule({
   /**
    * A copy of `thing` to change, sending nothing until `core.saveDraft()`:  what `a draft of the recipe` compiles to.
    * - What's asked again before it's saved is the same copy.
+   * - Nothing is nothing:  a view's `its draft`, before it has its thing (epic `data` T135).
    * - throws `TypeError` for a thing kept in no place, or read from none yet
    */
   draftOf<T>(thing: T): T {
+    if (thing == null) return thing
     const things = programPlaces().thingMakerNow
     if (!things)
       throw new TypeError("core.draftOf():  nothing's been read from a place yet, so this thing isn't kept in one")
-    return things.draftOf(thing as Thing).thing as unknown as T
+    return things.draftOf(thing as unknown as Thing).thing as unknown as T
   },
 
   /** Send what's changed in `copy`, a draft:  one group, shown at once.  What `save the draft` compiles to.  - throws for anything else */
