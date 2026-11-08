@@ -8,27 +8,27 @@ core.heading("Feed:  what's new across your org")
 /** A post, as its space has it:  who wrote it, what about, when, and where it's from. */
 export class Post extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 506, end: 524 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 627, end: 645 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "topic" is text
-  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 528, end: 547 } }) }
+  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 649, end: 668 } }) }
   get topic() { return this.getProp("topic") }
   set topic(value) { this.setProp("topic", value) }
 
   // - its "posted" is text
-  static { this.declareProp("posted", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 551, end: 571 } }) }
+  static { this.declareProp("posted", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 672, end: 692 } }) }
   get posted() { return this.getProp("posted") }
   set posted(value) { this.setProp("posted", value) }
 
   // - its "by" is text
-  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 575, end: 591 } }) }
+  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 696, end: 712 } }) }
   get by() { return this.getProp("by") }
   set by(value) { this.setProp("by", value) }
 
   // - its "space" is text
-  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 595, end: 614 } }) }
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 716, end: 735 } }) }
   get space() { return this.getProp("space") }
   set space(value) { this.setProp("space", value) }
 
@@ -70,13 +70,15 @@ export class Post extends Thing {
  * Everyone in an org has a feed there:  "@rs/__feed" is yours in the Rock Society, whoever you are.
  * It's every post in every space of RS you may read, each read as you;  a quiet event's are left out.
  * Your org's feed page names its own org on the next line.
+ * Kept on this device:  opening it again, and each check, asks only for what's new since.
  */
 export class MyFeed extends Place {}
 export const myFeed = core.place(new MyFeed(), {
   name: "my_feed",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__feed",
-  checkedEvery: 30
+  checkedEvery: 30,
+  keptOnDevice: true
 })
 
 // -----------

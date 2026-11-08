@@ -9,23 +9,23 @@ core.heading("Feed:  what's new across your org")
 /** A post, as its space has it:  who wrote it, what about, when, and where it's from. */
 export class Post extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 506, end: 524 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 627, end: 645 } })
   accessor text!: string
 
   // - its "topic" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 528, end: 547 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 649, end: 668 } })
   accessor topic!: string
 
   // - its "posted" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 551, end: 571 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 672, end: 692 } })
   accessor posted!: string
 
   // - its "by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 575, end: 591 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 696, end: 712 } })
   accessor by!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 595, end: 614 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 716, end: 735 } })
   accessor space!: string
 
   /** How much of it you want:  2 more of it, 1 as it comes, 0 none */
@@ -68,13 +68,15 @@ export class Post extends Thing {
  * Everyone in an org has a feed there:  "@rs/__feed" is yours in the Rock Society, whoever you are.
  * It's every post in every space of RS you may read, each read as you;  a quiet event's are left out.
  * Your org's feed page names its own org on the next line.
+ * Kept on this device:  opening it again, and each check, asks only for what's new since.
  */
 export class MyFeed extends Place {}
 export const myFeed = core.place(new MyFeed(), {
   name: "my_feed",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__feed",
-  checkedEvery: 30
+  checkedEvery: 30,
+  keptOnDevice: true
 })
 
 // -----------

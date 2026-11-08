@@ -134,6 +134,9 @@ function isAbandoned(error: unknown): boolean {
   return (error as Error | undefined)?.name === "AbortError"
 }
 
+/** A project data folder's kind:  its lists are whoever's signed in's, so its copy on this device is too. */
+const DATA_FOLDER_KIND = "data folder"
+
 /** Each read's list, for what draws it to ask for its next page. */
 const MORE_PAGES = new WeakMap<object, SavedRead>()
 
@@ -354,7 +357,8 @@ class ProgramPlaces {
       scope: `${this.programName}:${name}`,
       ...(typeof keptOnDevice === "number" && { mostBytes: keptOnDevice }),
       freshFor: () => (checkedAt ? msUntil(checkedAt) : (checkedEvery ?? 0) * 1000),
-      ...(keyNamed !== undefined && { person: () => this.personNow.id })
+      // a key's, or a data folder's (whose lists are whoever's signed in's):  each person's apart
+      ...((keyNamed !== undefined || details.kind === DATA_FOLDER_KIND) && { person: () => this.personNow.id })
     })
     copy.onChanged(() => void this.refresh(undefined, name))
     this.copies.set(name, copy)

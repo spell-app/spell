@@ -301,6 +301,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         a space's own folder its members, a program's own data each row's owner.
       - A space's own folder is read direct (P5):  the place gets its read address, `spaceReadAddressFor()`'s.
         Its lists come straight from the files, with a credential for the whole space;  only its writes go through Spell.
+      - `- keep a copy on this device` keeps each list it read whole on this device, each person's apart, and reads
+        only what changed after (`RemotePlace`'s `deviceCopy`, epic `atmosphere` T51):  the built-in Feed's.
       - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3),
         its bar drawn by [signInBar.ts](signInBar.ts):
         - until someone signs in, its bar says it takes them to be this machine's person (`identifiesBy: "this machine"`)

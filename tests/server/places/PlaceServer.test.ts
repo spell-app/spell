@@ -7,6 +7,8 @@ import { SRV, type Handler } from "spell/server"
 import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer } from "spell/server/places"
 import { ask, serveHandler, type Served } from "spell/server/test/serve"
 import {
+  DeviceCopy,
+  type DeviceCopyStore,
   JsonChunks,
   MemoryPlace,
   PlaceError,
@@ -55,6 +57,21 @@ async function placeServer(places: Record<string, Place>, keys?: PlaceKeys) {
   )
   const name = Object.keys(places)[0]!
   return { port, remote: new RemotePlace({ url: `http://127.0.0.1:${port}/api/places/${name}`, token: TOKEN }) }
+}
+
+/** A store in memory, standing in for the browser's database a `DeviceCopy` keeps its copies in. */
+class MemoryCopies implements DeviceCopyStore {
+  private readonly values = new Map<string, unknown>()
+  async load(store: string, key: string): Promise<unknown> {
+    return structuredClone(this.values.get(`${store}\n${key}`))
+  }
+  async saveOrThrow(store: string, key: string, value: unknown): Promise<void> {
+    if (value === undefined) this.values.delete(`${store}\n${key}`)
+    else this.values.set(`${store}\n${key}`, structuredClone(value))
+  }
+  async removeUnder(store: string, prefix: string): Promise<void> {
+    for (const key of this.values.keys()) if (key.startsWith(`${store}\n${prefix}`)) this.values.delete(key)
+  }
 }
 
 /** A POST with the right token, as a page would send. */
@@ -214,6 +231,55 @@ describe("PlaceServer and RemotePlace", () => {
     const { version } = await remote.list("recipes", {}, {})
     writeFileSync(file, JSON.stringify({ title: "Heard" }))
     expect((await remote.changesSince("recipes", version!, {})).rows[0]!.title).toBe("Heard")
+  })
+
+  test("kept on this device, a list read again asks only what changed (epic `atmosphere` T51)", async () => {
+    const memory = new MemoryPlace({
+      collections: {
+        posts: [
+          { id: "a", text: "first" },
+          { id: "b", text: "second" }
+        ]
+      }
+    })
+    const { port } = await placeServer({ posts: memory })
+    const store = new MemoryCopies()
+    const page = () =>
+      new RemotePlace({
+        url: `http://127.0.0.1:${port}/api/places/posts`,
+        token: TOKEN,
+        deviceCopy: new DeviceCopy({ scope: "test:feed", store })
+      })
+    expect((await page().list("posts", {}, {})).rows.map((row) => row.id)).toEqual(["a", "b"])
+    await memory.apply(
+      [
+        { kind: "update", collection: "posts", id: "a", fields: { text: "first, again" } },
+        { kind: "delete", collection: "posts", id: "b" },
+        { kind: "insert", collection: "posts", id: "c", fields: { id: "c", text: "third" } }
+      ],
+      {}
+    )
+    const lists = vi.spyOn(memory, "list")
+    // the page opened again:  the same device, a new place
+    const again = await page().list("posts", {}, {})
+    expect(lists).not.toHaveBeenCalled()
+    expect(again.rows).toEqual([
+      { id: "a", text: "first, again" },
+      { id: "c", text: "third" }
+    ])
+  })
+
+  test("kept on this device, a place that can't say what changed is read whole", async () => {
+    const memory = new MemoryPlace({ collections: { posts: [{ id: "a" }] } })
+    memory.changesSince = undefined as never
+    const { port } = await placeServer({ posts: memory })
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/posts`,
+      token: TOKEN,
+      deviceCopy: new DeviceCopy({ scope: "test:feed", store: new MemoryCopies() })
+    })
+    await remote.list("posts", {}, {})
+    expect((await remote.list("posts", {}, {})).rows).toEqual([{ id: "a" }])
   })
 
   test("a place's operations go through `call()`", async () => {

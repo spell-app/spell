@@ -189,6 +189,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `readsAt` (epic `atmosphere` P5):  its lists are read straight from the files, and written through the server side.
       - The reading is a `ChunkedPlace` on `WebChunks`.
       - Refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.
+    - `deviceCopy` (`- keep a copy on this device`, epic `atmosphere` T51):  each list it read whole is kept on this
+      device with its version, and the next read (opening again, or a check) asks only what changed (`changesSince()`),
+      put on the copy.
+      - Only a list the place did nothing to (no filter, sort or page of its own);  one that can't say what changed is
+        read whole.
+      - Its own copy, by list:  its reads are POSTs, which `WebPlace`'s copy of GET answers never keeps.
     - `can.identifiesBy: "a sign-in"` (the cloud, epic `atmosphere` P8, `cloudCapabilities()`):
       - nobody signed in:  it asks nothing and reads no rows;
         a write fails as no answer would, so it stays pending in this browser

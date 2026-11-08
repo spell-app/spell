@@ -9,37 +9,37 @@
     {
       "type": "Post",
       "superType": "Thing",
-      "defined": "/OrgFeed.api.spell:459-614"
+      "defined": "/OrgFeed.api.spell:580-735"
     },
     {
       "property": "text",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:506-524"
+      "defined": "/OrgFeed.api.spell:627-645"
     },
     {
       "property": "topic",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:528-547"
+      "defined": "/OrgFeed.api.spell:649-668"
     },
     {
       "property": "posted",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:551-571"
+      "defined": "/OrgFeed.api.spell:672-692"
     },
     {
       "property": "by",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:575-591"
+      "defined": "/OrgFeed.api.spell:696-712"
     },
     {
       "property": "space",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:595-614"
+      "defined": "/OrgFeed.api.spell:716-735"
     },
     {
       "property": "weight",
@@ -83,7 +83,7 @@
     {
       "type": "MyFeed",
       "superType": "Place",
-      "defined": "/OrgFeed.api.spell:301-371"
+      "defined": "/OrgFeed.api.spell:392-492"
     },
     {
       "type": "FeedPage",
@@ -115,8 +115,8 @@
     42,
     47,
     52,
-    73,
-    100,
-    103
+    74,
+    102,
+    105
   ]
 }

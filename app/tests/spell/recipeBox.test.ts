@@ -2428,7 +2428,8 @@ the published sheet is a projection of the sign up sheet:
       const program = withPlace(
         shipped("OrgFeed/OrgFeed.api.spell"),
         `my feed is a data folder at "@spell/__feed":
-	- check it every 2 seconds`
+	- check it every 2 seconds
+	- keep a copy on this device`
       )
       const more = program.more!.map((each) => ({
         ...each,

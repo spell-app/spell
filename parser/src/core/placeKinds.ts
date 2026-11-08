@@ -215,7 +215,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       })
     }),
   "data folder": (
-    { details },
+    { details, deviceCopy },
     {
       RemotePlace,
       ChunkedPlace,
@@ -240,11 +240,13 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         const source = new RemotePlace({ url: of, can: spaceFolderCapabilities(of), signIn: SpellSignIn.for(of) })
         void source.call(SPACE_PROJECTION_OPERATIONS.set, { name: details.name, ...projection }, {}).catch(() => {})
       }
+      // kept on this device, when its line says:  each whole list, its next read asking only what changed (T51)
       const folder = new RemotePlace({
         url: at,
         can: spaceFolderCapabilities(at),
         signIn: SpellSignIn.for(at),
-        ...(readsAt !== undefined && { readsAt })
+        ...(readsAt !== undefined && { readsAt }),
+        ...(deviceCopy && { deviceCopy })
       })
       // a sign-up sheet's rules are its space's to keep, for a manager:  anyone else is refused, which changes nothing
       if (details.sheet) void folder.call(SPACE_SHEET_OPERATIONS.set, details.sheet, {}).catch(() => {})
