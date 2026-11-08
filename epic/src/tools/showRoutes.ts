@@ -29,7 +29,7 @@ import { after } from "spell/util/timing"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
-import { SHOWN_TAB_TITLE } from "spell/epic/vscode/src/docUrls.ts"
+import { SHOWN_TAB_TITLE } from "spell/epic/server/server.types.ts"
 import { Window } from "spell/epic/window.mjs"
 import { openUrlInChrome } from "./pages.js"
 
