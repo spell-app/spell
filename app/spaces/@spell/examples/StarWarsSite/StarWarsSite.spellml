@@ -26,7 +26,7 @@
 # The films
 
 <spell-page "films page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see every film, in the order they came out
 		- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order
 			- done when:  a switch flips the list between release and story order
@@ -44,7 +44,7 @@
 </>
 
 <spell-page "film page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] read the film's opening crawl
 		- [x] As a fan, I want to see who's in a film, so that I can find their other films
 			- done when:  its people are listed, each a link to their page
@@ -95,7 +95,7 @@
 # The people
 
 <spell-page "people page">
-	<spell-jobs>
+	<spell-stories>
 		- [ ] find a person by name as I type
 		- [x] see each person's home planet and species at a glance
 		- [x] open a person in the side panel without leaving the list
@@ -112,7 +112,7 @@
 </>
 
 <spell-page "person page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see a person's height, birth year and home planet
 		- [x] As a fan, I want to see every film a person is in, so that I can follow their story
 			- done when:  their films are listed in release order, each a link
@@ -153,7 +153,7 @@
 # The planets
 
 <spell-page "planets page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see every planet, with its climate and terrain
 		- [ ] sort the planets by how many people live there
 	</>
@@ -169,7 +169,7 @@
 </>
 
 <spell-page "planet page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see who comes from a planet
 		- [x] see the films a planet appears in
 	</>
@@ -192,7 +192,7 @@
 # The species
 
 <spell-page "species list page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see every species, with its classification and language
 		- [ ] filter the species by how long they live
 	</>
@@ -208,7 +208,7 @@
 </>
 
 <spell-page "species page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see the people of a species
 		- [ ] see a species' home world
 	</>
@@ -227,7 +227,7 @@
 # The vehicles and starships
 
 <spell-page "vehicles page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see every vehicle, with its class and crew
 		- [ ] sort the vehicles by speed
 	</>
@@ -242,7 +242,7 @@
 </>
 
 <spell-page "vehicle page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see who has piloted a vehicle
 		- [x] see the films it appears in
 	</>
@@ -262,7 +262,7 @@
 </>
 
 <spell-page "starships page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see every starship, with its class and hyperdrive rating
 		- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one
 			- done when:  picking two starships shows their numbers in two columns
@@ -278,7 +278,7 @@
 </>
 
 <spell-page "starship page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see a starship's pilots
 		- [x] see its length, crew and cost
 	</>
@@ -297,7 +297,7 @@
 # Every review, edited like a spreadsheet
 
 <spell-page "reviews page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] see every review written on this device, in one table
 		- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again
 			- done when:  a cell edits as a spreadsheet's does, and Enter keeps it

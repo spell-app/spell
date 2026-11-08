@@ -805,14 +805,14 @@ A page says what it must let people do before it's laid out, first in its own de
 
 ```html
 <spell-page "film page">
-	<spell-jobs>
+	<spell-stories>
 		- [x] read the film's opening crawl
 		- [x] As a fan, I want to see who's in a film, so that I can find their other films
 			- done when:  its people are listed, each a link to their page
 	</>
 ```
 
-- Nothing draws the jobs:  they're the page's description, kept for good;  code Spell writes `<jobs>`.
+- Nothing draws the stories:  they're the page's description, kept for good;  code Spell writes `<stories>`.
 - The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spellml).
 - **Not yet:**  Python runs no site, and a page has no state
   (old, new, mocked, built).

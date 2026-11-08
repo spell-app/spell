@@ -1784,7 +1784,7 @@ sidebars any of them opens.
 - Its theme (epic `mockup` P8):  a property of its own, `<property "theme">"mockup"</property>` (`- its "theme" is
   "mockup"`), no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
   alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
-- A page's jobs (epic `mockup` P6) are the page's own, `<jobs>` / `<spell-jobs>` in its outline:  "Markdown" below.
+- A page's stories (epic `mockup` P6) are the page's own, `<stories>` / `<spell-stories>` in its outline:  "Markdown" below.
 - Spellx:  `<spell-site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
   `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
   (`<sidebar>` is Spell UI's).
@@ -2352,12 +2352,12 @@ sidebars any of them opens.
   - in a type's outline:  [`markdown_description`](rules/classes/MarkdownDescription.ts), the type's description
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
-  - a page's JOBS, `<jobs>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static jobs`
+  - a page's STORIES, `<stories>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static stories`
     - what the page must let people do, a markdown list, `- [x]` for one done;  nothing draws them
-    - spellx writes it `<spell-jobs>` (Spanish `<encanto-tareas>`), a note whose twin is the `<jobs>` block
-      (`SpellxTwin.withJobsAsBlocks()`)
+    - spellx writes it `<spell-stories>` (Spanish `<encanto-historias>`), a note whose twin is the `<stories>` block
+      (`SpellxTwin.withStoriesAsBlocks()`)
     - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between
-      a `<jobs>` and a `<markdown>` keeps them apart
+      a `<stories>` and a `<markdown>` keeps them apart
   - in a `<spell-viewer>` layout:  the app's `LayoutSpell`
     - it splits holes as `markdown_block` does
   - no diagnostics inside
