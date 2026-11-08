@@ -2231,6 +2231,193 @@ the published sheet is a projection of the sign up sheet:
     )
   })
 
+  describe("one event, end to end:  the RS trial (epic `atmosphere` P34)", () => {
+    /** Spell's own org:  Bo manages the Events Team;  Cy proposes and organizes;  Ann and Ed sign up. */
+    const EMAILS = {
+      bo: "bo.harvest@example.com",
+      cy: "cy.harvest@example.com",
+      ann: "ann.harvest@example.com",
+      ed: "ed.harvest@example.com"
+    }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The event's project, once Bo says yes:  a project under the Events Team. */
+    const EVENT = "events_team@spell/harvest_picnic"
+    /** `program`, pointed at this event's spaces and Spell's own org, checked often. */
+    const atEvent = (program: Program): Program => ({
+      ...program,
+      source: program.source
+        .replaceAll("picnic@rs", EVENT)
+        .replaceAll("@rs/", "@spell/")
+        .replaceAll("check it every 30 seconds", "check it every 2 seconds"),
+      more: program.more?.map((each) => ({ ...each, contents: each.contents.replaceAll("picnic@rs", EVENT) }))
+    })
+    const events = () =>
+      withPlace(
+        shipped("OrgEvents/OrgEvents.api.spell"),
+        `org events is a data folder at "@spell/__admin/events":
+	- check it every 2 seconds`
+      )
+    const sheet = () =>
+      withPlace(
+        atEvent(shipped("SignUpSheet/SignUpSheet.api.spell")),
+        `sign up sheet is a data folder at "${EVENT}/__private/signups":
+	- open to sign-ups from "${EVENT}/sheet"
+	- only its attendees add rows
+	- at most 2 rows for each shift
+	- at most 40 rows for each event
+	- each person asks for at most their "invitations" tickets
+	- confirmed tickets join "${EVENT}/__attendees"
+	- check it every 2 seconds
+
+the published sheet is a projection of the sign up sheet:
+	- into "${EVENT}/sheet"
+	- showing each row's person and shift
+	- published volunteers live at "volunteers"
+	- check it every 2 seconds`
+      )
+    const letter = () => atEvent(shipped("PicnicLetter/PicnicLetter.api.spell"))
+    /** The event's row on the events page. */
+    const card = (page: Page) => page.locator("ui-segment.events .event", { hasText: "Harvest Picnic" })
+    const section = (page: Page, name: string) => page.locator(`ui-segment.${name}`).textContent()
+    const stageOf = async () =>
+      (await spaceFolders.events.events("spell")).find((each) => each.id === "harvest_picnic")?.stage
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      const org = await people.org("spell")
+      const known = new Set((org?.members.items ?? []).map((each) => people.addressOf(each.person!)))
+      const members = [
+        ...(org?.members.items ?? []).map((each) => ({
+          $type: "Membership",
+          person: { $ref: `Person#${people.addressOf(each.person!)}` },
+          role: each.role
+        })),
+        ...Object.values(address)
+          .filter((each) => !known.has(each))
+          .map((each) => ({ $type: "Membership", person: { $ref: `Person#${each}` }, role: "editor" }))
+      ]
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members })
+      )
+      const roles = spaceFolders.orgRoles
+      if (!(await people.roster("spell"))) await roles.setUp("spell", { board: address.bo! })
+      const board = (await roles.terms("spell")).find((each) => each.role === "board")!.person
+      if (!(await people.roster("spell"))!.teams.items.some((each) => each.folder === "events_team"))
+        await roles.addTeam("spell", { id: "events_team", name: "Events Team" }, { by: board })
+      await roles.give("spell", { role: "team-manager", person: address.bo, of: "events_team" }, { by: board })
+    })
+
+    test(
+      "propose, approve, plan, sign-ups, invitations, the letter, open, analysis, quiet:  one event, " +
+        "a picture of each step",
+      { timeout: 240_000 },
+      async () => {
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        const shot = (page: Page, step: string) =>
+          page.screenshot({ path: join(shots, `rs-trial-${step}.png`), fullPage: true })
+
+        // 1. Cy proposes the harvest picnic, organizing it herself
+        const cy = await deviceOn("trial-cy", events())
+        await signIn(cy.bar, EMAILS.cy)
+        await expect.poll(() => cy.page.locator("ui-segment.stages").textContent(), WAITING).toContain("Analysis")
+        const form = cy.page.locator("ui-segment.propose ui-input input")
+        await form.nth(0).fill("Harvest Picnic")
+        await form.nth(1).fill(address.cy!)
+        await cy.page.locator("ui-segment.propose ui-button.propose").click()
+        await expect.poll(() => card(cy.page).textContent(), WAITING).toContain("Proposed")
+        await shot(cy.page, "1-proposed")
+
+        // 2. Bo, the Events Team's Manager, says yes:  the event's project, Cy its Manager
+        const bo = await deviceOn("trial-bo", events())
+        await signIn(bo.bar, EMAILS.bo)
+        await expect.poll(() => card(bo.page).textContent(), WAITING).toContain("Proposed")
+        await card(bo.page).locator("ui-button.move").click()
+        await expect.poll(stageOf, WAITING).toBe("approved")
+        expect(await spaceFolders.orgRoles.managersOf("spell", "harvest_picnic")).toContain(address.cy)
+        await shot(bo.page, "2-approved")
+
+        // 3. Cy moves it to Planning
+        await cy.page.reload()
+        await expect.poll(() => card(cy.page).locator("ui-button.move").isDisabled(), WAITING).toBe(false)
+        await card(cy.page).locator("ui-button.move").click()
+        await expect.poll(stageOf, WAITING).toBe("planning")
+        await shot(cy.page, "3-planning")
+
+        // 4. Sign-ups:  Cy lists Ann and Ed as attendees;  each takes a shift
+        const cySheet = await deviceOn("trial-cy-sheet", sheet())
+        await signIn(cySheet.bar, EMAILS.cy)
+        await cySheet.page.reload()
+        await expect.poll(() => section(cySheet.page, "organizers"), WAITING).toContain("Who may sign up")
+        for (const who of ["ann", "ed"]) {
+          await cySheet.page.locator("ui-segment.organizers ui-input input").last().fill(address[who]!)
+          await cySheet.page.locator("ui-segment.organizers ui-button.add").click()
+          await expect.poll(() => section(cySheet.page, "organizers"), WAITING).toContain(address[who]!)
+        }
+        const ann = await deviceOn("trial-ann", sheet())
+        await signIn(ann.bar, EMAILS.ann)
+        await ann.page.reload()
+        await ann.page.locator("ui-segment.sign-up ui-button.setup").click()
+        const ed = await deviceOn("trial-ed", sheet())
+        await signIn(ed.bar, EMAILS.ed)
+        await ed.page.reload()
+        await ed.page.locator("ui-segment.sign-up ui-button.cleanup").click()
+        await expect
+          .poll(() => cySheet.page.locator("ui-segment.published .signed-up").count(), { timeout: 15_000 })
+          .toBe(2)
+        await shot(cySheet.page, "4-sign-ups")
+
+        // 5. Invitations:  Cy works them out;  Ann asks for a ticket for her brother
+        await cySheet.page.locator("ui-segment.organizers ui-button.work-out").click()
+        await expect.poll(() => section(cySheet.page, "organizers"), { timeout: 15_000 }).toContain("invitations")
+        await ann.page.reload()
+        await ann.page.locator("ui-segment.invitations ui-input input").fill("Sam")
+        await ann.page.locator("ui-segment.invitations ui-button.ask").click()
+        await expect.poll(() => section(ann.page, "invitations"), { timeout: 20_000 }).toContain("You have used 1 of")
+        await shot(ann.page, "5-invitations")
+
+        // 6. The letter:  Ann's own shifts and count;  Cy sends it, a pointer in Ann's inbox
+        const annsLetter = await deviceOn("trial-ann-letter", letter())
+        await signIn(annsLetter.bar, EMAILS.ann)
+        await annsLetter.page.reload()
+        await expect.poll(() => section(annsLetter.page, "your-shifts"), { timeout: 20_000 }).toContain("setup")
+        await shot(annsLetter.page, "6-letter")
+        await cySheet.page.locator("ui-segment.organizers ui-button.send-letter").click()
+        const annsInbox = await spaceFolders.placeFor(`${address.ann}/__inbox`, address.ann)
+        await expect
+          .poll(
+            async () => {
+              const { rows } = await annsInbox!.list("messages", {}, { identity: address.ann! })
+              return rows.some((row) => row.page === `${EVENT}/PicnicLetter`)
+            },
+            { timeout: 20_000 }
+          )
+          .toBe(true)
+
+        // 7. Open, Analysis, Quiet:  then its spaces are read only, and what's there stays
+        for (const stage of ["open", "analysis", "quiet"]) {
+          await cy.page.reload()
+          await expect.poll(() => card(cy.page).locator("ui-button.move").isDisabled(), WAITING).toBe(false)
+          await card(cy.page).locator("ui-button.move").click()
+          await expect.poll(stageOf, WAITING).toBe(stage)
+          await shot(cy.page, `${{ open: 7, analysis: 8, quiet: 9 }[stage]}-${stage}`)
+        }
+        expect(await spaceFolders.events.isQuietAt(`${EVENT}/sheet`)).toBe(true)
+        await ed.page.reload()
+        await ed.page.locator("ui-segment.sign-up ui-button.serving").click()
+        await ed.page.waitForTimeout(3_000)
+        expect(await cySheet.page.locator("ui-segment.published .signed-up").count()).toBe(2)
+
+        for (const one of [cy, bo, cySheet, ann, ed, annsLetter]) {
+          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          await one.close()
+        }
+      }
+    )
+  })
+
   describe("a feed, the built-in Feed (epic `atmosphere` P33)", () => {
     /** Spell's own org, in this spell.spaces:  Ana paints and argues, Cy organizes, Bo reads. */
     const EMAILS = { ana: "ana.feed@example.com", bo: "bo.feed@example.com", cy: "cy.feed@example.com" }
