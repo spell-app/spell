@@ -36525,6 +36525,11 @@
           "description": "Under `Matrix` in the list."
         },
         {
+          "key": "mockupDescription",
+          "text": "A hand-drawn sketch",
+          "description": "Under `Mockup` in the list."
+        },
+        {
           "key": "toDark",
           "text": "Switch to dark",
           "description": "The light / dark button's name, while the page is light."

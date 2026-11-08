@@ -5,7 +5,7 @@ import type { ThemeMenuText, ThemeMenuTextKey } from "./UIThemeMenu.types"
 /****************
  * ### `ThemeMenu`
  * What `<ui-theme-menu>` lists, and its text:  plain data, no Solid, which tests drive directly.
- * - Entries:  Spell's own themes (`UI.themes.own`:  Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix), in that order,
+ * - Entries:  Spell's own themes (`UI.themes.own`:  Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix, Mockup), in that order,
  *   each with its one-line description.
  *   - Nothing else since epic `debut` P17:  no Plain, no Classic, no Fomantic theme
  *     (those are archived, `src/styles/themes/archive/`).
@@ -94,5 +94,6 @@ const DESCRIPTIONS: Readonly<Record<string, ThemeMenuTextKey>> = {
   midnight: "midnightDescription",
   crisp: "crispDescription",
   pop: "popDescription",
-  matrix: "matrixDescription"
+  matrix: "matrixDescription",
+  mockup: "mockupDescription"
 }
