@@ -10,7 +10,9 @@ import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { ChooserToolbar } from "./ProjectChooser"
 import { PageJobs, type PageJob } from "./PageJobs"
+import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart } from "./SiteEdits"
+import type { ProjectIndex } from "./SitePlaces"
 import { SiteWrites } from "./SiteWrites"
 import { TileCard } from "./TileCard"
 
@@ -45,7 +47,9 @@ export function SiteEditorRoute(props: RouteSectionProps) {
  * - Every change is ONE step of the editor's history, written into the site's file (`SiteWrites`):
  *   ⌘Z takes it back, ⌘S saves it (the editor's own keys, `editorHotkeys()`).
  * - A project that isn't a site says so, and how to make one.
- * - NOT yet:  live pictures of each page on its card;  the NERD tab (P10).
+ * - Its Data tab (epic `mockup` P11):  the places the site reads, as a NERD whose boxes turn over to their ERD,
+ *   and a collection's sample rows to edit (`<SiteData>`).
+ * - NOT yet:  live pictures of each page on its card.
  ****************/
 export function SiteEditorPage() {
   // the editor's own keys:  ⌘Z and ⇧⌘Z take back the site's changes, ⌘S saves
@@ -53,6 +57,7 @@ export function SiteEditorPage() {
   const parts = createMemo(() => SiteWrites.parts() ?? [])
   const all = createMemo(() => SiteEdits.allParts(parts()))
   const [picked, setPicked] = createSignal<string>()
+  const [tab, setTab] = createSignal<SiteEditorTab>("pages")
   const pickedPart = createMemo(() => all().find((part) => part.name === picked()))
   const addPage = () => {
     const address = SiteEditorPage.freeAddress(all())
@@ -85,25 +90,51 @@ export function SiteEditorPage() {
           <main class="board">
             <header>
               <h1>{appTexts.text("siteEditorTitle", { project: editor.project?.projectName ?? "" })}</h1>
+              <ui-buttons size="small" class="tabs">
+                <ui-button
+                  appearance={tab() === "pages" ? undefined : "basic"}
+                  icon="sitemap"
+                  aria-pressed={tab() === "pages" ? "true" : "false"}
+                  onClick={() => setTab("pages")}
+                >
+                  {appTexts.text("siteTabPages")}
+                </ui-button>
+                <ui-button
+                  appearance={tab() === "data" ? undefined : "basic"}
+                  icon="database"
+                  aria-pressed={tab() === "data" ? "true" : "false"}
+                  onClick={() => setTab("data")}
+                >
+                  {appTexts.text("siteTabData")}
+                </ui-button>
+              </ui-buttons>
               <ui-button size="small" appearance="basic" icon="play" onClick={() => void editor.showRunner()}>
                 {appTexts.text("siteRunSite")}
               </ui-button>
             </header>
-            <div class="cards">
-              <For each={all()}>
-                {(part) => (
-                  <TileCard
-                    title={SiteEditorPage.titleOf(part)}
-                    line={SiteEditorPage.lineOf(part)}
-                    hueFrom={part.name}
-                    selected={picked() === part.name}
-                    class={`depth-${Math.min(part.depth, 2)}`}
-                    onClick={() => setPicked(part.name)}
-                    onDblClick={() => SiteEditorPage.openInEdit(part.name)}
-                  />
-                )}
-              </For>
-            </div>
+            <Show when={tab() === "data"}>
+              <SiteData
+                projectId={editor.project?.projectId ?? ""}
+                contents={editor.project?.contents as ProjectIndex | undefined}
+              />
+            </Show>
+            <Show when={tab() === "pages"}>
+              <div class="cards">
+                <For each={all()}>
+                  {(part) => (
+                    <TileCard
+                      title={SiteEditorPage.titleOf(part)}
+                      line={SiteEditorPage.lineOf(part)}
+                      hueFrom={part.name}
+                      selected={picked() === part.name}
+                      class={`depth-${Math.min(part.depth, 2)}`}
+                      onClick={() => setPicked(part.name)}
+                      onDblClick={() => SiteEditorPage.openInEdit(part.name)}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
           </main>
           <aside class="form">
             <Show when={pickedPart()} fallback={<p class="quiet">{appTexts.text("sitePickOne")}</p>}>
@@ -185,6 +216,9 @@ SiteEditorPage.openInEdit = (name: string): void => {
   editor.cameFromSite = project.path
   editor.showFileAt(file.path, { anchor: { line, ch: 0 }, head: { line, ch: 0 } }).catch(editor.showError)
 }
+
+/** The board's tabs:  the site's pages, or the data it reads. */
+type SiteEditorTab = "pages" | "data"
 
 /** Where a new page goes, before a number makes it free. */
 const NEW_PAGE_ADDRESS = "/new-page"
