@@ -527,6 +527,16 @@ holding its id (Q7).  Its colour says where the item stands."
                     <td></td>
                   </tr>
                   <tr>
+                    <td><code>urgent</code></td>
+                    <td>present or absent</td>
+                    <td>
+                      A todo that asks Owen to act (Make Todo's follow-up): red (<code>attention</code>) until it's
+                      reviewed, queued or done, as an open issue is. Its details say the Problem and the Proposed fix,
+                      read from what it came from. Its id chip flips it to yellow (<code>calm</code>) and back.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>source</code></td>
                     <td>text</td>
                     <td>
@@ -636,7 +646,7 @@ holding its id (Q7).  Its colour says where the item stands."
                       <td><code>id</code></td>
                       <td>
                         The id chip (<code>Q7</code>), a link to the item, in its state's colour. While the page is
-                        reviewed, an open judgement call's or issue's chip is a button instead: urgent (red) &lt;-&gt;
+                        reviewed, an open judgement call's, issue's or follow-up todo's chip is a button instead: urgent (red) &lt;-&gt;
                         not urgent (yellow).
                       </td>
                     </tr>
@@ -861,7 +871,7 @@ holding its id (Q7).  Its colour says where the item stands."
                   its state's colour: the result.
                 </li>
                 <li>
-                  While the page is reviewed, an open judgement call's or issue's chip is a button: a click flips it
+                  While the page is reviewed, an open judgement call's, issue's or follow-up todo's chip is a button: a click flips it
                   between urgent (red) and not urgent (yellow, <code>calm</code>).
                 </li>
               </ul>

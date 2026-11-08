@@ -29,7 +29,7 @@ export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied"
 
 /**
  * The items Owen may call urgent or not (`calm`, its id chip):
- * judgement calls and issues, the kinds red while open and not reviewed.
+ * judgement calls and issues, the kinds red while open and not reviewed;  a todo marked `urgent` too (`StateFields`).
  * - `PlanReader.itemState()`;  the tool's `CALM_ID`, the same rule
  */
 export const CALM_ID = /^[ij]\d+$/
@@ -87,6 +87,8 @@ export type StateFields = {
   queued?: string | null
   /** work on it under way */
   working?: boolean
+  /** a todo asking Owen to act:  red until reviewed */
+  urgent?: boolean
 }
 
 /** What the page's review inbox says of an item now (`ReviewState.liveOf()`), for `DrawnState.of()`. */
@@ -130,11 +132,11 @@ export class DrawnState {
 
   /**
    * May Owen call it urgent or not (its id chip, while the page is reviewed)?
-   * - yes for an open judgement call or issue, not reviewed, nothing queued or under way:
+   * - yes for an open judgement call, issue or `urgent` todo, not reviewed, nothing queued or under way:
    *   the items red for want of a review (`PlanReader.itemState()`)
    */
-  static canCalm({ id, status, reviewed, queued, working }: StateFields): boolean {
-    return CALM_ID.test(id ?? "") && status === "open" && !reviewed && !queued && !working
+  static canCalm({ id, status, reviewed, queued, working, urgent }: StateFields): boolean {
+    return (CALM_ID.test(id ?? "") || !!urgent) && status === "open" && !reviewed && !queued && !working
   }
 
   /**
@@ -149,7 +151,8 @@ export class DrawnState {
       changed: item.getAttribute("changed"),
       reviewed: item.getAttribute("reviewed"),
       queued: item.getAttribute("queued"),
-      working: item.hasAttribute("working")
+      working: item.hasAttribute("working"),
+      urgent: item.hasAttribute("urgent")
     }
   }
 }

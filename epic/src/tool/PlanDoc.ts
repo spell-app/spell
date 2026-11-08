@@ -20,6 +20,7 @@ import { ThreadFacts } from "spell/epic/comments"
 import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
+import { FIX_LABEL, FollowUpSummary, PROBLEM_LABEL } from "./FollowUpSummary"
 import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
 
 import {
@@ -882,6 +883,7 @@ export class PlanDoc extends PlanReader {
       underway: !!item.querySelector(UNDERWAY_CARD),
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
+      urgent: Boolean(data.urgent),
       awaitsPick: PlanItem.awaitsPick(item),
       reviewAs: data.reviewAs,
       handled: data.handled
@@ -919,11 +921,16 @@ export class PlanDoc extends PlanReader {
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
+   * - `urgent`:  a todo that asks Owen to act, red until reviewed, as an open issue is (`followUp()`, I230)
    * - no `details`:  its title's words are its body (`PlanItem.giveBody()`), so it opens and takes a comment
    * - stamped (`stamp()`)
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
    */
-  addItem(kind: string, title: string, { details, titleHTML = false, calm = false }: AddItemOptions = {}): string {
+  addItem(
+    kind: string,
+    title: string,
+    { details, titleHTML = false, calm = false, urgent = false }: AddItemOptions = {}
+  ): string {
     const id = this.nextId(kind)
     const spec = KINDS[kind as ItemKind]
     if (calm && !CALM_ID.test(id)) throw new PlanDocError(`--calm is for a judgement call or an issue, not a ${kind}`)
@@ -937,7 +944,8 @@ export class PlanDoc extends PlanReader {
       answered: kind === "decision",
       ...((spec as { limit?: boolean }).limit && { limit: true }),
       ...(this.bedtime && { overnight: true }),
-      ...(calm && { calm: true })
+      ...(calm && { calm: true }),
+      ...(urgent && { urgent: true })
     }
     const item = this.make("epic-item", data, heading.slot ? [heading.slot] : [])
     for (const node of this.incoming(details, { question: kind === "question" })) Markup.place(item, node)
@@ -1156,12 +1164,13 @@ export class PlanDoc extends PlanReader {
   /**
    * Item `id` is urgent (`calm` false) or not (`calm` true):  Owen's click on its id chip, applied (`epic inbox
    * apply`);  returns what it did, for the log (`not urgent`), or `undefined` when it already was.
-   * - only a judgement call or an issue:  throws for any other item, or an id the doc doesn't have
+   * - only a judgement call, an issue, or a todo that asks Owen to act (`urgent`, I230):
+   *   throws for any other item, or an id the doc doesn't have
    */
   setCalm(id: string, calm: boolean): string | undefined {
     const item = this.item(id)
-    if (!CALM_ID.test(item.id))
-      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls and issues`)
+    if (!CALM_ID.test(item.id) && !item.hasAttribute("urgent"))
+      throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and follow-up todos`)
     if (item.hasAttribute("calm") === calm) return undefined
     Markup.set(item, { calm: calm || undefined })
     this.stamp(item)
@@ -1460,10 +1469,10 @@ export class PlanDoc extends PlanReader {
         return new OptionSets(this).applyToItem(item, mark)
       case "todo": {
         const from = { label: item.id.toUpperCase(), link: item.id, what: kind, title: PlanItem.titleOf(item) }
-        const todo = this.followUp(from, note)
+        const todo = this.followUp(from, item, note)
         this.review(item.id)
-        this.noteStatus(item.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        this.noteStatus(item.id, filedTodo(todo.id))
+        return { applied: true, did: filedDid(todo) }
       }
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
@@ -2813,9 +2822,9 @@ export class PlanDoc extends PlanReader {
           this.noteStatus(part.id, PlanMarkup.text("Go ahead:  Owen wants this phase built"))
           return { applied: true, did: `go ahead:  build it${note ? " (his note kept)" : ""}` }
         }
-        const todo = this.followUp(part, note)
-        this.noteStatus(part.id, filedTodo(todo))
-        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
+        const todo = this.followUp(part, part.element, note)
+        this.noteStatus(part.id, filedTodo(todo.id))
+        return { applied: true, did: filedDid(todo) }
       }
       case "pick":
         return { applied: false, left: `${part.label} (${part.what}):  can't pick ${mark.pick}` }
@@ -3110,15 +3119,46 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * A new todo, "Follow up:  <title>", linking back to what it's from (`from`:  its label, link and what it is),
-   * Owen's note in his words;  its id.
+   * A new todo, "Follow up:  <title>", red until Owen reviews it (`urgent`):  it asks him to act (I230).
+   * - says what's wrong and the fix proposed, read from `source`, the item or part it's from (`FollowUpSummary`)
+   * - then links back to it (`from`:  its label, link and what it is), then Owen's note in his words
+   * - returns its id, and whether a fix was found:  none, and `inbox apply` tells the agent to write one
    */
-  private followUp(from: Pick<ReviewPart, "label" | "link" | "what" | "title">, note: string | undefined): string {
+  private followUp(
+    from: Pick<ReviewPart, "label" | "link" | "what" | "title">,
+    source: Element,
+    note: string | undefined
+  ): FiledFollowUp {
     // Owen's note (Make Todo's box, epic `windows-and-review` P2) goes in as his words
     const said = note ? `<p>${AuthorWords.said(PlanMarkup.text(this.person))}  ${PlanMarkup.text(note)}</p>` : ""
     const link = `<a href="#${from.link}">${PlanMarkup.text(from.label)}</a>`
-    const details = `<p>From ${link} (${from.what}), marked "Make Todo" on the page:  ${PlanMarkup.text(from.title)}</p>${said}`
-    return this.addItem("todo", `Follow up:  ${from.title}`, { details })
+    const summary = FollowUpSummary.of(source, from.title)
+    const made = `<p>From ${link} (${from.what}), marked "Make Todo" on the page:  ${PlanMarkup.text(from.title)}</p>`
+    const details = `${summary.html}${made}${said}`
+    const id = this.addItem("todo", `Follow up:  ${from.title}`, { details, urgent: true })
+    return { id, hasFix: summary.hasFix }
+  }
+
+  /**
+   * Bring follow-up todo `id`, made before epic `epic-engine` I230, up to what `followUp()` writes today:
+   * its Problem and Proposed fix above its "From ..." line, and `urgent`.
+   * - leaves `changed` alone:  it's not news
+   * - what it did:  `filled`, `no-fix` (filled, nothing proposed), or why not:  `not-follow-up`, `has-fields`, `no-source`
+   */
+  fillFollowUp(id: string): "filled" | "no-fix" | "not-follow-up" | "has-fields" | "no-source" {
+    const item = this.item(id)
+    const line = Array.from(item.querySelectorAll(":scope > p")).find((p) => MADE_FROM.test(PlanMarkup.squeeze(p.textContent ?? "")))
+    if (!line) return "not-follow-up"
+    if (item.querySelector(`:scope > epic-field[label="${PROBLEM_LABEL}"], :scope > epic-field[label="${FIX_LABEL}"]`))
+      return "has-fields"
+    const link = line.querySelector("a")?.getAttribute("href")?.slice(1)
+    const source = link ? (this.findItem(link) ?? this.reviewPart(link)?.element) : undefined
+    if (!source) return "no-source"
+    const title = PlanMarkup.squeeze(line.textContent ?? "").replace(MADE_FROM, "")
+    const summary = FollowUpSummary.of(source, title)
+    for (const node of this.incoming(summary.html)) line.before(node)
+    Markup.set<"epic-item">(item, { urgent: true })
+    return summary.hasFix ? "filled" : "no-fix"
   }
 
   /**
@@ -3246,6 +3286,20 @@ type ReviewPart = {
 
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
+
+/**
+ * The "From ..." line of a follow-up todo, up to its source's title (`PlanDoc.followUp()`).
+ */
+const MADE_FROM = /^From .* marked "Make Todo" on the page:\s*/
+
+/** What `PlanDoc.followUp()` made:  the new todo's id, and did its source propose a fix? */
+type FiledFollowUp = { id: string; hasFix: boolean }
+
+/** A mark's outcome for a new follow-up, as `inbox apply` prints it:  with no fix found, the agent's to write one. */
+function filedDid({ id, hasFix }: FiledFollowUp): string {
+  const made = `to todo ${id.toUpperCase()}`
+  return hasFix ? made : `${made}:  no fix proposed yet, write one in its "${FIX_LABEL}" field`
+}
 
 /** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {

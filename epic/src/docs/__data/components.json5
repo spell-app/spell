@@ -2649,6 +2649,11 @@
           "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
         },
         {
+          "name": "urgent",
+          "kind": "boolean",
+          "description": "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow."
+        },
+        {
           "name": "failed",
           "kind": "string",
           "description": "A test that FAILED in your test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It stays open;  gone once a run passes it."

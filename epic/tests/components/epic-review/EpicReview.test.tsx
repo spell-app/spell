@@ -720,6 +720,22 @@ describe("<epic-item> review controls", () => {
     expect(box().classList.contains("attention")).toBe(true)
   })
 
+  // epic `epic-engine` I230:  Make Todo's follow-up asks Owen to act
+  test("an urgent todo's chip is red and a button;  a plain todo's stays a link", async () => {
+    await adoptClient()
+    const urgent = await render(
+      `<epic-item id="t9" title="Follow up:  x" status="open" state="attention" urgent></epic-item>`
+    )
+    const chip = deep(urgent).querySelector<HTMLElement>("[part~='id']")!
+    expect(deep(urgent).querySelector("[part~='base']")!.classList.contains("attention")).toBe(true)
+    expect(chip.localName).toBe("button")
+    chip.click()
+    await settle()
+    expect(routes.inbox.urgency.t9?.calm).toBe(true)
+    const plain = await render(`<epic-item id="t8" title="Work" status="open" state="open"></epic-item>`)
+    expect(deep(plain).querySelector<HTMLElement>("[part~='id']")!.localName).toBe("a")
+  })
+
   test("a question's chip, or a reviewed call's, stays a link", async () => {
     await adoptClient()
     const question = await render(`<epic-item id="q4" title="Which?" status="open"></epic-item>`)

@@ -546,7 +546,7 @@ test("apply:  sent new items are made, a phase's todo a go-ahead (I181), the sum
     [
       "NEW1  made question Q1:  window or aisle?",
       "P1  go ahead:  build it (his note kept)",
-      "SUMMARY  to todo T1"
+      "SUMMARY  to todo T1:  no fix proposed yet, write one in its \"Proposed fix\" field"
     ].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
