@@ -2,12 +2,12 @@ import { SiteEdits } from "./SiteEdits"
 
 /****************
  * ### `PageJobs`
- * A page's JOBS, read from its file and written back (epic `mockup` P6, Q12):  what the page must let people do,
+ * A page's STORIES, read from its file and written back (epic `mockup` P6, Q12):  what the page must let people do,
  * kept with it for good, through the mockup and into the real site.
  * - Written in the page's own declaration, first in its body, as markdown:
- *   - spellx:  `<spell-jobs>` ... `</>`
- *   - code spell:  `<jobs>` ... `</jobs>`
- *   - both compile to the page's `static jobs` (`markdown_description`);  the running page draws nothing for them.
+ *   - spellx:  `<spell-stories>` ... `</>`
+ *   - code spell:  `<stories>` ... `</stories>`
+ *   - both compile to the page's `static stories` (`markdown_description`);  the running page draws nothing for them.
  * - A job is a markdown list item:  a plain line, or an Agile story ("As a fan, I want ..., so that ...");
  *   a task list's box ticks it off, `- [x]`.  Lines under it are its details:  `- done when:  ...`.
  * - Plain text in, text out, as `SiteEdits` is:  it loads no parser, so it's tested in node;
@@ -51,7 +51,7 @@ export class PageJobs {
     }
     const withColon = form === "code" && !firstLine.trimEnd().endsWith(":") ? `${firstLine.trimEnd()}:` : firstLine
     // code spell reads two raw-text blocks on lines next to each other as one:  a blank line before a `<markdown>`
-    const apart = form === "code" && /^[ \t]+<(?:markdown|jobs)>/.test(text.slice(headEnd)) ? "\n" : ""
+    const apart = form === "code" && /^[ \t]+<(?:markdown|stories)>/.test(text.slice(headEnd)) ? "\n" : ""
     return text.slice(0, declared.start) + `${withColon}\n${written}${apart}` + text.slice(headEnd)
   }
 
@@ -112,7 +112,7 @@ export class PageJobs {
       const box = job.done === undefined ? "" : job.done ? "[x] " : "[ ] "
       return [`\t\t- ${box}${job.text}`, ...job.details.filter((line) => line.trim()).map((line) => `\t\t\t${line}`)]
     })
-    const [opener, closer] = form === "spellx" ? ["<spell-jobs>", "</>"] : ["<jobs>", "</jobs>"]
+    const [opener, closer] = form === "spellx" ? ["<spell-stories>", "</>"] : ["<stories>", "</stories>"]
     return `\t${opener}\n${items.join("\n")}\n\t${closer}\n`
   }
 }
@@ -130,8 +130,8 @@ export type PageJob = {
 /** A jobs block in a page's declaration:  where it's written, and its markdown. */
 type JobsBlock = { span: { start: number; end: number }; markdown: string }
 
-/** A jobs block's first line, in either form:  `\t<spell-jobs>`, `\t<jobs>`;  its indent, and its tag. */
-const OPENER = /^([ \t]*)<(spell-jobs|encanto-tareas|jobs)>[ \t]*\r?\n/m
+/** A jobs block's first line, in either form:  `\t<spell-stories>`, `\t<stories>`;  its indent, and its tag. */
+const OPENER = /^([ \t]*)<(spell-stories|encanto-historias|stories)>[ \t]*\r?\n/m
 
 /** A list item at the left edge:  `- [x] see a film`, `- see a film`;  its box, then its words. */
 const ITEM = /^[-*+]\s+(\[[ xX]\]\s+)?(.*)$/

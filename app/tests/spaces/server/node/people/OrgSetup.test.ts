@@ -4,7 +4,7 @@
  * - On an empty server:  its file, its Admin space, its Admins and teams, its paired spaces' folders.
  * - Run again:  nothing doubled.
  */
-import { existsSync, mkdtempSync, rmSync } from "fs"
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
@@ -26,6 +26,19 @@ const ask = { org: "rs", name: "Rock Society", admins: ["ana@example.org"], team
 afterAll(() => {
   folders.close()
   rmSync(root, { recursive: true, force: true })
+})
+
+describe("an org's own programs", () => {
+  test("are a project group of their own, found by address;  nothing lists it", () => {
+    expect(new SP.SpellLocation("@rs/OrgAdmin/OrgAdmin.spellml").projectId).toBe("@rs/OrgAdmin")
+    expect(SP.SpellSetup.projectRootPaths).not.toContain("@rs")
+  })
+
+  test("never Spell's own folders, its built-ins, or a local folder", () => {
+    expect(SP.SpellSetup.groupFor("@rs/__admin/roles")).toBeUndefined()
+    expect(SP.SpellSetup.groupFor("@spell/nothing/x")).toBeUndefined()
+    expect(SP.SpellSetup.groupFor("@local/mine/x")).toBeUndefined()
+  })
 })
 
 describe("spell space org create", () => {
@@ -52,12 +65,34 @@ describe("spell space org create", () => {
     expect(report.next.join("\n")).toMatch(/spell space org codes rs ana@spell <someone>/)
   })
 
+  test("its own copies of the org's pages, each naming the org:  the built-in's sample name gone", async () => {
+    await setup.create({ org: "willzalone", name: "Willzalone", admins: ["ana@example.org"] })
+    const source = (page: string, file: string) => readFileSync(join(folderFor(`@willzalone/${page}`), file), "utf8")
+    expect(source("OrgAdmin", "OrgAdmin.api.spell")).toContain('"@willzalone/__admin/roles"')
+    expect(source("Inbox", "Inbox.api.spell")).toContain('"@willzalone/__inbox"')
+    expect(source("OrgFeed", "OrgFeed.api.spell")).toContain('"@willzalone/__feed"')
+    expect(source("OrgChat", "OrgChat.api.spell")).toContain('"@willzalone/__thread"')
+    for (const [page, file] of [
+      ["OrgAdmin", "OrgAdmin.spellml"],
+      ["OrgChat", "OrgChat.api.spell"]
+    ] as const) {
+      expect(source(page, file)).not.toMatch(/@rs\b|Rock Society|\bRS\b/)
+    }
+  })
+
   test("run again, it makes nothing:  each part already there", async () => {
     const report = await setup.create(ask)
     expect(report.made).toEqual([])
-    expect(report.already).toHaveLength(6)
+    expect(report.already).toHaveLength(10)
     expect((await folders.orgRoles.terms("rs")).length).toBe(2)
     expect((await people.org("rs"))?.members.items).toHaveLength(1)
+  })
+
+  test("run again, a copy someone edited stays as it is", async () => {
+    const file = join(folderFor("@rs/OrgAdmin"), "OrgAdmin.api.spell")
+    writeFileSync(file, "// edited\n")
+    await setup.create(ask)
+    expect(readFileSync(file, "utf8")).toBe("// edited\n")
   })
 
   test("a second Admin later joins the same org;  recovery codes then name both", async () => {
@@ -68,6 +103,7 @@ describe("spell space org create", () => {
       "bo@spell one of @rs's Admins"
     ])
     expect(report.next.join("\n")).toMatch(/spell space org codes rs ana@spell bo@spell/)
+    expect(report.next.join("\n")).toContain("/apps/@rs/OrgAdmin")
   })
 
   test("an id that's no folder's name, or no Admin, is refused", async () => {

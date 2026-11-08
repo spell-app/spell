@@ -1,0 +1,130 @@
+<!doctype html>
+<!--
+  What someone gets at a program in an org's shared space that they can't read yet (epic `atmosphere` I14, `SpellCloud`):
+  - nobody signed in:  sign in by email, then this address loads the program
+  - signed in as someone the org hasn't let in:  who they are, and Sign out
+  - A program can't load to draw its own sign-in bar:  its files are only for the org's people.
+  - The same for every name in the space, so a stranger can't tell what an org has.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in to Spell</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        margin: 0 auto;
+        max-width: 26rem;
+        padding: 4rem 1rem;
+        line-height: 1.5;
+      }
+      form {
+        display: flex;
+        gap: 0.5rem;
+      }
+      input {
+        flex: 1;
+        min-width: 0;
+        font: inherit;
+        padding: 0.4rem 0.6rem;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 0.8rem;
+      }
+      [hidden] {
+        display: none;
+      }
+      #problem {
+        color: #c33;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sign in to see this page</h1>
+    <section id="signing-in" hidden>
+      <p>This page belongs to an organization on Spell. Sign in with the email it knows you by.</p>
+      <form id="email-form">
+        <input
+          id="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+          aria-label="Your email"
+        />
+        <button>Email me a link</button>
+      </form>
+    </section>
+    <section id="waiting" hidden>
+      <p>Check your email: open its link, or type its code here.</p>
+      <form id="code-form">
+        <input id="code" required autocomplete="one-time-code" aria-label="The code from your email" />
+        <button>Sign in</button>
+      </form>
+    </section>
+    <section id="not-yours" hidden>
+      <p>You're signed in as <b id="who"></b>, and this page isn't open to that account.</p>
+      <button id="sign-out">Sign out</button>
+    </section>
+    <p id="problem" role="alert"></p>
+    <script type="module">
+      const WAIT_MS = 3000
+      const element = (id) => document.getElementById(id)
+      const show = (id) => {
+        for (const each of ["signing-in", "waiting", "not-yours"]) element(each).hidden = each !== id
+        element("problem").textContent = ""
+      }
+      const ask = async (what, body) => {
+        const response = await fetch(`/api/sign-in/${what}`, {
+          method: body ? "POST" : "GET",
+          cache: "no-store",
+          ...(body && { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        })
+        const answer = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(answer.error ?? `the server answered ${response.status}`)
+        return answer
+      }
+      const saying = (work) => (event) => {
+        event.preventDefault()
+        work().catch((error) => (element("problem").textContent = error.message))
+      }
+      let email = ""
+      element("email-form").addEventListener(
+        "submit",
+        saying(async () => {
+          email = element("email").value.trim()
+          const { request } = await ask("ask", { email })
+          show("waiting")
+          const timer = setInterval(async () => {
+            const answer = await ask("waiting", { request }).catch(() => undefined)
+            if (answer?.status !== "signed in") return
+            clearInterval(timer)
+            location.reload()
+          }, WAIT_MS)
+        })
+      )
+      element("code-form").addEventListener(
+        "submit",
+        saying(async () => {
+          await ask("code", { email, code: element("code").value.trim() })
+          location.reload()
+        })
+      )
+      element("sign-out").addEventListener(
+        "click",
+        saying(async () => {
+          await ask("out", {})
+          location.reload()
+        })
+      )
+      const { person } = await ask("me").catch(() => ({}))
+      if (person) element("who").textContent = person
+      show(person ? "not-yours" : "signing-in")
+    </script>
+  </body>
+</html>
