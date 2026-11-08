@@ -126,11 +126,11 @@ describe("a running site", () => {
     vi.restoreAllMocks()
   })
 
-  /** What the site draws now, as text. */
+  /** What the site draws now, as text:  its columns, not the narrow width's style sheet and menu button. */
   async function shown(): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve))
     core.flush()
-    return element.textContent ?? ""
+    return element.querySelector(".spell-site")?.textContent ?? ""
   }
 
   /** Draw the site into the fake page. */
@@ -245,6 +245,30 @@ describe("a running site", () => {
     site.closeOverlay()
     await shown()
     expect(element.querySelector("ui-modal")).toBeNull()
+  })
+
+  test("its navigation's pages are JSON text, which reads the same with or without Spell UI", async () => {
+    drawSite()
+    await site.showAddress("/films")
+    await shown()
+    const pages = JSON.parse(element.querySelector("ui-site-nav")!.getAttribute("pages")!)
+    expect(pages[0]).toMatchObject({ title: "Films", href: "/films" })
+  })
+
+  test("narrow:  the menu button opens the navigation over the page;  Escape closes it", async () => {
+    drawSite()
+    await site.showAddress("/films")
+    await shown()
+    const menu = element.querySelector<HTMLElement>(".spell-site-menu")!
+    const columns = () => element.querySelector(".spell-site")!
+    expect(menu.getAttribute("aria-expanded")).toBe("false")
+    menu.click()
+    await shown()
+    expect(columns().classList.contains("nav-open")).toBe(true)
+    expect(menu.getAttribute("aria-expanded")).toBe("true")
+    columns().dispatchEvent(Object.assign(new Event("keydown", { bubbles: true }), { key: "Escape" }))
+    await shown()
+    expect(columns().classList.contains("nav-open")).toBe(false)
   })
 
   test("a link to one of its addresses is followed here", async () => {

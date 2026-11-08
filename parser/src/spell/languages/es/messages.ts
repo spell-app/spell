@@ -80,5 +80,6 @@ export const spanishMessages: CoreMessages = {
   "site-create-page": "¿Quieres crearla?",
   "site-create-it": "Crearla",
   "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",
-  "site-page-failed-why": "{page} falló:  {why}"
+  "site-page-failed-why": "{page} falló:  {why}",
+  "site-menu": "Páginas"
 }

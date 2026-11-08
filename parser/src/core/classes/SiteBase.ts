@@ -277,15 +277,58 @@ export class SiteBase extends App {
   draw(): Drawing {
     return h(
       "div",
-      { class: "spell-site", style: SITE_LAYOUT, onClick: (event: MouseEvent) => this.followLink(event) },
+      { class: "spell-site-frame", onKeyDown: (event: KeyboardEvent) => this.closeNavOnEscape(event) },
+      h("style", {}, NARROW_SITE_CSS),
+      h("ui-button", {
+        class: "spell-site-menu",
+        icon: "bars",
+        appearance: "basic",
+        size: "small",
+        "aria-label": core.message("site-menu"),
+        title: core.message("site-menu"),
+        "aria-expanded": () => (this.isNavOpen ? "true" : "false"),
+        onClick: () => (this.isNavOpen = !this.isNavOpen)
+      }),
+      this.drawSite()
+    ) as unknown as Drawing
+  }
+
+  /**
+   * Its navigation is open over the page:  only below a width, where it slides in from the button (T10, epic
+   * `mockup` P5).  Above it the navigation is always beside the page, and this changes nothing.
+   */
+  get isNavOpen(): boolean {
+    return !!this.getState<boolean>("navOpen")
+  }
+
+  set isNavOpen(open: boolean) {
+    this.setState("navOpen", open)
+  }
+
+  /** Escape closes the navigation open over the page. */
+  private closeNavOnEscape(event: KeyboardEvent) {
+    if (event.key === "Escape" && this.isNavOpen) this.isNavOpen = false
+  }
+
+  /** The two columns:  the navigation, the page shown, and an open dialog or sidebar over it. */
+  private drawSite(): Drawing {
+    return h(
+      "div",
+      {
+        class: () => (this.isNavOpen ? "spell-site nav-open" : "spell-site"),
+        style: SITE_LAYOUT,
+        onClick: (event: MouseEvent) => this.followLink(event)
+      },
       h("ui-site-nav", {
         class: "spell-site-nav",
         remember: this.constructor.name,
         // functions:  `h()` reads a function on a dashed tag as a live value
-        pages: () => this.navPages(),
+        // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
+        pages: () => JSON.stringify(this.navPages()),
         current: () => this.navCurrent(),
         "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
           event.preventDefault()
+          this.isNavOpen = false
           this.navigate(event.detail.href)
         }
       }),
@@ -470,6 +513,28 @@ const SITE_LAYOUT =
 
 /** The page's column:  as wide as it's given. */
 const PAGE_LAYOUT = "min-width: 0"
+
+/**
+ * Below 40em of the box Run gives it (a container query, not the window's width):  one column, and the navigation
+ * slides over the page from the menu button, inside the site's own box.
+ * - Not `<ui-flyout>`:  that's fixed to the window, and Run draws the site inside the editor's page.
+ */
+const NARROW_SITE_CSS = `
+.spell-site-frame { container: spell-site / inline-size; position: relative }
+.spell-site-menu { display: none }
+@container spell-site (width < 40em) {
+  .spell-site-menu { display: inline-flex; margin-block-end: 0.5em }
+  .spell-site { grid-template-columns: minmax(0, 1fr) !important }
+  .spell-site-nav {
+    position: absolute; inset-inline-start: 0; inset-block-start: 2.75em; z-index: 2; width: min(16em, 85%);
+    max-height: calc(100% - 2.75em); overflow: auto; background: var(--ui-background, Canvas);
+    box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2)); border-radius: var(--ui-radius, 6px);
+    translate: calc(-100% - 1em); visibility: hidden; transition: translate 0.2s, visibility 0.2s
+  }
+  .spell-site.nav-open .spell-site-nav { translate: 0; visibility: visible }
+}
+@media (prefers-reduced-motion: reduce) { .spell-site-nav { transition: none } }
+`
 
 /** What a site shows:  a page, the not found page for an address, or the error page for a page that failed. */
 type Showing =

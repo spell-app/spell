@@ -14,4 +14,33 @@
   nav {
     padding: var(--_ui-site-nav-padding);
   }
+
+  /* a page's title as a link:  the row's own look, so it reads as the row does */
+  .link {
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* a page's star:  seen while starred, or while the row is under the mouse or focused */
+  .star {
+    opacity: 0;
+  }
+  /* starred:  the star yellow on no fill, as it is at rest */
+  .star[selected]::part(button),
+  .star[selected]::part(button):hover {
+    background: transparent;
+    color: var(--ui-yellow);
+  }
+  .star[selected],
+  ui-tree-item:hover > .star,
+  ui-tree-item:focus-within > .star,
+  ui-tree-item:focus > .star {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .star {
+      opacity: 0.4;
+    }
+  }
 }

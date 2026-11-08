@@ -1406,6 +1406,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "pages", kind: "json", group: "content" },
     { name: "current", kind: "string", group: "content" },
     { name: "label", kind: "string", group: "content" },
+    { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
     { name: "remember", kind: "string", group: "behaviour" }
   ],
   "ui-slider": [
@@ -1738,6 +1739,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "choose", kind: "valueOnly", group: "behaviour", values: ["one", "many"] },
     { name: "filter", kind: "string", group: "behaviour" },
     { name: "label", kind: "string", group: "behaviour" },
+    { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
     { name: "sticky-path", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-tree-diagram": [
@@ -1754,7 +1756,10 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "open", kind: "keyOnly", group: "behaviour" },
     { name: "selected", kind: "keyOnly", group: "behaviour" },
     { name: "expandable", kind: "keyOnly", group: "behaviour" },
-    { name: "group", kind: "keyOnly", group: "behaviour" }
+    { name: "group", kind: "keyOnly", group: "behaviour" },
+    { name: "band", kind: "valueOnly", group: "appearance", values: ["heading", "subheading"] },
+    { name: "count", kind: "string", group: "content" },
+    { name: "badge", kind: "string", group: "content" }
   ],
   "ui-tree-node": [
     { name: "label", kind: "string", group: "content" },

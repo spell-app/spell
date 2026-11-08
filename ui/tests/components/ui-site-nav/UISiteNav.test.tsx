@@ -98,3 +98,115 @@ describe("<ui-site-nav>", () => {
     PrefStore.setAt(`ui-site-nav:${key}`, undefined)
   })
 })
+
+/** Wait for every element in `host`'s shadow tree, all the way down. */
+async function settleDeep(host: Element) {
+  for (let round = 0; round < 4; round++) {
+    const hosts: Element[] = []
+    const walk = (root: ShadowRoot | null) => {
+      for (const element of root?.querySelectorAll("*") ?? []) {
+        hosts.push(element)
+        walk(element.shadowRoot)
+      }
+    }
+    walk(host.shadowRoot)
+    const ready = hosts.flatMap((each) => {
+      const waited = (each as Element & { ready?: Promise<unknown> }).ready
+      return waited ? [waited] : []
+    })
+    await Promise.all(ready)
+    await ElementFixture.settle()
+  }
+}
+
+describe("<ui-site-nav> pages' extras", () => {
+  /** A nav of `pages`, showing `current`, in `appearance` if given. */
+  async function navOf(pages: SiteNavPage[], { current = "", appearance = "" } = {}) {
+    const host = (await ElementFixture.render(
+      `<ui-site-nav current="${current}" ${appearance ? `appearance="${appearance}"` : ""}></ui-site-nav>`
+    )) as HTMLElement
+    host.setAttribute("pages", JSON.stringify(pages))
+    await ElementFixture.settle()
+    return host
+  }
+
+  it("a page with an `href` is a real link, so a modified click is the browser's;  a plain one goes", async () => {
+    const host = await navOf([{ title: "Films", href: "#/films" }])
+    const link = row(host, "Films").querySelector<HTMLAnchorElement>(":scope > a")!
+    expect(link.getAttribute("href")).toBe("#/films")
+    expect(link.getAttribute("slot")).toBe("label")
+    const seen = vi.fn((event: Event) => event.preventDefault())
+    host.addEventListener("ui-navigating", seen)
+    const box = row(host, "Films").shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!
+    box.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, metaKey: true }))
+    expect(seen).not.toHaveBeenCalled()
+    box.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    expect(seen).toHaveBeenCalledTimes(1)
+  })
+
+  it("draws `band`, `count` and `badge` on the rows, in the tree's `nav` look", async () => {
+    const host = await navOf(
+      [
+        {
+          title: "Components",
+          band: "heading",
+          count: 2,
+          pages: [{ title: "Calendar", href: "#/calendar", badge: "in progress" }]
+        }
+      ],
+      { appearance: "nav" }
+    )
+    const band = row(host, "Components")
+    expect(band.getAttribute("band")).toBe("heading")
+    expect(band.matches(":state(nav)")).toBe(true)
+    expect(band.matches(":state(band)")).toBe(true)
+    expect(band.shadowRoot!.querySelector('[part~="count"]')!.textContent).toBe("2")
+    expect(getComputedStyle(band.shadowRoot!.querySelector('[part~="row"]')!).textTransform).toBe("uppercase")
+    band.setAttribute("open", "")
+    await ElementFixture.settle()
+    expect(row(host, "Calendar").shadowRoot!.querySelector('[part~="badge"]')!.textContent).toBe("in progress")
+  })
+
+  it("a page's `open` wins;  a row opening or closing says which page, cancelably", async () => {
+    const host = await navOf([{ title: "Help", open: false, pages: [{ title: "About", href: "#/about" }] }])
+    expect(row(host, "Help").hasAttribute("open")).toBe(false)
+    const seen: string[] = []
+    host.addEventListener("ui-opening", (event) => {
+      const { page, open } = (event as CustomEvent<{ page: SiteNavPage; open: boolean }>).detail
+      seen.push(`${page.title} ${open}`)
+      event.preventDefault()
+    })
+    click(host, "Help")
+    await ElementFixture.settle()
+    expect(seen).toEqual(["Help true"])
+    expect(row(host, "Help").hasAttribute("open")).toBe(false)
+  })
+
+  it("a starred page has a star, which sends `ui-starred` and selects nothing", async () => {
+    const host = await navOf([{ title: "Input", href: "#/input", starred: false }])
+    const starred = vi.fn()
+    const navigating = vi.fn()
+    host.addEventListener("ui-starred", (event) => starred((event as CustomEvent).detail.starred))
+    host.addEventListener("ui-navigating", navigating)
+    await settleDeep(host)
+    const star = row(host, "Input").querySelector<HTMLElement>(":scope > .star")!
+    star.shadowRoot!.querySelector("button")!.click()
+    expect(starred).toHaveBeenCalledWith(true)
+    expect(navigating).not.toHaveBeenCalled()
+    await expectAccessible(host)
+  })
+
+  it("reveals the shown page's row in whatever scrolls it", async () => {
+    const pages = Array.from({ length: 40 }, (_, index) => ({ title: `Page ${index}`, href: `#/p${index}` }))
+    const box = (await ElementFixture.render(
+      `<div style="height: 120px; overflow: auto"><ui-site-nav current="#/p35"></ui-site-nav></div>`
+    )) as HTMLElement
+    const host = box.querySelector<HTMLElement & { revealCurrent(): void }>("ui-site-nav")!
+    host.setAttribute("pages", JSON.stringify(pages))
+    await settleDeep(host)
+    expect(box.scrollHeight).toBeGreaterThan(box.clientHeight)
+    host.revealCurrent()
+    await ElementFixture.settle()
+    expect(box.scrollTop).toBeGreaterThan(0)
+  })
+})

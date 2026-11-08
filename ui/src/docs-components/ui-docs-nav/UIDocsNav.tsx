@@ -1,7 +1,8 @@
-import { For, Match, Show, Switch, createMemo } from "solid-js"
+import { For, Match, Show, Switch } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
+import type { SiteNavPage } from "spell/ui/components/ui-site-nav"
 import { SiteData } from "spell/ui/docs-components/SiteData"
 import { SiteDataLoad } from "spell/ui/docs-components/SiteDataLoad"
 import type { DOMDocsSearchElement } from "spell/ui/docs-components/ui-docs-search/UIDocsSearch"
@@ -14,17 +15,14 @@ import {
   FOUNDATION_PAGES,
   ICONS,
   INDEX_PAGE,
-  MOTION_QUERY,
   NavGroups,
   NavViews,
-  REVEAL_FRACTION,
   TOP_PAGES,
   type DocsNavText,
   type DocsNavVocabulary,
   type NavGroup,
   type NavPage,
   type NavRow,
-  type NavTopic,
   type NavView
 } from "./UIDocsNav.types"
 
@@ -198,6 +196,16 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     return this.base ?? (isServer ? "" : SiteData.root())
   }
 
+  /**
+   * The page the list marks:  the current page, unless it's a sub-tag shown on its family's page (it has no page of
+   * its own, so its row isn't the page shown).
+   */
+  get markedPage(): string {
+    const page = this.currentPage
+    const row = this.navIndex?.row(page)
+    return row && !row.page ? "" : page
+  }
+
   /** The current page's row, when it's a component's page. */
   get currentRow(): NavRow | undefined {
     const row = this.navIndex?.row(this.currentPage)
@@ -210,31 +218,12 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   }
 
   /**
-   * Scroll the current page's link into view, a third of the way down its scroll container (the panel's list);
-   * nothing if it's already in view, or nothing scrolls (never the page itself).
-   * - In view is below the group's band stuck at the list's top:  a row half under it isn't.
-   * - And no row is left half under that band:  the one it cuts moves down, whole, below it.
+   * Scroll the current page's row into view, inside the panel's list (never the page itself).
    * - Script API (`DOMDocsNavElement`).
-   * - The link in the main list, not its copy in Favourites;  none in a shut fold.
+   * - The row in the main list:  its copy in Favourites isn't the current page's (its key is another).
    */
   revealCurrent() {
-    const shown = `[${DATA.current}]:not([inert] *)`
-    const item =
-      this.box?.querySelector<HTMLElement>(`.${ROWS}:not(.${FAVORITES}) ${shown}`) ??
-      this.box?.querySelector<HTMLElement>(shown)
-    if (!item) return
-    const scroller = UIDocsNav.scrollerFor(item)
-    if (!scroller) return
-    const box = item.getBoundingClientRect()
-    const port = scroller.getBoundingClientRect()
-    if (box.top >= UIDocsNav.bandEndIn(scroller) && box.bottom <= port.bottom) return
-    scroller.scrollTop += box.top - port.top - port.height * REVEAL_FRACTION
-    const bandEnd = UIDocsNav.bandEndIn(scroller)
-    const cut = [...scroller.querySelectorAll(`.${ROW}`)].find((row) => {
-      const { top, bottom } = row.getBoundingClientRect()
-      return top < bandEnd && bottom > bandEnd
-    })
-    if (cut) scroller.scrollTop -= bandEnd - cut.getBoundingClientRect().top
+    this.siteNav?.revealCurrent()
   }
 
   ////////////////
@@ -285,7 +274,6 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     this.searchQuery = query
     this.topicsClosedForSearch = new Set()
     this.groupsClosedForSearch = new Set()
-    this.closingTopics = new Set()
   }
 
   ////////////////
@@ -320,12 +308,10 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
 
   /**
    * Star or un-star `tag`;  remembered, `ui-starred`.
-   * - Un-starring from the Favourites list removes the clicked row:
-   *   focus moves to the tag's star in the list below, else the search box.
    * - Stored tags this site doesn't list stay stored:  every site on this bundle shares the key (`STORAGE_KEYS`), so
    *   starring an `<epic-*>` element on Epic UI's pages keeps the viewer's Spell UI favourites.
    */
-  private toggleFavorite({ tag, star, event }: { tag: string; star: Element; event: Event }) {
+  private toggleFavorite({ tag, event }: { tag: string; event: Event }) {
     const favorites = new Set(this.favorites)
     const isFavorite = !favorites.has(tag)
     if (isFavorite) favorites.add(tag)
@@ -336,13 +322,6 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     const elsewhere = NavPreferences.favorites().filter((stored) => !this.navIndex?.row(stored))
     NavPreferences.setFavorites([...list, ...elsewhere])
     this.send("ui-starred", { tag, favorite: isFavorite, favorites: list, originalEvent: event })
-    if (isFavorite || !star.closest(`.${FAVORITES}`)) return
-    E.afterSolidUpdate(() => {
-      const next = this.box?.querySelector<HTMLElement>(
-        `.${ROWS}:not(.${FAVORITES}) [${DATA.star}="${CSS.escape(tag)}"]`
-      )
-      ;(next ?? this.search)?.focus()
-    })
   }
 
   ////////////////
@@ -388,9 +367,6 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   /** Topic ids the viewer closed during THIS search;  emptied when the query changes. */
   @E.state accessor topicsClosedForSearch: ReadonlySet<string> = new Set()
 
-  /** Topics shut by the viewer whose fold is still easing shut:  their rows stay rendered until it has. */
-  @E.state accessor closingTopics: ReadonlySet<string> = new Set()
-
   /** The viewer closed the topic opened for the current page:  don't open it again. */
   @E.state accessor autoTopicWasClosed = false
 
@@ -408,13 +384,9 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     return this.openTopics.has(topic) || this.autoTopic === topic
   }
 
-  /** Open or close `topic`;  remembered unless searching.  A topic shut with motion on eases shut (`closingTopics`). */
+  /** Open or close `topic`;  remembered unless searching. */
   private toggleTopic(topic: string) {
     const isOpen = this.topicIsOpen(topic)
-    if (isOpen && matchMedia(MOTION_QUERY).matches) {
-      this.closingTopics = new Set(this.closingTopics).add(topic)
-      this.closeSoon(topic)
-    }
     if (this.isSearching) {
       this.topicsClosedForSearch = UIDocsNav.copyWith(this.topicsClosedForSearch, topic, isOpen ? "add" : "delete")
       return
@@ -423,41 +395,6 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     if (isOpen && topic === this.autoTopic) this.autoTopicWasClosed = true
     this.openTopics = topics
     NavPreferences.setOpenTopics(topics)
-  }
-
-  /**
-   * A topic's fold has eased shut:  stop rendering its rows.
-   * - NOT `transitioncancel`:  shutting a topic while it eases open cancels the opening,
-   *   and the closing that replaces it ends with its own `transitionend` (or none:  `closeSoon()`).
-   */
-  private onTransitionEnd(event: TransitionEvent) {
-    if (event.propertyName !== "grid-template-rows") return
-    const topic = (event.target as Element).getAttribute(DATA.fold)
-    if (topic !== null) this.finishClosing(topic)
-  }
-
-  /** `topic` no longer eases shut:  its rows go. */
-  private finishClosing(topic: string) {
-    const closing = this.closingTopics
-    if (!closing.has(topic)) return
-    const next = new Set(closing)
-    next.delete(topic)
-    this.closingTopics = next
-  }
-
-  /**
-   * `topic` was just shut:  if its fold isn't easing shut two frames on, it never will
-   * (shut mid-way through easing open, from the same height).
-   * No `transitionend` comes, so end its closing now.
-   */
-  private closeSoon(topic: string) {
-    E.beforeNextPaint(() => E.beforeNextPaint(() => this.closeIfStill(topic)))
-  }
-
-  /** `topic`'s fold isn't animating:  end its closing (`closeSoon()`). */
-  private closeIfStill(topic: string) {
-    const fold = this.box?.querySelector(`[${DATA.fold}="${CSS.escape(topic)}"]`)
-    if (!fold?.getAnimations().length) this.finishClosing(topic)
   }
 
   ////////////////
@@ -494,6 +431,126 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   }
 
   ////////////////
+  // ## The list, as pages
+  ////////////////
+
+  /**
+   * The whole list, as `<ui-site-nav>` takes it:  a heading band per group, the topics as subheading bands under
+   * Components, each component a page with its status badge and its star.
+   * - Every band says whether it's `open`:  the nav decides (a search opens what matches), not the site nav.
+   */
+  get navPages(): SiteNavPage[] {
+    const pages: SiteNavPage[] = []
+    const startPages = this.startPages
+    if (startPages.length)
+      pages.push(
+        this.band(
+          "start",
+          "getStarted",
+          startPages.map((page) => this.pagePage(page))
+        )
+      )
+    const favorites = this.favoriteRows
+    if (favorites.length) {
+      pages.push(
+        this.band(
+          FAVORITES,
+          "favorites",
+          favorites.map((row) => this.rowPage(row, FAVORITE_PREFIX))
+        )
+      )
+    }
+    const components = this.band("components", "components", this.componentPages)
+    if (this.navIndex) components.count = this.matchingTags.size
+    pages.push(components)
+    const foundationPages = this.foundationPages
+    if (foundationPages.length) {
+      pages.push(
+        this.band(
+          "foundation",
+          "foundation",
+          foundationPages.map((page) => this.pagePage(page))
+        )
+      )
+    }
+    return pages
+  }
+
+  /** The Components band's pages:  every matching component A-Z, or a subheading band per topic with a match. */
+  private get componentPages(): SiteNavPage[] {
+    const index = this.navIndex
+    if (!index) return []
+    if (this.view !== "topics") return this.azRows.map((row) => this.rowPage(row))
+    const matching = this.matchingTags
+    return index.topics.flatMap((topic) => {
+      const rows = topic.rows.filter((row) => matching.has(row.tag))
+      if (!rows.length) return []
+      return [
+        {
+          title: topic.title,
+          id: TOPIC_PREFIX + topic.id,
+          band: "subheading" as const,
+          count: rows.length,
+          open: this.topicIsOpen(topic.id),
+          pages: rows.map((row) => this.rowPage(row))
+        }
+      ]
+    })
+  }
+
+  /** A group's heading band:  its title, open as the viewer left it, holding `pages`. */
+  private band(group: NavGroup, title: DocsNavText, pages: SiteNavPage[]): SiteNavPage {
+    return {
+      title: this.groupTitle(group, title),
+      id: GROUP_PREFIX + group,
+      band: "heading",
+      open: this.groupIsOpen(group),
+      pages
+    }
+  }
+
+  /** A component's page:  its name, its link, its status badge, its star;  `prefix` keeps a second copy apart. */
+  private rowPage(row: NavRow, prefix = ""): SiteNavPage {
+    return {
+      title: row.name,
+      href: this.href(row.href),
+      id: prefix + row.tag,
+      badge: row.status ? this.translationForKey(row.status === "planned" ? "planned" : "inProgress") : undefined,
+      starred: this.favorites.has(row.tag)
+    }
+  }
+
+  /** A hand-written page's page:  its icon, its name, its link. */
+  private pagePage(page: NavPage): SiteNavPage {
+    return {
+      title: page.label ?? (page.text ? this.translationForKey(page.text) : page.id),
+      href: this.href(page.file),
+      id: page.id,
+      icon: page.icon
+    }
+  }
+
+  /** `group`'s band title:  the site's own (`SiteNav.titles`), else the vocabulary's `title`. */
+  private groupTitle(group: NavGroup, title: DocsNavText): string {
+    const titles = this.navIndex?.nav?.titles
+    const own = group === "favorites" ? undefined : titles?.[group]
+    return own ?? this.translationForKey(title)
+  }
+
+  /**
+   * The links above the components:  the site's own (`SiteDataFile.nav`), else Spell UI's (`TOP_PAGES`).
+   * - None until the data has loaded (Spell UI's if it fails), so another site never shows Spell UI's for a moment.
+   */
+  get startPages(): readonly NavPage[] {
+    return this.navIndex ? (this.navIndex.nav?.start ?? TOP_PAGES) : this.loadError ? TOP_PAGES : []
+  }
+
+  /** The links below the components, as `startPages`:  the site's own, else Spell UI's (`FOUNDATION_PAGES`). */
+  get foundationPages(): readonly NavPage[] {
+    return this.navIndex ? (this.navIndex.nav?.foundation ?? FOUNDATION_PAGES) : this.loadError ? FOUNDATION_PAGES : []
+  }
+
+  ////////////////
   // ## Rendering
   ////////////////
 
@@ -503,36 +560,28 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   /** The panel, while rendered. */
   private box: HTMLElement | undefined
 
+  /** The site nav that draws the list, while rendered. */
+  private siteNav: (HTMLElement & { revealCurrent(): void }) | undefined
+
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("nav")} ref={(element: HTMLElement) => this.wire(element)}>
         {this.masthead()}
-        <nav
-          part={this.partForName("menu")}
-          aria-label={this.attributes["aria-label"] ?? this.translationForKey("navLabel")}
-        >
-          {this.group({ group: "start", title: "getStarted", body: this.pages(this.startPages) })}
-          <Show when={this.favoriteRows.length}>
-            {this.group({
-              group: FAVORITES,
-              title: "favorites",
-              body: (
-                <ul class={[ROWS, FAVORITES]}>
-                  <For each={this.favoriteRows}>{(row) => this.row(row)}</For>
-                </ul>
-              )
-            })}
-          </Show>
-          {this.group({ group: "components", title: "components", body: this.components(), extra: this.count() })}
-          <Show when={this.foundationPages.length}>
-            {this.group({ group: "foundation", title: "foundation", body: this.pages(this.foundationPages) })}
-          </Show>
+        <div part={this.partForName("menu")} class={MENU}>
+          <ui-site-nav
+            ref={(element: HTMLElement) => (this.siteNav = element as HTMLElement & { revealCurrent(): void })}
+            appearance="nav"
+            label={this.attributes["aria-label"] ?? this.translationForKey("navLabel")}
+            current={this.markedPage}
+            pages={this.navPages}
+          />
+          {this.notes()}
           <Show when={this.slots.hasContent(this.slotForName("footer"))}>
             <div class={[SLOTTED, FOOTER]}>
               <slot name={this.slotForName("footer")} />
             </div>
           </Show>
-        </nav>
+        </div>
       </div>
     )
   }
@@ -569,38 +618,8 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     )
   }
 
-  /**
-   * One group:  its heading band (a `<button aria-expanded>` in an `<h2>`, the brand's sub-head band), then its fold.
-   * - The fold stays rendered while shut:
-   *   `inert` keeps its links out of reach, the sheet hides it once folded.
-   */
-  private group({ group, title, body, extra }: GroupProps): JSX.Element {
-    const isOpen = () => this.groupIsOpen(group)
-    const fold = GROUP_FOLD_ID + group
-    return (
-      <section class={[GROUP, group]}>
-        <h2 class={HEADING}>
-          <button
-            type="button"
-            class={BAND}
-            data-nav-group={group}
-            aria-expanded={isOpen() ? "true" : "false"}
-            aria-controls={fold}
-          >
-            <span class={UIT.TITLE}>{this.groupTitle(group, title)}</span>
-            {extra}
-            {this.chevron()}
-          </button>
-        </h2>
-        <div id={fold} class={[FOLD, { [OPEN]: isOpen() }]} inert={isOpen() ? undefined : ""}>
-          <div class={FOLDED}>{body}</div>
-        </div>
-      </section>
-    )
-  }
-
-  /** The Components group's body:  loading, the error, or the list (A-Z rows or the topics) and "no matches". */
-  private components(): JSX.Element {
+  /** Under the list:  loading, the load error, or "no matches". */
+  private notes(): JSX.Element {
     return (
       <Switch>
         <Match when={this.loadError}>
@@ -611,38 +630,10 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
         <Match when={!this.navIndex}>
           <p class={NOTE}>{this.translationForKey("loading")}</p>
         </Match>
-        <Match when={true}>
-          <Show
-            when={this.view === "topics"}
-            fallback={
-              <ul class={ROWS}>
-                <For each={this.azRows}>{(row) => this.row(row)}</For>
-              </ul>
-            }
-          >
-            <For each={this.navIndex!.topics}>{(topic, index) => this.topic(topic, index)}</For>
-          </Show>
-          <Show when={this.hasNoMatches}>
-            <p class={[NOTE, EMPTY]}>{this.translationForKey("noMatches")}</p>
-          </Show>
+        <Match when={this.hasNoMatches}>
+          <p class={[NOTE, EMPTY]}>{this.translationForKey("noMatches")}</p>
         </Match>
       </Switch>
-    )
-  }
-
-  /** The Components band's count:  how many components show. */
-  private count(): JSX.Element {
-    return (
-      <Show when={this.navIndex}>
-        <ui-label
-          part={this.partForName("count")}
-          size="mini"
-          aria-label={this.translationForKey("count", { count: this.matchingTags.size })}
-          appearance="circular"
-        >
-          {this.matchingTags.size}
-        </ui-label>
-      </Show>
     )
   }
 
@@ -661,186 +652,63 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     )
   }
 
-  /**
-   * One topic:  its band (an `<h3>`), and while open (or easing shut) its fold of matching rows;
-   * nothing when none match.
-   * - `rows` stays an explicit memo:  one per topic, made here for each item of a `<For>`.
-   */
-  private topic(topic: NavTopic, index: () => number): JSX.Element {
-    const rows = createMemo(() => topic.rows.filter((row) => this.matchingTags.has(row.tag)))
-    const isOpen = () => this.topicIsOpen(topic.id)
-    const fold = () => TOPIC_FOLD_ID + index()
-    return (
-      <Show when={rows().length}>
-        <h3 class={HEADING}>
-          <button
-            type="button"
-            class={[BAND, TOPIC]}
-            data-nav-topic={topic.id}
-            aria-expanded={isOpen() ? "true" : "false"}
-            aria-controls={isOpen() ? fold() : undefined}
-          >
-            <span class={UIT.TITLE}>{topic.title}</span>
-            <ui-label
-              class={COUNT}
-              size="mini"
-              aria-label={this.translationForKey("count", { count: rows().length })}
-              appearance="circular"
-            >
-              {rows().length}
-            </ui-label>
-            {this.chevron()}
-          </button>
-        </h3>
-        <Show when={isOpen() || this.closingTopics.has(topic.id)}>
-          <div
-            id={fold()}
-            class={[FOLD, TOPIC_ROWS, { [OPEN]: isOpen() }]}
-            data-nav-fold={topic.id}
-            inert={isOpen() ? undefined : ""}
-          >
-            <div class={FOLDED}>
-              <ul class={ROWS}>
-                <For each={rows()}>{(row) => this.row(row)}</For>
-              </ul>
-            </div>
-          </div>
-        </Show>
-      </Show>
-    )
-  }
-
-  /** One component:  its link (with a status badge) and its star. */
-  private row(row: NavRow): JSX.Element {
-    const isStarred = () => this.favorites.has(row.tag)
-    const isCurrent = () => this.currentRow === row
-    const label = () => this.translationForKey(isStarred() ? "removeFavorite" : "addFavorite", { name: row.name })
-    return (
-      <li class={ROW}>
-        <a
-          class={UIT.ITEM}
-          href={this.href(row.href)}
-          aria-current={isCurrent() ? "page" : undefined}
-          data-nav-link={row.tag}
-          data-nav-current={isCurrent() ? "" : undefined}
-        >
-          <span class={NAME}>{row.name}</span>
-          {row.status && (
-            <ui-label class={STATUS_BADGE} size="mini" color="yellow" appearance="basic">
-              {this.translationForKey(row.status === "planned" ? "planned" : "inProgress")}
-            </ui-label>
-          )}
-        </a>
-        <ui-button
-          class={STAR}
-          data-nav-star={row.tag}
-          toggle=""
-          selected={isStarred() ? "" : undefined}
-          icon={isStarred() ? ICONS.star : ICONS.starOutline}
-          size="mini"
-          aria-label={label()}
-          title={label()}
-          appearance="tertiary"
-        />
-      </li>
-    )
-  }
-
-  /**
-   * The links above the components:  the site's own (`SiteDataFile.nav`), else Spell UI's (`TOP_PAGES`).
-   * - None until the data has loaded (Spell UI's if it fails), so another site never shows Spell UI's for a moment.
-   */
-  get startPages(): readonly NavPage[] {
-    return this.navIndex ? (this.navIndex.nav?.start ?? TOP_PAGES) : this.loadError ? TOP_PAGES : []
-  }
-
-  /** The links below the components, as `startPages`:  the site's own, else Spell UI's (`FOUNDATION_PAGES`). */
-  get foundationPages(): readonly NavPage[] {
-    return this.navIndex ? (this.navIndex.nav?.foundation ?? FOUNDATION_PAGES) : this.loadError ? FOUNDATION_PAGES : []
-  }
-
-  /** `group`'s band title:  the site's own (`SiteNav.titles`), else the vocabulary's `title`. */
-  private groupTitle(group: NavGroup, title: DocsNavText): string {
-    const titles = this.navIndex?.nav?.titles
-    const own = group === "favorites" ? undefined : titles?.[group]
-    return own ?? this.translationForKey(title)
-  }
-
-  /** A list of hand-written pages' rows. */
-  private pages(pages: readonly NavPage[]): JSX.Element {
-    return (
-      <ul class={[ROWS, PAGES]}>
-        <For each={pages}>{(page) => this.pageRow(page)}</For>
-      </ul>
-    )
-  }
-
-  /** A hand-written page's row:  its icon and name. */
-  private pageRow(page: NavPage): JSX.Element {
-    const isCurrent = () => this.currentPage === page.id
-    return (
-      <li class={ROW}>
-        <a
-          class={UIT.ITEM}
-          href={this.href(page.file)}
-          aria-current={isCurrent() ? "page" : undefined}
-          data-nav-link={page.id}
-          data-nav-current={isCurrent() ? "" : undefined}
-        >
-          <span class={UIT.ICON}>
-            <ui-icon name={page.icon} />
-          </span>
-          <span class={NAME}>{page.label ?? (page.text ? this.translationForKey(page.text) : page.id)}</span>
-        </a>
-      </li>
-    )
-  }
-
-  /** A band's chevron (a box round the `<ui-icon>`, which is `display: contents`):  the sheet turns it while shut. */
-  private chevron(): JSX.Element {
-    return (
-      <span class={CHEVRON}>
-        <ui-icon name={ICONS.chevron} />
-      </span>
-    )
-  }
-
   ////////////////
   // ## Events
   ////////////////
 
-  /** Listeners on the panel:  clicks (delegated), the search box, the view switch, folds easing shut. */
+  /** Listeners on the panel:  the view switch, the search box, and the site nav's picks, folds and stars. */
   private wire(box: HTMLElement) {
     this.box = box
     box.addEventListener("click", (event) => this.onClick(event))
     box.addEventListener("ui-typed", (event) => this.onSearch(event as CustomEvent<{ value?: string }>))
     box.addEventListener("ui-selected", (event) => this.onToggle(event))
     box.addEventListener("ui-deselected", (event) => this.onToggle(event))
-    box.addEventListener("transitionend", (event) => this.onTransitionEnd(event))
+    box.addEventListener("ui-navigating", (event) => this.onNavigating(event as SiteNavEvent))
+    box.addEventListener("ui-opening", (event) => this.onFolding(event as SiteNavEvent))
+    box.addEventListener("ui-closing", (event) => this.onFolding(event as SiteNavEvent))
+    box.addEventListener("ui-starred", (event) => this.onStarred(event as SiteNavEvent))
   }
 
-  /** A click:  a star, a band, a view button, or a link (delegated, by `data-nav-*`). */
+  /** A click on a view button (by `data-nav-view`). */
   private onClick(event: MouseEvent) {
-    const target = UIDocsNav.dataTargetFor(event)
-    if (!target) return
-    const { element, name, value } = target
-    if (name === DATA.star) this.toggleFavorite({ tag: value, star: element, event })
-    else if (name === DATA.topic) this.toggleTopic(value)
-    else if (name === DATA.group) this.toggleGroup(NavGroups.find((group) => group === value))
-    else if (name === DATA.view)
+    const button = event
+      .composedPath()
+      .find((target): target is Element => target instanceof Element && target.hasAttribute(DATA.view))
+    const view = button?.getAttribute(DATA.view)
+    if (view)
       this.switchView(
-        NavViews.find((view) => view === value),
+        NavViews.find((each) => each === view),
         event
       )
-    else if (name === DATA.link) this.navigate(value, event)
   }
 
-  /** A link was followed:  `ui-navigating` for a plain left click;  vetoed, the browser stays. */
-  private navigate(page: string, event: MouseEvent) {
-    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
-    const link = event.composedPath().find((target): target is HTMLAnchorElement => target instanceof HTMLAnchorElement)
-    if (!link) return
-    if (!this.send("ui-navigating", { href: link.href, page, originalEvent: event })) event.preventDefault()
+  /**
+   * The site nav is going to a page:  the nav's own `ui-navigating` (`page` its tag or id) goes out in its place;
+   * cancelled, the browser stays.
+   */
+  private onNavigating(event: SiteNavEvent) {
+    if (event.target !== this.siteNav) return
+    event.stopPropagation()
+    const { href, page, originalEvent } = event.detail
+    if (!this.send("ui-navigating", { href: href ?? "", page: UIDocsNav.tagOf(page), originalEvent })) {
+      event.preventDefault()
+    }
+  }
+
+  /** A band of the site nav is opening or closing:  a group's or a topic's, so this nav's to remember. */
+  private onFolding(event: SiteNavEvent) {
+    if (event.target !== this.siteNav) return
+    event.stopPropagation()
+    const id = event.detail.page.id ?? ""
+    if (id.startsWith(GROUP_PREFIX)) this.toggleGroup(NavGroups.find((group) => GROUP_PREFIX + group === id))
+    else if (id.startsWith(TOPIC_PREFIX)) this.toggleTopic(id.slice(TOPIC_PREFIX.length))
+  }
+
+  /** A component's star was clicked, in its row or in Favourites. */
+  private onStarred(event: SiteNavEvent) {
+    if (event.target !== this.siteNav) return
+    event.stopPropagation()
+    this.toggleFavorite({ tag: UIDocsNav.tagOf(event.detail.page), event: event.detail.originalEvent ?? event })
   }
 
   ////////////////
@@ -855,83 +723,36 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     return next
   }
 
-  /** The nearest element on `event`'s path with one of the `DATA` attributes:  it, the attribute, its value. */
-  private static dataTargetFor(event: Event): { element: Element; name: string; value: string } | undefined {
-    for (const target of event.composedPath()) {
-      if (!(target instanceof Element)) continue
-      for (const name of CLICK_TARGETS) {
-        const value = target.getAttribute(name)
-        if (value !== null) return { element: target, name, value }
-      }
-    }
-    return undefined
-  }
-
-  /**
-   * Where `scroller`'s visible rows start, in the viewport:  the bottom of the group's band stuck at its top,
-   * else its own top.
-   */
-  private static bandEndIn(scroller: HTMLElement): number {
-    const { top } = scroller.getBoundingClientRect()
-    const stuck = [...scroller.querySelectorAll(`.${GROUP} > .${HEADING}`)]
-      .map((heading) => heading.getBoundingClientRect())
-      .find((band) => Math.abs(band.top - top) < 1)
-    return stuck?.bottom ?? top
-  }
-
-  /**
-   * The nearest scroll container of `element`, up the FLAT tree (slots, shadow hosts):
-   * one whose content overflows and may scroll.
-   * - Never the page's own scroller.
-   */
-  private static scrollerFor(element: Element): HTMLElement | undefined {
-    const page = document.scrollingElement
-    for (let node = E.flatParentFor(element); node && node !== page && node !== document.body;) {
-      if (node instanceof HTMLElement && node.scrollHeight > node.clientHeight) {
-        const overflow = getComputedStyle(node).overflowY
-        if (SCROLLING.has(overflow)) return node
-      }
-      node = E.flatParentFor(node)
-    }
-    return undefined
+  /** A component's tag from its page in the site nav:  its id, without the Favourites copy's prefix. */
+  private static tagOf(page: SiteNavPage): string {
+    const id = page.id ?? ""
+    return id.startsWith(FAVORITE_PREFIX) ? id.slice(FAVORITE_PREFIX.length) : id
   }
 }
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UIDocsNav extends E.AttributeValues<DocsNavVocabulary> {}
 
-/** What `UIDocsNav.group()` draws:  one group's band and fold. */
-type GroupProps = {
-  /** which group:  its class word, its fold's id, its `data-nav-group` */
-  group: NavGroup
-  /** the vocabulary text of its band's title */
-  title: DocsNavText
-  /** what folds away under the band */
-  body: JSX.Element
-  /** what the band shows after its title (the Components count) */
-  extra?: JSX.Element
-}
+/** What the site nav's `ui-navigating`, `ui-opening`, `ui-closing` and `ui-starred` carry. */
+type SiteNavEvent = CustomEvent<{ page: SiteNavPage; href?: string; originalEvent?: Event }>
 
-/** The Favourites group:  also the class word of its list, which `revealCurrent()` skips. */
+/** The Favourites group. */
 const FAVORITES: NavGroup = "favorites"
 
 /** Groups a search filters:  they open while searching. */
 const SEARCHED: ReadonlySet<NavGroup> = new Set([FAVORITES, "components"])
 
-/** The `DATA` attributes a click acts on, nearest first per element. */
-const CLICK_TARGETS = [DATA.star, DATA.topic, DATA.group, DATA.view, DATA.link]
+/** A group's band's page id:  + the `NavGroup`. */
+const GROUP_PREFIX = "group:"
 
-/** Id prefix of a group's fold, + the group:  its band's `aria-controls`. */
-const GROUP_FOLD_ID = "nav-group-"
+/** A topic's band's page id:  + the topic's id. */
+const TOPIC_PREFIX = "topic:"
 
-/** Id prefix of a topic's fold, + the topic's index. */
-const TOPIC_FOLD_ID = "nav-topic-"
+/** A Favourites row's page id:  + its tag, apart from its row in Components. */
+const FAVORITE_PREFIX = "favorite:"
 
-/** `overflow-y` values that make a box a scroll container. */
-const SCROLLING: ReadonlySet<string> = new Set(["auto", "scroll"])
-
-/** What every `ui-*` DOM element has, and plain elements don't:  its `ready` promise. */
-const READY = "ready"
+/** Class word of the scrolling list. */
+const MENU = "menu"
 
 /** Class word of the header band. */
 const MASTHEAD = "masthead"
@@ -945,42 +766,6 @@ const FOOTER = "footer"
 /** Class word of the box holding the search field and the view switch. */
 const TOOLS = "tools"
 
-/** Class word of a group (with its `NavGroup`). */
-const GROUP = "group"
-
-/** Class word of a fold (with `open` while open). */
-const FOLD = "fold"
-
-/** Class word of a fold's inner box, the one that clips. */
-const FOLDED = "folded"
-
-/** Class word of an open fold. */
-const OPEN = "open"
-
-/** Class word of a topic's band. */
-const TOPIC = "topic"
-
-/** Class word of a topic's fold. */
-const TOPIC_ROWS = "topic-rows"
-
-/** Class word of a topic band's count. */
-const COUNT = "count"
-
-/** Class word of the hand-written pages' lists. */
-const PAGES = "pages"
-
-/** Class word of a row's name. */
-const NAME = "name"
-
-/** Class word of a row's status badge. */
-const STATUS_BADGE = "status"
-
-/** Class word of a component's star. */
-const STAR = "star"
-
-/** Class word of a band's chevron box. */
-const CHEVRON = "chevron"
-
 /** Class word of a note in the list (loading, no matches). */
 const NOTE = "note"
 
@@ -990,14 +775,5 @@ const EMPTY = "empty"
 /** Class word of the load error's message. */
 const PROBLEM = "problem"
 
-/** Class word of a list of rows (`<ul>`). */
-const ROWS = "rows"
-
-/** Class word of one row (`<li>`):  a link, and a component's star. */
-const ROW = "row"
-
-/** Class word of a group's heading (`<h2>`;  a topic's `<h3>`). */
-const HEADING = "heading"
-
-/** Class word of a heading band (its fold button). */
-const BAND = "band"
+/** What every `ui-*` DOM element has, and plain elements don't:  its `ready` promise. */
+const READY = "ready"

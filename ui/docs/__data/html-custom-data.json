@@ -35497,7 +35497,7 @@
       "name": "ui-site-nav",
       "description": {
         "kind": "markdown",
-        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Events:**  `ui-navigating`"
+        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
       },
       "attributes": [
         {
@@ -35513,6 +35513,18 @@
             "kind": "markdown",
             "value": "What a screen reader calls the navigation.  None:  \"Site\".\n\nTakes:  text"
           }
+        },
+        {
+          "name": "appearance",
+          "description": {
+            "kind": "markdown",
+            "value": "`nav`:  the docs site's look, its pages a tree with `appearance=\"nav\"`:  taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.\n\nTakes:  `nav`"
+          },
+          "values": [
+            {
+              "name": "nav"
+            }
+          ]
         },
         {
           "name": "remember",
@@ -44689,6 +44701,18 @@
           }
         },
         {
+          "name": "appearance",
+          "description": {
+            "kind": "markdown",
+            "value": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.\n\nTakes:  `nav`"
+          },
+          "values": [
+            {
+              "name": "nav"
+            }
+          ]
+        },
+        {
           "name": "sticky-path",
           "description": {
             "kind": "markdown",
@@ -45229,6 +45253,35 @@
           "description": {
             "kind": "markdown",
             "value": "It only holds rows:  a click opens or closes it, and it's never selected.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "band",
+          "description": {
+            "kind": "markdown",
+            "value": "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it.\n\nTakes:  `heading` · `subheading`"
+          },
+          "values": [
+            {
+              "name": "heading"
+            },
+            {
+              "name": "subheading"
+            }
+          ]
+        },
+        {
+          "name": "count",
+          "description": {
+            "kind": "markdown",
+            "value": "A number in a small round label after its words:  how many rows are inside it, say.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "badge",
+          "description": {
+            "kind": "markdown",
+            "value": "A word in a small label after its words:  `Planned`, `In progress`.\n\nTakes:  text"
           }
         },
         {

@@ -29913,17 +29913,46 @@ export interface UISiteNavEventMap {
     page: { title: string; href?: string; id?: string }
     originalEvent?: Event
   }>
+  /**
+   * `ui-opening`:  A page's row is about to open:  cancel it to keep it closed.
+   * - `event.detail`:  `{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-opening": CustomEvent<{
+    page: { title: string; href?: string; id?: string }
+    open: boolean
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-closing`:  A page's row is about to close:  cancel it to keep it open.
+   * - `event.detail`:  `{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{
+    page: { title: string; href?: string; id?: string }
+    open: boolean
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-starred`:  A page's star was clicked:  `starred` is what the person asked for.  The page decides, and hands the nav its pages again with the new `starred`.
+   * - `event.detail`:  `{ page: { title: string, href?: string, id?: string }, starred: boolean, originalEvent?: Event }`
+   */
+  "ui-starred": CustomEvent<{
+    page: { title: string; href?: string; id?: string }
+    starred: boolean
+    originalEvent?: Event
+  }>
 }
 
 /** `<ui-site-nav>`'s own attributes, from its vocabulary. */
 export interface UISiteNavAttributes {
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` (open or closed, whatever the person did:  the page decides).
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   pages?: unknown
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` (open or closed, whatever the person did:  the page decides).
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `pages` -- `prop:` stays only for compiled spell
    */
@@ -29948,6 +29977,16 @@ export interface UISiteNavAttributes {
    * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
   "prop:label"?: string
+  /**
+   * `nav`:  the docs site's look, its pages a tree with `appearance="nav"`:  taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.
+   * - takes:  `nav`
+   */
+  appearance?: "nav"
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: "nav"
   /**
    * Keep which pages are open for each person, under this name, across reloads and visits.  None:  only for as long as the page is open.
    * - takes:  text
@@ -30116,6 +30155,23 @@ export interface UISiteNavAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-navigating"?: (event: UISiteNavEventMap["ui-navigating"]) => void
+  /**
+   * `ui-opening`:  A page's row is about to open:  cancel it to keep it closed.
+   * - `event.detail`:  `{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-opening"?: (event: UISiteNavEventMap["ui-opening"]) => void
+  /**
+   * `ui-closing`:  A page's row is about to close:  cancel it to keep it open.
+   * - `event.detail`:  `{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UISiteNavEventMap["ui-closing"]) => void
+  /**
+   * `ui-starred`:  A page's star was clicked:  `starred` is what the person asked for.  The page decides, and hands the nav its pages again with the new `starred`.
+   * - `event.detail`:  `{ page: { title: string, href?: string, id?: string }, starred: boolean, originalEvent?: Event }`
+   */
+  "on-ui-starred"?: (event: UISiteNavEventMap["ui-starred"]) => void
 }
 
 /** `<ui-site-nav>` in JSX:  its own attributes, and HTML's global ones. */
@@ -37618,6 +37674,16 @@ export interface UITreeAttributes {
    */
   "prop:label"?: string
   /**
+   * `nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.
+   * - takes:  `nav`
+   */
+  appearance?: "nav"
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: "nav"
+  /**
    * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
    * - takes:  flag (present / absent)
    */
@@ -38137,6 +38203,36 @@ export interface UITreeItemAttributes {
    * @deprecated write `group` -- `prop:` stays only for compiled spell
    */
   "prop:group"?: boolean | ""
+  /**
+   * The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it.
+   * - takes:  `heading` · `subheading`
+   */
+  band?: "heading" | "subheading"
+  /**
+   * `band`, as the DOM element's property.
+   * @deprecated write `band` -- `prop:` stays only for compiled spell
+   */
+  "prop:band"?: "heading" | "subheading"
+  /**
+   * A number in a small round label after its words:  how many rows are inside it, say.
+   * - takes:  text
+   */
+  count?: string
+  /**
+   * `count`, as the DOM element's property.
+   * @deprecated write `count` -- `prop:` stays only for compiled spell
+   */
+  "prop:count"?: string
+  /**
+   * A word in a small label after its words:  `Planned`, `In progress`.
+   * - takes:  text
+   */
+  badge?: string
+  /**
+   * `badge`, as the DOM element's property.
+   * @deprecated write `badge` -- `prop:` stays only for compiled spell
+   */
+  "prop:badge"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -40342,7 +40438,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-site-nav>`:  A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.
        * - also known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree
-       * - events:  `ui-navigating`
+       * - events:  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`
        */
       "ui-site-nav": UISiteNavJSXAttributes
       /**
@@ -40650,6 +40746,7 @@ export interface UIEventMap {
   "ui-replied": CustomEvent<unknown>
   "ui-animated": CustomEvent<unknown>
   "ui-navigating": CustomEvent<unknown>
+  "ui-starred": CustomEvent<unknown>
   "ui-moved": CustomEvent<unknown>
   "ui-stuck": CustomEvent<unknown>
   "ui-unstuck": CustomEvent<unknown>

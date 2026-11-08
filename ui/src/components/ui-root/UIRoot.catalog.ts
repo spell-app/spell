@@ -1285,7 +1285,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-site-nav": {
     folder: "ui-site-nav",
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
-    attributes: ["pages", "current", "label", "remember"]
+    attributes: ["pages", "current", "label", "appearance", "remember"]
   },
   "ui-slider": {
     folder: "ui-slider",
@@ -1593,7 +1593,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
-    attributes: ["choose", "filter", "label", "sticky-path"]
+    attributes: ["choose", "filter", "label", "appearance", "sticky-path"]
   },
   "ui-tree-diagram": {
     folder: "ui-tree-diagram",
@@ -1603,7 +1603,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree-item": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "line" }] },
-    attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group"]
+    attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group", "band", "count", "badge"]
   },
   "ui-tree-node": {
     folder: "ui-tree-diagram",

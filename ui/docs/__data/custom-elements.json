@@ -31378,6 +31378,14 @@
               "fieldName": "label"
             },
             {
+              "name": "appearance",
+              "description": "`nav`:  the docs site's look, its pages a tree with `appearance=\"nav\"`:  taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.",
+              "type": {
+                "text": "\"nav\""
+              },
+              "fieldName": "appearance"
+            },
+            {
               "name": "remember",
               "description": "Keep which pages are open for each person, under this name, across reloads and visits.  None:  only for as long as the page is open.",
               "type": {
@@ -31454,7 +31462,7 @@
             {
               "kind": "field",
               "name": "pages",
-              "description": "The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ \"title\": \"Films\", \"href\": \"/films\" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  A JS property (rich data), not an attribute.",
+              "description": "The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ \"title\": \"Films\", \"href\": \"/films\" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` (open or closed, whatever the person did:  the page decides).  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -31466,6 +31474,27 @@
               "description": "A page was picked, and the browser is about to go there:  cancel it to show the page yourself (a site that shows its pages without loading another).  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ href: string, page: { title: string, href?: string, id?: string }, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-opening",
+              "description": "A page's row is about to open:  cancel it to keep it closed.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-closing",
+              "description": "A page's row is about to close:  cancel it to keep it open.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-starred",
+              "description": "A page's star was clicked:  `starred` is what the person asked for.  The page decides, and hands the nav its pages again with the new `starred`.",
+              "type": {
+                "text": "CustomEvent<{ page: { title: string, href?: string, id?: string }, starred: boolean, originalEvent?: Event }>"
               }
             }
           ],
@@ -38822,6 +38851,14 @@
               "fieldName": "label"
             },
             {
+              "name": "appearance",
+              "description": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.",
+              "type": {
+                "text": "\"nav\""
+              },
+              "fieldName": "appearance"
+            },
+            {
               "name": "sticky-path",
               "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.",
               "type": {
@@ -39013,6 +39050,30 @@
             {
               "name": "--ui-tree-path-background",
               "default": "var(--ui-background)"
+            },
+            {
+              "name": "--ui-tree-nav-border-color",
+              "default": "light-dark(color-mix(in oklab, var(--ui-brown-background), var(--ui-brown) 9%), var(--ui-border-color))"
+            },
+            {
+              "name": "--ui-tree-nav-band-background",
+              "default": "color-mix(in oklab, var(--ui-brown-background) 50%, light-dark(#fffdf8, var(--ui-surface)))"
+            },
+            {
+              "name": "--ui-tree-nav-band-color",
+              "default": "var(--ui-brown-text)"
+            },
+            {
+              "name": "--ui-tree-nav-subheading-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-tree-nav-current-background",
+              "default": "light-dark(var(--ui-primary-background), var(--ui-primary))"
+            },
+            {
+              "name": "--ui-tree-nav-current-color",
+              "default": "light-dark(var(--ui-primary-text), var(--ui-primary-on))"
             }
           ]
         },
@@ -39087,6 +39148,30 @@
                 "text": "boolean"
               },
               "fieldName": "group"
+            },
+            {
+              "name": "band",
+              "description": "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it.",
+              "type": {
+                "text": "\"heading\" | \"subheading\""
+              },
+              "fieldName": "band"
+            },
+            {
+              "name": "count",
+              "description": "A number in a small round label after its words:  how many rows are inside it, say.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "count"
+            },
+            {
+              "name": "badge",
+              "description": "A word in a small label after its words:  `Planned`, `In progress`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "badge"
             },
             {
               "name": "disabled",
@@ -39202,6 +39287,14 @@
               "description": "Its words."
             },
             {
+              "name": "count",
+              "description": "Its `count`'s label."
+            },
+            {
+              "name": "badge",
+              "description": "Its `badge`'s label."
+            },
+            {
               "name": "group",
               "description": "The box around the rows inside it."
             }
@@ -39222,6 +39315,10 @@
             {
               "name": "filtered-out",
               "description": "The tree's `filter` hides it."
+            },
+            {
+              "name": "nav",
+              "description": "Its tree's `appearance` is `nav`:  it takes the side navigation's look."
             },
             {
               "name": "disabled",

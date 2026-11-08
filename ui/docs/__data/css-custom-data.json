@@ -10180,6 +10180,48 @@
       }
     },
     {
+      "name": "--ui-tree-nav-border-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `light-dark(color-mix(in oklab, var(--ui-brown-background), var(--ui-brown) 9%), var(--ui-border-color))`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-band-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `color-mix(in oklab, var(--ui-brown-background) 50%, light-dark(#fffdf8, var(--ui-surface)))`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-band-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-brown-text)`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-subheading-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-text-muted)`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-current-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `light-dark(var(--ui-primary-background), var(--ui-primary))`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-current-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `light-dark(var(--ui-primary-text), var(--ui-primary-on))`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",
@@ -10381,7 +10423,7 @@
       "name": "::part(badge)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-action>`:  Menu:  the box around the `badge` slot.\n- `<ui-item>`:  Menu:  the box around the `badge` slot.\n- `<ui-panel>`:  The badge pill.\n- `<ui-property-editor>`:  The badge pill.\n- `<ui-property-group>`:  The badge pill.\n- `<ui-section>`:  The badge pill."
+        "value": "Part of:\n\n- `<ui-action>`:  Menu:  the box around the `badge` slot.\n- `<ui-item>`:  Menu:  the box around the `badge` slot.\n- `<ui-panel>`:  The badge pill.\n- `<ui-property-editor>`:  The badge pill.\n- `<ui-property-group>`:  The badge pill.\n- `<ui-section>`:  The badge pill.\n- `<ui-tree-item>`:  Its `badge`'s label."
       }
     },
     {
@@ -10585,6 +10627,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-code>`:  The copy button."
+      }
+    },
+    {
+      "name": "::part(count)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree-item>`:  Its `count`'s label."
       }
     },
     {
@@ -12449,6 +12498,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-field>`:  The things being edited disagree on this value (`mixed`).\n- `<ui-property>`:  The things being edited disagree on this value (`mixed`)."
+      }
+    },
+    {
+      "name": ":state(nav)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-tree-item>`:  Its tree's `appearance` is `nav`:  it takes the side navigation's look."
       }
     },
     {

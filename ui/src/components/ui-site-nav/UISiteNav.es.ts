@@ -13,5 +13,6 @@ export const siteNavEs = {
   aka: ["navegacion lateral", "menu lateral", "mapa del sitio", "arbol de paginas"],
   attributes: { pages: "paginas", current: "actual", remember: "recordar" },
   parts: { nav: "navegacion", tree: "arbol" },
-  texts: { label: "Sitio" }
+  events: { "ui-starred": "ui-marcado" },
+  texts: { label: "Sitio", star: "Agregar {title} a favoritos", unstar: "Quitar {title} de favoritos" }
 } as const satisfies E.TagDictionary

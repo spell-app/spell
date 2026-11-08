@@ -84,6 +84,17 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-nav" label="Nav" sticky="stack" collapsible dividing>
+                <ui-example description="`appearance=&quot;nav&quot;` draws it as the docs site's side navigation does:  a page's `band` is a heading band over its pages (`heading`, or a lighter `subheading`), `count` and `badge` label its title, and `starred` gives it a star, which sends `ui-starred`.">
+                  <ui-site-nav
+                    appearance="nav"
+                    style="max-width: 16em"
+                    pages='[{ "title": "Get started", "band": "heading", "open": true, "pages": [{ "title": "Overview", "icon": "house", "href": "index.html" }] }, { "title": "Components", "band": "heading", "count": 3, "open": true, "pages": [{ "title": "Forms", "band": "subheading", "count": 2, "open": true, "pages": [{ "title": "Input", "href": "ui-input.html", "starred": true }, { "title": "Calendar", "href": "ui-calendar.html", "badge": "in progress", "starred": false }] }, { "title": "Lists", "band": "subheading", "count": 1, "pages": [{ "title": "Tree", "href": "ui-tree.html", "starred": false }] }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+            </ui-section>
             <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
               <ui-section id="examples-states-remembered" label="Remembered" sticky="stack" collapsible dividing>
                 <ui-example description="With `remember`, the pages a person opens and closes stay so when they come back:  open one, then reload the page.">

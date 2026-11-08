@@ -29980,7 +29980,7 @@
           "name": "pages",
           "kind": "json",
           "reflect": false,
-          "description": "The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ \"title\": \"Films\", \"href\": \"/films\" }]`.  A page with no `href` only holds pages:  a click opens or closes it."
+          "description": "The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ \"title\": \"Films\", \"href\": \"/films\" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` (open or closed, whatever the person did:  the page decides)."
         },
         {
           "name": "current",
@@ -29991,6 +29991,14 @@
           "name": "label",
           "kind": "string",
           "description": "What a screen reader calls the navigation.  None:  \"Site\"."
+        },
+        {
+          "name": "appearance",
+          "kind": "valueOnly",
+          "values": [
+            "nav"
+          ],
+          "description": "`nav`:  the docs site's look, its pages a tree with `appearance=\"nav\"`:  taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands."
         },
         {
           "name": "remember",
@@ -30108,6 +30116,23 @@
           "detail": "{ href: string, page: { title: string, href?: string, id?: string }, originalEvent?: Event }",
           "cancelable": true,
           "description": "A page was picked, and the browser is about to go there:  cancel it to show the page yourself (a site that shows its pages without loading another)."
+        },
+        {
+          "name": "ui-opening",
+          "detail": "{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "A page's row is about to open:  cancel it to keep it closed."
+        },
+        {
+          "name": "ui-closing",
+          "detail": "{ page: { title: string, href?: string, id?: string }, open: boolean, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "A page's row is about to close:  cancel it to keep it open."
+        },
+        {
+          "name": "ui-starred",
+          "detail": "{ page: { title: string, href?: string, id?: string }, starred: boolean, originalEvent?: Event }",
+          "description": "A page's star was clicked:  `starred` is what the person asked for.  The page decides, and hands the nav its pages again with the new `starred`."
         }
       ],
       "parts": [
@@ -30163,6 +30188,16 @@
           "key": "label",
           "text": "Site",
           "description": "What a screen reader calls the navigation, without `label`."
+        },
+        {
+          "key": "star",
+          "text": "Add {title} to favourites",
+          "description": "A page's star, not starred."
+        },
+        {
+          "key": "unstar",
+          "text": "Remove {title} from favourites",
+          "description": "A page's star, starred."
         }
       ],
       "mainTag": "ui-site-nav",
@@ -38648,6 +38683,14 @@
           "description": "What a screen reader calls the tree."
         },
         {
+          "name": "appearance",
+          "kind": "valueOnly",
+          "values": [
+            "nav"
+          ],
+          "description": "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands."
+        },
+        {
           "name": "sticky-path",
           "kind": "keyOnly",
           "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight."
@@ -39181,6 +39224,25 @@
           "description": "It only holds rows:  a click opens or closes it, and it's never selected."
         },
         {
+          "name": "band",
+          "kind": "valueOnly",
+          "values": [
+            "heading",
+            "subheading"
+          ],
+          "description": "The row is a heading band over the rows inside it, in a tree whose `appearance` is `nav`:  `heading`, a tinted band that stays at the top while its rows scroll;  `subheading`, a lighter one inside it."
+        },
+        {
+          "name": "count",
+          "kind": "string",
+          "description": "A number in a small round label after its words:  how many rows are inside it, say."
+        },
+        {
+          "name": "badge",
+          "kind": "string",
+          "description": "A word in a small label after its words:  `Planned`, `In progress`."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -39330,6 +39392,14 @@
           "description": "Its words."
         },
         {
+          "name": "count",
+          "description": "Its `count`'s label."
+        },
+        {
+          "name": "badge",
+          "description": "Its `badge`'s label."
+        },
+        {
           "name": "group",
           "description": "The box around the rows inside it."
         }
@@ -39350,6 +39420,10 @@
         {
           "name": "filtered-out",
           "description": "The tree's `filter` hides it."
+        },
+        {
+          "name": "nav",
+          "description": "Its tree's `appearance` is `nav`:  it takes the side navigation's look."
         },
         {
           "name": "disabled",
@@ -44265,27 +44339,9 @@
           "type": "color"
         },
         {
-          "name": "--ui-docs-nav-row-weight",
-          "default": "500",
-          "description": "Weight of a row's text (the brand's UI weight).",
-          "type": "number"
-        },
-        {
-          "name": "--ui-docs-nav-row-radius",
-          "default": "var(--ui-radius-m)",
-          "description": "Corner radius of a row.",
-          "type": "length"
-        },
-        {
           "name": "--ui-docs-nav-row-hover-background",
           "default": "oklch(from var(--ui-text-dark) l c h / 0.06)",
           "description": "Fill of a hovered row (`--surface-tint`): the ink, faint.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-nav-row-hover-color",
-          "default": "var(--ui-text-dark)",
-          "description": "Text colour of a hovered row (`--text-strong`).",
           "type": "color"
         },
         {
@@ -44299,42 +44355,6 @@
           "default": "light-dark(var(--ui-primary-text), var(--ui-primary-on))",
           "description": "Text colour of the current page's row (`--text-accent`; dark: ink on the solid fill).",
           "type": "color"
-        },
-        {
-          "name": "--ui-docs-nav-icon-color",
-          "default": "var(--ui-text-muted)",
-          "description": "Colour of a page row's icon and a band's chevron.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-nav-star-color",
-          "default": "var(--ui-yellow)",
-          "description": "Colour of a starred component's star.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-nav-star-opacity",
-          "default": "0",
-          "description": "Opacity of an unstarred star at rest, where the device hovers: it shows on its row's hover or focus.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-nav-open-duration",
-          "default": "320ms",
-          "description": "How long a fold takes to ease open (the brand's 320ms).",
-          "type": "time"
-        },
-        {
-          "name": "--ui-docs-nav-close-duration",
-          "default": "140ms",
-          "description": "How long a fold takes to ease shut (the brand's 140ms).",
-          "type": "time"
-        },
-        {
-          "name": "--ui-docs-nav-ease",
-          "default": "var(--ui-ease-out)",
-          "description": "Easing of a fold (the brand's `cubic-bezier(.22, 1, .36, 1)`, the Spell theme's `--ui-ease-out`).",
-          "type": "other"
         }
       ]
     },
@@ -51664,6 +51684,36 @@
         {
           "name": "--ui-tree-path-background",
           "default": "var(--ui-background)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-border-color",
+          "default": "light-dark(color-mix(in oklab, var(--ui-brown-background), var(--ui-brown) 9%), var(--ui-border-color))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-band-background",
+          "default": "color-mix(in oklab, var(--ui-brown-background) 50%, light-dark(#fffdf8, var(--ui-surface)))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-band-color",
+          "default": "var(--ui-brown-text)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-subheading-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-current-background",
+          "default": "light-dark(var(--ui-primary-background), var(--ui-primary))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-current-color",
+          "default": "light-dark(var(--ui-primary-text), var(--ui-primary-on))",
           "type": "color"
         }
       ]
