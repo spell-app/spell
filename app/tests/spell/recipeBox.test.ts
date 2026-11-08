@@ -2231,6 +2231,90 @@ the published sheet is a projection of the sign up sheet:
     )
   })
 
+  describe("a feed, the built-in Feed (epic `atmosphere` P33)", () => {
+    /** Spell's own org, in this spell.spaces:  Ana paints and argues, Cy organizes, Bo reads. */
+    const EMAILS = { ana: "ana.feed@example.com", bo: "bo.feed@example.com", cy: "cy.feed@example.com" }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships, at Spell's own org, checked often;  its ranking Bo's, naming Ana as the invite made her. */
+    const feed = (): Program => {
+      const program = withPlace(
+        shipped("OrgFeed/OrgFeed.api.spell"),
+        `my feed is a data folder at "@spell/__feed":
+	- check it every 2 seconds`
+      )
+      const more = program.more!.map((each) => ({
+        ...each,
+        contents: each.contents.replaceAll('"ana@rs"', `"${address.ana}"`)
+      }))
+      return { ...program, more }
+    }
+    /** The texts of the posts in `section` of `page`. */
+    const postsIn = (page: Page, section: string) =>
+      page
+        .locator(`ui-segment.${section} ui-segment.post ui-text.text`)
+        .evaluateAll((texts) => texts.map((text) => text.textContent ?? ""))
+    /** As `who`, post `fields` as `id` in the space at `space`. */
+    async function post(who: string, space: string, id: string, fields: Record<string, string>) {
+      const place = (await spaceFolders.placeFor(space, address[who]))!
+      await place.apply!([{ kind: "insert", collection: "posts", id, fields: { id, ...fields } }], {
+        identity: address[who]!
+      })
+    }
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      const org = await people.org("spell")
+      const known = new Set((org?.members.items ?? []).map((each) => people.addressOf(each.person!)))
+      const members = [
+        ...(org?.members.items ?? []).map((each) => ({
+          $type: "Membership",
+          person: { $ref: `Person#${people.addressOf(each.person!)}` },
+          role: each.role
+        })),
+        ...Object.values(address)
+          .filter((each) => !known.has(each))
+          .map((each) => ({ $type: "Membership", person: { $ref: `Person#${each}` }, role: "editor" }))
+      ]
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members })
+      )
+      const roles = spaceFolders.orgRoles
+      if (!(await roles.terms("spell")).length) await roles.setUp("spell", { board: address.ana! })
+      await post("cy", "@spell/feed-news", "n-1", { text: "Picnic on Saturday", topic: "events", posted: "2026-11-01" })
+      await post("ana", `${address.ana}/posts`, "a-1", { text: "A new painting", topic: "art", posted: "2026-11-02" })
+      await post("ana", `${address.ana}/posts`, "a-2", {
+        text: "Vote on Tuesday",
+        topic: "politics",
+        posted: "2026-11-03"
+      })
+    })
+
+    test(
+      "Bo opens his feed:  Ana's art at the top, her politics left out, the rest newest first;  a new post shows",
+      { timeout: 120_000 },
+      async () => {
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        const bo = await deviceOn("feed-bo", feed())
+        await signIn(bo.bar, EMAILS.bo)
+        await bo.page.reload()
+        await expect.poll(() => postsIn(bo.page, "favourites"), { timeout: 20_000 }).toEqual(["A new painting"])
+        await expect.poll(() => postsIn(bo.page, "everything"), { timeout: 20_000 }).toEqual(["Picnic on Saturday"])
+        expect(await bo.page.locator("ui-segment.post", { hasText: "Vote on Tuesday" }).count()).toBe(0)
+        await bo.page.screenshot({ path: join(shots, "org-feed.png"), fullPage: true })
+
+        await post("cy", "@spell/feed-news", "n-2", { text: "Who has a grill?", topic: "events", posted: "2026-11-05" })
+        await expect
+          .poll(() => postsIn(bo.page, "everything"), { timeout: 20_000 })
+          .toEqual(["Who has a grill?", "Picnic on Saturday"])
+        expect(bo.problems).toEqual([])
+        await bo.close()
+      }
+    )
+  })
+
   describe("an inbox, the built-in Inbox (epic `atmosphere` P29)", () => {
     /** Spell's own org, in this spell.spaces:  Ana writes to Bo and Cy. */
     const EMAILS = { ana: "ana.inbox@example.com", bo: "bo.inbox@example.com", cy: "cy.inbox@example.com" }

@@ -31,7 +31,8 @@ export const SPACE_NAMES = [
   "__admin",
   "__private",
   "__inbox",
-  "__attendees"
+  "__attendees",
+  "__feed"
 ] as const
 
 /**
@@ -57,6 +58,17 @@ export const PRIVATE_SPACE = "__private"
  *   reads each person's own (`SpaceFolders`).
  */
 export const INBOX_SPACE = "__inbox"
+
+/**
+ * A person's FEED in an org (epic `atmosphere` P33):  `ana@rs/__feed`, what's new across every space of the org she
+ * may read, put together as she asks (the app's `PersonFeed`);  no folder holds it.
+ * - One of spaces' own names, so no project or folder of her own space can take it.
+ * - `@rs/__feed`, the org's address with no person, stands for whoever's asking, as the inbox's does (`SpaceFolders`).
+ */
+export const FEED_SPACE = "__feed"
+
+/** The collection a feed reads from each space, and answers as (epic `atmosphere` P33):  a post's, by the kit's rules. */
+export const FEED_POSTS = "posts"
 
 /**
  * An event's ATTENDEES' SPACE, a third beside a project's two (epic `atmosphere` P31):  `picnic@rs/__attendees/`,

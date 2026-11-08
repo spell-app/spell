@@ -1,0 +1,15 @@
+## Feed:  what's new across your org
+// Everyone in an org has a feed there:  "@rs/__feed" is yours in the Rock Society, whoever you are.
+// It's every post in every space of RS you may read, each read as you;  a quiet event's are left out.
+// Your org's feed page names its own org on the next line.
+my feed is a data folder at "@rs/__feed":
+	- check it every 30 seconds
+
+// A post, as its space has it:  who wrote it, what about, when, and where it's from.
+a "post" is a thing:
+	- it lives in my feed
+	- its "text" is text
+	- its "topic" is text
+	- its "posted" is text
+	- its "by" is text
+	- its "space" is text

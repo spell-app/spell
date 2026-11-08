@@ -932,6 +932,14 @@ export const ORG_ROLES_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__admin\/(?:roles|eve
  */
 export const PERSON_INBOX_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__inbox(\/|$)/i
 
+/**
+ * Whoever's asking's own FEED in an org (epic `atmosphere` P33):  `@rs/__feed`, the org's address with no person.
+ * - What's new across every space of the org they may read, put together by the app's `PersonFeed`:  each space read as
+ *   them, so its own read check holds.
+ * - So it's never read direct (`spaceReadAddressFor()`):  one read address would be everyone's, and no folder holds it.
+ */
+export const PERSON_FEED_ADDRESS = /^@([a-z0-9][a-z0-9_-]*)\/__feed$/i
+
 /** The folder of a space or a project that holds its data:  `owen@spell/__data/recipes`, a reserved name in spaces. */
 export const DATA_FOLDER = "__data"
 
@@ -1166,15 +1174,16 @@ export const PLACE_CREDENTIAL = "credential"
 /**
  * Where the project data folder written at `address` is read directly:  `undefined` for one that's no space's own.
  * - Only a space's own folder (`"its members"`, `whoWritesFolderAt()`):  a program's own data stays read through
- *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox
- *   (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`).
+ *   Spell's server, which shows each person what's theirs;  so do an org's roles, and whoever's asking's inbox and
+ *   feed (`ORG_ROLES_ADDRESS`, `PERSON_INBOX_ADDRESS`, `PERSON_FEED_ADDRESS`).
  * - `/api/places/spaces/@family/cookbook` => `/api/reads/spaces/@family/cookbook`, its origin kept.
  */
 export function spaceReadAddressFor(address: string): string | undefined {
   if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
   const [path = ""] = address.split(/[?#]/)
   const name = path.slice(path.indexOf(`${SPACE_FOLDERS_PREFIX}/`) + SPACE_FOLDERS_PREFIX.length + 1)
-  if (ORG_ROLES_ADDRESS.test(name) || PERSON_INBOX_ADDRESS.test(name)) return undefined
+  if (ORG_ROLES_ADDRESS.test(name) || PERSON_INBOX_ADDRESS.test(name) || PERSON_FEED_ADDRESS.test(name))
+    return undefined
   return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
 }
 

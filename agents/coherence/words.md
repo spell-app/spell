@@ -187,6 +187,16 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   (`editor.showNotice()`'s line on screen is a notice).
 - **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29 and P30.
 
+### feed, ranking
+
+- **Say:**  feed, for what's new across every space of an org a person may read, put together as they ask
+  (`ana@rs/__feed`;  in code `PersonFeed`, never `Feed` alone);  each thing in it a post.
+  - ranking:  what a feed's program says each post is worth to its reader, `weight` in the built-in Feed;
+    changed by changing their own copy of the program
+- **Not:**  timeline, stream, news;  "following", which is a subscription to one space (above);
+  a feed is no space and has no folder.
+- **Decided:**  epic `atmosphere` P33.
+
 ### an org's event, its stages
 
 - **Say:**  event, for something an org runs (RS's picnic), from someone's proposal to a quiet record;

@@ -228,13 +228,15 @@ export class MemberLists {
   /**
    * Every space's own folder under org `org`'s, by address:  each with a list or settings of its own (`SPACE_MARKS`).
    * - `@rs/minutes`, `@rs/__private/budget`, `events_team@rs/2026-q4/__private/notes`, `ana@rs/recipes`
+   * - `marks`:  what in a folder makes it one;  a person's feed (`PersonFeed`, P33) asks for every folder holding posts,
+   *   `["posts.list.json"]`.
    */
-  private async spacesOf(org: string): Promise<string[]> {
+  async spacesOf(org: string, marks: readonly string[] = SPACE_MARKS): Promise<string[]> {
     const storage = this.people.storage
     const found: string[] = []
     const walk = async (path: string, depth: number): Promise<void> => {
       const names = await storage.list(path)
-      if (depth && names.some((name) => SPACE_MARKS.includes(name))) found.push(addressFor(org, path))
+      if (depth && names.some((name) => marks.includes(name))) found.push(addressFor(org, path))
       if (depth >= MOST_DEPTH) return
       for (const name of names) {
         if (!name.endsWith("/") || (name.startsWith("__") && !SPACE_FOLDERS_UNDER.has(name))) continue

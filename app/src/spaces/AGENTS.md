@@ -342,6 +342,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Through the ONE mail seam (`Mailer`), the same catcher as the sign-in's (`environment.signInDir`'s `mail/`), until
       P18's sender;  through the ONE retry queue (Q19 A), on the server's disk.
     - Made by `SpaceFolders` when it's handed a `mailer` (the page server and the cloud);  without one, no mail.
+  - A PERSON'S FEED in the org ([PersonFeed.ts](server/node/places/PersonFeed.ts), epic `atmosphere` P33):
+    `bo@rs/__feed`, what's new across every space of the org he may read, put together each time he asks.
+    - `@rs/__feed`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
+      `PERSON_FEED_ADDRESS`, never read direct):  one program, each person's feed, the built-in `@spell/examples/OrgFeed`.
+    - Every space's `posts` (`FEED_POSTS`), each read through its own place AS HIM:  its read check, takedowns and
+      public settings hold, and a space he can't read is left out;  every inbox left out, and a quiet event's spaces
+      (`OrgEvents.isQuietAt()`).
+      - Which spaces:  every folder under the org's holding posts (`MemberLists.spacesOf()`, by `posts.list.json`).
+    - Each row the post as its space has it, its id `<space>~<id>`, its `space` saying where it's from.
+    - Read only, and sorted by nothing:  the RANKING is the page's, a Spell property in its program
+      (the built-in's `weight`:  2 more of it, 1 as it comes, 0 none), changed by changing his own copy of the program.
+    - The second time, only what changed:  its version is each space's own, so `changesSince()` asks each space what
+      changed since (`FolderPlace.changesSince()`), a space new to him whole, and one gone from his feed removed.
+    - For communities of hundreds:  300 posts read well under a second, in its test.  Not a feed for millions,
+      worked out ahead of time.
   - An org with no Admin space (the family cookbook) has no org Managers:  its spaces use their three roles alone.
 - AN ORG'S RECOVERY ([OrgRecovery.ts](server/node/people/OrgRecovery.ts), epic `atmosphere` P21, Q15 A):
   how its Board takes it back, even from a Board gone wrong.

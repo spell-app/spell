@@ -1,0 +1,14 @@
+{
+  "title": "Feed",
+  "description": "What's new across your org:  every post in every space of it you may read, newest first, a quiet event's left out.  What you see more of, and none of, is the program's to say:  change your copy of it.",
+  "imports": [
+    {
+      "path": "/OrgFeed.api.spell",
+      "active": true
+    },
+    {
+      "path": "/OrgFeed.spellml",
+      "active": true
+    }
+  ]
+}
