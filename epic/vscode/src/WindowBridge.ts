@@ -44,6 +44,7 @@
  *     - `/isolate` hands its session to the worktree's window this way
  *     - no `sessionId`:  a NEW session;
  *       `/epic <name>` from another epic's session starts its own this way (`epic window launch`)
+ *   - `close-shown-tab {}`:  close the tab a clicked link's show route opened (`closeShownTab()`)
  *   - `close-session-tab { titles }`:  close the ONE Claude Code tab labelled with the first of `titles`
  *     that exactly one tab shows
  *     - none (or only several-tab matches):  ok, `closed: false`, `matches` per title
@@ -74,7 +75,7 @@ import { HttpError } from "spell/server/server.types"
 
 import { DocPreview } from "./DocPreview"
 import { DocView } from "./DocView"
-import { folderIndex, isDocView, tabShows, windowsFolder } from "./docUrls"
+import { SHOWN_TAB_TITLE, folderIndex, isDocView, tabShows, windowsFolder } from "./docUrls"
 
 /** Largest request body accepted, in bytes:  ops carry a path or two. */
 const MAX_BODY = 64 * 1024
@@ -84,6 +85,10 @@ const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 /** The Claude Code extension's editor tabs' webview type;  VS Code prefixes it (`mainThreadWebview-...`). */
 const CLAUDE_PANEL = "claudeVSCodePanel"
+
+/** How many times `closeShownTab()` looks for its tab, and how long between looks, in ms. */
+const SHOWN_TAB_LOOKS = 12
+const SHOWN_TAB_WAIT = 150
 
 /****************
  * ### `WindowBridge`
@@ -247,6 +252,8 @@ export class WindowBridge {
         await vscode.commands.executeCommand("claude-vscode.primaryEditor.open", sessionId, prompt)
         return { sessionId: sessionId ?? null, typed: Boolean(prompt) }
       }
+      case "close-shown-tab":
+        return WindowBridge.closeShownTab()
       case "close-session-tab": {
         const titles = Array.isArray(body.titles) ? body.titles : [body.title]
         return WindowBridge.closeSessionTab(titles.filter((title): title is string => typeof title === "string"))
@@ -321,6 +328,25 @@ export class WindowBridge {
       return { closed: true, title }
     }
     return { closed: false, matches }
+  }
+
+  /**
+   * `close-shown-tab`:  close the VS Code tab a clicked link's show route opened (epic `epic-engine` r61).
+   * - found by its page's title, which arrives a moment after the tab does:  looked for a few times
+   * - none shows up (the link opened elsewhere):  `closed: false`
+   */
+  static async closeShownTab(): Promise<Record<string, unknown>> {
+    for (let attempt = 0; attempt < SHOWN_TAB_LOOKS; attempt++) {
+      const tabs = vscode.window.tabGroups.all
+        .flatMap((group) => group.tabs)
+        .filter((tab) => tab.label === SHOWN_TAB_TITLE)
+      if (tabs.length) {
+        await vscode.window.tabGroups.close(tabs)
+        return { closed: true }
+      }
+      await new Promise((done) => setTimeout(done, SHOWN_TAB_WAIT))
+    }
+    return { closed: false }
   }
 
   /** Index of `folder` among the window's folders, or -1:  by real paths (`folderIndex()`). */

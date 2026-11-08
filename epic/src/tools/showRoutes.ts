@@ -15,6 +15,7 @@
  *     the window holding the page's checkout, else any
  *   - `in=browser`:  in Chrome instead, in front, reusing the page's tab.  Why through here:  the Claude panel opens
  *     a plain `localhost` link in a VS Code tab, not the browser
+ *   - a link that opened in VS Code's own browser tab:  the extension closes that tab, which can't close itself (r61)
  *   - answers a tiny page that closes its own tab (a tab opened from outside, one history entry, may), then brings
  *     VS Code back to the front (macOS)
  *   - refused unless the browser says the user started it (`Sec-Fetch-Site:  none`) or it's our own page:  another
@@ -28,6 +29,7 @@ import { after } from "spell/util/timing"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
+import { SHOWN_TAB_TITLE } from "spell/epic/vscode/src/docUrls.ts"
 import { Window } from "spell/epic/window.mjs"
 import { openUrlInChrome } from "./pages.js"
 
@@ -49,6 +51,7 @@ const showRoutes: RouteModule = {
       if (request.query.in === "browser") {
         const key = path.slice(Math.max(0, path.indexOf("/packages/")))
         openUrlInChrome(`http://${request.get("host")}${path}${hash ? `#${hash}` : ""}`, key, { front: true })
+        closeShownTab(pickWindow(Number(request.query.window), file))
         return void reply.set("Cache-Control", "no-store").send(closingPage(path, "Chrome"))
       }
       const window = pickWindow(Number(request.query.window), file)
@@ -61,6 +64,7 @@ const showRoutes: RouteModule = {
       )
       const tab = TAB_NAMES[shown.view as keyof typeof TAB_NAMES] ?? "Epic Docs"
       reply.set("Cache-Control", "no-store").send(closingPage(path, `VS Code's side bar (${tab})`))
+      closeShownTab(window)
       if (process.platform === "darwin") void after(FOCUS_DELAY / 1000, focusVSCode).catch(console.error)
     })
   }
@@ -111,10 +115,18 @@ const EPIC_PAGE = /\/epics\/([^/]+)\//
 
 /** A page that closes its own tab;  if the browser won't let it, it says where the page went (`where`). */
 function closingPage(path: string, where: string): string {
-  return `<!doctype html><meta charset="utf-8"><title>Shown in VS Code</title>
+  return `<!doctype html><meta charset="utf-8"><title>${SHOWN_TAB_TITLE}</title>
 <body style="font:14px system-ui;margin:2em;color:#555">
 <p>Shown in ${where}:  <code>${escapeHTML(path)}</code>.</p><p>You can close this tab.</p>
 <script>window.close()</script>`
+}
+
+/**
+ * Close the VS Code tab this link opened in, if it did (epic `epic-engine` r61):  VS Code's own browser tab can't close itself.
+ * - NEVER throws:  a window whose extension is older just keeps the tab
+ */
+function closeShownTab(window: ReturnType<typeof pickWindow>): void {
+  if (window) void Window.request("close-shown-tab", {}, window).catch(console.error)
 }
 
 /** Bring VS Code to the front (macOS):  the window the page went to is the one last used. */
