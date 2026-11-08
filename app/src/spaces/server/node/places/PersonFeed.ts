@@ -61,7 +61,7 @@ export const FEED_SPACE_FIELD = "space"
 export class PersonFeed implements Place {
   /** Its org's id:  `rs`. */
   readonly org: string
-  /** Whose it is, by address:  `bo@rs`. */
+  /** Whose it is, as the org's file names them:  `bo@rs`, or a Spell account, `owen@spell`. */
   readonly person: string
   /** Every space's own folder under the org's that holds posts, by address (`MemberLists.spacesOf()`). */
   private readonly spacesOf: PersonFeedProps["spacesOf"]
@@ -70,9 +70,9 @@ export class PersonFeed implements Place {
   /** Is the space at `address` a quiet event's? */
   private readonly isQuietAt: PersonFeedProps["isQuietAt"]
 
-  constructor({ person, spacesOf, placeAt, isQuietAt }: PersonFeedProps) {
+  constructor({ person, org, spacesOf, placeAt, isQuietAt }: PersonFeedProps) {
     this.person = person
-    this.org = person.slice(person.indexOf("@") + 1)
+    this.org = org
     this.spacesOf = spacesOf
     this.placeAt = placeAt
     this.isQuietAt = isQuietAt
@@ -165,8 +165,10 @@ export class PersonFeed implements Place {
 
 /** Constructor props of `PersonFeed`. */
 export type PersonFeedProps = {
-  /** Whose it is, by address:  `bo@rs`. */
+  /** Whose it is, as the org's file names them:  `bo@rs`, or a Spell account, `owen@spell`. */
   person: string
+  /** Its org's id:  `rs`.  Not the person's own:  a Spell account's is `spell`. */
+  org: string
   /** Every space's own folder under org `org`'s that holds posts, by address:  `MemberLists.spacesOf()`. */
   spacesOf: (org: string) => Promise<string[]>
   /** The place of the space at `address`:  `undefined` for none. */

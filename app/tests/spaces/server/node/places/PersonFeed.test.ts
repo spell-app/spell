@@ -83,7 +83,12 @@ beforeAll(async () => {
   for (const id of [...RS, "zed"]) {
     await storage.write(personFile(id, "rs"), JSON.stringify({ $type: "Person", id, names: id }))
   }
-  const members = RS.map((id) => ({ $type: "Membership", person: { $ref: `Person#${id}@rs` }, role: "editor" }))
+  await storage.write(personFile("owen", "spell"), JSON.stringify({ $type: "Person", id: "owen", names: "Owen" }))
+  const members = [...RS.map((id) => `${id}@rs`), "owen@spell"].map((address) => ({
+    $type: "Membership",
+    person: { $ref: `Person#${address}` },
+    role: "editor"
+  }))
   await storage.write(orgFile("rs"), JSON.stringify({ $type: "Org", id: "rs", name: "RS", members }))
   const roles = folders.orgRoles
   await roles.setUp("rs", { board: "ana@rs" })
@@ -120,6 +125,12 @@ describe("a person's feed", () => {
   test("Cy doesn't see the team's private notes;  Zed, outside RS, sees nothing", async () => {
     expect(textsOf((await read("cy")).rows)).toEqual(["A new painting", "Picnic on Saturday", "Vote on Tuesday"])
     expect((await read("zed")).rows).toEqual([])
+  })
+
+  test("someone in RS by their Spell account reads its shared spaces, not an empty feed (I16)", async () => {
+    const place = await folders.placeFor("@rs/__feed", "owen@spell")
+    const { rows } = await place!.list("posts", {}, { identity: "owen@spell" })
+    expect(textsOf(rows)).toEqual(["A new painting", "Picnic on Saturday", "Vote on Tuesday"])
   })
 
   test("a feed is read only, and holds posts alone", async () => {

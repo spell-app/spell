@@ -78,11 +78,11 @@ beforeAll(async () => {
   for (const id of [...Object.keys(RS), "zed"]) {
     await storage.write(personFile(id, "rs"), JSON.stringify({ $type: "Person", id, names: id }))
   }
-  const members = Object.entries(RS).map(([id, role]) => ({
-    $type: "Membership",
-    person: { $ref: `Person#${id}@rs` },
-    role
-  }))
+  await storage.write(personFile("owen", "spell"), JSON.stringify({ $type: "Person", id: "owen", names: "Owen" }))
+  const members = [
+    ...Object.entries(RS).map(([id, role]) => ({ $type: "Membership", person: { $ref: `Person#${id}@rs` }, role })),
+    { $type: "Membership", person: { $ref: "Person#owen@spell" }, role: "editor" }
+  ]
   await storage.write(orgFile("rs"), JSON.stringify({ $type: "Org", id: "rs", name: "RS", members }))
   await roles.setUp("rs", { board: "ana@rs" })
   await roles.give("rs", { role: "admins", person: "ada@rs" }, { by: "ana@rs" })
@@ -114,6 +114,20 @@ describe("a person's inbox", () => {
     await expect(members.add("vic@rs", "viewer")).rejects.toThrow(/an inbox is read by its person/)
     expect(await members.mayRead("vic@rs")).toBe(false)
     expect(await members.mayRead("zed@rs")).toBe(false)
+  })
+})
+
+describe("a person in the org by their Spell account (I16)", () => {
+  test("owen@spell's inbox in RS is owen@rs/__inbox:  he reads it, sends from it, and is sent to", async () => {
+    expect(await roles.inboxAt("owen@rs/__inbox")).toEqual({ org: "rs", person: "owen@spell" })
+    await write("owen@spell", "owen@rs/__inbox", [
+      { kind: "insert", collection: "messages", id: "s-1", fields: { id: "s-1", text: "Hi Bo", recipients: "bo@rs" } }
+    ])
+    await (await folders.inboxOf("owen@spell", "rs"))!.settled
+    expect((await messagesOf("bo@rs"))["s-1"]).toMatchObject({ text: "Hi Bo", from: "owen@spell" })
+
+    await send("bo@rs", "s-2", { text: "Hi Owen", recipients: "owen@spell" })
+    expect((await messagesOf("owen@rs", "owen@spell"))["s-2"]).toMatchObject({ text: "Hi Owen", from: "bo@rs" })
   })
 })
 
