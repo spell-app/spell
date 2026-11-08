@@ -198,7 +198,16 @@ As `plan-doc.md`, "Ids":
   - The migration `whole-phase-numbers` (every edit) removes it, numbering the phase by its place, the phases after
     it moving down one, and what names them following (`PhaseNumbers.makeWhole()`).
 - `title`:  2-4 words, WITHOUT `P2 · ` (drawn).
-- `status`:  `todo`, `active`, `done`.
+- `status`:  `todo`, `active`, `done`, `dropped`.
+  - `dropped` (epic `epic-engine` I228):  never built, and won't be, e.g. a phase moved later, re-added there (`epic
+    move` won't renumber a started one);  `phase <name>#P18 dropped --why "Moved to P38"`.
+    - FINISHED, as `done` is (`PhaseStatuses.isFinished()`):  never the next phase, counted done in `3/5`, out of what's
+      left of the estimate, an epic all of whose phases are finished is done, listed in "While you were out"
+    - `--why` writes its Dropped field (`<epic-field name="dropped">`) in place of Done, a Done field removed;  a bare
+      phase number in it (`P38`) becomes a link to that phase;  the log line says it
+    - its UPDATE markers go, as a done phase's;  its plan is not accepted;  `done-at` stamped
+    - another phase may move past it, or be inserted before it:  nothing was built, so no commit says its number
+    - drawn struck through and grey, a crossed circle (`circle xmark`), grey at once
 - `plan`:  CLAUDE'S BUILD PLAN for it (epic `epic-engine` P33, M1), `waiting` or `accepted`:  in the skeleton, so the
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
@@ -306,8 +315,8 @@ As `plan-doc.md`, "Ids":
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
   - Older phases have none, until asked.
-- `done-at`:  WHEN it was done, written as it's set done (`isoMinutes`, the log's time;  epic `epic-engine` I170),
-  removed when it's set to anything else.
+- `done-at`:  WHEN it was done (or dropped, I228), written as it's set so (`isoMinutes`, the log's time;  epic
+  `epic-engine` I170), removed when it's set to anything else.
   - A phase done before I170 takes its log's last `P3 done` line's time on the page's next write (`updateDoneAt()`);
     none, no attribute.
   - The page draws it green for 3 days after (`PlanDates.isQuiet()`), then grey:  its Phases chip and status circle.

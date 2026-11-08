@@ -13,6 +13,7 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { DataFile, type DataFileMove } from "spell/epic/data/DataFile"
 import { RepoList } from "spell/epic/server/RepoList"
+import { PhaseStatuses } from "spell/epic/phases"
 import { SRV } from "spell/server"
 
 import { planDocIn } from "spell/epic/tools/pages.js"
@@ -245,7 +246,7 @@ export class PlanDocFiles {
           title: plan.title || name,
           status: plan.future
             ? "future"
-            : !plan.standing && phases.length && phases.every((phase) => phase.status === "done")
+            : !plan.standing && phases.length && phases.every((phase) => PhaseStatuses.isFinished(phase.status))
               ? "done"
               : "in progress",
           checkout: there ? relative(main, there) : this.epicCheckout(name, main),

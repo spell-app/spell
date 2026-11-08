@@ -15,6 +15,7 @@
 // By file, with its extension:  plain `node` loads this file (`Sagas`, for the docs index), and the barrel too would load
 // every vocabulary
 import { ItemLetters, type ItemSectionKind } from "spell/epic/definitions/definitions.types.ts"
+import { PhaseStatuses, type PhaseStatus } from "spell/epic/phases/PhaseStatuses.ts"
 
 import type { ChoicesSummary } from "./OptionSets"
 import type { AddedOption, EditedOption, SetPick } from "./ReviewInbox"
@@ -38,15 +39,15 @@ export const TITLE_PREFIX = "Epic: "
 // ## Phases
 ////////////////
 
-/** A phase's status:  `<epic-phase status>`. */
-export const PHASE_STATUSES = ["todo", "active", "done"] as const
+/** A phase's status:  `<epic-phase status>`;  `dropped` too (epic `epic-engine` I228).  The rule:  `PhaseStatuses`. */
+export const PHASE_STATUSES = PhaseStatuses.ALL
 
 /** One of `PHASE_STATUSES`. */
-export type PhaseStatus = (typeof PHASE_STATUSES)[number]
+export type { PhaseStatus }
 
 /** Whether `status` is one of `PHASE_STATUSES`:  a command line's word, checked. */
 export function isPhaseStatus(status: string): status is PhaseStatus {
-  return (PHASE_STATUSES as readonly string[]).includes(status)
+  return PhaseStatuses.isStatus(status)
 }
 
 /**
@@ -69,7 +70,7 @@ export type Phase = {
   id: string
   /** its short name, without `P3 · ` */
   name: string
-  /** `todo`, `active` or `done`;  any other text is a broken doc (`PlanReader.check()`) */
+  /** `todo`, `active`, `done` or `dropped`;  any other text is a broken doc (`PlanReader.check()`) */
   status: string
   /** its estimate's text (`1-2h`);  `undefined` while missing or `TBD` */
   estimate: string | undefined

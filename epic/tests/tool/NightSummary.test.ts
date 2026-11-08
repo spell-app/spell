@@ -67,6 +67,20 @@ describe("NightSummary", () => {
   })
 
   // epic `epic-engine` r57, I224 (🚧 language:  issues made into todos stayed "open issue" under Still to do)
+  // epic `epic-engine` I228:  a phase dropped since Owen read it is news, with the done, saying why
+  test("a phase dropped since Owen read it:  listed with the done, its why its line", () => {
+    const plan = readPage()
+    plan.now = NIGHT
+    plan.setPhase(1, "dropped", { why: "<p>Moved to P2</p>" })
+    const summary = NightSummary.of(plan, READ)
+    expect(summary.done.map(({ label, status, built }) => [label, status, built])).toEqual([
+      ["P1 · Build it", "dropped", "Moved to P2 · Polish it"]
+    ])
+    plan.refreshAway()
+    const line = plan.document.querySelector('epic-away-line[line="p-build-it"]')!
+    expect(line.textContent).toBe("P1 · Build it dropped:  Moved to P2 · Polish it")
+  })
+
   test("an issue Owen made a todo leaves Still to do:  it waits on the todo, not on him", () => {
     const plan = readPage()
     night(plan)

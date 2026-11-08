@@ -1281,6 +1281,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
   phase: {
     "--done <html>": "done:  what was built, a <ul>",
+    "--why <html>": 'dropped:  why it was never built ("Moved to P38", the P38 linked), in place of Done',
     "--no-open": "done:  don't bring the page forward in VS Code",
     "--dry-run": "took:  only say the time"
   },

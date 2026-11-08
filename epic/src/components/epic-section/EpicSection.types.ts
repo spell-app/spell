@@ -241,10 +241,10 @@ export const NOTE = "note"
 
 /**
  * Statuses that DON'T count as open:  finished (`done`), made moot (`canceled`), answered (`decided`);  a phase's
- * `done`.  The old runtime's `CLOSED`, and the tool's.
+ * `done` and `dropped` (epic `epic-engine` I228).  The old runtime's `CLOSED`, and the tool's.
  * - an item's too:  a closed one's Choose pills show only while it's revisited (`<epic-option>`)
  */
-export const CLOSED_STATUSES = ["done", "decided", "canceled"] as const
+export const CLOSED_STATUSES = ["done", "decided", "canceled", "dropped"] as const
 
 /** The children a section counts:  its items, or its phases (`<epic-phase status>`). */
 export const COUNTED = ":scope > epic-item, :scope > epic-phase"
