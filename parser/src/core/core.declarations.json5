@@ -1270,6 +1270,31 @@
     },
     {
       "kind": "method",
+      "name": "now",
+      "of": "core",
+      "module": "string",
+      "description": "This moment, as a date:  what spell's `now` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "joined",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "left"
+        },
+        {
+          "name": "right"
+        },
+        {
+          "name": "separator"
+        }
+      ],
+      "description": "`left` and `right` joined into one text, `separator` between:  what `&` and `&&` compile to (HyperTalk's)."
+    },
+    {
+      "kind": "method",
       "name": "shortDate",
       "of": "core",
       "module": "string",

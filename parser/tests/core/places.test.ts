@@ -364,6 +364,16 @@ describe("PlaceThings, a refresh", () => {
     ]).toEqual(["11/7/26", "Saturday, November 7, 2026", "Sat, Nov 7, 2026", "9:14 AM", "12:05:03 AM", "x"])
   })
 
+  test("`&` and `&&` join into text, a date said in words, nothing as nothing", () => {
+    const due = new Date(2026, 10, 7)
+    expect([core.joined("due", due, " "), core.joined(1, 2), core.joined("a", undefined, " ")]).toEqual([
+      "due November 7, 2026",
+      "12",
+      "a "
+    ])
+    expect(core.now()).toBeInstanceOf(Date)
+  })
+
   test("a list type's row keeps its items in place too", async () => {
     const place = new MemoryPlace({
       collections: { menus: [{ id: "m-1", $items: [{ $type: "Recipe", id: "r-1", title: "Soup" }] }] }

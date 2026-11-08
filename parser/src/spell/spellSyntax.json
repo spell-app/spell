@@ -656,6 +656,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheDate",
+          "ruleNames": ["the_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TheDate.ts",
+          "line": 15,
+          "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
+          "syntaxes": [
+            {
+              "syntax": "the {form:date_form}? {what:date_or_time}",
+              "example": "the date",
+              "outputs": {
+                "js": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "ts": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "py": {
+                  "code": "core.short_date(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "Now",
+          "ruleNames": ["now"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Now.ts",
+          "line": 12,
+          "purpose": "This moment, as a date, e.g. `set the added of the note to now` => `core.now()`.",
+          "syntaxes": [
+            {
+              "syntax": "now",
+              "example": "now",
+              "outputs": {
+                "js": {
+                  "code": "core.now()"
+                },
+                "ts": {
+                  "code": "core.now()"
+                },
+                "py": {
+                  "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "HexLiteral",
           "ruleNames": ["hex_literal"],
           "internal": false,
@@ -1194,6 +1246,32 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "Joined",
+          "ruleNames": ["joined"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Joined.ts",
+          "line": 15,
+          "purpose": "Joins two things into one text, as HyperTalk's `&` and `&&` do.",
+          "syntaxes": [
+            {
+              "syntax": "{operator:join_mark} {expression:operand}",
+              "example": "\"Total:\" && price",
+              "outputs": {
+                "js": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                },
+                "ts": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                },
+                "py": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1424,6 +1502,9 @@
           "className": "Wording",
           "ruleNames": [
             "and_or",
+            "join_mark",
+            "date_form",
+            "date_or_time",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1466,6 +1547,15 @@
           "syntaxes": [
             {
               "syntax": "((and:and)|(or:or))"
+            },
+            {
+              "syntax": "((spaced:&&)|&)"
+            },
+            {
+              "syntax": "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
+            },
+            {
+              "syntax": "((date:date)|(time:time))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"

@@ -38,6 +38,22 @@ export const stringMethods = defineCoreModule({
   },
 
   /**
+   * This moment, as a date:  what spell's `now` compiles to.
+   * - `the date` and `the time` say it as text:  `core.shortDate(core.now())`.
+   */
+  now(): Date {
+    return new Date()
+  },
+  /**
+   * `left` and `right` joined into one text, `separator` between:  what `&` and `&&` compile to (HyperTalk's).
+   * - Each said as a drawing says it:  a date `November 7, 2026` (`dateShown()`), nothing as `""`.
+   * - Text whatever they are:  `joined(1, 2)` is `"12"`.
+   */
+  joined(left: unknown, right: unknown, separator = ""): string {
+    return `${joinable(left)}${separator}${joinable(right)}`
+  },
+
+  /**
    * A date's day, short:  `11/7/26`.
    * - `the short date of its time`, as HyperTalk's `the short date`.
    * - Nothing, or anything that isn't a date, stays as it is (`dateShown()`).
@@ -109,6 +125,12 @@ export const stringMethods = defineCoreModule({
   }
 })
 Object.assign(core, stringMethods)
+
+/** `value` as `joined()` puts it in text:  a date said in words, nothing as `""`. */
+function joinable(value: unknown): string {
+  if (value == null) return ""
+  return `${stringMethods.dateShown(value) as string}`
+}
 
 /**
  * `date`'s time on a 12-hour clock:  `9:14 AM`, or `9:14:42 AM` to the second.

@@ -386,6 +386,10 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.long_time(datetime(2026, 11, 7, 0, 5, 3)) == "12:05:03 AM"
     assert program.short_time(date(2026, 11, 7)) == "12:00 AM"
     assert program.short_date("x") == "x"
+    assert program.joined("due", date(2026, 11, 7), " ") == "due November 7, 2026"
+    assert program.joined(1, 2) == "12"
+    assert program.joined("a", None, " ") == "a "
+    assert isinstance(program.now(), datetime)
     assert program.total_of([1, 2.5, "x", True]) == 3.5
     assert program.first_few([1, 2, 3], 2) == [1, 2]
     assert program.draw_each([1, 2], lambda item, position, items: item * 10) == [10, 20]

@@ -41,6 +41,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from spell_core.js_text import js_string
 from spell_core.lists import List
 from spell_core.place_kinds import ID_FIELD, Change, PlaceBehind, PlaceError, Row, place_behind
 from spell_core.things import (
@@ -692,6 +693,24 @@ class PlaceMethods:
         if isinstance(date_value, datetime | date):
             return f"{date_value:%B} {date_value.day}, {date_value.year}"
         return date_value
+
+    def now(self) -> datetime:
+        """This moment, as a date:  what spell's `now` compiles to."""
+        return datetime.now()
+
+    def joined(self, left: object, right: object, separator: str = "") -> str:
+        """`left` and `right` joined into one text, `separator` between:  `&` and `&&` (HyperTalk's).
+
+        - Each said as a drawing says it:  a date `November 7, 2026`, `None` as `""`.
+        - The twin of string.ts's `joined()`.
+        """
+        return f"{self._joinable(left)}{separator}{self._joinable(right)}"
+
+    def _joinable(self, value: object) -> str:
+        """`value` as `joined()` puts it in text."""
+        if value is None:
+            return ""
+        return js_string(self.date_shown(value))
 
     def short_date(self, date_value: object) -> object:
         """A date's day, short:  `11/7/26` -- HyperTalk's `the short date`.  Anything else as it is."""

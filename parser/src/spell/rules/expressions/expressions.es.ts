@@ -15,6 +15,9 @@ import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
 import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
+import { Joined } from "./Joined"
+import { Now } from "./Now"
+import { TheDate } from "./TheDate"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -517,6 +520,47 @@ expressionsEs.addRule(AsUppercase, {
       ]
     }
   ]
+})
+
+// Unir en texto:  `&` tal cual, `&&` con un espacio
+expressionsEs.addRule(Wording.specialize({ ruleName: "join_mark", meanings: ["spaced"] }), {
+  syntax: "((spaced:&&)|&)"
+})
+expressionsEs.addRule(Joined, {
+  syntax: "{operator:join_mark} {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("precio")
+      },
+      tests: [['"Total:" && precio', 'core.joined("Total:", precio, " ")']]
+    }
+  ]
+})
+
+// Hoy, como lo dice HyperTalk:  `la fecha`, `la hora larga`
+expressionsEs.addRule(Wording.specialize({ ruleName: "date_form", meanings: ["short", "long", "abbreviated"] }), {
+  syntax: "((short:corta)|(long:larga)|(abbreviated:abreviada))"
+})
+expressionsEs.addRule(Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time"] }), {
+  syntax: "((date:fecha)|(time:hora))"
+})
+expressionsEs.addRule(TheDate, {
+  syntax: "la {what:date_or_time} {form:date_form}?",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["la fecha", "core.shortDate(core.now())"],
+        ["la hora larga", "core.longTime(core.now())"]
+      ]
+    }
+  ]
+})
+expressionsEs.addRule(Now, {
+  syntax: "ahora",
+  tests: [{ compileAs: "expression", tests: [["ahora", "core.now()"]] }]
 })
 
 expressionsEs.addRule(WithCommas, {
