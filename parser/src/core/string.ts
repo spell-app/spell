@@ -38,6 +38,34 @@ export const stringMethods = defineCoreModule({
   },
 
   /**
+   * A date's day, short:  `11/7/26`.
+   * - `the short date of its time`, as HyperTalk's `the short date`.
+   * - Nothing, or anything that isn't a date, stays as it is (`dateShown()`).
+   */
+  shortDate(date: unknown): unknown {
+    return date instanceof Date
+      ? `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`
+      : date
+  },
+  /** A date's day, in full:  `Saturday, November 7, 2026` -- HyperTalk's `the long date`. */
+  longDate(date: unknown): unknown {
+    return date instanceof Date ? date.toLocaleDateString("en-US", { dateStyle: "full" }) : date
+  },
+  /** A date's day, its names cut short:  `Sat, Nov 7, 2026` -- HyperTalk's `the abbreviated date`. */
+  abbreviatedDate(date: unknown): unknown {
+    if (!(date instanceof Date)) return date
+    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })
+  },
+  /** A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`. */
+  shortTime(date: unknown): unknown {
+    return date instanceof Date ? clockTime(date, "minutes") : date
+  },
+  /** A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`. */
+  longTime(date: unknown): unknown {
+    return date instanceof Date ? clockTime(date, "seconds") : date
+  },
+
+  /**
    * A number for people to read:  `1,000,000`.
    * - Compiles from spell `{expression} with commas` (see `rules/expressions/WithCommas.ts`).
    * - Nothing stays nothing, and what isn't a number stays as it is.
@@ -81,6 +109,17 @@ export const stringMethods = defineCoreModule({
   }
 })
 Object.assign(core, stringMethods)
+
+/**
+ * `date`'s time on a 12-hour clock:  `9:14 AM`, or `9:14:42 AM` to the second.
+ * - Written out, not `toLocaleTimeString()`:  that puts a narrow no-break space before `AM`, which Python's twin doesn't.
+ */
+function clockTime(date: Date, to: "minutes" | "seconds"): string {
+  const hours = date.getHours()
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const seconds = to === "seconds" ? `:${pad(date.getSeconds())}` : ""
+  return `${hours % 12 || 12}:${pad(date.getMinutes())}${seconds} ${hours < 12 ? "AM" : "PM"}`
+}
 
 /** A word's first letter, after the start or anything but a letter, digit, `_` or apostrophe (Python's twin:  `[^\w'’]`). */
 const TITLE_CASE_WORD_START = /(^|[^\p{L}\p{N}_'’])(\p{L})/gu

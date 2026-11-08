@@ -352,6 +352,18 @@ describe("PlaceThings, a refresh", () => {
     }
   })
 
+  test("a date said as HyperTalk says it:  short, long and abbreviated;  its time short and long", () => {
+    const morning = new Date(2026, 10, 7, 9, 14, 42)
+    expect([
+      core.shortDate(morning),
+      core.longDate(morning),
+      core.abbreviatedDate(morning),
+      core.shortTime(morning),
+      core.longTime(new Date(2026, 10, 7, 0, 5, 3)),
+      core.shortDate("x")
+    ]).toEqual(["11/7/26", "Saturday, November 7, 2026", "Sat, Nov 7, 2026", "9:14 AM", "12:05:03 AM", "x"])
+  })
+
   test("a list type's row keeps its items in place too", async () => {
     const place = new MemoryPlace({
       collections: { menus: [{ id: "m-1", $items: [{ $type: "Recipe", id: "r-1", title: "Soup" }] }] }

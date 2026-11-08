@@ -561,7 +561,9 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     name: "date",
     docstring: md(
       "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.",
-      "- Its parts are numbers:  `the year of the due date of the todo`."
+      "- Its parts are numbers:  `the year of the due date of the todo`.",
+      "- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`.",
+      '- Joined to text with `+`, it says itself as a drawing does:  `"due " + its due date` is `due November 7, 2026`.'
     ),
     members: [
       {
@@ -586,6 +588,41 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         docstring: md(
           "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
         )
+      },
+      {
+        words: "short date",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.shortDate({it})",
+        docstring: md("Its day, short, e.g. `11/7/26`:  `the short date of its time`, as HyperTalk's `the short date`.")
+      },
+      {
+        words: "long date",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.longDate({it})",
+        docstring: md("Its day in full, e.g. `Saturday, November 7, 2026`.")
+      },
+      {
+        words: "abbreviated date",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.abbreviatedDate({it})",
+        docstring: md("Its day, its names cut short, e.g. `Sat, Nov 7, 2026`.")
+      },
+      {
+        words: "short time",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.shortTime({it})",
+        docstring: md("Its time of day, e.g. `9:14 AM`.")
+      },
+      {
+        words: "long time",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.longTime({it})",
+        docstring: md("Its time of day to the second, e.g. `9:14:42 AM`.")
       }
     ]
   }

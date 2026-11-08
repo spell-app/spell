@@ -1270,6 +1270,66 @@
     },
     {
       "kind": "method",
+      "name": "shortDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, short:  `11/7/26`."
+    },
+    {
+      "kind": "method",
+      "name": "longDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, in full:  `Saturday, November 7, 2026` -- HyperTalk's `the long date`."
+    },
+    {
+      "kind": "method",
+      "name": "abbreviatedDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, its names cut short:  `Sat, Nov 7, 2026` -- HyperTalk's `the abbreviated date`."
+    },
+    {
+      "kind": "method",
+      "name": "shortTime",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`."
+    },
+    {
+      "kind": "method",
+      "name": "longTime",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`."
+    },
+    {
+      "kind": "method",
       "name": "withCommas",
       "of": "core",
       "module": "string",
