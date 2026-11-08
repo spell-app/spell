@@ -34,6 +34,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `write-refused-owner` | the same, as it's someone else's:  JS core's | `thing` |
 | `write-refused-full` | the same, as a sign-up sheet's place is taken:  JS core's | `thing` |
 | `write-refused-not-listed` | the same, as a sign-up sheet's list doesn't name you:  JS core's | `thing` |
+| `write-refused-used-up` | the same, as you've asked for every invitation you have:  JS core's | `thing` |
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
@@ -84,9 +85,14 @@ MESSAGES: dict[str, str] = {
     "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
     "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
     "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
+    "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
     "write-retry": "Retry",
     "read-failed": "Can't read this right now:  {why}",
+    "read-too-soon": "The server asks to wait:  try again in a little while",
+    "read-too-soon-seconds": "The server asks to wait:  try again in {seconds} seconds",
+    "read-too-soon-minute": "The server asks to wait:  try again in a minute",
+    "read-too-soon-minutes": "The server asks to wait:  try again in {minutes} minutes",
     "saved-added": "Add",
     "saved-removed": "Remove",
     "write-show-me": "Show me",

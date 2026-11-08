@@ -16,6 +16,8 @@ from spell_core.drawing import Element, h
 from spell_core.events import SentEvent, SpellEvent
 from spell_core.lists import List
 from spell_core.notebook import Notebook
+from spell_core.place_kinds import PlaceError
+from spell_core.places import Place
 from spell_core.positions import end_position, position, spell_position, with_spell_positions
 from spell_core.saving import Loader, Saved, SavedRef, Saver, parse_ref, ref_text
 from spell_core.site import Site
@@ -31,6 +33,8 @@ __all__ = [
     "Loader",
     "Notebook",
     "Page",
+    "Place",
+    "PlaceError",
     "Saved",
     "SavedRef",
     "Saver",

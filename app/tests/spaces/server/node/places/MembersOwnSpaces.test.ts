@@ -5,7 +5,7 @@
  * - Its members (`SpaceMembers`), then over HTTP through the page server's route (`SpaceFolders`);
  *   what a project there may hold (`ProjectRoles`);  and Mo leaving with his (`SpaceFolders.takeOwnSpace()`).
  */
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from "fs"
 import { createServer } from "http"
 import { tmpdir } from "os"
 import { join } from "path"
@@ -158,31 +158,15 @@ describe("members' own spaces", () => {
     })
   })
 
-  test("a project in someone's own space holds documents and approved apps, never code", async () => {
+  test("a project in someone's own space takes any file, code included (J130)", async () => {
     const folder = join(root, "projects", "about")
     mkdirSync(folder, { recursive: true })
-    writeFileSync(join(folder, "About.spellml"), "<text>Hi</text>\n")
     const vicAbout = new ProjectRoles({ projectId: "vic@rs/about", person: "vic@rs", folder, people, orgRoles: roles })
-    await vicAbout.mayHoldOrDie("/About.spellml", "<text>I teach guitar.</text>")
-    await vicAbout.mayHoldOrDie("/About.css", "text { color: teal }")
-    for (const code of ["/About.spell", "/about.js", "/page.html", "/logo.svg"]) {
-      await expect(vicAbout.mayHoldOrDie(code, "")).rejects.toMatchObject({
-        status: 403,
-        message: expect.stringMatching(/vic@rs's own space:  it holds documents and approved apps, never code/)
-      })
-    }
-    await expect(vicAbout.mayHoldOrDie("/About.spellml", '<action "pay">send money</action>')).rejects.toMatchObject({
-      status: 403
-    })
-    // anywhere else, code is fine:  a team's space
-    const welcome = new ProjectRoles({
-      projectId: "events_team@rs/welcome",
-      person: "bo@rs",
-      folder,
-      people,
-      orgRoles: roles
-    })
-    await welcome.mayHoldOrDie("/Welcome.spell", "")
-    expect(readFileSync(join(folder, "About.spellml"), "utf8")).toBe("<text>Hi</text>\n")
+    // Vic manages his own space:  he designs, makes and renames its files, a program's among them
+    expect(await vicAbout.may("design")).toBe(true)
+    expect(await vicAbout.may("create")).toBe(true)
+    // everyone else in RS reads it, and changes none of its files
+    const boAbout = new ProjectRoles({ projectId: "vic@rs/about", person: "bo@rs", folder, people, orgRoles: roles })
+    expect(await boAbout.may("design")).toBe(false)
   })
 })

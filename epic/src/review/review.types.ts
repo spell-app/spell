@@ -20,6 +20,7 @@ import type {
   NowRequest,
   PageInbox,
   PickFields,
+  SetPick,
   AddedOption,
   EditedOption,
   WaitingComment,
@@ -386,6 +387,7 @@ export type {
   NowAction,
   NowRequest,
   PickFields,
+  SetPick,
   AddedOption,
   EditedOption,
   WaitingComment,
@@ -495,13 +497,107 @@ export function inTestOrder<T extends { prepared?: string | null; deferred?: str
 }
 
 /**
- * `mark`'s pick and the rest of its set change (epic `epic-engine` P50), to carry into another mark (a revisit's
- * "pick B, but ..."):  `{ pick, choices, multiple, added, edited, removed }`, each only when given;  `{}` with no change.
- * As `ReviewInbox.pickOf()`.
+ * `mark`'s pick and the rest of its set changes (epic `epic-engine` P50), to carry into another mark (a revisit's
+ * "pick B, but ..."):  `{ pick, choices, multiple, added, edited, removed, sets }`, each only when given;  `{}` with no
+ * change.
+ * - every set's change kept (`sets`, I227), tidied by `pickFieldsOf()`
+ * - As `ReviewInbox.pickOf()`, which calls it.
  */
 export function pickOf(mark: PickFields | null | undefined): PickFields {
-  if (!mark || !hasSetChange(mark)) return {}
-  const { pick, choices, multiple, added, edited, removed } = mark
+  return pickFieldsOf(setPicksOf(mark))
+}
+
+/** Does `mark` change an option set at all:  a pick, the flip, an option added, edited or removed, in any set? */
+export function hasSetChange(mark: PickFields): boolean {
+  return changesSet(mark) || !!mark.sets?.some(changesSet)
+}
+
+/** Does `mark` pick an option, in any of its sets? */
+export function hasPick(mark: PickFields | null | undefined): boolean {
+  return setPicksOf(mark).some((change) => !!change.pick)
+}
+
+/**
+ * Every option set change `mark` carries, ONE per set, in set order (epic `epic-engine` I227):  its own fields', then
+ * each of `sets`;  `[]` for none.
+ * - each tidied:  only the fields given, `choices` kept
+ */
+export function setPicksOf(mark: PickFields | null | undefined): SetPick[] {
+  if (!mark) return []
+  const all = [mark, ...(mark.sets ?? [])].filter(changesSet).map(onePick)
+  return all.sort((a, b) => (a.choices ?? 0) - (b.choices ?? 0))
+}
+
+/** The change `mark` carries for its holder's set `index` (none given counts as `0`);  `{}` for none. */
+export function setPickOf(mark: PickFields | null | undefined, index: number): SetPick {
+  return setPicksOf(mark).find((change) => (change.choices ?? 0) === index) ?? {}
+}
+
+/**
+ * `mark`'s set changes, set `index`'s replaced by `change` (`{}`:  dropped), the others kept, as one mark's fields
+ * (`pickFieldsOf()`):  a pick in a phase's 2nd set keeps the 1st's (epic `epic-engine` I227).
+ */
+export function withSetPick(mark: PickFields | null | undefined, index: number, change: SetPick): PickFields {
+  const others = setPicksOf(mark).filter((each) => (each.choices ?? 0) !== index)
+  const own = changesSet(change) ? [{ ...onePick(change), choices: index }] : []
+  return pickFieldsOf([...others, ...own])
+}
+
+/** Set changes as ONE mark's fields:  the lowest set's at the top, the rest in `sets`;  `{}` for none. */
+export function pickFieldsOf(changes: readonly SetPick[]): PickFields {
+  const [first, ...rest] = changes
+    .filter(changesSet)
+    .map(onePick)
+    .sort((a, b) => (a.choices ?? 0) - (b.choices ?? 0))
+  if (!first) return {}
+  return rest.length ? { ...first, sets: rest } : first
+}
+
+/**
+ * Option `letter` as people see it in its holder's set `index` (epic `epic-engine` I227):  `B` in the first set, `B2`
+ * in the second, `B3` ...;  an added option's key (`+1`) as it is.
+ * - only what's SHOWN:  the `letter` in the HTML, and in a mark's `pick`, stays `B`
+ */
+export function setLetter(letter: string, index: number | undefined): string {
+  return index && !letter.startsWith("+") ? `${letter}${index + 1}` : letter
+}
+
+/**
+ * A letter as a person or an agent types it, `setLetter()`'s back:  `B2` => `{ letter: "B", choices: 1 }`,
+ * `B` => `{ letter: "B" }`;  `undefined` when it's neither.
+ */
+export function parseSetLetter(typed: string): { letter: string; choices?: number } | undefined {
+  const match = /^([A-Z])(\d*)$/i.exec(typed.trim())
+  if (!match) return undefined
+  const letter = match[1]!.toUpperCase()
+  const n = Number(match[2])
+  return match[2] && n >= 1 ? (n === 1 ? { letter, choices: 0 } : { letter, choices: n - 1 }) : { letter }
+}
+
+/**
+ * `mark`'s picks as people see them (`setLetter()`):  each set's letters a space apart, the sets a comma apart,
+ * `B, A2 C2`;  `""` for none.
+ */
+export function pickLabel(mark: PickFields | null | undefined): string {
+  return setPicksOf(mark)
+    .filter((change) => change.pick)
+    .map((change) =>
+      pickedLetters(change.pick)
+        .map((letter) => setLetter(letter, change.choices))
+        .join(" ")
+    )
+    .join(", ")
+}
+
+/** Does `fields` change its own set (its top-level fields, `sets` aside)? */
+function changesSet(fields: SetPick): boolean {
+  const { pick, multiple, added, edited, removed } = fields
+  return Boolean(pick || multiple !== undefined || added?.length || edited?.length || removed?.length)
+}
+
+/** `fields`' own set change, only the fields given, in a fixed order. */
+function onePick(fields: SetPick): SetPick {
+  const { pick, choices, multiple, added, edited, removed } = fields
   return {
     ...(pick && { pick }),
     ...(choices !== undefined && { choices }),
@@ -510,12 +606,6 @@ export function pickOf(mark: PickFields | null | undefined): PickFields {
     ...(edited?.length && { edited }),
     ...(removed?.length && { removed })
   }
-}
-
-/** Does `mark` change its option set at all:  a pick, the flip, an option added, edited or removed? */
-export function hasSetChange(mark: PickFields): boolean {
-  const { pick, multiple, added, edited, removed } = mark
-  return Boolean(pick || multiple !== undefined || added?.length || edited?.length || removed?.length)
 }
 
 /** The letters (and added keys, `+1`) a pick names:  `"A C +1"` => `["A", "C", "+1"]`;  `[]` for none. */
@@ -574,11 +664,16 @@ export function withInlineComments(note: string, ids: readonly string[]): string
 /**
  * Is `mark`'s pick option `letter` of card set `choices` (its position among the item's sets, I8)?
  * - a pick-any set's mark names several (`A C`, P50):  any of them
+ * - each of its sets' changes (`sets`, I227):  any of them
  * A mark without `choices` (from before I8) picks from the item's OWN set:  `own` says whether set `choices` is it.
  */
 export function picks(mark: PickFields | null | undefined, letter: string, choices: number, own: boolean): boolean {
-  if (!mark || !pickedLetters(mark.pick).includes(letter)) return false
-  return mark.choices === undefined ? own : mark.choices === choices
+  return [mark, ...(mark?.sets ?? [])].some(
+    (change) =>
+      !!change &&
+      pickedLetters(change.pick).includes(letter) &&
+      (change.choices === undefined ? own : change.choices === choices)
+  )
 }
 
 /**

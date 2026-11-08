@@ -649,6 +649,9 @@ A kind that says so is saved in a file of its own.
     - NOT `with the address`:  in a new thing, `a new card with the suit` sets its suit to `the suit` (Q30)
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
+    - Backwards:  `..., newest first` (`highest first` ...,  any key `reversed` or `z-a`;  Spanish `al revés`, `z-a`, `de mayor a menor`), after the key,
+      [`sort_key_order`](rules/lists/SortKeyOrder.ts), a suffix only a key takes:  `core.descending(key)`,
+      which `core.sortedBy()` reads largest first, an item with no key still last (epic `atmosphere` T48).
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made
   - compiles to `core.everyThing(Pile)`, a scratch list:  it takes none of them from the lists holding them
   - its datatype:  `list of piles`
@@ -1347,6 +1350,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A `<for>` inside an element (epic `language` I19):  its text is read again as a drawing's own lines
     (`SpellxTokenizer.tokenizeDrawingLines()`) and parsed in place, its loop drawn as one of the element's children
     (`SpellJSX.parseLoop()`).
+    - Its head is a phrase to its `>`, as a chain tag's is (`SpellxTokenizer.matchJSXStartTag()`, epic `data` I93):
+      read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never joined it.
 - COMMENTS INSIDE MARKUP, in either form (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to
@@ -1712,7 +1717,7 @@ What a program's lines about where data lives compile to, and what reads the res
   - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
   - `where`:  each part that says `its X is <a value>`, joined by `and`, goes to the place as a filter (`handedFilterOf()`).
     Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
-  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
+  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`;  `newest first` says `descending`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
   - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):
     - its variable reads as a variable;  a property, the word alone reads it, as no other rule does
@@ -1735,7 +1740,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - An atmosphere account (epic `data` P16) warns at its line of what no referee can promise (`CreatePlace.warnOfNoReferee()`, `hasNoReferee`):  it's public, each person
     changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
     `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
-- A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
+- A target that says `places: false` (a library) refuses a project that names one;  one that lists the kinds it keeps
+  (Python's:  a database on this device, a data folder, a sheet, an Excel file;  `PY.PLACE_KINDS`, epic `data` P40)
+  refuses a place of any other kind, by its word:  the Atmosphere is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
 
 ## Sites
 

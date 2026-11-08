@@ -24,8 +24,8 @@ describe("SpellUIDefaults.read()", () => {
         value: "pill"
       })
     }
-    // a value Spell UI's Spanish leaves in English stays so:  `<es-segmento apariencia="raised">`
-    expect(SpellUIDefaults.read({ tag: "es-segmento", attribute: "apariencia", value: "raised" }, "es")).toEqual({
+    // a segment's look, in Spanish too (epic `language` T42):  `<es-segmento apariencia="elevado">`
+    expect(SpellUIDefaults.read({ tag: "es-segmento", attribute: "apariencia", value: "elevado" }, "es")).toEqual({
       tag: "ui-segment",
       attribute: "appearance",
       value: "raised"

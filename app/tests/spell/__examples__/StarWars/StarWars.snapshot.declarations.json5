@@ -397,6 +397,7 @@
       ],
       "kind": "method",
       "name": "play it",
+      "returns": "nothing",
       "waits": true,
       "defined": "/StarWars.spellml:9722-9772"
     },
@@ -411,6 +412,7 @@
       ],
       "kind": "method",
       "name": "end it",
+      "returns": "nothing",
       "waits": true,
       "defined": "/StarWars.spellml:9785-9839"
     },
@@ -1393,6 +1395,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/StarWars.spellml:437-500"
     },
     {
@@ -1456,6 +1459,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/StarWars.spellml:1650-1795"
     },
     {
@@ -1469,6 +1473,7 @@
       ],
       "kind": "method",
       "name": "play the opening",
+      "returns": "nothing",
       "waits": true,
       "defined": "/StarWars.spellml:1809-1872"
     },
@@ -1483,6 +1488,7 @@
       ],
       "kind": "method",
       "name": "punch it",
+      "returns": "nothing",
       "waits": true,
       "defined": "/StarWars.spellml:1886-2107"
     },
@@ -1524,6 +1530,7 @@
       "group": "What everything here can do",
       "kind": "method",
       "name": "open (a thing)",
+      "returns": "nothing",
       "defined": "/StarWars.spellml:5612-5786"
     },
     {

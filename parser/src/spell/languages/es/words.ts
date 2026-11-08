@@ -391,8 +391,11 @@ export const spanishWords: SP.LanguageWords = {
    * Words which name `it` as an object:  `imprimir eso`, `obtener su nombre`, then `imprimir eso`.
    * - Spanish attaches the pronoun to its verb (`imprimirlo`), which spell's words can't split, so `eso` ("that").
    * - `ello` too, the plain pronoun.
+   * - And `ella`, `él` after a word like `en` or `sobre`, as Spanish says it of a thing by its gender:
+   *   `para tarea y lugar en ella`, in a list's action (epic `language` T89).
+   * - The first one is how a translation writes `it`.
    */
-  itWords: new Set(["eso", "ello"]),
+  itWords: new Set(["eso", "ello", "ella", "él"]),
 
   /**
    * A verb with `it` fused onto its end:  `barajarla`, `dibujarlo`, `voltearlas` => `barajar`, `dibujar`, `voltear`.
@@ -416,6 +419,12 @@ export const spanishWords: SP.LanguageWords = {
     year: ["año", "ano"],
     day: ["día", "dia"],
     hour: ["hora"],
+    "short date": ["fecha corta"],
+    "long date": ["fecha larga"],
+    "abbreviated date": ["fecha abreviada"],
+    "short time": ["hora corta"],
+    "long time": ["hora larga"],
+    timestamp: ["marca de tiempo"],
     selection: ["selección", "seleccion"]
   },
 

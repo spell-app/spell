@@ -28,6 +28,7 @@
       ],
       "kind": "method",
       "name": "create it",
+      "returns": "nothing",
       "defined": "/Counter.spell:319-353"
     },
     {
@@ -41,6 +42,7 @@
       ],
       "kind": "method",
       "name": "increment it",
+      "returns": "nothing",
       "defined": "/Counter.spell:358-407"
     },
     {

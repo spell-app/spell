@@ -53,6 +53,7 @@
       ],
       "kind": "method",
       "name": "remove it",
+      "returns": "nothing",
       "defined": "/RecipeBox.spell:514-586"
     },
     {

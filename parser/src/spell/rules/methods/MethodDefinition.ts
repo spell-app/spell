@@ -339,6 +339,17 @@ export class MethodDefinition<
   }
 
   /**
+   * An action or `to ...` method gives back its last line's value, as a property does (epic `language` I47, Owen's C):
+   * `to double it:` ending `its n * 2` returns it.  See `SpellStatement.returnsLastLine()`.
+   * - NOT a test's body:  a test gives back nothing.
+   * - NOT a drawing's (`to draw:`):  its lines draw, gathered by `DrawnLines`.
+   */
+  returnsLastLine(statement: P.Match): boolean {
+    if ((statement.groups as { asTest?: P.Match }).asTest) return false
+    return !/^draw/.test((statement.nestedScope as P.Scope & { name?: string }).name ?? "")
+  }
+
+  /**
    * SIDE EFFECT:  now our body has parsed, record what the method returns on its record --
    * `P.ScopeMethod.returns`, which a call's `datatype` is.  See `getReturnedDatatype()`.
    * - Journaled.  Returns it, so `BlockLine.reparseBody()` can tell when an edit changes it.

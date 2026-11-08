@@ -364,7 +364,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         continue
       }
       const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
-      if (ast) asts.push(ast)
+      // `<film/>`, a loop's item beside other markup:  `draw the film`, in braces (epic `atmosphere` T48)
+      if (ast && child?.is(SpellJSX) && child.data.loopItem)
+        asts.push(new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression }))
+      else if (ast) asts.push(ast)
     }
     return asts
   }

@@ -16,6 +16,10 @@ export const sharedEs = {
     link: "enlace",
     target: "destino",
     font: "letra",
+    shadow: "sombra",
+    width: "ancho",
+    "min-width": "ancho-min",
+    "max-width": "ancho-max",
     tooltip: "ayuda",
     label: "etiqueta",
     movable: "movible",
@@ -25,6 +29,7 @@ export const sharedEs = {
     // `<es-texto letra="negrita cursiva">`;  a size stays a number (`letra="14"`)
     font: {
       bold: "negrita",
+      heavy: "extranegrita",
       italic: "cursiva",
       underline: "subrayado",
       strikethrough: "tachado",

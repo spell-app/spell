@@ -46,6 +46,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "turn it face up",
+          returns: "nothing",
           defined: "/TwoSidedView.spell:467-512"
         },
         {
@@ -56,6 +57,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "turn it face down",
+          returns: "nothing",
           defined: "/TwoSidedView.spell:516-565"
         },
         {
@@ -66,6 +68,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "turn it over",
+          returns: "nothing",
           defined: "/TwoSidedView.spell:569-658"
         },
         {
@@ -139,6 +142,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla boca arriba",
+          returns: "nothing",
           defined: "/TwoSidedView.es.spell:506-563"
         },
         {
@@ -149,6 +153,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla boca abajo",
+          returns: "nothing",
           defined: "/TwoSidedView.es.spell:567-622"
         },
         {
@@ -159,6 +164,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla",
+          returns: "nothing",
           defined: "/TwoSidedView.es.spell:626-733"
         }
       ],

@@ -97,7 +97,7 @@ describe("a property's value on the line below its name (T58)", () => {
     expect(compiled).toContain("return this.monday && this.tuesday")
   })
 
-  test("code spell too;  lines that are steps still need their `return`", () => {
+  test("code spell too;  after lines that are steps, the last line's value is returned (I47)", () => {
     const { compiled, errors } = parsed(`a habit is a thing:
 	- its "monday" is yes or no
 	- its "days" is:
@@ -107,7 +107,8 @@ describe("a property's value on the line below its name (T58)", () => {
 		x + 1
 `)
     expect(compiled).toContain("return [this.monday]")
-    expect(errors).toEqual(['7:2 Don\'t understand "x + 1"'])
+    expect(compiled).toContain("const x = 1\n    return x + 1")
+    expect(errors).toEqual([])
   })
 })
 
@@ -231,6 +232,93 @@ ${drawing}
     )
     expect(errors.join()).toMatch(/^14:\d+ /)
   })
+
+  test("its head is a phrase, whatever's in it:  quotes, parens, an apostrophe;  and it has a body (I93)", () => {
+    const { compiled, errors } = parsed(
+      SHELF(`		<segment>
+			<header>Owen's films</header>
+			<for film in the films of (it) where its title isn't "Alien" as="cards">
+				<failed><text>Can't</text></failed>
+			</for>
+			<text>Don't go</text>
+		</segment>`),
+      "/Shelf.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(compiled).toContain('items: () => h("ui-cards"), failed: () => h("ui-text", "Can\'t") })')
+    expect(compiled).toContain('h("ui-text", "Don\'t go")')
+  })
+
+  test("closed on its own line too, `/>` after its phrase (I93)", () => {
+    const { compiled, errors } = parsed(
+      SHELF(`		<segment>
+			<for film in the films of it where its title isn't "Alien" as="cards" />
+			<text>After</text>
+		</segment>`),
+      "/Shelf.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(compiled).toContain('items: () => h("ui-cards") })')
+    expect(compiled).toContain('h("ui-text", "After")')
+  })
+})
+
+describe("a drawing named like a list or a property (I94, I95)", () => {
+  const SHELF = (call: string, name: string) => `<spell-thing "film">
+	<spell>
+		- its "title" is text
+	</spell>
+	<draw><text>{its title}</text></draw>
+</spell-thing>
+<spell-view "shelf">
+	<spell>
+		- its "films" is a list of films
+		- its "found" is a list of films
+	</spell>
+	<draw>
+		<segment>{${call}}</segment>
+	</draw>
+	<draw "${name}">
+		<for its films as="cards" />
+	</draw>
+</spell-view>
+`
+  test("a plural name, written above it, draws it:  not the shelf's items (I94)", () => {
+    for (const name of ["results", "hours", "details"]) {
+      const { compiled, errors } = parsed(SHELF(`draw the ${name} of it`, name), "/Shelf.spellml")
+      expect(errors).toEqual([])
+      expect(compiled).toContain(`() => this.draw${name[0]!.toUpperCase()}${name.slice(1)}())`)
+    }
+  })
+
+  test("a property's name draws the drawing, with what's around its items:  not the property's list, loose (I95)", () => {
+    for (const name of ["found", "films"]) {
+      const { compiled, errors } = parsed(SHELF(`draw the ${name} of it`, name), "/Shelf.spellml")
+      expect(errors).toEqual([])
+      expect(compiled).toContain(`this.draw${name[0]!.toUpperCase()}${name.slice(1)}()`)
+      expect(compiled).not.toContain(`core.drawThing(this.${name})`)
+    }
+  })
+
+  test("with no drawing of that name, a plural's a list's items, and a property draws its value, as before", () => {
+    const items = parsed(SHELF("draw the films of it", "other"), "/Shelf.spellml")
+    expect(items.errors.join()).toContain("A Shelf isn't a list")
+    const property = parsed(SHELF("draw the found of it", "other"), "/Shelf.spellml")
+    expect(property.compiled).toContain("core.drawThing(this.found)")
+  })
+})
+
+describe('an inline if in a hole, `{its time if ... otherwise ""}` (I96)', () => {
+  test("says a date as the block form does:  a raw Date never reaches the page", () => {
+    const { compiled, errors } = parsed(`an hour is a thing:
+	- it has a time as a date
+	- it has a shown as yes or no
+	- to draw:
+		<td>{its time if its shown otherwise ""}</td>
+`)
+    expect(errors).toEqual([])
+    expect(compiled).toContain('this.shown ? core.dateShown(this.time) : ""')
+  })
 })
 
 describe("a possessive of the app inside a `where` (T82)", () => {
@@ -288,5 +376,72 @@ describe("a template's test runs its lines on its own thing (T86)", () => {
     expect(compiled).toContain("core.expect(it.total, `the total`, 17, `17`)")
     expect(compiled).toContain("it.total = 0")
     expect(compiled).not.toContain("calculator.appendDigit")
+  })
+})
+
+describe("a call given a member nobody declares steps aside (T90)", () => {
+  const GUIDE = (button: string) => `<spell-thing "film">
+	<property "title">text</>
+	<action "play it">
+		print its title
+	</action>
+</spell-thing>
+<spell-app "guide">
+	<property "playing">a film</>
+	<action "play the opening">
+		set its playing to the first film
+	</action>
+	<draw>
+		<button onClick={${button}}>Play</button>
+	</draw>
+</spell-app>
+`
+  test("`play the opening of the guide` is the guide's action, not Film's `play` of a guide's `opening`", () => {
+    const { compiled, errors, warnings } = parsed(GUIDE("play the opening of the guide"), "/Guide.spellml")
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+    expect(compiled).toContain("() => this.playTheOpening()")
+  })
+
+  test("with no other reading, the loose read still reads, and warns", () => {
+    const { compiled, warnings } = parsed(GUIDE("play the trailer of the guide"), "/Guide.spellml")
+    expect(compiled).toContain("() => this.trailer.play()")
+    expect(warnings.join()).toContain("A guide never says it has a trailer")
+  })
+})
+
+describe("Spanish:  `ella` is `it`, and a list named `la lista` agrees as one (T89)", () => {
+  const AGENDA = (lines: string) => `<encanto-vista "tarea">
+	<propiedad "orden" tipo="número"/>
+</encanto-vista>
+<encanto-vista "agenda" plantilla="lista visible de tareas">
+${lines}
+</encanto-vista>
+`
+  test("`para tarea y lugar en ella`, and with a comma, read as `en eso` does", () => {
+    for (const loop of ["para tarea y lugar en ella", "para tarea, lugar en ella", "para tarea y lugar en él"]) {
+      const { compiled, errors } = parsed(
+        AGENDA(`	<acción "guardar el orden">\n\t\t${loop}\n\t\t\tponer el orden de la tarea al lugar\n\t</acción>`),
+        "/Agenda.es.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(compiled).toContain("this.forEach(withSpellPositions((tarea, lugar) => (tarea.orden = lugar)))")
+    }
+  })
+
+  const SORTED = (list: string, word: string) =>
+    AGENDA(`	<probar "el orden">
+		poner la lista a una nueva agenda
+		poner x a ${list} ${word} por su orden
+	</probar>`)
+
+  test("`la lista ordenada`:  the noun that names it says, not its items", () => {
+    expect(parsed(SORTED("la lista", "ordenada"), "/Agenda.es.spellml").warnings).toEqual([])
+    expect(parsed(SORTED("la lista", "ordenadas"), "/Agenda.es.spellml").warnings.join()).toContain('"ordenada"')
+  })
+
+  test("a list named by its items' type still agrees with them", () => {
+    expect(parsed(SORTED("las tareas", "ordenadas"), "/Agenda.es.spellml").warnings).toEqual([])
+    expect(parsed(SORTED("las tareas", "ordenada"), "/Agenda.es.spellml").warnings.join()).toContain('"ordenadas"')
   })
 })

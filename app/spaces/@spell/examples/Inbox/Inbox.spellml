@@ -26,14 +26,58 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 </spell-more-of>
 
 
-## The page:  write one, then every conversation
+## How you hear of it, by mail:  pick one
+
+<spell-more-of "mail choice">
+	<draw>
+		<form value={it} class="mail-choice">
+			<field label="Mail me" inline>
+				<select name="how">
+					<item value="each">One mail per message</item>
+					<item value="digest">A daily digest</item>
+					<item value="none">No mail</item>
+				</select>
+			</field>
+		</form>
+	</draw>
+</spell-more-of>
+
+
+## A space you follow, and a button to stop
+
+<spell-more-of "subscription">
+	<draw>
+		<stack class="subscription" direction="horizontal" spacing="md" align="center">
+			<text>{its space}</text>
+			<button class="unsubscribe" icon="close" size="mini" appearance="transparent" aria-label="Stop following it" title="Stop following it" onClick={remove it from the subscriptions}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
+
+## The page:  write one, then every message, newest first, each with a Reply
 
 <spell-app "inbox page">
 	<property "new message">a new message</>
+	<property "new subscription">a new subscription</>
 
 	<action "send it">
 		add the new message to the messages
 		set its new message to a new message
+	</action>
+
+	<action "reply to (who as text) in (conversation as text)">
+		set the recipients of the new message to who
+		set the thread of the new message to conversation
+	</action>
+
+	<action "choose how">
+		add a new mail choice whose how is "digest" to the mail choices
+	</action>
+
+	<action "subscribe">
+		add the new subscription to the subscriptions
+		set its new subscription to a new subscription
 	</action>
 
 	<draw>
@@ -54,10 +98,42 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 					</form>
 				</segment>
 
+				<segment class="mail">
+					<header size="medium">Mail</header>
+					<stack class="mail-choices" spacing="sm">
+						<for choice in every mail choice loading="Reading how you hear of it">
+							<empty>
+								<stack direction="horizontal" spacing="md" align="center" wrap>
+									<text color="grey">A daily digest of what's new, each morning.</text>
+									<button class="choose" size="small" onClick={choose how}>Choose</button>
+								</stack>
+							</empty>
+						</for>
+					</stack>
+				</segment>
+
+				<segment class="subscriptions">
+					<header size="medium">Spaces you follow</header>
+					<form value={its new subscription}>
+						<input name="space" placeholder="events_team@rs" aria-label="A shared space of the org, by its address" fluid action>
+							<button slot="action" color="primary" disabled={the space of the new subscription is ""} onClick={subscribe}>Follow</button>
+						</input>
+					</form>
+					<stack class="subscription-list" spacing="sm">
+						<for subscription in every subscription>
+							<empty><text color="grey">None yet.</text></empty>
+						</for>
+					</stack>
+				</segment>
+
 				<segment class="messages">
 					<header size="medium">Conversations</header>
 					<stack class="message-list" spacing="sm">
-						<for message in every message sorted by its thread loading="Reading your inbox">
+						<for message in every message sorted by its sent newest first loading="Reading your inbox">
+							<stack class="row" spacing="xs">
+								<message/>
+								<button class="reply" icon="reply" size="small" appearance="basic" title="Answer in this conversation:  fills in who it's to and the conversation" onClick={reply to the from of message in the thread of message}>Reply</button>
+							</stack>
 							<empty><text class="none" color="grey">Nothing yet.</text></empty>
 							<failed><text color="red">We can't read your inbox right now.</text></failed>
 						</for>

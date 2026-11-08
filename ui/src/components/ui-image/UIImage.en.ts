@@ -56,6 +56,16 @@ export const imageVocabulary = {
         "Old names:  `bordered`, `circular`, `rounded` written alone."
     },
     {
+      name: "background",
+      group: "appearance",
+      kind: "valueAndKey",
+      values: "hues",
+      description:
+        'A hue behind the picture, drawn soft (its light tint), with room round the picture:  `background="yellow"`.  ' +
+        "With `circular` it's a circle.  A transparent drawing on a coloured disc, so it has no hairline round it:  " +
+        "the theme's hairline is for photos with white edges, which `bordered` names."
+    },
+    {
       name: "align",
       group: "layout",
       kind: "valueOnly",

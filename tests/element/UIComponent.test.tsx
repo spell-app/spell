@@ -243,7 +243,8 @@ describe("UIComponent.mount() Solid roots", () => {
 ////////////////
 // ## Shared words
 //
-// `link`, `font`, `tooltip` and `label`:  every element takes them (epic `ui-gaps` P3).
+// `link`, `font`, `tooltip` and `label`:  every element takes them (epic `ui-gaps` P3);
+// `shadow`, `width`, `min-width` and `max-width` too (epic `language` P35, I63).
 ////////////////
 
 /** `UIComponent`'s protected `followLink()` hook, as a test spies on it. */
@@ -316,6 +317,49 @@ describe("UIComponent shared words", () => {
       { size: "14px", leading: "", state: true },
       { size: "", leading: "", state: false }
     ])
+  })
+
+  test("`shadow` writes its hue as `--_ui-shadow-color`, with `:state(shadow)`, and takes them away again", async () => {
+    const element = await shown(`shadow="yellow"`)
+    const written = () => ({
+      color: element.style.getPropertyValue("--_ui-shadow-color"),
+      state: element.matches(":state(shadow)")
+    })
+    const yellow = written()
+    element.removeAttribute("shadow")
+    await ElementFixture.settle()
+    expect([yellow, written()]).toEqual([
+      { color: "var(--ui-yellow)", state: true },
+      { color: "", state: false }
+    ])
+  })
+
+  test("`width`, `min-width`, `max-width` write their lengths and states, on the element's own box", async () => {
+    const element = await shown(`min-width="16em" max-width="26em"`)
+    const written = () => ({
+      min: element.style.getPropertyValue("--_ui-min-width"),
+      max: element.style.getPropertyValue("--_ui-max-width"),
+      width: element.style.getPropertyValue("--_ui-width"),
+      states: ["width", "min-width", "max-width", "sized-inside"].filter((name) => element.matches(`:state(${name})`))
+    })
+    const range = written()
+    element.removeAttribute("min-width")
+    element.removeAttribute("max-width")
+    element.setAttribute("width", "10em")
+    await ElementFixture.settle()
+    const width = written()
+    element.removeAttribute("width")
+    await ElementFixture.settle()
+    expect([range, width, written()]).toEqual([
+      { min: "16em", max: "26em", width: "", states: ["min-width", "max-width"] },
+      { min: "", max: "", width: "10em", states: ["width"] },
+      { min: "", max: "", width: "", states: [] }
+    ])
+  })
+
+  test("the widths go on the shadow root's top-level boxes where the element is `display: contents`", async () => {
+    const element = await shown(`width="10em" style="display: contents"`)
+    expect(element.matches(":state(sized-inside)")).toBe(true)
   })
 
   test("`tooltip` writes the element's `title`, and takes it away again", async () => {

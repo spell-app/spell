@@ -34,9 +34,10 @@
  */
 import h from "@solidjs/h"
 import { createComponent, insert, type JSX } from "@solidjs/web"
-import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
+import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwner, onCleanup } from "solid-js"
 
 import { msUntil, pollWhileVisible } from "spell/util/polling"
+import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { after } from "spell/util/timing"
 
 import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
@@ -133,6 +134,9 @@ function addressIn(value: unknown): string | undefined {
 function isAbandoned(error: unknown): boolean {
   return (error as Error | undefined)?.name === "AbortError"
 }
+
+/** A project data folder's kind:  its lists are whoever's signed in's, so its copy on this device is too. */
+const DATA_FOLDER_KIND = "data folder"
 
 /** Each read's list, for what draws it to ask for its next page. */
 const MORE_PAGES = new WeakMap<object, SavedRead>()
@@ -354,7 +358,8 @@ class ProgramPlaces {
       scope: `${this.programName}:${name}`,
       ...(typeof keptOnDevice === "number" && { mostBytes: keptOnDevice }),
       freshFor: () => (checkedAt ? msUntil(checkedAt) : (checkedEvery ?? 0) * 1000),
-      ...(keyNamed !== undefined && { person: () => this.personNow.id })
+      // a key's, or a data folder's (whose lists are whoever's signed in's):  each person's apart
+      ...((keyNamed !== undefined || details.kind === DATA_FOLDER_KIND) && { person: () => this.personNow.id })
     })
     copy.onChanged(() => void this.refresh(undefined, name))
     this.copies.set(name, copy)
@@ -503,13 +508,14 @@ class ProgramPlaces {
    * - Its read given up on while it waited, as everyone holding it left:
    *   - something holds it again by then, e.g. the same page drawn again:  it asks again, for them
    *   - nothing does:  rejects with an `AbortError`, as nothing's learned from that
+   * - `byId`:  a row another read brought isn't enough, `readById()`:  `the user whose id is ...`
    * - throws what the read threw
    */
-  async follow(Class: SavedClass, address: string): Promise<Thing | undefined> {
+  async follow(Class: SavedClass, address: string, { byId = false } = {}): Promise<Thing | undefined> {
     await this.load()
     this.noteClass(Class)
-    const asked = () => this.linkKnown(Class, address)
     const whole = this.reads.get(`${Class.name}\n${JSON.stringify({})}`)
+    const asked = () => (byId ? this.readById(Class, address, whole) : this.linkKnown(Class, address))
     if (asked() === undefined && whole?.isGoing) await whole.firstPage().catch(() => undefined)
     while (asked() === undefined) {
       const read = this.readOf(Class, linkQuery(address))
@@ -522,6 +528,19 @@ class ProgramPlaces {
       }
     }
     return asked() ?? undefined
+  }
+
+  /**
+   * The thing with id `address`, if a read of it alone found it, or a read of every one of its type:
+   * `null` if the place holds nothing there, `undefined` if neither has said.
+   * - NOT a row another read brought, a search's:  that may hold only some of its fields (epic `data` I90),
+   *   so `the user whose id is ...` reads it whole, and a failure says so rather than showing the row.
+   */
+  private readById(Class: SavedClass, address: string, whole: SavedRead | undefined): Thing | null | undefined {
+    const found = this.linksFound.get(`${Class.name}\n${address}`)
+    if (found !== undefined) return found
+    const known = this.things?.thingKnownAs(Class.name, address) as Thing | undefined
+    return known && whole?.list.items.some((item) => item === known) ? known : undefined
   }
 
   /** One list for `owner`'s `field`, holding `things`, the same one while `addresses` are. */
@@ -1220,7 +1239,8 @@ export const savedMethods = defineCoreModule({
 
   /**
    * The thing of `Class` with this id, from the place it's saved in:  what `the wiki page whose id is its name` compiles to.
-   * - One read per id, shared, and none for a thing already read.
+   * - One read per id, shared, and none for a thing already read by its id, or in a read of every one of its type.
+   *   - A row a search brought is read again by its id:  it may hold only some of its fields (epic `data` I90).
    * - Waits for the answer, as any read does.
    * - `undefined` if the place holds nothing by that id, or no id's given:  nothing was asked.
    * - throws what the read threw
@@ -1233,7 +1253,7 @@ export const savedMethods = defineCoreModule({
     const program = programPlaces()
     const saved = Class as unknown as SavedClass
     program.holdLink(saved, `${id as string}`)
-    return (await program.follow(saved, `${id as string}`)) as InstanceType<Class> | undefined
+    return (await program.follow(saved, `${id as string}`, { byId: true })) as InstanceType<Class> | undefined
   },
 
   /**
@@ -1522,33 +1542,38 @@ export const savedMethods = defineCoreModule({
       const row = around?.firstElementChild ?? undefined
       const drawItem = (item: Item, position: () => number) => {
         const drawing = drawEach(item, position() + 1)
-        return row ? rowOf(row, around!, drawing) : drawing
+        return row ? rowOf(row, drawing) : drawing
       }
-      const list =
-        paging === "pages"
-          ? drawnInPages({ items, drawItem, more })
-          : paging === "all"
-            ? (createComponent(
-                For as never,
-                {
-                  get each() {
-                    return items()
-                  },
-                  children: drawItem
-                } as never
-              ) as JSX.Element)
-            : drawnInWindow({
-                items,
-                drawItem,
-                // the same read draws the same list, so coming back finds it as it was
-                key: () => {
-                  const list = current()
-                  return list instanceof List ? list : undefined
+      const paged = paging === "pages" ? drawnInPages({ items, drawItem, more }) : undefined
+      const list = paged
+        ? paged.list
+        : paging === "all"
+          ? (createComponent(
+              For as never,
+              {
+                get each() {
+                  return items()
                 },
-                more
-              })
-      if (row) row.remove()
-      const shown = around ? drawnIn(around, list) : list
+                children: drawItem
+              } as never
+            ) as JSX.Element)
+          : drawnInWindow({
+              items,
+              drawItem,
+              // the same read draws the same list, so coming back finds it as it was
+              key: () => {
+                const list = current()
+                return list instanceof List ? list : undefined
+              },
+              more
+            })
+      if (row) {
+        row.remove()
+        keepHeaderRow(row, around!, items)
+      }
+      const inside = around ? drawnIn(around, list) : list
+      // the pager comes AFTER what's around the items:  never one more card, or a row of the table
+      const shown = paged ? ([inside, paged.pager] as unknown as JSX.Element) : inside
       const isEmpty = createMemo(() => !items().length)
       return (() => (isEmpty() ? (riders.none?.() ?? null) : shown)) as unknown as Drawing
     }
@@ -1565,8 +1590,11 @@ export const savedMethods = defineCoreModule({
           })
         : standInFor(drawn)
     const whole = createComponent(Errored, {
-      fallback: (error: unknown) =>
-        riders.failed ? riders.failed() : failedDrawing(riders.failedSay ? `${riders.failedSay()}` : error),
+      // Solid hands the error as an accessor:  read as it was, it said "function () { [native code] }"
+      fallback: (error: () => unknown) =>
+        riders.failed
+          ? riders.failed()
+          : failedDrawing(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
       get children() {
         return body()
       }
@@ -1629,33 +1657,51 @@ function drawnIn(element: Element, drawing: JSX.Element): JSX.Element {
   return element as unknown as JSX.Element
 }
 
-/**
- * One item of a table:  its cells in a copy of the row in `table`, and, for the first, a header row from what each cell's named.
- * - `<cell "Name">` is `<ui-cell data-column="Name">`.
- */
-function rowOf(row: Element, table: Element, cells: Drawing): JSX.Element {
+/** One item of a table:  its cells, in a copy of the row in `table`. */
+function rowOf(row: Element, cells: Drawing): JSX.Element {
   const drawn = row.cloneNode(false) as Element
-  // made now, so the header can read what each cell's named
   insert(drawn, made(cells) as JSX.Element)
-  const named = [...drawn.children].filter((cell) => cell.hasAttribute(COLUMN_NAME))
-  if (named.length && !table.querySelector(`:scope > [${HEADER_ROW}]`)) {
-    const header = row.cloneNode(false) as Element
-    header.setAttribute("header", "")
-    header.setAttribute(HEADER_ROW, "")
-    for (const cell of named) {
-      const title = document.createElement(cell.localName)
-      title.textContent = cell.getAttribute(COLUMN_NAME)
-      header.append(title)
-    }
-    table.prepend(header)
-  }
   return drawn as unknown as JSX.Element
+}
+
+/**
+ * A table of items keeps a header row, made from what the cells of its first row are named.
+ * - `<cell "Name" align="right">` is `<ui-cell data-column="Name" align="right">`:
+ *   its heading is `Name`, lined up as its column is.
+ * - Made AFTER the rows are on the page, each time the list changes, and only when it's missing (I88):
+ *   a row's cells are `h()`s, which make their elements when the row is inserted,
+ *   and that waits while anything on the page does.
+ *   So looking for them as the row was made found none on a read that waited:  no header, or one only once more rows came.
+ */
+function keepHeaderRow(row: Element, table: Element, items: () => readonly unknown[]): void {
+  createEffect(
+    () => items().length,
+    () => {
+      if (table.querySelector(`:scope > [${HEADER_ROW}]`)) return
+      const first = [...table.children].find((child) => child.localName === row.localName)
+      const named = first ? [...first.children].filter((cell) => cell.hasAttribute(COLUMN_NAME)) : []
+      if (!named.length) return
+      const header = row.cloneNode(false) as Element
+      header.setAttribute("header", "")
+      header.setAttribute(HEADER_ROW, "")
+      for (const cell of named) {
+        const title = document.createElement(cell.localName)
+        title.textContent = cell.getAttribute(COLUMN_NAME)
+        const align = cell.getAttribute("align")
+        if (align) title.setAttribute("align", align)
+        header.append(title)
+      }
+      table.prepend(header)
+    }
+  )
 }
 
 /**
  * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
  * - A page holds `MOST_AT_ONCE`.
  * - Next at the end of what's read asks a place for its next page.
+ * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
+ *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
  */
 function drawnInPages<Item>({
   items,
@@ -1665,7 +1711,7 @@ function drawnInPages<Item>({
   items: () => readonly Item[]
   drawItem: (item: Item, position: () => number) => JSX.Element
   more: () => MorePages | undefined
-}): JSX.Element {
+}): { list: JSX.Element; pager: JSX.Element } {
   const pageChanged = new Cell()
   let page = 0
   const pageNow = () => {
@@ -1698,7 +1744,7 @@ function drawnInPages<Item>({
     h("ui-text", () => core.message("page-number", { page: pageNow() + 1 })),
     h("ui-button", { disabled: () => !hasNext(), onClick: () => void next() }, core.message("page-next"))
   )
-  return [list, () => (hasNext() || pageNow() ? pager : null)] as unknown as JSX.Element
+  return { list, pager: (() => (hasNext() || pageNow() ? pager : null)) as unknown as JSX.Element }
 }
 
 /** What a cell's column is called, on the cell:  `<cell "Name">`. */
@@ -1707,10 +1753,67 @@ const COLUMN_NAME = "data-column"
 /** The mark on the header row a table of items makes. */
 const HEADER_ROW = "data-header-row"
 
-/** What shows when a read failed, and nothing said what to:  a message, and Try again. */
-function failedDrawing(error: unknown): Drawing {
-  const why = typeof error === "string" ? undefined : `${(error as Error)?.message ?? error}`
-  const message = why === undefined ? (error as string) : core.message("read-failed", { why })
-  const button = h("ui-button", { onClick: () => void savedMethods.reloadSaved() }, core.message("write-retry"))
-  return h("ui-message", { color: "red" }, message, button) as unknown as Drawing
+/**
+ * What shows when a read failed, and nothing drew its own:  a message, and Try again.
+ * - `said`:  the program's own words for it, `failed="..."`;  else the core's, with why.
+ * - A read that was only too soon -- a rate limit, a server busy (`waitAfter()`) -- is no mistake of the reader's
+ *   (epic `data` I92):  a quiet warning, saying when to try again where the server says;  any other, red.
+ */
+function failedDrawing(error: unknown, said?: string): Drawing {
+  const wait = waitAfter(error)
+  const message = said ?? (wait === undefined ? core.message("read-failed", { why: whyOf(error) }) : tooSoon(wait))
+  const button = h(
+    "ui-button",
+    {
+      onClick: () => void savedMethods.reloadSaved(),
+      ...(wait !== undefined && { size: "small", appearance: "basic" })
+    },
+    core.message("write-retry")
+  )
+  const look = wait === undefined ? { color: "red" } : { state: "warning", size: "small" }
+  return h("ui-message", look, message, button) as unknown as Drawing
+}
+
+/** What a failure says of itself. */
+function whyOf(error: unknown): string {
+  return typeof error === "string" ? error : `${(error as Error)?.message ?? error}`
+}
+
+/** "Try again in a minute", for a read that was too soon:  `wait`, in ms, `0` when the server didn't say. */
+function tooSoon(wait: number): string {
+  const seconds = Math.ceil(wait / 1000)
+  if (!seconds) return core.message("read-too-soon")
+  if (seconds < 60) return core.message("read-too-soon-seconds", { seconds: `${seconds}` })
+  if (seconds < 120) return core.message("read-too-soon-minute")
+  return core.message("read-too-soon-minutes", { minutes: `${Math.ceil(seconds / 60)}` })
+}
+
+/** The answers that mean "too soon:  ask again later":  a rate limit, a server busy or slow to answer. */
+const TOO_SOON_STATUSES = new Set([408, 425, 429, 503])
+
+/**
+ * How long until a read that failed may be asked again, if it failed only for being too soon:
+ * - a 429 (and a 408, 425, 503), or a 403 whose rate limit says no requests are left, GitHub's way
+ * - its wait in ms:  the answer's `retry-after`, else when its rate limit resets;  `0` when it says neither
+ * - `undefined` for any other failure, or one with no answer at all
+ * - Reads the answer the error holds (`spell/util`'s `ApiError`), by its shape:  places are a chunk of their own.
+ */
+export function waitAfter(error: unknown, now = Date.now()): number | undefined {
+  const response = responseOf(error)
+  if (!response) return undefined
+  const { status, headers } = response
+  if (!TOO_SOON_STATUSES.has(status) && !(status === 403 && rateLimitLeft(headers) === 0)) return undefined
+  const resetAt = rateLimitResetAt(headers, now)
+  return retryAfter(response) ?? (resetAt === undefined ? 0 : Math.max(0, resetAt - now))
+}
+
+/** The server's answer a failure holds, if it holds one:  its own `response`, or its cause's. */
+function responseOf(error: unknown): Response | undefined {
+  const holders = [error, (error as { cause?: unknown } | undefined)?.cause]
+  for (const holder of holders) {
+    const response = (holder as { response?: unknown } | undefined)?.response
+    if (response && typeof (response as Response).status === "number" && (response as Response).headers)
+      return response as Response
+  }
+  return undefined
 }

@@ -38,6 +38,7 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   /**
    * SIDE EFFECT:  a warning when Spanish's `ordenada` doesn't agree with its list:  `cada receta, ordenada`, `las recetas, ordenadas`.
    * - `every recipe` is one, `the recipes` and `all recipes` many:  it's what the type's name says.
+   * - A list named otherwise, `la lista`:  its own noun's gender and number -- see `nounOf()`.
    */
   private static warnIfItDoesntAgree(match: P.Match, tokens: P.Token[]): void {
     const left = SuffixLeft.current
@@ -47,8 +48,24 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     if (!word || !type) return
     const written = (left.groups as { type?: P.Match }).type?.raw
     const isOne = !!written && SP.singularIn(match.scope, `${written}`.trim()) === `${written}`.trim()
-    const wanted = language.agreedForm(word, type, !isOne)
+    // a list with a name of its own, `la lista`:  that noun's, by its article (epic `language` T89)
+    const named = written === undefined ? ListSortedBy.nounOf(match.scope, left) : undefined
+    const wanted = named ? language.agreedForm(word, named, named.isPlural) : language.agreedForm(word, type, !isOne)
     if (wanted) SP.SpellWarnings.note(match, language.parserMessage("did-you-mean", { phrase: wanted }))
+  }
+
+  /**
+   * The noun naming list `left`, by the article written before it:  its gender, and whether it's plural --
+   * `la lista` is one, feminine;  `los mazos` many, masculine.
+   * - `undefined` without an article that says a gender, e.g. `sus tareas`:  then the items' type says.
+   */
+  private static nounOf(scope: P.Scope, left: P.Match): { gender: string; isPlural: boolean } | undefined {
+    const [article, ...rest] = left.tokens
+    const gender =
+      article instanceof P.WordToken ? SP.Language.of(scope).genderOf(`${article.value}`.toLowerCase()) : undefined
+    const noun = rest.map((token) => `${token.value}`).join(" ")
+    if (!gender || !noun) return undefined
+    return { gender, isPlural: SP.singularIn(scope, noun) !== noun }
   }
 
   /** Nested scope for the key:  `it` is the item, what the list before us holds, if that's known. */
@@ -94,15 +111,25 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     if (!(lhs instanceof P.ASTCoreMethodInvocation) || lhs.methodName !== "savedThings") return undefined
     const [type, query, ...rest] = lhs.args?.args ?? []
     if (rest.length) return undefined
-    const field = fieldOfKey(key)
+    const { field, descending } = fieldOfKey(key) ?? {}
     if (!field) return undefined
-    const one = new P.ASTObjectLiteralProperty(match, {
-      property: "field" as never,
-      value: new P.ASTStringLiteral(match, { value: JSON.stringify(field) })
-    })
+    const props = [
+      new P.ASTObjectLiteralProperty(match, {
+        property: "field" as never,
+        value: new P.ASTStringLiteral(match, { value: JSON.stringify(field) })
+      })
+    ]
+    // `newest first` (`sort_key_order`)
+    if (descending)
+      props.push(
+        new P.ASTObjectLiteralProperty(match, {
+          property: "descending" as never,
+          value: new P.ASTBooleanLiteral(match, { value: true })
+        })
+      )
     const sort = new P.ASTObjectLiteralProperty(match, {
       property: "sort" as never,
-      value: new P.ASTArrayLiteral(match, { items: [new P.ASTObjectLiteral(match, { properties: [one] })] })
+      value: new P.ASTArrayLiteral(match, { items: [new P.ASTObjectLiteral(match, { properties: props })] })
     })
     const held = query instanceof P.ASTObjectLiteral ? query.properties : []
     return new P.ASTCoreMethodInvocation(match, {
@@ -112,13 +139,18 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   }
 }
 
-/** The field `key`, a sort's function, reads, when that's all it does:  `(item) => item.title`. */
-function fieldOfKey(key: P.ASTMethodDefinition): string | undefined {
+/**
+ * The field `key`, a sort's function, reads, when that's all it does:  `(item) => item.title`.
+ * - `descending` when it reads it backwards, `newest first`:  `(item) => core.descending(item.sent)`.
+ */
+function fieldOfKey(key: P.ASTMethodDefinition): { field: string; descending: boolean } | undefined {
   const item = (key.args?.[0] as P.ASTVariableExpression | undefined)?.name
   let body: unknown = key.body
   while ((body instanceof P.ASTStatementGroup || body instanceof P.ASTStatementBlock) && body.statements?.length === 1)
     body = body.statements[0]
   if (body instanceof P.ASTReturnStatement) body = body.value
+  const descending = body instanceof P.ASTCoreMethodInvocation && body.methodName === "descending"
+  if (descending) body = (body as P.ASTCoreMethodInvocation).args?.args?.[0]
   if (!(body instanceof P.ASTPropertyExpression) || !(body.object instanceof P.ASTVariableExpression)) return undefined
-  return body.object.name === item ? body.property.value : undefined
+  return body.object.name === item ? { field: body.property.value, descending } : undefined
 }

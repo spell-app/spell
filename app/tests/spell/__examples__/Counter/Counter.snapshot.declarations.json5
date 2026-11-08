@@ -28,6 +28,7 @@
       ],
       "kind": "method",
       "name": "count up",
+      "returns": "nothing",
       "defined": "/Counter.spellml:358-407"
     },
     {

@@ -14,6 +14,10 @@ import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
 import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
+import { Joined } from "./Joined"
+import { Now } from "./Now"
+import { AsADate } from "./AsADate"
+import { TheDate } from "./TheDate"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -493,6 +497,94 @@ expressions.addRule(AsUppercase, {
       tests: [
         [`"foo" as upper case`, '"foo".toLocaleUpperCase()'],
         [`1 as uppercase`, '`${1 ?? ""}`.toLocaleUpperCase()']
+      ]
+    }
+  ]
+})
+
+// Join into text, `&` as they are, `&&` with a space (HyperTalk's)
+expressions.addRule(Wording.specialize({ ruleName: "join_mark", meanings: ["spaced"] }), {
+  syntax: "((spaced:&&)|&)"
+})
+expressions.addRule(Joined, {
+  syntax: "{operator:join_mark} {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("price")
+        scope.variables?.add("tax")
+        scope.variables?.add({ name: "due", datatype: "date" })
+      },
+      tests: [
+        ['"Total:" && price', 'core.joined("Total:", price, " ")'],
+        ['"Total:" & price', 'core.joined("Total:", price)'],
+        ['"Total:" && price + tax', 'core.joined("Total:", price + tax, " ")'],
+        ['"due" && due', 'core.joined("due", due, " ")']
+      ]
+    }
+  ]
+})
+
+// Today, as HyperTalk says it:  `the date`, `the long time`
+expressions.addRule(Wording.specialize({ ruleName: "date_form", meanings: ["short", "long", "abbreviated"] }), {
+  syntax: "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
+})
+expressions.addRule(Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time", "timestamp"] }), {
+  syntax: "((date:date)|(time:time)|(timestamp:timestamp))"
+})
+expressions.addRule(TheDate, {
+  syntax: "the {form:date_form}? {what:date_or_time}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["the date", "core.shortDate(core.now())"],
+        ["the long date", "core.longDate(core.now())"],
+        ["the abbrev date", "core.abbreviatedDate(core.now())"],
+        ["the time", "core.shortTime(core.now())"],
+        ["the long time", "core.longTime(core.now())"],
+        ["the timestamp", "core.timestamp(core.now())"]
+      ]
+    }
+  ]
+})
+// A date said one way:  `its time as a short date`
+expressions.addRule(
+  Wording.specialize({
+    ruleName: "date_style",
+    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "timestamp"]
+  }),
+  {
+    syntax:
+      "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(timestamp:timestamp))"
+  }
+)
+expressions.addRule(AsADate, {
+  syntax: "as (a|an)? {style:date_style}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "due", datatype: "date" })
+      },
+      tests: [
+        ["due as a short date", 'core.dateAs(due, "short")'],
+        ["due as an abbreviated date", 'core.dateAs(due, "abbreviated")'],
+        ["due as a long time", 'core.dateAs(due, "long time")'],
+        ["due as a timestamp", 'core.dateAs(due, "timestamp")']
+      ]
+    }
+  ]
+})
+expressions.addRule(Now, {
+  syntax: "now",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["now", "core.now()"],
+        ["the hour of now", "core.now().getHours()"]
       ]
     }
   ]

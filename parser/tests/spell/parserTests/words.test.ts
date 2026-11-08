@@ -485,12 +485,28 @@ una receta es una vista:
 })
 
 describe("what a target can't do, it says", () => {
-  it("Python, and a library:  a project with a place doesn't compile, and says why", () => {
+  it("a library, and Python for a kind it doesn't keep:  a project with a place doesn't compile, and says why", () => {
     const parts = parseSpellProject([{ path: "/Test.spell", contents: `${PLACE}\n` }]).files.map(
       ({ match }) => match?.AST
     )
     expect(SP.SpellProject.keepsThingsInPlaces(parts as never)).toBe(true)
-    expect(SP.TARGETS.py!.can.places).toBe(false)
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS["ts/lib"]!, parts as never)).toBe("any")
+    // Python keeps things in three kinds (epic `data` P40):  any other is refused by its word
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS.py!, parts as never)).toBe("in memory database")
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS["js/solid"]!, parts as never)).toBeUndefined()
+  })
+
+  it("Python keeps things on this device, in a data folder and in a sheet (epic `data` P40)", () => {
+    const lines = [
+      "this device is a database on this device",
+      'note folder is a data folder at "notes"',
+      'note sheet is a sheet at "notes.csv"'
+    ]
+    const parts = parseSpellProject([{ path: "/Test.spell", contents: `${lines.join("\n\n")}\n` }]).files.map(
+      ({ match }) => match?.AST
+    )
+    expect(SP.SpellProject.placeKindsIn(parts as never)).toEqual(["database on this device", "data folder", "sheet"])
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS.py!, parts as never)).toBeUndefined()
   })
 })
 

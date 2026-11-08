@@ -1,0 +1,14 @@
+{
+  "title": "Administración de la org",
+  "description": "La página de administración de una org:  agrega personas, crea equipos y proyectos, nombra quién dirige qué y hasta cuándo, aprueba aplicaciones, cambia las etapas de sus eventos y lee el registro de cada cambio.  Cada cambio pasa por el servidor de Encanto, con las reglas de la org.",
+  "imports": [
+    {
+      "path": "/AdministracionDeLaOrg.api.es.spell",
+      "active": true
+    },
+    {
+      "path": "/AdministracionDeLaOrg.es.spellml",
+      "active": true
+    }
+  ]
+}

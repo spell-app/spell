@@ -37,6 +37,17 @@
         background: transparent;
         color: inherit;
       }
+      /* A `<ui-table>` carries its class words on itself (`ui ... table`), which `semantic.min.css` colours black:
+         its cells' text is the page's, so a table reads on a dark page too. */
+      ui-table.ui.table {
+        color: inherit;
+      }
+      /* ... and sets its width, `auto` when `collapsing`, which fills a block:  its width is Spell UI's,
+         so a collapsing table hugs its columns (epic `data` I91). */
+      ui-table.ui.table,
+      ui-table.ui.collapsing.table {
+        width: revert-layer;
+      }
       /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
          Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet. */
       #PageLoading {

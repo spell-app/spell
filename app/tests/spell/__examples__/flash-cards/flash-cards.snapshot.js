@@ -25,7 +25,7 @@ export class FlashCard extends TwoSidedView {
 
   /** A click turns it over */
   onClick(event) {
-    return this.turnOver()
+    this.turnOver()
   }
 
   drawFront() {

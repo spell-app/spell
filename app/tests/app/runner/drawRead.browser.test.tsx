@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
-import { flush } from "solid-js"
+import { createSignal, flush } from "solid-js"
 import { render } from "@solidjs/web"
 import h from "@solidjs/h"
 
@@ -24,12 +24,13 @@ afterEach(() => {
 function drawn(rows: readonly number[], riders: Record<string, () => unknown> = {}, cell = false) {
   box = document.createElement("div")
   document.body.append(box)
-  const drawItem = (row: number) =>
-    cell ? h("ui-cell", { "data-column": "Number" }, `${row}`) : h("div", { class: "row" }, `${row}`)
+  const drawItem = (row: number) => (cell ? cellsOf(row) : h("div", { class: "row" }, `${row}`))
   dispose = render(() => core.drawRead(() => rows, drawItem as never, riders as never) as never, box)
   flush()
 }
 
+/** A row's cells as the compiler writes them:  a list of `h()`s, which make their elements when they're inserted. */
+const cellsOf = (row: number) => [h("ui-cell", { "data-column": "Number" }, () => `${row}`)]
 const rowsOf = (count: number) => Array.from({ length: count }, (_, index) => index + 1)
 const texts = (selector: string) => [...box.querySelectorAll(selector)].map((element) => element.textContent)
 
@@ -55,6 +56,19 @@ describe("<for>'s attributes, as core.drawRead() draws them", () => {
     expect(texts("ui-text")).toEqual(["Page 2"])
   })
 
+  test("paging=pages, as=cards or a table:  the pager comes after them, never one more card or row", () => {
+    const arounds = { cards: () => h("ui-cards", { columns: "4" }), table: () => h("ui-table", {}, h("ui-row")) }
+    for (const [kind, items] of Object.entries(arounds)) {
+      drawn(rowsOf(MOST_AT_ONCE + 5), { paging: () => "pages", items }, kind === "table")
+      const around = box.querySelector("ui-cards, ui-table")!
+      expect(around.querySelector("ui-button")).toBeNull()
+      expect(around.nextElementSibling?.localName).toBe("ui-stack")
+      expect(around.nextElementSibling!.querySelectorAll("ui-button")).toHaveLength(2)
+      dispose?.()
+      box.remove()
+    }
+  })
+
   test("paging=none:  every item at once", () => {
     drawn(rowsOf(MOST_AT_ONCE * 3), { paging: () => "all" })
     expect(texts(".row")).toHaveLength(MOST_AT_ONCE * 3)
@@ -65,6 +79,70 @@ describe("<for>'s attributes, as core.drawRead() draws them", () => {
     const rows = [...box.querySelectorAll("ui-table > ui-row")]
     expect(rows.map((row) => row.hasAttribute("header"))).toEqual([true, false, false])
     expect(rows.map((row) => row.textContent)).toEqual(["Number", "1", "2"])
+  })
+
+  test("as=table, paging=none:  the header row too (I88)", () => {
+    drawn(rowsOf(3), { paging: () => "all", items: () => h("ui-table", {}, h("ui-row")) }, true)
+    const rows = [...box.querySelectorAll("ui-table > ui-row")]
+    expect(rows.map((row) => row.textContent)).toEqual(["Number", "1", "2", "3"])
+  })
+
+  for (const paging of ["all", "window", "pages"] as const)
+    test(`as=table, paging=${paging}:  the header row stays as the list redraws (I88)`, () => {
+      const [list, setList] = createSignal<readonly number[]>([])
+      box = document.createElement("div")
+      document.body.append(box)
+      const drawItem = cellsOf
+      const riders = {
+        items: () => h("ui-table", {}, h("ui-row")),
+        ...(paging === "window" ? {} : { paging: () => paging })
+      }
+      dispose = render(() => core.drawRead(() => list(), drawItem as never, riders as never) as never, box)
+      flush()
+      const header = () => box.querySelectorAll("ui-table > ui-row[header]").length
+      for (const next of [[1, 2], [3, 4], [3], [], [5, 6, 7], [1, 2]]) {
+        setList(next)
+        flush()
+        expect({ next, header: header() }).toEqual({ next, header: next.length ? 1 : header() })
+      }
+      expect(texts("ui-table > ui-row")).toEqual(["Number", "1", "2"])
+    })
+
+  for (const paging of ["all", "window"] as const)
+    test(`as=table, paging=${paging}:  a read that waits keeps its header row once it lands (I88)`, async () => {
+      box = document.createElement("div")
+      document.body.append(box)
+      const drawItem = cellsOf
+      const riders = {
+        items: () => h("ui-table", {}, h("ui-row")),
+        ...(paging === "window" ? {} : { paging: () => paging })
+      }
+      const read = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        return rowsOf(3)
+      }
+      dispose = render(() => core.drawRead(read, drawItem as never, riders as never) as never, box)
+      flush()
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      flush()
+      expect(texts("ui-table > ui-row")).toEqual(["Number", "1", "2", "3"])
+    })
+
+  test("as=table:  each heading takes its column's align (I89)", () => {
+    box = document.createElement("div")
+    document.body.append(box)
+    const drawItem = (row: number) => [
+      h("ui-cell", { "data-column": "Name" }, () => `Row ${row}`),
+      h("ui-cell", { "data-column": "Count", align: "right" }, () => `${row}`)
+    ]
+    const riders = { items: () => h("ui-table", {}, h("ui-row")) }
+    dispose = render(() => core.drawRead(() => rowsOf(2), drawItem as never, riders as never) as never, box)
+    flush()
+    const headings = [...box.querySelectorAll("ui-table > ui-row[header] > ui-cell")]
+    expect(headings.map((cell) => [cell.textContent, cell.getAttribute("align")])).toEqual([
+      ["Name", null],
+      ["Count", "right"]
+    ])
   })
 
   test("empty:  what it says;  with nothing said, nothing", () => {

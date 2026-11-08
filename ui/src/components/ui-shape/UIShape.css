@@ -161,14 +161,55 @@
 *******************************/
 
 @layer ui.components.shape.states {
+  /*
+   * A flip card (`flip-on="click"`):  pressable, with a focus ring, and a block filling its place.
+   * - In a `<ui-cards>` group it sits as one of the group's cards:  the group's private item width and margin
+   *   (`--_cards-item-*`, a mosaic's;  else `--_cards-width` / `--_cards-spacing`, `UICard.css`) reach it by
+   *   inheritance, and it never splits across a mosaic's columns.
+   */
+  .ui.shape[tabindex] {
+    display: block;
+    width: var(--_cards-item-width, var(--_cards-width, 100%));
+    margin: var(--_cards-item-margin, calc(var(--_cards-row-spacing, 0px) / 2) var(--_cards-spacing, 0px));
+    break-inside: avoid;
+    cursor: pointer;
+  }
+  /*
+   * A flip card is as tall as its tallest side:  the sides share one grid cell, and a hidden side keeps its place
+   * (`visibility: hidden`, out of the accessibility tree all the same) -- so turning it never moves what's around it
+   * - the sides box is the grid;  the `<slot>` adds no box, so each side is a grid item
+   */
+  .ui.shape[tabindex] > .sides {
+    display: grid;
+  }
+  .ui.shape[tabindex].animating > .sides {
+    inset: 0;
+  }
+  :host(:state(side):state(in-flip-card)) {
+    grid-area: 1 / 1;
+  }
+  /* each face a grid too:  what it holds (a card) stretches to the card's full height, leaving no gap under it */
+  :host(:state(side):state(in-flip-card)) > .side {
+    display: grid;
+  }
+  .ui.shape[tabindex]:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: var(--ui-focus-width, 2px);
+    border-radius: var(--ui-radius);
+  }
+
   /* Active (static markup) */
   .ui.shape .active.side {
     display: block;
   }
 
-  /* Hidden:  another side is shown. */
+  /* Hidden:  another side is shown.  In a flip card it keeps its place, so the card keeps its tallest side's height. */
   :host(:state(inactive)) {
     display: none;
+  }
+  :host(:state(inactive):state(in-flip-card)) {
+    display: block;
+    visibility: hidden;
   }
   /*
    * Its face too, for a server render (`spell/ui/static`), whose root is the DOM element and the face at once:
@@ -177,6 +218,9 @@
    */
   :host(:state(inactive)) > .side {
     display: none;
+  }
+  :host(:state(inactive):state(in-flip-card)) > .side {
+    display: grid;
   }
 
   /* Animating:  the box turns, the incoming side is staged absolutely over it. */

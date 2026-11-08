@@ -31,7 +31,7 @@ export const words = {
       stateReason: "state reason",
       draft: "draft",
       pullRequest: "pull request",
-      draw: "draw it"
+      assignee: "assignee"
     },
     Contributor: {
       login: "login",
@@ -52,8 +52,7 @@ export const words = {
       kind: "kind",
       userViewType: "user view type",
       siteAdmin: "site admin",
-      contributions: "contributions",
-      draw: "draw it"
+      contributions: "contributions"
     },
     User: {
       login: "login",
@@ -86,7 +85,11 @@ export const words = {
       followers: "followers",
       following: "following",
       createdAt: "created at",
-      updatedAt: "updated at"
+      updatedAt: "updated at",
+      bio: "bio",
+      draw: "draw it",
+      lookAtUser: "look at (a user)",
+      lookAwayFromUser: "look away from (a user)"
     },
     IssueUser: {
       login: "login",
@@ -188,13 +191,133 @@ export const words = {
       pullRequests: "pull requests",
       repositoryHooks: "repository hooks",
       statuses: "statuses",
-      workflows: "workflows"
+      workflows: "workflows",
+      repositoryCreation: "repository creation"
     },
     PullRequest: {
       url: "url",
       htmlUrl: "html url",
       diffUrl: "diff url",
       patchUrl: "patch url"
+    },
+    Repository: {
+      nodeId: "node id",
+      name: "name",
+      fullName: "full name",
+      private: "private",
+      owner: "owner",
+      htmlUrl: "html url",
+      description: "description",
+      fork: "fork",
+      url: "url",
+      forksUrl: "forks url",
+      keysUrl: "keys url",
+      collaboratorsUrl: "collaborators url",
+      teamsUrl: "teams url",
+      hooksUrl: "hooks url",
+      issueEventsUrl: "issue events url",
+      eventsUrl: "events url",
+      assigneesUrl: "assignees url",
+      branchesUrl: "branches url",
+      tagsUrl: "tags url",
+      blobsUrl: "blobs url",
+      gitTagsUrl: "git tags url",
+      gitRefsUrl: "git refs url",
+      treesUrl: "trees url",
+      statusesUrl: "statuses url",
+      languagesUrl: "languages url",
+      stargazersUrl: "stargazers url",
+      contributorsUrl: "contributors url",
+      subscribersUrl: "subscribers url",
+      subscriptionUrl: "subscription url",
+      commitsUrl: "commits url",
+      gitCommitsUrl: "git commits url",
+      commentsUrl: "comments url",
+      issueCommentUrl: "issue comment url",
+      contentsUrl: "contents url",
+      compareUrl: "compare url",
+      mergesUrl: "merges url",
+      archiveUrl: "archive url",
+      downloadsUrl: "downloads url",
+      issuesUrl: "issues url",
+      pullsUrl: "pulls url",
+      milestonesUrl: "milestones url",
+      notificationsUrl: "notifications url",
+      labelsUrl: "labels url",
+      releasesUrl: "releases url",
+      deploymentsUrl: "deployments url",
+      createdAt: "created at",
+      updatedAt: "updated at",
+      pushedAt: "pushed at",
+      gitUrl: "git url",
+      sshUrl: "ssh url",
+      cloneUrl: "clone url",
+      svnUrl: "svn url",
+      homepage: "homepage",
+      size: "size",
+      stargazersCount: "stargazers count",
+      watchersCount: "watchers count",
+      language: "language",
+      issues: "issues",
+      projects: "projects",
+      downloads: "downloads",
+      wiki: "wiki",
+      pages: "pages",
+      discussions: "discussions",
+      forksCount: "forks count",
+      archived: "archived",
+      disabled: "disabled",
+      openIssuesCount: "open issues count",
+      license: "license",
+      allowForking: "allow forking",
+      template: "template",
+      webCommitSignoffRequired: "web commit signoff required",
+      pullRequests: "pull requests",
+      pullRequestCreationPolicy: "pull request creation policy",
+      topics: "topics",
+      visibility: "visibility",
+      forks: "forks",
+      openIssues: "open issues",
+      watchers: "watchers",
+      defaultBranch: "default branch",
+      permissions: "permissions",
+      score: "score",
+      draw: "draw it"
+    },
+    Assignee: {
+      login: "login",
+      number: "number",
+      nodeId: "node id",
+      avatarUrl: "avatar url",
+      gravatarId: "gravatar id",
+      url: "url",
+      htmlUrl: "html url",
+      followersUrl: "followers url",
+      followingUrl: "following url",
+      gistsUrl: "gists url",
+      starredUrl: "starred url",
+      subscriptionsUrl: "subscriptions url",
+      organizationsUrl: "organizations url",
+      reposUrl: "repos url",
+      eventsUrl: "events url",
+      receivedEventsUrl: "received events url",
+      kind: "kind",
+      userViewType: "user view type",
+      siteAdmin: "site admin"
+    },
+    License: {
+      key: "key",
+      name: "name",
+      spdxId: "spdx id",
+      url: "url",
+      nodeId: "node id"
+    },
+    GithubPage: {
+      search: "search",
+      showing: "showing",
+      create: "create it",
+      tryWords: "try (words as text)",
+      draw: "draw it"
     },
     Book: {
       authors: "authors",
@@ -220,7 +343,8 @@ export const words = {
       subtitle: "subtitle",
       writer: "writer",
       draw: "draw it",
-      open: "open (a book)"
+      open: "open (a book)",
+      close: "close (a book)"
     },
     Author: {
       links: "links",
@@ -312,6 +436,60 @@ export const words = {
       found: "found",
       draw: "draw it"
     },
+    Post: {
+      userId: "user id",
+      title: "title",
+      body: "body",
+      comments: "comments",
+      draw: "draw it"
+    },
+    Comment: {
+      postId: "post id",
+      name: "name",
+      email: "email",
+      body: "body",
+      draw: "draw it"
+    },
+    JsonplaceholderUser: {
+      name: "name",
+      username: "username",
+      email: "email",
+      address: "address",
+      phone: "phone",
+      website: "website",
+      company: "company",
+      posts: "posts",
+      todos: "todos"
+    },
+    Todo: {
+      userId: "user id",
+      title: "title",
+      completed: "completed",
+      draw: "draw it"
+    },
+    Address: {
+      street: "street",
+      suite: "suite",
+      city: "city",
+      zipcode: "zipcode",
+      geo: "geo"
+    },
+    Geo: {
+      lat: "lat",
+      lng: "lng"
+    },
+    Company: {
+      name: "name",
+      catchPhrase: "catch phrase",
+      bs: "bs"
+    },
+    JsonplaceholderPage: {
+      newTodo: "new todo",
+      person: "person",
+      todos: "todos",
+      addTheNewTodo: "add the new todo",
+      draw: "draw it"
+    },
     Forecast: {
       latitude: "latitude",
       longitude: "longitude",
@@ -326,8 +504,7 @@ export const words = {
       time: "time",
       temperature: "temperature",
       precipitation: "precipitation",
-      windSpeed: "wind speed",
-      draw: "draw it"
+      windSpeed: "wind speed"
     },
     OpenMeteoPage: {
       cities: "cities",
@@ -401,8 +578,7 @@ export const words = {
       objectWikidataUrl: "object wikidata url",
       timelineWork: "timeline work",
       galleryNumber: "gallery number",
-      draw: "draw it",
-      lookAtArtwork: "look at (an artwork)"
+      draw: "draw it"
     },
     Constituent: {
       constituentId: "constituent id",
@@ -430,9 +606,9 @@ export const words = {
     },
     MetMuseumPage: {
       search: "search",
-      showing: "showing",
       create: "create it",
       found: "found",
+      tryWords: "try (words as text)",
       draw: "draw it"
     },
     Country: {
@@ -459,8 +635,7 @@ export const words = {
       borders: "borders",
       area: "area",
       flag: "flag",
-      demonyms: "demonyms",
-      draw: "draw it"
+      demonyms: "demonyms"
     },
     Name: {
       common: "common",
@@ -510,89 +685,28 @@ export const words = {
       create: "create it",
       countries: "countries",
       pickRegionRegion: "pick region (region as text)",
-      pickLanguageLanguage: "pick language (language as text)",
       draw: "draw it"
     },
     PublicServer: {
       tab: "tab",
+      github: "github",
       library: "library",
       weather: "weather",
       museum: "museum",
       atlas: "atlas",
       create: "create it",
-      showServer: "show (server as text)",
-      draw: "draw it"
-    },
-    GithubPage: {
-      login: "login",
-      create: "create it",
-      person: "person",
-      draw: "draw it"
-    },
-    Post: {
-      userId: "user id",
-      title: "title",
-      body: "body",
-      comments: "comments",
-      draw: "draw it"
-    },
-    Comment: {
-      postId: "post id",
-      name: "name",
-      email: "email",
-      body: "body",
-      draw: "draw it"
-    },
-    JsonplaceholderUser: {
-      name: "name",
-      username: "username",
-      email: "email",
-      address: "address",
-      phone: "phone",
-      website: "website",
-      company: "company",
-      posts: "posts",
-      todos: "todos"
-    },
-    Todo: {
-      userId: "user id",
-      title: "title",
-      completed: "completed",
-      draw: "draw it"
-    },
-    Address: {
-      street: "street",
-      suite: "suite",
-      city: "city",
-      zipcode: "zipcode",
-      geo: "geo"
-    },
-    Geo: {
-      lat: "lat",
-      lng: "lng"
-    },
-    Company: {
-      name: "name",
-      catchPhrase: "catch phrase",
-      bs: "bs"
-    },
-    JsonplaceholderPage: {
-      newTodo: "new todo",
-      person: "person",
-      todos: "todos",
-      addTheNewTodo: "add the new todo",
       draw: "draw it"
     }
   },
   groups: {
+    User: [
+      { name: "What someone on GitHub can do, from anywhere", members: ["lookAtUser", "lookAwayFromUser"] }
+    ],
     Book: [
-      { name: "What a book and a city can do, from anywhere", members: ["open"] }
+      { name: "What a book and a city can do, from anywhere", members: ["open", "close"] }
     ],
     City: [
       { name: "What a book and a city can do, from anywhere", members: ["pick"] }
-    ],
-    Artwork: [
-      { name: "What an artwork can do, from anywhere", members: ["lookAtArtwork"] }
     ]
   }
 }

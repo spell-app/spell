@@ -39,6 +39,12 @@ export const words = {
       space: "space",
       draw: "draw it"
     },
+    Stage: {
+      name: "name",
+      movesTo: "moves to",
+      movedBy: "moved by",
+      draw: "draw it"
+    },
     RoleChange: {
       at: "at",
       who: "who",
@@ -54,12 +60,14 @@ export const words = {
       newTerm: "new term",
       newApp: "new app",
       newDesigner: "new designer",
+      newStage: "new stage",
       addTheNewMember: "add the new member",
       addTheNewTeam: "add the new team",
       addTheNewProject: "add the new project",
       giveTheNewTerm: "give the new term",
       approveTheNewApp: "approve the new app",
       addTheNewDesigner: "add the new designer",
+      addTheNewStage: "add the new stage",
       draw: "draw it"
     }
   }

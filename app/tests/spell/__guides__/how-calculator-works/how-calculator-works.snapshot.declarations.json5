@@ -39,6 +39,7 @@
           "datatype": "text"
         }
       ],
+      "returns": "nothing",
       "defined": "/HowCalculatorWorks.spellml:1516-1666"
     },
     {
@@ -66,6 +67,7 @@
       ],
       "kind": "method",
       "name": "clear it",
+      "returns": "nothing",
       "defined": "/HowCalculatorWorks.spellml:1935-2032"
     },
     {

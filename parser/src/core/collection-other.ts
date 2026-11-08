@@ -43,11 +43,31 @@ export type CollectionIterationCallback<T = unknown> = (
  * - Python's core sorts the same, but for accents, which it reads as their plain letter:  `_sort_key()`.
  */
 export function compareSortKeys(one: unknown, other: unknown): number {
+  // `newest first`:  the same keys, the other way round;  nothing still goes last
+  if (one instanceof Descending || other instanceof Descending) {
+    const [first, second] = [Descending.keyOf(one), Descending.keyOf(other)]
+    if (first === undefined || first === null || second === undefined || second === null)
+      return compareSortKeys(first, second)
+    return compareSortKeys(second, first)
+  }
   if (one === undefined || one === null) return other === undefined || other === null ? 0 : 1
   if (other === undefined || other === null) return -1
   if (typeof one === "string" && typeof other === "string") return textOrder().compare(one, other)
   if ((one as number) < (other as number)) return -1
   return (one as number) > (other as number) ? 1 : 0
+}
+
+/**
+ * A sort key read backwards:  what `core.descending()` hands `core.sortedBy()`, for `sorted by its sent, newest first`.
+ * - Only `compareSortKeys()` reads it.
+ */
+export class Descending {
+  constructor(readonly key: unknown) {}
+
+  /** `key`'s own value, unwrapped. */
+  static keyOf(key: unknown): unknown {
+    return key instanceof Descending ? key.key : key
+  }
 }
 
 /** The order text sorts in, in each language, kept:  making one is slow. */
@@ -449,6 +469,14 @@ export const collectionOtherMethods = defineCoreModule({
     const results = core.isArrayLike(collection) ? core.newThingLike(collection) : []
     for (const { value } of keyed) core.append(results, value)
     return results as C
+  },
+
+  /**
+   * `key` read backwards, as a sort key:  `sorted by its sent, newest first` (epic `atmosphere` T48).
+   * - `core.sortedBy()` puts the largest first;  an item with no key still goes last.
+   */
+  descending(key?: unknown): Descending {
+    return new Descending(key)
   },
 
   /** The first `count` items of `collection`, as a list that owns none of them:  `the first 20 recipes where ...`. */

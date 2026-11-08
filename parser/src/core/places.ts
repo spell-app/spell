@@ -159,7 +159,8 @@ const REFUSAL_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
   owner: "write-refused-owner",
   "taken down": "write-refused-taken-down",
   full: "write-refused-full",
-  "not listed": "write-refused-not-listed"
+  "not listed": "write-refused-not-listed",
+  "used up": "write-refused-used-up"
 }
 
 /** The refusal notice that names the role it takes, by what it `needs` (epic `atmosphere` P23). */

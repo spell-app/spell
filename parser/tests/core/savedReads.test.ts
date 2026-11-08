@@ -7,6 +7,7 @@ import { beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { bridgeSolid, observe } from "spell/util"
 import { core, Place, Thing } from "spell/parser/core"
+import { waitAfter } from "spell/parser/core/saved"
 import { MemoryPlace, type ListAnswer, type ListAsk, type ListQuery, type PlaceContext } from "spell/places"
 
 /** How long to let what's asked be answered. */
@@ -176,5 +177,29 @@ describe("a field the compiler left out", () => {
     const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
     expect(place.requests[0]![0]!.query.select).toBeUndefined()
     expect(recipe!.notes).toBe("Salt it")
+  })
+})
+
+describe("waitAfter():  a read that was only too soon (epic `data` I92)", () => {
+  const NOW = Date.UTC(2026, 10, 7, 12)
+  /** A failure holding the server's answer, as `spell/util`'s `ApiError` does. */
+  const failed = (status: number, headers: Record<string, string> = {}) =>
+    Object.assign(new Error(`${status}`), { response: new Response("", { status, headers }) })
+
+  test("a 429 waits as its retry-after says, else says no time", () => {
+    expect(waitAfter(failed(429, { "retry-after": "30" }), NOW)).toBe(30_000)
+    expect(waitAfter(failed(429), NOW)).toBe(0)
+  })
+
+  test("GitHub's 403 with no requests left waits until its limit resets", () => {
+    const reset = `${NOW / 1000 + 90}`
+    expect(waitAfter(failed(403, { "x-ratelimit-remaining": "0", "x-ratelimit-reset": reset }), NOW)).toBe(90_000)
+  })
+
+  test("any other failure is no wait:  it shows red, as before", () => {
+    expect(waitAfter(failed(403), NOW)).toBeUndefined()
+    expect(waitAfter(failed(404), NOW)).toBeUndefined()
+    expect(waitAfter(new Error("offline"), NOW)).toBeUndefined()
+    expect(waitAfter("Lost the signal", NOW)).toBeUndefined()
   })
 })

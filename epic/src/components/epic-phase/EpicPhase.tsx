@@ -33,7 +33,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-phase>`:  one phase of the plan, in the Phases section --
  * a fold (`EpicFold`) titled `P3 · <title>`.
  * - Its title line:
- *   - the status icon, its shape by its status (an outline to do, half filled under way, a check done), its COLOUR
+ *   - the status icon, its shape by its status (an outline to do, a still load indicator under way, a check done), its COLOUR
  *     by where it stands, as its Phases chip (`PhaseState.of()`, epic `epic-engine` I170;  Owen, 2026-10-29):  red
  *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a grey PAUSE
  *     held by him (`plan="held"`, I221), a DOTTED blue circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
@@ -542,7 +542,9 @@ const SEEN_ALL = "seen-all"
 /** A phase's status => its icon (Spell UI's names, from the docs bundle's set). */
 const STATUS_ICONS = {
   todo: "circle outline",
-  active: "circle half stroke",
+  // a load indicator, standing still (epic `epic-engine` I226;  Owen, 2026-11-07:  "While a phase is running, show as
+  // non-rotating load indicator"):  the half circle before
+  active: "circle notch",
   done: "circle check"
 } as const
 

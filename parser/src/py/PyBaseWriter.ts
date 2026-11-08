@@ -813,9 +813,11 @@ export class PyBaseWriter extends P.ProgramWriter {
       if (!written) continue
       // PEP 8:  two blank lines around a top-level `def` or `class`, one around a method
       const gap = topLevel ? 2 : statement instanceof P.ASTClassMember ? 1 : 0
-      if (isDefinition && gap) separateAt(lines, above, gap)
+      // a top-level step that waits is a `def` of its own too, run where it was (`PyWriter.topLevelStep()`)
+      const spaced = isDefinition || (topLevel && written.startsWith("async def "))
+      if (spaced && gap) separateAt(lines, above, gap)
       lines.push(written)
-      if (isDefinition && gap) lines.push(...Array<string>(gap).fill(""))
+      if (spaced && gap) lines.push(...Array<string>(gap).fill(""))
     }
     pushDoc()
     while (lines.at(-1) === "") lines.pop()
@@ -1002,6 +1004,8 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     // in a loop's body, written from a function per item:  ends that turn only
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
+    if (this.givesNothing(node.value)) return this.bare(node.value)
     this.returnsInPlace.set(node, this.mayBeNothing(node.value))
     return this.testBlock(node.value) ?? `return ${this.bare(node.value)}`
   }
@@ -1219,7 +1223,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   returnHint(method: P.ASTMethodDefinition): string | undefined {
     const returns: P.ASTReturnStatement[] = []
     forEachReturn(method.body, (node) => returns.push(node))
-    if (!returns.some((it) => it.value)) return "None"
+    if (!returns.some((it) => it.value && !this.givesNothing(it.value))) return "None"
     if (returns.every((it) => it.value && isTestCall(it.value))) return "None"
     const isDrawing = returns.every((it) => it.value && unwrapped(it.value) instanceof P.ASTJSXElement)
     // a class of the program's may take the name

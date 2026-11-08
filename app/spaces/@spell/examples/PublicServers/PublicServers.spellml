@@ -1,10 +1,12 @@
 # Public Servers
-Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
+Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own, on a tab, in one centred column.
+The tab chosen, and each page's search, are kept in the page's address (`?server=met&art=van+gogh`), so Back steps through them.
 GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
 <spell-app "public servers">
 	<spell>
 		- its "tab" is text
+		- its "github" is a new github page
 		- its "library" is a new open library page
 		- its "weather" is a new open meteo page
 		- its "museum" is a new met museum page
@@ -13,30 +15,36 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 			set its tab to "github"
 	</spell>
 
-	<action "show (server as text)">
-		set its tab to server
-	</action>
-
 	<draw>
-		<toolbar appearance="secondary pointing" aria-label="Servers">
-			<item active={its tab is "github"} onClick={show "github"}>GitHub</item>
-			<item active={its tab is "open library"} onClick={show "open library"}>Open Library</item>
-			<item active={its tab is "jsonplaceholder"} onClick={show "jsonplaceholder"}>JSONPlaceholder</item>
-			<item active={its tab is "open meteo"} onClick={show "open meteo"}>Open-Meteo</item>
-			<item active={its tab is "met museum"} onClick={show "met museum"}>The Met</item>
-			<item active={its tab is "rest countries"} onClick={show "rest countries"}>REST Countries</item>
-		</toolbar>
+		<container>
+			<stack spacing="lg">
+				<form value={it}>
+					<tabs name="tab" parameter="server" appearance="secondary pointing basic" aria-label="Servers">
+						<tab label="GitHub" value="github" />
+						<tab label="Open Library" value="library" />
+						<tab label="JSONPlaceholder" value="jsonplaceholder" />
+						<tab label="Open-Meteo" value="weather" />
+						<tab label="The Met" value="met" />
+						<tab label="REST Countries" value="countries" />
+					</tabs>
+				</form>
+				{draw the server of it}
+			</stack>
+		</container>
+	</draw>
+
+	<draw "server" description="The tab's page:  its own drawing, so its `if` picks just one, and only that one asks its server">
 		<if its tab is "github">
-			draw (a new github page)
-		<otherwise if its tab is "open library">
+			draw its github
+		<otherwise if its tab is "library">
 			draw its library
 		<otherwise if its tab is "jsonplaceholder">
 			draw (a new jsonplaceholder page)
-		<otherwise if its tab is "open meteo">
+		<otherwise if its tab is "weather">
 			draw its weather
-		<otherwise if its tab is "met museum">
+		<otherwise if its tab is "met">
 			draw its museum
-		<otherwise if its tab is "rest countries">
+		<otherwise if its tab is "countries">
 			draw its atlas
 		</>
 	</draw>
@@ -49,6 +57,9 @@ Only this file can name the public servers:  so its other files ask this.
 <spell>
 	to open (a book):
 		set the public servers' library's showing to it
+
+	to close (a book):
+		set the public servers' library's showing to nothing
 
 	to pick (a city):
 		set the public servers' weather's city to it

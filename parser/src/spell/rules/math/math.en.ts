@@ -97,6 +97,17 @@ math.addRule(Plus, {
         ["price+tax", "(price + tax)"],
         ["price plus tax", "(price + tax)"]
       ]
+    },
+    {
+      title: "a date joined to text says itself, as a drawing does (epic `data`)",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "due", datatype: "date" })
+      },
+      tests: [
+        ['"at " + due', "`at ${core.dateShown(due)}`"],
+        ['"at " + the short date of the due', "`at ${core.shortDate(due)}`"]
+      ]
     }
   ]
 })

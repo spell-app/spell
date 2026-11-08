@@ -6,6 +6,8 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
 import "spell/ui/components/ui-text"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-parts"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-text/examples/elements/*.html", {
@@ -280,6 +282,43 @@ describe("<ui-text paragraph> and <ui-link>", () => {
     expect([root.localName, root.className, root.getAttribute("href")]).toEqual(["a", "ui text", "help.html"])
     expect(root.querySelector("strong > slot")).not.toBe(null)
     await expectAccessible(host)
+  })
+
+  it("`<ui-link>` holding only an icon, after a name in a header:  a small gap, and never on a line of its own", async () => {
+    const box = await ElementFixture.render(
+      `<div style="width: 600px"><ui-header>Ann Smithson<ui-link link="https://example.com" aria-label="Elsewhere">` +
+        `<ui-icon name="star"></ui-icon></ui-link></ui-header></div>`
+    )
+    await ElementFixture.settle()
+    const link = box.querySelector("ui-link")!
+    expect(link.matches(":state(icon-only)")).toBe(true)
+    const a = link.shadowRoot!.querySelector("a")!
+    const fontSize = parseFloat(getComputedStyle(a).fontSize)
+    expect(parseFloat(getComputedStyle(a).marginInlineStart)).toBeCloseTo(0.35 * fontSize, 1)
+    // narrower than the name and its icon:  the name breaks at its space, and the icon goes down WITH its word
+    const name = link.previousSibling!
+    const line = () => {
+      const range = document.createRange()
+      range.selectNodeContents(name)
+      return [...range.getClientRects()]
+    }
+    ;(box as HTMLElement).style.width = `${a.getBoundingClientRect().right - line()[0]!.left - 4}px`
+    const icon = a.getBoundingClientRect()
+    const words = line()
+    expect(words.length).toBe(2)
+    expect(Math.abs(words[1]!.top + words[1]!.height / 2 - (icon.top + icon.height / 2))).toBeLessThan(
+      words[1]!.height / 2
+    )
+  })
+
+  it("`<ui-link>` with words is not icon-only, and keeps no gap", async () => {
+    const box = await ElementFixture.render(
+      `<div><ui-header>Ann<ui-link link="https://example.com">her page <ui-icon name="star"></ui-icon></ui-link></ui-header></div>`
+    )
+    await ElementFixture.settle()
+    const link = box.querySelector("ui-link")!
+    expect(link.matches(":state(icon-only)")).toBe(false)
+    expect(getComputedStyle(link.shadowRoot!.querySelector("a")!).marginInlineStart).toBe("0px")
   })
 
   it("`<ui-link disabled>`:  no longer a link", async () => {

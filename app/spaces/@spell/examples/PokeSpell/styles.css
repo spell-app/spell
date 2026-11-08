@@ -1,8 +1,12 @@
-/* File styles.css:  PokéSpell's theme, and the few looks no `ui-*` attribute gives.
+/* File styles.css:  PokéSpell's theme, and Who's that Pokémon's shadow.
    - The theme:  a bright sky (a night sky in dark mode), round friendly letters, white cards with round corners.
      Spell UI's own tokens, so every card, header and button follows.
-   - Each kind's colour is Spell's, in Pokemon.spellml:  a button's own `color`.
-   - Every button's a pill:  the app's `<ui-defaults>` says so, in PokeSpell.spellml. */
+   - Every other look is an attribute, in the spellml files:
+     - the logo and a Pokémon's name:  `size="poster"`, `font="heavy"`, the logo's `shadow="yellow"`
+     - each picture's sunny circle:  `background="yellow"`
+     - how wide the search, a strength bar and a card in a family are:  `width`, `min-width`, `max-width`
+     - a family's row that runs down a phone, its arrows turning:  `stackable="34em"`, `rotated="when stacked"`
+     - each kind's colour, a button's own `color`;  every button a pill, the app's `<ui-defaults>` */
 
 poke-spell-app {
   --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);
@@ -38,57 +42,6 @@ poke-spell-app {
   }
 }
 
-/* The logo and a Pokémon's name:  as big as the window allows, in the games' heavy letters */
-.logo::part(button) {
-  font-size: clamp(2em, 6vw, 3.2em);
-  font-weight: 900;
-  text-shadow: 0.06em 0.06em 0 #ffcb05;
-}
-
-.title::part(header) {
-  font-size: clamp(2.4em, 7vw, 4em);
-  font-weight: 900;
-  line-height: 1;
-}
-
-/* Every Pokémon's picture on a sunny circle, with no hairline round it:  the theme's, for photos with white edges */
-.art::part(image) {
-  outline: none;
-  padding: 0.75em;
-  background: radial-gradient(circle, #fff3b0 0 58%, transparent 59%);
-}
-
-/* How wide a few things are:  the search, a strength bar, a card in a family */
-.find {
-  flex: 1 1 16em;
-  max-width: 26em;
-}
-
-.strength {
-  max-width: 36em;
-}
-
-.evolution::part(card) {
-  flex: none;
-  width: 10em;
-}
-
-/* Too narrow for a row (a phone):  a family runs down the page, each arrow pointing down */
-@container (width < 34em) {
-  .evolutions {
-    flex-direction: column;
-  }
-
-  .branches {
-    flex: none;
-    justify-content: center;
-  }
-
-  .arrow::part(icon) {
-    rotate: 90deg;
-  }
-}
-
 /****************
  * Who's that Pokémon?  Black as a shadow, until you've guessed.
  ****************/
@@ -97,9 +50,10 @@ poke-spell-app {
   background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);
 }
 
+/* No hairline round it (the theme's, for photos with white edges):  a black shape on the sunburst */
 .shadow .art::part(image) {
   width: min(18em, 70vw);
-  background: none;
+  outline: none;
   filter: brightness(0);
   transition: filter 0.6s ease;
 }

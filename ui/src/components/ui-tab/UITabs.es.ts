@@ -11,5 +11,6 @@ export const tabsEs = {
   tag: "ui-tabs",
   name: "solapas",
   aka: ["pestañas", "barra de pestañas", "panel con pestañas", "fichas"],
-  attributes: { activation: "activacion", history: "historial" }
+  attributes: { activation: "activacion", history: "historial" },
+  texts: { scrollStart: "Desplazar atrás", scrollEnd: "Desplazar adelante" }
 } as const satisfies E.TagDictionary

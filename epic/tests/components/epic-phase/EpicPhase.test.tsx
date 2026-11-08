@@ -199,6 +199,9 @@ describe("<epic-phase> while Claude works on it", () => {
       // blue, as the header's step label under way:  not the grey of a to-do phase
       const blue = getComputedStyle(section.querySelector("#p-built")!.shadowRoot!.querySelector('[part~="status"]')!)
       expect(getComputedStyle(status()).color).toBe(blue.color)
+      // under way, nobody on it:  a load indicator standing still (I226;  Owen:  "non-rotating load indicator")
+      const built = section.querySelector("#p-built")!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+      expect(getComputedStyle(built.querySelector("svg") ?? built).animationName).toBe("none")
       expect(section.querySelector("#p-old")!.shadowRoot!.querySelector(".icon.working")).toBeNull()
       await expectAccessible(phase)
     } finally {

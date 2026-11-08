@@ -17,3 +17,14 @@ a "message" is a thing:
 	- its "page" is text
 	- its "title" is text
 	- its "line" is text
+
+// How you hear of your inbox by mail:  one mail per message, a daily digest, or none.  The first one counts;
+// with none, a daily digest.  Every mail has a link that stops it.
+a "mail choice" is a thing:
+	- it lives in my inbox
+	- its "how" is text
+
+// A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update.
+a "subscription" is a thing:
+	- it lives in my inbox
+	- its "space" is text

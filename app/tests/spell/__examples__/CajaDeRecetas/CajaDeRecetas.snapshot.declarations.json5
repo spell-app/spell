@@ -75,6 +75,7 @@
       ],
       "kind": "method",
       "name": "crearla",
+      "returns": "nothing",
       "waits": true,
       "defined": "/CajaDeRecetas.es.spellml:1363-1843"
     },
@@ -95,6 +96,7 @@
       ],
       "kind": "method",
       "name": "agregar la receta nueva",
+      "returns": "nothing",
       "defined": "/CajaDeRecetas.es.spellml:2111-2246"
     }
   ],

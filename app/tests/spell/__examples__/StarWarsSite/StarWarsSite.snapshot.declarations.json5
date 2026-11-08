@@ -10,7 +10,6 @@
     "FilmsPage",
     "FilmPage",
     "PeoplePage",
-    "PersonPage",
     "PlanetsPage",
     "PlanetPage",
     "SpeciesListPage",
@@ -21,7 +20,8 @@
     "StarshipPage",
     "ReviewsPage",
     "GalaxyGuide",
-    "GalaxyReview"
+    "GalaxyReview",
+    "PersonPage"
   ],
   "statements": [
     {
@@ -191,6 +191,7 @@
       ],
       "kind": "method",
       "name": "save the review",
+      "returns": "nothing",
       "defined": "/StarWarsSite.spellml:14223-14402"
     },
     {

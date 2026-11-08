@@ -59,6 +59,11 @@ export abstract class FormComponent<V extends E.ComponentVocabulary = E.Componen
     super(...args)
     // here, not in a field initializer:  TypeScript refuses one reading `domElement`, `declare`d above (TS2729)
     this.labels = new F.ControlLabels(this.domElement)
+    this.address = new E.AddressParameter({
+      domElement: this.domElement,
+      read: () => this.addressText,
+      show: (text, event) => this.showAddressText(text, event)
+    })
   }
 
   ////////////////
@@ -248,6 +253,65 @@ export abstract class FormComponent<V extends E.ComponentVocabulary = E.Componen
   }
 
   ////////////////
+  // ## The address
+  ////////////////
+
+  /**
+   * `parameter`:  the value kept in the page's address, as that query parameter (`AddressParameter`).
+   * - Recorded each time the value SETTLES:  its `ui-changed` (a choice made, a text left or committed,
+   *   a search's pause);  never on every keystroke.
+   * - Back, Forward and a page opened on the address show the value through `showAddressText()`.
+   */
+  readonly address: E.AddressParameter
+
+  /** Where `parameter` keeps the value, if it has one. */
+  get addressPlace(): E.AddressPlace | undefined {
+    const parameter = this.parameter?.trim()
+    return parameter ? { parameter } : undefined
+  }
+
+  /** Follow the address while there's a `parameter` and the element is in the page. */
+  @E.onChange("parameter", "isConnected", "isReady")
+  protected onAddressChanged(_parameter: string | undefined, isConnected: boolean, isReady: boolean) {
+    return isConnected && isReady ? this.address.follow(this.addressPlace) : undefined
+  }
+
+  /** It settled on a value (its own `ui-changed`, not one bubbling from a control inside it):  record it. */
+  @E.on("ui-changed")
+  protected onSettled(event: Event) {
+    if (event.target === this.domElement) this.address.record(this.addressPlace)
+  }
+
+  /**
+   * Hook:  is the value written to a form only as it settles (`ui-changed`), never on each `input`?
+   * Default no;  a search waits for a pause in typing.
+   */
+  get settlesItself(): boolean {
+    return false
+  }
+
+  /**
+   * Hook:  the value as the address holds it;  `undefined` (or `""`) for none.
+   * - Default:  `formValue` as text;  a list joined with commas.
+   */
+  protected get addressText(): string | undefined {
+    const value = this.formValue
+    if (value == null || value === false || value === "") return undefined
+    return Array.isArray(value) ? value.join(",") : String(value)
+  }
+
+  /**
+   * Hook:  show `text` from the address, as a person's change would:  the value, then `ui-changed`,
+   * so a form (and a Spell program) hears it.
+   * - `undefined`:  the address has none, and the element started with none.
+   * - Default:  the DOM element's `value` property, which each control converts.
+   */
+  protected showAddressText(text: string | undefined, originalEvent?: Event) {
+    ;(this.domElement as unknown as { value: unknown }).value = text ?? ""
+    E.afterSolidUpdate(() => this.send("ui-changed" as never, { value: this.formValue, originalEvent }))
+  }
+
+  ////////////////
   // ## Activation
   ////////////////
 
@@ -312,6 +376,8 @@ type FormAttributes = {
    * - A slider or colour picker set up with no value fails it, though it shows a default (`validationValue`).
    */
   required: boolean
+  /** the query parameter that keeps the value in the page's address (`addressPlace`) */
+  parameter: string | undefined
 }
 
 /**

@@ -68,7 +68,8 @@ export const SPACE_ROLES = {
       post: { make: true, change: "own", remove: "own" },
       row: NO_RIGHTS,
       file: NO_RIGHTS,
-      app: NO_RIGHTS
+      app: NO_RIGHTS,
+      thread: NO_RIGHTS
     }
   },
   editor: {
@@ -83,7 +84,8 @@ export const SPACE_ROLES = {
       post: { make: true, change: "own", remove: "own" },
       row: { make: true, change: "any", remove: "own" },
       file: { make: true, change: "any", remove: "own" },
-      app: NO_RIGHTS
+      app: NO_RIGHTS,
+      thread: NO_RIGHTS
     }
   },
   manager: {
@@ -98,7 +100,8 @@ export const SPACE_ROLES = {
       post: { make: true, change: "own", remove: "any" },
       row: { make: true, change: "any", remove: "any" },
       file: { make: true, change: "any", remove: "any" },
-      app: { make: true, change: "any", remove: "any" }
+      app: { make: true, change: "any", remove: "any" },
+      thread: { make: true, change: "any", remove: "any" }
     }
   }
 } as const satisfies Record<string, SpaceRoleRights>

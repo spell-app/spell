@@ -1083,7 +1083,18 @@ export const NO_ANIMATION = "none"
 export const Animations = [...VisibilityAnimations, ...AttentionAnimations, NO_ANIMATION] as const
 
 /**
+ * The sizes of a header or a button, and one more past `massive`:  `poster`, a logo's or a title's
+ * (epic `language` P35, I63).
+ * - `poster` grows with the window, between a floor and a ceiling:  each family's tokens say them
+ *   (`--ui-header-poster-min` ...).
+ * - Only where a family draws it:  every other `size` stops at `massive`.
+ */
+export const PosterSizes = ["mini", "tiny", "small", "medium", "large", "big", "huge", "massive", "poster"] as const
+
+/**
  * The faces the shared `font` takes, any together (`font="bold italic"`;  epic `ui-gaps` P3):  how letters look.
+ * - `heavy`:  heavier than `bold`, the theme's `--ui-font-weight-heavy` (900), for a poster's title
+ *   (epic `language` P35, I63)
  * - `all-caps` and `title-caps` change its letters' case (Owen, 2026-10-27):
  *   every letter a capital, or each word's first.
  * - `<ui-text>` draws each as its HTML element (`<strong>`, `<em>`, `<code>`, `<mark>`, `<sub>`, `<sup>` ...),
@@ -1092,6 +1103,7 @@ export const Animations = [...VisibilityAnimations, ...AttentionAnimations, NO_A
  */
 export const FontFaces = [
   "bold",
+  "heavy",
   "italic",
   "underline",
   "strikethrough",
@@ -1711,7 +1723,17 @@ export const FormControlAttributes = {
     key: "read-only",
     description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
   },
-  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." }
+  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
+  parameter: {
+    name: "parameter",
+    group: "form",
+    kind: "string",
+    description:
+      'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  ' +
+      "each change it settles on is a new history entry, so Back and Forward step through them, " +
+      "and a page opened on the address starts with that value.  Other parameters are kept;  an empty value " +
+      "takes its own out."
+  }
 } as const
 
 /** The states every control with a value has (`FormComponent`):  its vocabulary takes them by name, as above. */

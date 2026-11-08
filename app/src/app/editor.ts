@@ -234,7 +234,9 @@ export class EditorStore extends Observable {
     if (path !== file.path && !showsSitePage) {
       // console.warn({ path, file: file.path })
       const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
-      navigate(url, { replace: true })
+      // keep the address's query and hash, which name no file:  a program's own (`?server=met`, its tab)
+      const { search = "", hash = "" } = globalThis.location ?? {}
+      navigate(`${url}${search}${hash}`, { replace: true })
       return
     }
 

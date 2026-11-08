@@ -759,7 +759,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     appearance={step().color === "green" ? undefined : "basic"}
                     color={pillColorOf(step().color)}
                     icon={step().icon}
-                    data-spins={step().icon === ACTIVE_ICON ? "" : undefined}
                     link={step().href}
                     title={step().tip}
                   >
@@ -1803,8 +1802,8 @@ function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] 
   return !color || color === "blue" ? "grey" : color
 }
 
-/** The step label's icon while a phase is under way:  it spins like a coin (I211). */
-const ACTIVE_ICON = "circle half stroke"
+/** The step label's icon while a phase is under way:  a load indicator, standing still (I226;  a coin spinning, I211). */
+const ACTIVE_ICON = "circle notch"
 
 /** The toolbar chips whose badge already says items need Owen:  the step label isn't red for them too (I216). */
 const URGENT_CHIPS: ReadonlySet<string> = new Set(URGENT_STATES)

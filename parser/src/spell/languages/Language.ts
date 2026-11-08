@@ -243,7 +243,7 @@ export class Language {
    * - Never for a language with no `articles`.
    * - Only a warning:  `SP.SpellWarnings.noteArticles()` notes it, and the line parses as it is.
    */
-  agreedForm(word: string, type: P.TypeScope | undefined, isPlural: boolean): string | undefined {
+  agreedForm(word: string, type: { gender?: string } | undefined, isPlural: boolean): string | undefined {
     return this.articles?.agreedForm?.(word, type, isPlural)
   }
 
@@ -371,8 +371,9 @@ export type ArticleAgreement = {
   /**
    * The form an agreeing word should take for things of `type`:  `undefined` if it's right, or the language has no such thing.
    * - Spanish's `ninguno` for a `receta` is `ninguna`, its `ordenados` for one `receta` is `ordenada` (epic `data` P11).
+   * - `type`:  the type, or anything with a gender, e.g. a noun's article's (`la lista`, epic `language` T89).
    */
-  agreedForm?(word: string, type: P.TypeScope | undefined, isPlural: boolean): string | undefined
+  agreedForm?(word: string, type: { gender?: string } | undefined, isPlural: boolean): string | undefined
 
   /**
    * The article `noun` should have had, if not `article`, e.g. `an` for `a apple` -- `undefined` when they agree.

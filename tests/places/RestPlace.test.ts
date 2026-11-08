@@ -5,6 +5,7 @@ import { SRV } from "spell/server"
 import { RecipeBox, restHandler, type RestServerProps } from "spell/server/test/recipeServers"
 import {
   PlaceError,
+  PlaceQuery,
   Places,
   RestPlace,
   type PlaceChange,
@@ -147,6 +148,66 @@ describe("RestPlace.list()", () => {
 ////////////////
 // ## Paging
 ////////////////
+
+describe("RestPlace, a collection searched at its own address", () => {
+  /**
+   * A server shaped like GitHub's search:  `/search/users?q=` answers `{ total_count, items }`, a page at a time,
+   * the next named in its `Link` header;  `/users/<login>` answers one.
+   */
+  async function github() {
+    const asked: string[] = []
+    const http = createServer((request, response) => {
+      const url = new URL(request.url!, "http://here")
+      asked.push(`${url.pathname}${url.search}`)
+      response.setHeader("content-type", "application/json")
+      if (url.pathname !== "/search/users" || !url.searchParams.get("q")) {
+        response.statusCode = 422
+        return response.end("{}")
+      }
+      const page = Number(url.searchParams.get("page") ?? 1)
+      if (page === 1) {
+        const next = `http://${request.headers.host}/search/users?q=${url.searchParams.get("q")}&page=2`
+        response.setHeader("link", `<${next}>; rel="next"`)
+      }
+      response.end(JSON.stringify({ total_count: 2, items: [{ login: page === 1 ? "ryansolid" : "ryansolida" }] }))
+    })
+    const port = await SRV.listenPreferred(http)
+    servers.push(() => new Promise((done) => (http.closeAllConnections(), http.close(() => done()))))
+    const place = new RestPlace({
+      url: `http://127.0.0.1:${port}`,
+      can: { page: "cursor", idOf: "login" },
+      collections: { users: { path: "/users{/id}", searches: { param: "q", fields: [], at: "/search/users" } } }
+    })
+    return { place, asked }
+  }
+
+  test("asks there with its own parameter, and takes the one list in its answer as the rows", async () => {
+    const { place, asked } = await github()
+    expect(place.describe().search).toBe("every field")
+    const first = await place.list("users", { search: { "*": "ryan" } }, {})
+    expect(first.rows).toEqual([{ login: "ryansolid" }])
+    expect(first.handled).toEqual({ search: true })
+    expect(asked).toEqual(["/search/users?q=ryan"])
+  })
+
+  test("its next page, a whole address, was searched too:  so the engine doesn't search again", async () => {
+    const { place, asked } = await github()
+    const search = { "*": "ryan" }
+    const first = await place.list("users", { search }, {})
+    const second = await place.list("users", { search, page: { at: first.nextPage! } }, {})
+    expect(second.rows).toEqual([{ login: "ryansolida" }])
+    expect(second.handled).toEqual({ search: true })
+    expect(asked.at(-1)).toBe("/search/users?q=ryan&page=2")
+    // the engine took it as unsearched, and its page as a place in a list it filters:  "isn't a place in the list"
+    const query = new PlaceQuery({
+      placeName: "github",
+      place,
+      collection: "users",
+      query: { search, page: { at: first.nextPage! } }
+    })
+    expect((await query.answer(new AbortController().signal)).rows).toEqual([{ login: "ryansolida" }])
+  })
+})
 
 describe("RestPlace paging", () => {
   test("by offset:  a full page means there may be more", async () => {
@@ -298,7 +359,7 @@ describe("RestPlace.apply()", () => {
     expect(box.asks.at(-1)!.headers["if-match"]).toBeUndefined()
   })
 
-  test("what the server answers:  a 4xx is known, a 5xx or a 429 isn't, so that one resends", async () => {
+  test("what the server answers:  a 4xx is known, a 5xx, a 429 or a rate limit's 403 isn't, so that one resends", async () => {
     const { place } = await served()
     const change = (fields: PlaceRow): PlaceChange[] => [{ kind: "update", collection: "recipes", id: "r-1", fields }]
     await expect(place.apply(change({ refuse: true }), {})).rejects.toMatchObject({ kind: "refused" })
@@ -306,7 +367,12 @@ describe("RestPlace.apply()", () => {
       place.apply([{ kind: "update", collection: "recipes", id: "none", fields: {} }], {})
     ).rejects.toMatchObject({ kind: "not found" })
 
-    const fakes = [503, 429].map((status) => new Response("", { status, statusText: "busy" }))
+    // a 403 whose rate limit has no requests left is GitHub's "too soon" (epic `data` I92):  no answer, not refused
+    const outOfRequests = { "x-ratelimit-remaining": "0" }
+    const fakes = [
+      ...[503, 429].map((status) => new Response("", { status, statusText: "busy" })),
+      new Response("", { status: 403, statusText: "rate limit exceeded", headers: outOfRequests })
+    ]
     for (const answer of fakes) {
       const real = globalThis.fetch
       globalThis.fetch = (() => Promise.resolve(answer)) as typeof fetch

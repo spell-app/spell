@@ -298,6 +298,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorDataWhyNotTakenDown: "Solo lectura:  Encanto retiró esto de {place}.",
   inspectorDataWhyNotFull: "Completo:  {place} no tiene sitio para esto.",
   inspectorDataWhyNotNotListed: "Solo lectura:  solo se apuntan aquí las personas que lista {place}.",
+  inspectorDataWhyNotUsedUp: "Agotadas:  ya pediste a {place} todas las invitaciones que tienes.",
   inspectorDataWorkedOutFrom: "Se calcula con lo que lee en {places}:  cambia eso en su lugar.",
   inspectorDataSourceReal: "Datos reales, guardados en {place}:  lo que cambies aquí se guarda allí.",
   inspectorDataSourceReadOnly:

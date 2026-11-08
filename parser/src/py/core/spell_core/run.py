@@ -20,6 +20,7 @@
   Without it, English.
 - The program's own folder is first on the import path:
   another project it imports (`from cards import Card`) sits beside it.
+- A database on this device it keeps things in is a file beside it, `<Program>.device.json` (`place_kinds.py`).
 """
 
 import argparse
@@ -69,6 +70,8 @@ def run_program(path: str | Path, seed: int | None = None, pauses: bool = True) 
         sys.path.insert(0, str(program.parent))
     for beside in program.parent.glob("*.py"):
         sys.modules.pop(beside.stem, None)
+    # a database on this device is a file beside it (`place_kinds.py`)
+    core.program_file = program
     names = runpy.run_path(str(program), run_name="__main__")
     core.send_waiting_changes()
     return names

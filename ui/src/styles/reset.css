@@ -139,8 +139,28 @@
    * The shared `font` and `link` (`UIComponent`, "Shared words"):  the look alone;  `<ui-text>` draws the elements.
    * - Inherited ones on the element;  lines on its top-level boxes.  Underline and line-through:  the latter wins.
    */
+  /* Its weight:  `bold`, or `heavy` (900, a poster's title).
+     - `--_ui-font-weight` carries it to a box whose family sets its own weight (a header, a button, a label):
+       those read `var(--_ui-font-weight, <their own>)`, as they read `--_ui-font-case`. */
   :host(:state(font-bold)) {
+    --_ui-font-weight: var(--ui-font-weight-bold);
     font-weight: var(--ui-font-weight-bold);
+  }
+  :host(:state(font-heavy)) {
+    --_ui-font-weight: var(--ui-font-weight-heavy);
+    font-weight: var(--ui-font-weight-heavy);
+  }
+  /* The shared `shadow`:  a hard shadow down and to the right, in the hue `UIComponent` writes as
+     `--_ui-shadow-color`;  carried by `--_ui-font-shadow` to a box that clears its own (a button's `<button>`). */
+  :host(:state(shadow)) {
+    --_ui-font-shadow: 0.06em 0.06em 0 var(--_ui-shadow-color);
+    text-shadow: var(--_ui-font-shadow);
+  }
+  /* The shared widths (below, unlayered) are custom properties `UIComponent` writes on the element:
+     each is read only under its own state, but a stack reads a fluid child's `--_ui-min-width` (`UIStack.css`),
+     so every element clears the one it inherits. */
+  :host {
+    --_ui-min-width: initial;
   }
   :host(:state(font-italic)) {
     font-style: italic;
@@ -242,6 +262,29 @@
  */
 :host([hidden]:not([hidden="until-found"], :state(hiding))) {
   display: none;
+}
+
+/*
+ * The shared `width`, `min-width` and `max-width` (`UIComponent`, "Shared words"):  its box's own width where it sits.
+ * - `UIComponent` writes each as a custom property on the element (`--_ui-width` ...), and a state saying it's set.
+ * - On the element itself, where it draws a box (`<ui-form>`, `<ui-progress>`, `<ui-stack>`);
+ *   also on its shadow root's top-level boxes, where it's `display: contents` (`<ui-card>`, `<ui-segment>` ...):
+ *   `:state(sized-inside)`.  (A `display: contents` element's own width does nothing.)
+ * - A `width` is kept in a row, never squeezed (`flex-shrink: 0`).
+ * - Unlayered, as the hiding above:  it beats the family's own width (a card's 290px);  a page's own rules still win.
+ */
+:host(:state(width)),
+:host(:state(width):state(sized-inside)) > :not(slot) {
+  flex-shrink: 0;
+  width: var(--_ui-width);
+}
+:host(:state(min-width)),
+:host(:state(min-width):state(sized-inside)) > :not(slot) {
+  min-width: var(--_ui-min-width);
+}
+:host(:state(max-width)),
+:host(:state(max-width):state(sized-inside)) > :not(slot) {
+  max-width: var(--_ui-max-width);
 }
 
 /*

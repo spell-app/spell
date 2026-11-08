@@ -45,16 +45,13 @@ export class ReadCredentials {
   issue({ space, person }: { space: string; person: string }): string {
     const said: ReadCredential = { space, person, until: this.now() + READ_CREDENTIAL_DAYS * 24 * 60 * 60 * 1000 }
     const text = Buffer.from(JSON.stringify(said)).toString("base64url")
-    return `${text}.${this.signatureOf(text)}`
+    return `${text}.${this.sign(text)}`
   }
 
   /** What `credential` says, if it's one of this server's and still good:  else `undefined`.  - NEVER throws */
   check(credential: string | undefined): ReadCredential | undefined {
     const [text, signature, ...rest] = (credential ?? "").split(".")
-    if (!text || !signature || rest.length) return undefined
-    const expected = Buffer.from(this.signatureOf(text))
-    const given = Buffer.from(signature)
-    if (given.length !== expected.length || !timingSafeEqual(given, expected)) return undefined
+    if (!text || !signature || rest.length || !this.isSigned(text, signature)) return undefined
     try {
       const said = JSON.parse(Buffer.from(text, "base64url").toString("utf8")) as ReadCredential
       const isWhole = typeof said.space === "string" && typeof said.person === "string"
@@ -64,9 +61,19 @@ export class ReadCredentials {
     }
   }
 
-  /** `text`'s signature, by this server's key. */
-  private signatureOf(text: string): string {
+  /**
+   * `text`'s signature, by this server's key:  for anything else this server hands out and must know again, as a mail's
+   * stop link (the app's `InboxMail`, epic `atmosphere` P30).
+   */
+  sign(text: string): string {
     return createHmac("sha256", this.key).update(text).digest("base64url")
+  }
+
+  /** Is `signature` this server's for `text`?  - NEVER throws */
+  isSigned(text: string, signature: string): boolean {
+    const expected = Buffer.from(this.sign(text))
+    const given = Buffer.from(signature)
+    return given.length === expected.length && timingSafeEqual(given, expected)
   }
 }
 

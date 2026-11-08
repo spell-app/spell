@@ -91,6 +91,7 @@
       "group": "La mesa:  una columna, y una mano de cartas para probar en ella",
       "kind": "method",
       "name": "jugar una carta",
+      "returns": "nothing",
       "defined": "/ComoFuncionaSolitario.es.spell:2742-3022"
     },
     {

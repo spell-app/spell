@@ -12,6 +12,8 @@
  *   each old switch still works, through the attribute's `replaces`.
  */
 
+import * as UIT from "spell/ui/components/components.types"
+
 import type { E } from "spell/ui/core"
 import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
 
@@ -35,8 +37,11 @@ export const buttonVocabulary = {
       name: "size",
       group: "appearance",
       kind: "size",
+      values: UIT.PosterSizes,
       default: "medium",
-      description: "How big it is, from `mini` to `massive`.  The default is `medium`."
+      description:
+        "How big it is, from `mini` to `massive`.  The default is `medium`.  " +
+        "`poster` is bigger still, for a logo:  it grows with the window, from 2 to 3.2 times the text."
     },
     {
       name: "color",

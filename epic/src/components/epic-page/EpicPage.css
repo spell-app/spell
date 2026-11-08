@@ -318,30 +318,6 @@
     --epic-agents-radius: 0 999px 999px 0;
     --epic-agents-border-start: 0;
   }
-  /*
-   * a phase under way:  its half-filled circle spins like a coin on a table, about its upright axis (Owen, 2026-11-03,
-   * epic `epic-engine` I211:  "spinning like in 3d like a coin")
-   */
-  .status ui-label[data-spins]::part(icon) {
-    animation: epic-page-coin 3.4s ease-in-out infinite;
-  }
-  /* a turn, then a second's rest (I213) */
-  @keyframes epic-page-coin {
-    0% {
-      rotate: y 0turn;
-    }
-    70% {
-      rotate: y 1turn;
-    }
-    100% {
-      rotate: y 1turn;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .status ui-label[data-spins]::part(icon) {
-      animation: none;
-    }
-  }
   /* a label as tall as the git toggle, its icon and text on the row's middle */
   .status ui-label::part(label) {
     box-sizing: border-box;

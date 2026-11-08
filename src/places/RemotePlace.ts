@@ -1,6 +1,7 @@
 import type { ApiError } from "spell/util/fetching"
 
 import { ChunkedPlace } from "./ChunkedPlace"
+import type { DeviceCopy } from "./DeviceCopy"
 import { EVERY_FIELD, JsonChunks } from "./JsonChunks"
 import {
   type ApplyAnswer,
@@ -59,6 +60,9 @@ const OVER_CEILING_STATUS = 413
 /** Why a write waits, while a place kept in the browser until sign-in has nobody signed in:  it stays pending. */
 const NOT_SIGNED_IN = "RemotePlace:  nobody's signed in yet:  it's kept in this browser until someone is"
 
+/** The start of the address a list's copy is kept under, on this device:  then its collection and query. */
+const KEPT_LIST = "list:"
+
 /** `PlaceServer`'s answer when someone got there first. */
 const OUT_OF_DATE_STATUS = 409
 
@@ -92,6 +96,13 @@ const OUT_OF_DATE_STATUS = 409
  *   - A read is no rows, at once:  what's pending shows on top of it, so a program shows what this browser added.
  *   - A write fails as no answer would, so it stays pending, kept in this browser, and is sent again every few seconds;
  *     once someone signs in, the next try goes up, through the save queue, as any pending change does.
+ * - KEPT ON THIS DEVICE (`deviceCopy`, `- keep a copy on this device`;  epic `atmosphere` T51, J158):
+ *   each list it read whole is kept, with the version it was read at.
+ *   - The next read of that list, on opening again or on a check, asks only what changed since (`changesSince()`), and
+ *     puts it on the copy:  a feed of thousands of posts is a few rows a check.
+ *   - Only a list the place did nothing to (no filter, sort or page of its own):  so the copy is the whole collection.
+ *   - A place that can't say what changed, or a version it no longer knows, is read whole again.
+ *   - Its reads are POSTs, which `WebPlace`'s own copy of GET answers never keeps:  so it's kept here, by list.
  ****************/
 export class RemotePlace extends WebPlace implements Place {
   /** What it says it can do. */
@@ -108,9 +119,12 @@ export class RemotePlace extends WebPlace implements Place {
   private readonly reads: ChunkedPlace | undefined
   /** How a person signs in here, if each person is someone. */
   readonly signIn?: PlaceSignIn
+  /** Each whole list read, kept on this device with its version:  only when its line says so. */
+  private readonly keptLists: DeviceCopy | undefined
 
-  constructor({ url, can, token, lines, signIn, readsAt }: RemotePlaceProps) {
+  constructor({ url, can, token, lines, signIn, readsAt, deviceCopy }: RemotePlaceProps) {
     super({ url, changeIdHeader: false })
+    this.keptLists = deviceCopy
     this.capabilities = { ...REMOTE_CAPABILITIES, ...can }
     this.token = token
     this.lines = lines
@@ -134,9 +148,47 @@ export class RemotePlace extends WebPlace implements Place {
     if (await this.waitsForSignIn()) return { rows: [], handled: {} }
     const reads = this.reads
     if (reads) return this.readingDirect(collection, context, () => reads.list(collection, query, context))
+    if (this.keptLists) return this.listKept(collection, query, context)
+    return this.listWhole(collection, query, context)
+  }
+
+  /** `list()`, asked of the server side in full. */
+  private async listWhole(
+    collection: string,
+    query: ListQuery,
+    context: PlaceContext
+  ): Promise<ListAnswer & WithVersions> {
     const { versions, ...answer } = await this.ask<ListAnswer & WithVersions>("list", { collection, query }, context)
     this.note(collection, versions)
     if (answer.readOnlyFields) this.readOnlyFields.set(collection, new Set(answer.readOnlyFields))
+    return { ...answer, ...(versions && { versions }) }
+  }
+
+  /**
+   * `list()`, from the list kept on this device:  only what changed since asked of the server side, and put on it
+   * (see the class).
+   * - SIDE EFFECT:  the list as it is now is kept, for the next read.
+   * - throws as `listWhole()`
+   */
+  private async listKept(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    const copy = this.keptLists!
+    const address = `${KEPT_LIST}${collection}:${JSON.stringify(query)}`
+    const was = await copy.read(address).then((kept) => (kept ? (JSON.parse(kept.body) as KeptList) : undefined))
+    let answer: KeptList | undefined
+    if (was?.version !== undefined) {
+      answer = await this.changesSince(collection, was.version, context).then(
+        (changes) => withChanges(was, changes, this.capabilities.idOf),
+        // it can't say what changed, or no longer knows that version:  read whole, below
+        (error: unknown) => {
+          if (error instanceof PlaceError) return undefined
+          throw error
+        }
+      )
+      if (answer) this.note(collection, answer.versions)
+    }
+    answer ??= await this.listWhole(collection, query, context)
+    const { readOnlyFields: _readOnly, ...kept } = answer
+    if (isWholeList(answer)) await copy.keep(address, { body: JSON.stringify(kept), headers: [] })
     return answer
   }
 
@@ -300,10 +352,55 @@ export type RemotePlaceProps = {
   /** How a person signs in to the server side:  a project data folder's `SpellSignIn`.  Left out:  nobody does. */
   signIn?: PlaceSignIn
   /**
+   * A copy of each whole list it reads, kept on this device (`- keep a copy on this device`), its next read asking
+   * only what changed (epic `atmosphere` T51).  Left out:  every read is whole.
+   */
+  deviceCopy?: DeviceCopy
+  /**
    * Where its files are read direct, apart from the server side, which only writes then (epic `atmosphere` P5):
    * a space's own folder, `spaceReadAddressFor()`.  Left out:  read through the server side too.
    */
   readsAt?: string
+}
+
+/** A list kept on this device:  its answer, the version it was read at, and each thing's version. */
+type KeptList = ListAnswer & WithVersions
+
+/** A list the place did nothing to:  every row of the collection, so what changed can be put on it. */
+function isWholeList({ nextPage, version, handled }: ListAnswer): boolean {
+  return nextPage === undefined && version !== undefined && !Object.values(handled).some(Boolean)
+}
+
+/**
+ * `was`, with `changes` on it:  each row changed put in its place (a new one at the end), each one removed left out,
+ * and the version the changes were read at.
+ * - A changed row's version isn't said with it:  it's dropped, so a change made from it isn't checked against an old one.
+ */
+function withChanges(
+  was: KeptList,
+  { rows, removed, token }: ChangesAnswer,
+  idOf: PlaceCapabilities["idOf"]
+): KeptList {
+  const gone = new Set(removed)
+  const changed = new Map(rows.map((row) => [idOfRow(row, idOf), row] as const))
+  const versions = { ...was.versions }
+  const kept: PlaceRow[] = []
+  for (const row of was.rows) {
+    const id = idOfRow(row, idOf)
+    if (id !== undefined && gone.has(id)) continue
+    const now = id === undefined ? undefined : changed.get(id)
+    if (now && id !== undefined) {
+      changed.delete(id)
+      delete versions[id]
+    }
+    kept.push(now ?? row)
+  }
+  for (const [id, row] of changed) {
+    if (id !== undefined) delete versions[id]
+    kept.push(row)
+  }
+  for (const id of gone) delete versions[id]
+  return { ...was, rows: kept, version: token, versions }
 }
 
 /** The write token of the server that served this page. */

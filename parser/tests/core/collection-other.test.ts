@@ -1012,6 +1012,16 @@ describe("core.sortedBy()", () => {
   test("a plain object's values, in an array", () => {
     expect(core.sortedBy({ a: 2, b: 1 }, (value) => value)).toEqual([1, 2])
   })
+  test("`core.descending()` turns it round:  `newest first`, nothing still last, a tie keeping its order", () => {
+    expect(core.sortedBy(["b", "A", "c"], (word) => core.descending(word))).toEqual(["c", "b", "A"])
+    const items = [{ n: undefined }, { n: 2, tag: "one" }, { n: 1 }, { n: 2, tag: "two" }]
+    expect(core.sortedBy(items, (item) => core.descending((item as { n?: number }).n))).toEqual([
+      { n: 2, tag: "one" },
+      { n: 2, tag: "two" },
+      { n: 1 },
+      { n: undefined }
+    ])
+  })
   test("a spell list's result is a scratch list of its class, owning nothing", () => {
     const pile = new Pile()
     pile.items = [3, 1, 2]

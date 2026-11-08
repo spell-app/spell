@@ -2,7 +2,9 @@ import {
   PlaceError,
   SPACE_SHEET_OPERATIONS,
   type PlaceContext,
+  type PlaceEvent,
   type PlaceRow,
+  type SheetMost,
   type SheetRules,
   type ThingChange
 } from "spell/places/places.types"
@@ -11,6 +13,7 @@ import { SP } from "spell/parser/spell"
 import type { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 
+import type { PersonInbox } from "./PersonInbox"
 import type { SpaceMembers } from "./SpaceMembers"
 
 /** Where a space keeps its sign-up sheet's rules:  in its `__settings/`, so never listed, read direct or exported. */
@@ -18,6 +21,21 @@ const SHEET_FILE = "__settings/sheet.json5"
 
 /** The field a list of who may sign up names each one by:  an attendee's `person`. */
 const LISTED_FIELD = "person"
+
+/** The field a manager confirms a row with (P31):  `status`, set to `CONFIRMED`. */
+const STATUS_FIELD = "status"
+
+/** What a confirmed row's `status` says. */
+const CONFIRMED = "confirmed"
+
+/** Who a confirmed row puts in the attendees' space:  its `guest`, else its `person`. */
+const GUEST_FIELD = "guest"
+
+/** The role a confirmed guest gets in the attendees' space:  they read it, and post where it lets them. */
+const GUEST_ROLE = "viewer"
+
+/** The conversation each person's count of their allowance is sent in, in their inbox (P31). */
+const ALLOWANCE_THREAD = "invitations"
 
 /****************
  * ### `SpaceSheets`
@@ -32,7 +50,12 @@ const LISTED_FIELD = "person"
  *   - `- open to sign-ups from "picnic@rs"`:  anyone who reads that space adds rows here, and changes or removes only
  *     their own, though they can't read this one:  the master in an event's private space, organizers' notes and all
  *   - `- only its attendees add rows` (J101):  only the people its `attendees` list names, by each one's `person`
- *   - `- at most 2 rows for each shift`:  a shift's last place goes to one person, the other is told it's gone
+ *   - `- at most 2 rows for each shift`:  a shift's last place goes to one person, the other is told it's gone;
+ *     several such lines each hold (`- at most 40 rows for each event`, P31)
+ *   - `- each person asks for at most their "invitations" tickets` (P31):  as many as their row on the list says,
+ *     one more refused, `"used up"`;  each change sends them their count, an update in their inbox
+ *   - `- confirmed tickets join "picnic@rs/__attendees"` (P31):  a manager setting a ticket's `status` to
+ *     `"confirmed"` puts its `guest` (else its `person`) on the attendees' space's list;  nobody else sets `status`
  * - A manager's page tells this space as it opens the place (`setSheet`), which keeps it in `__settings/sheet.json5`;
  *   anyone else is refused, which changes nothing.
  * - Every collection of the folder is a sheet, but the list it names.
@@ -50,14 +73,19 @@ export class SpaceSheets {
   private readonly members: SpaceMembers
   /** A space's members, by its address:  for who reads the space sign-ups come from. */
   private readonly membersAt: (address: string) => SpaceMembers | undefined
+  /** A person's inbox, by their address:  where their count is sent (P31). */
+  private readonly inboxOf: ((person: string) => Promise<PersonInbox | undefined>) | undefined
   /** Its rules, read once. */
   private kept: Promise<SheetRules | undefined> | undefined
+  /** Each allowance change being written, by the row's id:  whose, and their count once it lands (`written`). */
+  private readonly counting = new Map<string, AllowanceCount>()
 
-  constructor({ address, storage, members, membersAt }: SpaceSheetsProps) {
+  constructor({ address, storage, members, membersAt, inboxOf }: SpaceSheetsProps) {
     this.address = address
     this.storage = storage
     this.members = members
     this.membersAt = membersAt
+    this.inboxOf = inboxOf
   }
 
   /** Its rules:  `undefined` for a folder that's no sign-up sheet. */
@@ -105,8 +133,107 @@ export class SpaceSheets {
       await this.listedOrDie(rules.onlyFrom, identity, rowsOf)
     }
     if (isSignUp) ownRowsOrDie(sheetChanges, identity)
-    if (rules.mostEach) await this.roomOrDie(rules.mostEach, sheetChanges, rowsOf)
+    if (!member?.canManage && rules.joins) noStatusOrDie(rules.joins.collection, sheetChanges)
+    for (const most of [rules.mostEach ?? []].flat()) await this.roomOrDie(most, sheetChanges, rowsOf)
+    if (rules.allowance) await this.allowanceOrDie(rules, identity, !!member?.canManage, sheetChanges, rowsOf)
     return isSignUp
+  }
+
+  /**
+   * SIDE EFFECT:  these writes went through on the sheet (P31):  each count changed sent to its person, an update in
+   * their inbox;  each newly confirmed row's guest put on the attendees' space's list.  NEVER throws.
+   */
+  written = (written: readonly PlaceEvent[]): void => {
+    void this.afterWrites(written).catch((error) => console.error("SpaceSheets:  after a write", error))
+  }
+
+  /** See `written`. */
+  private async afterWrites(written: readonly PlaceEvent[]): Promise<void> {
+    const rules = await this.rules()
+    if (!rules) return
+    for (const { collection, id, row, was } of written) {
+      const count = this.counting.get(id)
+      if (count && collection === rules.allowance?.collection) {
+        this.counting.delete(id)
+        await this.sendCount(count)
+      }
+      const joins = rules.joins
+      if (!joins || collection !== joins.collection || !row || row[STATUS_FIELD] !== CONFIRMED) continue
+      if (was?.[STATUS_FIELD] === CONFIRMED) continue
+      const guest = textOf(row[GUEST_FIELD]) || textOf(row[LISTED_FIELD])
+      const attendees = guest ? this.membersAt(joins.address) : undefined
+      if (!attendees) {
+        console.error(`SpaceSheets:  ${joins.address} has no space's folder;  ${guest || id} wasn't added`)
+        continue
+      }
+      if (await attendees.memberOf(guest)) continue
+      await attendees.add(guest, GUEST_ROLE)
+    }
+  }
+
+  /**
+   * Is each row `changes` makes in the allowance's collection within its maker's allowance?  Notes each one's count,
+   * sent once it lands (`written`).
+   * - Their allowance:  their row on the list (`onlyFrom`), its field;  none listed, none.  A manager isn't held to it.
+   * - Whose:  the row's `person`, else whoever's asking:  a manager confirming Bo's ticket counts Bo's.
+   * - throws `PlaceError` `"refused"`, `"used up"`
+   */
+  private async allowanceOrDie(
+    { allowance, onlyFrom }: SheetRules,
+    identity: string,
+    isManager: boolean,
+    changes: readonly ThingChange[],
+    rowsOf: SignUpAsk["rowsOf"]
+  ): Promise<void> {
+    const { collection, field } = allowance!
+    const ours = changes.filter((change) => change.collection === collection)
+    if (!ours.length) return
+    const listed = onlyFrom ? await rowsOf(onlyFrom) : []
+    const rows = await rowsOf(collection)
+    // each person's rows, as the changes leave them:  a manager's changes count for the row's person
+    const rowsBy = new Map<string, Set<string>>()
+    const rowsOfPerson = (person: string) => {
+      let theirs = rowsBy.get(person)
+      if (!theirs) {
+        theirs = new Set(rows.filter((row) => row[LISTED_FIELD] === person).map(({ id }) => `${id}`))
+        rowsBy.set(person, theirs)
+      }
+      return theirs
+    }
+    for (const [position, { id, action, fields }] of ours.entries()) {
+      const held = id === undefined ? undefined : rows.find((row) => `${row.id}` === id)
+      const person = textOf(fields?.[LISTED_FIELD]) || textOf(held?.[LISTED_FIELD]) || identity
+      const allowed = Number(listed.find((row) => row[LISTED_FIELD] === person)?.[field] ?? 0) || 0
+      const theirs = rowsOfPerson(person)
+      // one with no id yet still counts
+      const key = id ?? `new ${position}`
+      if (action === "remove") theirs.delete(key)
+      else if (action === "make") {
+        if (!isManager && theirs.size >= allowed) {
+          throw new PlaceError(`"${collection}":  ${person} has asked for all ${allowed} of their ${field}`, {
+            cause: { kind: "refused", whyNot: "used up" }
+          })
+        }
+        theirs.add(key)
+      }
+      if (id !== undefined) this.counting.set(id, { person, used: theirs.size, allowed, field })
+    }
+  }
+
+  /** SIDE EFFECT:  `person`'s count, an update from Spell in their inbox, written over the one before.  NEVER throws. */
+  private async sendCount({ person, used, allowed, field }: AllowanceCount): Promise<void> {
+    const inbox = await this.inboxOf?.(person)
+    if (!inbox) return
+    inbox.sendAsSpell(
+      {
+        recipients: person,
+        thread: ALLOWANCE_THREAD,
+        text: `You have used ${used} of your ${allowed} available ${field}`,
+        used: `${used}`,
+        allowed: `${allowed}`
+      },
+      { id: `${ALLOWANCE_THREAD}-${countKeyOf(this.address)}` }
+    )
   }
 
   /** May `identity` sign up here, though they don't write it:  they read the space sign-ups come from. */
@@ -129,7 +256,7 @@ export class SpaceSheets {
    * - throws `PlaceError` `"refused"`, `"full"`, naming the value:  someone got the last place first
    */
   private async roomOrDie(
-    { field, most }: NonNullable<SheetRules["mostEach"]>,
+    { field, most }: SheetMost,
     changes: readonly ThingChange[],
     rowsOf: SignUpAsk["rowsOf"]
   ): Promise<void> {
@@ -158,6 +285,42 @@ export type SpaceSheetsProps = {
   members: SpaceMembers
   /** A space's members, by its address:  `undefined` for no space's own folder. */
   membersAt: (address: string) => SpaceMembers | undefined
+  /** A person's inbox, by their address:  where their allowance's count is sent (P31).  Left out:  none is sent. */
+  inboxOf?: (person: string) => Promise<PersonInbox | undefined>
+}
+
+/** One person's count of their allowance, sent once the write lands. */
+type AllowanceCount = {
+  /** Whose, by address. */
+  person: string
+  /** How many they've asked for. */
+  used: number
+  /** How many they may. */
+  allowed: number
+  /** What they're asking for, the list's field:  `invitations`. */
+  field: string
+}
+
+/**
+ * Only a manager confirms (P31):  a change setting a row's `status` in `collection` is refused.
+ * - throws `PlaceError` `"refused"`, `"field"`
+ */
+function noStatusOrDie(collection: string, changes: readonly ThingChange[]): void {
+  const confirming = changes.find((each) => each.collection === collection && each.fields?.[STATUS_FIELD] !== undefined)
+  if (!confirming) return
+  throw new PlaceError(`"${collection}":  only its managers set a row's ${STATUS_FIELD}`, {
+    cause: { kind: "refused", whyNot: "field" }
+  })
+}
+
+/** A field's value as text:  `""` for none. */
+function textOf(value: unknown): string {
+  return typeof value === "string" ? value : ""
+}
+
+/** The sheet's address as part of a message's id:  `picnic@rs/__private/signups` => `picnic_rs___private_signups`. */
+function countKeyOf(address: string): string {
+  return address.replace(/[^a-z0-9]/gi, "_")
 }
 
 /**
@@ -182,22 +345,36 @@ function fieldText(value: PlaceRow[string]): unknown {
   return value && typeof value === "object" && "$ref" in value ? (value as { $ref: unknown }).$ref : value
 }
 
-/** Rules as sent:  an address, a collection's name, a field and a count.  - throws `TypeError` */
+/** Rules as sent:  an address, a collection's name, fields and counts.  - throws `TypeError` */
 function rulesOrDie(input: unknown): SheetRules {
-  const { signUpsFrom, onlyFrom, mostEach } = (input ?? {}) as Partial<SheetRules>
+  const { signUpsFrom, onlyFrom, mostEach, allowance, joins } = (input ?? {}) as Partial<SheetRules>
   if (signUpsFrom !== undefined && (typeof signUpsFrom !== "string" || !SP.SpellLocation.isAddress(signUpsFrom))) {
     throw new TypeError(`SpaceSheets:  sign-ups come from a space, by its address, not ${JSON.stringify(signUpsFrom)}`)
   }
   if (onlyFrom !== undefined && (typeof onlyFrom !== "string" || !onlyFrom)) {
     throw new TypeError("SpaceSheets:  the list of who may sign up is a collection, by its name")
   }
-  const isMost =
-    mostEach === undefined ||
-    (typeof mostEach.field === "string" && Number.isInteger(mostEach.most) && mostEach.most > 0)
-  if (!isMost) throw new TypeError("SpaceSheets:  a shift's places are a field and a whole number above 0")
+  const mosts = [mostEach ?? []].flat()
+  if (!mosts.every(({ field, most }) => typeof field === "string" && Number.isInteger(most) && most > 0)) {
+    throw new TypeError("SpaceSheets:  a shift's places are a field and a whole number above 0")
+  }
+  if (allowance !== undefined && !(isName(allowance.collection) && isName(allowance.field))) {
+    throw new TypeError("SpaceSheets:  an allowance is a collection and the list's field that counts it")
+  }
+  if (joins !== undefined && !(isName(joins.collection) && SP.SpellLocation.isAddress(joins.address))) {
+    throw new TypeError("SpaceSheets:  a confirmed row joins a space, by its collection and the space's address")
+  }
+  const most = mosts.map(({ field, most }) => ({ field, most }))
   return {
     ...(signUpsFrom && { signUpsFrom }),
     ...(onlyFrom && { onlyFrom }),
-    ...(mostEach && { mostEach: { field: mostEach.field, most: mostEach.most } })
+    ...(most.length && { mostEach: most.length === 1 ? most[0]! : most }),
+    ...(allowance && { allowance: { collection: allowance.collection, field: allowance.field } }),
+    ...(joins && { joins: { collection: joins.collection, address: joins.address } })
   }
+}
+
+/** A collection's or field's name:  some text. */
+function isName(value: unknown): value is string {
+  return typeof value === "string" && !!value
 }

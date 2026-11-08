@@ -5,6 +5,7 @@ import { E } from "spell/ui/core"
 
 import { PlanDates } from "spell/epic/dates"
 import { PhaseIds } from "spell/epic/phases"
+import { hasPick, pickLabel } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import {
@@ -264,10 +265,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const mark = this.reviewState.mark()
     const fill = this.reviewState.isSent() ? "outline" : "dashed"
     if (mark?.action === "skip") return { fill, label: "boxSkip" }
-    if (mark?.pick) return { fill, label: { pick: mark.pick } }
+    // each set's letters as people see them:  `B2` in the 2nd set (`pickLabel()`, epic `epic-engine` I227)
+    if (hasPick(mark)) return { fill, label: { pick: pickLabel(mark) } }
     // read plainly:  the doc's `chosen` lands with the item's own attributes changing
     // (`reviewed`, `state` ...), which re-run this
-    const taken = this.reviewState.takenPick()?.pick
+    const taken = pickLabel(this.reviewState.takenPick())
     if (taken && !this.domElement.querySelector(CHOSEN_SET))
       return { color: "green", fill: "outline", label: { pick: taken } }
     if (this.itemState() === "progress") return { color: "blue", fill: "outline" }

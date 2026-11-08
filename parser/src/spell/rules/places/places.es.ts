@@ -33,6 +33,8 @@ import { ProjectedInto } from "./ProjectedInto"
 import { ProjectedOnlyWhere } from "./ProjectedOnlyWhere"
 import { ProjectionOf } from "./ProjectionOf"
 import { MostRowsEach } from "./MostRowsEach"
+import { RowsAllowedEach } from "./RowsAllowedEach"
+import { ConfirmedJoin } from "./ConfirmedJoin"
 import { RowsOnlyFrom } from "./RowsOnlyFrom"
 import { SignUpsFrom } from "./SignUpsFrom"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
@@ -58,6 +60,7 @@ import { SearchesEverything } from "./SearchesEverything"
 import { RequestsASecond } from "./RequestsASecond"
 import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
+import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
@@ -249,6 +252,37 @@ placesEs.addRule(SignUpsFrom, {
 })
 placesEs.addRule(RowsOnlyFrom, { syntax: "solo sus {list:identifier} añaden filas" })
 placesEs.addRule(MostRowsEach, { syntax: "como mucho {most:number} filas (por|para) cada {field:identifier}" })
+placesEs.addRule(RowsAllowedEach, {
+  syntax: "cada persona (pide|añade) como mucho sus {field:text} {collection:identifier}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'hoja de inscripción es una carpeta de datos en "picnic@rs/__private/inscripciones"\n\t- solo sus asistentes añaden filas\n\t- como mucho 2 filas por cada turno\n\t- como mucho 40 filas por cada evento\n\t- cada persona pide como mucho sus "invitaciones" entradas\n\t- las entradas confirmadas se unen a "picnic@rs/__attendees"',
+          [
+            "export class HojaDeInscripción extends Place {}",
+            "export const hojaDeInscripción = core.place(new HojaDeInscripción(), {",
+            '  name: "hoja_de_inscripción",',
+            '  kind: "data folder",',
+            '  at: "/api/places/spaces/picnic@rs/__private/inscripciones",',
+            "  sheet: {",
+            '    onlyFrom: "asistentes",',
+            '    mostEach: [{ field: "turno", most: 2 }, { field: "evento", most: 40 }],',
+            '    allowance: { collection: "entradas", field: "invitaciones" },',
+            '    joins: { collection: "entradas", address: "picnic@rs/__attendees" }',
+            "  },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(ConfirmedJoin, {
+  syntax: "(los|las) {collection:identifier} (confirmados|confirmadas) se unen a {address:text}"
+})
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })
@@ -422,6 +456,37 @@ placesEs.addRule(SearchesEverything, {
 })
 placesEs.addRule(SearchesWith, {
   syntax: "{type:subject_implied} busca (en)? {fields:searched_fields} con {param:text}"
+})
+placesEs.addRule(CollectionSearchedWith, {
+  syntax: `${THE} {collection:plural_type} se buscan con {param:text} (en {path:text})?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github es un servidor web en "https://api.github.com"\n\t- los repositorios se buscan con "q" en "/search/repositories"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://api.github.com",',
+            "  collections: { repositorios: {",
+            "    searches: {",
+            '      param: "q",',
+            "      fields: [],",
+            '      at: "/search/repositories"',
+            "    },",
+            '    at: "/search/repositories",',
+            "    searchedOnly: true",
+            "  } },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 placesEs.addRule(AskedBy, {
   syntax: `${THE} {collection:plural_type} se piden por (su|sus)? {fields:searched_fields}`,

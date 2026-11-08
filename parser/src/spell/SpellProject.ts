@@ -723,11 +723,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       params: { target: target.name }
                     })
                   }
-                  if (target.can.places === false && SpellProject.keepsThingsInPlaces(parts)) {
+                  const refusedKind = SpellProject.placeKindRefusedBy(target, parts)
+                  if (refusedKind === "any") {
                     throw new P.ParserError({
                       message: `'${this.projectName}' keeps things in a place, which target '${target.name}' can't yet:  it's browser work first (epic data, J10).`,
                       activity: "SpellProject.compile",
                       params: { target: target.name }
+                    })
+                  }
+                  if (refusedKind !== undefined) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}' keeps things in a ${refusedKind}, which target '${target.name}' can't:  not in ${target.name === "py" ? "Python" : target.name} yet.`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name, kind: refusedKind }
                     })
                   }
                   const header = this.importHeader(target.writer)
@@ -1199,14 +1207,51 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /** Does a program made of `parts` name a place?  A target that says `places: false` can't write one. */
   static keepsThingsInPlaces(parts: Array<P.ASTStatementGroup | string | undefined>): boolean {
-    let found = false
+    return SpellProject.placeKindsIn(parts).length > 0
+  }
+
+  /**
+   * The kind of each place a program made of `parts` names, by its word (`"data folder"`), in order:
+   * `""` for a kind a library adds, which its class knows.
+   */
+  static placeKindsIn(parts: Array<P.ASTStatementGroup | string | undefined>): string[] {
+    const kinds: string[] = []
     P.forEachNode(
       parts.filter((part) => typeof part === "object"),
       (node) => {
-        if (node instanceof P.ASTCoreMethodInvocation && node.methodName === "place") found = true
+        if (!(node instanceof P.ASTCoreMethodInvocation) || node.methodName !== "place") return
+        const details = node.args.args?.[1]
+        const kind =
+          details instanceof P.ASTObjectLiteral
+            ? details.properties.find(
+                (each): each is P.ASTObjectLiteralProperty =>
+                  each instanceof P.ASTObjectLiteralProperty && each.property.value === "kind"
+              )?.value
+            : undefined
+        kinds.push(kind instanceof P.ASTStringLiteral ? (JSON.parse(kind.value) as string) : "")
       }
     )
-    return found
+    return kinds
+  }
+
+  /**
+   * The place a program made of `parts` keeps things in that `target` can't write (epic `data` P40):
+   * - `"any"`:  the target keeps nothing in a place (`places: false`), and the program names one
+   * - a kind's word, `"personal atmosphere account"`:  the first place of a kind the target doesn't list;
+   *   a kind a library adds is `"place of its own kind"`
+   * - `undefined`:  every place it names, the target can write
+   */
+  static placeKindRefusedBy(
+    target: SP.Target,
+    parts: Array<P.ASTStatementGroup | string | undefined>
+  ): string | undefined {
+    const { places } = target.can
+    if (places === undefined) return undefined
+    const kinds = SpellProject.placeKindsIn(parts)
+    if (!kinds.length) return undefined
+    if (places === false) return "any"
+    const refused = kinds.find((kind) => !places.includes(kind))
+    return refused === "" ? "place of its own kind" : refused
   }
 
   /**

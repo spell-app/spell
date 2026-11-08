@@ -429,6 +429,61 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     this.internalState.wroteFontSize = !!size
   }
 
+  /**
+   * The shared `shadow`:  the hue of a hard shadow behind its letters (`shadow="yellow"`);  `:state(shadow)`.
+   * - `undefined` without one, or where the family declares its own `shadow`.
+   */
+  @cssState("shadow")
+  get sharedShadow(): string | undefined {
+    return this.sharedText(SHADOW)
+  }
+
+  /**
+   * The shared `shadow` changed:  its hue, as `--_ui-shadow-color` (the theme's `--ui-<hue>`), which `reset.css`
+   * draws under `:state(shadow)`.
+   * - SIDE EFFECT:  writes it in the element's `style`;  removes it again once `shadow` is gone.
+   */
+  @onChange("sharedShadow", { writesDOMElement: true })
+  protected onShadowChanged(hue: string | undefined) {
+    const { style } = this.domElement
+    if (hue) style.setProperty(SHADOW_COLOR_TOKEN, `var(--ui-${hue})`)
+    else if (this.internalState.wroteShadow) style.removeProperty(SHADOW_COLOR_TOKEN)
+    this.internalState.wroteShadow = !!hue
+  }
+
+  /**
+   * The shared `width`, `min-width` and `max-width`, any CSS lengths, by name;  each `undefined` without one.
+   * - A new record each time:  only the three attributes are read, so `onWidthsChanged()` runs only when one changes.
+   */
+  get sharedWidths(): SharedWidths {
+    return Object.fromEntries(WIDTHS.map((name) => [name, this.sharedText(name)])) as SharedWidths
+  }
+
+  /**
+   * The shared widths changed, or the element's style sheets arrived:  its box's own width where it sits.
+   * - Each as a custom property (`--_ui-width` ...) and a state (`:state(width)` ...), which `reset.css` draws:
+   *   on the element itself where it draws a box, else on its shadow root's top-level boxes (`:state(sized-inside)`).
+   * - Which it is, the element's computed `display`:  so only once its sheets are in (`isReady`).
+   * - SIDE EFFECT:  writes them in the element's `style` and states;  removes them again once they're gone.
+   * - Not on a server:  the static render draws no widths.
+   */
+  @onChange("sharedWidths", "isReady", { writesDOMElement: true })
+  protected onWidthsChanged(widths: SharedWidths, isReady: boolean) {
+    if (isServer) return
+    const { domElement, internalState } = this
+    const isSized = WIDTHS.some((name) => widths[name] !== undefined)
+    if (!isSized && !internalState.wroteWidths) return
+    for (const name of WIDTHS) {
+      const width = widths[name]
+      if (width !== undefined) domElement.style.setProperty(`--_ui-${name}`, width)
+      else domElement.style.removeProperty(`--_ui-${name}`)
+      domElement.setState(name, width !== undefined)
+    }
+    const isContents = isSized && isReady && getComputedStyle(domElement).display === "contents"
+    domElement.setState(SIZED_INSIDE_STATE, isContents)
+    internalState.wroteWidths = isSized
+  }
+
   /** The shared `tooltip`:  the browser's own tooltip, written as the element's `title`. */
   get sharedTooltip(): string | undefined {
     return this.sharedText(TOOLTIP)
@@ -480,7 +535,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   /** A shared attribute's text, where the element takes it and it isn't empty;  else `undefined`. */
   private sharedText(name: string): string | undefined {
     if (!this.elementDefinition.takesShared(name)) return undefined
-    const value = E.Reactive.attributeValue(this, name)
+    // by its camelCase key, as every attribute value is kept (`min-width` => `minWidth`)
+    const value = E.Reactive.attributeValue(this, E.camelCase(name))
     return typeof value === "string" && value !== "" ? value : undefined
   }
 
@@ -1451,6 +1507,15 @@ const FONT_SIZE_STATE = "font-size"
 /** The tokens a size in `font` writes:  every set's components work their sizes out from them (Spell UI's). */
 const FONT_SIZE_TOKEN = "--ui-font-size"
 const LINE_HEIGHT_TOKEN = "--ui-line-height"
+const SHADOW = "shadow"
+/** Where the shared `shadow`'s hue goes, which `reset.css` draws under `:state(shadow)`. */
+const SHADOW_COLOR_TOKEN = "--_ui-shadow-color"
+/** The shared widths:  each one's state and custom property (`--_ui-width`) has its name. */
+const WIDTHS = ["width", "min-width", "max-width"] as const
+/** The state saying the shared widths go on the shadow root's top-level boxes:  the element is `display: contents`. */
+const SIZED_INSIDE_STATE = "sized-inside"
+/** The shared widths, by name:  any CSS length each, or `undefined` (`UIComponent.sharedWidths`). */
+type SharedWidths = Record<(typeof WIDTHS)[number], string | undefined>
 const TOOLTIP = "tooltip"
 /** The shared `movable`:  people drag it to a new place. */
 const MOVABLE = "movable"
@@ -1476,6 +1541,10 @@ type InternalState = {
   wroteTitle?: boolean
   /** the shared `font`'s size wrote the element's `--ui-font-size`, so a later one without removes it again */
   wroteFontSize?: boolean
+  /** the shared `shadow` wrote the element's `--_ui-shadow-color`, so a later empty one removes it again */
+  wroteShadow?: boolean
+  /** the shared widths wrote the element's custom properties and states, so later empty ones clear them */
+  wroteWidths?: boolean
   /** `isVisible` as `onVisibleChange()` last ran with it;  `undefined` before the element first drew */
   wasVisible?: boolean
   /** counts `onVisibleChange()` runs, so only the latest ends the hiding */
