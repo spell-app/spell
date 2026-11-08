@@ -14,10 +14,10 @@ import { Thing } from "./Thing"
 
 /**
  * `SiteBase`:  what a running site DOES, under spell's built-in template `site` (`Site`, compiled from
- * `templates/Site.spell`, extends it):  showing the page its address names, and the dialogs and sidebars its pages open
- * (epic `mockup` P2).
- * - Spell can't say this part, so it's written here, by hand:  the template keeps what spell can say, its words in
- *   every language (`its current address`).
+ * `templates/Site.spell`, extends it):
+ * showing the page its address names, and the dialogs and sidebars its pages open (epic `mockup` P2).
+ * - Spell can't say this part, so it's written here, by hand:
+ *   the template keeps what spell can say, its words in every language (`its current address`).
  * - The site's lines compile to its class's statics (`static pages`, `static dialogs` ...):  this reads them.
  * - An address is matched by the kit's ONE address grammar (`spell/util/addressPattern`), the page server router's:
  *   `/films/:film` shows the film page, its `film` the film the address names.
@@ -81,8 +81,8 @@ export class SiteBase extends App {
   }
 
   /**
-   * The address of page `name`, its parameters filled from `values`:  `addressOf("film page", { film: aFilm })` =>
-   * `/films/4`.
+   * The address of page `name`, its parameters filled from `values`:
+   * `addressOf("film page", { film: aFilm })` => `/films/4`.
    * - A value may be a thing:  its id is what goes in the address (`idInAddressOf()`).
    * - throws `TypeError` for a page the site doesn't have, or a parameter with no value
    */
@@ -130,8 +130,8 @@ export class SiteBase extends App {
   ////////////////
 
   /**
-   * Show page `name`, or open the dialog or sidebar of that name:  what `go to the film page for this film` and
-   * `show the settings dialog` compile to (`core.showSitePart()`).
+   * Show page `name`, or open the dialog or sidebar of that name:
+   * what `go to the film page for this film` and `show the settings dialog` compile to (`core.showSitePart()`).
    * - `thing`:  what fills the page's parameter, e.g. the film.
    *   It goes in the parameter whose property is of its type, else the first.
    * - A page goes through the host, so the browser's address and its back button follow (`navigate()`).
@@ -158,8 +158,8 @@ export class SiteBase extends App {
   }
 
   /**
-   * What a LINK to page `name` says, `thing` in its parameter:  what `the address of the film page for this film`
-   * compiles to (`core.siteAddressOf()`).
+   * What a LINK to page `name` says, `thing` in its parameter:
+   * what `the address of the film page for this film` compiles to (`core.siteAddressOf()`).
    * - `""` while `thing` is nothing yet, for a page that needs one:  a link followed as the page draws (a person's
    *   home world) has no thing until it's read, and a drawing mustn't fail meanwhile (epic `mockup` P8).
    * - throws `TypeError` for a page the site doesn't have
@@ -260,8 +260,8 @@ export class SiteBase extends App {
   }
 
   /**
-   * Close dialog or sidebar `name`, if it's the one open:  what `close the review dialog` compiles to
-   * (`core.closeSitePart()`).
+   * Close dialog or sidebar `name`, if it's the one open:
+   * what `close the review dialog` compiles to (`core.closeSitePart()`).
    * - throws `TypeError` for a name that's none of the site's dialogs or sidebars:  a page isn't closed, it's left
    */
   close(name: string): void {
@@ -318,8 +318,8 @@ export class SiteBase extends App {
    * Its side navigation, the page it shows beside it, and an open dialog or sidebar over it (epic `mockup` P3).
    * - The navigation is Spell UI's `<ui-site-nav>`, its pages the site's, nested as its lines nest them
    *   (`navPages()`);  picking one goes there without leaving the page.
-   * - Two columns of its own, not `<ui-page>`:  that's a whole window's frame and root, and Run draws the site inside
-   *   the editor's page.
+   * - Two columns of its own, not `<ui-page>`:
+   *   that's a whole window's frame and root, and Run draws the site inside the editor's page.
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
    */
   draw(): Drawing {
@@ -630,10 +630,10 @@ function propertyFor(param: string): string {
 }
 
 /**
- * What goes in an address for `value`:  a thing's id, from the place it's kept in when it's saved;  anything else as
- * it is.
- * - An id that's a web address, as a web server's often are (`https://swapi.py4e.com/api/films/1/`):  its last part,
- *   `1`, so the site's address reads `/films/1`;  `valueFor()` finds the thing again by it.
+ * What goes in an address for `value`:  a thing's id, from the place it's kept in when it's saved;
+ * anything else as it is.
+ * - An id that's a web address, as a web server's often are (`https://swapi.py4e.com/api/films/1/`):
+ *   its last part, `1`, so the site's address reads `/films/1`;  `valueFor()` finds the thing again by it.
  */
 function idInAddressOf(value: unknown): string | number | undefined {
   if (typeof value === "string" || typeof value === "number") return value

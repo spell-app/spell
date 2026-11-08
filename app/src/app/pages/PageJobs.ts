@@ -10,8 +10,8 @@ import { SiteEdits } from "./SiteEdits"
  *   - both compile to the page's `static jobs` (`markdown_description`);  the running page draws nothing for them.
  * - A job is a markdown list item:  a plain line, or an Agile story ("As a fan, I want ..., so that ...");
  *   a task list's box ticks it off, `- [x]`.  Lines under it are its details:  `- done when:  ...`.
- * - Plain text in, text out, as `SiteEdits` is:  it loads no parser, so it's tested in node;  the site editor applies
- *   the result as one step of the editor's history (`SiteWrites.changeJobs()`).
+ * - Plain text in, text out, as `SiteEdits` is:  it loads no parser, so it's tested in node;
+ *   the site editor applies the result as one step of the editor's history (`SiteWrites.changeJobs()`).
  * - Static and instance-free on purpose:  it holds nothing, and every caller has its own text.
  ****************/
 export class PageJobs {

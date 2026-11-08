@@ -15,8 +15,8 @@
 export type AddressParams = Record<string, string>
 
 /**
- * A matcher for address `pattern`, e.g. `/projects/file/:projectId/:filePath*`:  the parameters if a path matches,
- * else `undefined`.
+ * A matcher for address `pattern`, e.g. `/projects/file/:projectId/:filePath*`:
+ * the parameters if a path matches, else `undefined`.
  * - Each parameter is percent-decoded.
  * - The matcher throws `URIError` when a parameter's encoding is bad:  the router turns that into a 400.
  */
@@ -49,8 +49,8 @@ export function compilePattern(pattern: string): (path: string) => AddressParams
 }
 
 /**
- * `pattern` with its parameters filled from `params`, each encoded:  `/films/:film` and `{ film: "a b" }` =>
- * `/films/a%20b`.
+ * `pattern` with its parameters filled from `params`, each encoded:
+ * `/films/:film` and `{ film: "a b" }` => `/films/a%20b`.
  * - A `:name*` parameter keeps its `/`s:  each of its parts is encoded on its own.
  * - throws `TypeError`, naming it, when `params` has no value for one of its parameters
  */

@@ -10,10 +10,10 @@ import { namesSitePart, refuseUnlistedPart } from "./sites.shared"
  * `show_site_part` rule:  go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).
  * - e.g. `go to the films page`, `go to the film page for this film`, `show the film page with this film`
  * - e.g. `show the settings dialog`, `show the person sidebar for this person`
- * - e.g. `close the review dialog`:  closes the dialog or sidebar if it's open (epic `mockup` P8);  `close` names
- *   only a dialog or a sidebar, never a page
- * - It names the PAGE, never its address:  the site says where each page is, so a page moves without this line
- *   changing.
+ * - e.g. `close the review dialog`:  closes the dialog or sidebar if it's open (epic `mockup` P8);
+ *   `close` names only a dialog or a sidebar, never a page
+ * - It names the PAGE, never its address:
+ *   the site says where each page is, so a page moves without this line changing.
  * - What comes after `for` / `with` fills the page's parameter:  the one whose property is of its type, else the first.
  *   For a dialog or sidebar, its view's property of that type.
  * - A name no site of the program lists won't compile, once the whole project has parsed (`refuseUnlistedPart()`):
@@ -45,8 +45,8 @@ export class ShowSitePart extends SpellStatement<"part|thing?|close?"> {
   }
 
   /**
-   * The part `match` names, and the words naming it, if it's one of this rule's:  `films page` in
-   * `go to the films page`.  For an editor renaming a page (epic `mockup` P6, T13).
+   * The part `match` names, and the words naming it, if it's one of this rule's:
+   * `films page` in `go to the films page`.  For an editor renaming a page (epic `mockup` P6, T13).
    */
   static partNamedBy(match: P.Match): { name: string; words: P.Match } | undefined {
     if (!match.is(ShowSitePart)) return undefined

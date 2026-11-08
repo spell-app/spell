@@ -361,8 +361,8 @@ export function listenForTableEdits(element: HTMLElement): () => void {
  * its `tableColumns`, which Spell UI's table reads when it's handed no `columnDefs`.
  * - So an empty list still has its columns, and a table of it can take its first row.
  * - Each declared property, in the order declared (a parent class's first), headed by its words
- *   (`filmTitle` => `film title`), of its kind:  `number`, `date`, `choice` (true or false:  a tick box),
- *   one of its values (`its "size" is small or large`);  a list, or a thing, isn't a column.
+ *   (`filmTitle` => `film title`), of its kind:  `number`, `date`, `choice` (true or false:
+ *   a tick box), one of its values (`its "size" is small or large`);  a list, or a thing, isn't a column.
  * - SIDE EFFECT:  a getter on `list`, not enumerable, so its JSON and its items don't change.
  */
 export function nameTableColumns(list: object, Class: Function): void {

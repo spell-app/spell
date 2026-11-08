@@ -12,8 +12,8 @@ import type { SiteOverlayEntry, SitePageEntry } from "./sites.shared"
  * - e.g. `star wars guide is a site:`, then its parts under it:
  *   `- it has a film page at "/films/:film", named "Film"`, `- it has a settings dialog`
  * - e.g. `spell ui is a site at "owen@spell/spell-ui":`, `galaxy guide is a site in the cloud:`:  where it lives
- * - A site is made from spell's built-in template `site`, an app (`Site`, in the core);  so it's one of a kind, as
- *   `solitaire is an app` is.
+ * - A site is made from spell's built-in template `site`, an app (`Site`, in the core);
+ *   so it's one of a kind, as `solitaire is an app` is.
  * - Gathers what the lines under it say into its class, for whatever shows its pages:
  *   - `static pages`, nested as its lines nest (`site_page`)
  *   - `static dialogs` and `static sidebars` (`site_overlay`)

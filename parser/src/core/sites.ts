@@ -1,11 +1,11 @@
 /**
  * Sites (epic `mockup` P2):  what compiled spell calls to move between a site's pages, and what the host hands in.
  * - `go to the film page for this film` => `core.showSitePart("film page", film)`
- * - `show the settings dialog` => `core.showSitePart("settings dialog")`;  `close the settings dialog` =>
- *   `core.closeSitePart("settings dialog")`
+ * - `show the settings dialog` => `core.showSitePart("settings dialog")`;
+ *   `close the settings dialog` => `core.closeSitePart("settings dialog")`
  * - `the address of the film page for this film` => `core.siteAddressOf("film page", film)`, for a link
- * - Each goes through the running program's site, `core.RUNTIME.site` (the first one made):  the site itself is
- *   `SiteBase`, under spell's built-in template `site`.
+ * - Each goes through the running program's site, `core.RUNTIME.site` (the first one made):
+ *   the site itself is `SiteBase`, under spell's built-in template `site`.
  * - `siteHost`:  where the address lives, set by whatever runs the program (the editor's Run puts it in its URL).
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -45,8 +45,8 @@ export const siteMethods = defineCoreModule({
   },
 
   /**
-   * The address of the site's page `name`, its parameter filled with `thing`:  what
-   * `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`.
+   * The address of the site's page `name`, its parameter filled with `thing`:
+   * what `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`.
    * - The thing goes in the parameter whose property is of its type, else the first.
    * - `""` while the thing is nothing yet (a link still being followed):  see `SiteBase.linkTo()`.
    * - throws `TypeError` when the program has no site, or its site no page of that name

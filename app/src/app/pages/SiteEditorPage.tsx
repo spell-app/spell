@@ -20,10 +20,10 @@ import "./SiteEditorPage.css"
 
 /****************
  * ### `<SiteEditorRoute>`
- * The site editor's route, `/site/<project>` (epic `mockup` P4):  it shows the project its address names, then
- * `<SiteEditorPage>`.
- * - The project loads as it does for Edit and Run (`followRoute()`), with the page `site`:  the URL stays the
- *   project's, whichever file the editor shows.
+ * The site editor's route, `/site/<project>` (epic `mockup` P4):
+ * it shows the project its address names, then `<SiteEditorPage>`.
+ * - The project loads as it does for Edit and Run (`followRoute()`), with the page `site`:
+ *   the URL stays the project's, whichever file the editor shows.
  ****************/
 export function SiteEditorRoute(props: RouteSectionProps) {
   followRoute(
@@ -312,8 +312,8 @@ function startMove(event: PointerEvent, name: string): void {
 
 /****************
  * ### `<SitePartForm>`
- * The picked part's form, a `<ui-property-editor>`:  its name, title and address, and its address's parameters,
- * read only.
+ * The picked part's form, a `<ui-property-editor>`:
+ * its name, title and address, and its address's parameters, read only.
  * - What's typed is held, and written when the field is left or Enter is pressed:  ONE step of the editor's
  *   history per change (`SiteWrites`), never one per keystroke.
  * - A dialog or sidebar has only its name.
@@ -398,8 +398,8 @@ function parametersOf(address: string | undefined): string {
  * A page's JOBS, under its form (epic `mockup` P6, Q12):  what it must let people do, kept with the page for good.
  * - Each a row:  its box to tick it off, its words, and its details under them (`- done when:  ...`), each a field
  *   that grows with its text;  buttons to move it up or down, or delete it.
- * - "Add a job" adds a plain one;  "Add a story" an Agile story to fill in, `As a …, I want …, so that …`, with a
- *   check under it.
+ * - "Add a job" adds a plain one;
+ *   "Add a story" an Agile story to fill in, `As a …, I want …, so that …`, with a check under it.
  * - Every change is ONE step of the editor's history, written into the page's own file (`SiteWrites.changeJobs()`);
  *   typed words are written when the field is left, never once a keystroke.
  * - A page another project declares (a notebook a site imports) says its jobs are written there.

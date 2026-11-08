@@ -6,8 +6,8 @@ import { diagramNodeVocabulary } from "./UIDiagramNode.en"
 import diagramNodeCSS from "./UIDiagramNode.css?inline"
 
 /**
- * What a `<ui-diagram-node>` tells its diagram when what it holds changes size:  plumbing, like the platform's
- * `slotchange`.
+ * What a `<ui-diagram-node>` tells its diagram when what it holds changes size:
+ * plumbing, like the platform's `slotchange`.
  * - Bubbles to the diagram, which measures again, and lays its box out at the new size.
  */
 export const DIAGRAM_NODE_RESIZED = "ui-diagram-node-resized"

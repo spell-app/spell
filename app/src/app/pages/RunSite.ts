@@ -9,10 +9,10 @@ import { SiteWrites } from "./SiteWrites"
  * Where a running SITE's address lives in the editor's Run (epic `mockup` P2):  the editor's own URL.
  * - `/run/@spell/examples/StarWarsSite/films/4` shows the site's `/films/4`:  the part after the project, which
  *   the editor's addresses keep for a page of the running app (`SP.SpellUrls.withoutPage()`).
- * - A page going to another changes the URL (`go()`), so the browser's back and forward work;  the route hears every
- *   change of the URL, and tells the site (`heard()`, from `followRoute()`).
- * - While designing, a site's not found page offers to make the page:  `createPage()`, one step of the editor's
- *   history.
+ * - A page going to another changes the URL (`go()`), so the browser's back and forward work;
+ *   the route hears every change of the URL, and tells the site (`heard()`, from `followRoute()`).
+ * - While designing, a site's not found page offers to make the page:
+ *   `createPage()`, one step of the editor's history.
  * - The core's `SiteHost`, handed to each run (`editor.executeCompiledApp()`):  no Solid, as `editor.ts` uses it.
  * - ONE for the page, `runSite`.
  ****************/

@@ -1,7 +1,7 @@
 /****************
  * ### `SiteEdits`
- * A site's program, changed by what a person did rather than typed (epic `mockup` P2):  a new page, made where an
- * address had none.
+ * A site's program, changed by what a person did rather than typed (epic `mockup` P2):
+ * a new page, made where an address had none.
  * - Plain text in, text out:  it loads no parser, so it's tested in node, and the editor applies the result as one
  *   step of its history (`RunSite.createPage()`).
  * - It reads both of Spell's forms:  spellx's `<spell-site>`, and code spell's `galaxy guide is a site:`.
@@ -9,8 +9,8 @@
  ****************/
 export class SiteEdits {
   /**
-   * The words of a new page at `address`, from its last part that isn't a parameter:  `/planets/tatooine` =>
-   * `tatooine page`;  `/` => `home page`;  `/new-page` => `new page`.
+   * The words of a new page at `address`, from its last part that isn't a parameter:
+   * `/planets/tatooine` => `tatooine page`;  `/` => `home page`;  `/new-page` => `new page`.
    * - A name `taken` already gets a number:  `tatooine page 2`.
    */
   static pageNameFor(address: string, taken: readonly string[] = []): string {
@@ -38,8 +38,8 @@ export class SiteEdits {
   }
 
   /**
-   * `text`, a file declaring a site, with a page `name` added:  declared just before the site, and listed in it, last,
-   * at `address`.
+   * `text`, a file declaring a site, with a page `name` added:
+   * declared just before the site, and listed in it, last, at `address`.
    * - spellx:  `<spell-page "tatooine page"/>`, then `<page "tatooine page" address="/planets/tatooine"/>`
    * - code spell:  `a "tatooine page" is a page`, then `- it has a tatooine page at "/planets/tatooine"`
    * - Indented as the file is:  with tabs, or with what its site's first part is indented by.
@@ -106,8 +106,9 @@ export class SiteEdits {
 
   /**
    * `text` with the part `name` called `newName`:  in its site's list, and in its own declaration.
-   * - Lines elsewhere naming it (`go to the films page`) aren't this text edit's:  `SiteWrites.renamePart()` finds
-   *   them by the project's parse, in every file, and renames them in the same step (epic `mockup` P6, T13).
+   * - Lines elsewhere naming it (`go to the films page`) aren't this text edit's:
+   *   `SiteWrites.renamePart()` finds them by the project's parse, in every file,
+   *   and renames them in the same step (epic `mockup` P6, T13).
    * - throws `TypeError` when `newName` is taken, or isn't one the language reads as this kind of part
    */
   static withPartRenamed(text: string, name: string, newName: string): string {
@@ -160,8 +161,9 @@ export class SiteEdits {
    * - throws `TypeError` for a move into its own pages
    */
   /**
-   * Where page `name`'s own declaration is written in `text`, with its body:  `<spell-page "x">...</>` or
-   * `a "x" is a page:` and its lines;  none for a page `text` doesn't declare (another file's, another project's).
+   * Where page `name`'s own declaration is written in `text`, with its body:
+   * `<spell-page "x">...</>` or `a "x" is a page:` and its lines.
+   * - none for a page `text` doesn't declare (another file's, another project's)
    */
   static declarationOf(text: string, name: string): TextSpan | undefined {
     return declarationOf(text, name)

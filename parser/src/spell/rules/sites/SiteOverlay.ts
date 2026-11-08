@@ -13,10 +13,11 @@ import { overlayKindOf, siteOf, specialPageOf, typeNamed, type SiteOverlayEntry 
  * - What it shows:  the view of its name, when the program declares one (`a "settings dialog" is a view`);
  *   else it's a name, waiting for one.
  * - Its last word says which, in the language's own words:  `site_dialog`, `site_sidebar`.
- * - Its NOT FOUND and ERROR pages too (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
- *   (`site_not_found_page`, `site_error_page`).  Pages with no address, shown in place of one:  the program's own
- *   when it declares a page of that name, else a plain built-in one.  Every new site lists them;  one deleted still
- *   shows the built-in one.
+ * - Its NOT FOUND and ERROR pages too (epic `mockup` P2):
+ *   `- it has a not found page`, `- it has an error page` (`site_not_found_page`, `site_error_page`).
+ *   - pages with no address, shown in place of one
+ *   - the program's own when it declares a page of that name, else a plain built-in one
+ *   - every new site lists them;  one deleted still shows the built-in one
  * - Only in a site's body;  anywhere else, `it has a ...` is a property.
  * - Compiles to nothing by itself:  `create_site` lists them in its class, `static dialogs = [...]`.
  */

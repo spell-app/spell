@@ -18,8 +18,8 @@ import { pageNamed, paramsIn, siteOf, type SitePageEntry } from "./sites.shared"
  * - Refused, saying why:
  *   - a name that isn't one of the program's pages
  *   - an address that doesn't start with `/`
- *   - a parameter, `:film`, the page has no property for:  the page says `- it has a film`, and its type is the
- *     parameter's
+ *   - a parameter, `:film`, the page has no property for:
+ *     the page says `- it has a film`, and its type is the parameter's
  *   - an address another page already has
  * - Only in a site's body;  anywhere else, `it has a ...` is a property.
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.

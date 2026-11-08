@@ -35,12 +35,12 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  *     </nav>
  *
  * - Picking a page (a click, Enter or Space on its row) goes there:  `ui-navigating`, cancelable, then the browser's
- *   address.  A site that shows its pages without loading another (a Spell site in Run) cancels it and shows the
- *   page itself.
+ *   address.
+ *   A site that shows its pages without loading another (a Spell site in Run) cancels it and shows the page itself.
  *   - The tree's own selecting is always cancelled:  what's selected is `current`, which the page sets.
  * - Which pages are open:  the ones the person opened, and every page the shown one is under.
- *   - With `remember`, kept for each person across visits (`PrefStore`, `ui-site-nav:<remember>`);  without it, for
- *     as long as the page is open.
+ *   - With `remember`, kept for each person across visits (`PrefStore`, `ui-site-nav:<remember>`);
+ *     without it, for as long as the page is open.
  * - The tree's keys walk it:  up and down, right opens, left closes (`<ui-tree>`'s).
  * - Plain data in, no fetching:  whatever draws the site hands it its pages, a Spell site's from its site file
  *   (`static pages`), a docs site's from its own data.

@@ -9,11 +9,11 @@ import "./SiteData.css"
 
 /****************
  * ### `<SiteData>`
- * The site editor's Data tab:  each place the site reads, as a NERD, its boxes turning over to their ERD
- * (epic `mockup` P11).
+ * The site editor's Data tab:
+ * each place the site reads, as a NERD, its boxes turning over to their ERD (epic `mockup` P11).
  * - The NERD:  `<ui-diagram>` drawing `PlaceNerd.of()`, by Owen's NERD skill's rules:  a box per collection, only
- *   its linking fields, `contains` solid and `refers to` dashed, at most `columns` columns;  boxes dragged about
- *   stay where they're put, per project and place (`remember`);  a right click saves it as SVG.
+ *   its linking fields, `contains` solid and `refers to` dashed, at most `columns` columns;
+ *   boxes dragged about stay where they're put, per project and place (`remember`);  a right click saves it as SVG.
  * - Clicking a box turns it over, a card flip, to its ERD side:  every field and its kind, ids and links said
  *   (`<ui-diagram-node>` holding a `<ui-shape>`);  clicking it again turns it back.
  *   - While it's turned, the box is the card, its lines at its middle;  turned back, it's the NERD's box again, its

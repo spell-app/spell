@@ -302,8 +302,8 @@ sites.addRule(Wording.specialize({ ruleName: "site_error_page", meanings: [] }),
   syntax: "(error page|failure page)"
 })
 
-// `not` can't be in a member's name, so each has a line of its own:  `- it has a not found page`
-// (Spanish's `de` can't either:  `página de error`)
+// `not` can't be in a member's name, so each has a line of its own:
+// `- it has a not found page` (Spanish's `de` can't either:  `página de error`)
 sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_not_found_page}" })
 sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_not_found_page}" })
 sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_error_page}" })
