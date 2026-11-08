@@ -55,6 +55,11 @@ const OWENS_ROWS: [string[], string[][]][] = [
   [["add", "seo#choices", "Upgrades", "--multiple"], [["add", "seo", "choices", "Upgrades", "--multiple"]]],
   [["update", "seo#P3", "--choices", "<epic-choices>"], [["phase-body", "seo", "3", "--choices", "<epic-choices>"]]],
   [["close", "seo#J3"], [["close", "seo", "J3"]]],
+  [
+    ["close", "seo#J3", "seo#I7", "T2", "--why", "P9 did it"],
+    [["close", "seo", "J3", "I7", "T2", "--why", "P9 did it"]]
+  ],
+  [["close", "--why", "gone", "seo#J3"], [["close", "seo", "J3", "--why", "gone"]]],
   [["reopen", "seo#J3"], [["reopen", "seo", "J3"]]],
   [["cancel", "seo#J3", "why"], [["cancel", "seo", "J3", "why"]]],
   [
@@ -130,6 +135,7 @@ describe("planDocArgs()", () => {
 
   test("no epic at all:  which, pointing to the verb's help;  the verbs that take none run", () => {
     expect(() => planDocArgs("close", [])).toThrow("close:  which epic?  epic close --help")
+    expect(() => planDocArgs("close", ["seo#J3", "web#I7"])).toThrow("close:  one epic at a time, not seo and web")
     expect(() => planDocArgs("summary", ["--json"])).toThrow("summary:  which epic?")
     expect(planDocArgs("list", [])).toEqual([["list"]])
   })

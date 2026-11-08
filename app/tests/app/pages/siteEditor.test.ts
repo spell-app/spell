@@ -132,18 +132,18 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await text()).toContain('<spell-page "planets page">')
   })
 
-  test("a page's jobs:  one added, then ticked off, each one step written into the page;  its card counts them", async () => {
+  test("a page's stories:  one added, then ticked off, each one step written into the page;  its card counts them", async () => {
     await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · " }).click()
-    const jobs = page.locator(".SitePageJobs")
-    await jobs.locator("li").first().waitFor({ timeout: 10_000 })
-    expect(await jobs.locator("li").count()).toBe(3)
-    await jobs.locator("ui-button", { hasText: "Add a job" }).click()
+    const stories = page.locator(".SitePageStories")
+    await stories.locator("li").first().waitFor({ timeout: 10_000 })
+    expect(await stories.locator("li").count()).toBe(3)
+    await stories.locator("ui-button", { hasText: "Add a story" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [x] open a film's page from its row\n\t\t- [ ] New job\n\t</>")
-    await jobs.locator("li").last().locator('input[type="checkbox"]').check()
+    expect(await text()).toContain("\t\t- [x] open a film's page from its row\n\t\t- [ ] \n\t</>")
+    await stories.locator("li").last().locator('input[type="checkbox"]').check()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [x] New job\n")
-    expect(await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · 3 of 4 jobs" }).count()).toBe(1)
+    expect(await text()).toContain("\t\t- [x] \n")
+    expect(await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · 3 of 4 stories" }).count()).toBe(1)
   })
 
   test("a double click opens the page in Edit, and Back to the site comes back", async () => {

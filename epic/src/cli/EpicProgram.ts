@@ -207,6 +207,12 @@ export class EpicProgram {
       "epic summary seo"
     ).usage("<epic> [--json]")
     this.page(
+      epic.command("stale"),
+      "the facts for judging which open calls, issues and todos have gone stale:  age, phase, whether the files and " +
+        "names they mention still exist, commits since, later mentions;  decides nothing (for /epic tidy)",
+      "epic stale seo --json"
+    ).usage("<epic> [--json]")
+    this.page(
       epic.command("summaries"),
       "`summary --json` of each page, by path (worktrees' too), for /epics",
       "epic summaries epics/seo/seo.plan.html"
@@ -354,7 +360,11 @@ export class EpicProgram {
       'add <epic>#Q4 "Title" ["note"] [--image <png>]  |  edit <epic>#Q4 B [--title "..."] [--note "..."]  |  ' +
         "remove <epic>#Q4 B  |  close <epic>#Q4  [--set N]"
     )
-    this.page(epic.command("close"), "close an item:  done", "epic close seo#J3").usage("<epic>#J3")
+    this.page(
+      epic.command("close"),
+      "close items:  done;  --why closes them as obsolete, the reason saved on each, some refused (its help)",
+      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"'
+    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]')
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
       epic.command("cancel"),

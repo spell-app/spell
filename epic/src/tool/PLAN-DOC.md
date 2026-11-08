@@ -373,7 +373,7 @@ As `plan-doc.md`, "Ids":
     - `open`
     - `decided`:  an answered question.
       Set by `decide`, or by `add <name>#D`, born answered with `answered`.
-    - `done`:  closed (fixed, passed, accepted)
+    - `done`:  closed (fixed, passed, accepted, or obsolete:  `close --why`, the reason a Done card on it)
     - `canceled`:  made moot (struck through)
   - `state`:  the first row below that applies.
     - The tool rewrites it on every edit;  its colours:  "Colours" below.

@@ -28,6 +28,7 @@ import {
   CLOSED,
   ITEM_STATUSES,
   KINDS,
+  OBSOLETE_ID,
   OLD_DECISION,
   PHASE_FIELDS,
   PHASE_STATUSES,
@@ -64,7 +65,7 @@ import {
   type PlanMark,
   type RenameResult,
   type ReviewAs,
-  type StatusState
+  type AddStatusOptions
 } from "./planDoc.types"
 
 import { AuthorWords } from "./AuthorWords"
@@ -2007,9 +2008,10 @@ export class PlanDoc extends PlanReader {
    *   plain text goes as it is (`&lt;` for a `<`)
    * - slotted, so never ordered (`Markup.place()`):  appended;  drawn under Owen's marked note, above the note box
    * - an item is stamped (`changed`), not flagged UPDATE:  a record of a mark, not a change to the item
+   * - `quiet`:  not stamped either (`/epic tidy`'s doubtful items)
    * - throws for an id the doc doesn't have, or a reading with no text
    */
-  addStatus(id: string, reading: string, { state = "underway" }: { state?: StatusState } = {}): string {
+  addStatus(id: string, reading: string, { state = "underway", quiet = false }: AddStatusOptions = {}): string {
     const host = this.statusHost(id)
     const blocks = this.statusBlocks(reading)
     if (!blocks.length) throw new PlanDocError(`${id.toUpperCase()}:  a status card needs a reading`)
@@ -2018,7 +2020,7 @@ export class PlanDoc extends PlanReader {
     const card = this.make("epic-status", { state, at, from: this.person, agent: this.agent }, blocks)
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
-    if (host.localName === "epic-item") this.stamp(host)
+    if (host.localName === "epic-item" && !quiet) this.stamp(host)
     return PlanItem.titleOf(host)
   }
 
@@ -2119,10 +2121,50 @@ export class PlanDoc extends PlanReader {
    *   the session took the mark, and recording it was all there was to do
    * - else a card born noted (`addStatus()`)
    * - NOT for work done (an answer written, code changed):  that's `finishStatus()`'s Done
+   * - `quiet`:  a card born noted leaves the item's `changed` stamp alone (`addStatus()`)
    */
-  noteStatus(id: string, what: string): string {
+  noteStatus(id: string, what: string, { quiet = false }: { quiet?: boolean } = {}): string {
     if (this.underwayCard(this.statusHost(id))) return this.finishStatus(id, what, { state: "noted" })
-    return this.addStatus(id, what, { state: "noted" })
+    return this.addStatus(id, what, { state: "noted", quiet })
+  }
+
+  /**
+   * Why item `id` may NOT be closed as obsolete (`epic close --why`, `/epic tidy`);  `undefined` when it may.
+   * - only an open judgement call, issue or todo (`OBSOLETE_ID`):  a question is decided, a manual test run
+   * - never one Owen wants (`urgent`), one fixed and waiting for his review (`fixed`), one waiting for his pick,
+   *   one Claude is at work on or that has work queued
+   * - `marked`:  the ids (lower case) holding a mark of his not taken yet:  never those
+   * - `epic stale` reports this same answer, so an agent needn't try
+   */
+  closeRefusal(id: string, { marked = new Set<string>() }: { marked?: ReadonlySet<string> } = {}): string | undefined {
+    if (!this.hasItem(id)) return "no such item"
+    const facts = this.facts(this.item(id))
+    if (QUESTION_ID.test(facts.id)) return "a question:  decide it (`epic decide`)"
+    if (!OBSOLETE_ID.test(facts.id)) return "only judgement calls, issues and todos close this way"
+    if (facts.status !== "open") return `already ${facts.status}`
+    if (facts.urgent) return "Owen asked for it (urgent)"
+    if (facts.fixed) return "fixed, waiting for Owen's review"
+    if (facts.awaitsPick) return "waiting for Owen's pick"
+    if (marked.has(facts.id)) return "Owen's mark on it hasn't been taken"
+    if (facts.underway || facts.working) return "being worked on"
+    if (facts.queued !== undefined) return "queued work:  `epic unqueue` it first"
+    return undefined
+  }
+
+  /**
+   * Close item `id` as obsolete:  done, `why` (HTML, as a status card's reading) a Done card on it and in the log's
+   * line;  returns its title.
+   * - not taken up by the active phase (`setItem()`'s `taken-in`):  nothing was built for it
+   * - throws when `closeRefusal()` says no (the caller has checked;  this is the guard)
+   */
+  closeObsolete(id: string, why: string, { marked }: { marked?: ReadonlySet<string> } = {}): string {
+    const refusal = this.closeRefusal(id, { marked })
+    if (refusal) throw new PlanDocError(`${id.toUpperCase()} can't close as obsolete:  ${refusal}`)
+    this.addStatus(id, why, { state: "done" })
+    const title = this.setItem(id, "done")
+    Markup.set<"epic-item">(this.item(id), { takenIn: undefined })
+    this.log(`${id.toUpperCase()} closed:  ${title} -- ${why.replace(/<[^>]+>/g, "")}`)
+    return title
   }
 
   /**

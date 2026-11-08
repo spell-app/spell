@@ -9,7 +9,7 @@ import { editor } from "spell/app/app/editor"
 import { SpellPage } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
-import { PageJobs, type PageJob } from "./PageJobs"
+import { PageStories, type PageStory } from "./PageStories"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart } from "./SiteEdits"
 import type { ProjectIndex } from "./SitePlaces"
@@ -43,8 +43,8 @@ export function SiteEditorRoute(props: RouteSectionProps) {
  * - The board, in the middle:  a card per page, dialog and sidebar;  a click picks it, a double click opens it in
  *   Edit, at the line that declares it, with "Back to the site" in the editor's bar.
  * - The form, on the right:  the picked part's name, title and address;  its address's parameters, read only.
- *   - A page's JOBS under it (epic `mockup` P6):  what it must let people do, plain lines or Agile stories,
- *     to add, tick off, change, reorder and delete (`<SitePageJobs>`);  each card counts them.
+ *   - A page's STORIES under it (epic `mockup` P6):  what it must let people do, plain lines or Agile stories,
+ *     to add, tick off, change, reorder and delete (`<SitePageStories>`);  each card counts them.
  * - Every change is ONE step of the editor's history, written into the site's file (`SiteWrites`):
  *   ⌘Z takes it back, ⌘S saves it (the editor's own keys, `editorHotkeys()`).
  * - A project that isn't a site says so, and how to make one.
@@ -144,7 +144,7 @@ export function SiteEditorPage() {
                 <>
                   <SitePartForm part={part()} onRenamed={setPicked} />
                   <Show when={part().kind === "page"}>
-                    <SitePageJobs name={part().name} />
+                    <SitePageStories name={part().name} />
                   </Show>
                   <div class="actions">
                     <ui-button
@@ -178,14 +178,14 @@ export function SiteEditorPage() {
 }
 
 /**
- * A card's second line:  a page's address, else what it is;  and how many of its jobs are done, when it has some.
- * - e.g. `/films/:film · 1 of 3 jobs`
+ * A card's second line:  a page's address, else what it is;  and how many of its stories are done, when it has some.
+ * - e.g. `/films/:film · 1 of 3 stories`
  */
 SiteEditorPage.lineOf = (part: SitePart): string => {
   const where = part.address ?? appTexts.text(`siteKind.${part.kind}` as AppTextKey)
-  const jobs = part.kind === "page" ? SiteWrites.jobsOf(part.name) : undefined
-  if (!jobs?.length) return where
-  return `${where} · ${appTexts.text("siteJobsCount", { done: PageJobs.doneIn(jobs), count: jobs.length })}`
+  const stories = part.kind === "page" ? SiteWrites.storiesOf(part.name) : undefined
+  if (!stories?.length) return where
+  return `${where} · ${appTexts.text("siteStoriesCount", { done: PageStories.doneIn(stories), count: stories.length })}`
 }
 
 /** What a part's card and row say:  its title, else its name. */
@@ -407,60 +407,63 @@ function parametersOf(address: string | undefined): string {
 }
 
 /****************
- * ### `<SitePageJobs>`
- * A page's JOBS, under its form (epic `mockup` P6, Q12):  what it must let people do, kept with the page for good.
+ * ### `<SitePageStories>`
+ * A page's STORIES, under its form (epic `mockup` P6, Q12):  what it must let people do, kept with the page for good.
  * - Each a row:  its box to tick it off, its words, and its details under them (`- done when:  ...`), each a field
  *   that grows with its text;  buttons to move it up or down, or delete it.
- * - "Add a job" adds a plain one;
- *   "Add a story" an Agile story to fill in, `As a …, I want …, so that …`, with a check under it.
- * - Every change is ONE step of the editor's history, written into the page's own file (`SiteWrites.changeJobs()`);
+ * - "Add a story" adds an empty one, its field showing the shape to fill in:  `As a …, I want …, so that …`.
+ * - Every change is ONE step of the editor's history, written into the page's own file (`SiteWrites.changeStories()`);
  *   typed words are written when the field is left, never once a keystroke.
- * - A page another project declares (a notebook a site imports) says its jobs are written there.
+ * - A page another project declares (a notebook a site imports) says its stories are written there.
  ****************/
-function SitePageJobs(props: { name: string }) {
-  const jobs = createMemo(() => SiteWrites.jobsOf(props.name))
-  const write = (next: PageJob[]) => SiteWrites.changeJobs(props.name, next)
-  const changed = (job: PageJob, change: Partial<PageJob>) =>
-    write((jobs() ?? []).map((each) => (each === job ? { ...each, ...change } : each)))
-  const moved = (job: PageJob, by: -1 | 1) => {
-    const list = [...(jobs() ?? [])]
-    const at = list.indexOf(job)
+function SitePageStories(props: { name: string }) {
+  const stories = createMemo(() => SiteWrites.storiesOf(props.name))
+  const write = (next: PageStory[]) => SiteWrites.changeStories(props.name, next)
+  const changed = (story: PageStory, change: Partial<PageStory>) =>
+    write((stories() ?? []).map((each) => (each === story ? { ...each, ...change } : each)))
+  const moved = (story: PageStory, by: -1 | 1) => {
+    const list = [...(stories() ?? [])]
+    const at = list.indexOf(story)
     if (at < 0 || at + by < 0 || at + by >= list.length) return
     list.splice(at, 1)
-    list.splice(at + by, 0, job)
+    list.splice(at + by, 0, story)
     write(list)
   }
-  const added = (job: PageJob) => write([...(jobs() ?? []), job])
+  const added = (story: PageStory) => write([...(stories() ?? []), story])
   return (
-    <section class="SitePageJobs" aria-label={appTexts.text("siteJobs")}>
-      <h3>{appTexts.text("siteJobs")}</h3>
-      <Show when={jobs()} fallback={<p class="quiet">{appTexts.text("siteJobsElsewhere", { name: props.name })}</p>}>
+    <section class="SitePageStories" aria-label={appTexts.text("siteStories")}>
+      <h3>{appTexts.text("siteStories")}</h3>
+      <Show
+        when={stories()}
+        fallback={<p class="quiet">{appTexts.text("siteStoriesElsewhere", { name: props.name })}</p>}
+      >
         {(list) => (
           <>
-            <Show when={list().length} fallback={<p class="quiet">{appTexts.text("siteJobsNone")}</p>}>
+            <Show when={list().length} fallback={<p class="quiet">{appTexts.text("siteStoriesNone")}</p>}>
               <ol>
                 <For each={list()} keyed={false}>
-                  {(job) => (
-                    <li class={{ done: !!job().done }}>
+                  {(story) => (
+                    <li class={{ done: !!story().done }}>
                       <input
                         type="checkbox"
-                        checked={!!job().done}
-                        aria-label={appTexts.text("siteJobDone")}
-                        onChange={(event) => changed(job(), { done: event.currentTarget.checked })}
+                        checked={!!story().done}
+                        aria-label={appTexts.text("siteStoryDone")}
+                        onChange={(event) => changed(story(), { done: event.currentTarget.checked })}
                       />
                       <div class="words">
                         <textarea
                           class="text"
                           rows="1"
-                          value={job().text}
-                          onChange={(event) => changed(job(), { text: event.currentTarget.value.trim() })}
+                          value={story().text}
+                          placeholder={appTexts.text("siteNewStory")}
+                          onChange={(event) => changed(story(), { text: event.currentTarget.value.trim() })}
                         />
                         <textarea
                           class="details"
                           rows="1"
-                          value={job().details.join("\n")}
-                          placeholder={appTexts.text("siteJobDetails")}
-                          onChange={(event) => changed(job(), { details: event.currentTarget.value.split("\n") })}
+                          value={story().details.join("\n")}
+                          placeholder={appTexts.text("siteStoryDetails")}
+                          onChange={(event) => changed(story(), { details: event.currentTarget.value.split("\n") })}
                         />
                       </div>
                       <span class="actions">
@@ -468,25 +471,25 @@ function SitePageJobs(props: { name: string }) {
                           size="mini"
                           appearance="basic"
                           icon="arrow up"
-                          aria-label={appTexts.text("siteJobUp")}
-                          title={appTexts.text("siteJobUp")}
-                          onClick={() => moved(job(), -1)}
+                          aria-label={appTexts.text("siteStoryUp")}
+                          title={appTexts.text("siteStoryUp")}
+                          onClick={() => moved(story(), -1)}
                         />
                         <ui-button
                           size="mini"
                           appearance="basic"
                           icon="arrow down"
-                          aria-label={appTexts.text("siteJobDown")}
-                          title={appTexts.text("siteJobDown")}
-                          onClick={() => moved(job(), 1)}
+                          aria-label={appTexts.text("siteStoryDown")}
+                          title={appTexts.text("siteStoryDown")}
+                          onClick={() => moved(story(), 1)}
                         />
                         <ui-button
                           size="mini"
                           appearance="basic"
                           icon="trash alternate outline"
-                          aria-label={appTexts.text("siteJobRemove")}
-                          title={appTexts.text("siteJobRemove")}
-                          onClick={() => write(list().filter((each) => each !== job()))}
+                          aria-label={appTexts.text("siteStoryRemove")}
+                          title={appTexts.text("siteStoryRemove")}
+                          onClick={() => write(list().filter((each) => each !== story()))}
                         />
                       </span>
                     </li>
@@ -495,22 +498,7 @@ function SitePageJobs(props: { name: string }) {
               </ol>
             </Show>
             <div class="add">
-              <ui-button
-                size="small"
-                appearance="basic"
-                icon="plus"
-                onClick={() => added(PageJobs.newJob(appTexts.text("siteNewJob")))}
-              >
-                {appTexts.text("siteAddJob")}
-              </ui-button>
-              <ui-button
-                size="small"
-                appearance="basic"
-                icon="user outline"
-                onClick={() =>
-                  added(PageJobs.newJob(appTexts.text("siteNewStory"), [appTexts.text("siteNewStoryCheck")]))
-                }
-              >
+              <ui-button size="small" appearance="basic" icon="plus" onClick={() => added(PageStories.newStory(""))}>
                 {appTexts.text("siteAddStory")}
               </ui-button>
             </div>
