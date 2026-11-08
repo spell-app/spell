@@ -268,9 +268,11 @@ export class EpicProgram {
     this.page(
       epic.command("update"),
       "set a phase's or an item's fields, or the page's flags;  or Claude's status card on an item:  underway " +
-        "(spinner on), done, or noted"
+        "(spinner on), done, fixed, or noted"
     )
-      .usage('<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | noted ["<html>"]')
+      .usage(
+        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted ["<html>"]'
+      )
       .addHelpText("after", UPDATE_HELP)
     this.page(
       epic.command("updated"),
@@ -1165,6 +1167,8 @@ word after the target, never with fields:
   underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
+  fixed ["<what changed>"]                                an issue or judgement call fixed, for your review:  orange
+                                                          until Approve closes it;  a Do this's done means this too
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
 
@@ -1175,6 +1179,7 @@ Examples:
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"
+  epic update seo#I3 fixed "Writes the file on build now"
   epic update seo#J3 noted "Answered his note:  options A and B"`
 
 /** After `epic saga --help`. */

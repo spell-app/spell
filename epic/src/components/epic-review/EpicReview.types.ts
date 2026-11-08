@@ -29,6 +29,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
 /**
  * Whose controls (`buttons`), which picks the buttons:
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
+ * - `issue`:  an issue's or a judgement call's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `part`:  a part of the plan -- an Overview sub-section, the summary:  no Approve (`PART_BUTTONS`)
  * - `phase`:  a phase, still to do (epic `epic-engine` I181):  Do this, Revisit (`PHASE_BUTTONS`);  its note box a part's
@@ -54,6 +55,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  */
 export const REVIEW_KINDS = [
   "item",
+  "issue",
   "todo",
   "part",
   "phase",
@@ -139,6 +141,7 @@ export type ReviewButtonSpec = {
     | "readLineTip"
     | "acceptPlanTip"
     | "doThisTip"
+    | "doThisIssueTip"
 }
 
 /**
@@ -154,6 +157,16 @@ export const REVIEW_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
   { action: "approve", color: "green", icon: "check", label: "approve", tip: "approveTip" }
 ]
+
+/**
+ * An issue's or a judgement call's review buttons (epic `epic-engine` I232;  Owen, 2026-11-08):  Do this, Revisit, Approve.
+ * - Do this, a thumbs up (a `todo` mark, as a phase's):  fix it, in the item itself;
+ *   no todo made, it stays red until handled (`PlanDoc.doThis()`)
+ * - Approve:  on a fix waiting for him (orange), closes it
+ */
+export const ISSUE_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.map((spec) =>
+  spec.action === "todo" ? { ...spec, icon: "thumbs up", label: "doThis", tip: "doThisIssueTip" } : spec
+)
 
 /**
  * A TODO's review buttons (Owen, 2026-10-09), one group, in this order:
@@ -262,6 +275,7 @@ export const AWAY_LINE_BUTTONS: readonly ReviewButtonSpec[] = [
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
+  issue: ISSUE_BUTTONS,
   todo: TODO_BUTTONS,
   part: PART_BUTTONS,
   phase: PHASE_BUTTONS,
@@ -538,6 +552,11 @@ export const REVIEW_TEXTS = [
     text: "Yes:  build this phase",
     description: "A to-do phase's review button:  what Do this does."
   },
+  {
+    key: "doThisIssueTip",
+    text: "Yes:  fix this, right here, then I'll review it",
+    description: "An issue's or a judgement call's review button:  what Do this does."
+  },
   { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
   {
     key: "revisitCommentsTip",
@@ -649,6 +668,11 @@ export const REVIEW_TEXTS = [
   { key: "howSoon", text: "revisit soon", description: "A marked note's kind." },
   { key: "howNow", text: "revisit now", description: "A marked note's kind." },
   { key: "howTodo", text: "todo", description: "A marked note's kind." },
+  {
+    key: "howDoThis",
+    text: "do this",
+    description: "A marked note's kind:  an issue's, a call's or a phase's Do this."
+  },
   { key: "howNext", text: "next phase", description: "A marked note's kind:  a todo's plane." },
   { key: "howDrop", text: "drop", description: "A marked note's kind:  a todo's x." },
   { key: "howSkip", text: "skip", description: "A marked note's kind:  the note box's x." },

@@ -827,7 +827,7 @@ export class PlanDocCommands {
   }
 
   /**
-   * `status <name> <id> underway "<reading>"` / `done ["<summary>"]` / `noted "<what>"`:
+   * `status <name> <id> underway "<reading>"` / `done ["<summary>"]` / `fixed ["<what changed>"]` / `noted "<what>"`:
    * Claude's status card on an item or an Overview sub-section (P13), and the page's spinner on it.
    * - `epic update <name>#<id> underway ...` runs it (Owen, epic `repo-split` J140:  `epic status` takes stock)
    * - `underway`:  a new blue card (`PlanDoc.addStatus()`), stamped now
@@ -838,6 +838,11 @@ export class PlanDocCommands {
    *     a question, judgement call or test keeps its status
    *   - the spinner off
    *   - refused on an item with no underway card
+   *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
+   * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
+   *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
+   *   - his Approve closes it;  his Do this sends it back, red (`PlanDoc.fixedForReview()`)
+   *   - the spinner off
    * - `noted`:  a STEP done that doesn't finish the item:  Claude RECORDED what Owen chose (Owen, 2026-10-10), or
    *   answered, added details, condensed it, called a request off
    *   - a calm Noted card, `what` saying what was recorded and what happens next
@@ -864,8 +869,14 @@ export class PlanDocCommands {
       const done = await this.edit(file, (plan) => plan.finishWork(id, text))
       title = done.title
       if (done.closed) said = "done, closed"
+      if (done.fixed) said = FIXED_WORDS
+    } else if (state === "fixed") {
+      title = await this.edit(file, (plan) => plan.fixedForReview(id, text))
+      said = FIXED_WORDS
     } else
-      throw new PlanDocError(`epic update <name>#${id} underway | done | noted, not '${state ?? ""}'  (${USAGE_HINT})`)
+      throw new PlanDocError(
+        `epic update <name>#${id} underway | done | fixed | noted, not '${state ?? ""}'  (${USAGE_HINT})`
+      )
     // a status card says Claude has the item's mark:  the page shows it taken (I190)
     this.inbox.setWorking(file, id, state === "underway", { took: true })
     this.print(`${id.toUpperCase()} ${said}:  ${title}`)
@@ -1498,6 +1509,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    summary under it when there's something worth saying;  an
                                                    open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
+  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange,
+                                                   still open;  Approve closes it.  A Do this's done means this too
   status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
                                                    an answer, details or a summary written, a request called
                                                    off:  a calm "Claude • Noted" card saying what was done and
@@ -1596,6 +1609,9 @@ function need(value: string | undefined, what: string): string {
 }
 
 /** Where a usage error points:  the whole `USAGE` is long, and every error printing it buried the message. */
+/** What `epic update ... fixed` says it did. */
+const FIXED_WORDS = "fixed, for review"
+
 const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name), an item `<epic>#J3`"
 
 /**

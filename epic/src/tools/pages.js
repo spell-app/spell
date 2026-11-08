@@ -325,8 +325,9 @@ function reorgEntry(name) {
  *   - NOT the `details` epic's own folder, `epics/details/` (`findPages()`)
  * - `parts`:  a split epic page's bodies (`epics/<name>/parts/<id>.html`, `PlanParts`), fragments its page loads
  *   - told from pages by this folder alone, since they're `.html` (Q12 of `epic-components`;  `.htm` before)
+ * - `requests`:  what `/send` saved for a request (`epics/<name>/requests/<rN>/`), its snippets `.html` too:  not pages
  */
-const SKIP_DIRS = new Set(["node_modules", "experiments", "examples", "details", "parts"])
+const SKIP_DIRS = new Set(["node_modules", "experiments", "examples", "details", "parts", "requests"])
 
 /**
  * Epic `name`'s epic page in folder `dir` (`epics/<name>/`):  `<name>.plan.html`, else `<name>.html`.

@@ -6,10 +6,11 @@ import { PlanMarkup } from "./PlanMarkup"
 /**
  * What a follow-up todo says about what it came from (epic `epic-engine` I230):  the Problem, and the Proposed fix.
  * - `PlanDoc.followUp()` writes these on a todo Owen made with Make Todo, so the todo reads on its own;
- *   the same for the older ones (`PlanDoc.fillFollowUp()`).
+ *   an issue's or call's Do this reads it too:  has it a fix yet (`PlanDoc.doThisSteps()`, I232)?
  * - The Problem:  the lead of the source's own text (its first paragraphs, whole sentences:  never cut mid-way);
  *   its title when it has no text of its own.
  * - The Proposed fix, the first of:
+ *   - a field of that name already in the source (what Claude wrote on an issue, I232)
  *   - the option Owen chose, or its Net effect
  *   - the recommended Net effect, or a lone Net effect not tied to one option
  *   - the recommended option
@@ -107,10 +108,17 @@ export class FollowUpSummary {
   private static fixOf(source: Element): string | undefined {
     const text = PlanItem.currentText(source)
     return (
+      FollowUpSummary.fixField(text) ??
       FollowUpSummary.optionFix(source, text) ??
       FollowUpSummary.proseRecommendation(text) ??
       FollowUpSummary.latestFromClaude(source)
     )
+  }
+
+  /** The text of `text`'s own "Proposed fix" field, unless it's the placeholder saying there's none. */
+  private static fixField(text: Element): string | undefined {
+    const field = text.querySelector(`epic-field[label="${FIX_LABEL}"]`)
+    return field && !field.textContent?.includes(NO_FIX_YET) && field.textContent?.trim() ? field.innerHTML : undefined
   }
 
   /** The chosen option, else the recommended one, else a Net effect that stands alone. */
@@ -191,7 +199,7 @@ function timeOf(element: Element): string {
 }
 
 /** The labels of a follow-up's two fields. */
-export const PROBLEM_LABEL = "Problem"
+const PROBLEM_LABEL = "Problem"
 export const FIX_LABEL = "Proposed fix"
 
 /** What the Proposed fix field says when nothing proposes one:  for the agent working the inbox. */

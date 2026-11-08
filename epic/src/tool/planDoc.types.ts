@@ -174,6 +174,7 @@ export const QUESTION_ID = /^q\d+$/
  * The items red while open and not reviewed (`PlanReader.itemState()`), so the ones `calm` makes blue:
  * judgement calls and issues (`i3`, `j7`).
  * - a todo marked `urgent` is too (`PlanDoc.followUp()`), whatever its id
+ * - and the kinds Owen's Do this leaves in place (`PlanDoc.doThis()`, I232):  `urgent` keeps them red after a review
  * - `ReviewInbox`'s and `<epic-item>`'s `CALM_ID`, the same rule
  */
 export const CALM_ID = /^[ij]\d+$/
@@ -250,8 +251,10 @@ export type ItemFacts = {
   bedtime: boolean
   /** not urgent:  blue while open and not reviewed, not red (`<epic-item calm>`) */
   calm: boolean
-  /** a todo asking Owen to act:  red until reviewed, as an open issue is (`<epic-item urgent>`) */
+  /** a todo asking Owen to act, red until reviewed;  an issue or call he wants done (Do this), red until handled */
   urgent: boolean
+  /** fixed, waiting for his review:  orange (`<epic-item fixed>`, I232) */
+  fixed: boolean
   /** Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`) */
   awaitsPick: boolean
   /** how Claude handled Owen's last review mark (`<epic-item review-as>`, `REVIEW_AS`), or `undefined` */

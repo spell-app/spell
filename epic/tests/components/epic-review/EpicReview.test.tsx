@@ -554,7 +554,8 @@ describe("<epic-item> review controls", () => {
     )
     for (const host of [approved, answered]) {
       expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
-      for (const action of actions(host)) expect(button(host, action).getAttribute("aria-label")).not.toMatch(/done/)
+      for (const action of actions(host))
+        expect(button(host, action).getAttribute("aria-label")).not.toMatch(/\bdone\b/)
     }
     const look = (host: Element) => {
       const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
@@ -696,7 +697,14 @@ describe("<epic-item> review controls", () => {
     )
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
     expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
+    // a judgement call's first button is Do this (I232)
     expect(button(host, "todo").getAttribute("title")).toBe(
+      "Do this:  Yes:  fix this, right here, then I'll review it · reviewed 10/7/26"
+    )
+    const question = await render(
+      `<epic-item id="q5" title="A question" status="decided" reviewed="2026-10-07"><p>Text</p></epic-item>`
+    )
+    expect(button(question, "todo").getAttribute("title")).toBe(
       "Make Todo:  Follow it up later, as a todo:  work still to do · reviewed 10/7/26"
     )
   })

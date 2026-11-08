@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  2f949c69b1643644
+// sources:  4ee22211c972a55f
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -25,7 +25,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
   "epic-focus": {"folder":"epic-focus","attributes":["for"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","urgent","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","urgent","fixed","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
   "epic-mark": {"folder":"epic-mark","attributes":["item","link"]},

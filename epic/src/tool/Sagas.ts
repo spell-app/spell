@@ -237,7 +237,7 @@ const GUIDES = "guides"
 const GUIDES_LIST = "guides/index.html"
 
 /** Folders that hold no pages (the docs tools' `SKIP_DIRS`). */
-const NO_PAGES = new Set(["node_modules", "experiments", "examples", "details", "parts"])
+const NO_PAGES = new Set(["node_modules", "experiments", "examples", "details", "parts", "requests"])
 
 /** A page's saga meta, either attribute order:  `$2` the id;  `$1` / `$3` around it. */
 const SAGA_META = /(<meta\s+name="spell-saga"\s+content=")([^"]*)("[^>]*>)/

@@ -10,7 +10,14 @@ import { PageInboxes } from "spell/epic/tools/PageInboxes"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
 
-import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
+import {
+  CALM_ID,
+  PlanDocError,
+  type ItemDescription,
+  type KeptNote,
+  type MarkResult,
+  type OptionCard
+} from "./planDoc.types"
 
 import { CommentList, CommentsError, type IdentifiedComment } from "./CommentList"
 import { GuideInbox, type GuideSend } from "./GuideInbox"
@@ -235,10 +242,13 @@ export class InboxCommands {
     for (const action of ACTIONS) {
       if (!marks[action].length) continue
       lines.push(`${action} (${marks[action].length}):`)
-      for (const mark of marks[action])
+      for (const mark of marks[action]) {
         lines.push(
           `  - ${mark.id.toUpperCase()}  ${mark.kind ? `${mark.kind}:  ` : ""}${mark.title ?? "(no such item)"}${extra(mark)}`
         )
+        const steps = doThisStepsOf(plan, mark)
+        if (steps) lines.push(`      ${steps}`)
+      }
     }
     const urgency = inbox.urgencyList
     if (urgency.length) lines.push(`urgency, from the id chips (${urgency.length}):`)
@@ -437,6 +447,9 @@ export class InboxCommands {
         lines.push(`  ${SENT_HEADINGS[action] ?? action} (${marks.length}):`)
         for (const mark of marks) {
           lines.push(`    - ${line(mark)}${mark.again ? "  (sent before)" : ""}`)
+          // an issue's or a call's Do this (I232):  what the agent does, with or without a fix proposed
+          const steps = doThisStepsOf(plan, mark)
+          if (steps) lines.push(`        ${steps}`)
           // a revisit with a pick:  "pick B, but ...", one line
           if (mark.action === "revisit" && mark.picked)
             lines.push(`        ${PlanItem.pickAsks(mark.picked, mark.note)}`)
@@ -856,8 +869,8 @@ const SENT_HEADINGS: Partial<Record<string, string>> = {
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
   skip: "skip, nothing to do",
-  // a phase's todo is its Do this (epic `epic-engine` I181):  `apply` takes it as a go-ahead, an item's makes a todo
-  todo: "todo:  an item's makes a todo;  a phase's is Do this, a go-ahead to build it"
+  // Do this:  a phase's (epic `epic-engine` I181), a go-ahead;  an issue's or a call's (I232), worked in the item itself
+  todo: "todo:  a question's or a test's makes a todo;  a phase's is Do this, a go-ahead to build it;  an issue's or a call's is Do this, worked in the item"
 }
 
 /** A test answer's result in words, as `inbox` and `wait` print it. */
@@ -905,6 +918,12 @@ function markTitle(plan: PlanReader, mark: ListedMark): string | null {
 /** A new item's mark (`new1`), described as an item is (`describeItem()`):  kind `new todo`, not made yet. */
 function newItemOf(mark: ListedMark): ItemDescription {
   return { id: mark.id.toUpperCase(), kind: `new ${mark.kind}`, status: "not made yet", title: mark.title ?? "" }
+}
+
+/** What the agent does with `mark`, when it's an issue's or a call's Do this (I232);  else `undefined`. */
+function doThisStepsOf(plan: PlanReader, mark: { id: string; action: string }): string | undefined {
+  const item = mark.action === "todo" ? plan.findItem(mark.id) : null
+  return item && CALM_ID.test(item.id) ? plan.doThisSteps(item) : undefined
 }
 
 /** `not urgent` (calm) / `urgent`. */
