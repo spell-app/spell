@@ -285,6 +285,8 @@ export abstract class PlanReader {
    *   decided question is work too)
    * - canceled (made moot, struck through):  `old`, grey -- the ONE "no longer relevant"
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
+   * - an issue Claude found and fixed itself, never needing Owen (epic `epic-engine` I236):  `handled`, grey:
+   *   closed done, `calm`, never reviewed, not one he asked for (Owen:  "I don't need to worry about transient stuff")
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
    * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  `replied`, orange, Owen's turn
@@ -302,7 +304,7 @@ export abstract class PlanReader {
     if (facts.underway || facts.working) return "progress"
     if (facts.status === CANCELED) return "old"
     // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
-    if (facts.handled) return "handled"
+    if (facts.handled || isSelfFixed(facts)) return "handled"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
     if (facts.fixed) return "replied"
     if (facts.queued !== undefined) return "open"
@@ -415,3 +417,17 @@ const SOMEONE = "someone"
 
 /** Which agent wrote it, when nobody said (`PlanDocOptions.agent`):  as `EpicHome.agent()` guesses. */
 const GUESSED_AGENT = "claude"
+
+/** Is it an issue Claude found and fixed itself:  closed done, `calm`, never reviewed, not wanted (`itemState()`)? */
+function isSelfFixed({
+  id,
+  status,
+  calm,
+  reviewed,
+  urgent
+}: Pick<ItemFacts, "id" | "status" | "calm" | "reviewed" | "urgent">): boolean {
+  return ISSUE_ID.test(id) && status === "done" && !!calm && reviewed === undefined && !urgent
+}
+
+/** An issue's id. */
+const ISSUE_ID = /^i\d+$/

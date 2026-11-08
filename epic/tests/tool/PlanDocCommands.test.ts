@@ -304,6 +304,20 @@ describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent
     expect(loud.itemState(loud.item(call))).toBe("attention")
   })
 
+  test("an issue Claude found and fixed itself is grey;  one reviewed, or not calm, stays green (I236)", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "issue", "Quiet"])
+    await owner.run(["add", "x", "issue", "Loud"])
+    const [quiet, loud] = printed
+    await owner.run(["calm", "x", quiet])
+    await owner.run(["close", "x", quiet, loud])
+    const plan = FILES.read(file)
+    expect(plan.itemState(plan.item(quiet))).toBe("handled")
+    expect(plan.itemState(plan.item(loud))).toBe("recent")
+    plan.item(quiet).setAttribute("reviewed", "2026-11-08")
+    expect(plan.itemState(plan.item(quiet))).toBe("recent")
+  })
+
   test("refuses no id, an id the doc doesn't have, or an item that's never urgent, writing nothing", async () => {
     const owner = commands()
     await owner.run(["add", "x", "todo", "A todo"])
