@@ -8,12 +8,12 @@ import { editor } from "spell/app/app/editor"
 import { SpellPage } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
-import { ChooserToolbar } from "./ProjectChooser"
 import { PageJobs, type PageJob } from "./PageJobs"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart } from "./SiteEdits"
 import type { ProjectIndex } from "./SitePlaces"
 import { SiteWrites } from "./SiteWrites"
+import { EditorToolbar } from "./SpellEditor"
 import { TileCard } from "./TileCard"
 
 import "./SiteEditorPage.css"
@@ -66,7 +66,7 @@ export function SiteEditorPage() {
   }
   return (
     <SpellPage id="SiteEditorPage" fillWindow rows>
-      <ChooserToolbar isHome={false} />
+      <EditorToolbar mode="site" />
       <Show
         when={SiteWrites.siteFile()}
         fallback={

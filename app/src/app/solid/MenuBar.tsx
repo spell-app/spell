@@ -28,7 +28,6 @@ import {
   type Mode
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
-import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
 import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spellml"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
@@ -468,7 +467,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     inspectorOpen: Inspector.isOpen,
     lineNumbersShowing: LineNumbers.isShowing,
     inspecting: Inspector.isInspecting,
-    siteReady: !!editor.project?.files.some((file) => SiteEdits.hasSite(file.contents ?? ""))
+    siteReady: EditorMode.hasSite
   }))
   const bar = spellMenu("bar menu")
   const editItem = (item: SpellMenuAction): JSX.Element => {
