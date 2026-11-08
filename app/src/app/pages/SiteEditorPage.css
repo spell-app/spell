@@ -55,9 +55,24 @@
     align-content: start;
   }
 
-  /* the row a dragged part would go before */
-  ui-tree-item[data-drop-before]::part(row) {
+  /* where a dragged part would land:  a line above the row;  a line below it and its pages;  or the row lit up, inside it */
+  ui-tree-item[data-drop="before"]::part(row) {
     box-shadow: inset 0 2px 0 var(--ui-primary-color, var(--ui-focus-color));
+  }
+  ui-tree-item[data-drop="after"] {
+    position: relative;
+    &::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 2px;
+      background: var(--ui-primary-color, var(--ui-focus-color));
+      pointer-events: none;
+    }
+  }
+  ui-tree-item[data-drop="into"]::part(row) {
+    background: color-mix(in oklab, var(--ui-primary-color, var(--ui-focus-color)) 22%, transparent);
+    box-shadow: inset 0 0 0 2px var(--ui-primary-color, var(--ui-focus-color));
   }
 
   .actions {
