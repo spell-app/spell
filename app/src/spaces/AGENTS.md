@@ -687,6 +687,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           a program's files are the org's, so it can't load to draw its own sign-in bar
         - `spell space org create` copies the Admin, Inbox, Feed and Chat programs there, each naming the org (`OrgSetup`)
       - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
+    - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
+      it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
       - sessions, caught mail, its read key
