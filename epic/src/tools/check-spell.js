@@ -333,7 +333,8 @@ function itemStuck(id) {
 function foldTarget() {
   // one with content to hide, open to start with, if there is one
   const filled = (section) => [...section.children].some((child) => !child.hasAttribute("slot"))
-  const blocks = [...document.querySelectorAll("main epic-page > :is(epic-overview, epic-section)[id]")]
+  // never "While you were out" (`#away`):  it opens again by itself whenever there is news
+  const blocks = [...document.querySelectorAll("main epic-page > :is(epic-overview, epic-section)[id]:not(#away)")]
   if (blocks.length) {
     const best = blocks.find((block) => filled(block) && block.open) ?? blocks.find(filled) ?? blocks[0]
     return { id: best.id, kind: "epic" }
