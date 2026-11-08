@@ -345,8 +345,9 @@ export function listenForTableEdits(element: HTMLElement): () => void {
       return saving.length ? Promise.all(saving).then(() => undefined) : undefined
     }
     const history = core.RUNTIME?.history
-    if (history) history.transaction(core.message("table-edit"), write)
-    else write()
+    // un-awaited on purpose:  each write says its own failure on the program's console
+    if (history) void history.transaction(core.message("table-edit"), write)
+    else void write()
   }
   element.addEventListener(TABLE_EDITING, onEditing)
   return () => element.removeEventListener(TABLE_EDITING, onEditing)
