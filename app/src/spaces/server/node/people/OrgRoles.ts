@@ -177,6 +177,34 @@ export class OrgRoles {
     return this.memberSpaceAt(head)
   }
 
+  /**
+   * Every paired space of org `org`, both sides of each, with the name of whose it is (epic `atmosphere` P37):
+   * the org's, the Admins', each standing team's and each project's, an event's among them.
+   * - None for an org with no Admin space.
+   * - Who may read each is `managersOfSpace()`'s for a private side;  everyone in the org for a shared one.
+   */
+  async pairedSpacesOf(org: string): Promise<NamedSpace[]> {
+    const roster = await this.people.roster(org)
+    if (!roster) return []
+    const both = (owner: Pick<PairedSpace, "org" | "of">, address: string, name: string): NamedSpace[] => [
+      { ...sideOf(owner, address, undefined), name },
+      { ...sideOf(owner, address, PRIVATE_SPACE), name }
+    ]
+    const spaces = [
+      ...both({ org, of: { kind: "the-org" } }, `@${org}`, org.toUpperCase()),
+      { org, of: { kind: "the-admin-space" }, side: "shared", address: `${ADMINS_SHARED}@${org}`, name: "Admins" },
+      { org, of: { kind: "the-admin-space" }, side: "private", address: `@${org}/${ADMIN_SPACE}`, name: "Admins" }
+    ] satisfies NamedSpace[] as NamedSpace[]
+    for (const team of roster.teams.items) {
+      spaces.push(...both({ org, of: { kind: "a-team", folder: team.folder } }, `${team.folder}@${org}`, team.name))
+    }
+    for (const project of roster.projects.items) {
+      const address = project.team ? `${project.team.folder}@${org}/${project.folder}` : `${project.folder}@${org}`
+      spaces.push(...both({ org, of: { kind: "a-project", folder: project.folder } }, address, project.name))
+    }
+    return spaces
+  }
+
   /** The Board and the Admins of org `org`, by address:  who may delete what's in a person's own space, never edit it. */
   async boardAndAdmins(org: string): Promise<string[]> {
     const roster = await this.people.roster(org)
@@ -804,6 +832,12 @@ export type PairedSpace = {
   side: SpaceSide
   /** Its own address, the part before its folders:  `@rs`, `@rs/__private`, `events_team@rs/2026-q4/__private`. */
   address: string
+}
+
+/** A paired space, with the name of whose it is:  "Events Team", "RS" (`OrgRoles.pairedSpacesOf()`, P37). */
+export type NamedSpace = PairedSpace & {
+  /** Whose it is, as people call it:  the team's, the project's or the org's name;  "Admins" for the Admins'. */
+  name: string
 }
 
 /** The org's own space of one of its people (`OrgRoles.memberSpaceAt()`, epic `atmosphere` P28). */

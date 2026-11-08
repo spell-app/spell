@@ -2,32 +2,40 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Message",
+    "Thread",
     "ChatPage",
-    "TeamChat"
+    "Chat",
+    "MyThread"
   ],
   "statements": [
     {
       "type": "Message",
       "superType": "Thing",
-      "defined": "/OrgChat.api.spell:715-827"
+      "defined": "/OrgChat.api.spell:959-1090"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:767-785"
+      "defined": "/OrgChat.api.spell:1006-1024"
     },
     {
       "property": "by",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:789-805"
+      "defined": "/OrgChat.api.spell:1028-1044"
     },
     {
       "property": "sent",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:809-827"
+      "defined": "/OrgChat.api.spell:1048-1066"
+    },
+    {
+      "property": "thread",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:1070-1090"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -40,24 +48,70 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spellml:349-871"
+      "defined": "/OrgChat.spellml:418-940"
     },
     {
-      "type": "TeamChat",
+      "type": "Thread",
+      "superType": "Thing",
+      "defined": "/OrgChat.api.spell:1203-1370"
+    },
+    {
+      "property": "name",
+      "of": "Thread",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:1255-1273"
+    },
+    {
+      "property": "side",
+      "of": "Thread",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:1277-1295"
+    },
+    {
+      "property": "topic",
+      "of": "Thread",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:1299-1318"
+    },
+    {
+      "property": "link",
+      "of": "Thread",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:1322-1340"
+    },
+    {
+      "property": "current",
+      "of": "Thread",
+      "datatype": "choice",
+      "defined": "/OrgChat.api.spell:1344-1370"
+    },
+    {
+      "type": "Chat",
       "superType": "Place",
-      "defined": "/OrgChat.api.spell:584-632"
+      "defined": "/OrgChat.api.spell:738-770"
+    },
+    {
+      "type": "MyThread",
+      "superType": "Place",
+      "defined": "/OrgChat.api.spell:771-847"
     },
     {
       "type": "ChatPage",
       "superType": "App",
-      "defined": "/OrgChat.spellml:976-1946"
+      "defined": "/OrgChat.spellml:1076-2926"
     },
     {
       "property": "new_message",
       "asWritten": "new message",
       "of": "ChatPage",
       "datatype": "Message",
-      "defined": "/OrgChat.spellml:989-1026"
+      "defined": "/OrgChat.spellml:1089-1126"
+    },
+    {
+      "property": "picked",
+      "of": "ChatPage",
+      "datatype": "Thread",
+      "defined": "/OrgChat.spellml:1131-1200"
     },
     {
       "syntax": "send {thisArg:expression}",
@@ -71,7 +125,8 @@
       "kind": "method",
       "name": "send it",
       "returns": "nothing",
-      "defined": "/OrgChat.spellml:1032-1175"
+      "waits": true,
+      "defined": "/OrgChat.spellml:1206-1412"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -84,7 +139,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spellml:1189-1937"
+      "defined": "/OrgChat.spellml:1426-2917"
     }
   ],
   "codeLines": [
@@ -93,10 +148,19 @@
     14,
     19,
     24,
-    57,
-    79,
-    82,
-    87,
-    93
+    29,
+    55,
+    56,
+    61,
+    66,
+    71,
+    76,
+    93,
+    99,
+    121,
+    124,
+    129,
+    134,
+    141
   ]
 }

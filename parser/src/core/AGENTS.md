@@ -312,6 +312,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The compiler turns it into the page server's room of that space's collection (`CreatePlace.roomAddressFor()`):
         `/api/rooms/spaces/events_team@rs/messages`.
       - This makes a `LiveRoomPlace` signed in by a Spell account, `SpellSignIn`, as a data folder is.
+      - A room at `"@rs/__thread"` is the thread the page's address picks (epic `atmosphere` P37, the kit's
+        `roomForPage()`), and a data folder at `"@rs/__threads"` marks that one `current`:  the built-in Chat's list.
+        This browser's last thread per org is kept under `spell-last-threads`.
     - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud`.
       - It compiles to kind `the cloud`, at `personal "family-cookbook"`'s address.
       - A remote place that takes nobody to be this machine's person:

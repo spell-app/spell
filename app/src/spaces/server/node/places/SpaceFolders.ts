@@ -37,7 +37,7 @@ import {
 } from "spell/server/places"
 import { ReadCredentials, type Mailer } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
-import { FEED_POSTS, FEED_SPACE, INBOX_SPACE, isSpaceName } from "spell/app/spaces/models/spaceNames"
+import { FEED_POSTS, FEED_SPACE, INBOX_SPACE, THREADS_SPACE, isSpaceName } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
 import { OrgRoles } from "spell/app/spaces/server/node/people/OrgRoles"
 import { OrgEvents, copyFolder } from "spell/app/spaces/server/node/people/OrgEvents"
@@ -52,6 +52,7 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { InboxMail } from "./InboxMail"
 import { MemberLists } from "./MemberLists"
 import { PersonFeed } from "./PersonFeed"
+import { PersonThreads } from "./PersonThreads"
 import { PersonInbox } from "./PersonInbox"
 import { RealSpace } from "./RealSpace"
 import { SpaceExport } from "./SpaceExport"
@@ -250,6 +251,8 @@ export class SpaceFolders {
   private readonly inboxes = new Map<string, Promise<PersonInbox | undefined>>()
   /** Each person's feed in their org, by address (`PersonFeed`, P33):  `bo@rs`'s, made once. */
   private readonly feeds = new Map<string, PersonFeed>()
+  /** Each person's list of threads in their org, by address (`PersonThreads`, P37):  `bo@rs`'s, made once. */
+  private readonly threadLists = new Map<string, PersonThreads>()
   /** What each space projects, by its address, made once (epic `atmosphere` P17). */
   private readonly projections = new Map<string, SpaceProjections>()
   /** The org's account, signed in, a space kept in a real Space is written as. */
@@ -489,6 +492,8 @@ export class SpaceFolders {
     if (rolesOf !== undefined) return this.rolesPlaceOf(rolesOf)
     const feedOf = PersonFeed.personAt(address)
     if (feedOf !== undefined) return this.feedOf(feedOf)
+    const threadsOf = PersonThreads.personAt(address)
+    if (threadsOf !== undefined) return this.threadsOf(threadsOf)
     const known = this.places.get(address)
     if (known) return known
     const folder = this.folderAt(address)
@@ -902,6 +907,25 @@ export class SpaceFolders {
   }
 
   /**
+   * `person`'s list of threads in their org (`PersonThreads`, epic `atmosphere` P37):  every chat thread of it they may
+   * read;  made once.
+   */
+  private threadsOf(person: string): PersonThreads {
+    const known = this.threadLists.get(person)
+    if (known) return known
+    const roles = this.orgRoles
+    const threads = new PersonThreads({
+      person,
+      spacesOf: (org) => roles.pairedSpacesOf(org),
+      isInOrg: (org, who) => roles.isInOrg(org, who),
+      managersOf: (space) => roles.managersOfSpace(space),
+      placeAt: (address) => this.placeFor(address, undefined)
+    })
+    this.threadLists.set(person, threads)
+    return threads
+  }
+
+  /**
    * Org `org`'s roles as a place (`OrgRolesPlace`):  what its Admin page reads and writes, at `@rs/__admin/roles`.
    * - `undefined` for an address with no folder on disk.
    */
@@ -930,12 +954,12 @@ export class SpaceFolders {
    * - `personal/recipes` is theirs, `__data/recipes` in it
    * - `@rs/__inbox`, an org's with no person, is their own inbox there:  `ana@rs/__inbox` for `ana@rs` (P29), or
    *   `owen@rs/__inbox` for `owen@spell`, their id in that org;  nobody asking, none
-   * - `@rs/__feed` likewise their own feed there (P33)
+   * - `@rs/__feed` likewise their own feed there (P33), and `@rs/__threads` their own list of threads (P37)
    */
   private addressFor(name: string, identity: string | undefined): string | undefined {
     const personal = `${PERSONAL_FOLDERS}/`
     const [head = "", next] = name.split("/")
-    if (head.startsWith("@") && (next === INBOX_SPACE || next === FEED_SPACE)) {
+    if (head.startsWith("@") && (next === INBOX_SPACE || next === FEED_SPACE || next === THREADS_SPACE)) {
       const asker = identity === undefined ? undefined : SP.SpellLocation.accountParts(identity)
       return asker && `${asker.id}@${head.slice(1)}${name.slice(head.length)}`
     }

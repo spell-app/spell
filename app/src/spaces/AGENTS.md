@@ -607,6 +607,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Ad-hoc threads in the org's shared space:  a record in its `threads` (the kit's `THREADS_COLLECTION`, kind
       `"thread"`), which only a Manager makes, there the Board and the Admins;  its messages name it in their `thread`.
     - A busy thread:  200 messages from one page, one after another, in about a second on this machine (its test).
+  - THE THREAD LIST (epic `atmosphere` P37, T53):  every thread a person may read, down the side of the built-in Chat,
+    like Slack's channels ([PersonThreads.ts](server/node/places/PersonThreads.ts)).
+    - `@rs/__threads`, the org's address with no person, is whoever's asking's own list (`SpaceFolders`;  the kit's
+      `PERSON_THREADS_ADDRESS`, never read direct):  each paired space's open thread (`OrgRoles.pairedSpacesOf()`), the
+      organizers' ones they manage, and the org's ad-hoc ones;  an org with no Admin space, its own open thread alone.
+    - Each row:  `name`, `side`, `thread` (its room), `topic` (an ad-hoc thread's id) and `link`, the page's address
+      showing it, `?thread=events_team@rs/messages`.
+    - The page's room is at `"@rs/__thread"`:  whichever thread its address names, else the one this browser showed
+      last, else the org's own (the kit's `roomForPage()`);  picking another is following its link.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
     - Each with a reason, by a Spell admin (`spell space takedown`).
