@@ -191,9 +191,10 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     servers = await startRecipeServers({
       port: 0,
       folder,
-      guardedRoutes: (router, guard) => {
+      guardedRoutes: (router, guard, upgrade) => {
         signIn.route(router, guard)
-        spaceFolders.route({ router, guard })
+        // the live rooms too (epic `atmosphere` P36):  a signed-in page's cookie rides on its socket
+        spaceFolders.route({ router, guard, upgrade, signIn })
       },
       routes: (router) => {
         router.use(signIn.check)
@@ -2674,6 +2675,81 @@ the published sheet is a projection of the sign up sheet:
 
         expect(bo.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
         await bo.close()
+      }
+    )
+  })
+
+  describe("a team's open thread, the built-in Chat (epic `atmosphere` P36)", () => {
+    /** Two of Spell's own org, in this spell.spaces:  Bo and Cy, chatting live. */
+    const EMAILS = { bo: "bo.chat@example.com", cy: "cy.chat@example.com" }
+    /** Each person's address, as their invite made it. */
+    const address: Record<string, string> = {}
+    /** The example as it ships, its thread a folder of Spell's own org's shared space. */
+    const chat = (): Program =>
+      withPlace(shipped("OrgChat/OrgChat.api.spell"), 'team chat is a room at "@spell/chat/messages"')
+    /** The texts of the messages `page` shows. */
+    const messagesOn = (page: Page) =>
+      page
+        .locator("ui-segment.message ui-text.text")
+        .evaluateAll((texts) => texts.map((text) => text.textContent ?? ""))
+
+    beforeAll(async () => {
+      for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
+      const people = new PeopleStore(new DiskStorage(spaces))
+      const org = await people.org("spell")
+      const known = new Set((org?.members.items ?? []).map((each) => people.addressOf(each.person!)))
+      const members = [
+        ...(org?.members.items ?? []).map((each) => ({
+          $type: "Membership",
+          person: { $ref: `Person#${people.addressOf(each.person!)}` },
+          role: each.role
+        })),
+        ...Object.values(address)
+          .filter((each) => !known.has(each))
+          .map((each) => ({ $type: "Membership", person: { $ref: `Person#${each}` }, role: "editor" }))
+      ]
+      await people.storage.write(
+        orgFile("spell"),
+        JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members })
+      )
+    })
+
+    test(
+      "Cy's message shows on Bo's open page at once;  Cy takes it back, and it's gone from both",
+      { timeout: 120_000 },
+      async () => {
+        const shots = process.env.SPELL_TEST_SHOTS ?? folder
+        const bo = await deviceOn("chat-bo", chat())
+        const cy = await deviceOn("chat-cy", chat())
+        for (const [device, who] of [
+          [bo, "bo"],
+          [cy, "cy"]
+        ] as const) {
+          await signIn(device.bar, EMAILS[who])
+          await device.page.reload()
+        }
+        await expect.poll(() => cy.page.locator("ui-text.none").count(), { timeout: 20_000 }).toBeGreaterThan(0)
+        await cy.page.locator("ui-form ui-input input").fill("Who's bringing chairs?")
+        await cy.page.locator("ui-button.send").click()
+        await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toEqual(["Who's bringing chairs?"])
+        await expect
+          .poll(() => bo.page.locator("ui-segment.message ui-text.by").textContent(), WAITING)
+          .toBe(address.cy)
+
+        await bo.page.locator("ui-form ui-input input").fill("I am")
+        await bo.page.locator("ui-button.send").click()
+        await expect.poll(() => messagesOn(cy.page), { timeout: 20_000 }).toEqual(["Who's bringing chairs?", "I am"])
+        await cy.page.screenshot({ path: join(shots, "org-chat.png"), fullPage: true })
+
+        await cy.page
+          .locator("ui-segment.message", { hasText: "Who's bringing chairs?" })
+          .locator("ui-button.remove")
+          .click()
+        await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toEqual(["I am"])
+        expect(bo.problems).toEqual([])
+        expect(cy.problems).toEqual([])
+        await bo.close()
+        await cy.close()
       }
     )
   })

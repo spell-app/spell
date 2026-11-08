@@ -269,8 +269,16 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       `core.place():  "${details.name}" is a file, and a browser can't write one by itself:  give it a server side, at its address`
     )
   },
-  room: ({ details, person }, { LiveRoomPlace }) =>
-    new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
+  // a room of a space on Spell's server (epic `atmosphere` P36):  signed in by a Spell account, as its data folder is
+  room: ({ details, person }, { LiveRoomPlace, SpellSignIn, SPACE_ROOMS_PREFIX }) => {
+    const at = details.at!.replace(/^ws/, "http")
+    const isSpaces = at.startsWith(`${SPACE_ROOMS_PREFIX}/`)
+    return new LiveRoomPlace({
+      url: at,
+      person,
+      ...(isSpaces && { signIn: SpellSignIn.for(at), can: { identifiesBy: "this machine" } })
+    })
+  },
   // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
   sheet: (making, folder) => sheetAt(making, folder),
   // an Excel workbook, whatever its address ends in (P38):  each sheet a collection

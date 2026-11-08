@@ -1043,8 +1043,9 @@ export const FILE_BYTES_FOLDER = "__blobs"
  * - `"row"`:  a row of a sheet, a program's data:  `recipes`, `signups`
  * - `"file"`:  a page, a sheet or any other file (`FILES_COLLECTION`)
  * - `"app"`:  an app installed in the space (`APPS_COLLECTION`)
+ * - `"thread"`:  a chat thread someone started, its messages posts beside it (`THREADS_COLLECTION`, P36)
  */
-export type ThingKind = "post" | "row" | "file" | "app"
+export type ThingKind = "post" | "row" | "file" | "app" | "thread"
 
 /**
  * The collections whose things are people's own words:  `"post"`s.
@@ -1059,11 +1060,19 @@ export const POST_COLLECTIONS = ["posts", "comments", "messages"] as const
  */
 export const APPS_COLLECTION = "__apps"
 
+/**
+ * The collection a space's ad-hoc chat threads are in (epic `atmosphere` P36):  one record each, `{ name, about }`;
+ * each thread's messages are `messages`, naming it in their `thread`.
+ * - Starting one is a Manager's:  in the org's shared space, the Board's and the Admins'.
+ */
+export const THREADS_COLLECTION = "threads"
+
 /** What a thing in `collection` is:  `"posts"` => `"post"`, `"__files"` => `"file"`, `"recipes"` => `"row"`. */
 export function thingKindOf(collection: string): ThingKind {
   if ((POST_COLLECTIONS as readonly string[]).includes(collection)) return "post"
   if (collection === FILES_COLLECTION) return "file"
   if (collection === APPS_COLLECTION) return "app"
+  if (collection === THREADS_COLLECTION) return "thread"
   return "row"
 }
 

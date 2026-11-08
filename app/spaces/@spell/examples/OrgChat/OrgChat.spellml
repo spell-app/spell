@@ -1,0 +1,55 @@
+# Chat
+A team's open thread, live:  a message shows on everyone's open page at once.
+Where it's kept is in OrgChat.api.spell, and only its first line knows.
+Everyone in the org reads and writes it;  you delete your own messages, and the team's Managers anyone's.
+
+
+## A row for each:  who sent it, when, and what it says
+
+<spell-more-of "message">
+	<draw>
+		<segment class="message">
+			<stack spacing="xs">
+				<stack direction="horizontal" spacing="md" align="center" wrap>
+					<text class="by">{its by}</text>
+					<text class="sent" color="grey">{its sent}</text>
+					<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Delete this message" title="Delete this message:  yours, or anyone's if you manage the space" onClick={remove it from the messages}/>
+				</stack>
+				<text class="text">{its text}</text>
+			</stack>
+		</segment>
+	</draw>
+</spell-more-of>
+
+
+## The page:  the thread, oldest first, and a line to write in
+
+<spell-app "chat page">
+	<property "new message">a new message</>
+
+	<action "send it">
+		set the sent of the new message to a new date
+		add the new message to the messages
+		set its new message to a new message
+	</action>
+
+	<draw>
+		<container class="chat">
+			<stack>
+				<header size="large">Team chat</header>
+				<stack class="message-list" spacing="sm">
+					<for message in every message sorted by its sent loading="Joining the thread">
+						<message/>
+						<empty><text class="none" color="grey">Nothing yet:  say hello.</text></empty>
+						<failed><text color="red">We can't join this thread right now.</text></failed>
+					</for>
+				</stack>
+				<form value={its new message}>
+					<input name="text" placeholder="Write to the team" aria-label="Your message" fluid action>
+						<button slot="action" class="send" color="primary" disabled={the text of the new message is ""} onClick={send it}>Send</button>
+					</input>
+				</form>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

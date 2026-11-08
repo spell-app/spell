@@ -495,11 +495,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       collection (the kit's `thingKindOf()`), checked where a write lands (`SpaceMembers.changeOrDie()`, handed to the
       kit's `FolderPlace`):
 
-      | Role | a post (posts, comments, messages) | a row (any other collection) | a file (`__files`) | an app (`__apps`) |
-      | --- | --- | --- | --- | --- |
-      | viewer | makes;  changes and removes its own, where the space lets viewers post (`viewersPost`) | -- | -- | -- |
-      | editor | makes;  changes and removes its own | makes;  changes any;  removes its own | the same as a row | -- |
-      | manager | makes;  removes any;  changes only its own | makes, changes and removes any | the same | installs one the org's Admins approved |
+      | Role | a post (posts, comments, messages) | a row (any other collection) | a file (`__files`) | an app (`__apps`) | a thread (`threads`, P36) |
+      | --- | --- | --- | --- | --- | --- |
+      | viewer | makes;  changes and removes its own, where the space lets viewers post (`viewersPost`) | -- | -- | -- | -- |
+      | editor | makes;  changes and removes its own | makes;  changes any;  removes its own | the same as a row | -- | -- |
+      | manager | makes;  removes any;  changes only its own | makes, changes and removes any | the same | installs one the org's Admins approved | starts, changes and removes any |
 
       - "its own":  whose `by` is them;  nobody else ever changes a post, so its `by` is always its writer
       - a refusal is `"role"`, with the role it takes (`needs`:  `"editor"`, `"manager"`), so a page names it in its own
@@ -597,6 +597,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     at `/api/rooms/spaces/<address>/<collection>` (a websocket;  the kit's `Referee` on the space's `FolderPlace`).
     - Each write is its page's person's, so every check here holds in a room too.
     - Only someone who may read the space joins.
+    - A program names one by its Spell address:  `team chat is a room at "events_team@rs/messages"`, the page server's
+      room of that space's `messages`, signed in by a Spell account as a data folder is (epic `atmosphere` P36).
+  - CHAT THREADS (epic `atmosphere` P36):  a live room of a space's `messages`, the built-in `@spell/examples/OrgChat`.
+    - Every team, project and event has two, with nothing to set up:  an open thread in its shared space
+      (`events_team@rs/messages`), everyone in the org writing there, and its organizers' in its private one
+      (`events_team@rs/__private/messages`), only its Managers.
+    - A message is a post:  everyone deletes their own, the space's Managers anyone's, and nobody changes another's.
+    - Ad-hoc threads in the org's shared space:  a record in its `threads` (the kit's `THREADS_COLLECTION`, kind
+      `"thread"`), which only a Manager makes, there the Board and the Admins;  its messages name it in their `thread`.
+    - A busy thread:  200 messages from one page, one after another, in about a second on this machine (its test).
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
     - Each with a reason, by a Spell admin (`spell space takedown`).

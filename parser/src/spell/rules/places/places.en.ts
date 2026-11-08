@@ -155,6 +155,17 @@ places.addRule(CreatePlace, {
           ]
         ],
         [
+          'team chat is a room at "events_team@rs/messages"',
+          [
+            "export class TeamChat extends Place {}",
+            "export const teamChat = core.place(new TeamChat(), {",
+            '  name: "team_chat",',
+            '  kind: "room",',
+            '  at: "/api/rooms/spaces/events_team@rs/messages"',
+            "})"
+          ]
+        ],
+        [
           'family cookbook is a spreadsheet at "recipes.csv"',
           [
             "export class FamilyCookbook extends Place {}",

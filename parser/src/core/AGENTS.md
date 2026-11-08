@@ -308,6 +308,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - until someone signs in, its bar says it takes them to be this machine's person (`identifiesBy: "this machine"`)
         - it offers to email a link and a code
         - signed out, it also says where to report abuse:  the server's abuse contact (`sign-in-abuse`, epic `atmosphere` P6)
+    - A SPACE'S LIVE ROOM (epic `atmosphere` P36):  `team chat is a room at "events_team@rs/messages"`, a Spell address.
+      - The compiler turns it into the page server's room of that space's collection (`CreatePlace.roomAddressFor()`):
+        `/api/rooms/spaces/events_team@rs/messages`.
+      - This makes a `LiveRoomPlace` signed in by a Spell account, `SpellSignIn`, as a data folder is.
     - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud`.
       - It compiles to kind `the cloud`, at `personal "family-cookbook"`'s address.
       - A remote place that takes nobody to be this machine's person:

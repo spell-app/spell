@@ -1,0 +1,102 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Message",
+    "ChatPage",
+    "TeamChat"
+  ],
+  "statements": [
+    {
+      "type": "Message",
+      "superType": "Thing",
+      "defined": "/OrgChat.api.spell:715-827"
+    },
+    {
+      "property": "text",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:767-785"
+    },
+    {
+      "property": "by",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:789-805"
+    },
+    {
+      "property": "sent",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/OrgChat.api.spell:809-827"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Message",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/OrgChat.spellml:349-871"
+    },
+    {
+      "type": "TeamChat",
+      "superType": "Place",
+      "defined": "/OrgChat.api.spell:584-632"
+    },
+    {
+      "type": "ChatPage",
+      "superType": "App",
+      "defined": "/OrgChat.spellml:976-1946"
+    },
+    {
+      "property": "new_message",
+      "asWritten": "new message",
+      "of": "ChatPage",
+      "datatype": "Message",
+      "defined": "/OrgChat.spellml:989-1026"
+    },
+    {
+      "syntax": "send {thisArg:expression}",
+      "output": "send",
+      "rule": "method_call",
+      "of": "ChatPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "send it",
+      "returns": "nothing",
+      "defined": "/OrgChat.spellml:1032-1175"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "ChatPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/OrgChat.spellml:1189-1937"
+    }
+  ],
+  "codeLines": [
+    8,
+    9,
+    14,
+    19,
+    24,
+    57,
+    79,
+    82,
+    87,
+    93
+  ]
+}

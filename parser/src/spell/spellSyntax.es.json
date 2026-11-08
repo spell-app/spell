@@ -6867,7 +6867,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 72,
+          "line": 77,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {

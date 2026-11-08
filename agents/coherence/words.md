@@ -197,6 +197,15 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   a feed is no space and has no folder.
 - **Decided:**  epic `atmosphere` P33.
 
+### thread, message (in chat)
+
+- **Say:**  thread, for a live conversation in a space:  a room of its `messages`, each message a post
+  (`events_team@rs/messages`, the team's open thread;  `events_team@rs/__private/messages`, its organizers');
+  an ad-hoc thread is a record in the org's `threads`, its messages naming it.
+- **Not:**  channel, chat room, conversation (an inbox's replies are a conversation, in a person's inbox);
+  room alone, for people:  a room is the live connection under it.
+- **Decided:**  epic `atmosphere` P36.
+
 ### an org's event, its stages
 
 - **Say:**  event, for something an org runs (RS's picnic), from someone's proposal to a quiet record;

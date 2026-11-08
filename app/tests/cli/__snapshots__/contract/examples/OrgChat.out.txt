@@ -1,0 +1,2 @@
+
+<div id="spell-app-root"><test-project-app><ui-container class="chat"><ui-stack><ui-header size="large">Team chat</ui-header><ui-stack class="message-list" spacing="sm"><ui-text color="red">We can't join this thread right now.</ui-text></ui-stack><ui-form><ui-input action="" aria-label="Your message" fluid="" name="text" placeholder="Write to the team"><ui-button class="send" color="primary" disabled slot="action" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Send</ui-button></ui-input></ui-form></ui-stack></ui-container></test-project-app></div>

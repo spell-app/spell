@@ -7,7 +7,8 @@ import {
   type PlaceContext,
   type SpaceMember,
   type SpaceSettings,
-  type ThingChange
+  type ThingChange,
+  type ThingKind
 } from "spell/places/places.types"
 import { parseRef } from "spell/places/refs"
 import { SRV } from "spell/server"
@@ -62,7 +63,13 @@ const MOST_FOR_A_MEMBER: SpaceRole = "editor"
 const INBOX_PERSON_ROLE: SpaceRole = "editor"
 
 /** What a refusal calls each kind of thing, in English:  a page says it in its own language, from the role it `needs`. */
-const KIND_WORDS = { post: "posts or comments", row: "rows", file: "pages or files", app: "apps" } as const
+const KIND_WORDS = {
+  post: "posts or comments",
+  row: "rows",
+  file: "pages or files",
+  app: "apps",
+  thread: "threads"
+} as const satisfies Record<ThingKind, string>
 
 /****************
  * ### `SpaceMembers`

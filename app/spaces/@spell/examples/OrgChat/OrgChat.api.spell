@@ -1,0 +1,15 @@
+## Chat:  a team's open thread, live
+// Every team, project and event has two threads:  an open one in its shared space, which everyone in the org reads
+// and writes, and its organizers' in its private one, which only its Managers reach.
+// A thread is live:  a message shows on everyone's open page at once.  Each is written as the person who sent it,
+// so the space's own rules hold:  everyone deletes their own messages, and its Managers anyone's.
+// Your thread's page names its own space on the next line.  The organizers' thread is at
+//   "events_team@rs/__private/messages"
+team chat is a room at "events_team@rs/messages"
+
+// A message:  what it says, and when;  who sent it is the space's to say, `by`.
+a "message" is a thing:
+	- it lives in team chat
+	- its "text" is text
+	- its "by" is text
+	- its "sent" is text

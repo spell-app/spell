@@ -164,7 +164,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a refusal for a role that can't write is `whyNot: "role"`, with the role it takes (`PlaceErrorCause.needs`,
         P23), which `PlaceServer` and `RemotePlace` pass on
       - what each thing is, for its write check:  `thingKindOf()` (`ThingKind`, `ThingChange`;  P23), a post, a row, a
-        file or an app;  and the setting `viewersPost`
+        file, an app or a chat thread (`THREADS_COLLECTION`, P36);  and the setting `viewersPost`
       - its members are `SpaceMember`s, a read, a write and a manage flag each, in the shape of AT Protocol's lists (T6)
       - a SIGN-UP SHEET's rules (P27):  `SheetRules`, set through `SPACE_SHEET_OPERATIONS`;  its refusals `"full"` (the
         last place is taken) and `"not listed"` (its list doesn't name you)
@@ -252,6 +252,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       a page signed in to a Spell account is that account.
     - Its run token goes as the socket's sub-protocol, never in its address (`ROOM_TOKEN_PROTOCOL`).
       A page signed in needs none, its cookie riding along (epic `atmosphere` P3).
+    - A space's room on Spell's server takes the page's `SpellSignIn` as its `signIn` (epic `atmosphere` P36):  its bar
+      shows, and the room opens again once someone signs in or out, so the new cookie rides on the new socket.
     - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
   - `PlaceCopy`:  every thing in one place's collection copied into another, whole, by its id (epic `atmosphere` P1).
