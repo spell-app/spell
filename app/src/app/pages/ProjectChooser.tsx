@@ -217,7 +217,7 @@ export function ProjectCards(props: ProjectCardsProps) {
     <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
       <header>
         <h2>
-          {root().words.title}. <span class="line">{props.line}</span>
+          {props.heading ?? root().words.title}. <span class="line">{props.line}</span>
         </h2>
         {props.create}
       </header>
@@ -293,6 +293,8 @@ export type ProjectCardsProps = {
   id: string
   /** The group whose projects to show. */
   projectRoot: SPACES.SpellProjectRoot
+  /** Its title, in place of its group's own (the group's word for what it holds). */
+  heading?: string
   /** The quiet line after its title. */
   line: string
   /** Its "create" button, in its header. */

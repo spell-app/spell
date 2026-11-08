@@ -25,6 +25,7 @@ export function SiteGroupPage(props: { group: string }) {
         <ProjectCards
           id="sites"
           projectRoot={new SPACES.SpellProjectRoot(props.group as SP.ProjectRootPath)}
+          heading={appTexts.text("siteGroupTitle")}
           line={appTexts.text("siteGroupLine")}
           empty={appTexts.text("siteGroupNone")}
           sitesOnly
