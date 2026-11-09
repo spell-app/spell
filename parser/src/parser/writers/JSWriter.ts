@@ -192,7 +192,9 @@ export class JSWriter extends ProgramWriter {
    */
   ASTStringLiteral(node: P.ASTStringLiteral): string {
     if (!node.quote) return node.value
-    return doubleQuoted(node.raw ?? jsText.inQuotes(node.value, node.quote))
+    return doubleQuoted(
+      node.raw === undefined ? jsText.inQuotes(node.value, node.quote) : jsText.lineBreaksEscaped(node.raw)
+    )
   }
 
   /**
