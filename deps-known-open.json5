@@ -1,0 +1,12 @@
+// What `spell deps check` and `spell publish` allow although it's deprecated, or critical or high (epic `epic-engine` P67).
+// - Each entry says why.
+// - An entry that no longer matches anything fails the check:  take it off when the problem goes.
+// - `in`:  "repo" is the lockfile;  "npm" is what an install from npm gets.
+[
+  {
+    package: "zod",
+    advisories: ["GHSA-mrhx-c7xc-m3w5"],
+    in: ["repo", "npm"],
+    reason: "@atproto's packages need zod 3, and the fix is in zod 4.6.6:  memory exhaustion validating oversized collections.  Only the Bluesky sign-in loads it, and an npm install gets it only with the add-ons."
+  }
+]
