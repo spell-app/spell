@@ -1276,7 +1276,7 @@
           "ruleNames": ["as_a_date"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsADate.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
           "syntaxes": [
             {
@@ -1598,7 +1598,7 @@
               "syntax": "((date:date)|(time:time)|(timestamp:timestamp))"
             },
             {
-              "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(timestamp:timestamp))"
+              "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(date_and_time:date and time)|(timestamp:timestamp))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
@@ -1631,7 +1631,7 @@
               "syntax": "((top_up:with a progress bar filling up at the top)|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
             },
             {
-              "syntax": "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
+              "syntax": "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(date_and_time:dates and times)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
             },
             {
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
@@ -1673,7 +1673,7 @@
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
             },
             {
-              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
             },
             {
               "syntax": "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
@@ -3745,7 +3745,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 20,
+          "line": 27,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -4915,7 +4915,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 47,
+          "line": 50,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -6857,7 +6857,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 96,
+          "line": 100,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6867,7 +6867,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 31,
+          "line": 34,
           "purpose": "What a read in a drawing shows while it has no list to show (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6931,12 +6931,27 @@
           "ruleNames": ["every_thing_matching"],
           "internal": false,
           "file": "src/spell/rules/places/EveryThingMatching.ts",
-          "line": 19,
+          "line": 24,
           "purpose": "Every thing a web server finds for some text, by its own search (epic `data` P34).",
           "syntaxes": [
             {
-              "syntax": "every {type:known_type} matching {words:expression}",
+              "syntax": "every {type:known_type} (matching|which matches) {words:expression}",
               "example": "every artwork matching search",
+              "outputs": {
+                "js": {
+                  "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
+                },
+                "ts": {
+                  "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
+                },
+                "py": {
+                  "code": "await core.saved_things(Artwork, {\"search\": {\"*\": search}})"
+                }
+              }
+            },
+            {
+              "syntax": "(all|the)? {type:plural_type} (matching|which match) {words:expression}",
+              "example": "all artworks matching search",
               "outputs": {
                 "js": {
                   "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
@@ -7132,7 +7147,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 77,
+          "line": 84,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -7158,6 +7173,32 @@
             },
             {
               "syntax": "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StoredOnThisDevice",
+          "ruleNames": ["stored_on_this_device"],
+          "internal": false,
+          "file": "src/spell/rules/places/StoredOnThisDevice.ts",
+          "line": 20,
+          "purpose": "A place kept in this browser (epic `data` Q33).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is stored on this device (each_tab:, for each tab)? {with_nested_statements}?",
+              "example": "settings is stored on this device",
+              "outputs": {
+                "js": {
+                  "code": "export class Setting extends Place {}\nexport const settings = core.place(new Setting(), { name: \"settings\", kind: \"database on this device\" })"
+                },
+                "ts": {
+                  "code": "export class Setting extends Place {}\nexport const settings = core.place(new Setting(), { name: \"settings\", kind: \"database on this device\" })"
+                },
+                "py": {
+                  "code": "class Setting(Place):\n    pass\n\nsettings = core.place(Setting(), {\"name\": \"settings\", \"kind\": \"database on this device\"})"
+                }
+              }
             }
           ],
           "aliases": ["statement"]
@@ -7263,6 +7304,58 @@
                 },
                 "py": {
                   "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"only_from\": \"attendees\",\n            \"most_each\": [{\"field\": \"shift\", \"most\": 2}, {\"field\": \"event\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"tickets\", \"field\": \"invitations\"},\n            \"joins\": {\"collection\": \"tickets\", \"address\": \"picnic@rs/__attendees\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInHeader",
+          "ruleNames": ["key_goes_in_header"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInHeader.ts",
+          "line": 16,
+          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key goes in its {name:text} header",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in its \"X-Api-Key\" header",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"header\": \"X-Api-Key\"},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInAddress",
+          "ruleNames": ["key_goes_in_address"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInAddress.ts",
+          "line": 16,
+          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key goes in the address as {name:text}",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in the address as \"api_key\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"in_address\": \"api_key\"},\n    },\n)"
                 }
               }
             }
@@ -7629,6 +7722,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ShowThemAtATime",
+          "ruleNames": ["show_them_at_a_time"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 126,
+          "purpose": "`show them 12 at a time`: how many a long list draws at once: a page of `show them in pages`, or each lot of more as you scroll -- see `core.drawRead()` (epic `data` Q35).",
+          "syntaxes": [
+            {
+              "syntax": "show them {size:number} at a time",
+              "example": "show them 12 at a time",
+              "outputs": {
+                "js": {
+                  "code": "core.readRider(\"pageSize\", () => 12)"
+                },
+                "ts": {
+                  "code": "core.readRider(\"pageSize\", () => 12)"
+                },
+                "py": {
+                  "code": "core.read_rider(\"pageSize\", lambda: 12)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -7826,7 +7945,7 @@
           "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} key is the secret {name:text}, if it's set"
+              "syntax": "{type:subject_its} optional key is the secret {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -7982,11 +8101,11 @@
           "ruleNames": ["page_size_is"],
           "internal": false,
           "file": "src/spell/rules/places/PageSizeIs.ts",
-          "line": 9,
+          "line": 11,
           "purpose": "How many a web server gives at a time, when asked (epic `data` P27).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} gives up to {size:number} at a time"
+              "syntax": "{type:subject_it} gives up to {size:number} at a time (, asked for with {param:text})?"
             }
           ],
           "aliases": ["statement"]
@@ -8038,7 +8157,7 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 33,
+          "line": 38,
           "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
@@ -8052,7 +8171,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 17,
+          "line": 24,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
@@ -8068,11 +8187,28 @@
           "aliases": ["statement"]
         },
         {
+          "className": "KeepsNoTimes",
+          "ruleNames": ["keeps_no_times"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeepsNoTimes.ts",
+          "line": 13,
+          "purpose": "A saved type does without its `created` and `modified` (epic `data` T57).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} keeps no times"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} keeps no times"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WhileWaiting",
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 150,
+          "line": 188,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8086,7 +8222,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 158,
+          "line": 196,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8100,7 +8236,7 @@
           "ruleNames": ["if_that_fails_say"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 69,
+          "line": 77,
           "purpose": "`if that fails say \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).",
           "syntaxes": [
             {
@@ -8114,7 +8250,7 @@
           "ruleNames": ["show_them_paged"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 90,
+          "line": 98,
           "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
           "syntaxes": [
             {
@@ -8128,7 +8264,7 @@
           "ruleNames": ["show_them_all"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 106,
+          "line": 114,
           "purpose": "`show them all` -- see `ShowThemPaged`.",
           "syntaxes": [
             {
@@ -8142,7 +8278,7 @@
           "ruleNames": ["show_them_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 140,
+          "line": 178,
           "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
           "syntaxes": [
             {
@@ -8156,7 +8292,7 @@
           "ruleNames": ["show_it_all_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 145,
+          "line": 183,
           "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
           "syntaxes": [
             {
@@ -8170,7 +8306,7 @@
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 173,
+          "line": 224,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8404,20 +8540,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 45,
+          "line": 49,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -8427,7 +8563,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 37,
+          "line": 38,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -8527,7 +8663,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 57,
+          "line": 65,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

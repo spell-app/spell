@@ -117,6 +117,7 @@ export const englishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `list of cards`. */
   listOfWord: "of",
+  savedTimeWords: { created: "created", modified: "modified" },
   // `closing`, `opening`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /ing$/,
   // the app's own actions, as a menu names them (`define_menu`, epic `elemental-spell` P10)
@@ -184,7 +185,7 @@ export const englishWords: SP.LanguageWords = {
     // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
     // `<spell-description>`, `<spell-comment>`,
     // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
-    // and a page's stories, `<spell-stories>` (epic `mockup` P6):  what it must let people do
+    // and a page's stories, `<stories>` or `<spell-stories>` (epic `mockup` P6):  what it must let people do
     notes: { description: "description", comment: "comment", "property-editor": "property editor", stories: "stories" },
     handlers: {
       on: "on",
@@ -215,6 +216,7 @@ export const englishWords: SP.LanguageWords = {
       "hide-empty": "hide-empty",
       failed: "failed",
       paging: "paging",
+      "page-size": "page-size",
       as: "as"
     },
     forFlagsNotAfter: ["is", "are", "not", "isn't", "aren't"],
@@ -255,6 +257,7 @@ export const englishWords: SP.LanguageWords = {
       tab: "tab",
       tags: "tags",
       thumbnail: "thumbnail",
+      live: "live",
       row: "row",
       column: "column",
       color: "color"
@@ -324,9 +327,12 @@ export const englishWords: SP.LanguageWords = {
       sitePageTags: ", tagged {quoted tags}",
       sitePageState: ", {state}",
       sitePageThumbnail: ", thumbnail {quoted thumbnail}",
+      sitePageLive: ", live {quoted live}",
       siteCardPlace: ", in row {row} column {column}",
       siteCardColor: ", colored {color}",
       siteOverlay: "it has {a words} {words}",
+      siteOverlayOf: { dialog: "it has {a words} {words} dialog", sidebar: "it has {a words} {words} sidebar" },
+      siteOverlayWords: "dialog|modal|sidebar|flyout",
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",
@@ -361,6 +367,7 @@ export const englishWords: SP.LanguageWords = {
         whole: "show it all in :",
         inPages: "show them in pages",
         allAtOnce: "show them all",
+        atATime: "show them {size} at a time",
         no: "no",
         pages: "pages",
         none_: "none",
@@ -415,6 +422,9 @@ export const englishWords: SP.LanguageWords = {
     ],
     /** A line starting a method:  `to play a card`, `animation deal`. */
     methodLine: /^(?:to|(?:create[ \t]+)?animation)[ \t]/iu,
+    /** A place's line, its name captured:  `family cookbook is a web server at "...":`. */
+    placeDeclaration:
+      /^(?!(?:an?|its?|the)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+is[ \t]+an?[ \t].*[ \t](?:at|from)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
     /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`. */
     reopenedType: /^an?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:where[ \t]*)?:[ \t]*$/iu
   }

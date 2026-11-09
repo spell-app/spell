@@ -445,7 +445,7 @@ describe("whose id it is (epic data I5)", () => {
 
 describe("links", () => {
   /** Recipes linking to a cookbook. */
-  async function linked() {
+  async function linked({ toOne = true } = {}) {
     const stub = await new AirtableStub(`appLinks${++made}`)
       .addTable("Books", [{ name: "Spell id" }, { name: "Name" }], [{ "Spell id": "b-1", Name: "Family" }])
       .addTable("Recipes", [
@@ -454,7 +454,7 @@ describe("links", () => {
         {
           name: "Book",
           type: "multipleRecordLinks",
-          options: { linkedTableId: "tblBooks", prefersSingleRecordLink: true }
+          options: { linkedTableId: "tblBooks", prefersSingleRecordLink: toOne }
         }
       ])
       .start()
@@ -479,6 +479,14 @@ describe("links", () => {
     expect(stub.rowsOf("Recipes")[0]!.Book).toEqual([parent.recordId])
     expect(rows[0]!.book).toBe("b-1")
     expect(stub.asks.filter(({ method, path }) => method !== "POST" && path.endsWith("/Books"))).toEqual([])
+  })
+
+  test("a link column that can hold many reads as ids, by the parent's id:  a program's one parent is its first (T63)", async () => {
+    const { place } = await linked({ toOne: false })
+    await place.list("books", {}, {})
+    await place.apply([change("insert", "r-1", { title: "Soup", book: "b-1" })], {})
+    const { rows } = await place.list("recipes", {}, {})
+    expect(rows[0]!.book).toEqual(["b-1"])
   })
 })
 

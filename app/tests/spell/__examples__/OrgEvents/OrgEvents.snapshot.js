@@ -57,7 +57,21 @@ export class Event extends Thing {
     )
   }
 
-  static savedIn = { place: "org_events", collection: "events" }
+  static savedIn = {
+    place: "org_events",
+    collection: "events",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in org events
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 538, end: 560 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in org events
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 538, end: 560 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class EventStage extends Thing {
@@ -83,7 +97,20 @@ export class EventStage extends Thing {
     )
   }
 
-  static savedIn = { place: "org_events", collection: "event_stages", select: ["name", "movedBy"] }
+  static savedIn = {
+    place: "org_events",
+    collection: "event_stages",
+    times: ["created", "modified"], select: ["name", "movedBy"] }
+
+  // - it lives in org events
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 774, end: 796 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in org events
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 774, end: 796 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

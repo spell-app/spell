@@ -71,6 +71,10 @@ Its cover, its title and who wrote it:  on its card, every name the search gave;
 					{draw the writing of it}
 				</stack>
 			</stack>
+			<stack spacing="sm">
+				<header size="medium">Editions</header>
+				<for its editions as="cards" columns="4" doubling stackable paging="pages" loading="Asking Open Library for its editions" empty="No editions listed." />
+			</stack>
 		</stack>
 	</draw>
 
@@ -82,6 +86,21 @@ Its cover, its title and who wrote it:  on its card, every name the search gave;
 			<loader visible inline text>Asking Open Library who wrote it</loader>
 		if that fails:
 			<text>Open Library can't say who wrote it just now.</text>
+	</draw>
+</spell-more-of>
+
+
+# An edition
+One printing of a book:  read from the book's own list of editions, when its page is open.
+
+<spell-more-of "edition">
+	<draw>
+		<ui-card>
+			<content>
+				<header>{its title}</header>
+				<meta>{its publish date} · {the first item of its publishers}</meta>
+			</content>
+		</ui-card>
 	</draw>
 </spell-more-of>
 

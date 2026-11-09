@@ -155,6 +155,7 @@ _DATE_STYLES: dict[str, Callable[[date], str]] = {
     "abbreviated": lambda when: f"{when:%a}, {when:%b} {when.day}, {when.year}",
     "short time": lambda when: _clock_time(when, seconds=False),
     "long time": lambda when: _clock_time(when, seconds=True),
+    "date and time": lambda when: f"{when:%b} {when.day}, {when.year}, {_clock_time(when, seconds=False)}",
     "timestamp": _timestamp,
     "reader": lambda when: f"{when:%x}",
 }

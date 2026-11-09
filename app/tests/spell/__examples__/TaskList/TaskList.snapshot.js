@@ -134,7 +134,21 @@ export class BrowserTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "browser_storage", collection: "browser_tasks" }
+  static savedIn = {
+    place: "browser_storage",
+    collection: "browser_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in browser storage
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in browser storage
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class BrowserKeeper extends TaskKeeper {
@@ -170,7 +184,21 @@ export class ServerTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "task_files", collection: "server_tasks" }
+  static savedIn = {
+    place: "task_files",
+    collection: "server_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task files
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in task files
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class ServerKeeper extends TaskKeeper {
@@ -212,7 +240,21 @@ export class SheetTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "task_sheet", collection: "sheet_tasks" }
+  static savedIn = {
+    place: "task_sheet",
+    collection: "sheet_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in task sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class SheetKeeper extends TaskKeeper {
@@ -262,7 +304,21 @@ export class SkyTask extends Task {
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
-  static savedIn = { place: "task_sky", collection: "sky_tasks" }
+  static savedIn = {
+    place: "task_sky",
+    collection: "sky_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task sky
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in task sky
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class SkyKeeper extends TaskKeeper {

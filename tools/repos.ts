@@ -24,7 +24,16 @@
  * ```
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, rmSync, symlinkSync } from "node:fs"
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "node:fs"
 import { join, resolve } from "node:path"
 
 import JSON5 from "json5"
@@ -246,8 +255,38 @@ function isLink(path: string): boolean {
 function links(): number {
   linkKit()
   for (const dir of kitFolders(TOP)) linkAgents(dir)
+  installPrePush()
   return 0
 }
+
+/**
+ * The git hook that checks the dependencies before a push to `main` (`tools/pre-push.ts`;  epic `epic-engine` P67).
+ * - In the checkout's shared git folder, so every worktree has it;  it runs whichever checkout is pushing's own tool.
+ * - A checkout from before the tool has no such file:  the hook does nothing there.
+ * - Leaves alone a hook it didn't write, and a checkout with no git (an unpacked copy).
+ */
+function installPrePush(): void {
+  const found = spawnSync("git", ["rev-parse", "--git-common-dir"], { cwd: TOP, encoding: "utf8" })
+  if (found.status !== 0) return
+  const hooks = resolve(TOP, found.stdout.trim(), "hooks")
+  const hook = join(hooks, "pre-push")
+  if (existsSync(hook) && !readFileSync(hook, "utf8").includes(PRE_PUSH_MARK)) return
+  mkdirSync(hooks, { recursive: true })
+  writeFileSync(hook, PRE_PUSH_HOOK, { mode: 0o755 })
+}
+
+/** Says the hook is ours. */
+const PRE_PUSH_MARK = "spell pre-push hook"
+
+/** The hook itself, as small as it can be:  everything it does is the checkout's own `tools/pre-push.ts`. */
+const PRE_PUSH_HOOK = `#!/usr/bin/env node
+// ${PRE_PUSH_MARK}:  written by \`yarn install\`;  the work is tools/pre-push.ts
+// no import or require:  git's folder is under the kit, so which module system node picks depends on its package.json
+const { existsSync } = process.getBuiltinModule("node:fs")
+const { spawnSync } = process.getBuiltinModule("node:child_process")
+if (existsSync("tools/pre-push.ts"))
+  process.exit(spawnSync(process.execPath, ["tools/pre-push.ts", ...process.argv.slice(2)], { stdio: "inherit" }).status ?? 1)
+`
 
 /**
  * `node_modules/spell`, a link to the kit itself (epic `repo-split` P9).

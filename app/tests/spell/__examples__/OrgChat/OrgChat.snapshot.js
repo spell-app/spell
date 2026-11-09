@@ -58,7 +58,21 @@ export class Message extends Thing {
     )
   }
 
-  static savedIn = { place: "chat", collection: "messages" }
+  static savedIn = {
+    place: "chat",
+    collection: "messages",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in chat
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 986, end: 1002 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in chat
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 986, end: 1002 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /** A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it. */
@@ -95,7 +109,20 @@ export class Thread extends Thing {
     return "hashtag"
   }
 
-  static savedIn = { place: "my_threads", collection: "threads" }
+  static savedIn = {
+    place: "my_threads",
+    collection: "threads",
+    times: ["created", "modified"], select: ["name", "side", "topic", "link", "current"] }
+
+  // - it lives in my threads
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1231, end: 1253 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my threads
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1231, end: 1253 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

@@ -51,11 +51,16 @@ export function engineEnv(root: string): NodeJS.ProcessEnv {
  */
 export function toolArgs(spec: CLI.ToolSpec, root: string): string[] {
   const script = RealPath.of(join(root, spec.tool))
-  return spec.tsx ? ["--import", TSX_LOADER, script] : [script]
+  return spec.tsx ? ["--import", tsxLoader(), script] : [script]
 }
 
-/** The kit's own `tsx` loader:  a worktree's tool runs before the worktree has a `node_modules`. */
-export const TSX_LOADER = import.meta.resolve("tsx/esm")
+/**
+ * The kit's own `tsx` loader:  a worktree's tool runs before the worktree has a `node_modules`.
+ * - Looked up when asked, never as this file loads:  an npm install has no `tsx`, and every command loads this file.
+ */
+export function tsxLoader(): string {
+  return import.meta.resolve("tsx/esm")
+}
 
 /**
  * Run `command` with `args` as a child, with this terminal attached, and resolve to its exit code.
@@ -121,7 +126,7 @@ export function epicBin(from = process.cwd()): string {
 /**
  * The published `spell-epic`'s `bin/epic`, as Node finds the package from the kit `kit`
  * (`npm install spell spell-epic`);  `undefined` when none is installed.
- * - the published `spell` has no `epic/bin`:  its epic code is built into `dist/`, the command is `spell-epic`'s
+ * - a `spell-epic` installed by hand, for a `spell` whose own `epic/bin/epic` `epicBin()` didn't find
  */
 export function publishedEpicBin(kit = CLI.KIT_ROOT): string | undefined {
   try {
@@ -139,7 +144,9 @@ export function publishedEpicBin(kit = CLI.KIT_ROOT): string | undefined {
 /**
  * `spell epic <args>` (epic `epic-friend` P13):  the epic tool, wherever it is, so `npx spell@next epic init` is the
  * one command a new repo needs.
- * - an `epic/bin/epic` or an installed `spell-epic` (`epicBin()`'s first two):  run under this `node`
+ * - the nearest `epic/bin/epic`, or an installed `spell-epic`'s (`epicBin()`'s first two):  run under this `node`
+ *   - the published `spell` ships its own (epic `epic-engine` P66):  so `npx spell@next epic init` needs nothing more
+ *     from npm, where it fetched `spell-epic`, and with it a second `spell`
  * - else `npx -y spell-epic@<spell's version>`:  fetched at the version of the `spell` running, never another
  * - NEVER the `epic` on the `PATH`:  it may be another checkout's, at another version
  * - resolves to its exit code

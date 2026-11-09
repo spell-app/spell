@@ -93,6 +93,30 @@ function holding(rows: Array<Record<string, unknown>>): KeepingPlace {
 beforeAll(() => bridgeSolid({ enableExternalSource, flush }))
 beforeEach(() => core.resetRuntime())
 
+describe("a thing saved new", () => {
+  test("writes a number as text where the place keeps that field as text", async () => {
+    const place = holding([{ id: "1", height: "172", mass: 77 }])
+    const { Character } = program(place)
+    await core.savedThings(Character)
+    await core.saveThing(new Character({ name: "Han", height: 180, mass: 80 }))
+    await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
+    expect(place.sent[0]!.fields).toMatchObject({ height: "180", mass: 80 })
+  })
+})
+
+describe("a number field that sent other text", () => {
+  test("is warned about once, in the program's language", async () => {
+    const place = holding([{ id: "1", avg_ht: "heavy" }])
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    const { Character } = program(place)
+    core.useMessages({ "number-sent-as-other-text": "{field} recibió {value}" })
+    await core.savedThings(Character)
+    core.useMessages()
+    expect(warn).toHaveBeenCalledWith("Character.averageHeight recibió heavy")
+    warn.mockRestore()
+  })
+})
+
 describe("what a place sends, as the type declares it", () => {
   test("names by their words, numbers from their text, its words for nothing quiet", async () => {
     const place = holding([
@@ -118,6 +142,24 @@ describe("what a place sends, as the type declares it", () => {
     const spanish = program(holding([{ id: "1", height: "1,200", mass: "1,5" }]), { unclearNumbers: "," })
     const [two] = (await core.savedThings(spanish.Character)).items as Array<InstanceType<typeof spanish.Character>>
     expect([two!.height, two!.mass]).toEqual([1.2, 1.5])
+  })
+
+  test("a place that knows its own numbers (a Google Sheet's locale) settles what the text can't;  a line still wins (T83)", async () => {
+    const saying = (rows: Array<Record<string, unknown>>) => {
+      const place = holding(rows)
+      const list = place.list.bind(place)
+      place.list = async (collection, query, context) => ({
+        ...(await list(collection, query, context)),
+        unclearNumbers: "," as const
+      })
+      return place
+    }
+    const sheet = program(saying([{ id: "1", height: "1,200" }]))
+    const [one] = (await core.savedThings(sheet.Character)).items as Array<InstanceType<typeof sheet.Character>>
+    expect(one!.height).toBe(1.2)
+    const said = program(saying([{ id: "1", height: "1,200" }]), { numbersLike: "1,200.5" })
+    const [two] = (await core.savedThings(said.Character)).items as Array<InstanceType<typeof said.Character>>
+    expect(two!.height).toBe(1200)
   })
 
   test("text that isn't a number:  nothing, said once on the program's console", async () => {

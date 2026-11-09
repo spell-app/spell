@@ -1,6 +1,8 @@
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
 import {
   canDoAll,
+  idOfRow,
+  MovedVersions,
   PlaceError,
   type ApplyAnswer,
   type ListAnswer,
@@ -74,7 +76,11 @@ const ALIAS = /^\s*(\w+)\s*:\s*(\w+)/
  * - An answer with `errors` is an answer:  it's thrown as a `PlaceError`, by its `extensions.code`, so it isn't resent.
  *   A 5xx, or no answer at all, resends (`WebPlace`).
  * - `operations`:  any other query or mutation, by name, for `call()`.
- * - Sends no versions:  no two GraphQL services say them the same way, so the last save wins that field.
+ * - Versions, if a mapping names the field they're in (`versions: { field }`;  epic `data` T19):
+ *   - every row asks for it, and `versionOf()` knows each thing's as it last read or wrote it
+ *   - an update sends it back in its `input`:  a server says `CONFLICT` if it's moved on, and it merges, per field
+ *   - no version known yet:  `"out of date"` without asking, so the engine reads the thing and merges
+ * - With none, the last save wins that field:  no two services say versions the same way.
  * - No subscriptions.
  ****************/
 export class GraphPlace extends WebPlace implements Place {
@@ -86,17 +92,28 @@ export class GraphPlace extends WebPlace implements Place {
   private readonly operations: Readonly<Record<string, string>>
   /** How many rows it asks for at a time. */
   private readonly pageSize: number
+  /** The field a row's version is in.  Left out:  the last save wins that field. */
+  private readonly versions: { field: string } | undefined
+  /** Each thing's version, as last read or written, by collection and id:  as the server wrote it, a number if it was one. */
+  private readonly seenVersions = new Map<string, string | number>()
 
-  constructor({ collections, can, operations = {}, pageSize = GRAPH_PAGE_SIZE, ...rest }: GraphPlaceProps) {
+  constructor({ collections, can, operations = {}, pageSize = GRAPH_PAGE_SIZE, versions, ...rest }: GraphPlaceProps) {
     super(rest)
     this.collections = collections
     this.operations = operations
     this.pageSize = pageSize
+    this.versions = versions
     const all = Object.values(collections)
     const write = (["insert", "update", "delete"] as const).filter((kind) => all.some((mapping) => mapping[kind]))
     const paging = all.find(({ paging }) => paging)?.paging
     const page = paging === "connection" ? "cursor" : (paging ?? "none")
-    this.capabilities = { ...GRAPH_CAPABILITIES, write: write.length ? write : "none", page, ...can }
+    this.capabilities = {
+      ...GRAPH_CAPABILITIES,
+      write: write.length ? write : "none",
+      page,
+      ...(versions && { versionCheck: true }),
+      ...can
+    }
   }
 
   /** What it can do. */
@@ -117,7 +134,7 @@ export class GraphPlace extends WebPlace implements Place {
     const called = argumentTexts.length ? `(${argumentTexts.join(", ")})` : ""
     const text = `query List${declared} { ${mapping.list}${called} { ${inner} } }`
     const data = (await this.ask(text, variables, context)) as Record<string, unknown>
-    return this.answerOf(mapping, query, data[mapping.list])
+    return this.answerOf(collection, mapping, query, data[mapping.list])
   }
 
   /** What's selected inside a list, as it pages. */
@@ -129,14 +146,16 @@ export class GraphPlace extends WebPlace implements Place {
   }
 
   /** `answered`, what the service said to one list, as a place answers. */
-  private answerOf(mapping: GraphCollection, query: ListQuery, answered: unknown): ListAnswer {
+  private answerOf(collection: string, mapping: GraphCollection, query: ListQuery, answered: unknown): ListAnswer {
     const { paging } = mapping
     const handled: ListHandled = { ...(query.select && { select: true }) }
     this.listArguments(mapping, query, handled)
     if (paging === "connection") {
       const { edges, pageInfo } = answered as GraphConnection
       const nextPage = pageInfo.hasNextPage ? pageInfo.endCursor : undefined
-      return { rows: edges.map(({ node }) => node), ...(nextPage && { nextPage }), handled }
+      const rows = edges.map(({ node }) => node)
+      for (const row of rows) this.noteVersion(collection, row)
+      return { rows, ...(nextPage && { nextPage }), handled }
     }
     if (!Array.isArray(answered)) {
       throw new TypeError(
@@ -144,6 +163,7 @@ export class GraphPlace extends WebPlace implements Place {
       )
     }
     const rows = answered as PlaceRow[]
+    for (const row of rows) this.noteVersion(collection, row)
     if (paging !== "offset") return { rows, handled }
     const { size, start } = this.offsetPage(query)
     return { rows, ...(rows.length === size && { nextPage: String(start + size) }), handled }
@@ -171,7 +191,7 @@ export class GraphPlace extends WebPlace implements Place {
       unknown
     >
     return asks.map(({ collection, query }, index) =>
-      this.answerOf(this.mappingOf(collection), query, data[`list${index}`])
+      this.answerOf(collection, this.mappingOf(collection), query, data[`list${index}`])
     )
   }
 
@@ -200,7 +220,25 @@ export class GraphPlace extends WebPlace implements Place {
       variables,
       context
     )) as Record<string, PlaceRow | null>
-    return Object.values(data).filter((row) => !!row) as PlaceRow[]
+    const rows = Object.values(data).filter((row) => !!row) as PlaceRow[]
+    for (const row of rows) this.noteVersion(collection, row)
+    return rows
+  }
+
+  /** The version of this thing as it last read or wrote it. */
+  versionOf(collection: string, id: string): string | undefined {
+    const version = this.seenVersions.get(versionKey(collection, id))
+    return version === undefined ? undefined : `${version}`
+  }
+
+  /** Remember `row`'s version, if this place keeps them. */
+  private noteVersion(collection: string, row: PlaceRow): void {
+    if (!this.versions) return
+    const id = idOfRow(row, this.capabilities.idOf)
+    const version = row[this.versions.field]
+    if (id !== undefined && (typeof version === "string" || typeof version === "number")) {
+      this.seenVersions.set(versionKey(collection, id), version)
+    }
   }
 
   /** Run the operation it was told is called `name`, with `input` as its variables.  - throws `PlaceError` if there's none */
@@ -221,16 +259,19 @@ export class GraphPlace extends WebPlace implements Place {
   /** Make these changes, one mutation at a time, in order.  - throws `PlaceError`;  what came before it stays made */
   async apply(changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer> {
     const rows: PlaceRow[] = []
+    const moved = new MovedVersions()
     for (const change of changes) {
-      const row = await this.makeChange(change, context)
+      const version = moved.versionFor(change)
+      const row = await this.makeChange({ ...change, ...(version !== undefined && { version }) }, context)
       if (row) rows.push(row)
+      if (change.id !== undefined) moved.note(change, version, this.versionOf(change.collection, change.id))
     }
     return { rows }
   }
 
   /** One mutation:  its row, if it answered with one.  - throws `PlaceError` `"refused"` if the mapping names none */
   private async makeChange(change: PlaceChange, context: PlaceContext): Promise<PlaceRow | undefined> {
-    const { kind, collection, id, fields = {}, changeId } = change
+    const { kind, collection, id, fields = {}, changeId, version } = change
     const mapping = this.mappingOf(collection)
     const mutation = mapping[kind]
     if (!mutation) {
@@ -240,6 +281,11 @@ export class GraphPlace extends WebPlace implements Place {
           cause: { kind: "refused", whyNot: "place" }
         }
       )
+    }
+    if (kind === "update" && this.versions && version === undefined) {
+      throw new PlaceError(`GraphPlace.apply():  no version known yet for "${id}" in "${collection}";  read it first`, {
+        cause: { kind: "out of date" }
+      })
     }
     const typeTexts: string[] = []
     const argumentTexts: string[] = []
@@ -252,7 +298,11 @@ export class GraphPlace extends WebPlace implements Place {
     if (mutation.input) {
       typeTexts.push(`$input: ${mutation.input}`)
       argumentTexts.push("input: $input")
-      variables.input = this.onTheWire(mapping, fields)
+      variables.input = this.onTheWire(mapping, {
+        ...fields,
+        ...(kind === "update" &&
+          this.versions && { [this.versions.field]: this.versionOnTheWire(collection, id!, version!) })
+      })
     }
     const selection =
       kind === "delete" ? mutation.selection : (mutation.selection ?? this.selectionFor(collection, mapping))
@@ -262,7 +312,15 @@ export class GraphPlace extends WebPlace implements Place {
     const text = `mutation Change${declared} { ${mutation.mutation}${called}${asked} }`
     const data = (await this.ask(text, variables, context, changeId)) as Record<string, unknown>
     const row = data[mutation.mutation]
-    return kind !== "delete" && row && typeof row === "object" ? (row as PlaceRow) : undefined
+    if (kind === "delete") this.seenVersions.delete(versionKey(collection, id!))
+    if (kind === "delete" || !row || typeof row !== "object") return undefined
+    this.noteVersion(collection, row as PlaceRow)
+    return row as PlaceRow
+  }
+
+  /** `version`, as the server writes it:  a number, if it wrote this thing's as one. */
+  private versionOnTheWire(collection: string, id: string, version: string): string | number {
+    return typeof this.seenVersions.get(versionKey(collection, id)) === "number" ? Number(version) : version
   }
 
   ////////////////
@@ -333,7 +391,11 @@ export class GraphPlace extends WebPlace implements Place {
     if (!select) return fields.join(" ")
     const { idOf } = this.capabilities
     const byName = new Map(fields.map((line) => [FIRST_NAME.exec(line)?.[1], line]))
-    const wanted = new Set([...(idOf === undefined ? [] : [idOf]), ...select])
+    const wanted = new Set([
+      ...(idOf === undefined ? [] : [idOf]),
+      ...(this.versions ? [this.versions.field] : []),
+      ...select
+    ])
     return [...wanted]
       .map((name) => {
         const line = byName.get(name)
@@ -389,6 +451,8 @@ export type GraphPlaceProps = WebPlaceProps & {
   operations?: Readonly<Record<string, string>>
   /** How many rows it asks for at a time on a place that pages, when nobody says;  default 100. */
   pageSize?: number
+  /** The field a row's version is in, by our name:  SEE `GraphPlace`.  Left out:  the last save wins that field. */
+  versions?: { field: string }
 }
 
 /** How one collection maps onto the schema. */
@@ -449,6 +513,11 @@ type GraphConnection = {
   edges: { node: PlaceRow }[]
   /** Where it stands. */
   pageInfo: { hasNextPage: boolean; endCursor?: string }
+}
+
+/** Where a thing's version is kept. */
+function versionKey(collection: string, id: string): string {
+  return `${collection}\n${id}`
 }
 
 /** Each field's name on the server, by ours:  from the aliases in `fields`. */

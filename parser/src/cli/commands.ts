@@ -258,18 +258,29 @@ export default function languageCommands(spell: Command): void {
         "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes (but with --try-writes), " +
         "and checks the Spell compiles and that a read through it returns rows.  Exits 1 if something needs a person"
     )
-    .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
+    .argument(
+      "<address>",
+      "where it is, e.g. https://swapi.info/api, recipes.csv, wss://rooms.example.com/family, appXXXXXXXXXXXXXX, did:plc:abc123"
+    )
     .option(
       "--kind <kind>",
-      "its kind:  web server, graphql server, sheet (a CSV file, or an Excel .xlsx), google sheet -- default worked out from the address, else it asks"
+      "its kind:  web server, graphql server, sheet (a CSV file, or an Excel .xlsx), google sheet, room, data folder, file, airtable, atmosphere account -- default worked out from the address, else it asks"
     )
     .option(
       "--into <file>",
       "the .spell file for its Spell, one server to a file, e.g. StarWars.api.spell:  your program in another, so " +
-        "spell place update never touches what you drew;  added to, never overwritten -- default it asks"
+        "spell place update never touches what you drew;  added to, never overwritten;  a <Name>.es.spell gets Spanish -- default it asks"
     )
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
+    .option(
+      "--key-header <name>",
+      'the header its key goes in, as it is, e.g. X-Api-Key -- default "Authorization: Bearer <key>";  writes the line that says so'
+    )
+    .option(
+      "--key-in-address <name>",
+      "the question its key goes in the address as, e.g. api_key:  it's hidden from every message;  writes the line that says so"
+    )
     .option(
       "--signed-in <place>",
       "read it as you, with the session spell place sign-in kept under that name:  its cookies go only to their own " +
@@ -342,6 +353,10 @@ export default function languageCommands(spell: Command): void {
         "something needs a person"
     )
     .argument("<file>", "the place's .spell file, e.g. StarWars.api.spell")
+    .option(
+      "--address <new>",
+      "where it's moved to:  looks there instead, and changes the place's line, e.g. https://swapi.py4e.com/api"
+    )
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((file: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))

@@ -1850,6 +1850,7 @@ What a program's lines about where data lives compile to, and what reads the res
 - A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
   - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
     a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
+  - In an action, `if that fails:` compiles to a `try` around the line above it, at `Block.getAST()` (`IfThatFails.catchesLineAbove()`).
   - Its read function is named `drawRead`, which `P.DRAWING_NAME` knows:  a drawing never waits, it shows what it has.
 - What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
   `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
@@ -1859,8 +1860,8 @@ What a program's lines about where data lives compile to, and what reads the res
     changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
     `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
 - A target that says `places: false` (a library) refuses a project that names one;  one that lists the kinds it keeps
-  (Python's:  a database on this device, a data folder, a sheet, an Excel file;  `PY.PLACE_KINDS`, epic `data` P40)
-  refuses a place of any other kind, by its word:  the Atmosphere is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
+  (Python's:  a database on this device, a data folder, a sheet, an Excel file, an atmosphere account;  `PY.PLACE_KINDS`, epic `data` P40, P46)
+  refuses a place of any other kind, by its word:  a web server is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
 
 ## Sites
 
@@ -2476,8 +2477,9 @@ sidebars any of them opens.
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
   - a page's STORIES, `<stories>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static stories`
-    - what the page must let people do, a markdown list, `- [x]` for one done;  nothing draws them
-    - spellx writes it `<spell-stories>` (Spanish `<encanto-historias>`), a note whose twin is the `<stories>` block
+    - what the page must let people do, one `<story "S1" done>` tag each (epic `mockup` P17):  anything else in the
+      block is refused;  nothing draws them
+    - spellx writes it `<stories>` or `<spell-stories>` (Spanish `<encanto-historias>`), a note whose twin is the `<stories>` block
       (`SpellxTwin.withStoriesAsBlocks()`)
     - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between
       a `<stories>` and a `<markdown>` keeps them apart

@@ -12,7 +12,7 @@ import {
   type PlaceRow,
   type PlacesProps
 } from "spell/places"
-import { SamplePlace, useRealPlace, useSample } from "spell/places/SamplePlace"
+import { SamplePlace, startSampleOver, useRealPlace, useSample } from "spell/places/SamplePlace"
 
 /** The real recipes. */
 const REAL_ROWS: PlaceRow[] = [
@@ -104,6 +104,69 @@ describe("SamplePlace, its first records", () => {
     expect(row).toEqual({ id: "recipes-1", title: "Soup" })
     await sample.apply([{ kind: "update", collection: "recipes", id: "recipes-1", fields: { title: "Stew" } }])
     expect((await sample.list("recipes", {})).rows[0]!.title).toBe("Stew")
+  })
+})
+
+describe("SamplePlace, a later read asking for more", () => {
+  test("a field the first read didn't name is asked for once, and filled in", async () => {
+    const real = realPlace()
+    const list = vi.spyOn(real.place, "list")
+    const sample = new SamplePlace({ real: real.place })
+    await sample.list("recipes", { select: ["title"] })
+    const asked = list.mock.calls.length
+    await sample.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" } }])
+    const { rows } = await sample.list("recipes", { select: ["title", "serves"] })
+    expect(rows[0]).toMatchObject({ title: "Mine", serves: 2 })
+    expect(list.mock.calls.length).toBe(asked + 1)
+    await sample.list("recipes", { select: ["title", "serves"] })
+    expect(list.mock.calls.length).toBe(asked + 1)
+  })
+
+  test("a read of every field, after one that named a few, gets them", async () => {
+    const real = realPlace()
+    const sample = new SamplePlace({ real: real.place })
+    await sample.list("recipes", { select: ["title"] })
+    expect((await sample.list("recipes", {})).rows[0]).toMatchObject({ serves: 2 })
+  })
+
+  test("records made up ask for nothing more", async () => {
+    const list = vi.fn(() => Promise.reject(new Error("no server")))
+    const sample = new SamplePlace({ real: placeThatOnlyLists(list), rowsFromType: () => [{ title: "Made up" }] })
+    await sample.list("recipes", { select: ["title"] })
+    const asked = list.mock.calls.length
+    await sample.list("recipes", { select: ["title", "serves"] })
+    expect(list.mock.calls.length).toBe(asked)
+  })
+})
+
+describe("SamplePlace, starting over", () => {
+  test("a sample started over forgets its changes and copies the real place again", async () => {
+    const { places, pending } = await cookbook()
+    const sample = await useSample(places, "cookbook")
+    rename(places, "Sample soup")
+    await pending().queue.save()
+    expect((await sample.list("recipes", {})).rows[0]!.title).toBe("Sample soup")
+
+    await startSampleOver(places, "cookbook")
+    expect((await sample.list("recipes", {})).rows[0]!.title).toBe("Soup")
+    expect(sample.sourceOf("recipes")).toBe("the real place")
+  })
+
+  test("made-up records, even with the real place there to read", async () => {
+    const places = new Places({ wait: 0 }).add("cookbook", realPlace().place)
+    const reader = places.read({ placeName: "cookbook", collection: "recipes", type: "Recipe" })
+    await reader.load()
+    const rowsFromType = () => [{ title: "Sample title 1" }]
+    const sample = await useSample(places, "cookbook", { rowsFromType })
+    await startSampleOver(places, "cookbook", "made up")
+    expect((await sample.list("recipes", {})).rows[0]!.title).toBe("Sample title 1")
+    expect(sample.sourceOf("recipes")).toBe("the type")
+  })
+
+  test("no sample behind the name:  nothing happens", async () => {
+    const { places } = await cookbook()
+    await expect(startSampleOver(places, "cookbook")).resolves.toBeUndefined()
+    expect(places.placeFor("cookbook")!.describe().isSample).toBeFalsy()
   })
 })
 

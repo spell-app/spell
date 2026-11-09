@@ -18,6 +18,7 @@ import {
   type SelectingContext
 } from "./places.types"
 import { FieldNames, type NameStyle } from "./FieldNames"
+import { DEFAULT_CEILING } from "./PlaceQuery"
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
 
 /** How many rows it asks for at a time on a place that pages, when nobody says. */
@@ -222,21 +223,28 @@ export class RestPlace extends WebPlace implements Place {
     const body = await jsonIn(response)
     const { rowsAt, nextAt, askedBy } = this.mappingOf(collection)
     const held = valueAt(body, rowsAt)
+    // nothing at all where its rows would be is no rows:  the Met's `objectIDs: null`, when a search finds nothing;
     // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place;
-    // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`
+    // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`;
+    // so does a list under a thing:  Open Library's `{ links, size, entries: [...] }` (epic `data` T114)
     const rows =
-      askedBy && isOneRow(held)
-        ? [held]
-        : !Array.isArray(held) && this.isSearchAddress(collection, url)
-          ? (soleListIn(body) ?? held)
-          : held
+      held === null
+        ? []
+        : askedBy && isOneRow(held)
+          ? [held]
+          : !Array.isArray(held) && (query.under || this.isSearchAddress(collection, url))
+            ? (soleListIn(body) ?? held)
+            : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
         `RestPlace.list():  "${collection}" didn't answer with a list${rowsAt ? ` at "${rowsAt}"` : ""};  say where it is with \`rowsAt\``
       )
     }
-    // told no count, it gives what it gives:  a read asking for fewer takes the first of them
-    const kept = this.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
+    // told no count, it gives what it gives:  a read asking for fewer takes the first of them;
+    // and what's more than this place keeps at once (the Met Museum's every id) is cut, saying so (epic `data` T123)
+    const { rows: mostRows } = { ...DEFAULT_CEILING, ...this.capabilities.ceiling }
+    const wanted = this.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
+    const kept = wanted.length > mostRows ? wanted.slice(0, mostRows) : wanted
     const sizeIsKnown = this.asksForPageSize || query.page?.size !== undefined
     const nextPage = this.nextPageOf({
       page,
@@ -253,6 +261,11 @@ export class RestPlace extends WebPlace implements Place {
     return {
       rows: (kept as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
       ...(nextPage !== undefined && { nextPage }),
+      ...(kept.length < wanted.length && {
+        notes: [
+          `"${collection}" answered ${wanted.length} rows, and only the first ${mostRows} are kept:  ask for less, or raise its \`ceiling\``
+        ]
+      }),
       handled
     }
   }

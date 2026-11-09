@@ -3,6 +3,7 @@
  * - See `PlaceIngest`, which runs the steps.
  * - No values but the error:  every step's other half is handed in, so the editor can run the same steps.
  */
+import type { KeyGoes } from "spell/places/keyGoes"
 import type { ClaudeRunner } from "spell/parser/spell/translate/translate.types"
 
 /** Thrown when it can't go on, and only a person can say what to do:  its message says what's wrong, and how to go on. */
@@ -46,6 +47,8 @@ export type IngestFiles = {
   listInProject?(file: string, path: string): Promise<void>
   /** The text of every other Spell file beside this one:  what else may use what it declares. */
   otherSpellBeside(path: string): Promise<string[]>
+  /** The names of what's in the folder on this disk at `path`:  left out, or no such folder, `undefined`.  A data folder's own files say what it holds. */
+  namesInFolder?(path: string): Promise<string[] | undefined>
 }
 
 /** What a read through the Spell needs:  see `ReadThrough`. */
@@ -68,6 +71,8 @@ export type ReadThroughAsk = {
   byQuery?: Readonly<Record<string, Readonly<Record<string, unknown>>>>
   /** Every request the program makes goes through this:  it can't write, and it stops at a size. */
   fetch: typeof globalThis.fetch
+  /** A place server's run token, for a room or a folder behind one:  as a page it served has its own. */
+  serverToken?: string
 }
 
 /** What one type's read found. */
@@ -76,6 +81,11 @@ export type ReadOfType = {
   rows: number
   /** Why it couldn't be read. */
   problem?: string
+  /**
+   * Nothing here can read it through the Spell:  a program reaches it through a server side, which holds its key (epic `data` T71).
+   * - `rows` are the look's own.
+   */
+  readByTheLook?: boolean
 }
 
 /**
@@ -109,6 +119,8 @@ export type IngestSettings = {
   now?: () => Date
   /** Waits:  a test's. */
   sleep?: (msec: number) => Promise<void>
+  /** Opens a room:  left out, the platform's websocket. */
+  Socket?: new (url: string, protocols?: string | string[]) => WebSocket
   /** Says how it's going, a line at a time. */
   say?: (line: string) => void
 }
@@ -125,6 +137,8 @@ export type IngestAsk = {
   name?: string
   /** The NAME of the key it needs. */
   keySecret?: string
+  /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
+  keyGoes?: KeyGoes
   /** The name of the place whose kept session it reads as:  `spell place sign-in`'s (epic `mockup` P12). */
   signedIn?: string
   /** An address to read its docs at, over those it finds by itself. */
@@ -273,8 +287,29 @@ export type PlaceLook = {
   writesOffered?: readonly string[]
   /** The lists it keeps under each thing of a collection:  a post's comments (`listsFoundUnder()`). */
   listsUnder?: readonly ListUnderSeen[]
+  /** What it was seen to do when it was asked, of its first list:  see `ServerTakes`. */
+  serverTakes?: ServerTakes
+  /** What the program could call it, worked out from what it says of itself:  an account's handle. */
+  nameSuggested?: string
   /** What the look had to say. */
   notes: string[]
+}
+
+/**
+ * What a web server was seen to do when it was asked (epic `data` T162):  each tried once, on its first list, with reads only.
+ * - Tried, not read from docs:  a server that ignores the question answers as if it hadn't been asked.
+ */
+export type ServerTakes = {
+  /** The fields that narrowed what it answered to the rows holding that value:  `it filters by cuisine`. */
+  filters?: string[]
+  /** The fields it answered in order by:  `it sorts by title`. */
+  sorts?: string[]
+  /** What it calls a sort, when it isn't `sort`:  `with "_sort"`. */
+  sortedWith?: string
+  /** The question naming the fields it should give:  `fields`. */
+  fieldsNamedIn?: string
+  /** What it calls how many and where from, for a list it says nothing of paging:  `limit` and `offset`. */
+  pagesWith?: { limit: string; offset: string }
 }
 
 /** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */
@@ -465,6 +500,8 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
+    /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
+    keyGoes?: KeyGoes
     /** The name of the session it's read as, never the session. */
     signedIn?: string
     /** It answered without the key too, so it takes it only when it's set:  GitHub's, 60 requests an hour without. */
@@ -512,6 +549,8 @@ export type PlaceDescription = {
   checkEverySeconds?: number
   /** The most requests a second its docs ask for:  `it takes up to 80 requests a second`, the Met Museum's (epic `data` P34). */
   mostPerSecond?: number
+  /** What it was seen to do when it was asked:  its lines say what it filters, sorts, pages and gives. */
+  serverTakes?: ServerTakes
   /** The Spell, a line at a time, as it was last written:  a person's copy may differ. */
   spell: string[]
 }

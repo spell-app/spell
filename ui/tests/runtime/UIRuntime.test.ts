@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vite-plus/test"
+import { describe, expect, it, vi } from "vite-plus/test"
 
 import { RUNTIME_KEY, UI, loadUI, type RuntimeGlobal } from "spell/ui/runtime"
 
@@ -55,6 +55,21 @@ describe("UI.keyboard / version / i18n", () => {
 })
 
 describe("UIRuntime.toast() / modals", () => {
+  it("toasts.ready() imports the family the first time, and not once a provider is there", async () => {
+    const ui = new UIRuntime()
+    const load = vi.fn(async () => {
+      Toasts.provider = { show: ({ id = "t1" }) => ({ id, closed: Promise.resolve() }), dismiss: () => {} }
+    })
+    ui.toasts.loadFamilyWith(load)
+    try {
+      await ui.toasts.ready()
+      await ui.toasts.ready()
+      expect(load).toHaveBeenCalledTimes(1)
+    } finally {
+      Toasts.provider = undefined
+    }
+  })
+
   it("toasts and modals throw until their component registers a provider", async () => {
     const runtime = await UI.load()
     expect(() => runtime.toast({ message: "hi" })).toThrow(/ui-toast not registered/)

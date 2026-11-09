@@ -2836,7 +2836,9 @@ export class PlanDoc extends PlanReader {
     if (summary.needs.length) {
       body.push(heading("todo", "attention", "Still to do"))
       for (const [index, need] of summary.needs.entries())
-        body.push(line(need.id, "attention", `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`))
+        body.push(
+          line(need.id, "attention", `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`)
+        )
     }
     return body
   }

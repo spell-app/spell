@@ -19,8 +19,5 @@ await buildExtension({
   folder: here,
   external: ["vite-plus/fmt"],
   constants: { ENGINE_ROOT: resolve(here, "..") },
-  tsconfig: "tsconfig.json",
-  // the assembler's json5.ts loads json5-writer through `import.meta.url` ON FIRST WRITE:
-  // the extension only reads JSON5 (the repo list), so the empty `import.meta` of a CommonJS bundle is never reached
-  logOverride: { "empty-import-meta": "silent" }
+  tsconfig: "tsconfig.json"
 })

@@ -6,16 +6,18 @@ rows = await behind.rows("device_notes")
 behind.apply([{"kind": "insert", "collection": "device_notes", "id": "device-note-k3x9q2mf", "fields": {...}}])
 ```
 
-- The twin of the JavaScript core's `placeKinds.ts`, for the three kinds Python has:
+- The twin of the JavaScript core's `placeKinds.ts`, for the kinds Python has:
   - `database on this device`:  ONE JSON file beside the compiled program, `<Program>.device.json` (`DeviceFile`)
     - a browser keeps it in its own storage;  a Python program has none, so it's a file you can open and delete
     - written whole on each change, through a temporary file and a rename
   - `data folder`, `sheet` and `excel file`:  through the page server's place routes (`ServerPlace`),
     the same requests a browser's `RemotePlace` sends, with the page server's write token
     - the server finds the folder, reads the CSV file or the workbook, and checks who writes what
-- Any other kind is refused, naming it:  the Atmosphere, a web server, GraphQL, Airtable, a Google sheet, a room,
-  the cloud.  The compiler refuses them first (spell's `SP.TARGETS`, `PY.PLACE_KINDS`):  this is for a program
-  compiled by hand.
+  - `atmosphere account` and `personal atmosphere account`:  `atmosphere.py`, signed in with an app password
+- Any other kind is refused, naming it:  a web server, GraphQL, Airtable, a Google sheet, a room, the cloud.
+  The compiler refuses them first (spell's `SP.TARGETS`, `PY.PLACE_KINDS`):  this is for a program compiled by hand.
+- A place's key comes from the environment (`key_from()`):  a Python program is a server side, as `spell run` is.
+- A server asking it to wait is waited out, when that's soon (`open_minding_limits()`):  what `WebPlace` does.
 - Standard library only:  HTTP through `urllib`, its waiting off the event loop (`asyncio.to_thread()`).
 - Knows nothing of things:  rows are plain JSON, by the JavaScript names of their fields.  `places.py` makes things.
 """
@@ -24,9 +26,13 @@ import asyncio
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
+from datetime import datetime
+from email.utils import parsedate_to_datetime
+from http.client import HTTPResponse
 from pathlib import Path
 from typing import Any
 
@@ -46,8 +52,18 @@ SERVER_TOKEN_VARIABLE = "SPELL_SERVER_TOKEN"
 TOKEN_HEADER = "x-server-token"
 # Where the page server serves every place:  an address under it reaches a server side.
 PLACES_PREFIX = "/api/places/"
-# How long a request to the page server may take, in seconds.
+# How long a request to a server may take, in seconds.
 REQUEST_SECONDS = 30
+# The longest wait a place sits out itself, in seconds:  told to wait longer, it says when instead.
+LONGEST_WAIT_SECONDS = 15
+# How many times one request is asked, in all, while a server says to wait.
+MOST_TRIES = 3
+# The answers that mean "too soon:  ask again later".
+TOO_SOON_STATUSES = {408, 425, 429, 503}
+# How long to wait, in seconds, when a server says "later" and not when:  the first try's, doubling each time.
+FIRST_BACKOFF_SECONDS = 1
+# A number of seconds too big to be a wait:  it's a time, in seconds since 1970, as GitHub's `x-ratelimit-reset` is.
+SECONDS_SINCE_1970 = 1_000_000_000
 # Where two words of a Python name meet:  `device_count`.
 SNAKE_WORD = re.compile(r"_([a-z0-9])")
 # The end of a compiled program's file name, before which its name is:  `Notes.spell.py`.
@@ -70,6 +86,12 @@ class PlaceError(Exception):
         self.why_not = why_not
 
 
+# A place that can hold whatever field it's handed:  `PlaceBehind.times_held`.
+EVERY_FIELD = "every field"
+# The kinds on the page server that hold any field, as a sheet with no such column doesn't.
+HOLDS_ANY_FIELD = {"data folder", "the cloud"}
+
+
 class PlaceBehind:
     """What's behind one place:  its rows, by collection, and the changes it takes.
 
@@ -78,6 +100,19 @@ class PlaceBehind:
 
     # the kind's word, as the program's line says it:  `data folder`
     kind = ""
+    # what it can hold of Spell's two times (`created`, `modified`):  `EVERY_FIELD`, or those fields;  none by default
+    times_held: str | Sequence[str] = ()
+
+    def signed_in_person(self) -> tuple[str, str] | None:
+        """Who it's signed in as, their id and what they go by:  `None` for a place that isn't.  - NEVER throws"""
+        return None
+
+    def fields_it_fills_in(self) -> Row:
+        """What it says of a new row by itself, whatever the program sent:  an atmosphere account's `owner`."""
+        return {}
+
+    def know_numbers(self, collection: str, fields: list[str]) -> None:
+        """SIDE EFFECT:  `fields` of `collection` are numbers, for a place that holds them some other way."""
 
     async def rows(self, collection: str) -> list[Row]:
         """Every row of `collection`.  - throws `PlaceError`"""
@@ -110,6 +145,7 @@ class DeviceFile(PlaceBehind):
     """
 
     kind = "database on this device"
+    times_held = EVERY_FIELD
 
     def __init__(self, file: Path) -> None:
         """The database kept in `file`, which needn't exist yet."""
@@ -174,6 +210,8 @@ class ServerPlace(PlaceBehind):
         self.token = token
         self.lines = dict(lines or {})
         self.post = post or post_json
+        # a sheet says what it can hold in its list's answer, by its columns
+        self.times_held: str | Sequence[str] = EVERY_FIELD if kind in HOLDS_ANY_FIELD else ()
 
     async def rows(self, collection: str) -> list[Row]:
         """Every row of `collection`, asked of the server off the event loop."""
@@ -182,6 +220,8 @@ class ServerPlace(PlaceBehind):
     def rows_now(self, collection: str) -> list[Row]:
         """As `rows()`, waiting here for the answer."""
         answer = self.ask("list", {"collection": collection, "query": {}})
+        if isinstance(answer, dict) and "timesHeld" in answer:
+            self.times_held = answer["timesHeld"]
         return list(answer.get("rows", [])) if isinstance(answer, dict) else []
 
     def apply(self, changes: list[Change]) -> None:
@@ -210,10 +250,10 @@ def post_json(url: str, body: dict[str, object], headers: dict[str, str]) -> obj
     data = json.dumps(body).encode("utf-8")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=REQUEST_SECONDS) as response:
+        with open_minding_limits(request) as response:
             return json.loads(response.read().decode("utf-8") or "null")
     except urllib.error.HTTPError as error:
-        said = _json_of(error.read())
+        said = json_object_in(error.read())
         message = said.get("error") or f"the server answered {error.code}"
         kind = said.get("kind") or ("refused" if error.code in (401, 403) else "no answer")
         raise PlaceError(f"{url}:  {message}", kind, said.get("whyNot")) from error
@@ -221,13 +261,75 @@ def post_json(url: str, body: dict[str, object], headers: dict[str, str]) -> obj
         raise PlaceError(f"{url}:  no answer ({error}):  is the page server running?  `spell server start`") from error
 
 
-def _json_of(text: bytes) -> dict[str, Any]:
+def open_minding_limits(request: urllib.request.Request) -> HTTPResponse:
+    """The answer to `request`, a server that says to wait waited out:  what the JavaScript `WebPlace` does.
+
+    - A 429, a 408, 425 or 503, or a 403 with no requests left of its rate limit (GitHub's):
+      - told when, soon:  it waits that long, and asks again
+      - told nothing:  it waits a second, then two, and asks again
+      - told when, and that's over `LONGEST_WAIT_SECONDS`:  a `PlaceError` saying when, with nothing more sent
+    - throws `urllib.error.HTTPError` for any other answer, and for one still saying to wait after `MOST_TRIES`
+    - SIDE EFFECT:  waits here, on the caller's thread:  a read is off the event loop, and a write waits for its answer.
+    """
+    for attempt in range(MOST_TRIES):
+        try:
+            return urllib.request.urlopen(request, timeout=REQUEST_SECONDS)
+        except urllib.error.HTTPError as error:
+            wait = wait_after(error.code, error.headers)
+            if wait is None or attempt == MOST_TRIES - 1:
+                raise
+            if wait > LONGEST_WAIT_SECONDS:
+                when = datetime.fromtimestamp(time.time() + wait).strftime("%H:%M")
+                message = f"{request.full_url}:  the server asks to wait:  ask it again after {when}"
+                raise PlaceError(message) from error
+            time.sleep(wait or FIRST_BACKOFF_SECONDS * 2**attempt)
+    raise AssertionError("open_minding_limits():  MOST_TRIES is at least 1")
+
+
+def wait_after(status: int, headers: Mapping[str, str]) -> float | None:
+    """How long, in seconds, an answer of `status` says to wait:  `0` when it says "later" and not when.
+
+    - `None` when it isn't saying to wait at all:  the JavaScript core's `waitAfter()`.
+    - Its `retry-after`, a number of seconds or a date;  else when its rate limit resets.
+    """
+    left = headers.get("x-ratelimit-remaining") or headers.get("ratelimit-remaining")
+    if status not in TOO_SOON_STATUSES and not (status == 403 and left == "0"):
+        return None
+    said = headers.get("retry-after")
+    if said:
+        return _seconds_in_retry_after(said)
+    reset = headers.get("x-ratelimit-reset") or headers.get("ratelimit-reset")
+    if not reset or not reset.isdigit():
+        return 0
+    seconds = int(reset)
+    return max(0.0, seconds - time.time()) if seconds > SECONDS_SINCE_1970 else float(seconds)
+
+
+def _seconds_in_retry_after(said: str) -> float:
+    """`retry-after`'s wait, in seconds:  a number of them, or a date;  `0` for what can't be read, or a past time."""
+    if said.isdigit():
+        return float(said)
+    try:
+        return max(0.0, parsedate_to_datetime(said).timestamp() - time.time())
+    except (TypeError, ValueError):
+        return 0
+
+
+def json_object_in(text: bytes) -> dict[str, Any]:
     """`text` as a JSON object:  empty when it isn't one."""
     try:
         said = json.loads(text.decode("utf-8"))
     except (ValueError, UnicodeDecodeError):
         return {}
     return said if isinstance(said, dict) else {}
+
+
+def key_from(name: str) -> str | None:
+    """The secret named `name`, from the environment:  `None` when it isn't set, or is empty.
+
+    - A Python program runs on a server side, so it can hold a key:  `core.RUNTIME.keyFrom`, for the JavaScript core.
+    """
+    return os.environ.get(name) or None
 
 
 def place_behind(details: Mapping[str, Any], program: Path | None) -> PlaceBehind:
@@ -249,7 +351,12 @@ def place_behind(details: Mapping[str, Any], program: Path | None) -> PlaceBehin
                 "a project's own (a name alone), or a place server's address",
                 "not found",
             )
-        return ServerPlace(kind, server_address(at), os.environ.get(SERVER_TOKEN_VARIABLE) or None, lines_of(details))
+        return ServerPlace(kind, server_address(at), key_from(SERVER_TOKEN_VARIABLE), lines_of(details))
+    # Imported here:  it builds on this module's `PlaceBehind`
+    from spell_core.atmosphere import ATMOSPHERE_KINDS, AtmosphereAccount
+
+    if kind in ATMOSPHERE_KINDS:
+        return AtmosphereAccount(details)
     raise PlaceError(f'"{name}" is a {kind or "place of its own kind"}:  not in Python yet', "not found")
 
 

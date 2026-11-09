@@ -33,7 +33,8 @@ export const epicAwayLineVocabulary = {
     {
       name: "state",
       kind: "string",
-      description: "Which of the section's badges it counts in (`recent`, `progress`, `attention`):  its tick's colour, and what filters it."
+      description:
+        "Which of the section's badges it counts in (`recent`, `progress`, `attention`):  its tick's colour, and what filters it."
     },
     {
       name: "working",

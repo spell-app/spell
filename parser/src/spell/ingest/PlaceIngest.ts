@@ -1,4 +1,5 @@
-import { ANY_FIELD } from "spell/places/places.types"
+import type { KeyGoes } from "spell/places/keyGoes"
+import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -16,8 +17,10 @@ import {
 import { agentRead, renameCollections } from "./PlaceReading"
 import { answersUnder, IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
+import { partsInLanguageOf } from "./PlaceInLanguage"
 import {
   isSearchedApart,
+  KINDS_WITH_KEY_LINES,
   mergedSpell,
   placeLineAt,
   placesIn,
@@ -35,12 +38,17 @@ const MOST_COMPILES = 12
 /** What a compile says of a line:  `3:12 ...`. */
 const ERROR_LINE = /^(\d+):\d+ (.*)$/s
 
+/** The line that keeps a copy on this device, in either language:  a person's, if it's in the file. */
+const KEEPS_A_COPY = /keep a copy on this device|guarda una copia en este dispositivo/i
+
 /** A kind of place, as a person might write it:  `sheet` and `spreadsheet` are one. */
 const KIND_WORDS: Readonly<Record<string, string>> = {
   spreadsheet: "sheet",
   csv: "sheet",
   rest: "web server",
-  graphql: "graphql server"
+  graphql: "graphql server",
+  folder: "data folder",
+  atmosphere: "atmosphere account"
 }
 
 /** The kinds of place spell knows, for the question. */
@@ -63,7 +71,8 @@ const KINDS_TO_NAME = [...KINDS_IT_CAN_LOOK_AT]
  *   4. what the rows show (`describeLook()`), then what the agent reads in samples of them (`agentRead()`)
  *   5. the Spell (`spellPartsFor()`), which has to compile:  a line Spell can't read is left out, and the description says so
  *   6. a real read through that Spell (`readThrough`), which has to return rows
- *   7. only then, the files:  a file is added to, never overwritten, and the same place isn't added twice
+ *   7. only then, the files:  a file is added to, never overwritten, and the same place isn't added twice;
+ *      a `<Name>.es.spell` gets Spanish, its names as the source has them (`partsInLanguageOf()`, epic `data` T72)
  * - One server per Spell file, `<Name>.api.spell`;  its description goes beside it, `<Name>.api.json5`.
  *   - JSON5, so a person can read it, and the next look can too.
  *   - What every collection agrees on is written once, in `allCollections`;
@@ -91,17 +100,21 @@ export class PlaceIngest {
     const { files } = this.settings
     const address = addressFrom(ask.address)
     const file = await this.fileFor(ask.into)
-    refuseLanguage(file)
     const existing = (await files.read(file)) ?? ""
     const already = placeLineAt(existing, address)
     if (already) return this.alreadyThere(file, already, existing)
-    const reader = this.readerFor(ask.keySecret, ask.signedIn)
+    const reader = this.readerFor(ask.keySecret, ask.signedIn, ask.keyGoes)
     const kind = await this.kindFor(address, ask.kind, reader, ask)
     this.say(`A ${kind}.  Looking at what it holds ...`)
     const look = await lookAtPlace(kind, {
       address,
       reader,
-      ...withDefined({ docs: ask.docs, collections: ask.collections, samples: ask.samples })
+      ...withDefined({
+        docs: ask.docs,
+        collections: ask.collections,
+        samples: ask.samples,
+        namesInFolder: files.namesInFolder
+      })
     })
     if (!look.collections.length) {
       throw new IngestStopped(`${address} gave back nothing to describe.  ${look.notes.join("  ")}`)
@@ -110,8 +123,12 @@ export class PlaceIngest {
     const alreadyAbove = placeLineAt(existing, look.address)
     if (alreadyAbove) return this.alreadyThere(file, alreadyAbove, existing)
     refuseSecondServer(file, existing)
-    const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
+    const description = describeLook(look, {
+      kind,
+      name: ask.name ?? look.nameSuggested ?? plainNameFor(address, kind)
+    })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
+    if (ask.keyGoes) description.about.keyGoes = ask.keyGoes
     if (ask.keySecret) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
@@ -121,9 +138,10 @@ export class PlaceIngest {
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
-    await this.readThroughIt(description, reader)
+    await this.readThroughIt(description, reader, ask.keySecret)
+    noteKeepingACopy(description, existing)
     await this.finish(description)
-    const spell = description.spell.join("\n")
+    const spell = spellTextOf(partsInLanguageOf(file, spellPartsFor(description))).trimEnd()
     const text = existing.trim() ? `${existing.trimEnd()}\n\n${spell}\n` : `${spell}\n`
     const descriptionPath = descriptionPathFor(file)
     await files.write(file, text)
@@ -135,9 +153,10 @@ export class PlaceIngest {
    * Look again at the place described beside `file`:  say what changed, and change it.
    * - Keeps what a person wrote, in the Spell and in the description:  see `mergedSpell()`.
    * - Writes nothing until the merged file compiles, and a read through the new Spell returns rows.
+   * - `movedTo`:  its new address, for a place that moved:  the same collections, looked at where it is now (epic `data` T77).
    * - throws `IngestStopped`:  no description, or nothing compiles or reads
    */
-  async update(file: string): Promise<IngestResult> {
+  async update(file: string, { movedTo }: { movedTo?: string } = {}): Promise<IngestResult> {
     const descriptionPath = descriptionPathFor(file)
     const onDisk = await this.settings.files.readDescription(descriptionPath)
     if (!onDisk) {
@@ -145,14 +164,20 @@ export class PlaceIngest {
         `${file} has no description beside it, ${descriptionPath}, so there's nothing to look at again:  spell place ingest <address> --into ${file}`
       )
     }
-    return this.updateOne(file, descriptionPath, descriptionFromDisk(onDisk))
+    return this.updateOne(file, descriptionPath, descriptionFromDisk(onDisk), movedTo)
   }
 
-  /** Look again at one place. */
-  private async updateOne(file: string, descriptionPath: string, old: PlaceDescription): Promise<IngestResult> {
+  /** Look again at one place, at `movedTo` when it's moved. */
+  private async updateOne(
+    file: string,
+    descriptionPath: string,
+    old: PlaceDescription,
+    movedTo?: string
+  ): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, address, keySecret, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
-    const reader = this.readerFor(keySecret, signedIn)
+    const { name, kind, keySecret, keyGoes, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
+    const address = movedTo === undefined ? old.about.address : addressFrom(movedTo)
+    const reader = this.readerFor(keySecret, signedIn, keyGoes)
     this.say(`Looking again at ${address} ...`)
     // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
     const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
@@ -166,10 +191,15 @@ export class PlaceIngest {
       reader,
       collections,
       addListed: !collectionsAsked,
-      ...withDefined({ docs: docsAt, samples: samples.length ? samples : undefined })
+      ...withDefined({
+        docs: docsAt,
+        samples: samples.length ? samples : undefined,
+        namesInFolder: files.namesInFolder
+      })
     })
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
+    if (keyGoes) description.about.keyGoes = keyGoes
     if (keySecret) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
@@ -190,14 +220,16 @@ export class PlaceIngest {
     if (old.about.triesWrites) await this.noteWrites(description, look, reader)
     // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
     this.compileLeavingOut(description, file)
-    const before = writtenOf(spellPartsFor(old), old.spell)
-    const after = spellPartsFor(description)
+    // each in the file's language:  the same line in, the same line out
+    const before = partsInLanguageOf(file, writtenOf(spellPartsFor(old), old.spell))
+    const after = partsInLanguageOf(file, spellPartsFor(description))
     const text = (await files.read(file)) ?? ""
     const others = await files.otherSpellBeside(file)
     const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
-    await this.readThroughIt(description, reader)
+    await this.readThroughIt(description, reader, keySecret)
+    noteKeepingACopy(description, merge.text)
     await this.finish(description)
     await files.write(file, merge.text)
     await this.writeDescription(file, descriptionPath, description)
@@ -253,8 +285,8 @@ export class PlaceIngest {
   }
 
   /** A reader for this place, with its key and session.  - throws `IngestStopped` for one that isn't there, or has ended */
-  private readerFor(keySecret: string | undefined, signedIn?: string): PoliteReader {
-    const { fetch, sleep, keyNamed, sessionNamed } = this.settings
+  private readerFor(keySecret: string | undefined, signedIn?: string, keyGoes?: KeyGoes): PoliteReader {
+    const { fetch, sleep, keyNamed, sessionNamed, Socket } = this.settings
     const key = keySecret ? keyNamed?.(keySecret) : undefined
     if (keySecret && key === undefined) {
       throw new IngestStopped(
@@ -266,7 +298,7 @@ export class PlaceIngest {
       throw new IngestStopped(`${signedIn} hasn't been signed in to:  spell place sign-in ${signedIn} <address>`)
     }
     if (session?.hasEnded) throw sessionEnded(session)
-    return new PoliteReader({ fetch, ...withDefined({ key, session, sleep }) })
+    return new PoliteReader({ fetch, ...withDefined({ key, keyGoes, session, sleep, Socket }) })
   }
 
   /**
@@ -397,10 +429,12 @@ export class PlaceIngest {
    * - throws `IngestStopped` for an error on any other line:  the place's own, say
    */
   private compileLeavingOut(description: PlaceDescription, file: string): string[] {
+    // the English it wrote:  whatever language the file is in, that's checked after
+    const englishFile = file.replace(/\.[a-z]{2}\.spell$/, ".spell")
     for (let round = 0; round < MOST_COMPILES; round++) {
       const parts = spellPartsFor(description)
       const text = spellTextOf(parts)
-      const { errors, warnings } = compile(text, file)
+      const { errors, warnings } = compile(text, englishFile)
       if (!errors.length) return warnings
       const lines = text.split("\n")
       let leftOut = 0
@@ -418,9 +452,8 @@ export class PlaceIngest {
 
   /** The file with this place added has no error it hadn't before.  - throws `IngestStopped` if it does */
   private checkAddedCompiles(existing: string, description: PlaceDescription, file: string): void {
-    if (!existing.trim()) return
-    const added = `${existing.trimEnd()}\n\n${spellTextOf(spellPartsFor(description))}`
-    this.checkFileCompiles(existing, added, file)
+    const spell = spellTextOf(partsInLanguageOf(file, spellPartsFor(description)))
+    this.checkFileCompiles(existing, existing.trim() ? `${existing.trimEnd()}\n\n${spell}` : spell, file)
   }
 
   /** The file as it'll be has no error it hadn't before:  a program may import what no single file can see.  - throws `IngestStopped` if it does */
@@ -428,7 +461,8 @@ export class PlaceIngest {
     const was = new Set(compile(before, file).errors.map(withoutPlaceInFile))
     const { errors, warnings } = compile(after, file)
     const added = errors.filter((error) => !was.has(withoutPlaceInFile(error)))
-    if (added.length) throw new IngestStopped(`with this place in it, ${file} doesn't compile:\n${added.join("\n")}`)
+    if (added.length)
+      throw new IngestStopped(`with this place in it, ${file} doesn't compile:\n${added.join("\n")}\n\n${after}`)
     return warnings
   }
 
@@ -440,12 +474,25 @@ export class PlaceIngest {
    * SIDE EFFECT:  really reads each type through the Spell, and says what it found on `description`.
    * - throws `IngestStopped` if no type returned any row
    */
-  private async readThroughIt(description: PlaceDescription, reader: PoliteReader): Promise<void> {
-    const { readThrough } = this.settings
+  private async readThroughIt(
+    description: PlaceDescription,
+    reader: PoliteReader,
+    keySecret: string | undefined
+  ): Promise<void> {
+    const { readThrough, keyNamed } = this.settings
     reader.startAgain()
+    const shown = Object.values(description.collections).filter((collection) => !collection.leftOut)
+    const { kind, address } = description.about
+    // an Airtable is reached through a server side, which holds its key:  there's none here to read through
+    if (kind === "airtable" && !isPlaceServerAddress(address)) {
+      for (const collection of shown) collection.readThrough = { rows: collection.rowsSeen, readByTheLook: true }
+      description.notes.push(
+        "It wasn't read through the Spell:  a program reaches an Airtable through a server side that holds its key, and there's none here.  Its rows came straight from Airtable."
+      )
+      return
+    }
     this.say("Reading through the Spell ...")
     const types: Record<string, string> = {}
-    const shown = Object.values(description.collections).filter((collection) => !collection.leftOut)
     for (const { type } of shown) types[type] = classNameFor(type)
     const byName = Object.fromEntries(
       shown.flatMap(({ type, samples }) => (samples?.length ? [[type, samples[0]!]] : []))
@@ -491,7 +538,17 @@ export class PlaceIngest {
       )
     )
     const spell = spellTextOf(spellPartsFor(description, { withKey: false }))
-    const { byType, complaints } = await readThrough({ spell, types, byName, bySearch, byQuery, fetch: reader.fetch })
+    // a data folder, a file or a room's key is its server's run token, as a page it served has its own
+    const serverToken = keySecret && !KINDS_WITH_KEY_LINES.has(kind) ? keyNamed?.(keySecret) : undefined
+    const { byType, complaints } = await readThrough({
+      spell,
+      types,
+      byName,
+      bySearch,
+      byQuery,
+      fetch: reader.fetch,
+      ...withDefined({ serverToken })
+    })
     for (const collection of shown) {
       const read = byType[collection.type]
       if (read) collection.readThrough = read
@@ -546,14 +603,18 @@ function kindNamed(kind: string): string {
   return named
 }
 
-/** A file in another language can't take this Spell yet:  it's written in English.  - throws `IngestStopped` */
-function refuseLanguage(file: string): void {
-  const language = /\.([a-z]{2})\.spell$/.exec(file)?.[1]
-  if (language && language !== "en") {
-    throw new IngestStopped(
-      `it writes English Spell, and ${file} is in another language:  put it in an English file, then spell translate`
-    )
-  }
+/**
+ * SIDE EFFECT:  a server that takes no writes is said to be one a program could keep a copy of (epic `data` T126).
+ * - Only said:  it never writes the line itself, and one a person added stays.
+ * - Not said once the file has it.
+ */
+function noteKeepingACopy(description: PlaceDescription, text: string): void {
+  const { kind } = description.about
+  const onlyReads = /read only|offers none/i.test(description.canDo.write)
+  if ((kind !== "web server" && kind !== "graphql server") || !onlyReads || KEEPS_A_COPY.test(text)) return
+  description.notes.push(
+    "It only reads, so a program could keep what it read on this device, and open with it the next time:  add `- keep a copy on this device`."
+  )
 }
 
 /** Where a place's description goes:  beside its Spell file, `StarWars.api.spell` => `StarWars.api.json5`. */
@@ -711,7 +772,7 @@ function keyOfLine({ placeLines, types }: SpellParts, line: string): string | un
 }
 
 /** A type a Spell file declares:  `a "user" is a thing`, `a user is a thing`. */
-const DECLARED_TYPE = /^(?:a|an) (?:"([^"\n]+)"|([\p{L}\d ]+?)) is a thing\b/gmu
+const DECLARED_TYPE = /^(?:a|an|un|una) (?:"([^"\n]+)"|([\p{L}\d ]+?)) (?:is a thing|es una cosa)\b/gmu
 
 /**
  * SIDE EFFECT:  a type another Spell file beside it already declares goes by the place's name too,
@@ -805,6 +866,7 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
     spellCantSay,
     checkEverySeconds,
     mostPerSecond,
+    serverTakes,
     spell,
     ...personsKeys
   } = old
@@ -854,7 +916,7 @@ function saidChanges(old: PlaceDescription, now: PlaceDescription): string[] {
 }
 
 /** What this source does that Spell has no words for:  each said plainly, in the description, as what a program can't do yet. */
-function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): string[] {
+function whatSpellCantSay({ about, collections, serverTakes }: PlaceDescription): string[] {
   const said = new Set<string>()
   if (about.signedIn) {
     said.add(
@@ -908,15 +970,10 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
     if (nextAt && new Set(lists.map(([, collection]) => collection.nextAt)).size > 1)
       said.add(`A next page kept somewhere different in each collection:  "its next page is" is for the whole place.`)
   }
-  const { kind } = about
-  if (kind === "web server") {
+  if (about.kind === "web server" && !serverTakes?.filters && !serverTakes?.sorts) {
     said.add(
-      "What it can filter or sort:  it wasn't tried, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `- it filters by cuisine` or `- it sorts by title`."
+      "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `- it filters by cuisine` or `- it sorts by title`."
     )
-    if (/read only/.test(canDo.write))
-      said.add(
-        "That it's read only:  it isn't said for you, so a program's write compiles, and fails when it runs.  If it is, add `- it is read only`."
-      )
   }
   return [...said]
 }

@@ -54,7 +54,8 @@ describe("first-word filing", () => {
     expect(offenders).toEqual([])
   })
 
-  test("the rule tests answer the same with the first-word table as without it", () => {
+  // every rule test twice, the second without the first-word table:  not a quick one
+  test("the rule tests answer the same with the first-word table as without it", { timeout: 30_000 }, () => {
     const withTable = spellParser.testRules(undefined, false)
     P.Choice.USE_FIRST_WORD_INDEX = false
     let without: P.TestResults

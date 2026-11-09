@@ -1,17 +1,20 @@
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readFileSync, statSync } from "node:fs"
 import { basename } from "node:path"
 
 import { CsvFile } from "spell/places/CsvFile"
 import { FieldNames } from "spell/places/FieldNames"
 import { isListPosition, positionAtIndex } from "spell/places/positions"
+import { DEFAULT_CEILING } from "spell/places/PlaceQuery"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   idOfRow,
   type ApplyAnswer,
   type ListAnswer,
   type ListQuery,
   type Place,
   type PlaceCapabilities,
+  type PlaceCeiling,
   type PlaceChange,
   type PlaceContext,
   type PlaceLines,
@@ -28,6 +31,9 @@ export const CSV_SAVE_ROWS = "save rows"
 
 /** What a file that isn't UTF-8 reads as:  saving would change every letter that became this. */
 const UNREADABLE_LETTER = "�"
+
+/** How many digits a row's position has:  3 stopped sorting by text past 46,656 rows;  5 outlasts any ceiling. */
+const POSITION_DIGITS = 5
 
 /** A row with no position sorts after those with one. */
 const LAST_POSITION = "~"
@@ -106,6 +112,8 @@ export class CsvPlace implements Place {
   private readonly numbers: readonly string[] | undefined
   /** The field a row's place in the file reads as. */
   private readonly positionField: string | undefined
+  /** The most it reads into memory on the server. */
+  private readonly ceiling: PlaceCeiling
   /** Each column a program's lines name, by the field it is. */
   private readonly fields: Readonly<Record<string, string>>
   /** The names of the file's columns, as it last read:  what its answers are named by. */
@@ -117,7 +125,8 @@ export class CsvPlace implements Place {
   /** The same file with another id column, as a program's lines name it, made once each (`withLines()`). */
   private readonly withThoseLines = new Map<string, CsvPlace>()
 
-  constructor({ file, collection, idColumn, numbers, positionField, fields = {} }: CsvPlaceProps) {
+  constructor({ file, collection, idColumn, numbers, positionField, fields = {}, ceiling }: CsvPlaceProps) {
+    this.ceiling = { ...DEFAULT_CEILING, ...ceiling }
     this.file = file
     this.collection = collection
     this.idColumn = idColumn
@@ -130,6 +139,7 @@ export class CsvPlace implements Place {
   describe(): PlaceCapabilities {
     return {
       kind: "sheet",
+      timesHeld: this.names.columnsHeld(SAVED_TIME_FIELDS, this.fields),
       ...(this.idColumn !== undefined && { idOf: this.idColumn }),
       filter: "none",
       sort: "none",
@@ -218,9 +228,23 @@ export class CsvPlace implements Place {
     return basename(this.file)
   }
 
-  /** The file's text:  `""` if it isn't there. */
+  /** The file's text:  `""` if it isn't there.  - throws `PlaceError` `"over the ceiling"`, before reading it */
   private textNow(): string {
-    return existsSync(this.file) ? readFileSync(this.file, "utf8") : ""
+    if (!existsSync(this.file)) return ""
+    const { size } = statSync(this.file)
+    if (size > this.ceiling.bytes) this.overTheCeiling(`${size} bytes`)
+    return readFileSync(this.file, "utf8")
+  }
+
+  /** - throws `PlaceError` `"over the ceiling"`, saying how big the file is */
+  private overTheCeiling(howBig: string): never {
+    const { rows, bytes } = this.ceiling
+    throw new PlaceError(
+      `CsvPlace:  ${this.name} holds ${howBig};  this place stops at ${rows} rows or ${bytes} bytes`,
+      {
+        cause: { kind: "over the ceiling" }
+      }
+    )
   }
 
   /** The file's version, for a list's answer and `CSV_SAVE_ROWS`:  its `ETag`.  Left out:  it isn't there. */
@@ -231,7 +255,9 @@ export class CsvPlace implements Place {
   /** `text` parsed. */
   private csvIn(text: string): CsvFile {
     const { idColumn, numbers } = this
-    return new CsvFile(text, { name: this.collection ?? this.name, idColumn, numbers })
+    const csv = new CsvFile(text, { name: this.collection ?? this.name, idColumn, numbers })
+    if (csv.rows.length > this.ceiling.rows) this.overTheCeiling(`${csv.rows.length} rows`)
+    return csv
   }
 
   /** SIDE EFFECT:  its names are now those of `csv`'s columns. */
@@ -280,7 +306,7 @@ export class CsvPlace implements Place {
     return SRV.FileLock.run(this.file, () => {
       const csv = this.csvToWrite()
       const rows = new Map<PlaceRow, string>(
-        csv.rows.map((row, at): [PlaceRow, string] => [{ ...row }, positionAtIndex(at)])
+        csv.rows.map((row, at): [PlaceRow, string] => [{ ...row }, positionAtIndex(at, POSITION_DIGITS)])
       )
       const answered: { row: PlaceRow; id: string | undefined; position: unknown }[] = []
       this.nameColumnsOf(csv)
@@ -475,11 +501,13 @@ export type CsvPlaceProps = {
   numbers?: readonly string[]
   /** The field a row's place in the file reads as, and writing it moves the row.  Left out:  rows have no such field. */
   positionField?: string
+  /** The most it reads into memory on the server;  by default, what the browser's engine holds (`DEFAULT_CEILING`). */
+  ceiling?: Partial<PlaceCeiling>
   /** Each column a program's lines name, by the field it is:  `{ title: "Dish Name" }`. */
   fields?: Readonly<Record<string, string>>
 }
 
 /** Row `at`'s place in the file, for a reader:  it isn't in any list but the one. */
 function placeAt(at: number) {
-  return { parent: null, at: positionAtIndex(at) }
+  return { parent: null, at: positionAtIndex(at, POSITION_DIGITS) }
 }

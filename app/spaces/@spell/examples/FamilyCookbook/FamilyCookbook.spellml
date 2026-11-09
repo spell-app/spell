@@ -38,10 +38,8 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 	<property "new recipe">a new recipe with servings = 4</>
 	<property "box menu">a menu of "undo"</>
 
-	<property "matches" description="Newest first:  a new one joins the end, so they're shown the other way round">
-		set found to every recipe where its title includes the search
-		reverse found
-		return found
+	<property "matches" description="Newest first, by when each was saved">
+		return every recipe where its title includes the search, sorted by its created, newest first
 	</property>
 
 	<action "add the new recipe">

@@ -1,1 +1,1 @@
-70:91 TS2339 Property 'nombre' does not exist on type 'PersonHere'.
+84:91 TS2339 Property 'nombre' does not exist on type 'PersonHere'.

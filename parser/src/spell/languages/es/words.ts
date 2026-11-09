@@ -111,6 +111,7 @@ export const spanishWords: SP.LanguageWords = {
     "excel file": "archivo de excel",
     "google sheet": "hoja de google",
     airtable: "airtable",
+    "atmosphere space": "espacio de atmosphere",
     "atmosphere account": "cuenta de atmosphere",
     "personal atmosphere account": "cuenta personal de atmosphere",
     "database on this device": "base de datos en este dispositivo",
@@ -119,6 +120,7 @@ export const spanishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
+  savedTimeWords: { created: "creado", modified: "modificado" },
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)
@@ -237,6 +239,8 @@ export const spanishWords: SP.LanguageWords = {
       fallo: "failed",
       paginación: "paging",
       paginacion: "paging",
+      "tamaño-de-página": "page-size",
+      "tamano-de-pagina": "page-size",
       como: "as"
     },
     forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
@@ -284,6 +288,7 @@ export const spanishWords: SP.LanguageWords = {
       pestana: "tab",
       etiquetas: "tags",
       miniatura: "thumbnail",
+      "en-vivo": "live",
       fila: "row",
       columna: "column",
       color: "color"
@@ -355,9 +360,12 @@ export const spanishWords: SP.LanguageWords = {
       sitePageTags: ", etiquetada {quoted tags}",
       sitePageState: ", {state}",
       sitePageThumbnail: ", miniatura {quoted thumbnail}",
+      sitePageLive: ", en vivo {quoted live}",
       siteCardPlace: ", en la fila {row} columna {column}",
       siteCardColor: ", de color {color}",
       siteOverlay: "tiene {a words} {words}",
+      siteOverlayOf: { dialog: "tiene un diálogo {words}", sidebar: "tiene un panel {words}" },
+      siteOverlayWords: "diálogo|dialogo|modal|panel|lateral",
       viewFlags: {
         draggable: "es arrastrable",
         droppable: "es soltable",
@@ -392,6 +400,7 @@ export const spanishWords: SP.LanguageWords = {
         whole: "mostrar todo en :",
         inPages: "mostrarlos en páginas",
         allAtOnce: "mostrarlos todos",
+        atATime: "mostrarlos de {size} en {size}",
         no: "no",
         pages: "páginas",
         none_: "ninguna",
@@ -503,6 +512,8 @@ export const spanishWords: SP.LanguageWords = {
      */
     methodLine: /^(?:para(?![ \t]+cada\b)|(?:crear[ \t]+)?animaci[oó]n)[ \t]/iu,
     /** A line re-opening a type, its name captured:  `una carta:`, `un solitario donde:`. */
+    placeDeclaration:
+      /^(?!(?:un[oa]?|el|la|los|las|su|sus)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+un[oa]?[ \t].*[ \t](?:en|desde)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
     reopenedType: /^un[oa]?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:donde[ \t]*)?:[ \t]*$/iu
   }
 }

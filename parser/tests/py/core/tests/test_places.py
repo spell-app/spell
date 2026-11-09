@@ -345,7 +345,7 @@ def test_a_wrong_token_is_refused_saying_why(page_server: str, program: Core, mo
 ################
 
 
-@pytest.mark.parametrize("kind", ["personal atmosphere account", "web server", "graphql server", "the cloud"])
+@pytest.mark.parametrize("kind", ["atmosphere space", "web server", "graphql server", "the cloud"])
 def test_any_other_kind_is_refused_by_name(kind: str) -> None:
     with pytest.raises(PlaceError, match=f"is a {kind}:  not in Python yet"):
         place_behind({"name": "sky", "kind": kind}, None)
@@ -404,6 +404,7 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.joined("a", None, " ") == "a "
     assert isinstance(program.now(), datetime)
     assert program.date_as(datetime(2026, 11, 7, 17, 14, 42, tzinfo=UTC), "timestamp") == "2026-11-07T17:14:42.000Z"
+    assert program.date_as(morning, "date and time") == "Nov 7, 2026, 9:14 AM"
     assert program.date_as(morning, "nonsense") == "November 7, 2026"
     program.show_dates_as("short")
     assert program.date_shown(morning) == "11/7/26"
@@ -417,3 +418,68 @@ def test_field_names_as_javascript_writes_them() -> None:
     assert javascript_name("device_count") == "deviceCount"
     assert javascript_name("class_") == "class"
     assert python_name("deviceCount") == "device_count"
+
+
+class TimedNote(Thing):
+    """`a timed note is a thing` + `- it lives in this device`:  its two times, as the compiler gives them."""
+
+    saved_in: ClassVar[dict[str, object]] = {
+        "place": "this_device",
+        "collection": "timed_notes",
+        "times": ["created", "modified"],
+    }
+    title = prop(type="text")
+    created = prop(type="date")
+    modified = prop(type="date")
+
+
+class TimelessNote(Thing):
+    """`- it keeps no times`:  nothing in its `saved_in`."""
+
+    saved_in: ClassVar[dict[str, str]] = {"place": "this_device", "collection": "timeless_notes"}
+    title = prop(type="text")
+
+
+# The rows both cores read:  the JavaScript core's test beside it.
+SAVED_ROW_TIMES = Path(__file__).parents[3] / "core" / "savedRowTimes.expected.json5"
+
+
+def test_a_new_thing_is_stamped_and_a_change_stamps_modified(tmp_path: Path) -> None:
+    core = new_core(tmp_path)
+    with using_core(core):
+        note = TimedNote(title="Soup")
+        core.save_thing(note)
+        assert note.created
+        created = note.created
+        note.title = "Stew"
+        kept = core._places.behind("this_device").rows_now("timed_notes")[0]
+    assert kept["created"] == created
+    assert kept["modified"]
+
+
+def test_a_type_with_no_times_is_left_alone(tmp_path: Path) -> None:
+    core = new_core(tmp_path)
+    with using_core(core):
+        core.save_thing(TimelessNote(title="Soup"))
+        kept = core._places.behind("this_device").rows_now("timeless_notes")[0]
+    assert "created" not in kept
+
+
+def test_a_row_from_before_times_reads_with_nothing_made_up(tmp_path: Path) -> None:
+    rows = _json5_rows()
+    core = new_core(tmp_path)
+    device = core._places.behind("this_device")
+    device.apply([{"kind": "insert", "collection": "timed_notes", "id": "old", "fields": rows["old"]}])
+    with using_core(core):
+        notes = asyncio.run(core.saved_things(TimedNote))
+        assert not notes[0].created
+        notes[0].title = "Changed"
+        kept = device.rows_now("timed_notes")[0]
+    assert "created" not in kept
+    assert kept["modified"]
+
+
+def _json5_rows() -> dict[str, dict[str, object]]:
+    """The fixture's rows:  JSON with one comment line."""
+    lines = [line for line in SAVED_ROW_TIMES.read_text().splitlines() if not line.strip().startswith("//")]
+    return json.loads("\n".join(lines))

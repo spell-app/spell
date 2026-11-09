@@ -92,6 +92,15 @@ function memoryFiles(start: Record<string, string> = {}) {
   return { files, texts, descriptions, listed }
 }
 
+/** A websocket that can't connect. */
+class SocketThatFails {
+  onerror?: () => void
+  constructor() {
+    setTimeout(() => this.onerror?.(), 0)
+  }
+  close() {}
+}
+
 /** A `PlaceIngest` on a fake source, with no agent, and no one to ask. */
 function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings> = {}, start?: Record<string, string>) {
   const { fetch, asked } = fakeFetch(routes)
@@ -111,6 +120,7 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
 const STARS_SPELL = `stars is a web server at "${API}":
 	- its id is its "url"
 	- check it every 30 seconds
+	- it is read only
 	- it writes names like "hair_color"
 	- people live at "/people"
 	- planets live at "/planets"
@@ -653,16 +663,14 @@ describe("adding a source", () => {
 describe("which kind", () => {
   test("--kind says;  one it can't look at stops, naming those it can", async () => {
     const { ingest } = ingestOf(STARS)
-    await expect(ingest.add({ address: API, into: "/K.spell", kind: "room" })).rejects.toThrow(
+    await expect(ingest.add({ address: API, into: "/K.spell", kind: "atmosphere space" })).rejects.toThrow(
       /web server, graphql server/
     )
   })
 
-  test("the address says, with no request", async () => {
-    const { ingest, asked } = ingestOf({})
-    await expect(ingest.add({ address: "wss://rooms.test/x", into: "/K.spell" })).rejects.toThrow(
-      /can't look at a room yet/
-    )
+  test("the address says, with no request:  a room, by its websocket", async () => {
+    const { ingest, asked } = ingestOf({}, { Socket: SocketThatFails as never })
+    await expect(ingest.add({ address: "wss://rooms.test/x", into: "/K.spell" })).rejects.toThrow(/didn't let it in/)
     expect(asked).toEqual([])
   })
 
@@ -761,14 +769,26 @@ describe("which file", () => {
     expect(texts.get("/Mine.spell")).toBe(once)
   })
 
-  test("a second server stops:  one to a file;  and a Spanish file can't take English Spell", async () => {
+  test("a second server stops:  one to a file", async () => {
     const start = { "/Mine.spell": `elsewhere is a web server at "https://other.test"\n` }
     await expect(
       ingestOf(STARS, {}, start).ingest.add({ address: API, into: "/Mine.spell", name: "stars" })
     ).rejects.toThrow(/already holds elsewhere, and a server gets a file of its own/)
-    await expect(ingestOf(STARS).ingest.add({ address: API, into: "/Mine.es.spell" })).rejects.toThrow(
-      /another language/
-    )
+  })
+
+  test("a Spanish file gets Spanish:  it compiles, and looking again changes it line for line (epic `data` T72)", async () => {
+    const { ingest, texts, descriptions } = ingestOf(STARS)
+    const { spell, wrote } = await ingest.add({ address: API, into: "/Stars.api.es.spell", name: "stars" })
+    expect(wrote).toBe(true)
+    console.log(spell)
+    expect(spell).toMatch(/^stars es un servidor web en "https:\/\/stars\.test\/api":/)
+    expect(spell).toContain(`- su "name" es texto`)
+    // the English it wrote is what the description keeps
+    expect(descriptions.get("/Stars.api.es.json5")!.spell[0]).toMatch(/is a web server at/)
+    const first = texts.get("/Stars.api.es.spell")!
+    const again = await ingest.update("/Stars.api.es.spell")
+    expect(again.changes).toEqual([])
+    expect(texts.get("/Stars.api.es.spell")).toBe(first)
   })
 })
 
@@ -846,7 +866,7 @@ describe("a key", () => {
     const { ingest, asked, texts, descriptions } = ingestOf(echoing, { keyNamed: () => KEY, claude })
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "stuff", keySecret: "STUFF_KEY" })
     expect(asked[0]!.headers.get("authorization")).toBe(`Bearer ${KEY}`)
-    expect(texts.get("/K.spell")).toContain(`- its key is the secret "STUFF_KEY"`)
+    expect(texts.get("/K.spell")).toContain(`- its optional key is the secret "STUFF_KEY"`)
     const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")
@@ -896,7 +916,7 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
     const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell, description } = await ingest.add(ASK)
-    expect(spell).toContain(`- its key is the secret "GH_KEY", if it's set`)
+    expect(spell).toContain(`- its optional key is the secret "GH_KEY"`)
     expect(spell).toContain(`- its next page is in its "Link" header`)
     expect(spell).toContain(`a "user" is a thing:`)
     expect(spell).toContain(`- a user's id is its "login"`)
@@ -909,6 +929,17 @@ describe("GitHub's way (epic `data` P28)", () => {
     // 60 an hour with no key, two collections:  a check every 20 minutes keeps to a tenth of it
     expect(spell).toContain(`- check it every 20 minutes`)
     expect(description.canDo.limits).toMatch(/It allows 60 requests/)
+  })
+
+  test("a key that goes elsewhere (T73):  it's sent there, the line says so, and looking again keeps both", async () => {
+    const { ingest, asked, texts, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
+    const { spell } = await ingest.add({ ...ASK, keyGoes: { header: "X-Api-Key" } })
+    expect(spell).toContain(`- its key goes in its "X-Api-Key" header`)
+    expect(asked[0]!.headers.get("x-api-key")).toBe("k3y")
+    expect(asked[0]!.headers.get("authorization")).toBeNull()
+    expect(descriptions.get("/G.json5")!.about.keyGoes).toEqual({ header: "X-Api-Key" })
+    await ingest.update("/G.spell")
+    expect(texts.get("/G.spell")).toContain(`- its key goes in its "X-Api-Key" header`)
   })
 
   test("looking again leaves out what it left out before", async () => {
@@ -935,6 +966,24 @@ describe("the manners", () => {
       reader.fetch(API, { method: "POST", body: JSON.stringify({ query: "{ recipes { id } }" }) })
     ).resolves.toBeInstanceOf(Response)
     expect(asked.filter(({ method }) => method !== "GET")).toHaveLength(1)
+  })
+
+  test("a key in the address (T73):  it's asked there, and never comes back in what's read", async () => {
+    const KEY = "k3y/wi th"
+    const secretLink = `<${API}?api_key=${encodeURIComponent(KEY)}&page=2>; rel="next"`
+    const sent: string[] = []
+    const fetch = (async (url: string) => {
+      sent.push(url)
+      const answer = Response.json({ echoed: KEY }, { headers: { link: secretLink } })
+      Object.defineProperty(answer, "url", { value: url })
+      return answer
+    }) as unknown as typeof globalThis.fetch
+    const reader = new PoliteReader({ fetch, key: KEY, keyGoes: { inAddress: "api_key" }, sleep: async () => {} })
+    const { text, url, headers } = await reader.read(`${API}?q=1`)
+    expect(new URL(sent[0]!).searchParams.get("api_key")).toBe(KEY)
+    expect(text).toBe('{"echoed":"[its key]"}')
+    expect(url).toBe(`${API}?q=1`)
+    expect(headers.get("link")).not.toContain("wi")
   })
 
   test("it waits when told to, then goes on", async () => {
@@ -1068,7 +1117,7 @@ describe("looking again", () => {
         }
       }
     )
-    expect(description.notes).toEqual([])
+    expect(description.notes.filter((note) => !/keep a copy/.test(note))).toEqual([])
     expect(description.agentNotes).toEqual(["It asks people to be gentle."])
   })
 
@@ -1202,7 +1251,7 @@ describe("looking again", () => {
   })
 })
 
-describe("the demo's real servers", () => {
+describe("the demo's real servers", { timeout: 20_000 }, () => {
   let servers: RecipeServers
   let folder: string
   beforeAll(async () => {

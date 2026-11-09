@@ -61,7 +61,18 @@ export class Post extends Thing {
     )
   }
 
-  static savedIn = { place: "my_feed", collection: "posts" }
+  static savedIn = {
+    place: "my_feed",
+    collection: "posts",
+    times: ["created", "modified"], select: ["text", "topic", "posted", "by", "space"] }
+
+  // - it lives in my feed
+  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my feed
+  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**

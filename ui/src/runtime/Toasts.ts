@@ -27,6 +27,23 @@ export class Toasts {
     }
   }
 
+  /** How this page imports the `ui-toast` family:  `loadFamilyWith()`. */
+  private familyLoader: (() => Promise<unknown>) | undefined
+
+  /** Say how to import the `ui-toast` family, for a page that doesn't define it up front:  `RootLoader` does. */
+  loadFamilyWith(loader: () => Promise<unknown>): void {
+    this.familyLoader = loader
+  }
+
+  /**
+   * Resolves once a toast can show, importing the `ui-toast` family the first time it's needed.
+   * - So a page that never shows one doesn't pay for it (epic `data` T137).
+   * - rejects if the family can't be imported;  a page with no way to import it resolves, and `show()` says what's wrong
+   */
+  async ready(): Promise<void> {
+    if (!Toasts.provider) await this.familyLoader?.()
+  }
+
   /** Show a toast;  see `ToastOptions`. */
   show(options: ToastOptions): ToastHandle {
     return this.registeredProvider.show(options)

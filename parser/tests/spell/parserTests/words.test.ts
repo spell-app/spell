@@ -106,8 +106,8 @@ describe("what compiles", () => {
   it("is saved in:  a place's name, so `is saved in its own file` keeps its meaning", () => {
     const code = compiled(PLACE, "a recipe is a thing:", "\t- it is saved in its own file").compiled
     expect(code).toContain("savedInFile = true")
-    expect(compiled(PLACE, RECIPE).compiled).toContain(
-      'static savedIn = { place: "family_cookbook", collection: "recipes" }'
+    expect(compiled(PLACE, RECIPE).compiled).toMatch(
+      /static savedIn = \{\s*place: "family_cookbook",\s*collection: "recipes",\s*times: \["created", "modified"\]\s*\}/
     )
   })
 
@@ -188,7 +188,7 @@ describe("what compiles", () => {
   it("a sort key that waits won't compile;  a rider outside a drawing won't", () => {
     const wait = compiled(PLACE, RECIPE, "set x to every recipe, sorted by the first recipe")
     expect(wait.errors.join()).toContain("can't wait for its key")
-    const rider = compiled("recipe box is an app:", "\t- to go:", "\t\tif that fails:", "\t\t\tprint 1")
+    const rider = compiled("recipe box is an app:", "\t- to go:", "\t\tif there are none:", "\t\t\tprint 1")
     expect(rider.errors.join()).toContain("only goes in a drawing")
   })
 
