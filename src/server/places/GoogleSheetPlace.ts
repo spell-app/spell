@@ -10,7 +10,8 @@ import {
   type PlaceContext,
   type PlaceLines,
   type PlaceRow,
-  type RateLimit
+  type RateLimit,
+  type DecimalMark
 } from "spell/places/places.types"
 import { FieldNames } from "spell/places/FieldNames"
 import { SheetTable } from "spell/places/SheetTable"
@@ -73,6 +74,10 @@ export class GoogleSheetPlace extends WebPlace implements Place {
   private readonly token: GoogleToken
   /** Each tab's number, by its title, once known:  what a write names it by. */
   private readonly sheetIds = new Map<string, number>()
+  /** How a number its text can't settle reads, by the sheet's locale:  `undefined` until it's read, or if it can't say. */
+  private unclearNumbers: DecimalMark | undefined
+  /** It's read the sheet's locale, or tried to. */
+  private hasReadLocale = false
   /** What it was made with:  each program's lines make another from it. */
   private readonly props: GoogleSheetPlaceProps
   /** This place as each program's lines say. */
@@ -132,11 +137,39 @@ export class GoogleSheetPlace extends WebPlace implements Place {
    */
   async list(collection: string, _query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     const table = await this.tableOf(collection, context)
+    await this.readLocale(context)
     const names = this.namesOf(table, collection)
     return {
       rows: table.rows.map((row) => names.fromServer(row)),
+      ...(this.unclearNumbers && { unclearNumbers: this.unclearNumbers }),
       ...(table.notes.length && { notes: table.notes }),
       handled: {}
+    }
+  }
+
+  /**
+   * SIDE EFFECT:  how its numbers read is known, from the sheet's own locale (epic `data` T83), asked once.
+   * - NEVER throws:  no answer leaves it to the program's language.
+   */
+  private async readLocale(context: PlaceContext): Promise<void> {
+    if (this.hasReadLocale) return
+    this.hasReadLocale = true
+    try {
+      const response = await this.answerTo(
+        {
+          url: `${this.url}/{spreadsheet}`,
+          urlData: { spreadsheet: this.spreadsheet },
+          data: { fields: "properties.locale" }
+        },
+        context
+      )
+      const { properties } = (await jsonIn(response)) as { properties?: { locale?: string } }
+      this.unclearNumbers = decimalMarkOfLocale(properties?.locale)
+    } catch (ignored) {
+      console.error(
+        "GoogleSheetPlace:  couldn't read the sheet's locale;  its numbers go by the program's language",
+        ignored
+      )
     }
   }
 
@@ -426,6 +459,18 @@ type TabEditProps = {
   idColumn: string
   /** The names of its columns. */
   names: FieldNames
+}
+
+/** How `locale` writes a decimal:  Google's `de_DE` writes `1,5`.  `undefined` for one this can't read. */
+function decimalMarkOfLocale(locale: string | undefined): DecimalMark | undefined {
+  if (!locale) return undefined
+  try {
+    const parts = new Intl.NumberFormat(locale.replace("_", "-")).formatToParts(1.5)
+    const mark = parts.find(({ type }) => type === "decimal")?.value
+    return mark === "," || mark === "." ? mark : undefined
+  } catch {
+    return undefined
+  }
 }
 
 /** `value` as a cell Google is sent:  always a value, never a formula. */

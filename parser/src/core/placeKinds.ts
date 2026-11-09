@@ -109,6 +109,8 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
+  /** What a web server calls that, when it isn't `limit`:  `it gives up to 100 at a time, asked for with "per_page"`. */
+  pageSizeAskedWith?: string
   /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
   filters?: "every field" | readonly string[]
   /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
@@ -239,6 +241,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     new GraphPlace({
       url: making.details.at!,
       collections: graphCollections(making),
+      ...(making.details.versionsIn !== undefined && { versions: { field: making.details.versionsIn } }),
       ...keyLinesOf(making.details, making.keyFrom)
     }),
   "data folder": ({ details, deviceCopy }, places) => {
@@ -520,6 +523,7 @@ function restAbilitiesIn({
   pagesByOffset,
   pagesByNumber,
   pagesByLastId,
+  pageSizeAskedWith,
   filters,
   sorts,
   sortedWith,
@@ -538,6 +542,7 @@ function restAbilitiesIn({
   }
   const params = {
     ...(count?.limit !== undefined && { limit: count.limit }),
+    ...(pageSizeAskedWith !== undefined && { limit: pageSizeAskedWith }),
     ...(position && { offset: position.offset }),
     ...(nextPageSentAs !== undefined && { cursor: nextPageSentAs }),
     ...(pagesByLastId && { cursor: pagesByLastId.param }),
@@ -572,7 +577,8 @@ function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
   const list = at ?? collection
   const one = list.replace(/s$/, "")
   const typeName = one.charAt(0).toUpperCase() + one.slice(1)
-  const selected = [ID_FIELD, ...declaredFields(Class).filter((field) => field !== ID_FIELD)]
+  const versionField = details.versionsIn === undefined ? [] : [details.versionsIn]
+  const selected = [...new Set([ID_FIELD, ...versionField, ...declaredFields(Class)])]
   return {
     [collection]: {
       list,

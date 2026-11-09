@@ -130,6 +130,11 @@ function addressIn(value: unknown): string | undefined {
   return typeof url === "string" ? url : undefined
 }
 
+/** The one link `value` holds, for a field that links to one thing:  the first, if a place gave it as a list. */
+function oneLinkIn(value: unknown): unknown {
+  return Array.isArray(value) ? value[0] : value
+}
+
 /** A read given up on because nobody's waiting for it any more. */
 function isAbandoned(error: unknown): boolean {
   return (error as Error | undefined)?.name === "AbortError"
@@ -699,6 +704,15 @@ class ProgramPlaces {
     return this.things!.thingsFrom(result, options) as Thing[]
   }
 
+  /**
+   * SIDE EFFECT:  `Class`'s numbers read as the place said it writes them, for a number its text can't settle:
+   * a Google Sheet's own locale (epic `data` T83).  A line saying how it writes them wins.
+   */
+  noteUnclearNumbers(Class: SavedClass, { unclearNumbers }: PlaceResult): void {
+    if (unclearNumbers && this.detailsOf(Class).numbersLike === undefined)
+      readNumbersAs(Class, { unclear: unclearNumbers })
+  }
+
   /** Someone else added or removed `thing`, as a read found out by asking again. */
   noteChangedElsewhere(thing: Thing, kind: "added" | "removed"): void {
     this.things!.noteChanged(thing, { kind, isElsewhere: true })
@@ -712,6 +726,7 @@ class ProgramPlaces {
 
   /**
    * Where the list the place keeps under `owner`, in its field `field`, is:  `/posts/1/comments`, its id in the braces.
+   * - An address that starts with the id takes the id as it is:  a path of its own, Open Library's `/works/OL45804W`.
    * - `undefined` for a field no line says lives under it (`- a post's comments live at "..."`),
    *   or a thing read from no place.
    */
@@ -720,7 +735,7 @@ class ProgramPlaces {
     const id = Owner.savedIn && this.things?.placeOf(owner)?.id
     if (id === undefined) return undefined
     const path = this.detailsOf(Owner).listsUnder?.[Owner.savedIn!.collection]?.[field]
-    return path?.replace("{id}", encodeURIComponent(id))
+    return path?.replace("{id}", path.startsWith("{id}") ? id : encodeURIComponent(id))
   }
 
   /** What the lines of the place `Class` is saved in say. */
@@ -1026,6 +1041,7 @@ class SavedRead {
    * or what's reading it only draws it, and asks for the next when it's needed.
    */
   private async withOtherPages(result: PlaceResult, pages: number): Promise<Thing[]> {
+    this.program.noteUnclearNumbers(this.Class, result)
     const things = this.program.thingsOf(result, { quietly: this.isAskingWhole })
     this.nextPage = this.query.page?.size === undefined ? result.nextPage : undefined
     this.pagesRead = 1
@@ -1314,13 +1330,14 @@ export const savedMethods = defineCoreModule({
         }
       })
     }
-    const address = addressIn(held)
-    if (address === undefined) return held
+    // a link column a place gives as a list, though this thing links to one:  an Airtable's `["rec123"]` (epic `data` T63)
+    const address = addressIn(oneLinkIn(held))
+    if (address === undefined) return Array.isArray(held) ? undefined : held
     const known = program.linkKnown(saved, address)
     if (known !== undefined) return known ?? undefined
     program.holdLink(saved, address)
     return core.waitedValue(owner, name, async () => {
-      const now = addressIn(read())
+      const now = addressIn(oneLinkIn(read()))
       try {
         return now === undefined ? undefined : await program.follow(saved, now)
       } catch (error) {
@@ -1773,8 +1790,9 @@ const HEADER_ROW = "data-header-row"
 function failedDrawing(error: unknown, said?: string): Drawing {
   const wait = waitAfter(error)
   const message = said ?? (wait === undefined ? core.message("read-failed", { why: whyOf(error) }) : tooSoon(wait))
-  // told when, it tries again then, itself:  waiting out a rate limit (epic `data` T110)
-  if (wait && getOwner()) {
+  // told when, it tries again then, itself:  waiting out a rate limit (epic `data` T110);
+  // under node, a timer would keep the program running
+  if (wait && getOwner() && typeof document !== "undefined") {
     const timer = setTimeout(() => void savedMethods.reloadSaved(), wait)
     onCleanup(() => clearTimeout(timer))
   }

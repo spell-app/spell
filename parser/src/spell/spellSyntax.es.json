@@ -6792,7 +6792,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 98,
+          "line": 100,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7198,6 +7198,58 @@
                 },
                 "py": {
                   "code": "class HojaDeInscripción(Place):\n    pass\n\nhoja_de_inscripción = core.place(\n    HojaDeInscripción(),\n    {\n        \"name\": \"hoja_de_inscripción\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/inscripciones\",\n        \"sheet\": {\n            \"only_from\": \"asistentes\",\n            \"most_each\": [{\"field\": \"turno\", \"most\": 2}, {\"field\": \"evento\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"entradas\", \"field\": \"invitaciones\"},\n            \"joins\": {\"collection\": \"entradas\", \"address\": \"picnic@rs/__attendees\"},\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInHeader",
+          "ruleNames": ["key_goes_in_header"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInHeader.ts",
+          "line": 16,
+          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} clave va en su cabecera {name:text}",
+              "example": "recetario es un servidor web en \"https://example.com\"\n\t- su clave va en su cabecera \"X-Api-Key\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"header\": \"X-Api-Key\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInAddress",
+          "ruleNames": ["key_goes_in_address"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInAddress.ts",
+          "line": 16,
+          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} clave va en la dirección como {name:text}",
+              "example": "recetario es un servidor web en \"https://example.com\"\n\t- su clave va en la dirección como \"api_key\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"in_address\": \"api_key\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }
@@ -7795,34 +7847,6 @@
           "aliases": ["statement"]
         },
         {
-          "className": "KeyGoesInHeader",
-          "ruleNames": ["key_goes_in_header"],
-          "internal": false,
-          "file": "src/spell/rules/places/KeyGoesInHeader.ts",
-          "line": 16,
-          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
-          "syntaxes": [
-            {
-              "syntax": "{type:subject_its} clave va en su cabecera {name:text}"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "KeyGoesInAddress",
-          "ruleNames": ["key_goes_in_address"],
-          "internal": false,
-          "file": "src/spell/rules/places/KeyGoesInAddress.ts",
-          "line": 16,
-          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
-          "syntaxes": [
-            {
-              "syntax": "{type:subject_its} clave va en la dirección como {name:text}"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
           "className": "CheckedEvery",
           "ruleNames": ["checked_every"],
           "internal": false,
@@ -7945,11 +7969,11 @@
           "ruleNames": ["page_size_is"],
           "internal": false,
           "file": "src/spell/rules/places/PageSizeIs.ts",
-          "line": 9,
+          "line": 11,
           "purpose": "How many a web server gives at a time, when asked (epic `data` P27).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_implied} da hasta {size:number} a la vez"
+              "syntax": "{type:subject_implied} da hasta {size:number} a la vez (, pedidos con {param:text})?"
             }
           ],
           "aliases": ["statement"]

@@ -94,7 +94,9 @@ function keyGoesFrom({ keySecret, keyHeader, keyInAddress }: PlaceIngestOptions)
     throw new CLI.CliError("spell place ingest:  a key goes in one place:  --key-header or --key-in-address, not both")
   }
   if (keySecret === undefined) {
-    throw new CLI.CliError("spell place ingest:  --key-header and --key-in-address say where a key goes:  name it too, --key-secret <NAME>")
+    throw new CLI.CliError(
+      "spell place ingest:  --key-header and --key-in-address say where a key goes:  name it too, --key-secret <NAME>"
+    )
   }
   return keyHeader !== undefined ? { header: keyHeader } : { inAddress: keyInAddress! }
 }

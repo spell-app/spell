@@ -43,6 +43,8 @@ export type PlaceDetailValue = {
   numbersLike?: string
   listsGive?: string[]
   pageSize?: number
+  /** What it calls how many it gives, when that isn't `limit`:  see `PageSizeIs`. */
+  pageSizeAskedWith?: string
   /** Which fields it filters by itself:  see `FiltersBy`. */
   filters?: "every field" | string[]
   /** Which fields it sorts by itself:  see `SortsBy`. */

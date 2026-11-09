@@ -120,6 +120,24 @@ describe("what a place sends, as the type declares it", () => {
     expect([two!.height, two!.mass]).toEqual([1.2, 1.5])
   })
 
+  test("a place that knows its own numbers (a Google Sheet's locale) settles what the text can't;  a line still wins (T83)", async () => {
+    const saying = (rows: Array<Record<string, unknown>>) => {
+      const place = holding(rows)
+      const list = place.list.bind(place)
+      place.list = async (collection, query, context) => ({
+        ...(await list(collection, query, context)),
+        unclearNumbers: "," as const
+      })
+      return place
+    }
+    const sheet = program(saying([{ id: "1", height: "1,200" }]))
+    const [one] = (await core.savedThings(sheet.Character)).items as Array<InstanceType<typeof sheet.Character>>
+    expect(one!.height).toBe(1.2)
+    const said = program(saying([{ id: "1", height: "1,200" }]), { numbersLike: "1,200.5" })
+    const [two] = (await core.savedThings(said.Character)).items as Array<InstanceType<typeof said.Character>>
+    expect(two!.height).toBe(1200)
+  })
+
   test("text that isn't a number:  nothing, said once on the program's console", async () => {
     const said: string[] = []
     const warn = core.console.warn

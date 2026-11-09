@@ -6829,7 +6829,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 98,
+          "line": 100,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -8006,11 +8006,11 @@
           "ruleNames": ["page_size_is"],
           "internal": false,
           "file": "src/spell/rules/places/PageSizeIs.ts",
-          "line": 9,
+          "line": 11,
           "purpose": "How many a web server gives at a time, when asked (epic `data` P27).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} gives up to {size:number} at a time"
+              "syntax": "{type:subject_it} gives up to {size:number} at a time (, asked for with {param:text})?"
             }
           ],
           "aliases": ["statement"]

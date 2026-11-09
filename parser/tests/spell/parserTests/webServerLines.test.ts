@@ -497,7 +497,9 @@ describe("GitHub's way (epic `data` P28)", () => {
       ...(key ? [`\t- its key is the secret "COOKBOOK_KEY"`] : []),
       `\t- ${line}`
     ]
-    expect(compiled(en(`its key goes in its "X-Api-Key" header`)).compiled).toContain(`keyGoes: { header: "X-Api-Key" }`)
+    expect(compiled(en(`its key goes in its "X-Api-Key" header`)).compiled).toContain(
+      `keyGoes: { header: "X-Api-Key" }`
+    )
     expect(compiled(en(`its key goes in the address as "api_key"`)).compiled).toContain(
       `keyGoes: { inAddress: "api_key" }`
     )
@@ -540,11 +542,81 @@ describe("GitHub's way (epic `data` P28)", () => {
       [`${HOST}/repos/solidjs/solid/contributors?api_key=t0ken`]: { body: [{ login: "ryansolid" }] }
     })
     core.resetRuntime().keyFrom = (name) => (name === "GITHUB_TOKEN" ? "t0ken" : undefined)
-    const { Contributor } = runSpell([`${LINES[0]}`, `\t- its key goes in the address as "api_key"`, ...LINES.slice(1)])(
-      "Contributor"
-    )
+    const { Contributor } = runSpell([
+      `${LINES[0]}`,
+      `\t- its key goes in the address as "api_key"`,
+      ...LINES.slice(1)
+    ])("Contributor")
     expect((await read(Contributor)).map(({ login }) => login)).toEqual(["ryansolid"])
     expect(asked.map(({ key }) => key)).toEqual([null])
+  })
+
+  test("a page size by another name asks for it there (T112), in either language", async () => {
+    const lines = [
+      ...LINES.slice(0, 2),
+      `\t- it gives up to 100 at a time, asked for with "per_page"`,
+      ...LINES.slice(2)
+    ]
+    const { compiled } = parseSpellProject([{ path: "/G.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(compiled).toContain('pageSizeAskedWith: "per_page"')
+    const es = [`github es un servidor web en "${HOST}":`, `\t- da hasta 100 a la vez, pedidos con "per_page"`]
+    const spanish = parseSpellProject([{ path: "/G.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain('pageSizeAskedWith: "per_page"')
+  })
+
+  test("a link column's one parent:  a list of one id reads as the thing it names (T63)", async () => {
+    serveWithHeaders({
+      [`${HOST}/recipes`]: {
+        body: [
+          { id: "r-1", parent: ["b-1"] },
+          { id: "r-2", parent: [] }
+        ]
+      },
+      [`${HOST}/books/b-1`]: { body: { id: "b-1", title: "Joy of Cooking" } }
+    })
+    core.resetRuntime()
+    const { Recipe } = runSpell([
+      `github is a web server at "${HOST}":`,
+      `a "book" is a thing:`,
+      `\t- it lives in github`,
+      `\t- its "title" is text`,
+      `a "recipe" is a thing:`,
+      `\t- it lives in github`,
+      `\t- its "parent" is a book`,
+      `\t- to name its parent:`,
+      `\t\treturn the title of its parent`
+    ])("Recipe")
+    const [one, two] = (await read(Recipe)) as unknown as Array<{ nameItsParent(): Promise<string> }>
+    expect(await one!.nameItsParent()).toBe("Joy of Cooking")
+    await expect(two!.nameItsParent()).resolves.toBeFalsy()
+  })
+
+  test("a graphql server's version line:  each read asks for it, and an update sends it back (T19)", async () => {
+    const bodies: string[] = []
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+      const body = init.body as string
+      bodies.push(body)
+      const node = { id: "r-1", title: "Soup", version: 3 }
+      return Response.json(
+        body.includes("mutation")
+          ? { data: { changeRecipe: { ...node, version: 4 } } }
+          : { data: { recipes: { edges: [{ node }], pageInfo: { hasNextPage: false } } } }
+      )
+    })
+    core.resetRuntime()
+    const { Recipe } = runSpell([
+      `cookbook is a graphql server at "${HOST}/graphql":`,
+      `\t- its version is its "version"`,
+      `a "recipe" is a thing:`,
+      `\t- it lives in cookbook`,
+      `\t- its "title" is text`
+    ])("Recipe")
+    const [recipe] = await read(Recipe)
+    expect(bodies[0]).toMatch(/\bversion\b/)
+    recipe!.title = "Mine"
+    await vi.waitFor(() => expect(bodies).toHaveLength(2))
+    expect(JSON.parse(bodies[1]!).variables.input).toEqual({ title: "Mine", version: 3 })
   })
 
   test("with the key set where it runs, it goes on each request", async () => {

@@ -736,7 +736,9 @@ places.addRule(ListsUnder, { syntax: "(a|an) {owner:known_type}'s {property:quot
 places.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
 })
-places.addRule(PageSizeIs, { syntax: "{type:subject_it} gives up to {size:number} at a time" })
+places.addRule(PageSizeIs, {
+  syntax: "{type:subject_it} gives up to {size:number} at a time (, asked for with {param:text})?"
+})
 places.addRule(RequestsASecond, {
   syntax: "{type:subject_it} takes up to {most:number} requests a second",
   tests: [

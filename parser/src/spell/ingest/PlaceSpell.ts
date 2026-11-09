@@ -28,7 +28,9 @@ const USUAL_ID = "id"
 
 /** The line saying where a key goes. */
 function keyGoesLine(goes: KeyGoes): string {
-  return "header" in goes ? `- its key goes in its "${goes.header}" header` : `- its key goes in the address as "${goes.inAddress}"`
+  return "header" in goes
+    ? `- its key goes in its "${goes.header}" header`
+    : `- its key goes in the address as "${goes.inAddress}"`
 }
 
 /** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */

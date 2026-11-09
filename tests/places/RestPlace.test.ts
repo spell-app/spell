@@ -801,6 +801,21 @@ describe("RestPlace, a key", () => {
   })
 })
 
+describe("what's too much to keep (epic `data` T123)", () => {
+  test("a list longer than the place keeps at once is cut there, and said", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ ids: Array.from({ length: 60_000 }, (_each, index) => index) }))
+    const place = new RestPlace({
+      url: "https://example.com",
+      collections: { things: { rowsAt: "ids" } },
+      can: { idOf: "id" }
+    })
+    const { rows, notes } = await place.list("things", {}, {})
+    expect(rows).toHaveLength(50_000)
+    expect(notes![0]).toMatch(/60000 rows, and only the first 50000/)
+    vi.unstubAllGlobals()
+  })
+})
+
 describe("where a key goes (epic `data` T73)", () => {
   const KEY = "s3cret key&more"
   const keyed = { keyNamed: "RECIPES_KEY", keyFrom: () => KEY }
@@ -820,7 +835,10 @@ describe("where a key goes (epic `data` T73)", () => {
   })
 
   test("in the address, beside the rest of the query, on a read and on a write", async () => {
-    const { box, place } = await served({}, { ...keyed, keyGoes: { inAddress: "api_key" }, can: { sort: "every field" } })
+    const { box, place } = await served(
+      {},
+      { ...keyed, keyGoes: { inAddress: "api_key" }, can: { sort: "every field" } }
+    )
     await place.list("recipes", { sort: [{ field: "title" }] }, {})
     expect(box.asks[0]!.query).toEqual({ api_key: KEY, sort: "name" })
     await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Soup" } }], {})
@@ -872,7 +890,9 @@ describe("a rate limit, in a running program (epic `data` T110)", () => {
     const sent = { count: 0 }
     vi.stubGlobal(
       "fetch",
-      vi.fn(() => {
+      vi.fn((url: string) => {
+        // a place from an earlier test, still resending, isn't asking this one
+        if (!`${url}`.startsWith("https://example.com/")) return Promise.resolve(Response.json([]))
         sent.count++
         return Promise.resolve(answers.shift() ?? Response.json([]))
       })
@@ -880,10 +900,7 @@ describe("a rate limit, in a running program (epic `data` T110)", () => {
     return { sent, place: new RestPlace({ url: "https://example.com", collections: { recipes: {} } }) }
   }
 
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.unstubAllGlobals()
-  })
+  afterEach(() => void vi.unstubAllGlobals())
 
   test("told to wait a long while, nothing more is sent until then, and it says when", async () => {
     const reset = Math.round(Date.now() / 1000) + 600
@@ -906,16 +923,12 @@ describe("a rate limit, in a running program (epic `data` T110)", () => {
     expect(sent.count).toBe(1)
   })
 
-  test("told to wait a few seconds, the next read waits, then asks", async () => {
-    vi.useFakeTimers()
-    const { sent, place } = answering(new Response("", { status: 429, headers: { "retry-after": "5" } }))
+  test("told to wait a moment, the next read waits, then asks", async () => {
+    const started = Date.now()
+    const { sent, place } = answering(new Response("", { status: 429, headers: { "retry-after": "1" } }))
     await expect(place.list("recipes", {}, {})).rejects.not.toBeInstanceOf(TooSoonError)
-    const read = place.list("recipes", {}, {})
-    await vi.advanceTimersByTimeAsync(0)
-    await vi.advanceTimersByTimeAsync(4000)
-    expect(sent.count).toBe(1)
-    await vi.advanceTimersByTimeAsync(1000)
-    await expect(read).resolves.toMatchObject({ rows: [] })
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: [] })
+    expect(Date.now() - started).toBeGreaterThanOrEqual(900)
     expect(sent.count).toBe(2)
   })
 

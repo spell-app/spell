@@ -41,7 +41,7 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
   "next_page_in_link": "type|header",
   "number_of_things_where": "type|body?",
   "operation_at": "signature|path",
-  "page_size_is": "type|size",
+  "page_size_is": "type|size|param?",
   "picture_at": "property|owner|path",
   "projected_fields": "thing|fields",
   "projected_into": "address",

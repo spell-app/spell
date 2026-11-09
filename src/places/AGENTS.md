@@ -58,10 +58,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
       unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
       With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
+      With `keyGoes`, it goes in a header of its own, or the address (`KeyGoes`, [keyGoes.ts](keyGoes.ts);  epic `data` T73),
+      hidden from every message.
+    - A limit a server names (`retry-after`, or a rate limit with none left) is waited out (epic `data` T110):
+      a few seconds waited for;  longer, `TooSoonError` says when, and a drawing tries again then.
     - What a web server can do is what its lines say (`restAbilitiesIn()`, in the parser's core;  epic `data` I35):
       paging by a count and a position, filtering, sorting, naming the fields it gives, being read only.
     - `RestPlace`:  named operations (`operations`, `call()`), each a `POST`;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
-    - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
+    - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping;
+      versions, if a line names their field (`versions: { field }`, sent back in an update's `input`;  epic `data` T19).
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
     - `keyFrom` can wait, for a key that's a token made from another (`GoogleToken`).
   - [DeviceCopy](DeviceCopy.ts):  a copy, in the browser's database, of every answer a web place gives,

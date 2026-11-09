@@ -550,6 +550,11 @@ export type ListAnswer = {
    */
   notes?: string[]
   /**
+   * How a number its text can't settle, `1,200`, reads, when the place knows (epic `data` T83):
+   * a Google Sheet's own locale.  Left out:  the program's language's way.
+   */
+  unclearNumbers?: DecimalMark
+  /**
    * The fields that read, and take no write, as far as the place knows:  Airtable's formulas, lookups and rollups.
    * - For a place behind a server side, whose `canWrite()` a browser can't call:  `RemotePlace` keeps them, and answers from them.
    */

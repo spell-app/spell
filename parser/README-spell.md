@@ -1237,7 +1237,10 @@ recipe box is an app:
     `the name of its homeworld`, with no homeworld, is nothing, not a throw.
 - What a real server is like, a line each under it, which the ingest writes when it finds it:
   - a key it can go without:  `its key is the secret "GITHUB_TOKEN", if it's set`
+  - a key it wants anywhere but `Authorization: Bearer`:
+    `its key goes in its "X-Api-Key" header`, or `its key goes in the address as "api_key"`
   - paging by a header:  `its next page is in its "Link" header`
+  - how many at a time, when that isn't its `limit`:  `it gives up to 100 at a time, asked for with "per_page"`
   - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
   - no list, only a search:  `books are searched at "/search.json"`;  then `every book` won't compile
   - a search of everything, at its own address:
