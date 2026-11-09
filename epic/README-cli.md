@@ -512,7 +512,7 @@ Lost track?  `epic status`.
   A bundle or a snapshot is made from BOTH sides' source, so no line merge of the two is right:
   `merge-main` runs its generator on the merged source instead
   (a root lockfile's own tool, the snapshots' update by the repo's own runner, and any generator the repo lists:
-  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file)).
+  [README-config.md](README-config.md#the-config-file)).
   - Where `main` takes only pull requests, it fast-forwards local `main` from `origin` first, when that's safe.
   - It prints what it regenerated, then each snapshot entry neither side had, under
     `REVIEW <file>:  neither side had these values`:  new behaviour nobody has looked at yet.
@@ -530,7 +530,7 @@ Lost track?  `epic status`.
 
 - A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
   through `checkoutPatches`, not when each branch merges `main`
-  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file)).
+  ([README-config.md](README-config.md#the-config-file)).
   - Add the fix on `main`, list it there, then `epic worktree patch --all`;  new and reopened sessions catch up by
     themselves.
   - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
@@ -596,7 +596,7 @@ an epic or saga page goes to Review, a details or choice page to Details, anythi
 | `epic window move` | carries the window files, once, from the main checkout's old `workspaces/` folder to the windows folder (`windowsFolder`), the old files kept;  `--dry-run` |
 
 Two kinds of server serve the pages:  each checkout's own page server, and ONE epic server for the machine,
-which serves every repo that uses spell-epic (its address and routes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#one-epic-server-for-the-machine)).
+which serves every repo that uses spell-epic (its address and routes:  [README-config.md](README-config.md#one-epic-server-for-the-machine)).
 
 | Verb | What it does |
 | --- | --- |
@@ -637,13 +637,13 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 - `whoami` and `whois` say who is who on the pages.
 - `plugin install` sets Claude Code up, or Codex.
 
-Every key of the config file, and what `epic init` writes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file).
+Every key of the config file, and what `epic init` writes:  [README-config.md](README-config.md#the-config-file).
 
 | Verb | What it does |
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic settings [<key>] [--json]` | prints how the epic tooling behaves for you, each value and the file that set it:  three files named `epic_settings.json5`, merged key by key, the later winning:  the kit's own, the epic repo's root (your team's, optional), and `~/.spell/` (yours, optional);  a file that won't read, or a bad value, is said on stderr, and the layer below stands |
-| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](https://github.com/spell-app/spell/blob/main/README-epics.md#on-gitlab)), `--protected-base` ([main takes only pull requests](https://github.com/spell-app/spell/blob/main/README-epics.md#when-main-takes-only-pull-requests)), `--no-plugin`, `--no-commit`, `--no-server`;  `--dry-run` first;  safe to run again |
+| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](README-setup.md#on-gitlab)), `--protected-base` ([main takes only pull requests](README-setup.md#when-main-takes-only-pull-requests)), `--no-plugin`, `--no-commit`, `--no-server`;  `--dry-run` first;  safe to run again |
 | `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
 | `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--kit <folder>` names another checkout;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer and coherence as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
@@ -713,7 +713,7 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   A team shares the epic pages and every comment on them through the epic repo, every turn, each under its
   writer's name, and each person's Claude answers that person's comments;
   but the marks you press on items, and your Send, stay on your own machine.
-  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.
+  [README-teams.md](README-teams.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.
 
 ## See also
 
