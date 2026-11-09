@@ -279,6 +279,8 @@ export const spanishWords: SP.LanguageWords = {
       dirección: "address",
       direccion: "address",
       estado: "state",
+      pestaña: "tab",
+      pestana: "tab",
       ilustración: "picture",
       ilustracion: "picture",
       fila: "row",

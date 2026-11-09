@@ -252,6 +252,7 @@ export const englishWords: SP.LanguageWords = {
       cloud: "cloud",
       address: "address",
       state: "state",
+      tab: "tab",
       picture: "picture",
       row: "row",
       column: "column",
