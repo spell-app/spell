@@ -27,6 +27,9 @@ export class EditorServer {
   /** the page server's root, where its records go:  the kit (epic `repo-split` P16) */
   readonly root: string
 
+  /** the port vite was told to take, once `start()` has picked it */
+  port?: number
+
   /** the running vite, in its own process group */
   private child?: ChildProcess
 
@@ -44,10 +47,13 @@ export class EditorServer {
    * doesn't wait), and records the editor's URL once it answers.
    * - `guard`:  the page server's;  vite gets its write token, which its proxy adds to the project data folders'
    *   requests alone (`pageServerProxy()`), and the editor's origin may write (epic `language` T68)
+   * - `thisMachineOnly`:  vite listens on this machine alone, when this machine's site gives it a house-network address
+   *   (`LocalSiteServer.editorAddress`, epic `atmosphere` P39):  so Caddy, with what it refuses, is the one way in
    */
-  async start(pagePort: number, guard: SRV.Guard): Promise<void> {
+  async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
     if (process.env.SPELL_NO_EDITOR || this.child) return
     const port = await editorPort()
+    this.port = port
     const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
     guard.allowOriginPort(port)
     const env = {
@@ -55,7 +61,8 @@ export class EditorServer {
       VITE_PORT: String(port),
       PORT: String(pagePort),
       API_SERVER: "127.0.0.1",
-      SPELL_SERVER_TOKEN: guard.token
+      SPELL_SERVER_TOKEN: guard.token,
+      ...(thisMachineOnly && { SPELL_EDITOR_THIS_MACHINE_ONLY: "1" })
     }
     const child = spawn(process.execPath, [VP, "dev", "--port", String(port), "--strictPort"], {
       cwd: APP_DIR,
