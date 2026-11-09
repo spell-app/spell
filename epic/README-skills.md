@@ -19,8 +19,8 @@ The hook read it first, knew that plan mode can't make a worktree, and refused i
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The whole plugin works like that.
-It gives Claude Code nineteen skills, workflows you start by typing a name,
-and nine hooks, scripts Claude Code runs by itself when something happens.
+It gives Claude Code twenty skills, workflows you start by typing a name,
+and eleven hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
@@ -53,11 +53,11 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node e
 
 </details>
 
-## Nineteen you type, nine that run by themselves
+## Twenty you type, eleven that run by themselves
 
 In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
 A skill here is a procedure.
-Each one is a `SKILL.md` in [skills/](skills/), 41 lines for `/title` and over a thousand for `/epic`,
+Each one is a `SKILL.md` in [skills/](skills/), 44 lines for `/title` and over a thousand for `/epic`,
 and Claude follows it step by step:  when to ask you, what to recommend, what to write on the epic page.
 - The judgement and the questions live in the skill.
   Every change it makes goes through the `epic` command ([README-cli.md](README-cli.md)),
@@ -70,12 +70,14 @@ and Claude follows it step by step:  when to ask you, what to recommend, what to
 A hook is a git hook for Claude Code.
 Instead of a commit or a push, it fires when a session starts, a prompt is sent, a worktree is made or a turn ends.
 You never type one;  you notice one.
-- Every hook acts only in a repo that has `.epic/config.json5`, and always exits 0:
-  a broken hook never blocks a session.
-- The worktree hook is the exception.
-  It replaces Claude Code's own worktree logic in every repo, so when it fails, there's no worktree:
-  its failure is Claude Code's answer.
-- A hook can refuse a prompt, title the session or hand Claude a note, but it can't make Claude act.
+- The hooks act only in a repo that has `.epic/config.json5`, but for the prompt gate,
+  which reads an `/epic`, `/isolate` or `/unpark` prompt in any repo.
+- A hook always exits 0:  a broken one never blocks a session.
+- Two exceptions:
+  - The worktree hook replaces Claude Code's own worktree logic in every repo, so when it fails, there's no worktree:
+    its failure is Claude Code's answer.
+  - The inbox poller exits 2 on purpose:  that exit is what wakes the session.
+- A hook can refuse a prompt, title the session, hand Claude a note or wake it, but it can't make Claude act.
   The worktree guard tells a lost session to go back to its worktree;  Claude does the going.
 
 ## Planning and review:  one page per piece of work
@@ -84,7 +86,7 @@ An epic is one piece of work with its own page, worktree and window ([spell-epic
 Its whole life fits in two skills:
 `/epic` plans it and builds it phase by phase, up to the merge;
 `/epic review` goes through its page with you, whenever you've marked it up.
-The other six here are for the moments in between.
+The other nine here are for the moments in between.
 
 | When | Type | What happens |
 | --- | --- | --- |
@@ -97,7 +99,7 @@ The other six here are for the moments in between.
 | an epic is about to merge, or you're about to fly | `/docs-check <epic...>` | makes the docs an epic wrote agree with what was chosen and built, then with each other;  fixed in place, uncommitted;  no epic:  it asks which |
 | guides read older than the house's voice | `/voice [<page>...] [--voice <name>]` | background agents rewrite them in the voice (`epic voice`), every fact, id and link kept, and stamp each one done;  no pages:  every guide not done yet |
 | you suspect something's written twice, or a plan rebuilds what exists | `/coherence sweep [area]`, `/coherence epic <name>` | holds the code, or an epic's plan, up against your repo's catalog of the mechanisms it has and its word list (`agents/coherence/`), asks the code map what already does each thing, and lands each finding with the epic that owns the code:  worked into a plan still being made, a question for one being built, else an issue on the coherence epic |
-| a page looks off, or a UI phase is ending | `/designer <page \| URL> [focus]` | screenshots it headlessly (desktop and phone, light and dark), holds every shot up against [the designer's rules](designer/designer.md), your own asks first, and lists what's wrong with the fix;  at the end of a UI phase it fixes the obvious things itself and asks about the rest with before / after pictures |
+| a page looks off, or a UI phase is ending | `/designer <page \| URL> [focus]` | screenshots it headlessly (desktop, narrow and phone width, light and dark, hover and open states), holds every shot up against [the designer's rules](designer/designer.md), your own asks first, and lists what's wrong with the fix;  at the end of a UI phase it fixes the obvious things itself and asks about the rest with before / after pictures |
 | you notice something that belongs to another epic | `/send [<epic>] <text>` | writes your words and screenshots into that epic as a request, and wakes its session;  no epic:  the tooling's |
 
 - `/send` also goes off unasked, when you ask a session to change how you work rather than what it's building:
@@ -108,17 +110,20 @@ The other six here are for the moments in between.
 - `/docs-check` fixes what an epic's docs SAY;  `/voice` and spell-app's `/fussbudget` fix how they READ:
   `/voice` a whole guide at a time, `/fussbudget` line by line.
 - Pressed Send on a page with nobody listening?  You needn't type `/epic review`:
-  the page types it into the epic's own session, for you to send ([README-pages.md](README-pages.md)).
+  the epic's running session hears it through its inbox poller ([below](#hooks));
+  a session with no poller gets it typed in for you to send, and an epic with no session gets a new one
+  ([README-pages.md](README-pages.md)).
 
 <details>
-<summary>Six more <code>/epic</code> verbs, one for each moment inside an epic</summary>
+<summary>Seven more <code>/epic</code> verbs, one for each moment inside an epic</summary>
 
 | When | Type | What happens |
 | --- | --- | --- |
-| an idea for later, not planned yet | `/epic future <name> [idea]` | a stub epic page, and a page of its big open questions to answer in the Review tab;  no worktree |
+| an idea for later, not planned yet | `/epic future <name> [idea]` | a stub epic page, and a page of its big open questions to answer in the side bar's Details tab;  no worktree |
 | some items should become a phase | `/epic phase [ids] [name]` | adds a phase to this session's epic:  `/epic phase J1 J5, t3` makes one from those three items |
 | one phase, or a handful of items, now | `/epic start <P1 \| ids>` | works it:  `/epic start J3 J4 T6` is one block, with one commit |
 | a request arrived from `/send` | `/epic request <epic> [<rN>]` | files it into a phase still to do about the same thing, else into a new one |
+| other work has made items obsolete | `/epic tidy [<epic>]` | closes the open calls, issues and todos that no longer apply, leaving a reason on each;  only when you ask;  never ones you asked for lately, fixes waiting for your review, or your picks;  no epic:  this session's |
 | this window should look different | `/epic color <look>` | recolours it, in one of 12 looks;  no look:  it lists them |
 | the work is finished | `/epic done` | the same as `/isolate done`, below |
 
@@ -127,8 +132,9 @@ The other six here are for the moments in between.
 
 </details>
 
-`/epic` stops after every phase, and asks before it starts the next.
-That's the point while you're at the keyboard;  for a night away from it, `/bedtime` is the one that doesn't stop.
+`/epic` writes a build plan for every phase up front, and once you've accepted them it goes straight through.
+It stops to ask only for a phase with no accepted plan, something urgent such as a check it can't fix, or the last phase.
+For a night away from the keyboard, `/bedtime` asks everything first, then asks nothing until morning.
 
 ## Worktrees and sessions:  leaving work, and finding it again
 
@@ -244,15 +250,20 @@ Each of those is a row here, by when it happens.
 | --- | --- | --- |
 | a worktree is made | [worktree.mjs](hooks/worktree.mjs) `create`;  `WorktreeCreate`, 900 seconds (the install runs inside it) | makes `<worktreesFolder>/<name>` on branch `<name>`, from the local `main`, unpushed work included, and installs it before anything opens it;  keeps the session saved at the repo's root, where every window's Claude panel lists it |
 | a worktree is removed | [worktree.mjs](hooks/worktree.mjs) `remove`;  `WorktreeRemove`, Claude Code's default | keeps a worktree with uncommitted changes, or with commits `main` lacks;  else stops its page and Vite servers, then removes it and its branch |
-| a session starts, or enters a worktree | [behind-main.mjs](hooks/behind-main.mjs);  `SessionStart`, and `PostToolUse` on `EnterWorktree`, 10 seconds | says when the worktree is behind `main`, `⎇ <branch> is <n> commits behind main:  its code and pages are that old.`, and offers the merge |
+| a session starts, or enters a worktree | [behind-main.mjs](hooks/behind-main.mjs);  `SessionStart`, and `PostToolUse` on `EnterWorktree`, 10 seconds | says when the worktree is behind `main`, `⎇ <branch> is <n> commits behind main:  its code and pages are that old.`, and offers the merge;  behind or not, starts `epic worktree patch`'s work for the checkout in the background, without a word ([patch-checkout.mjs](hooks/patch-checkout.mjs)) |
+| a session starts | [sync-notice.mjs](hooks/sync-notice.mjs);  `SessionStart`, 10 seconds | says, to you and to Claude, when the epic repo's last sync stopped on a conflict it couldn't settle |
 | a session starts | [worktree-guard.mjs](hooks/worktree-guard.mjs);  `SessionStart`, 10 seconds | tells a worktree's session that opened outside its worktree to go back in:  otherwise its branch work lands on `main` |
-| a session starts | [server-prune.mjs](hooks/server-prune.mjs);  `SessionStart`, 20 seconds | at most hourly, stops the page and Vite servers whose checkout is gone;  never a live checkout's |
+| a session starts | [server-prune.mjs](hooks/server-prune.mjs);  `SessionStart`, 20 seconds | at most hourly, stops the page and Vite servers whose checkout is gone;  never a live checkout's;  and deletes removed worktrees' leftover folders set aside in the trash |
+| a session starts, and each turn ends | [listen.mjs](monitors/listen.mjs) `--hook`, the inbox poller;  `SessionStart` and `Stop`, `asyncRewake`, a day | waits in the background beside the session and watches its epic page's inbox;  prints nothing while idle, and when you Send, wakes the session with one `📬` line (exit 2);  one per session, the next turn's end starts it again |
 | a session leaves a worktree | [left-worktree.mjs](hooks/left-worktree.mjs);  `PostToolUse` on `ExitWorktree`, 10 seconds | reminds the reply to end with its closing line, "*You can close this tab*", only when nothing is left:  no unmerged work, no agent running, no question waiting |
-| you send a prompt | [prompt-gate.mjs](hooks/prompt-gate.mjs);  `UserPromptSubmit`, Claude Code's default | titles the session for an `/epic`, `/isolate` or `/unpark`, or refuses one that would go wrong (below);  every other prompt passes untouched;  marks the session as one whose hooks run, and says a window move promised last turn that never happened |
+| you send a prompt | [prompt-gate.mjs](hooks/prompt-gate.mjs);  `UserPromptSubmit`, Claude Code's default | titles the session for an `/epic`, `/isolate` or `/unpark`, or refuses one that would go wrong (below);  every other prompt passes untouched;  marks the session as one whose hooks run, and says a window move promised last turn that never happened;  a long message sent while the session is busy gets an `On it:  ...` line back, so you know it was seen (`promptAck` in the config turns it off) |
 | a turn ends | [handoff.mjs](hooks/handoff.mjs);  `Stop`, Claude Code's default | moves the session to another window, when a move was armed (`epic window handoff <name>`, which refuses when this hook won't run) |
 | a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | runs `epic turn end`:  commits the epic folder, one commit per group of files, `auto: epic seo`, then syncs it;  detached, so the turn never waits for git |
 
 - They all come from the plugin's [hooks.json](hooks/hooks.json);  no repo's own Claude settings add one.
+- Ten scripts make those eleven rows:  `worktree.mjs` answers both worktree events.
+- In a terminal session, the inbox poller also runs as the plugin's monitor ([monitors.json](monitors/monitors.json)).
+  VS Code's panel never starts monitors, which is why the hook starts it too.
 - Codex gets three of them, from its own file, [codex-hooks.json](hooks/codex-hooks.json):
   `behind-main.mjs` and `sync-notice.mjs` as a session starts, `shared-commit.mjs` as a turn ends.
   - Its own file because Codex reads Claude Code's `hooks.json` by default, which names events Codex hasn't got.
@@ -260,7 +271,8 @@ Each of those is a row here, by when it happens.
     its `/hooks` screen.
   - The Codex plugin manifest names the same file, each script passed `--codex-plugin`:  a script started so stands down
     while `~/.codex/hooks.json` runs it, so a machine with both runs each hook once.
-- Each runs `node "${CLAUDE_PLUGIN_ROOT}/hooks/<script>"`:  the plugin's own folder, wherever it's installed.
+- Each runs `node "${CLAUDE_PLUGIN_ROOT}/hooks/<script>"`, the poller from `monitors/`:
+  the plugin's own folder, wherever it's installed.
 - Why the worktree guard exists:  Claude Code brings a reopened session back into its worktree
   only when it ENTERED it, with its own worktree tool.
   A session that merely started in the folder isn't brought back,
@@ -295,22 +307,24 @@ Every prompt it acts on comes out one of three ways:
   - `/epic review <name>` or `/epic request <name>` in a session titled for a different epic
 - **Let through, not renamed**, with a note for Claude:
   - `/epic seo` inside another epic's worktree, which means "open seo's own window":
-    Claude does, at once, with `/epic seo` typed into a new session there for you to send
+    Claude does, at once, with `/epic seo` typed into a new session there for you to send;
+    `/epic resume seo` likewise, and a brand-new session is titled for seo and moves there itself
   - an epic worked in another repo:  the note names its window (`epic window launch`)
 - **Renamed**, then let through:
   - `🚧 <name>` for `/epic`, `/isolate`, `/unpark`, `/epic resume` and `/epic request`;
     a resume and an unpark pick their window themselves
-  - `📅 <name>` for `/epic future <name>`, which is never refused:  it makes no worktree
+  - `📅 <name>` for `/epic future <name>`, which is never refused:  it makes no worktree;
+    a session titled for another epic keeps its title
 
 The rules are in [PromptGate.ts](src/command/PromptGate.ts);  the hook is its thin caller.
 The rename is the hook's `sessionTitle` output, which Claude Code doesn't document yet.
 
 ## In Claude Code:  two names for every skill
 
-A plugin's skills are named after the plugin:  `/spell-epic:epic`, `/spell-epic:isolate`.
+A plugin's skills are named after the plugin:  `/epic:epic`, `/epic:isolate`.
 The bare `/epic` you've seen on these pages comes from a link per skill in your own skills folder,
-which the third of the plugin's four install commands makes
-([the kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) has all four, `epic` on your `PATH` among them).
+which `epic plugin install` makes
+([the kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) has its steps, `epic` on your `PATH` among them).
 Both names then run the same skill, from the plugin's one folder.
 
 - A skill's new text reaches a running session after `/reload-plugins`;

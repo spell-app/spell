@@ -1186,7 +1186,7 @@ epic worktree merge-main
   `epic close seo#J3`.
 - Every verb runs on the caller's checkout:  a worktree's, when run in one.
   `epic --version` says which code that is:  its commit, branch and checkout.
-- `epic --help` lists all 63 verbs, in twelve groups;
+- `epic --help` lists all 77 verbs, under thirteen headings;
   `epic help <verb>`, or `epic <verb> --help`, shows one's usage, what it does and an example,
   and a group's verbs too (`epic ask create --help`).
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.

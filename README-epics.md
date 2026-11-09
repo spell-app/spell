@@ -2,7 +2,7 @@
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-npx spell@next epic init
+node ~/www/spell/bin/spell.mjs epic init   # from a clone of Spell, below
 ```
 
 <details>
@@ -139,7 +139,21 @@ beside the main checkout rather than inside it.
 You need Claude Code, VS Code, git, Node 24.11 or later, and GitHub's command, `gh`.
 These steps are for the FIRST person on a team;  everyone after them:  "A teammate joins", below.
 
-### 1. GitHub's command, logged in
+### 1. A clone of Spell
+
+The epic tools run from a clone, once per machine, and the VS Code extension is built in it:
+
+```sh
+git clone https://github.com/spell-app/spell.git ~/www/spell
+cd ~/www/spell
+corepack enable
+yarn install
+```
+
+- `~/www/spell` is only the convention these pages use:  anywhere will do, and the commands below follow it.
+- `corepack: command not found`, and the rest of a first setup:  [Setup from zero](README.md#setup-from-zero).
+
+### 2. GitHub's command, logged in
 
 `epic init` uses it to make the team's epic repo, so install it first.
 On macOS, with Homebrew:
@@ -155,13 +169,13 @@ gh auth login
 - Without it, `epic init` still sets everything else up, and says how to get it.
   Run `epic init` again once you're logged in:  it makes the epic repo then.
 
-### 2. `epic init`, in your repo
+### 3. `epic init`, in your repo
 
 From any folder of your repo, a git repo with at least one commit:
 
 ```sh
 cd ~/www/my-app
-npx spell@next epic init
+node ~/www/spell/bin/spell.mjs epic init
 ```
 
 <details>
@@ -228,11 +242,10 @@ _Ana's first `epic init`, against the same stand-in for GitHub as the top of thi
 then a summary, then each step;  a gray line before each slow one (GitHub, the push, the server).
 The settings it wrote are in the file, not printed._
 
-- `npx spell@next epic init` fetches Spell's package and runs its `spell epic`, which runs the epic tool:
-  the one installed beside it, else `spell-epic` fetched at the same version.
+- That runs the clone's `spell epic`, which runs the epic tool beside it.
   Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
-- 🌱 `spell epic` is new:  until the next `spell@next` is published, run it from a clone of Spell
-  ([Setup from zero](README.md#setup-from-zero)):  `node ~/www/spell/bin/spell.mjs epic init`.
+- 🌱 No clone, once a `spell@next` with `spell epic` is published:  `npx spell@next epic init`.
+  The extension still needs a clone (below).
 
 In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow, then sums up the
 answers (`> Your name  :  Ana`, the values bold) before it does anything.
@@ -298,18 +311,17 @@ epic init --dry-run --no-remote --no-plugin
 <summary>Output</summary>
 
 ```text
-.../my-app/.epic/config.json5:  would be written
+Initializing Epic for repo .../my-app
 ...
-.../my-app.epics:  would make it, a git repo with epics, sagas, guides, pages
-epic repo:  none (--no-remote):  the plans stay on this machine
-.../my-app/epics:  would link (missing)
-.../my-app/sagas:  would link (missing)
-.../my-app/guides:  would link (missing)
-.../my-app/pages:  would link (missing)
-.../my-app/.gitignore:  would be written
-you:  ...
+Setting up epic files:
+  would write            .../my-app/.epic/config.json5
+  would make             .../my-app.epics
+  would link (missing)   .../my-app/epics
+  would link (missing)   .../my-app/sagas
+  would link (missing)   .../my-app/guides
+  would link (missing)   .../my-app/pages
+  would update           .../my-app/.gitignore
 ...
-epic server:  would start, and serve this repo
 dry run:  nothing changed
 ```
 
@@ -350,8 +362,8 @@ epic ... (...) .../epic
 - `--version` names the code that answers:  its commit, its branch and the folder it's in.
 - `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  put the link wherever yours looks.
 
-🌱 The plugin is being published, so npm won't be needed either:
-`/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`, in Claude Code.
+🌱 Planned:  the plugin from Claude Code's marketplace, with no clone.
+The marketplace entry exists, but the plugin's `epic` command needs a clone's install to run.
 
 ### And the extension
 
@@ -391,10 +403,11 @@ and CLONES it, beside the code repo:
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-npx spell@next epic init
+node ~/www/spell/bin/spell.mjs epic init
 ```
 
 - What it printed:  the top of this page.
+- They need the clone of Spell first (step 1 above).
 - It asks your name and your colour, as it asked the first person, from any folder of the code repo:
   it finds the repo's main checkout from wherever it runs.
 - The epic repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
@@ -829,9 +842,9 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 
 What you'd trip on today, roughly in the order you'd meet it.
 
-1. **The extension is built from a clone of Spell.**
-   `npx spell@next epic init` sets up everything else from npm, but the VS Code extension is built and installed by
-   hand, in a clone's `epic/vscode/`.
+1. **It all runs from a clone of Spell.**
+   `epic init` and the epic tools run from one, and the VS Code extension is built and installed by hand in its
+   `epic/vscode/`.
 2. **Sharing needs GitHub.**
    `epic init` makes the epic repo only through GitHub's `gh`;
    anywhere else, make it by hand and pass `--remote <address>`.
@@ -883,8 +896,8 @@ What you'd trip on today, roughly in the order you'd meet it.
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
-- `npx spell@next epic init` itself, until the next `spell@next` is published:  a clone runs it today
-- the VS Code extension without a clone
+- setting up without a clone:  `npx spell@next epic init` needs a `spell@next` with `spell epic` in it, which isn't
+  published yet, and the VS Code extension is built in a clone
 - Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
 - a host other than GitHub, without making the epic repo by hand
@@ -905,7 +918,7 @@ and Send waking Codex and other agents
 - [epic/README-pages.md](epic/README-pages.md):  what your epic folder will fill with, and how a review round works
 - [epic/README-skills.md](epic/README-skills.md):  the skills and hooks you just installed, and what each hook does to a repo
 - [epic/README-cli.md](epic/README-cli.md):  every `epic` verb, `init`, `whoami`, `shared` and `server` among them
-- [epic/README-vscode.md](epic/README-vscode.md):  the extension's two views, and the window bridge
+- [epic/README-vscode.md](epic/README-vscode.md):  the extension's three views, and the window bridge
 
 <details>
 <summary>More in the docs site</summary>

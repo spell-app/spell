@@ -543,18 +543,18 @@ spell compile @spell/examples/fizzbuzz --target py --stdout
 ```text
 ✓ @spell/examples/fizzbuzz
 from __future__ import annotations
-
+...
 def play_fizzbuzz() -> None:
-    """File FizzBuzz.spell"""
+    """each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number"""
     for number in range(1, 101):
         if (number / 15).is_integer():
-            print(number, "fizzbuzz")
+            core.trigger("fizzbuzz", number=number)
         elif (number / 3).is_integer():
-            print(number, "fizz")
+            core.trigger("fizz", number=number)
         elif (number / 5).is_integer():
-            print(number, "buzz")
+            core.trigger("buzz", number=number)
         else:
-            print(number)
+            core.trigger("plain-number", number=number)
 
 
 play_fizzbuzz()
@@ -675,8 +675,7 @@ a folder's file adds the folder's name, as `spell/ui/core` does
 | [src/element-tools/](src/element-tools/) | `spell/element-tools/...` | the elements' build tools:  the pack build, the root catalog, their Vite settings | [README/element.md](README/element.md) |
 | [src/test-helpers/](src/test-helpers/) | `spell/test-helpers/...` | the test helpers every set of elements' tests use | [README/element.md](README/element.md) |
 | [src/cli/](src/cli/) | `spell/cli` | the `spell` command's base:  arguments, help, every folder's commands, and its own | [README/cli.md](README/cli.md) |
-| [tests/](tests/) | -- | the tests, at the same paths as the code:  [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts) | [README/npm.md](README/npm.md) | <ul><li>`spell publish`:  three packages, one version, checked in a scratch project first</li><li>`next` until you say `latest`</li><li>logging in with a 30-day token, not `npm login`</li><li>what trips people up:  zsh, tarball paths, versions never reused</li></ul> |
-| [README/development.md](README/development.md) |
+| [tests/](tests/) | -- | the tests, at the same paths as the code:  [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts) | [README/development.md](README/development.md) |
 | [bin/](bin/) | -- | the repo's programs:  `spell`, `spell-pack`, `spell-types` | [README/cli.md](README/cli.md) |
 | [scripts/](scripts/) | -- | what `yarn cli:install` and `yarn favicon` run | -- |
 | [tools/](tools/) | -- | <ul><li>[repos.ts](tools/repos.ts):  the checks over every folder (`yarn ts`, `test`, `lint`, `review`), and the links the install makes</li><li>[readme-check.ts](tools/readme-check.ts) and [mermaid-pretty.ts](tools/mermaid-pretty.ts):  the READMEs' check, and their pictures' look ([README/toolchain.md](README/toolchain.md#the-houses-own-lint-rules))</li></ul> | [README/development.md](README/development.md) |
@@ -746,8 +745,9 @@ Spell is built with Claude Code today, set up so an agent finds the rules before
 As a session starts, the root's [CLAUDE.md](CLAUDE.md) loads [AGENTS.md](AGENTS.md) and WWOD;
 each folder's own `AGENTS.md` comes in where it works, and WWOD's spoke for the task before it writes.
 The rules are plain Markdown, and Codex reads the same `AGENTS.md` files.
-The tooling around them is Claude Code's alone, for now:  the epic plugin, with its skills and hooks
-(🌱 the same for other agents is coming).
+The tooling around them, the epic plugin with its skills and hooks, is Claude Code's first:
+Codex runs most of it from the same files, not yet tried with a real Codex
+([README-epics.md](README-epics.md#with-codex)).
 The whole order, the logs agents keep, and the plugin:  [README/agents.md](README/agents.md).
 
 ## 🌱 Coming
@@ -775,6 +775,7 @@ The shared code's topic pages are in [README/](README/), beside this one.
 | [README/element.md](README/element.md) | <ul><li>custom elements on Solid 2, mapped from React</li><li>what every element gets without asking;  making one, in eight steps</li><li>nothing loads up front:  packs and `<ui-root>`</li><li>styling through the shadow root;  testing in a real browser</li><li>the build tools, who's written on it, and what it costs</li></ul> |
 | [README/cli.md](README/cli.md) | <ul><li>setting up `spell`;  naming projects by path, address or group</li><li>every command, under the folder that brings it</li><li>`epic`, and two more programs for yarn scripts</li><li>output, exit codes, and what writes files</li><li>how a command is built</li></ul> |
 | [README/development.md](README/development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with two differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>an epic's worktree, one branch for every folder;  CI over every folder</li><li>where to change what;  the papercuts;  every script</li></ul> |
+| [README/npm.md](README/npm.md) | <ul><li>`spell publish`:  three packages, one version, checked in a scratch project first</li><li>`next` until you say `latest`</li><li>logging in with a 30-day token, not `npm login`</li><li>what trips people up:  zsh, tarball paths, versions never reused</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell extension, which runs the Spell on your disk</li><li>two extensions you build, the rest from the Marketplace</li><li>what it does for a `.spell` file;  the settings the repo ships</li><li>Spell Epic, the pages beside your code;  windows and worktrees</li><li>working on the extensions</li></ul> |
 | [README/agents.md](README/agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>epics on a page;  the epic plugin, its skills and hooks</li><li>what's Claude-specific, and 🌱 other agents</li></ul> |
 | [README-epics.md](README-epics.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it, shared through GitHub</li><li>setting it up, in four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the epic folder, the config file, the worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
@@ -794,10 +795,10 @@ The shared code's topic pages are in [README/](README/), beside this one.
 | [ui/README-themes.md](https://github.com/spell-app/spell/blob/main/ui/README-themes.md) | <ul><li>theming, by contrast with MUI and Tailwind</li><li>what ships:  tokens, dark mode and the themes</li><li>four recipes, from sitewide defaults to the app stylesheet</li><li>🌱 picking and making themes</li></ul> |
 | [ui/README-site.md](https://github.com/spell-app/spell/blob/main/ui/README-site.md) | <ul><li>the docs site, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser</li><li>the tools and the visual tests</li><li>Spell UI's `spell` commands</li></ul> |
 | [epic/README.md](https://github.com/spell-app/spell/blob/main/epic/README.md) | <ul><li>epics and sagas:  an epic's life, by contrast with tickets, pull requests and chat</li><li>try it:  a small epic, start to finish</li><li>ids you can say;  a page you act on, beside your code</li><li>built from Spell UI;  the `epic` command and the skills</li><li>beyond Spell;  working on it;  the pages</li></ul> |
-| [epic/README-pages.md](https://github.com/spell-app/spell/blob/main/epic/README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  nine sections and their ids</li><li>a review round:  marks, comments, test runs, colours</li><li>the other pages, from the same parts</li><li>the `<epic-*>` elements</li></ul> |
-| [epic/README-skills.md](https://github.com/spell-app/spell/blob/main/epic/README-skills.md) | <ul><li>seventeen skills you type, eight hooks that run by themselves</li><li>planning and review;  worktrees and sessions</li><li>background and offline</li><li>what the hooks do, and the prompt gate first</li><li>two names for every skill in Claude Code</li></ul> |
+| [epic/README-pages.md](https://github.com/spell-app/spell/blob/main/epic/README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections and their ids</li><li>a review round:  marks, comments, test runs, colours</li><li>the other pages, from the same parts</li><li>the `<epic-*>` elements</li></ul> |
+| [epic/README-skills.md](https://github.com/spell-app/spell/blob/main/epic/README-skills.md) | <ul><li>twenty skills you type, eleven hooks that run by themselves</li><li>planning and review;  worktrees and sessions</li><li>background and offline</li><li>what the hooks do, and the prompt gate first</li><li>two names for every skill in Claude Code</li></ul> |
 | [epic/README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md) | <ul><li>the `epic` command:  six you'll actually type</li><li>an address is a page and an id</li><li>one copy of the code;  a session wakes when its `wait` exits</li><li>`--help`, and every verb by group</li><li>where it stops</li></ul> |
-| [epic/README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md) | <ul><li>the Spell Epic extension, installed in three commands and a reload</li><li>two views, each a page that stays</li><li>which server answers, the first of four</li><li>the window bridge:  a session finds its own window</li><li>working on it</li></ul> |
+| [epic/README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md) | <ul><li>the Spell Epic extension, installed in three commands and a reload</li><li>three views, each a page that stays</li><li>which server answers, the first of four</li><li>the window bridge:  a session finds its own window</li><li>working on it</li></ul> |
 | [app/README.md](https://github.com/spell-app/spell/blob/main/app/README.md) | <ul><li>the Spell app;  spaces:  every project has an owner and an address</li><li>the live loop, from a keystroke to the app changing</li><li>what you can do today, and 🌱 the ambition</li><li>five example apps;  its folders, a page each</li><li>setup from zero;  working on it</li></ul> |
 | [app/README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places;  a runtime per program</li><li>the editor:  one object behind every pane</li><li>the builds:  one Solid per page</li><li>App UI, a page for every component</li></ul> |
 | [app/README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in spellx and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |

@@ -224,7 +224,8 @@ export class EpicConfig {
         const content = config.contentFolder
         if (existsSync(content)) return content
         // named, but not there:  said, never silent (epic `epic-engine` I59);  a repo with no epic repo yet names none
-        if (config.named.has("contentFolder"))
+        // ... but not of a clone of the engine's own repo, whose epic folder is its maker's:  every `epic` would say so
+        if (config.named.has("contentFolder") && RealPath.of(root) !== engineCheckout())
           warnOnce(
             `contentFolder ${config.settings.contentFolder} is missing:  ${content};  using the checkout itself,` +
               ` ${resolve(root)} -- update ${config.file}`
@@ -1395,6 +1396,14 @@ function readOrEmpty(file: string): string {
  */
 function insideOf(root: string, path: string): string | undefined {
   return RealPath.from(root, path) || undefined
+}
+
+/**
+ * The checkout of the repo this code runs from.
+ * - worked out when read:  the VS Code extension's bundle has no `import.meta.dirname`
+ */
+function engineCheckout(): string {
+  return RealPath.of(resolve(import.meta.dirname ?? ".", "../../.."))
 }
 
 /** The messages `warnOnce()` has written, this process. */
