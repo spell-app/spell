@@ -67,7 +67,7 @@
 	<property "film" type="film" description="The film the address names:  /films/:film"/>
 	<property "reviews" description="What's been said of it, on this device">
 		set title to its film's title
-		return every review where its film title is title
+		return every review where its film title is title, sorted by its created, newest first
 	</property>
 	<draw>
 		draw (a new page top with title = its film's title)

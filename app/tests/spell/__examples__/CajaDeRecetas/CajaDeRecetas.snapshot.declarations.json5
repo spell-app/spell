@@ -5,6 +5,7 @@
   ],
   "provides": [
     "Receta",
+    "EditorDeReceta",
     "CajaDeRecetas",
     "RecetarioFamiliar"
   ],
@@ -39,6 +40,20 @@
       "defined": "/CajaDeRecetas.api.es.spell:896-916"
     },
     {
+      "syntax": "editar {thisArg:expression}?",
+      "output": "editar",
+      "rule": "method_call",
+      "of": "Receta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "editarla",
+      "returns": "nothing",
+      "defined": "/CajaDeRecetas.es.spellml:422-554"
+    },
+    {
       "type": "RecetarioFamiliar",
       "superType": "Place",
       "place": {
@@ -48,30 +63,82 @@
       "defined": "/CajaDeRecetas.api.es.spell:720-779"
     },
     {
+      "type": "EditorDeReceta",
+      "superType": "View",
+      "gender": "masculine",
+      "defined": "/CajaDeRecetas.es.spellml:1517-2976"
+    },
+    {
+      "property": "receta",
+      "of": "EditorDeReceta",
+      "datatype": "Receta",
+      "defined": "/CajaDeRecetas.es.spellml:1553-1585"
+    },
+    {
+      "property": "borrador",
+      "of": "EditorDeReceta",
+      "datatype": "PlaceDraft",
+      "defined": "/CajaDeRecetas.es.spellml:1636-1757"
+    },
+    {
+      "syntax": "aceptar los cambios ((de|del) {thisArg:expression})?",
+      "output": "aceptar_los_cambios",
+      "rule": "method_call",
+      "of": "EditorDeReceta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "aceptar los cambios",
+      "returns": "nothing",
+      "defined": "/CajaDeRecetas.es.spellml:1772-1931"
+    },
+    {
+      "syntax": "olvidar los cambios ((de|del) {thisArg:expression})?",
+      "output": "olvidar_los_cambios",
+      "rule": "method_call",
+      "of": "EditorDeReceta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "olvidar los cambios",
+      "returns": "nothing",
+      "defined": "/CajaDeRecetas.es.spellml:1945-2100"
+    },
+    {
       "uiDefaults": {
         "ui-textarea": {
           "grow": true
         }
       },
-      "defined": "/CajaDeRecetas.es.spellml:261-310"
+      "defined": "/CajaDeRecetas.es.spellml:289-338"
     },
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spellml:1191-4154"
+      "defined": "/CajaDeRecetas.es.spellml:3099-6451"
     },
     {
       "property": "búsqueda",
       "of": "CajaDeRecetas",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spellml:1210-1237"
+      "defined": "/CajaDeRecetas.es.spellml:3118-3145"
     },
     {
       "property": "receta_nueva",
       "asWritten": "receta nueva",
       "of": "CajaDeRecetas",
       "datatype": "Receta",
-      "defined": "/CajaDeRecetas.es.spellml:1242-1302"
+      "defined": "/CajaDeRecetas.es.spellml:3150-3210"
+    },
+    {
+      "property": "editando",
+      "of": "CajaDeRecetas",
+      "datatype": "Receta",
+      "defined": "/CajaDeRecetas.es.spellml:3215-3249"
     },
     {
       "syntax": "crear {thisArg:expression}?",
@@ -86,13 +153,13 @@
       "name": "crearla",
       "returns": "nothing",
       "waits": true,
-      "defined": "/CajaDeRecetas.es.spellml:1363-1843"
+      "defined": "/CajaDeRecetas.es.spellml:3379-3859"
     },
     {
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spellml:1857-2094"
+      "defined": "/CajaDeRecetas.es.spellml:3873-4083"
     },
     {
       "syntax": "agregar la receta nueva ((de|del) {thisArg:expression})?",
@@ -106,7 +173,7 @@
       "kind": "method",
       "name": "agregar la receta nueva",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spellml:2111-2246"
+      "defined": "/CajaDeRecetas.es.spellml:4100-4235"
     }
   ],
   "codeLines": [
@@ -114,13 +181,20 @@
     8,
     13,
     18,
-    76,
-    92,
-    102,
-    105,
-    110,
+    24,
+    99,
     116,
+    120,
+    126,
+    131,
     137,
-    144
+    183,
+    196,
+    199,
+    204,
+    210,
+    216,
+    237,
+    242
   ]
 }

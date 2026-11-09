@@ -2,6 +2,7 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Recipe",
+    "RecipeEditor",
     "RecipeBox",
     "FamilyCookbook"
   ],
@@ -35,6 +36,20 @@
       "defined": "/RecipeBox.api.spell:1215-1234"
     },
     {
+      "syntax": "edit {thisArg:expression}",
+      "output": "edit",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "edit it",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spellml:365-484"
+    },
+    {
       "syntax": "draw {thisArg:expression}",
       "output": "draw",
       "rule": "method_call",
@@ -45,7 +60,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spellml:343-943"
+      "defined": "/RecipeBox.spellml:498-1242"
     },
     {
       "type": "FamilyCookbook",
@@ -57,30 +72,94 @@
       "defined": "/RecipeBox.api.spell:1059-1103"
     },
     {
+      "type": "RecipeEditor",
+      "superType": "View",
+      "defined": "/RecipeBox.spellml:1344-2615"
+    },
+    {
+      "property": "recipe",
+      "of": "RecipeEditor",
+      "datatype": "Recipe",
+      "defined": "/RecipeBox.spellml:1374-1405"
+    },
+    {
+      "property": "draft",
+      "of": "RecipeEditor",
+      "datatype": "PlaceDraft",
+      "defined": "/RecipeBox.spellml:1449-1559"
+    },
+    {
+      "syntax": "save {thisArg:expression}",
+      "output": "save",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "save it",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spellml:1573-1704"
+    },
+    {
+      "syntax": "cancel {thisArg:expression}",
+      "output": "cancel",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "cancel it",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spellml:1718-1862"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeBox.spellml:1876-2606"
+    },
+    {
       "uiDefaults": {
         "ui-textarea": {
           "grow": true
         }
       },
-      "defined": "/RecipeBox.spellml:220-269"
+      "defined": "/RecipeBox.spellml:242-291"
     },
     {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spellml:1059-3637"
+      "defined": "/RecipeBox.spellml:2719-5667"
     },
     {
       "property": "search",
       "of": "RecipeBox",
       "datatype": "text",
-      "defined": "/RecipeBox.spellml:1073-1096"
+      "defined": "/RecipeBox.spellml:2733-2756"
     },
     {
       "property": "new_recipe",
       "asWritten": "new recipe",
       "of": "RecipeBox",
       "datatype": "Recipe",
-      "defined": "/RecipeBox.spellml:1101-1154"
+      "defined": "/RecipeBox.spellml:2761-2814"
+    },
+    {
+      "property": "editing",
+      "of": "RecipeBox",
+      "datatype": "Recipe",
+      "defined": "/RecipeBox.spellml:2819-2851"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -95,13 +174,13 @@
       "name": "create it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/RecipeBox.spellml:1202-1633"
+      "defined": "/RecipeBox.spellml:2957-3388"
     },
     {
       "property": "matches",
       "of": "RecipeBox",
       "datatype": "list of recipes",
-      "defined": "/RecipeBox.spellml:1647-1813"
+      "defined": "/RecipeBox.spellml:3402-3568"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -115,7 +194,7 @@
       "kind": "method",
       "name": "add the new recipe",
       "returns": "nothing",
-      "defined": "/RecipeBox.spellml:1829-1949"
+      "defined": "/RecipeBox.spellml:3584-3704"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -128,7 +207,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spellml:1963-3628"
+      "defined": "/RecipeBox.spellml:3718-4229"
     }
   ],
   "codeLines": [
@@ -136,15 +215,23 @@
     8,
     13,
     18,
-    23,
-    81,
-    93,
-    103,
-    106,
-    111,
-    117,
-    138,
-    143,
-    148
+    24,
+    28,
+    97,
+    110,
+    114,
+    120,
+    125,
+    131,
+    136,
+    170,
+    183,
+    186,
+    191,
+    197,
+    203,
+    224,
+    229,
+    234
   ]
 }

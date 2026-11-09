@@ -496,6 +496,16 @@ export class User extends Thing {
   get bio() { return this.getProp("bio") }
   set bio(value) { this.setProp("bio", value) }
 
+  /** Their own page, in the GitHub tab */
+  async lookAtUser() {
+    publicServers.github.showing = this
+  }
+
+  /** Put their page away again, with its Back button */
+  async lookAwayFromUser() {
+    publicServers.github.showing = undefined
+  }
+
   draw() {
     return h("ui-card", {
       onClick: core.pressed(this, async () => await this.lookAtUser()),
@@ -559,19 +569,6 @@ export class User extends Thing {
         })
       )
     )
-  }
-
-  //////////////////////////////////////////////////
-  // ## What someone on GitHub can do, from anywhere
-  //////////////////////////////////////////////////
-  // Shown on their own page, and put away again by its Back button, in the GitHub tab of the public servers.
-
-  async lookAtUser() {
-    publicServers.github.showing = this
-  }
-
-  async lookAwayFromUser() {
-    publicServers.github.showing = undefined
   }
 
   static savedIn = {
@@ -1893,7 +1890,6 @@ core.heading("A repository")
 //////////////////
 // Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
 
-core.heading("What someone on GitHub can do, from anywhere")
 // -----------
 core.heading("Open Library:  books by what they're called, who wrote them, and their covers")
 ///////////////////////////////////////////////////////////////////////////////////
@@ -2028,6 +2024,16 @@ export class Book extends Thing {
     return core.getItemAt(this.authors, 0)
   }
 
+  /** Its own page, on the library's tab */
+  async open() {
+    publicServers.library.showing = this
+  }
+
+  /** Back to what the search found */
+  async close() {
+    publicServers.library.showing = undefined
+  }
+
   draw() {
     return h("ui-card", {
       class: "book",
@@ -2090,19 +2096,6 @@ export class Book extends Thing {
       "Asking Open Library who wrote it"
     ))
     core.readRider("failed", () => h("ui-text", { part: "writing" }, "Open Library can't say who wrote it just now."))
-  }
-
-  //////////////////////////////////////////////////
-  // ## What a book and a city can do, from anywhere
-  //////////////////////////////////////////////////
-  // Only this file can name the public servers:  so its other files ask this.
-
-  async open() {
-    publicServers.library.showing = this
-  }
-
-  async close() {
-    publicServers.library.showing = undefined
   }
 
   static savedIn = {
@@ -3246,16 +3239,17 @@ export class City extends Thing {
   get longitude() { return this.getProp("longitude") }
   set longitude(value) { this.setProp("longitude", value) }
 
+  /** The city the weather's for */
+  pick() {
+    publicServers.weather.city = this
+  }
+
   draw() {
     return h("ui-item", {
       active: () => this === publicServers.weather.city,
       onClick: core.pressed(this, () => this.pick()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.name)
-  }
-
-  pick() {
-    publicServers.weather.city = this
   }
 }
 
@@ -4340,7 +4334,5 @@ export class PublicServer extends App {
   }
 }
 export const publicServers = new PublicServer()
-
-core.heading("What a book and a city can do, from anywhere")
 // -----------
 if (!core.isCarryingOver) publicServers.start()
