@@ -596,7 +596,7 @@ const OFFSET_PARAMS = [
  * What the server does when it's asked, tried on its first plain list (epic `data` T162):  `undefined` if it does none of it.
  * - Reads only, as every look is, and few:  a server that ignores these answers as if it hadn't been asked.
  * - A list of a page or two's rows is enough to tell by.
- * - NEVER throws, but `IngestStopped` past the reader's limits.
+ * - NEVER throws:  past the reader's limits, what's left of it just says nothing.
  */
 async function serverTakesOf(
   place: string,
@@ -621,8 +621,8 @@ async function serverTakesOf(
       if (answer.status >= 400 || answer.isCut) return undefined
       const body = jsonOf(answer.text)
       return (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
-    } catch (error) {
-      if (error instanceof IngestStopped) throw error
+    } catch {
+      // none of these is what the look's for:  past its limits, they just say nothing
       return undefined
     }
   }
