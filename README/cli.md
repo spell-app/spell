@@ -1075,12 +1075,12 @@ spell projects
 <summary>Output</summary>
 
 ```text
-owen@spell        Projects       ...
-@spell/examples   Examples       ... projects
-@spell/guides     Guides         ... projects
-@spell/notebooks  Notebooks      ... projects
-@spell/library    Libraries      1 project
-@spell/test       Test fixtures  ... projects
+owen@spell       Projects       ...
+@spell/examples  Examples       ... projects
+@spell/guides    Guides         ... projects
+@spell/library   Libraries      1 project
+@spell/editor    The editor     ... projects
+@spell/test      Test fixtures  ... projects
 ```
 
 </details>

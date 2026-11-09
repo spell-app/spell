@@ -457,11 +457,11 @@ markdown, markup and examples, where they sit.
 - **Notebooks:**  a page with the `notebook` flag, written `<spell-page "x" notebook>` or `<spell-notebook "x">`.
   - Both read the same;  Spanish says `<encanto-página cuaderno>` or `<encanto-cuaderno>`.
   - The flag only says the editor shows the page in place, editable.
-- Every one of Spell UI's component pages is a project of notebooks, in `@spell/notebooks`:
-  each of its page's tabs one notebook.
+- Every one of Spell UI's component pages is a notebook of one project, `@spell/guides/SpellUI`:
+  a folder per component, each of its tabs one notebook.
 - A notebook is only ever a `.spellml` file.
   The editor shows its page drawn by the running program, editable in place:
-  `/edit/@spell/notebooks/Counter/Counter.spellml`.
+  `/edit/@spell/guides/SpellUI/Divider/Usage.spellml`.
 - `spell lint --fix` rewrites the old spellings:
   - `<spell-notebook>` as `<spell-page notebook>`
   - a `<spell-view>` inside a page as `<view>`
