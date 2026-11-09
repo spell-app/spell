@@ -454,6 +454,8 @@ markdown, markup and examples, where they sit.
 - `locked` on any page is the page's `lock` (Spanish `bloqueado`).
   - In the editor every edit to a locked page is a try-out, saved for nobody.
   - Whoever may save the page locks or unlocks it.
+- `thumbnail="snapshots/terms.jpg"` on a page or view (Spanish `miniatura=`) is a picture of it, a file of its project:
+  it draws while there is no drawing of its own, and a drawing can place it with `draw its thumbnail`.
 - **Notebooks:**  a page with the `notebook` flag, written `<spell-page "x" notebook>` or `<spell-notebook "x">`.
   - Both read the same;  Spanish says `<encanto-página cuaderno>` or `<encanto-cuaderno>`.
   - The flag only says the editor shows the page in place, editable.

@@ -902,7 +902,9 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
       "What it can filter or sort:  it wasn't tried, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `- it filters by cuisine` or `- it sorts by title`."
     )
     if (/read only/.test(canDo.write))
-      said.add("That it's read only:  it isn't said for you, so a program's write compiles, and fails when it runs.  If it is, add `- it is read only`.")
+      said.add(
+        "That it's read only:  it isn't said for you, so a program's write compiles, and fails when it runs.  If it is, add `- it is read only`."
+      )
   }
   return [...said]
 }

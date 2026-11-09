@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
-import { core, ViewableList, List, Page, Thing } from "spell/parser/core"
+import { core, ViewableList, List, Page, Thing, View } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 
 /**
@@ -84,11 +84,13 @@ describe("built-in type table", () => {
       "thing's id",
       "list's id",
       "list's name",
+      "view's thumbnail",
       "page's lock"
     ])
     const runtime: Record<string, () => Record<string, unknown>> = {
       thing: () => new Thing() as unknown as Record<string, unknown>,
       list: () => new List({}) as unknown as Record<string, unknown>,
+      view: () => new View() as unknown as Record<string, unknown>,
       page: () => new Page() as unknown as Record<string, unknown>
     }
     for (const { entry, member } of stored) {

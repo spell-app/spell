@@ -65,7 +65,7 @@ function SiteProjectRoute(props: { params: RouteSectionProps["params"] }) {
  * - A project that isn't a site says so, and how to make one.
  * - Its Data tab (epic `mockup` P11):  the places the site reads, as a NERD whose boxes turn over to their ERD,
  *   and a collection's sample rows to edit (`<SiteData>`).
- * - NOT yet:  live pictures of each page on its card.
+ * - NOT yet:  live thumbnails of each page on its card.
  ****************/
 export function SiteEditorPage() {
   // the editor's own keys:  ⌘Z and ⇧⌘Z take back the site's changes, ⌘S saves
@@ -151,7 +151,7 @@ export function SiteEditorPage() {
                   picked={picked()}
                   titleOf={SiteEditorPage.cardTitleOf}
                   lineOf={SiteEditorPage.lineOf}
-                  pictureOf={SiteEditorPage.pictureOf}
+                  thumbnailOf={SiteEditorPage.thumbnailOf}
                   newTabUrlOf={SiteEditorPage.newTabUrlOf}
                   newTabLabel={appTexts.text("siteOpenInNewTab")}
                   onPick={setPicked}
@@ -224,9 +224,11 @@ SiteEditorPage.cardTitleOf = (part: SitePart): string => {
   return words.charAt(0).toUpperCase() + words.slice(1)
 }
 
-/** A part's picture, as the address of its file;  none when its line names none. */
-SiteEditorPage.pictureOf = (part: SitePart): string | undefined =>
-  part.picture && SP.SpellUrls.fileUrl(`${editor.project?.path}/${part.picture}`)
+/** A part's thumbnail, as the address of its file:  its site line's, else its page's or view's own;  none has none. */
+SiteEditorPage.thumbnailOf = (part: SitePart): string | undefined => {
+  const thumbnail = part.thumbnail ?? SiteWrites.thumbnailOf(part.name)
+  return thumbnail && SP.SpellUrls.fileUrl(`${editor.project?.path}/${thumbnail}`)
+}
 
 /** The address of a page in the running site, for a new tab;  none for a part with no address. */
 SiteEditorPage.newTabUrlOf = (part: SitePart): string | undefined =>

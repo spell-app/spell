@@ -28,6 +28,20 @@ export const siteMethods = defineCoreModule({
   siteHost: undefined as SiteHost | undefined,
 
   /**
+   * The folder of the program running, as an address:  `/spaces/@spell/sites/SpellApp`.
+   * - Set by whatever runs it;  none:  a file's name is left as it is, relative to the page.
+   */
+  projectFolder: undefined as string | undefined,
+
+  /**
+   * The address of `file`, a file of the running project:  `snapshots/terms.jpg` => `/spaces/.../snapshots/terms.jpg`.
+   * - An address of its own (`/x.jpg`, `https://...`, `data:...`) is left as it is.
+   */
+  addressOfFile(file: string): string {
+    return !core.projectFolder || /^(\/|[a-z][a-z0-9+.-]*:)/i.test(file) ? file : `${core.projectFolder}/${file}`
+  },
+
+  /**
    * Show the site's page `name`, its parameter filled with `thing`, or open its dialog or sidebar of that name:
    * what `go to the film page for this film` and `show the settings dialog` compile to.
    * - throws `TypeError` when the program has no site, or its site no part of that name

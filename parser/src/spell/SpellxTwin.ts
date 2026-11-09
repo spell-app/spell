@@ -176,6 +176,7 @@ export class SpellxTwin {
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
    * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
+   * - A page's or view's `thumbnail=`:  `- its thumbnail is "..."` (epic `mockup` P16).
    */
   private template(): SpellxTwinLine {
     const regrouped =
@@ -202,7 +203,15 @@ export class SpellxTwin {
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
       .map(([, line]) => [this.bullet(), ...this.expand(line)])
     const locked = kind === "page" && this.isLocked ? [[this.bullet(), ...this.expand(this.words.pageLocked)]] : []
-    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked])
+    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked, ...this.thumbnailLines()])
+  }
+
+  /** A page's or view's `thumbnail=`, as the line that says it:  none on any other tag, or without one. */
+  private thumbnailLines(): P.Token[][] {
+    const isDrawable = this.tag.kind === "page" || this.tag.kind === "view"
+    return isDrawable && this.attribute("thumbnail")
+      ? [[this.bullet(), ...this.expand(this.words.templateThumbnail)]]
+      : []
   }
 
   /** Is the tag `locked`, `<spell-page "x" locked>`? */
@@ -221,7 +230,7 @@ export class SpellxTwin {
    * - Its sections draw as the docs pages' do, sticky and foldable (epic `notebook` P3, J1):
    *   - each `##` heading and what follows it, a `<section>` the twin makes:  see `markdownLines()`, `gatherSections()`
    *   - each `<section label="...">` written at its top level, with the same look:  see `withSectionLook()`
-   * - `locked`:  a line, `- its lock is "locked"`.
+   * - `locked`:  a line, `- its lock is "locked"`;  `thumbnail=`, `- its thumbnail is "..."`.
    * - Its own templates aren't in its block:  the tokenizer lifted them out, to before it (`liftPageTemplates()`).
    */
   private drawnPage(): SpellxTwinLine {
@@ -272,6 +281,7 @@ export class SpellxTwin {
       new P.LineToken({ start: this.head.start, line: this.head.line, ch: this.head.ch, indent, tokens })
     const items: Array<P.LineToken | P.BlockToken> = [...members]
     if (this.isLocked) items.push(lineOf([this.bullet(), ...this.expand(this.words.pageLocked)]))
+    items.push(...this.thumbnailLines().map(lineOf))
     if (drawing.length) {
       items.push(lineOf([this.bullet(), ...this.expand(this.words.draw)]))
       SpellxTwin.joinMarkup(drawing)
@@ -665,7 +675,7 @@ export class SpellxTwin {
               this.attribute("tags") ? words.sitePageTags : "",
               // the state is a word of the line, not a text:  `state="old"` is `, old`
               this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
-              this.attribute("picture") ? words.sitePagePicture : "",
+              this.attribute("thumbnail") ? words.sitePageThumbnail : "",
               this.siteCardWords()
             ].join(" ")
           )

@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { Wording } from "spell/parser/spell/rules/expressions"
 // Through the folder:  read only when called, once the folder has loaded
@@ -85,7 +86,12 @@ export class DrawSlot extends SpellStatement<"slot", { slot?: string }> {
     if (Wording.reads(scope, "draw_method", words, "draw_its_placeholder")) return undefined
     const slot = DrawIt.slotName(`${match.groups.slot.value}`)
     const type = DrawSlot.viewIn(scope)
-    if (type && !type.hasSlot(slot) && type.getMember(`${match.groups.slot.value}`)) return undefined
+    const member = type?.getMember(`${match.groups.slot.value}`)
+    if (type && !type.hasSlot(slot) && member) return undefined
+    // a view's own data called `thumbnail`, a thing of its own (`its "thumbnail" is a thumbnail`), is `draw_thing`'s
+    if (member instanceof P.ScopeVariable && member.datatype !== "text") {
+      if (SP.builtInStoredMember(type, `${match.groups.slot.value}`)?.member.anyDatatype) return undefined
+    }
     // by the name it compiles by:  a two sided view's Spanish `frente` is its `front` (`P.TypeScope.slotOutputs`)
     match.data.slot = type?.slotOutput(slot) ?? slot
     return match

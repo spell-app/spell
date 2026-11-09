@@ -7,6 +7,32 @@ import { SiteEdits } from "spell/app/app/pages/SiteEdits"
  * in it, in either of Spell's forms.
  */
 describe("SiteEdits", () => {
+  test("a part's thumbnail is read, and kept when its line is rewritten;  a line without one gets none (P16)", () => {
+    const spellx =
+      '<spell-site "s">\n\t<page "a page" address="/a" thumbnail="x.jpg"/>\n\t<page "b page" address="/b"/>\n</>\n'
+    expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ thumbnail: "x.jpg" })
+    const moved = SiteEdits.withPartPlaced(spellx, "a page", { row: 1, column: 2 })
+    expect(moved).toContain('thumbnail="x.jpg"')
+    expect(SiteEdits.withPartPlaced(spellx, "b page", { row: 1, column: 2 })).toContain(
+      '<page "b page" address="/b" row="1" column="2"/>'
+    )
+    const code = 'a "s" is a site:\n\t- it has a "a page" at "/a", thumbnail "x.jpg"\n'
+    expect(SiteEdits.partsIn(code)![0]).toMatchObject({ thumbnail: "x.jpg" })
+    expect(SiteEdits.withPartPlaced(code, "a page", { row: 1, column: 2 })).toContain(', thumbnail "x.jpg"')
+  })
+
+  test("a page's or view's own thumbnail is found in the file declaring it (P16)", () => {
+    expect(SiteEdits.thumbnailOf('<spell-page "a page" thumbnail="x.jpg"/>\n', "a page")).toBe("x.jpg")
+    expect(SiteEdits.thumbnailOf('<spell-view "b dialog" thumbnail="y.jpg">\n</>\n', "b dialog")).toBe("y.jpg")
+    expect(
+      SiteEdits.thumbnailOf('<spell-page "button usage" notebook thumbnail="z.jpg">\n</>\n', "button usage page")
+    ).toBe("z.jpg")
+    expect(SiteEdits.thumbnailOf('a "c page" is a page where:\n\t- its thumbnail is "w.jpg"\n', "c page")).toBe("w.jpg")
+    expect(
+      SiteEdits.thumbnailOf('<spell-page "a page"/>\n<spell-page "other" thumbnail="x.jpg"/>\n', "a page")
+    ).toBeUndefined()
+  })
+
   test("a part's tags and tab are read, and kept when its line is rewritten (P15)", () => {
     const spellx = '<spell-site "s">\n\t<page "a page" address="/a" tab="Usage" tags="Forms, Inputs"/>\n</>\n'
     expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs" })

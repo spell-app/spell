@@ -133,6 +133,18 @@ export class SiteWrites {
     )
   }
 
+  /**
+   * The thumbnail on part `name`'s own page or view, from whichever of the project's files declares it.
+   * - None for a part another project declares:  its site line has to say.
+   */
+  static thumbnailOf(name: string): string | undefined {
+    for (const file of editor.project?.files ?? []) {
+      const thumbnail = SiteEdits.thumbnailOf(file.contents ?? "", name)
+      if (thumbnail) return thumbnail
+    }
+    return undefined
+  }
+
   /** The project's file declaring page `name`:  the site's own, else another of its files;  none for an imported page. */
   static declaringFile(name: string): SiteFile | undefined {
     const files = editor.project?.files ?? []

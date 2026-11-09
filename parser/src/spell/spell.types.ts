@@ -524,6 +524,8 @@ export type BuiltInType = {
   superType?: P.Datatype
   /** What it holds, if it's a sort of list, e.g. `character` for `text` -- see `P.TypeScope.itemType`. */
   itemType?: P.Datatype
+  /** Slots every type built on it can place, by the name they compile by:  a view's `thumbnail`. */
+  slots?: string[]
   /** One-line summary, for the Type Explorer, e.g. `counts from 1`. */
   detail?: string
   /** Its docs, as markdown. */
@@ -578,6 +580,11 @@ export type BuiltInMember = {
    * - Without it, no type may declare it, e.g. `id` -- see `SpellStatement.refuseBuiltInType()`.
    */
   declarable?: true
+  /**
+   * A `declarable` member a type may declare with any datatype of its own:
+   * `its "thumbnail" is a thumbnail`, a view's own data, is fine for all a view's built-in `thumbnail` is text.
+   */
+  anyDatatype?: true
   /** Built-in rules which spell it, by name, e.g. `list_shuffle` -- their syntax shows in the Type Explorer. */
   rules?: string[]
   /** Its docs, as markdown. */

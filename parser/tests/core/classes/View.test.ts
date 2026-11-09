@@ -17,6 +17,25 @@ describe("View, ViewableList", () => {
     expect(pile.items).toHaveLength(1)
   })
 
+  test("a view with a thumbnail and no drawing draws its thumbnail;  one with neither can't be drawn (mockup P16)", () => {
+    class Terms extends View {
+      get thumbnail() {
+        return "snapshots/t.jpg"
+      }
+    }
+    class Blank extends View {}
+    expect(() => new Blank().draw()).toThrow(/does not implement draw/)
+    core.projectFolder = "/spaces/@spell/x"
+    try {
+      expect(core.addressOfFile("snapshots/t.jpg")).toBe("/spaces/@spell/x/snapshots/t.jpg")
+      expect(core.addressOfFile("/elsewhere/t.jpg")).toBe("/elsewhere/t.jpg")
+      expect(core.addressOfFile("https://a.example/t.jpg")).toBe("https://a.example/t.jpg")
+      expect(new Terms().drawThumbnail()).toBeDefined()
+    } finally {
+      core.projectFolder = undefined
+    }
+  })
+
   test("both are built in:  found by name", () => {
     expect(core.things.classNamed("View")).toBe(View)
     expect(core.things.classNamed("ViewableList")).toBe(ViewableList)
