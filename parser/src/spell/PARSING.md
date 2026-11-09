@@ -402,6 +402,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - An enumeration's instance twin compiles to its class variable:  `the suits of the card` => `Card.Suits`.
   - LOOSE:  ONE word, which nothing need declare, blacklisted words out:  `the is-set-up of it`.
     - Several undeclared words are NOT a property read, so `the first card of the deck` stays the ordinal rule's.
+    - `the first of its authors` is an item too, not a property named `first`:
+      [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
+      (never a property the owner declares, nor `the top of its card`).
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
     - its syntax:  `the {property:member_words} of {expression:operand}`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`
@@ -1067,7 +1070,7 @@ A kind that says so is saved in a file of its own.
     - Its type's name, `CardSuit`, `PaloDeCarta`:  `SP.Language.propertyKindType()`.
     - Its plural is any name's of several words:  `card suits`;  `palos de carta`, up to the `de`.
   - A `P.TypeScope` whose `valueKind` names its `property`:  `{ values, listOn: "Card", listName: "Suits", property: "suit" }`.
-  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOfType()`):
+  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOf()`):
     so a loop over `card suits` knows each is a card suit.
 - What it gives another type, and the program:
   - `its "suit" is a card suit`:  `{ oneOf: () => Card.Suits }`, as for a value kind.
@@ -1761,6 +1764,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
 - `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
   - Compiled:  `static savedIn = { place, collection }`.
+  - The project's declarations say it too (epic `data` I19):  `savedIn` on the type, `place` on the place's type,
+    so in a project importing the type the words below read the place as well (`SP.SpellDeclarations.load()`).
+    - A project can't yet name an imported place on its own type's line:  the place's one instance isn't imported.
 - The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
   while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
   - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.

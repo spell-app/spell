@@ -21,6 +21,56 @@ function folderAt(at: string) {
   })
 }
 
+/** What's behind a web server whose lines say `details`. */
+function webServerWith(details: object) {
+  return placeBehind({
+    details: { name: "cookbook", kind: "web server", at: "https://cookbook.test", ...details },
+    folder: PlacesFolder,
+    collection: "recipes",
+    Class: Object,
+    person: { id: "guest-1", name: "Guest 1" }
+  })
+}
+
+describe("placeBehind(), a web server (epic `data` I35)", () => {
+  test("says what its lines say it can do", () => {
+    expect(
+      webServerWith({
+        pagesByOffset: { limit: "per", offset: "from" },
+        filters: ["cuisine"],
+        sorts: "every field",
+        fieldsNamedIn: "response_fields",
+        readOnly: true
+      }).describe()
+    ).toMatchObject({
+      page: "offset",
+      filter: ["cuisine"],
+      sort: "every field",
+      select: "every field",
+      write: "none"
+    })
+  })
+
+  test("with no lines it promises nothing, and takes writes", () => {
+    expect(webServerWith({}).describe()).toMatchObject({
+      page: "none",
+      filter: "none",
+      sort: "none",
+      select: "none",
+      write: ["insert", "update", "delete"]
+    })
+  })
+
+  test("pages counted by number are paged by offset, asked for by what they're called", () => {
+    expect(webServerWith({ pagesByNumber: { limit: "per_page", page: "page" } }).describe().page).toBe("offset")
+    expect(webServerWith({ pagesByNumber: { page: "p", first: 0 } }).describe().page).toBe("offset")
+  })
+
+  test("its next page in its `Link` header still pages by cursor", () => {
+    expect(webServerWith({ nextPageInLink: true }).describe()).toMatchObject({ page: "cursor" })
+  })
+})
+
 describe("placeBehind(), a data folder", () => {
   test("a project data folder's address is the page server's, and says what its server does", () => {
     const behind = folderAt("/api/places/spaces/owen@spell/recipes")

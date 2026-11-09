@@ -24,6 +24,42 @@ export type SavedPlace = {
   collection: string
 }
 
+/**
+ * What a place's lines say that the compiler asks about, for a place another project declared (epic `data` I19).
+ * - In that project's declarations, as plain data:  an imported place has no `declaredBy` to read the lines from.
+ * - The same names as a place's own lines give them (`CreatePlace.detailsOf()`).
+ */
+export type ImportedPlaceDetails = {
+  /** Asks what changed this often:  `check it every 5 seconds`.  In seconds. */
+  checkedEvery?: number
+  /** Its own search:  `it searches names with "q"`. */
+  searches?: ImportedPlaceSearch
+  /** Nothing can be written to it, as far as the compiler can tell:  a sheet at a plain address, say. */
+  readOnly?: boolean
+  /** What its lines say of each collection, by the name a type's `savedIn` knows it by:  only what's said. */
+  collections?: Record<string, ImportedPlaceCollection>
+}
+
+/** How a place, or one of its collections, is searched. */
+export type ImportedPlaceSearch = {
+  /** The query parameter:  `q`. */
+  param: string
+  /** The fields it looks through. */
+  fields: string[]
+}
+
+/** What a place's lines say of one collection -- see `ImportedPlaceDetails`. */
+export type ImportedPlaceCollection = {
+  /** Where it is, when its line says:  `/page/summary/{name}`. */
+  at?: string
+  /** How this one is searched, on its own. */
+  searches?: ImportedPlaceSearch
+  /** Given only to a search, with no list of them all. */
+  searchedOnly?: boolean
+  /** The fields it's asked for by, each a query parameter. */
+  askedBy?: string[]
+}
+
 /** How a type's records are published, as `- it is published as "..."` says. */
 export type PublishedAs = {
   /** Its Lexicon's name, an NSID, when the line names one:  `xyz.statusphere.status`. */
@@ -139,6 +175,11 @@ export class TypeScope extends BlockScope {
    * - What a projection of it names as its source (epic `atmosphere` P17).  Any other place:  none.
    */
   declare placeAt?: string
+  /**
+   * What the compiler asks about a place from another project's lines:  see `ImportedPlaceDetails`.
+   * - None for a place of our own, whose lines are read through `declaredBy`.
+   */
+  declare importedPlaceDetails?: ImportedPlaceDetails
   /**
    * The name each of our slots compiles by, when it isn't its own -- e.g. a two sided view's Spanish `frente` draws
    * with `drawFront()` (epic `elemental-spell` Q71):  a built-in template has ONE class, whatever language says it.

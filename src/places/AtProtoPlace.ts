@@ -110,6 +110,8 @@ export type AtProtoNetwork = {
 export type AtProtoPageSettings = Partial<AtProtoNetwork> & {
   /** Who's signed in, in place of the real sign-in. */
   signIn?: AtProtoAccess
+  /** Where this page's program keeps its client file, on a real address:  `AtProtoSignInProps.clientFile`. */
+  clientFile?: string
 }
 
 /** What a page has set. */
@@ -299,14 +301,14 @@ export class AtProtoPlace implements Place {
     network
   }: AtProtoPlaceProps) {
     this.findsAccounts = findsAccounts
-    const { signIn: signedIn, ...settings } = pageSettings()
+    const { signIn: signedIn, clientFile, ...settings } = pageSettings()
     this.kind = kind
     this.accounts = accounts
     this.corner = corner
     this.collections = collections
     this.guest = person ?? { id: "guest", name: "Guest" }
     this.network = { ...REAL_NETWORK, ...settings, ...network }
-    this.signIn = signIn ?? signedIn ?? (pageSignIn ??= new AtProtoSignIn())
+    this.signIn = signIn ?? signedIn ?? (pageSignIn ??= new AtProtoSignIn({ clientFile }))
     this.signIn.onChange(() => this.signInChanged())
     void this.signIn.ready.then(() => this.signInChanged())
   }

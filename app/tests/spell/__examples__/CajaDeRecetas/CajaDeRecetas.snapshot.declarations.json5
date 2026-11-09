@@ -13,6 +13,11 @@
       "type": "Receta",
       "superType": "Thing",
       "gender": "feminine",
+      "savedIn": {
+        "place": "recetario_familiar",
+        "placeType": "RecetarioFamiliar",
+        "collection": "recetas"
+      },
       "defined": "/CajaDeRecetas.api.es.spell:781-916"
     },
     {
@@ -36,6 +41,10 @@
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
+      "place": {
+        "name": "recetario_familiar",
+        "kind": "database on this device"
+      },
       "defined": "/CajaDeRecetas.api.es.spell:720-779"
     },
     {

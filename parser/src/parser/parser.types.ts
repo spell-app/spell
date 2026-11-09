@@ -167,19 +167,19 @@ export function isValueType(datatype: Datatype | undefined): boolean {
   return isBuiltInType(datatype) && !BUILT_IN_CLASSES.includes(datatype!)
 }
 
-/** Datatype of a list holding `itemType`s, e.g. `Card` => `list of cards`, `number` => `list of numbers`. */
-export function listOf(itemType: Datatype): Datatype {
-  return `list of ${pluralize(itemType.toLowerCase())}`
-}
-
 /**
- * Datatype of a list holding the type named `typeName`, its words kept apart:
- * `CardSuit` => `list of card-suits`, so `itemTypeOf()` gives `CardSuit` back.
- * - `listOf()` would run them together, `list of cardsuits`, a type nobody declared.
- * - A one-word name is the same either way:  `Card` => `list of cards`.
+ * Datatype of a list holding `itemType`s, e.g. `Card` => `list of cards`, `number` => `list of numbers`.
+ * - The words of a name of several words stay apart:
+ *   `CardSuit` => `list of card-suits`, so `itemTypeOf()` gives `CardSuit` back.
+ *   - Run together, `list of cardsuits` gives back `Cardsuit`, a type nobody declared.
  */
-export function listOfType(typeName: string): Datatype {
-  return listOf(`${typeName}`.split(/(?<=\p{Ll})(?=\p{Lu})/u).join("-"))
+export function listOf(itemType: Datatype): Datatype {
+  return `list of ${pluralize(
+    itemType
+      .split(/(?<=\p{Ll})(?=\p{Lu})/u)
+      .join("-")
+      .toLowerCase()
+  )}`
 }
 
 /**

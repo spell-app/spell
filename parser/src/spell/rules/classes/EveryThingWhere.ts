@@ -27,7 +27,7 @@ const WORDS_TO_THE_TYPE = 3
 export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnList }> {
   /** A list of the type, e.g. `list of recipes`:  as `every_thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    return P.listOfType(SP.typeName(`${match.groups.type.value}`))
+    return P.listOf(SP.typeName(`${match.groups.type.value}`))
   }
 
   /** Quick test:  a known type, up to two words in:  it can start with a type's plural alone, and this runs on every expression. */
