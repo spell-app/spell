@@ -115,7 +115,8 @@ describe("the Spell UI site", () => {
   })
 
   test("every page is in the site, once, and every site line is a page", () => {
-    expect(SITE_PAGES.map(({ name }) => name).sort()).toEqual(PAGES.map(({ name }) => name).sort())
+    expect(new Set(SITE_PAGES.map(({ name }) => name))).toEqual(new Set(PAGES.map(({ name }) => name)))
+    expect(SITE_PAGES.length).toBe(PAGES.length)
   })
 
   test("every address is unique", () => {
