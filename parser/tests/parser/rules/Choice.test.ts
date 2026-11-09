@@ -6,10 +6,15 @@ import "spell/parser/parser/rulex"
 
 const { tokenize } = new Tokenizer({ whitespacePolicy: WhitespacePolicy.NONE })
 
+/** A sequence from its rulex `syntax`, which the constructor's type doesn't name. */
+function sequence<T extends P.Sequence>(syntax: string, Class: new (props: never) => T = P.Sequence as never): T {
+  return new Class({ syntax } as never)
+}
+
 /** A choice long enough to look its rules up by first word, of `syntaxes`, and fillers nothing here matches. */
 function longChoice(...syntaxes: string[]): P.Choice {
-  const fillers = Array.from({ length: 20 }, (_, index) => new P.Sequence({ syntax: `filler${index} word` }))
-  return new P.Choice({ rules: [...syntaxes.map((syntax) => new P.Sequence({ syntax })), ...fillers] })
+  const fillers = Array.from({ length: 20 }, (_, index) => sequence(`filler${index} word`))
+  return new P.Choice({ rules: [...syntaxes.map((syntax) => sequence(syntax)), ...fillers] })
 }
 
 /** Which of `choice`'s rules are tried for the first token of `text`, by their syntax. */
@@ -40,7 +45,7 @@ describe("a long `P.Choice` looks its rules up by first word", () => {
         return true
       }
     }
-    const ownTest = new OwnTest({ syntax: "own word" })
+    const ownTest = sequence("own word", OwnTest)
     const choice = longChoice("the/i red")
     choice.addChoice(undefined as unknown as P.Parser, ownTest)
     expect(triedFor(choice, "THE")).toEqual(["the/i red", ownTest.toRulexSyntax()])
@@ -49,7 +54,7 @@ describe("a long `P.Choice` looks its rules up by first word", () => {
   test("a rule added afterward is looked up too", () => {
     const choice = longChoice("the red")
     expect(triedFor(choice, "blue")).toEqual([])
-    choice.addChoice(undefined as unknown as P.Parser, new P.Sequence({ syntax: "blue sky" }))
+    choice.addChoice(undefined as unknown as P.Parser, sequence("blue sky"))
     expect(triedFor(choice, "blue")).toEqual(["blue sky"])
   })
 
@@ -61,7 +66,7 @@ describe("a long `P.Choice` looks its rules up by first word", () => {
   })
 
   test("a short choice just tries each", () => {
-    const choice = new P.Choice({ rules: [new P.Sequence({ syntax: "red sky" }), new P.Sequence({ syntax: "blue sky" })] })
+    const choice = new P.Choice({ rules: [sequence("red sky"), sequence("blue sky")] })
     expect(choice["rulesFor"](tokenize("green")[0]!)).toBe(choice.rules)
   })
 })
