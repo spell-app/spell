@@ -330,10 +330,10 @@
     line-height: 1;
     white-space: nowrap;
   }
-  /* `to do`:  work a review queued, still open, so yellow (decision Q20) */
+  /* `to do`:  work a review queued, not started:  blue, as its dotted chip (epic `epic-engine` P63) */
   .review.todo {
-    --_epic-review-border: var(--ui-yellow-border, var(--ui-yellow));
-    --_epic-review-text: var(--ui-yellow-text, var(--ui-yellow));
+    --_epic-review-border: var(--ui-blue-border, var(--ui-blue));
+    --_epic-review-text: var(--ui-blue-text, var(--ui-blue));
   }
   .review.recent {
     --_epic-review-border: var(--ui-green-border, var(--ui-green));
@@ -470,7 +470,10 @@
    * - blue:  Claude is working on it
    * - yellow (dark text):  open and still undecided
    * - green:  decided or done (however long ago:  Owen, 2026-10-08)
-   * - grey:  no longer relevant (canceled), or handled in a phase (`handled`, epic `epic-engine` P31), a quiet tint
+   * - grey:  no longer relevant (canceled), handled in a phase (`handled`, epic `epic-engine` P31), or open with nothing
+   *   to think about (`quiet`, P63), a quiet tint
+   * - light orange (dark text):  what Owen asked for is finished, his turn to see it (`requested`, P63)
+   * - blue outlined (`handed`) or dotted (`scheduled`):  with Claude, nothing for Owen to do (P63;  the chip's `chipMark`)
    */
   .item.attention {
     --_epic-state: var(--epic-state-attention, light-dark(var(--ui-red), var(--ui-red-on-light)));
@@ -482,7 +485,12 @@
     --_epic-state-on: var(--epic-state-replied-on, var(--ui-orange-on));
     --_epic-state-text: var(--ui-orange-text, var(--_epic-state));
   }
-  .item.progress {
+  .item.requested {
+    --_epic-state: var(--epic-state-requested, var(--ui-orange-background));
+    --_epic-state-on: var(--epic-state-requested-on, var(--ui-yellow-on));
+    --_epic-state-text: var(--ui-orange-text, var(--_epic-state));
+  }
+  .item:is(.progress, .handed, .scheduled) {
     --_epic-state: var(--epic-state-progress, var(--ui-blue));
     --_epic-state-on: var(--epic-state-progress-on, var(--ui-blue-on));
     --_epic-state-text: var(--ui-blue-text, var(--_epic-state));
@@ -492,7 +500,7 @@
     --_epic-state-on: var(--epic-state-recent-on, var(--ui-green-on));
     --_epic-state-text: var(--ui-green-text, var(--_epic-state));
   }
-  .item:is(.old, .handled) {
+  .item:is(.old, .handled, .quiet) {
     --_epic-state: var(--epic-state-old, var(--ui-grey-background));
     --_epic-state-on: var(--epic-state-old-on, var(--ui-grey-text));
     --_epic-state-text: var(--ui-grey-text, var(--_epic-state));
@@ -502,7 +510,7 @@
    * - Owen's own mark in flight keeps the item's STATE colour (no `data-color`), so the chip still matches the
    *   section's counts:  a red item marked Revisit stays red, outlined (Owen, 2026-10-11, J3;  before:  the button's
    *   colour, 2026-10-08)
-   * - work Claude still owes wears its own colour:  queued green, Claude working blue, a taken pick green
+   * - work Claude still owes wears its own colour:  blue while it's with Claude, a taken pick green
    * - the letters in the colour's readable ink, over the line's band
    */
   .chip[data-fill]:not([data-color]) {
@@ -530,6 +538,11 @@
   .chip[data-fill="dashed"] {
     border-style: dashed;
   }
+  /* agreed, not started (`scheduled`, epic `epic-engine` P63):  a scheduled phase's dotted blue;  2px, or the dots blur */
+  .chip[data-fill="dotted"] {
+    border-width: 2px;
+    border-style: dotted;
+  }
   /*
    * marked in this pass, not applied yet (epic `epic-engine` P43):  ONE ring, 2px dotted in the blue badge's blue, in
    * place of its own, and blue letters:  all blue, "handed to Claude" (Owen, 2026-10-26;  red letters before, which read
@@ -546,10 +559,10 @@
    * still wants a look:  a bolder title;  no longer relevant:  a quieter one
    * - a todo that's only a LIMIT to know about (`limit`, epic `epic-engine` P32):  calmer, never bold
    */
-  .item:is(.attention, .replied, .progress, .open):not(.limit) .title {
+  .item:is(.attention, .replied, .requested, .progress, .handed, .open, .scheduled):not(.limit) .title {
     font-weight: 600;
   }
-  .item:is(.old, .handled) .title {
+  .item:is(.old, .handled, .quiet) .title {
     color: var(--_epic-item-muted);
   }
   /* the ONE struck-through status:  `canceled`, made moot;  `done` stays unstruck */

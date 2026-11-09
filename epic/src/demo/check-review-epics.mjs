@@ -501,13 +501,13 @@ async function run() {
     }, withDetails),
     { reviewAs: "skip", status: "open", note: SKIP_NOTE.replace(/\s+/g, " "), chip: null }
   )
-  // a todo's plane:  queued for the next phase, a Noted card, its chip outlined green, the buttons cleared;  its x:  canceled, grey
+  // a todo's plane:  queued for the next phase, a Noted card, its chip dotted blue, the buttons cleared;  its x:  canceled, grey
   if (todos.length >= 2) {
     expect(`${todos[0]}'s review-as`, await attribute(page, todos[0], "review-as"), "next")
     expect(`${todos[0]}:  queued, a Noted card`, (await statusOf(page, todos[0])).cards.at(-1), "noted")
     expect(`${todos[0]}'s plane, applied:  cleared`, (await buttonState(page, todos[0], "next")).fill, "none")
-    // queued, the work still due:  its chip OUTLINED (Owen, 2026-10-10)
-    expect(`${todos[0]}'s chip, queued:  outlined`, (await chipState(page, todos[0])).fill, "outline")
+    // queued, the work still due:  its chip DOTTED blue (epic `epic-engine` P63)
+    expect(`${todos[0]}'s chip, queued:  dotted blue`, (await chipState(page, todos[0])).fill, "dotted")
     expect(`${todos[1]}:  canceled`, await attribute(page, todos[1], "status"), "canceled")
     expect(`${todos[1]}'s chip:  grey`, await chipState(page, todos[1]), { fill: null, state: "old" })
   }

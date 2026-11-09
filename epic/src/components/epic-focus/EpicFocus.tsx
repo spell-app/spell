@@ -683,9 +683,12 @@ const WATCHED = [
 const TAB_COLORS: readonly (readonly [string, TabColor])[] = [
   ["attention", "red"],
   ["replied", "orange"],
+  ["requested", "orange"],
+  ["waiting", "orange"],
   ["updated", "orange"],
   ["open", "yellow"],
   ["progress", "blue"],
+  ["handed", "blue"],
   ["scheduled", "blue"]
 ]
 

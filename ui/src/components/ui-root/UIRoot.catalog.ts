@@ -164,6 +164,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: [
       "size",
       "color",
+      "background",
       "direction",
       "appearance",
       "fluid",
@@ -186,6 +187,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: [
       "size",
       "color",
+      "background",
       "columns",
       "layout",
       "doubling",

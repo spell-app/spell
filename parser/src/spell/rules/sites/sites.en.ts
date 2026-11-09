@@ -11,6 +11,9 @@ import { ShowSitePart } from "./ShowSitePart"
 import { SiteAddressOf } from "./SiteAddressOf"
 import { SitePartWords } from "./SitePartWords"
 
+/** What any part's line may end with:  its place in its section of the site editor's board, and its colour there. */
+const CARD_DETAILS = "(, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+
 ////////////////
 // ## Word rules
 ////////////////
@@ -25,6 +28,18 @@ sites.addRule(Synonyms.specialize({ ruleName: "site_sidebar" }), { syntax: "(sid
 sites.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["old", "new", "mocked", "built"] }), {
   syntax: "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
 })
+
+// the colour of a part's card on the site editor's board, one of Spell UI's:  `- it has a films page at "/films", colored blue`
+sites.addRule(
+  Wording.specialize({
+    ruleName: "site_card_color",
+    meanings: ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"]
+  }),
+  {
+    syntax:
+      "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey))"
+  }
+)
 
 // the words naming a site's part, `of` / `de` included (epic `mockup` P3, T5)
 sites.addRule(SitePartWords, {
@@ -263,35 +278,31 @@ sites.addRule(CreateSite, {
 
 // a page of a site, at its address:  `- it has a film page at "/films/:film", named "Film"`
 sites.addRule(SitePage, {
-  syntax:
-    "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
+  syntax: `{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... with the subject left out:  `- has a film page at "/films/:film"`
 sites.addRule(SitePage, {
-  syntax:
-    "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
+  syntax: `{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // a dialog or a sidebar of a site:  `- it has a settings dialog`, `- it has a syntax sidebar`
-sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_part_words}" })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_it} has (a|an) {part:site_part_words} ${CARD_DETAILS}` })
 
 // ... with the subject left out:  `- has a settings dialog`
-sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_part_words}" })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:site_part_words} ${CARD_DETAILS}` })
 
 // ... its name quoted, as any name may be:  `- it has a "page of films" at "/films"`
 sites.addRule(SitePage, {
-  syntax:
-    "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
+  syntax: `{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 sites.addRule(SitePage, {
-  syntax:
-    "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? {with_nested_statements}?"
+  syntax: `{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... and a dialog or sidebar's:  `- it has a "dialog of settings"`
-sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:quoted_member}" })
-sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:quoted_member}" })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_it} has (a|an) {part:quoted_member} ${CARD_DETAILS}` })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:quoted_member} ${CARD_DETAILS}` })
 
 ////////////////
 // ## Its not found and error pages (epic `mockup` P2)
@@ -309,10 +320,10 @@ sites.addRule(Wording.specialize({ ruleName: "site_error_page", meanings: [] }),
 
 // `not` can't be in a member's name, so each has a line of its own:
 // `- it has a not found page` (Spanish's `de` can't either:  `página de error`)
-sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_not_found_page}" })
-sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_not_found_page}" })
-sites.addRule(SiteOverlay, { syntax: "{type:subject_it} has (a|an) {part:site_error_page}" })
-sites.addRule(SiteOverlay, { syntax: "{type:subject_implied} has (a|an) {part:site_error_page}" })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_it} has (a|an) {part:site_not_found_page} ${CARD_DETAILS}` })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:site_not_found_page} ${CARD_DETAILS}` })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_it} has (a|an) {part:site_error_page} ${CARD_DETAILS}` })
+sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:site_error_page} ${CARD_DETAILS}` })
 
 ////////////////
 // ## Going to its pages (epic `mockup` P2)

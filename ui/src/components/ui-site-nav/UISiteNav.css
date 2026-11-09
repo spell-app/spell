@@ -15,6 +15,11 @@
     padding: var(--_ui-site-nav-padding);
   }
 
+  /* a row's focus ring is the row's own (the tree's):  without this, our shadow root's reset rings its whole box too */
+  ui-tree-item:focus-visible {
+    outline: none;
+  }
+
   /* a page's title as a link:  the row's own look, so it reads as the row does */
   .link {
     color: inherit;

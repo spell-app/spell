@@ -130,6 +130,50 @@ describe("<ui-site-nav> pages' extras", () => {
     return host
   }
 
+  it("keeps a row's element across new `pages`, so its focus stays and its rows can ease", async () => {
+    const pages: SiteNavPage[] = [
+      { title: "Films", id: "films", open: true, pages: [{ title: "Film", href: "/film" }] }
+    ]
+    const host = await navOf(pages)
+    const before = row(host, "Films")
+    host.setAttribute("pages", JSON.stringify([{ ...pages[0]!, open: false, title: "All films" }]))
+    await ElementFixture.settle()
+    const after = host.shadowRoot!.querySelector('[data-page="films"]')!
+    expect(after).toBe(before)
+    expect(after.getAttribute("label")).toBe("All films")
+    expect(after.hasAttribute("open")).toBe(false)
+  })
+
+  it("marks a `copyOf` page as shown whenever its original is, but reveals only the original", async () => {
+    const host = await navOf(
+      [
+        { title: "Favourite", id: "favorite:films", copyOf: "films", href: "/a" },
+        { title: "Films", id: "films", href: "/b" }
+      ],
+      { current: "films" }
+    )
+    expect(row(host, "Favourite").hasAttribute("selected")).toBe(true)
+    expect(row(host, "Favourite").getAttribute("aria-current")).toBe("page")
+    expect(row(host, "Favourite").hasAttribute("data-current")).toBe(false)
+    expect(row(host, "Films").hasAttribute("data-current")).toBe(true)
+  })
+
+  it("shows a page's `slot` inside it, after its pages, and it can open with no pages yet", async () => {
+    const host = await navOf([{ title: "Band", id: "band", band: "heading", open: true, slot: "notes", pages: [] }], {
+      appearance: "nav"
+    })
+    const note = document.createElement("p")
+    note.slot = "notes"
+    note.textContent = "Loading"
+    host.append(note)
+    await ElementFixture.settle()
+    const band = row(host, "Band")
+    expect(band.hasAttribute("open")).toBe(true)
+    const assigned = band.querySelector("slot")!.assignedElements()
+    expect(assigned).toEqual([note])
+    expect(note.getBoundingClientRect().height).toBeGreaterThan(0)
+  })
+
   it("a page with an `href` is a real link, so a modified click is the browser's;  a plain one goes", async () => {
     const host = await navOf([{ title: "Films", href: "#/films" }])
     const link = row(host, "Films").querySelector<HTMLAnchorElement>(":scope > a")!

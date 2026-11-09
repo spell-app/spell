@@ -86,6 +86,12 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - What Claude did since Owen last pressed Done reading (`<epic-page away-read>`), and what needs him, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
       no section.  `waiting` is its toolbar badge.
+    - An item Owen addressed leaves it, however recently it changed (`NightSummary.isAddressed()`, epic `epic-engine`
+      I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
+      A fix Claude made since (orange) is back, "fixed, to review".
+    - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
+      by `done-at`.  One with no `done-at` stays until read.
+    - Drawn on every edit:  an edit is what brings an idle page up to date.
     - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
@@ -303,7 +309,8 @@ As `plan-doc.md`, "Ids":
   - E.g. `30m`, `2h`, `1h30m`, `1-2h`.
   - The Overview's `estimate` is the total, rewritten on every change:
     `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
-    - then, once done phases are timed:  `;  3 done took 1h 9m, estimated 4h-6h` (only phases with both)
+    - then, once done phases are timed:  `;  3 done took 1h 9m / 9h, estimated 4h-6h` (only phases with both)
+      - some without a `span`:  `;  3 done took 1h 9m, estimated 4h-6h;  2 of them took 41m / 5h`
 - `took`:  how long Claude REALLY worked on it, written when it's done (epic `epic-engine` P41):  `21m`, `1h 30m`.
   - `epic phase seo#P3 done` writes it (`WorkTime`, `ActiveTime`, in `command/`), and the log says it:
     `P3 done:  took 21m`.
@@ -314,6 +321,10 @@ As `plan-doc.md`, "Ids":
     - else the epic's sessions' turns while it was active
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
+- `span`:  how long a done phase was under way by the clock (epic `epic-engine` I127):  `4h`, `1h 30m`.
+  - From its log:  its last `active` to its `done`, waits on Owen included;  so `took` against `span` is overall velocity.
+  - Written beside `took`, by `epic phase seo#P3 done` and `epic phase seo#P3 took`;  no start in the log:  none.
+  - Its title row reads `34m / 4h`, its tooltip `34m of work over 4h, estimated ~3-4h`.
   - Older phases have none, until asked.
 - `done-at`:  WHEN it was done (or dropped, I228), written as it's set so (`isoMinutes`, the log's time;  epic
   `epic-engine` I170), removed when it's set to anything else.
@@ -373,7 +384,7 @@ As `plan-doc.md`, "Ids":
     - `open`
     - `decided`:  an answered question.
       Set by `decide`, or by `add <name>#D`, born answered with `answered`.
-    - `done`:  closed (fixed, passed, accepted)
+    - `done`:  closed (fixed, passed, accepted, or obsolete:  `close --why`, or `--why-file` for a reason per item, the reason a Done card on it, written as plain text)
     - `canceled`:  made moot (struck through)
   - `state`:  the first row below that applies.
     - The tool rewrites it on every edit;  its colours:  "Colours" below.
@@ -383,11 +394,15 @@ As `plan-doc.md`, "Ids":
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
-    | `open`      | yellow | work a review queued (`queued`), not started                                       |
+    | `requested` | light orange | an issue filed from Owen's own words (`requested`), closed done, not reviewed:  his turn to see it (epic `epic-engine` P63) |
+    | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  Owen reviews it), or Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
     | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue Owen asked for with Do this (`urgent`), reviewed or not |
+    | `handed`    | blue, outlined | a judgement call or issue Owen pressed Do this on (`urgent`), Claude hasn't started (epic `epic-engine` P63) |
+    | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
-    | `open`      | yellow | anything else open:  still undecided, not urgent;  a revisit or request for now answered |
+    | `replied`   | orange | a manual test whose phase isn't done (epic `epic-engine` P63:  `PlanReader.manualTestState()`) |
+    | `open`      | yellow | anything else open:  still undecided, not urgent;  a calm issue, a test whose phase is done;  a revisit or request for now answered |
 
     - Green across the board for what's decided, grey only for what no longer matters (Owen, 2026-10-08).
       A `/bedtime` run and `recent-since` no longer colour anything.
@@ -487,7 +502,7 @@ As `plan-doc.md`, "Ids":
       `queued`, and `work` `P10 · <name>`.
     - No such phase:  `the next phase`, and its line says so.
     - A Noted status card, `Queued for P10 · <name>`;  reviewed.
-    - Its chip stays OUTLINED green while queued:  the work is due.
+    - Its chip is DOTTED blue while queued (`scheduled`):  agreed, not started.
   - Revisit (blue):  "Revisit:  I'm adding a note for you";  answered as any revisit.
   - The x (`drop`, grey):  "Drop it".
     - `inbox apply` cancels it:  struck through, grey;  reviewed.
@@ -709,6 +724,9 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
       close (Approve;  a test Claude checked itself it closes with `close`, Q58);  a `limit` has nothing to do.
     - Refused with no underway card.
     - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
+  - `update <name>#<id> promised "<what>"` (`/epic tidy`):  a Noted card starting `Promised, not delivered:`, for an
+    item waiting on finished work whose promised thing never came;  it goes back on Owen's list (red), and
+    `close --why` refuses it (`PlanDoc.promiseUnkept()`).
   - `update <name>#<id> noted "<what>"`:  a STEP done, the item not finished:
     Owen's choice recorded, an answer, details or a summary written, a request called off.
     - The latest underway card turns noted, `what` its summary.
@@ -735,13 +753,14 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, Ow
 | colour | means                                    | where                                                                  |
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
 | red    | needs Owen                               | `attention` chips;  the rail's count (only what needs him)             |
-| yellow | open, still undecided (DARK text on it)  | `open` chips;  a `to do` review label                                  |
-| blue   | do it now, or Claude is working on it    | `progress` chips (outlined);  Revisit, Send;  Underway cards;  the active phase |
+| yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
+| blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since Owen looked, or a warning;  an item Claude answered with options, waiting for Owen's pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing Owen |
 | violet | Claude's voice                           | his reply cards;  the bedtime label                                    |
 | ivory  | Owen's voice                             | his note box, marked note, reply cards, the answer card                |
-| grey   | no longer relevant, inactive, not chosen | `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
+| light orange | what he asked for is finished, his turn to see it | `requested` chips (DARK text) |
+| grey   | no longer relevant, inactive, not chosen, nothing to think about | `quiet` chips (a calm call, a limit);  `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 
 The FILL, on every button, pill and chip with a lifecycle.
 - Those are:  the review buttons, the note box's, the pick's letter, the Choose pill and its card, Send.
@@ -768,8 +787,8 @@ In Owen's words (2026-10-10):
 - While his OWN mark is live (dashed, or outlined once sent), the chip keeps its STATE's colour:  only the fill shows
   the mark, and the colour below is the button's (Owen, 2026-10-11, epic `epic-workflow` I6:  a red item marked
   Revisit turned blue, and its section's red count matched no chip).
-  - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), a todo queued (green),
-    work underway (blue).
+  - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), work with Claude (blue:  outlined;
+    queued, dotted).
 - So at a glance:
   - a dashed or outlined chip is ANSWERED (don't answer again)
   - solid red or orange WAITS ON OWEN
@@ -780,24 +799,23 @@ In Owen's words (2026-10-10):
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
 | an open question answered (Approve:  its recommended option;  or a pick) | green | as above | as above                  | green `decided` |
 | Make Todo                            | green  | pressed           | sent                                         | green:  settled;  the new todo is its own item (yellow until queued) |
-| Do this (an issue, a judgement call) | green  | pressed           | sent                                         | RED, and stays red, in the item, until Claude's fix turns it orange;  Approve closes it |
-| a todo's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  outlined until the todo is closed | green, once done |
-| a review's "do it" (`queue <id> "work"`) | green | --              | queued:  outlined until started and done     | green, once done                |
+| Do this (an issue, a judgement call) | green  | pressed           | sent                                         | BLUE outlined (`handed`), in the item, until Claude's fix turns it orange;  Approve closes it |
+| a todo's plane:  "do it in the next phase" | green | pressed      | sent;  then QUEUED (`queued`):  dotted blue until the todo is closed | green, once done |
+| a review's "do it" (`queue <id> "work"`) | green | --              | queued:  dotted blue until started and done  | green, once done                |
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
 | the note box's x:  "skip this" (no line button wears it:  the chip alone does) | grey | pressed | sent              | its status as it was (`skip` settles nothing) |
 | Revisit, with a note                   | blue   | pressed           | sent:  Claude talking it over                | yellow (talked over, still open);  orange if Claude answered with options (Owen's turn);  green if it got decided |
 | any work Claude took (an underway status card) | blue | --          | `progress`:  outlined until the card is Done or Noted | the state's colour      |
 | a new todo or question from the page | its section's new row | not sent | sent                              | the new item's own chip (a question red, a todo yellow) |
-| urgent / not urgent (the id chip itself) | red / yellow | a dashed ring | --                                    | solid red / yellow              |
+| urgent / not urgent (the id chip itself) | red / grey (an issue's yellow) | a dashed ring | --                     | solid red / grey                |
 
 - The chip of an item waiting on Owen is never outlined:
-  - `attention` (red) and `replied` (orange) stay solid
+  - `attention` (red), `replied` (orange) and `requested` (light orange) stay solid
   - the toolbar counts them (`state`, as the script writes it, unchanged)
 - Outlined is drawn from the item's own marks, never written:
   - Owen's live mark (the inbox)
   - a pick Claude took (`ReviewClient.takenPickOf()`)
-  - `queued` on an open item
-  - `progress`
+  - `scheduled` (dotted), `handed`, `progress`
 
 ## Folding
 

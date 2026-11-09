@@ -62,6 +62,17 @@ describe("DiagramLayout, the NERD skill's layout", () => {
     expect(derived).toMatchObject({ italic: true, role: "field", node: "Cook" })
   })
 
+  test("a legend group's box is `legend` (the theme's), unless its spec says its own `bg`", () => {
+    const groups = [{ label: "A", nodes: [{ id: "a", name: "A" }] }, { legend: true }]
+    const rolesOf = (spec: DiagramSpec) =>
+      DiagramLayout.of(spec)
+        .shapes.filter((shape) => shape.type === "rect" && (shape.role === "legend" || shape.role === "group"))
+        .map((shape) => shape.role)
+    expect(rolesOf({ columns: [{ groups }] } as DiagramSpec)).toEqual(["group", "legend"])
+    const own = [groups[0], { legend: true, bg: "#fff" }]
+    expect(rolesOf({ columns: [{ groups: own }] } as DiagramSpec)).toEqual(["group", "group"])
+  })
+
   test("the legend lists only the kinds of line used", () => {
     const spec: DiagramSpec = {
       columns: [{ groups: [{ label: "A", nodes: [{ name: "One", fields: ["two"] }, { name: "Two" }] }] }],

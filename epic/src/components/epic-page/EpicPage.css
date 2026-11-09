@@ -99,6 +99,9 @@
      */
     --epic-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
     --epic-state-replied-on: var(--ui-orange-on);
+    /* light orange:  what Owen asked for is finished, his turn to see it (`requested`, epic `epic-engine` P63) */
+    --epic-state-requested: light-dark(oklch(0.86 0.1 66), oklch(0.89 0.08 68));
+    --epic-state-requested-on: var(--ui-yellow-on);
     --epic-state-open: var(--ui-yellow);
     --epic-state-open-on: var(--ui-yellow-on);
     --epic-state-progress: var(--ui-blue);

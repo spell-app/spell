@@ -164,6 +164,11 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
   // ## Rendering
   ////////////////
 
+  /** The hue of `background`, its own or its group's:  what `tinted` tints (`UICard.css`). */
+  get tintHue(): string | undefined {
+    return this.classValue("background") as string | undefined
+  }
+
   /** Root element:  a link with `link` (not bare:  that's the old look), else an article. */
   get rootTag(): "a" | "article" {
     return this.link ? "a" : "article"
@@ -181,6 +186,7 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
         aria-disabled={isLink() && this.disabled ? "true" : undefined}
         tabindex={this.isOwnStop ? 0 : undefined}
         role={this.isOwnStop ? "link" : undefined}
+        style={this.tintHue ? { "--_card-tint": `var(--ui-${this.tintHue})` } : undefined}
       >
         <Show when={this.rendersShorthand(UIT.IMAGE)}>
           <div class={UIT.IMAGE} part={this.partForName("image")}>
@@ -252,6 +258,7 @@ type Shorthand = (typeof Shorthands)[number]
 const SHARED_VARIATIONS: ReadonlySet<string> = new Set<UIT.CardSharedVariation>([
   "size",
   "color",
+  "background",
   "direction",
   "appearance",
   "inverted"

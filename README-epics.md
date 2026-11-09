@@ -630,6 +630,30 @@ Every page the agent writes lands in one of four folders, each linked into your 
   The page templates are the engine's, in [templates/](epic/templates/).
   A repo can add its own with `repoTemplates`, found by name before the engine's.
 
+## <a id="your-settings"></a>Your settings:  three layers, later wins
+
+How the epic tooling behaves is separate from where a repo keeps things.
+Three files of the same name and shape, `epic_settings.json5`, merged key by key:
+
+| Layer | Where | Checked in? |
+| --- | --- | --- |
+| default | [epic/epic_settings.json5](epic/epic_settings.json5), every key with its value | in Spell |
+| org | at the root of the epic repo;  optional | in the epic repo |
+| developer | `~/.spell/epic_settings.json5`;  optional | nowhere |
+
+To change one for yourself, write only that key:
+
+```json5
+{ away: { finishedPhaseDays: 7 } }
+```
+
+- `epic settings` prints each value and which file set it;  `epic settings <key>` one value;  `--json` for a script.
+- A file that won't read, or a bad value in one, is said on stderr, and the layer below stands.
+
+| Key | Default | What it sets |
+| --- | --- | --- |
+| `away.finishedPhaseDays` | `3` | how many days a finished phase (done or dropped) and a bedtime run's summary stay in "While you were out";  a phase with no recorded time stays until you read it |
+
 ## <a id="the-config-file"></a>The config file:  one per repo, read from the main checkout
 
 `epic init` wrote this file, and most repos never touch it again.

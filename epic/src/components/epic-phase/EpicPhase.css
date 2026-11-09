@@ -117,7 +117,7 @@
   .icon[data-state="attention"] {
     color: var(--epic-state-attention, var(--ui-red));
   }
-  .icon[data-state="updated"] {
+  .icon:is([data-state="waiting"], [data-state="updated"]) {
     color: var(--epic-state-replied, var(--ui-orange));
   }
   .icon[data-state="progress"],

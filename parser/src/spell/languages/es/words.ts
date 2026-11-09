@@ -278,7 +278,10 @@ export const spanishWords: SP.LanguageWords = {
       direccion: "address",
       estado: "state",
       ilustración: "picture",
-      ilustracion: "picture"
+      ilustracion: "picture",
+      fila: "row",
+      columna: "column",
+      color: "color"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
@@ -340,6 +343,8 @@ export const spanishWords: SP.LanguageWords = {
       sitePageTitled: "tiene {a words} {words} en {quoted address} , llamada {quoted title}",
       sitePageState: ", {state}",
       sitePagePicture: ", ilustrada en {quoted picture}",
+      siteCardPlace: ", en la fila {row} columna {column}",
+      siteCardColor: ", de color {color}",
       siteOverlay: "tiene {a words} {words}",
       viewFlags: {
         draggable: "es arrastrable",

@@ -58,7 +58,7 @@ export class LiveBox extends App {
   accessor changes!: number
 
   addOne() {
-    core.saveThing(new Recipe({ title: "New" }))
+    core.saveThing(new (core.classToMake(Recipe))({ title: "New" }))
   }
 
   @drawn draw() {

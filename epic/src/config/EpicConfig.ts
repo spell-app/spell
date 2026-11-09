@@ -18,6 +18,7 @@ import { VoiceColor } from "./VoiceColor.ts"
 /****************
  * ### `EpicConfig`
  * Where a repo keeps its epic things, read from ONE file in it:  `.epic/config.json5` (epic `epic-eject` P4).
+ * - NOT how the tooling behaves for a person:  that's `LayeredSettings`, `epic_settings.json5` (epic `epic-engine` I235).
  *
  * ```ts
  * const config = EpicConfig.of(process.cwd())   // the main checkout's file, from any worktree

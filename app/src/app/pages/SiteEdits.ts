@@ -1,3 +1,5 @@
+import { CODE_SITE, SPELLX_SITE, declaresSite } from "spell/app/spaces/models/siteFiles"
+
 /****************
  * ### `SiteEdits`
  * A site's program, changed by what a person did rather than typed (epic `mockup` P2):
@@ -34,7 +36,7 @@ export class SiteEdits {
 
   /** Does `text` declare a site, in either form? */
   static hasSite(text: string): boolean {
-    return SPELLX_SITE.test(text) || CODE_SITE.test(text)
+    return declaresSite(text)
   }
 
   /**
@@ -155,16 +157,11 @@ export class SiteEdits {
     }
     const state = change.state === undefined ? part.state : change.state || undefined
     const line = text.slice(part.line.start, part.line.end)
-    const said = { address, title, state, picture: part.picture }
+    const said = { ...wordsOf(part), address, title, state }
     const changed = part.form === "spellx" ? spellxLineWith(line, said) : codeLineWith(line, part, said)
     return text.slice(0, part.line.start) + changed + text.slice(part.line.end)
   }
 
-  /**
-   * `text` with the part `name`, and its pages, moved to just before the part `before`, at that part's depth;
-   * no `before`:  last in the site.
-   * - throws `TypeError` for a move into its own pages
-   */
   /**
    * Where page `name`'s own declaration is written in `text`, with its body:
    * `<spell-page "x">...</>` or `a "x" is a page:` and its lines.
@@ -174,24 +171,72 @@ export class SiteEdits {
     return declarationOf(text, name)
   }
 
-  static withPartMoved(text: string, name: string, before?: string): string {
+  /**
+   * Can `part` have pages under it?
+   * - Only a page with an address:  the not found and error pages are shown when no address matches,
+   *   and nothing goes under a dialog or sidebar, so the language reads nothing there.
+   */
+  static canNest(part: SitePart): boolean {
+    return part.kind === "page" && part.address !== undefined
+  }
+
+  /**
+   * Can `part` go under a page?
+   * - A page with an address, a dialog or a sidebar (which belongs to that page's section of the board);
+   *   not the not found and error pages, which the language only reads at the site's top.
+   */
+  static canGoUnder(part: SitePart): boolean {
+    return part.kind !== "page" || part.address !== undefined
+  }
+
+  /**
+   * `text` with the part `name`'s card at `place`, a row and column of its section;  none takes its place out.
+   * - Any part:  a dialog's card has a place too.
+   */
+  static withPartPlaced(text: string, name: string, place: { row: number; column: number } | undefined): string {
     const part = SiteEdits.partNamed(text, name)
-    if (before === name) return text
-    const target = before === undefined ? undefined : SiteEdits.partNamed(text, before)
-    if (target && target.span.start >= part.span.start && target.span.end <= part.span.end) {
+    const line = text.slice(part.line.start, part.line.end)
+    const said = { ...wordsOf(part), row: place?.row, column: place?.column }
+    const changed = part.form === "spellx" ? spellxLineWith(line, said) : codeLineWith(line, part, said)
+    return text.slice(0, part.line.start) + changed + text.slice(part.line.end)
+  }
+
+  /**
+   * `text` with the part `name`, and its pages, moved to `place`.
+   * - `before` or `after` another part:  at that part's depth, `after` going below that part's own pages too.
+   * - `into` a page:  its first page, whether or not it has any yet.
+   * - A page's address stays as it's written, wherever it moves.
+   * - A spellx page left with no pages closes on its own line again:  `<page "x"/>`.
+   * - throws `TypeError` for a move into itself or its own pages,
+   *   or `into` something that can't hold it (`canNest()`, `canGoUnder()`)
+   */
+  static withPartMoved(text: string, name: string, place: SitePartPlace): string {
+    const part = SiteEdits.partNamed(text, name)
+    const target = SiteEdits.partNamed(text, place.part)
+    if (target.name === name) {
+      if (place.where === "into") {
+        throw new TypeError(`SiteEdits.withPartMoved():  "${name}" can't go inside itself;  pick another page`)
+      }
+      return text
+    }
+    if (target.span.start >= part.span.start && target.span.end <= part.span.end) {
       throw new TypeError(`SiteEdits.withPartMoved():  "${name}" can't go under one of its own pages`)
     }
-    const moving = text.slice(part.span.start, part.span.end)
-    const without = text.slice(0, part.span.start) + text.slice(part.span.end)
-    const parts = SiteEdits.allParts(SiteEdits.partsIn(without) ?? [])
-    const there = target && parts.find((each) => each.name === target.name)
-    const at = there ? there.line.start : siteEndIn(without, parts)
-    const indent = there ? there.indent : (parts.find((each) => each.depth === 0)?.indent ?? part.indent)
-    const reindented = moving
-      .split("\n")
-      .map((line) => (line.startsWith(part.indent) ? indent + line.slice(part.indent.length) : line))
-      .join("\n")
-    return without.slice(0, at) + reindented + without.slice(at)
+    if (place.where === "into" && !(SiteEdits.canGoUnder(part) && SiteEdits.canNest(target))) {
+      throw new TypeError(
+        `SiteEdits.withPartMoved():  "${name}" can't go inside "${target.name}";  only a page with an address holds parts`
+      )
+    }
+    const everyPart = SiteEdits.allParts(SiteEdits.partsIn(text) ?? [])
+    const parentName = everyPart.find((each) => each.parts.some((under) => under.name === name))?.name
+    const moving = withLineBreak(text.slice(part.span.start, part.span.end))
+    const taken = withLineBreak(text.slice(0, part.span.start) + text.slice(part.span.end))
+    const without =
+      place.where === "into" && place.part === parentName ? taken : withPageClosedIfEmpty(taken, parentName)
+    const there = SiteEdits.allParts(SiteEdits.partsIn(without) ?? []).find((each) => each.name === target.name)!
+    if (place.where === "into") return withPartInside(without, there, reindent(moving, part.indent, indentUnder(there)))
+    const at = place.where === "before" ? there.line.start : there.span.end
+    return without.slice(0, at) + reindent(moving, part.indent, there.indent) + without.slice(at)
   }
 
   /** `text` with a page added to the `<spell-site>` opening at `start`. */
@@ -234,12 +279,6 @@ export class SiteEdits {
   }
 }
 
-/** Where a spellx site starts:  `<spell-site "galaxy guide">`. */
-const SPELLX_SITE = /^<spell-site\b/m
-
-/** Where a code-spell site starts:  `galaxy guide is a site:`, `... is a site at "owen@spell/galaxy":`. */
-const CODE_SITE = /^\S.* is an? site\b.*$/m
-
 /** A closing line at the file's left edge:  the end of a top-level tag, `</>` or `</spell-site>`. */
 const CLOSING_TAG = /^<\/(?:spell-site)?>/m
 
@@ -266,6 +305,12 @@ export type SitePart = {
   state?: string
   /** A picture of a page, a file of the project:  `snapshots/films.png`. */
   picture?: string
+  /** Which row of its section of the board its card is in, from 1, if its line says. */
+  row?: number
+  /** Which column of its section, from 1. */
+  column?: number
+  /** Its card's colour, one of Spell UI's, if its line says;  the parts under it take it too. */
+  color?: string
   /** Its name is written in quotes, in code spell:  `- it has a "films page" at "/films"`. */
   isQuoted?: boolean
   /** The parts under it, as the side navigation nests them. */
@@ -304,6 +349,13 @@ function linesOf(text: string): TextLine[] {
   return lines
 }
 
+/**
+ * Where a part is moved to:  next to another part, or inside a page.
+ * - `before` / `after`:  beside `part`, at its depth
+ * - `into`:  `part`'s first page
+ */
+export type SitePartPlace = { where: "before" | "after" | "into"; part: string }
+
 /** What a part's kind is, from the last word of its name:  `settings dialog` is a dialog. */
 function kindOfName(name: string): SitePartKind {
   if (/\b(?:dialog|modal)$/.test(name)) return "dialog"
@@ -339,6 +391,9 @@ function spellxPartsIn(text: string, start: number): SitePart[] {
       title: ATTRIBUTE("title").exec(attributes!)?.[1],
       state: ATTRIBUTE("state").exec(attributes!)?.[1],
       picture: ATTRIBUTE("picture").exec(attributes!)?.[1],
+      row: numberIn(ATTRIBUTE("row").exec(attributes!)?.[1]),
+      column: numberIn(ATTRIBUTE("column").exec(attributes!)?.[1]),
+      color: ATTRIBUTE("color").exec(attributes!)?.[1],
       parts: [],
       depth: open.length,
       form: "spellx",
@@ -361,7 +416,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
     if (line.text.trim() && !/^[ \t]/.test(line.text)) break
     const written = CODE_PART.exec(line.text)
     if (!written) continue
-    const [, indent, written_name, address, title, state, picture] = written
+    const [, indent, written_name, address, title, state, picture, row, column, color] = written
     const isQuoted = /^".*"$/.test(written_name!)
     const name = isQuoted ? written_name!.slice(1, -1) : written_name!
     while (open.length && open.at(-1)!.indent.length >= indent!.length) open.pop()
@@ -372,6 +427,9 @@ function codePartsIn(text: string, start: number): SitePart[] {
       title,
       state,
       picture,
+      row: numberIn(row),
+      column: numberIn(column),
+      color,
       isQuoted,
       parts: [],
       depth: open.length,
@@ -387,13 +445,41 @@ function codePartsIn(text: string, start: number): SitePart[] {
   return top
 }
 
-/** Where a part goes when it's put last in the site:  after the last of its parts, before its closing line. */
-function siteEndIn(text: string, parts: readonly SitePart[]): number {
-  const last = parts.reduce((end, part) => Math.max(end, part.span.end), 0)
-  if (last) return last
-  const site = SPELLX_SITE.exec(text) ?? CODE_SITE.exec(text)
-  const lineEnd = site ? text.indexOf("\n", site.index) : -1
-  return lineEnd < 0 ? text.length : lineEnd + 1
+/** `text`, ending in a line break:  a part moved from, or to, a file's last line stays a line of its own. */
+function withLineBreak(text: string): string {
+  return text.endsWith("\n") ? text : `${text}\n`
+}
+
+/** `lines` with `from`, what they're indented by, replaced by `to`;  what's further in stays further in. */
+function reindent(lines: string, from: string, to: string): string {
+  return lines
+    .split("\n")
+    .map((line) => (line.startsWith(from) ? to + line.slice(from.length) : line))
+    .join("\n")
+}
+
+/** What a page under `page` is indented by:  as its first page is, else one step further than `page`. */
+function indentUnder(page: SitePart): string {
+  const step = page.indent.slice(0, page.indent.length / (page.depth + 1)) || "\t"
+  return page.parts[0]?.indent ?? page.indent + step
+}
+
+/** `text` with `lines` as page `page`'s first page:  a spellx page that closes on its own line opens first. */
+function withPartInside(text: string, page: SitePart, lines: string): string {
+  const line = text.slice(page.line.start, page.line.end)
+  const after = text.slice(page.line.end)
+  if (page.form === "code" || !SPELLX_CLOSES_ITSELF.test(line)) return text.slice(0, page.line.end) + lines + after
+  const opened = line.replace(SPELLX_CLOSES_ITSELF, ">$1")
+  return `${text.slice(0, page.line.start)}${opened}${lines}${page.indent}</>\n${after}`
+}
+
+/** `text` with spellx page `name` closing on its own line, if nothing is left inside it but its closing line. */
+function withPageClosedIfEmpty(text: string, name: string | undefined): string {
+  const page = SiteEdits.allParts(SiteEdits.partsIn(text) ?? []).find((each) => each.name === name)
+  if (!page || page.form !== "spellx" || page.parts.length) return text
+  if (!/^[ \t]*<\/(?:page)?>\s*$/.test(text.slice(page.line.end, page.span.end))) return text
+  const closed = text.slice(page.line.start, page.line.end).replace(/\s*>(\s*)$/, "/>$1")
+  return text.slice(0, page.line.start) + closed + text.slice(page.span.end)
 }
 
 /** `text` without page `name`'s own declaration, `<spell-page "x">` or `a "x" is a page`, and the blank line after it. */
@@ -439,13 +525,16 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
 }
 
 /** A spellx part's `line` with its address and title as given:  an attribute added, changed or taken out. */
-function spellxLineWith(line: string, { address, title, state, picture }: PartWords): string {
+function spellxLineWith(line: string, { address, title, state, picture, row, column, color }: PartWords): string {
   let changed = line
   for (const [word, value] of [
     ["address", address],
     ["title", title],
     ["state", state],
-    ["picture", picture]
+    ["picture", picture],
+    ["row", row === undefined ? undefined : `${row}`],
+    ["column", column === undefined ? undefined : `${column}`],
+    ["color", color]
   ] as const) {
     const written = ATTRIBUTE(word).exec(changed)
     if (written && value === undefined) changed = changed.replace(` ${written[0]}`, "")
@@ -456,17 +545,41 @@ function spellxLineWith(line: string, { address, title, state, picture }: PartWo
 }
 
 /** What a part's line says, besides its name. */
-type PartWords = { address?: string; title?: string; state?: string; picture?: string }
+type PartWords = {
+  address?: string
+  title?: string
+  state?: string
+  picture?: string
+  row?: number
+  column?: number
+  color?: string
+}
+
+/** What `part`'s line says now, besides its name. */
+function wordsOf({ address, title, state, picture, row, column, color }: SitePart): PartWords {
+  return { address, title, state, picture, row, column, color }
+}
+
+/** `text` as a number;  none for none. */
+function numberIn(text: string | undefined): number | undefined {
+  return text === undefined ? undefined : Number(text)
+}
 
 /** A code-spell part's `line` with what it says as given:  `- it has a films page at "/films", named "Films"`. */
-function codeLineWith(line: string, part: SitePart, { address, title, state, picture }: PartWords): string {
+function codeLineWith(
+  line: string,
+  part: SitePart,
+  { address, title, state, picture, row, column, color }: PartWords
+): string {
   const ending = line.endsWith("\n") ? "\n" : ""
   const at = address === undefined ? "" : ` at ${JSON.stringify(address)}`
   const named = title === undefined || !address ? "" : `, named ${JSON.stringify(title)}`
   const stated = state === undefined || !address ? "" : `, ${state}`
   const pictured = picture === undefined || !address ? "" : `, pictured in ${JSON.stringify(picture)}`
+  const placed = row === undefined || column === undefined ? "" : `, in row ${row} column ${column}`
+  const colored = color === undefined ? "" : `, colored ${color}`
   const name = part.isQuoted ? JSON.stringify(part.name) : part.name
-  return `${part.indent}- it has ${articleOf(part.name)} ${name}${at}${named}${stated}${pictured}${ending}`
+  return `${part.indent}- it has ${articleOf(part.name)} ${name}${at}${named}${stated}${pictured}${placed}${colored}${ending}`
 }
 
 /** `a` or `an`, for `name`. */
@@ -479,7 +592,10 @@ const SPELLX_PART = /^<(page|dialog|sidebar)\s+"([^"]+)"([^>]*?)\s*(\/>|>)$/
 
 /** A code-spell part's line:  `- it has a films page at "/films", named "Films"`, `- it has a settings dialog`. */
 const CODE_PART =
-  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, (old|new|mocked|built))?(?:, pictured in "([^"]*)")?\s*$/
+  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, (old|new|mocked|built))?(?:, pictured in "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
+
+/** The end of a spellx tag that closes itself, `<page "x"/>`, what follows it in group 1. */
+const SPELLX_CLOSES_ITSELF = /\s*\/>(\s*)$/
 
 /** An attribute `word` in a spellx tag, its value in group 1. */
 const ATTRIBUTE = (word: string) => new RegExp(`\\b${word}="([^"]*)"`)

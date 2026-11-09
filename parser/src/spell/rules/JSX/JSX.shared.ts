@@ -72,6 +72,8 @@ const PLAIN_WORD = /^\p{L}+$/u
 export type JSXMatchData = {
   /** (`jsxAttribute`/`jsxExpression`) Sub-expression match parsed out of the attribute/expression value. */
   expression?: P.Match
+  /** (`jsxAttribute`/`jsxExpression`) The items of the loops around it, in a drawing:  `readableInDrawing()`. */
+  loopItems?: string[]
   /** (`jsxAttribute`) Sub-statement match parsed out of an `on*` attribute value, e.g. an inline event handler. */
   statement?: P.Match
   /**

@@ -572,10 +572,10 @@ describe("<epic-item> review controls", () => {
     ).not.toBeNull()
   })
 
-  test("answered, the work still due (Owen, 2026-10-10):  the chip OUTLINED -- green queued, blue Claude on it;  done, solid", async () => {
+  test("answered, the work still due (Owen, 2026-10-10):  the chip blue:  dotted queued, outlined Claude on it;  done, solid", async () => {
     await adoptClient()
     const queued = await render(
-      `<epic-item id="t4" title="Tidy" status="open" state="open" queued="2026-10-10" work="P9 · Build" review-as="next"></epic-item>`
+      `<epic-item id="t4" title="Tidy" status="open" state="scheduled" queued="2026-10-10" work="P9 · Build" review-as="next"></epic-item>`
     )
     const onIt = await render(`<epic-item id="j6" title="A call" status="open" state="progress"></epic-item>`)
     const doneTodo = await render(
@@ -587,7 +587,7 @@ describe("<epic-item> review controls", () => {
       return [chip.dataset.color, chip.dataset.fill, getComputedStyle(chip).backgroundColor === "rgba(0, 0, 0, 0)"]
     }
     expect([look(queued), look(onIt), look(doneTodo)]).toEqual([
-      ["green", "outline", true],
+      ["blue", "dotted", true],
       ["blue", "outline", true],
       [undefined, undefined, false]
     ])
@@ -719,7 +719,7 @@ describe("<epic-item> review controls", () => {
     chip().click()
     await settle()
     expect(routes.inbox.urgency.j6?.calm).toBe(true)
-    expect([box().classList.contains("open"), box().classList.contains("attention")]).toEqual([true, false])
+    expect([box().classList.contains("quiet"), box().classList.contains("attention")]).toEqual([true, false])
     expect(chip().hasAttribute("data-unsent")).toBe(true)
     expect(host.open).toBeFalsy()
     chip().click()

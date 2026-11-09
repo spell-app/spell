@@ -49,6 +49,7 @@ import {
   STATE_TIP_KEYS,
   STATUS_SLOT,
   DrawnState,
+  MANUAL_TEST,
   THREAD_ATTRIBUTES,
   TITLE,
   TOGGLE,
@@ -239,6 +240,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    */
   readonly itemState = createMemo((): ItemState => DrawnState.of(this.stateFields(), this.reviewState.liveOf()))
 
+  /** A manual test orange because its phase isn't done (`PlanReader.manualTestState()`):  its tooltip says so. */
+  private get isWaitingTest(): boolean {
+    return MANUAL_TEST.test(this.domElement.id) && this.itemState() === "replied"
+  }
+
   /** Its attributes its drawn state reads (`DrawnState.of()`), tracked. */
   private stateFields(): StateFields {
     const { id, state, status, changed, reviewed, queued, working, urgent, fixed } = this
@@ -275,8 +281,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const taken = pickLabel(this.reviewState.takenPick())
     if (taken && !this.domElement.querySelector(CHOSEN_SET))
       return { color: "green", fill: "outline", label: { pick: taken } }
-    if (this.itemState() === "progress") return { color: "blue", fill: "outline" }
-    if (this.queued && this.status === "open") return { color: "green", fill: "outline" }
+    if (this.itemState() === "progress" || this.itemState() === "handed") return { color: "blue", fill: "outline" }
+    if (this.itemState() === "scheduled") return { color: "blue", fill: "dotted" }
     return undefined
   })
 
@@ -399,7 +405,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     // greyed with age (`ItemAge`), it's still decided or done, not "no longer relevant"
     const aged = this.itemState() === "old" && this.status !== "canceled"
     const parts = [
-      this.translationForKey(this.fixed ? "stateFixed" : STATE_TIP_KEYS[aged ? "recent" : this.itemState()])
+      this.translationForKey(
+        this.fixed
+          ? "stateFixed"
+          : this.isWaitingTest
+            ? "stateTestWaiting"
+            : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
+      )
     ]
     const mark = this.chipMark()
     // a mark with no label (work still due:  queued, Claude on it):  the state's words and `to do` say it

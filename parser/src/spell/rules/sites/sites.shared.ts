@@ -20,6 +20,12 @@ export type SitePageEntry = {
   state?: string
   /** a picture of it, if the line names one:  a file of the project, `snapshots/films.png` */
   picture?: string
+  /** which row of its section on the site editor's board its card is in, from 1, if the line says */
+  row?: number
+  /** which column of its section, from 1 */
+  column?: number
+  /** its card's colour on the board, one of Spell UI's, if the line says;  the parts under it take it too */
+  color?: string
   /** its address's parameters, each one of the page's own properties:  `["film"]` */
   params?: string[]
   /** the pages under it, as the lines under its line list them */
@@ -36,6 +42,45 @@ export type SiteOverlayEntry = {
   name: string
   /** the view it draws, when one of its name is declared:  `SettingsDialog` */
   view?: string
+  /** which row of its section on the site editor's board its card is in, from 1, if the line says */
+  row?: number
+  /** which column of its section, from 1 */
+  column?: number
+  /** its card's colour on the board, one of Spell UI's, if the line says */
+  color?: string
+}
+
+/** Where a part's card sits in its section of the site editor's board, and its colour:  what the end of its line says. */
+export type SiteCardDetails = Pick<SitePageEntry, "row" | "column" | "color">
+
+/**
+ * What the end of a part's line says about its card:  `, in row 2 column 3, colored blue` (epic `mockup` T31).
+ * - Only what it says:  none of the keys when the line says nothing.
+ * - `undefined` when its row or column isn't a whole number from 1:  the caller refuses the line, saying why.
+ */
+export function cardDetailsOf(groups: {
+  row?: P.Match
+  column?: P.Match
+  color?: P.Match
+}): SiteCardDetails | undefined {
+  const { row, column, color } = groups
+  const place = row && column ? { row: Number(row.raw), column: Number(column.raw) } : {}
+  if (row && column && !(isCardPosition(place.row) && isCardPosition(place.column))) return undefined
+  const named = Wording.meaningOf(color)
+  return { ...place, ...(named && { color: named }) }
+}
+
+/** Is `number` a row or column:  whole, from 1? */
+function isCardPosition(number: number | undefined): boolean {
+  return Number.isInteger(number) && number! >= 1
+}
+
+/** The message refusing a line whose `row` and `column` aren't a place in a section. */
+export function cardPlaceMessage(language: SP.Language, groups: { row?: P.Match; column?: P.Match }): string {
+  return language.parserMessage("site-card-place-not-whole", {
+    row: groups.row?.raw ?? "",
+    column: groups.column?.raw ?? ""
+  })
 }
 
 /** The site whose body `scope` is in:  its type, or `undefined` anywhere else. */

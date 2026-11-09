@@ -14,6 +14,9 @@
  *   | `--ui-tree-nav-subheading-color` | a `band="subheading"` row |
  *   | `--ui-tree-nav-border-color` | the line above a band |
  *   | `--ui-tree-nav-current-background` / `-color` | the selected row, the page shown |
+ *   | `--ui-tree-nav-open-duration` / `-close-duration` | how long a row's rows take to ease open, and shut |
+ *   | `--ui-tree-nav-ease` | how they ease |
+ *   - A row's rows stay drawn while it's closed, a one-row grid 0fr tall, so they ease;  never under reduced motion.
  */
 @layer ui.components {
   :host {
@@ -188,9 +191,47 @@
       --ui-tree-nav-current-color,
       light-dark(var(--ui-primary-text), var(--ui-primary-on))
     );
+    --_ui-tree-nav-open-duration: var(--ui-tree-nav-open-duration, 320ms);
+    --_ui-tree-nav-close-duration: var(--ui-tree-nav-close-duration, 140ms);
+    --_ui-tree-nav-ease: var(--ui-tree-nav-ease, var(--ui-ease-out));
     --_ui-tree-indent: var(--ui-tree-indent, 1em);
     --_ui-tree-hover-background: var(--ui-tree-hover-background, oklch(from var(--ui-text-dark) l c h / 0.06));
     line-height: 1.25;
+  }
+  /* a row's rows, folded:  one grid row, 1fr open, 0fr shut, what's in it clipped and hidden once it's folded */
+  :host(:state(nav)) > .rows {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+  :host(:state(nav)) > .rows.shut {
+    grid-template-rows: 0fr;
+  }
+  :host(:state(nav)) > .rows > .folded {
+    min-height: 0;
+    overflow: hidden;
+  }
+  :host(:state(nav)) > .rows.shut > .folded {
+    visibility: hidden;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :host(:state(nav)) > .rows {
+      transition: grid-template-rows var(--_ui-tree-nav-open-duration) var(--_ui-tree-nav-ease);
+    }
+    :host(:state(nav)) > .rows.shut {
+      transition-duration: var(--_ui-tree-nav-close-duration);
+    }
+    /* hidden only once it's folded:  its `visibility` waits out the close */
+    :host(:state(nav)) > .rows.shut > .folded {
+      transition: visibility 0s linear var(--_ui-tree-nav-close-duration);
+    }
+    :host(:state(nav)) > .row > .toggle {
+      transition: opacity 150ms ease-out;
+    }
+    :host(:state(nav):state(has-items)) > .row > .toggle::before {
+      transition:
+        rotate 200ms var(--_ui-tree-nav-ease),
+        translate 200ms var(--_ui-tree-nav-ease);
+    }
   }
   :host(:state(nav)) > .row {
     gap: 0.75em;
@@ -217,7 +258,8 @@
   }
   /* the rows under a band:  a little room above and below, as a list of links has, and a pixel between rows;
      a subheading band goes edge to edge, as the first and last thing under its heading */
-  :host(:state(nav):state(band)) > .rows {
+  :host(:state(nav):state(band)) > .rows > .folded > slot {
+    display: block;
     padding-block: 0.375em;
   }
   :host(:state(nav):not(:state(band))) {
@@ -249,7 +291,8 @@
     margin-inline: auto -0.25em;
     opacity: 0.55;
   }
-  :host(:state(nav)) > .row:hover > .toggle {
+  :host(:state(nav)) > .row:hover > .toggle,
+  :host(:state(nav):focus-visible) > .row > .toggle {
     opacity: 1;
   }
   :host(:state(nav):state(has-items)) > .row > .toggle::before {

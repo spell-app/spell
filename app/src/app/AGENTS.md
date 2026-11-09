@@ -20,12 +20,14 @@ and in the app's build folder, `app/` at the app folder's root.
     `core`'s [drawing.ts](../../../parser/src/core/drawing.ts).
   - No React:  every `.tsx` is Solid.
   - `build.test.ts` pins that no chunk holds React, `spell-runtime.js` included.
-  - Two test projects (the root's `vitest.config.ts`):
-    - Both read the app folder's `tests/app/`, where the tests live at the same paths as the code:
+  - Three test projects (the root's `vitest.config.ts`):
+    - All read the app folder's `tests/app/`, where the tests live at the same paths as the code:
       the test of this folder's `index.tsx` is [solid.test.tsx](../../tests/app/solid.test.tsx).
     - `app:node`, for most tests:  there Solid is its SERVER build
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
+    - `app:integration`, for `tests/app/pages/*.test.ts`:  headless Playwright over this checkout's running editor,
+      one file at a time
   - `spell/app/app/solid` is the app's UI, all Solid (P8).
     - the pages' shell (`SpellPage`, `AppRoot`)
     - menus, panes, dialogs, and the plumbing
@@ -36,7 +38,8 @@ and in the app's build folder, `app/` at the app folder's root.
 - `src/` is the app:
   - `solid/`:  the UI
   - `pages/`:  the pages and the router;  among them a site's editor, `/site/<project>` (`SiteEditorPage`, epic
-    `mockup` P4), which changes the site's file through `SiteWrites`;  a page's jobs, `PageJobs` (P6)
+    `mockup` P4), which changes the site's file through `SiteWrites`;  a page's stories, `PageStories` (P6);
+    its board of sections and cards, `SiteBoard` and `<SiteBoardView>` (T31);  a group's sites, `/site/<group>` (`SiteGroupPage`)
   - `ui/`:  `UI`, shared UI types, Monaco's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)

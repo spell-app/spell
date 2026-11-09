@@ -57,7 +57,7 @@ import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
 import { readNumbersAs } from "./saving"
-import { showSignIn } from "./signInBar"
+import { showSignIn, signInMenu } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -1423,6 +1423,15 @@ export const savedMethods = defineCoreModule({
   /** The person using the program:  what `them` compiles to.  With no sign-in, the name its server knows them by, else a guest. */
   currentPerson(): PersonHere {
     return programPlaces().person
+  },
+
+  /**
+   * The person menu, for a program's own toolbar:  what `the sign in menu` compiles to.
+   * - Who's signed in and the way in and out, where the bar above the app would show them.
+   * - With no page, as under `spell run`:  nothing.
+   */
+  signInMenu(): HTMLElement | undefined {
+    return signInMenu()
   },
 
   /**

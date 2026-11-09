@@ -120,6 +120,29 @@ describe("<epic-phase>", () => {
     expect([pill(open!).textContent, pill(open!).classList.contains("took")]).toEqual(["1h", false])
   })
 
+  // epic `epic-engine` I127 (Owen:  "`34m / 4h` is fine, shorter is good ... explain more in the tool tip")
+  test("done, timed and spanned:  the pill says `34m / 4h`, its tooltip in words;  no span, only the time worked", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-span" title="Span" status="done" estimate="~3-4h" took="34m" span="4h"></epic-phase>` +
+        `<epic-phase id="p-no-estimate" title="No estimate" status="done" took="34m" span="4h"></epic-phase>` +
+        `<epic-phase id="p-no-start" title="No start" status="done" estimate="3-4h" took="34m"></epic-phase>` +
+        `<epic-phase id="p-open" title="Open" status="active" estimate="1h" took="5m" span="2h"></epic-phase>` +
+        `</epic-section>`,
+      "#p-span"
+    )
+    const shown = Array.from(host.parentElement!.children).map((phase) => {
+      const pill = phase.shadowRoot!.querySelector('[part~="estimate"]')!
+      return [pill.textContent, pill.getAttribute("title")]
+    })
+    expect(shown).toEqual([
+      ["34m / 4h", "34m of work over 4h, estimated ~3-4h"],
+      ["34m / 4h", "34m of work over 4h"],
+      ["34m", "~3-4h"],
+      ["1h", null]
+    ])
+  })
+
   // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")
   test("dropped:  its title struck through and grey, a crossed circle, its Dropped field;  grey in the chips, not open", async () => {
     const host = await render(

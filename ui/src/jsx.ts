@@ -4765,6 +4765,50 @@ export interface UICardAttributes {
     | "positive"
     | "negative"
   /**
+   * Fills the card with a light tint of this colour, its text dark enough to read in the light and dark schemes;  `--ui-card-tint-lightness` and `--ui-card-tint-chroma` set how light and how strong.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  background?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `background`, as the DOM element's property.
+   * @deprecated write `background` -- `prop:` stays only for compiled spell
+   */
+  "prop:background"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
    * `horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
@@ -5175,6 +5219,50 @@ export interface UICardsAttributes {
    * @deprecated write `color` -- `prop:` stays only for compiled spell
    */
   "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Fills every card in the group with a light tint of this colour, as a card's `background` does.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  background?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `background`, as the DOM element's property.
+   * @deprecated write `background` -- `prop:` stays only for compiled spell
+   */
+  "prop:background"?:
     | "primary"
     | "secondary"
     | "red"
@@ -39915,12 +40003,12 @@ export interface UISiteNavEventMap {
 /** `<ui-site-nav>`'s own attributes, from its vocabulary. */
 export interface UISiteNavAttributes {
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` (open or closed, whatever the person did:  the page decides).
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   pages?: unknown
   /**
-   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` (open or closed, whatever the person did:  the page decides).
+   * The site's pages, nested as the navigation nests them:  `SiteNavPage[]`, each `{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  A page with no `href` only holds pages:  a click opens or closes it.  Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, `badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` (open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  marked as shown whenever that page is).
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `pages` -- `prop:` stays only for compiled spell
    */

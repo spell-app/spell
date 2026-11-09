@@ -213,7 +213,10 @@ export type ProjectManifestJSON5 = {
   imports: ProjectManifestImport[]
   /** Its name for people, from its project file, when its folder's name can't say it:  see `SpellProject.title`. */
   title?: string
-  /** This project's semver, from its project file -- stamped on its declarations. */
+  /**
+   * This project's semver, from its project file -- stamped on its declarations.
+   * - It marks a project made to be imported:  with no `exports`, its own types are made by name (`P.WriterOptions.extendable`).
+   */
   version?: string
   /** Names it offers importers, from its project file -- default:  everything it declares. */
   exports?: string[]
@@ -309,8 +312,15 @@ export type ProjectList = ProjectListEntry[]
  * - `description` only when its project file has one:  what it shows, for the editor's landing page cards.
  * - `language` only when its files are all written in another language than English, by their names:
  *   `es` for Solitario (`Carta.es.spell` ...), so the landing page lists it under "En Español".
+ * - `isSite` only when one of its files declares a site:  the page of a group's sites lists those.
  */
-export type ProjectListEntry = { path: string; title?: string; description?: string; language?: string }
+export type ProjectListEntry = {
+  path: string
+  title?: string
+  description?: string
+  language?: string
+  isSite?: boolean
+}
 
 /** List of project addresses, e.g. `owen@spell/errors`:  a `ProjectList`'s paths. */
 export type ProjectPathList = string[]

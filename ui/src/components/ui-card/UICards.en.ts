@@ -7,6 +7,7 @@
 
 import type { E } from "spell/ui/core"
 import * as UIT from "spell/ui/components/components.types"
+import { TINTED_HUES } from "./UICard.en"
 
 /****************
  * ### `cardsVocabulary`
@@ -22,6 +23,13 @@ export const cardsVocabulary = {
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Text size of every card in the group." },
     { name: "color", group: "appearance", kind: "color", description: "Colour of every card in the group." },
+    {
+      name: "background",
+      group: "appearance",
+      kind: "color",
+      classes: TINTED_HUES,
+      description: "Fills every card in the group with a light tint of this colour, as a card's `background` does."
+    },
     {
       name: "columns",
       group: "layout",

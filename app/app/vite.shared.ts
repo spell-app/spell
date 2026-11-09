@@ -6,7 +6,7 @@ import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
-import { CSS_TARGETS, SOLID_DEDUPE } from "spell/element-tools/elementConfig"
+import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE } from "spell/element-tools/elementConfig"
 import { emitIconPacks } from "spell/ui/vite.config.ts"
 
 /**
@@ -63,7 +63,7 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
     // every import a package name, found through `package.json`s' `exports` (epic `repo-split` P14):  no aliases
     resolve: { dedupe: SOLID_DEDUPE },
     // every repo's files, beside spell-app (`TOP_REPO`)
-    server: { fs: { allow: [TOP_REPO] } },
+    server: { ...DEV_SERVER_SETTINGS, fs: { allow: [TOP_REPO] } },
     css: {
       transformer: "lightningcss",
       lightningcss: {
