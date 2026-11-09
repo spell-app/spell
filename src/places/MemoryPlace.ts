@@ -364,6 +364,22 @@ export class MemoryPlace implements Place {
     this.collections.set(collection, structuredClone([...rows]))
   }
 
+  /** Forget everything it holds:  what starting over is, not a write, so nobody's told. */
+  protected forgetEveryCollection(): void {
+    this.collections.clear()
+  }
+
+  /** Does some row of `collection` have this field? */
+  protected holdsField(collection: string, field: string): boolean {
+    return this.rowsOf(collection).some((row) => field in row)
+  }
+
+  /** Add fields the row with this id doesn't have yet:  what's there stays, a change made here above all.  Nobody's told. */
+  protected addMissingFields(collection: string, id: string, fields: PlaceRow): void {
+    const row = this.rowFor(collection, id)
+    if (row) for (const [field, value] of Object.entries(fields)) if (!(field in row)) row[field] = value
+  }
+
   /** Every collection it holds, by name:  copies. */
   protected get everyCollection(): Record<string, PlaceRow[]> {
     return structuredClone(Object.fromEntries(this.collections))

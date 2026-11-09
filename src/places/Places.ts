@@ -151,8 +151,8 @@ export class Places {
     return () => this.swapListeners.delete(listener)
   }
 
-  /** What showed from the place behind `name` no longer stands -- see `useInstead()`. */
-  private async readAfresh(name: string): Promise<void> {
+  /** What showed from the place behind `name` no longer stands -- see `useInstead()`:  every reader reads again. */
+  async readAfresh(name: string): Promise<void> {
     const readers = this.reads.readersOf(name)
     this.reads.forgetPlace(name)
     for (const [type, ids] of this.rowsFromPlace.get(name) ?? []) {
