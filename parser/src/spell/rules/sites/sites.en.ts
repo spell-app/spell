@@ -11,6 +11,9 @@ import { ShowSitePart } from "./ShowSitePart"
 import { SiteAddressOf } from "./SiteAddressOf"
 import { SitePartWords } from "./SitePartWords"
 
+/** What a page's line may say after its address:  what the navigation calls it, its tab, how far along it is, its picture. */
+const PAGE_DETAILS = "(, named {title:text})? (, tab {tab:text})? (, {state:site_page_state})? (, pictured in {picture:text})?"
+
 /** What any part's line may end with:  its place in its section of the site editor's board, and its colour there. */
 const CARD_DETAILS = "(, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
 
@@ -278,12 +281,12 @@ sites.addRule(CreateSite, {
 
 // a page of a site, at its address:  `- it has a film page at "/films/:film", named "Film"`
 sites.addRule(SitePage, {
-  syntax: `{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_it} has (a|an) {part:site_part_words} at {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... with the subject left out:  `- has a film page at "/films/:film"`
 sites.addRule(SitePage, {
-  syntax: `{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // a dialog or a sidebar of a site:  `- it has a settings dialog`, `- it has a syntax sidebar`
@@ -294,10 +297,10 @@ sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:si
 
 // ... its name quoted, as any name may be:  `- it has a "page of films" at "/films"`
 sites.addRule(SitePage, {
-  syntax: `{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_it} has (a|an) {part:quoted_member} at {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 sites.addRule(SitePage, {
-  syntax: `{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... and a dialog or sidebar's:  `- it has a "dialog of settings"`

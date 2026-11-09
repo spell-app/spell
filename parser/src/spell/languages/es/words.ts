@@ -347,6 +347,7 @@ export const spanishWords: SP.LanguageWords = {
       siteCloud: "{words} es {a super} {super} en la nube :",
       sitePage: "tiene {a words} {words} en {quoted address}",
       sitePageTitled: "tiene {a words} {words} en {quoted address} , llamada {quoted title}",
+      sitePageTab: ", pestaña {quoted tab}",
       sitePageState: ", {state}",
       sitePagePicture: ", ilustrada en {quoted picture}",
       siteCardPlace: ", en la fila {row} columna {column}",

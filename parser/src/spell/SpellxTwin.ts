@@ -661,6 +661,7 @@ export class SpellxTwin {
           this.expand(
             [
               this.attribute("title") ? words.sitePageTitled : words.sitePage,
+              this.attribute("tab") ? words.sitePageTab : "",
               // the state is a word of the line, not a text:  `state="old"` is `, old`
               this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
               this.attribute("picture") ? words.sitePagePicture : "",

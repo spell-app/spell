@@ -364,6 +364,8 @@ export type SitePageEntry = {
   address: string
   /** what the site calls it, in its navigation, if the line names it:  `Film` */
   title?: string
+  /** what its tab says in `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
+  tab?: string
   /** its address's parameters, each one of the page's own properties:  `["film"]` */
   params?: string[]
   /** the pages under it, as the lines under its line list them */

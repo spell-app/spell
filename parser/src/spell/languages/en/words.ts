@@ -317,6 +317,7 @@ export const englishWords: SP.LanguageWords = {
       siteCloud: "{words} is {a super} {super} in the cloud :",
       sitePage: "it has {a words} {words} at {quoted address}",
       sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
+      sitePageTab: ", tab {quoted tab}",
       sitePageState: ", {state}",
       sitePagePicture: ", pictured in {quoted picture}",
       siteCardPlace: ", in row {row} column {column}",

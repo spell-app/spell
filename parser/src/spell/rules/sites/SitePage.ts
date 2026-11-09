@@ -16,6 +16,8 @@ import { cardDetailsOf, cardPlaceMessage, pageNamed, paramsIn, siteOf, type Site
  * - e.g. `- it has a film page at "/films/:film", in row 2 column 3, colored blue`:
  *   where its card sits in its section of the site editor's board, and its colour (epic `mockup` T31);
  *   any part's line may end so
+ * - e.g. `- it has a button usage page at "/button", named "Button", tab "Usage"`:  what its tab says, when it has pages
+ *   under it and shouldn't read as the navigation does (epic `notebook` P10, Q10)
  * - e.g. `- it has a button usage page at "/button"`:  a page named for a notebook, `button usage`, its last word
  *   "page" read as a word, not the type's
  * - The SITE holds each page's address and name, never the page:  so a page moves, or is named in another language,
@@ -31,7 +33,7 @@ import { cardDetailsOf, cardPlaceMessage, pageNamed, paramsIn, siteOf, type Site
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.
  */
 export class SitePage extends SpellStatement<
-  "type|part|address|title?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
+  "type|part|address|title?|tab?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
   { entry?: SitePageEntry }
 > {
   @proto static priority = Priority.declaration + 1
@@ -68,6 +70,7 @@ export class SitePage extends SpellStatement<
       return SpellStatement.refuse(match, language.parserMessage("site-address-taken", { address, page: taken }))
     }
     const title = match.groups.title ? textIn(match.groups.title) : undefined
+    const tab = match.groups.tab ? textIn(match.groups.tab) : undefined
     const state = Wording.meaningOf(match.groups.state)
     const picture = match.groups.picture ? textIn(match.groups.picture) : undefined
     const card = cardDetailsOf(match.groups)
@@ -77,6 +80,7 @@ export class SitePage extends SpellStatement<
       page: page.name,
       address,
       ...(title && { title }),
+      ...(tab && { tab }),
       ...(state && { state }),
       ...(picture && { picture }),
       ...card,

@@ -687,6 +687,8 @@ export type SpellxTwinWords = {
   sitePage: string
   /** ... with what the site calls it, `title=`:  `..., named {quoted title}`. */
   sitePageTitled: string
+  /** What a page's `tab=` adds to its line:  what its tab says. */
+  sitePageTab: string
   /** What a page's `state=` adds to its line. */
   sitePageState: string
   /** What a page's `picture=` adds to its line. */
