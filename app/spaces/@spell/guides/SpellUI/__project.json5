@@ -32,6 +32,14 @@
       "active": true
     },
     {
+      "path": "/KitchenSink.spellml",
+      "active": true
+    },
+    {
+      "path": "/ThemeBench.spellml",
+      "active": true
+    },
+    {
       "path": "/Accordion/Usage.spellml",
       "active": true
     },
@@ -1149,6 +1157,10 @@
     },
     {
       "path": "/SiteTabs/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/SiteTabs/Theming.spellml",
       "active": true
     },
     {

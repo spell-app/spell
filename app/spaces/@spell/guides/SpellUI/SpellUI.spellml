@@ -12,6 +12,8 @@
 	<page "icons page" address="/icons" title="Icons"/>
 	<page "utilities page" address="/utilities" title="Utilities"/>
 	<page "component index page" address="/components" title="Components"/>
+	<page "kitchen sink page" address="/kitchen-sink" title="Kitchen Sink"/>
+	<page "theme bench page" address="/theme-bench" title="Theme bench"/>
 	<page "accordion usage page" address="/accordion" title="Accordion" tab="Usage">
 		<page "accordion examples page" address="/accordion/examples" title="Examples"/>
 		<page "accordion api page" address="/accordion/api" title="API"/>
@@ -365,6 +367,7 @@
 	<page "site-tabs usage page" address="/site-tabs" title="Site tabs" tab="Usage">
 		<page "site-tabs examples page" address="/site-tabs/examples" title="Examples"/>
 		<page "site-tabs api page" address="/site-tabs/api" title="API"/>
+		<page "site-tabs theming page" address="/site-tabs/theming" title="Theming"/>
 	</>
 	<page "slider usage page" address="/slider" title="Slider" tab="Usage">
 		<page "slider examples page" address="/slider/examples" title="Examples"/>

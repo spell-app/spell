@@ -1,0 +1,2133 @@
+<spell-page "kitchen sink" notebook>
+	<header level="1">
+		Kitchen Sink
+		<header>Every component family's main example on one page, live: pick a theme and see it everywhere at once.</>
+	</>
+
+	<!-- A snapshot of the docs site's kitchen sink (`yarn site:kitchen`, each family's main example). -->
+	<markdown>
+		Every component family's main example, live, on one page: pick a theme and a colour scheme below and see it on
+		everything at once. The choice is remembered on every page of this site. Each family's own page has the rest of
+		its examples; the [theming page](/theming) says which themes restyle which components.
+	</>
+	<sticky class="site-sticky-bar">
+		<segment appearance="secondary">
+			<theme-menu/>
+		</>
+	</>
+
+	<section label="Elements">
+		<section label="Button" sticky="stack" collapsible dividing>
+			<example "Button" description="A button indicates a possible user action. \[Button page](/button)">
+				<button>Follow</button>
+			</example>
+			<example "Button" description="Emphasis">
+				<button color="primary">Save</button>
+				<button color="secondary">Okay</button>
+				<button>Cancel</button>
+			</example>
+			<example "Button" description="Animated">
+				<button reveal="slide" icon="arrow-right">Next</button>
+				<button reveal="vertical" icon="cart-shopping">Shop</button>
+				<button reveal="fade"><text slot="icon">$12.99 a month</text>Sign-up for a Pro account</button>
+			</example>
+		</>
+
+		<section label="Container" sticky="stack" collapsible dividing>
+			<example "Container" description="A container limits content to a maximum width. \[Container page](/container)">
+				<container>
+					<text paragraph>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</text>
+					<text paragraph>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</text>
+				</container>
+			</example>
+			<example "Container" description="Text container">
+				<html>
+					<ui-container text>
+						<h2>Header</h2>
+						<ui-text paragraph>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</ui-text>
+						<ui-text paragraph>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</ui-text>
+					</ui-container>
+				</html>
+			</example>
+		</>
+
+		<section label="Content parts" sticky="stack" collapsible dividing>
+			<example "Content parts" description="Headers, content, descriptions, metas and the other generic parts that cards, items, modals and messages share. \[Content parts page](/content-parts) · \[Actions page](/actions) · \[Author page](/author) · \[Avatar page](/avatar) · \[Content page](/content) · \[Date page](/date) · \[Description page](/description) · \[Detail page](/detail) · \[Extra page](/extra) · \[Meta page](/meta) · \[Summary page](/summary) · \[Title page](/title) · \[Value page](/value)">
+				<header level="1">First header</header>
+				<header level="2">Second header</header>
+				<header level="3">Third header</header>
+				<header level="4">Fourth header</header>
+				<header level="5">Fifth header</header>
+				<header level="6">Sixth header</header>
+			</example>
+			<example "Content parts" description="Content headers">
+				<header size="huge">Huge header</header>
+				<header size="large">Large header</header>
+				<header>Plain header</header>
+				<header size="medium">Medium header</header>
+				<header size="small">Small header</header>
+				<header size="tiny">Tiny header</header>
+				<header size="mini">Mini header</header>
+				<header size="massive" level="2">A sized page header</header>
+			</example>
+			<example "Content parts" description="Icon headers">
+				<header align="center" icon level="2"><icon name="users" appearance="circular"/> Friends</header>
+				<header icon level="2">
+					<icon name="gear"/>
+					<content>Account Settings <header sub>Manage your account settings and set e-mail preferences.</header></content>
+				</header>
+			</example>
+		</>
+
+		<section label="Divider" sticky="stack" collapsible dividing>
+			<example "Divider" description="A divider visually segments content into groups. \[Divider page](/divider)">
+				<text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</text>
+				<divider/>
+				<text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</text>
+			</example>
+			<example "Divider" description="Vertical divider">
+				<stack style="position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4em; padding: 1em; border: 1px solid var(--ui-border-color);">
+					<stack>
+						<text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</text>
+					</stack>
+					<divider direction="vertical">and</divider>
+					<stack>
+						<text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</text>
+					</stack>
+				</stack>
+			</example>
+			<example "Divider" description="Horizontal divider">
+				<stack style="text-align: center">
+					<button type="button">Search</button>
+					<divider direction="horizontal">Or</divider>
+					<button type="button">Create new order</button>
+				</stack>
+				<divider direction="horizontal" icon="tag">Description</divider>
+				<text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</text>
+				<divider direction="horizontal" icon="chart-column">Specifications</divider>
+			</example>
+		</>
+
+		<section label="Emoji" sticky="stack" collapsible dividing>
+			<example "Emoji" description="An emoji is a glyph used to represent something else. \[Emoji page](/emoji)">
+				<text paragraph>
+					<emoji name="grinning_face_with_smiling_eyes"/>
+					<emoji name="face_with_tears_of_joy"/>
+					<emoji name="thumbs_up"/>
+					<emoji name="red_heart"/>
+					<emoji name="sun"/>
+					<emoji name="flag_united_states"/>
+					<emoji name="keycap_1"/>
+					<emoji name="woman_technologist"/>
+				</text>
+			</example>
+			<example "Emoji" description="In text">
+				<text paragraph>That was <emoji name=":face_with_tears_of_joy:"/> hilarious, thanks <emoji name="thumbs_up" label="Approved"/></text>
+			</example>
+			<example "Emoji" description="Decorative">
+				<text paragraph><emoji name="sparkles" label=""/> New features</text>
+			</example>
+		</>
+
+		<section label="Flag" sticky="stack" collapsible dividing>
+			<example "Flag" description="A flag is used to represent a political state. \[Flag page](/flag)">
+				<text paragraph>
+					<flag country="fr"/>
+					<flag country="us"/>
+					<flag country="gb"/>
+					<flag country="de"/>
+					<flag country="jp"/>
+					<flag country="br"/>
+					<flag country="in"/>
+					<flag country="za"/>
+					<flag country="eu"/>
+					<flag country="un"/>
+				</text>
+			</example>
+			<example "Flag" description="Other flags">
+				<text paragraph>
+					<flag country="pride"/>
+					<flag country="transgender"/>
+					<flag country="pirate"/>
+					<flag country="england"/>
+					<flag country="scotland"/>
+					<flag country="wales"/>
+				</text>
+			</example>
+		</>
+
+		<section label="Icon" sticky="stack" collapsible dividing>
+			<example "Icon" description="An icon is a glyph used to represent something else. \[Icon page](/icon)">
+				<icon name="house"/>
+				<icon name="users"/>
+				<icon name="cloud"/>
+				<icon name="puzzle-piece"/>
+				<icon name="heart"/>
+			</example>
+			<example "Icon" description="Regular (outline)">
+				<icon name="heart outline"/>
+				<icon name="bell outline"/>
+				<icon name="envelope outline"/>
+				<icon name="circle outline"/>
+			</example>
+			<example "Icon" description="Brands">
+				<icon name="github"/>
+				<icon name="discord"/>
+				<icon name="medium"/>
+			</example>
+		</>
+
+		<section label="Image" sticky="stack" collapsible dividing>
+			<example "Image" description="An image is a graphic representation of something. \[Image page](/image)">
+				<image src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt=""/>
+			</example>
+			<example "Image" description="Image link">
+				<image link="#image-link" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt="A landscape"/>
+			</example>
+		</>
+
+		<section label="Input" sticky="stack" collapsible dividing>
+			<example "Input" description="An input is a field used to elicit a response from a user. \[Input page](/input) · \[Textarea page](/textarea)">
+				<input placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example "Input" description="Native types">
+				<stack class="ui-cluster">
+					<input type="password" placeholder="Password" aria-label="Password"/>
+					<input type="email" placeholder="E-mail" aria-label="E-mail"/>
+					<input type="number" placeholder="Quantity" aria-label="Quantity"/>
+					<input type="date" aria-label="Date"/>
+				</stack>
+			</example>
+			<example "Input" description="Textarea">
+				<textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"/>
+			</example>
+		</>
+
+		<section label="Label" sticky="stack" collapsible dividing>
+			<example "Label" description="A label displays content classification. \[Label page](/label)">
+				<label icon="envelope">23</label>
+				<text paragraph><html><kbd><ui-label>Ctrl</ui-label></kbd> + <kbd><ui-label>Alt</ui-label></kbd> + <kbd><ui-label>Del</ui-label></kbd> <kbd><ui-label appearance="basic">W</ui-label></kbd><kbd><ui-label appearance="basic">A</ui-label></kbd><kbd><ui-label appearance="basic">S</ui-label></kbd></html></text>
+			</example>
+			<example "Label" description="Image">
+				<label link="#joe" image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E">Joe</label>
+				<label link="#elliot" image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E">Elliot</label>
+				<label link="#veronika" color="blue" image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" detail="Friend">Veronika</label>
+				<label image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" removable>Zoe</label>
+			</example>
+			<example "Label" description="Pointing">
+				<html>
+					<ui-stack class="ui-stack">
+						<ui-stack>
+							<input type="text" placeholder="First name" aria-label="First name" />
+							<br />
+							<ui-label pointing>Please enter a value</ui-label>
+						</ui-stack>
+						<ui-stack>
+							<ui-label pointing="below">Please enter a value</ui-label>
+							<br />
+							<input type="text" aria-label="Value" />
+						</ui-stack>
+						<ui-stack>
+							<input type="text" placeholder="Username" aria-label="Username" />
+							<ui-label pointing="left">That name is taken!</ui-label>
+						</ui-stack>
+						<ui-stack>
+							<ui-label pointing="right">Your password must be 6 characters or more</ui-label>
+							<input type="password" aria-label="Password" />
+						</ui-stack>
+						<ui-stack>
+							<input type="text" aria-label="Name" />
+							<ui-label color="red" pointing="left" appearance="basic">That name is taken!</ui-label>
+						</ui-stack>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+
+		<section label="List" sticky="stack" collapsible dividing>
+			<example "List" description="A list is used to group related content. \[List page](/list)">
+				<list>
+					<item>Apples</item>
+					<item>Pears</item>
+					<item>Oranges</item>
+				</list>
+			</example>
+			<example "List" description="Icons">
+				<list>
+					<item icon="users">
+						<content>Fomantic UI</content>
+					</item>
+					<item icon="location dot">
+						<content>Worldwide</content>
+					</item>
+					<item icon="mail">
+						<content>
+							<link link="mailto:contact@example.com">contact@example.com</link>
+						</content>
+					</item>
+					<item icon="linkify">
+						<content>
+							<link link="#site">example.com</link>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example "List" description="Relaxed, divided, with headers">
+				<list spacing="lg" divided>
+					<item icon="github">
+						<content>
+							<header link="#ui">fomantic/Fomantic-UI</header>
+							<description>Updated 10 mins ago</description>
+						</content>
+					</item>
+					<item icon="github">
+						<content>
+							<header link="#docs">fomantic/Fomantic-UI-Docs</header>
+							<description>Updated 22 mins ago</description>
+						</content>
+					</item>
+					<item icon="github">
+						<content>
+							<header link="#less">fomantic/Fomantic-UI-LESS</header>
+							<description>Updated 34 mins ago</description>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Loader" sticky="stack" collapsible dividing>
+			<example "Loader" description="A loader alerts a user to wait for an activity to complete. \[Loader page](/loader)">
+				<stack style="position: relative; height: 8em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+					<loader visible/>
+				</stack>
+			</example>
+			<example "Loader" description="Text loader">
+				<stack style="position: relative; height: 8em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+					<loader visible text>Loading</loader>
+				</stack>
+			</example>
+		</>
+
+		<section label="Placeholder" sticky="stack" collapsible dividing>
+			<example "Placeholder" description="A placeholder is used to reserve space for content that soon will appear in a layout. \[Placeholder page](/placeholder)">
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+					<placeholder-paragraph>
+						<placeholder-line length="medium"/>
+						<placeholder-line length="short"/>
+					</placeholder-paragraph>
+				</placeholder>
+			</example>
+			<example "Placeholder" description="Cards">
+				<stack style="--min-column-size: 12em" class="ui-grid">
+					<stack style="padding: 1em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+						<placeholder fluid>
+							<placeholder-image rectangular/>
+							<placeholder-header>
+								<placeholder-line length="very short"/>
+								<placeholder-line length="medium"/>
+							</placeholder-header>
+							<placeholder-paragraph>
+								<placeholder-line length="short"/>
+							</placeholder-paragraph>
+						</placeholder>
+					</stack>
+					<stack style="padding: 1em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+						<placeholder fluid>
+							<placeholder-image rectangular/>
+							<placeholder-header>
+								<placeholder-line length="very short"/>
+								<placeholder-line length="medium"/>
+							</placeholder-header>
+							<placeholder-paragraph>
+								<placeholder-line length="short"/>
+							</placeholder-paragraph>
+						</placeholder>
+					</stack>
+					<stack style="padding: 1em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+						<placeholder fluid>
+							<placeholder-image rectangular/>
+							<placeholder-header>
+								<placeholder-line length="very short"/>
+								<placeholder-line length="medium"/>
+							</placeholder-header>
+							<placeholder-paragraph>
+								<placeholder-line length="short"/>
+							</placeholder-paragraph>
+						</placeholder>
+					</stack>
+				</stack>
+			</example>
+			<example "Placeholder" description="Consecutive placeholders">
+				<stack>
+					<placeholder>
+						<placeholder-header image>
+							<placeholder-line/>
+							<placeholder-line/>
+						</placeholder-header>
+					</placeholder>
+					<placeholder>
+						<placeholder-header image>
+							<placeholder-line/>
+							<placeholder-line/>
+						</placeholder-header>
+					</placeholder>
+					<placeholder>
+						<placeholder-header image>
+							<placeholder-line/>
+							<placeholder-line/>
+						</placeholder-header>
+					</placeholder>
+				</stack>
+			</example>
+		</>
+
+		<section label="Rail" sticky="stack" collapsible dividing>
+			<example "Rail" description="A rail is used to show accompanying content outside the boundaries of the main view of a site. \[Rail page](/rail)">
+				<stack style="margin-inline: 20em">
+					<segment>
+						<rail position="left">
+							<segment>Left rail content</segment>
+						</rail>
+						<rail position="right">
+							<segment>Right rail content</segment>
+						</rail>
+						<text paragraph>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</text>
+					</segment>
+				</stack>
+			</example>
+			<example "Rail" description="Internal">
+				<segment>
+					<rail position="left" internal>
+						<segment>Left rail content</segment>
+					</rail>
+					<rail position="right" internal>
+						<segment>Right rail content</segment>
+					</rail>
+					<text paragraph>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</text>
+				</segment>
+			</example>
+			<example "Rail" description="Dividing">
+				<stack style="margin-inline: 20em">
+					<segment>
+						<rail position="left" dividing>
+							<segment>Left rail content</segment>
+						</rail>
+						<rail position="right" dividing>
+							<segment>Right rail content</segment>
+						</rail>
+						<text paragraph>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</text>
+					</segment>
+				</stack>
+			</example>
+		</>
+
+		<section label="Reveal" sticky="stack" collapsible dividing>
+			<example "Reveal" description="A reveal displays additional content in place of previous content when activated. \[Reveal page](/reveal)">
+				<reveal fade>
+					<image height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+			</example>
+			<example "Reveal" description="Move">
+				<reveal move>
+					<image height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+				<reveal move="right">
+					<image height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+				<reveal move="up">
+					<image height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+				<reveal move="down">
+					<image height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+			</example>
+			<example "Reveal" description="Rotate">
+				<reveal rotate>
+					<image style="border-radius: 50%" height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image style="border-radius: 50%" height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+				<reveal rotate="left">
+					<image style="border-radius: 50%" height="150" width="150" alt="Avatar" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" slot="visible"/>
+					<image style="border-radius: 50%" height="150" width="150" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" slot="hidden"/>
+				</reveal>
+			</example>
+		</>
+
+		<section label="Segment" sticky="stack" collapsible dividing>
+			<example "Segment" description="A segment is used to create a grouping of related content. \[Segment page](/segment)">
+				<segment>
+					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his.</text>
+				</segment>
+			</example>
+			<example "Segment" description="Placeholder segment">
+				<segment placeholder="">
+					<text style="text-align: center" paragraph>No documents are listed for this customer.</text>
+					<button type="button">Add document</button>
+				</segment>
+			</example>
+			<example "Segment" description="Raised">
+				<segment appearance="raised">
+					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his.</text>
+				</segment>
+			</example>
+		</>
+
+		<section label="Step" sticky="stack" collapsible dividing>
+			<example "Step" description="A step shows the completion status of an activity in a series of activities. \[Step page](/step)">
+				<steps>
+					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
+				</steps>
+			</example>
+			<example "Step" description="Steps">
+				<steps>
+					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
+					<step selected icon="credit-card" heading="Billing" description="Enter billing information"/>
+					<step disabled icon="circle-info" heading="Confirm Order"/>
+				</steps>
+			</example>
+			<example "Step" description="Ordered">
+				<steps ordered>
+					<step completed heading="Shipping" description="Choose your shipping options"/>
+					<step completed heading="Billing" description="Enter billing information"/>
+					<step selected heading="Confirm Order" description="Verify order details"/>
+				</steps>
+			</example>
+		</>
+
+		<section label="Text" sticky="stack" collapsible dividing>
+			<example "Text" description="A text is used to style some inline text with a simple color. \[Text page](/text)">
+				<text paragraph>This is <text color="red">red inline text</text> and <text color="blue">this is blue inline text</text> and <text color="purple">this is purple inline text</text>.</text>
+				<text paragraph>
+					<text color="primary">Primary</text>
+					<text color="secondary">Secondary</text>
+					<text color="orange">Orange</text>
+					<text color="yellow">Yellow</text>
+					<text color="olive">Olive</text>
+					<text color="green">Green</text>
+					<text color="teal">Teal</text>
+					<text color="violet">Violet</text>
+					<text color="pink">Pink</text>
+					<text color="brown">Brown</text>
+					<text color="grey">Grey</text>
+					<text color="black">Black</text>
+				</text>
+			</example>
+			<example "Text" description="Semantic colors">
+				<text paragraph>This is <text state="info">info inline text</text> and <text state="success">this is success inline text</text> and <text state="warning">this is warning inline text</text> and <text state="error">this is error inline text</text>.</text>
+			</example>
+		</>
+
+		<section label="Video" sticky="stack" collapsible dividing>
+			<example "Video" description="A video plays a video file in the browser's own player. \[Video page](/video) · \[Audio page](/audio)">
+				<video src="/components/ui/examples/media/sample.webm" captions="examples/media/sample.vtt" ratio="16/9" label="A ball rolls across the screen" style="max-width: 32em"/>
+			</example>
+			<example "Video" description="Audio">
+				<audio src="/components/ui/examples/media/chime.wav" controls label="A chime"/>
+			</example>
+		</>
+	</>
+
+	<section label="Collections">
+		<section label="Breadcrumb" sticky="stack" collapsible dividing>
+			<example "Breadcrumb" description="A breadcrumb is used to show hierarchy between content. \[Breadcrumb page](/breadcrumb)">
+				<breadcrumbs aria-label="Breadcrumb demo">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#store">Store</breadcrumb>
+					<breadcrumb selected>T-Shirt</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example "Breadcrumb" description="Semantic list, token divider">
+				<breadcrumbs aria-label="Token divider demo">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#store">Store</breadcrumb>
+					<breadcrumb selected>T-Shirt</breadcrumb>
+				</breadcrumbs>
+				<breadcrumbs aria-label="Custom divider demo" divider="›">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#store">Store</breadcrumb>
+					<breadcrumb selected>T-Shirt</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example "Breadcrumb" description="Icon divider">
+				<breadcrumbs aria-label="Icon divider demo" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+		</>
+
+		<section label="Form" sticky="stack" collapsible dividing>
+			<example "Form" description="A form displays a set of related user input fields in a structured way. \[Form page](/form)">
+				<form>
+					<field label="First Name">
+						<input id="fm-types-first" name="first-name" placeholder="First Name"/>
+					</field>
+					<field label="Last Name">
+						<input id="fm-types-last" name="last-name" placeholder="Last Name"/>
+					</field>
+					<field>
+						<checkbox name="terms">I agree to the Terms and Conditions</checkbox>
+					</field>
+					<button type="submit">Submit</button>
+				</form>
+			</example>
+		</>
+
+		<section label="Grid" sticky="stack" collapsible dividing>
+			<example "Grid" description="A grid is used to harmonize negative space in a layout. \[Grid page](/grid)">
+				<grid>
+					<column width="4">
+						<text paragraph>Four wide</text>
+					</column>
+					<column width="4">
+						<text paragraph>Four wide</text>
+					</column>
+					<column width="4">
+						<text paragraph>Four wide</text>
+					</column>
+					<column width="4">
+						<text paragraph>Four wide</text>
+					</column>
+					<column width="8">
+						<text paragraph>Eight wide</text>
+					</column>
+					<column width="8">
+						<text paragraph>Eight wide</text>
+					</column>
+				</grid>
+			</example>
+			<example "Grid" description="Divided">
+				<grid divided columns="3">
+					<row>
+						<column>
+							<text paragraph>One</text>
+						</column>
+						<column>
+							<text paragraph>Two</text>
+						</column>
+						<column>
+							<text paragraph>Three</text>
+						</column>
+					</row>
+					<row>
+						<column>
+							<text paragraph>Four</text>
+						</column>
+						<column>
+							<text paragraph>Five</text>
+						</column>
+						<column>
+							<text paragraph>Six</text>
+						</column>
+					</row>
+				</grid>
+			</example>
+			<example "Grid" description="Vertically divided">
+				<grid divided="vertically">
+					<row columns="2">
+						<column>
+							<text paragraph>One</text>
+						</column>
+						<column>
+							<text paragraph>Two</text>
+						</column>
+					</row>
+					<row columns="3">
+						<column>
+							<text paragraph>Three</text>
+						</column>
+						<column>
+							<text paragraph>Four</text>
+						</column>
+						<column>
+							<text paragraph>Five</text>
+						</column>
+					</row>
+				</grid>
+			</example>
+		</>
+
+		<section label="Menu" sticky="stack" collapsible dividing>
+			<example "Menu" description="A menu displays grouped navigation actions. \[Menu page](/menu)">
+				<menu items="3" aria-label="Menu demo">
+					<item link="#editorials" selected>Editorials</item>
+					<item link="#reviews">Reviews</item>
+					<item link="#events">Upcoming Events</item>
+				</menu>
+			</example>
+			<example "Menu" description="Secondary menu">
+				<menu appearance="secondary" aria-label="Secondary demo">
+					<item link="#home" active>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+					<menu position="right">
+						<item link="#logout">Logout</item>
+					</menu>
+				</menu>
+			</example>
+			<example "Menu" description="Pointing">
+				<menu appearance="pointing" aria-label="Pointing demo">
+					<item link="#home">Home</item>
+					<item link="#messages" selected>Messages</item>
+					<item link="#friends">Friends</item>
+					<menu position="right">
+						<item link="#search">Search</item>
+					</menu>
+				</menu>
+				<menu appearance="secondary pointing" aria-label="Secondary pointing demo">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+					<menu position="right">
+						<item link="#logout">Logout</item>
+					</menu>
+				</menu>
+			</example>
+		</>
+
+		<section label="Message" sticky="stack" collapsible dividing>
+			<example "Message" description="A message displays information that explains nearby content. \[Message page](/message)">
+				<message>
+					<header>Changes in Service</header>
+					<text paragraph>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</text>
+				</message>
+			</example>
+			<example "Message" description="List message">
+				<message heading="New site features">
+					<list bulleted>
+						<item>You can now have cover images on blog pages</item>
+						<item>Drafts will now auto-save while writing</item>
+					</list>
+				</message>
+			</example>
+			<example "Message" description="Icon message">
+				<message heading="Have you heard about our mailing list?">
+					<icon slot="icon" name="envelope"/>
+					<text paragraph>Get the best news in your e-mail every day.</text>
+				</message>
+			</example>
+		</>
+
+		<section label="Property Editor" sticky="stack" collapsible dividing>
+			<example "Property Editor" description="A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. \[Property Editor page](/property-editor)">
+				<html>
+					<ui-property-editor compact show-defaults label="Routine" style="max-width: 340px" schema="{\"name\": \"Routine\", \"attributes\": \[
+                    {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX\", \"tip\": \"Shown on the circuit.\"},
+                    {\"name\": \"kind\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"gate\", \"measure\", \"reset\"], \"default\": \"gate\", \"description\": \"\"},
+                    {\"name\": \"steps\", \"kind\": \"number\", \"type\": \"number\", \"default\": 1, \"description\": \"\"},
+                    {\"name\": \"angle\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX or a #\"},
+                    {\"name\": \"align\", \"kind\": \"textAlign\", \"default\": \"left\", \"description\": \"\", \"tip\": \"Where its label sits.\"},
+                    {\"name\": \"color\", \"kind\": \"color\", \"description\": \"\"},
+                    {\"name\": \"margin\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"},
+                    {\"name\": \"padding\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"},
+                    {\"name\": \"controlled\", \"kind\": \"boolean\", \"description\": \"\", \"tip\": \"Runs only when its control is on.\"},
+                    {\"name\": \"inverse\", \"kind\": \"boolean\", \"description\": \"\"},
+                    {\"name\": \"barrier\", \"kind\": \"boolean\", \"description\": \"\"},
+                    {\"name\": \"visible\", \"kind\": \"boolean\", \"default\": true, \"description\": \"\"},
+                    {\"name\": \"locked\", \"kind\": \"boolean\", \"description\": \"\"}
+                  ]}" value="{\"name\": \"QFT\", \"kind\": \"gate\", \"steps\": 3, \"angle\": \"\", \"align\": \"center\", \"color\": \"violet\", \"margin\": \"0 0 0 0\", \"padding\": \"4 8 4 8\", \"controlled\": true, \"inverse\": false, \"barrier\": true, \"visible\": true, \"locked\": false}">
+						<ui-property-group label="Defaults" collapsible>
+							<ui-property name="name"></ui-property>
+							<ui-property name="kind"></ui-property>
+							<ui-property name="steps"></ui-property>
+							<ui-property name="angle"></ui-property>
+						</ui-property-group>
+						<ui-property-group label="Appearance" collapsible>
+							<ui-property name="align"></ui-property>
+							<ui-property name="color"></ui-property>
+							<ui-property name="margin"></ui-property>
+							<ui-property name="padding"></ui-property>
+						</ui-property-group>
+						<ui-property-group label="Behaviour" collapsible>
+							<ui-property name="controlled"></ui-property>
+							<ui-property name="inverse"></ui-property>
+							<ui-property name="barrier"></ui-property>
+						</ui-property-group>
+						<ui-property-group label="Layout" collapsible>
+							<ui-property name="visible"></ui-property>
+							<ui-property name="locked"></ui-property>
+						</ui-property-group>
+					</ui-property-editor>
+				</html>
+			</example>
+		</>
+
+		<section label="Table" sticky="stack" collapsible dividing>
+			<example "Table" description="A table displays a collection of data grouped into rows. \[Table page](/table)">
+				<table celled>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell/>
+					</row>
+				</table>
+			</example>
+			<example "Table" description="Definition">
+				<table definition celled>
+					<row header>
+						<cell/>
+						<cell>Arguments</cell>
+						<cell>Description</cell>
+					</row>
+					<row>
+						<cell>reset rating</cell>
+						<cell>None</cell>
+						<cell>Resets rating to default value</cell>
+					</row>
+					<row>
+						<cell>set rating</cell>
+						<cell>rating (integer)</cell>
+						<cell>Sets the current star rating to specified value</cell>
+					</row>
+				</table>
+			</example>
+			<example "Table" description="Structured">
+				<html>
+					<ui-table appearance="structured" celled>
+						<table>
+							<thead>
+								<tr>
+									<th rowspan="2" scope="col">Name</th>
+									<th rowspan="2" scope="col">Type</th>
+									<th rowspan="2" scope="col">Files</th>
+									<th colspan="3" scope="colgroup">Languages</th>
+								</tr>
+								<tr>
+									<th scope="col">Ruby</th>
+									<th scope="col">JavaScript</th>
+									<th scope="col">Python</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Alpha Team</td>
+									<td>Project 1</td>
+									<td class="right aligned">2</td>
+									<td class="center aligned">Yes</td>
+									<td></td>
+									<td></td>
+								</tr>
+								<tr>
+									<td rowspan="2">Beta Team</td>
+									<td>Project 1</td>
+									<td class="right aligned">52</td>
+									<td class="center aligned">Yes</td>
+									<td></td>
+									<td></td>
+								</tr>
+								<tr>
+									<td>Project 2</td>
+									<td class="right aligned">12</td>
+									<td></td>
+									<td class="center aligned">Yes</td>
+									<td></td>
+								</tr>
+							</tbody>
+						</table>
+					</ui-table>
+				</html>
+			</example>
+		</>
+
+		<section label="Terms" sticky="stack" collapsible dividing>
+			<example "Terms" description="Terms list facts as a label and a value each, lined up. \[Terms page](/terms)">
+				<terms>
+					<term label="Suit" value="hearts"/>
+					<term label="Rank" value="queen"/>
+					<term label="Played by">
+						<label color="blue">Jamie</label>
+					</term>
+				</terms>
+			</example>
+			<example "Terms" description="Horizontal">
+				<terms direction="horizontal">
+					<term label="Score" value="42"/>
+					<term label="Moves" value="17"/>
+					<term label="Time" value="3:05"/>
+				</terms>
+			</example>
+		</>
+
+		<section label="Toolbar" sticky="stack" collapsible dividing>
+			<example "Toolbar" description="A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way. \[Toolbar page](/toolbar)">
+				<toolbar appearance="secondary" aria-label="Sections demo" style="max-width: 360px">
+					<item link="#types" selected>Types</item>
+					<item link="#groups">Groups</item>
+					<item link="#content">Content</item>
+					<item link="#states">States</item>
+					<item link="#variations">Variations</item>
+					<item link="#group-variations">Group Variations</item>
+				</toolbar>
+			</example>
+			<example "Toolbar" description="Segmented">
+				<toolbar appearance="segmented" aria-label="Segmented demo" style="max-width: 320px">
+					<item selected>Examples</item>
+					<item>Usage</item>
+					<item>API</item>
+					<item>Theming</item>
+					<item>Accessibility</item>
+					<item>History</item>
+				</toolbar>
+			</example>
+			<example "Toolbar" description="Everything fits">
+				<toolbar appearance="secondary" aria-label="Short demo">
+					<item link="#one" selected>One</item>
+					<item link="#two">Two</item>
+					<item link="#three">Three</item>
+				</toolbar>
+			</example>
+		</>
+	</>
+
+	<section label="Views">
+		<section label="Advertisement" sticky="stack" collapsible dividing>
+			<example "Advertisement" description="An ad displays third-party promotional content. \[Advertisement page](/advertisement)">
+				<ad unit="medium rectangle" test="Medium rectangle"/>
+			</example>
+			<example "Advertisement" description="Large rectangle">
+				<ad unit="large rectangle" test="Large rectangle"/>
+			</example>
+			<example "Advertisement" description="Small rectangle">
+				<ad unit="small rectangle" test="Small rectangle"/>
+			</example>
+		</>
+
+		<section label="Card" sticky="stack" collapsible dividing>
+			<example "Card" description="A card displays site content in a manner similar to a playing card. \[Card page](/card)">
+				<card>
+					<image alt="Kristy" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+					<content>
+						<header link="#kristy">Kristy</header>
+						<meta>
+							<text>Joined in 2013</text>
+						</meta>
+						<description>Kristy is an art director living in New York.</description>
+					</content>
+					<extra>
+						<link link="#kristy-friends"><icon name="user"/> 22 Friends</link>
+					</extra>
+				</card>
+			</example>
+			<example "Card" description="Cards">
+				<cards>
+					<card>
+						<image alt="Matthew" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+						<content>
+							<header link="#matthew">Matthew</header>
+							<meta>
+								<text>Joined in 2015</text>
+							</meta>
+							<description>Matthew is a musician living in Nashville.</description>
+						</content>
+						<extra>
+							<link link="#matthew-friends"><icon name="user"/> 75 Friends</link>
+						</extra>
+					</card>
+					<card>
+						<image alt="Molly" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+						<content>
+							<header link="#molly">Molly</header>
+							<meta>
+								<text>Coworker</text>
+							</meta>
+							<description>Molly is a personal assistant living in Paris.</description>
+						</content>
+						<extra>
+							<link link="#molly-friends"><icon name="user"/> 35 Friends</link>
+						</extra>
+					</card>
+					<card>
+						<image alt="Elyse" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+						<content>
+							<header link="#elyse">Elyse</header>
+							<meta>
+								<text>Friend</text>
+							</meta>
+							<description>Elyse is a copywriter working in New York.</description>
+						</content>
+						<extra>
+							<link link="#elyse-friends"><icon name="user"/> 151 Friends</link>
+						</extra>
+					</card>
+				</cards>
+			</example>
+			<example "Card" description="Horizontal card">
+				<card direction="horizontal">
+					<image alt="Jenny" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M1 9l3-4 2 3 1-1 2 2z%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+					<content>
+						<header link="#jenny">Jenny</header>
+						<meta>
+							<text>Friend</text>
+						</meta>
+						<description>Jenny is a student studying Media Management.</description>
+					</content>
+				</card>
+			</example>
+		</>
+
+		<section label="Comment" sticky="stack" collapsible dividing>
+			<example "Comment" description="A comment displays user feedback to site content. \[Comment page](/comment)">
+				<comments>
+					<header level="3" dividing>Comments</header>
+					<comment>
+						<avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"/>
+						<content>
+							<author link="#matt">Matt</author>
+							<meta>
+								<text>Today at 5:42PM</text>
+							</meta>
+							<description>How artistic!</description>
+							<actions>
+								<button type="button">Reply</button>
+							</actions>
+						</content>
+					</comment>
+					<comment>
+						<avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"/>
+						<content>
+							<author link="#elliot-fu">Elliot Fu</author>
+							<meta>
+								<text>Yesterday at 12:30AM</text>
+							</meta>
+							<description>This has been very useful for my research. Thanks as well!</description>
+							<actions>
+								<button type="button">Reply</button>
+							</actions>
+						</content>
+						<comments>
+							<comment>
+								<avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"/>
+								<content>
+									<author link="#jenny-hess">Jenny Hess</author>
+									<meta>
+										<text>Just now</text>
+									</meta>
+									<description>Elliot you are always so right :)</description>
+									<actions>
+										<button type="button">Reply</button>
+									</actions>
+								</content>
+							</comment>
+						</comments>
+					</comment>
+					<comment>
+						<avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"/>
+						<content>
+							<author link="#joe-henderson">Joe Henderson</author>
+							<meta>
+								<text>5 days ago</text>
+							</meta>
+							<description>Dude, this is awesome. Thanks so much</description>
+							<actions>
+								<button type="button">Reply</button>
+							</actions>
+						</content>
+					</comment>
+					<form slot="reply">
+						<field>
+							<textarea aria-label="Reply"/>
+						</field>
+						<button type="submit" color="primary">Add Reply</button>
+					</form>
+				</comments>
+			</example>
+		</>
+
+		<section label="Feed" sticky="stack" collapsible dividing>
+			<example "Feed" description="A feed presents user activity chronologically. \[Feed page](/feed)">
+				<feed>
+					<event image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E">
+						<content>
+							<summary><author link="#elliot-fu">Elliot Fu</author> added you as a friend <date>1 Hour Ago</date></summary>
+							<meta>
+								<link link="#elliot-fu-likes"><icon name="heart"/> 4 Likes</link>
+							</meta>
+						</content>
+					</event>
+					<event image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E">
+						<content>
+							<summary><author link="#helen-troy">Helen Troy</author> added 2 new illustrations <date>4 days ago</date></summary>
+							<extra text>Ours is a life of constant reruns. We're always circling back to where we'd we started.</extra>
+							<meta>
+								<link link="#helen-troy-likes"><icon name="heart"/> 1 Like</link>
+							</meta>
+						</content>
+					</event>
+					<event image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E">
+						<content>
+							<summary><author link="#jenny-hess">Jenny Hess</author> added you as a friend <date>2 Days Ago</date></summary>
+							<meta>
+								<link link="#jenny-hess-likes"><icon name="heart"/> 8 Likes</link>
+							</meta>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+
+		<section label="Items" sticky="stack" collapsible dividing>
+			<example "Items" description="A group of items presents a set of site content for display, each an image beside its text. \[Items page](/items)">
+				<items>
+					<item>
+						<image alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+						<content>
+							<header link="#cute-dog">Cute Dog</header>
+							<meta>
+								<text>Description</text>
+							</meta>
+							<description>
+								<text paragraph>Many people also have their own barometers for what makes a cute dog.</text>
+							</description>
+							<extra>Additional details</extra>
+						</content>
+					</item>
+					<item>
+						<image alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+						<content>
+							<header link="#arrowhead-valley-camp">Arrowhead Valley Camp</header>
+							<meta>
+								<text>$1200 1 month</text>
+							</meta>
+							<description>
+								<text paragraph>Ours is a life of constant reruns.</text>
+							</description>
+							<extra>Limited availability</extra>
+						</content>
+					</item>
+				</items>
+			</example>
+			<example "Items" description="Image shorthand">
+				<items>
+					<item image="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E">
+						<content>
+							<header link="#bucks-homebrew-stayaway">Buck's Homebrew Stayaway</header>
+							<meta>
+								<text>$1000 2 weeks</text>
+							</meta>
+							<description>
+								<text paragraph>We're always looking to include new people.</text>
+							</description>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Statistic" sticky="stack" collapsible dividing>
+			<example "Statistic" description="A statistic emphasizes the current value of an attribute. \[Statistic page](/statistic)">
+				<statistic value="5,550" label="Downloads"/>
+			</example>
+			<example "Statistic" description="Statistic group">
+				<statistics>
+					<statistic value="22" label="Saves"/>
+					<statistic>
+						<value text>Three<space/>Thousand</value>
+						<label>Signups</label>
+					</statistic>
+					<statistic value="5" label="Flights"/>
+					<statistic value="42" label="Team members"/>
+				</statistics>
+			</example>
+		</>
+
+		<section label="Tree diagram" sticky="stack" collapsible dividing>
+			<example "Tree diagram" description="A tree diagram draws a tree:  a box for each node, a line to each of its children. \[Tree diagram page](/tree-diagram)">
+				<tree-diagram>
+					<tree-node label="If" hover-text="if number / 15 is an integer">
+						<tree-node label="IsA · integer" detail="boolean" edge-label="condition">
+							<tree-node label="Divide" detail="number" edge-label="value">
+								<tree-node label="Variable number" detail="number"/>
+								<tree-node label="Number 15" detail="number"/>
+							</tree-node>
+						</tree-node>
+						<tree-node label="Print" edge-label="body">
+							<tree-node label="Variable number" detail="number"/>
+							<tree-node label="Text \"fizzbuzz\"" detail="text"/>
+						</tree-node>
+						<tree-node label="If …" edge-label="otherwise"/>
+					</tree-node>
+				</tree-diagram>
+			</example>
+			<example "Tree diagram" description="Labels only">
+				<tree-diagram>
+					<tree-node label="Add">
+						<tree-node label="Number 1"/>
+						<tree-node label="Number 2"/>
+					</tree-node>
+				</tree-diagram>
+			</example>
+		</>
+	</>
+
+	<section label="Modules">
+		<section label="Accordion" sticky="stack" collapsible dividing>
+			<example "Accordion" description="An accordion allows users to toggle the display of sections of content. \[Accordion page](/accordion)">
+				<accordion open="0">
+					<title>What is a dog?</title>
+					<content>
+						<text paragraph>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</text>
+					</content>
+					<title>What kinds of dogs are there?</title>
+					<content>
+						<text paragraph>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</text>
+					</content>
+					<title>How do you acquire a dog?</title>
+					<content>
+						<text paragraph>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</text>
+					</content>
+				</accordion>
+			</example>
+			<example "Accordion" description="Styled">
+				<accordion appearance="styled" open="0">
+					<title>What is a dog?</title>
+					<content>
+						<text paragraph>A dog is a type of domesticated animal.</text>
+					</content>
+					<title>What kinds of dogs are there?</title>
+					<content>
+						<text paragraph>There are many breeds of dogs.</text>
+					</content>
+					<title>How do you acquire a dog?</title>
+					<content>
+						<text paragraph>From pet shops, private owners, or shelters.</text>
+					</content>
+				</accordion>
+			</example>
+		</>
+
+		<section label="Calendar" sticky="stack" collapsible dividing>
+			<example "Calendar" description="A calendar lets a user pick a date, a time, or both. \[Calendar page](/calendar)">
+				<calendar value="2026-09-30T14:30" locale="en-US" placeholder="Date and time" today/>
+			</example>
+			<example "Calendar" description="Date, time, month, year">
+				<stack class="ui-cluster">
+					<calendar type="date" locale="en-US" placeholder="Date"/>
+					<calendar type="time" locale="en-US" placeholder="Time"/>
+					<calendar type="month" locale="en-US" placeholder="Month"/>
+					<calendar type="year" locale="en-US" placeholder="Year"/>
+				</stack>
+			</example>
+			<example "Calendar" description="Inline">
+				<stack class="ui-cluster">
+					<calendar inline type="date" value="2026-09-30" locale="en-US" aria-label="Inline date"/>
+					<calendar inline type="month" value="2026-09" locale="en-US" aria-label="Inline month"/>
+					<calendar inline type="time" value="14:30" locale="en-US" aria-label="Inline time"/>
+				</stack>
+			</example>
+		</>
+
+		<section label="Checkbox" sticky="stack" collapsible dividing>
+			<example "Checkbox" description="A checkbox allows a user to select a value from a small set of options, often binary. \[Checkbox page](/checkbox) · \[Radio page](/radio)">
+				<checkbox>Make my profile visible</checkbox>
+			</example>
+			<example "Checkbox" description="Radio">
+				<stack aria-label="How often?" role="radiogroup" class="ui-stack">
+					<radio name="often" value="week" selected>Once a week</radio>
+					<radio name="often" value="day">Once a day</radio>
+				</stack>
+			</example>
+			<example "Checkbox" description="Slider">
+				<checkbox appearance="slider">Accept terms and conditions</checkbox>
+			</example>
+		</>
+
+		<section label="Dimmer" sticky="stack" collapsible dividing>
+			<example "Dimmer" description="A dimmer hides distractions to focus attention on particular content. \[Dimmer page](/dimmer)">
+				<html>
+					<button type="button" class="ui button" commandfor="dimmer-types-plain" command="--toggle">Toggle</button>
+				</html>
+				<segment>
+					<text paragraph>A segment holding some text that the dimmer covers.</text>
+					<text paragraph>Another paragraph, so the segment has some height.</text>
+					<dimmer id="dimmer-types-plain" visible/>
+				</segment>
+			</example>
+			<example "Dimmer" description="Content dimmer">
+				<segment>
+					<text style="min-height: 12em" paragraph>A dimmer can show content, centred over what it dims.</text>
+					<dimmer visible>
+						<header level="4">Dimmed message!</header>
+						<button inverted>Add</button>
+					</dimmer>
+				</segment>
+			</example>
+			<example "Dimmer" description="Page dimmer">
+				<html>
+					<button type="button" class="ui button" commandfor="dimmer-types-page" command="--show">Dim the page</button>
+				</html>
+				<dimmer id="dimmer-types-page" page aria-label="Dark page dimmer">
+					<header level="2">Dark page dimmer</header>
+					<text paragraph>A click anywhere, or Escape, brings the page back.</text>
+				</dimmer>
+			</example>
+		</>
+
+		<section label="Dropdown" sticky="stack" collapsible dividing>
+			<example "Dropdown" description="A dropdown allows a user to select a value from a series of options. \[Dropdown page](/dropdown)">
+				<dropdown label="File">
+					<item>New</item>
+					<item description="ctrl + o">Open...</item>
+					<item description="ctrl + s">Save as...</item>
+					<item kind="divider"/>
+					<item>Edit</item>
+					<item>Share</item>
+				</dropdown>
+			</example>
+			<example "Dropdown" description="Selection">
+				<dropdown selection placeholder="Gender" name="gender">
+					<item value="male">Male</item>
+					<item value="female">Female</item>
+				</dropdown>
+			</example>
+			<example "Dropdown" description="Search selection">
+				<dropdown search selection placeholder="Select Country">
+					<item value="af" flag="af">Afghanistan</item>
+					<item value="ax" flag="ax">Aland Islands</item>
+					<item value="al" flag="al">Albania</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Embed" sticky="stack" collapsible dividing>
+			<example "Embed" description="An embed displays content from other websites, like YouTube videos, loaded only when asked for. \[Embed page](/embed)">
+				<embed source="youtube" video-id="O6Xo21L0ybE" placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23456'/%3E%3Ccircle cx='12' cy='3' r='1.5' fill='%23fc6'/%3E%3Cpath d='M0 9 5 4l3 3 2-2 6 4z' fill='%23234'/%3E%3C/svg%3E" label="Fomantic UI intro"/>
+			</example>
+			<example "Embed" description="Aspect ratios">
+				<embed source="vimeo" video-id="125292332" aspect-ratio="4:3" style="max-width: 16em"/>
+				<embed url="https://example.com/" aspect-ratio="21:9" label="Example page" style="max-width: 24em"/>
+				<embed source="youtube" video-id="O6Xo21L0ybE" aspect-ratio="square" style="max-width: 10em">
+					<text style="position: absolute; bottom: 0.5em; left: 0.5em; padding: 0 0.25em; background: oklch(0 0 0 / 0.75); color: white;">Watch</text>
+				</embed>
+			</example>
+		</>
+
+		<section label="Flyout" sticky="stack" collapsible dividing>
+			<example "Flyout" description="A flyout is a modal that slides in from a side of the page. \[Flyout page](/flyout)">
+				<html>
+					<button type="button" class="ui button" commandfor="flyout-types-standard" command="--show">Show</button>
+				</html>
+				<flyout id="flyout-types-standard" closable>
+					<header>Archive old messages</header>
+					<content>
+						<text paragraph>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</text>
+					</content>
+					<actions>
+						<button class="cancel" color="red">No</button>
+						<button class="ok" color="green">Yes</button>
+					</actions>
+				</flyout>
+			</example>
+			<example "Flyout" description="Right, shorthands">
+				<html>
+					<button type="button" class="ui button" commandfor="flyout-types-right" command="--show">Show right</button>
+				</html>
+				<flyout id="flyout-types-right" position="right" width="thin" heading="Profile" content="A thin flyout." closable/>
+			</example>
+			<example "Flyout" description="Top, inverted">
+				<html>
+					<button type="button" class="ui button" commandfor="flyout-types-top" command="--show">Show top</button>
+				</html>
+				<flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
+					<content>
+						<text paragraph>A top flyout is full width, as tall as its content.</text>
+					</content>
+				</flyout>
+			</example>
+		</>
+
+		<section label="Include" sticky="stack" collapsible dividing>
+			<example "Include" description="An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view. \[Include page](/include)">
+				<include source="/components/ui/examples/release-notes.html">Loading the release notes...</include>
+			</example>
+			<example "Include" description="One part, with the page's styles">
+				<include source="/components/ui/examples/release-notes.html" selector="#notes" page-styles/>
+			</example>
+			<example "Include" description="Another site">
+				<include source="https://example.com/"/>
+			</example>
+		</>
+
+		<section label="JSON data" sticky="stack" collapsible dividing>
+			<example "JSON data" description="JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it. \[JSON data page](/json)">
+				<tree-diagram>
+					<json>&#123; "label": "Add", "children": \[&#123; "label": "Number 1" &#125;, &#123; "label": "Number 2" &#125;] &#125;</json>
+				</tree-diagram>
+			</example>
+		</>
+
+		<section label="Modal" sticky="stack" collapsible dividing>
+			<example "Modal" description="A modal displays content that temporarily blocks interactions with the main view of a site. \[Modal page](/modal)">
+				<html>
+					<button type="button" class="ui button" commandfor="modal-types-standard" command="--show">Show</button>
+				</html>
+				<modal id="modal-types-standard" closable>
+					<header>Profile Picture</header>
+					<content>
+						<description>
+							<text paragraph>We've found the following gravatar image associated with your e-mail address.</text>
+							<text paragraph>Is it okay to use this photo?</text>
+						</description>
+					</content>
+					<actions>
+						<button class="deny" color="black">Nope</button>
+						<button class="approve" color="positive">Yep, that's me</button>
+					</actions>
+				</modal>
+			</example>
+			<example "Modal" description="Basic">
+				<html>
+					<button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
+				</html>
+				<modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
+					<content>
+						<text paragraph>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</text>
+					</content>
+					<actions>
+						<button class="cancel" inverted appearance="basic">No</button>
+						<button class="ok" color="green" inverted>Yes</button>
+					</actions>
+				</modal>
+			</example>
+		</>
+
+		<section label="Nag" sticky="stack" collapsible dividing>
+			<example "Nag" description="A nag is a persistent message that stays until dismissed, and can remember the dismissal. \[Nag page](/nag)">
+				<nag>
+					<text class="title">We have updated our privacy policy.</text>
+				</nag>
+			</example>
+			<example "Nag" description="Overlay, bottom">
+				<stack style="position: relative; height: 6em; border: 1px dashed var(--ui-border-color)">
+					<nag overlay closable="false">
+						<text class="title">Over the top of the frame</text>
+					</nag>
+					<nag bottom overlay closable="false">
+						<text class="title">Over its bottom</text>
+					</nag>
+				</stack>
+			</example>
+			<example "Nag" description="Inverted">
+				<nag inverted closable="false">
+					<text class="title">A light nag</text>
+				</nag>
+			</example>
+		</>
+
+		<section label="Popup" sticky="stack" collapsible dividing>
+			<example "Popup" description="A popup displays additional information on top of a page. \[Popup page](/popup)">
+				<button icon="plus" aria-label="Add users"/>
+				<popup label="Add users to your feed"/>
+			</example>
+			<example "Popup" description="Titled">
+				<button id="popup-types-rating">Rating</button>
+				<popup for="popup-types-rating" heading="User Rating" label="A popup can have a header and content."/>
+			</example>
+			<example "Popup" description="HTML content, on click">
+				<button id="popup-types-plan">Choose a plan</button>
+				<popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
+					<text paragraph>Does not include upload or chat.</text>
+					<button size="small" color="primary">Choose</button>
+				</popup>
+			</example>
+		</>
+
+		<section label="Progress" sticky="stack" collapsible dividing>
+			<example "Progress" description="A progress bar shows the progression of a task. \[Progress page](/progress)">
+				<progress value="74" bar-text="percent" aria-label="Standard"/>
+			</example>
+			<example "Progress" description="Indicating">
+				<html>
+					<ui-stack class="ui-stack">
+						<ui-progress indicating value="12" label="{percent}% funded"></ui-progress>
+						<ui-progress indicating value="47" label="{percent}% funded"></ui-progress>
+						<ui-progress indicating value="91" label="{percent}% funded"></ui-progress>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+
+		<section label="Rating" sticky="stack" collapsible dividing>
+			<example "Rating" description="A rating indicates user interest in content. \[Rating page](/rating)">
+				<rating value="3" aria-label="Rating"/>
+			</example>
+			<example "Rating" description="Star">
+				<rating color="yellow" value="3" max-rating="5" aria-label="Stars"/>
+			</example>
+			<example "Rating" description="Heart">
+				<rating icon="heart" color="red" value="1" max-rating="3" clearable aria-label="Hearts"/>
+			</example>
+		</>
+
+		<section label="Search" sticky="stack" collapsible dividing>
+			<example "Search" description="A search module allows a user to query for results from a selection of data. \[Search page](/search)">
+				<html>
+					<ui-search placeholder="Common passwords..." source="\[{\"title\":\"123456\"},{\"title\":\"password\"},{\"title\":\"qwerty\"},{\"title\":\"letmein\"},{\"title\":\"dragon\"}]"></ui-search>
+				</html>
+			</example>
+			<example "Search" description="With descriptions, prices and links">
+				<html>
+					<ui-search aria-label="Fruit" highlight-matches source="\[{\"title\":\"Apple\",\"description\":\"Crisp and sweet\"},{\"title\":\"Apricot\",\"description\":\"Soft, from Valencia\",\"price\":\"$2.00\"},{\"title\":\"Grape\",\"url\":\"#grape\"}]"></ui-search>
+				</html>
+			</example>
+			<example "Search" description="Category">
+				<html>
+					<ui-search category aria-label="Food" source="\[{\"title\":\"Apple\",\"category\":\"Fruit\"},{\"title\":\"Banana\",\"category\":\"Fruit\"},{\"title\":\"Asparagus\",\"category\":\"Vegetables\"}]"></ui-search>
+				</html>
+			</example>
+		</>
+
+		<section label="Select" sticky="stack" collapsible dividing>
+			<example "Select" description="A select lets a user choose a value from a list, with the platform's own picker. \[Select page](/select)">
+				<select placeholder="Gender" name="gender">
+					<item value="male">Male</item>
+					<item value="female">Female</item>
+				</select>
+			</example>
+			<example "Select" description="Chosen value">
+				<select aria-label="Fruit" value="banana">
+					<item value="apple">Apple</item>
+					<item value="banana">Banana</item>
+					<item value="cherry">Cherry</item>
+				</select>
+			</example>
+			<example "Select" description="Groups and dividers">
+				<select placeholder="Choose food">
+					<item kind="header">Fruit</item>
+					<item value="apple">Apple</item>
+					<item value="pear">Pear</item>
+					<item kind="header">Vegetables</item>
+					<item value="leek">Leek</item>
+					<item kind="divider"/>
+					<item value="none">Nothing</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Shape" sticky="stack" collapsible dividing>
+			<example "Shape" description="A shape is a three dimensional object displayed on a two dimensional plane. \[Shape page](/shape)">
+				<html>
+					<button type="button" class="ui button" commandfor="shape-demo-plain" command="--next">Flip left</button>
+				</html>
+				<shape id="shape-demo-plain">
+					<side>
+						<text paragraph>This side starts visible.</text>
+					</side>
+					<side>
+						<text paragraph>This is yet another side.</text>
+					</side>
+					<side>
+						<text paragraph>This is the last side.</text>
+					</side>
+				</shape>
+			</example>
+			<example "Shape" description="Cube">
+				<html>
+					<button type="button" class="ui button" commandfor="shape-demo-cube" command="--next">Flip up</button>
+					<button type="button" class="ui button" commandfor="shape-demo-cube" command="--previous">Back</button>
+				</html>
+				<shape id="shape-demo-cube" cube direction="up">
+					<side>
+						<text>1</text>
+					</side>
+					<side>
+						<text>2</text>
+					</side>
+					<side>
+						<text>3</text>
+					</side>
+				</shape>
+			</example>
+			<example "Shape" description="Text">
+				<html>
+					<button type="button" class="ui button" commandfor="shape-demo-text" command="--next">Flip down</button>
+				</html>
+				<text paragraph>Flip to <shape id="shape-demo-text" text direction="down" active-index="1"><side>Scale</side> <side>Fade</side></shape></text>
+			</example>
+		</>
+
+		<section label="Sidebar" sticky="stack" collapsible dividing>
+			<example "Sidebar" description="A sidebar hides additional content beside a page. \[Sidebar page](/sidebar)">
+				<html>
+					<ui-pushable style="height: 14em">
+						<ui-sidebar id="sidebar-demo-left" inverted aria-label="Site">
+							<ui-menu direction="vertical" inverted fluid aria-label="Site">
+								<ui-item link="#home">Home</ui-item>
+								<ui-item link="#games">Games</ui-item>
+								<ui-item link="#channels">Channels</ui-item>
+							</ui-menu>
+						</ui-sidebar>
+						<ui-pusher>
+							<ui-segment appearance="basic">
+								<button type="button" class="ui button" commandfor="sidebar-demo-left" command="--toggle">Menu</button>
+								<ui-text paragraph>The default left sidebar uncovers itself from under this content, which dims.</ui-text>
+							</ui-segment>
+						</ui-pusher>
+					</ui-pushable>
+				</html>
+			</example>
+			<example "Sidebar" description="Overlay, right, thin">
+				<html>
+					<button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
+				</html>
+				<pushable style="height: 12em">
+					<sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
+						<menu direction="vertical" inverted fluid aria-label="Numbers">
+							<item link="#one">One</item>
+							<item link="#two">Two</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<text paragraph>An overlay sidebar covers the content without moving it.</text>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+			<example "Sidebar" description="Persistent">
+				<pushable style="height: 10em">
+					<sidebar position="left" width="thin" transition="push" persistent visible aria-label="Sections">
+						<menu direction="vertical" fluid aria-label="Sections">
+							<item link="#a">Alpha</item>
+							<item link="#b">Beta</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<text paragraph>A persistent sidebar is part of the page: nothing is dimmed or blocked.</text>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Slider" sticky="stack" collapsible dividing>
+			<example "Slider" description="A slider allows users to select values within a range. \[Slider page](/slider)">
+				<slider value="5" aria-label="Volume"/>
+			</example>
+			<example "Slider" description="Range">
+				<slider range value="5" end="15" aria-label="Price"/>
+			</example>
+			<example "Slider" description="Labeled">
+				<slider labeled max="10" value="3" aria-label="Rating"/>
+			</example>
+		</>
+
+		<section label="Sticky" sticky="stack" collapsible dividing>
+			<example "Sticky" description="Sticky content stays fixed to the viewport while its container is on screen. \[Sticky page](/sticky)">
+				<stack aria-label="Sticky rail example" role="region" tabindex="0" style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)">
+					<stack style="display: flex; gap: 1em; padding: 0 1em">
+						<stack style="flex: 1">
+							<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+							<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+							<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+							<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+							<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+						</stack>
+						<stack style="width: 8em">
+							<sticky offset="8">
+								<text style="margin: 0; padding: 0.5em; background: var(--ui-surface-strong)" paragraph>I stick 8px from the top</text>
+							</sticky>
+						</stack>
+					</stack>
+				</stack>
+			</example>
+			<example "Sticky" description="Pushing">
+				<stack aria-label="Pushing sticky example" role="region" tabindex="0" style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)">
+					<stack style="padding: 0 1em">
+						<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+						<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+						<sticky pushing>
+							<text style="margin: 0; padding: 0.5em; background: var(--ui-surface-strong)" paragraph>I stick to either edge</text>
+						</sticky>
+						<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+						<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+						<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+						<text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <text code>position: sticky</text>, and the element only reports when it is stuck.</text>
+					</stack>
+				</stack>
+			</example>
+		</>
+
+		<section label="Tab" sticky="stack" collapsible dividing>
+			<example "Tab" description="A tab is a hidden section of content activated by a menu. \[Tab page](/tab)">
+				<tabs appearance="tabular" attach="top" aria-label="Tabular demo">
+					<tab label="First">First</tab>
+					<tab label="Second">Second</tab>
+					<tab label="Third">Third</tab>
+				</tabs>
+			</example>
+			<example "Tab" description="Pointing">
+				<tabs appearance="pointing secondary" aria-label="Pointing demo">
+					<tab label="First">First</tab>
+					<tab label="Second">Second</tab>
+					<tab label="Third">Third</tab>
+				</tabs>
+			</example>
+			<example "Tab" description="Basic menu">
+				<tabs aria-label="Basic demo">
+					<tab label="First">First</tab>
+					<tab label="Second">Second</tab>
+				</tabs>
+			</example>
+		</>
+
+		<section label="Toast" sticky="stack" collapsible dividing>
+			<example "Toast" description="A toast allows users to receive a short, non-blocking notification. \[Toast page](/toast)">
+				<toast message="I am a toast, nice to meet you!"/>
+			</example>
+			<example "Toast" description="Titled">
+				<toast heading="Better?" message="Hey, I am a nice message!"/>
+			</example>
+			<example "Toast" description="Consequences">
+				<toast type="info" icon message="An info toast, with its icon."/>
+				<toast type="success" message="You're using the good framework!"/>
+				<toast type="warning" message="Your battery is running low."/>
+				<toast type="error" message="We couldn't save your changes."/>
+			</example>
+		</>
+
+		<section label="Transition" sticky="stack" collapsible dividing>
+			<example "Transition" description="A transition is an animation used to show or hide content, or to draw attention to it. \[Transition page](/transition)">
+				<html>
+					<button type="button" class="ui button" commandfor="transition-demo-fade" command="--toggle">Fade up</button>
+					<button type="button" class="ui button" commandfor="transition-demo-scale" command="--toggle">Scale</button>
+					<button type="button" class="ui button" commandfor="transition-demo-flip" command="--toggle">Horizontal flip</button>
+				</html>
+				<stack class="ui-cluster">
+					<transition id="transition-demo-fade" animation="fade up" inline visible>
+						<segment>Fade up</segment>
+					</transition>
+					<transition id="transition-demo-scale" animation="scale" inline visible>
+						<segment>Scale</segment>
+					</transition>
+					<transition id="transition-demo-flip" animation="horizontal flip" duration="500" inline visible>
+						<segment>Horizontal flip</segment>
+					</transition>
+				</stack>
+			</example>
+			<example "Transition" description="Attention">
+				<html>
+					<button type="button" class="ui button" commandfor="transition-demo-shake" command="--transition">Shake</button>
+					<button type="button" class="ui button" commandfor="transition-demo-tada" command="--transition">Tada</button>
+				</html>
+				<stack class="ui-cluster">
+					<transition id="transition-demo-shake" animation="shake" inline visible>
+						<segment>Shake</segment>
+					</transition>
+					<transition id="transition-demo-tada" animation="tada" inline visible>
+						<segment>Tada</segment>
+					</transition>
+				</stack>
+			</example>
+			<example "Transition" description="Hidden">
+				<html>
+					<button type="button" class="ui button" commandfor="transition-demo-hidden" command="--show">Show</button>
+				</html>
+				<transition id="transition-demo-hidden" animation="drop">
+					<segment>Hidden until shown</segment>
+				</transition>
+			</example>
+		</>
+
+		<section label="Visibility" sticky="stack" collapsible dividing>
+			<example "Visibility" description="Visibility provides a set of callbacks for when content appears in the viewport. \[Visibility page](/visibility)">
+				<visibility once="false" offset="0">
+					<text paragraph>I fire <text code>ui-in-view</text> and <text code>ui-out-of-view</text> each time I come and go.</text>
+				</visibility>
+			</example>
+			<example "Visibility" description="Lazy loading images">
+				<visibility type="image" animation="fade" duration="500">
+					<stack style="display: flex; gap: 1em; flex-wrap: wrap">
+						<image style="background: var(--ui-surface-strong)" data-src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" height="96" width="96" alt="First"/>
+						<image style="background: var(--ui-surface-strong)" data-src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" height="96" width="96" alt="Second"/>
+						<image style="background: var(--ui-surface-strong)" data-src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" height="96" width="96" alt="Third"/>
+					</stack>
+				</visibility>
+			</example>
+		</>
+	</>
+
+	<section label="Spell UI's own">
+		<section label="Code" sticky="stack" collapsible dividing>
+			<example "Code" description="Code shows a block of source code coloured by its language, from the element's own text or a file on this site. \[Code page](/code)">
+				<html>
+					<ui-code language="typescript">
+						<script type="text/plain">
+							const greeting = "hello"
+							// one line each
+						</script>
+					</ui-code>
+				</html>
+			</example>
+			<example "Code" description="Line numbers, wrapping, a copy button">
+				<html>
+					<ui-code language="bash" line-numbers start="10" wrap copy>
+						<script type="text/plain">
+							echo "line ten"
+							echo "a long line that wraps once the box is too narrow to hold it, hanging past the line number"
+						</script>
+					</ui-code>
+				</html>
+			</example>
+			<example "Code" description="From a file, language guessed">
+				<code source="/components/ui/examples/sample.json" line-numbers/>
+			</example>
+		</>
+
+		<section label="Example" sticky="stack" collapsible dividing>
+			<example "Example" description="An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. \[Example page](/example)">
+				<stack class="ui-stack">
+					<example "Button" description="A standard button.">
+						<button>Follow</button>
+					</example>
+					<example "Emphasis" code description="A button can be formatted to show different levels of emphasis.">
+						<button color="primary">Save</button>
+						<button>Discard</button>
+					</example>
+					<example "Rich description">
+						<button color="secondary">Okay</button>
+						<text slot="description" paragraph>A description with a <link link="#rich">link</link>, from the <text code>description</text> slot.</text>
+					</example>
+				</stack>
+			</example>
+		</>
+
+		<section label="Icon Picker" sticky="stack" collapsible dividing>
+			<example "Icon Picker" description="An icon picker lets people choose an icon by searching for it and clicking its glyph. \[Icon Picker page](/icon-picker)">
+				<icon-picker value="star" aria-label="Icon"/>
+			</example>
+			<example "Icon Picker" description="None chosen">
+				<icon-picker aria-label="Icon"/>
+			</example>
+			<example "Icon Picker" description="Sizes">
+				<icon-picker size="small" value="heart" aria-label="Small icon"/>
+				<icon-picker size="large" value="heart" aria-label="Large icon"/>
+			</example>
+		</>
+
+		<section label="Keys" sticky="stack" collapsible dividing>
+			<example "Keys" description="Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it. \[Keys page](/keys)">
+				<text paragraph>Save with <keys shortcut="mod+S"/>, undo with <keys shortcut="mod+Z"/>.</text>
+			</example>
+			<example "Keys" description="On a Mac, and elsewhere">
+				<text paragraph><keys shortcut="shift+mod+P" platform="apple"/> on a Mac, <keys shortcut="shift+mod+P" platform="other"/> elsewhere.</text>
+			</example>
+			<example "Keys" description="Two shortcuts">
+				<text paragraph>Redo with <keys shortcut="shift+mod+Z mod+Y"/>.</text>
+			</example>
+		</>
+
+		<section label="Markdown" sticky="stack" collapsible dividing>
+			<example "Markdown" description="Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site. \[Markdown page](/markdown)">
+				<html>
+					<ui-markdown source="/components/ui/examples/readme.md" heading-offset="4"></ui-markdown>
+				</html>
+			</example>
+			<example "Markdown" description="Small">
+				<markdown>Smaller text, the _same_ look.</>
+			</example>
+		</>
+
+		<section label="Page" sticky="stack" collapsible dividing>
+			<example "Page" description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer. \[Page page](/page)">
+				<stack style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+					<page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
+						<header slot="header" level="2">Inbox</header>
+						<menu slot="nav" direction="vertical" fluid aria-label="Folders">
+							<item selected>Inbox</item>
+							<item>Sent</item>
+							<item>Drafts</item>
+						</menu>
+						<text paragraph>Three new messages since this morning.</text>
+						<segment slot="aside">Tip: press <keys shortcut="mod+K"/> to search.</segment>
+						<text slot="footer" color="grey">© 2026 Inbox</text>
+					</page>
+				</stack>
+			</example>
+		</>
+
+		<section label="Panel" sticky="stack" collapsible dividing>
+			<example "Panel" description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold. \[Panel page](/panel)">
+				<panel label="Theme" level="5" style="max-width: 320px">
+					<input placeholder="Name, e.g. sunrise" aria-label="Name"/>
+					<slider min="13" max="19" value="16" aria-label="Text size"/>
+				</panel>
+			</example>
+			<example "Panel" description="Sub-panels">
+				<panel label="Color Set" level="5" collapsible style="max-width: 320px">
+					<input placeholder="Name, e.g. brand" aria-label="Set name"/>
+					<panel label="Tweak" collapsible>
+						<slider min="0" max="200" step="20" value="100" aria-label="Vibrancy"/>
+					</panel>
+					<panel label="Presets" collapsible open="false">
+						<text paragraph>Six preset chips.</text>
+					</panel>
+				</panel>
+			</example>
+			<example "Panel" description="Colors">
+				<stack style="align-items: start" class="ui-cluster">
+					<panel label="Violet" level="5" color="violet" style="width: 200px">
+						<panel label="Tweak">
+							<text paragraph>Any hue.</text>
+						</panel>
+					</panel>
+					<panel label="Grey" level="5" color="grey" style="width: 200px">
+						<panel label="Tweak">
+							<text paragraph>Sub-panels follow.</text>
+						</panel>
+					</panel>
+				</stack>
+			</example>
+		</>
+
+		<section label="Quote" sticky="stack" collapsible dividing>
+			<example "Quote" description="A quote holds someone else's words:  a block of its own, or a few words inside a sentence. \[Quote page](/quote)">
+				<quote cite="https://en.wikipedia.org/wiki/Alan_Kay">The best way to predict the future is to invent it.</quote>
+			</example>
+			<example "Quote" description="Inline">
+				<text paragraph>She looked up and said <quote inline>not today</quote>, then went back to her book.</text>
+			</example>
+		</>
+
+		<section label="Root" sticky="stack" collapsible dividing>
+			<example "Root" description="A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows them once they're ready. \[Root page](/root)">
+				<root>
+					<segment>
+						<header>Report</header>
+						<text paragraph>Every component inside was loaded by the root, on demand.</text>
+						<button color="primary">Save</button>
+					</segment>
+				</root>
+			</example>
+			<example "Root" description="Theme and size">
+				<root theme="dark" size="small" width="100%" aria-label="Dark report">
+					<segment>
+						<header>Report</header>
+						<text paragraph>Dark and small: everything inside follows.</text>
+						<button color="primary">Save</button>
+					</segment>
+				</root>
+			</example>
+			<example "Root" description="A box that scrolls">
+				<root height="8em" aria-label="Numbers">
+					<list bulleted>
+						<item>One</item>
+						<item>Two</item>
+						<item>Three</item>
+						<item>Four</item>
+						<item>Five</item>
+						<item>Six</item>
+						<item>Seven</item>
+						<item>Eight</item>
+					</list>
+				</root>
+			</example>
+		</>
+
+		<section label="Section" sticky="stack" collapsible dividing>
+			<example "Section" description="A section is a titled block of content that can fold away and keep its title in view. \[Section page](/section)">
+				<section label="Getting started">
+					<text paragraph>A titled block of content. Its title is a real heading: an <text code>h2</text> at the top level.</text>
+				</section>
+			</example>
+			<example "Section" description="Dividing">
+				<section label="Installation" dividing>
+					<text paragraph>A rule under the title.</text>
+				</section>
+			</example>
+			<example "Section" description="Block">
+				<section label="Configuration" block>
+					<text paragraph>The title bar sits in a tinted box.</text>
+				</section>
+			</example>
+		</>
+
+		<section label="Sides" sticky="stack" collapsible dividing>
+			<example "Sides" description="Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side. \[Sides page](/sides)">
+				<sides aria-label="Margin" value="10 20 10 20"/>
+				<html>
+					<ui-sides aria-label="Padding" value="{ \"top\": 8, \"bottom\": 8 }"></ui-sides>
+				</html>
+				<sides aria-label="Vertical padding" sides="top bottom" value="4 0"/>
+			</example>
+		</>
+
+		<section label="Site tabs" sticky="stack" collapsible dividing>
+			<example "Site tabs" description="Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link. \[Site tabs page](/site-tabs)">
+				<html>
+					<ui-site-tabs current="#api" pages="\[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"pages\": \[{ \"title\": \"Examples\", \"href\": \"#examples\" }, { \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }] }]"></ui-site-tabs>
+				</html>
+			</example>
+		</>
+
+		<section label="Space" sticky="stack" collapsible dividing>
+			<example "Space" description="A space is a gap between things:  a line break, a gap in a line, or the room left in a row. \[Space page](/space)">
+				<rating value="3" max-rating="5"/>
+				<space/>
+				<rating value="4" max-rating="5"/>
+			</example>
+			<example "Space" description="Inline">
+				<label>Design</label>
+				<space inline width="lg"/>
+				<label>Engineering</label>
+			</example>
+			<example "Space" description="Fluid">
+				<stack direction="horizontal">
+					<button>Back</button>
+					<space fluid/>
+					<button color="primary">Next</button>
+				</stack>
+			</example>
+		</>
+
+		<section label="Split Panel" sticky="stack" collapsible dividing>
+			<example "Split Panel" description="A split panel lays its children out side by side or one above the other, with bars to resize them. \[Split Panel page](/split-panel)">
+				<split-panel columns="25%,*" resizable style="height: 8em">
+					<segment>Tree</segment>
+					<segment>Code</segment>
+				</split-panel>
+			</example>
+		</>
+
+		<section label="Stack" sticky="stack" collapsible dividing>
+			<example "Stack" description="A stack lays its children out in a column, or a row that wraps, evenly spaced. \[Stack page](/stack)">
+				<stack>
+					<segment>First</segment>
+					<segment>Second</segment>
+					<segment>Third</segment>
+				</stack>
+			</example>
+			<example "Stack" description="Horizontal, wrapping">
+				<stack direction="horizontal" wrap spacing="sm">
+					<label>Design</label>
+					<label>Engineering</label>
+					<label>Research</label>
+					<label>Writing</label>
+				</stack>
+			</example>
+			<example "Stack" description="One left, one right">
+				<stack direction="horizontal" justify="between">
+					<header level="4">Inbox</header>
+					<button color="primary">New message</button>
+				</stack>
+			</example>
+		</>
+
+		<section label="Table of contents" sticky="stack" collapsible dividing>
+			<example "Table of contents" description="A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all. \[Table of contents page](/table-of-contents)">
+				<stack style="align-items: flex-start" class="ui-cluster ui-gap-l">
+					<toc for="toc-example-content" heading="Button" style="width: 12em"/>
+					<section style="flex: 1" id="toc-example-content">
+						<header level="2" dividing>Types</header>
+						<example "Button" description="A standard button.">
+							<button>Follow</button>
+						</example>
+						<example "Emphasis" description="A button can show different levels of emphasis.">
+							<button color="primary">Save</button>
+						</example>
+						<header level="2" dividing>States</header>
+						<example "Disabled" description="A button can't be used.">
+							<button disabled>Followed</button>
+						</example>
+					</section>
+				</stack>
+			</example>
+		</>
+
+		<section label="Theme Editor" sticky="stack" collapsible dividing>
+			<example "Theme Editor" description="A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser. \[Theme Editor page](/theme-editor)">
+				<theme-editor/>
+			</example>
+		</>
+
+		<section label="Theme Menu" sticky="stack" collapsible dividing>
+			<example "Theme Menu" description="A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page. \[Theme Menu page](/theme-menu)">
+				<segment inverted>
+					<theme-menu inverted size="small"/>
+				</segment>
+			</example>
+			<example "Theme Menu" description="A theme dropdown">
+				<theme-menu show="theme"/>
+			</example>
+			<example "Theme Menu" description="Light / dark only">
+				<theme-menu show="scheme"/>
+			</example>
+		</>
+
+		<section label="Tree" sticky="stack" collapsible dividing>
+			<example "Tree" description="A tree shows rows nested in rows, which open and close, and can be selected one or many at a time. \[Tree page](/tree)">
+				<tree choose="many" label="Files" style="width: 16em">
+					<tree-item label="src" icon="folder" open>
+						<tree-item label="Card.spellml" icon="file code" selected/>
+						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="styles" icon="folder">
+							<tree-item label="card.css" icon="file code"/>
+						</tree-item>
+					</tree-item>
+					<tree-item label="README.md" which="notes" icon="file alternate outline"/>
+				</tree>
+			</example>
+		</>
+
+		<section label="Zoom" sticky="stack" collapsible dividing>
+			<example "Zoom" description="A zoom shows something small in the page, and full size over it on a click. \[Zoom page](/zoom)">
+				<zoom max-width="320px">
+					<segment>
+						<header level="3">Release notes</header>
+						<text paragraph>Spell UI 2.4 adds a zoom, a stack and a textarea that grows with its text.</text>
+						<button color="primary">Read more</button>
+					</segment>
+				</zoom>
+			</example>
+			<example "Zoom" description="Cut off">
+				<zoom max-height="120px" shrink="100%">
+					<list bulleted>
+						<item>Zoom</item>
+						<item>Stack</item>
+						<item>Growing textarea</item>
+						<item>Shrinkable menu</item>
+						<item>Fitting titles</item>
+						<item>Theme menu</item>
+					</list>
+				</zoom>
+			</example>
+			<example "Zoom" description="A picture">
+				<zoom shrink="33%">
+					<image alt="A landscape" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22960%22 height=%22640%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
+				</zoom>
+			</example>
+		</>
+	</>
+
+</spell-page>

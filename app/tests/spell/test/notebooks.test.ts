@@ -132,12 +132,14 @@ describe("the Spell UI site", () => {
     for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spellml"))).toBe(false)
   })
 
-  test("every link is a site address, a docs page or a `#`", () => {
+  test("every link is a site address, a file of the docs site or a `#`, never one of its old pages", () => {
     const addresses = new Set(SITE_PAGES.map(({ address }) => address))
     const bad: string[] = []
     for (const { path, contents } of PAGES) {
       for (const link of linksIn(contents)) {
-        if (link.startsWith("#") || /^(https?|mailto):/.test(link) || link.startsWith("/components/ui/")) continue
+        if (link.startsWith("#") || /^(https?|mailto):/.test(link)) continue
+        // an image or an example's file;  an old page (`/components/ui/ui-button.html`) has a site address now
+        if (link.startsWith("/components/ui/") && !OLD_DOCS_PAGE.test(link)) continue
         if (addresses.has(link.split("#")[0]!)) continue
         bad.push(`${path}: ${link}`)
       }
@@ -145,6 +147,9 @@ describe("the Spell UI site", () => {
     expect(bad).toEqual([])
   })
 })
+
+/** A page of the old docs site:  straight under `/components/ui/`, which an example's files and images aren't. */
+const OLD_DOCS_PAGE = /^\/components\/ui\/[\w-]+\.html/
 
 /** The links of `text`, a page:  its `link=`, `href=` and markdown links, outside its code listings and inline code. */
 function linksIn(text: string): string[] {
