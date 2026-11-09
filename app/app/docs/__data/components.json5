@@ -3199,7 +3199,7 @@
           "file": "src/app/pages/SiteEditorPage.tsx"
         },
         {
-          "name": "SiteGroupPage",
+          "name": "SitesFrame",
           "file": "src/app/pages/SiteGroupPage.tsx"
         },
         {

@@ -199,6 +199,7 @@ export const APP_TEXTS = {
   siteGroupTitle: "Sites",
   siteGroupLine: "Every site in this group:  open one to change its pages.",
   siteGroupNone: 'No sites here yet.  Make one by writing "galaxy guide is a site:" in a project of this group.',
+  sitesHomeLine: "Every site, by the group it's in:  open one to change its pages.",
   siteRunSite: "Run the site",
   siteFieldName: "Name",
   siteFieldTitle: "Title",

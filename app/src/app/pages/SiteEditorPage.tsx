@@ -15,7 +15,7 @@ import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
 import type { ProjectIndex } from "./SitePlaces"
-import { SiteGroupPage } from "./SiteGroupPage"
+import { SiteGroupPage, SitesHomePage } from "./SiteGroupPage"
 import { SiteWrites } from "./SiteWrites"
 import { EditorToolbar } from "./SpellEditor"
 
@@ -24,13 +24,17 @@ import "./SiteEditorPage.css"
 /****************
  * ### `<SiteEditorRoute>`
  * The site editor's route, `/site/<address>` (epic `mockup` P4):
- * a group's address shows its sites (`<SiteGroupPage>`), a project's its site's editor.
+ * no address shows every site (`<SitesHomePage>`), a group's address its sites (`<SiteGroupPage>`),
+ * a project's its site's editor.
  ****************/
 export function SiteEditorRoute(props: RouteSectionProps) {
-  const group = createMemo(() => SiteGroupPage.groupAt(props.params.address as string | undefined))
+  const address = () => (props.params.address as string | undefined)?.replace(/\/+$/, "")
+  const group = createMemo(() => SiteGroupPage.groupAt(address()))
   return (
-    <Show when={group()} fallback={<SiteProjectRoute params={props.params} />}>
-      {(path) => <SiteGroupPage group={path()} />}
+    <Show when={address()} fallback={<SitesHomePage />}>
+      <Show when={group()} fallback={<SiteProjectRoute params={props.params} />}>
+        {(path) => <SiteGroupPage group={path()} />}
+      </Show>
     </Show>
   )
 }
