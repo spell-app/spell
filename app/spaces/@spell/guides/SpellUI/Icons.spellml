@@ -1,0 +1,44 @@
+<spell-page "icons" notebook>
+	<header level="1">
+		Icons
+		<header>Every icon in the packs Spell UI ships: Font Awesome 7 Free by default, brands and Fomantic's names when a page adds them.</>
+	</>
+
+	<section label="Icon packs">
+		<markdown>
+			An icon is a name: `<ui-icon name="bell">`, or the `icon` attribute most components take. Names come from icon
+			PACKS, each a folder of SVGs plus an index (`pack.js`); a pack's SVG is fetched the first time a page draws it.
+
+			- **FA7 Free**, Font Awesome 7 Free's solid and regular icons (`bell`, `bell outline`), is the default: every page
+			  has it.
+			- **FA7 Brands** adds Font Awesome's brand logos (`github`, `apple`).
+			- **Fomantic** answers Fomantic-UI's own names, so a ported page keeps working (`right arrow`, `setting`).
+			- A pack added later wins a name the earlier ones share; `fa7-free:bell` asks one pack.
+		</>
+		<markdown>
+			```html
+			<ui-root icons="fa7-brands, fomantic">
+			  <ui-icon name="github"></ui-icon>
+			  <ui-button icon="setting">Settings</ui-button>
+			</ui-root>
+			```
+		</>
+		<markdown>
+			Or from script: `UI.icons.use("fa7-brands")`. Your own pack: `yarn icons:pack <folder> --id <id>` writes its
+			`pack.js`, then `<ui-root icons="/icons/lucide/pack.js">` (see `guides/ui/notes/icons.md`).
+		</>
+	</>
+
+	<section label="Browse">
+		<markdown>
+			Open the picker for a search box and a grid of every icon this page knows, in Font Awesome's categories.
+			Type to filter, by name or by what it shows (`mail` finds `envelope`).
+			The name it shows is the one `name` takes.
+		</>
+		<icon-picker value="star" aria-label="Icon"/>
+		<markdown>
+			Icons: [Font Awesome 7 Free](https://fontawesome.com) (CC BY 4.0). Names in the Fomantic pack from
+			[Fomantic-UI](https://github.com/fomantic/Fomantic-UI) (MIT).
+		</>
+	</>
+</spell-page>

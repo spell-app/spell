@@ -12,6 +12,14 @@
 	<page "icons page" address="/icons" title="Icons"/>
 	<page "utilities page" address="/utilities" title="Utilities"/>
 	<page "component index page" address="/components" title="Components"/>
+	<!-- the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders -->
+	<page "home page" address="/" title="Spell UI"/>
+	<page "getting started page" address="/getting-started" title="Getting started"/>
+	<page "grammar page" address="/grammar" title="Grammar"/>
+	<page "theming page" address="/theming" title="Theming"/>
+	<page "icons page" address="/icons" title="Icons"/>
+	<page "utilities page" address="/utilities" title="Utilities"/>
+	<page "component index page" address="/components" title="Components"/>
 	<page "kitchen sink page" address="/kitchen-sink" title="Kitchen Sink"/>
 	<page "theme bench page" address="/theme-bench" title="Theme bench"/>
 	<page "accordion usage page" address="/accordion" title="Accordion" tab="Usage">

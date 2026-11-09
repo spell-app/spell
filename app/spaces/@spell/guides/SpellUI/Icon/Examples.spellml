@@ -19,7 +19,7 @@
 		work here as written.
 	-->
 	<section label="Types">
-		<message size="small">The icon set -- every icon with its name, by category, searchable -- is on the <link link="/components/ui/icons.html" target="_blank">Icons</> page. Icons are Font Awesome 7 Free SVG files, one per icon, loaded on first use.</>
+		<message size="small">The icon set -- every icon with its name, by category, searchable -- is on the <link link="/icons" target="_blank">Icons</> page. Icons are Font Awesome 7 Free SVG files, one per icon, loaded on first use.</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
 			<example "Icon" description="An icon is a glyph used to represent something else.  `name` is its name in words;  solid is the default set.">
