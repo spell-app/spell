@@ -269,6 +269,10 @@ export class DefinePropertyHas extends SpellStatement<
     values.forEach((value) => {
       if (typeof value === "string") scope.constants?.add({ name: value, declaredBy: match })
     })
+
+    // the property remembers its list:  it's what a quoted value is checked against, and what `it is clubs` finds
+    const record = typeScope.variables.get(property.name, "LOCAL_ONLY")
+    if (record) P.ParseJournal.assign(scope.parser?.journal, record, { listedValues: values })
   }
 
   /**

@@ -279,6 +279,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "value-line-outside-getter":
     'Una línea del cuerpo de una propiedad calculada:  ponla debajo de una, p. ej. "el color de una carta es:"',
   "cant-set-worked-out": "No se puede poner {what}:  spell lo calcula",
+  "not-one-of-its-values": "{what} no puede ser {value}:  es uno de {values}",
+  "it-itself": "Esto",
+  "no-listed-values": "No puede ser {value}:  no tiene ninguna propiedad con una lista de valores",
+  "listed-on-two-properties": '{value} es un valor de su {first} y de su {second}:  di cuál, "su {first} es {value}"',
   "cant-set-belongs-to": "No se puede poner {what}:  es {theHolder} que lo contiene -- muévelo a {aHolder}",
   "the-property": "{theProperty}",
   "the-property-of-a-type": "{theProperty} de {aType}",

@@ -361,11 +361,12 @@ describe("a spellx page that draws its body", () => {
       }
     })
 
-    test("a value it doesn't know stays as said, and a later read goes by the member's name", () => {
-      const text = 'inicio es una página donde:\n\t- su candado es "otro"\n\t- su "aviso" es su candado\n'
+    test("a value it doesn't know is refused, naming its values;  a later read goes by the member's name", () => {
+      const refused = compiled('inicio es una página donde:\n\t- su candado es "otro"\n', "/Inicio.es.spell")
+      expect(refused.errors.join()).toContain("desbloqueado, bloqueado")
+      const text = 'inicio es una página donde:\n\t- su candado es "bloqueado"\n\t- su "aviso" es su candado\n'
       const { code, errors } = compiled(text, "/Inicio.es.spell")
       expect(errors).toEqual([])
-      expect(code).toContain('return "otro"')
       expect(code).toContain("this.lock")
     })
 

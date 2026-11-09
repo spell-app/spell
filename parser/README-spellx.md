@@ -459,6 +459,7 @@ markdown, markup and examples, where they sit.
   - Its own views read just before it.
   - It starts by itself, as any app or page does.
 - `locked` on any page is the page's `lock` (Spanish `bloqueado`).
+  - In plain Spell that's `- it is locked`, or `- its lock is locked`.
   - In the editor every edit to a locked page is a try-out, saved for nobody.
   - Whoever may save the page locks or unlocks it.
 - `thumbnail="snapshots/terms.jpg"` on a page or view (Spanish `miniatura=`) is a picture of it, a file of its project:

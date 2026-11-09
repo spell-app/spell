@@ -62,6 +62,7 @@ import { PatternText } from "./PatternText"
 import { PropertyBodyMust } from "./PropertyBodyMust"
 import { PropertyMust } from "./PropertyMust"
 import { PropertyValueEither } from "./PropertyValueEither"
+import { ItIsValue } from "./ItIsValue"
 import { PropertyValueGetter } from "./PropertyValueGetter"
 import { QuotedPropertyFormula } from "./QuotedPropertyFormula"
 import { RandomKindValue } from "./RandomKindValue"
@@ -1791,6 +1792,9 @@ classesEs.addRule(ItsQuotedProperty, {
 classesEs.addRule(ItsQuotedProperty, {
   syntax: "{type:subject_implied} {property:body_member_words}"
 })
+
+// en el cuerpo de un tipo:  `- está bloqueada`, `- es una reina`
+classesEs.addRule(ItIsValue, { syntax: "(es|está) (un|una)? {value:constant}" })
 
 classesEs.addRule(PropertyValueEither, {
   syntax: "{type_property} es {inline_value_if}",

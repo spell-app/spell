@@ -44,6 +44,8 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     const { type, property } = match.groups.type_property.groups
     const refused = SpellStatement.refuseUnknownType(match, type)
     if (refused === match) PropertyValueEither.noteInheritedMember(match, this.getBody(match))
+    const wrongValue = refused === match ? PropertyValueEither.wrongValueMessage(match, this.getBody(match)) : undefined
+    if (wrongValue) return SpellStatement.refuse(match, wrongValue)
     return refused === match ? SpellStatement.refuseBuiltInType(match, type, property) : refused
   }
 
@@ -56,7 +58,8 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     typeScope.declareProperty(`${property.value}`, match, {
       asWritten: property.raw,
       output: member?.output,
-      valueOutputs: member?.valueOutputs
+      valueOutputs: member?.valueOutputs,
+      listedValues: member?.listedValues
     })
     // its values, e.g. `red` and `black`, are the property's to declare:  its declaration lists them
     const { value, otherValue } = (this.getBody(match)?.groups ?? {}) as { value?: P.Match; otherValue?: P.Match }
@@ -73,6 +76,20 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     if (member?.output) match.data.inheritedOutput = member.output
     const { value, otherValue } = (body?.groups ?? {}) as { value?: P.Match; otherValue?: P.Match }
     for (const each of [value, otherValue]) SpellConstant.sayForMember(member, each)
+  }
+
+  /** What's wrong with a quoted value it gives, `- its lock is "banana" if ...` (epic `language` P39), if anything. */
+  private static wrongValueMessage(
+    match: P.MatchFor<PropertyValueEither>,
+    body: P.Match | undefined
+  ): string | undefined {
+    const { type, property } = match.groups.type_property.groups
+    const member = getKnownType(type).inheritedMember(`${property.value}`)
+    const { value, otherValue } = (body?.groups ?? {}) as { value?: P.Match; otherValue?: P.Match }
+    return (
+      SpellConstant.wrongValueMessage(match.scope, member, value) ??
+      SpellConstant.wrongValueMessage(match.scope, member, otherValue)
+    )
   }
 
   /** Nested scope for the `value_if` body:  `it` / `its` are the thing, as in any getter's. */

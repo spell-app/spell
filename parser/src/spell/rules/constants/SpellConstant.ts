@@ -1,4 +1,4 @@
-import { NONE, proto } from "spell/util"
+import { NONE, proto, upperFirst } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
@@ -84,6 +84,86 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
     for (let each = value; each; each = SpellConstant.onlyChild(each)) {
       if (each.is(TextLiteral)) return TextLiteral.sayAs(each as P.MatchFor<TextLiteral>, member.valueOutputs)
     }
+  }
+
+  /**
+   * What's wrong with `value`, as a value of `member`:  the message, in `scope`'s language, or `undefined` if nothing is.
+   * - Only a plain quoted text, `"banana"`:  anything else (`x`, `"[rank]"`) can only be known when it runs.
+   * - Fine:  a value on its list, a word that stands for one, or the value itself (`"bloqueado"` or `"locked"`).
+   * - A lookup's result:  call it WHILE PARSING.
+   */
+  static wrongValueMessage(
+    scope: P.Scope,
+    member: P.ScopeVariable | undefined,
+    value: P.Match | undefined
+  ): string | undefined {
+    if (!member?.listedValues) return undefined
+    const text = SpellConstant.plainTextIn(value)
+    if (!text || SpellConstant.isListed(member, text.inner)) return undefined
+    return SpellConstant.notOneOfMessage(scope, member, text.raw)
+  }
+
+  /**
+   * As `wrongValueMessage()`, for a line naming both sides of a comparison or an assignment:
+   * either may be the property (`if "banana" is its lock`).
+   */
+  static wrongValueOf(scope: P.Scope, property: P.Match | undefined, value: P.Match | undefined): string | undefined {
+    const member = SpellConstant.memberOf(property)
+    if (member) return SpellConstant.wrongValueMessage(scope, member, value)
+    return SpellConstant.wrongValueMessage(scope, SpellConstant.memberOf(value), property)
+  }
+
+  /** Is `text` one of `member`'s values, a word that stands for one, or what one compiles to? */
+  static isListed(member: P.ScopeVariable, text: string): boolean {
+    const outputs = member.valueOutputs ?? {}
+    return (
+      (member.listedValues ?? []).some((value) => `${P.spellValueOf(value)}` === text) ||
+      text in outputs ||
+      Object.values(outputs).includes(text)
+    )
+  }
+
+  /** `The lock can't be "banana":  it's one of unlocked, locked`, in `scope`'s language -- see `listedWordsOf()`. */
+  static notOneOfMessage(scope: P.Scope, member: P.ScopeVariable, value: string): string {
+    const language = SP.Language.of(scope)
+    const what = upperFirst(language.withArticle("definite", member.asWritten ?? member.name))
+    return language.parserMessage("not-one-of-its-values", {
+      what,
+      value,
+      values: SpellConstant.listedWordsOf(member).join(", ")
+    })
+  }
+
+  /** The words `member` can be, to show a person:  one for each value it compiles to, so `bloqueado`, not `bloqueada` too. */
+  static listedWordsOf(member: P.ScopeVariable): string[] {
+    const outputs = member.valueOutputs ?? {}
+    const seen = new Set<string>()
+    const words: string[] = []
+    for (const listed of member.listedValues ?? []) {
+      const word = `${P.spellValueOf(listed)}`
+      const output = outputs[word] ?? word
+      if (seen.has(output)) continue
+      seen.add(output)
+      words.push(word)
+    }
+    return words
+  }
+
+  /** SIDE EFFECT:  `value`, a constant's match, compiles as `output`:  `clubs` for `it is a club`. */
+  static compileAs(value: P.Match | undefined, output: string): void {
+    const constant = SpellConstant.constantIn(value)
+    if (constant) constant.data.valueOutput = output
+  }
+
+  /** The plain quoted text `match` is, through matches of one child:  `undefined` for anything else, a fill-in's too. */
+  private static plainTextIn(match: P.Match | undefined): { raw: string; inner: string } | undefined {
+    for (let each = match; each; each = SpellConstant.onlyChild(each)) {
+      if (!each.is(TextLiteral)) continue
+      if ((each.data as { fillIns?: unknown }).fillIns) return undefined
+      const token = each.matched[0] as P.TextToken
+      return { raw: `${each.value}`, inner: TextLiteral.plainText(`${each.value}`, token) }
+    }
+    return undefined
   }
 
   /** The property variable `match` reads, through matches of one child (`expression`), if any. */
