@@ -184,12 +184,15 @@
     flex: none;
     place-items: center;
     box-sizing: border-box;
-    width: var(--_epic-act-size);
+    /* a circle for one letter;  a pill that grows for several sets' (`A, B3, A4`), never text past its edge */
+    min-width: var(--_epic-act-size);
     height: var(--_epic-act-size);
+    padding-inline: 5px;
     border: 1.5px solid var(--_act);
-    border-radius: 50%;
+    border-radius: 999px;
     color: var(--_act);
     font: 700 12px/1 var(--ui-font-family-mono, ui-monospace, monospace);
+    white-space: nowrap;
   }
   .review-pick[data-fill="dashed"] {
     border-style: dashed;
