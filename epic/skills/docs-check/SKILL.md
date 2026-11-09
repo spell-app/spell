@@ -9,7 +9,7 @@ argument-hint: "<epic...>"
 In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
 (the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
 
-Owen's words (epic `airplane`, P10, 2026-10-10):
+The person's words (epic `airplane`, P10, 2026-10-10):
 "Make a doc task which:  first makes sure that any docs a plan wrote OTHER THAN THE PLAN DOC are consistent with
 what we chose,  then goes through all of those docs as a group, and makes sure things are internally consistent."
 

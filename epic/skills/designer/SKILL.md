@@ -1,6 +1,7 @@
 ---
 name: designer
-description: Review a page's LOOK the way Owen would -- screenshot it headlessly (desktop, narrow, phone, light and dark, hover and open states), hold each shot up against the designer's rules, and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase, fix the obvious ones and ask about bigger ones with before / after pictures.  Use for `/designer <page | URL> [focus]`, or "how does this look?", "review the design of ...", "check the UI of ...".
+description: Review a page's LOOK the way the person would -- screenshot it headlessly (desktop, narrow, phone,
+light and dark, hover and open states), hold each shot up against the designer's rules, and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase, fix the obvious ones and ask about bigger ones with before / after pictures.  Use for `/designer <page | URL> [focus]`, or "how does this look?", "review the design of ...", "check the UI of ...".
 argument-hint: "<page | URL> [focus]"
 ---
 
@@ -11,16 +12,17 @@ In Codex:  each step that needs a Claude Code tool says what Codex does instead,
 
 A design review of one page (epic `epic-engine` P24, request r19), against the designer's rules in
 [designer/](${CLAUDE_PLUGIN_ROOT}/designer/), three files, each one read:
-- [designer.md](${CLAUDE_PLUGIN_ROOT}/designer/designer.md):  how the rules learn, where Owen's asks pull two ways, and
-  **Owen's taste** (`T1` ...), his own asks word for word.  They WIN over craft.
+- [designer.md](${CLAUDE_PLUGIN_ROOT}/designer/designer.md):
+  how the rules learn, where the person's asks pull two ways, and
+  **the person's taste** (`T1` ...), their own asks word for word.  They WIN over craft.
   - `Theme: fruity` on a rule:  about the fruity theme's glass and pills;  another theme isn't held to it.
 - [craft.md](${CLAUDE_PLUGIN_ROOT}/designer/craft.md):  **craft** (`C1` ...), interfaces.dev's and jakub.kr's rules, each
-  with its source;  where one pulls against Owen's, it says so at the rule.
+  with its source;  where one pulls against the person's, it says so at the rule.
 - [procedures.md](${CLAUDE_PLUGIN_ROOT}/designer/procedures.md):  the severity scale, reading a screenshot, reviewing a
   change against its intent (jakub.kr's skills).
 - The same files drive the `designer` agent type ([designer-agent.md](${CLAUDE_PLUGIN_ROOT}/designer/designer-agent.md),
   Q11):  another session hands it a page and gets the findings back.
-- Headless only:  never Claude-in-Chrome (Owen's standing rule).
+- Headless only:  never Claude-in-Chrome (the person's standing rule).
 
 ## Forms
 
@@ -65,9 +67,10 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
      recommended.
      - In Codex:  the list, then ask in the chat which to fix, the obvious ones first;
        the person answers with the numbers.
-   - **The end of a UI phase** (Q12;  Owen, 2026-10-23:  "yes, and fix obvious things, ask about bigger changes with
+   - **The end of a UI phase** (Q12;  2026-10-23:  "yes, and fix obvious things, ask about bigger changes with
      pictures"), before `epic phase ... done`, for a phase that changed a page or an element:
-     - OBVIOUS:  ONE place, a SETTLED rule (any T rule not in designer.md's "Where his asks pull two ways", or a C rule
+     - OBVIOUS:  ONE place, a SETTLED rule (any T rule not in designer.md's "Where their asks pull two ways",
+       or a C rule
        no T rule pulls against), and no new look to choose:  an icon off centre, padding past the house spacing, a
        ring on a toolbar icon, a label wrapping, a contrast fail.  Fix it, shoot again, and list it in the phase's Done.
      - BIGGER (a layout, a new surface, a colour, anything in "pull two ways", anything the person could want either way):
@@ -75,11 +78,12 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
        - A details page ([the details skill](../details/SKILL.md)), one question per change:  the before shot, an after
          shot (the change tried in the page, shot, then undone), the rule it answers;  options "Do it" / "Leave it" /
          Other.
-       - Each one also an issue on the epic page, calm unless it breaks one of Owen's own asks:
+       - Each one also an issue on the epic page, calm unless it breaks one of the person's own asks:
          `epic add <epic>#I "<what> (designer)" --details "..." --calm`.
    - **The agent type**:  returns the ranked list to the session that asked;  it changes nothing itself.
 6. Learn (designer.md says so in its header):
-   - The person gives design feedback, in any session:  add it to "Owen's taste" in the same turn, their words quoted, with
+   - The person gives design feedback, in any session:
+     add it to "the person's taste" in the same turn, their words quoted, with
      the epic, phase and date (a new `T<n>`, or a quote added to the rule it repeats).
    - The person rejects a finding:  note it under its rule;  rejected twice, reword the rule or drop it.
    - Commit it with the turn's other spell-epic changes:  the rules are code, versioned per branch.

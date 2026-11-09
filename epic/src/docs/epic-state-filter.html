@@ -85,8 +85,8 @@
               </ui-content>
             </ui-accordion>
             <p>
-              The Phases section's (<code>phases</code>, epic <code>epic-engine</code> I170): a phase's states, in Owen's
-              order. Red needs him, orange changed since he looked, the one under way in the blue badge, a dotted blue
+              The Phases section's (<code>phases</code>, epic <code>epic-engine</code> I170): a phase's states, in your
+              order. Red needs you, orange changed since you looked, the one under way in the blue badge, a dotted blue
               outline scheduled, green done lately, grey done before.
             </p>
 <epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></epic-state-filter>
@@ -137,9 +137,9 @@
                 </thead>
                 <tbody>
                   <tr><td><code>counts</code></td><td>How many items are in each state: <code>attention:2 open:5</code>. A chip per state with any, in the filter's order: progress, attention, replied, open, recent, old.</td></tr>
-                  <tr><td><code>phases</code></td><td>The Phases section's chips (epic <code>epic-engine</code> I170): <code>counts</code> names a phase's states, in Owen's order: attention (red), updated (orange), progress (blue, in the badge), scheduled (a dotted blue outline), recent (green), old (grey), each with its own words.</td></tr>
+                  <tr><td><code>phases</code></td><td>The Phases section's chips (epic <code>epic-engine</code> I170): <code>counts</code> names a phase's states, in your order: attention (red), updated (orange), progress (blue, in the badge), scheduled (a dotted blue outline), recent (green), old (grey), each with its own words.</td></tr>
                   <tr><td><code>shown</code></td><td>The states showing. No attribute: every state; <code>""</code>: none.</td></tr>
-                  <tr><td><code>marked</code></td><td>How many items Owen marked in this pass, not applied yet (epic <code>epic-engine</code> P43): the blue badge, left of the chips, drawn whatever <code>shown</code> says. Left out of <code>counts</code>. None or 0: no badge.</td></tr>
+                  <tr><td><code>marked</code></td><td>How many items you marked in this pass, not applied yet (epic <code>epic-engine</code> P43): the blue badge, left of the chips, drawn whatever <code>shown</code> says. Left out of <code>counts</code>. None or 0: no badge.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -176,7 +176,7 @@
           <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
-              <li>Each state in its colour: blue Claude is on it, red needs Owen, orange his turn to pick, yellow open, green done lately, grey older.</li>
+              <li>Each state in its colour: blue Claude is on it, red needs you, orange your turn to pick, yellow open, green done lately, grey older.</li>
               <li>A phase scheduled, still to do: a DOTTED blue outline, its count in blue, never filled; faded while hidden (epic <code>epic-engine</code> I170).</li>
               <li>The colours come from the page: an epic page's <code>--epic-state-*</code>, a docs page's <code>--spell-state-*</code>.</li>
               <li>Each chip's tooltip says how many, which state, and what a click does; its second line, that ⌥-click shows only these.</li>

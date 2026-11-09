@@ -3,7 +3,7 @@
  * Claude Code's `PostToolUse` hook on `ExitWorktree` (the plugin's `hooks/hooks.json`):
  * reminds the session that leaving a worktree closes out its work,
  * so its reply may end with `*You can close this tab*`.
- * - Epic `epic-eject` P10, Owen's r1:  a session left with `ExitWorktree` keep and never said it.
+ * - Epic `epic-eject` P10, the person's r1:  a session left with `ExitWorktree` keep and never said it.
  * - The rule itself:  the isolate skill's "Closing line" (`skills/isolate/SKILL.md`).
  *   This hook only points at it, so a bare `ExitWorktree`, outside `/isolate done`, follows it too.
  * - stdin `{ cwd, hook_event_name, tool_input: { action }, ... }`;
@@ -36,7 +36,7 @@ try {
             "open." +
             (kept
               ? "  The worktree is still on disk:  with the line, also ask (AskUserQuestion) whether to run " +
-                'it:  "Run `/epic done`" (Recommended) / "Leave it" in an epic\'s session (Owen, 2026-10-24), else ' +
+                'it:  "Run `/epic done`" (Recommended) / "Leave it" in an epic\'s session (2026-10-24), else ' +
                 '"Run `/isolate done`" (Recommended) / "Leave it".'
               : "")
         }

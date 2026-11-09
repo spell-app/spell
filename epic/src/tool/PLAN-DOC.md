@@ -14,7 +14,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - The shared epics template (`templates/epics/plan.html`) retired at the switch.
 - How to WRITE a doc stays in [plan-doc.md](../../templates/epics/plan-doc.md).
   It points here for the markup.
-  - "Rules":  write for Owen cold, Net effect, never delete an item, never drop its text
+  - "Rules":  write for the person cold, Net effect, never delete an item, never drop its text
   - "Ids"
   - what phases and items say, "Prose"
   - "Explaining a question or issue"
@@ -83,10 +83,12 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - Drawn:  their titles, icons, notes, counts and the progress bar.
   - "0. WHILE YOU WERE OUT" (`kind="away"`, id `away`;  epic `epic-engine` P62):  FIRST, before the Overview,
     unnumbered, titled its own.
-    - What Claude did since Owen last pressed Done reading (`<epic-page away-read>`), and what needs him, in order:
+    - What Claude did since the person last pressed Done reading (`<epic-page away-read>`),
+      and what needs them, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
       no section.  `waiting` is its toolbar badge.
-    - An item Owen addressed leaves it, however recently it changed (`NightSummary.isAddressed()`, epic `epic-engine`
+    - An item the person addressed leaves it, however recently it changed (`NightSummary.isAddressed()`,
+      epic `epic-engine`
       I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
       A fix Claude made since (orange) is back, "fixed, to review".
     - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
@@ -95,7 +97,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
-    - what a run wrote for Owen to read (an overnight `/bedtime` report)
+    - what a run wrote for the person to read (an overnight `/bedtime` report)
     - its own `id` and `title`
     - right after the Overview, unnumbered, with the page's bands
 - The Overview:  `<epic-summary>` (two sentences, drawn as a lede), then `<epic-prompt>`, then its sub-sections.
@@ -163,7 +165,7 @@ As `plan-doc.md`, "Ids":
     file (`parts/p-epic-migrate.html`) stay on their phase.
   - "P7" is what people see and say:  the 7th phase, worked out as the page draws (`<epic-phase>`, the step label, the
     Epics list page) and as the tool prints.
-    - Always WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
+    - Always WHOLE (epic `epic-engine` I126;  2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
       moving a phase renumbers the to-do phases after it, and the tool rewrites what names them.
       - bare numbers too (I137):  `P18`, `P17-P20`, `P20's`, `epic-engine P46`, in phases, items and Update blocks,
         mapped all at once, so P18 => P19 never chains on to P20
@@ -185,7 +187,7 @@ As `plan-doc.md`, "Ids":
 <epic-phase id="p-short-name" title="Short Name" status="active" estimate="1-2h" to-see="up1@2026-10-29T10:00">
   <epic-field name="symptom">what's wrong today, one line</epic-field>
   <epic-field name="requests"
-    ><epic-field label="r3 · 🚧 python (83d39e12)"><blockquote><p>Owen's words</p></blockquote> ...</epic-field
+    ><epic-field label="r3 · 🚧 python (83d39e12)"><blockquote><p>The person's words</p></blockquote> ...</epic-field
   ></epic-field>
   <epic-field name="goal"><ul><li>a bullet per outcome</li></ul></epic-field>
   <epic-field name="changes">what changes, two or three lines</epic-field>
@@ -217,24 +219,24 @@ As `plan-doc.md`, "Ids":
 - `plan`:  CLAUDE'S BUILD PLAN for it (epic `epic-engine` P33, M1), `waiting` or `accepted`:  in the skeleton, so the
   title row knows with its body not loaded.
   - `update <name>#P3 --plan "<ol>...</ol>"` writes the `plan` field and sets `waiting`, logged
-    (`P3 plan written:  waiting for Owen's Accept`);  `--plan ""` removes both.
+    (`P3 plan written:  waiting for the person's Accept`);  `--plan ""` removes both.
   - Waiting:  the field "Claude's plan:" with an orange rule;  the phase's review pills Accept Phase and Revisit, ringed 2px #666 while they wait (the header's Send ringed too, its tooltip naming the waiting plans)
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
-  - Accept plan pressed on a phase whose text holds Owen's comments (its auto revisit, I158) KEEPS them (epic
+  - Accept plan pressed on a phase whose text holds the person's comments (its auto revisit, I158) KEEPS them (epic
     `epic-engine` I163):  the mark `{ action: "approve", note, comments: ["c4", "c5"] }`;  a comment saved on a phase
     already approved joins it, still approved (`ReviewInbox.noteComment()`).
     - `wait` prints "accepted, with comments to fold in:  C4, C5", each comment under it;  `inbox apply` accepts the
       plan as usual ("plan accepted:  build it, with comments to fold in:  C4, C5") and leaves the comments waiting.
     - Claude folds them in and keeps it accepted:  `update <name>#P3 --plan "..." --accepted` writes the plan
-      `accepted` (logged `P3 plan written:  accepted, Owen's comments folded in`), no `waiting`, no spinner;  then
+      `accepted` (logged `P3 plan written:  accepted, the person's comments folded in`), no `waiting`, no spinner;  then
       answers each comment.  Without `--accepted`, `--plan` waits as before.
-    - Only a comment against something he decided, or changing the scope a lot, becomes a Q item instead.
+    - Only a comment against something they decided, or changing the scope a lot, becomes a Q item instead.
 - Children in that order, always (the vocabulary's `childOrder: "listed"`):
   the tool puts each where it belongs.
-  - Owen's kept notes (`<epic-reply>`) after Requests, before Goal;  slotted children (status cards) at the end.
-  - Changes after Goal, next to Claude's plan (epic `epic-engine` P45;  Owen, 2026-10-25:  "Move `changes` below
+  - The person's kept notes (`<epic-reply>`) after Requests, before Goal;  slotted children (status cards) at the end.
+  - Changes after Goal, next to Claude's plan (epic `epic-engine` P45;  2026-10-25:  "Move `changes` below
     `goal` so it's next to the plan");  the migration `changes-after-goal` moves an older page's.
   - To review's items are `<epic-mark item link>`s (P45), each drawn in its item's state colour;  the migration
     `to-review-marks` turns an older page's `<a href="#j1">` links into them.
@@ -284,20 +286,20 @@ As `plan-doc.md`, "Ids":
     (`STAGE accepted overview:  stage phases, write the phases`).
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
     phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
-- Requests (epic `epic-workflow`):  what Owen sent the phase from other sessions, one labelled block per request.
+- Requests (epic `epic-workflow`):  what the person sent the phase from other sessions, one labelled block per request.
   - Written by `epic file <epic>#P<N> <rN>` (the tool's `request <name> <N> <rN> --from "..." --file f`).
-  - The block:  his words quoted, what the sender was looking at, when, a link to `requests/<rN>/request.md`, and
+  - The block:  their words quoted, what the sender was looking at, when, a link to `requests/<rN>/request.md`, and
     each screenshot.
   - Filing a request again replaces its block.
 - Plan changes:  `<epic-update at summary>` blocks, one per change to the phase's plan, oldest first (see "Updates").
   - Written by `updated <name>#<N> "<html>" [--summary "..."] [--for <item ids>]`.
   - Only for a change NO ITEM caused (a plan adjusted while building, a file moved):  an answer's change is its
     change marks alone ("Change marks";  epic `epic-engine` I159).
-  - At the END of the phase's description (Owen, 2026-10-11:  "The updated blocks themselves go at the end of the
-    phase description"):  after Goal (and Owen's kept notes), before Done, the commits, Files, Verify, To review.
+  - At the END of the phase's description (2026-10-11:  "The updated blocks themselves go at the end of the
+    phase description"):  after Goal (and the person's kept notes), before Done, the commits, Files, Verify, To review.
   - `phase`:  the phase active then.
   - They stay once the phase is done.
-  - No box around them (Owen, 2026-10-11:  "lose the "Plan changes" surround"):  each is its own block.
+  - No box around them (2026-10-11:  "lose the "Plan changes" surround"):  each is its own block.
   - The phase's `to-see`:  the new ones (not seen, not quiet), written by the tool on every edit, in the skeleton;
     its pen counts them ("Updates", I168).  Its `changes`, the count before I168, goes on the next write.
     While the phase isn't done, its title shows an orange pen and that count, folded too (its part not loaded).
@@ -305,7 +307,7 @@ As `plan-doc.md`, "Ids":
     the to-do phases' first in the Phases section (`<epic-updated slot="changes" of="N">`, T14).
     - They still read, and draw:  slotted lines at the end of the phase's body, unboxed.
     - The migration `updates-as-epic-update` turned every page's into `<epic-update>`s ("Migrations").
-- `estimate`:  wall-clock time for Claude, agents included, Owen's review not.
+- `estimate`:  wall-clock time for Claude, agents included, the person's review not.
   - E.g. `30m`, `2h`, `1h30m`, `1-2h`.
   - The Overview's `estimate` is the total, rewritten on every change:
     `4h-5h 30m in all, 2h-3h left (P5 not estimated)`.
@@ -319,10 +321,11 @@ As `plan-doc.md`, "Ids":
   - From Claude Code's transcripts:
     - the phase's own agents, named `<epic>-p3` (`-p3-docs`) or saying `P3`, that ran while it was active
     - else the epic's sessions' turns while it was active
-    - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
+    - side by side, counted once;  never the wait for the person's next prompt, an answer, a permission, or their notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
 - `span`:  how long a done phase was under way by the clock (epic `epic-engine` I127):  `4h`, `1h 30m`.
-  - From its log:  its last `active` to its `done`, waits on Owen included;  so `took` against `span` is overall velocity.
+  - From its log:  its last `active` to its `done`, waits on the person included;
+    so `took` against `span` is overall velocity.
   - Written beside `took`, by `epic phase seo#P3 done` and `epic phase seo#P3 took`;  no start in the log:  none.
   - Its title row reads `34m / 4h`, its tooltip `34m of work over 4h, estimated ~3-4h`.
   - Older phases have none, until asked.
@@ -394,23 +397,23 @@ As `plan-doc.md`, "Ids":
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
-    | `requested` | light orange | an issue filed from Owen's own words (`requested`), closed done, not reviewed:  his turn to see it (epic `epic-engine` P63) |
+    | `requested` | light orange | an issue filed from the person's own words (`requested`), closed done, not reviewed:  their turn to see it (epic `epic-engine` P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
-    | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  Owen reviews it), or Claude's LAST reply holds options nothing is picked in yet:  Owen's turn |
-    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue Owen asked for with Do this (`urgent`), reviewed or not |
-    | `handed`    | blue, outlined | a judgement call or issue Owen pressed Do this on (`urgent`), Claude hasn't started (epic `epic-engine` P63) |
+    | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
+    | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
+    | `handed`    | blue, outlined | a judgement call or issue the person pressed Do this on (`urgent`), Claude hasn't started (epic `epic-engine` P63) |
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `replied`   | orange | a manual test whose phase isn't done (epic `epic-engine` P63:  `PlanReader.manualTestState()`) |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a calm issue, a test whose phase is done;  a revisit or request for now answered |
 
-    - Green across the board for what's decided, grey only for what no longer matters (Owen, 2026-10-08).
+    - Green across the board for what's decided, grey only for what no longer matters (2026-10-08).
       A `/bedtime` run and `recent-since` no longer colour anything.
-    - `replied` (Owen, 2026-10-09):
+    - `replied` (2026-10-09):
       - The reply is the item's last `<epic-reply>`, `from="Claude"`, holding an `<epic-choices>` without `chosen`.
-      - A pick, a newer reply from Owen, or closing the item ends it.
+      - A pick, a newer reply from the person, or closing the item ends it.
       - A reply that asks without cards (a yes / no in prose) doesn't make it.
-      - It counts as needing Owen, as `attention` does:  the rail's count, the "only what needs you" filter.
+      - It counts as needing the person, as `attention` does:  the rail's count, the "only what needs you" filter.
 
   - `changed`:  ISO local time with offset.
     - Stamped by every command that changes its status or review marks.
@@ -418,7 +421,7 @@ As `plan-doc.md`, "Ids":
   - `phase`:  the phase active when it was added.
   - review marks:
     - `reviewed`, `deferred`, `queued` (`YYYY-MM-DD`), `work`, `working`
-    - `review-as`:  how Owen's mark was handled
+    - `review-as`:  how the person's mark was handled
       - `approve`, `todo`, `revisit`
       - `now`:  a request for now (Add Details, a revisit now) done, written by `inbox done`
       - `next`, `drop`:  a todo (work) queued into the next phase, or dropped
@@ -430,7 +433,7 @@ As `plan-doc.md`, "Ids":
       - saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and shown under the words
       - it rides in the mark as `shot` (revisit, todo, next, drop and skip take one);  a picture alone is a revisit
       - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's,
-        next's or drop's picture in Owen's kept reply
+        next's or drop's picture in the person's kept reply
   - `limit`:  a todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn
     calmer, never offered for the next phase, with an item's buttons (Approve, Revisit, Make Todo).
     - a todo without it is WORK still to do:  the plane, Revisit, the x (below)
@@ -440,11 +443,12 @@ As `plan-doc.md`, "Ids":
     - and by the session that filed the failure itself (epic `epic-engine` I174):
       `epic update <name>#M3 --failed I12`, a Noted card linking the issue;  `--failed off` takes it off
     - closing the test (passed) takes it off too (`PlanDoc.setItem()`)
-  - `prepared`:  a manual test Start testing wrote out for Owen, its place in his order (`prepared="2"`, 1 first;
+  - `prepared`:  a manual test Start testing wrote out for the person, its place in their order (`prepared="2"`,
+    1 first;
     format `place`;  epic `epic-engine` P51).
     - written by `epic details <name>#M3 --prepared <n>`
 - A MANUAL TEST (`m3`, epic `epic-engine` P4;  `t3` before P44, `v3` before P32):
-  its text is FIELDS, in this order, so Owen can do it straight off the page, in the Manual tests section:
+  its text is FIELDS, in this order, so the person can do it straight off the page, in the Manual tests section:
 
   ```html
   <epic-item id="m3" title="The sitemap lists every guide" status="open">
@@ -460,21 +464,23 @@ As `plan-doc.md`, "Ids":
     (`EpicTests.fieldsHTML()`);  `details <name>#M3 --step ...` rewrites a test in them.
   - A Step's `a.epic-test-action` links are pages to open:  the page shows each as a button.
   - Screenshots live beside the page in `tests/`, their paths from the page's folder:
-    Claude's examples `tests/m3.png`, the pictures in Owen's notes `tests/m3-20261019-1432.png` (`POST shot`).
+    Claude's examples `tests/m3.png`, the pictures in the person's notes `tests/m3-20261019-1432.png` (`POST shot`).
     - An older one keeps its file name (`tests/t3-...`, `v3-...`):  the page names it by path.
   - An older test has only prose, still valid:  the page shows the prose as its Step.
     No migration step:  the fields are new content a test MAY have, nothing an old page must change.
-  - Owen answers a test WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,
+  - The person answers a test WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:
+    no separate test run,
     no Passed / Failed / Skip / Not now, no P / F / S / N keys):
     - Approve:  passed;  `inbox apply` closes it.
-    - A Revisit note, or a comment in its Step or Should (which presses Revisit itself, I158):  what he saw, often with
-      a picture.  Left for the session, which closes the test when his note says it passed, else files an issue,
-      "M3 failed:  <title>", holding his note and picture, linked both ways (`update <name>#M3 --failed I12`), the
+    - A Revisit note, or a comment in its Step or Should (which presses Revisit itself, I158):
+      what they saw, often with
+      a picture.  Left for the session, which closes the test when their note says it passed, else files an issue,
+      "M3 failed:  <title>", holding their note and picture, linked both ways (`update <name>#M3 --failed I12`), the
       test left open.
     - The note box's x (`skip`):  `inbox apply` CANCELS it, "no longer applies";  a note says why.
     - Left alone:  still open.
   - A test Claude checked itself and saw pass, Claude MAY close (Q58):  with a Done card saying how it was checked,
-    the picture attached.  The one exception to "a manual test is Owen's to close".
+    the picture attached.  The one exception to "a manual test is the person's to close".
   - START TESTING, the Manual tests section's button (on its title, while reviewed and a test is open):
     - "Start testing · 9":  a request for now, `{ action: "prepare" }` keyed on the section's id, `tests`;
       only `tests` takes `prepare`, and it takes nothing else.
@@ -482,20 +488,20 @@ As `plan-doc.md`, "Ids":
         the same window come together, stamps each `prepared`, then `inbox done <name>#tests`
       - nobody listening:  the page server wakes the epic, as for Add Details
     - "Preparing tests" while it's worked;  a click calls it off.
-    - Done:  the page opens the first open test (unless Owen is typing in a field:  "Tests ready").
-    - Every open test prepared:  "Next test · 3 left" (open tests with no mark of his yet), the next unanswered one
+    - Done:  the page opens the first open test (unless the person is typing in a field:  "Tests ready").
+    - Every open test prepared:  "Next test · 3 left" (open tests with no mark of theirs yet), the next unanswered one
       after the last it opened, round to the start;  none left, "Go through the tests · N".
       It never asks Claude again.
-  - Owen's ORDER, on the page and in `epic test --list`:  prepared tests first by place, then page order,
+  - The person's ORDER, on the page and in `epic test --list`:  prepared tests first by place, then page order,
     deferred last (`inTestOrder()`).
   - An OLD mark from the test run before P51, `{ action: "test", result, note?, shot? }`, still applies
     (`PlanDoc.applyTest()`), so nothing sent before is lost:
     - `passed`:  `done`, reviewed, `failed` gone
-    - `failed`:  a new issue, "M3 failed:  <title>", linking the test, with his note and an `<img>` of his
+    - `failed`:  a new issue, "M3 failed:  <title>", linking the test, with their note and an `<img>` of theirs
       screenshot;  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking it
     - `skip`:  `canceled` ("no longer applies"), reviewed
-    - `notnow`:  `deferred`:  last in his order
-- A WORK todo's review buttons (no `limit`;  Owen, 2026-10-09):  the plane, Revisit, the x,
+    - `notnow`:  `deferred`:  last in their order
+- A WORK todo's review buttons (no `limit`;  2026-10-09):  the plane, Revisit, the x,
   in one group.  No Approve or Make Todo.
   - The plane (`next`, green):  "Do it in the next phase".
     - `inbox apply` queues it into the first phase whose status is `todo`:
@@ -506,15 +512,15 @@ As `plan-doc.md`, "Ids":
   - Revisit (blue):  "Revisit:  I'm adding a note for you";  answered as any revisit.
   - The x (`drop`, grey):  "Drop it".
     - `inbox apply` cancels it:  struck through, grey;  reviewed.
-    - The log:  `T3 canceled:  dropped by Owen in review`.
+    - The log:  `T3 canceled:  dropped by the person in review`.
   - Its note box matches:  the plane, Revisit Later, the x.
     - The plane or the x takes the note in the box along.
-    - `inbox apply` keeps it first, as Owen's `<epic-reply re="next phase">` (or `re="drop"`).
+    - `inbox apply` keeps it first, as the person's `<epic-reply re="next phase">` (or `re="drop"`).
   - An issue or a judgement call:  Do this, Revisit, Approve (epic `epic-engine` I232;  below, "Do this").
   - Every other kind keeps Make Todo, Revisit and Approve, a LIMIT todo (`limit`) too.
 - EVERY other note box (an item's, an Overview sub-section's, a phase's, the summary's):  Revisit Later, then the x.
   - The x is `skip`, grey:  "Skip this".
-  - It took Make Todo's place in the box (Owen, 2026-10-09);  Make Todo stays on the line.
+  - It took Make Todo's place in the box (2026-10-09);  Make Todo stays on the line.
   - The x means nothing to do here.
     - It takes the note in the box along, or none.
     - It replaces any other mark, a pick too.
@@ -523,7 +529,7 @@ As `plan-doc.md`, "Ids":
   - `inbox apply`, on an item:  reviewed, and nothing else.
     - Its status stays as it was:  an open question stays open, since `skip` settles nothing.
     - No status card.
-    - A note is kept first, as Owen's `<epic-reply re="skip">`.
+    - A note is kept first, as the person's `<epic-reply re="skip">`.
     - The log:  `J9 skipped:  nothing to do, reviewed`.
   - On a todo that's work, skipping it IS dropping it.
     - Its own box's x is `drop`.
@@ -549,13 +555,13 @@ As `plan-doc.md`, "Ids":
     - the set records the pick, drawn inside its folded Choices (I153):
       `<epic-choices chosen="B" chosen-on="2026-10-29" chosen-note="recorded as the answer;  waiting for ...">`
       - `chosen-note`:  `<what was recorded>;  <what happens next>`
-      - NO Noted card:  it said again what the Choices header says (Owen, 2026-10-29:  "should be part of the
+      - NO Noted card:  it said again what the Choices header says (2026-10-29:  "should be part of the
         collapsed 'chosen' section");  only an underway card on the item still turns Noted, `Chose B · ...`
     - and the option in the log line
   - A pick riding on a revisit ("pick B, but ..."):  left for the talk.
     - Claude finishes the mark (`inbox done | clear`) without a `decide --option`:
       the pick is still written as that set's `chosen`, with its line (`keepPick()`):  `recorded after the talk;  ...`.
-    - Once Owen picked, the card says Chosen (Owen, 2026-10-10).
+    - Once the person picked, the card says Chosen (2026-10-10).
 - The way in (`IncomingHtml`):  agents may still write the OLD shapes.
   - Every command taking HTML turns them into elements on the way in, so a doc never holds them.
     - Those commands:  `add --details`, `decide --details`, `details --file`, `updated`, a phase's fields.
@@ -587,7 +593,7 @@ As `plan-doc.md`, "Ids":
     - a code accordion holding a `<ui-code>`, or two blocks
     - a note headed `DEFERRED`
 - A rewrite never drops text:  `details --file`, `decide` again, `details --more` again, `summarize`.
-  - `summarize --file` (Owen, epic `repo-split` J141) condenses the item after a lot of back and forth:
+  - `summarize --file` (epic `repo-split` J141) condenses the item after a lot of back and forth:
     its text, replies, More Details and unpicked Choices all move, as one version;
     the question as asked, the answer, picked Choices (copied out of a moved reply too), status cards and commits stay.
   - What it replaces moves into `<epic-original>`, one `<epic-version>` per version.
@@ -602,34 +608,36 @@ As `plan-doc.md`, "Ids":
 - A details page has no `<epic-*>` elements:  an item's text goes there as the prose each element draws.
   - E.g. `Net effect (A):` over its list, a code block's title over its `<pre>` ...
   - `PlanItem.asProse({ plain })` does it.
-- Owen's note, once Claude clears its mark:  `<epic-reply from="Owen" at="..." re="revisit soon">`.
+- The person's note, once Claude clears its mark:  `<epic-reply from="Ana" at="..." re="revisit soon">`.
 - An Overview sub-section takes review marks too (Q14):
   - approve and skip are logged
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
-  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase,
+  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
     you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
-    - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:  Owen wants this phase
-      built", his note kept;  Claude builds it (`go ahead:  build it`).  It made `Follow up:  P3 · <title>` before I181
-    - a kept note is Owen's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
+    - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:
+      the person wants this phase
+      built", their note kept;  Claude builds it (`go ahead:  build it`).  It made `Follow up:  P3 · <title>` before
+      I181
+    - a kept note is the person's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
   - The summary, keyed `summary` in the inbox (it has no id):
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
-- Do this on an issue or a judgement call (epic `epic-engine` I232;  Owen, 2026-11-08):  its first button, the phase's
+- Do this on an issue or a judgement call (epic `epic-engine` I232;  2026-11-08):  its first button, the phase's
   word and thumbs up;  the same stored `todo` mark.  NO todo is made.
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
-    his note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
+    their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
   - Fixed:  `epic update <epic>#I3 fixed ["<what changed>"]` (also what `done` means on one):  still open, `fixed`,
-    ORANGE, on his list to review again.
-  - His Approve closes it;  his Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
+    ORANGE, on their list to review again.
+  - Their Approve closes it;  their Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
   - A mark already sent with `todo` applies the same way.
   - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
 - NEW items from the page (epic `airplane` P2).
   - Asked for with a small form:  todo or question, title, note, what it's about.
-  - Opened by the page toolbar's new-item button:  comment dots (Owen, 2026-10-10).
+  - Opened by the page toolbar's new-item button:  comment dots (2026-10-10).
   - Or by a New todo / New question button, at the end of the Todo and Questions sections.
   - It waits in the inbox as a mark under a key of its own, `new1`, `new2` ...:
     `{ action: "new", kind, title, note?, near? }`.
@@ -638,7 +646,7 @@ As `plan-doc.md`, "Ids":
   - `inbox apply` makes each sent one as `add` does:
     - the note its details (a question's lead)
     - `About <a href="#p-epic-migrate">P3</a>.` for `near` (a phase by its id, or as typed:  `p3`)
-    - a Noted status card, `Made from the page:  Owen's new todo, written <time>.`
+    - a Noted status card, `Made from the page:  the person's new todo, written <time>.`
     - one log line
   - `inbox clear new1` drops one;  its note is never kept as a reply.
 
@@ -665,23 +673,23 @@ The blocks prose used to shape by hand, now each an element (epic `epic-componen
 | `<epic-link>`                 | `<epic-link saga="drawable-spell" epic="python-target" item="T1"></epic-link>`:  a link to a saga page (`saga` alone), an epic page (`epic`), or an item or phase on one (`item="T1"`, `phase="7"` or `phase="epic-migrate"`);  none of `saga` / `epic`:  the page it's in.  No text:  draws the short form (`python-target T1`, `T1` here, `P7 · Epic Migrate`), the target's title its tooltip ("Links") |
 | `<epic-field label>`          | `<epic-field label="Where"><p>the inbox file</p></epic-field>`:  a labelled block, `Where:` before its prose (`What should happen`, `Step`);  a phase's fields have `name` instead |
 | `<epic-section kind="report">` | `<epic-section id="overnight" kind="report" title="Overnight · 2026-10-04">...</epic-section>`:  a run's report, after the Overview (`The page`) |
-| a table                       | `<ui-table celled padding="compact" appearance="striped" unstackable><table>...</table></ui-table>`:  Spell UI's, not an element of ours;  ALWAYS `unstackable` (epic `epic-engine` I36;  Owen, 2026-10-19:  a table drawn at the side bar's width as its header cells, then each row's cells one under another, "I hate it"):  too wide, it scrolls sideways in its own box.  The tool's way in adds `unstackable` to one without (`IncomingHtml`) |
+| a table                       | `<ui-table celled padding="compact" appearance="striped" unstackable><table>...</table></ui-table>`:  Spell UI's, not an element of ours;  ALWAYS `unstackable` (epic `epic-engine` I36;  2026-10-19:  a table drawn at the side bar's width as its header cells, then each row's cells one under another, "I hate it"):  too wide, it scrolls sideways in its own box.  The tool's way in adds `unstackable` to one without (`IncomingHtml`) |
 | the crumbs                    | none written:  `<epic-page>` draws `Docs › Epics › <title>` from its `title` (an older doc's `.spell-crumbs` before it:  it draws none) |
 
 ## Status cards
 
-What Claude took each of Owen's review marks to mean, and that it's done or noted (P13).
+What Claude took each of the person's review marks to mean, and that it's done or noted (P13).
 - A card per mark, on what the mark is on:  the item, the Overview sub-section, the phase, the summary.
 
 Two kinds of finished card, so a card for one STEP never reads as the item finished.
-- Owen, 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything".
-- Owen, 2026-10-26 (epic `epic-engine` I148), on repo-split's I65, two Done cards and still red:
+- 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything".
+- 2026-10-26 (epic `epic-engine` I148), on repo-split's I65, two Done cards and still red:
   "why is this showing as red if it is fixed?"  So Done FINISHES the item;  every other step is Noted.
 
 | card             | when                                                                  | says, in one line                                   |
 | ---------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
 | `Claude • Underway` | Claude is on it                                                     | what Claude took the task to be                     |
-| `Claude • Noted` | a STEP done, the item not finished:  Owen's choice RECORDED (a todo made or queued, a new item made, a choice talked over;  a pick goes in its Choices, I153), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Made todo T23 to follow this up.` |
+| `Claude • Noted` | a STEP done, the item not finished:  the person's choice RECORDED (a todo made or queued, a new item made, a choice talked over;  a pick goes in its Choices, I153), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Made todo T23 to follow this up.` |
 | `Claude • Done`  | the item's WORK is finished:  an issue fixed, a todo built;  an open issue or todo CLOSES with it | the reading kept, a summary when worth saying     |
 
 ```html
@@ -707,8 +715,8 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
 - An underway card makes its item `progress` (blue:  Claude is working on it) until it's done.
 - `slot="status"`:  never ordered.
   - Written last in the item, or the section.
-  - Drawn last in the details:  UNDER Owen's marked note, and above the note box
-    ("under my input", Owen, 2026-10-08).
+  - Drawn last in the details:  UNDER the person's marked note, and above the note box
+    ("under my input", 2026-10-08).
   - A part file never holds them:  they stay in the skeleton with the title.
 - The reading:  one or two sentences, plain words, no file names.
 - The summary (`slot="summary"`, one or more blocks):  only when there's something worth saying.
@@ -720,15 +728,15 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - The LATEST underway card turns done (`done-at`), the reading kept;  spinner off.
     - An open ISSUE or TODO (not a `limit`) closes in the same write, as `close` does (`PlanDoc.finishWork()`):
       `done`, green, `taken-in` its phase, the log's `I3 closed:  <title>`.
-    - Only the card on the rest:  a question is decided, never done;  a judgement call or manual test is Owen's to
+    - Only the card on the rest:  a question is decided, never done;  a judgement call or manual test is the person's to
       close (Approve;  a test Claude checked itself it closes with `close`, Q58);  a `limit` has nothing to do.
     - Refused with no underway card.
     - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
   - `update <name>#<id> promised "<what>"` (`/epic tidy`):  a Noted card starting `Promised, not delivered:`, for an
-    item waiting on finished work whose promised thing never came;  it goes back on Owen's list (red), and
+    item waiting on finished work whose promised thing never came;  it goes back on the person's list (red), and
     `close --why` refuses it (`PlanDoc.promiseUnkept()`).
   - `update <name>#<id> noted "<what>"`:  a STEP done, the item not finished:
-    Owen's choice recorded, an answer, details or a summary written, a request called off.
+    the person's choice recorded, an answer, details or a summary written, a request called off.
     - The latest underway card turns noted, `what` its summary.
     - None:  a card born noted (`at` alone).
     - Spinner off.
@@ -737,7 +745,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - each todo it files (Q19):  `Made todo T23 to follow this up.`
       - a pick has none since I153:  its set's `chosen-on` and `chosen-note`, drawn in its Choices
     - each todo it queues:  `Queued for P10 · <name>`
-    - each new item it makes:  `Made from the page:  Owen's new todo, ...`
+    - each new item it makes:  `Made from the page:  the person's new todo, ...`
   - `inbox done | clear` of a mark carrying a pick:  the pick kept on its set, `chosen-note` `recorded after the
     talk;  ...`.  Unless a `decide --option` already chose in that set.
   - The reading and summary are HTML, as `updated` takes:
@@ -748,53 +756,53 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
 
 ## Colours
 
-Drawn, never written:  one meaning per colour on every element (decision Q20, Owen, 2026-10-08).
+Drawn, never written:  one meaning per colour on every element (decision Q20, 2026-10-08).
 
 | colour | means                                    | where                                                                  |
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
-| red    | needs Owen                               | `attention` chips;  the rail's count (only what needs him)             |
+| red    | needs the person                               | `attention` chips;  the rail's count (only what needs them)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
-| orange | changed since Owen looked, or a warning;  an item Claude answered with options, waiting for Owen's pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing Owen |
+| orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
 | ivory  | the page's warm ground               | the toolbar, the rail, a comment thread's ground                       |
-| light orange | what he asked for is finished, his turn to see it | `requested` chips (DARK text) |
+| light orange | what they asked for is finished, their turn to see it | `requested` chips (DARK text) |
 | grey   | no longer relevant, inactive, not chosen, nothing to think about | `quiet` chips (a calm call, a limit);  `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 
 The FILL, on every button, pill and chip with a lifecycle.
 - Those are:  the review buttons, the note box's, the pick's letter, the Choose pill and its card, Send.
-- The review buttons are Owen's INPUT (Owen, 2026-10-08).
+- The review buttons are the person's INPUT (2026-10-08).
 
 The fills, in the order they come:
 - a grey outline:  available
-- DASHED in its colour:  Owen pressed it, not committed (not sent;  a revisit now not taken yet)
+- DASHED in its colour:  the person pressed it, not committed (not sent;  a revisit now not taken yet)
 - OUTLINED in its colour:  recorded (sent), or in progress (a revisit now taken, its icon turning while Claude is on it)
 - then CLEARED, once Claude has handled the mark (`inbox apply` / `done`, the inbox's mark gone):
   - every review button is a grey outline again
-  - the id chip carries the result:  green decided, yellow still open, red needs Owen
+  - the id chip carries the result:  green decided, yellow still open, red needs the person
 - SOLID only on:
   - chips (an item's state)
   - the step label's DONE
   - a Choose pill on its set's `chosen` option (applied, wherever the cards are)
 
-An item's id chip says WHERE OWEN'S ANSWER STANDS, by its fill.
-In Owen's words (2026-10-10):
+An item's id chip says WHERE THE PERSON'S ANSWER STANDS, by its fill.
+In the person's words (2026-10-10):
 "it's not clear when an answer is queued and being addressed, so I keep filling in answers over and over".
-- DASHED:  his answer given, not sent.
+- DASHED:  their answer given, not sent.
 - OUTLINED:  sent.  Claude has it, is on it, or the work it asked for is still due.
 - SOLID:  done.  Claude did it, or noted it, and nothing more is due from anyone.
-- While his OWN mark is live (dashed, or outlined once sent), the chip keeps its STATE's colour:  only the fill shows
-  the mark, and the colour below is the button's (Owen, 2026-10-11, epic `epic-workflow` I6:  a red item marked
+- While their OWN mark is live (dashed, or outlined once sent), the chip keeps its STATE's colour:  only the fill shows
+  the mark, and the colour below is the button's (2026-10-11, epic `epic-workflow` I6:  a red item marked
   Revisit turned blue, and its section's red count matched no chip).
   - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), work with Claude (blue:  outlined;
     queued, dotted).
 - So at a glance:
   - a dashed or outlined chip is ANSWERED (don't answer again)
-  - solid red or orange WAITS ON OWEN
+  - solid red or orange WAITS ON THE PERSON
 
-| Owen's answer                          | colour | dashed:  not sent | outlined:  sent, Claude has it, or still due | solid:  done (the item's state) |
+| The person's answer                          | colour | dashed:  not sent | outlined:  sent, Claude has it, or still due | solid:  done (the item's state) |
 | -------------------------------------- | ------ | ----------------- | -------------------------------------------- | ------------------------------- |
 | Approve                                | green  | pressed           | sent, until `inbox apply`                    | green:  a call accepted, a test passed;  an issue / todo settled |
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
@@ -805,23 +813,24 @@ In Owen's words (2026-10-10):
 | a review's "do it" (`queue <id> "work"`) | green | --              | queued:  dotted blue until started and done  | green, once done                |
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
 | the note box's x:  "skip this" (no line button wears it:  the chip alone does) | grey | pressed | sent              | its status as it was (`skip` settles nothing) |
-| Revisit, with a note                   | blue   | pressed           | sent:  Claude talking it over                | yellow (talked over, still open);  orange if Claude answered with options (Owen's turn);  green if it got decided |
+| Revisit, with a note                   | blue   | pressed           | sent:  Claude talking it over                | yellow (talked over, still open);  orange if Claude answered with options (the person's turn);  green if it got decided |
 | any work Claude took (an underway status card) | blue | --          | `progress`:  outlined until the card is Done or Noted | the state's colour      |
 | a new todo or question from the page | its section's new row | not sent | sent                              | the new item's own chip (a question red, a todo yellow) |
 | urgent / not urgent (the id chip itself) | red / grey (an issue's yellow) | a dashed ring | --                     | solid red / grey                |
 
-- The chip of an item waiting on Owen is never outlined:
+- The chip of an item waiting on the person is never outlined:
   - `attention` (red), `replied` (orange) and `requested` (light orange) stay solid
   - the toolbar counts them (`state`, as the script writes it, unchanged)
 - Outlined is drawn from the item's own marks, never written:
-  - Owen's live mark (the inbox)
+  - The person's live mark (the inbox)
   - a pick Claude took (`ReviewClient.takenPickOf()`)
   - `scheduled` (dotted), `handed`, `progress`
 
 ## Folding
 
-EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a heading band folds from it, chevron first.
-- Newly folding:  a reply (Owen's and Claude's), the answer, a status card, an `<epic-note>`, an `<epic-update>` block,
+EVERYTHING boxed in a section folds (2026-10-08):  every card with a heading band folds from it, chevron first.
+- Newly folding:  a reply (the person's and Claude's), the answer, a status card, an `<epic-note>`,
+  an `<epic-update>` block,
   an older doc's `<epic-updated>` fence, an open question's option card.
 - As these already did:
   More Details, Choices, an aside, a code block, Original Discussion, Agents running.
@@ -832,7 +841,7 @@ EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a headi
 - A click anywhere on the band folds, but on a link or a control in it (`Fold.heading`, `fold.button()`).
 
 The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
-- No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
+- No Do Now (the wand) since 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
   same day.
   - The header's Send counts down by itself instead (Auto Send, epic `epic-engine` P53):  a ring round the plane,
     2 minutes by default, chosen in the header's gear;  a press still sends at once.
@@ -841,7 +850,7 @@ The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
 
 ## Updates
 
-ONE element for every update (Owen, 2026-10-11:  "Make these a new `<epic-update>` web component so we can restyle
+ONE element for every update (2026-10-11:  "Make these a new `<epic-update>` web component so we can restyle
 easily"), `components/epic-update/`:
 
 ```html
@@ -851,14 +860,14 @@ easily"), `components/epic-update/`:
 
 - A BLOCK:  it has a `summary`, an `at` or children.
   - Drawn titled `**Update**: <summary>`, its date (`at`) at the right of the title row, as a comment thread's
-    message shows its time;  what changed under it.  Orange:  changed since Owen looked.
+    message shows its time;  what changed under it.  Orange:  changed since the person looked.
   - It folds by its title row, open to start with.
-  - Owen comments on it with its own bullhorn (`BlockAnchors.js`, kind `update`), even inside an item or a field.
+  - The person comments on it with its own bullhorn (`BlockAnchors.js`, kind `update`), even inside an item or a field.
   - `at`:  `YYYY-MM-DD HH:MM` (any form `PlanDates` reads).  `summary`:  one line, plain text.
     The tool's `updated` without `--summary`:  the first sentence of what changed (`UpdateSummary`).
   - Where it goes:
     - a PLAN CHANGE no item caused:  at the end of its phase's description (`updated`;  "Phases")
-    - an update to PROSE (an agent's, by hand):  right AFTER the block it changed (Owen, 2026-10-11:  "or after the
+    - an update to PROSE (an agent's, by hand):  right AFTER the block it changed (2026-10-11:  "or after the
       section which they updated"):  after the paragraph, list or code block, inside its item, field or Overview
       sub-section;  an update to a whole Overview sub-section goes last inside it
     - Before 2026-10-11 a prose update was a NOTE placed BEFORE the block (`<epic-update phase>` with children, no
@@ -869,21 +878,23 @@ easily"), `components/epic-update/`:
   - `phase N done` removes phase N's bare labels and its updates OUTSIDE a phase (prose updates):  once the phase is
     finished, those changes are just the plan.
   - A phase's own plan changes (`epic-phase > epic-update`) stay for good:  the record of how the plan moved.
-- NEW, then QUIET (epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear these 'update' marks?"):
+- NEW, then QUIET (epic `epic-engine` I168;  2026-10-29:  "How do I clear these 'update' marks?"):
   - New:  orange, open, counted on its phase's pen.
   - Quiet:  grey, folded to its title row (its date and summary), out of the pen;  kept, as the record.
     - seen:  `seen="<time>"` on the block, written by `epic inbox apply` from its Seen mark (below), for everyone
     - or old:  3 days after `at`, the change marks' rule (`PlanDates.isQuiet()`, one copy for both)
-  - NEVER NEW:  a block carrying out OWEN'S OWN ANSWER is no news for him (epic `epic-engine` I179;  Owen, 2026-10-29,
-    on debut's P21 and P22 orange for his own picks on Q39 and Q41:  "If its 'accepting the update' I shouldn't have to
+  - NEVER NEW:  a block carrying out THE PERSON'S OWN ANSWER is no news for them (epic `epic-engine` I179;  2026-10-29,
+    on debut's P21 and P22 orange for their own picks on Q39 and Q41:
+    "If its 'accepting the update' I shouldn't have to
     do that if you are doing what I said")
     - written `seen="<its at>"`, never in `to-see`:  no orange, no pen count, no Seen to press
-    - Owen's:  every item it names (its words, summary or `#q39` links) is one he answered (`answered`, `decided`, a
-      `chosen` set, `taken-in`, `handled`) or a comment of his (`C3`);  and it names no file (a move) and no estimate
+    - The person's:  every item it names (its words, summary or `#q39` links) is one they answered (`answered`,
+      `decided`, a
+      `chosen` set, `taken-in`, `handled`) or a comment of theirs (`C3`);  and it names no file (a move) and no estimate
       (a scope change)
-      - or `updated --for <ids>`:  every item it's for is his, whatever the words name
+      - or `updated --for <ids>`:  every item it's for is theirs, whatever the words name
     - the rule:  `UpdateMarks.owensAnswer()`;  the write:  `PlanDoc.seenAsOwens()`, from `addPhaseUpdate()` (`updated`
-      prints "P21:  Update block is Owen's own answer (Q39):  no Seen needed", logged too) and from every write's
+      prints "P21:  Update block is the person's own answer (Q39):  no Seen needed", logged too) and from every write's
       `updateUpdates()` (a block written by hand)
     - a change Claude made on its own (a plan adjusted while building, a file moved, a scope change) stays new
     - the pages nothing has written since:  the migration `owens-answers-seen` (below)
@@ -892,7 +903,8 @@ easily"), `components/epic-update/`:
   - SEEN, a review mark (`{ action: "seen" }` under the block's id):
     - a ✓ before a new block's date while the page is reviewed (`<epic-review buttons="update">`), and a ✓ after
       its phase's pen for all of them at once
-    - the block folds to a grey line at once (its mark in the inbox), for Owen;  Send carries it, as a change mark's
+    - the block folds to a grey line at once (its mark in the inbox), for the person;
+      Send carries it, as a change mark's
       Reopen;  `inbox apply` stamps `seen`, logged (`UP3 seen:  Split in two`)
     - only an update takes it, and an update takes nothing else (`ReviewInbox`)
   - Each body host (an Overview sub-section, a phase, an item, the log) lists the new blocks inside it in `to-see`,
@@ -904,7 +916,8 @@ easily"), `components/epic-update/`:
       until then the pen shows `changes`
   - No migration step:  `seen` is new and optional, an older block goes quiet by age, and every write stamps the ids
     and `to-see`.
-    - Except Owen's own answers (I179):  `owens-answers-seen` stamps the new ones seen and takes them out of `to-see`.
+    - Except the person's own answers (I179):  `owens-answers-seen` stamps the new ones seen and takes them out of
+      `to-see`.
   - Why a review mark, not a write at once:  the review routes never write the page (only `inbox apply` does, under
     its lock), and Reopen, the other button that changes a mark's look, already goes this way.
 
@@ -925,7 +938,7 @@ text itself, where an `<epic-update>` only said a block changed.
   - `id`:  the next free `ch<N>`, never reused;  its inbox key, and a link's target (`#ch3`)
   - `at`:  now;  `answer`:  the item's answer in short (its `<epic-answer title>`, 160 characters at most), once it
     has one, so the chip still says why months later
-  - `was`:  the words it REPLACED, plain text, 300 characters at most (epic `epic-engine` I160;  Owen, 2026-10-29:
+  - `was`:  the words it REPLACED, plain text, 300 characters at most (epic `epic-engine` I160;  2026-10-29:
     "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
     - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
       word with the same block in the doc as it was, and what lay between the words around the mark
@@ -939,7 +952,7 @@ text itself, where an `<epic-update>` only said a block changed.
   skeleton:  `to-accept="ch1 ch3"` (the name from when marks waited for an Accept).  The page counts and finds them with the body not loaded;  the review routes take
   their marks from it (`ReviewInbox.itemIds()`).
 - On the page:  the words on an orange ground, a folded chip naming the item (`Q16`;  unfolded, its title and the
-  answer).  NO approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the question"):
+  answer).  NO approval (2026-10-25:  "i shouldn't have to approve those -- I already answered the question"):
   orange for 3 days after `at`, then quiet (`isNewChange()`;  `<epic-change>`'s `isQuiet`).
   - a click on the words (or Enter / Space) opens a popup under them (I160;  never a hover):  "Changed by Q16
     (10/24/26 15:10)", then "Originally:" and `was`, when it has one;  a click elsewhere or Escape closes it
@@ -948,7 +961,7 @@ text itself, where an `<epic-update>` only said a block changed.
     kept):  answered again, Claude rewrites the words with a new mark
   - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
 - The marks are the WHOLE record of an answer's change:  no `<epic-update>` block beside them (epic `epic-engine`
-  I159;  Owen, 2026-10-29, on P51's orange "Update:  No answer buttons ..." under its Q53 marks:  "Do we still need
+  I159;  2026-10-29, on P51's orange "Update:  No answer buttons ..." under its Q53 marks:  "Do we still need
   the orange update section like this?", then picked "only when no mark says it").
   - `updated` writes nothing when the marks say it (`PlanDoc.marksSay()`, `UpdateMarks`), printing
     `P51:  no Update block, the change marks say it (Q53)`:
@@ -975,7 +988,7 @@ answer lives in the phase now.
 
 ### Taken up in a phase
 
-An item a PHASE fixed or did names it, `<epic-item taken-in="p-fix-open-issues">` (epic `epic-engine` I128;  Owen,
+An item a PHASE fixed or did names it, `<epic-item taken-in="p-fix-open-issues">` (epic `epic-engine` I128;
 2026-10-25:  "issues should say "in P14" like questions do"):  its line says `in P1`, linking the phase, as a handled
 question's does.
 
@@ -998,10 +1011,10 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
 - Where a choice goes:
   - a fork that belongs to ONE phase:  inside that phase, its Choices field, not a separate question
   - a cross-cutting one:  a question, as before
-  - an open-ended list Owen picks from round after round:  a standing set, in the Choices section
+  - an open-ended list the person picks from round after round:  a standing set, in the Choices section
 - Its settings, any mix:
   - `multiple`:  pick any;  `chosen` may name several letters, `chosen="A C"`
-  - `fixed`:  Owen may NOT add options (every other open set takes his)
+  - `fixed`:  the person may NOT add options (every other open set takes theirs)
   - `closed`:  done;  no picks, adds or edits, and a mark on it is left, not applied
   - `standing`, `title`:  a standing set, in the Choices section
 - Where they sit, and what keys their marks (`choices`, a set's position, counts as written):
@@ -1052,7 +1065,7 @@ The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), besid
 
 - Lint (`Markup.validate()`):  a standing set's id `s-<slug>` and its title;  `slot="removed"` needs `removed`,
   `slot="picked"` needs `picked-on`;  several letters in `chosen` only in a `multiple` set.
-- No migration:  an existing set stays pick-one, and takes Owen's options by the new default.
+- No migration:  an existing set stays pick-one, and takes the person's options by the new default.
 
 ## Migrations
 
@@ -1089,14 +1102,16 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
   the docs tool's `ui-section`, `answer-elements`, `engine-asset-routes` and its data files' pass.
   - Their code, and what each did, is in git history:  for a page restored from an old backup.
 - The epic page's steps:
-  - `links-agree` (2026-10-11, on command;  Owen on I7):  every `#id` link and comment anchor against today's ids and
+  - `links-agree` (2026-10-11, on command;  the person on I7):
+    every `#id` link and comment anchor against today's ids and
     titles (`LinksAgree`)
     - fixes:  a link's words naming a title its target had before (the log's `renamed` lines say which), a phase link
       naming another phase's title (`#p-docs P10 · Doc Review` -> `#p-doc-review P11 · Doc Review`), a phase link
       saying an old number (an insert moved it down:  `#p-doc-review P10 · Doc Review` -> `P11 · Doc Review`), a comment
       whose block only moved (found by its excerpt, `PlanAnchors`:  BlockAnchors.js's rules, copied), moved in the
       inbox after the page
-    - reports, for Claude or Owen:  a link to an id that's gone, a comment or mark on one, a comment whose block's words
+    - reports, for Claude or the person:  a link to an id that's gone, a comment or mark on one,
+      a comment whose block's words
       changed
     - never the log, nor an Original Discussion:  history
     - also run by `update --title` and `add-phase --before`, right after their change (what it says goes to stderr)
@@ -1175,10 +1190,11 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       (`UpdateMarks.SAME_PASS_MINUTES`), naming an item one of those marks names
     - kept:  a block holding marks itself, naming a file or folder, or an estimate;  a phase whose marks are from
       another time (the backfill's);  ONE log line names the phases
-    - its first dry run (2026-10-29):  only epic-engine's P51 · Tests Inline, Owen's case;  epic-friend's three hold
+    - its first dry run (2026-10-29):  only epic-engine's P51 · Tests Inline, the person's case;
+      epic-friend's three hold
       their marks, debut's P23 and epic-engine's P48 say an estimate
     - idempotent:  a dropped block is gone
-  - `agents-marked` (2026-10-29, every edit;  epic `epic-friend` P2, Q9):  Claude's old replies marked his,
+  - `agents-marked` (2026-10-29, every edit;  epic `epic-friend` P2, Q9):  Claude's old replies marked theirs,
     `<epic-reply from="Claude" agent="claude">` (`AgentsMarked`), so a reply's name never says who wrote it
     - which:  no `agent`, `from` "Claude" (any case), dated before `ThreadFacts.AGENTS_MARKED` (or undated);
       a person's reply and one written since (a person who calls themselves Claude) are left
@@ -1203,7 +1219,7 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
 
 ## Log
 
-The epic's CHANGE LOG (epic `epic-engine` P52;  Owen, 2026-10-29:  "a log of what changes went in when, not when I
+The epic's CHANGE LOG (epic `epic-engine` P52;  2026-10-29:  "a log of what changes went in when, not when I
 answered a question"):  one entry per commit, drawn newest first.
 
 ```html
@@ -1211,7 +1227,7 @@ answered a question"):  one entry per commit, drawn newest first.
 <epic-event at="2026-10-06T08:12-04:00">P2 active</epic-event>
 ```
 
-- A COMMIT entry, `<epic-commit>`, the element a phase's Commits list uses (Owen's comment C5):
+- A COMMIT entry, `<epic-commit>`, the element a phase's Commits list uses (the person's comment C5):
   - `sha`, the full sha;  `repo` when it isn't the page's (a peer's, spell-brand;  the kit's, on an older page whose
     `repo` is an old child repo's)
   - `at`:  git's commit time, to the minute, with its offset
@@ -1243,7 +1259,8 @@ As `plan-doc.md`, "Parts", with the elements as hosts (`EpicParts`, beside this 
   `/epics/seo/details/q.html`, the same text in the skeleton and its parts, from any checkout.
   - The tool writes them so on every write (`SRV.Linker.link()`, in `PlanDocFiles.writeDoc()`):  a relative link
     handed over is made the root path of what it reaches from the page.
-  - A link to a file in the page's OWN folder stays relative in the skeleton (Owen's Q1), and is that folder's root
+  - A link to a file in the page's OWN folder stays relative in the skeleton (the person's Q1),
+    and is that folder's root
     path in a part, as it's split (`PlanParts.toPartFrom()`):  from `parts/` it would climb.
   - A part written before P46 holds links relative to `parts/` (`../../../ui/x.ts`):  read, they're rebased to
     the page (`PlanParts.toPage()`), and the next write makes them root paths.
@@ -1261,7 +1278,7 @@ Pointing at a saga, an epic, a phase or an item, the same way everywhere (epic `
   - On the page it points into, a `#id` link;  elsewhere, the page from the checkout's root and its `#id`,
     the page server giving it the target's title and short form (`GET /api/epics/target`, [linkRoutes.ts](linkRoutes.ts)).
   - `saga` with an `epic` isn't needed;  one the epic doesn't name still links (the check flags it).
-- A SHORT ADDRESS means the same, for a plain link or for Owen in chat:
+- A SHORT ADDRESS means the same, for a plain link or for the person in chat:
   - `SAGA:/drawable-spell` -- the saga page;  `SAGA:/drawable-spell#Q3` -- item Q3 on it
   - `SAGA:/drawable-spell/python-target` -- the epic page;  `...#T1` -- item T1 on it
   - the colon form, `SAGA:/drawable-spell:python-target#T1`, is read too;  the tools write the slash form
