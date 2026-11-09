@@ -1008,6 +1008,8 @@ export class SpellxTwin {
     const paging = own("paging")?.value?.text
     if (paging === words.pages) lines.push(words.inPages)
     else if (paging === words.none_) lines.push(words.allAtOnce)
+    const pageSize = own("page-size")?.value?.text.trim()
+    if (pageSize) lines.push(words.atATime.replaceAll("{size}", pageSize))
     const layout = own("as")?.value?.text
     if (layout) {
       const handedOn = tag.attributes.filter((attribute) => !FOR_OWN_ATTRIBUTES.has(attribute.name))
@@ -1197,4 +1199,4 @@ const STORIES = "stories"
 const NOT_PARAMS = new Set(["name", "description", "group"])
 
 /** `<for>`'s own attributes, by their English names:  any other goes on what's around its items. */
-const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "as"])
+const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "page-size", "as"])

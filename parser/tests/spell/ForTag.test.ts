@@ -56,6 +56,12 @@ describe("<for>", () => {
     expect(code).toContain("Scanning...")
   })
 
+  test("page-size says how many at a time", () => {
+    const { code, errors } = compiled(`\t\t<for its films paging="pages" page-size="12" />`)
+    expect(errors).toEqual([])
+    expect(code).toMatch(/pageSize:[^,]*12/)
+  })
+
   test("loading={no}", () => {
     const { code, errors } = compiled(`\t\t<for its films loading={no} />`)
     expect(errors).toEqual([])

@@ -378,6 +378,7 @@ describe("PlaceThings, a refresh", () => {
     const morning = new Date(Date.UTC(2026, 10, 7, 17, 14, 42))
     expect(core.dateAs(morning, "timestamp")).toBe("2026-11-07T17:14:42.000Z")
     expect(core.dateAs(morning, "reader")).toBe(morning.toLocaleDateString(undefined, { dateStyle: "medium" }))
+    expect(core.dateAs(new Date(2026, 10, 7, 9, 14), "date and time")).toBe("Nov 7, 2026, 9:14 AM")
     expect(core.dateAs(morning, "nonsense")).toBe(core.dateAs(morning, "plain"))
     try {
       core.showDatesAs("short")

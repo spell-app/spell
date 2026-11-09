@@ -588,6 +588,8 @@ export type SpellxForWords = {
   inPages: string
   /** A list drawn whole. */
   allAtOnce: string
+  /** How many a list draws at once, with `{size}` for the number. */
+  atATime: string
   /** The word in `loading={no}`. */
   no: string
   /** `paging="pages"`'s value. */
@@ -884,4 +886,9 @@ export type DeclarationPatterns = {
   methodLine: RegExp
   /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */
   reopenedType: RegExp
+  /**
+   * A place's line, its name captured:  `family cookbook is a web server at "...":`, so what's under it can be found.
+   * - `iu`, never `g`:  it's tried line by line.
+   */
+  placeDeclaration: RegExp
 }

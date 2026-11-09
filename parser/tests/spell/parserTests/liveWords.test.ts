@@ -227,9 +227,9 @@ describe("an action at a place's address (Q17's C)", () => {
     expect(js).toContain("await refresh()")
   })
 
-  it("is known below its line:  a place's lines come first, as a saved type needs them to", () => {
+  it("is known above its line too", () => {
     const { errors } = compiled("to go:", "\trefresh", ...PLACE)
-    expect(errors.join()).toMatch(/refresh/)
+    expect(errors).toEqual([])
   })
 
   it("Spanish", () => {

@@ -1292,7 +1292,7 @@
           "ruleNames": ["as_a_date"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsADate.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
           "syntaxes": [
             {
@@ -1615,7 +1615,7 @@
               "syntax": "((date:fecha)|(time:hora)|(timestamp:marca de tiempo))"
             },
             {
-              "syntax": "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
+              "syntax": "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(date_and_time:fecha y hora)|(timestamp:marca de tiempo))"
             },
             {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"
@@ -1648,7 +1648,7 @@
               "syntax": "((top_up:con una barra de progreso que se llena arriba)|(bottom_up:con una barra de progreso que se llena|con una barra de progreso que se llena abajo)|(top:con una barra de progreso arriba)|(bottom:con una barra de progreso|con una barra de progreso abajo))"
             },
             {
-              "syntax": "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
+              "syntax": "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(date_and_time:fechas y horas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
             },
             {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
@@ -1690,7 +1690,7 @@
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
             },
             {
-              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
             },
             {
               "syntax": "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
@@ -3731,7 +3731,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 20,
+          "line": 27,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -6802,7 +6802,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 31,
+          "line": 34,
           "purpose": "What a read in a drawing shows while it has no list to show (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6866,12 +6866,27 @@
           "ruleNames": ["every_thing_matching"],
           "internal": false,
           "file": "src/spell/rules/places/EveryThingMatching.ts",
-          "line": 19,
+          "line": 24,
           "purpose": "Every thing a web server finds for some text, by its own search (epic `data` P34).",
           "syntaxes": [
             {
               "syntax": "(cada|todo|toda) {type:known_type} que (coincide|coincida) con {words:expression}",
               "example": "cada obra que coincide con búsqueda",
+              "outputs": {
+                "js": {
+                  "code": "await core.savedThings(Obra, { search: { \"*\": búsqueda } })"
+                },
+                "ts": {
+                  "code": "await core.savedThings(Obra, { search: { \"*\": búsqueda } })"
+                },
+                "py": {
+                  "code": "await core.saved_things(Obra, {\"search\": {\"*\": búsqueda}})"
+                }
+              }
+            },
+            {
+              "syntax": "((todos|todas) (los|las)?|los|las)? {type:plural_type} que (coinciden|coincidan) con {words:expression}",
+              "example": "todas las obras que coinciden con búsqueda",
               "outputs": {
                 "js": {
                   "code": "await core.savedThings(Obra, { search: { \"*\": búsqueda } })"
@@ -7067,7 +7082,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 77,
+          "line": 84,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -7093,6 +7108,32 @@
             },
             {
               "syntax": "{type:type_words} es (un|una) {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StoredOnThisDevice",
+          "ruleNames": ["stored_on_this_device"],
+          "internal": false,
+          "file": "src/spell/rules/places/StoredOnThisDevice.ts",
+          "line": 20,
+          "purpose": "A place kept in this browser (epic `data` Q33).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} se guarda en este dispositivo (each_tab:, para cada pestaña)? {with_nested_statements}?",
+              "example": "ajustes se guarda en este dispositivo",
+              "outputs": {
+                "js": {
+                  "code": "export class Ajuste extends Place {}\nexport const ajustes = core.place(new Ajuste(), {\n  name: \"ajustes\",\n  kind: \"database on this device\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Ajuste extends Place {}\nexport const ajustes = core.place(new Ajuste(), {\n  name: \"ajustes\",\n  kind: \"database on this device\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Ajuste(Place):\n    pass\n\najustes = core.place(\n    Ajuste(),\n    {\"name\": \"ajustes\", \"kind\": \"database on this device\", \"unclear_numbers\": \",\"},\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]
@@ -7564,6 +7605,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ShowThemAtATime",
+          "ruleNames": ["show_them_at_a_time"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 126,
+          "purpose": "`show them 12 at a time`: how many a long list draws at once: a page of `show them in pages`, or each lot of more as you scroll -- see `core.drawRead()` (epic `data` Q35).",
+          "syntaxes": [
+            {
+              "syntax": "mostrarlos de {size:number} en {same:number}",
+              "example": "mostrarlos de 12 en 12",
+              "outputs": {
+                "js": {
+                  "code": "core.readRider(\"pageSize\", () => 12)"
+                },
+                "ts": {
+                  "code": "core.readRider(\"pageSize\", () => 12)"
+                },
+                "py": {
+                  "code": "core.read_rider(\"pageSize\", lambda: 12)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -7761,7 +7828,7 @@
           "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} clave es el secreto {name:text}, si la hay"
+              "syntax": "{type:subject_its} clave opcional es el secreto {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -7973,7 +8040,7 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 33,
+          "line": 38,
           "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
@@ -8007,7 +8074,7 @@
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 150,
+          "line": 188,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8021,7 +8088,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 158,
+          "line": 196,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8035,7 +8102,7 @@
           "ruleNames": ["if_that_fails_say"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 69,
+          "line": 77,
           "purpose": "`if that fails say \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).",
           "syntaxes": [
             {
@@ -8049,7 +8116,7 @@
           "ruleNames": ["show_them_paged"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 90,
+          "line": 98,
           "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
           "syntaxes": [
             {
@@ -8063,7 +8130,7 @@
           "ruleNames": ["show_them_all"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 106,
+          "line": 114,
           "purpose": "`show them all` -- see `ShowThemPaged`.",
           "syntaxes": [
             {
@@ -8077,7 +8144,7 @@
           "ruleNames": ["show_them_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 140,
+          "line": 178,
           "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
           "syntaxes": [
             {
@@ -8091,7 +8158,7 @@
           "ruleNames": ["show_it_all_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 145,
+          "line": 183,
           "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
           "syntaxes": [
             {
@@ -8105,7 +8172,7 @@
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 173,
+          "line": 224,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8462,7 +8529,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 56,
+          "line": 64,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
