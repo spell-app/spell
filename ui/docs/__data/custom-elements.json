@@ -3361,6 +3361,14 @@
               "fieldName": "color"
             },
             {
+              "name": "background",
+              "description": "Fills the card with a light tint of this colour, its text dark enough to read in the light and dark schemes;  `--ui-card-tint-lightness` and `--ui-card-tint-chroma` set how light and how strong.",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "background"
+            },
+            {
               "name": "direction",
               "description": "`horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name was `horizontal`.",
               "type": {
@@ -3703,6 +3711,14 @@
               "default": "2px"
             },
             {
+              "name": "--ui-card-tint-lightness",
+              "default": "0.9"
+            },
+            {
+              "name": "--ui-card-tint-chroma",
+              "default": "0.4"
+            },
+            {
               "name": "--ui-card-link-raise",
               "default": "3px"
             },
@@ -3803,6 +3819,14 @@
                 "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
               },
               "fieldName": "color"
+            },
+            {
+              "name": "background",
+              "description": "Fills every card in the group with a light tint of this colour, as a card's `background` does.",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "background"
             },
             {
               "name": "columns",

@@ -399,10 +399,10 @@ export class SpellxTokenizer extends P.Tokenizer {
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
     if (word.isShortTemplate && (isPage(owner) || !owner)) return true
-    // a site's parts, `<page>`, `<dialog>`, `<sidebar>`:  only among a site's members, a page under a page too, and
+    // a site's parts, `<page>`, `<dialog>`, `<sidebar>`:  only among a site's members, or under one of its pages, and
     // markup everywhere else (`<sidebar>` is Spell UI's;  epic `mockup` P1)
     if (word.category === "declaration" && SITE_PARTS.has(word.kind))
-      return isSite(owner) || (word.kind === "page" && owner?.category === "declaration" && owner.kind === "page")
+      return isSite(owner) || (owner?.category === "declaration" && owner.kind === "page")
     // an old short note, `<comment>`, in a drawing:  markup, Spell UI's `<ui-comment>` (epic `data` P31, I60)
     if (word.isShortNote && (drawsItsBody(owner) || this.isInDrawingAt(indent))) return false
     // in a body drawn as a page's drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)

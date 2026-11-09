@@ -828,6 +828,20 @@
       }
     },
     {
+      "name": "--ui-card-tint-lightness",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-card>`'s token.  Default:  `0.9`"
+      }
+    },
+    {
+      "name": "--ui-card-tint-chroma",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-card>`'s token.  Default:  `0.4`"
+      }
+    },
+    {
       "name": "--ui-card-link-raise",
       "description": {
         "kind": "markdown",

@@ -252,7 +252,10 @@ export const englishWords: SP.LanguageWords = {
       cloud: "cloud",
       address: "address",
       state: "state",
-      picture: "picture"
+      picture: "picture",
+      row: "row",
+      column: "column",
+      color: "color"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -316,6 +319,8 @@ export const englishWords: SP.LanguageWords = {
       sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
       sitePageState: ", {state}",
       sitePagePicture: ", pictured in {quoted picture}",
+      siteCardPlace: ", in row {row} column {column}",
+      siteCardColor: ", colored {color}",
       siteOverlay: "it has {a words} {words}",
       viewFlags: {
         draggable: "it is draggable",

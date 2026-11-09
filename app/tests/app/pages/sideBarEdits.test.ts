@@ -1,9 +1,7 @@
-import { execSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type BrowserContext, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
+
+import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A change in the side bar goes into the program's text, in the running editor (epic `editor`, Sidebar Writes Source).
@@ -14,28 +12,6 @@ import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-pl
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** The code editor's chunk, in dev:  never answered, to work without it. */
 const CODE_EDITOR = /\/src\/app\/solid\/monaco\//
@@ -72,20 +48,28 @@ async function open(page: Page, project: string, { codeEditor }: { codeEditor: b
   await page.waitForTimeout(1000)
 }
 
-/** Select the first element named `tag` by a click on it, as a person does;  `alt`:  a Spell UI element. */
+/**
+ * Select the first element named `tag` by a click on it, as a person does;  `alt`:  a Spell UI element.
+ * - Waits for it to be drawn:  a slow load can still be drawing when the fixed waits in `open()` end.
+ */
 async function select(page: Page, tag: string, { alt = false } = {}): Promise<void> {
-  const at = await page.evaluate((name) => {
-    const find = (root: Document | ShadowRoot): Element | undefined => {
-      for (const element of root.querySelectorAll("*")) {
-        if (element.localName === name) return element
-        const inside = element.shadowRoot && find(element.shadowRoot)
-        if (inside) return inside
+  const drawn = await page.waitForFunction(
+    (name) => {
+      const find = (root: Document | ShadowRoot): Element | undefined => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === name) return element
+          const inside = element.shadowRoot && find(element.shadowRoot)
+          if (inside) return inside
+        }
+        return undefined
       }
-      return undefined
-    }
-    const box = find(document)!.getBoundingClientRect()
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
-  }, tag)
+      const box = find(document)?.getBoundingClientRect()
+      return box && { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    },
+    tag,
+    { timeout: 30_000 }
+  )
+  const at = (await drawn.jsonValue())!
   // the first Inspect's help popup sits over the app's top:  Counter's one button is under it
   await page.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
   await page.waitForTimeout(300)
@@ -153,8 +137,12 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   afterAll(async () => (await browser).close())
 
   // what this test is for:  the built-in examples stay as they are
+  let builtInProjectsBefore: string
+  beforeEach(() => {
+    builtInProjectsBefore = builtInProjectsNow()
+  })
   afterEach(() => {
-    expect(execSync("git status --short spaces", { cwd: path.join(KIT, "app") }).toString()).toBe("")
+    expect(builtInProjectsNow()).toBe(builtInProjectsBefore)
   })
 
   test("with the code editor not loaded:  edit, undo, redo, Save, reload", { timeout: 150_000 }, async () => {

@@ -10,6 +10,8 @@
  * - `spell space backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
  * - `spell space cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine,
  *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
+ * - `spell space local setup | start | mail | sign-in`:  the cloud at real-looking addresses, for one house network
+ *   (epic `atmosphere` T57)
  * - `spell space org host start | stop`:  Spell's own Spaces host on this machine, with two throwaway accounts,
  *   for the Spaces trial to run against (epic `atmosphere` P13)
  * - `spell space org create <org> --name "RS" --admin ana@example.org [--team "Events Team"]`:
@@ -269,6 +271,54 @@ export default function appCommands(spell: Command): void {
     .option("--port <port>", "its port on this machine -- default 4949", (value) => Number(value))
     .action((_options, command: Command) => runCloud("service", undefined, command))
 
+  const local = space
+    .command("local")
+    .description("Spell's cloud at real-looking addresses, for one house network, on a Mac:  nothing public changes")
+
+  local
+    .command("setup")
+    .description("this Mac's certificate, names and trust, and a folder to set up another Mac with")
+    .option(
+      "--address <url>",
+      "where it's reached;  give one or more -- default https://test.spell.app and .space",
+      collect,
+      []
+    )
+    .option("--undo", "take the names away again")
+    .action((_options, command: Command) => runLocal("setup", [], command))
+
+  local
+    .command("start")
+    .description(
+      "run the cloud and HTTPS in front of it, until Ctrl-C;  real mail once `spell space local mail` has run"
+    )
+    .option("--address <url>", "where it's reached;  each needs `setup` -- default what `setup` made", collect, [])
+    .option(
+      "--home <path>",
+      "the page the bare address goes to, remembered, e.g. /apps/@rs/OrgAdmin -- default the first org's Admin page"
+    )
+    .action((_options, command: Command) => runLocal("start", [], command))
+
+  local
+    .command("mail")
+    .description("send real mail from this Mac:  its postfix relays through Gmail, with a Gmail app password")
+    .option("--gmail <address>", "the Gmail address it sends as -- default this machine's person's email")
+    .option("--new-password", "ask for the app password again")
+    .action((_options, command: Command) => runLocal("mail", [], command))
+
+  local
+    .command("sign-in")
+    .description("sign in on the running site:  asks for the link, opens it, then opens the page")
+    .argument("[email]", "whose -- default this machine's person's")
+    .argument("[page]", "e.g. @rs/OrgAdmin -- default the last one")
+    .action((email: string | undefined, page: string | undefined, _options, command: Command) =>
+      runLocal(
+        "sign-in",
+        [email, page].filter((each) => each !== undefined),
+        command
+      )
+    )
+
   const org = space
     .command("org")
     .description(
@@ -500,6 +550,14 @@ function runCloud(verb: string, target: string | undefined, command: Command): P
   return CLI.runCommand(async () => {
     const { cloudCommand } = await import("spell/app/cli/commands/cloudCommand")
     return cloudCommand(verb, target, command.optsWithGlobals())
+  })
+}
+
+/** Run a `spell space local` verb:  no `loadApp()`, only spaces' node side (`localCommand.ts`). */
+function runLocal(verb: string, targets: string[], command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { localCommand } = await import("spell/app/cli/commands/localCommand")
+    return localCommand(verb, targets, command.optsWithGlobals())
   })
 }
 

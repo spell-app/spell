@@ -4373,6 +4373,31 @@
           "description": "A coloured line along the bottom edge (a tinted fill when `basic`)."
         },
         {
+          "name": "background",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "Fills the card with a light tint of this colour, its text dark enough to read in the light and dark schemes;  `--ui-card-tint-lightness` and `--ui-card-tint-chroma` set how light and how strong."
+        },
+        {
           "name": "direction",
           "kind": "valueOnly",
           "values": [
@@ -4751,6 +4776,31 @@
           ],
           "valueSet": "hues",
           "description": "Colour of every card in the group."
+        },
+        {
+          "name": "background",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "Fills every card in the group with a light tint of this colour, as a card's `background` does."
         },
         {
           "name": "columns",
@@ -52064,6 +52114,16 @@
           "name": "--ui-card-colored-width",
           "default": "2px",
           "type": "length"
+        },
+        {
+          "name": "--ui-card-tint-lightness",
+          "default": "0.9",
+          "type": "number"
+        },
+        {
+          "name": "--ui-card-tint-chroma",
+          "default": "0.4",
+          "type": "number"
         },
         {
           "name": "--ui-card-link-raise",

@@ -691,6 +691,10 @@ export type SpellxTwinWords = {
   sitePageState: string
   /** What a page's `picture=` adds to its line. */
   sitePagePicture: string
+  /** What a part's `row=` and `column=` add to its line:  its place in its section of the site editor's board. */
+  siteCardPlace: string
+  /** What a part's `color=` adds to its line. */
+  siteCardColor: string
   /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
   siteOverlay: string
   /**

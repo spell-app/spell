@@ -3199,6 +3199,10 @@
           "file": "src/app/pages/SiteEditorPage.tsx"
         },
         {
+          "name": "SiteGroupPage",
+          "file": "src/app/pages/SiteGroupPage.tsx"
+        },
+        {
           "name": "SpellEditor",
           "file": "src/app/pages/SpellEditor.tsx"
         },

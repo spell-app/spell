@@ -964,7 +964,7 @@ describe("spell projects", () => {
   test("lists the groups, each by its address", () => {
     const { status, stdout } = spell(["projects"])
     expect(status).toBe(0)
-    expect(stdout).toMatch(/^@spell\/test +Test fixtures +12 projects$/m)
+    expect(stdout).toMatch(/^@spell\/test +Test fixtures +13 projects$/m)
     expect(stdout).toMatch(/^owen@spell +Projects /m)
   })
 
@@ -974,6 +974,7 @@ describe("spell projects", () => {
       { name: "counter", id: "@spell/test/counter" },
       { name: "counter-app", id: "@spell/test/counter-app" },
       { name: "fizzbuzz", id: "@spell/test/fizzbuzz" },
+      { name: "kept-in-places", id: "@spell/test/kept-in-places" },
       { name: "lists-from-zero", id: "@spell/test/lists-from-zero" },
       { name: "live-room", id: "@spell/test/live-room" },
       { name: "people", id: "@spell/test/people" },
