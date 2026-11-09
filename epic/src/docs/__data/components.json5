@@ -483,6 +483,11 @@
           "description": "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  Its Read mark goes under `away:<line>`."
         },
         {
+          "name": "state",
+          "kind": "string",
+          "description": "Which of the section's badges it counts in (`recent`, `progress`, `attention`):  its tick's colour, and what filters it."
+        },
+        {
           "name": "working",
           "kind": "boolean",
           "description": "A phase still under way:  a half-filled circle spinning like a coin in place of the tick, nothing to read yet (Owen, 2026-11-03:  \"P23 icon should be the spinning coin half-circle\")."
@@ -6012,6 +6017,11 @@
           "name": "waiting",
           "kind": "number",
           "description": "`kind=\"away\"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the toolbar's red badge."
+        },
+        {
+          "name": "news",
+          "kind": "string",
+          "description": "`kind=\"away\"`:  how much is new, as `<state>:<count>` (`recent:2 progress:1 attention:3`), written by the tool:  its title's badges, there while it's folded;  a click filters its lines."
         },
         {
           "name": "lines",

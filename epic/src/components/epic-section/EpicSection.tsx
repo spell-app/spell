@@ -43,6 +43,7 @@ import {
   PHASE_FILTER_STATES,
   REPORT,
   AWAY,
+  FOLD_KEY,
   SECTION_LOOKS,
   STAYS_FOLDED_KINDS,
   ALL_QUERY,
@@ -332,9 +333,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Its items not marked in this pass:  what the state chips count and filter. */
   readonly unmarked = createMemo(() => this.itemStates().filter((it) => !this.marked().has(it.item)))
 
+  /** "0. While you were out"'s lines by state (`news`):  `recent:2 attention:7`. */
+  readonly newsCounts = createMemo((): ReadonlyMap<string, number> => {
+    const pairs = (this.news ?? "").split(/\s+/).filter(Boolean)
+    return new Map(pairs.map((pair) => [pair.split(":")[0]!, Number(pair.split(":")[1])]))
+  })
+
   /** The states its unmarked items (or phases) are in, in the filter's order:  its state chips. */
   readonly present = createMemo((): ChipState[] => {
-    const states = new Set<string>(this.unmarked().map((it) => it.state))
+    const states = new Set<string>(this.kind === AWAY ? this.newsCounts().keys() : this.unmarked().map((it) => it.state))
     if (this.marked().size) states.add(MARKED_SHOWS_AS)
     const order: readonly ChipState[] = this.kind === "phases" ? PHASE_FILTER_STATES : FILTER_STATES
     return order.filter((it) => states.has(it.state))
@@ -538,7 +545,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           : kind === "overview-part"
             ? () => this.reviewButtons()
             : kind === AWAY
-              ? () => this.doneReading()
+              ? () => (
+                  <>
+                    {this.awayBadges()}
+                    {this.doneReading()}
+                  </>
+                )
               : this.holdsItems()
                 ? () => (
                     <>
@@ -922,6 +934,17 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Review (an Overview sub-section)
   ////////////////
 
+  /** "0. While you were out"'s badges, at the title's end:  how much is new, by colour;  a click filters its lines (`news`). */
+  private awayBadges(): JSX.Element {
+    return (
+      <Show when={this.news}>
+        <span class={FILTER} part={this.partForName("filter")}>
+          <epic-state-filter counts={this.news} shown={this.chosen ? [...this.showing()].join(" ") : undefined} />
+        </span>
+      </Show>
+    )
+  }
+
   /** "0. While you were out"'s Done reading, at the title's end, while the page is reviewed (P62). */
   private doneReading(): JSX.Element {
     return (
@@ -932,13 +955,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * "0. While you were out" opens by itself as the page loads (P62):  it's what Owen came back to read, whatever fold he
-   * left it in;  once, after it first draws.
+   * "0. While you were out" opens by itself the first time a page shows it (P62):  it's what you came back to read;
+   * once, after it first draws.
+   * - folded or opened by hand since:  stays as you left it (`FOLD_KEY`, the docs runtime's memory of a page's folds)
    */
   @E.onChange("isReady")
   protected onAwayReady(isReady: boolean) {
     if (!isReady || this.kind !== AWAY || this.hasOpenedAway) return
     this.hasOpenedAway = true
+    if (this.id && this.id in EpicSection.saved(FOLD_KEY)) return
     E.afterSolidUpdate(() => void this.expand())
   }
 
@@ -1098,6 +1123,24 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   protected onShowAll(event: Event) {
     event.stopPropagation()
     this.showStates(undefined)
+  }
+
+  /** The states "0. While you were out" hides, for `EpicFold.css`:  its lines may not be loaded yet, so a rule hides them. */
+  get awayHides(): string {
+    if (this.kind !== AWAY || !this.chosen) return ""
+    const showing = this.showing()
+    return this.present()
+      .map((it) => it.state as string)
+      .filter((state) => !showing.has(state))
+      .join(" ")
+  }
+
+  /** Say which of "0. While you were out"'s states are hidden, on its element (`AWAY_HIDES`). */
+  @E.onChange("awayHides")
+  protected onAwayHides(hides: string) {
+    if (isServer) return
+    if (hides) this.domElement.setAttribute(AWAY_HIDES, hides)
+    else this.domElement.removeAttribute(AWAY_HIDES)
   }
 
   /**
@@ -1298,3 +1341,6 @@ const SUMMARY_LINK = "overview"
 
 /** "0. While you were out"'s icon on the toolbar (P62):  one in `ICONS`. */
 const AWAY_ICON = "bed"
+
+/** The states "0. While you were out" hides right now:  page state on its element, never in the file. */
+const AWAY_HIDES = "data-away-hides"

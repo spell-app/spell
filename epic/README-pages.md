@@ -112,6 +112,9 @@ a link to `#todos` lands on the todos of any epic page, a year from now.
 
 Three more appear only when they have something to say, and the eight never move for them:
 - **0. While you were out** (`#away`), first, above the Overview.
+  Its title has badges for what's new, by colour, so you can tell while it's folded;  a click on one filters the lines,
+  and each line's tick wears its badge's colour, dotted once you've marked it and until you send;
+  it opens the first time a page shows it, then stays as you left it.
   What Claude did since you last pressed Done reading, and what needs you now, in the order to look at it.
   The tool writes it on every edit, never by hand;  each line has its own Read.
   What you've already addressed leaves it, and a finished phase ages out after 3 days (`epic settings`).

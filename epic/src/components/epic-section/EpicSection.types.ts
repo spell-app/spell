@@ -198,6 +198,9 @@ export const REPORT = "report"
 /** "0. While you were out"'s kind (epic `epic-engine` P62):  its own title, unnumbered, first on the page. */
 export const AWAY = "away"
 
+/** `PrefStore` key prefix of a page's folds (`{ [section id]: folded }`), the docs runtime's `FOLD_KEY_PREFIX`. */
+export const FOLD_KEY = "spell-folds:"
+
 /** The page's NUMBERED blocks, as siblings:  the Overview and the sections, but a report and "While you were out". */
 export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:not([kind="${REPORT}"], [kind="${AWAY}"])`
 

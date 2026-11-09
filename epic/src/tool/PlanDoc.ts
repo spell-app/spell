@@ -2739,7 +2739,8 @@ export class PlanDoc extends PlanReader {
       id: AWAY_ID,
       kind: AWAY,
       title: AWAY_TITLE,
-      waiting: summary.waiting || undefined
+      waiting: summary.waiting || undefined,
+      news: awayCounts(summary) || undefined
     })
     section.append(...this.awayBody(summary))
     // its lines' keys on the section itself:  the review inbox reads the skeleton, and the body is a part (I206)
@@ -2800,13 +2801,13 @@ export class PlanDoc extends PlanReader {
       anchor.setAttribute("href", `#${id}`)
       return anchor
     }
-    const line = (key: string, ...children: (Node | string)[]) => {
-      const element = this.make("epic-away-line", { line: key })
+    const line = (key: string, state: AwayState, ...children: (Node | string)[]) => {
+      const element = this.make("epic-away-line", { line: key, state })
       element.append(...children)
       return element
     }
-    const heading = (key: AwayPart, text: string) => {
-      const element = line(key, html("b", text))
+    const heading = (key: AwayPart, state: AwayState, text: string) => {
+      const element = line(key, state, html("b", text))
       element.setAttribute("heading", "")
       return element
     }
@@ -2815,27 +2816,27 @@ export class PlanDoc extends PlanReader {
     const finished = summary.done.filter((done) => done.status !== "under way")
     const running = summary.done.filter((done) => done.status === "under way")
     if (finished.length) {
-      body.push(heading("done", "What was done"))
+      body.push(heading("done", "recent", "What was done"))
       for (const done of finished) {
         const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
         const commit = done.sha ? `  (${done.sha}${merged})` : ""
         const built = done.built ? `:  ${done.built}` : ""
-        body.push(line(done.id, link(done.id, done.label), ` ${done.status}${built}${commit}`))
+        body.push(line(done.id, "recent", link(done.id, done.label), ` ${done.status}${built}${commit}`))
       }
     }
     // a part of its own (epic `epic-engine` I223):  each line's mark spins, no tick (nothing to read yet)
     if (running.length) {
-      body.push(heading("underway", "Under way"))
+      body.push(heading("underway", "progress", "Under way"))
       for (const done of running) {
-        const element = line(done.id, link(done.id, done.label))
+        const element = line(done.id, "progress", link(done.id, done.label))
         element.setAttribute("working", "")
         body.push(element)
       }
     }
     if (summary.needs.length) {
-      body.push(heading("todo", "Still to do"))
+      body.push(heading("todo", "attention", "Still to do"))
       for (const [index, need] of summary.needs.entries())
-        body.push(line(need.id, `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`))
+        body.push(line(need.id, "attention", `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`))
     }
     return body
   }
@@ -3601,3 +3602,20 @@ function changeTitle(change: Element): string {
 
 /** "While you were out"'s title, its own:  numbered 0, before the Overview's 1 (epic `epic-engine` P62). */
 const AWAY_TITLE = "0. While you were out"
+
+/** A line of "0. While you were out":  which of its title's badges it counts in, and so its tick's colour. */
+type AwayState = "recent" | "progress" | "attention"
+
+/** What's new in "0. While you were out", for its title's badges:  `recent:2 progress:1 attention:3`. */
+function awayCounts(summary: NightSummary): string {
+  const running = summary.done.filter((done) => done.status === "under way").length
+  const counts = {
+    recent: summary.done.length - running,
+    progress: running,
+    attention: summary.waiting
+  }
+  return Object.entries(counts)
+    .filter(([, count]) => count > 0)
+    .map(([state, count]) => `${state}:${count}`)
+    .join(" ")
+}
