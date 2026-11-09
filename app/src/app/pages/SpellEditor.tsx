@@ -296,7 +296,11 @@ export function AppPane() {
         <div
           class={[
             "AppPaneProgram",
-            { hidden: isEditorPiece(), NotebookPage: !!notebook(), "ui-docs-sections": !!notebook() || isNotebookSite() }
+            {
+              hidden: isEditorPiece(),
+              NotebookPage: !!notebook(),
+              "ui-docs-sections": !!notebook() || isNotebookSite()
+            }
           ]}
           ref={(element: HTMLDivElement) => (program = element)}
         >

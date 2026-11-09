@@ -515,7 +515,9 @@ export class EditorStore extends Observable {
 
   /** Is `project` a site of pages alone in their files, e.g. the Spell UI site?  It wears the docs look in Run. */
   isNotebookSite(project: SP.SpellProject): boolean {
-    return editor.projectPage === "runner" && project.isLoaded && editor.projectHasSite(project) && project.hasAlonePages
+    return (
+      editor.projectPage === "runner" && project.isLoaded && editor.projectHasSite(project) && project.hasAlonePages
+    )
   }
 
   /** The running program's site, if any. */
