@@ -339,6 +339,14 @@ export const PARSER_MESSAGES = {
   /** `its next page is asked for with "offset" and "limit"`:  the wrong way round.  `{first}` and `{second}` as written. */
   "next-page-count-first":
     'How many comes first, then where from:  `its next page is asked for with "{second}" and "{first}"`',
+  /** A page's number or a cursor where a place in the list goes. */
+  "next-page-counts-pages":
+    'Those count pages, not rows:  `its next page is asked for by number with "per_page" and "page"`, and `, counting from 0` if its first page is 0',
+  "next-page-is-a-cursor":
+    'A cursor comes from its answer, so it can\'t be worked out:  `its next page is its "next_cursor", sent back as "cursor"`',
+  /** `its next page is asked for by number with "page" and "per_page"`:  the wrong way round. */
+  "next-page-number-count-first":
+    'How many comes first, then which page:  `its next page is asked for by number with "{second}" and "{first}"`',
   "next-page-header-not-link":
     'A next page is said in a "Link" header, not "{header}":  `its next page is in its "Link" header`, or name the field of its answer that says it',
   "searched-only":

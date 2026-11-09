@@ -74,8 +74,18 @@ export type PlaceDetails = {
   /**
    * What a web server calls how many and where from, when it pages by a position, for every collection:
    * `its next page is asked for with "limit" and "offset"`.
+   * - No `limit`:  it's asked only where from, and gives its own page size.
    */
-  pagesByOffset?: { limit: string; offset: string }
+  pagesByOffset?: { limit?: string; offset: string }
+  /**
+   * What a web server calls how many and which page, when it counts pages, for every collection:
+   * `its next page is asked for by number with "per_page" and "page"`.
+   * - No `limit`:  it's asked only which page.
+   * - `first`:  the first page's number;  left out, 1.
+   */
+  pagesByNumber?: { limit?: string; page: string; first?: number }
+  /** What a web server calls the cursor it's sent back, when that isn't `cursor`:  `its next page is its "nextPageToken", sent back as "pageToken"`. */
+  nextPageSentAs?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
   /** How it spells a field's name, by an example:  `hair_color` (`it writes names like "hair_color"`). */
@@ -475,14 +485,17 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
 function restAbilitiesIn({
   nextPageIn,
   nextPageInLink,
+  nextPageSentAs,
   pagesByOffset,
+  pagesByNumber,
   filters,
   sorts,
   sortedWith,
   fieldsNamedIn,
   readOnly
 }: PlaceDetails) {
-  const page = pagesByOffset ? "offset" : nextPageIn !== undefined || nextPageInLink ? "cursor" : undefined
+  const position = pagesByOffset ?? (pagesByNumber && { limit: pagesByNumber.limit, offset: pagesByNumber.page })
+  const page = position ? "offset" : nextPageIn !== undefined || nextPageInLink ? "cursor" : undefined
   const can = {
     ...(page && { page: page as "offset" | "cursor" }),
     ...(filters && { filter: filters }),
@@ -491,13 +504,17 @@ function restAbilitiesIn({
     ...(readOnly && { write: "none" as const })
   }
   const params = {
-    ...pagesByOffset,
+    ...(position?.limit !== undefined && { limit: position.limit }),
+    ...(position && { offset: position.offset }),
+    ...(nextPageSentAs !== undefined && { cursor: nextPageSentAs }),
     ...(sortedWith !== undefined && { sort: sortedWith }),
     ...(fieldsNamedIn !== undefined && { select: fieldsNamedIn })
   }
   return {
     ...(Object.keys(can).length > 0 && { can }),
-    ...(Object.keys(params).length > 0 && { params })
+    ...(Object.keys(params).length > 0 && { params }),
+    ...(pagesByNumber && { pageNumbers: { first: pagesByNumber.first ?? 1 } }),
+    ...(position && position.limit === undefined && { sendsNoCount: true })
   }
 }
 

@@ -52,6 +52,7 @@ import {
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
 import { NextPageByOffset } from "./NextPageByOffset"
+import { NextPageByNumber } from "./NextPageByNumber"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
@@ -402,11 +403,12 @@ places.addRule(RowsIn, {
   syntax: "{type:subject_its} rows are (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
 places.addRule(NextPageIn, {
-  syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+  syntax:
+    "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text} (, sent back as {param:text})?"
 })
 places.addRule(NextPageInLink, { syntax: "{type:subject_its} next page is in its {header:text} header" })
 places.addRule(NextPageByOffset, {
-  syntax: "{type:subject_its} next page is asked for with {limit:text} and {offset:text}",
+  syntax: "{type:subject_its} next page is asked for with ({limit:text} and)? {offset:text}",
   tests: [
     {
       compileAs: "block",
@@ -420,6 +422,57 @@ places.addRule(NextPageByOffset, {
             '  kind: "web server",',
             '  at: "https://collectionapi.metmuseum.org",',
             '  pagesByOffset: { limit: "limit", offset: "offset" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(NextPageByNumber, {
+  syntax:
+    "{type:subject_its} next page is asked for by number with ({limit:text} and)? {page:text} (, counting from {first:number})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github is a web server at "https://github.test"\n\t- its next page is asked for by number with "per_page" and "page"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://github.test",',
+            '  pagesByNumber: { limit: "per_page", page: "page" }',
+            "})"
+          ]
+        ],
+        [
+          'spring is a web server at "https://spring.test"\n\t- its next page is asked for by number with "size" and "page", counting from 0',
+          [
+            "export class Spring extends Place {}",
+            "export const spring = core.place(new Spring(), {",
+            '  name: "spring",',
+            '  kind: "web server",',
+            '  at: "https://spring.test",',
+            "  pagesByNumber: {",
+            '    limit: "size",',
+            '    page: "page",',
+            "    first: 0",
+            "  }",
+            "})"
+          ]
+        ],
+        [
+          'blog is a web server at "https://blog.test"\n\t- its next page is asked for by number with "p"',
+          [
+            "export class Blog extends Place {}",
+            "export const blog = core.place(new Blog(), {",
+            '  name: "blog",',
+            '  kind: "web server",',
+            '  at: "https://blog.test",',
+            '  pagesByNumber: { page: "p" }',
             "})"
           ]
         ]

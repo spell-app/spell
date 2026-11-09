@@ -30,7 +30,11 @@ export type PlaceDetailValue = {
   nextPageIn?: string
   nextPageInLink?: boolean
   /** What a web server calls how many and where from:  see `NextPageByOffset`. */
-  pagesByOffset?: { limit: string; offset: string }
+  pagesByOffset?: { limit?: string; offset: string }
+  /** What a web server calls how many and which page:  see `NextPageByNumber`. */
+  pagesByNumber?: { limit?: string; page: string; first?: number }
+  /** What it calls the cursor it's sent back:  see `NextPageIn`. */
+  nextPageSentAs?: string
   namesLike?: string
   numbersLike?: string
   listsGive?: string[]

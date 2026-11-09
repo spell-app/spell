@@ -186,6 +186,93 @@ describe("what a server can do, said in its lines (epic `data` I35)", () => {
     expect(asked).toEqual([`${HOST}/recipes?per=2&from=0`])
   })
 
+  test("pages by number, from 1 unless it says", async () => {
+    const asked = serve({
+      [`${HOST}/recipes?per_page=2&page=1`]: [{ id: 1 }, { id: 2 }],
+      [`${HOST}/recipes?per_page=2&page=2`]: [{ id: 3 }]
+    })
+    core.resetRuntime()
+    const Recipe = recipeIn(
+      `\t- its next page is asked for by number with "per_page" and "page"`,
+      `\t- it gives up to 2 at a time`
+    )
+    expect(await read(Recipe)).toHaveLength(3)
+    expect(asked).toHaveLength(2)
+    const zero = serve({ [`${HOST}/recipes?size=2&page=0`]: [{ id: 1 }] })
+    core.resetRuntime()
+    const FromZero = recipeIn(
+      `\t- its next page is asked for by number with "size" and "page", counting from 0`,
+      `\t- it gives up to 2 at a time`
+    )
+    expect(await read(FromZero)).toHaveLength(1)
+    expect(zero).toEqual([`${HOST}/recipes?size=2&page=0`])
+  })
+
+  test("only a position, or only a page's number:  on until a page comes back empty", async () => {
+    const asked = serve({
+      [`${HOST}/recipes?start=0`]: [{ id: 1 }, { id: 2 }],
+      [`${HOST}/recipes?start=2`]: []
+    })
+    core.resetRuntime()
+    expect(await read(recipeIn(`\t- its next page is asked for with "start"`))).toHaveLength(2)
+    expect(asked).toHaveLength(2)
+    const pages = serve({ [`${HOST}/recipes?p=1`]: [{ id: 1 }], [`${HOST}/recipes?p=2`]: [] })
+    core.resetRuntime()
+    expect(await read(recipeIn(`\t- its next page is asked for by number with "p"`))).toHaveLength(1)
+    expect(pages).toHaveLength(2)
+  })
+
+  test("a token in its answer goes back by what it calls that, in either language", async () => {
+    const asked = serve({
+      [`${HOST}/recipes`]: { items: [{ id: 1 }], nextPageToken: "abc" },
+      [`${HOST}/recipes?pageToken=abc`]: { items: [{ id: 2 }] }
+    })
+    core.resetRuntime()
+    const Recipe = recipeIn(
+      `\t- its rows are its "items"`,
+      `\t- its next page is its "nextPageToken", sent back as "pageToken"`
+    )
+    expect(await read(Recipe)).toHaveLength(2)
+    expect(asked).toHaveLength(2)
+    const es = [
+      `recetario es un servidor web en "${HOST}":`,
+      `\t- su página siguiente está en "nextPageToken", devuelta como "pageToken"`
+    ]
+    const spanish = parseSpellProject([{ path: "/C.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain(`nextPageSentAs: "pageToken"`)
+  })
+
+  test.each([
+    [`"per_page" and "page"`, /count pages, not rows/],
+    [`"pageSize" and "pageNumber"`, /count pages, not rows/],
+    [`"page"`, /count pages, not rows/],
+    [`"limit" and "cursor"`, /A cursor comes from its answer/],
+    [`"pageToken"`, /A cursor comes from its answer/],
+    [`"skip" and "take"`, /How many comes first.*with "take" and "skip"/],
+    [`"$skip" and "$top"`, /How many comes first/],
+    [`"start" and "rows"`, /How many comes first/]
+  ])("asked for with %s won't compile, saying what to write", (names, message) => {
+    const lines = [`cookbook is a web server at "${HOST}":`, `\t- its next page is asked for with ${names}`]
+    const { errors } = parseSpellProject([{ path: "/C.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors.join("\n")).toMatch(message)
+  })
+
+  test("by number the wrong way round won't compile, in either language", () => {
+    const lines = [
+      `cookbook is a web server at "${HOST}":`,
+      `\t- its next page is asked for by number with "page" and "per_page"`
+    ]
+    const { errors } = parseSpellProject([{ path: "/C.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors.join("\n")).toMatch(/with "per_page" and "page"/)
+    const es = [
+      `recetario es un servidor web en "${HOST}":`,
+      `\t- su página siguiente se pide por número con "page" y "per_page"`
+    ]
+    const spanish = parseSpellProject([{ path: "/C.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors.join("\n")).toMatch(/con "per_page" y "page"/)
+  })
+
   test("the count and the position the wrong way round won't compile, saying which comes first", () => {
     const lines = [`cookbook is a web server at "${HOST}":`, `\t- its next page is asked for with "offset" and "limit"`]
     const { errors } = parseSpellProject([{ path: "/C.spell", contents: `${lines.join("\n")}\n` }]).files[0]!

@@ -61,6 +61,11 @@ describe("placeBehind(), a web server (epic `data` I35)", () => {
     })
   })
 
+  test("pages counted by number are paged by offset, asked for by what they're called", () => {
+    expect(webServerWith({ pagesByNumber: { limit: "per_page", page: "page" } }).describe().page).toBe("offset")
+    expect(webServerWith({ pagesByNumber: { page: "p", first: 0 } }).describe().page).toBe("offset")
+  })
+
   test("its next page in its `Link` header still pages by cursor", () => {
     expect(webServerWith({ nextPageInLink: true }).describe()).toMatchObject({ page: "cursor" })
   })

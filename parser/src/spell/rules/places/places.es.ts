@@ -70,6 +70,7 @@ import { VersionsIn } from "./VersionsIn"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
 import { NextPageByOffset } from "./NextPageByOffset"
+import { NextPageByNumber } from "./NextPageByNumber"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
@@ -358,11 +359,12 @@ placesEs.addRule(RowsIn, {
   syntax: "{type:subject_its} filas están en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
 placesEs.addRule(NextPageIn, {
-  syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+  syntax:
+    "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text} (, devuelta como {param:text})?"
 })
 placesEs.addRule(NextPageInLink, { syntax: "{type:subject_its} página siguiente está en su cabecera {header:text}" })
 placesEs.addRule(NextPageByOffset, {
-  syntax: "{type:subject_its} página siguiente se pide con {limit:text} y {offset:text}",
+  syntax: "{type:subject_its} página siguiente se pide con ({limit:text} y)? {offset:text}",
   tests: [
     {
       compileAs: "block",
@@ -376,6 +378,60 @@ placesEs.addRule(NextPageByOffset, {
             '  kind: "web server",',
             '  at: "https://collectionapi.metmuseum.org",',
             '  pagesByOffset: { limit: "limit", offset: "offset" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(NextPageByNumber, {
+  syntax:
+    "{type:subject_its} página siguiente se pide por número con ({limit:text} y)? {page:text} (, contando desde {first:number})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github es un servidor web en "https://github.test"\n\t- su página siguiente se pide por número con "per_page" y "page"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://github.test",',
+            '  pagesByNumber: { limit: "per_page", page: "page" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'spring es un servidor web en "https://spring.test"\n\t- su página siguiente se pide por número con "size" y "page", contando desde 0',
+          [
+            "export class Spring extends Place {}",
+            "export const spring = core.place(new Spring(), {",
+            '  name: "spring",',
+            '  kind: "web server",',
+            '  at: "https://spring.test",',
+            "  pagesByNumber: {",
+            '    limit: "size",',
+            '    page: "page",',
+            "    first: 0",
+            "  },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'blog es un servidor web en "https://blog.test"\n\t- su página siguiente se pide por número con "p"',
+          [
+            "export class Blog extends Place {}",
+            "export const blog = core.place(new Blog(), {",
+            '  name: "blog",',
+            '  kind: "web server",',
+            '  at: "https://blog.test",',
+            '  pagesByNumber: { page: "p" },',
             '  unclearNumbers: ","',
             "})"
           ]

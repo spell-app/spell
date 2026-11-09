@@ -6766,7 +6766,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 90,
+          "line": 94,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7209,11 +7209,11 @@
           "ruleNames": ["next_page_by_offset"],
           "internal": false,
           "file": "src/spell/rules/places/NextPageByOffset.ts",
-          "line": 20,
-          "purpose": "A web server pages by a count and a position, with no next link to follow (epic `data` I35).",
+          "line": 32,
+          "purpose": "A web server pages by a row's position, with no next link to follow (epic `data` I35).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} página siguiente se pide con {limit:text} y {offset:text}",
+              "syntax": "{type:subject_its} página siguiente se pide con ({limit:text} y)? {offset:text}",
               "example": "museo met es un servidor web en \"https://collectionapi.metmuseum.org\"\n\t- su página siguiente se pide con \"limit\" y \"offset\"",
               "outputs": {
                 "js": {
@@ -7224,6 +7224,32 @@
                 },
                 "py": {
                   "code": "class MuseoMet(Place):\n    pass\n\nmuseo_met = core.place(\n    MuseoMet(),\n    {\n        \"name\": \"museo_met\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"pages_by_offset\": {\"limit\": \"limit\", \"offset\": \"offset\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageByNumber",
+          "ruleNames": ["next_page_by_number"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageByNumber.ts",
+          "line": 17,
+          "purpose": "A web server pages by a page's number, not by a row's position (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente se pide por número con ({limit:text} y)? {page:text} (, contando desde {first:number})?",
+              "example": "github es un servidor web en \"https://github.test\"\n\t- su página siguiente se pide por número con \"per_page\" y \"page\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://github.test\",\n  pagesByNumber: { limit: \"per_page\", page: \"page\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://github.test\",\n  pagesByNumber: { limit: \"per_page\", page: \"page\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Github(Place):\n    pass\n\ngithub = core.place(\n    Github(),\n    {\n        \"name\": \"github\",\n        \"kind\": \"web server\",\n        \"at\": \"https://github.test\",\n        \"pages_by_number\": {\"limit\": \"per_page\", \"page\": \"page\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }
@@ -7797,11 +7823,11 @@
           "ruleNames": ["next_page_in"],
           "internal": false,
           "file": "src/spell/rules/places/NextPageIn.ts",
-          "line": 11,
+          "line": 13,
           "purpose": "Which field of a web server's answer says where its next page is.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+              "syntax": "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text} (, devuelta como {param:text})?"
             }
           ],
           "aliases": ["statement"]
