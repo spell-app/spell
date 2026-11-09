@@ -904,17 +904,6 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
     if (/read only/.test(canDo.write))
       said.add("That it's read only:  no line says, so a program's write compiles, and fails when it runs.")
   }
-  if (kind === "sheet" || kind === "google sheet") {
-    if (
-      each.some(([, { fields }]) =>
-        Object.keys(fields).some((field) => /[^a-z0-9_ ]/.test(field) || /[A-Z]/.test(field))
-      )
-    ) {
-      said.add(
-        "A sheet's column by another name:  a sheet reads no `a recipe's title is its \"Title\"` line, so a column named differently stays empty."
-      )
-    }
-  }
   return [...said]
 }
 

@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { basename } from "node:path"
 
 import { CsvFile } from "spell/places/CsvFile"
+import { FieldNames } from "spell/places/FieldNames"
 import { isListPosition, positionAtIndex } from "spell/places/positions"
 import {
   PlaceError,
@@ -91,6 +92,8 @@ export type CsvSaveRowsAnswer = {
  * - A program's own CSV file in its project data folder (`a sheet at "tasks.csv"`, the app's `SpaceFolders`;
  *   epic `language` T65) names no `collection`:  its one collection is whatever the program calls it.
  *   - Its id column is the program's (`withLines()`), `id` until a line says otherwise.
+ * - Each column is a field by the program's name for it, reading and writing (`FieldNames`):
+ *   a line's (`withLines()`), else by its words, so a write to `hairColor` lands in `Hair Color`.
  ****************/
 export class CsvPlace implements Place {
   /** The file. */
@@ -103,6 +106,10 @@ export class CsvPlace implements Place {
   private readonly numbers: readonly string[] | undefined
   /** The field a row's place in the file reads as. */
   private readonly positionField: string | undefined
+  /** Each column a program's lines name, by the field it is. */
+  private readonly fields: Readonly<Record<string, string>>
+  /** The names of the file's columns, as it last read:  what its answers are named by. */
+  private names = new FieldNames()
   /** The rows it last read whole:  what a half-saved file answers with. */
   private lastGood: PlaceRow[] | undefined
   /** Each row's version when it was last read, by id. */
@@ -110,12 +117,13 @@ export class CsvPlace implements Place {
   /** The same file with another id column, as a program's lines name it, made once each (`withLines()`). */
   private readonly withThoseLines = new Map<string, CsvPlace>()
 
-  constructor({ file, collection, idColumn, numbers, positionField }: CsvPlaceProps) {
+  constructor({ file, collection, idColumn, numbers, positionField, fields = {} }: CsvPlaceProps) {
     this.file = file
     this.collection = collection
     this.idColumn = idColumn
     this.numbers = numbers
     this.positionField = positionField
+    this.fields = fields
   }
 
   /** What it can do:  all at once.  With no id column it can only add:  nothing says which row a change means. */
@@ -136,22 +144,32 @@ export class CsvPlace implements Place {
   }
 
   /**
-   * The same file, read by the id column a program's line names (`- its id is its "key"`), when this place names none
-   * of its own collection:  a program's own file, which only its lines describe.
-   * - A place made for one collection keeps its own:  whoever made it said.
+   * The same file as a program's lines describe it, made once for each description:
+   * - the columns they name (`- a recipe's title is its "Dish Name"`)
+   * - the id column one names (`- its id is its "key"`), when this place names none of its own collection:
+   *   a program's own file, which only its lines describe
+   * - A place made for one collection keeps its own id column:  whoever made it said.
    */
-  withLines({ idColumn }: PlaceLines): CsvPlace {
-    if (this.collection !== undefined || idColumn === undefined || idColumn === this.idColumn) return this
-    let place = this.withThoseLines.get(idColumn)
+  withLines({ idColumn, collections = {} }: PlaceLines): CsvPlace {
+    const fields = Object.assign({}, ...Object.values(collections).map((lines) => lines.fields)) as Record<
+      string,
+      string
+    >
+    const id = this.collection === undefined && idColumn !== undefined ? idColumn : this.idColumn
+    if (id === this.idColumn && !Object.keys(fields).length) return this
+    const name = JSON.stringify([id, fields])
+    let place = this.withThoseLines.get(name)
     if (!place) {
-      const { file, numbers, positionField } = this
+      const { file, collection, numbers, positionField } = this
       place = new CsvPlace({
         file,
-        idColumn,
+        fields,
+        ...(collection !== undefined && { collection }),
+        ...(id !== undefined && { idColumn: id }),
         ...(numbers && { numbers }),
         ...(positionField !== undefined && { positionField })
       })
-      this.withThoseLines.set(idColumn, place)
+      this.withThoseLines.set(name, place)
     }
     return place
   }
@@ -173,7 +191,7 @@ export class CsvPlace implements Place {
       const csv = this.csvNow()
       const notes = csv.whyUnclear ? [...csv.notes, csv.whyUnclear] : csv.notes
       return {
-        rows: this.heldRows(csv),
+        rows: this.named(this.heldRows(csv)),
         ...this.versionAnswer(),
         handled: {},
         ...(notes.length && { notes: [...notes] })
@@ -181,7 +199,7 @@ export class CsvPlace implements Place {
     } catch (error) {
       if (!(error instanceof SyntaxError) || !this.lastGood) throw error
       const note = `"${collection}" can't be read just now, so this is how it last read:  ${error.message}`
-      return { rows: this.lastGood, ...this.versionAnswer(), handled: {}, notes: [note] }
+      return { rows: this.named(this.lastGood), ...this.versionAnswer(), handled: {}, notes: [note] }
     }
   }
 
@@ -216,11 +234,22 @@ export class CsvPlace implements Place {
     return new CsvFile(text, { name: this.collection ?? this.name, idColumn, numbers })
   }
 
+  /** SIDE EFFECT:  its names are now those of `csv`'s columns. */
+  private nameColumnsOf(csv: CsvFile): void {
+    this.names = FieldNames.ofColumns(csv.columns, this.fields, [this.idColumn, this.positionField])
+  }
+
+  /** `rows`, each column by the program's name for it. */
+  private named(rows: readonly PlaceRow[]): PlaceRow[] {
+    return rows.map((row) => this.names.fromServer(row))
+  }
+
   /** The rows of `csv`, each with its place in the file if it's asked for.  SIDE EFFECT:  remembers them, and their versions. */
   private heldRows(csv: CsvFile): PlaceRow[] {
     const { positionField, idColumn } = this
     const rows = positionField ? csv.rows.map((row, at) => ({ ...row, [positionField]: placeAt(at) })) : [...csv.rows]
     this.lastGood = rows
+    this.nameColumnsOf(csv)
     this.versions = new Map()
     if (idColumn === undefined || csv.whyUnclear) return rows
     csv.rows.forEach((row, at) => this.versions.set(idOfRow(row, idColumn)!, contentVersion(csv.cellsOfRow(at))))
@@ -254,6 +283,7 @@ export class CsvPlace implements Place {
         csv.rows.map((row, at): [PlaceRow, string] => [{ ...row }, positionAtIndex(at)])
       )
       const answered: { row: PlaceRow; id: string | undefined; position: unknown }[] = []
+      this.nameColumnsOf(csv)
       for (const change of changes) {
         const row = this.madeIn(rows, csv, change)
         if (row) answered.push({ row, id: change.id, position: this.positionIn(change) })
@@ -271,7 +301,7 @@ export class CsvPlace implements Place {
         // the position it was given, not the one the file now makes:  the rows around it haven't heard yet
         return position !== undefined && positionField ? { ...kept, [positionField]: position } : kept
       })
-      return { rows: rowsNow, ...this.versionAnswer() }
+      return { rows: this.named(rowsNow), ...this.versionAnswer() }
     })
   }
 
@@ -298,7 +328,10 @@ export class CsvPlace implements Place {
       }
       const csv = this.csvToWrite()
       const fields = this.positionField
-      const without = fields ? rows.map(({ [fields]: _position, ...row }) => row) : rows
+      this.nameColumnsOf(csv)
+      const without = (fields ? rows.map(({ [fields]: _position, ...row }) => row) : rows).map((row) =>
+        this.names.toServer(row)
+      )
       const { added, moved, edited, removed } = this.writeAndHold(csv, without)
       const readsAsBoth = this.idColumn === undefined && added.length > 0 && removed.length > 0
       const note = `"${this.collection ?? this.name}" has no id column, so an edited row can't be told from one removed and one added:  it's saved as that`
@@ -400,8 +433,8 @@ export class CsvPlace implements Place {
   /** What `change` writes to cells:  not its position, nor anything of the engine's. */
   private fieldsIn({ fields = {} }: PlaceChange): PlaceRow {
     const { positionField } = this
-    return Object.fromEntries(
-      Object.entries(fields).filter(([field]) => field !== positionField && !field.startsWith("$"))
+    return this.names.toServer(
+      Object.fromEntries(Object.entries(fields).filter(([field]) => field !== positionField && !field.startsWith("$")))
     )
   }
 
@@ -442,6 +475,8 @@ export type CsvPlaceProps = {
   numbers?: readonly string[]
   /** The field a row's place in the file reads as, and writing it moves the row.  Left out:  rows have no such field. */
   positionField?: string
+  /** Each column a program's lines name, by the field it is:  `{ title: "Dish Name" }`. */
+  fields?: Readonly<Record<string, string>>
 }
 
 /** Row `at`'s place in the file, for a reader:  it isn't in any list but the one. */

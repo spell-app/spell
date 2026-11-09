@@ -49,6 +49,22 @@ describe("a field's name, by its words", () => {
     })
   })
 
+  test("a sheet's columns:  known before a row is read, a named one wins, and the id column keeps its name", () => {
+    const names = FieldNames.ofColumns(["Recipe ID", "Dish Name", "Hair Color"], { title: "Dish Name" }, ["Recipe ID"])
+    expect(names.toServer({ title: "Broth", hairColor: "red", "Recipe ID": "r-1", nobody: 1 })).toEqual({
+      "Dish Name": "Broth",
+      "Hair Color": "red",
+      "Recipe ID": "r-1",
+      nobody: 1
+    })
+    expect(names.fromServer({ "Recipe ID": "r-1", "Dish Name": "Soup" })).toEqual({ "Recipe ID": "r-1", title: "Soup" })
+  })
+
+  test("what a line names wins over a column that reads the same, whichever comes first", () => {
+    const names = new FieldNames({ title: "Dish Name" })
+    expect(names.fromServer({ Title: "Not this", "Dish Name": "Soup" })).toEqual({ title: "Soup" })
+  })
+
   test("with no style, a field it hasn't read keeps our name", () => {
     expect(new FieldNames().serverName("eyeColor")).toBe("eyeColor")
   })

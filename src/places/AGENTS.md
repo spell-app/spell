@@ -205,6 +205,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](SheetTable.ts) makes its rows, shared with
       `GoogleSheetPlace`, in `spell/server/places`.
     - An author's `idColumn`, or rows share no identity.  A row with no id or a repeated one is left out, and said.
+    - Each column is a field by the program's name for it (`FieldNames.ofColumns()`, epic `data` I36):
+      a line's (`a recipe's title is its "Dish Name"`), else by its words, so `Hair Color` is `hairColor`;  the id column keeps its name.
+      Every kind of sheet does the same, writing too, so a change goes back under the column it was read from.
     - What a place wants known about an answer is `ListAnswer.notes`, shown by `PlaceResult.notes`;
       `PlaceQuery` adds the one for rows with no id, for every place.
     - Its ceiling holds while it reads:  the engine only counts rows it's handed.

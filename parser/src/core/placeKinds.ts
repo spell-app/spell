@@ -288,11 +288,13 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   ) => {
     const at = details.at!
     const { idColumn } = details
+    const collections = columnLines(details, collection, Class)
     // a server in front:  `GoogleSheetPlace`, which holds the key, and takes writes
     if (isPlaceServerAddress(at)) {
       return new RemotePlace({
         url: at,
-        can: { kind: "google sheet", atomic: true, ...(idColumn !== undefined && { idOf: idColumn }) }
+        can: { kind: "google sheet", atomic: true, ...(idColumn !== undefined && { idOf: idColumn }) },
+        ...(collections && { lines: { collections } })
       })
     }
     // no key:  anyone with its link can read it, as its one tab's CSV, and nothing can write it
@@ -300,7 +302,8 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       url: googleSheetCsvAddress(at),
       collection,
       numbers: fieldsOfKind(Class, "number"),
-      ...(idColumn !== undefined && { idColumn })
+      ...(idColumn !== undefined && { idColumn }),
+      ...(collections && { collections })
     })
   },
   // always through a server side, which holds the key:  a place server's address, or this page's own server, by the base's name
@@ -356,26 +359,47 @@ function sheetAt(
 ): PlaceBehind {
   const at = details.at!
   const { idColumn } = details
+  const collections = columnLines(details, collection, Class)
   // the program's own CSV file, in its project data folder (epic `language` T65):  its address made by the compiler,
   // `"tasks.csv"`;  an id column of `id` unless a line names another, which goes with each request
   if (isSpaceFolderAddress(at)) {
     return new RemotePlace({
       url: at,
       can: { kind: "sheet", atomic: true, idOf: idColumn ?? ID_FIELD },
-      ...(idColumn !== undefined && { lines: { idColumn } })
+      ...((idColumn !== undefined || collections) && {
+        lines: { ...(idColumn !== undefined && { idColumn }), ...(collections && { collections }) }
+      })
     })
   }
   // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
   if (isPlaceServerAddress(at)) {
-    return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })
+    return new RemotePlace({
+      url: at,
+      can: { kind: "sheet", atomic: true, idOf: idColumn as string },
+      ...(collections && { lines: { collections } })
+    })
   }
   return new SheetPlace({
     url: new URL(at, globalThis.location?.href).href,
     collection,
     numbers: fieldsOfKind(Class, "number"),
     ...(idColumn !== undefined && { idColumn }),
+    ...(collections && { collections }),
     ...(format && { format })
   })
+}
+
+/**
+ * What a sheet's columns are called, where that isn't their words:  `a recipe's title is its "Dish Name"`, `stored as "avg_ht"`.
+ * - `collection` is first read by `Class`:  its `stored as` names join its own.
+ * - `undefined` when nothing names one.
+ */
+function columnLines({ collections = {} }: PlaceDetails, collection: string, Class: Function) {
+  const named: Record<string, { fields: Record<string, string> }> = {}
+  for (const [name, { fields }] of Object.entries(collections)) if (fields) named[name] = { fields }
+  const storedAs = storedAsIn(Class)
+  if (Object.keys(storedAs).length) named[collection] = { fields: { ...named[collection]?.fields, ...storedAs } }
+  return Object.keys(named).length ? named : undefined
 }
 
 /** SIDE EFFECT:  atmosphere account `place` keeps the first class's decimal numbers as text -- see `knowCollection()`. */
