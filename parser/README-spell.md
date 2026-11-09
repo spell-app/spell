@@ -1207,7 +1207,8 @@ recipe box is an app:
     but not its cell colours and fonts.
   - `an airtable at`, `an atmosphere account at`
   - `a personal atmosphere account`
-  - `a database on this device`, `an in memory database`
+  - `an atmosphere space at` (it compiles;  reading one says Spell can't reach those yet)
+  - `a database on this device`, or `is stored on this device`, and `is stored on this device, for each tab`;  `an in memory database`
   - `a data folder at` names a project data folder, three ways:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person
@@ -1236,7 +1237,7 @@ recipe box is an app:
   - A field holding another thing may be nothing, and the X of nothing is nothing:
     `the name of its homeworld`, with no homeworld, is nothing, not a throw.
 - What a real server is like, a line each under it, which the ingest writes when it finds it:
-  - a key it can go without:  `its key is the secret "GITHUB_TOKEN", if it's set`
+  - a key it can go without:  `its optional key is the secret "GITHUB_TOKEN"`
   - paging by a header:  `its next page is in its "Link" header`
   - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
   - no list, only a search:  `books are searched at "/search.json"`;  then `every book` won't compile

@@ -215,6 +215,7 @@ export const englishWords: SP.LanguageWords = {
       "hide-empty": "hide-empty",
       failed: "failed",
       paging: "paging",
+      "page-size": "page-size",
       as: "as"
     },
     forFlagsNotAfter: ["is", "are", "not", "isn't", "aren't"],
@@ -361,6 +362,7 @@ export const englishWords: SP.LanguageWords = {
         whole: "show it all in :",
         inPages: "show them in pages",
         allAtOnce: "show them all",
+        atATime: "show them {size} at a time",
         no: "no",
         pages: "pages",
         none_: "none",

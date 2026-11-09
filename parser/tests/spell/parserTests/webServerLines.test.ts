@@ -452,7 +452,7 @@ describe("GitHub's way (epic `data` P28)", () => {
 
   const LINES = [
     `github is a web server at "${HOST}":`,
-    `\t- its key is the secret "GITHUB_TOKEN", if it's set`,
+    `\t- its optional key is the secret "GITHUB_TOKEN"`,
     `\t- its next page is in its "Link" header`,
     `\t- contributors live at "/repos/solidjs/solid/contributors"`,
     `a "contributor" is a thing:`,
@@ -478,7 +478,7 @@ describe("GitHub's way (epic `data` P28)", () => {
     expect(compiled).toContain(`nextPageInLink: true`)
     const es = [
       `github es un servidor web en "${HOST}":`,
-      `\t- su clave es el secreto "GITHUB_TOKEN", si la hay`,
+      `\t- su clave opcional es el secreto "GITHUB_TOKEN"`,
       `\t- su página siguiente está en su cabecera "Link"`
     ]
     const spanish = parseSpellProject([{ path: "/G.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
@@ -527,5 +527,63 @@ describe("GitHub's way (epic `data` P28)", () => {
     ])("User")
     const user = (await core.savedThingWithId(User as never, "ryansolid")) as unknown as Record<string, unknown>
     expect([user.id, user.login, user.name]).toEqual(["ryansolid", "ryansolid", "Ryan"])
+  })
+})
+
+describe("the place kinds' other words", () => {
+  const errorsOf = (contents: string) =>
+    parseSpellProject([{ path: "/Lines.spell", contents }]).files[0]!.errors
+
+  test("an atmosphere space's address has to be a space's", () => {
+    expect(errorsOf('family cookbook is an atmosphere space at "at://did:plc:abc/space/family"')).toEqual([])
+    expect(errorsOf('family cookbook is an atmosphere space at "https://example.com"').join()).toMatch(
+      /isn't a space/
+    )
+  })
+
+  test("reading an atmosphere space says it can't be reached yet", async () => {
+    const { Note } = await runSpell([
+      'family cookbook is an atmosphere space at "at://did:plc:abc/space/family"',
+      "a note is a thing",
+      "\t- it is saved in family cookbook"
+    ])("Note")
+    await expect(read(Note)).rejects.toThrow(/atmosphere space.*can't reach those yet/)
+  })
+
+  test("a whole-list read of a searching server by its plural:  all, the, or nothing", () => {
+    const lines = (read: string) =>
+      errorsOf(
+        [
+          'met museum is a web server at "https://met.test"',
+          '\t- it searches everything with "q"',
+          "an artwork is a thing",
+          "\t- it lives in met museum",
+          "a shelf is a thing",
+          '\t- its "search" is text',
+          `\t- to look:  return ${read}`
+        ].join("\n")
+      )
+    expect(lines("all artworks matching its search")).toEqual([])
+    expect(lines("artworks which match its search")).toEqual([])
+  })
+
+  test("which match:  still refused for a place that doesn't search", () => {
+    const errors = errorsOf(
+      [
+        'met museum is a web server at "https://met.test"',
+        "an artwork is a thing",
+        "\t- it lives in met museum",
+        "a shelf is a thing",
+        '\t- its "search" is text',
+        "\t- to look:  return artworks which match its search"
+      ].join("\n")
+    )
+    expect(errors.join()).toMatch(/search/)
+  })
+
+  test("settings stored on this device, for each tab", () => {
+    expect(errorsOf("scratch is stored on this device, for each tab")).toEqual([])
+    expect(errorsOf("settings is stored on this device")).toEqual([])
+    expect(errorsOf("settings is a database on this device")).toEqual([])
   })
 })

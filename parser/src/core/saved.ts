@@ -98,6 +98,8 @@ export type ReadRiders = {
   whole?: () => unknown
   /** `show them in pages`, `show them all`:  how a long list draws;  none:  more as you scroll. */
   paging?: () => "pages" | "all"
+  /** `show them 12 at a time`:  how many a page holds, or each lot of more as you scroll;  none:  `MOST_AT_ONCE`. */
+  pageSize?: () => number
 }
 
 /** A row's id, always asked for:  it's what makes it one row. */
@@ -1549,13 +1551,14 @@ export const savedMethods = defineCoreModule({
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
       const more = () => MORE_PAGES.get(current() as object)
       const paging = riders.paging?.()
+      const atOnce = riders.pageSize?.() ?? MOST_AT_ONCE
       const around = elementOf(riders.items?.())
       const row = around?.firstElementChild ?? undefined
       const drawItem = (item: Item, position: () => number) => {
         const drawing = drawEach(item, position() + 1)
         return row ? rowOf(row, drawing) : drawing
       }
-      const paged = paging === "pages" ? drawnInPages({ items, drawItem, more }) : undefined
+      const paged = paging === "pages" ? drawnInPages({ items, drawItem, more, atOnce }) : undefined
       const list = paged
         ? paged.list
         : paging === "all"
@@ -1576,7 +1579,8 @@ export const savedMethods = defineCoreModule({
                 const list = current()
                 return list instanceof List ? list : undefined
               },
-              more
+              more,
+              atOnce
             })
       if (row) {
         row.remove()
@@ -1709,7 +1713,7 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
 
 /**
  * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
- * - A page holds `MOST_AT_ONCE`.
+ * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`).
  * - Next at the end of what's read asks a place for its next page.
  * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
  *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
@@ -1717,11 +1721,13 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
 function drawnInPages<Item>({
   items,
   drawItem,
-  more
+  more,
+  atOnce
 }: {
   items: () => readonly Item[]
   drawItem: (item: Item, position: () => number) => JSX.Element
   more: () => MorePages | undefined
+  atOnce: number
 }): { list: JSX.Element; pager: JSX.Element } {
   const pageChanged = new Cell()
   let page = 0
@@ -1733,7 +1739,7 @@ function drawnInPages<Item>({
     page = to
     pageChanged.changed()
   }
-  const lastDrawn = () => (pageNow() + 1) * MOST_AT_ONCE
+  const lastDrawn = () => (pageNow() + 1) * atOnce
   const hasNext = () => items().length > lastDrawn() || !!more()?.hasMorePages
   const next = async () => {
     if (items().length <= lastDrawn()) await more()?.readNextPage()
@@ -1743,9 +1749,9 @@ function drawnInPages<Item>({
     For as never,
     {
       get each() {
-        return items().slice(pageNow() * MOST_AT_ONCE, lastDrawn())
+        return items().slice(pageNow() * atOnce, lastDrawn())
       },
-      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * MOST_AT_ONCE + position())
+      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * atOnce + position())
     } as never
   ) as JSX.Element
   const pager = h(

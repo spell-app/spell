@@ -111,6 +111,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "atmosphere-reads-here":
     'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda un número decimal como texto, "12.50", que otras aplicaciones leen como texto',
   "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
+  "page-size-a-whole-number": "Una página tiene un número entero de cosas, 1 o más",
+  "atmosphere-not-a-space": '"{address}" no es un espacio:  se escribe "at://did:plc:.../space/familia"',
   "atmosphere-not-a-corner":
     '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
   "atmosphere-not-a-collection":

@@ -588,6 +588,8 @@ export type SpellxForWords = {
   inPages: string
   /** A list drawn whole. */
   allAtOnce: string
+  /** How many a list draws at once, with `{size}` for the number. */
+  atATime: string
   /** The word in `loading={no}`. */
   no: string
   /** `paging="pages"`'s value. */

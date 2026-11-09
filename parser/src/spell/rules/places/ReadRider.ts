@@ -8,7 +8,7 @@ import { loopItemOf } from "./places.shared"
 import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
 
 /** Which of a read's riders a line is:  what `core.drawRead()` calls each. */
-export type RiderKind = "waiting" | "none" | "failed" | "failedSay" | "items" | "whole" | "paging"
+export type RiderKind = "waiting" | "none" | "failed" | "failedSay" | "items" | "whole" | "paging" | "pageSize"
 
 /**
  * `read_rider` rule:  what a read in a drawing shows while it has no list to show (epic `data` P11).
@@ -105,6 +105,36 @@ export class ShowThemPaged extends SpellStatement {
 /** `show them all` -- see `ShowThemPaged`. */
 export class ShowThemAll extends ShowThemPaged {
   @proto static paging: "pages" | "all" = "all"
+}
+
+/**
+ * `show them 12 at a time`:  how many a long list draws at once:  a page of `show them in pages`, or each lot of more as you
+ * scroll -- see `core.drawRead()` (epic `data` Q35).
+ * - e.g. `<for films paging="pages" page-size="12">`, the same thing as an attribute
+ * - Left out:  24.
+ * - Spanish says the number twice, `mostrarlos de 12 en 12`:  two different numbers aren't this rule.
+ * - A whole number, 1 or more:  anything else won't compile.
+ */
+export class ShowThemAtATime extends SpellStatement<"size|same?"> {
+  @proto static alias = "statement"
+  @proto static priority = Priority.declaration
+  @proto static loops = true
+  @proto static kind: RiderKind = "pageSize"
+  declare kind: RiderKind
+
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match) return undefined
+    const { size, same } = match.groups
+    if (same && same.raw !== size.raw) return undefined
+    const howMany = Number(size.raw)
+    if (Number.isInteger(howMany) && howMany >= 1) return match
+    return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("page-size-a-whole-number"))
+  }
+
+  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
+    return riderSaying(match, "pageSize", P.matchAST(match.groups.size))
+  }
 }
 
 /**

@@ -14,6 +14,7 @@ import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
+import { StoredOnThisDevice } from "./StoredOnThisDevice"
 import { DraftOf } from "./DraftOf"
 import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
@@ -45,6 +46,7 @@ import {
   IfThereAreNone,
   ShowItAllIn,
   ShowThemAll,
+  ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
   WhileWaiting
@@ -95,6 +97,7 @@ const KINDS_AT = [
   "excel_file",
   "google_sheet",
   "airtable",
+  "atmosphere_space",
   "atmosphere_account"
 ]
 
@@ -116,7 +119,7 @@ const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
 places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }), {
   syntax:
-    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
 })
 
 places.addRule(Wording.specialize({ ruleName: "place_kind_here", meanings: KINDS_HERE }), {
@@ -184,6 +187,17 @@ places.addRule(CreatePlace, {
           ]
         ],
         [
+          'family cookbook is an atmosphere space at "at://did:plc:abc123/space/family"',
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "atmosphere space",',
+            '  at: "at://did:plc:abc123/space/family"',
+            "})"
+          ]
+        ],
+        [
           'family cookbook is an excel file at "recipes.xlsx"',
           [
             "export class FamilyCookbook extends Place {}",
@@ -205,6 +219,31 @@ places.addRule(CreatePlace, { syntax: "{type:type_words} is (a|an) {kind:place_k
 places.addRule(CreatePlace, {
   syntax:
     "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
+})
+places.addRule(StoredOnThisDevice, {
+  syntax: "{type:type_words} is stored on this device (each_tab:, for each tab)? {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "settings is stored on this device",
+          ["export class Setting extends Place {}", "export const settings = core.place(new Setting(), { name: \"settings\", kind: \"database on this device\" })"]
+        ],
+        [
+          "scratch is stored on this device, for each tab",
+          [
+            "export class Scratch extends Place {}",
+            "export const scratch = core.place(new Scratch(), {",
+            '  name: "scratch",',
+            '  kind: "database on this device",',
+            "  forEachTab: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 places.addRule(SavedInTheCloud, {
   syntax: "{type:type_words} is saved in the cloud {with_nested_statements}?",
@@ -340,7 +379,7 @@ places.addRule(PictureAt, {
 })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
-places.addRule(KeyIfSet, { syntax: "{type:subject_its} key is the secret {name:text}, if it's set" })
+places.addRule(KeyIfSet, { syntax: "{type:subject_its} optional key is the secret {name:text}" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
@@ -820,6 +859,22 @@ places.addRule(IfThereAreNone, { syntax: "if there are none :? {statement_body}?
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })
 places.addRule(ShowThemPaged, { syntax: "show them in pages" })
 places.addRule(ShowThemAll, { syntax: "show them all" })
+places.addRule(ShowThemAtATime, {
+  syntax: "show them {size:number} at a time",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["show them 12 at a time", 'core.readRider("pageSize", () => 12)'],
+        {
+          title: "a whole number, 1 or more",
+          input: "show them 0 at a time",
+          js: "/* PARSE ERROR: A page holds a whole number of things, 1 or more */"
+        }
+      ]
+    }
+  ]
+})
 places.addRule(ShowThemIn, { syntax: "show them in :? {statement_body}?" })
 places.addRule(ShowItAllIn, { syntax: "show it all in :? {statement_body}?" })
 places.addRule(IfThatFails, { syntax: "if that fails :? {statement_body}?" })
@@ -848,7 +903,7 @@ places.addRule(TryAgain, {
 
 places.addRule(ThingWithId, { syntax: "the {type:known_type} whose id is {id:expression}" })
 places.addRule(EveryThingMatching, {
-  syntax: "every {type:known_type} matching {words:expression}",
+  syntax: "every {type:known_type} (matching|which matches) {words:expression}",
   tests: [
     {
       compileAs: "expression",
@@ -864,7 +919,35 @@ places.addRule(EveryThingMatching, {
         )
         scope.variables?.add("search")
       },
-      tests: [["every artwork matching search", 'await core.savedThings(Artwork, { search: { "*": search } })']]
+      tests: [
+        ["every artwork matching search", 'await core.savedThings(Artwork, { search: { "*": search } })'],
+        ["every artwork which matches search", 'await core.savedThings(Artwork, { search: { "*": search } })']
+      ]
+    }
+  ]
+})
+places.addRule(EveryThingMatching, {
+  syntax: "(all|the)? {type:plural_type} (matching|which match) {words:expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'met museum is a web server at "https://collectionapi.metmuseum.org"',
+            '\t- it searches everything with "q"',
+            "an artwork is a thing",
+            "\t- it lives in met museum"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("search")
+      },
+      tests: [
+        ["all artworks matching search", 'await core.savedThings(Artwork, { search: { "*": search } })'],
+        ["artworks matching search", 'await core.savedThings(Artwork, { search: { "*": search } })'],
+        ["the artworks which match search", 'await core.savedThings(Artwork, { search: { "*": search } })']
+      ]
     }
   ]
 })

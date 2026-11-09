@@ -159,6 +159,10 @@ export const PARSER_MESSAGES = {
     'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** `show them 0 at a time`. */
+  "page-size-a-whole-number": "A page holds a whole number of things, 1 or more",
+  /** An atmosphere space's address that isn't one. */
+  "atmosphere-not-a-space": '"{address}" isn\'t a space:  it looks like "at://did:plc:.../space/family"',
   /** A personal atmosphere account's address that isn't the start of a collection's name. */
   "atmosphere-not-a-corner":
     '"{address}" isn\'t a corner of an account:  it reads like a domain written backwards, e.g. "com.example.cookbook"',

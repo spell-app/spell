@@ -15,6 +15,7 @@ import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
+import { StoredOnThisDevice } from "./StoredOnThisDevice"
 import { DraftOf } from "./DraftOf"
 import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
@@ -46,6 +47,7 @@ import {
   IfThereAreNone,
   ShowItAllIn,
   ShowThemAll,
+  ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
   WhileWaiting
@@ -117,12 +119,13 @@ placesEs.addRule(
       "excel_file",
       "google_sheet",
       "airtable",
+      "atmosphere_space",
       "atmosphere_account"
     ]
   }),
   {
     syntax:
-      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
   }
 )
 
@@ -171,6 +174,37 @@ placesEs.addRule(CreatePlace, {
 placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?` })
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
+})
+placesEs.addRule(StoredOnThisDevice, {
+  syntax: "{type:type_words} se guarda en este dispositivo (each_tab:, para cada pestaña)? {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "ajustes se guarda en este dispositivo",
+          [
+            "export class Ajuste extends Place {}",
+            "export const ajustes = core.place(new Ajuste(), {",
+            '  name: "ajustes",',
+            '  kind: "database on this device"',
+            "})"
+          ]
+        ],
+        [
+          "borrador se guarda en este dispositivo, para cada pestaña",
+          [
+            "export class Borrador extends Place {}",
+            "export const borrador = core.place(new Borrador(), {",
+            '  name: "borrador",',
+            '  kind: "database on this device",',
+            "  forEachTab: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 placesEs.addRule(SavedInTheCloud, {
   syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?",
@@ -306,7 +340,7 @@ placesEs.addRule(FieldCalled, {
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })
-placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave es el secreto {name:text}, si la hay" })
+placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
 placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
@@ -779,6 +813,18 @@ placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? 
 placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })
 placesEs.addRule(ShowThemPaged, { syntax: "mostrarlos en (páginas|paginas)" })
 placesEs.addRule(ShowThemAll, { syntax: "mostrarlos todos" })
+placesEs.addRule(ShowThemAtATime, {
+  syntax: "mostrarlos de {size:number} en {same:number}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["mostrarlos de 12 en 12", 'core.readRider("pageSize", () => 12)'],
+        { title: "the same number, twice", input: "mostrarlos de 12 en 10", js: undefined }
+      ]
+    }
+  ]
+})
 placesEs.addRule(ShowThemIn, { syntax: "mostrarlos en :? {statement_body}?" })
 placesEs.addRule(ShowItAllIn, { syntax: "mostrar todo en :? {statement_body}?" })
 placesEs.addRule(IfThatFails, { syntax: "si falla :? {statement_body}?" })
@@ -824,6 +870,33 @@ placesEs.addRule(EveryThingMatching, {
         scope.variables?.add("búsqueda")
       },
       tests: [["cada obra que coincide con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })']]
+    }
+  ]
+})
+placesEs.addRule(EveryThingMatching, {
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} que (coinciden|coincidan) con {words:expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'museo met es un servidor web en "https://collectionapi.metmuseum.org"',
+            '\t- busca en todo con "q"',
+            "una obra es una cosa",
+            "\t- vive en museo met"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("búsqueda")
+      },
+      tests: [
+        [
+          "todas las obras que coinciden con búsqueda",
+          'await core.savedThings(Obra, { search: { "*": búsqueda } })'
+        ],
+        ["las obras que coinciden con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })']
+      ]
     }
   ]
 })

@@ -896,7 +896,7 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
     const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell, description } = await ingest.add(ASK)
-    expect(spell).toContain(`- its key is the secret "GH_KEY", if it's set`)
+    expect(spell).toContain(`- its optional key is the secret "GH_KEY"`)
     expect(spell).toContain(`- its next page is in its "Link" header`)
     expect(spell).toContain(`a "user" is a thing:`)
     expect(spell).toContain(`- a user's id is its "login"`)
