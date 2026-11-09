@@ -757,8 +757,9 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, Ow
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since Owen looked, or a warning;  an item Claude answered with options, waiting for Owen's pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing Owen |
-| violet | Claude's voice                           | his reply cards;  the bedtime label                                    |
-| ivory  | Owen's voice                             | his note box, marked note, reply cards, the answer card                |
+| violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
+| terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
+| ivory  | the page's warm ground               | the toolbar, the rail, a comment thread's ground                       |
 | light orange | what he asked for is finished, his turn to see it | `requested` chips (DARK text) |
 | grey   | no longer relevant, inactive, not chosen, nothing to think about | `quiet` chips (a calm call, a limit);  `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 

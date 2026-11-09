@@ -1681,7 +1681,7 @@ In `tools/`:
         "would be cool if color names worked here from our 'standard' color set"):  `VoiceColor`
         (`spell/epic/config/VoiceColor`), the ONE check and drawing, which `EpicConfig` and `ThreadFacts` share;  it
         imports nothing, so plain `node` and the pages' bundle both load it
-    - ivory:  the page's warm ground (the answer card, a marked note, the toolbar, a comment thread)
+    - ivory:  the page's warm ground (the toolbar, the rail, a comment thread)
     - grey:  older
   - And the fill:  grey outline available, dashed pressed but not sent, outline sent, solid done.
   - The table, with examples:  [the plan-doc guide](../templates/epics/plan-doc.md), "Colours".
