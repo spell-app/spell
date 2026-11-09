@@ -98,7 +98,7 @@ describe("a thing saved new", () => {
     const place = holding([{ id: "1", height: "172", mass: 77 }])
     const { Character } = program(place)
     await core.savedThings(Character)
-    core.saveThing(new Character({ name: "Han", height: 180, mass: 80 }))
+    await core.saveThing(new Character({ name: "Han", height: 180, mass: 80 }))
     await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
     expect(place.sent[0]!.fields).toMatchObject({ height: "180", mass: 80 })
   })

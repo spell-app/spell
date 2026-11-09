@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { MemoryPlace, Places, type Place } from "spell/places"
+import { MemoryPlace, Places, type ListAnswer, type ListQuery, type Place } from "spell/places"
 
 /** One recipe, and the rows told to whoever shows them. */
 function cookbook(
@@ -44,10 +44,10 @@ describe("PlaceHeal", () => {
   })
 
   test("a heal with no ids reads every page of a paged place", async () => {
-    const pages: Record<string, { rows: { id: string }[]; nextPage?: string }> = {
-      first: { rows: [{ id: "r-1" }], nextPage: "two" },
-      two: { rows: [{ id: "r-2" }], nextPage: "three" },
-      three: { rows: [{ id: "r-3" }] }
+    const pages: Record<string, ListAnswer> = {
+      first: { rows: [{ id: "r-1" }], nextPage: "two", handled: {} },
+      two: { rows: [{ id: "r-2" }], nextPage: "three", handled: {} },
+      three: { rows: [{ id: "r-3" }], handled: {} }
     }
     const { places, told } = cookbook({
       describe: () => new MemoryPlace().describe(),
@@ -58,13 +58,11 @@ describe("PlaceHeal", () => {
   })
 
   test("a heal of a few ids stops reading pages once it has them", async () => {
-    const pages: Record<string, { rows: { id: string }[]; nextPage?: string }> = {
-      first: { rows: [{ id: "r-1" }], nextPage: "two" },
-      two: { rows: [{ id: "r-2" }] }
+    const pages: Record<string, ListAnswer> = {
+      first: { rows: [{ id: "r-1" }], nextPage: "two", handled: {} },
+      two: { rows: [{ id: "r-2" }], handled: {} }
     }
-    const list = vi.fn((_collection: string, query: { page?: { at: string } }) =>
-      Promise.resolve(pages[query.page?.at ?? "first"]!)
-    )
+    const list = vi.fn((_collection: string, query: ListQuery) => Promise.resolve(pages[query.page?.at ?? "first"]!))
     const { places } = cookbook({ describe: () => new MemoryPlace().describe(), list })
     await places.heal.heal({ ...ask, ids: ["r-1"] })
     expect(list).toHaveBeenCalledTimes(1)

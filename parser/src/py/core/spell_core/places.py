@@ -324,7 +324,7 @@ class ProgramPlaces:
         return times if held == EVERY_FIELD else [field for field in times if field in held]
 
     def stamp(self, thing: SpellObject, _home: Home, fields: Sequence[str]) -> Row:
-        """SIDE EFFECT:  `fields` of `thing`, Spell's two times, say now, as ISO text.  Returns them as a row holds them.
+        """SIDE EFFECT:  `fields` of `thing`, Spell's two times, say now, as ISO text.  Returns them.
 
         - No change anybody made:  it isn't sent as one, and `note_change()` hears nothing of it.
         """
