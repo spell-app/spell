@@ -88,6 +88,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Place.signIn` (`PlaceSignIn`):  how a person signs in, for what shows:  core's `showSignIn()`.
     - A session is two weeks at most, a day on a local address:  it ends as `"ended"`, and what's pending stays.
     - `atProtoClientMetadata()`:  the file a program on a real address has to serve;  a local address needs none, and must be `127.0.0.1`.
+      - Spell's cloud answers one for each program, beside its page;  the page says where (`SPELL_ATMOSPHERE.clientFile`).
+      - Anywhere else, it goes at the top of the address, by hand;  missing, a sign-in says which address it couldn't read.
   - [AtProtoPasswordSignIn](AtProtoPasswordSignIn.ts):  a PROGRAM signing in by itself,
     with an app password, no browser (epic `atmosphere` P9).
     - The handle becomes a DID, the DID's document names its host, and the host gives a session (`createSession`).

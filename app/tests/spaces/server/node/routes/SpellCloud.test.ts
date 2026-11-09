@@ -126,6 +126,38 @@ describe("Spell's cloud", () => {
     expect(readFileSync(list, "utf8")).toContain("ana@spell")
   })
 
+  describe("the file a host reads when someone signs in to a program", () => {
+    /** GET `path` with no sign-in, as a host does. */
+    const hostAsks = (path: string) => ask(port, "GET", path, { headers: { host: "cloud.test.example" } })
+
+    test("each program has its own, naming its own page", async () => {
+      const file = "/apps/@spell/examples/FamilyCookbook/oauth-client-metadata.json"
+      const answer = await hostAsks(file)
+      expect(answer.status).toBe(200)
+      expect(JSON.parse(answer.text)).toMatchObject({
+        client_id: `${ADDRESS}${file}`,
+        client_name: "FamilyCookbook",
+        redirect_uris: [`${ADDRESS}/apps/@spell/examples/FamilyCookbook`]
+      })
+    })
+
+    test("none for anyone's own projects", async () => {
+      expect((await hostAsks("/apps/@ana/Secret/oauth-client-metadata.json")).status).toBe(404)
+    })
+
+    test("none on a local address", async () => {
+      const localDir = mkdtempSync(join(tmpdir(), "spell-cloud-local-"))
+      const local = new SpellCloud({ dir: localDir, people, folderFor })
+      await local.listen({ port: 0, backups: "off" })
+      const answer = await ask(local.server.port, "GET", "/apps/@spell/examples/X/oauth-client-metadata.json", {
+        headers: { host: `127.0.0.1:${local.server.port}` }
+      })
+      expect(answer.status).toBe(404)
+      await local.close()
+      rmSync(localDir, { recursive: true, force: true })
+    })
+  })
+
   describe("a program in an org's shared space", () => {
     /** GET `path` as a browser outside;  `cookie`:  signed in. */
     const get = (path: string, cookie = "") =>
@@ -169,6 +201,14 @@ describe("Spell's cloud", () => {
         const file = await get("/spaces/@rs/OrgAdmin/OrgAdmin.api.spell", cookie)
         expect(file.status).toBe(404)
         expect(file.text).toContain("no such file here")
+      }
+    })
+
+    test("the file a host reads:  every name answers, so a stranger learns nothing;  never a private space", async () => {
+      expect((await get("/apps/@rs/OrgAdmin/oauth-client-metadata.json")).status).toBe(200)
+      expect((await get("/apps/@rs/Nothing/oauth-client-metadata.json")).status).toBe(200)
+      for (const path of ["/apps/@rs/__private/Notes", "/apps/@rs/__admin"]) {
+        expect((await get(`${path}/oauth-client-metadata.json`)).status).toBe(404)
       }
     })
 
