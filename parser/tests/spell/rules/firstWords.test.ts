@@ -71,6 +71,5 @@ describe("first-word filing", () => {
     })
     expect(withTable.pass).toBeGreaterThan(1000)
     expect(answers(withTable)).toEqual(answers(without))
-    // every rule's tests, twice:  slower than a test's default time when the whole folder runs at once
-  }, 30_000)
+  })
 })
