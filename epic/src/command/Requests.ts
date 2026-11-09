@@ -4,7 +4,9 @@ import { join } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
 import { localDate, localMinutes } from "spell/util/time"
+import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
+import { PageServer } from "spell/server/page"
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { Transcript } from "spell/epic/config/Transcript"
@@ -110,6 +112,7 @@ export class Requests {
         }
       }
       await Requests.recordMerged(named, merged)
+      if (merged.some(({ commits }) => commits.length)) await Requests.refreshPageServer()
       return EXIT.OK
     }
     if (verb === "home") {
@@ -187,6 +190,7 @@ export class Requests {
       if (phase !== undefined)
         throw new EpicCommandError(`file:  epic file ${epic}#${phaseLabel(phase)} ${id}  (the phase goes after a #)`)
       CLI.out(requestLine(this.file(epic, id, where)))
+      await this.markIssuesRequested(epic, where)
       return EXIT.OK
     }
     if (!id || where !== undefined) throw new EpicCommandError(`file:  ${FILE_USAGE}`)
@@ -205,6 +209,17 @@ export class Requests {
     const { filed, phase } = await this.phaseFiled(epic, ref)
     CLI.out(request ? requestLine(this.file(epic, id, filed, phase)) : `${id}  into ${epic}#${filed}`)
     return EXIT.OK
+  }
+
+  /**
+   * Each issue `where` names (`I234`, `filed as I12 and I13`) marked as filed from the person's own words:
+   * closed by Claude, it turns light orange (`epic requested`, epic `epic-engine` P63).
+   * - best effort:  `where` is free text, so an id the epic doesn't have is ignored
+   */
+  private async markIssuesRequested(epic: string, where: string): Promise<void> {
+    const issues = where.match(ISSUE_IN_WHERE) ?? []
+    for (const issue of issues)
+      await EpicTools.runPlanDoc(["requested", epic, issue.toLowerCase()]).catch(() => undefined)
   }
 
   /**
@@ -513,6 +528,25 @@ export class Requests {
   }
 
   /**
+   * After `epic merge` moved `main`:  the main checkout's page server, when it runs, RESTARTED if the merge changed its
+   * code (`PageServer.ensure()`, which restarts one older than its code;  epic `epic-engine` I219).
+   * - Owen, 2026-11-04:  "So why aren't you restarting the page server when you merge to main?" -- a merge of a new
+   *   review mark (`hold`) left the running server refusing it, till a restart by hand
+   * - one that isn't running stays stopped;  says so in one line when it restarted
+   * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
+   */
+  static async refreshPageServer(cwd = process.cwd()): Promise<void> {
+    try {
+      const main = Git.mainRoot(cwd)
+      if (!(await new SRV.PidFile(main).status())) return
+      const server = await PageServer.ensure(main)
+      if (server.launched) CLI.out(`page server restarted with the merged code:  ${server.base}`)
+    } catch (error) {
+      CLI.out(`page server:  not restarted (${error instanceof Error ? error.message : String(error)})`)
+    }
+  }
+
+  /**
    * The commits `epic merge` just brought onto `main`, onto the epic's page (epic `epic-engine` I135):
    * each one whose subject names the epic or its ids (`PlanCommits.parseCommitSubject()`), under its phases and
    * items.
@@ -655,6 +689,9 @@ export type RecordMergedOptions = { cwd?: string; record?: (argv: string[], root
 const VERBS = "send, requests, file, home or merge"
 
 /** How `file` is called, for its errors. */
+/** An issue's id in `epic file`'s "where it went":  `I234`. */
+const ISSUE_IN_WHERE = /\bI\d+\b/g
+
 const FILE_USAGE = 'epic file <epic>#P3 <request id>  |  epic file <epic> <request id> "where it went"'
 
 /** A content block of a prompt, as a transcript holds it:  text, an image ... */

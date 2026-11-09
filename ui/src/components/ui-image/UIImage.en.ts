@@ -10,6 +10,7 @@
  *   See `UIImage.css`.
  * - `src`, `alt`, `width`, `height`, `loading` pass straight through to the shadow `<img>`.
  * - `zoom` opens it full size, in the page's `<ui-zoom>` (epic `ui-gaps` P14).
+ * - `aspect-ratio` gives it a shape, and `crop` fills that shape (epic `language` I18).
  * - NOT the generic content part `<ui-image>` of cards / items (`plan.md`):  those land with their owners.
  */
 
@@ -53,6 +54,16 @@ export const imageVocabulary = {
         "The look, several words at once:  `bordered` (a hairline border, for images with white edges), " +
         "`circular` (cropped to a circle;  a pill when not square), `rounded` (softly rounded corners).  " +
         "Old names:  `bordered`, `circular`, `rounded` written alone."
+    },
+    {
+      name: "background",
+      group: "appearance",
+      kind: "valueAndKey",
+      values: "hues",
+      description:
+        'A hue behind the picture, drawn soft (its light tint), with room round the picture:  `background="yellow"`.  ' +
+        "With `circular` it's a circle.  A transparent drawing on a coloured disc, so it has no hairline round it:  " +
+        "the theme's hairline is for photos with white edges, which `bordered` names."
     },
     {
       name: "align",
@@ -125,6 +136,25 @@ export const imageVocabulary = {
       description: "Intrinsic height in px, as the native `<img height>`:  reserves space before load."
     },
     {
+      name: "aspect-ratio",
+      group: "appearance",
+      kind: "string",
+      description:
+        "Its shape, width to height:  `2:3` (a book's cover), `16:9`, `1` (a square);  `2/3` too.  The whole " +
+        "picture shows inside that shape, unless `crop`.  So a row of cards lines up, whatever shape each picture is."
+    },
+    {
+      name: "crop",
+      group: "appearance",
+      kind: "keyOrValueAndKey",
+      key: "cropped",
+      values: "attachments",
+      description:
+        "Fills its shape (`aspect-ratio`, or its `size` and `height`), cutting off what doesn't fit, rather than " +
+        'showing the whole picture.  `crop` alone keeps the middle;  `crop="top"` keeps the top (a face), ' +
+        "`bottom`, `left`, `right`, `top left` ..."
+    },
+    {
       name: "loading",
       group: "states",
       kind: "enum",
@@ -155,7 +185,10 @@ export const imageVocabulary = {
     { name: "image", description: "The image box:  the `<img>`, or the `<a>` with `link`." },
     { name: "img", description: "With `link`:  the `<img>` inside the link." }
   ],
-  states: [{ name: "disabled", description: "Faded:  shown as unavailable." }],
+  states: [
+    { name: "disabled", description: "Faded:  shown as unavailable." },
+    { name: "shaped", description: "`aspect-ratio` gives it a shape." }
+  ],
   texts: [
     { key: "zoom", text: "{alt}:  show full size", description: "With `zoom`:  the image's name, as a button." },
     { key: "zoomUntitled", text: "Show the image full size", description: "With `zoom`, and no `alt`:  its name." }

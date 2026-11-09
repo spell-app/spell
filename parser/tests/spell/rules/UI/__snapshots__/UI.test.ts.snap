@@ -4,9 +4,13 @@ exports[`testing spell module UI > rule group specs > match snapshot -- if this 
 {
   "alert": "message|okButton?",
   "confirm": "message|okButton?|cancelButton?",
+  "load_sound": "sound",
   "notify": "kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
+  "play_sound": "sound",
   "print": "operator?|expressions",
   "prompt": "message|defaultValue?",
+  "show_dates_as": "style",
+  "stop_sound": "sound",
   "warn": "message|okButton?",
 }
 `;

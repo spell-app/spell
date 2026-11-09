@@ -18,6 +18,8 @@ import {
   trackProjectRoot,
   type ProjectRootState
 } from "spell/app/app/solid"
+import { siteEditorUrlFor } from "./pages.types"
+import { EmptyCard, TileCard } from "./TileCard"
 
 import "./ProjectChooser.css"
 
@@ -28,14 +30,14 @@ import "./ProjectChooser.css"
  *   then a grid of cards per group, each card a project's title and the first phrase of its description.
  * - No empty columns:  a group with nothing in it says so in one quiet card;  "create" buttons sit in their
  *   group's header.
- * - In dev, also the test fixtures (`@spell/test`) -- open one to look at it, edit it, then
+ * - In dev, also the editor's own pieces (`@spell/editor`, epic `editor` P22) and the test fixtures (`@spell/test`) -- open one to look at it, edit it, then
  *   `spell content check --bless`.  No "create" for those:  copy a project into `spaces/@spell/test/`.
  * - A guide opens in the editor, as an example does:  its prose is the comments in its spell file (epic `debut` Q18).
  * - Every route the others don't take (`routes.tsx`).
  * - Its look follows the editor's theme:  the hero and cards are tokens (`ProjectChooser.css`).
  ****************/
 export function ProjectChooser() {
-  const { projects, examples, guides, notebooks, fixtures } = SPACES.SpellProjectRoot
+  const { projects, examples, guides, notebooks, fixtures, editorPieces } = SPACES.SpellProjectRoot
   // a dev-only root is there in every build -- just not listed outside dev
   const showFixtures = !!import.meta.env?.DEV || !fixtures.devOnly
   const exampleList = trackProjectRoot(() => examples)
@@ -73,6 +75,9 @@ export function ProjectChooser() {
         />
         <Show when={showFixtures}>
           <ProjectCards id="fixtures" projectRoot={fixtures} line={appTexts.text("homeFixturesLine")} small />
+        </Show>
+        <Show when={!!import.meta.env?.DEV || !editorPieces.devOnly}>
+          <ProjectCards id="editor" projectRoot={editorPieces} line={appTexts.text("homeEditorLine")} small />
         </Show>
       </div>
     </SpellPage>
@@ -193,17 +198,7 @@ const SOLITAIRE = "@spell/examples/Solitaire"
 
 /** One way to start:  a card like a project's. */
 function StartCard(props: { name: string; line: string; start: () => void }) {
-  return (
-    <button type="button" class="card" onClick={() => props.start()}>
-      <span class="tile" style={{ "--ProjectCards-hue": hueFor(props.name) }} aria-hidden="true">
-        {props.name.charAt(0)}
-      </span>
-      <span class="text">
-        <span class="title">{props.name}</span>
-        <span class="description">{props.line}</span>
-      </span>
-    </button>
-  )
+  return <TileCard title={props.name} line={props.line} hueFrom={props.name} onClick={() => props.start()} />
 }
 
 /****************
@@ -215,13 +210,14 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
  *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
  ****************/
-function ProjectCards(props: ProjectCardsProps) {
+export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
+  const listed = () => root().projects.filter((project) => !props.sitesOnly || project.isSite)
   return (
     <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
       <header>
         <h2>
-          {root().words.title}. <span class="line">{props.line}</span>
+          {props.heading ?? root().words.title}. <span class="line">{props.line}</span>
         </h2>
         {props.create}
       </header>
@@ -229,24 +225,26 @@ function ProjectCards(props: ProjectCardsProps) {
         <Show
           when={root().loaded}
           fallback={
-            <div class="card empty">
+            <EmptyCard>
               {root().failed ? appTexts.text("couldNotLoadGroup", root().words) : appTexts.text("loadingGroup")}
-            </div>
+            </EmptyCard>
           }
         >
           <For
-            each={root().projects.filter((project) => !project.language)}
-            fallback={<div class="card empty">{props.empty ?? appTexts.text("nothingInGroup", root().words)}</div>}
+            each={listed().filter((project) => !project.language)}
+            fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
           >
-            {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
+            {(project) => <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />}
           </For>
           {/* those written in another language:  after the rest, under a quiet line naming it */}
-          <For each={languagesIn(root().projects)}>
+          <For each={languagesIn(listed())}>
             {(language) => (
               <>
                 <h3 class="language">{languageTitle(language)}</h3>
-                <For each={root().projects.filter((project) => project.language === language)}>
-                  {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
+                <For each={listed().filter((project) => project.language === language)}>
+                  {(project) => (
+                    <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />
+                  )}
                 </For>
               </>
             )}
@@ -258,27 +256,24 @@ function ProjectCards(props: ProjectCardsProps) {
 }
 
 /** One project's card:  its tile, its title, the first phrase of its description;  a click opens it. */
-function ProjectCard(props: { project: ProjectRootState["projects"][number]; useRunner?: boolean }) {
+function ProjectCard(props: {
+  project: ProjectRootState["projects"][number]
+  useRunner?: boolean
+  sitesOnly?: boolean
+}) {
   const project = () => props.project
   return (
-    <a
-      class="card"
-      href={project().path}
+    <TileCard
+      title={project().name}
+      line={firstPhrase(project().description)}
+      hueFrom={project().path}
+      href={props.sitesOnly ? siteEditorUrlFor(project().path) : project().path}
       onClick={(event) => {
         event.preventDefault()
-        openProject(project().path, props.useRunner)
+        if (props.sitesOnly) editor.showSiteEditor(project().path)
+        else openProject(project().path, props.useRunner)
       }}
-    >
-      <span class="tile" style={{ "--ProjectCards-hue": hueFor(project().path) }} aria-hidden="true">
-        {project().name.charAt(0)}
-      </span>
-      <span class="text">
-        <span class="title">{project().name}</span>
-        <Show when={firstPhrase(project().description)}>
-          <span class="description">{firstPhrase(project().description)}</span>
-        </Show>
-      </span>
-    </a>
+    />
   )
 }
 
@@ -293,11 +288,13 @@ function languageTitle(language: string): string {
 }
 
 /** Props for `<ProjectCards>`. */
-type ProjectCardsProps = {
+export type ProjectCardsProps = {
   /** The section's id:  a link target (`#examples`). */
   id: string
   /** The group whose projects to show. */
   projectRoot: SPACES.SpellProjectRoot
+  /** Its title, in place of its group's own (the group's word for what it holds). */
+  heading?: string
   /** The quiet line after its title. */
   line: string
   /** Its "create" button, in its header. */
@@ -308,6 +305,8 @@ type ProjectCardsProps = {
   useRunner?: boolean
   /** Smaller cards, e.g. the test fixtures. */
   small?: boolean
+  /** Only its projects that hold a site, each opening in the site editor (`<SiteGroupPage>`). */
+  sitesOnly?: boolean
 }
 
 /**
@@ -316,13 +315,6 @@ type ProjectCardsProps = {
  */
 function firstPhrase(description: string | undefined): string | undefined {
   return description?.split(/[:;]\s|\.\s/)[0]?.trim() || undefined
-}
-
-/** A hue for a project's tile, the same every time:  from its address. */
-function hueFor(path: string): string {
-  let hash = 0
-  for (const char of path) hash = (hash * 31 + char.charCodeAt(0)) % 360
-  return `${hash}`
 }
 
 /****************

@@ -1,0 +1,35 @@
+<!doctype html>
+<!--
+  A program on Spell's server, the cloud (epic `atmosphere` P8, `SpellCloud`):  served at `/apps/<project>`.
+  - Its `<spell-viewer>` names the project from the page's own address,
+    so this file is the same for every program.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spell</title>
+    <script type="module" src="/element/spell-viewer.js"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+      }
+      spell-viewer {
+        display: block;
+        min-height: 90vh;
+      }
+    </style>
+  </head>
+  <body>
+    <spell-viewer></spell-viewer>
+    <script type="module">
+      const project = decodeURIComponent(location.pathname.replace(/^\/apps\//, "").replace(/\/+$/, ""))
+      document.title = project.slice(project.lastIndexOf("/") + 1)
+      document.querySelector("spell-viewer").setAttribute("project", project)
+    </script>
+  </body>
+</html>

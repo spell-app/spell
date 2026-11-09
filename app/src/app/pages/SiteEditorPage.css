@@ -1,0 +1,211 @@
+/*
+ * Look of the site editor, `<SiteEditorPage>` (`SiteEditorPage.tsx`, epic `mockup` P4):  the pages' tree, the board
+ * of cards and the picked part's form, side by side under the top bar, each on the editor's pane look.
+ */
+
+/* Spell UI's breakpoints (`@custom-media`), inlined at build time */
+@import "spell/ui/styles/media.css";
+.SiteEditorPage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr minmax(260px, 320px);
+  gap: 14px;
+  padding: 14px;
+  color: var(--ui-text-color);
+
+  > aside,
+  > main {
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: var(--spell-pane-radius, var(--ui-radius-l, 12px));
+    background: var(--spell-pane-background);
+    border: 1px solid var(--spell-pane-border-color);
+    box-shadow: var(--spell-pane-shadow);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  h1,
+  h2 {
+    margin: 0;
+    font-family: var(--ui-font-family-heading);
+    font-weight: var(--ui-font-weight-bold);
+  }
+  h1 {
+    font-size: 20px;
+  }
+  h2 {
+    font-size: 15px;
+  }
+
+  /* the board's title, with the way back to the group's sites */
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  /* what the board scrolls in, both ways, wider than the pane or not (`<SiteBoardView>`) */
+  .cards {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* where a dragged part would land:  a line above the row;  a line below it and its pages;  or the row lit up, inside it */
+  ui-tree-item[data-drop="before"]::part(row) {
+    box-shadow: inset 0 2px 0 var(--ui-primary-color, var(--ui-focus-color));
+  }
+  ui-tree-item[data-drop="after"] {
+    position: relative;
+    &::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 2px;
+      background: var(--ui-primary-color, var(--ui-focus-color));
+      pointer-events: none;
+    }
+  }
+  ui-tree-item[data-drop="into"]::part(row) {
+    background: color-mix(in oklab, var(--ui-primary-color, var(--ui-focus-color)) 22%, transparent);
+    box-shadow: inset 0 0 0 2px var(--ui-primary-color, var(--ui-focus-color));
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .quiet {
+    margin: 0;
+    color: var(--ui-text-muted);
+  }
+
+  /* a page's stories, under its form (P6):  a row each, its box, its words and details, its buttons */
+  .SitePageStories {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--spell-pane-border-color);
+
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: var(--ui-font-weight-bold);
+    }
+    ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    li {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: start;
+      gap: 6px;
+    }
+    li > input[type="checkbox"] {
+      margin-top: 7px;
+    }
+    .words {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    textarea {
+      field-sizing: content;
+      resize: none;
+      min-height: 0;
+      width: 100%;
+      padding: 4px 6px;
+      font: inherit;
+      color: inherit;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--ui-radius-s, 4px);
+    }
+    textarea:hover,
+    textarea:focus {
+      border-color: var(--spell-pane-border-color);
+      background: var(--ui-background-color);
+    }
+    textarea.details {
+      font-size: 12px;
+      color: var(--ui-text-muted);
+    }
+    /* an empty details field shows only on the story being pointed at or typed in:  not a hint under every story */
+    li:not(:hover, :focus-within) textarea.details:placeholder-shown {
+      display: none;
+    }
+    /* a story done:  its words struck, quiet */
+    li.done textarea.text {
+      text-decoration: line-through;
+      color: var(--ui-text-muted);
+    }
+    .actions {
+      flex-wrap: nowrap;
+      gap: 2px;
+    }
+    .add {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
+}
+
+/* a project that isn't a site:  what it says, where the page would be */
+.SiteEditorPage-empty {
+  margin: 28px;
+  color: var(--ui-text-muted);
+}
+
+/* a middling window:  the form under the board, so the board keeps room for its cards */
+@media (width <= 1200px) {
+  .SiteEditorPage {
+    grid-template-columns: minmax(200px, 260px) 1fr;
+    grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+
+    > .pages {
+      grid-row: 1 / span 2;
+    }
+  }
+}
+
+/* a phone:  one column, the board first, the page scrolling as a whole */
+@media (--ui-mobile) {
+  .SiteEditorPage {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+
+    > aside,
+    > main {
+      flex: none;
+      overflow: visible;
+    }
+    > main {
+      order: -1;
+    }
+    .cards {
+      flex: none;
+      overflow-y: visible;
+    }
+  }
+}

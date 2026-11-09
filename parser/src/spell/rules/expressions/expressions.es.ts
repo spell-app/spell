@@ -13,7 +13,12 @@ import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
+import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
+import { Joined } from "./Joined"
+import { Now } from "./Now"
+import { AsADate } from "./AsADate"
+import { TheDate } from "./TheDate"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -38,6 +43,9 @@ import { UnicodeCode } from "./UnicodeCode"
 import { UnicodeExpression } from "./UnicodeExpression"
 import { UnicodeLiteral } from "./UnicodeLiteral"
 import { UnicodeOffset } from "./UnicodeOffset"
+import { UnitWords } from "./UnitWords"
+import { MeasureLiteral } from "./MeasureLiteral"
+import { MeasureIn } from "./MeasureIn"
 
 /** Spanish's `expressions` rules. */
 export const expressionsEs = new SpellParser({ module: "expressions" })
@@ -515,6 +523,70 @@ expressionsEs.addRule(AsUppercase, {
   ]
 })
 
+// Unir en texto:  `&` tal cual, `&&` con un espacio
+expressionsEs.addRule(Wording.specialize({ ruleName: "join_mark", meanings: ["spaced"] }), {
+  syntax: "((spaced:&&)|&)"
+})
+expressionsEs.addRule(Joined, {
+  syntax: "{operator:join_mark} {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("precio")
+      },
+      tests: [['"Total:" && precio', 'core.joined("Total:", precio, " ")']]
+    }
+  ]
+})
+
+// Hoy, como lo dice HyperTalk:  `la fecha`, `la hora larga`
+expressionsEs.addRule(Wording.specialize({ ruleName: "date_form", meanings: ["short", "long", "abbreviated"] }), {
+  syntax: "((short:corta)|(long:larga)|(abbreviated:abreviada))"
+})
+expressionsEs.addRule(Wording.specialize({ ruleName: "date_or_time", meanings: ["date", "time", "timestamp"] }), {
+  syntax: "((date:fecha)|(time:hora)|(timestamp:marca de tiempo))"
+})
+expressionsEs.addRule(TheDate, {
+  syntax: "la {what:date_or_time} {form:date_form}?",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["la fecha", "core.shortDate(core.now())"],
+        ["la hora larga", "core.longTime(core.now())"]
+      ]
+    }
+  ]
+})
+// Una fecha dicha de un modo:  `su hora como fecha corta`
+expressionsEs.addRule(
+  Wording.specialize({
+    ruleName: "date_style",
+    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "timestamp"]
+  }),
+  {
+    syntax:
+      "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
+  }
+)
+expressionsEs.addRule(AsADate, {
+  syntax: "como (una|un)? {style:date_style}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "due", datatype: "date" })
+      },
+      tests: [["due como fecha corta", 'core.dateAs(due, "short")']]
+    }
+  ]
+})
+expressionsEs.addRule(Now, {
+  syntax: "ahora",
+  tests: [{ compileAs: "expression", tests: [["ahora", "core.now()"]] }]
+})
+
 expressionsEs.addRule(WithCommas, {
   syntax: "con comas",
   tests: [{ compileAs: "expression", tests: [["1000 con comas", "core.withCommas(1000)"]] }]
@@ -527,6 +599,19 @@ expressionsEs.addRule(AsLowercase, {
       tests: [
         [`"foo" en minúsculas`, '"foo".toLocaleLowerCase()'],
         [`1 como minusculas`, `core.lowerCase(1)`]
+      ]
+    }
+  ]
+})
+// "con mayúsculas iniciales":  each word's first letter a capital
+expressionsEs.addRule(AsTitleCase, {
+  syntax: "(con|en) (mayúsculas|mayusculas) iniciales",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`"as de picas" con mayúsculas iniciales`, 'core.titleCase("as de picas")'],
+        [`1 en mayusculas iniciales`, `core.titleCase(1)`]
       ]
     }
   ]
@@ -625,4 +710,21 @@ expressionsEs.addRule(UnicodeExpression, {
       ]
     }
   ]
+})
+
+////////////////
+// ## Measures:  numbers with units (epic `language` P23) -- their tests:  `tests/spell/Dimensions.test.ts`
+////////////////
+
+// one unit of a dimension the scope knows, by its name, an `aka` or a plural:  `cm`, `feet`, `°F`
+expressionsEs.addRule(UnitWords)
+
+// a measure as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`
+expressionsEs.addRule(MeasureLiteral, {
+  syntax: "{number} {unit:unit_words}"
+})
+
+// a measure in other units:  `its height in feet`, `su altura en pies y pulgadas`
+expressionsEs.addRule(MeasureIn, {
+  syntax: "en [units:{unit:unit_words} (,|y)]"
 })

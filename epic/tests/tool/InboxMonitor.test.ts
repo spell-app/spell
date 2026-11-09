@@ -9,10 +9,11 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, beforeEach, expect, test } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import type { RunningSession } from "spell/epic/command/command.types"
 import { Sessions } from "spell/epic/command/Sessions"
 import { InboxMonitor } from "spell/epic/tool/InboxMonitor"
-import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -82,8 +83,8 @@ test("check:  another session listening hears it;  this one watches nothing unti
   })
   const check = monitor().check({ ...MONITOR, now })
   expect(check).toMatchObject({ waiting: false, watch: [] })
-  expect(check.recheckMs).toBeGreaterThan(LISTEN_STALE_MS)
-  expect(check.recheckMs).toBeLessThan(LISTEN_STALE_MS + 5_000)
+  expect(check.recheckMs).toBeGreaterThan(SRV.Heartbeat.STALE_MS)
+  expect(check.recheckMs).toBeLessThan(SRV.Heartbeat.STALE_MS + 5_000)
   expect(ReviewInbox.read(inboxFile).listening?.session).toBe("other")
   expect(ReviewInbox.read(inboxFile).hasWork).toBe(true)
 })

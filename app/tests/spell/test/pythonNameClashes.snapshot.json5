@@ -6,6 +6,12 @@
     "where": "@spell/examples/Solitario"
   },
   {
+    "spell": "from",
+    "python": "from_",
+    "kind": "property",
+    "where": "@spell/examples/Inbox"
+  },
+  {
     "spell": "list",
     "python": "list_",
     "kind": "variable",
@@ -28,5 +34,11 @@
     "python": "try_",
     "kind": "method",
     "where": "@spell/guides/how-solitaire-works"
+  },
+  {
+    "spell": "type",
+    "python": "type_",
+    "kind": "variable",
+    "where": "@spell/examples/PokeSpell"
   }
 ]

@@ -1,0 +1,51 @@
+/*
+ * `<ui-site-nav>` (`UISiteNav.tsx`):  a site's side navigation, its pages a `<ui-tree>`.
+ * - Tokens:
+ *   | `--ui-site-nav-padding` | the room around the tree |
+ * - The rows' look is the tree's own (`--ui-tree-*`).
+ */
+@layer ui.components {
+  :host {
+    --_ui-site-nav-padding: var(--ui-site-nav-padding, 0.5em 0);
+    display: block;
+    min-width: 0;
+  }
+
+  nav {
+    padding: var(--_ui-site-nav-padding);
+  }
+
+  /* a row's focus ring is the row's own (the tree's):  without this, our shadow root's reset rings its whole box too */
+  ui-tree-item:focus-visible {
+    outline: none;
+  }
+
+  /* a page's title as a link:  the row's own look, so it reads as the row does */
+  .link {
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* a page's star:  seen while starred, or while the row is under the mouse or focused */
+  .star {
+    opacity: 0;
+  }
+  /* starred:  the star yellow on no fill, as it is at rest */
+  .star[selected]::part(button),
+  .star[selected]::part(button):hover {
+    background: transparent;
+    color: var(--ui-yellow);
+  }
+  .star[selected],
+  ui-tree-item:hover > .star,
+  ui-tree-item:focus-within > .star,
+  ui-tree-item:focus > .star {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .star {
+      opacity: 0.4;
+    }
+  }
+}

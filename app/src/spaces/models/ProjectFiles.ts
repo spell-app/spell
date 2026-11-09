@@ -1,4 +1,5 @@
-import { CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { LoadableFile, getDier, KnownFormat } from "spell/util"
+import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
 import { DRAFTS_URL, type ProjectDraftsJSON, type PublishJSON } from "./drafts"
@@ -11,7 +12,7 @@ import { DRAFTS_URL, type ProjectDraftsJSON, type PublishJSON } from "./drafts"
  * - Asked through `LoadableFile.fetch`, as every file is read:  whoever answers files answers these,
  *   e.g. the editor's static build, which keeps them in the browser (`StaticFiles`).
  * - Each throws (through `getDier()`) with what it was doing, e.g. "renaming file", for the editor to show.
- * - A prompt you cancel returns `undefined`.
+ * - The editor asks for names and "are you sure":  models never show a dialog.
  * - It was `SpellProject`'s, until epic `people-and-orgs` P15.
  */
 export class ProjectFiles {
@@ -33,22 +34,16 @@ export class ProjectFiles {
   /**
    * Create a new file within the project, and return it.
    * - `filePath` is relative to the project, and may or may not start with `/`.
-   * - No `filePath`:  asks for one (`prompt()`), suggesting `newFileName`.
    * - NOTE: in theory this handles nested files.
-   * - throws if the file is already there, or the server says no;  `undefined` if the prompt is cancelled
+   * - throws if the file is already there, or the server says no
    */
   async create(
-    filePath: string | undefined,
+    filePath: string,
     contents: string | undefined,
-    newFileName = "Untitled.spell",
     die?: ReturnType<typeof getDier>
-  ): Promise<SP.AnySpellFile | undefined> {
+  ): Promise<SP.AnySpellFile> {
     const { project } = this
     if (!die) die = getDier(project, "creating file", { projectId: project.projectId, filePath })
-
-    if (!filePath) filePath = prompt("Name for the new file?", newFileName) ?? undefined
-    if (!filePath) return undefined
-    die.params.filePath = filePath
 
     await project.loadOrDie(die)
     if (project.getFile(filePath)) die("File already exists.")
@@ -75,10 +70,9 @@ export class ProjectFiles {
 
   /**
    * Copy an existing file, and return the copy.
-   * - No `newFilePath`:  asks for one (`create()`).
    * - throws if the file isn't there, or the server says no
    */
-  async duplicate(filePath: string, newFilePath: string | undefined): Promise<SP.AnySpellFile | undefined> {
+  async duplicate(filePath: string, newFilePath: string): Promise<SP.AnySpellFile> {
     const { project } = this
     const die = getDier(project, "duplicating file", {
       projectId: project.projectId,
@@ -94,27 +88,19 @@ export class ProjectFiles {
     } catch (e) {
       die("Server error loading file", e)
     }
-    return this.create(newFilePath, contents, file.file, die)
+    return this.create(newFilePath, contents, die)
   }
 
   /**
    * Rename an existing file, keeping its place in the project's file order, and return the renamed file.
-   * - No `newFilePath`:  asks for a new name (`prompt()`);  cancelled or unchanged:  `undefined`.
    * - throws if the file isn't there, the new one is, or the server says no
    */
-  async rename(filePath: string, newFilePath?: string): Promise<SP.AnySpellFile | undefined> {
+  async rename(filePath: string, newFilePath: string): Promise<SP.AnySpellFile> {
     const { project } = this
     const die = getDier(project, "renaming file", { projectId: project.projectId, filePath, newFilePath })
     await project.loadOrDie(die)
     const file = project.getFile(filePath) || die("File not found.")
 
-    if (!newFilePath) {
-      const filename = prompt("New name for the file?", file.file)
-      if (!filename) return undefined
-      newFilePath = SP.SpellLocation.getFileLocation(project.projectId, filename).filePath!
-      if (newFilePath === filePath) return undefined
-      die.params.newFilePath = newFilePath
-    }
     if (project.getFile(newFilePath)) die("New file already exists.")
 
     // Tell the server to rename the file, which returns the updated index.
@@ -129,28 +115,23 @@ export class ProjectFiles {
       die("Server error renaming file", e)
     }
     // Have the file clean itself up in a tick (doing it at once trips whatever is drawing it)
-    setTimeout(() => file.onRemove(), 10)
+    void after(0.01, () => file.onRemove()).catch(console.error)
     // return the new file
     return project.getFile(newFilePath) || die("Server didn't rename file.")
   }
 
   /**
    * Delete a file from the project.
-   * - `CONFIRM`:  asks first (`confirm()`);  "no" returns `undefined`.
    * - Returns `true` once it's gone.
    * - throws for the project's last file, a file that isn't there, or when the server says no
    */
-  async delete(filePath: string, shouldConfirm?: typeof CONFIRM): Promise<boolean | undefined> {
+  async delete(filePath: string): Promise<boolean> {
     const { project } = this
     const die = getDier(project, "deleting file", { projectId: project.projectId, filePath })
     await project.loadOrDie(die)
     if (project.files.length === 1) die(`You can't delete the last file in this ${project.type}.`)
 
     const file = project.getFile(filePath) || die("File not found.")
-
-    if (shouldConfirm === CONFIRM) {
-      if (!confirm(`Really remove file '${file.file}'?`)) return undefined
-    }
 
     // Tell the server to delete the file, which returns the updated index.
     try {
@@ -168,7 +149,7 @@ export class ProjectFiles {
     if (project.getFile(filePath)) die("Server didn't delete the file.")
 
     // Have the file clean itself up in a tick (doing it at once trips whatever is drawing it)
-    setTimeout(() => file.onRemove(), 10)
+    void after(0.01, () => file.onRemove()).catch(console.error)
 
     return true
   }

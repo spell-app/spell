@@ -56,11 +56,18 @@ export class CreateOneOfAKind extends CreateType {
     return isOneOfAKindType(scopeType) ? match : undefined
   }
 
-  /** SIDE EFFECT:  declares our type, then its one instance, e.g. `solitaire` -- a variable of kind `only`. */
+  /**
+   * SIDE EFFECT:  declares our type, then its one instance, e.g. `solitaire` -- a variable of kind `only`.
+   * - In the PROJECT's scope, not its file's:  every file can say `the hearing of the pokedex` (epic `data` I44).
+   *   - Its other top-level variables stay its own.
+   * - Replacing the one the scan made ahead (`SpellParser.stubDeclaredVariables()`).
+   */
   mutateScope(match: P.MatchFor<this>) {
     super.mutateScope(match)
     const words = `${match.groups.type.value}`
-    match.scope.variables?.add({
+    // a rule's own test has no project:  its scope, then
+    const project = match.getScopeOfType(P.ProjectScope) ?? match.scope
+    project.variables?.replace({
       name: CreateOneOfAKind.variableName(match),
       datatype: match.scope.getType(words)?.name ?? words,
       kind: "only",
@@ -82,10 +89,7 @@ export class CreateOneOfAKind extends CreateType {
 
   /** Name of the one instance's variable:  the line's words, `my_game` for `my game is an app`. */
   static variableName(match: P.Match): string {
-    return `${(match.groups.type as P.Match).raw}`
-      .trim()
-      .toLowerCase()
-      .replace(/[\s-]+/g, "_")
+    return SP.SpellParser.oneOfAKindVariableName(`${(match.groups.type as P.Match).raw}`)
   }
 }
 

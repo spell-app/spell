@@ -46,7 +46,7 @@ If you've grown a grammar for a parser generator, that's the part to notice.
 There, a new phrase is an edit to the grammar file and a rebuild;
 in a regular expression, it's one more alternation nobody can read next month.
 Spell has no grammar file.
-Its grammar is 270 syntax strings on 244 rule classes, and a program adds rules of its own as it's read.
+Its grammar is 271 syntax strings on 245 rule classes, and a program adds rules of its own as it's read.
 
 And it doesn't guess.
 The same line compiles to the same code every time, and a line nothing reads is an error where it stands:
@@ -169,10 +169,10 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | variables | names, of one word or several | 9 | `the start pile` | `startPile` |
 | constants | words that are values | 3 | `red` | `"red"` |
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
-| math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
+| math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `play` and `stop` a sound, styles | 12 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -185,14 +185,14 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | methods | `to ...` actions, animations, quoted aliases | 17 | `to start the game` | `export function startTheGame() {}` |
 | tests | `expect`, `should be`, `echo` | 4 | `its rank should be queen` | `core.expect(it.rank, ...)` |
 
-The weight is in `classes`:  52 of the 244 rule classes, and 95 of the 270 syntaxes, are ways to DECLARE
+The weight is in `classes`:  52 of the 245 rule classes, and 95 of the 271 syntaxes, are ways to DECLARE
 something (a template, a property, an alias, how a thing is saved).
 A language that reads like English spends most of its grammar letting you say what things ARE;
 doing things is the smaller half.
 
 - Nineteen modules are folders of [the rules folder](src/spell/rules/), one rule class per file;
   the base rules sit at the top of it:  a block, a line, a blank line, a line nothing reads.
-- The 244 classes are 227 rules, and 17 base classes that no syntax names.
+- The 245 classes are 228 rules, and 17 base classes that no syntax names.
   There are more syntaxes than rules because a rule with several ways to be written is registered once per way.
 - Every rule, with every syntax and what each target writes for it:
   the generated syntax table, [spellSyntax.json](src/spell/spellSyntax.json), which the Spell Syntax guide draws
@@ -288,6 +288,28 @@ Its first line is how you call it, with each blank's type in brackets:
 | `for card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
 | `move the card to the stock` | `await card.moveToPile(stock)`, inside an action, when moving waits |
 
+- An action's last line is its value, when that line is a value, as in Ruby and Rust:
+  it gives it back with no `return`, in JavaScript, TypeScript and Python alike.
+  A worked-out property's body does the same.
+
+  ```spell
+  a bill is a thing:
+  	- it has an amount as a number
+  	- to double it:
+  		set twice to its amount * 2
+  		twice + 1
+  	- its "doubled" is:
+  		double it
+  ```
+
+  - A value:  an expression (`twice + 1`, `"hey"`) or a call (`double it`).
+    `doubled` gives back what `double it` does.
+  - A last line that's a step stays a step:  `set`, `if`, `for each`, `print`, `return` ...
+  - It works the same in Spanish, and in a spellx `<action>` or `<property>`.
+  - The edge:  an action ending in a call gives back what that call gives,
+    so `to deal` ending `shuffle the deck` gives what shuffling gives.
+  - Not a test's body, and not a drawing's:  a drawing's lines draw.
+    A markup line anywhere else is still an error.
 - An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
   - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spellml` declares
@@ -429,6 +451,7 @@ Its first line is how you call it, with each blank's type in brackets:
 | `return tasks in its tasks where it is active` | `return core.filter(this.tasks, (task) => task.isActive)` |
 | `every task where it is active` | `core.filter(core.everyThing(Task), (task) => task.isActive)` |
 | `every task, sorted by its title` | `core.sortedBy(core.everyThing(Task), (item) => item.title)` |
+| `every message, sorted by its sent, newest first` | `core.sortedBy(core.everyThing(Message), (item) => core.descending(item.sent))` |
 | `move card to tableau` | `core.move(card, tableau)` |
 | `a card belongs to one pile` | `Pile.exclusive = true`, and a `pile` getter on the card |
 
@@ -436,6 +459,48 @@ Its first line is how you call it, with each blank's type in brackets:
   the compiler turns them into the target's own ([README-core](README-core.md#positions-count-from-1)).
 - A project whose project file says `"listsStartAt": 0` counts from 0 instead:  the frozen `lists-from-zero`.
 - `a card belongs to one pile` makes piles exclusive:  adding a card to one takes it out of the last.
+
+### Numbers with units
+
+A property can say what it measures, and Spell converts it.
+The kinds of measure are dimensions, and their units are written in Spell.
+
+```spell
+a person is a thing:
+	- its "height" is a length in cm
+	- its "mass" is a weight in kg
+
+print the person's height in feet and inches
+print 2' 3 1/2" in cm
+```
+
+| Spell | JavaScript |
+| --- | --- |
+| `its height in feet` | `core.convertMeasure(this.height, "Length", "centimeter", "foot")` |
+| `its height in feet and inches` | `core.measureText(this.height, "Length", "centimeter", ["foot", "inch"])` |
+| `5 ft 8 in in cm` | `core.convertMeasure(68, "Length", "inch", "centimeter")` |
+
+- The value stays a plain number in its stored unit, so saved data and places don't change.
+- One unit gives a number;  several give the measure written for people, `5 ft 8 in`.
+- A written measure is a number and its unit, as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, `100 °C`.
+  - `'` and `"` are feet and inches only straight after a number.
+- Six dimensions are built in:  length, weight, temperature, volume, speed, and proportion, a part of a whole.
+  Their units are in the core's `dimensions/dimensions.spell`, and its Spanish twin.
+- A percent is a proportion, kept as its fraction:  `18%` (`18 percent`, Spanish `18 por ciento`) is `0.18`.
+  - So `the bill * the tip` is the tip, with no `/ 100`, as a spreadsheet keeps a percent.
+  - `its "tip" is a percent` declares one (`<property "tip" type="percent">18%</>`);  `its tip in percent` is `18`.
+  - Shown with its % sign the reader's way:  `18%`, Spanish `18 %`;  `<input type="percent">` edits it as `18`.
+- A program declares its own the same way:
+
+  ```spell
+  data size is a dimension:
+  	- its base is "byte", aka "B"
+  	- one "kilobyte", aka "KB", is 1000 B
+  ```
+
+  - Each unit is said in a unit named above it.
+    One that doesn't start at the same place says where it does:  `one "fahrenheit", aka "°F", is 5/9 °C, starting at 32`.
+- A unit of another dimension is an error naming both:  `its height in kg`.
 
 ### Drawing
 
@@ -511,6 +576,25 @@ export class Tableau extends Pile {
 - A thing that moves from one list to another glides there on the page.
 - A viewable list's wrapper may have named places a child can fill,
   `<children name="header"/>`, filled by a child written `<h3 in="header">`.
+- An app says how its widgets look by default in a `<ui-defaults>` block, at a file's top:
+  one sample tag per widget, each attribute a default.
+
+  ```spell
+  <ui-defaults>
+    <ui-button appearance="pill"/>
+    <ui-segment appearance="raised"/>
+  </ui-defaults>
+  ```
+
+  - Every button the app draws is a pill, unless it says otherwise:  `<ui-button appearance="basic">` stays basic.
+  - Any attribute but what a widget shows (`label`, `value`, `text`);
+    a widget, attribute or value Spell UI doesn't have is an error naming what it takes.
+  - A Spanish file writes Spell UI's Spanish words, `<es-boton apariencia="píldora"/>`:
+    it compiles to the English ones, `core.useDefaults("/Tema.es.spell", { "ui-button": { appearance: "pill" } })`.
+  - `<ui-defaults source="@spell/library/theme/ui-defaults.spell"/>` takes another project's file of them,
+    that project in your project file's imports.
+  - The app's element hands them to everything drawn inside it, as `<ui-root defaults>` does;
+    the editor's Inspector says "From ui-defaults" on a value that came from them, naming the file.
 
 ### Events
 
@@ -522,7 +606,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `- when flipped:` | `onFlipped(event) { ... }`:  `when` and `on` say the same |
 | `send flipped to the card with side = 1` | `send(card, "flipped", { side: 1 })` |
 | `send closing`, in a handler | `if ((await send(this, "closing", {}, this)).canceled) return` |
-| `trigger card-click` | `trigger("card-click")`:  to every `on card-click` in the program |
+| `trigger card-click` | `trigger("card-click")`:  to every `on card-click` in the program, the app's and pages' own too |
 
 - `send` goes to ONE thing, and up its chain until a handler takes it:
   - the thing itself
@@ -550,6 +634,9 @@ A thing hears an event when its handler says so, and sends one with `send`:
   - `space is down`, `the escape key is down`, `the up arrow is down` ...
   - `the thing under the mouse`
 - `trigger` and `fire` stay what they were:  to every listener, no chain, nothing to cancel.
+  - The app and each page hear it too, by their own handler:  a page's `<on fizz>` hears `trigger fizz`,
+    with no `on fizz:` at a file's top (FizzBuzz's explainer).
+  - Any other thing doesn't:  `send` an event to it.
   `card click` and `card-click` name the same event, and `with card = 1` hands the listener a property
   ([README-parser](README-parser.md#one-line-six-stages) follows `fire event card click with card = 1` through every
   stage of the parse).
@@ -573,7 +660,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `a card is dropped on it` | the drop | the list | no | the card |
 | `created` | a thing is made | the new thing:  `- when created:` is its creation hook, not an event | no | |
 | one a template declares, `flipped` | `send flipped` | the thing it's sent to, then up its chain | when its name is still happening (`closing`) | what the template says (`side`) |
-| one the program triggers, `card-click` | `trigger card-click` | every `on card-click` | no | its `with` properties |
+| one the program triggers, `card-click` | `trigger card-click` | the app's and every page's own handler, then every `on card-click` | no | its `with` properties |
 
 - The mouse's events come from the browser's own, `click` to `mouseleave`;  the view's element sends each once,
   from the innermost thing, and never for a press in a control inside the view.
@@ -683,6 +770,52 @@ A project, and each file in it, has an ADDRESS:  a group, then the project, then
 - The groups (`@spell/examples`, `@spell/library`, `@spell/test`) are spell-app's spaces',
   which tells Spell where each one's folder is ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)).
 - A project outside every group is `@local/<folders>`:  the card above, compiled in `try/`, was `@local/try/solitaire`.
+
+### Sites:  pages at addresses
+
+A SITE lists a program's pages, each at an address, and the dialogs and sidebars any page can open.
+The pages never name their addresses:  the site does, so a page moves without its file changing.
+
+```spell
+galaxy guide is a site at "owen@spell/galaxy":
+	- it has a films page at "/films", named "Films"
+		- it has a film page at "/films/:film"
+	- it has a settings dialog
+	- it has a person sidebar
+	- it has a not found page
+```
+
+- `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
+- The tag form is `<spell-site>`, a tag per part inside it.
+- Every site lists a not found page and an error page.
+- A line naming a page the site doesn't list, a `:name` the page has no property for, or two pages at one address
+  is refused at its line.
+
+Every move names the page, never its address:
+
+| Spell | What it does |
+| --- | --- |
+| `go to the film page for this film` | shows that page, its address in the URL |
+| `show the film page with this film` | the same, in the words a program shows things with |
+| `show the settings dialog` | opens the dialog;  a sidebar opens the same way |
+| `close the review dialog` | closes it, from a button inside it |
+| `the address of the planet page for planet` | the text for a link |
+
+A page says what it must let people do before it's laid out, first in its own declaration:
+
+```html
+<spell-page "film page">
+	<spell-stories>
+		- [x] read the film's opening crawl
+		- [x] As a fan, I want to see who's in a film, so that I can find their other films
+			- done when:  its people are listed, each a link to their page
+	</>
+```
+
+- Nothing draws the stories:  they're the page's description, kept for good;  code Spell writes `<stories>`.
+- The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spellml).
+- **Not yet:**  Python runs no site, and a page has no state
+  (old, new, mocked, built).
 
 ## The compiler
 
@@ -930,7 +1063,7 @@ A rule's class takes any language's syntax, which is why `addRule()` takes only 
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
 Spanish has all of English's:  `spell translate check` says `Spanish (es):  complete, 19 modules`.
-A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
+A file in Spanish says so in its name, `Carta.es.spellml`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
 ## What lives here, and what doesn't
@@ -972,8 +1105,8 @@ each says its words, and what it reads as in `core` or JavaScript.
 | list | `length`, `size`;  `item (n) of (a list)`;  `items in (a list) where`;  `add (a thing) to (a list)`;  `shuffle (a list)` |
 | app | `start (an app)` |
 | view, viewable list | what a thing or list that draws itself adds |
-| text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case` |
-| date | `year`, and its other parts |
+| text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case`, `as lower case`, `as title case` |
+| date | `year`, `day`, `hour`;  HyperTalk's ways to say it, `short date`, `long date`, `abbreviated date`, `short time`, `long time`, and `timestamp` (also `(a date) as a short date` ...) |
 
 </details>
 
@@ -1058,32 +1191,87 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
+- In a `.spellml` drawing the same loop is one tag:
+  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
-- Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+- Moving the data changes the first line:
+  - `a graphql server at`, `a data folder at`
+  - `a file at`, `a room at`
+  - `a sheet at`, `a google sheet at`
+  - `a spreadsheet at "recipes.xlsx"` reads an Excel workbook, by its ending;
+    `an excel file at` names one whatever its address ends in.
+    Each sheet of it is a collection, named by its tab.
+    A save, through a place server, keeps its other sheets, formulas and column widths,
+    but not its cell colours and fonts.
+  - `an airtable at`, `an atmosphere account at`
+  - `a personal atmosphere account`
+  - `a database on this device`, `an in memory database`
+  - `a data folder at` names a project data folder, three ways:
+    - `"recipes"`:  the program's own
+    - `personal "recipes"`:  one per person
+    - `"owen@spell/recipes"`:  a space's, written by its members
+  - `a sheet at "recipes.csv"`, a CSV file's name alone, is the program's own CSV file, in its project data folder:
+    the server writes it, changing only the lines that change;  any other address is a file that's read only.
+  - `family cookbook is saved in the cloud` is a person's own project data folder on Spell's server:
+    kept in the browser until they sign in, then on every device they sign in on.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
-- Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
-  or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).
-- Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
+- Asking again, for a server that can't say what changed:  `check it every 30 seconds`, or `every 5 minutes`.
+  - `every hour` works too.
+  - Or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock;
+    `at 5am UTC` goes by the server's.
+- Keeping what it reads, so a visit before then asks the server nothing:  `keep a copy on this device`, or `..., up to 20 MB`.
+  - Only a place that says so:  what's kept is fresh until its next check, then shown at once while it's read again.
+  - Past its limit (50 MB unless it says), what was read least recently goes;  `reload the films` asks the server whatever's kept.
+- Reading:  `every recipe`, `all recipes`.
+  - `recipes where it is quick`, `recipes, sorted by title`
+  - `load the recipes`
   - A server that searches says so:  `it searches names with "search"`.
     Then `every recipe where its name includes the search` asks it, `?search=soup`, not every page;  the program still checks what comes back.
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
+  - `the saved recipes` always means the place's, even beside a property of that name.
+  - A filter says what a `where` would, shorter:  `every favourite with the same address and name "blah"`;
+    a place gets it as its query too.
+  - A field holding another thing may be nothing, and the X of nothing is nothing:
+    `the name of its homeworld`, with no homeworld, is nothing, not a throw.
+- What a real server is like, a line each under it, which the ingest writes when it finds it:
+  - a key it can go without:  `its key is the secret "GITHUB_TOKEN", if it's set`
+  - paging by a header:  `its next page is in its "Link" header`
+  - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
+  - no list, only a search:  `books are searched at "/search.json"`;  then `every book` won't compile
+  - a search of everything, at its own address:
+    `it searches everything with "q" at "/v1.1/search"`, read as `every artwork matching the search`
+  - pictures on another server:  `a book's "cover i" is a picture at "https://covers.openlibrary.org/b/id/{id}-M.jpg"`
+  - a list under each thing:  `a post's comments live at "/posts/{id}/comments"`
+  - answers only to a question:  `forecasts are asked for by their latitude and longitude`;
+    a read without both won't compile
+  - its pace:  `it takes up to 80 requests a second`
+  - Lists side by side (one of hours, one per measure) read as one thing per hour, and a map keyed by a code
+    (`"EUR": { ... }`) as a list of things with a code:  neither needs a line.
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
 - A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
   `if that fails:` with lines under it draws them instead.
-- A field finds the server's own spelling by its words:  `its "cook name" is text` reads `cook_name`, `cookName` or `Cook Name`.
+- A field finds the server's own spelling by its words:  `its "cook name" is text`.
+  - It reads `cook_name` or `cookName`.
+  - Even `Cook Name`.
   - Only a name that really differs says so, on its own line:  `its "title" is text, stored as "dish_name"`.
-  - A number written as text reads as one, `"172"`, `"1,200"`, `"1,5"`;  a field the server didn't send is nothing, not 0.
+  - A number written as text reads as one:  `"172"`, `"1,200"`.
+    A field the server didn't send is nothing, not 0.
   - The server's word for none:  `its "servings" is a number or "unknown"`, quiet, and what saving nothing writes back.
   - Rarely needed, as the ingest writes them when it sees it:  `it writes numbers like "1.200,5"`, `it writes names like "cook_name"`.
-- The person using the program, who may not be whoever wrote it:  `they`, `them`, `their name`, `the person`:  `add a new recipe with cook = them`.
+- The person using the program, who may not be whoever wrote it:  `they`, `them`.
+  - Or `their name`, `the person`.
+  - `add a new recipe with cook = them`
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile
   - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
   - a web server can't announce what changed, so it warns until a line says how often to ask
   - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.
+- Removing from the place:  `remove saved favourites with the same address`, or `remove favourites from the favourites where ...`.
+  - Each match leaves its place in one go, one Undo;  refused on a read-only place.
+  - A loop over a read goes round a copy, so removing each one as it goes reaches every match.
+- A new thing with its fields:  `a new card with suit hearts, rank queen`;  `with the suit` takes the suit in reach.
 - A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
 
 ## See also

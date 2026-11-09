@@ -83,6 +83,11 @@
       "types": "./dist-types/src/server/Links.d.ts",
       "default": "./src/server/Links.ts"
     },
+    "./server/Heartbeat": {
+      "spell-source": "./src/server/Heartbeat.ts",
+      "types": "./dist-types/src/server/Heartbeat.d.ts",
+      "default": "./src/server/Heartbeat.ts"
+    },
     "./server/FileLock": {
       "spell-source": "./src/server/FileLock.ts",
       "types": "./dist-types/src/server/FileLock.d.ts",
@@ -123,10 +128,25 @@
       "types": "./dist-types/src/server/kitFolders.d.ts",
       "default": "./src/server/kitFolders.ts"
     },
+    "./util/node/findUp": {
+      "spell-source": "./src/util/node/findUp.ts",
+      "types": "./dist-types/src/util/node/findUp.d.ts",
+      "default": "./src/util/node/findUp.ts"
+    },
     "./util/node/json5": {
       "spell-source": "./src/util/node/json5.ts",
       "types": "./dist-types/src/util/node/json5.d.ts",
       "default": "./src/util/node/json5.ts"
+    },
+    "./util/node/timing": {
+      "spell-source": "./src/util/node/timing.ts",
+      "types": "./dist-types/src/util/node/timing.d.ts",
+      "default": "./src/util/node/timing.ts"
+    },
+    "./util/node/typescript": {
+      "spell-source": "./src/util/node/typescript.ts",
+      "types": "./dist-types/src/util/node/typescript.d.ts",
+      "default": "./src/util/node/typescript.ts"
     },
     "./util": {
       "spell-source": "./src/util/index.ts",
@@ -138,10 +158,10 @@
       "types": "./dist-types/src/util/persist/index.d.ts",
       "default": "./src/util/persist/index.ts"
     },
-    "./util/places": {
-      "spell-source": "./src/util/places/index.ts",
-      "types": "./dist-types/src/util/places/index.d.ts",
-      "default": "./src/util/places/index.ts"
+    "./places": {
+      "spell-source": "./src/places/index.ts",
+      "types": "./dist-types/src/places/index.d.ts",
+      "default": "./src/places/index.ts"
     },
     "./util/reactive": {
       "spell-source": "./src/util/reactive/index.ts",
@@ -167,6 +187,11 @@
       "spell-source": "./src/server/places/index.ts",
       "types": "./dist-types/src/server/places/index.d.ts",
       "default": "./src/server/places/index.ts"
+    },
+    "./server/signIn": {
+      "spell-source": "./src/server/signIn/index.ts",
+      "types": "./dist-types/src/server/signIn/index.d.ts",
+      "default": "./src/server/signIn/index.ts"
     },
     "./server/site": {
       "spell-source": "./src/server/site/index.ts",
@@ -331,6 +356,11 @@
       "spell-source": "./ui/src/components/ui-container/index.ts",
       "types": "./ui/dist-types/src/components/ui-container/index.d.ts",
       "default": "./ui/src/components/ui-container/index.ts"
+    },
+    "./ui/components/ui-dimension": {
+      "spell-source": "./ui/src/components/ui-dimension/index.ts",
+      "types": "./ui/dist-types/src/components/ui-dimension/index.d.ts",
+      "default": "./ui/src/components/ui-dimension/index.ts"
     },
     "./ui/components/ui-dimmer": {
       "spell-source": "./ui/src/components/ui-dimmer/index.ts",
@@ -661,6 +691,16 @@
       "spell-source": "./ui/src/components/ui-toc/index.ts",
       "types": "./ui/dist-types/src/components/ui-toc/index.d.ts",
       "default": "./ui/src/components/ui-toc/index.ts"
+    },
+    "./ui/components/ui-site-nav": {
+      "spell-source": "./ui/src/components/ui-site-nav/index.ts",
+      "types": "./ui/dist-types/src/components/ui-site-nav/index.d.ts",
+      "default": "./ui/src/components/ui-site-nav/index.ts"
+    },
+    "./ui/components/ui-diagram": {
+      "spell-source": "./ui/src/components/ui-diagram/index.ts",
+      "types": "./ui/dist-types/src/components/ui-diagram/index.d.ts",
+      "default": "./ui/src/components/ui-diagram/index.ts"
     },
     "./ui/components/ui-tree-diagram": {
       "spell-source": "./ui/src/components/ui-tree-diagram/index.ts",
@@ -1200,6 +1240,7 @@
       "default": "./app/src/*.ts"
     },
     "./app/spaces/@spell/library/people/people.lib.ts": "./app/spaces/@spell/library/people/people.lib.ts",
+    "./app/spaces/@spell/editor/*": "./app/spaces/@spell/editor/*",
     "./app/vscode/src/spellAppRoot.ts": "./app/vscode/src/spellAppRoot.ts"
   },
   "scripts": {
@@ -1235,6 +1276,7 @@
   },
   "dependencies": {
     "@atproto/oauth-client-browser": "0.5.11",
+    "@atproto/oauth-client-node": "0.5.13",
     "@inkjs/ui": "^2",
     "@solidjs/h": "2.0.0-rc.17",
     "@solidjs/router": "2.0.0-next.41",
@@ -1272,7 +1314,8 @@
     "vscode-css-languageservice": "^6.3.10",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
-    "wrap-ansi": "^9"
+    "wrap-ansi": "^9",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",
@@ -1335,7 +1378,8 @@
     "routes": [
       "src/server/test/recipeServersRoutes.ts",
       "src/server/places/airtableRoutes.ts"
-    ]
+    ],
+    "cacheLimit": "200MB"
   },
   "spell": {
     "commands": "./src/cli/commands.ts"

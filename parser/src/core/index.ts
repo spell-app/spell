@@ -7,7 +7,7 @@
  *   as a top-level side effect when its file first loads -- see `defineCoreModule()` in `core.types.ts`.
  *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `messages`, `tests`,
  *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`, `described`, `acting`, `waiting`,
- *     `abilities`, `sending`,
+ *     `abilities`, `dimensions`, `sending`, `sites`,
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
  *   importing this barrel (or anything that transitively imports `spell/parser/core`) is what triggers the assembly.
@@ -42,6 +42,8 @@ import "./acting"
 import "./waiting"
 import "./saved"
 import "./abilities"
+import "./dimensions"
+import "./sites"
 import { send } from "./sending"
 
 export { core, assert, SpellEvent, Eventful }
@@ -82,6 +84,18 @@ export {
 } from "./saving"
 // A saved entry checked against its class, and the JSON Schema VS Code checks it with (P5):  see `checking.ts`.
 export { checkEntry, jsonSchemaFor, kindOf, type EntryProblem, type CheckOptions, type Kind } from "./checking"
+// A type as a Lexicon, AT Protocol's schema language, and one read back as Spell (epic `atmosphere` P10):  see `lexicon.ts`.
+export {
+  lexiconFor,
+  nsidFor,
+  spellTypeFor,
+  DECIMAL_NOTE,
+  type LexiconDocument,
+  type LexiconField,
+  type LexiconObject,
+  type LexiconRecord,
+  type SpellTypeFromLexicon
+} from "./lexicon"
 export type { ThingsToSearch } from "./references"
 // A program's actions on a page (epic `elemental-spell` P10):  a menu's items, a key pressed -- see `acting.ts`.
 export type { MenuItem, ActionRun, ActionWay, ShortcutKey } from "./acting"

@@ -1,7 +1,12 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
+import { createEffect, untrack } from "solid-js"
+
 import type { E } from "spell/element"
 
+// Import directly:  this file loads before the barrel's values are there (it holds only types for `E`)
+import { Reactive } from "./Reactive"
 import { RichAttributes } from "./RichAttributes"
+import { SpellSolid } from "./SpellSolid"
 // Import directly:  this file loads before the barrel's values are there (it holds only types for `E`)
 import { StaleCatalogError } from "./elements.types"
 
@@ -36,6 +41,7 @@ const HTMLElementOrShim = (globalThis.HTMLElement ?? class {}) as typeof HTMLEle
  *   - a property per attribute (`button.size = "large"`), and writing it back to the attribute ("reflection")
  *   - properties a page set before the tag was defined, kept ("the upgrade step")
  *   - the `ready` promise, custom states, the link to the component, swallowing clicks while disabled
+ *   - the nearest root's defaults for the attributes it doesn't set (see "Root defaults")
  * - Each tag gets its OWN subclass, made by `UIComponent.define()` (`DOMElement.subclassForTag()`):
  *   its `tagSetup` says which attributes it has and how to build its component (see "The tag", at the end).
  *
@@ -93,6 +99,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
       }
       if (this.visibleAttribute) this.attributeValues[VISIBLE] = this.isVisibleInMarkup
       this.captureUpgradeValues(definition)
+      // its tag grew since the platform defined it:  hear the attributes it doesn't ("A tag that grows")
+      if (DOMElement.unobserved(this.constructor as DOMElementClass).length) DOMElement.watchAttributes(this, "replay")
     } else {
       // a tag defined early, its family not loaded yet:  pending until `attach()` ("Defined early")
       EARLY.get(this.constructor as DOMElementClass)?.pending.add(this)
@@ -115,7 +123,9 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
    *   - read the markup's attributes for the family's script API (`<ui-code content="...">`)
    *   - build and render the component
    *   - hand it what the browser reported before it existed
-   * - Every time:  the component's `onConnect()`.
+   * - Every time:
+   *   - the nearest root's defaults, and follow them while connected ("Root defaults")
+   *   - the component's `onConnect()`
    * - NEVER writes default values to attributes:  a bare element grows no attributes, as a native one doesn't.
    */
   connectedCallback() {
@@ -124,6 +134,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     this.settleVisible()
     this.restoreUpgradeValues()
     RichAttributes.replay(this, this.tagSetup?.elementDefinition)
+    this.followRootDefaults()
     const { connectedState } = this
     if (!connectedState.isMounted) {
       connectedState.isMounted = true
@@ -142,6 +153,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
    * - Only `dispose()` ends it.
    */
   disconnectedCallback() {
+    this.stopFollowingRootDefaults()
     this.component?.onDisconnect()
   }
 
@@ -153,6 +165,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     const { connectedState } = this
     if (!connectedState.isMounted) return
     connectedState.isMounted = false
+    this.stopFollowingRootDefaults()
     connectedState.propertyChangedCallbacks.length = 0
     let callback
     while ((callback = connectedState.releaseCallbacks.pop())) callback(this)
@@ -185,6 +198,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     if (!attribute || connectedState.upgradeValues?.has(attribute.property)) return
     if (attribute === visibleAttribute) return this.onVisibleAttributeChanged(text)
     this.setValue(attribute, definition.convert(attribute, text), "attribute")
+    this.markOwnValue(attribute, text !== null)
   }
 
   /**
@@ -233,6 +247,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     const { elementDefinition } = this.tagSetup
     const attribute = elementDefinition.attribute(name)
     this.setValue(attribute, elementDefinition.convert(attribute, value), "property")
+    this.markOwnValue(attribute, value != null)
   }
 
   /**
@@ -375,6 +390,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
       const value = self[attribute.property]
       delete self[attribute.property]
       ;(this.connectedState.upgradeValues ??= new Map()).set(attribute.property, value)
+      if (value != null) (this.connectedState.ownValues ??= new Set()).add(attribute.key)
       this.attributeValues[attribute.key] = definition.convert(attribute, value)
     }
   }
@@ -385,6 +401,100 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     if (!values) return
     this.connectedState.upgradeValues = undefined
     for (const [property, value] of values) (this as unknown as Record<string, unknown>)[property] = value
+  }
+
+  ////////////////
+  // ## Root defaults
+  //
+  // A root can say what an attribute is for every element of a tag inside it, unless the element says
+  // (`<ui-root defaults>`:  every `<ui-button>` a pill;  epic `language` P28):
+  // - the element's OWN value always wins:  its attribute, or a property set in code
+  // - else the nearest root's default:  converted and checked as its attribute's text would be, stored in
+  //   `attributeValues` with source `"default"`, so the component reads and redraws it as any attribute
+  // - never written to the attribute:  the markup stays what the page wrote
+  // - live:  while connected, the element follows the roots' settings (a Solid effect in a root of its own),
+  //   and a removed attribute or a property set back to `undefined` falls back to the default
+  // - `visible` never takes one:  shown or hidden is the page's to say
+  // - the settings that find them are the component set's (`SpellSolidSettings.defaults`):
+  //   this file can't import Spell UI, whose `RootSettings` keeps them
+  ////////////////
+
+  /**
+   * Note whether the element now sets `attribute` itself;  when it stopped, take the root's default again.
+   * - `isOwn`:  its attribute is written, or a property set it to something but `undefined` / `null`.
+   */
+  private markOwnValue(attribute: E.ResolvedAttribute, isOwn: boolean) {
+    const { connectedState } = this
+    if (isOwn) {
+      ;(connectedState.ownValues ??= new Set()).add(attribute.key)
+      connectedState.defaultedValues?.delete(attribute.key)
+      return
+    }
+    if (!connectedState.ownValues?.delete(attribute.key) || !this.isConnected) return
+    const defaults = DOMElement.defaultSettings
+    if (defaults) this.applyRootDefaults(untrack(() => defaults.for(this, this.tagSetup.elementDefinition)))
+  }
+
+  /**
+   * Connect step:  take the nearest root's defaults now, then follow them until the element disconnects.
+   * - Now, untracked:  so the first render already draws them, and an effect that inserted the element tracks nothing.
+   * - Then a Solid effect of its own (`Reactive.ownRoot()`):  safe in a `connectedCallback()` Solid's insertion runs.
+   */
+  private followRootDefaults() {
+    const defaults = DOMElement.defaultSettings
+    const { connectedState } = this
+    const definition = this.tagSetup?.elementDefinition
+    if (!defaults || !definition || connectedState.stopDefaults) return
+    this.applyRootDefaults(untrack(() => defaults.for(this, definition)))
+    connectedState.stopDefaults = Reactive.ownRoot((dispose) => {
+      createEffect(
+        () => defaults.for(this, definition),
+        (found) => {
+          this.applyRootDefaults(found)
+        }
+      )
+      return dispose
+    })
+  }
+
+  /** Stop following the roots' defaults (disconnected, or released);  the values stay as they are. */
+  private stopFollowingRootDefaults() {
+    const { connectedState } = this
+    connectedState.stopDefaults?.()
+    connectedState.stopDefaults = undefined
+  }
+
+  /**
+   * Store each default the element doesn't set itself;  one no root gives any more goes back to its starting value.
+   * - Nothing is stored, and nobody told, where the value is already that.
+   */
+  private applyRootDefaults(found: readonly E.AttributeDefault[]) {
+    const { connectedState } = this
+    const definition = this.tagSetup.elementDefinition
+    const visibleAttribute = this.visibleAttribute
+    const own = connectedState.ownValues
+    const given = new Map<string, E.ResolvedAttribute>()
+    for (const { attribute, value } of found) {
+      if (own?.has(attribute.key) || attribute === visibleAttribute) continue
+      given.set(attribute.key, attribute)
+      this.storeIfChanged(attribute, definition.convert(attribute, value))
+    }
+    for (const [key, attribute] of connectedState.defaultedValues ?? []) {
+      if (given.has(key) || own?.has(key)) continue
+      this.storeIfChanged(attribute, definition.startingValue(attribute))
+    }
+    connectedState.defaultedValues = given.size ? given : undefined
+  }
+
+  /** Store a default's `value` for `attribute` (source `"default"`), unless it's already there. */
+  private storeIfChanged(attribute: E.ResolvedAttribute, value: unknown) {
+    if (Object.is(this.attributeValues[attribute.key], value)) return
+    this.storeValue(attribute, value, "default")
+  }
+
+  /** The component set's defaults (`SpellSolidSettings.defaults`);  `undefined` when it has none, or none are installed. */
+  private static get defaultSettings(): E.DefaultSettings | undefined {
+    return SpellSolid.isInstalled ? SpellSolid.settings.defaults : undefined
   }
 
   ////////////////
@@ -574,6 +684,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
         },
         set(this: DOMElement, value: unknown) {
           this.setValue(attribute, this.tagSetup.elementDefinition.convert(attribute, value), "property")
+          this.markOwnValue(attribute, value != null)
         },
         enumerable: true,
         configurable: true
@@ -698,6 +809,102 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   }
 
   ////////////////
+  // ## A tag that grows
+  //
+  // The platform reads a tag's observed attributes ONCE, as it defines it.
+  // A tag whose definition later gains attributes (hot reload, `HotDefinitions`;  a program edited as it runs, the
+  // app's `SpellElement`) hears the new ones through a `MutationObserver` on each element instead.
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  `Class` takes `next`, a definition with MORE attributes, in place:  its live `elements` keep
+   * everything they had, and gain the new attributes.
+   * - The new attributes' properties go on `Class.prototype` (`defineProperties()`).
+   * - Each element's value of a new attribute:  converted from its attribute, if it has one, else the starting value.
+   * - Each element hears the new attributes (`watchAttributes()`), as one made from now on does.
+   * - NEVER re-renders:  the elements' components stay as they are, and read the new values through their element.
+   * - `elements`:  every element of `Class` still in memory, connected or not.
+   * - throws a `TypeError`, changing nothing, when `next` drops an attribute `Class` has,
+   *   or when a new attribute's property would hide a member of the element (as a first definition would)
+   */
+  static addAttributes(Class: DOMElementClass, next: TagSetup, elements: Iterable<DOMElement>) {
+    const previous = Class.tagSetup.elementDefinition
+    const keys = new Set(next.elementDefinition.attributes.map(({ key }) => key))
+    const dropped = previous.attributes.filter(({ key }) => !keys.has(key)).map(({ attribute }) => attribute)
+    if (dropped.length) {
+      throw new TypeError(`DOMElement.addAttributes():  <${previous.tag}> would lose ${dropped.join(", ")};  only add`)
+    }
+    // dry run on a stand-in:  a clash throws BEFORE anything changed
+    const Probe = class extends (Object.getPrototypeOf(Class) as AnyDOMElementClass) {} as unknown as DOMElementClass
+    Probe.tagSetup = next
+    DOMElement.defineProperties(Probe)
+    DOMElement.observedByPlatform(Class)
+    DOMElement.removeProperties(Class)
+    Class.tagSetup = next
+    DOMElement.defineProperties(Class)
+    const added = next.elementDefinition.attributes.filter(
+      ({ key }) => !previous.attributes.some((it) => it.key === key)
+    )
+    for (const element of elements) {
+      for (const attribute of added) {
+        const text = element.getAttribute(attribute.attribute)
+        element.attributeValues[attribute.key] =
+          text === null
+            ? next.elementDefinition.startingValue(attribute)
+            : next.elementDefinition.convert(attribute, text)
+      }
+      DOMElement.watchAttributes(element)
+    }
+  }
+
+  /**
+   * The attributes the platform observes for `Class`:  fixed when it was defined.
+   * - Recorded the first time a tag grows, before its definition changes:
+   *   `observedAttributes` reads the CURRENT definition, not what the platform took.
+   */
+  static observedByPlatform(Class: DOMElementClass): string[] {
+    let names = PLATFORM_OBSERVED.get(Class)
+    if (!names) PLATFORM_OBSERVED.set(Class, (names = [...Class.observedAttributes]))
+    return names
+  }
+
+  /** The attributes `Class`'s current definition observes and the platform doesn't (`watchAttributes()`). */
+  static unobserved(Class: DOMElementClass): string[] {
+    const platform = PLATFORM_OBSERVED.get(Class)
+    if (!platform || !Class.tagSetup) return []
+    return DOMElement.observedAttributesFor(Class.tagSetup.elementDefinition).filter((name) => !platform.includes(name))
+  }
+
+  /**
+   * Hear the attributes `domElement`'s tag observes now and the platform doesn't (its tag grew), as
+   * DOM API `attributeChangedCallback()` would:  a `MutationObserver` on the element calls it.
+   * - after the platform's reports:  a mutation observer's callback runs in a microtask
+   * - `replay`:  report the ones it has already too (an element made after the tag grew, its markup's attributes)
+   * - none left:  stops listening
+   */
+  static watchAttributes(domElement: DOMElement, replay?: "replay") {
+    const names = DOMElement.unobserved(domElement.constructor as DOMElementClass)
+    ATTRIBUTE_WATCHERS.get(domElement)?.disconnect()
+    ATTRIBUTE_WATCHERS.delete(domElement)
+    if (!names.length) return
+    const watcher = new MutationObserver((records) => {
+      for (const { attributeName, oldValue } of records) {
+        if (attributeName)
+          domElement.attributeChangedCallback(attributeName, oldValue, domElement.getAttribute(attributeName))
+      }
+    })
+    watcher.observe(domElement, { attributes: true, attributeFilter: names, attributeOldValue: true })
+    ATTRIBUTE_WATCHERS.set(domElement, watcher)
+    if (!replay) return
+    queueMicrotask(() => {
+      for (const name of names) {
+        const text = domElement.getAttribute(name)
+        if (text !== null) domElement.attributeChangedCallback(name, null, text)
+      }
+    })
+  }
+
+  ////////////////
   // ## Hot reload
   ////////////////
 
@@ -734,6 +941,12 @@ const READY = "ready"
 
 /** Each class defined early (`defineEarly()`), and its state until its family loads. */
 const EARLY = new WeakMap<DOMElementClass, EarlyState>()
+
+/** The attributes the platform observes, per tag class, as it defined it (`observedByPlatform()`). */
+const PLATFORM_OBSERVED = new WeakMap<DOMElementClass, string[]>()
+
+/** Each element's watcher of the attributes the platform doesn't observe (`watchAttributes()`). */
+const ATTRIBUTE_WATCHERS = new WeakMap<DOMElement, MutationObserver>()
 
 ////////////////
 // ## Types
@@ -792,8 +1005,11 @@ type EarlyState = EarlyTag & {
 /** A change callback (`addPropertyChangedCallback()`):  key, new value, old value, where it came from. */
 export type PropertyChangedCallback = (key: string, value: unknown, old: unknown, source: ValueSource) => void
 
-/** Where an attribute value came from:  its attribute's text, or a property write. */
-export type ValueSource = "attribute" | "property"
+/**
+ * Where an attribute value came from:  its attribute's text, a property write,
+ * or the nearest root's default ("Root defaults").
+ */
+export type ValueSource = "attribute" | "property" | "default"
 
 /** Hot reload's hooks into every DOM element:  `HotDefinitions` installs them, in development only. */
 export type DOMElementHotHooks = {
@@ -828,4 +1044,10 @@ type ConnectedState = {
   hasServerContent?: boolean
   /** form state the browser reported before the component existed */
   earlyForm?: { form?: HTMLFormElement | null; disabled?: boolean }
+  /** the attributes the element sets itself (its attribute, or a property), by key:  no root's default reaches them */
+  ownValues?: Set<string>
+  /** the attributes holding a root's default right now, by key */
+  defaultedValues?: Map<string, E.ResolvedAttribute>
+  /** stops following the roots' defaults ("Root defaults");  set while connected */
+  stopDefaults?: () => void
 }

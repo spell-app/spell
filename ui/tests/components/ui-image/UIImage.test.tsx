@@ -42,6 +42,7 @@ describe("<ui-image> classes", () => {
     ['spacing="md"', "ui spaced image"],
     ['spacing="left"', "ui left spaced image"],
     ['vertical-align="middle"', "ui middle aligned image"],
+    ['background="yellow"', "ui yellow background image"],
     [
       'size="tiny" appearance="circular" floated="left" vertical-align="top"',
       "ui tiny left floated circular top aligned image"
@@ -50,6 +51,27 @@ describe("<ui-image> classes", () => {
     const { root } = await image(`<ui-image src="${SRC}" alt="x" ${attributes}></ui-image>`)
     expect(root.localName).toBe("img")
     expect(root.className).toBe(classes)
+  })
+})
+
+////////////////
+// ## Background
+////////////////
+
+describe("<ui-image background>", () => {
+  it("draws the hue's light tint behind the picture, with room round it", async () => {
+    const { root } = await image(`<ui-image src="${SRC}" alt="" background="yellow"></ui-image>`)
+    const style = getComputedStyle(root)
+    expect([style.backgroundColor === "rgba(0, 0, 0, 0)", Number.parseFloat(style.paddingTop) > 0]).toEqual([
+      false,
+      true
+    ])
+  })
+
+  it("with `circular`, a disc behind the whole picture:  never cropped", async () => {
+    const { root } = await image(`<ui-image src="${SRC}" alt="" appearance="circular" background="yellow"></ui-image>`)
+    const style = getComputedStyle(root)
+    expect([style.borderTopLeftRadius, style.backgroundImage.startsWith("radial-gradient")]).toEqual(["0px", true])
   })
 })
 
@@ -122,6 +144,53 @@ describe("<ui-image> image", () => {
 ////////////////
 // ## `<ui-images>`
 ////////////////
+
+describe("<ui-image aspect-ratio crop>", () => {
+  /** Render `attributes` on a 2x1 picture 120px wide;  its box's size and fit. */
+  async function shaped(attributes: string) {
+    const { host } = await image(`<ui-image src="${SRC}" ${attributes}></ui-image>`)
+    const box = host.shadowRoot!.querySelector<HTMLElement>("[part~=image]")!
+    box.style.width = "120px"
+    const img = host.shadowRoot!.querySelector("img")!
+    const { width, height } = box.getBoundingClientRect()
+    const style = getComputedStyle(img)
+    return [Math.round(width), Math.round(height), style.objectFit, style.objectPosition]
+  }
+
+  it("`aspect-ratio`:  its shape, the whole picture inside it", async () => {
+    expect(await shaped(`aspect-ratio="2:3"`)).toEqual([120, 180, "contain", "50% 50%"])
+    expect(await shaped(`aspect-ratio="1"`)).toEqual([120, 120, "contain", "50% 50%"])
+  })
+
+  it("`crop`:  it fills its shape, keeping the middle, or the part it names (`true`, as a script writes it, too)", async () => {
+    expect(await shaped(`aspect-ratio="2/3" crop`)).toEqual([120, 180, "cover", "50% 50%"])
+    expect(await shaped(`aspect-ratio="16:9" crop="top"`)).toEqual([120, 68, "cover", "50% 0%"])
+    expect(await shaped(`aspect-ratio="1" crop="true"`)).toEqual([120, 120, "cover", "50% 50%"])
+  })
+
+  it("`crop`'s class words, as Fomantic writes a variation", async () => {
+    expect((await image(`<ui-image src="${SRC}" crop="top left"></ui-image>`)).root.className).toBe(
+      "ui top left cropped image"
+    )
+  })
+
+  it("with `link`:  the link takes the shape, its picture fills it", async () => {
+    const { host } = await image(`<ui-image src="${SRC}" link="#a" aspect-ratio="1" crop></ui-image>`)
+    host.shadowRoot!.querySelector<HTMLElement>("a")!.style.width = "100px"
+    const img = host.shadowRoot!.querySelector("img")!
+    const { width, height } = img.getBoundingClientRect()
+    expect([Math.round(width), Math.round(height), getComputedStyle(img).objectFit]).toEqual([100, 100, "cover"])
+  })
+
+  it("neither:  no shape of its own, so its `width` / `height` still reserve its space", async () => {
+    const { host, root } = await image(`<ui-image src="${SRC}" width="200" height="100"></ui-image>`)
+    expect([host.matches(":state(shaped)"), root.className, root.getAttribute("style")]).toEqual([
+      false,
+      "ui image",
+      null
+    ])
+  })
+})
 
 describe("<ui-images>", () => {
   it.each([

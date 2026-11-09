@@ -1,5 +1,6 @@
-import { parseCsv } from "spell/util/places/csv"
-import { googleSheetCsvAddress } from "spell/util/places/places.types"
+import { parseCsv } from "spell/places/csv"
+import { googleSheetCsvAddress } from "spell/places/places.types"
+import { Workbook } from "spell/places/Workbook"
 
 import {
   IngestStopped,
@@ -9,6 +10,7 @@ import {
   type PlaceLook,
   type SearchSeen
 } from "./ingest.types"
+import { listsFoundUnder } from "./ListsUnderLook"
 import { keptHeaders, PoliteReader, type ReadAnswer } from "./PoliteReader"
 
 /** How many collections it reads:  a source with more says so, and `--collections` names the ones wanted. */
@@ -33,7 +35,7 @@ const SEARCH_PARAMS = ["search", "q"]
 const SEARCHED_FIELDS = ["name", "title"]
 
 /** The fields an answer usually says how many there are in. */
-const COUNT_FIELDS = ["count", "total", "total_count", "totalCount"]
+const COUNT_FIELDS = ["count", "total", "total_count", "totalCount", "numFound", "num_found"]
 
 /** A `<...>; rel="next"` in a `Link` header. */
 const NEXT_LINK = /<([^>]+)>\s*;[^,]*\brel="?next"?/
@@ -51,7 +53,7 @@ const VERSION_HEADER = /^(?:x-)?api-version$|^[a-z]+-version$/i
 export const IS_WEB_ADDRESS = /^(?:https?|file):/i
 
 /** What each kind's look needs. */
-type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections"> & {
+type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samples"> & {
   /** Reads it. */
   reader: PoliteReader
   /** Looking again:  `collections`, and whatever else it now lists. */
@@ -92,7 +94,7 @@ export function kindReadFrom(address: string): string | undefined {
   if (/^did:/i.test(address)) return "atmosphere account"
   if (/^app[A-Za-z0-9]{14}$|airtable\.com\//i.test(address)) return "airtable"
   if (/docs\.google\.com\/spreadsheets\//i.test(address)) return "google sheet"
-  if (/\.csv(?:[?#]|$)/i.test(address)) return "sheet"
+  if (/\.csv(?:[?#]|$)/i.test(address) || Workbook.isWorkbookAddress(address)) return "sheet"
   return undefined
 }
 
@@ -115,6 +117,32 @@ export async function kindFoundAt(address: string, reader: PoliteReader, tried: 
     return answer.status < 400 && isJSON(answer.text) ? "web server" : undefined
   } catch {
     return undefined
+  }
+}
+
+/**
+ * Does a collection under `address` answer with JSON?
+ * - The collection:  the first of `collections`, a name in its braces as the first of `samples`.
+ * - What says an address that answers nothing itself (Wikipedia's) is a web server.
+ * - NEVER throws:  no answer tells it nothing.
+ */
+export async function answersUnder(
+  address: string,
+  reader: PoliteReader,
+  collections: readonly string[] | undefined,
+  samples: readonly string[] | undefined
+): Promise<boolean> {
+  const [first] = collections ?? []
+  if (!first || !IS_WEB_ADDRESS.test(address)) return false
+  const { name, at } = wantedAt(first)
+  const [sample] = samplesFor(name, samples)
+  const path = IS_FOUND_BY_NAME.test(at) ? at.replace(IS_FOUND_BY_NAME, encodeURIComponent(sample ?? "")) : at
+  if (IS_FOUND_BY_NAME.test(at) && sample === undefined) return false
+  try {
+    const answer = await reader.read(`${address}${path}`)
+    return answer.status < 400 && isJSON(answer.text)
+  } catch {
+    return false
   }
 }
 
@@ -154,7 +182,14 @@ function jsonOf(text: string): unknown {
  *   document;  an address that's a list itself is its one collection, and the place is the address above it.
  * - A source that does neither:  `--collections` names them, or it stops and says so.
  */
-async function lookAtWebServer({ address, docs, collections, addListed, reader }: LookAsk): Promise<PlaceLook> {
+async function lookAtWebServer({
+  address,
+  docs,
+  collections,
+  samples,
+  addListed,
+  reader
+}: LookAsk): Promise<PlaceLook> {
   const first = await reader.read(address)
   if (!collections?.length) refuseAnswer(address, first)
   const body = jsonOf(first.text)
@@ -190,28 +225,191 @@ async function lookAtWebServer({ address, docs, collections, addListed, reader }
   const read: CollectionLook[] = []
   for (const { name, at } of wanted) {
     try {
-      const look = await readCollection(place, name, at, reader)
-      if (look.rows.length) read.push(look)
+      const look = IS_FOUND_BY_NAME.test(at)
+        ? await readFoundByName(place, name, at, samplesFor(name, samples, at), reader)
+        : searchIn(at)
+          ? await readSearched(place, name, at, reader)
+          : await readCollection(place, name, at, reader)
+      if (look.searchedOnly) {
+        notes.push(
+          `"${name}" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.`
+        )
+      }
+      if (look.movedFrom) {
+        notes.push(
+          `"${name}" answered from ${look.at}, not ${look.movedFrom}:  its line says where it answers, so each read is one request, not two.`
+        )
+      }
+      if (look.isCut) {
+        notes.push(
+          `"${name}" is a list of ${look.rowsItSays ?? "more"} ids, too long to read whole:  a few it read were read by id, each at its own address.`
+        )
+      }
+      // a search's ids:  the list it searches reads them
+      if (look.rows.length || look.ids?.length) read.push(look)
       else notes.push(`"${name}" answered with no rows, so nothing says what it holds:  it's left out.`)
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) notes.push(`Stopped before "${name}":  ${error.message}.`)
       else notes.push(`"${name}" couldn't be read:  ${messageOf(error)}.`)
     }
   }
+  await foldSearchesIntoLists(place, read, notes, reader)
+  // the lists under each thing, as a post's comments:  asked only where one collection's rows name another's
+  const listsUnder = await listsFoundUnder(place, read, reader)
   return {
     address: place,
     collections: read,
-    headers: keptHeaders(first.headers),
+    ...(listsUnder.length && { listsUnder }),
+    // what its lists answered with too:  an address that's a page for people (Open Library's) says nothing of pages
+    headers: { ...read[0]?.headers, ...keptHeaders(first.headers) },
     ...(found.text !== undefined && { docs: found.text, docsAt: found.at! }),
     ...(version && { version }),
     notes
   }
 }
 
-/** A name from `--collections`:  `recipes`, or a path, `/v1/recipes`. */
-function wantedAt(name: string): { name: string; at: string } {
-  const at = `/${name.replace(/^\/+/, "")}`
-  return { name: at.slice(at.lastIndexOf("/") + 1), at }
+/**
+ * A name from `--collections`:
+ * `recipes`, a path, `/v1/recipes`, or a name and a path, `wiki pages=/page/summary/{name}`.
+ * - A path with a name in braces, and no name of its own, is named for what's before them:
+ *   `/page/summary/{name}` => `summary`.
+ */
+function wantedAt(given: string): { name: string; at: string } {
+  // at the first `=` only:  a search's path has one of its own, `books=/search.json?q=dune`
+  const cut = given.indexOf("=")
+  const isNamed = cut >= 0 && !given.slice(0, cut).includes("?")
+  const [named, path] = isNamed ? [given.slice(0, cut), given.slice(cut + 1)] : [undefined, given]
+  const at = `/${path.trim().replace(/^\/+/, "")}`
+  const listed = at
+    .replace(/\/\{[^{}]*\}.*$/, "")
+    .replace(/[?#].*$/, "")
+    .replace(/\.json$/, "")
+  return { name: named?.trim() || listed.slice(listed.lastIndexOf("/") + 1), at }
+}
+
+/**
+ * The names `--samples` gives the collection `name`:  each plain one, and each named for it, `authors=OL79034A`.
+ * - So two collections found by name each read by their own:  Open Library's author and edition ids look alike.
+ * - Named by its address instead, `/authors/{name}.json=OL79034A`:  how looking again names them.
+ */
+function samplesFor(name: string, samples: readonly string[] | undefined, at?: string): string[] {
+  return (samples ?? []).flatMap((sample) => {
+    const cut = sample.indexOf("=")
+    if (cut < 0) return [sample]
+    const named = sample.slice(0, cut).trim()
+    return named === name || named === at ? [sample.slice(cut + 1).trim()] : []
+  })
+}
+
+/** A search's address, as `--collections` gives it:  `/search.json?q=dune`, its path, its parameter and the word asked. */
+function searchIn(at: string): { path: string; param: string; word: string } | undefined {
+  const [, path, param, word] = /^([^?]+)\?([^=&]+)=([^&]+)$/.exec(at) ?? []
+  return path && param && word ? { path, param, word: decodeURIComponent(word).toLowerCase() } : undefined
+}
+
+/**
+ * A collection asked for by a search, `/search.json?q=dune`:  read as asked, then asked with no search.
+ * - Answering nothing with none, it's searched only, with no list of them all (Open Library's books).
+ * - What it searches is the field holding the word in the most rows, the usual ones first.
+ */
+async function readSearched(place: string, name: string, at: string, reader: PoliteReader): Promise<CollectionLook> {
+  const { path, param, word } = searchIn(at)!
+  const look = await readCollection(place, name, at, reader, { isSearch: true })
+  look.at = path
+  const holding = (field: string) => look.rows.filter((row) => textIn(row[field]).toLowerCase().includes(word)).length
+  const fields = [...new Set([...SEARCHED_FIELDS, ...look.rows.flatMap((row) => Object.keys(row))])]
+  const field = fields.reduce<string | undefined>(
+    (best, each) => (holding(each) > (best === undefined ? 0 : holding(best)) ? each : best),
+    undefined
+  )
+  // a list of ids says nothing of where it matched:  all of each thing
+  if (look.listsGive?.length === 0) look.searchedBy = { param, field: "", searchesEverything: true }
+  else if (field !== undefined) look.searchedBy = { param, field }
+  look.searchedFor = word
+  try {
+    const answer = await reader.read(`${place}${path}`)
+    const body = answer.status >= 400 ? undefined : answer.isCut ? idsReadOf(answer.text) : jsonOf(answer.text)
+    const rows = Array.isArray(body) ? body : wrappedRows(body)?.rows
+    if (!rows?.length) look.searchedOnly = true
+  } catch (error) {
+    if (error instanceof IngestStopped) throw error
+    look.searchedOnly = true
+  }
+  return look
+}
+
+/**
+ * SIDE EFFECT:  a search named as a list is (`artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers`)
+ * is that list's search, at its own address, not a collection of its own (epic `data` P34):  the Met Museum's.
+ * - Its rows are ids, so nothing says where it matched:  it searches all of each thing (`searchesEverything`).
+ *   - A few of them are read whole too, by the list's address:  what a search finds is what a program shows.
+ */
+async function foldSearchesIntoLists(
+  place: string,
+  read: CollectionLook[],
+  notes: string[],
+  reader: PoliteReader
+): Promise<void> {
+  for (const search of [...read]) {
+    const list = read.find((each) => each !== search && each.name === search.name && !each.searchedBy)
+    if (!list || search.searchedFor === undefined || !search.searchedBy) continue
+    const { param } = search.searchedBy
+    list.searchedBy = {
+      param,
+      field: search.listsGive?.length === 0 ? "" : search.searchedBy.field,
+      ...(search.listsGive?.length === 0 && { searchesEverything: true }),
+      at: search.at
+    }
+    list.searchedFor = search.searchedFor
+    if (search.ids?.length && list.listsGive?.length === 0) {
+      const found = await rowsByIdOf(`${place}${list.at.replace(/[?#].*$/, "")}`, search.ids, reader, list)
+      list.rows.push(...found)
+    }
+    read.splice(read.indexOf(search), 1)
+    notes.push(`"${list.name}" is searched at ${search.at}, with "${param}":  its search, not a collection of its own.`)
+  }
+  // a search of ids with no list to read them by:  nothing says what they are
+  for (const search of read.filter(({ ids }) => ids?.length)) {
+    read.splice(read.indexOf(search), 1)
+    notes.push(
+      `"${search.name}" answers only ids, and no list of the same name says where each is:  name one, ${search.name}=/<its list>.`
+    )
+  }
+}
+
+/** A collection found by name, its address saying where the name goes:  `/page/summary/{name}`. */
+const IS_FOUND_BY_NAME = /\{[^{}/]*\}/
+
+/** How many names it reads a collection found by name by. */
+const MOST_SAMPLES = 5
+
+/**
+ * A collection found by name, with no list:  each of `samples` read at its own address.
+ * - throws `IngestStopped` with no samples to read it by:  `--samples` names some
+ */
+async function readFoundByName(
+  place: string,
+  name: string,
+  at: string,
+  samples: readonly string[],
+  reader: PoliteReader
+): Promise<CollectionLook> {
+  if (!samples.length) {
+    throw new IngestStopped(
+      `"${name}" is found by name, with no list:  name a few to read it by, --samples "Tatooine,Hoth"`
+    )
+  }
+  const look: CollectionLook = { name, at, rows: [], paging: "none", pagesRead: 0, hasMore: false, samples: [] }
+  for (const sample of samples.slice(0, MOST_SAMPLES)) {
+    const url = `${place}${at.replace(IS_FOUND_BY_NAME, encodeURIComponent(sample))}`
+    const answer = await reader.read(url)
+    const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+    if (!isRow(body)) continue
+    look.rows.push(body)
+    look.samples!.push(sample)
+    look.pagesRead++
+  }
+  return look
 }
 
 /** Refuse an answer that's no use:  - throws `IngestStopped`, saying what would help */
@@ -245,33 +443,209 @@ function wrappedRows(body: unknown): { rows: unknown[]; rowsAt: string } | undef
 }
 
 /** A few pages of one collection. */
-async function readCollection(place: string, name: string, at: string, reader: PoliteReader): Promise<CollectionLook> {
+async function readCollection(
+  place: string,
+  name: string,
+  at: string,
+  reader: PoliteReader,
+  { isSearch = false }: { isSearch?: boolean } = {}
+): Promise<CollectionLook> {
   const look: CollectionLook = { name, at, rows: [], paging: "none", pagesRead: 0, hasMore: false }
   let url: string | undefined = `${place}${at}`
   while (url && look.pagesRead < MOST_PAGES) {
     const answer = await reader.read(url)
     refuseAnswer(url, answer)
-    if (answer.isCut) throw new TypeError(`its answer is too big to read`)
-    const body = jsonOf(answer.text)
+    // a list of ids too long to read whole, the Met Museum's 500,000:  the ids it read are enough to look at
+    const body = answer.isCut ? idsReadOf(answer.text) : jsonOf(answer.text)
+    if (body === undefined && answer.isCut) throw new TypeError(`its answer is too big to read`)
+    if (answer.isCut) look.isCut = true
     const wrapped = wrappedRows(body)
-    const rows = Array.isArray(body) ? body : wrapped?.rows
+    // asked with a query, one thing is its one row:  Open-Meteo's forecast for one place
+    const isOne = !Array.isArray(body) && !wrapped && !look.pagesRead && IS_QUERY.test(at) && isRow(body)
+    const rows = Array.isArray(body) ? body : (wrapped?.rows ?? (isOne ? [body] : undefined))
     if (!rows) throw new TypeError("its answer isn't a list")
+    if (isOne) look.answersOne = true
     look.pagesRead++
+    if (look.pagesRead === 1) look.headers = keptHeaders(answer.headers)
+    // led elsewhere on the same server, swapi's `/people` to `/people/`:  its address is where it answered from
+    if (look.pagesRead === 1) {
+      const landed = answer.url.replace(/[?#].*$/, "")
+      if (landed !== url.replace(/[?#].*$/, "") && landed.startsWith(`${place}/`)) {
+        look.movedFrom = at
+        look.at = landed.slice(place.length)
+      }
+    }
     look.rows.push(...rows.filter(isRow))
+    // only the first few:  it reads no more than `MOST_BY_ID` of them, and a list can hold 500,000
+    if (rows.length && rows.every(isPlainId)) look.ids ??= (rows as Array<string | number>).slice(0, MOST_BY_ID)
     if (wrapped) look.rowsAt = wrapped.rowsAt
     if (look.pagesRead === 1) look.rowsItSays = countIn(body)
-    const next = nextPageIn(body, answer.headers)
+    const next = isOne ? undefined : nextPageIn(body, answer.headers)
     if (next) {
       look.paging = next.paging
       if (next.field) look.nextAt = next.field
     }
     url = next?.url && isSameServer(next.url, place) ? next.url : undefined
     look.hasMore = !!url
+    if (url && /[?&]limit=\d+/.test(url)) look.takesLimit = true
   }
   if (look.rowsItSays === undefined) delete look.rowsItSays
-  const searchedBy = await searchOf(`${place}${at}`, look, reader)
+  if (look.hasMore && !look.takesLimit) look.takesLimit = false
+  // one thing, asked for by a query:  which of its parameters it can't answer without
+  if (look.answersOne) {
+    await noteAskedBy(place, look, reader)
+    return look
+  }
+  // a list of ids only:  a few read whole by id, each at its own address;  a search's, by the list it searches
+  if (look.ids) {
+    look.listsGive = []
+    if (isSearch) return look
+    look.rows = await rowsByIdOf(`${place}${look.at.replace(/[?#].*$/, "")}`, look.ids, reader, look)
+    delete look.ids
+    return look
+  }
+  // searched by the names its list gives, before a summary's rows are read whole
+  const searchedBy = isSearch ? undefined : await searchOf(`${place}${look.at}`, look, reader)
   if (searchedBy) look.searchedBy = searchedBy
+  const summary = summaryOf(look.rows, place)
+  if (summary) {
+    const whole = await wholeRowsOf(look.rows, summary.addressField, reader)
+    if (whole.length) {
+      look.listsGive = summary.given
+      look.idAt = summary.addressField
+      look.rows = whole
+    }
+  }
   return look
+}
+
+/** Is this an id, as a list of ids holds one:  a number or a text? */
+function isPlainId(value: unknown): value is string | number {
+  return typeof value === "number" || (typeof value === "string" && !!value.trim())
+}
+
+/**
+ * The JSON of an answer cut short that's a list of ids, up to the last one read whole:  `undefined` for anything else.
+ * - `{"total":503102,"objectIDs":[1,2,3,...,48` => `{ total: 503102, objectIDs: [1, 2, 3, ...] }`
+ */
+function idsReadOf(text: string): unknown {
+  const cut = text.lastIndexOf(",")
+  const body = cut < 0 ? undefined : jsonOf(`${text.slice(0, cut)}]}`)
+  const wrapped = wrappedRows(body)
+  return wrapped?.rows.length && wrapped.rows.every(isPlainId) ? body : undefined
+}
+
+/** How many of a list of ids it reads whole, by id. */
+const MOST_BY_ID = 3
+
+/**
+ * SIDE EFFECT:  a few of `ids`, each read whole at `list`'s address and its id (`/v1/objects/436524`),
+ * with `look` saying its list gives only each one's id (`listsGive` empty) and which field holds it (`idAt`).
+ * - NEVER throws:  an id that won't read is left out.
+ */
+async function rowsByIdOf(
+  list: string,
+  ids: ReadonlyArray<string | number>,
+  reader: PoliteReader,
+  look: CollectionLook
+): Promise<Array<Record<string, unknown>>> {
+  const rows: Array<Record<string, unknown>> = []
+  for (const id of ids.slice(0, MOST_BY_ID)) {
+    try {
+      const answer = await reader.read(`${list}/${encodeURIComponent(`${id}`)}`)
+      const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+      if (!isRow(body)) continue
+      rows.push(body)
+      look.idAt ??= Object.keys(body).find((field) => body[field] === id)
+    } catch (error) {
+      if (error instanceof IngestStopped) throw error
+    }
+  }
+  return rows
+}
+
+/** An address with a query of its own:  `/v1/forecast?latitude=52.52`. */
+const IS_QUERY = /\?[^=&]+=/
+
+/**
+ * SIDE EFFECT:  `look`, one thing asked for by a query, says the parameters it can't answer without (epic `data` P33):
+ * each asked again without it, and a parameter it then won't answer is what it's asked for by.
+ * - Only a field its answer holds as a plain value, as a read says it as one:  Open-Meteo's `latitude` and `longitude`.
+ *   - One it answers without (`hourly`, `timezone`) stays in its address.
+ * - Its `at` is then without them:  `/v1/forecast?hourly=temperature_2m`.
+ */
+async function noteAskedBy(place: string, look: CollectionLook, reader: PoliteReader): Promise<void> {
+  const [path, query = ""] = look.at.split("?") as [string, string?]
+  const params = [...new URLSearchParams(query)]
+  const [row] = look.rows
+  const askedBy: Record<string, string> = {}
+  for (const [param, value] of params) {
+    if (!row || !isPlainValue(row[param])) continue
+    const without = new URLSearchParams(params.filter(([other]) => other !== param)).toString()
+    const answer = await reader.read(`${place}${path}${without ? `?${without}` : ""}`)
+    const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+    if (!isRow(body) || !Object.keys(body).length) askedBy[param] = value
+  }
+  if (!Object.keys(askedBy).length) return
+  look.askedBy = askedBy
+  const kept = new URLSearchParams(params.filter(([param]) => !(param in askedBy)))
+  // its own commas stay as they're written:  `hourly=temperature_2m,precipitation`
+  const rest = kept.toString().replace(/%2C/gi, ",")
+  look.at = `${path}${rest ? `?${rest}` : ""}`
+}
+
+/** Is this a plain value, a number or a text, as a read can say:  not a list or an object? */
+function isPlainValue(value: unknown): boolean {
+  return typeof value === "number" || typeof value === "string"
+}
+
+/** How many rows of a list that gives only a little of each it reads whole. */
+const MOST_WHOLE_ROWS = 2
+
+/** The most fields a row can have and still be only a summary of its whole:  a name, its address, one more. */
+const MOST_SUMMARY_FIELDS = 3
+
+/**
+ * Is this list only a summary of each row, its whole at the row's address?  PokéAPI's `{ "name", "url" }`.
+ * - Every row has the same few fields, one an address on this server:  `undefined` for anything else.
+ */
+function summaryOf(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  place: string
+): { addressField: string; given: string[] } | undefined {
+  const [first] = rows
+  if (!first) return undefined
+  const fields = Object.keys(first)
+  if (fields.length > MOST_SUMMARY_FIELDS) return undefined
+  const same = fields.join("\n")
+  if (!rows.every((row) => Object.keys(row).join("\n") === same)) return undefined
+  const addressField = fields.find((field) =>
+    rows.every((row) => typeof row[field] === "string" && isSameServer(row[field] as string, place))
+  )
+  if (addressField === undefined) return undefined
+  return { addressField, given: fields.filter((field) => field !== addressField) }
+}
+
+/**
+ * A few of `rows`, each read whole from its address, with what the list gave kept:  what says which fields there are.
+ * - NEVER throws:  a row that won't read is left out.
+ */
+async function wholeRowsOf(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  addressField: string,
+  reader: PoliteReader
+): Promise<Array<Record<string, unknown>>> {
+  const whole: Array<Record<string, unknown>> = []
+  for (const row of rows.slice(0, MOST_WHOLE_ROWS)) {
+    try {
+      const answer = await reader.read(row[addressField] as string)
+      const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+      if (isRow(body)) whole.push({ ...body, ...row })
+    } catch {
+      // the next one
+    }
+  }
+  return whole
 }
 
 /**
@@ -537,6 +911,7 @@ function unwrapped(type: GraphType | null | undefined): GraphType {
  * - throws `IngestStopped` if there's nothing there
  */
 async function lookAtSheet({ address, reader }: LookAsk, shownAs = address): Promise<PlaceLook> {
+  if (Workbook.isWorkbookAddress(address)) return lookAtWorkbook(address, reader)
   const answer = await reader.read(address, { accept: "text/csv" })
   refuseAnswer(address, answer)
   const [header, ...lines] = parseCsv(answer.text)
@@ -549,6 +924,23 @@ async function lookAtSheet({ address, reader }: LookAsk, shownAs = address): Pro
     headers: keptHeaders(answer.headers),
     notes: answer.isCut ? ["It's bigger than it reads:  only its first part was read."] : []
   }
+}
+
+/**
+ * Look at an Excel workbook (`.xlsx`;  epic `data` P38):  one collection per sheet, named by its tab, its first row the fields.
+ * - throws `IngestStopped` for a workbook cut short, or one with no rows on any sheet
+ */
+async function lookAtWorkbook(address: string, reader: PoliteReader): Promise<PlaceLook> {
+  const answer = await reader.read(address, { bytes: true })
+  refuseAnswer(address, answer)
+  if (answer.isCut) throw new IngestStopped(`${address} is bigger than it reads, and a workbook can't be read in part`)
+  const workbook = new Workbook(answer.bytes, await Workbook.sheetJs())
+  const collections = workbook.sheets.flatMap((sheet) => {
+    const { rows } = workbook.rowsOf(sheet)
+    return rows.length ? [{ name: sheet, at: "", rows, paging: "none" as const, pagesRead: 1, hasMore: false }] : []
+  })
+  if (!collections.length) throw new IngestStopped(`${address} has no rows, so nothing says what it holds`)
+  return { address, collections, headers: keptHeaders(answer.headers), notes: [] }
 }
 
 /** `error`'s message. */

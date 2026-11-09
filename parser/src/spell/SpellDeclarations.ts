@@ -59,12 +59,14 @@ export class SpellDeclarations {
       codeLines.push(code.length)
     }
     const spoken = SpellDeclarations.speakingFirst(languages, statements)
+    const subclasses = SpellDeclarations.subclassesOf(scope, statements)
     const declarations = definedOnly({
       version,
       spellVersion: SP.SPELL_VERSION,
       // English alone, the default, says nothing:  every English project's declarations stay as they were
       languages: spoken.length === 1 && spoken[0] === SP.SpellWords.LANG ? undefined : spoken,
-      provides: SpellDeclarations.provides(scope, exports),
+      provides: SpellDeclarations.provides(scope, exports, subclasses),
+      subclasses: subclasses.length ? subclasses : undefined,
       statements,
       codeLines
     })
@@ -76,7 +78,7 @@ export class SpellDeclarations {
    * - `exports` from its project file limits them, default everything.
    * - Throws if it names something the project doesn't declare.
    */
-  static provides(scope: P.ProjectScope, exports?: string[]): string[] {
+  static provides(scope: P.ProjectScope, exports?: string[], subclasses: string[] = []): string[] {
     // a property's kind has no class to export:  an importer makes it again (`P.ValueKind.property`)
     const types = scope.types
       .get()
@@ -86,7 +88,7 @@ export class SpellDeclarations {
       .get()
       .filter(({ declaredBy }) => declaredBy?.rule.getDeclaration(declaredBy)?.kind === "function")
       .map((rule) => rule.name)
-    const declared = [...types, ...functions]
+    const declared = [...types, ...subclasses, ...functions]
     const unknown = exports?.find((name) => !declared.includes(name))
     if (unknown) {
       throw new P.ParserError({
@@ -96,6 +98,21 @@ export class SpellDeclarations {
       })
     }
     return exports ?? declared
+  }
+
+  /**
+   * The imported types project `scope` adds members to, in the order its `statements` first do, e.g. `["Card"]`:
+   * each compiles to a class of our own extending the imported one -- see `SP.subclassImportedTypes()`.
+   * - Not one imported under another name (`Card:Playingcard`):  that one is patched, as before.
+   */
+  static subclassesOf(scope: P.ProjectScope, statements: SP.SpellDeclaration[]): string[] {
+    const imports = scope.parentScope
+    if (!(imports instanceof P.ImportScope)) return []
+    const names = statements.flatMap(({ of, type }) => (of && !type ? [of] : []))
+    return [...new Set(names)].filter((name) => {
+      const type = imports.types.get(name, "LOCAL_ONLY")
+      return !!type && !type.runtimeName && imports.origins.has(name)
+    })
   }
 
   /**
@@ -160,8 +177,8 @@ export class SpellDeclarations {
       if (item instanceof P.TypeScope) {
         // a property's kind, e.g. `CardSuit`:  loading makes it again from the property's own list
         if (!item.stub && !item.valueKind?.property) {
-          const { name: type, superType, aka, gender, itemType } = item
-          merge({ type, superType, aka, gender, itemType })
+          const { name: type, superType, aka, gender, itemType, units } = item
+          merge({ type, superType, aka, gender, itemType, units })
         }
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
@@ -177,6 +194,9 @@ export class SpellDeclarations {
     // a view's slots aren't scope records:  its rule notes them -- see `HasSlots`
     const declaresSlots = (statement.data as { declaresSlots?: SP.DeclaredSlots }).declaresSlots
     if (declaresSlots) merge({ of: declaresSlots.of, slots: declaresSlots.slots })
+    // an app's widget defaults aren't scope records either:  its `<ui-defaults>` block notes them (`ui_defaults`)
+    const declaresDefaults = (statement.data as { declaresDefaults?: SP.UIDefaultsTable }).declaresDefaults
+    if (declaresDefaults) merge({ uiDefaults: declaresDefaults })
     // constants an `enumeration` declares are loaded from it
     const fromEnumeration = enumerationConstants(declaration.enumeration)
     const others = constants.filter((name) => !fromEnumeration.includes(name))
@@ -337,6 +357,7 @@ export class SpellDeclarations {
       .filter((name) => originals.has(name))
       .map((name) => (renames.has(name) ? `${name} as ${renames.get(name)}` : name))
     if (module && scope instanceof P.ImportScope) scope.modules.set(module, provided)
+    SpellDeclarations.loadSubclasses(scope, from, declarations, originals, module)
     // names as the importer knows them
     const names = new Set([...originals].map((name) => renames.get(name) ?? name))
     for (const original of declarations.statements) {
@@ -350,6 +371,12 @@ export class SpellDeclarations {
         const valueKind = values && { values, listOn: of!, listName: classVariable! }
         const props = { name: type, superType, aka, gender, itemType, valueKind, runtimeName, declaredAt }
         SpellDeclarations.loadType(scope, from, names, props)
+        // a dimension's units, `data size is a dimension:` (epic `language` T34)
+        const loaded = declaration.units && names.has(type) ? scope.types.get(type, "LOCAL_ONLY") : undefined
+        if (loaded) {
+          loaded.units = declaration.units
+          declaration.units!.forEach(SP.noteUnitNames)
+        }
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
       SpellDeclarations.loadConstants(scope, from, names, declaration, declaredAt)
@@ -360,6 +387,67 @@ export class SpellDeclarations {
       }
       SpellDeclarations.loadMethod(scope, names, declaration, declaredAt)
       SpellDeclarations.loadSlots(scope, names, declaration)
+      if (declaration.uiDefaults) SpellDeclarations.loadUIDefaults(scope, projectId, declaration)
+    }
+  }
+
+  /**
+   * `declaration`'s widget defaults (an imported project's `<ui-defaults>` block), kept by its file's address,
+   * `@spell/library/theme/ui-defaults.spell`, for `uiDefaultsIn()`.
+   */
+  private static loadUIDefaults(scope: P.RootScope, projectId: string, declaration: SP.SpellDeclaration) {
+    const file = declaration.defined?.replace(/:[^:]*$/, "") ?? ""
+    let byFile = UI_DEFAULTS.get(scope)
+    if (!byFile) UI_DEFAULTS.set(scope, (byFile = new Map()))
+    byFile.set(`${projectId}${file}`, declaration.uiDefaults!)
+  }
+
+  /**
+   * The widget defaults another project's file holds, by its address (`<ui-defaults source="...">`, epic `language` P29):
+   * from the declarations of the projects `scope`'s project imports.
+   * - `undefined` when none of them has that file, or it holds no `<ui-defaults>` block.
+   */
+  static uiDefaultsIn(scope: P.Scope, address: string): SP.UIDefaultsTable | undefined {
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) {
+      const table = UI_DEFAULTS.get(at)?.get(address)
+      if (table) return table
+    }
+    return undefined
+  }
+
+  /**
+   * The imported types `declarations`' project makes its own class of (`subclasses`), if picked (epic `language` P26):
+   * its class is the one an importer gets from now on, by that name.
+   * - So a chain of them, in import order:  Solitaire's card extends jokers' card extends the cards library's.
+   * - Its `Card` is imported from it, `module`, NOT from the project before it:  that one's import line drops it.
+   * - Its members' rules load as any of its declarations' do, onto the type already there.
+   * - throws if the type isn't there yet:  the project it comes from is imported after this one, or not at all
+   */
+  private static loadSubclasses(
+    scope: P.RootScope,
+    from: string,
+    declarations: SP.SpellDeclarationsData,
+    picked: Set<string>,
+    module: string | undefined
+  ) {
+    for (const name of declarations.subclasses ?? []) {
+      if (!picked.has(name)) continue
+      if (!scope.types.get(name, "LOCAL_ONLY")) {
+        SpellDeclarations.fail(
+          from,
+          `it adds to '${name}', which isn't imported yet:  import the project it comes from first`
+        )
+      }
+      if (!(scope instanceof P.ImportScope)) continue
+      scope.origins.set(name, from)
+      if (!module) continue
+      for (const [other, names] of scope.modules) {
+        if (other !== module && names.includes(name))
+          scope.modules.set(
+            other,
+            names.filter((it) => it !== name)
+          )
+      }
     }
   }
 
@@ -428,10 +516,12 @@ export class SpellDeclarations {
       datatype,
       initializer,
       enumeration,
+      enumerationOutputs,
       autoDeclared,
       exclusive,
       rules,
       readAs,
+      measure,
       output
     } = declaration
     const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
@@ -442,9 +532,12 @@ export class SpellDeclarations {
           name: property,
           // compiled by another name:  a built-in template's Spanish `dirección` reads `.direction`
           output,
+          // and its values too:  `arriba` sets `.direction` to `up`
+          valueOutputs: enumerationOutputs,
           asWritten,
           datatype,
           readAs,
+          measure,
           initializer,
           autoDeclared,
           exclusive,
@@ -720,7 +813,8 @@ export class SpellDeclarations {
     typeScope: P.TypeScope,
     declared: unknown[]
   ): SP.SpellDeclaration {
-    const { name, asWritten, datatype, readAs, enumeration, initializer, autoDeclared, exclusive, rules } = variable
+    const { name, asWritten, datatype, readAs, enumeration, initializer, autoDeclared, exclusive, rules, measure } =
+      variable
     const of = typeScope.name
     const derived = enumerationInitializer(enumeration)
     const ownInitializer = initializer === derived ? undefined : initializer
@@ -738,6 +832,7 @@ export class SpellDeclarations {
       autoDeclared,
       exclusive,
       rules,
+      measure,
       initializer: ownInitializer
     }
   }
@@ -892,6 +987,8 @@ const PROP_ORDER = [
   "autoDeclared",
   "getter",
   "itemType",
+  "units",
+  "measure",
   "exclusive",
   "rules",
   "params",
@@ -1017,3 +1114,6 @@ function originOf(scope: P.RootScope, name: string): string | undefined {
 function definedOnly<T extends object>(record: T): T {
   return Object.fromEntries(Object.entries(record).filter(([, value]) => value !== undefined)) as T
 }
+
+/** Each import layer's widget defaults, by file address (`SpellDeclarations.uiDefaultsIn()`). */
+const UI_DEFAULTS = new WeakMap<P.Scope, Map<string, SP.UIDefaultsTable>>()

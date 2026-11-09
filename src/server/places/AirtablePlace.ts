@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto"
 
 import { LoadOnce } from "spell/util/LoadOnce"
 import { ApiError, type ApiRequest } from "spell/util/fetching"
-import { DEFAULT_CEILING } from "spell/util/places/PlaceQuery"
+import { DEFAULT_CEILING } from "spell/places/PlaceQuery"
 import {
   PlaceError,
   type ApplyAnswer,
@@ -21,8 +21,8 @@ import {
   type WhyNotWritable,
   type WriteAnswer,
   type WriteQuestion
-} from "spell/util/places/places.types"
-import { jsonIn, WebPlace } from "spell/util/places/WebPlace"
+} from "spell/places/places.types"
+import { jsonIn, WebPlace } from "spell/places/WebPlace"
 import { every } from "spell/util/timing"
 
 import { PlaceEvents } from "./PlaceEvents"

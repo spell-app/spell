@@ -1,0 +1,19 @@
+{
+  "title": "Statusphere",
+  "description": "Bluesky's example app, Statusphere, in Spell:  set your status, an emoji, in your own atmosphere account, and see everyone's as they arrive.  Its status type is read in from Statusphere's Lexicon, Status.spell",
+  "readsOtherPeoplesServers": true,
+  "imports": [
+    {
+      "path": "/Status.spell",
+      "active": true
+    },
+    {
+      "path": "/Statusphere.api.spell",
+      "active": true
+    },
+    {
+      "path": "/Statusphere.spellml",
+      "active": true
+    }
+  ]
+}

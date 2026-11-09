@@ -1,55 +1,64 @@
 {
   "spellVersion": "0.8.0",
   "provides": [
-    "Calculator"
+    "Calculator",
+    "test_two_sums_in_a_row"
   ],
   "statements": [
     {
       "type": "Calculator",
       "superType": "App",
-      "defined": "/Calculator.spell:330-352"
+      "defined": "/Calculator.spellml:210-4459"
     },
     {
       "property": "input",
       "of": "Calculator",
-      "group": "What it keeps",
+      "group": "what it keeps",
+      "groupDescription": "The sum being typed:  its left number, its operator and its right number",
       "datatype": "text",
-      "defined": "/Calculator.spell:353-386"
-    },
-    {
-      "property": "output",
-      "of": "Calculator",
-      "group": "What it keeps",
-      "datatype": "text",
-      "defined": "/Calculator.spell:387-421"
+      "defined": "/Calculator.spellml:337-445"
     },
     {
       "property": "left",
       "of": "Calculator",
-      "group": "What it keeps",
+      "group": "what it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:422-453"
-    },
-    {
-      "property": "right",
-      "of": "Calculator",
-      "group": "What it keeps",
-      "datatype": "text",
-      "defined": "/Calculator.spell:454-486"
-    },
-    {
-      "property": "total",
-      "of": "Calculator",
-      "group": "What it keeps",
-      "datatype": "number",
-      "defined": "/Calculator.spell:487-523"
+      "defined": "/Calculator.spellml:450-471"
     },
     {
       "property": "operator",
       "of": "Calculator",
-      "group": "What it keeps",
+      "group": "what it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:524-560"
+      "defined": "/Calculator.spellml:476-501"
+    },
+    {
+      "property": "right",
+      "of": "Calculator",
+      "group": "what it keeps",
+      "datatype": "text",
+      "defined": "/Calculator.spellml:506-528"
+    },
+    {
+      "property": "total",
+      "of": "Calculator",
+      "group": "what it keeps",
+      "datatype": "number",
+      "defined": "/Calculator.spellml:533-924"
+    },
+    {
+      "property": "sum",
+      "of": "Calculator",
+      "group": "what it keeps",
+      "datatype": "text",
+      "defined": "/Calculator.spellml:939-1142"
+    },
+    {
+      "property": "output",
+      "of": "Calculator",
+      "group": "what it keeps",
+      "datatype": "text",
+      "defined": "/Calculator.spellml:1157-1313"
     },
     {
       "syntax": "clear {thisArg:expression}",
@@ -60,64 +69,11 @@
         "statement",
         "expression"
       ],
-      "group": "What its keys do",
+      "group": "what its keys do",
       "kind": "method",
-      "name": "clear (a calculator)",
-      "defined": "/Calculator.spell:583-735"
-    },
-    {
-      "syntax": "update the total of {thisArg:expression}",
-      "output": "update_the_total_of_calculator",
-      "rule": "method_call",
-      "of": "Calculator",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "What its keys do",
-      "kind": "method",
-      "name": "update the total of (a calculator)",
-      "defined": "/Calculator.spell:737-1164"
-    },
-    {
-      "syntax": "append {callArgs:expression} to {thisArg:expression}",
-      "output": "append_$digit_to_calculator",
-      "rule": "method_call",
-      "of": "Calculator",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "What its keys do",
-      "kind": "method",
-      "name": "append (digit as text) to (a calculator)",
-      "params": [
-        {
-          "name": "digit",
-          "datatype": "text"
-        }
-      ],
-      "defined": "/Calculator.spell:1269-1642"
-    },
-    {
-      "syntax": "apply {callArgs:expression} to {thisArg:expression}",
-      "output": "apply_$op_to_calculator",
-      "rule": "method_call",
-      "of": "Calculator",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "What its keys do",
-      "kind": "method",
-      "name": "apply (op as text) to (a calculator)",
-      "params": [
-        {
-          "name": "op",
-          "datatype": "text"
-        }
-      ],
-      "defined": "/Calculator.spell:1731-1871"
+      "name": "clear it",
+      "returns": "nothing",
+      "defined": "/Calculator.spellml:1358-1451"
     },
     {
       "syntax": "finish {thisArg:expression}",
@@ -128,11 +84,53 @@
         "statement",
         "expression"
       ],
-      "group": "What its keys do",
+      "group": "what its keys do",
       "kind": "method",
-      "name": "finish (a calculator)",
+      "name": "finish it",
       "returns": "nothing",
-      "defined": "/Calculator.spell:1948-2126"
+      "defined": "/Calculator.spellml:1464-1694"
+    },
+    {
+      "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
+      "output": "press_$digit",
+      "rule": "method_call",
+      "of": "Calculator",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "what its keys do",
+      "kind": "method",
+      "name": "press (digit as text)",
+      "params": [
+        {
+          "name": "digit",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Calculator.spellml:1707-2162"
+    },
+    {
+      "syntax": "apply {callArgs:expression} (of {thisArg:expression})?",
+      "output": "apply_$key",
+      "rule": "method_call",
+      "of": "Calculator",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "what its keys do",
+      "kind": "method",
+      "name": "apply (key as text)",
+      "params": [
+        {
+          "name": "key",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Calculator.spellml:2175-2392"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -143,25 +141,35 @@
         "statement",
         "expression"
       ],
-      "group": "How it draws:  the display, then the keypad, four keys a row",
+      "group": "drawing",
       "kind": "method",
-      "name": "draw (a calculator)",
-      "defined": "/Calculator.spell:2193-3690"
+      "name": "draw it",
+      "defined": "/Calculator.spellml:2426-4128"
+    },
+    {
+      "syntax": "test two sums in a row",
+      "output": "test_two_sums_in_a_row",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "two sums in a row",
+      "defined": "/Calculator.spellml:4140-4450"
     }
   ],
   "codeLines": [
-    14,
-    17,
-    22,
-    27,
-    32,
-    37,
-    42,
-    48,
-    57,
-    71,
+    9,
+    13,
+    18,
+    23,
+    28,
+    34,
+    44,
+    50,
+    55,
+    63,
+    72,
     82,
     89,
-    99
+    234
   ]
 }

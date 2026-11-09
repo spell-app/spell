@@ -13,10 +13,11 @@
         "expression"
       ],
       "kind": "function",
-      "defined": "/FizzBuzz.spell:23-326"
+      "returns": "nothing",
+      "defined": "/FizzBuzz.spellml:451-827"
     }
   ],
   "codeLines": [
-    4
+    36
   ]
 }

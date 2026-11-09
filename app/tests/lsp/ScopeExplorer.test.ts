@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll } from "vite-plus/test"
-import { copyFileSync, cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "fs"
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { resolve } from "path"
 import { pathToFileURL } from "url"
@@ -12,7 +12,7 @@ import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { scopesFromPacks } from "spell/app/lsp/ScopesSource"
 import { compiledSpellProject } from "spell/parser/spell/test"
-import { copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
+import { copyCodeSpellTwin, copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
 
 /** The Solitaire example's Card.spellml:  the tests name its lines by what they say (`lineOf()`), as it changes. */
 const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spellml"), "utf8")
@@ -454,10 +454,13 @@ describe("ScopeExplorer scope packs", () => {
   test("`core`'s `src/core.scopes.js` is what `yarn scopes --builtins` generates from the table -- run it", () => {
     const path = resolve(environment.coreDir, "core.scopes.js")
     const shipped = runPackScript(readFileSync(path, "utf8"), "core.scopes.js")
-    // The pack names each file by its `file://` URI, which holds the checkout's own path:  compare without it
-    const withoutCheckout = (pack: LSP.ScopePack) =>
-      JSON.parse(JSON.stringify(pack).replace(/file:\/\/[^"]*?(?=\/parser\/src\/core\/)/g, "file://"))
-    expect(withoutCheckout(shipped)).toEqual(withoutCheckout(builtIns))
+    expect(shipped).toEqual(explorer.exportBuiltIns(pathToFileURL(environment.coreDir).href))
+  })
+
+  test("the built-ins' pack names its template files relative to core's `src/`, never a checkout's own path", () => {
+    const shipped = readFileSync(resolve(environment.coreDir, "core.scopes.js"), "utf8")
+    expect(shipped).not.toContain("file:")
+    expect(shipped).toContain('uri: "templates/Notebook.spell"')
   })
 })
 
@@ -514,7 +517,8 @@ describe("ScopeExplorer built-in types", () => {
 /** The scope tree of a project written in Spanish:  a temp copy of the Solitario example. */
 describe("ScopeExplorer in Spanish", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-es-"))
-  cpSync(fixtureFolder("@spell/examples/Solitario"), resolve(dir, "Solitario"), { recursive: true })
+  // as code spell:  the example is spellx, its code-spell twin the same program
+  copyCodeSpellTwin("@spell/examples/Solitario", resolve(dir, "Solitario"))
   const cartaPath = resolve(dir, "Solitario/Carta.es.spell")
   const cartaUri = pathToFileURL(cartaPath).href
   const workspace = new SpellDiskWorkspace()
@@ -528,7 +532,8 @@ describe("ScopeExplorer in Spanish", () => {
 
   test("its types come from Spanish's built-in types, and show their rules in Spanish", () => {
     const tree = explorer.tree(project)
-    expect(find(tree, "Carta").super).toBe("type:View")
+    // `una vista reversible`, Spanish for the built-in two sided view
+    expect(find(tree, "Carta").super).toBe("type:TwoSidedView")
     expect(find(tree, "Mazo").super).toBe("type:List")
     expect(explorer.details(project, "type:List/method:number of (items) in (a list)")!.rules).toContainEqual({
       name: "list_count",

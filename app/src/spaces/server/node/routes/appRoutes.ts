@@ -4,13 +4,27 @@ import "spell/parser/spell/node/packageVersion.node"
 import { existsSync, readFileSync } from "fs"
 import JSON5 from "json5"
 import { join } from "path"
+import { fileURLToPath } from "url"
 
 import { PREF_SAVED_EVENT } from "spell/util"
 import { SRV } from "spell/server"
+import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
+import { pageServerSettings } from "spell/server/page/settings"
+import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import environment from "spell/app/spaces/server/node/environment"
+import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
+import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
+import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
+import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
-import { api, projectBuild, spaceFiles } from "./api"
+import { api, compileCache, projectBuild, spaceFiles } from "./api"
+import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
+import { LocalSiteServer } from "./LocalSiteServer"
+
+/** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
+const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
 
 /**
  * The app on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`),
@@ -21,9 +35,35 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *   - `/api/...` -- the app's API, `./api` (as `cli.ts` serves it alone, `yarn start:server`);  bodies as JSON5
  *     - a pref saved through it (`/api/prefs/save`) is told to every open page, over the live channel
  *       (`PREF_SAVED_EVENT`):  a theme picked in one place shows in every other at once
- *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):  a server without this
- *       module (spell-epic's own) has none, and its pages never ask
+ *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):
+ *       a server without this module (spell-epic's own) has none, and its pages never ask
+ *   - `/api/compiles/...` -- the compile cache (`compileCache`, `./api`), capped at the page server's `cacheLimit`
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
+ *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
+ *     `family cookbook is a data folder at "owen@spell/recipes"`, behind the page server's guard, as the Airtable
+ *     routes are
+ *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
+ *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
+ *   - `/api/rooms/spaces/<address>/<collection>` -- a space's own folder shared live, a websocket room per collection,
+ *     each write as its page's person (`SpaceFolders`, epic `atmosphere` T38)
+ *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code
+ *     (`SignInCheck`, epic `atmosphere` P3)
+ *     - the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
+ *     - its check runs FIRST, for every route after it:  who's signed in on the device is on the request
+ *       (`request.person`), which the guard, the project data folders, the prefs and the people routes read
+ *     - invite only:  `POST /api/sign-in/invite { email }`, with this run's token, makes an account (`SpellAccounts`)
+ *     - mail goes to the local catcher (`environment.signInDir`'s `mail/`) until a mail service is chosen (Q12)
+ *     - an account Spell took down can't sign in;  `GET /api/sign-in/me` says the abuse contact
+ *       (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`), which the sign-in bar and the link's page show (P6)
+ *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell space takedown`, the log in each folder's
+ *     `__takedowns.json5`) is refused through both the project data folders and the reads direct
+ *   - `/api/exports/spaces/<address>` -- a space downloaded whole, a zip of plain JSON (`SpaceExport`, epic `atmosphere`
+ *     P7);  `/terms` -- Spell's terms, among them the promise to hand over a space's keys (T5)
+ * - THE DAILY ROUND (`spacesDailyRound()`, epic `atmosphere` P24), while the MAIN checkout's page server runs;
+ *   a worktree's server runs none, as every checkout reads the same spell.spaces:
+ *   - BACKUPS (epic `atmosphere` P7):  every space, each night, a week kept (`SpaceBackups`);
+ *     a missed night is in its log
+ *   - each real Space's member list, in step with its org's roles (`MemberLists`):  a term ending on its date
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
@@ -31,6 +71,9 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *     - not up yet (vite takes seconds) or not running:  says so
  * - The editor UI (`EditorServer`):  vite's dev server, started once the page server listens and stopped with it.
  *   The page server and the editor are ONE thing to start.
+ * - The house-network test site (`LocalSiteServer`, epic `atmosphere` T58):  the cloud and Caddy, from the main
+ *   checkout's page server alone, on a Mac set up for it;  stopped with the page server.
+ *   - `SPELL_NO_LOCAL_SITE=1` or a test (`VITEST`):  not started, so a test's server leaves the real ports alone.
  * - Writes refuse a foreign `Origin` (another site posting into our projects).
  *   - The API has no token, since the editor calls it from vite's origin, through vite's proxy.
  * - As it starts:  compiles the built-in projects that are out of date (`@spell/examples`, `@spell/library`),
@@ -39,16 +82,57 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  */
 const appRoutes: RouteModule = {
   name: "app",
-  setup({ router, root, info, live, addPageConfig, onListening, onStop }) {
+  setup({ router, guard, web, root, info, live, addPageConfig, addServerReport, onListening, onStop }) {
+    // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
+    // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
+    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go through it
+    const mailer = mailerFor({ folder: join(environment.signInDir, "mail"), ...environment.mail })
+    const folders = new SpaceFolders({
+      credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") }),
+      mailer,
+      address: () => `http://127.0.0.1:${info.port}`
+    })
+    // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);
+    // an account taken down can't sign in, and the abuse contact is on the sign-in bar (P6);
+    // or a linked Bluesky account, its host sending the browser back to this machine's address (P19)
+    const signIn = new SignInCheck({
+      signIns: new SignIns({ file: join(environment.signInDir, "sessions.json"), minutes: environment.signInMinutes }),
+      mailer,
+      accounts: new SpellAccounts(peopleStore(), { takedowns: folders.takedowns }),
+      abuseContact: environment.abuseContact,
+      atProto: new AtProtoIdentity({ address: () => `http://127.0.0.1:${info.port}` })
+    })
+    router.use(signIn.check)
+    signIn.route(router, guard)
     // the person's prefs are answered here (`/api/prefs`, under `api`):  every page keeps its theme in their space
     addPageConfig(() => ({ prefs: true }))
     const editor = new EditorServer(root)
-    onListening(() => editor.start(info.port))
+    onListening(() => editor.start(info.port, guard))
     onStop(() => editor.stop())
     projectBuild.start()
     onStop(() => projectBuild.stop())
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
+    // before `/api`'s own routes, whose last answers every path it doesn't know
+    // and their live rooms, each write as its page's person (epic `atmosphere` T38)
+    folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
+    onStop(() => folders.close())
+    router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
+    // the daily round (a copy a night, real Spaces' lists), from the main checkout's server alone:
+    // every worktree's reads the same spell.spaces
+    const checkout = checkoutOf(environment.repoDir)
+    const isMainCheckout = !!checkout && checkout.root === checkout.main
+    if (isMainCheckout) onStop(spacesDailyRound(folders).start())
+    if (!process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE) {
+      const site = new LocalSiteServer({ isMainCheckout })
+      // deliberately not waited for:  the page server's own start mustn't hang on Caddy's
+      onListening(() => void site.startWithPageServer().catch((error: unknown) => console.error(error)))
+      onStop(() => site.stop())
+      addServerReport?.(() => site.report())
+    }
+    // the compile cache's cap:  the page server's `cacheLimit` setting (epic `language` Q41)
+    const { cacheLimit } = pageServerSettings(root)
+    if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))

@@ -339,6 +339,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     const comparison = this.comparison(node)
     if (comparison) return comparison
     const operator = PyBaseWriter.OPERATORS[node.operator]
+    if (node.operator === "and") this.noteChecked(node.lhs, node.rhs)
     return `${this.operand(node.lhs, node.operator, "lhs")} ${operator} ${this.operand(node.rhs, node.operator, "rhs")}`
   }
 
@@ -467,6 +468,9 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
     if (node instanceof P.ASTConsoleMethodInvocation) return this.consoleCall(node)
     if (node.thing instanceof P.ASTCoreExpression) {
+      this.noteLoopItems(node)
+      const cleared = this.clearedValue(node)
+      if (cleared) return this.ASTAssignmentStatement(cleared)
       const written = this.coreCall(node)
       if (written !== undefined) return written
       const name = node.methodName
@@ -738,6 +742,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     const items = this.bare(collection)
     const previous = this.returnContinues
     this.returnContinues = true
+    this.noteLoopItems(call as P.ASTScopedMethodInvocation)
     const body = this.inBlock(() => {
       this.noteParams(method)
       if (isRange) this.wholeNumbers.add(item.name)
@@ -808,9 +813,11 @@ export class PyBaseWriter extends P.ProgramWriter {
       if (!written) continue
       // PEP 8:  two blank lines around a top-level `def` or `class`, one around a method
       const gap = topLevel ? 2 : statement instanceof P.ASTClassMember ? 1 : 0
-      if (isDefinition && gap) separateAt(lines, above, gap)
+      // a top-level step that waits is a `def` of its own too, run where it was (`PyWriter.topLevelStep()`)
+      const spaced = isDefinition || (topLevel && written.startsWith("async def "))
+      if (spaced && gap) separateAt(lines, above, gap)
       lines.push(written)
-      if (isDefinition && gap) lines.push(...Array<string>(gap).fill(""))
+      if (spaced && gap) lines.push(...Array<string>(gap).fill(""))
     }
     pushDoc()
     while (lines.at(-1) === "") lines.pop()
@@ -877,6 +884,8 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - Only for a name or a path of names, `start_pile`, `card.pile`.
    */
   protected assertThere(object: P.ASTExpression, written: string): void {
+    // a read a check just before it found there:  pyright narrows it too -- see `noteChecked()`
+    if (this.isCheckedRead(object)) return
     if (!this.asserts || !/^[\w.]+$/.test(written) || !this.hintedMaybeNothing(object)) return
     const key = `\0asserted:${written}`
     if (this.localValue(key)) return
@@ -912,7 +921,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (statement instanceof P.ASTClassDeclaration)
       return this.classDeclaration(this.withProjectMembers(statement), doc)
     if (statement instanceof P.ASTPropertyDefinition) {
-      // outside a class body:  a class of another project, e.g. Klondike's `to play a card` for Cards' `Card`
+      // outside a class body:  a class this one doesn't write, e.g. one imported under another name (`Card:Playingcard`)
       return this.inClassBody ? this.memberDefinition(statement, doc) : this.ASTPropertyDefinition(statement, doc)
     }
     if (statement instanceof P.ASTStaticMethod) return this.staticMethod(statement, doc)
@@ -934,6 +943,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   /** `node`'s statements, one a line, `pass` for none -- see `pyText.block()`. */
   blockBody(node: P.ASTStatementBlock | P.ASTNode): string {
     const statements = node instanceof P.ASTStatementBlock ? [...(node.statements ?? [])] : [node]
+    this.noteCheckedElses(statements)
     return this.statementLines(statements)
   }
 
@@ -964,6 +974,7 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** `if condition:` and its statements. */
   ASTIfStatement(node: P.ASTIfStatement): string {
+    this.noteChecked(node.condition, node.statements)
     const written = pyText.block(`if ${this.condition(node.condition)}`, this.blockBody(node.statements))
     this.noteGuard(node)
     return written
@@ -979,6 +990,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** `yes if condition else no`. */
   ASTTernaryExpression(node: P.ASTTernaryExpression): string {
+    this.noteChecked(node.condition, node.trueValue)
+    this.noteChecked(node.condition, node.falseValue, "when false")
     const yes = this.operand(node.trueValue, "or", "lhs")
     const no = this.operand(node.falseValue, "or", "rhs")
     return `${yes} if ${this.bare(node.condition)} else ${no}`
@@ -991,6 +1004,8 @@ export class PyBaseWriter extends P.ProgramWriter {
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     // in a loop's body, written from a function per item:  ends that turn only
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
+    if (this.givesNothing(node.value)) return this.bare(node.value)
     this.returnsInPlace.set(node, this.mayBeNothing(node.value))
     return this.testBlock(node.value) ?? `return ${this.bare(node.value)}`
   }
@@ -1208,7 +1223,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   returnHint(method: P.ASTMethodDefinition): string | undefined {
     const returns: P.ASTReturnStatement[] = []
     forEachReturn(method.body, (node) => returns.push(node))
-    if (!returns.some((it) => it.value)) return "None"
+    if (!returns.some((it) => it.value && !this.givesNothing(it.value))) return "None"
     if (returns.every((it) => it.value && isTestCall(it.value))) return "None"
     const isDrawing = returns.every((it) => it.value && unwrapped(it.value) instanceof P.ASTJSXElement)
     // a class of the program's may take the name
@@ -1438,7 +1453,9 @@ export class PyBaseWriter extends P.ProgramWriter {
    */
   classDeclaration(node: P.ASTClassDeclaration, doc: P.ASTDocComment | undefined): string {
     const { type, superType, members } = node
-    const base = superType ? `(${this.typeNameOf(superType.name)})` : ""
+    // our own class of an imported one:  the imported one, as it's imported here (`P.WriterProject.importedBases`)
+    const imported = this.project.importedBases.get(type.name)
+    const base = superType ? `(${imported ?? this.typeNameOf(superType.name)})` : ""
     const docstring = doc ? pyText.docstring(doc.lines) : ""
     const previous = this.inClassBody
     this.inClassBody = true
@@ -1463,7 +1480,9 @@ export class PyBaseWriter extends P.ProgramWriter {
       const value = property.value ? this.bare(property.value) : this.nameOf(property.property.value, "variable")
       return `${key}=${value}`
     })
-    return pyText.call(String(this.write(node.type)), props)
+    const type = String(this.write(node.type))
+    // one of a library's own types:  the running program's class of its name (`makesByName()`)
+    return pyText.call(this.makesByName(node.type.name) ? `core.class_to_make(${type})` : type, props)
   }
 
   /** `[a, b]`. */
@@ -1500,7 +1519,7 @@ export class PyBaseWriter extends P.ProgramWriter {
   /**
    * From outside its class:  its function, set on the class by `spell_core`'s decorator.
    * - `@Card.add_method("play")` above `def _card_play(self)`;  `@Card.add_property("pile")` for a getter.
-   * - For a class of another project:  a class of this one has it in its body (`withProjectMembers()`).
+   * - For a class of another project:  our own class of it has it in its body (`SP.subclassImportedTypes()`).
    * - `doc`:  its docstring, if any.
    */
   ASTPropertyDefinition(node: P.ASTPropertyDefinition, doc?: P.ASTDocComment): string {

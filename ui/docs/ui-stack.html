@@ -123,6 +123,24 @@
                   </ui-stack>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-variations-fill-the-row" label="Fill the row" sticky="stack" collapsible dividing>
+                <ui-example description="In a row, a `fluid` child takes the room left:  a task's title field between its checkbox and its priority.">
+                  <ui-stack direction="horizontal" spacing="sm">
+                    <ui-checkbox aria-label="Done"></ui-checkbox>
+                    <ui-input aria-label="Task" value="Write the tests" fluid></ui-input>
+                    <ui-label size="tiny" color="red">high</ui-label>
+                  </ui-stack>
+                </ui-example>
+                <ui-example description="A `fluid` stack does too:  a picture's details take the rest of the row, and wrap under it when the row is too narrow.">
+                  <ui-stack direction="horizontal" wrap align="start">
+                    <ui-icon name="image outline" size="massive"></ui-icon>
+                    <ui-stack fluid spacing="sm">
+                      <ui-header level="4">Bulbasaur</ui-header>
+                      <ui-text>A strange seed was planted on its back at birth.</ui-text>
+                    </ui-stack>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
               <ui-section id="examples-variations-centred" label="Centred" sticky="stack" collapsible dividing>
                 <ui-example description="`align=&quot;center&quot;`:  a column's children centred across it.">
                   <ui-stack align="center" spacing="sm">
@@ -130,6 +148,31 @@
                     <ui-text>No messages yet</ui-text>
                     <ui-button size="small">Write one</ui-button>
                   </ui-stack>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-stackable" label="Stackable" sticky="stack" collapsible dividing>
+                <ui-example description="`stackable=&quot;34em&quot;`:  a row that becomes a column when the room it's in is narrower than 34em;  bare `stackable`, a phone's width.  The room is the nearest size container around it, or the window, whichever is narrower.  An icon with `rotated=&quot;when stacked&quot;` turns a quarter while it's a column, so the arrows point down.  Narrow the window to see it.">
+                  <ui-stack direction="horizontal" align="center" spacing="sm" stackable="34em">
+                    <ui-card width="10em"><ui-content align="center"><ui-header>Bulbasaur</ui-header></ui-content></ui-card>
+                    <ui-icon name="chevron right" size="large" rotated="when stacked"></ui-icon>
+                    <ui-card width="10em"><ui-content align="center"><ui-header>Ivysaur</ui-header></ui-content></ui-card>
+                    <ui-icon name="chevron right" size="large" rotated="when stacked"></ui-icon>
+                    <ui-card width="10em"><ui-content align="center"><ui-header>Venusaur</ui-header></ui-content></ui-card>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-widths" label="Widths" sticky="stack" collapsible dividing>
+                <ui-example description="Every element takes `width`, `min-width` and `max-width`, any CSS length:  its box's own width where it sits.  Here a `fluid` search grows into the room left, from 16em up to 26em;  a card keeps its 10em in a row.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels.">
+                  <ui-stack direction="horizontal" wrap align="center" justify="between">
+                    <ui-button size="big" appearance="tertiary">Logo</ui-button>
+                    <ui-form fluid min-width="16em" max-width="26em">
+                      <ui-input name="search" icon="search" placeholder="Pikachu" aria-label="Find a Pokémon" fluid></ui-input>
+                    </ui-form>
+                    <ui-button color="yellow">Surprise me!</ui-button>
+                  </ui-stack>
+                </ui-example>
+                <ui-example description="`max-width`:  a bar that stops growing on a wide screen.">
+                  <ui-progress value="45" total="255" color="green" max-width="36em" label="Health:  45"></ui-progress>
                 </ui-example>
               </ui-section>
             </ui-section>

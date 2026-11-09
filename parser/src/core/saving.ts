@@ -35,7 +35,7 @@
  *   - The people store (P9) gives each person its org, `"Person#matt@spell"`, through `placeOf` (below).
  * - A thing kept in ANOTHER place (`placeOf`) is a reference with that place, `"Person#matt@three-degrees"`.
  *   - It gets no entry:  its own place saves it.
- *   - `parseRef()` reads one, `refText()` writes one (P4, Q18), the ones in `spell/util/places/refs` (epic `data` T2).
+ *   - `parseRef()` reads one, `refText()` writes one (P4, Q18), the ones in `spell/places/refs` (epic `data` T2).
  *   - So an id may never hold an `@`:  saving one throws.
  * - Where entries live is the caller's:  a `Map` here, one file each in the people store.
  * - The twin of Python's `spell_core.saving`:  both write `savedById.expected.json5`, and read it.
@@ -43,9 +43,9 @@
  * - Not the same as a page's state (`state.ts`):  that numbers things per page, and holds them in one message.
  */
 import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell/util"
-// By file:  the rest of `spell/util/places` has no business in the core
-import { NO_NUMBER, numberInText, type DecimalMark } from "spell/util/places/places.types"
-import { parseRef, refText, type SavedRef } from "spell/util/places/refs"
+// By file:  the rest of `spell/places` has no business in the core
+import { NO_NUMBER, numberInText, type DecimalMark } from "spell/places/places.types"
+import { parseRef, refText, type SavedRef } from "spell/places/refs"
 
 import { programThings, core } from "./core"
 import { fieldsOf, hasSetter, isPlainObject, isSpellObject } from "./state"
@@ -525,13 +525,18 @@ function isReference(json: unknown): json is Record<string, unknown> {
 
 /**
  * `value`, a saved row's text, as what `Class` declares `key` to be:
- * - a date:  a `Date`, from its ISO text
+ * - a date:  a `Date`, from its ISO text, in the reader's own time when it names none (epic `data` I73)
+ *   - `"2026-11-06T14:00"`:  2 pm there, as JavaScript reads it
+ *   - `"1977-05-25"`, a day alone:  that day's midnight there, NOT in UTC as JavaScript reads it,
+ *     so its day, its hour and how it's shown (`dateShown()`) all agree
  * - a number:  a number, from its digits (`"172"`, `"1,358"`, `"1 200"`, `"1.200,5"`), which is how many web servers write them
  *   (epic `data` P18, P23;  `numberInText()`), its marks read as its place writes them (`readNumbersAs()`)
  *   - a word for no number at all reads as nothing, quietly:  the property's own (`or "unknown"`, `PropInfo.nothingAs`), or one
  *     of the usual ones (`NO_NUMBER`)
  *   - any other text:  nothing, with a warning on the program's console, once per field
  *   - one that came as text is written back as text (`valueAsWritten()`)
+ * - yes or no (`choice`):  `true` or `false`, from a sheet's cell (epic `language` T65):
+ *   `"true"`, `"yes"`, `"1"` are yes;  `"false"`, `"no"`, `"0"` and an empty cell are no;  any other text as it is
  * - else, and any other text:  `value`, as it is
  * - a `null` where a property's declared:  nothing, as that's how a row says it has none
  */
@@ -540,9 +545,10 @@ export function valueAsDeclared(Class: SpellClass, key: string, value: unknown):
   if (typeof value !== "string") return value
   const info = schemaOf(Class).info(key)
   if (info?.type === "date") {
-    const date = new Date(value)
+    const date = new Date(DAY_ALONE.test(value) ? `${value}T00:00` : value)
     return Number.isNaN(date.getTime()) ? value : date
   }
+  if (info?.type === "choice") return YES_TEXT.test(value) ? true : NO_TEXT.test(value) ? false : value
   if (info?.type !== "number") return value
   sentAsText(Class).add(key)
   // nothing, not 0:  a height nobody knows isn't a height of 0
@@ -576,6 +582,15 @@ export function valueAsWritten(Class: SpellClass, key: string, json: unknown): u
 export function readNumbersAs(Class: SpellClass, marks: { mark?: DecimalMark; unclear?: DecimalMark }): void {
   NUMBER_MARKS.set(Class, marks)
 }
+
+/** Yes, as a sheet's cell says it. */
+const YES_TEXT = /^\s*(?:true|yes|1)\s*$/i
+
+/** No, as a sheet's cell says it:  an empty one too. */
+const NO_TEXT = /^\s*(?:false|no|0)?\s*$/i
+
+/** A day alone, in ISO text:  `1977-05-25`. */
+const DAY_ALONE = /^\d{4}-\d{2}-\d{2}$/
 
 /** How each type's place writes numbers -- see `readNumbersAs()`. */
 const NUMBER_MARKS = new WeakMap<Function, { mark?: DecimalMark; unclear?: DecimalMark }>()

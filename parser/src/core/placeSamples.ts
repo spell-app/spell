@@ -11,7 +11,7 @@
  * - Its `id` is left out too:  the sample gives each record one.
  */
 import { schemaOf, type PropInfo, type Schema } from "spell/util"
-import type { PlaceRow } from "spell/util/places/places.types"
+import type { PlaceRow } from "spell/places/places.types"
 
 import { kindOf } from "./checking"
 
@@ -53,7 +53,8 @@ function madeUpValue(name: string, info: PropInfo, number: number): unknown {
     case "choice":
       return number % 2 === 1
     case "date":
-      return new Date(Date.UTC(2026, 0, number)).toISOString()
+      // a day alone, so it's that day wherever it's read (`valueAsDeclared()`)
+      return new Date(Date.UTC(2026, 0, number)).toISOString().slice(0, 10)
     case "list":
       return []
     default:

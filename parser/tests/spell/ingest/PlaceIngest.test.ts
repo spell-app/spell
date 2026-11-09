@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
+import * as XLSX from "xlsx"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
@@ -148,6 +149,32 @@ describe("adding a source", () => {
     expect(back.collections.planets!.idField).toBe("url")
   })
 
+  test("a field every row sent the same no, 0 or empty is filled;  one sent as nothing isn't (epic `data` I53)", async () => {
+    // the look sees a closing date;  the read through the Spell, none
+    let isReading = false
+    const rows = () =>
+      [1, 2].map((id) => ({
+        id,
+        title: `Issue ${id}`,
+        locked: false,
+        comments: 0,
+        body: "",
+        closed_at: isReading ? null : "2026-11-01T10:00:00Z"
+      }))
+    const routes = { [API]: { issues: `${API}/issues` } }
+    Object.defineProperty(routes, `${API}/issues`, { get: rows, enumerable: true })
+    const { ingest } = ingestOf(routes, {
+      readThrough: (asked) => {
+        isReading = true
+        return readThroughSpell(asked)
+      }
+    })
+    const { description } = await ingest.add({ address: API, into: "/I.spell", name: "issues place" })
+    const notes = description.notes.join("\n")
+    expect(notes).not.toMatch(/"(?:locked|comments|body)"/)
+    expect(notes).toMatch(/No row read filled issue's "closedAt"/)
+  })
+
   test("what swapi.info's shape needs:  links, numbers as text, ids only in an address, several collections", async () => {
     const { ingest, texts, descriptions } = ingestOf(STARS)
     const result = await ingest.add({ address: `${API}/`, into: "/Stars.spell", name: "stars" })
@@ -212,6 +239,372 @@ describe("adding a source", () => {
     const moves = descriptions.get("/M.json5")!.collections.moves!
     expect(moves).toMatchObject({ rowsSeen: 3, rowsItSays: 900, paging: "next field" })
     expect(moves.readThrough).toEqual({ rows: 1 })
+  })
+
+  test("a list led to another address answers from there:  its line says so, one request a read, not two", async () => {
+    const rows = [
+      { url: `${API}/people/1/`, name: "Luke" },
+      { url: `${API}/people/2/`, name: "Leia" }
+    ]
+    const { fetch: plain } = fakeFetch({ [API]: { people: `${API}/people` }, [`${API}/people/`]: rows })
+    // `/people` answers from `/people/`, as a redirect does:  the answer says where it came from
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`.replace(/[?#].*$/, "")
+      const moved = url === `${API}/people` ? `${API}/people/` : undefined
+      const answer = await plain(moved ?? input, init)
+      if (moved) Object.defineProperty(answer, "url", { value: moved })
+      return answer
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({ address: API, into: "/S.spell", name: "stars" })
+    expect(spell).toContain(`- people live at "/people/"`)
+    const description = descriptions.get("/S.json5")!
+    expect(description.collections.people!.at).toBe("/people/")
+    expect(description.notes.join("\n")).toMatch(/answered from \/people\/, not \/people/)
+  })
+
+  test("the collections it was asked for are the ones it looks at again", async () => {
+    const page = (name: string) => [{ url: `${API}/${name}/1`, name }]
+    const routes = {
+      [API]: { films: `${API}/films`, people: `${API}/people` },
+      [`${API}/films`]: page("films"),
+      [`${API}/people`]: page("people")
+    }
+    const { ingest, descriptions } = ingestOf(routes)
+    await ingest.add({ address: API, into: "/F.spell", name: "stars", collections: ["films"] })
+    expect(descriptions.get("/F.json5")!.about.collectionsAsked).toEqual(["films"])
+    const again = await ingest.update("/F.spell")
+    expect(Object.keys(again.description.collections)).toEqual(["films"])
+  })
+
+  test("an address that answers nothing itself is a web server, when a collection under it answers", async () => {
+    const routes = { [`${API}/page/summary/Hoth`]: { title: "Hoth", extract: "Cold." } }
+    const { ingest } = ingestOf(routes)
+    const { description } = await ingest.add({
+      address: API,
+      into: "/H.spell",
+      name: "wiki",
+      collections: ["wiki pages=/page/summary/{name}"],
+      samples: ["Hoth"]
+    })
+    expect(description.about.kind).toBe("web server")
+  })
+
+  test("a collection found by name, with no list:  read by the names given, its id the field holding them", async () => {
+    const page = (title: string, pageid: number) => ({
+      type: "standard",
+      title,
+      pageid,
+      namespace: { id: 0, text: "" },
+      extract: `${title} is somewhere.`
+    })
+    const routes = {
+      [`${API}/page/summary/Tatooine`]: page("Tatooine", 1),
+      [`${API}/page/summary/Hoth`]: page("Hoth", 2)
+    }
+    const { ingest, descriptions } = ingestOf(routes)
+    const { spell } = await ingest.add({
+      address: API,
+      kind: "web server",
+      into: "/W.spell",
+      name: "wiki",
+      collections: ["wiki pages=/page/summary/{name}"],
+      samples: ["Tatooine", "Hoth"]
+    })
+    expect(spell).toContain(`- wiki pages are found at "/page/summary/{name}"`)
+    expect(spell).toContain(`- its id is its "title"`)
+    expect(spell).toContain(`- its "title" is text`)
+    expect(spell).toContain(`- its "kind" is text, stored as "type"`)
+    expect(spell).toContain(`- its "number" is a number, stored as "id"`)
+    const pages = descriptions.get("/W.json5")!.collections.wiki_pages!
+    expect(pages).toMatchObject({ samples: ["Tatooine", "Hoth"], readThrough: { rows: 1 } })
+  })
+
+  test("Open Library's way (epic `data` P29):  books only by a search, authors linked by their ids, covers on another server", async () => {
+    const COVERS = "https://covers.test/b/id/{id}-M.jpg"
+    const books = [
+      { key: "/works/OL1W", title: "Dune", author_key: ["OL1A"], cover_i: 7 },
+      { key: "/works/OL2W", title: "Dune Messiah", author_key: ["OL1A"], cover_i: 8 }
+    ]
+    const answers: Record<string, () => Response> = {
+      [`${API}/search.json?q=dune`]: () => Response.json({ numFound: 2, docs: books }),
+      [`${API}/search.json`]: () => Response.json({ numFound: 0, docs: [] }),
+      [`${API}/authors/OL1A.json`]: () => Response.json({ key: "/authors/OL1A", name: "Frank Herbert" }),
+      ["https://covers.test/b/id/7-M.jpg"]: () => new Response("jpeg", { headers: { "content-type": "image/jpeg" } })
+    }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push(url)
+      return answers[url]?.() ?? new Response("nope", { status: 404 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: API,
+      kind: "web server",
+      into: "/L.spell",
+      name: "library",
+      collections: ["books=/search.json?q=dune", "authors=/authors/{name}.json"],
+      samples: ["authors=OL1A"],
+      pictures: [`cover_i=${COVERS}`]
+    })
+    expect(spell).toContain(`- books are searched at "/search.json"`)
+    expect(spell).toContain(`- it searches titles with "q"`)
+    // what's said of lists is said of those that list:  authors are read one at a time
+    expect(spell).toContain(`- its rows are its "docs"`)
+    expect(spell).toContain(`- authors are found at "/authors/{name}.json"`)
+    expect(spell).toContain(`- its "authors" is a list of authors, stored as "author_key"`)
+    expect(spell).toContain(`- a book's "cover i" is a picture at "${COVERS}"`)
+    expect(spell).toContain(`- its "cover i" is text  // a picture's address`)
+    const { collections, about } = descriptions.get("/L.json5")!
+    expect(collections.books).toMatchObject({ searchedOnly: true, searchedFor: "dune", readThrough: { rows: 2 } })
+    expect(collections.authors).toMatchObject({ samples: ["OL1A"], readThrough: { rows: 1 } })
+    expect(about.picturesAsked).toEqual([`cover_i=${COVERS}`])
+    // the read through searched, as a program has to
+    expect(asked.filter((url) => url.startsWith(`${API}/search.json`))).toEqual([
+      `${API}/search.json?q=dune`,
+      `${API}/search.json`,
+      `${API}/search.json?q=dune`
+    ])
+  })
+
+  test("GitHub's way (epic `data` P41):  users found by login and searched at an address of their own, repositories only by a search", async () => {
+    const GH = "https://gh.test"
+    const users = [{ login: "ryansolid", name: "Ryan Carniato" }]
+    const repositories = [
+      { id: 1, full_name: "solidjs/solid", stargazers_count: 34000 },
+      { id: 2, full_name: "ryansolid/dom-expressions", stargazers_count: 1000 }
+    ]
+    const answers: Record<string, () => Response> = {
+      [`${GH}/users/ryansolid`]: () => Response.json(users[0]),
+      [`${GH}/search/users?q=ryansolid`]: () => Response.json({ total_count: 1, items: users }),
+      [`${GH}/search/repositories?q=solid`]: () => Response.json({ total_count: 2, items: repositories })
+    }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push(url)
+      return answers[url]?.() ?? new Response("{}", { status: 422 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: GH,
+      kind: "web server",
+      into: "/G.spell",
+      name: "github",
+      collections: [
+        "users=/users/{name}",
+        "users=/search/users?q=ryansolid",
+        "repositories=/search/repositories?q=solid"
+      ],
+      samples: ["users=ryansolid"]
+    })
+    // each its own search, not one line for the place that names fields of both
+    expect(spell).not.toContain("- it searches")
+    expect(spell).toContain(`- users are found at "/users/{name}"`)
+    expect(spell).toContain(`- users are searched with "q" at "/search/users"`)
+    expect(spell).toContain(`- repositories are searched with "q" at "/search/repositories"`)
+    expect(spell).not.toContain(`- repositories are searched at`)
+    const { collections } = descriptions.get("/G.json5")!
+    expect(collections.repositories).toMatchObject({ searchedOnly: true, readThrough: { rows: 2 } })
+    expect(collections.users).toMatchObject({ readThrough: { rows: 1 } })
+    // the read through searched all of each repository, as a program's `matching` does
+    expect(asked).toContain(`${GH}/search/repositories?q=solid`)
+  })
+
+  test("Open-Meteo's way (epic `data` P33):  one thing asked for by a query, its hours lists side by side, in the units it names", async () => {
+    const WEATHER = "https://weather.test"
+    const forecast = {
+      latitude: 52.5126,
+      longitude: 13.4195,
+      timezone: "Europe/Berlin",
+      hourly_units: { time: "iso8601", temperature_2m: "°C", precipitation: "mm", relative_humidity_2m: "%" },
+      hourly: {
+        time: ["2026-11-05T00:00", "2026-11-05T01:00"],
+        temperature_2m: [6.2, 5.5],
+        precipitation: [0, 0.4],
+        relative_humidity_2m: [80, 82]
+      }
+    }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`)
+      asked.push(url.href)
+      // it can't answer without where it's for;  the hours it's asked for it answers without
+      const hasWhere = url.searchParams.has("latitude") && url.searchParams.has("longitude")
+      if (url.pathname !== "/v1/forecast") return new Response("nope", { status: 404 })
+      return hasWhere ? Response.json(forecast) : Response.json({ error: true }, { status: 400 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: WEATHER,
+      kind: "web server",
+      into: "/W.spell",
+      name: "weather",
+      collections: ["forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation"]
+    })
+    expect(spell).toContain(`- forecasts live at "/v1/forecast?hourly=temperature_2m,precipitation"`)
+    expect(spell).toContain(`- forecasts are asked for by their latitude and longitude`)
+    expect(spell).toContain(`- its "hours" is a list of hours, stored as "hourly"`)
+    expect(spell).toContain(`- its "temperature" is a temperature in °C, stored as "temperature_2m"`)
+    expect(spell).toContain(`- its "precipitation" is a length in mm`)
+    // a unit Spell has no dimension for is said beside it
+    expect(spell).toContain(`- its "relative humidity" is a number, stored as "relative_humidity_2m"  // in %`)
+    expect(spell).not.toContain(`hourly units`)
+    const { collections, spellCantSay } = descriptions.get("/W.json5")!
+    expect(collections.forecasts).toMatchObject({
+      askedBy: { latitude: "52.52", longitude: "13.41" },
+      readThrough: { rows: 1 }
+    })
+    expect(collections.forecasts!.fields.hourly).toMatchObject({ words: "hours", isSideBySide: true })
+    expect(spellCantSay.join("\n")).not.toMatch(/hourly_units/)
+    // the read through asked where it's for, as a program has to
+    expect(asked.at(-1)).toBe(
+      `${WEATHER}/v1/forecast?hourly=temperature_2m,precipitation&latitude=52.52&longitude=13.41`
+    )
+  })
+
+  test("REST Countries' way (epic `data` P35):  every country at once, each map by a code a list of things with its code", async () => {
+    const COUNTRIES = "https://countries.test"
+    const france = {
+      name: { common: "France", native: { fra: { official: "République française", common: "France" } } },
+      ccn3: "250",
+      currencies: { EUR: { name: "Euro", symbol: "€" } },
+      languages: { fra: "French" },
+      latlng: { lat: 46, lng: 2 },
+      idd: { root: "+3", suffixes: ["3"] }
+    }
+    const aruba = {
+      name: {
+        common: "Aruba",
+        native: { nld: { official: "Aruba", common: "Aruba" }, pap: { official: "Aruba", common: "Aruba" } }
+      },
+      ccn3: "533",
+      currencies: { AWG: { name: "Aruban florin", symbol: "ƒ" } },
+      languages: { nld: "Dutch", pap: "Papiamento" },
+      latlng: { lat: 12.5, lng: -69.97 },
+      idd: { root: "+2", suffixes: ["97"] }
+    }
+    const afghanistan = { ...aruba, ccn3: "004", currencies: { AFN: { name: "Afghan afghani", symbol: "؋" } } }
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`)
+      return url.pathname === "/countries.json"
+        ? Response.json([france, aruba, afghanistan])
+        : new Response("nope", { status: 404 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: COUNTRIES,
+      kind: "web server",
+      into: "/C.spell",
+      name: "world",
+      collections: ["countries=/countries.json"]
+    })
+    // each code a thing's own, not a type of its own:  `EUR`, `fra`
+    expect(spell).toContain(`- its "currencies" is a list of currencies`)
+    expect(spell).toContain(`- its "languages" is a list of languages`)
+    expect(spell).toContain(`- its "native" is a list of natives`)
+    expect(spell).toMatch(
+      /a "currency" is a thing:\n\t- its "code" is text\n\t- its "name" is text\n\t- its "symbol" is text/
+    )
+    expect(spell).toMatch(/a "language" is a thing:\n\t- its "code" is text\n\t- its "name" is text/)
+    expect(spell).not.toMatch(/"EUR"|"fra" is|"nld" is/)
+    // a thing's few fields, the same in every row, are its fields
+    expect(spell).toContain(`- its "lat" is a number`)
+    // a code in digits stays text:  `004`, `+3`
+    expect(spell).toContain(`- its "ccn3" is text`)
+    expect(spell).toContain(`- its "root" is text`)
+    const { collections } = descriptions.get("/C.json5")!
+    expect(collections.countries).toMatchObject({ paging: "none", readThrough: { rows: 3 } })
+    expect(collections.countries!.fields.currencies).toMatchObject({ isListInside: true, isByCode: true })
+  })
+
+  test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
+    const at = (path: string) => `${API}${path}`
+    const pikachu = {
+      id: 25,
+      name: "pikachu",
+      weight: 60,
+      types: [{ slot: 1, type: { name: "electric", url: at("/type/13/") } }],
+      stats: [{ base_stat: 90, stat: { name: "speed", url: at("/stat/6/") } }],
+      abilities: [{ is_hidden: true, ability: { name: "static", url: at("/ability/9/") } }],
+      sprites: {
+        front_default: "f.png",
+        versions: Object.fromEntries(["i", "ii", "iii", "iv"].map((n) => [`generation-${n}`, { x: {} }]))
+      },
+      location_area_encounters: at("/pokemon/25/encounters")
+    }
+    const routes = {
+      [API]: { pokemon: at("/pokemon/"), type: at("/type/") },
+      [at("/pokemon")]: {
+        count: 1351,
+        next: at("/pokemon/more?offset=1&limit=1"),
+        results: [{ name: "pikachu", url: at("/pokemon/25/") }]
+      },
+      [at("/pokemon/more")]: { count: 1351, next: null, results: [{ name: "raichu", url: at("/pokemon/26/") }] },
+      [at("/pokemon/25/")]: pikachu,
+      [at("/type")]: { count: 21, next: null, results: [{ name: "electric", url: at("/type/13/") }] },
+      [at("/type/13/")]: { id: 13, name: "electric" }
+    }
+    const { ingest, descriptions } = ingestOf(routes)
+    const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "poke api" })
+    expect(spell).toContain(`- its lists give only each one's "name"`)
+    expect(spell).toContain(`- it gives up to 2000 at a time`)
+    expect(spell).toContain(`- its id is its "url"`)
+    expect(spell).toContain(`- its "number" is a number, stored as "id"`)
+    expect(spell).toContain(`- its "weight" is a number`)
+    expect(spell).toContain(`- its "types" is a list of pokemon types`)
+    expect(spell).toContain(`- its "kind" is a type, stored as "type"`)
+    expect(spell).toContain(`- its "hidden" is yes or no, stored as "is_hidden"`)
+    expect(spell).toContain(`- its "location area encounters" is text  // an address`)
+    expect(spell).not.toMatch(/generation i/)
+    const pokemon = descriptions.get("/P.json5")!.collections.pokemon!
+    expect(pokemon).toMatchObject({ idField: "url", listsGive: ["name"] })
+  })
+
+  test("a name and an address to a collection nobody asked for is the place's one name type, held whole (epic `data` I47)", async () => {
+    const at = (path: string) => `${API}${path}`
+    const pikachu = {
+      id: 25,
+      name: "pikachu",
+      types: [{ slot: 1, type: { name: "electric", url: at("/type/13/") } }],
+      stats: [{ base_stat: 90, stat: { name: "speed", url: at("/stat/6/") }, chart: at("/charts/6") }],
+      color: { name: "yellow", url: at("/pokemon-color/10/") },
+      forms: [{ name: "pikachu", url: at("/pokemon-form/25/") }]
+    }
+    const routes = {
+      [API]: { pokemon: at("/pokemon/"), type: at("/type/") },
+      [at("/pokemon")]: { count: 1, next: null, results: [pikachu] },
+      [at("/type")]: { count: 1, next: null, results: [{ id: 13, name: "electric" }] }
+    }
+    const { ingest } = ingestOf(routes)
+    const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "poke api" })
+    // one of its own collections stays a link;  the rest are each a poke api name, with no comment
+    expect(spell).toContain(`- its "kind" is a type, stored as "type"`)
+    expect(spell).toContain(`- its "stat" is a poke api name\n`)
+    expect(spell).toContain(`- its "color" is a poke api name\n`)
+    expect(spell).toContain(`- its "forms" is a list of poke api names\n`)
+    // a plain address inside a row says so, as one at the top does
+    expect(spell).toContain(`- its "chart" is text  // an address`)
+    // ONE type for the whole place
+    expect(spell.match(/^a "poke api name" is a thing:/gm)).toHaveLength(1)
+    expect(spell).toContain(`\t- its "name" is text\n\t- its "address" is text, stored as "url"  // never read`)
+    // read through it, the pair is held whole:  its name, and its address still there
+    const { core } = await import("spell/parser/core")
+    const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
+    const held = globalThis.fetch
+    globalThis.fetch = fakeFetch(routes).fetch
+    try {
+      core.resetRuntime()
+      const { Pokemon } = runSpellFiles([{ path: "/P.spell", contents: spell }])("Pokemon") as {
+        Pokemon: new () => unknown
+      }
+      const list = await core.savedThings(Pokemon as never, { page: { size: 5 } })
+      const [first] = list.items as Array<{ stats: { items: Array<{ stat: { name: string; address: string } }> } }>
+      expect(first!.stats.items[0]!.stat).toMatchObject({ name: "speed", address: at("/stat/6/") })
+    } finally {
+      globalThis.fetch = held
+    }
   })
 
   test("a field Spell's plain words stop at gets quotes;  an object inside a row is a type of its own, read in words", async () => {
@@ -312,6 +705,43 @@ describe("which kind", () => {
   })
 })
 
+describe("an Excel workbook (epic `data` P38)", () => {
+  /** A workbook of recipes and shelves, as a server answers it. */
+  function workbookAnswer() {
+    const book = XLSX.utils.book_new()
+    const sheet = (rows: unknown[][]) => XLSX.utils.aoa_to_sheet(rows)
+    XLSX.utils.book_append_sheet(
+      book,
+      sheet([
+        ["id", "title", "servings"],
+        ["r-1", "Soup", 4],
+        ["r-2", "Dal", 6]
+      ]),
+      "recipes"
+    )
+    XLSX.utils.book_append_sheet(
+      book,
+      sheet([
+        ["id", "height"],
+        ["top", 180]
+      ]),
+      "shelves"
+    )
+    XLSX.utils.book_append_sheet(book, sheet([]), "empty")
+    return new Response(XLSX.write(book, { type: "array", bookType: "xlsx" }) as ArrayBuffer)
+  }
+
+  test("its address's ending says it's a sheet:  one collection per sheet, its header row the fields", async () => {
+    const { ingest } = ingestOf({ "https://box.test/recipes.xlsx": workbookAnswer() })
+    const { description, spell } = await ingest.add({ address: "https://box.test/recipes.xlsx", into: "/X.spell" })
+    expect(description.about).toMatchObject({ kind: "sheet", name: "recipes sheet" })
+    expect(Object.keys(description.collections).sort()).toEqual(["recipes", "shelves"])
+    expect(spell).toContain(`recipes sheet is a sheet at "https://box.test/recipes.xlsx"`)
+    expect(spell).toContain(`- its "servings" is a number`)
+    expect(spell).toContain(`- its "height" is a number`)
+  })
+})
+
 describe("which file", () => {
   test("none:  it asks, and with no one to ask, it stops", async () => {
     await expect(ingestOf(STARS).ingest.add({ address: API })).rejects.toThrow(/--into <file>/)
@@ -385,7 +815,7 @@ describe("the agent", () => {
     const description = descriptions.get("/A.json5")!
     expect(description.about).toMatchObject({ readBy: "a test", version: { says: "1.2", where: "its docs" } })
     expect(description.canDo.limits).toBe("100 a day")
-    expect(description.notes).toContain("Everything is public.")
+    expect(description.agentNotes).toContain("Everything is public.")
     expect(description.collections.heroes!.fields.homeworld!.linksTo).toBe("planets")
   })
 
@@ -434,6 +864,62 @@ describe("a key", () => {
   })
 })
 
+describe("GitHub's way (epic `data` P28)", () => {
+  const at = (path: string) => `${API}${path}`
+  const LIMITS = { "x-ratelimit-limit": "60", "x-ratelimit-remaining": "59", "x-ratelimit-reset": "1793764004" }
+  const issue = (number: number) => ({
+    number,
+    title: `Issue ${number}`,
+    url: at(`/repos/o/r/issues/${number}`),
+    reactions: { total_count: 1, "+1": 1, "-1": 0, laugh: 0 }
+  })
+  const ROUTES = {
+    [API]: Response.json({ current_user_url: at("/user") }, { headers: LIMITS }),
+    [at("/repos/o/r/issues")]: Response.json([issue(1)], {
+      headers: { ...LIMITS, link: `<${at("/repos/o/r/issues/more")}>; rel="next"` }
+    }),
+    [at("/repos/o/r/issues/more")]: Response.json([issue(2)], { headers: LIMITS }),
+    [at("/users/ryansolid")]: Response.json(
+      { login: "ryansolid", name: "Ryan", public_repos: 109 },
+      { headers: LIMITS }
+    )
+  }
+  const ASK = {
+    address: API,
+    into: "/G.spell",
+    name: "github",
+    keySecret: "GH_KEY",
+    collections: ["issues=/repos/o/r/issues", "users=/users/{name}"],
+    samples: ["ryansolid"]
+  }
+
+  test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
+    const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
+    const { spell, description } = await ingest.add(ASK)
+    expect(spell).toContain(`- its key is the secret "GH_KEY", if it's set`)
+    expect(spell).toContain(`- its next page is in its "Link" header`)
+    expect(spell).toContain(`a "user" is a thing:`)
+    expect(spell).toContain(`- a user's id is its "login"`)
+    expect(spell).not.toMatch(/"\+1"|its "1"/)
+    expect(description.notes.join("\n")).toMatch(/Left out reaction's "\+1"/)
+    expect(description.spellCantSay.join("\n")).not.toMatch(/Link header/)
+    // asked once with no key, to see that it answers without one
+    expect(asked.filter(({ headers }) => !headers.get("authorization")).length).toBe(1)
+    expect(descriptions.get("/G.json5")!.about.keyIfSet).toBe(true)
+    // 60 an hour with no key, two collections:  a check every 20 minutes keeps to a tenth of it
+    expect(spell).toContain(`- check it every 20 minutes`)
+    expect(description.canDo.limits).toMatch(/It allows 60 requests/)
+  })
+
+  test("looking again leaves out what it left out before", async () => {
+    const { ingest, texts } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
+    await ingest.add(ASK)
+    const { spell } = await ingest.update("/G.spell")
+    expect(spell).not.toMatch(/"\+1"|its "1"/)
+    expect(texts.get("/G.spell")).toContain(`- its next page is in its "Link" header`)
+  })
+})
+
 describe("the manners", () => {
   test("it names itself, and never sends a write, whoever asks", async () => {
     const { fetch, asked } = fakeFetch({ [API]: {} })
@@ -463,6 +949,28 @@ describe("the manners", () => {
     expect(waits).toContain(3000)
   })
 
+  test("a rate limit used up:  it waits for the reset when that's soon, else stops, saying when (epic `data` P28)", async () => {
+    const waits: number[] = []
+    let tries = 0
+    const usedUp = (inMs: number) => ({
+      "x-ratelimit-remaining": "0",
+      "x-ratelimit-reset": String(Math.ceil((Date.now() + inMs) / 1000))
+    })
+    const soon = (async () =>
+      ++tries === 1
+        ? new Response("limit", { status: 403, headers: usedUp(3000) })
+        : Response.json({})) as typeof globalThis.fetch
+    const reader = new PoliteReader({ fetch: soon, sleep: async (msec) => void waits.push(msec) })
+    expect((await reader.read(API)).status).toBe(200)
+    expect(Math.max(...waits)).toBeGreaterThan(1000)
+    const later = (async () =>
+      new Response("limit", { status: 403, headers: usedUp(3_600_000) })) as typeof globalThis.fetch
+    const stopped = new PoliteReader({ fetch: later, sleep: async () => {} })
+    await expect(stopped.read(API)).rejects.toThrow(
+      /stars.test says its rate limit is used up for now:  .* --key-secret/
+    )
+  })
+
   test("it stops at a size:  an answer too big is cut, and a look too long stops", async () => {
     const big = new PoliteReader({
       fetch: (async () => new Response("x".repeat(3_000_000))) as typeof globalThis.fetch,
@@ -487,7 +995,7 @@ describe("looking again", () => {
     edit: (text: string) => string,
     changed: Record<string, unknown>,
     others: Record<string, string> = {},
-    { olderTool = false }: { olderTool?: boolean } = {}
+    { olderTool = false, before }: { olderTool?: boolean; before?: (written: PlaceDescription) => void } = {}
   ) {
     const added = ingestOf(STARS, {}, others)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
@@ -495,6 +1003,7 @@ describe("looking again", () => {
     // what the description says it wrote, written the same way:  an older version of the tool
     const written = added.descriptions.get("/Stars.json5")!
     if (olderTool) written.spell = edit(written.spell.join("\n")).split("\n")
+    before?.(written)
     const { fetch } = fakeFetch({ ...STARS, ...changed })
     const ingest = new PlaceIngest({
       fetch,
@@ -526,6 +1035,41 @@ describe("looking again", () => {
     expect(text).not.toMatch(/written as text|hair color is its/)
     expect(result.couldntChange).toEqual([])
     expect(result.changes.join("\n")).toMatch(/Removed, as its field finds it by its words:  - a person's hair color/)
+  })
+
+  test("a note fixed since is gone;  the agent's stay, as it isn't asked again (epic `data` I54)", async () => {
+    const stale = `No row read filled person's "mass".`
+    const { description } = await updated(
+      (same) => same,
+      {},
+      {},
+      {
+        before: (written) => {
+          written.notes.push(stale)
+          written.agentNotes = ["It asks people to be gentle."]
+        }
+      }
+    )
+    expect(description.notes).not.toContain(stale)
+    expect(description.agentNotes).toEqual(["It asks people to be gentle."])
+  })
+
+  test("a description from before agentNotes:  its notes sorted once, the checks' said again, the rest the agent's (epic `data` I54)", async () => {
+    const stale = `No row read filled person's "mass".`
+    const { description } = await updated(
+      (same) => same,
+      {},
+      {},
+      {
+        before: (written) => {
+          delete written.agentNotes
+          written.about.readBy = "an agent"
+          written.notes = [stale, "Expected mass to be type 'number', got: x", "It asks people to be gentle."]
+        }
+      }
+    )
+    expect(description.notes).toEqual([])
+    expect(description.agentNotes).toEqual(["It asks people to be gentle."])
   })
 
   test("nothing changed:  it says so, and the file's as it was", async () => {

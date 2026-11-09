@@ -10,73 +10,85 @@
     {
       "type": "Habit",
       "superType": "View",
-      "defined": "/HabitTracker.spell:414-1879"
+      "defined": "/HabitTracker.spellml:320-2448"
     },
     {
       "property": "name",
       "of": "Habit",
       "datatype": "text",
-      "defined": "/HabitTracker.spell:444-462"
+      "defined": "/HabitTracker.spellml:342-363"
     },
     {
       "property": "monday",
       "of": "Habit",
+      "group": "days",
+      "groupDescription": "A yes or no for each day of the week",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:466-491"
+      "defined": "/HabitTracker.spellml:437-465"
     },
     {
       "property": "tuesday",
       "of": "Habit",
+      "group": "days",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:495-521"
+      "defined": "/HabitTracker.spellml:470-499"
     },
     {
       "property": "wednesday",
       "of": "Habit",
+      "group": "days",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:525-553"
+      "defined": "/HabitTracker.spellml:504-535"
     },
     {
       "property": "thursday",
       "of": "Habit",
+      "group": "days",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:557-584"
+      "defined": "/HabitTracker.spellml:540-570"
     },
     {
       "property": "friday",
       "of": "Habit",
+      "group": "days",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:588-613"
+      "defined": "/HabitTracker.spellml:575-603"
     },
     {
       "property": "saturday",
       "of": "Habit",
+      "group": "days",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:617-644"
+      "defined": "/HabitTracker.spellml:608-638"
     },
     {
       "property": "sunday",
       "of": "Habit",
+      "group": "days",
       "datatype": "choice",
-      "defined": "/HabitTracker.spell:648-673"
+      "defined": "/HabitTracker.spellml:643-671"
     },
     {
       "property": "days",
       "of": "Habit",
+      "group": "totals",
+      "groupDescription": "Worked out from its days, again as each one is ticked",
       "datatype": "list of choices",
-      "defined": "/HabitTracker.spell:705-811"
+      "defined": "/HabitTracker.spellml:764-925"
     },
     {
       "property": "count",
       "of": "Habit",
+      "group": "totals",
       "datatype": "number",
-      "defined": "/HabitTracker.spell:856-917"
+      "defined": "/HabitTracker.spellml:940-1054"
     },
     {
       "property": "streak",
       "of": "Habit",
+      "group": "totals",
       "datatype": "number",
-      "defined": "/HabitTracker.spell:961-1149"
+      "defined": "/HabitTracker.spellml:1059-1299"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -87,40 +99,77 @@
         "statement",
         "expression"
       ],
+      "group": "totals",
       "kind": "method",
       "name": "draw it",
-      "defined": "/HabitTracker.spell:1242-1879"
+      "defined": "/HabitTracker.spellml:1315-2183"
     },
     {
       "type": "Week",
       "superType": "ViewableList",
       "itemType": "Habit",
-      "defined": "/HabitTracker.spell:1917-2100"
+      "defined": "/HabitTracker.spellml:2564-2978"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Week",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/HabitTracker.spellml:2743-2969"
+    },
+    {
+      "syntax": "test streaks",
+      "output": "test_streaks",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "streaks",
+      "defined": "/HabitTracker.spellml:2195-2439"
     },
     {
       "property": "week",
       "of": "Habit",
-      "group": "The week:  the habits, one a row",
+      "group": "The week",
       "datatype": "Week",
       "exclusive": true,
-      "defined": "/HabitTracker.spell:2128-2155"
+      "defined": "/HabitTracker.spellml:3029-3056"
     },
     {
       "type": "HabitTracker",
       "superType": "App",
-      "defined": "/HabitTracker.spell:2173-3106"
+      "defined": "/HabitTracker.spellml:3138-4313"
     },
     {
       "property": "habits",
       "of": "HabitTracker",
       "datatype": "Week",
-      "defined": "/HabitTracker.spell:2207-2233"
+      "defined": "/HabitTracker.spellml:3155-3184"
     },
     {
       "property": "draft",
       "of": "HabitTracker",
       "datatype": "text",
-      "defined": "/HabitTracker.spell:2274-2293"
+      "defined": "/HabitTracker.spellml:3189-3282"
+    },
+    {
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
+      "rule": "method_call",
+      "of": "HabitTracker",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "create it",
+      "returns": "nothing",
+      "defined": "/HabitTracker.spellml:3288-3694"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -134,7 +183,7 @@
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/HabitTracker.spell:2359-2478"
+      "defined": "/HabitTracker.spellml:3708-3905"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -147,39 +196,32 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HabitTracker.spell:2548-3106"
-    },
-    {
-      "syntax": "test streaks",
-      "output": "test_streaks",
-      "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "streaks",
-      "defined": "/HabitTracker.spell:3488-3746"
+      "defined": "/HabitTracker.spellml:3919-4304"
     }
   ],
   "codeLines": [
-    15,
-    18,
-    23,
-    28,
-    33,
-    38,
-    43,
-    48,
-    53,
-    59,
-    64,
-    69,
-    82,
-    106,
-    120,
-    123,
-    126,
-    132,
-    138,
-    145,
-    201
+    16,
+    19,
+    24,
+    29,
+    34,
+    39,
+    44,
+    49,
+    54,
+    60,
+    65,
+    70,
+    83,
+    117,
+    122,
+    136,
+    163,
+    170,
+    173,
+    179,
+    185,
+    208,
+    214
   ]
 }

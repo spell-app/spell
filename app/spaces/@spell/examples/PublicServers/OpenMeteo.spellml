@@ -1,0 +1,80 @@
+# Open-Meteo
+The weather to come, hour by hour, today and tomorrow, for a few cities.
+Every thing it shows is in OpenMeteo.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+with `<spell-more-of>`, so looking again at the server never touches a line of this.
+Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.
+
+<spell-thing "open meteo page">
+	<spell>
+		- its "cities" is a list of cities
+		- its "city" is a city
+		- to create it:
+			add a new city with name = "Berlin", latitude = 52.52, longitude = 13.41 to its cities
+			add a new city with name = "New York", latitude = 40.71, longitude = -74.01 to its cities
+			add a new city with name = "Tokyo", latitude = 35.68, longitude = 139.69 to its cities
+			add a new city with name = "Buenos Aires", latitude = -34.6, longitude = -58.38 to its cities
+			set its city to the first item of its cities
+	</spell>
+	<property "forecasts" description="The city's, from Open-Meteo:  asked for by where it is, with no list of them all">every forecast where its latitude is the latitude of the city and its longitude is the longitude of the city</property>
+	<property "forecast" description="Its one forecast:  Open-Meteo answers with one, for the nearest place it has">the first item of its forecasts</property>
+
+	<draw>
+		<stack spacing="xl">
+			<stack spacing="sm">
+				<header size="large">The weather, from Open-Meteo</header>
+				<toolbar appearance="secondary" aria-label="Cities">
+					{draw each city in its cities}
+				</toolbar>
+			</stack>
+			{draw the forecast table of it}
+			<text size="small" paragraph>
+				From <link link="https://open-meteo.com/en/docs">Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
+			</text>
+		</stack>
+	</draw>
+
+	<draw "forecast table">
+		<if its forecast>
+			<stack spacing="sm">
+				<text color="grey">The next two days in {its forecast's timezone}, hour by hour.</text>
+				{draw the hour table of its forecast}
+			</stack>
+		</if>
+		while waiting:
+			<loader visible inline text>Asking Open-Meteo</loader>
+		if that fails:
+			<text>Open-Meteo can't be reached just now.</text>
+	</draw>
+</spell-thing>
+
+
+# A city
+Where it is on Earth:  what its forecast is asked for by.
+
+<spell-thing "city">
+	<spell>
+		- its "name" is text
+		- its "latitude" is a number
+		- its "longitude" is a number
+	</spell>
+
+	<draw>
+		<item active={it is the public servers' weather's city} onClick={pick it}>{its name}</item>
+	</draw>
+</spell-thing>
+
+
+# Its hours
+A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
+
+<spell-more-of "forecast">
+	<draw "hour table">
+		<for hour in its hours as="table" appearance="very-basic" padding="compact" collapsing unstackable>
+			<cell "Day"><if the hour of its time is 0>{its time}</if></cell>
+			<cell "Hour" align="right">{the hour of its time}:00</cell>
+			<cell "Temperature" align="right">{its temperature}</cell>
+			<cell "Rain" align="right">{its precipitation}</cell>
+			<cell "Wind" align="right">{its wind speed}</cell>
+		</for>
+	</draw>
+</spell-more-of>

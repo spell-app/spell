@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from "node:fs"
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 
-import { RealPath } from "spell/server/RealPath"
+import { RealPath, pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
@@ -96,8 +96,8 @@ export class RepoList {
   repoOf(file: string, repos = this.repos()): { repo: Repo; path: string } | undefined {
     const real = RealPath.of(file)
     for (const repo of repos) {
-      const inside = relative(RealPath.of(repo.content), real)
-      if (inside && !inside.startsWith("..") && !isAbsolute(inside)) return { repo, path: inside.split(sep).join("/") }
+      const path = pathInside(RealPath.of(repo.content), real)
+      if (path) return { repo, path }
     }
     return undefined
   }

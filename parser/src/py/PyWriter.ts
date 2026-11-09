@@ -4,6 +4,12 @@ import * as pyText from "./pyText"
 
 const { isCoreCall } = P.jsShapes
 
+/**
+ * `core`'s calls that read or ask a place, each a coroutine in `spell_core` (`places.py`, epic `data` P40):
+ * the JavaScript core's that wait (`P.CORE_CALLS_THAT_WAIT`), but the dialogs, which Python hasn't ported.
+ */
+const PLACE_CALLS_THAT_WAIT = new Set(["savedThings", "savedThingAt", "savedThingWithId", "inOneGo", "callPlace"])
+
 /****************
  * ### `PyWriter`
  * Writes a spell tree as Python, on `asyncio`:  the `py` target's writer (epic `python-target`;  one target since P22).
@@ -42,9 +48,14 @@ export class PyWriter extends PyBaseWriter {
   /** The steps lifted out of the top level, for a name each -- see `topLevelStep()`. */
   protected steps = 0
 
-  /** Does `call`, of `core`, wait?  Spell's pause, and a `send` a handler of which waits:  `spell_core` has no other. */
+  /**
+   * Does `call`, of `core`, wait?  `spell_core` has three kinds:
+   * - spell's pause
+   * - a `send` a handler of which waits
+   * - a read of a place, `core.saved_things()` ... (epic `data` P40):  each `PLACE_CALLS_THAT_WAIT`
+   */
   protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
-    return call.methodName === "pauseFor" || this.sendWaits(call)
+    return call.methodName === "pauseFor" || PLACE_CALLS_THAT_WAIT.has(call.methodName) || this.sendWaits(call)
   }
 
   /** Is `node` a call of a function that waits, by name, or spell's own pause? */
@@ -105,6 +116,8 @@ export class PyWriter extends PyBaseWriter {
       return `await ${pyText.call("core.filter_in_turn", this.items(node.args.args))}`
     }
     const written = super.ASTScopedMethodInvocation(node)
+    // a read of a place:  awaited wherever it's written, as `core.saved_things()` is a coroutine
+    if (isCoreCall(node) && PLACE_CALLS_THAT_WAIT.has(node.methodName)) return `await ${written}`
     if (this.project.togetherWaits(node, (run) => this.project.waitingMethods.has(run))) return `await ${written}`
     // a `send` where nothing can wait, a drawing or a getter, runs its handlers beside it:  `core.send()`
     const waits = isCoreCall(node)

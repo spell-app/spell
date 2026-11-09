@@ -138,6 +138,48 @@ describe("send", () => {
   })
 })
 
+describe("trigger, heard by a page's or an app's own handler (epic `language` T78)", () => {
+  beforeEach(() => {
+    core.resetRuntime()
+  })
+
+  /** A page and an app each counting the fizzes they hear themselves, beside a listener at the file's top. */
+  const LISTENERS = [
+    "explainer is a page where:",
+    '\t- its "count" is a number',
+    "\t- on fizz with number as a number:",
+    "\t\tset its count to its count + the number",
+    "game is an app where:",
+    '\t- its "count" is a number',
+    "\t- on fizz:",
+    "\t\tset its count to its count + 1",
+    "heard is a new list",
+    "on fizz with number as a number:",
+    "\tadd the number to heard",
+    "trigger fizz with number = 3",
+    "trigger fizz with number = 6"
+  ]
+
+  test("the page and the app hear it, and so does the program's own `on`", () => {
+    const run = runSpell(LISTENERS)("explainer, game, heard")
+    expect((run.explainer as { count: number }).count).toBe(9)
+    expect((run.game as { count: number }).count).toBe(2)
+    expect([...(run.heard as Iterable<number>)]).toEqual([3, 6])
+  })
+
+  test("a thing that's no page or app doesn't:  `send` it to one", () => {
+    const run = runSpell([
+      'a "card" is a thing where:',
+      '\t- its "count" is a number',
+      "\t- on fizz:",
+      "\t\tset its count to its count + 1",
+      "set the card to a new card with count = 0",
+      "trigger fizz"
+    ])("card")
+    expect((run.card as { count: number }).count).toBe(0)
+  })
+})
+
 describe("while", () => {
   test("`- while the mouse is down:` is a method the page starts and ends", () => {
     const compiled = compile([

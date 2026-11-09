@@ -89,9 +89,27 @@ export function formOfName(name: string | undefined): SpellForm {
  * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or markup, in any language?
  * - `Card.spell`, `Carta.es.spell`, `Card.spellml`, `Carta.es.spellml`, the old `Card.spellx`
  * - NOT a project's built output, `Solitaire.spell.js`.
+ * - NOT a property editors file, `Card.editor.spellml` (`isPropertyEditorsName()`):  it's never compiled.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name))
+  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name)) && !isPropertyEditorsName(name)
+}
+
+/** The end of a property editors file's name:  `.editor.spellml`, `.editors.spellml`, `.editor.es.spellml` ... */
+const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell(?:ml|x)$/
+
+/**
+ * Is `name` (a file's name or path) a PROPERTY EDITORS file's (epic `editor` P25, from `data`'s P31 Q28)?
+ * - `Card.editor.spellml`, one type's;  `Solitaire.editors.spellml`, any of the project's types'
+ * - In another language, its code before the ending:  `Carta.editor.es.spellml`
+ * - It holds `<spell-property-editor "card">` blocks (or the old short `<property-editor "card">`):
+ *   each a type's layout for its Inspector card, as markup.
+ * - One of a project's own files, which the editor opens and colours as spellml, and the Inspector reads;
+ *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
+ * - Not the property editor PAGE, `Card.editor.html` (`EDITOR_PAGE_SUFFIX`):  that's a page of its own.
+ */
+export function isPropertyEditorsName(name: string | undefined): boolean {
+  return !!name && PROPERTY_EDITORS_NAME.test(name)
 }
 
 /**
@@ -195,7 +213,10 @@ export type ProjectManifestJSON5 = {
   imports: ProjectManifestImport[]
   /** Its name for people, from its project file, when its folder's name can't say it:  see `SpellProject.title`. */
   title?: string
-  /** This project's semver, from its project file -- stamped on its declarations. */
+  /**
+   * This project's semver, from its project file -- stamped on its declarations.
+   * - It marks a project made to be imported:  with no `exports`, its own types are made by name (`P.WriterOptions.extendable`).
+   */
   version?: string
   /** Names it offers importers, from its project file -- default:  everything it declares. */
   exports?: string[]
@@ -291,11 +312,60 @@ export type ProjectList = ProjectListEntry[]
  * - `description` only when its project file has one:  what it shows, for the editor's landing page cards.
  * - `language` only when its files are all written in another language than English, by their names:
  *   `es` for Solitario (`Carta.es.spell` ...), so the landing page lists it under "En Español".
+ * - `isSite` only when one of its files declares a site:  the page of a group's sites lists those.
  */
-export type ProjectListEntry = { path: string; title?: string; description?: string; language?: string }
+export type ProjectListEntry = {
+  path: string
+  title?: string
+  description?: string
+  language?: string
+  isSite?: boolean
+}
 
 /** List of project addresses, e.g. `owen@spell/errors`:  a `ProjectList`'s paths. */
 export type ProjectPathList = string[]
+
+// ## CompileCache
+
+/**
+ * Where `SP.CompileCache` keeps its entries, as text, by key:  the editor's is the page server's `/api/compiles`.
+ * - It files each under the compiler's version:  a new compiler finds none.
+ * - Either may throw:  the cache then just misses.
+ */
+export type CompileCacheStore = {
+  /** Entry `key`'s text, or `undefined` if there's none */
+  get(key: string): Promise<string | undefined>
+  /** Keep `text` as entry `key` */
+  put(key: string, text: string): Promise<void>
+}
+
+/** What a project's compile wrote, as `SP.CompileCache` keeps it:  everything `SpellProject.compile()` sets. */
+export type CompiledEntry = {
+  /** Its running code (`js/solid`'s), as `SpellProject.compiled`:  without the line pointing at its source map */
+  compiled: string
+  /** Its declarations file's text */
+  declarations: string
+  /** The languages it has words files in, its program's first */
+  languages: string[]
+  /** Its words files' text, by language */
+  words: Record<string, string>
+  /** What it wrote for each target, by target name, `js/solid` first */
+  targets: Record<string, CompiledTargetEntry>
+}
+
+/** What a project's compile wrote for one target:  see `CompiledEntry`. */
+export type CompiledTargetEntry = {
+  /** Its output file's text */
+  code: string
+  /** Its source map's text, for a target that has one */
+  map?: string
+  /** Its own words files' text, by language, for a target that has them (Python's) */
+  words?: Record<string, string>
+  /** Its page's drawing half, for a target that has one */
+  elements?: string
+  /** Its web app, for a target that has one */
+  app?: string
+}
 
 // ## SpellProjectRoot
 
@@ -548,6 +618,13 @@ export const SPELL_VERSION = "0.8.0"
  *   so another project can import it WITHOUT re-parsing its `.spell` files -- whatever language that output is in.
  * - JSON:  no `Match`es, classes or functions.
  */
+/**
+ * An app's widget defaults:  tag => attribute => value, in its component pack's own names (epic `language` P29).
+ * - e.g. `{ "ui-button": { appearance: "pill" } }`:  what `<ui-defaults>` compiles to (`ui_defaults`),
+ *   and what `core.useDefaults()` takes.
+ */
+export type UIDefaultsTable = Readonly<Record<string, Readonly<Record<string, string | number | boolean>>>>
+
 export type SpellDeclarationsData = {
   /** This project's own semver, from its `project.json` -- if it has one. */
   version?: string
@@ -570,6 +647,13 @@ export type SpellDeclarationsData = {
    * - Each an `export` of its compiled JS.
    */
   provides: string[]
+  /**
+   * The imported types this project makes its own class of, by adding to them (epic `language` P26), e.g. `["Card"]`:
+   * `export class Card extends CardsCard`.  Missing when none.
+   * - Each is in `provides` too.
+   * - An importer must import the project it comes from FIRST:  ours extends that one's -- see `SpellDeclarations.load()`.
+   */
+  subclasses?: string[]
   /** What each declaring statement declared, in source order. */
   statements: SpellDeclaration[]
   /**
@@ -610,6 +694,11 @@ export type SpellDeclarationPlace = {
   output?: string
   /** For a type:  the project's other types it names (Q33), by class name. */
   uses?: string[]
+  /**
+   * A `to test ...` method, e.g. `<test "card setup">`:  a top-level function, so no `of`;
+   * the side bar shows it with the type whose lines it's written in.
+   */
+  test?: true
 }
 
 /**
@@ -715,6 +804,13 @@ export type SpellDeclaration = {
    */
   itemType?: string
   /**
+   * `type`'s units, if it's a DIMENSION, e.g. a program's own `data size is a dimension:` (epic `language` T34) --
+   * see `P.TypeScope.units`:  so an importer reads `3 KB in B` too.
+   */
+  units?: P.DimensionUnit[]
+  /** What a `property` measures, e.g. a length in cm -- see `P.ScopeVariable.measure`. */
+  measure?: P.Measure
+  /**
    * `true` if `property` names the ONE list of a family holding its item,
    * e.g. `pile` on `Card` for `a card belongs to one pile` -- its `datatype` is the list type.
    * - Read-only:  see `P.ScopeVariable.exclusive`.
@@ -771,10 +867,21 @@ export type SpellDeclaration = {
   /** Compiled output of any `constants` NOT output as just their name, quoted. */
   constantOutputs?: Record<string, string>
   /**
+   * On a PROPERTY:  the value each of its values said compiles to, when it isn't itself --
+   * a built-in template's Spanish `arriba` sets its `direction` to `up` (epic `language` T53).
+   * - See `P.ScopeVariable.valueOutputs`.
+   */
+  enumerationOutputs?: Record<string, string>
+  /**
    * The slots a view declared, e.g. `["front", "back"]` for `- it has slots "front" and "back"`, on type `of`
    * (epic `elemental-spell` P5) -- see `DeclaredSlots`.
    */
   slots?: string[]
+  /**
+   * An app's widget defaults, its `<ui-defaults>` block (epic `language` P29):  tag => attribute => value.
+   * - Another project names its file in `<ui-defaults source="...">`:  see `SpellDeclarations.uiDefaultsIn()`.
+   */
+  uiDefaults?: UIDefaultsTable
   /**
    * The name each slot compiles by, when it isn't its own:  a built-in template's Spanish `frente` draws its `front`
    * (epic `elemental-spell` Q71) -- see `P.TypeScope.slotOutputs`.

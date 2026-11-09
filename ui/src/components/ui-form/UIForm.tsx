@@ -156,6 +156,7 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
         this.hasHeldChanges = this.binding.hasHeld
         this.onHeldChanged()
       },
+      writesItself: (target, name, value) => this.writesItself(target, name, value),
       onWrite: (write) => this.onWritten(write)
     }
   })
@@ -190,6 +191,12 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
   /** `:state(error)`, `:state(info)` ...:  the state shown. */
   protected cssStates() {
     return FormStateFlags.of(this.shownState)
+  }
+
+  /** `:state(fluid)`:  in a `<ui-stack>`'s row, it takes the room left (`UIStack.css`;  epic `language` P35). */
+  @E.cssState("fluid")
+  get isFluid(): boolean {
+    return !!this.fluid
   }
 
   /** `:state(changed)`:  `apply="on save"` holds edits, not saved yet. */
@@ -551,6 +558,14 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
 
   /** A submit or a save passed validation:  for a subclass (the property editor tells its groups);  nothing here. */
   protected onSucceeded() {}
+
+  /**
+   * Write `value` to `target` itself, in place of the plain set:  for a subclass (the property editor's `writer`).
+   * - `true` when it did;  here, never.
+   */
+  protected writesItself(_target: object, _name: string, _value: unknown): boolean {
+    return false
+  }
 
   /** A control's value was written to its things:  for a subclass (`ui-changed`, "on change" rules);  nothing here. */
   protected onWritten(_write: { control: Element; name: string; value: unknown; things: readonly object[] }) {}

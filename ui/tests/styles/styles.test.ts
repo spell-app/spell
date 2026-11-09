@@ -1,5 +1,6 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
+import * as UIT from "spell/ui/components/components.types"
 import { AnimationNames } from "spell/ui/runtime"
 import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "spell/ui/styles"
 import { StyleGenerator } from "spell/ui/styles/StyleGenerator"
@@ -32,12 +33,14 @@ const RAW_SHEETS = import.meta.glob<string>(["./**/*.css", "!./themes/archive/**
 })
 
 /**
- * 14 KB:  the gzip budget for `foundationCSS`.
+ * 14.5 KB:  the gzip budget for `foundationCSS`.
  * - Was 12 KB;  the per-colour `-on` / `-inverted-on` contrast tokens and their remaps added ~0.65 KB.
  * - Was 13 KB;  the shared `font` and `link` looks every element takes (epic `ui-gaps` P3) went 8 bytes over it.
  * - Was 13.5 KB;  every theme's code colours, their recipe from its own colours (epic `debut` P22), added ~0.28 KB.
+ * - Was 14 KB;  the shared `shadow`, `width`, `min-width`, `max-width` and `font="heavy"` (epic `language` P35)
+ *   went 32 bytes over it.
  */
-const FOUNDATION_GZIP_BUDGET = 14 * 1024
+const FOUNDATION_GZIP_BUDGET = 14.5 * 1024
 
 /** `true` when Vite's Lightning CSS lowered `light-dark()` in the barrel's sheets (default targets). */
 const LIGHT_DARK_LOWERED = colorsCSS.includes("--lightningcss-light")
@@ -233,7 +236,7 @@ describe("src/styles/*.css", () => {
 ////////////////
 
 /** Attention animations run `static`;  the rest `in` / `out`. */
-const STATIC_ANIMATIONS = new Set<string>(["flash", "shake", "bounce", "tada", "pulse", "jiggle", "glow"])
+const STATIC_ANIMATIONS = new Set<string>(UIT.AttentionAnimations)
 
 /** A `.ui-dark` subtree gets `onDark` hues, in light DOM and through a shadow root. */
 function expectSchemes(shadowSheets: readonly string[]) {

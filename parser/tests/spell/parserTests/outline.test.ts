@@ -536,6 +536,104 @@ describe("outline style", () => {
     })
   })
 
+  // epic `data` I44:  the one-of-a-kind's variable belongs to the project
+  describe("the app's variable, from any file (I44):  `the score of the game`", () => {
+    const game = [
+      "game is an app where:",
+      '\t- its "score" is a number',
+      '\t- its "best score" is a number',
+      "\t- to reset:\n\t\tset its score to 0"
+    ]
+
+    test("a file before the app's reads it, in an action and a type's body", () => {
+      const run = runSpellFiles([
+        {
+          path: "/Card.spell",
+          contents: [
+            "a card is a thing where:",
+            "\t- to tap it:\n\t\tset the score of the game to the score of the game + 1",
+            // several words, declared in the later file:  known ahead by name
+            "\t- to keep it:\n\t\tset the best score of the game to the score of the game",
+            "to bump:\n\treset\n\tset the score of game to the score of game + 10"
+          ].join("\n")
+        },
+        {
+          path: "/Game.spell",
+          contents: [
+            ...game,
+            "bump",
+            "set card to a new card",
+            "tap card",
+            "keep card",
+            "set score to the score of the game",
+            "set best to the best score of the game"
+          ].join("\n")
+        }
+      ])
+      expect(run("score, best")).toEqual({ score: 11, best: 11 })
+    })
+
+    test("a file after the app's reads it at its top", () => {
+      const run = runSpellFiles([
+        { path: "/Game.spell", contents: game.join("\n") },
+        { path: "/Start.spell", contents: "set the score of the game to 5\nset score to the score of game" }
+      ])
+      expect(run("score")).toEqual({ score: 5 })
+    })
+
+    test("a top-level line that runs before it's made is refused, saying why", () => {
+      const { files } = parseSpellProject([
+        { path: "/Early.spell", contents: "print the score of the game\nreset\nrepeat 2 times:\n\tprint game" },
+        { path: "/Game.spell", contents: ["print game", ...game].join("\n") }
+      ])
+      const notMade = "game isn't made yet when this line runs:  it's made further on.  Say it inside an action"
+      expect(files[0]!.errors.map((error) => error.slice(0, 120))).toEqual([
+        expect.stringContaining(notMade),
+        expect.stringContaining(notMade),
+        expect.stringContaining(notMade)
+      ])
+      expect(files[1]!.errors).toEqual([expect.stringContaining(notMade)])
+    })
+
+    test("other top-level variables stay their file's own", () => {
+      const { files } = parseSpellProject([
+        { path: "/A.spell", contents: "set x to 1" },
+        { path: "/B.spell", contents: "print x + 1" }
+      ])
+      expect(files[1]!.errors).toEqual([expect.stringContaining("Don't understand")])
+    })
+
+    test("the scan knows it ahead:  a stub until its line, then the real one", () => {
+      const { scope } = parseSpellProject([{ path: "/Game.spell", contents: game.join("\n") }])
+      const variable = scope.variables.get("game", "LOCAL_ONLY")
+      expect(variable).toMatchObject({ name: "game", datatype: "Game", kind: "only" })
+      expect(variable.ahead).toBeUndefined()
+    })
+
+    test("in Spanish:  `los puntos del juego`, from a file before the app's;  a top-level read refused", () => {
+      const juego = ["juego es una aplicación donde:", '\t- sus "puntos" es un número']
+      const run = runSpellFiles([
+        {
+          path: "/Sumar.es.spell",
+          contents: "para sumar:\n\tponer los puntos del juego a los puntos del juego + 2"
+        },
+        {
+          path: "/Juego.es.spell",
+          contents: [...juego, "poner los puntos del juego a 1", "sumar", "puntos = los puntos del juego"].join("\n")
+        }
+      ])
+      expect(run("puntos")).toEqual({ puntos: 3 })
+
+      const { files } = parseSpellProject([
+        { path: "/Antes.es.spell", contents: "imprimir los puntos del juego" },
+        { path: "/Juego.es.spell", contents: juego.join("\n") }
+      ])
+      expect(files[0]!.errors).toEqual([
+        expect.stringContaining("juego aún no existe cuando corre esta línea:  se crea más adelante")
+      ])
+    })
+  })
+
   describe("body methods (P20, I15):  a method in a type's body that names no type is the type's", () => {
     test("`- to debug it:` is `to debug a game`;  `- to cheat at it:` keeps the type's name after `at`", () => {
       const sentences = ["a game is an app", "to debug a game:\n\tprint 1", "to cheat at a game:\n\tprint 2"]

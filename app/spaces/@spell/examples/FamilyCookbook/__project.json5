@@ -1,0 +1,15 @@
+{
+  "title": "Family Cookbook",
+  "description": "Your recipes on cards, saved in the cloud:  kept in this browser until you sign in, then on every device you sign in on.  One line of its API file says so, FamilyCookbook.api.spell",
+  "readsOtherPeoplesServers": true,
+  "imports": [
+    {
+      "path": "/FamilyCookbook.api.spell",
+      "active": true
+    },
+    {
+      "path": "/FamilyCookbook.spellml",
+      "active": true
+    }
+  ]
+}

@@ -27,6 +27,7 @@ import { FIELD_SELECTOR, type FieldApply } from "./UIForm.types"
  *   - anything else shows `value` (`""` for nullish)
  * - A dotted `name` reaches into nested things:  `name="font.size"` shows and writes `scope.font.size`.
  * - Control => object:  a change from a bound control (`input`, `change`, `ui-changed`) writes `scope[name]`,
+ *   (a control that `settlesItself`, a `<ui-search>`, only on `ui-changed` and `change`, after its own pause)
  *   when its `<ui-field apply>` says (`applyOf()`):
  *   - `immediately` (the default):  a microtask later, once the control holds its new value
  *   - `delayed [ms]`:  after a pause in typing (300ms);  a committed `change` writes at once
@@ -163,6 +164,8 @@ export class FormBinding {
     if (!this.bindings.size) return
     const control = this.controlFor(event)
     if (!control) return
+    // a control that settles itself (a search) writes on `ui-changed` alone, never a keystroke's `input`
+    if (event.type === "input" && (control as { settlesItself?: boolean }).settlesItself) return
     const apply = FormBinding.applyOf(control)
     const isCommitted = event.type === "change"
     if (apply.mode === "on leave" && !isCommitted) return void this.waiting.add(control)
@@ -247,8 +250,14 @@ export class FormBinding {
     if (this.form.isHolding()) return this.hold(control, binding, next)
     if (next === current) return
     FormBinding.markMixed(control, false)
-    for (const target of targets) FormBinding.write(target, binding.name, next)
+    for (const target of targets) this.write(target, binding.name, next)
     this.form.onWrite?.({ control, name: binding.name, value: next, things: targets })
+  }
+
+  /** `target[name] = value`, unless the form writes it itself (`writesItself()`). */
+  private write(target: Record<PropertyKey, unknown>, name: string, value: unknown) {
+    if (this.form.writesItself?.(target, name, value)) return
+    FormBinding.write(target, name, value)
   }
 
   /** `target[name] = value`, unless it's that already;  warns if it can't be set. */
@@ -309,7 +318,7 @@ export class FormBinding {
     for (const [control, { binding, value }] of this.held) {
       FormBinding.markMixed(control, false)
       const things = FormBinding.targetsOf(binding.scope())
-      for (const target of things) FormBinding.write(target, binding.name, value)
+      for (const target of things) this.write(target, binding.name, value)
       this.form.onWrite?.({ control, name: binding.name, value, things })
     }
     this.held.clear()
@@ -520,6 +529,11 @@ export type FormBindingProps = {
     canWrite(control: Element): boolean
     /** The held edits changed:  some, none, or others. */
     onHeldChange(): void
+    /**
+     * Write `value` to `target` itself, in place of the plain set:  `true` when it did.
+     * - Left out, or `false`:  `target[name] = value`.
+     */
+    writesItself?(target: object, name: string, value: unknown): boolean
     /** A control's value was written to its things (after a save, for held edits). */
     onWrite?(write: { control: Element; name: string; value: unknown; things: readonly object[] }): void
   }

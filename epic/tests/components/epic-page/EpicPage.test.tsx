@@ -324,7 +324,7 @@ describe("<epic-page>", () => {
     expect([mark(idle)?.dataset.state, mark(idle)?.getAttribute("color"), mark(idle)?.getAttribute("icon")]).toEqual([
       "paused",
       "grey",
-      "circle half stroke"
+      "circle notch"
     ])
     idle.remove()
     // every phase done, a question open:  errors;  answered, it's done, and the DONE label says so alone
@@ -1015,7 +1015,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     const p2 = host.querySelector("#p2")!
     const status = () => p2.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
     const rail = () => (phases as unknown as { contentsEntry: { count: { running: number } } }).contentsEntry.count
-    expect(status().querySelector(".spinner")).toBeNull()
+    expect(status().querySelector(".icon.working > svg")).toBeNull()
     expect(rail().running).toBe(0)
     routes.inbox.working = {
       p2: { action: "details", since: new Date().toISOString() },
@@ -1025,10 +1025,10 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    await vi.waitFor(() => expect(status().querySelector(".spinner")).not.toBeNull())
+    await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).not.toBeNull())
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
-    expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".spinner")).toBeNull()
+    expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".icon.working > svg")).toBeNull()
     expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  under way, being worked on, or marked in this pass"])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
@@ -1040,7 +1040,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
-    await vi.waitFor(() => expect(status().querySelector(".spinner")).toBeNull())
+    await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).toBeNull())
     expect(markedBadge(phases)).toBeNull()
   })
 
@@ -1052,7 +1052,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     const p2 = host.querySelector("#p2")!
     p2.setAttribute("plan", "waiting")
     const state = () => p2.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!.dataset.state
-    await vi.waitFor(() => expect(state()).toBe("attention"))
+    await vi.waitFor(() => expect(state()).toBe("waiting"))
     routes.inbox.marks.p2 = { action: "approve", at: new Date().toISOString() }
     await client.refresh()
     await vi.waitFor(() => expect(state()).toBe("progress"))

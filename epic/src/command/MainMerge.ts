@@ -1,9 +1,11 @@
 // spell ui rename: leave this file (its docstrings quote the renames merge-main makes, old names on purpose)
 import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync, realpathSync } from "node:fs"
-import { basename, dirname, join, matchesGlob, relative, resolve, sep } from "node:path"
+import { basename, dirname, join, matchesGlob, relative, resolve } from "node:path"
 
+import { findUp } from "spell/util/node/findUp"
 import { Git } from "spell/server/Git"
+import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
@@ -401,7 +403,7 @@ export class MainMerge {
     return Git.lines(["diff", "--name-only", "--diff-filter=d", "HEAD^2", "HEAD"], root).filter((file) => {
       if (isSnapshot(file) || matchesAny(file, generated)) return false
       const path = join(root, file)
-      return existsSync(path) && realpathSync(path).startsWith(realRoot + sep)
+      return existsSync(path) && Boolean(pathInside(realRoot, realpathSync(path)))
     })
   }
 
@@ -410,10 +412,7 @@ export class MainMerge {
    * `undefined` outside a Spell kit (a repo using the epic tooling alone), so no rename step
    */
   static kitRootOf(root: string): string | undefined {
-    for (let folder = resolve(root); ; folder = dirname(folder)) {
-      if (existsSync(join(folder, KIT_PROGRAM))) return folder
-      if (dirname(folder) === folder) return undefined
-    }
+    return findUp(root, KIT_PROGRAM)
   }
 
   /** where a checkout lists its generated files:  `<root>/.epic/generators.json5` (epic `epic-eject` T4) */

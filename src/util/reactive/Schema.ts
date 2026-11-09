@@ -253,7 +253,7 @@ export type PropInfo = {
   readsFrom?: readonly string[]
   /**
    * What the place it's kept in calls it, when that isn't its words:  `avg_ht` for `its "average height" is a number, stored as "avg_ht"`.
-   * - Left out:  the place's field is found by its words, `average_height` or `averageHeight` (`spell/util/places/FieldNames`).
+   * - Left out:  the place's field is found by its words, `average_height` or `averageHeight` (`spell/places/FieldNames`).
    */
   storedAs?: string
   /**
@@ -261,6 +261,8 @@ export type PropInfo = {
    * - Read as nothing, quietly;  saving nothing writes the first back (`spell/parser/core/saving`).
    */
   nothingAs?: readonly string[]
+  /** It may hold the address of a thing of its `type` until something follows it:  `spell/parser/core`'s `core.linked()`. */
+  link?: boolean
   /**
    * Called when it's read and unset, with what it's read from:  a place's read may have left it out (`spell/parser/core/saved`).
    * - Only on that path:  a set value's read costs nothing.

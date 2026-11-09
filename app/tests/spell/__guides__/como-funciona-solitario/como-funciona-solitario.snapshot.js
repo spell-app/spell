@@ -12,6 +12,7 @@ core.heading("Cómo funciona Solitario")
 // - PILAS de cartas, cada tipo con sus propias reglas sobre qué carta toma
 //
 // Esta guía tiene un tipo de carta y una regla:  una columna con un rey, y cuatro cartas para probar.
+// Está escrita en el estilo de esquema;  Solitario mismo es spellml, el mismo lenguaje en etiquetas.
 // Abre Solitario, en los Ejemplos, para jugar el juego entero.  Solitaire es el mismo juego, en inglés.
 
 core.heading("Una carta")
@@ -117,12 +118,12 @@ export class Mesa extends App {
   set mensaje(value) { this.setProp("mensaje", value) }
 
   draw() {
-    return h("div", { class: "Mesa" },
-      h("h3", "La columna"),
+    return h("es-contenedor", { texto: true },
+      h("es-encabezado", { tamano: "pequeño" }, "La columna"),
       () => core.drawThing(this.columna),
-      h("h3", "Tu mano: haz clic en una carta para ponerla en la columna"),
+      h("es-encabezado", { tamano: "pequeño" }, "Tu mano: haz clic en una carta para ponerla en la columna"),
       () => core.drawThing(this.mano),
-      h("p", () => this.mensaje)
+      h("es-texto", { parrafo: true }, () => this.mensaje)
     )
   }
 }
@@ -164,9 +165,10 @@ core.heading("Pruébalo")
 //   (Haz clic en ↻, sobre la mesa, para repartir la mano otra vez.)
 //
 // Y después:  Solitario, en los Ejemplos, donde la reserva, los descartes y las cuatro fundaciones
-// tienen sus propias reglas, escritas igual.
+// tienen sus propias reglas, escritas igual:  la de una columna es su "soltable cuando" allí.
+// Sus movimientos son acciones con un título, un icono y una tecla, dibujadas como su barra y su menú de clic derecho.
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the table looks -- the column, then the hand, each a row of cards. */¬¬.Mesa {¬  max-width: 34em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬como-funciona-solitario-columna,¬como-funciona-solitario-pila {¬  display: flex;¬  flex-wrap: wrap;¬  gap: 0.5em;¬  min-height: 2.5em;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  the column and the hand, each a row of cards that wraps.¬   - Each pile is an element of its own around its cards' elements, which no <es-*> tag lays out. */¬¬como-funciona-solitario-columna,¬como-funciona-solitario-pila {¬  display: flex;¬  flex-wrap: wrap;¬  gap: 0.5em;¬  min-height: 2.5em;¬}¬`)
 // -----------
 if (!core.isCarryingOver) mesa.start()
 // -----------

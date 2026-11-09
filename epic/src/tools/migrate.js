@@ -33,6 +33,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { parseHTML } from "linkedom"
 
 import { FileLock } from "spell/server/FileLock"
+import { pathInside } from "spell/server/RealPath"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { DataFile } from "spell/epic/data/DataFile.ts"
@@ -392,8 +393,7 @@ function fileOf(page, root) {
  */
 function baseOf(file, root) {
   const content = EpicConfig.contentOf(root)
-  const inside = relative(content, file)
-  return inside.startsWith("..") || isAbsolute(inside) ? root : content
+  return pathInside(content, file) === undefined ? root : content
 }
 
 /** `file`'s page path, `/`-separated:  from `baseOf()`. */

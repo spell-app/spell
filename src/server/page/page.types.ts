@@ -38,6 +38,8 @@ export type RouteModule = {
  * - `onListening`:  run `start` once the server listens -- `info.port` is set by then
  *   - e.g. to start a child process that needs the page server's port (`setup()` runs BEFORE it listens)
  * - `onStop`:  run `stop` when the server stops, e.g. to end a child process
+ * - `addServerReport`:  one more row in `spell server start all`'s table, for a server the module runs
+ *   - optional:  a server with no such table has none (spell-epic's `EpicServer`), so call it `addServerReport?.(...)`
  */
 export type RouteContext = {
   root: string
@@ -51,7 +53,26 @@ export type RouteContext = {
   addPageConfig: (add: PageConfig) => void
   onListening: (start: () => unknown) => void
   onStop: (stop: () => unknown) => void
+  addServerReport?: (report: ServerReport) => void
 }
+
+/**
+ * A server a route module runs, as a row of `spell server start all`'s table.
+ * - Comes from the module, so the kit names none of them.
+ */
+export type ReportedServer = {
+  /** What people call it. */
+  name: string
+  /** Where it's reached, or `-`. */
+  url: string
+  /** What it's for. */
+  what: string
+  /** `running`, which the table shows as `started` for a page server started just now;  else why not. */
+  state: string
+}
+
+/** Asked when `spell server start all` draws its table;  `undefined` for no row.  May wait for its server. */
+export type ServerReport = () => ReportedServer | undefined | Promise<ReportedServer | undefined>
 
 /** More fields for a page's `window.SPELL_SERVER`, as it's served (`PageServer.addPageConfig()`). */
 export type PageConfig = (served: ServedFile) => Record<string, unknown>
@@ -139,6 +160,14 @@ export type PageServerSettings = {
    *     without spell-app, no App/UI tab
    */
   siteTabs?: SiteTab[]
+  /**
+   * the most the server's caches on disk may take (`SRV.DiskCache`, in `~/.spell/cache`), e.g. `"200MB"`, `"1GB"`;
+   * default 200 MB (epic `language` Q41)
+   * - past it, a write drops the entries used least recently first
+   * - today one cache:  the app's compile cache, what the editor's projects compiled to (`/api/compiles`)
+   * - a later part's wins:  the kit's says `"200MB"`, the epic repo's `page-server.json5` may say otherwise
+   */
+  cacheLimit?: string | number
 }
 
 /** One of the page server's `pageScripts`:  a module script added to the pages it serves. */

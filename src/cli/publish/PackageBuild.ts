@@ -15,6 +15,7 @@ import JSON5 from "json5"
 
 import { packageRootFor } from "spell/toolchain/sourceNames"
 import { Git } from "spell/server/Git"
+import { pathInside } from "spell/server/RealPath"
 import { ALWAYS_EXCLUDED, DIST, type BuildReport, type PublishedRepo } from "spell/cli/publish"
 
 /****************
@@ -244,7 +245,7 @@ export class PackageBuild {
       built = `${target}${MODULE_SUFFIX[kind]}`
       this.modules.set(this.stagedPath(built), { source: target, kind })
     } else if (CODE_FILE.test(target)) {
-      if (!target.startsWith(`${this.src}${sep}`)) this.outsideCode.add(target)
+      if (!pathInside(this.src, target)) this.outsideCode.add(target)
       built = target.replace(/\.(mts|mjs)$/, ".mjs").replace(/\.(tsx?|jsx?)$/, ".js")
     }
     const from = dirname(this.stagedPath(importer))
@@ -276,15 +277,14 @@ export class PackageBuild {
   private stagedPath(path: string): string {
     // the package's own `package.json`, as a module (`manifest`):  in `dist/`, with the code
     if (path === join(this.root, `package.json${MODULE_SUFFIX.manifest}`)) return join(this.dist, "package.json.js")
-    return path.startsWith(`${this.src}${sep}`)
-      ? join(this.dist, relative(this.src, path))
-      : join(this.stage, relative(this.root, path))
+    const inSrc = pathInside(this.src, path)
+    return inSrc ? join(this.dist, inSrc) : join(this.stage, relative(this.root, path))
   }
 
   /** Does the package ship `path`:  in `src/`, its `package.json`, or in one of its `files`? */
   private ships(path: string): boolean {
-    if (path.startsWith(`${this.src}${sep}`) || path === join(this.root, "package.json")) return true
-    return (this.repo.settings.files ?? []).some((file) => path.startsWith(`${join(this.root, file)}${sep}`))
+    if (pathInside(this.src, path) || path === join(this.root, "package.json")) return true
+    return (this.repo.settings.files ?? []).some((file) => pathInside(join(this.root, file), path))
   }
 
   /** `rest` of an own name (`/spaces/x/y.lib.ts`) as a file in one of the package's `files`;  else `undefined`. */

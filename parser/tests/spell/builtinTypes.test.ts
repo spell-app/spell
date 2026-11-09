@@ -49,6 +49,13 @@ describe("built-in type table", () => {
         "text letters => ["A","d","a"]",
         "date year => 2026",
         "date day => 4",
+        "date hour => 14",
+        "date short date => "10/4/26"",
+        "date long date => "Sunday, October 4, 2026"",
+        "date abbreviated date => "Sun, Oct 4, 2026"",
+        "date short time => "2:00 PM"",
+        "date long time => "2:00:00 PM"",
+        "date timestamp => "2026-10-04T18:00:00.000Z"",
       ]
     `)
   })
@@ -156,7 +163,7 @@ const SAMPLES: Record<string, unknown> = {
   text: "Ada",
   list: Object.assign(new List({}), { items: ["a", "b", "c"] }),
   "viewable list": new ViewableList({}),
-  date: new Date(2026, 9, 4),
+  date: new Date(2026, 9, 4, 14),
   thing: {},
   app: {}
 }

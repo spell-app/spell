@@ -7,6 +7,16 @@
  *   | `--ui-tree-hover-background` | a row under the mouse |
  *   | `--ui-tree-selected-background` / `-color` | a selected row |
  *   | `--ui-tree-muted-color` | the triangle, the icon and `which` |
+ *   | `--ui-tree-path-background` | `sticky-path`'s line, over the rows it covers |
+ * - `appearance="nav"` (the rows' `:state(nav)`):  the docs site's side navigation, its look matched to `<ui-docs-nav>`'s
+ *   (epic `mockup` P5), with these tokens of its own:
+ *   | `--ui-tree-nav-band-background` / `-color` | a `band="heading"` row |
+ *   | `--ui-tree-nav-subheading-color` | a `band="subheading"` row |
+ *   | `--ui-tree-nav-border-color` | the line above a band |
+ *   | `--ui-tree-nav-current-background` / `-color` | the selected row, the page shown |
+ *   | `--ui-tree-nav-open-duration` / `-close-duration` | how long a row's rows take to ease open, and shut |
+ *   | `--ui-tree-nav-ease` | how they ease |
+ *   - A row's rows stay drawn while it's closed, a one-row grid 0fr tall, so they ease;  never under reduced motion.
  */
 @layer ui.components {
   :host {
@@ -20,6 +30,7 @@
     --_ui-tree-selected-background: var(--ui-tree-selected-background, var(--ui-primary-background));
     --_ui-tree-selected-color: var(--ui-tree-selected-color, var(--ui-primary-text, var(--ui-text-color)));
     --_ui-tree-muted-color: var(--ui-tree-muted-color, var(--ui-text-muted));
+    --_ui-tree-path-background: var(--ui-tree-path-background, var(--ui-background));
     display: block;
     min-width: 0;
     color: var(--ui-text-color);
@@ -39,6 +50,45 @@
   .empty {
     padding: 0.5em 8px;
     color: var(--_ui-tree-muted-color);
+  }
+
+  /* `sticky-path`:  one line pinned over the top rows, taking no room of its own, so nothing moves when it shows */
+  .path {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-tree-gap);
+    box-sizing: border-box;
+    height: var(--_ui-tree-row-height);
+    margin-block-end: calc(var(--_ui-tree-row-height) * -1);
+    padding-inline: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    background: var(--_ui-tree-path-background);
+    /* over a see-through pane, the rows under it blurred out of the way */
+    backdrop-filter: blur(12px);
+    border-block-end: 1px solid var(--ui-border-color);
+    color: var(--_ui-tree-muted-color);
+  }
+  /* the outer rows give way first:  each shrinks a hundred times more than the one after it */
+  .path-row {
+    flex: 0 1 auto;
+    min-width: 1.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .path-row:last-child {
+    min-width: 0;
+    color: var(--ui-text-color);
+  }
+  .path-row:hover {
+    color: var(--ui-text-color);
+    text-decoration: underline;
+  }
+  .separator {
+    flex: none;
   }
 
   .row {
@@ -119,5 +169,198 @@
     align-items: center;
     gap: var(--_ui-tree-gap);
     margin-inline-start: auto;
+  }
+
+  /* ## `appearance="nav"`:  the docs site's side navigation */
+  :host(:state(nav)) {
+    --_ui-tree-nav-border-color: var(
+      --ui-tree-nav-border-color,
+      light-dark(color-mix(in oklab, var(--ui-brown-background), var(--ui-brown) 9%), var(--ui-border-color))
+    );
+    --_ui-tree-nav-band-background: var(
+      --ui-tree-nav-band-background,
+      color-mix(in oklab, var(--ui-brown-background) 50%, light-dark(#fffdf8, var(--ui-surface)))
+    );
+    --_ui-tree-nav-band-color: var(--ui-tree-nav-band-color, var(--ui-brown-text));
+    --_ui-tree-nav-subheading-color: var(--ui-tree-nav-subheading-color, var(--ui-text-muted));
+    --_ui-tree-nav-current-background: var(
+      --ui-tree-nav-current-background,
+      light-dark(var(--ui-primary-background), var(--ui-primary))
+    );
+    --_ui-tree-nav-current-color: var(
+      --ui-tree-nav-current-color,
+      light-dark(var(--ui-primary-text), var(--ui-primary-on))
+    );
+    --_ui-tree-nav-open-duration: var(--ui-tree-nav-open-duration, 320ms);
+    --_ui-tree-nav-close-duration: var(--ui-tree-nav-close-duration, 140ms);
+    --_ui-tree-nav-ease: var(--ui-tree-nav-ease, var(--ui-ease-out));
+    --_ui-tree-indent: var(--ui-tree-indent, 1em);
+    --_ui-tree-hover-background: var(--ui-tree-hover-background, oklch(from var(--ui-text-dark) l c h / 0.06));
+    line-height: 1.25;
+  }
+  /* a row's rows, folded:  one grid row, 1fr open, 0fr shut, what's in it clipped and hidden once it's folded */
+  :host(:state(nav)) > .rows {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+  :host(:state(nav)) > .rows.shut {
+    grid-template-rows: 0fr;
+  }
+  :host(:state(nav)) > .rows > .folded {
+    min-height: 0;
+    overflow: hidden;
+  }
+  :host(:state(nav)) > .rows.shut > .folded {
+    visibility: hidden;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :host(:state(nav)) > .rows {
+      transition: grid-template-rows var(--_ui-tree-nav-open-duration) var(--_ui-tree-nav-ease);
+    }
+    :host(:state(nav)) > .rows.shut {
+      transition-duration: var(--_ui-tree-nav-close-duration);
+    }
+    /* hidden only once it's folded:  its `visibility` waits out the close */
+    :host(:state(nav)) > .rows.shut > .folded {
+      transition: visibility 0s linear var(--_ui-tree-nav-close-duration);
+    }
+    :host(:state(nav)) > .row > .toggle {
+      transition: opacity 150ms ease-out;
+    }
+    :host(:state(nav):state(has-items)) > .row > .toggle::before {
+      transition:
+        rotate 200ms var(--_ui-tree-nav-ease),
+        translate 200ms var(--_ui-tree-nav-ease);
+    }
+  }
+  :host(:state(nav)) > .row {
+    gap: 0.75em;
+    min-height: 2.25em;
+    /* 0.5em of the tree's text, from inside this smaller text */
+    margin-inline: calc(0.5em / 0.875);
+    padding-block: 0.25em;
+    padding-inline: calc(0.75em + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent)) 0.75em;
+    border-radius: var(--ui-radius-m);
+    font-size: 0.875em;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  :host(:state(nav)) > .row:hover {
+    color: var(--ui-text-dark);
+  }
+  :host(:state(nav):state(selected)) > .row {
+    background: var(--_ui-tree-nav-current-background);
+    color: var(--_ui-tree-nav-current-color);
+  }
+  :host(:state(nav):state(selected)) > .row .icon,
+  :host(:state(nav):state(selected)) > .row > ::slotted([slot="icon"]) {
+    color: inherit;
+  }
+  /* the rows under a band:  a little room above and below, as a list of links has, and a pixel between rows;
+     a subheading band goes edge to edge, as the first and last thing under its heading */
+  :host(:state(nav):state(band)) > .rows > .folded > slot {
+    display: block;
+    padding-block: 0.375em;
+  }
+  :host(:state(nav):not(:state(band))) {
+    margin-block-end: 1px;
+  }
+  :host(:state(nav)[band="subheading"]:first-child) {
+    margin-block-start: -0.375em;
+  }
+  :host(:state(nav)[band="subheading"]:last-child) {
+    margin-block-end: -0.375em;
+  }
+  :host(:state(nav)) .icon,
+  :host(:state(nav)) ::slotted([slot="icon"]) {
+    width: 1.25em;
+    font-size: 1.05em;
+    text-align: center;
+    --ui-icon-width: 1.25em;
+  }
+  .count::part(label),
+  .badge::part(label) {
+    margin: 0;
+    flex: none;
+  }
+
+  /* the chevron, at the row's end:  pointing down while open, right while closed */
+  :host(:state(nav)) > .row > .toggle {
+    order: 99;
+    flex-basis: 1em;
+    margin-inline: auto -0.25em;
+    opacity: 0.55;
+  }
+  :host(:state(nav)) > .row:hover > .toggle,
+  :host(:state(nav):focus-visible) > .row > .toggle {
+    opacity: 1;
+  }
+  :host(:state(nav):state(has-items)) > .row > .toggle::before {
+    width: 0.45em;
+    height: 0.45em;
+    background: none;
+    clip-path: none;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    rotate: -45deg;
+    translate: 0 -0.1em;
+  }
+  :host(:state(nav):state(has-items)[aria-expanded="true"]) > .row > .toggle::before,
+  :host(:state(nav):state(open):state(has-items)) > .row > .toggle::before {
+    rotate: 45deg;
+    translate: 0 -0.2em;
+  }
+
+  /* a heading band:  the whole width, stuck at the top while its rows scroll under it */
+  :host(:state(nav)) > .row.heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    min-height: 2.25em;
+    margin: 0;
+    padding: 0.25em 1em;
+    border-radius: 0;
+    border-block-start: 1px solid var(--_ui-tree-nav-border-color);
+    background:
+      linear-gradient(var(--_ui-tree-nav-band-background), var(--_ui-tree-nav-band-background)), var(--ui-background);
+    color: var(--_ui-tree-nav-band-color);
+    font: var(--ui-font-weight-bold) 0.75em / 1 var(--ui-font-family);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    gap: 0.5em;
+  }
+  :host(:state(nav):first-child) > .row.heading {
+    border-block-start: 0;
+  }
+  :host(:state(nav)) > .row.heading > .toggle,
+  :host(:state(nav)) > .row.subheading > .toggle {
+    font-size: 1.3em;
+  }
+  /* a subheading band, inside a heading's rows:  lighter, in the monospace face */
+  :host(:state(nav)) > .row.subheading {
+    min-height: 2em;
+    margin: 0;
+    padding: 0.25em 1em;
+    border-radius: 0;
+    border-block-start: 1px solid color-mix(in oklab, var(--_ui-tree-nav-border-color) 60%, transparent);
+    color: var(--_ui-tree-nav-subheading-color);
+    font: 500 0.6875em / 1 var(--ui-font-family-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    gap: 0.5em;
+  }
+  :host(:state(nav)) > .row.subheading:hover {
+    color: var(--ui-text-dark);
+  }
+  :host(:state(nav)) > .row.heading .count::part(label),
+  :host(:state(nav)) > .row.subheading .count::part(label) {
+    font-family: var(--ui-font-family);
+    letter-spacing: 0;
+  }
+  :host(:state(nav):state(band)) > .row:hover {
+    background-color: transparent;
+  }
+  :host(:state(nav):state(band):focus-visible) > .row {
+    outline-offset: calc(var(--ui-focus-width) * -1);
   }
 }

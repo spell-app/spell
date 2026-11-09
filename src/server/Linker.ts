@@ -1,14 +1,16 @@
 import { existsSync, lstatSync, readdirSync, statSync } from "node:fs"
-import { basename, dirname, isAbsolute, join, relative, resolve as resolvePath, sep } from "node:path"
+import { basename, dirname, join, relative, resolve as resolvePath, sep } from "node:path"
 
 import { parseHTML } from "linkedom"
 
 import { escapeHTML, slug } from "spell/util/string"
+import { findUp } from "spell/util/node/findUp"
 import { packageRootFor } from "spell/toolchain/sourceNames"
 import type { SRV } from "spell/server"
 
 import { contentFolderOf } from "./contentFolder"
 import { Git } from "./Git"
+import { pathInside } from "./RealPath"
 
 /**
  * Links source references in a page of the spell-app checkout at `root`:
@@ -261,9 +263,9 @@ export class Linker {
   rootPathFor(href: string, pageDir: string): string | undefined {
     if (!isRelativeUrl(href)) return undefined
     const path = urlPath(href)
-    const from = relative(this.root, this.servedDir(pageDir))
-    if (from.startsWith("..") || isAbsolute(from)) return undefined
-    const segments = from ? from.split(sep) : []
+    const from = pathInside(this.root, this.servedDir(pageDir))
+    if (from === undefined) return undefined
+    const segments = from ? from.split("/") : []
     const steps = path.split("/")
     // the last step names the file ("" for a folder's `x/`);  `..` and `.` there are folders too
     let name = steps.pop()!
@@ -955,10 +957,7 @@ function decodeEntities(text: string): string {
 
 /** The nearest folder up from `root` holding a `yarn.lock` (its install's root);  `root` itself without one. */
 function installRoot(root: string): string {
-  for (let at = resolvePath(root); ; at = dirname(at)) {
-    if (existsSync(join(at, "yarn.lock"))) return at
-    if (dirname(at) === at) return resolvePath(root)
-  }
+  return findUp(root, "yarn.lock") ?? resolvePath(root)
 }
 
 /**

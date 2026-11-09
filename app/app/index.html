@@ -37,6 +37,17 @@
         background: transparent;
         color: inherit;
       }
+      /* A `<ui-table>` carries its class words on itself (`ui ... table`), which `semantic.min.css` colours black:
+         its cells' text is the page's, so a table reads on a dark page too. */
+      ui-table.ui.table {
+        color: inherit;
+      }
+      /* ... and sets its width, `auto` when `collapsing`, which fills a block:  its width is Spell UI's,
+         so a collapsing table hugs its columns (epic `data` I91). */
+      ui-table.ui.table,
+      ui-table.ui.collapsing.table {
+        width: revert-layer;
+      }
       /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
          Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet. */
       #PageLoading {
@@ -50,43 +61,77 @@
         gap: 18px;
         background: light-dark(#f6f5fb, #16151d);
         color-scheme: light dark;
+        overflow: hidden;
         transition: opacity 0.15s ease-out;
+      }
+      /* A magic wand's stars:  they spill out from under the hat, and trail after the mouse, each one fading as it
+         drifts (the script after the markup makes them).  Above the card, never in the way of a click. */
+      #PageLoading .Sparkle {
+        position: absolute;
+        z-index: 2;
+        left: 0;
+        top: 0;
+        width: var(--size);
+        height: var(--size);
+        margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+        background: var(--color);
+        clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+        filter: drop-shadow(0 0 3px var(--color));
+        pointer-events: none;
       }
       #PageLoading.done {
         opacity: 0;
         pointer-events: none;
       }
       #PageLoading section {
+        position: relative;
+        z-index: 1;
         box-sizing: border-box;
-        width: 100%;
+        width: min(100% - 32px, 760px);
         padding: clamp(32px, 8vh, 72px) 24px;
-        border-block: 1px solid light-dark(#5b4bd626, #b9a7ff26);
-        background: light-dark(#ffffffb3, #ffffff0a);
+        border: 1px solid light-dark(#5b4bd626, #b9a7ff26);
+        border-radius: 24px;
+        background: light-dark(#ffffffcc, #16151dcc);
+        backdrop-filter: blur(2px);
         color: light-dark(#1d1a2e, #f4f2ff);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
         text-align: center;
+        /* the word's size and the line's:  the hat is measured from both */
+        --hero-size: clamp(64px, 15vmin, 148px);
+        --line-size: clamp(20px, 3.6vmin, 36px);
       }
-      /* the hat and "Spell":  the hat's height set by the word's, on one line */
-      #PageLoading h1 {
-        display: flex;
+      /* the hat beside "Spell" and the line under it, as tall as the two together, the three centred as one block */
+      #PageLoading section > div {
+        display: inline-grid;
+        grid-template-columns: auto auto;
         align-items: center;
-        justify-content: center;
-        gap: 0.18em;
+        column-gap: calc(var(--hero-size) * 0.18);
+        text-align: start;
+      }
+      #PageLoading h1 {
         margin: 0;
         font-family: inherit;
-        font-size: clamp(64px, 15vmin, 148px);
+        font-size: var(--hero-size);
         font-weight: 800;
         letter-spacing: -0.035em;
         line-height: 1;
       }
-      #PageLoading img {
-        width: 1.05em;
-        height: 1.05em;
+      /* the hat alone, in the line's colour:  a mask of the hat, written in (`static/favicon/hat.svg`), so it never waits
+         behind the app's own downloads (Owen:  "you lost the hat!");  the file pads it to 0.74 of its width, so the mask is
+         that much bigger);  its height the word's line, the gap and the line's (`p` below) */
+      #PageLoading .Hat {
+        grid-row: 1 / 3;
+        height: calc(var(--hero-size) + var(--line-size) * 1.8);
+        aspect-ratio: 218 / 192;
+        background: light-dark(#5b4bd6, #b9a7ff);
+        mask: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 294.6 294.6'%3e%3cpath fill-rule='evenodd' d='m207.7 241.6c-.3 0-1.9-.2-3.5-.3c-6.2-.5-12.6-1.6-16.1-2.9c-.9-.3-1.9-.6-2.2-.6c-.3 0-.9-.2-1.4-.5c-.5-.3-1.1-.5-1.3-.5c-.4 0-3.4-1.1-6.5-2.4c-1.1-.4-2.3-.9-2.6-1c-.3-.1-1.3-.5-2.1-1c-.8-.5-1.6-.8-1.7-.8c-.2 0-5.3-2.5-7.6-3.7c-.4-.2-1.1-.6-1.4-.7c-1.7-.9-4.1-2.2-4.9-2.8c-.5-.3-1.1-.6-1.2-.6c-.2 0-.5-.2-.8-.5c-.2-.3-.7-.5-1-.5c-.3 0-.6-.1-.7-.2c-.1-.2-.8-.6-1.5-.9c-.8-.4-1.6-1-1.8-1.3c-.2-.3-.6-.6-.9-.6c-.2 0-.7-.3-1.1-.6c-.5-.4-1-.6-1.2-.6c-.2 0-.9-.4-1.5-.8c-.7-.4-1.7-.8-2.4-1c-.7-.1-1.7-.5-2.2-.7c-.5-.3-1.5-.6-2.3-.7c-.8-.1-1.7-.3-2-.5c-.3-.1-1.2-.4-1.9-.5c-.7-.1-1.4-.3-1.7-.4c-.2-.1-1.5-.4-2.7-.6c-1.3-.2-2.8-.5-3.4-.6c-.7-.1-2.6-.4-4.4-.5c-1.8-.1-4-.3-4.9-.5c-1.1-.2-6.6-.3-16.1-.4c-12.3 0-14.7-.1-15.5-.4c-.6-.2-2-.5-3.3-.6c-1.2 0-2.6-.2-3.1-.3c-.5-.1-1.7-.4-2.7-.5c-1.1-.2-2.8-.5-4-.8c-1.1-.3-2.3-.5-2.8-.5c-.4 0-1.1-.2-1.5-.3c-.5-.2-1.9-.7-3.1-1.1c-3.1-.9-4.8-1.6-9.2-3.7c-1.3-.6-2.6-1.4-3-1.7c-.5-.4-1.3-.9-1.8-1.1c-.6-.3-1.6-1.1-2.2-1.7c-.7-.6-1.4-1.1-1.5-1.1c-.2 0-1.3-.9-2.3-1.9c-1.5-1.5-1.9-2-1.8-2.4c.1-.3 0-.6-.5-.9c-.3-.2-1-1.2-1.4-2.1c-.4-.9-1-2.1-1.3-2.7c-.5-.9-.5-1.5-.5-4.8c0-2.9 .1-3.8 .4-4.5c.2-.5 .5-1.3 .6-1.8c.1-.5 .3-1.1 .6-1.3c.3-.3 .5-.6 .5-.8c0-.2 .3-.6 .6-1c.4-.5 .7-.9 .7-1.1c0-.3 3.2-3.5 4.2-4.2c.3-.2 1.2-.9 1.9-1.5c.7-.6 1.5-1 1.8-1c.3 0 .6-.2 .8-.5c.1-.2 .9-.7 1.8-1.1c.9-.3 2.2-.9 3-1.2c.7-.3 1.9-.6 2.5-.7c.6-.1 1.3-.3 1.5-.5c.3-.2 2.1-.7 6.7-1.6c2.4-.5 3.4-.6 11-.5c5.2 0 8.9 .1 9.8 .3c.7 .1 1.9 .3 2.7 .4c.8 .1 2.1 .3 3 .5c.9 .2 2.2 .5 2.9 .6c1.6 .3 4.9 1.1 6.4 1.6c.6 .2 2.6 .9 4.5 1.5c1.9 .6 3.6 1.2 3.9 1.4c.5 .3 3.9 1.7 5.3 2.3c.5 .2 1.6 .7 2.5 1.1c.8 .5 1.7 .9 1.9 .9c.1 0 .4 .1 .6 .3c.2 .2 .9 .5 1.6 .6c.6 .2 1.5 .6 2 .9c.4 .4 1 .7 1.4 .7c.6 0 .8 .1 1 .6c.3 .5 .5 .6 1 .4c.4 0 .8 0 1 .3c.2 .2 .4 .4 .6 .4c.2 0 .7 .4 1.3 .8c.5 .4 1.1 .7 1.3 .7c.3 0 .6 .1 .8 .3c.3 .3 .7 .6 4.6 2.5c1.4 .7 2.5 1.4 2.6 1.6c0 .2 .4 .4 .7 .4c.3 0 .8 .2 1 .4c.5 .5 2 1.3 7 4c1.9 .9 3.9 2 4.5 2.4c.7 .3 1.6 .8 2.1 1c.5 .3 1 .6 1.3 .7c.2 .1 .7 .4 1.1 .5c.4 .2 .9 .6 1.1 .8c.2 .2 .6 .4 .9 .4c.2 0 .9 .3 1.4 .7c.6 .3 2.1 1.1 3.3 1.7c1.3 .6 2.4 1.2 2.5 1.3c.1 .2 .5 .3 .9 .3c.3 0 1.3 .3 2.1 .8c.8 .4 1.6 .7 1.8 .7c.1 0 .8 .3 1.5 .7c1.7 .8 5.8 2.3 6.6 2.3c.3 0 .9 .2 1.2 .4c.3 .2 1 .5 1.6 .6c.6 .1 1.7 .3 2.5 .5c.7 .2 2.3 .4 3.5 .5c1.1 .1 2.8 .3 3.7 .5c2.8 .4 11.6-.5 12.3-1.4c.1-.2 .8-.5 1.5-.7c.6-.2 1.3-.6 1.5-.8c.1-.2 .7-.5 1.1-.7c.9-.4 1.3-1.2 1-2.5c-.2-.8-.5-3.5-.9-8c-.1-1.5-.3-3.5-.5-4.5c-.4-2.3-.2-2.5 1.6-1.7c.6 .3 1.8 .8 2.8 1.2c.9 .3 2.1 .8 2.5 1c.4 .2 1.9 .8 3.2 1.4c1.4 .5 3 1.2 3.5 1.5c.6 .2 2 .8 3.3 1.3c1.2 .5 2.4 1.1 2.6 1.3c.2 .2 .7 .4 1 .5c.3 .1 .8 .3 1 .5c.2 .2 1.2 .7 2.1 1.2c7.1 3.6 12.8 8 17.3 13.4c.8 .9 2.1 3.1 2.1 3.5c0 .2 .3 1 .7 1.8c1.6 3.4 1.7 8.7 .3 11.9c-.4 1-.7 2-.7 2.2c0 .2-.3 .6-.6 1c-.4 .4-.8 1.1-1 1.5c-.6 1.1-3.4 3.8-5.2 5c-.5 .3-1.3 1-1.9 1.4c-2.4 1.8-6.3 4-7.2 4c-.3 0-.9 .2-1.4 .5c-.4 .2-1.4 .6-2.2 .8c-.8 .2-1.6 .4-1.8 .5c-.4 .3-3.9 1.1-5.8 1.4c-.8 .1-1.9 .4-2.5 .5c-2.4 .7-12.8 1.2-14.8 .8zm-19.9-53.1c-1-.1-2.7-.4-3.8-.7c-1-.3-2.2-.5-2.6-.5c-.4 0-1-.1-1.2-.3c-.3-.2-1.1-.5-1.7-.6c-1.1-.1-4.3-1.2-7.6-2.5c-1.5-.6-3.2-1.2-4.5-1.6c-.7-.2-3.8-1.8-12.7-6.3c-2.4-1.2-4.4-2.4-4.5-2.6c-.1-.2-.5-.3-.9-.3c-.6 0-.8-.2-1-.7c-.2-.4-.5-.6-1-.6c-.3 0-.8-.2-1-.3c-.4-.5-3.6-2.1-9.4-5.1c-2.3-1.1-4.3-2.2-4.5-2.4c-.3-.2-.9-.5-1.3-.7c-1.1-.4-5.2-2.3-6.6-3c-.5-.3-1.1-.5-1.2-.4c-.1 .1-.6-.1-1.2-.3c-1.3-.7-3.5-1.6-4.9-2.1c-.7-.3-1.9-.7-2.6-1c-1.9-.7-7.3-2.2-7.8-2.2c-.2 0-.9-.2-1.5-.3c-.6-.2-1.4-.5-1.8-.6c-.9-.1-.9-.7-.1-1.2c.4-.3 .7-.7 .7-1c0-.3 .3-1.1 .8-1.6c.5-.6 .9-1.2 .9-1.3c0-.2 .5-.9 1-1.6c.6-.7 1-1.4 1-1.5c0-.2 .5-.8 1.1-1.5c.7-.7 1.2-1.4 1.2-1.6c0-.2 .3-.9 .8-1.4c.4-.5 .9-1.3 1.1-1.7c.5-.7 2.1-3.2 3.2-4.8c.4-.5 .9-1 1.2-1c.2-.1 .4-.4 .4-.8c0-.7 1.3-2.3 1.8-2.3c.1 0 .2-.3 .2-.6c0-.6 .9-2.2 1.3-2.2c.1 0 .2-.2 .3-.5c.1-.2 .7-1.1 1.3-1.9c.6-.8 1.1-1.6 1.1-1.7c0-.2 .2-.5 .5-.8c.3-.3 .8-1 1.1-1.6c.2-.6 .8-1.6 1.3-2.2c.5-.5 .9-1.2 .9-1.4c0-.2 .2-.5 .4-.8c.3-.2 .7-.8 .9-1.2c.2-.5 .7-1.2 1-1.6c.3-.4 .8-1.1 1.1-1.7c.3-.5 .7-1.2 1-1.4c.3-.3 .6-.7 .6-.8c0-.4 3.4-5.6 3.7-5.6c.1 0 .3-.3 .4-.6c.1-.3 .5-1 .9-1.6c.5-.6 1.1-1.5 1.4-2.1c.4-.5 .9-1.3 1.2-1.6c.3-.4 .6-.8 .6-1c0-.1 .5-.7 1-1.4c.6-.7 1-1.3 1-1.5c0-.2 .5-.9 1-1.6c.6-.7 1-1.3 1-1.4c0-.1 .6-.9 1.3-1.8c.8-.9 1.6-2 1.8-2.4c.6-1.2 2.9-3.9 3.3-4c.2 0 .4-.3 .4-.7c0-.4 1.8-2.3 6.5-7c3.5-3.6 6.7-6.6 7-6.7c.3-.1 1-.7 1.6-1.2c1.3-1.3 3.3-2.9 4.9-3.8c.7-.4 1.5-1 1.8-1.3c.4-.3 .8-.6 .9-.6c.2 0 .7-.4 1.3-.8c.5-.5 2-1.4 3.3-2c1.3-.7 2.5-1.3 2.5-1.5c.2-.2 3.3-1.7 3.8-1.7c.2 0 .6-.2 1-.4c1.8-.9 4.4-1.8 6.8-2.2c.9-.2 2-.5 2.3-.6c.4-.2 1.9-.3 5-.2c4.9 .1 6 .2 8 .8c.8 .2 1.8 .5 2.3 .6c1.2 .3 5.7 2.5 6.7 3.3c.4 .4 1 .7 1.3 .7c.2 0 .6 .2 .7 .5c.2 .3 .6 .7 .9 .9c1.2 .6 3.6 2.7 4.3 3.9c.4 .6 1.3 1.7 2 2.5c.7 .8 1.3 1.6 1.3 1.7c0 .2 .4 .7 .8 1.3c1.3 1.5 6 11.1 6 12.3c0 .2 .1 .7 .3 1.1c.3 .7 1 3 1.4 5.3c.1 .6 .4 1.6 .5 2.1c.2 .6 .4 1.9 .6 2.9c.3 2 .7 3.2 2 6.8c.5 1.1 1 2.7 1.1 3.4c.2 .7 .4 1.4 .6 1.4c.1 .1 .3 .6 .5 1.1c.1 .5 .4 1.1 .6 1.4c.2 .2 .6 .7 .8 1.1c1.4 2.7 6.1 7.8 7.8 8.7c.5 .2 1.2 .7 1.5 1c.4 .2 1.4 .9 2.3 1.3c2.6 1.4 3.2 3.2 1.4 4.3c-.8 .4-1.3 .5-3.6 .5c-1.5 0-3-.1-3.5-.2c-.4-.2-1.3-.4-2-.5c-3.9-.8-9.3-3.2-11.5-5.1c-.5-.4-1-.7-1.3-.7c-.4 0-7-6.7-7-7.2c0-.1-.4-.7-.9-1.3c-.5-.6-1.2-1.6-1.4-2.2c-.3-.6-.7-1.1-.8-1.2c-.1-.1-.2-.3-.2-.6c0-.2-.3-.9-.7-1.4c-.4-.5-1.3-2.1-2-3.5c-.7-1.3-1.7-2.9-2-3.4c-.4-.5-.9-1.2-1.1-1.7c-.8-1.8-6.2-6.6-8.6-7.7c-2.4-1.1-2.7-1.2-5.8-1.2c-2.8 0-3.3 .1-4 .6c-1.8 1.1-3.3 3.5-3.3 5.3c0 .4-.1 1-.2 1.3c-.2 .2-.3 1.1-.4 2c-.3 5.1-.5 6.6-.7 7c-.1 .2-.3 1-.4 1.8c-.2 .7-.5 1.7-.7 2.2c-.1 .4-.6 1.6-1 2.6c-.3 .9-.8 2-1 2.2c-.1 .3-.4 1-.5 1.5c-.1 .6-.3 1.3-.5 1.7c-.3 .5-.4 1-.1 3c.2 2.5 .8 5.3 1.2 6.4c.4 1 1.6 5.9 1.6 6.7c0 .3 .1 1 .3 1.4c.3 .5 .4 1.9 .5 5.2c.1 2.5 .3 5 .4 5.6c.4 2 .9 3.8 1.2 4.3c.1 .3 .3 .9 .4 1.4c.2 .8 1.9 6.4 2.5 8.2c.2 .5 .5 1.5 .6 2.3c.3 1.3 .7 2.5 1.3 4.2c.4 1.3 1.3 4.6 1.6 6.4c.1 .8 .4 1.9 .5 2.4c.2 .4 .5 1.3 .5 2c.1 .6 .4 1.4 .5 1.7c.2 .3 .4 1.3 .5 2.1c.1 .9 .3 1.8 .5 2.2c.3 .6 .6 2.8 .8 5.4l0 1.3l-1.3 .9c-.7 .5-1.5 .9-1.9 .9c-.3 0-.8 .1-1.1 .3c-.3 .3-1.7 .5-3.7 .6c-3.6 .3-5.2 .3-7.9 0z'/%3e%3c/svg%3e")
+          center / calc(100% / 0.74) auto no-repeat;
       }
       #PageLoading p {
-        margin: 0.6em 0 0;
+        grid-column: 2;
+        margin: calc(var(--line-size) * 0.6) 0 0;
         color: light-dark(#5b4bd6, #b9a7ff);
-        font-size: clamp(20px, 3.6vmin, 36px);
+        font-size: var(--line-size);
         font-weight: 500;
         line-height: 1.2;
         animation: PageLoadingBreathe 1.6s ease-in-out infinite alternate;
@@ -106,16 +151,101 @@
   <body>
     <div id="PageLoading" role="status">
       <section>
-        <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
-        <p>Making magic...</p>
+        <div>
+          <i class="Hat"></i>
+          <h1><span>Spell</span></h1>
+          <p>All Magic, No Fuss!</p>
+        </div>
       </section>
     </div>
     <!-- Spell's name and the line in Spanish:  before any script of the app's has run, so no `AppTexts` yet -->
     <script>
       if (/^es\b/i.test(navigator.language)) {
         document.querySelector("#PageLoading span").textContent = "Encanto"
-        document.querySelector("#PageLoading p").textContent = "Haciendo magia..."
+        document.querySelector("#PageLoading p").textContent = "¡Toda la magia, cero líos!"
       }
+    </script>
+    <!-- The wand's stars (`.Sparkle` above):  plain script, before the app's, so they show from the first paint.
+         They stop once the page shows (`#PageLoading.done`), and never start for someone who asks for less motion. -->
+    <script>
+      ;(function () {
+        var hero = document.getElementById("PageLoading")
+        if (!hero.animate || matchMedia("(prefers-reduced-motion: reduce)").matches) return
+        var hat = hero.querySelector(".Hat")
+        var dark = matchMedia("(prefers-color-scheme: dark)").matches
+        var colors = dark ? ["#ffe08a", "#b9a7ff", "#ffffff", "#ff9ad5"] : ["#f5b301", "#7b6cf0", "#ff6fb5", "#3fb6ff"]
+        /** One star at (x, y), page pixels, drifting by (dx, dy) as it turns, shrinks and fades. */
+        function sparkle(x, y, dx, dy, size, life) {
+          var star = document.createElement("i")
+          star.className = "Sparkle"
+          star.style.setProperty("--size", size + "px")
+          star.style.setProperty("--color", colors[(Math.random() * colors.length) | 0])
+          hero.append(star)
+          var turn = (Math.random() - 0.5) * 360
+          star.animate(
+            [
+              { transform: "translate(" + x + "px," + y + "px) scale(0.2) rotate(0deg)", opacity: 0 },
+              {
+                transform:
+                  "translate(" +
+                  (x + dx * 0.25) +
+                  "px," +
+                  (y + dy * 0.25) +
+                  "px) scale(1) rotate(" +
+                  turn * 0.25 +
+                  "deg)",
+                opacity: 1,
+                offset: 0.2
+              },
+              {
+                transform: "translate(" + (x + dx) + "px," + (y + dy) + "px) scale(0.3) rotate(" + turn + "deg)",
+                opacity: 0
+              }
+            ],
+            { duration: life, easing: "cubic-bezier(0.2, 0.6, 0.4, 1)" }
+          ).onfinish = function () {
+            star.remove()
+          }
+        }
+        // from under the hat's brim:  a few at a time, out past it and drifting down
+        var spill = setInterval(function () {
+          if (hero.classList.contains("done")) return stop()
+          var box = hat.getBoundingClientRect()
+          if (!box.width) return
+          for (var count = 0; count < 3; count++) {
+            var across = (Math.random() - 0.5) * box.width * 0.8
+            var angle = Math.PI * (0.15 + Math.random() * 0.7)
+            var reach = 60 + Math.random() * 110
+            sparkle(
+              box.left + box.width / 2 + across,
+              box.top + box.height * 0.78,
+              Math.cos(angle) * reach * (across < 0 ? -1 : 1),
+              Math.sin(angle) * reach * 0.6 + 20,
+              9 + Math.random() * 14,
+              1100 + Math.random() * 900
+            )
+          }
+        }, 140)
+        // after the mouse:  one every 14px it moves, sinking a little as it fades
+        var last
+        function trail(event) {
+          if (last && Math.hypot(event.clientX - last.x, event.clientY - last.y) < 14) return
+          last = { x: event.clientX, y: event.clientY }
+          sparkle(
+            last.x,
+            last.y,
+            (Math.random() - 0.5) * 30,
+            18 + Math.random() * 26,
+            7 + Math.random() * 10,
+            700 + Math.random() * 500
+          )
+        }
+        hero.addEventListener("pointermove", trail)
+        function stop() {
+          clearInterval(spill)
+          hero.removeEventListener("pointermove", trail)
+        }
+      })()
     </script>
     <!-- `icons`:  the app's icon names are Fomantic's, for every `<ui-*>` in the page (see `src/app/solid/loadUI.ts`);
          Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none.

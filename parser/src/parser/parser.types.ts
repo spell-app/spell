@@ -70,6 +70,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   page: "view",
   // where a program's data lives:  `family cookbook is a web server at "..."` (epic `data` P11)
   place: "thing",
+  // a kind of measure, its units written in spell:  `length is a dimension:` (epic `language` P23)
+  dimension: undefined,
   nothing: undefined
 }
 
@@ -89,7 +91,8 @@ export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   place: "Place",
   // a built-in template written in spell, compiled into the core (not in `BUILT_IN_TYPES`)
   "two sided view": "TwoSidedView",
-  notebook: "Notebook"
+  notebook: "Notebook",
+  site: "Site"
 }
 
 /** Built-in types which are classes at runtime -- see `BUILT_IN_CLASS_NAMES`. */
@@ -138,8 +141,17 @@ export type TypeWords = Record<string, Datatype>
 function builtInTypeWritten(written: string, typeWords: TypeWords): Datatype | undefined {
   const lower = written.toLowerCase()
   const singular = singularize(lower)
-  const ownName = isBuiltInType(lower) ? lower : isBuiltInType(singular) ? singular : undefined
+  const ownName = isBuiltInType(lower) ? lower : isBuiltInType(singular) ? singular : builtInTypeOfPlural(lower)
   return typeWords[lower] ?? typeWords[singular] ?? ownName
+}
+
+/**
+ * The built-in type `plural` is the plural of, by the language in play -- `undefined` if none.
+ * - A built-in's own name is an English word, which another language's rules may not make singular again:
+ *   Spanish makes `text` plural as `textes` (`listOf()`), then `textes` singular as `texte` (epic `language` T54).
+ */
+function builtInTypeOfPlural(plural: string): Datatype | undefined {
+  return Object.keys(BUILT_IN_TYPES).find((datatype) => pluralize(datatype) === plural)
 }
 
 /** Is `datatype` one of spell's built-in types, e.g. `text` or `list` -- NOT `list of cards`, nor a user's type? */

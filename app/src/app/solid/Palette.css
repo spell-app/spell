@@ -58,10 +58,15 @@
 }
 
 /* an empty app, in Edit:  what to do */
+/* - only an app's element draws in its children:  a page's whole drawing is in its shadow root, so has none (T77) */
 .EmptyAppPrompt {
   display: none;
 }
-.AppPaneProgram:has(.App > :empty, .App > * > :is(ui-container, es-contenedor):only-child:empty) > .EmptyAppPrompt {
+.AppPaneProgram:has(
+    .App > :state(draws-in-children):empty,
+    .App > :state(draws-in-children) > :is(ui-container, es-contenedor):only-child:empty
+  )
+  > .EmptyAppPrompt {
   position: absolute;
   inset: 0;
   z-index: 1;

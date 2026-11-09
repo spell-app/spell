@@ -7,15 +7,18 @@ import { SRV, type Handler } from "spell/server"
 import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer } from "spell/server/places"
 import { ask, serveHandler, type Served } from "spell/server/test/serve"
 import {
+  DeviceCopy,
+  type DeviceCopyStore,
   JsonChunks,
   MemoryPlace,
+  PlaceError,
   Places,
   RemotePlace,
   RestPlace,
   type Place,
   type WriteAnswer,
   type WriteQuestion
-} from "spell/util/places"
+} from "spell/places"
 
 import { newFolder, removeFolders } from "./places.helpers"
 
@@ -56,6 +59,21 @@ async function placeServer(places: Record<string, Place>, keys?: PlaceKeys) {
   return { port, remote: new RemotePlace({ url: `http://127.0.0.1:${port}/api/places/${name}`, token: TOKEN }) }
 }
 
+/** A store in memory, standing in for the browser's database a `DeviceCopy` keeps its copies in. */
+class MemoryCopies implements DeviceCopyStore {
+  private readonly values = new Map<string, unknown>()
+  async load(store: string, key: string): Promise<unknown> {
+    return structuredClone(this.values.get(`${store}\n${key}`))
+  }
+  async saveOrThrow(store: string, key: string, value: unknown): Promise<void> {
+    if (value === undefined) this.values.delete(`${store}\n${key}`)
+    else this.values.set(`${store}\n${key}`, structuredClone(value))
+  }
+  async removeUnder(store: string, prefix: string): Promise<void> {
+    for (const key of this.values.keys()) if (key.startsWith(`${store}\n${prefix}`)) this.values.delete(key)
+  }
+}
+
 /** A POST with the right token, as a page would send. */
 function posted(port: number, path: string, body: object, headers: Record<string, string> = {}) {
   return ask(port, "POST", path, {
@@ -94,6 +112,44 @@ describe("PlaceServer and RemotePlace", () => {
     expect(handled).toEqual({})
     expect((await remote.list("recipes", { select: ["notes"] }, {})).rows[0]!.notes).toBe("Temper last")
     expect(await remote.getMany("recipes", ["r-2"], {})).toEqual([{ id: "r-2", title: "Soup", notes: "Roast first" }])
+  })
+
+  test("kept in the browser until sign-in (epic `atmosphere` P8):  nothing asked, writes wait, then go", async () => {
+    const { port, place } = await folder()
+    let status: "signed out" | "signed in" = "signed out"
+    const listeners = new Set<() => void>()
+    const signIn = {
+      account: "Spell account" as const,
+      get status() {
+        return status
+      },
+      ready: Promise.resolve(),
+      signIn: async () => undefined,
+      signOut: async () => undefined,
+      onChange: (listener: () => void) => (listeners.add(listener), () => listeners.delete(listener))
+    }
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/recipes`,
+      token: TOKEN,
+      can: { identifiesBy: "a sign-in" },
+      signIn
+    })
+    const change = {
+      changeId: "c-1",
+      kind: "insert" as const,
+      collection: "recipes",
+      id: "r-3",
+      fields: { title: "Stew" }
+    }
+    // signed out:  no rows, and a write fails as no answer would, so it stays pending
+    expect((await remote.list("recipes", {}, {})).rows).toEqual([])
+    expect(await remote.getMany("recipes", ["r-1"], {})).toEqual([])
+    await expect(remote.apply([change], {})).rejects.not.toBeInstanceOf(PlaceError)
+    expect((await place.list("recipes", {}, {})).rows.map(({ id }) => id)).toEqual(["r-1", "r-2"])
+    // signed in:  it reads and writes through
+    status = "signed in"
+    await remote.apply([change], {})
+    expect((await remote.list("recipes", {}, {})).rows.map(({ id }) => id)).toEqual(["r-1", "r-2", "r-3"])
   })
 
   test("it writes through, and a file edited on the disk is what it next answers", async () => {
@@ -177,6 +233,55 @@ describe("PlaceServer and RemotePlace", () => {
     expect((await remote.changesSince("recipes", version!, {})).rows[0]!.title).toBe("Heard")
   })
 
+  test("kept on this device, a list read again asks only what changed (epic `atmosphere` T51)", async () => {
+    const memory = new MemoryPlace({
+      collections: {
+        posts: [
+          { id: "a", text: "first" },
+          { id: "b", text: "second" }
+        ]
+      }
+    })
+    const { port } = await placeServer({ posts: memory })
+    const store = new MemoryCopies()
+    const page = () =>
+      new RemotePlace({
+        url: `http://127.0.0.1:${port}/api/places/posts`,
+        token: TOKEN,
+        deviceCopy: new DeviceCopy({ scope: "test:feed", store })
+      })
+    expect((await page().list("posts", {}, {})).rows.map((row) => row.id)).toEqual(["a", "b"])
+    await memory.apply(
+      [
+        { kind: "update", collection: "posts", id: "a", fields: { text: "first, again" } },
+        { kind: "delete", collection: "posts", id: "b" },
+        { kind: "insert", collection: "posts", id: "c", fields: { id: "c", text: "third" } }
+      ],
+      {}
+    )
+    const lists = vi.spyOn(memory, "list")
+    // the page opened again:  the same device, a new place
+    const again = await page().list("posts", {}, {})
+    expect(lists).not.toHaveBeenCalled()
+    expect(again.rows).toEqual([
+      { id: "a", text: "first, again" },
+      { id: "c", text: "third" }
+    ])
+  })
+
+  test("kept on this device, a place that can't say what changed is read whole", async () => {
+    const memory = new MemoryPlace({ collections: { posts: [{ id: "a" }] } })
+    memory.changesSince = undefined as never
+    const { port } = await placeServer({ posts: memory })
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/posts`,
+      token: TOKEN,
+      deviceCopy: new DeviceCopy({ scope: "test:feed", store: new MemoryCopies() })
+    })
+    await remote.list("posts", {}, {})
+    expect((await remote.list("posts", {}, {})).rows).toEqual([{ id: "a" }])
+  })
+
   test("a place's operations go through `call()`", async () => {
     const memory = new MemoryPlace({ operations: { twice: (input) => (input as number) * 2 } })
     const { remote } = await placeServer({ n: memory })
@@ -246,6 +351,78 @@ describe("PlaceServer's guard", () => {
   test("a request that names no collection is 400", async () => {
     const { port } = await placeServer({ n: new MemoryPlace() })
     expect((await posted(port, "/api/places/n/list", {})).status).toBe(400)
+  })
+})
+
+describe("PlaceServer, a place opened by its address (epic `atmosphere` P1)", () => {
+  /** A server that opens a memory place for each address it's asked for, saying who asked. */
+  async function opening() {
+    const router = new SRV.Router()
+    const guard = new SRV.Guard({ token: TOKEN })
+    const opened: { name: string; identity: string | undefined }[] = []
+    const places = new Map<string, MemoryPlace>()
+    const seen: (string | undefined)[] = []
+    new PlaceServer({
+      prefix: "/api/places/spaces",
+      identityOf: (request) => request.get("x-who") || undefined,
+      open: (name, identity) => {
+        opened.push({ name, identity })
+        if (!name.includes("@")) return undefined
+        let place = places.get(name)
+        if (!place) {
+          place = new MemoryPlace()
+          const list = place.list.bind(place)
+          place.list = (collection, query, context) => {
+            seen.push(context?.identity)
+            return list(collection, query, context)
+          }
+          places.set(name, place)
+        }
+        return place
+      }
+    }).route(router, guard)
+    const server = createServer(SRV.toListener(router.handle))
+    const port = await SRV.listenPreferred(server)
+    guard.allowPort(port)
+    closes.push(
+      () =>
+        new Promise((done) => {
+          server.closeAllConnections()
+          server.close(() => done())
+        })
+    )
+    return { port, opened, places, seen }
+  }
+
+  test("an address with its slashes is one name;  the place gets who's asking", async () => {
+    const { port, opened, seen } = await opening()
+    const answer = await posted(
+      port,
+      "/api/places/spaces/owen@spell/recipes/list",
+      { collection: "recipes" },
+      {
+        "x-who": "owen@spell"
+      }
+    )
+    expect(answer.status).toBe(200)
+    expect(opened).toEqual([{ name: "owen@spell/recipes", identity: "owen@spell" }])
+    expect(seen).toEqual(["owen@spell"])
+  })
+
+  test("a name it can't open is 404", async () => {
+    const { port } = await opening()
+    expect((await posted(port, "/api/places/spaces/nobody/list", { collection: "recipes" })).status).toBe(404)
+  })
+
+  test("a browser's place writes through it, at the address, and reads it back", async () => {
+    const { port, places } = await opening()
+    const remote = new RemotePlace({
+      url: `http://127.0.0.1:${port}/api/places/spaces/owen@spell/recipes`,
+      token: TOKEN
+    })
+    await remote.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], {})
+    expect((await remote.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Dal" }])
+    expect([...places.keys()]).toEqual(["owen@spell/recipes"])
   })
 })
 

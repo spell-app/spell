@@ -92,6 +92,8 @@ function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | un
  *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, a dot by its label;
  *     `:state(inherited)`, a quieter label;  `worked out`, read only;  its label's tooltip says where, and a small
  *     button at the row's end says it was pressed (`ui-reset`, `ui-show-code`)
+ *   - `data`:  kept in a place outside the program, `:state(data)`;  its `mark` at the row's end says where in short,
+ *     and is its button when it offers one;  an origin's `readonly` makes it read only, whatever its kind
  *   - a run of three or more yes-or-no properties in one group is ONE select of pills (`FlagRun`):
  *     the first draws it (`:state(flags)`), the rest hide (`:state(flag)`), each still its own property
  *   - choices carry their icons (`ValueSets.iconsFor()`), a hue its colour's chip;  four or fewer, all with
@@ -222,7 +224,7 @@ export class UIProperty extends UIField {
 
   @E.cssState("readonly")
   get isReadOnly(): boolean {
-    return !!this.readonly || this.isInReadonly || this.origin?.kind === WORKED_OUT
+    return !!this.readonly || this.isInReadonly || this.origin?.kind === WORKED_OUT || !!this.origin?.readonly
   }
 
   ////////////////
@@ -246,6 +248,12 @@ export class UIProperty extends UIField {
     return this.origin?.kind === "inherited"
   }
 
+  /** `:state(data)`:  its value is kept in a place outside the program, a back-end. */
+  @E.cssState("data")
+  get isData(): boolean {
+    return this.origin?.kind === "data"
+  }
+
   /** The label's tooltip says where. */
   get labelTitle(): string | undefined {
     return this.origin?.from
@@ -257,8 +265,44 @@ export class UIProperty extends UIField {
     name: () => (this.origin?.action ? ORIGIN_ACTIONS[this.origin.action].icon : undefined)
   })
 
-  /** The button its origin offers, at the row's end. */
+  /** What its origin shows at the row's end:  its `mark`, else the small button it offers. */
   protected rowEnd(): JSX.Element {
+    return (
+      <Show when={!this.origin?.mark} fallback={this.originMark()}>
+        {this.originButton()}
+      </Show>
+    )
+  }
+
+  /** Its origin's `mark`, at the row's end:  its button, when it offers one, else plain words. */
+  private originMark(): JSX.Element {
+    const action = () => this.origin?.action
+    return (
+      <Show
+        when={action()}
+        fallback={
+          <span class="origin mark" part={this.partForName("origin" as never)} title={this.origin?.from}>
+            {this.origin?.mark}
+          </span>
+        }
+      >
+        {(pressed) => (
+          <button
+            type="button"
+            class="origin mark"
+            part={this.partForName("origin" as never)}
+            title={this.origin?.from}
+            onClick={() => this.send(ORIGIN_ACTIONS[pressed()].event as never, { name: this.propertyName } as never)}
+          >
+            {this.origin?.mark}
+          </button>
+        )}
+      </Show>
+    )
+  }
+
+  /** The small button its origin offers. */
+  private originButton(): JSX.Element {
     return (
       <Show when={this.origin?.action}>
         {(action) => {
@@ -327,6 +371,8 @@ export class UIProperty extends UIField {
    *   (`ValueSets.setFor()`):  a tag's `size` is the sizes, its `color` the hues.
    *   Without the kind's set, a tag's own schema drew its selects with nothing to choose (Owen:  "dropdowns don't
    *   have options").
+   * - Each shown by its words, `valueLabels`, when the schema gives them (`up` shows as `arriba`;  epic `language` T73);
+   *   its value stays the value.
    */
   get choices(): readonly Choice[] | undefined {
     const text = this.optionsText
@@ -336,8 +382,15 @@ export class UIProperty extends UIField {
     const set = spec && E.ValueSets.setFor(spec)
     if (!set) return undefined
     const icons = E.ValueSets.iconsFor(spec)
+    const labels = spec.valueLabels
     const values = E.ValueSets.get(set)
-    return icons ? values.map((value) => (icons[value] ? { value, text: value, icon: icons[value] } : value)) : values
+    if (!icons && !labels) return values
+    return values.map((value) => {
+      const icon = icons?.[value]
+      const text = labels?.[value] ?? value
+      if (!icon) return text === value ? value : { value, text }
+      return { value, text, icon }
+    })
   }
 
   /** Its choices are colours:  each drawn with a chip of its hue (`hueChip()`). */

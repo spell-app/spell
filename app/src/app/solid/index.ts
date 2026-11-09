@@ -11,7 +11,7 @@
  *   - `chrome.tsx`:  `AppMenu`, `PanelMenu`, `Submenu`, `MenuHeader`, `Spring`, `MoreMenu`, the icon names
  *   - `Actions.tsx`:  `Action`, `Actions`
  *   - `EditorTheme.tsx`, `EditorMode.tsx`:  the editor's look, and its Run / Edit modes (and the Program panel shown)
- *   - `MenuBar.tsx`:  the top bar's menus, the project's and File · Edit · View · Run · Help
+ *   - `MenuBar.tsx`:  the top bar's menus, Spell's, the project's and File · Edit · View · Run · Help
  *   - `ErrorBoundary.tsx`:  `ErrorBoundary`
  *   - `ErrorNotice.tsx`:  `ErrorDisplay`, `ErrorNotice`;  `Notice.tsx`;  `Markdown.tsx`
  * - The pages' shell (P8):
@@ -42,6 +42,7 @@ export * from "./chrome"
 export * from "./EditorTheme"
 export * from "./EditorMode"
 export * from "./Inspector"
+export * from "./InspectorData"
 export * from "./PartEdits"
 export * from "./Palette"
 export * from "./ChangeThis"

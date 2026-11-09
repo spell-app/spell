@@ -1,0 +1,81 @@
+# REST Countries
+Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.
+Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+with `<spell-more-of>`, so looking again at the server never touches a line of this.
+All 250 come in one request, with no paging:  picking a region only looks through them again.
+
+<spell-thing "rest countries page">
+	<spell>
+		- its "region" is text
+		- its "language" is text  // its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`
+		- to create it:
+			set its region to "Europe"
+			set its language to "fra"
+	</spell>
+	<property "countries" description="The region's, looked through here:  REST Countries sends every one at once">every country where its region is the region, sorted by its name's common</property>
+
+	<action "pick region (region as text)">
+		set its region to region
+	</action>
+
+	<draw>
+		<stack spacing="xl">
+			<stack spacing="sm">
+				<form value={it}>
+					<stack direction="horizontal" wrap align="center" justify="between" spacing="sm">
+						<header size="large">The world's countries, from REST Countries</header>
+						<select name="language" aria-label="Names in">
+							<item value="fra">Français</item>
+							<item value="spa">Español</item>
+							<item value="deu">Deutsch</item>
+							<item value="jpn">日本語</item>
+						</select>
+					</stack>
+				</form>
+				<toolbar appearance="secondary" aria-label="Regions">
+					<item active={its region is "Africa"} onClick={pick region "Africa"}>Africa</item>
+					<item active={its region is "Americas"} onClick={pick region "Americas"}>The Americas</item>
+					<item active={its region is "Asia"} onClick={pick region "Asia"}>Asia</item>
+					<item active={its region is "Europe"} onClick={pick region "Europe"}>Europe</item>
+					<item active={its region is "Oceania"} onClick={pick region "Oceania"}>Oceania</item>
+					<item active={its region is "Antarctic"} onClick={pick region "Antarctic"}>The Antarctic</item>
+				</toolbar>
+			</stack>
+			{draw the countries table of it}
+			<text size="small" paragraph>
+				From <link link="https://github.com/mledoze/countries">the data REST Countries serves</link>, every country in one request.
+			</text>
+		</stack>
+	</draw>
+
+	<draw "countries table" description="A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code">
+		<for country in its countries as="table" appearance="very-basic" padding="compact" vertical-align="top" loading="Asking REST Countries" failed="REST Countries can't be reached just now.">
+			<cell "Flag" align="center"><text size="big">{its flag}</text></cell>
+			<cell "Country" header>{its name's common}</cell>
+			<cell "Its name there">{the common of the first translation in its translations where its code is the public servers' atlas's language}</cell>
+			<cell "Capital">{the first item of its capital}</cell>
+			<cell "Money"><stack spacing="none">{draw each currency in its currencies}</stack></cell>
+			<cell "Languages"><stack direction="horizontal" wrap spacing="xs">{draw each language in its languages}</stack></cell>
+		</for>
+	</draw>
+</spell-thing>
+
+
+# Its money
+Its name, its symbol and its code:  `Euro`, `€`, `EUR`.
+
+<spell-more-of "currency">
+	<draw>
+		<text>{its name} ({its symbol}) <text color="grey">{its code}</text></text>
+	</draw>
+</spell-more-of>
+
+
+# A language
+Its name in English, keyed by its code:  `French`, `fra`.
+
+<spell-more-of "language">
+	<draw>
+		<text>{its name}</text>
+	</draw>
+</spell-more-of>

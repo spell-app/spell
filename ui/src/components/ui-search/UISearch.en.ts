@@ -121,6 +121,7 @@ export const searchVocabulary = {
       description: "The input's text:  the query, or a chosen result's title."
     },
     { ...UIT.FormControlAttributes.name, description: "Form field name:  submits the input's text." },
+    UIT.FormControlAttributes.parameter,
     { ...UIT.FormControlAttributes.required, description: "Form validation:  the input can't be empty." },
     {
       name: "url",
@@ -148,6 +149,16 @@ export const searchVocabulary = {
       kind: "number",
       default: 200,
       description: "Remote:  ms to wait after typing stops before querying (a newer query aborts an older one)."
+    },
+    {
+      name: "delay",
+      group: "behaviour",
+      kind: "string",
+      default: "2s",
+      description:
+        "How long typing must pause before the text SETTLES:  a CSS time (`0.5s`, `500ms`) or bare ms;  `0` settles " +
+        "every keystroke.  Settling sends `ui-changed`, writes a bound form's field, and records `parameter`;  " +
+        "Enter, leaving the field, choosing a result and clearing it settle at once."
     },
     {
       name: "full-text-search",
@@ -210,7 +221,9 @@ export const searchVocabulary = {
     {
       name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
-      description: "The text was committed:  a result chosen, the input cleared with Escape, or left after an edit."
+      description:
+        "The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left " +
+        "after an edit.  Once per new text."
     },
     {
       name: "ui-replied",

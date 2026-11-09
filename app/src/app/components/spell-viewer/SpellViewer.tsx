@@ -2,6 +2,7 @@ import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
+import { UI } from "spell/ui/core"
 import { UIRoot, type RootVocabulary } from "spell/ui/components/ui-root"
 // Import directly, NOT through the `spell/parser/spell` barrel, which would pull in the whole parser.
 import { SpellUrls } from "spell/parser/spell/SpellUrls"
@@ -134,6 +135,19 @@ export class SpellViewer extends UIRoot<typeof vocabulary> {
     // where `assets` says as we join the page, else beside this script (read once:  a component is built untracked)
     const assets = new URL(this.assets ?? BUNDLE, document.baseURI).href
     void adoptShadowStyles(this.domElement.renderRoot, assets)
+  }
+
+  /**
+   * The program draws in our shadow root:  a table of rows there is styled by the table's page sheet,
+   * which the document's adopted sheets don't reach inside a shadow root.
+   */
+  onMount() {
+    const mounted = super.onMount()
+    // once the runtime is loaded;  un-awaited on purpose
+    void UI.load()
+      .then(() => UI.styles.adoptPageSheetsInto(this.domElement.renderRoot))
+      .catch((error: unknown) => console.error(error))
+    return mounted
   }
 
   ////////////////

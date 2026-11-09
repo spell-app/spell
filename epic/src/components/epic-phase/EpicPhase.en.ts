@@ -66,9 +66,12 @@ export const epicPhaseVocabulary = {
     {
       name: "status",
       kind: "enum",
-      values: ["todo", "active", "done"],
+      values: ["todo", "active", "done", "dropped"],
       required: true,
-      description: "`todo`, `active` (one at a time, blue:  under way) or `done` (green)."
+      description:
+        "`todo`, `active` (one at a time, blue:  under way), `done` (green) or `dropped` (never built, and won't be:  " +
+        "its title struck through and grey, a crossed circle, its Dropped field saying why;  finished, as `done` is:  " +
+        "epic `epic-engine` I228)."
     },
     {
       name: "estimate",
@@ -84,6 +87,14 @@ export const epicPhaseVocabulary = {
         "`… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, " +
         "side by side counted once, never the time waiting on you.  A done phase shows it in place of its " +
         "estimate, the estimate in its tooltip (`~3-4h`)."
+    },
+    {
+      name: "span",
+      kind: "string",
+      description:
+        "How long it was under way by the clock, from going active to done, waits on you included, written beside " +
+        "`took` from the page's log (epic `epic-engine` I127):  `4h`, `1h 30m`.  A done phase's pill then reads " +
+        "`34m / 4h`.  None when the log has no start for it:  the pill shows only `took`."
     },
     {
       name: "source",
@@ -124,11 +135,12 @@ export const epicPhaseVocabulary = {
     {
       name: "plan",
       kind: "enum",
-      values: ["waiting", "accepted"],
+      values: ["waiting", "accepted", "held"],
       description:
         "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review " +
         "buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  " +
-        "good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not " +
+        "good to go, epic `epic-engine` I140), or `held` (you un-clicked that thumbs up:  paused, a grey pause, not built " +
+        "till you accept it again, epic `epic-engine` I221);  written by the epic tool, so the title row knows with its body not " +
         "loaded."
     },
     {
@@ -199,7 +211,8 @@ export const epicPhaseVocabulary = {
       name: "estimate",
       description:
         "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and " +
-        "timed, what it `took` (`21m`), the estimate its tooltip."
+        "timed, what it `took` (`21m`), the estimate its tooltip;  with a `span` too, `34m / 4h`, its tooltip in " +
+        "words (`34m of work over 4h, estimated ~3-4h`)."
     },
     {
       name: "gear",
@@ -232,6 +245,7 @@ export const epicPhaseVocabulary = {
     { key: "statusTodo", text: "To do", description: "The status icon's name:  `todo`." },
     { key: "statusActive", text: "Under way", description: "The status icon's name:  `active`." },
     { key: "statusDone", text: "Done", description: "The status icon's name:  `done`." },
+    { key: "statusDropped", text: "Dropped", description: "The status icon's name:  `dropped` (I228)." },
     {
       key: "workingPlan",
       text: "Claude is writing this phase's plan",
@@ -262,6 +276,16 @@ export const epicPhaseVocabulary = {
       key: "tookTip",
       text: "~{estimate}",
       description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
+    },
+    {
+      key: "spanTip",
+      text: "{took} of work over {span}",
+      description: "A done phase's time pill with its clock time, no estimate:  its tooltip (I127)."
+    },
+    {
+      key: "spanEstimateTip",
+      text: "{took} of work over {span}, estimated ~{estimate}",
+      description: "A done phase's time pill with its clock time and an estimate:  its tooltip (I127)."
     },
     {
       key: "choiceOpen",
@@ -366,6 +390,14 @@ export const epicPhaseVocabulary = {
       where: { attribute: "name", values: ["done"] },
       max: 1,
       description: "Done:  what was built, once done."
+    },
+    {
+      tag: "epic-field",
+      where: { attribute: "name", values: ["dropped"] },
+      max: 1,
+      description:
+        "Dropped:  why a dropped phase was never built (`Moved to P38`, a link to that phase), in place of Done " +
+        "(epic `epic-engine` I228;  `epic phase <epic>#P18 dropped --why`)."
     },
     { tag: "epic-commit", description: "Its commits, oldest first." },
     {

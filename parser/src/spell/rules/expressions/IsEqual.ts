@@ -1,5 +1,6 @@
 import { lowerFirst, proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SpellConstant } from "spell/parser/spell/rules/constants"
 
 import { Negatable } from "./Negatable"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
@@ -22,6 +23,8 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
     if (!match) return match
     const property = IsEqual.listedPropertyFor(scope, SuffixLeft.current, match.groups.expression)
     if (property) (match.data as IsEqualMatchData).property = property
+    // a value said for a built-in template's property, in its own language:  `arriba` is `up` (epic `language` T74)
+    SpellConstant.sayFor(SuffixLeft.current, match.groups.expression)
     return match
   }
 

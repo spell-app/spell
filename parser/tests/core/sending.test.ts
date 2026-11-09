@@ -2,7 +2,8 @@
 import { describe, test, expect, beforeEach } from "vite-plus/test"
 
 import { core, send, Thing, List, App } from "spell/parser/core"
-import { chainOf, handlerOf, SentEvent } from "spell/parser/core/sending"
+import { chainOf, SentEvent } from "spell/parser/core/sending"
+import { handlerOf } from "spell/parser/core/SpellEvent"
 
 class Card extends Thing {
   heard: string[] = []

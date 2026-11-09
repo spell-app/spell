@@ -19,7 +19,7 @@
  *   so a refresh or a heal never comes back as a write.
  * - A reference in a row, `{ "$ref": "Person#matt" }`, finds that thing, or its row in the cache.
  * - By file, `spell/parser/core/places`, NOT in the core's barrel or `model`:  a program with no places pays nothing.
- * - Its only part of `spell/util/places` at run time is `idOfRow()` and `BrowserCopy`:
+ * - Its only part of `spell/places` at run time is `idOfRow()` and `BrowserCopy`:
  *   the rest of that folder is the caller's.
  *
  * Handed `places`, what's done to those things goes back to their place (epic `data` P3):
@@ -62,7 +62,7 @@
  * ```
  *
  * - `originOf()` is `Places`'s;  it asks here about a thing:  `describeValue()`.
- * - A sample (`spell/util/places/SamplePlace`) isn't known here, so a program doesn't carry it.
+ * - A sample (`spell/places/SamplePlace`) isn't known here, so a program doesn't carry it.
  *   This only makes sure nothing done for one reaches the real place:  `swapped()`.
  */
 import {
@@ -77,6 +77,7 @@ import {
   unsetReadsNothing,
   type Schema
 } from "spell/util"
+import { Cell } from "spell/util/reactive"
 import type { UndoRecord } from "spell/util/persist/persist.types"
 import type { UndoStack } from "spell/util/persist/UndoStack"
 import type {
@@ -87,16 +88,17 @@ import type {
   PlaceRowsChange,
   PlaceThingDeleted,
   PlaceWriteFailure
-} from "spell/util/places/PendingChanges"
-import type { PlaceCache } from "spell/util/places/PlaceCache"
-import type { PlaceResult } from "spell/util/places/PlaceResult"
-import type { PlaceThingMaker, Places, SavedValue, WorkedOutValue } from "spell/util/places/Places"
-import { ourNameFor } from "spell/util/places/FieldNames"
-import { idOfRow, type PlaceRow } from "spell/util/places/places.types"
-import { POSITIONS_KEY } from "spell/util/places/positions"
-import { parseRef } from "spell/util/places/refs"
-import { BrowserCopy } from "spell/util/places/SaveQueue"
+} from "spell/places/PendingChanges"
+import type { PlaceCache } from "spell/places/PlaceCache"
+import type { PlaceResult } from "spell/places/PlaceResult"
+import type { PlaceThingMaker, Places, SavedValue, WorkedOutValue } from "spell/places/Places"
+import { ourNameFor } from "spell/places/FieldNames"
+import { idOfRow, type PlaceRow } from "spell/places/places.types"
+import { POSITIONS_KEY } from "spell/places/positions"
+import { parseRef } from "spell/places/refs"
+import { BrowserCopy } from "spell/places/SaveQueue"
 
+import type { CoreMessageKey } from "./core.types"
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
 import { valueAsDeclared, valueAsWritten, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, isPlainObject, setField } from "./state"
@@ -152,6 +154,22 @@ const DRAFT_STORE = "spell-place-drafts"
 /** The event Show me sends, unless `PlaceThingsOptions.showMe` says otherwise. */
 const SHOW_ME_EVENT = "show-me"
 
+/** The refusal notice that says why, by the refusal's `whyNot`;  any other, the plain one, `write-refused`. */
+const REFUSAL_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
+  role: "write-refused-role",
+  owner: "write-refused-owner",
+  "taken down": "write-refused-taken-down",
+  full: "write-refused-full",
+  "not listed": "write-refused-not-listed",
+  "used up": "write-refused-used-up"
+}
+
+/** The refusal notice that names the role it takes, by what it `needs` (epic `atmosphere` P23). */
+const NEEDS_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
+  editor: "write-refused-editor",
+  manager: "write-refused-manager"
+}
+
 /** Every write, sent to whichever `PlaceThings` or draft the thing belongs to:  ONE for all of them. */
 const PLACE_WRITES: PlaceWriteListener = {
   setting(target, property, was, value) {
@@ -174,7 +192,10 @@ const PLACE_WRITES: PlaceWriteListener = {
       return home?.things.noteWrite(home, held.field, before, after)
     }
     const home = HOMES.get(list)
-    home?.things.noteWrite(home, ITEMS_KEY, before, after)
+    if (!home) return
+    // a saved list's own items, when they're saved nowhere else, are inside its row:  a change to one is a write of them
+    noteHeldItems(after, list as SpellObject, ITEMS_KEY)
+    home.things.noteWrite(home, ITEMS_KEY, before, after)
   }
 }
 
@@ -185,12 +206,22 @@ function rememberListField(list: List, owner: SpellObject, field: string): void 
   noteHeldItems(list.items, owner, field)
 }
 
-/** Who holds each thing saved inside its owner's row, and in which of its fields:  `the recipe of an ingredient`. */
+/**
+ * Who holds each thing saved inside its owner's row, and in which of its fields:  `the recipe of an ingredient`.
+ * - A saved list's own items are in its `ITEMS_KEY`.
+ */
 const HELD_BY = new WeakMap<object, { owner: SpellObject; field: string }>()
 
-/** A thing saved inside its owner's row, as its class says:  `an ingredient belongs to one recipe`. */
+/**
+ * A thing saved inside the row of what holds it, whole:
+ * - as its class says, `an ingredient belongs to one recipe`
+ * - or a thing of a type saved in no place, which has nowhere else to be:  a saved checklist's tasks
+ *   (epic `language` T66:  written as a reference to nothing, its items came back empty after a reload)
+ */
 function isSavedWithOwner(thing: object | undefined): boolean {
-  return !!(thing?.constructor as { savedWith?: unknown } | undefined)?.savedWith
+  if (!(thing instanceof Thing || thing instanceof List)) return false
+  const Class = thing.constructor as { savedWith?: unknown; savedIn?: unknown }
+  return !!Class.savedWith || !Class.savedIn
 }
 
 /** Note that each of `items` saved inside its owner's row is now `owner`'s. */
@@ -215,7 +246,7 @@ function noteWriteToHeld(
 ): void {
   const home = HOMES.get(owner)
   if (!home) return
-  const list = (owner as unknown as Record<string, unknown>)[field] as List
+  const list = field === ITEMS_KEY ? (owner as List) : ((owner as unknown as Record<string, unknown>)[field] as List)
   home.things.noteHeldChange(home, field, list.items, thing, property, value)
 }
 
@@ -231,12 +262,75 @@ const THINGS_INSIDE_ROWS = new WeakSet<SpellObject>()
  * - None declared:  `field` itself.
  * - What a web server sends is named so already (`FieldNames`);  this finds the rest, a sheet's columns and what's inside a row.
  */
-function nameDeclaredIn(schema: ReturnType<typeof schemaOf>, field: string): string {
-  if (schema.info(field)) return field
-  const stored = storedAsNamesOf(schema).get(field)
+function nameDeclaredIn(
+  schema: ReturnType<typeof schemaOf>,
+  field: string,
+  { isInside = false }: { isInside?: boolean } = {}
+): string {
+  // inside a row, as the place sent it:  what a line says it's called there first,
+  // `its "number" is a number, stored as "id"` over the id every thing has (a row of a place is ours already)
+  const stored = isInside ? storedAsNamesOf(schema).get(field) : undefined
   if (stored) return stored
+  if (schema.info(field)) return field
+  const storedAs = storedAsNamesOf(schema).get(field)
+  if (storedAs) return storedAs
   const ours = ourNameFor(field)
   return schema.info(ours) ? ours : field
+}
+
+/**
+ * `value`, a link with its name (PokéAPI's `{ "name": "pikachu", "url": "https://..." }`), as its address,
+ * as a link field or text holds one;  a list of them, each;  anything else as it is.
+ */
+function addressesOf(value: unknown): unknown {
+  if (Array.isArray(value)) return value.every(isNamedLink) ? value.map((each) => (each as { url: string }).url) : value
+  return isNamedLink(value) ? (value as { url: string }).url : value
+}
+
+/**
+ * `value`, lists side by side, as the list of things they make:
+ * each item's fields the items at one place in each list (epic `data` P33).
+ * - Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`, read by `its "hours" is a list of hours`:
+ *   each hour its `time` and its `temperature_2m`.
+ * - Only an object whose every field is a list, all the same length:  anything else as it is.
+ */
+function rowsOfListsSideBySide(value: unknown): unknown {
+  if (!isPlainObject(value)) return value
+  const lists = Object.entries(value as Record<string, unknown>)
+  if (!lists.length || !lists.every(([, list]) => Array.isArray(list))) return value
+  const length = (lists[0]![1] as unknown[]).length
+  if (!lists.every(([, list]) => (list as unknown[]).length === length)) return value
+  return Array.from({ length }, (_, at) =>
+    Object.fromEntries(lists.map(([field, list]) => [field, (list as unknown[])[at]]))
+  )
+}
+
+/** The field a map by code's key goes in, in each thing it makes:  `rowsOfMapByCode()`. */
+const MAP_CODE_FIELD = "code"
+
+/**
+ * `value`, a map by a code, as the list of things it makes, each its code and what it holds (epic `data` P35):
+ * REST Countries' `"currencies": { "EUR": { "name": "Euro", "symbol": "€" } }`,
+ * read by `its "currencies" is a list of currencies`, is a currency whose `code` is `EUR`.
+ * - Only where a list of things with a `code` is declared:  `schema` is the things'.
+ * - A plain value goes in the one other field the type declares:
+ *   `"languages": { "fra": "French" }` is a language whose `code` is `fra`, and its `name` `French`.
+ * - Anything but a plain object as it is.
+ */
+function rowsOfMapByCode(value: unknown, schema: ReturnType<typeof schemaOf>): unknown {
+  if (!isPlainObject(value) || !schema.info(MAP_CODE_FIELD)) return value
+  const others = [...schema.declared.keys()].filter((field) => field !== MAP_CODE_FIELD)
+  return Object.entries(value as Record<string, unknown>).map(([code, held]) => {
+    if (isPlainObject(held)) return { [MAP_CODE_FIELD]: code, ...(held as object) }
+    return others.length === 1 ? { [MAP_CODE_FIELD]: code, [others[0]!]: held } : { [MAP_CODE_FIELD]: code }
+  })
+}
+
+/** Is this a link with its name, and nothing more:  `{ name, url }`? */
+function isNamedLink(value: unknown): boolean {
+  if (!isPlainObject(value)) return false
+  const { url, ...rest } = value as Record<string, unknown>
+  return typeof url === "string" && Object.keys(rest).every((key) => key === "name")
 }
 
 /** Each field `schema` says its place calls something else, by that name:  `avg_ht` => `averageHeight`. */
@@ -387,7 +481,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     )
   }
 
-  /** `thing`, kept in a place, is gone from it.  What it holds on to stays:  it's still a thing here.  Not kept:  nothing. */
+  /**
+   * `thing`, kept in a place, is gone from it.
+   * - What it holds on to stays:  it's still a thing here.
+   * - A thing in no place:  nothing happens.
+   */
   remove(thing: SpellObject): void {
     const home = HOMES.get(thing)
     if (!home) return
@@ -400,7 +498,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
 
   /**
    * A draft of `thing`:  its `thing` takes changes, and they stay apart until `save()`.
-   * - ONE per thing:  asked again before it's saved or cancelled, the same draft.
+   * - ONE per thing:  asked again before it's saved or cancelled, the same draft;  after, a new one (T135).
    * - What it's holding is kept on this device, and comes back on the next visit.
    * - throws `TypeError` for a thing kept in no place
    */
@@ -409,9 +507,23 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!home) throw new TypeError("PlaceThings.draftOf():  this thing isn't kept in a place;  it needs no draft")
     let draft = this.drafts.get(thing)
     if (draft && !draft.isStillGood) draft = undefined
-    if (!draft) this.drafts.set(thing, (draft = new PlaceDraft(thing, home, () => this.drafts.delete(thing))))
+    // untracked:  a drawing asking for it hears when it ends, not of each field it copies
+    if (!draft) {
+      draft = untrackCells(() => new PlaceDraft(thing, home, () => this.draftEnded(thing)))
+      this.drafts.set(thing, draft)
+    }
+    this.anyDraftEnded.read()
     return draft
   }
+
+  /** `thing`'s draft is saved or cancelled:  what reads it next gets a new one, and a drawing of it draws again. */
+  private draftEnded(thing: SpellObject): void {
+    this.drafts.delete(thing)
+    this.anyDraftEnded.changed()
+  }
+
+  /** Read by whoever asks for a draft:  a draft kept in a property, `its draft`, is a new one once this one ends. */
+  private readonly anyDraftEnded = new Cell()
 
   /** Each thing's draft, while it has one. */
   private readonly drafts = new WeakMap<SpellObject, PlaceDraft>()
@@ -453,9 +565,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /** Where `thing` is kept:  `undefined` for one in no place. */
-  placeOf(thing: SpellObject): { placeName: string; collection: string } | undefined {
+  placeOf(thing: SpellObject): { placeName: string; collection: string; id: string } | undefined {
     const home = HOMES.get(thing)
-    return home && { placeName: home.placeName, collection: home.collection }
+    return home && { placeName: home.placeName, collection: home.collection, id: home.id }
   }
 
   /** The draft `copy` is the copy of:  `undefined` for anything else. */
@@ -632,6 +744,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   /** Note where `thing` is kept, and its lists. */
   private remember(thing: SpellObject, home: ThingHome): void {
     HOMES.set(thing, home)
+    if (thing instanceof List) noteHeldItems(thing.items, thing, ITEMS_KEY)
     for (const key of keysOf(thing)) {
       const value = (thing as unknown as Record<string, unknown>)[key]
       if (value instanceof List) rememberListField(value, thing, key)
@@ -861,14 +974,19 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /** A place refused a write:  the notice, anywhere in the app -- Retry, or Show me. */
-  private writeFailed({ changes, retry }: PlaceWriteFailure): void {
+  private writeFailed({ changes, error, retry }: PlaceWriteFailure): void {
     const [{ type, id } = {}] = changes
     const thing = this.loaded.get(`${type}#${id}`)
     const actions = [
       { text: core.message("write-retry"), click: retry },
       ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
     ]
-    const message = core.message("write-refused", { thing: `${type ?? ""} ${id ?? ""}`.trim() })
+    // the notice says why, when it's known:
+    // their role can't write (a viewer, or no member;  epic `atmosphere` P4), naming the role it takes (P23);
+    // it's someone else's (P23);  or Spell took it down (P6)
+    const { whyNot = "", needs = "" } = error.cause ?? {}
+    const key = (whyNot === "role" && NEEDS_MESSAGES[needs]) || REFUSAL_MESSAGES[whyNot] || "write-refused"
+    const message = core.message(key, { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })
   }
 
@@ -947,17 +1065,39 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    *   a sheet's columns, and what's inside a row, which nothing else maps.
    * - A type a place holds is a link, `core.linked()`'s.  A type nobody can find stays a plain object, read the same way.
    */
-  private withThingsInside(type: string, fields: Record<string, unknown>): Record<string, unknown> {
+  private withThingsInside(type: string, fields: Record<string, unknown>, isInside = false): Record<string, unknown> {
     const Class = this.classNamed(type)
     if (!Class) return fields
     const schema = schemaOf(Class)
-    const entries = Object.entries(fields).map(([field, value]) => {
-      const name = nameDeclaredIn(schema, field)
+    const entries = Object.entries(fields).map(([field, sent]) => {
+      const name = nameDeclaredIn(schema, field, { isInside })
       const info = schema.info(name)
       const held = info?.itemType ?? info?.type
+      const listed = this.listedAs(info, sent)
+      const value = this.isHeldInside(held) ? listed : addressesOf(listed)
       return [name, typeof held === "string" ? this.markedInside(held, value) : value]
     })
     return Object.fromEntries(entries)
+  }
+
+  /**
+   * `sent`, read as the list `info` declares, when it is one:
+   * - lists side by side, as the things they make (`rowsOfListsSideBySide()`)
+   * - a map by a code, as its things, each with its code (`rowsOfMapByCode()`)
+   * - anything else as it is
+   */
+  private listedAs(info: { itemType?: unknown } | undefined, sent: unknown): unknown {
+    if (info?.itemType === undefined) return sent
+    const listed = rowsOfListsSideBySide(sent)
+    if (listed !== sent) return listed
+    const Class = typeof info.itemType === "string" ? this.classNamed(info.itemType) : undefined
+    return Class ? rowsOfMapByCode(sent, schemaOf(Class)) : sent
+  }
+
+  /** Is `type` a type held inside a row, one no place holds:  its plain objects are made as things of it. */
+  private isHeldInside(type: unknown): boolean {
+    const Class = typeof type === "string" ? (this.classNamed(type) as { savedIn?: unknown } | undefined) : undefined
+    return !!Class && !Class.savedIn
   }
 
   /** `value`, each plain object in it to be made as a thing of `type`, if `type` is one no place holds. */
@@ -966,7 +1106,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!Class || Class.savedIn) return value
     if (Array.isArray(value)) return value.map((item) => this.markedInside(type, item))
     if (!isPlainObject(value) || TYPE_KEY in value || REF_KEY in value) return value
-    return { ...this.withThingsInside(type, value), [TYPE_KEY]: type, [INSIDE_KEY]: true }
+    return { ...this.withThingsInside(type, value, true), [TYPE_KEY]: type, [INSIDE_KEY]: true }
   }
 
   /**
@@ -1014,7 +1154,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && this.holdsTheSame(current, json)) continue
       const declared = schema.info(key)
       const held = declared?.itemType ?? declared?.type
-      const inside = typeof held === "string" ? this.markedInside(held, json) : json
+      const listed = this.listedAs(declared, json)
+      const sent = this.isHeldInside(held) ? listed : addressesOf(listed)
+      const inside = typeof held === "string" ? this.markedInside(held, sent) : sent
       const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value

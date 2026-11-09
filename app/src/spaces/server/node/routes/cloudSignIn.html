@@ -1,0 +1,180 @@
+<!doctype html>
+<!--
+  What someone gets at a program or an org's home that they can't read yet (epic `atmosphere` I14, T59, `SpellCloud`):
+  - nobody signed in:  sign in by email, then this address loads what they asked for
+  - signed in, arriving by another site's link (epic `atmosphere` I20):  loads this address once more
+    - The session cookie is `SameSite=Strict`, so a link from another site brings no cookie, and the server sent this.
+    - This page's own request does bring it, and going to its own address from here brings it too.
+    - Once only:  `RETRIED`, so someone who really has no access is told so, and it never goes round and round.
+  - signed in as someone the org hasn't let in:  who they are, and Sign out
+  - At `/sign-in`, the spaces home's way in:  signed in, on to the home.
+  - A program can't load to draw its own sign-in bar:  its files are only for the org's people.
+  - The same for every name in the space, so a stranger can't tell what an org has.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in to Spell</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        margin: 0 auto;
+        max-width: 26rem;
+        padding: 4rem 1rem;
+        line-height: 1.5;
+      }
+      form {
+        display: flex;
+        gap: 0.5rem;
+      }
+      input {
+        flex: 1;
+        min-width: 0;
+        font: inherit;
+        padding: 0.4rem 0.6rem;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 0.8rem;
+      }
+      [hidden] {
+        display: none;
+      }
+      #problem {
+        color: #c33;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="title" hidden>Sign in to see this page</h1>
+    <section id="signing-in" hidden>
+      <p>This page belongs to an organization on Spell. Sign in with the email it knows you by.</p>
+      <form id="email-form">
+        <input
+          id="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+          aria-label="Your email"
+        />
+        <button>Email me a link</button>
+      </form>
+    </section>
+    <section id="waiting" hidden>
+      <p>Check your email: open its link, or type its code here.</p>
+      <form id="code-form">
+        <input id="code" required autocomplete="one-time-code" aria-label="The code from your email" />
+        <button>Sign in</button>
+      </form>
+    </section>
+    <section id="not-yours" hidden>
+      <p>You're signed in as <b id="who"></b>, and you don't have access to this page.</p>
+      <button id="sign-out">Sign out</button>
+    </section>
+    <p id="problem" role="alert"></p>
+    <script type="module">
+      const WAIT_MS = 3000
+      /** Under this key:  when this page last went to its own address, so it goes once. */
+      const RETRIED = `spell-sign-in-retried:${location.pathname}`
+      /** How long ago that may be, ms, and still be this visit's. */
+      const RETRY_FRESH_MS = 10_000
+      /** At `/sign-in`, signing in leads to the spaces home;  anywhere else, to this address. */
+      const SIGN_IN_ONLY = location.pathname === "/sign-in"
+
+      const element = (id) => document.getElementById(id)
+      const show = (id) => {
+        for (const each of ["signing-in", "waiting", "not-yours"]) element(each).hidden = each !== id
+        element("title").hidden = false
+        element("title").textContent = id === "not-yours" ? "You don't have access" : TITLE
+        element("problem").textContent = ""
+      }
+      const TITLE = SIGN_IN_ONLY ? "Sign in to Spell" : element("title").textContent
+
+      /** Go where signing in leads.  `replace`, not `reload`:  a navigation of this page's own brings the cookie. */
+      const goOn = () => location.replace(SIGN_IN_ONLY ? "/" : location.href)
+
+      /**
+       * Did this page just go to its own address, and get answered this page again?  Clears the mark.
+       * - No storage to mark it in:  yes, so it never goes round and round.
+       */
+      const justRetried = () => {
+        try {
+          const when = Number(sessionStorage.getItem(RETRIED) ?? 0)
+          sessionStorage.removeItem(RETRIED)
+          return Date.now() - when < RETRY_FRESH_MS
+        } catch {
+          return true
+        }
+      }
+
+      /** SIDE EFFECT:  remembers going to its own address, then goes;  `false` if it can't remember, and so stays. */
+      const retry = () => {
+        try {
+          sessionStorage.setItem(RETRIED, `${Date.now()}`)
+        } catch {
+          return false
+        }
+        location.replace(location.href)
+        return true
+      }
+
+      const ask = async (what, body) => {
+        const response = await fetch(`/api/sign-in/${what}`, {
+          method: body ? "POST" : "GET",
+          cache: "no-store",
+          ...(body && { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        })
+        const answer = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(answer.error ?? `the server answered ${response.status}`)
+        return answer
+      }
+      const saying = (work) => (event) => {
+        event.preventDefault()
+        work().catch((error) => (element("problem").textContent = error.message))
+      }
+      let email = ""
+      element("email-form").addEventListener(
+        "submit",
+        saying(async () => {
+          email = element("email").value.trim()
+          const { request } = await ask("ask", { email })
+          show("waiting")
+          const timer = setInterval(async () => {
+            const answer = await ask("waiting", { request }).catch(() => undefined)
+            if (answer?.status !== "signed in") return
+            clearInterval(timer)
+            goOn()
+          }, WAIT_MS)
+        })
+      )
+      element("code-form").addEventListener(
+        "submit",
+        saying(async () => {
+          await ask("code", { email, code: element("code").value.trim() })
+          goOn()
+        })
+      )
+      element("sign-out").addEventListener(
+        "click",
+        saying(async () => {
+          await ask("out", {})
+          location.replace(location.href)
+        })
+      )
+      const { person } = await ask("me").catch(() => ({}))
+      if (person && SIGN_IN_ONLY) {
+        location.replace("/")
+      } else if (person && !justRetried() && retry()) {
+        // on its way to its own address
+      } else {
+        if (person) element("who").textContent = person
+        show(person ? "not-yours" : "signing-in")
+      }
+    </script>
+  </body>
+</html>

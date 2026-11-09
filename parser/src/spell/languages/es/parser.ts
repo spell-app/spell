@@ -25,6 +25,7 @@ import { UIEs } from "spell/parser/spell/rules/UI/UI.es"
 import { classesEs } from "spell/parser/spell/rules/classes/classes.es"
 import { methodsEs } from "spell/parser/spell/rules/methods/methods.es"
 import { placesEs } from "spell/parser/spell/rules/places/places.es"
+import { sitesEs } from "spell/parser/spell/rules/sites/sites.es"
 import { asyncEs } from "spell/parser/spell/rules/async/async.es"
 import { testsEs } from "spell/parser/spell/rules/tests/tests.es"
 import { drawEs } from "spell/parser/spell/rules/draw/draw.es"
@@ -60,5 +61,6 @@ spanishParser.import(
   testsEs,
   drawEs,
   placesEs,
+  sitesEs,
   JSXEs
 )

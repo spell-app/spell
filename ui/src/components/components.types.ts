@@ -612,6 +612,54 @@ export type TableColumn = {
   sortable?: boolean
   /** Fomantic width, `1` ... `16` (or `1/4`, `25%`):  `four wide` */
   width?: number | string
+  /**
+   * What its cells hold, for `editable`:  which editor a cell opens, and how typed text is read.
+   * - Left out:  worked out from the rows' values (`TableEditing.typeOf()`), else `text`.
+   */
+  type?: TableCellType
+  /** `choice` and `link`:  what a cell may hold, each with the words it shows;  a `link`'s values are rows. */
+  choices?: readonly TableChoice[]
+  /** `editable` leaves its cells alone:  a worked-out value, an id. */
+  readOnly?: boolean
+}
+
+/**
+ * What a column's cells hold, for `<ui-table editable>`:  each opens its own editor.
+ * - `text`, `number`, `date`:  a field of that kind, filling the cell
+ * - `yes-no`:  a tick box, toggled in place (Space, Enter, a click)
+ * - `choice`:  one of the column's `choices`
+ * - `link`:  another row, one of the column's `choices` (a run's analysis)
+ */
+export const TableCellTypes = ["text", "number", "date", "yes-no", "choice", "link"] as const
+/** One of `TableCellTypes`. */
+export type TableCellType = (typeof TableCellTypes)[number]
+
+/** One of a `choice` or `link` column's values, and the words a cell shows for it. */
+export type TableChoice = {
+  /** what the cell holds:  a word, a number, a linked row */
+  value: unknown
+  /** what it shows;  default the value as text */
+  text?: string
+}
+
+/**
+ * One change `<ui-table editable>` asks for, in `ui-editing`'s `edits`.
+ * - `set`:  `row`'s `key` is now `value`, was `was`
+ * - `add`:  a new row, its `values` by column key (typed in the empty last row, or pasted past the end)
+ * - `remove`:  `row` goes
+ * - `row` is the very object of `rows`:  a page that writes things itself finds its thing by it.
+ */
+export type TableEdit =
+  | { kind: "set"; row: TableRow; key: string; value: unknown; was: unknown }
+  | { kind: "add"; values: TableRow }
+  | { kind: "remove"; row: TableRow }
+
+/** `detail` of `ui-editing`:  everything one keystroke, paste or click changed, together. */
+export type TableEditDetail = {
+  /** the changes, in order */
+  edits: readonly TableEdit[]
+  /** the key, paste or click that made them */
+  originalEvent?: Event
 }
 
 /** One row of `<ui-table>`'s data mode (`rows`):  values by column key, shown as text. */
@@ -649,7 +697,7 @@ export type ListSelectDetail = {
  * when it doesn't set the attribute itself (Fomantic's `.ui.raised.cards > .card`).
  * - Read through `UICards.variationFor()`.
  */
-export type CardSharedVariation = "size" | "color" | "direction" | "appearance" | "inverted"
+export type CardSharedVariation = "size" | "color" | "background" | "direction" | "appearance" | "inverted"
 
 ////////////////
 // ## Popup
@@ -1020,10 +1068,13 @@ export const VisibilityAnimations = [
 ] as const
 
 /**
- * Fomantic's attention animations:  run in place, visibility unchanged (`<ui-transition>`'s `transition()`).
+ * Fomantic's attention animations, and `coin` (ours):  run in place, visibility unchanged (`<ui-transition>`'s
+ *   `transition()`).
+ * - `coin`:  one turn about the upright axis, like a coin spun on a table, then a rest;  `looping`, a "working on it"
+ *   mark (Owen, 2026-11-03, epic `epic-engine` I214)
  * - As an element's `animation`, showing and hiding happen at once.
  */
-export const AttentionAnimations = ["flash", "shake", "bounce", "tada", "pulse", "jiggle", "glow"] as const
+export const AttentionAnimations = ["flash", "shake", "bounce", "tada", "pulse", "jiggle", "glow", "coin"] as const
 
 /** `animation="none"`:  no motion, for the element and everything inside it (`--ui-motion: none`). */
 export const NO_ANIMATION = "none"
@@ -1032,7 +1083,18 @@ export const NO_ANIMATION = "none"
 export const Animations = [...VisibilityAnimations, ...AttentionAnimations, NO_ANIMATION] as const
 
 /**
+ * The sizes of a header or a button, and one more past `massive`:  `poster`, a logo's or a title's
+ * (epic `language` P35, I63).
+ * - `poster` grows with the window, between a floor and a ceiling:  each family's tokens say them
+ *   (`--ui-header-poster-min` ...).
+ * - Only where a family draws it:  every other `size` stops at `massive`.
+ */
+export const PosterSizes = ["mini", "tiny", "small", "medium", "large", "big", "huge", "massive", "poster"] as const
+
+/**
  * The faces the shared `font` takes, any together (`font="bold italic"`;  epic `ui-gaps` P3):  how letters look.
+ * - `heavy`:  heavier than `bold`, the theme's `--ui-font-weight-heavy` (900), for a poster's title
+ *   (epic `language` P35, I63)
  * - `all-caps` and `title-caps` change its letters' case (Owen, 2026-10-27):
  *   every letter a capital, or each word's first.
  * - `<ui-text>` draws each as its HTML element (`<strong>`, `<em>`, `<code>`, `<mark>`, `<sub>`, `<sup>` ...),
@@ -1041,6 +1103,7 @@ export const Animations = [...VisibilityAnimations, ...AttentionAnimations, NO_A
  */
 export const FontFaces = [
   "bold",
+  "heavy",
   "italic",
   "underline",
   "strikethrough",
@@ -1660,7 +1723,17 @@ export const FormControlAttributes = {
     key: "read-only",
     description: "Shows its value but can't be changed;  submitted with the form (unlike `disabled`)."
   },
-  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." }
+  placeholder: { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
+  parameter: {
+    name: "parameter",
+    group: "form",
+    kind: "string",
+    description:
+      'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`):  ' +
+      "each change it settles on is a new history entry, so Back and Forward step through them, " +
+      "and a page opened on the address starts with that value.  Other parameters are kept;  an empty value " +
+      "takes its own out."
+  }
 } as const
 
 /** The states every control with a value has (`FormComponent`):  its vocabulary takes them by name, as above. */

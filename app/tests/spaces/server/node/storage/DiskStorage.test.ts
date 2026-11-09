@@ -3,7 +3,7 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { afterAll, describe, test, expect, vi } from "vite-plus/test"
 
-import { JsonChunks } from "spell/util/places"
+import { JsonChunks } from "spell/places"
 import { FolderPlace } from "spell/server/places"
 import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"

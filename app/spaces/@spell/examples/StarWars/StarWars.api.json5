@@ -6,7 +6,7 @@
     "name": "star wars",
     "kind": "web server",
     "address": "https://swapi.py4e.com/api",
-    "lookedAt": "2026-11-04T01:08:04.715Z",
+    "lookedAt": "2026-11-04T02:25:48.954Z",
     "fingerprint": "5177353c7e1596cb",
     "readBy": "nobody:  worked out from what came back",
     "docsAt": "https://swapi.py4e.com/documentation"
@@ -28,7 +28,7 @@
   "collections": {
     "people": {
       "type": "character",
-      "at": "/people",
+      "at": "/people/",
       "rowsSeen": 30,
       "rowsItSays": 87,
 
@@ -147,11 +147,13 @@
       "searchedBy": {
         "param": "search",
         "field": "name"
-      }
+      },
+
+      "takesLimit": false
     },
     "planets": {
       "type": "planet",
-      "at": "/planets",
+      "at": "/planets/",
       "rowsSeen": 30,
       "rowsItSays": 61,
 
@@ -261,11 +263,13 @@
       "searchedBy": {
         "param": "search",
         "field": "name"
-      }
+      },
+
+      "takesLimit": false
     },
     "films": {
       "type": "film",
-      "at": "/films",
+      "at": "/films/",
       "rowsSeen": 7,
       "rowsItSays": 7,
 
@@ -374,7 +378,7 @@
     },
     "species": {
       "type": "species",
-      "at": "/species",
+      "at": "/species/",
       "rowsSeen": 30,
       "rowsItSays": 37,
 
@@ -478,11 +482,13 @@
       "searchedBy": {
         "param": "search",
         "field": "name"
-      }
+      },
+
+      "takesLimit": false
     },
     "vehicles": {
       "type": "vehicle",
-      "at": "/vehicles",
+      "at": "/vehicles/",
       "rowsSeen": 30,
       "rowsItSays": 39,
 
@@ -599,11 +605,13 @@
       "searchedBy": {
         "param": "search",
         "field": "name"
-      }
+      },
+
+      "takesLimit": false
     },
     "starships": {
       "type": "starship",
-      "at": "/starships",
+      "at": "/starships/",
       "rowsSeen": 30,
       "rowsItSays": 37,
 
@@ -739,10 +747,19 @@
       "searchedBy": {
         "param": "search",
         "field": "name"
-      }
+      },
+
+      "takesLimit": false
     }
   },
-  "notes": [],
+  "notes": [
+    "\"people\" answered from /people/, not /people:  its line says where it answers, so each read is one request, not two.",
+    "\"planets\" answered from /planets/, not /planets:  its line says where it answers, so each read is one request, not two.",
+    "\"films\" answered from /films/, not /films:  its line says where it answers, so each read is one request, not two.",
+    "\"species\" answered from /species/, not /species:  its line says where it answers, so each read is one request, not two.",
+    "\"vehicles\" answered from /vehicles/, not /vehicles:  its line says where it answers, so each read is one request, not two.",
+    "\"starships\" answered from /starships/, not /starships:  its line says where it answers, so each read is one request, not two."
+  ],
   "spellCantSay": [
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.",
     "That it's read only:  no line says, so a program's write compiles, and fails when it runs."
@@ -756,12 +773,12 @@
     "\t- check it once a day",
     "\t- it writes names like \"hair_color\"",
     "\t- it searches names and titles with \"search\"",
-    "\t- characters live at \"/people\"",
-    "\t- planets live at \"/planets\"",
-    "\t- films live at \"/films\"",
-    "\t- species live at \"/species\"",
-    "\t- vehicles live at \"/vehicles\"",
-    "\t- starships live at \"/starships\"",
+    "\t- characters live at \"/people/\"",
+    "\t- planets live at \"/planets/\"",
+    "\t- films live at \"/films/\"",
+    "\t- species live at \"/species/\"",
+    "\t- vehicles live at \"/vehicles/\"",
+    "\t- starships live at \"/starships/\"",
     "",
     "a \"character\" is a thing:",
     "\t- it lives in star wars",

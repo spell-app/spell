@@ -1,0 +1,115 @@
+# PokéSpell
+A Pokédex for kids:  look through every Pokémon, find one by name, keep your favourites, and guess who's hiding.
+Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.
+How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.spellml.
+
+// Every button is a round-ended pill, unless it says otherwise
+<ui-defaults>
+	<ui-button appearance="pill"/>
+</ui-defaults>
+
+<spell-app "pokedex">
+	<spell>
+		- its "tab" is text
+		- its "search" is text
+		- its "showing" is a pokemon
+		- its "trail" is a new list of pokemon
+		- its "picked kind" is a type
+		- its "game" is a new guess
+		- to create it:
+			set its tab to "everyone"
+			set its search to ""
+	</spell>
+
+	<action "go to (where as text)">
+		set its tab to where
+		set its search to ""
+		set its showing to nothing
+		clear its trail
+		scroll to the top
+	</action>
+
+	<action "go back">
+		if its trail is empty
+			set its showing to nothing
+			return
+		set its showing to the last item of its trail
+		remove the last item of its trail
+		scroll to the top
+	</action>
+
+	<action "surprise me" description="Any Pokémon at all">
+		open (a random pokemon in (every pokemon))
+	</action>
+
+	<property "kinds to pick">every type where it is real</property>
+
+	<property "found" description="Pokémon names are all small letters:  so the search is too">
+		set looking for to its search as lower case
+		return every pokemon where its name includes looking for
+	</property>
+
+	<draw>
+		<stack direction="horizontal" wrap align="center" justify="between">
+			<button appearance="tertiary" color="red" padding="none" size="poster" font="heavy" shadow="yellow" onClick={go to "everyone"}>PokéSpell</button>
+			<form value={it} fluid min-width="16em" max-width="26em">
+				<field label="Find a Pokémon">
+					<input name="search" icon="search" size="large" placeholder="Pikachu"/>
+				</field>
+			</form>
+			<button color="yellow" size="huge" appearance="pill raised" icon="wand magic sparkles" onClick={surprise me}>Surprise me!</button>
+		</stack>
+		<toolbar appearance="secondary pointing" size="huge" aria-label="Look through">
+			<item selected={its tab is "everyone"} onClick={go to "everyone"}>Everyone</item>
+			<item selected={its tab is "kinds"} onClick={go to "kinds"}>Kinds</item>
+			<item selected={its tab is "favourites"} onClick={go to "favourites"}>Favourites</item>
+			<item selected={its tab is "guess"} onClick={go to "guess"}>Who's that Pokémon?</item>
+		</toolbar>
+		draw its shelf
+		<text paragraph size="small">
+			Every Pokémon, its pictures and its sounds, from <link link="https://pokeapi.co/">PokéAPI</link>.
+			Pokémon belongs to Nintendo, Game Freak and Creatures.
+		</text>
+	</draw>
+
+	<draw "shelf" description="What shows under the tabs:  only the tab that's open reads anything">
+		<if its showing and its search is "">
+			<button appearance="basic" icon="arrow left" size="large" onClick={go back}>Back</button>
+			draw its showing's page
+		<otherwise if its search is not "">
+			<for its found as="cards" columns="4" doubling paging="pages" loading="Looking…" empty="Nobody's called that.  Try another name!" />
+		<otherwise if its tab is "kinds">
+			draw its kinds
+		<otherwise if its tab is "favourites">
+			<for every favourite as="cards" columns="4" doubling empty="No favourites yet.  Press a Pokémon's heart to keep it here!" />
+		<otherwise if its tab is "guess">
+			draw its game
+		<otherwise>
+			<for every pokemon as="cards" columns="4" doubling paging="pages" loading="Waking up the Pokémon…" />
+		</>
+	</draw>
+
+	<draw "kinds" description="A button for every kind, and the Pokémon of the one you pick">
+		<stack direction="horizontal" wrap justify="center">
+			{draw its kind buttons}
+		</stack>
+		<if its picked kind>
+			<header class="kind-heading" size="large" font="title-caps">{its picked kind's name} Pokémon</header>
+			<for the pokemon of its picked kind as="cards" columns="4" doubling paging="pages" loading="Finding them…" />
+		<otherwise>
+			<header size="small" align="center">Pick a kind, and see who's that kind.</header>
+		</>
+	</draw>
+
+	<draw "kind buttons">
+		<for its kinds to pick />
+	</draw>
+</spell-app>
+
+
+# Start it
+This file is the project's last:  every kind of thing the pokedex holds, a guess and the rest, is made by then.
+
+<spell>
+	start the pokedex
+</spell>

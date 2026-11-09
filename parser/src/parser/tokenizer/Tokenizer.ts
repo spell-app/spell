@@ -22,6 +22,11 @@ export class Tokenizer {
    * - None by default.
    */
   rawTextTags: string[] = []
+  /**
+   * Tags that are never drawn, so never part of an implicit fragment:  a block of their own, whatever follows them
+   * (`matchJSXElements()`).  Spell's:  `<stories>`, a page's stories (epic `mockup` P14, T26).
+   */
+  standAloneTags: string[] = []
 
   /**
    * JSX tags that take a bare quoted string as an attribute, by the attribute it is:
@@ -64,6 +69,12 @@ export class Tokenizer {
    * - REFACTOR: backtick?  left/right quotes, e.g. `""` and `''`?
    */
   quoteSymbols = [P.DOUBLE_QUOTE, P.SINGLE_QUOTE] as const
+
+  /**
+   * Is a quote straight after a digit a MARK, not the start of text?  e.g. the inch in spell's `3 1/2"`
+   * (epic `language` P23):  it's then a `SymbolToken`.
+   */
+  marksAfterDigits = false
 
   /** Debug logger. */
   logger = new Logger({ prefix: "tokenizer", level: Logger.ERROR })
@@ -359,6 +370,7 @@ export class Tokenizer {
     // REFACTOR: handle backticks, curly quotes, etc.
     const quoteSymbol = text[start]
     if (!this.quoteSymbols.includes(quoteSymbol as any)) return undefined
+    if (this.marksAfterDigits && start > 0 && /\d/.test(text[start - 1]!)) return undefined
 
     let textEnd = start + 1
     while (textEnd < end) {
@@ -448,6 +460,8 @@ export class Tokenizer {
    * - "Right after":  on the same line, or the NEXT line, indented at least as far as the line the first one
    *   starts on.  Not after a blank line, nor a less indented one:  that's the next statement's.
    * - Only at the top level:  inside an element, elements side by side are its children anyway.
+   * - Never a tag that's never drawn (`standAloneTags`:  spell's `<stories>`):  it's a block of its own, so a `<markdown>`
+   *   on the line after it reads as the next block (epic `mockup` P14, T26).
    */
   matchJSXElements = (text: string, start = 0, end?: number): P.JSXElementToken | P.JSXFragmentToken | undefined => {
     if (typeof end !== "number" || end > text.length) end = text.length
@@ -455,10 +469,11 @@ export class Tokenizer {
     if (!first) return undefined
     const lineStart = text.lastIndexOf("\n", first.start - 1) + 1
     const indent = this.eatWhitespace(text, lineStart, end) - lineStart
+    if (this.standsAlone(first)) return first
     const elements: P.Token[] = [first]
     while (true) {
       const next = this.matchJSXElement(text, this.nextElementStart(text, elements.at(-1)!.end, end, indent), end)
-      if (!next) break
+      if (!next || this.standsAlone(next)) break
       elements.push(next)
     }
     if (elements.length === 1) return first
@@ -469,6 +484,11 @@ export class Tokenizer {
       children: elements,
       isImplicit: true
     })
+  }
+
+  /** Is `token` an element of a tag that's never drawn (`standAloneTags`), a block of its own? */
+  private standsAlone(token: P.Token): boolean {
+    return token instanceof P.JSXElementToken && this.standAloneTags.includes(token.tagName)
   }
 
   /**
@@ -1275,12 +1295,16 @@ export class Tokenizer {
 
 /** Constructor props for `Tokenizer`. */
 export type TokenizerProps = {
+  /** See `Tokenizer.marksAfterDigits`. */
+  marksAfterDigits?: boolean
   /** See `Tokenizer.whitespacePolicy`. */
   whitespacePolicy?: P.WhitespacePolicy
   /** See `Tokenizer.quoteSymbols`. */
   quoteSymbols?: string[]
   /** See `Tokenizer.rawTextTags`. */
   rawTextTags?: string[]
+  /** See `Tokenizer.standAloneTags`. */
+  standAloneTags?: string[]
   /** See `Tokenizer.quotedNameTags`. */
   quotedNameTags?: Record<string, string>
   /** See `Tokenizer.emptyEndTagCloses`. */

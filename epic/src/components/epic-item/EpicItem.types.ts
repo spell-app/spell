@@ -15,24 +15,43 @@ export type EpicItemVocabulary = typeof epicItemVocabulary
 ////////////////
 
 /** An item's id-chip colours, by where it stands (the script's `state`):  see `EpicItem.css`. */
-export const ITEM_STATES = ["attention", "replied", "progress", "open", "recent", "handled", "old"] as const
+export const ITEM_STATES = [
+  "attention",
+  "replied",
+  "requested",
+  "progress",
+  "handed",
+  "open",
+  "scheduled",
+  "recent",
+  "handled",
+  "quiet",
+  "old"
+] as const
 
 /** One of `ITEM_STATES`. */
 export type ItemState = (typeof ITEM_STATES)[number]
 
 /**
  * The states that wait on the person:
- * `attention` (red), and `replied` (orange:  Claude answered with options, their turn to pick).
+ * `attention` (red), `replied` (orange:  their turn to pick or review), `requested` (light orange:  what they asked
+ * for is finished, their turn to see it), and a phase's `waiting` (orange:  its plan waits for their Accept).
  * - what a section's count and its "only what needs you" filter take (`<epic-section>`)
  */
-export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied"] satisfies ItemState[])
+export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied", "requested", "waiting"])
 
 /**
  * The items Owen may call urgent or not (`calm`, its id chip):
- * judgement calls and issues, the kinds red while open and not reviewed.
+ * judgement calls and issues, the kinds red while open and not reviewed;  a todo marked `urgent` too (`StateFields`).
  * - `PlanReader.itemState()`;  the tool's `CALM_ID`, the same rule
  */
 export const CALM_ID = /^[ij]\d+$/
+
+/** A manual test's id. */
+export const MANUAL_TEST = /^m\d+$/i
+
+/** A judgement call's id:  grey once it's `calm`, where a calm issue stays yellow (epic `epic-engine` P63). */
+export const JUDGEMENT_ID = /^j\d+$/
 
 /**
  * An item's state when it has no `state` (the tool writes one on every edit), by its status:
@@ -87,6 +106,10 @@ export type StateFields = {
   queued?: string | null
   /** work on it under way */
   working?: boolean
+  /** a todo asking Owen to act:  red until reviewed;  an issue or call he wants done:  red until handled */
+  urgent?: boolean
+  /** fixed, waiting for Owen's review:  orange, its chip no button */
+  fixed?: boolean
 }
 
 /** What the page's review inbox says of an item now (`ReviewState.liveOf()`), for `DrawnState.of()`. */
@@ -107,7 +130,7 @@ export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
  * its section's state chips and blue badge, the page's toolbar and its badges (Owen, 2026-10-26:  "badges don't match
  * up":  a worked-on item drew blue, yet counted red).
  * - Claude's agent at work on it (the inbox's `working`):  `progress` (blue), at once, before the tool rewrites `state`
- * - Owen's urgency, not applied yet:  `open` (yellow) when not urgent, `attention` (red) when urgent, at once
+ * - Owen's urgency, not applied yet:  `calmState()` when not urgent, `attention` (red) when urgent, at once
  * - else `state` as the tool wrote it, else by its status (`STATUS_STATES`), greyed with age (`ItemAge`)
  * - his check pressed, not applied yet:  a green one grey at once
  * - NEVER reads the page:  the caller hands it the fields and the live review, tracked or not
@@ -116,7 +139,8 @@ export class DrawnState {
   /** `fields`'s state as drawn, with the inbox saying `live`. */
   static of(fields: StateFields, live: LiveReview, now = Date.now()): ItemState {
     if (live.workedOn) return "progress"
-    if (live.urgency && DrawnState.canCalm(fields)) return live.urgency.calm ? "open" : "attention"
+    if (live.urgency && DrawnState.canCalm(fields))
+      return live.urgency.calm ? DrawnState.calmState(fields.id) : "attention"
     const state = fields.state
     const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
     const shown = ItemAge.shown(
@@ -125,16 +149,26 @@ export class DrawnState {
       fields.reviewed,
       now
     )
-    return shown === "recent" && live.approved ? "old" : shown
+    return (shown === "recent" || shown === "requested") && live.approved ? "old" : shown
+  }
+
+  /**
+   * Where an open item stands once it's not urgent (`calm`), not reviewed yet (epic `epic-engine` P63):
+   * a judgement call asks nothing of Owen, so `quiet` (grey);  an issue is still something undone, so `open` (yellow).
+   * - `PlanReader.itemState()`:  the same rule, for what the tool writes
+   */
+  static calmState(id: string | null | undefined): ItemState {
+    return JUDGEMENT_ID.test(id ?? "") ? "quiet" : "open"
   }
 
   /**
    * May Owen call it urgent or not (its id chip, while the page is reviewed)?
-   * - yes for an open judgement call or issue, not reviewed, nothing queued or under way:
-   *   the items red for want of a review (`PlanReader.itemState()`)
+   * - yes for an open judgement call, issue or `urgent` todo, not reviewed, nothing queued or under way:
+   *   the items red for want of a review, or quiet for being calm (`PlanReader.itemState()`);
+   *   a fix waiting on him is his to accept, not calm
    */
-  static canCalm({ id, status, reviewed, queued, working }: StateFields): boolean {
-    return CALM_ID.test(id ?? "") && status === "open" && !reviewed && !queued && !working
+  static canCalm({ id, status, reviewed, queued, working, urgent, fixed }: StateFields): boolean {
+    return (CALM_ID.test(id ?? "") || !!urgent) && status === "open" && !reviewed && !queued && !working && !fixed
   }
 
   /**
@@ -149,7 +183,9 @@ export class DrawnState {
       changed: item.getAttribute("changed"),
       reviewed: item.getAttribute("reviewed"),
       queued: item.getAttribute("queued"),
-      working: item.hasAttribute("working")
+      working: item.hasAttribute("working"),
+      urgent: item.hasAttribute("urgent"),
+      fixed: item.hasAttribute("fixed")
     }
   }
 }
@@ -165,14 +201,18 @@ const DAY_MS = 24 * 60 * 60 * 1000
 export const STATE_TIP_KEYS = {
   attention: "stateAttention",
   replied: "stateReplied",
+  requested: "stateRequested",
   progress: "stateProgress",
+  handed: "stateHanded",
   open: "stateOpen",
+  scheduled: "stateScheduled",
   recent: "stateRecent",
   handled: "stateHandled",
+  quiet: "stateQuiet",
   old: "stateOld"
 } as const satisfies Record<ItemState, string>
 
-/** The review label's look:  `todo` yellow (open:  work still to do), `deferred` grey, `reviewed` by state. */
+/** The review label's look:  `todo` blue (queued, not started), `deferred` grey, `reviewed` by state. */
 export type ReviewLook = "todo" | "deferred" | "recent" | "old"
 
 /** The review label on an item's line:  its words, look and tooltip. */
@@ -264,12 +304,14 @@ export const COMMITS_PROPERTY = "--epic-commits-display"
  * a colour and a fill, dashed or outlined;  none, and the chip is solid in its state's colour.
  * - his live mark:  NO colour, so the chip keeps its state's (Owen, 2026-10-11, J3 of `epic-workflow`:  the counts must
  *   match the chips;  2026-10-08 it wore the chosen button's colour), and the mark's fill
- * - answered, work still due (Owen, 2026-10-10):  outlined, green queued, blue Claude on it
+ * - answered, work still due (Owen, 2026-10-10):  outlined in blue, handed to Claude or Claude on it;
+ *   a taken pick outlined green;  DOTTED blue, agreed and not started (`scheduled`, epic `epic-engine` P63)
  */
 export type ChipMark = {
-  /** work Claude still owes:  green queued or a taken pick, blue on it;  none for Owen's own mark (its state's colour) */
+  /** work Claude still owes:  blue, or a taken pick's green;  none for Owen's own mark (its state's colour) */
   color?: ReviewColor
-  fill: Exclude<ReviewFill, "none">
+  /** `dotted`:  agreed, not started (`scheduled`), as a scheduled phase's chip */
+  fill: Exclude<ReviewFill, "none"> | "dotted"
   /**
    * the chosen button's name (`approve`;  the note box's x, `boxSkip`), or a pick's letter, for the tooltip;
    * none when work is still due
@@ -286,6 +328,15 @@ export const TODO_ID = /^t\d+$/i
 /** Is item `id` (`limit`:  its `limit`) work still to do:  a todo that's no limit (epic `epic-engine` P44)? */
 export function isTodo(id: string | undefined, limit: boolean | undefined): boolean {
   return TODO_ID.test(id ?? "") && !limit
+}
+
+/**
+ * Which review buttons item `id` draws (`<epic-review buttons>`):
+ * a todo's;  an issue's or a call's, whose first is Do this (I232);  else an item's, Make Todo first.
+ */
+export function buttonsForItem(id: string | undefined, limit: boolean | undefined): "todo" | "issue" | "item" {
+  if (isTodo(id, limit)) return "todo"
+  return CALM_ID.test(id ?? "") ? "issue" : "item"
 }
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */

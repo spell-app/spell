@@ -22,13 +22,14 @@
  * - Owen's side, clicked:
  *   - every item's buttons:  ONE group, Make Todo, Revisit, Approve;  no Do Now (the wand:  gone, Owen, 2026-10-25)
  *     - an Overview sub-section's:  without Approve
- *     - the note box's:  Later, the x (skip this:  Owen, 2026-10-09)
+ *     - the note box's:  none but its picture button (epic `epic-engine` I212)
  *   - the fill:  Approve pressed dashed green, again none;  Make Todo the same
  *   - Revisit on an item with details:  it opens, its box focused;  ten lines grow it;
- *     the box's x saves a skip WITH its note, the id chip dashed in its state's colour
+ *     a skip WITH its note (written into the inbox, as an older page's box x made one):  the id chip dashed in its
+ *     state's colour
  *   - Revisit on an item without details (one added to the copy):  a box under its line;  typing turns Revisit on at
  *     once (epic `epic-engine` P20), saved on Tab;  after a reload, a revisit soon shown under the line;  Edit puts it
- *     back in the box, and Later keeps it
+ *     back in the box, and Escape leaves it as it was
  *   - Revisit WITH a note (an Overview sub-section):  typing turns it on, dashed blue
  *   - a pick on a judgement call's REPLY cards
  *     (I8:  picks work anywhere;  the call added to the copy, its text and a reply each holding cards):
@@ -320,7 +321,7 @@ async function run() {
     })
   }
 
-  // Revisit on an item with details:  opens, docked box focused, grows, the box's x (skip this) with the note
+  // Revisit on an item with details:  opens, docked box focused, grows;  no buttons of its own (epic `epic-engine` I212)
   await press(page, withDetails, "revisit")
   await page
     .waitForFunction(
@@ -332,20 +333,27 @@ async function run() {
   expect(
     `${withDetails}'s note box buttons`,
     await page.evaluate(
-      (id) => Array.from(rootOf(id).querySelectorAll(".note-actions button"), (button) => button.dataset.how),
+      (id) =>
+        Array.from(
+          rootOf(id).querySelector("[part~='note-box']")?.shadowRoot?.querySelectorAll("button") ?? [],
+          (button) => button.className
+        ),
       withDetails
     ),
-    ["soon", "skip"]
+    ["note-pick"]
   )
   const before = await boxHeight(page, withDetails)
   await page.keyboard.type(Array.from({ length: 10 }, (_, line) => `line ${line + 1}`).join("\n"))
   const after = await boxHeight(page, withDetails)
   if (!(after > before + 60)) problems.push(`${withDetails}:  the note box didn't grow (${before} -> ${after})`)
   await page.keyboard.press("ControlOrMeta+a")
-  await page.keyboard.type(SKIP_NOTE)
-  await noteButton(page, withDetails, "skip")
-  await expectMark(page, withDetails, { action: "skip", note: SKIP_NOTE }, "the box's x (skip this)")
-  expect(`${withDetails}'s box emptied`, await noteValue(page, withDetails), "")
+  await page.keyboard.press("Backspace")
+  await page.keyboard.press("Escape")
+  // a skip, as an older page's box x made it:  no button makes one since I212, but its look and its apply stay
+  ReviewInbox.update(inboxFile, (box) => void box.setMark(withDetails, { action: "skip", note: SKIP_NOTE }))
+  await open(page)
+  await openBody(page, withDetails)
+  await expectMark(page, withDetails, { action: "skip", note: SKIP_NOTE }, "a skip")
   // no line button wears a skip:  the id chip alone shows it, dashed, in its STATE's colour (no colour of its own:
   // Owen, 2026-10-11, epic `epic-workflow` I6:  a live mark's chip keeps its state's colour, so the counts match)
   expect(
@@ -380,14 +388,15 @@ async function run() {
   const saidNote = await page.evaluate((id) => rootOf(id).querySelector(".said")?.textContent ?? "", bare)
   if (!saidNote.includes("revisit soon") || !saidNote.includes(NOTE))
     problems.push(`${bare}:  the said note reads "${saidNote}"`)
+  // every item has a body since epic `epic-engine` I209, a bare one its title's words:  its said note folds with it
+  await openBody(page, bare)
   await page.locator(`#${bare} .said-edit`).click()
   await page.waitForTimeout(300)
   expect(`${bare}:  Edit puts the note back`, await noteValue(page, bare), NOTE)
   await page.evaluate((id) => rootOf(id).querySelector("textarea").focus(), bare)
-  await noteButton(page, bare, "soon")
-  await expectMark(page, bare, { action: "revisit", when: "soon", note: NOTE }, "Later")
   // left in the box, not changed:  the mark stays as it was
   await page.keyboard.press("Escape")
+  await expectMark(page, bare, { action: "revisit", when: "soon", note: NOTE }, "left unchanged")
 
   // Revisit WITH a note (an Overview part):  typing turns Revisit on (epic `epic-engine` P20), dashed blue
   if (section) {
@@ -492,13 +501,13 @@ async function run() {
     }, withDetails),
     { reviewAs: "skip", status: "open", note: SKIP_NOTE.replace(/\s+/g, " "), chip: null }
   )
-  // a todo's plane:  queued for the next phase, a Noted card, its chip outlined green, the buttons cleared;  its x:  canceled, grey
+  // a todo's plane:  queued for the next phase, a Noted card, its chip dotted blue, the buttons cleared;  its x:  canceled, grey
   if (todos.length >= 2) {
     expect(`${todos[0]}'s review-as`, await attribute(page, todos[0], "review-as"), "next")
     expect(`${todos[0]}:  queued, a Noted card`, (await statusOf(page, todos[0])).cards.at(-1), "noted")
     expect(`${todos[0]}'s plane, applied:  cleared`, (await buttonState(page, todos[0], "next")).fill, "none")
-    // queued, the work still due:  its chip OUTLINED (Owen, 2026-10-10)
-    expect(`${todos[0]}'s chip, queued:  outlined`, (await chipState(page, todos[0])).fill, "outline")
+    // queued, the work still due:  its chip DOTTED blue (epic `epic-engine` P63)
+    expect(`${todos[0]}'s chip, queued:  dotted blue`, (await chipState(page, todos[0])).fill, "dotted")
     expect(`${todos[1]}:  canceled`, await attribute(page, todos[1], "status"), "canceled")
     expect(`${todos[1]}'s chip:  grey`, await chipState(page, todos[1]), { fill: null, state: "old" })
   }
@@ -770,12 +779,6 @@ async function openBody(page, id) {
 async function press(page, id, action) {
   await page.locator(`#${id} ui-button[data-action="${action}"]`).first().click()
   await page.waitForTimeout(150)
-}
-
-/** Click `id`'s note box button `how`, with the mouse. */
-async function noteButton(page, id, how) {
-  await page.locator(`#${id} .note-actions button[data-how="${how}"]`).first().click()
-  await page.waitForTimeout(250)
 }
 
 /** `id`'s `action` button, as drawn:  its fill, its colour. */

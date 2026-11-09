@@ -1,0 +1,139 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Status",
+    "Statusphere",
+    "StatusBoard"
+  ],
+  "statements": [
+    {
+      "type": "Status",
+      "superType": "Thing",
+      "defined": "/Status.spell:189-353"
+    },
+    {
+      "property": "status",
+      "of": "Status",
+      "datatype": "text",
+      "rules": [
+        {
+          "type": "empty"
+        },
+        {
+          "type": "maxLength",
+          "value": "1"
+        }
+      ],
+      "defined": "/Status.spell:262-314"
+    },
+    {
+      "property": "created_at",
+      "asWritten": "created at",
+      "of": "Status",
+      "datatype": "date",
+      "rules": [
+        {
+          "type": "empty"
+        }
+      ],
+      "defined": "/Status.spell:318-353"
+    },
+    {
+      "property": "owner",
+      "of": "Status",
+      "group": "Statusphere:  where the statuses are kept",
+      "datatype": "text",
+      "defined": "/Statusphere.api.spell:519-548"
+    },
+    {
+      "property": "who",
+      "of": "Status",
+      "defined": "/Statusphere.spellml:425-693"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Status",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Statusphere.spellml:709-900"
+    },
+    {
+      "type": "StatusBoard",
+      "superType": "Place",
+      "defined": "/Statusphere.api.spell:322-413"
+    },
+    {
+      "uiDefaults": {
+        "ui-button": {
+          "size": "large",
+          "appearance": "basic"
+        }
+      },
+      "defined": "/Statusphere.spellml:276-350"
+    },
+    {
+      "type": "Statusphere",
+      "superType": "App",
+      "defined": "/Statusphere.spellml:1013-2343"
+    },
+    {
+      "property": "recent",
+      "of": "Statusphere",
+      "datatype": "list of statuses",
+      "defined": "/Statusphere.spellml:1028-1202"
+    },
+    {
+      "syntax": "post {callArgs:expression} (of {thisArg:expression})?",
+      "output": "post_$emoji",
+      "rule": "method_call",
+      "of": "Statusphere",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "post (emoji as text)",
+      "params": [
+        {
+          "name": "emoji",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Statusphere.spellml:1218-1419"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Statusphere",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Statusphere.spellml:1433-2334"
+    }
+  ],
+  "codeLines": [
+    6,
+    7,
+    12,
+    18,
+    24,
+    32,
+    54,
+    70,
+    80,
+    84,
+    92,
+    97
+  ]
+}

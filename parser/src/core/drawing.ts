@@ -33,7 +33,7 @@ import { defineCoreModule } from "./core.types"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
-import { listenForUndoKeys } from "./ui"
+import { listenForTableEdits, listenForUndoKeys } from "./ui"
 import { standInFor } from "./waiting"
 
 /**
@@ -170,12 +170,14 @@ export const drawingMethods = defineCoreModule({
    * - Up to `MOST_AT_ONCE` items, or on a page that can't watch them come near the view:  `core.map()`, drawn together.
    * - A long list draws what fits, and more as you scroll, however the program wrote it:  `drawnInWindow()`.
    * - Reads the list here, as `core.map()` does:  what draws it follows it.
+   * - A spell `List`'s drawings come back as an array:
+   *   Solid can't draw a `List` (epic `data` P24, a Pokémon's kinds).
    */
   drawEach(list: unknown, each: (item: unknown, position: number, list: unknown) => Drawing): Drawing {
     const items = () => (Array.isArray(list) ? list : (list as { items?: unknown[] } | undefined)?.items)
     const all = items()
     if (!all || all.length <= MOST_AT_ONCE || !canDrawInWindows()) {
-      return core.map(list as never, each as never) as unknown as Drawing
+      return core.listDrawn(core.map(list as never, each as never))
     }
     return drawnInWindow({
       items: () => items() ?? [],
@@ -218,19 +220,25 @@ export const drawingMethods = defineCoreModule({
    * - What `App.start()` does, into `core.appElement()`.
    * - SIDE EFFECT:  `element.spellRoot` is the mounted app:
    *   so a runner can `unmount()` it before running a program again (`runCompiled()`).
+   * - SIDE EFFECT:  `element` gives what's drawn inside it the program's widget defaults (`core.useDefaults()`).
    * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
+   * - SIDE EFFECT:  a `<ui-table editable>` of its things writes them (`listenForTableEdits()`).
    */
   mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
+    // its widget defaults first, so its widgets draw with them (epic `language` P29)
+    core.handDefaultsTo(element)
     // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect),
     // whose owner would otherwise own the app's drawing -- and hold or re-run it with the host's
     const dispose = runWithOwner(null, () => render(() => core.drawThing(app), element))
     const stopUndoKeys = listenForUndoKeys(element)
+    const stopTableEdits = listenForTableEdits(element)
     const mounted: MountedApp = {
       app,
       unmount() {
         dispose()
         stopUndoKeys()
+        stopTableEdits()
         if ((element as AppElement).spellRoot === mounted) delete (element as AppElement).spellRoot
       }
     }
@@ -433,10 +441,17 @@ const H_THUNK: symbol | undefined = Object.getOwnPropertySymbols(h("i"))[0]
  * What a drawing that failed shows:  a stand-in naming the thing, after telling the program and the page.
  * - SIDE EFFECTS:  one line on the program's console;  a cancelable `ui-error` from the app's element.
  * - `null`, drawing nothing, when the page cancelled that event.
+ * - `null`, and nothing said, for an `AbortError`:  a read of a link given up on (`follow()`), as nobody's waiting.
  */
 function drawingFailed(thing: object, error: unknown): Drawing | null {
+  // a read given up on as its drawing went away (scrolled off):  nothing failed, and nothing to show;
+  // a drawing still waiting for it never sees this, as `follow()` asks again for whoever holds it
+  if ((error as Error | undefined)?.name === "AbortError") return null
   const type = (thing as { type?: string }).type ?? thing.constructor?.name ?? "thing"
   core.console.error(`${type}:  draw() failed`, error)
+  // the page a site shows:  its error page instead, in its place (epic `mockup` P2)
+  const site = core.RUNTIME?.site as { pageFailed?(thing: object, error: unknown): boolean } | undefined
+  if (site?.pageFailed?.(thing, error)) return null
   const event = new CustomEvent(ERROR_EVENT, {
     bubbles: true,
     composed: true,

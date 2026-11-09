@@ -26,7 +26,7 @@ export function AppRoot(props: AppRootProps) {
       </Show>
       <AppContainer
         scrolling={props.scrolling ?? true}
-        padded={props.padded ?? true}
+        padded={props.padded ?? false}
         appRef={(element) => {
           appElement = element
           editor.setAppRoot(element)
@@ -42,7 +42,10 @@ export type AppRootProps = {
   showToolbar?: boolean
   /** Scrolls the program's drawing.  Default:  `true`. */
   scrolling?: boolean
-  /** Padding around the program's drawing.  Default:  `true`. */
+  /**
+   * Padding around the program's drawing.  Default:  `false`:  an app runs to its pane's edges, as it would
+   * fill a window of its own (Owen, 2026-11-06:  "Shouldn't be a border on an app by default")
+   */
   padded?: boolean
 }
 

@@ -1,0 +1,503 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "Perfil",
+    "Función",
+    "Miembro",
+    "Equipo",
+    "Proyecto",
+    "Mandato",
+    "Aprobación",
+    "Diseñador",
+    "Etapa",
+    "Cambio",
+    "AdministraciónDeLaOrg",
+    "RolDeLaOrg"
+  ],
+  "statements": [
+    {
+      "type": "Perfil",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1027-1172"
+    },
+    {
+      "property": "nombre",
+      "of": "Perfil",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1082-1124"
+    },
+    {
+      "property": "espacio",
+      "of": "Perfil",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1128-1172"
+    },
+    {
+      "type": "Función",
+      "superType": "Thing",
+      "gender": "feminine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1210-1309"
+    },
+    {
+      "property": "nombre",
+      "of": "Función",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1267-1309"
+    },
+    {
+      "type": "Miembro",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1311-1550"
+    },
+    {
+      "property": "persona",
+      "of": "Miembro",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1367-1412"
+    },
+    {
+      "property": "nombre",
+      "of": "Miembro",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1416-1458"
+    },
+    {
+      "property": "rol",
+      "of": "Miembro",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1462-1501"
+    },
+    {
+      "property": "cargo",
+      "of": "Miembro",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1505-1550"
+    },
+    {
+      "type": "Equipo",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1552-1697"
+    },
+    {
+      "property": "nombre",
+      "of": "Equipo",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1607-1649"
+    },
+    {
+      "property": "espacio",
+      "of": "Equipo",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1653-1697"
+    },
+    {
+      "type": "Proyecto",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1699-1892"
+    },
+    {
+      "property": "nombre",
+      "of": "Proyecto",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1756-1798"
+    },
+    {
+      "property": "equipo",
+      "of": "Proyecto",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1802-1844"
+    },
+    {
+      "property": "espacio",
+      "of": "Proyecto",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1848-1892"
+    },
+    {
+      "type": "Mandato",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1894-2347"
+    },
+    {
+      "property": "rol",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1950-1989"
+    },
+    {
+      "property": "titular",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1993-2038"
+    },
+    {
+      "property": "ámbito",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2042-2087"
+    },
+    {
+      "property": "cargo",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2091-2136"
+    },
+    {
+      "property": "nombre_titular",
+      "asWritten": "nombre titular",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2140-2196"
+    },
+    {
+      "property": "nombre_ámbito",
+      "asWritten": "nombre ámbito",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2200-2256"
+    },
+    {
+      "property": "inicio",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2260-2304"
+    },
+    {
+      "property": "fin",
+      "of": "Mandato",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2308-2347"
+    },
+    {
+      "type": "Aprobación",
+      "superType": "Thing",
+      "gender": "feminine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2349-2501"
+    },
+    {
+      "property": "nombre",
+      "of": "Aprobación",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2409-2451"
+    },
+    {
+      "property": "versión",
+      "of": "Aprobación",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2455-2501"
+    },
+    {
+      "type": "Diseñador",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2616-2827"
+    },
+    {
+      "property": "persona",
+      "of": "Diseñador",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2674-2719"
+    },
+    {
+      "property": "espacio",
+      "of": "Diseñador",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2723-2767"
+    },
+    {
+      "property": "nombre_persona",
+      "asWritten": "nombre persona",
+      "of": "Diseñador",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2771-2827"
+    },
+    {
+      "type": "Etapa",
+      "superType": "Thing",
+      "gender": "feminine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2919-3122"
+    },
+    {
+      "property": "nombre",
+      "of": "Etapa",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2974-3016"
+    },
+    {
+      "property": "siguiente",
+      "of": "Etapa",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3020-3068"
+    },
+    {
+      "property": "quién_mueve",
+      "asWritten": "quién mueve",
+      "of": "Etapa",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3072-3122"
+    },
+    {
+      "type": "Cambio",
+      "superType": "Thing",
+      "gender": "masculine",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3124-3396"
+    },
+    {
+      "property": "cuándo",
+      "of": "Cambio",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3179-3219"
+    },
+    {
+      "property": "quién",
+      "of": "Cambio",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3223-3263"
+    },
+    {
+      "property": "hecho",
+      "of": "Cambio",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3267-3307"
+    },
+    {
+      "property": "qué",
+      "of": "Cambio",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3311-3350"
+    },
+    {
+      "property": "por_qué",
+      "asWritten": "por qué",
+      "of": "Cambio",
+      "datatype": "text",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3354-3396"
+    },
+    {
+      "type": "RolDeLaOrg",
+      "superType": "Place",
+      "defined": "/AdministracionDeLaOrg.api.es.spell:482-952"
+    },
+    {
+      "type": "AdministraciónDeLaOrg",
+      "superType": "App",
+      "defined": "/AdministracionDeLaOrg.es.spellml:659-14690"
+    },
+    {
+      "property": "miembro_nuevo",
+      "asWritten": "miembro nuevo",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Miembro",
+      "defined": "/AdministracionDeLaOrg.es.spellml:687-787"
+    },
+    {
+      "property": "equipo_nuevo",
+      "asWritten": "equipo nuevo",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Equipo",
+      "defined": "/AdministracionDeLaOrg.es.spellml:792-889"
+    },
+    {
+      "property": "proyecto_nuevo",
+      "asWritten": "proyecto nuevo",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Proyecto",
+      "defined": "/AdministracionDeLaOrg.es.spellml:894-1033"
+    },
+    {
+      "property": "mandato_nuevo",
+      "asWritten": "mandato nuevo",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Mandato",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1038-1081"
+    },
+    {
+      "property": "aprobación_nueva",
+      "asWritten": "aprobación nueva",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Aprobación",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1086-1136"
+    },
+    {
+      "property": "diseñador_nuevo",
+      "asWritten": "diseñador nuevo",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Diseñador",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1141-1262"
+    },
+    {
+      "property": "etapa_nueva",
+      "asWritten": "etapa nueva",
+      "of": "AdministraciónDeLaOrg",
+      "datatype": "Etapa",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1267-1432"
+    },
+    {
+      "syntax": "agregar el miembro nuevo ((de|del) {thisArg:expression})?",
+      "output": "agregar_el_miembro_nuevo",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar el miembro nuevo",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1438-1559"
+    },
+    {
+      "syntax": "agregar el equipo nuevo ((de|del) {thisArg:expression})?",
+      "output": "agregar_el_equipo_nuevo",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar el equipo nuevo",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1573-1689"
+    },
+    {
+      "syntax": "agregar el proyecto nuevo ((de|del) {thisArg:expression})?",
+      "output": "agregar_el_proyecto_nuevo",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar el proyecto nuevo",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1703-1829"
+    },
+    {
+      "syntax": "dar el mandato nuevo ((de|del) {thisArg:expression})?",
+      "output": "dar_el_mandato_nuevo",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "dar el mandato nuevo",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1843-1960"
+    },
+    {
+      "syntax": "aprobar la aprobación nueva ((de|del) {thisArg:expression})?",
+      "output": "aprobar_la_aprobación_nueva",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "aprobar la aprobación nueva",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:1974-2112"
+    },
+    {
+      "syntax": "agregar el diseñador nuevo ((de|del) {thisArg:expression})?",
+      "output": "agregar_el_diseñador_nuevo",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar el diseñador nuevo",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:2126-2258"
+    },
+    {
+      "syntax": "agregar la etapa nueva ((de|del) {thisArg:expression})?",
+      "output": "agregar_la_etapa_nueva",
+      "rule": "method_call",
+      "of": "AdministraciónDeLaOrg",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar la etapa nueva",
+      "returns": "nothing",
+      "defined": "/AdministracionDeLaOrg.es.spellml:2272-2384"
+    }
+  ],
+  "codeLines": [
+    8,
+    9,
+    14,
+    23,
+    24,
+    32,
+    33,
+    38,
+    43,
+    48,
+    56,
+    57,
+    62,
+    70,
+    71,
+    76,
+    81,
+    89,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120,
+    125,
+    133,
+    134,
+    139,
+    148,
+    149,
+    154,
+    159,
+    168,
+    169,
+    174,
+    179,
+    187,
+    188,
+    193,
+    198,
+    203,
+    208,
+    222,
+    256,
+    260,
+    266,
+    272,
+    277,
+    282,
+    288,
+    294,
+    299,
+    304,
+    309,
+    314,
+    319,
+    324,
+    329
+  ]
+}

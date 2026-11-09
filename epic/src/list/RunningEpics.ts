@@ -1,5 +1,5 @@
-import { existsSync, readdirSync, readFileSync, watch, type FSWatcher } from "node:fs"
-import { basename, dirname, join, relative, sep } from "node:path"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { basename, dirname, join, relative } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { RealPath } from "spell/server/RealPath"
@@ -7,6 +7,7 @@ import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { DataFile } from "spell/epic/data/DataFile"
+import { PhaseStatuses } from "spell/epic/phases"
 import { SRV } from "spell/server"
 
 import { planDocIn } from "spell/epic/tools/pages.js"
@@ -62,7 +63,7 @@ export class RunningEpics {
   readonly worktrees: string[]
 
   /** the watchers `watch()` started, one per worktrees folder there is, closed by `close()` */
-  private watchers: FSWatcher[] = []
+  private watchers: SRV.FolderWatch[] = []
 
   /** the Epics list page, `epics/index.html`, whose marker becomes the list (`epic pages index` writes it) */
   readonly index: string
@@ -125,26 +126,20 @@ export class RunningEpics {
    * Reload pages when a worktree's epic page changes:  that doc's own page, and the Epics page (its list).
    * - and a worktree's page assets (`ASSET_FILE`:  its docs runtime and bundle, its packs), so its pages served here
    *   (`/worktrees/<w>/...`) hot-reload when that worktree rebuilds them (the live client's `liveAction()`)
-   * - SIDE EFFECT:  one recursive `fs.watch` on each worktrees folder that exists (`.claude/worktrees`);  `close()`
-   *   ends them
+   * - SIDE EFFECT:  one `SRV.FolderWatch` on each worktrees folder that exists;  `close()` ends them
    */
   watch(live: SRV.LiveReload): this {
     for (const folder of this.worktrees) {
-      if (!existsSync(folder)) continue
-      try {
-        const watcher = watch(folder, { recursive: true }, (_event, name) => {
-          const path = name?.split(sep).join("/")
-          if (!name || !path) return
-          if (ASSET_FILE.test(path)) return live.changed(join(folder, name))
-          if (!EPIC_FILE.test(path)) return
-          live.changed(join(folder, name))
-          live.changed(this.index)
-        })
-        watcher.on("error", () => {})
-        this.watchers.push(watcher)
-      } catch {
-        // can't watch:  pages just don't reload by themselves
-      }
+      // can't watch:  pages just don't reload by themselves
+      const watcher = new SRV.FolderWatch(
+        folder,
+        { only: (path) => ASSET_FILE.test(path) || EPIC_FILE.test(path) },
+        ([path]) => {
+          live.changed(join(folder, path!))
+          if (EPIC_FILE.test(path!)) live.changed(this.index)
+        }
+      )
+      if (watcher.isWatching) this.watchers.push(watcher)
     }
     return this
   }
@@ -283,7 +278,7 @@ export class RunningEpics {
    * - NEVER throws:  an unreadable record is skipped
    */
   liveSessions(): TitledSession[] {
-    return ClaudeHome.liveSessions({ home: this.claudeHome, isAlive: SRV.isProcessAlive }).map((record) => ({
+    return ClaudeHome.liveSessions({ home: this.claudeHome }).map((record) => ({
       pid: record.pid,
       sessionId: record.sessionId,
       title: SessionFolders.recordTitle(record, this.claudeHome),
@@ -512,7 +507,7 @@ function read(
   return {
     title: decode(title),
     phases: phases.map((phase) => phase.status),
-    done: phases.filter((phase) => phase.status === "done").length,
+    done: phases.filter((phase) => PhaseStatuses.isFinished(phase.status)).length,
     total: phases.length,
     ...(active && { active: decode(active) }),
     ...(updated && { updated }),

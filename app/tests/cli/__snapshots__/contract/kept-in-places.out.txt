@@ -1,0 +1,4 @@
+0
+1
+
+<div id="spell-app-root"><test-project-app><ui-stack><ui-form value="[object Object]"><ui-input aria-label="Note" name="draft"></ui-input><ui-button class="keep" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Keep</ui-button></ui-form><ui-text class="counts">0 on this device, 0 in the folder, 0 in the sheet</ui-text></ui-stack></test-project-app></div>

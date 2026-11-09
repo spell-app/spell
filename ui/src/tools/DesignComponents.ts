@@ -151,6 +151,7 @@ export class DesignComponents {
       lines.push("")
     }
     for (const tag of tags) lines.push(...this.tagSection(tag, level))
+    lines.push(...DesignComponents.sharedSection(tags))
     if (level < 2 && site?.tokens.length) {
       lines.push(
         "## CSS tokens",
@@ -170,10 +171,28 @@ export class DesignComponents {
     return lines.join("\n").trimEnd() + "\n"
   }
 
-  /** One tag's API:  description, attributes, slots, events and (below trim level 1) parts and states. */
+  /**
+   * The attributes every tag takes though its vocabulary doesn't name them (`disabled`, `visible`, `movable` ...):
+   * listed ONCE for the card, not in each tag's table.
+   * - Why:  a family of many tags (Header's content parts) repeated them per tag, past the README's 64 KB cap.
+   */
+  private static sharedSection(tags: SiteTag[]): string[] {
+    const shared = tags.flatMap((tag) => tag.attributes).filter((attribute) => attribute.shared)
+    const names = [...new Set(shared.map((attribute) => attribute.name))]
+    if (!names.length) return []
+    return [
+      "## Shared attributes",
+      "",
+      `Every tag here also takes:  ${names.map((name) => `\`${name}\``).join(", ")}.`,
+      ""
+    ]
+  }
+
+  /** One tag's API:  description, attributes (not the shared ones), slots, events and (below trim level 1) parts and states. */
   private tagSection(tag: SiteTag, level: number): string[] {
     const lines = [`## \`<${tag.tag}>\``, "", tag.description ?? "", ""]
-    const attributes = tag.attributes.filter((attribute) => attribute.kind !== "json")
+    // the shared attributes every tag takes are listed once, in the README's own section (`sharedSection()`)
+    const attributes = tag.attributes.filter((attribute) => attribute.kind !== "json" && !attribute.shared)
     const properties = tag.attributes.filter((attribute) => attribute.kind === "json")
     if (attributes.length) {
       lines.push("### Attributes", "", "| Attribute | Takes | Default | What it does |", "|---|---|---|---|")

@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
 
+import { withoutAccents } from "spell/util/string"
+import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
+import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
+import { es } from "spell/ui/components/components.es"
 import { SPACES } from "spell/app/spaces"
 
 /** Spell UI, as a spellx drawing names its components bare (epic `elemental-spell` P7, Q46). */
@@ -79,5 +83,43 @@ describe("SPELL_UI_PACK", () => {
     const [file] = parseSpellProject([{ path: "/card.spellml", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('h("ui-space"')
+  })
+
+  test("<comment> in a drawing is ui-comment (epic `data` P31, I60):  spellml's own note is <spell-comment>", () => {
+    expect(SPACES.SPELL_UI_PACK.tagFor("comment", "en")).toBe("ui-comment")
+    const contents = [
+      '<spell-view "post">',
+      "\t<draw>",
+      "\t\t<comment>",
+      "\t\t\t<content>",
+      "\t\t\t\t<description>hello</description>",
+      "\t\t\t</content>",
+      "\t\t</comment>",
+      "\t</draw>",
+      "</spell-view>"
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/post.spellml", contents }]).files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain('h("ui-comment"')
+    expect(file!.compiled).toContain('h("ui-description"')
+  })
+})
+
+/**
+ * spellml's controls and handlers keep their short words, `<if>`, `<for each>`, `<on>` (epic `data` P31, Q27):
+ * so no Spell UI element may take one as its short name, or a drawing could never draw it.
+ * - The notes are spellml's with the prefix, `<spell-comment>`:  their short words are Spell UI's.
+ */
+describe("no Spell UI element's short name is a spellx control's or handler's word", () => {
+  test.each([
+    ["en", Object.keys(ROOT_CATALOG).map((tag) => tag.replace(/^ui-/, ""))],
+    ["es", Object.values(es.tags ?? {})]
+  ])("%s", (lang, names) => {
+    const spellx = SP.Language.for(lang).words.spellx!
+    expect(spellx.prefix).toBe(lang === "es" ? "encanto" : "spell")
+    const words = [...Object.keys(spellx.controls), ...Object.keys(spellx.handlers)]
+    const firstWords = new Set(words.map((word) => withoutAccents(word.split(" ")[0]!)))
+    expect(names.length).toBeGreaterThan(50)
+    expect(names.filter((name) => firstWords.has(withoutAccents(name)))).toEqual([])
   })
 })

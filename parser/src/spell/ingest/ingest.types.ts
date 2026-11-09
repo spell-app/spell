@@ -54,6 +54,18 @@ export type ReadThroughAsk = {
   spell: string
   /** The class each type compiles to, by its words. */
   types: Readonly<Record<string, string>>
+  /** A type found by name, with no list, by its words:  a name to read one by. */
+  byName?: Readonly<Record<string, string>>
+  /**
+   * A type that answers only a search, by its words:  the field to search, by Spell's name for it, and the text.
+   * - `{ book: { field: "title", text: "dune" } }`
+   */
+  bySearch?: Readonly<Record<string, { field: string; text: string }>>
+  /**
+   * A type asked for by a query, by its words:  what to ask, each field by Spell's name for it (epic `data` P33).
+   * - `{ forecast: { latitude: 52.52, longitude: 13.41 } }`
+   */
+  byQuery?: Readonly<Record<string, Readonly<Record<string, unknown>>>>
   /** Every request the program makes goes through this:  it can't write, and it stops at a size. */
   fetch: typeof globalThis.fetch
 }
@@ -113,8 +125,29 @@ export type IngestAsk = {
   keySecret?: string
   /** An address to read its docs at, over those it finds by itself. */
   docs?: string
-  /** Its collections' paths under the address, for a source that doesn't list them. */
+  /**
+   * Its collections' paths under the address, for a source that doesn't list them.
+   * - `name=path` names one:  `wiki pages=/page/summary/{name}`.
+   * - A path with a name in braces is a collection found by name, with no list:  read by `samples`.
+   */
   collections?: readonly string[]
+  /**
+   * Names to read a collection found by name by:  `Luke Skywalker`, `Tatooine`.
+   * - `name=sample` is one collection's own:  `authors=OL79034A`.
+   */
+  samples?: readonly string[]
+  /**
+   * Fields holding a picture's id on another server, each `field=address`, the braces where the id goes
+   * (epic `data` P29):  `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`.
+   * - Each is tried on a row's value before it's written.
+   */
+  pictures?: readonly string[]
+  /**
+   * It may try a write of each kind (`--try-writes`;  epic `data` P30):
+   * for a server that keeps nothing, as JSONPlaceholder keeps nothing, or one you don't mind writing to.
+   * - Left out, it never writes.
+   */
+  triesWrites?: boolean
 }
 
 /** What one run did. */
@@ -151,8 +184,12 @@ export type PagingSeen = "none" | "next field" | "link header"
 export type SearchSeen = {
   /** The parameter:  `search`. */
   param: string
-  /** The field it searched, by the source's name:  `name`. */
+  /** The field it searched, by the source's name:  `name`.  Empty when it searches all of each thing. */
   field: string
+  /** It searches all of each thing, not one field:  its answers are ids, so nothing says where it matched (epic `data` P34). */
+  searchesEverything?: boolean
+  /** Its own address, under the place's, when it isn't its list's:  the Met Museum's `/v1.1/search`. */
+  at?: string
 }
 
 /** One collection, as it came back. */
@@ -177,6 +214,41 @@ export type CollectionLook = {
   rowsItSays?: number
   /** It has more than it read. */
   hasMore: boolean
+  /**
+   * The only fields its list gives of each row, besides the row's address:  PokéAPI's `name`.
+   * - Its `rows` are then a few rows read whole from their addresses, each with what the list gave.
+   */
+  listsGive?: string[]
+  /** The field holding each row's address, for a list that gives only a little of each:  its id, whatever the whole holds. */
+  idAt?: string
+  /**
+   * Its next link asks for a `limit`, so it can be asked for more at a time.
+   * - `false`:  it pages without one
+   * - Left out:  one page
+   */
+  takesLimit?: boolean
+  /** Found by name, with no list:  the names its rows were read by. */
+  samples?: string[]
+  /** The address it was asked at, when it answered from another (its `at`):  swapi's `/people`, answering from `/people/`. */
+  movedFrom?: string
+  /** Interesting headers of its first answer, as `PlaceLook.headers`. */
+  headers?: Record<string, string>
+  /** It answers only a search, with no list of them all:  Open Library's books, at `/search.json?q=...`. */
+  searchedOnly?: boolean
+  /** The word it was searched for, when `--collections` asked with one:  `dune`. */
+  searchedFor?: string
+  /**
+   * What it's asked for by, each a query parameter it can't answer without, with what it was asked (epic `data` P33):
+   * Open-Meteo's forecast, `{ latitude: "52.52", longitude: "13.41" }`.
+   * - Its `at` is then without them.
+   */
+  askedBy?: Record<string, string>
+  /** It answered with one thing, not a list:  that's its one row. */
+  answersOne?: boolean
+  /** Its list holds only ids, as it's read:  each read whole by id, a few of them (epic `data` P34). */
+  ids?: Array<string | number>
+  /** Its answer was too big to read whole:  a list of ids, read as far as it was. */
+  isCut?: boolean
 }
 
 /** Everything a look at a place found. */
@@ -195,8 +267,36 @@ export type PlaceLook = {
   version?: PlaceVersion
   /** The writes it offers, by name, for a place that lists them:  never tried. */
   writesOffered?: readonly string[]
+  /** The lists it keeps under each thing of a collection:  a post's comments (`listsFoundUnder()`). */
+  listsUnder?: readonly ListUnderSeen[]
   /** What the look had to say. */
   notes: string[]
+}
+
+/** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */
+export type WritesSeen = {
+  /** The collection they were tried on, by its name there. */
+  collection: string
+  /** The status adding answered with. */
+  adding: number
+  /** The status changing answered with. */
+  changing: number
+  /** The status deleting answered with:  left out, nothing was added to delete. */
+  deleting?: number
+  /** The id adding answered with. */
+  addedId?: string
+  /** Was what was added there when it was read again?  Left out:  nothing said what was added. */
+  keeps?: boolean
+}
+
+/** A list a web server keeps under each thing of a collection, as a look found it (epic `data` P30). */
+export type ListUnderSeen = {
+  /** The collection whose things it's under, by its name there:  `posts`. */
+  owner: string
+  /** The collection the list is of, by its name there:  `comments`. */
+  list: string
+  /** Where it is, the thing's id in braces:  `/posts/{id}/comments`. */
+  at: string
 }
 
 /** A source's own word for its version, and where it said so. */
@@ -242,12 +342,48 @@ export type FieldDescription = {
   decimalComma?: boolean
   /** The collection it links to, by address. */
   linksTo?: string
+  /**
+   * Each link it holds comes with its name, PokéAPI's `{ "name": "hp", "url": "https://..." }` (epic `data` I47).
+   * - Linking to no collection asked for, it's held whole as the place's name type, `a poke api name`, never read:
+   *   so `the name of the stat of stat` is `hp`, not its address.
+   */
+  isNamedLink?: boolean
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** The line naming it needs its words in quotes:  they hold one the plain form stops at, like `in`. */
   wordsInQuotes?: boolean
   /** A field holding one object each:  the fields inside it, a type of their own in the Spell, never a path with dots. */
   inside?: Record<string, FieldDescription>
+  /** Its `inside` is each item of a list:  PokéAPI's `types`, `[{ "slot": 1, "type": ... }]`. */
+  isListInside?: boolean
+  /** It holds what holds it, the same fields:  PokéAPI's chain's `evolves_to`, a list of chains. */
+  isItsOwner?: boolean
+  /**
+   * The unit its answer says it's in (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`.
+   * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:
+   *   `its "temperature" is a temperature in °C`.
+   */
+  unit?: string
+  /** It names the units of another field's fields, by the source's name:  Open-Meteo's `hourly_units`, of `hourly`. */
+  unitsOf?: string
+  /**
+   * Its `inside` came as lists side by side, each item one place in all of them (epic `data` P33):
+   * Open-Meteo's `"hourly": { "time": [...], "temperature_2m": [...] }`.
+   * - The core reads them so:  `rowsOfListsSideBySide()`.
+   */
+  isSideBySide?: boolean
+  /**
+   * Its `inside` came as a map by a code, each key a thing's `code` (epic `data` P35):
+   * REST Countries' `"currencies": { "EUR": { "name": "Euro" } }`, `"languages": { "fra": "French" }` (its `name`).
+   * - The core reads it so, where a list of things with a `code` is declared:  `rowsOfMapByCode()`.
+   */
+  isByCode?: boolean
+  /**
+   * It holds a picture's id, and this is where its pictures are, the braces where the id goes (epic `data` P29):
+   * `https://covers.openlibrary.org/b/id/{id}-M.jpg`.
+   * - Tried on a value, which answered a picture.
+   */
+  pictureAt?: string
 }
 
 /** One collection of a place. */
@@ -272,8 +408,33 @@ export type CollectionDescription = {
   rowsAt?: string
   /** Which field says where the next page is. */
   nextAt?: string
+  /** The only fields its list gives of each row, besides its address:  the rest is read from there. */
+  listsGive?: string[]
+  /**
+   * It can be asked for more at a time:  its next link asks for a `limit`.
+   * - `false`:  it pages without one
+   * - Left out:  one page
+   */
+  takesLimit?: boolean
+  /** Found by name, with no list (its `at` says where the name goes, `{name}`):  the names it was read by. */
+  samples?: string[]
   /** How it searches, when trying it narrowed the rows:  `it searches names with "search"`. */
   searchedBy?: SearchSeen
+  /** It answers only a search, with no list of them all:  `books are searched at "/search.json"`. */
+  searchedOnly?: boolean
+  /** The word it was searched for, which a read through the Spell searches for again:  `dune`. */
+  searchedFor?: string
+  /**
+   * The fields it's asked for by, by the source's names, with what it was asked (epic `data` P33):
+   * `{ latitude: "52.52", longitude: "13.41" }`, which a read through the Spell asks again.
+   * - `forecasts are asked for by their latitude and longitude`
+   */
+  askedBy?: Record<string, string>
+  /**
+   * The lists it keeps under each of its things, by the collection each is of,
+   * at an address with the thing's id in braces (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
+   */
+  listsUnder?: Record<string, string>
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** What a read through the Spell found. */
@@ -300,16 +461,24 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
+    /** It answered without the key too, so it takes it only when it's set:  GitHub's, 60 requests an hour without. */
+    keyIfSet?: boolean
     /** Who read the samples:  `Claude API`, `claude -p`, or nobody. */
     readBy: string
     /** Where its docs were. */
     docsAt?: string
+    /** The collections it was asked to look at, `--collections` as given:  looking again looks at only these. */
+    collectionsAsked?: string[]
+    /** The fields it was told hold a picture's id, `--pictures` as given:  looking again tries them again. */
+    picturesAsked?: string[]
+    /** It was told it may try a write of each kind, `--try-writes`:  looking again tries them again. */
+    triesWrites?: boolean
   }
   /** What it can do, in plain words. */
   canDo: {
     /** Read:  always, as it's been read. */
     read: string
-    /** Write:  what it seems to offer.  Never tried. */
+    /** Write:  what it seems to offer, never tried;  or, tried with `--try-writes`, what each answered. */
     write: string
     /** Telling what changed. */
     live: string
@@ -320,12 +489,23 @@ export type PlaceDescription = {
   }
   /** Each collection, by what Spell calls it:  `films`. */
   collections: Record<string, CollectionDescription>
-  /** What a person should know. */
+  /**
+   * What a person should know, as this look found it:  each look says them all again (epic `data` I54).
+   * - A read through the Spell (`No row read filled ...`), the look itself, the pictures tried, a line left out.
+   */
   notes: string[]
+  /**
+   * What the agent said someone using it should know:
+   * kept from look to look, as a look with the same shape doesn't ask it again.
+   * - Left out:  a description from before (epic `data` I54), whose notes are sorted once, on its next look.
+   */
+  agentNotes?: string[]
   /** What Spell has no words for yet. */
   spellCantSay: string[]
   /** How often to ask it what changed, in seconds. */
   checkEverySeconds?: number
+  /** The most requests a second its docs ask for:  `it takes up to 80 requests a second`, the Met Museum's (epic `data` P34). */
+  mostPerSecond?: number
   /** The Spell, a line at a time, as it was last written:  a person's copy may differ. */
   spell: string[]
 }

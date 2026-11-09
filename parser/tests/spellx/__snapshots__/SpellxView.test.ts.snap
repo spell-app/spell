@@ -17,14 +17,14 @@ exports[`SpellxView.read():  the examples > Card.spellml reads with NO diagnosti
     code 1 line 33:28-33:52 "if it is not a face card"
   prose 35:2-35:15 "## Playing it"
   declaration action <action> "show it" 37:2-44:11
-    note description <description> 38:3-41:17 "Turns it face up, if it isn't already.…"
+    note description <spell-description> 38:3-41:23 "Turns it face up, if it isn't already.…"
     code 2 lines 42:3-43:16 "if it is face down"
   handler on <on> "mouse down" 46:2-52:5
-    note comment <comment> 47:3-47:95 "Face down:  turn it over.  Face up:  pass the pr…"
+    note comment <spell-comment> 47:3-47:101 "Face down:  turn it over.  Face up:  pass the pr…"
     code 4 lines 48:3-51:14 "if it is face down"
   prose 54:2-54:15 "## Drawing it"
   declaration draw <draw> "front" 56:2-59:9
-    note comment <comment> 57:3-57:92 "One line of text, the size of the text around it…"
+    note comment <spell-comment> 57:3-57:98 "One line of text, the size of the text around it…"
     element <text> 58:3-58:69 part="face" color={its color}
       hole {its rank} 58:39-58:49
       text 58:49-58:50 " "
@@ -52,14 +52,14 @@ exports[`SpellxView.read():  the examples > Carta.es.spellml reads with NO diagn
     code 1 line 33:33-33:52 "si no es una figura"
   prose 35:2-35:12 "## Jugarla"
   declaration action <acción> "mostrarla" 37:2-44:11
-    note description <descripción> 38:3-41:17 "La pone boca arriba, si no lo está ya.…"
+    note description <encanto-descripción> 38:3-41:25 "La pone boca arriba, si no lo está ya.…"
     code 2 lines 42:3-43:13 "si está boca abajo"
   handler on <al> "presionar el ratón" 46:2-52:5
-    note comment <comentario> 47:3-47:99 "Boca abajo:  voltearla.  Boca arriba:  pasar el …"
+    note comment <encanto-comentario> 47:3-47:107 "Boca abajo:  voltearla.  Boca arriba:  pasar el …"
     code 4 lines 48:3-51:16 "si está boca abajo"
   prose 54:2-54:14 "## Dibujarla"
   declaration draw <dibujar> "frente" 56:2-59:12
-    note comment <comentario> 57:3-57:107 "Una línea de texto, del tamaño del texto de alre…"
+    note comment <encanto-comentario> 57:3-57:115 "Una línea de texto, del tamaño del texto de alre…"
     element <texto> 58:3-58:70 part="cara" color={su color}
       hole {su rango} 58:39-58:49
       text 58:49-58:50 " "
@@ -93,11 +93,11 @@ exports[`SpellxView.read():  the examples > Solitaire.spellml reads with NO diag
     declaration action <action> "start a new game" /> 17:3-17:32
     declaration action <action> "undo the last move" /> 18:3-18:34
   handler on <on> "mouse down" 21:2-25:5
-    note comment <comment> 22:3-22:100 "A press a card passed on:  the original target i…"
+    note comment <spell-comment> 22:3-22:106 "A press a card passed on:  the original target i…"
     code 2 lines 23:3-24:52 "if the original target is a card"
   declaration draw <draw> 27:2-34:9
     element <toolbar> /> 28:3-28:30 menu="GameMenu"
-    note comment <comment> 29:3-29:97 "A card made by its own tag:  the game's logo, wi…"
+    note comment <spell-comment> 29:3-29:103 "A card made by its own tag:  the game's logo, wi…"
     element <solitaire-card> /> 30:3-30:97 rank="ace" suit="spades" direction="up" part="logo" context-menu="GameMenu"
     loop for each <for each> "column in its columns" 31:3-33:6
       hole {column} 32:4-32:12
@@ -125,10 +125,10 @@ exports[`SpellxView.read():  the examples > TwoSidedView.spellml reads with NO d
   declaration action <action> "turn it face down" 17:2-19:11
     code 1 line 18:3-18:28 "set its direction to down"
   declaration action <action> "turn it over" 20:2-27:11
-    note description <description> 21:3-21:66 "Flips it:  face up becomes face down, and back."
+    note description <spell-description> 21:3-21:72 "Flips it:  face up becomes face down, and back."
     code 5 lines 22:3-26:41 "if it is face up"
   declaration draw <draw> 29:2-36:9
-    note description <description> 30:3-30:77 "The front when it's face up, the back when it's …"
+    note description <spell-description> 30:3-30:83 "The front when it's face up, the back when it's …"
     choice 2 branches 31:3-35:6
       branch if <if> "it is face up" 31:3-33:3
         place <draw> "front" 32:4-32:20

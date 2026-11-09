@@ -3,6 +3,9 @@ import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { Priority } from "spell/parser/spell/rules/rules.types"
+import { SpellIdentifier } from "spell/parser/spell/rules/variables"
+// Through the folder:  read only when called, once the folder has loaded
+import { MemberReadExpression } from "spell/parser/spell/rules/properties"
 import { MethodDefinition } from "./MethodDefinition"
 import type { MethodRuleDeclared } from "./methods.shared"
 
@@ -26,6 +29,8 @@ const TEST_METHOD = /^test_/
 export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|props?", DynamicMethodData> {
   @proto static importableAs = "method_call"
   @proto static operandInExpressions = true
+  // a call is a value:  as an action's last line, what it gives back (epic `language` I47)
+  @proto static givesValue = true
 
   /** Generated method name to invoke -- fixed per rule by `specialize()`, shared by every match of it. */
   declare methodName: string
@@ -108,21 +113,36 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
    * - A call that's all words, no arguments, is `specific`:  the project's own phrase beats a built-in reading of
    *   the same words (Owen, epic page `outline-spell`):  `draw its placeholder` is the pile's `drawItsPlaceholder()`,
    *   not drawing a property `placeholder`.  One with arguments isn't:  `draw the card` stays `draw_thing`'s.
+   *   - Nor one whose words go on, past it (epic `language` I20):  in `add the new recipe to the recipes`,
+   *     `add the new recipe` is the start of a longer sentence, which the longest reading takes.
    */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match || !this.argumentsFit(match)) return undefined
+    // a typed slot given a member nobody declares:  any other reading of the words wins (epic `language` T90)
+    if (this.takesUndeclaredMember(match)) match.priority = Priority.overridable
     // on this thing:  inside our type's own methods, or anywhere on a one-of-a-kind app (`solitaire is an app`)
     if (this.onThis(match) && !this.insideOurType(scope)) {
       const only = this.theOnlyOne(scope)
       if (!only) return undefined
       match.data.onlyOne = only.output ?? only.name
+      SpellIdentifier.refuseIfNotMadeYet(match, only)
+    } else if (this.onThis(match)) {
+      // in a template's test:  on the test's own thing, `it` (epic `language` T86)
+      match.data.onlyOne = P.MethodScope.withThing(scope)?.thingName
     }
     const thisDatatype = this.onThis(match) ? this.thisType : match.groups.thisArg?.datatype
     match.data.method = MethodDefinition.findMethod(scope, this.methodName, thisDatatype)
     const { thisArg, callArgs, props } = match.groups
-    if (!thisArg && !callArgs?.length && !props) match.priority = Priority.specific
+    if (!thisArg && !callArgs?.length && !props && !DynamicMethodRule.wordsGoOn(match, tokens)) {
+      match.priority = Priority.specific
+    }
     return match
+  }
+
+  /** Does a word follow `match`, in the `tokens` it was read from:  is it the start of a longer sentence? */
+  private static wordsGoOn(match: P.Match, tokens: P.Token[]): boolean {
+    return tokens[match.length] instanceof P.WordToken
   }
 
   /**
@@ -155,6 +175,21 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
     const { thisArg, callArgs = [] } = match.groups
     if (thisArg && !scope.couldBeA(thisArg.datatype, this.thisType)) return false
     return callArgs.every((arg, index) => scope.couldBeA(arg.datatype, this.paramTypes?.[index]))
+  }
+
+  /**
+   * Is one of `match`'s typed arguments a read of a member its type never declares?
+   * - e.g. Film's `play (a film)` reading `play the opening of the guide`, a guide having no `opening`:
+   *   the guide's own `play the opening`, given `of the guide`, is what it says.
+   * - Then it's `Priority.overridable`:  it still reads when nothing else does, e.g. a member a `set` declares later.
+   */
+  private takesUndeclaredMember(match: P.MatchFor<this>): boolean {
+    const { thisArg, callArgs = [] } = match.groups
+    const typed = [
+      this.thisType ? thisArg : undefined,
+      ...callArgs.map((arg, index) => (this.paramTypes?.[index] ? arg : undefined))
+    ]
+    return typed.some((arg) => !!arg && MemberReadExpression.readsUndeclared(arg))
   }
 
   /** What the method returns, if known -- see `P.ScopeMethod.returns`. */
@@ -202,7 +237,10 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
 type DynamicMethodData = {
   /** Record of the method it calls, found while parsing -- `undefined` if none known. */
   method?: P.ScopeMethod
-  /** A call with its receiver left out, on a one-of-a-kind app:  that app's variable, e.g. `solitaire`.  See `parse()`. */
+  /**
+   * A call with its receiver left out, on a one-of-a-kind app:  that app's variable, e.g. `solitaire`.  See `parse()`.
+   * - In a template's test:  the test's own thing, `it` (`P.MethodScope.thingName`).
+   */
   onlyOne?: string
 }
 

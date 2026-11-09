@@ -1,0 +1,36 @@
+# A diner
+Someone at the table:  their name, what they ordered, and what they owe.
+Each diner is its own element on the page, a row of Spell UI's fields bound to it:
+typing a name or an amount changes the diner, and every sum follows.
+
+<spell-view "diner">
+	<property "name">text</>
+	<property "amount" type="number" description="What they ordered, before the tip"/>
+	<property "tip" description="Their share of the tip:  the same part of it as their part of the bill">the amount * bill splitter's percent</>
+	<property "share" description="What they owe">the amount + the tip</>
+
+	<action "remove it" description="Takes them off the bill">remove it from bill splitter's diners</>
+
+	<draw description="Their name, their amount, what they owe, and a button to take them off">
+		<form value={it}>
+			<stack direction="horizontal" spacing="sm">
+				<input name="name" placeholder="Name" aria-label="Name"/>
+				<input name="amount" type="number" min="0" step="0.01" aria-label="Amount" label="$"/>
+				<space fluid/>
+				<text bold>{write the share as money}</text>
+				<button icon="close" appearance="basic" aria-label="Remove" onClick={remove it}/>
+			</stack>
+		</form>
+	</draw>
+</spell-view>
+
+<spell-view "table" template="viewable list of diners" description="The diners, one a row">
+	<draw "placeholder">
+		<text color="grey">Nobody yet:  add someone</text>
+	</draw>
+</spell-view>
+
+<spell>
+	// a diner sits at one table
+	a diner belongs to one table
+</spell>

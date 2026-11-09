@@ -123,7 +123,7 @@ export type ProjectRootState = {
    * Its projects, in order:  `path`, the name to show, its description, if its project file has one, and its
    * language, when it's all written in another than English (`SP.ProjectListEntry`).
    */
-  projects: { path: string; name: string; description?: string; language?: string }[]
+  projects: { path: string; name: string; description?: string; language?: string; isSite?: boolean }[]
   /** Its icon name. */
   icon?: string
   /** Its words, in the page's language:  its title (`Examples`), what its projects are called (`Example`) ... */
@@ -168,7 +168,8 @@ function readProjectRoot(projectRoot: SPACES.SpellProjectRoot | undefined): Omit
             path,
             name: new SP.SpellProject(path).title,
             description: entry?.description,
-            language: entry?.language
+            language: entry?.language,
+            isSite: entry?.isSite
           }
         })
       : [],

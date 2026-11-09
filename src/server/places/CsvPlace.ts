@@ -1,9 +1,8 @@
-import { createHash } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
 import { basename } from "node:path"
 
-import { CsvFile } from "spell/util/places/CsvFile"
-import { isListPosition, positionAtIndex } from "spell/util/places/positions"
+import { CsvFile } from "spell/places/CsvFile"
+import { isListPosition, positionAtIndex } from "spell/places/positions"
 import {
   PlaceError,
   idOfRow,
@@ -14,12 +13,14 @@ import {
   type PlaceCapabilities,
   type PlaceChange,
   type PlaceContext,
+  type PlaceLines,
   type PlaceRow,
   type SelectingContext
-} from "spell/util/places/places.types"
+} from "spell/places/places.types"
 import { SRV } from "spell/server"
 
 import { ChunkFiles } from "./ChunkFiles"
+import { contentVersion } from "./contentVersion"
 
 /** The operation that saves a file's whole list of rows:  `call()`. */
 export const CSV_SAVE_ROWS = "save rows"
@@ -54,11 +55,6 @@ export type CsvSaveRowsAnswer = {
   notes: string[]
 }
 
-/** A row's version:  a hash of what it holds, as the cells of its line.  So changing one row moves that row's, and no other's. */
-export function csvRowVersion(cells: readonly string[]): string {
-  return createHash("sha1").update(JSON.stringify(cells)).digest("hex")
-}
-
 /****************
  * ### `CsvPlace`
  * A CSV file as a place that takes writes, for a browser to reach through `PlaceServer` (epic `data` P14).
@@ -70,7 +66,7 @@ export function csvRowVersion(cells: readonly string[]): string {
  * - One file, one collection.  `SheetPlace` reads the same file from a browser, at its plain address, and can't write.
  * - A SAVE CHANGES ONLY THE LINES THAT CHANGED (`CsvFile`), so a diff of the file shows what was done, and nothing else.
  * - WITH AN ID COLUMN:
- *   - a row's version is a hash of its cells (`csvRowVersion()`):  a CSV file has no version column, and a person's editor won't write one
+ *   - a row's version is a hash of its cells (`contentVersion()` of its line's cells):  a CSV file has no version column, and a person's editor won't write one
  *     - so editing a row in VS Code moves only that row's version, and only a change to that row is refused, `"out of date"`
  *     - the engine then merges per field (`PendingChanges`), and a clash gets the usual notice
  *     - changed and changed back is the same version, which is right:  the content is the same
@@ -92,12 +88,15 @@ export function csvRowVersion(cells: readonly string[]): string {
  *   - A read of a half-saved file answers as it last read, with a note, as `FolderPlace` does:  it may just be someone typing.
  * - Reads the whole file each time, so an edit in VS Code is in the next read;  polled, as a file has nothing to say by itself.
  * - Node only.  Takes an absolute path:  who may name which file is whoever makes the place.
+ * - A program's own CSV file in its project data folder (`a sheet at "tasks.csv"`, the app's `SpaceFolders`;
+ *   epic `language` T65) names no `collection`:  its one collection is whatever the program calls it.
+ *   - Its id column is the program's (`withLines()`), `id` until a line says otherwise.
  ****************/
 export class CsvPlace implements Place {
   /** The file. */
   readonly file: string
-  /** The one collection it holds. */
-  private readonly collection: string
+  /** The one collection it holds.  Left out:  whatever it's asked for, the file's name saying it in a message. */
+  private readonly collection: string | undefined
   /** The column holding each row's id. */
   private readonly idColumn: string | undefined
   /** The columns that hold numbers. */
@@ -108,6 +107,8 @@ export class CsvPlace implements Place {
   private lastGood: PlaceRow[] | undefined
   /** Each row's version when it was last read, by id. */
   private versions = new Map<string, string>()
+  /** The same file with another id column, as a program's lines name it, made once each (`withLines()`). */
+  private readonly withThoseLines = new Map<string, CsvPlace>()
 
   constructor({ file, collection, idColumn, numbers, positionField }: CsvPlaceProps) {
     this.file = file
@@ -132,6 +133,27 @@ export class CsvPlace implements Place {
       live: "poll",
       abort: "soft"
     }
+  }
+
+  /**
+   * The same file, read by the id column a program's line names (`- its id is its "key"`), when this place names none
+   * of its own collection:  a program's own file, which only its lines describe.
+   * - A place made for one collection keeps its own:  whoever made it said.
+   */
+  withLines({ idColumn }: PlaceLines): CsvPlace {
+    if (this.collection !== undefined || idColumn === undefined || idColumn === this.idColumn) return this
+    let place = this.withThoseLines.get(idColumn)
+    if (!place) {
+      const { file, numbers, positionField } = this
+      place = new CsvPlace({
+        file,
+        idColumn,
+        ...(numbers && { numbers }),
+        ...(positionField !== undefined && { positionField })
+      })
+      this.withThoseLines.set(idColumn, place)
+    }
+    return place
   }
 
   ////////////////
@@ -190,8 +212,8 @@ export class CsvPlace implements Place {
 
   /** `text` parsed. */
   private csvIn(text: string): CsvFile {
-    const { collection: name, idColumn, numbers } = this
-    return new CsvFile(text, { name, idColumn, numbers })
+    const { idColumn, numbers } = this
+    return new CsvFile(text, { name: this.collection ?? this.name, idColumn, numbers })
   }
 
   /** The rows of `csv`, each with its place in the file if it's asked for.  SIDE EFFECT:  remembers them, and their versions. */
@@ -201,7 +223,7 @@ export class CsvPlace implements Place {
     this.lastGood = rows
     this.versions = new Map()
     if (idColumn === undefined || csv.whyUnclear) return rows
-    csv.rows.forEach((row, at) => this.versions.set(idOfRow(row, idColumn)!, csvRowVersion(csv.cellsOfRow(at))))
+    csv.rows.forEach((row, at) => this.versions.set(idOfRow(row, idColumn)!, contentVersion(csv.cellsOfRow(at))))
     return rows
   }
 
@@ -279,7 +301,7 @@ export class CsvPlace implements Place {
       const without = fields ? rows.map(({ [fields]: _position, ...row }) => row) : rows
       const { added, moved, edited, removed } = this.writeAndHold(csv, without)
       const readsAsBoth = this.idColumn === undefined && added.length > 0 && removed.length > 0
-      const note = `"${this.collection}" has no id column, so an edited row can't be told from one removed and one added:  it's saved as that`
+      const note = `"${this.collection ?? this.name}" has no id column, so an edited row can't be told from one removed and one added:  it's saved as that`
       return {
         added: added.length,
         moved: moved.length,
@@ -369,7 +391,7 @@ export class CsvPlace implements Place {
   ): void {
     if (version === undefined) return
     const at = csv.rows.findIndex((each) => idOfRow(each, this.idColumn) === id)
-    if (at < 0 || csvRowVersion(csv.cellsOfRow(at)) === version) return
+    if (at < 0 || contentVersion(csv.cellsOfRow(at)) === version) return
     throw new PlaceError(`CsvPlace.apply():  "${id}" in "${collection}" has changed since ${version};  read it again`, {
       cause: { kind: "out of date" }
     })
@@ -396,7 +418,7 @@ export class CsvPlace implements Place {
 
   /** - throws `PlaceError` `"not found"` for any collection but its own */
   private mustHold(collection: string): void {
-    if (collection === this.collection) return
+    if (this.collection === undefined || collection === this.collection) return
     throw new PlaceError(`CsvPlace:  ${this.name} holds "${this.collection}", not "${collection}"`, {
       cause: { kind: "not found" }
     })
@@ -412,8 +434,8 @@ export class CsvPlace implements Place {
 export type CsvPlaceProps = {
   /** The file, absolute:  made by the first save, if it isn't there. */
   file: string
-  /** The name it's read by. */
-  collection: string
+  /** The name it's read by.  Left out:  whatever it's asked for, as one collection:  a program's own file. */
+  collection?: string
   /** The column holding each row's id.  Left out:  rows are told apart by their whole text, and can only be added to. */
   idColumn?: string
   /** The columns that hold numbers, so they filter and sort as numbers:  a CSV file's cells are all text. */

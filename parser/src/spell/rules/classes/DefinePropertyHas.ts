@@ -20,11 +20,13 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * What may follow a property's declaration:  its RULES -- see `DefinePropertyHas.rulesOf()` (epic `property-editor` P9).
+ * - its length in letters, on its line:  `, with maximum length 1`, `, with a minimum length of 2`
+ *   (Owen, 2026-11-04, epic `atmosphere`)
  * - one on its line:  `, which must not be empty`
  * - an indented body of them:  `- it must not be empty`
  */
 export const RULES =
-  "(or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+  "(or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
 
 /** The kind of place whose rows link to each other by address. */
 const WEB_SERVER = "web server"
@@ -50,7 +52,7 @@ const WEB_SERVER = "web server"
  *     - `set name(value) { this.setProp("name", value) }`
  * - An enumeration's values also go on the class, e.g. `static Suits = ["clubs", ...]` -- see `class_member`.
  * - Its RULES, what its value must be (epic `property-editor` P9):
- *   - on its line:  `, which must ...`
+ *   - on its line:  `, which must ...`;  its length, `, with maximum length 1`;  `required`, in `a required date`
  *   - indented under it:  `- it must ...` (`property_body_must`)
  *   - Both say a `must_rule`;  and `as a url` / `as an email` brings one.
  *   - They go in its declaration, `{ type: "text", rules: [{ type: "empty" }] }`,
@@ -58,7 +60,7 @@ const WEB_SERVER = "web server"
  *   - A rule on a line of its own, `- its title must ...`, is `property_must`'s.
  */
 export class DefinePropertyHas extends SpellStatement<
-  "type|property|specifier?|nothing?|storedAs?|rule?|body?",
+  "type|property|specifier?|nothing?|storedAs?|minimum?|maximum?|lengthCount?|rule?|body?",
   { valueType?: P.TypeScope; builtInName?: string }
 > {
   @proto static priority = Priority.declaration
@@ -215,10 +217,12 @@ export class DefinePropertyHas extends SpellStatement<
     const typeScope = P.TypeScope.getOrStub(scope, typeName, match)
     // what its specifier says it holds, e.g. `text`, `choice`, `thing` for `as a new thing`
     const name = DefinePropertyHas.propertyName(match)
-    typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype })
+    // what it measures, if it's a measure:  `its "height" is a length in cm` (epic `language` P23)
+    const { measure } = (specifier?.data ?? {}) as { measure?: P.Measure }
+    typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype, measure })
     if (specifierAST instanceof P.ASTNewInstanceExpression) DefinePropertyHas.refuseCircle(match, typeScope)
-    const rule = match.groups.rule as P.MatchFor<MustRule> | undefined
-    if (rule) typeScope.addPropertyRules(name, [MustRule.ruleOf(rule)], match)
+    const lineRules = DefinePropertyHas.lineRulesOf(match)
+    if (lineRules.length) typeScope.addPropertyRules(name, lineRules, match)
 
     // If there is a specifier as enumerated values, add rules to match it
     if (specifierAST instanceof P.ASTEnumeration) {
@@ -322,15 +326,29 @@ export class DefinePropertyHas extends SpellStatement<
   }
 
   /**
+   * The rules `match` says on its own line, in order:
+   * - `required` (`a required date`):  `{ type: "empty" }`, as `must not be empty`
+   * - `as a url` / `as an email`:  text that must be one
+   * - `, with maximum length 1`:  `{ type: "maxLength", value: "1" }`, in letters, as `must be at most 1 letter long`
+   * - `, which must ...`
+   * - Reads ONLY matches:  pure.
+   */
+  static lineRulesOf(match: P.MatchFor<DefinePropertyHas>): PropRule[] {
+    const rules: PropRule[] = []
+    const { rule, specifier, minimum, lengthCount } = match.groups
+    if ((specifier?.groups as { required?: P.Match } | undefined)?.required) rules.push({ type: "empty" })
+    if (specifier?.is(TypeSpecifierTextKind)) rules.push(TypeSpecifierTextKind.ruleOf(specifier))
+    if (lengthCount) rules.push({ type: minimum ? "minLength" : "maxLength", value: `${lengthCount.value}` })
+    if (rule) rules.push(MustRule.ruleOf(rule as P.MatchFor<MustRule>))
+    return rules
+  }
+
+  /**
    * Every rule `match` says, in order:  its line's (`, which must ...`), then its body's (`- it must ...`).
    * - Reads ONLY matches:  pure, for `getAST()` too.
    */
   static rulesOf(match: P.MatchFor<DefinePropertyHas>): PropRule[] {
-    const rules: PropRule[] = []
-    const { rule, specifier } = match.groups
-    // `as a url` / `as an email`:  text that must be one
-    if (specifier?.is(TypeSpecifierTextKind)) rules.push(TypeSpecifierTextKind.ruleOf(specifier))
-    if (rule) rules.push(MustRule.ruleOf(rule as P.MatchFor<MustRule>))
+    const rules = DefinePropertyHas.lineRulesOf(match)
     for (const statement of DefinePropertyHas.bodyStatementsOf(match)) {
       if (statement.is(PropertyBodyMust)) rules.push(MustRule.ruleOf(statement.groups.rule as P.MatchFor<MustRule>))
     }
@@ -466,15 +484,19 @@ export class DefinePropertyHas extends SpellStatement<
    *   such a server's rows link to each other by address, and a read of one follows it.
    * - Read when compiling, as a kind's list is:  the line saying where the other type lives may be further down.
    * - Only a web server, for now:  what other places hold is a reference, or the thing itself, read at once.
+   * - A type kept nowhere, inside a web server's row, links too (epic `data` P27):  PokéAPI's `types` entries,
+   *   whose `type` is `{ "name": "electric", "url": "https://..." }`.  Handed the thing itself, it holds it, as ever.
    */
   private static linkedTypeOf(match: P.MatchFor<DefinePropertyHas>): string | undefined {
     const { scope } = match
     const ownSaved = scope.types?.get(`${match.groups.type.value}`)?.savedPlace()
-    if (ownSaved?.placeType.placeKind !== WEB_SERVER) return undefined
+    if (ownSaved && ownSaved.placeType.placeKind !== WEB_SERVER) return undefined
     const datatype = match.groups.specifier?.datatype
     const name = P.itemTypeOf(datatype) ?? datatype
-    const target = name && scope.types?.get(name)
-    return target && target.savedPlace() ? target.name : undefined
+    const target = name ? scope.types?.get(name) : undefined
+    const targetSaved = target?.savedPlace()
+    if (!target || !targetSaved || (!ownSaved && targetSaved.placeType.placeKind !== WEB_SERVER)) return undefined
+    return target.name
   }
 
   /**

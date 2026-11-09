@@ -24,6 +24,7 @@ export const HOME_ORG = "spell"
  * - Each one's `path` is its address;  its folder comes from that (`SP.SpellUrls.folderFor()`):
  *   - `@spell/examples`, `@spell/guides`, `@spell/notebooks`, `@spell/library`:
  *     the `@spell` space's built-ins, `spaces/@spell/<group>/`, committed
+ *   - `@spell/editor`:  the editor's own pieces in Spell, one project each (epic `editor` P22), committed
  *   - `@spell/test`:  the test projects, beside them in `spaces/@spell/test/`, committed and frozen
  *   - `owen@spell`:  this machine's person's own, `<spell-spaces>/@spell/<person>@/`, outside git
  * - A project in one is its address, a slash and the project's folder name:  `@spell/examples/Solitaire`.
@@ -31,7 +32,7 @@ export const HOME_ORG = "spell"
  * - Each group's `icon` is its projects' icon everywhere the editor shows one:
  *   the project dropdown and its trigger, the program's header, the landing page's cards.
  *   - folder:  your projects;  lightbulb:  examples;  open book:  guides;  sticky note:  notebooks;
- *     puzzle piece:  libraries;  flask:  tests
+ *     puzzle piece:  libraries;  pencil:  the editor's own pieces;  flask:  tests
  * - SIDE EFFECT:  loading this file registers them with spell (`SpellSetup.addProjectRoot()`).
  *   - Every program that reads a spell address loads it first:  through `spell/app/spaces`, spaces' disk reader,
  *     or this file alone.
@@ -88,6 +89,17 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
     icon: "puzzle piece"
   },
   {
+    path: "@spell/editor",
+    space: "@spell",
+    domain: "editor",
+    title: "The editor",
+    Type: "Piece",
+    type: "piece",
+    description: "The editor's own pieces in Spell:  its panes, top bar, menus and file tabs, each a project",
+    icon: "pencil alternate",
+    devOnly: true
+  },
+  {
     path: "@spell/test",
     space: "@spell",
     domain: "fixtures",
@@ -101,3 +113,32 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
 ]
 
 for (const group of PROJECT_GROUPS) SpellSetup.addProjectRoot(group)
+
+/** An org's group, `@rs`, or a program in its shared space, `@rs/OrgAdmin`:  never Spell's own folders, `@rs/__admin`. */
+const ORG_PROGRAM = /^(@[a-z][a-z0-9_]*)(?:$|\/(?!__))/
+
+/** Orgs with an address of their own that isn't a project group:  Spell's built-ins, and an editor's local folders. */
+const NOT_AN_ORG_GROUP = new Set([`@${HOME_ORG}`, "@local"])
+
+/**
+ * The project group of an org's own programs, `@rs` for `@rs/OrgAdmin` (epic `atmosphere` I14):
+ * found by its address, as orgs can't be listed up front;  `undefined` for anything else.
+ * - Not one of `PROJECT_GROUPS`, so the editor doesn't list it.
+ * - Only their programs:  a data folder's address reads the same, and never asks.
+ */
+function orgProgramGroup(place: string): SP.ProjectRootSpec | undefined {
+  const org = ORG_PROGRAM.exec(place)?.[1] as SP.ProjectRootPath | undefined
+  if (!org || NOT_AN_ORG_GROUP.has(org)) return undefined
+  return {
+    path: org,
+    space: org,
+    domain: "org",
+    title: "Org programs",
+    Type: "Program",
+    type: "program",
+    description: "An org's own programs, in its shared space",
+    icon: "building"
+  }
+}
+
+SpellSetup.addProjectRootFinder(orgProgramGroup)

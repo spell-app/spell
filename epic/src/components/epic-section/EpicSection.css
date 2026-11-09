@@ -130,15 +130,15 @@
 
   /*
    * ## New items waiting to be made (a Todos or Questions section, epic `airplane` P2;  `newItemList()`):
-   * - Owen's own words, on his ivory (as `<epic-new-item>`'s form)
+   * - a person's own words, in their violet (as `<epic-new-item>`'s form)
    * - each card wearing the fill (dashed until sent, outlined once sent), green:
    *   a decision, filed when Claude next reviews
    */
   .new-list {
     --_epic-act-ink: var(--ui-text-color, CanvasText);
     --_epic-act-green: var(--ui-green, #00853a);
-    --_epic-act-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
-    --_epic-act-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
   }
   .new-card ui-icon::part(icon) {
@@ -161,7 +161,7 @@
     gap: 2px 8px;
     padding: 4px 4px 4px 10px;
     border-radius: 8px;
-    background: var(--_epic-act-ivory);
+    background: var(--_epic-act-person);
     font-size: 15px;
   }
   .new-card[data-fill="dashed"] {
@@ -174,7 +174,7 @@
   .new-card > ui-icon,
   .new-card > .what {
     flex: none;
-    color: var(--_epic-act-ivory-ink);
+    color: var(--_epic-act-person-ink);
   }
   .new-card > .what {
     font-size: 12px;
@@ -204,7 +204,7 @@
     cursor: pointer;
   }
   .new-card > .tools > button:hover {
-    background: color-mix(in oklab, var(--_epic-act-ivory-ink) 14%, transparent);
+    background: color-mix(in oklab, var(--_epic-act-person-ink) 14%, transparent);
   }
   .new-card > .tools > button:focus-visible {
     outline: 2px solid var(--_epic-act-focus);
@@ -224,11 +224,18 @@
 
   /* the Manual tests section's button while Claude prepares the tests (epic `epic-engine` P51):  its icon turns */
   .start-testing[data-busy]::part(icon) {
-    animation: epic-section-turn 1.2s linear infinite;
+    animation: epic-section-turn 3.4s ease-in-out infinite;
   }
+  /* like a coin on a table, a turn then a second's rest (I213) */
   @keyframes epic-section-turn {
-    to {
-      rotate: 1turn;
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
     }
   }
   @media (prefers-reduced-motion: reduce) {

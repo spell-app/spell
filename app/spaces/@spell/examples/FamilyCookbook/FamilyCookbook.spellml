@@ -1,0 +1,100 @@
+# Family Cookbook
+Your recipes, on cards, saved in the cloud:  sign in on your laptop and your phone, and both show the same ones.
+Where they're kept is in FamilyCookbook.api.spell, and only its first line knows.
+
+// Every notes box grows as you type
+<ui-defaults>
+	<ui-textarea grow/>
+</ui-defaults>
+
+## A recipe:  a card you can read and change
+
+<spell-more-of "recipe">
+	<draw>
+		<card>
+			<content>
+				<form value={it} class="recipe">
+					<field label="Recipe name">
+						<button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the recipes}/>
+						<input name="title" class="title" size="large"/>
+					</field>
+					<field label="Serves" inline>
+						<input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
+					</field>
+					<field label="Notes">
+						<textarea name="notes" rows="2"/>
+					</field>
+				</form>
+			</content>
+		</card>
+	</draw>
+</spell-more-of>
+
+
+## The box:  the card for a new recipe, then a card for each one you have
+
+<spell-app "cookbook">
+	<property "search">text</>
+	<property "new recipe">a new recipe with servings = 4</>
+	<property "box menu">a menu of "undo"</>
+
+	<property "matches" description="Newest first:  a new one joins the end, so they're shown the other way round">
+		set found to every recipe where its title includes the search
+		reverse found
+		return found
+	</property>
+
+	<action "add the new recipe">
+		add the new recipe to the recipes
+		set its new recipe to a new recipe with servings = 4
+	</action>
+
+	<draw>
+		<container>
+			<stack direction="horizontal" wrap align="end" justify="between">
+				<stack align="start">
+					<header size="large">Family Cookbook</header>
+					<text color="grey">Everything you type is saved as you go:  in the cloud, once you sign in.</text>
+				</stack>
+				<toolbar class="undo" menu="box menu" aria-label="Recipes"/>
+				<form value={it} class="find">
+					<field label="Search">
+						<input name="search" class="search" icon="search"/>
+					</field>
+				</form>
+			</stack>
+			<cards>
+				<card class="new">
+					<content>
+						<form value={its new recipe}>
+							<header size="small">Add a recipe</header>
+							<field label="Recipe name">
+								<input name="title" class="draft" size="large"/>
+							</field>
+							<field label="Serves" inline>
+								<input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
+							</field>
+							<field label="Notes">
+								<textarea name="notes" rows="2"/>
+							</field>
+						</form>
+					</content>
+					<extra>
+						<button class="add" size="small" color="primary" disabled={its new recipe's title is ""} onClick={add the new recipe}>Add recipe</button>
+					</extra>
+				</card>
+				<for recipe in the matches loading="Finding your recipes">
+					<empty>
+						<text class="none" color="grey">{"No recipes yet. Add your first one." if the search is "" otherwise "No recipes match your search."}</text>
+					</empty>
+					<failed>
+						<message class="failed" color="red">
+							We can't reach your recipes right now.
+							<button class="again" onClick={try again}>Try again</button>
+						</message>
+					</failed>
+				</for>
+			</cards>
+		</container>
+	</draw>
+</spell-app>

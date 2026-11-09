@@ -44,6 +44,12 @@ const BROWSER_EVENT_TYPES = new Set(
     .map((word) => `${word}Event`)
 )
 
+/** The core's text-case helpers:  each gives text, `""` for nothing (`as upper case`, `as lower case`, `as title case`). */
+const TEXT_CASES = new Set(["upperCase", "lowerCase", "titleCase"])
+
+/** Built-in classes whose sub-classes nobody replaces, so a project's are never made by name:  see `makesByName()`. */
+const NEVER_REPLACED = ["App", "Place"]
+
 /****************
  * ### `ProgramWriter`
  * What every writer of a PROGRAM shares, whatever language it writes (epic `python-target` P4):
@@ -101,6 +107,21 @@ export abstract class ProgramWriter extends Writer {
    */
   listsStartAt: 0 | 1 = 1
 
+  /** The project's own types another project may extend:  see `P.WriterOptions.extendable`, `makesByName()`. */
+  extendable: string[] | true | undefined
+
+  /**
+   * Is a new `typeName` made by name, as the running program's class (`core.classToMake()`), not as ours?
+   * - Only one of our own classes, which the project lets others extend (`extendable`).
+   * - Never its app or a place, with no list naming them:  nobody replaces those.
+   */
+  protected makesByName(typeName: string): boolean {
+    const { extendable, project } = this
+    if (!extendable || !project.members.has(typeName)) return false
+    if (extendable === true) return !NEVER_REPLACED.some((base) => project.isSubclassOf(typeName, base))
+    return extendable.includes(typeName)
+  }
+
   /** The class we're writing, e.g. `Tableau`:  what `this` is -- see `kindOf()`. */
   protected currentClass: string | undefined
 
@@ -124,6 +145,7 @@ export abstract class ProgramWriter extends Writer {
     // our language's names, as set on us
     writer.naming = this.naming
     writer.listsStartAt = options?.listsStartAt ?? 1
+    writer.extendable = options?.extendable
     writer.project.findWaiting(files, scope, {
       canWait: (name, isGetter) => writer.canWait(name, isGetter),
       coreCallWaits: (call) => writer.coreCallWaits(call),
@@ -155,6 +177,29 @@ export abstract class ProgramWriter extends Writer {
     if (call.methodName !== "send") return false
     const eventName = call.args.args?.map(P.quotedText).find(Boolean)
     return !!eventName && this.project.eventWaits(eventName)
+  }
+
+  /**
+   * `core.clear(value)` of what isn't a list, as setting it back to its empty value:  `square.mark = ""`.
+   * - Text to `""`, a number to `0`, a yes / no to `no`, as `list_empty` compiles one it knows as it parses.
+   * - Why here too:  a property declared in a LATER file is known ahead by name only, with no datatype,
+   *   so `clear the mark of the square` parses as a list's clear;  the whole project knows the mark is text
+   *   (epic `language` T85).
+   * - `undefined` for a list, or what can't be told:  `core.clear()` empties it.
+   */
+  protected clearedValue(node: P.ASTScopedMethodInvocation): P.ASTAssignmentStatement | undefined {
+    const [value] = node.args.args ?? []
+    if (node.methodName !== "clear" || !value || !(node.thing instanceof P.ASTCoreExpression)) return undefined
+    const kind = this.kindOf(value)
+    const empty =
+      kind === "text"
+        ? new P.ASTStringLiteral(node.match, { value: "", quote: '"' })
+        : kind === "number"
+          ? new P.ASTNumericLiteral(node.match, 0)
+          : kind === "choice"
+            ? new P.ASTBooleanLiteral(node.match, false)
+            : undefined
+    return empty && new P.ASTAssignmentStatement(node.match, { thing: value, value: empty })
   }
 
   /**
@@ -464,7 +509,8 @@ export abstract class ProgramWriter extends Writer {
       const isParameter = value instanceof P.ASTVariableExpression && value.name === inner.name
       const valueKind = value && !isParameter ? this.kindOf(value, depth + 1) : undefined
       const declared = isParameter ? value : inner
-      return valueKind ?? kindFromDatatype(declared.datatype ?? declared.variable?.datatype)
+      const datatypeKind = kindFromDatatype(declared.datatype ?? declared.variable?.datatype)
+      return valueKind ?? datatypeKind ?? (isParameter ? this.loopItemKind(inner.name, depth) : undefined)
     }
     if (inner instanceof P.ASTPropertyExpression) {
       if (inner.object instanceof P.ASTTypeExpression && this.isStaticList(inner)) return "array"
@@ -724,6 +770,45 @@ export abstract class ProgramWriter extends Writer {
     })
   }
 
+  /**
+   * Does `value` call one of the program's own methods that never gives a value?
+   * - `this.playFromTheStock()`, whose body has no `return` with a value, nor one of these
+   * - or one the parser says gives nothing (its call's match's `datatype`, from the method's record)
+   * - So a body's last line calling it (I47:  a last line is its value) is written as the call alone,
+   *   and Python's hint for its method stays `-> None`, not `-> Any`.
+   * - One already being worked out (it calls itself) can't be told:  `false`.
+   */
+  givesNothing(value: P.ASTExpression): boolean {
+    const inner = unwrapped(value)
+    const call = inner instanceof P.ASTAwaitExpression ? unwrapped(inner.expression) : inner
+    if (!(call instanceof P.ASTScopedMethodInvocation) || call.thing instanceof P.ASTCoreExpression) return false
+    // what the parser recorded for its method:  a built-in's too (a two sided view's `turn face up`)
+    if (call.match?.datatype === "nothing") return true
+    const owner = this.kindOf(call.thing)
+    const method = this.project.methodOf(owner, call.methodName)
+    if (!method || method.inline || this.nothingBeingTold.has(method)) return false
+    this.nothingBeingTold.add(method)
+    try {
+      // its own returns:  not one in a function inside it
+      const values: P.ASTExpression[] = []
+      const visit = (node: unknown) => {
+        if (Array.isArray(node)) return node.forEach(visit)
+        if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+        if (node instanceof P.ASTReturnStatement && node.value) values.push(node.value)
+        for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
+      }
+      visit(method.body.statements)
+      return this.inPlace({ typeName: owner ?? "", methods: [method] }, () =>
+        values.every((it) => this.givesNothing(it))
+      )
+    } finally {
+      this.nothingBeingTold.delete(method)
+    }
+  }
+
+  /** The methods `givesNothing()` is working out:  one that calls itself can't be told. */
+  private nothingBeingTold = new Set<P.ASTMethodDefinition>()
+
   /** What returning `value` gives, as `returnedKinds()` counts it:  `kindOf()`, one kind -- see `PyBaseWriter`. */
   protected returnKindsOf(value: P.ASTExpression): Array<string | undefined> {
     return [this.kindOf(value)]
@@ -798,6 +883,7 @@ export abstract class ProgramWriter extends Writer {
         return node.methodName === "duplicateList" && first ? this.kindOf(first, depth + 1) : undefined
       case "upperCase":
       case "lowerCase":
+      case "titleCase":
         return "text"
       case "itemCountOf":
       case "positionOf":
@@ -845,7 +931,46 @@ export abstract class ProgramWriter extends Writer {
   /** SIDE EFFECT:  notes `method`'s parameters as the block's own, so what they are is known -- see `kindOf()`. */
   protected noteParams(method: P.ASTMethodDefinition) {
     for (const arg of method.args ?? []) this.locals.at(-1)!.set(arg.name, arg)
+    // a loop's item:  one of its list's, e.g. a `Square` of `this.board` (`noteLoopItems()`)
+    const list = this.loopLists.get(method)
+    const [item] = method.args ?? []
+    if (list && item) this.locals.at(-1)!.set(ProgramWriter.loopItemKey(item.name), list)
   }
+
+  /**
+   * SIDE EFFECT:  notes the list a loop's function goes through, for its item's kind -- see `loopItemKind()`.
+   * - `core.forEach(this.board, (square) => ...)`:  `square` is one of the board's items.
+   * - Each writer calls it before it writes a `core` call.
+   */
+  protected noteLoopItems(node: P.ASTScopedMethodInvocation): void {
+    if (!(node.thing instanceof P.ASTCoreExpression) || !ProgramWriter.ITEM_LOOPS.has(node.methodName)) return
+    const [list, callback] = node.args.args ?? []
+    const method = callback && unwrapped(callback)
+    if (list && method instanceof P.ASTMethodDefinition) this.loopLists.set(method, list)
+  }
+
+  /**
+   * The kind of a loop's item `name`, from its list's class, e.g. `Square` for a board's -- `undefined` if not a loop's.
+   * - What a loop's variable is when spell couldn't tell as it parsed:
+   *   a list type declared further down, `for square in its board` above `<spell-thing "board" template="list of squares">`
+   *   (epic `language` T85).
+   */
+  protected loopItemKind(name: string, depth: number): string | undefined {
+    const list = this.localValue(ProgramWriter.loopItemKey(name))
+    const kind = list && this.kindOf(list, depth + 1)
+    return this.project.isListClass(kind) ? this.project.itemTypeOf(kind) : undefined
+  }
+
+  /** The key `locals` notes a loop's list under, by its item's name -- see `noteParams()`. */
+  static loopItemKey(name: string): string {
+    return `\0item of:${name}`
+  }
+
+  /** The `core` helpers that call a function with each item of a list, its first parameter. */
+  static ITEM_LOOPS = new Set(["map", "forEach", "forEachSequential", "filter", "all", "any", "removeWhere"])
+
+  /** Each loop's function, and the list it goes through -- see `noteLoopItems()`. */
+  private loopLists = new WeakMap<P.ASTMethodDefinition, P.ASTExpression>()
 
   /** `write()` inside a block of its own:  its new variables are forgotten when it's written. */
   protected inBlock<T>(write: () => T): T {
@@ -911,17 +1036,191 @@ export abstract class ProgramWriter extends Writer {
     return undefined
   }
 
+  ////////////////
+  // ## Reads a check already made
+  ////////////////
+
+  /**
+   * The reads a check just before them already found there, read off with `.`, not `?.` (epic `data`, T121, J182):
+   * - `this.page && this.page.fits`, `if (this.person) return this.person.drawCard()`
+   * - Python:  `self.person.draw_card()`, not `getattr(...)`
+   * - TypeScript:  no `!` -- it narrows the same reads
+   * - Noted as each check is written -- see `noteChecked()`.
+   */
+  private checkedReads = new WeakSet<P.ASTNode>()
+
+  /** Did a check just before `node` find it there?  See `noteChecked()`. */
+  isCheckedRead(node: P.ASTExpression): boolean {
+    return this.checkedReads.has(node) || this.checkedReads.has(unwrapped(node))
+  }
+
+  /**
+   * SIDE EFFECT:  notes the reads in `region` that `condition`, true, already found there -- see `checkedReads`.
+   * - `condition`:  a read (`its page`), `X is something`, or several joined with `and`.
+   * - `region`:  what runs only when it's true, right after it:
+   *   an `and`'s right side, an `if`'s statements, a `?`'s yes.
+   * - `runs: "when false"`:  `region` runs only when it's FALSE (an `otherwise`, a `?`'s no):
+   *   then only `not X` / `X is nothing` counts.
+   * - Kept simple, so it's safe:  the same path of names, read right away --
+   *   never inside a function the program writes (a drawing's `() => this.page?.summary` runs later),
+   *   nor after a statement that calls anything or waits, nor where `region` sets the path.
+   */
+  noteChecked(
+    condition: P.ASTExpression,
+    region: P.ASTNode | undefined,
+    runs: "when true" | "when false" = "when true"
+  ) {
+    if (!region) return
+    const checked = runs === "when false" ? this.uncheckedPaths(condition) : this.checkedPaths(condition)
+    if (!checked.length) return
+    // the paths `region` sets anywhere aren't found there any more
+    forEachNode(region, (node) => {
+      if (!(node instanceof P.ASTAssignmentStatement)) return
+      const set = this.pathKey(node.thing)
+      if (set === undefined) return
+      for (let index = checked.length - 1; index >= 0; index--) {
+        const path = checked[index]!
+        if (path === set || path.startsWith(`${set}.`)) checked.splice(index, 1)
+      }
+    })
+    if (checked.length) this.markChecked(region, new Set(checked))
+  }
+
+  /** SIDE EFFECT:  `noteChecked()` for an `otherwise` right after an `if not X`, in `statements`. */
+  noteCheckedElses(statements: readonly P.ASTNode[]) {
+    for (let index = 0; index < statements.length - 1; index++) {
+      const [check, otherwise] = [statements[index], statements[index + 1]]
+      if (check instanceof P.ASTIfStatement && otherwise instanceof P.ASTElseStatement) {
+        this.noteChecked(check.condition, otherwise.statements, "when false")
+      }
+    }
+  }
+
+  /** The paths of names `condition`, true, finds there:  `its page`, `X is something`, each side of an `and`. */
+  private checkedPaths(condition: P.ASTExpression): string[] {
+    const inner = unwrapped(condition)
+    if (inner instanceof P.ASTInfixExpression && inner.operator === "and") {
+      return [...this.checkedPaths(inner.lhs), ...this.checkedPaths(inner.rhs)]
+    }
+    const read = this.isDefinedRead(inner) ?? this.comparedToNothing(inner, "not equals") ?? inner
+    const path = this.pathKey(read)
+    return path === undefined ? [] : [path]
+  }
+
+  /** The paths of names `condition`, FALSE, finds there:  `not its page`, `X is nothing` -- one only. */
+  private uncheckedPaths(condition: P.ASTExpression): string[] {
+    const inner = unwrapped(condition)
+    const isNothing = this.comparedToNothing(inner, "equals")
+    if (isNothing) return this.checkedPaths(isNothing)
+    if (!(inner instanceof P.ASTNotExpression)) return []
+    const checked = unwrapped(inner.expression)
+    if (checked instanceof P.ASTInfixExpression) return []
+    return this.checkedPaths(checked)
+  }
+
+  /** What `X is nothing` (`operator` `equals`) or `X is not nothing` (`not equals`) compares, else `undefined`. */
+  private comparedToNothing(node: P.ASTNode, operator: "equals" | "not equals"): P.ASTExpression | undefined {
+    if (!(node instanceof P.ASTInfixExpression)) return undefined
+    const exactly = operator === "equals" ? "exactly equals" : "not exactly equals"
+    if (node.operator !== operator && node.operator !== exactly) return undefined
+    if (unwrapped(node.rhs) instanceof P.ASTNothingLiteral) return node.lhs
+    if (unwrapped(node.lhs) instanceof P.ASTNothingLiteral) return node.rhs
+    return undefined
+  }
+
+  /** What `X is something` (`core.isDefined(X)`) checks, else `undefined`. */
+  private isDefinedRead(node: P.ASTNode): P.ASTExpression | undefined {
+    if (!(isCoreCall(node) && (node as P.ASTScopedMethodInvocation).methodName === "isDefined")) return undefined
+    return ((node as P.ASTScopedMethodInvocation).args.args ?? [])[0]
+  }
+
+  /**
+   * `node` as a path of names, `this.page`, `v:card.pile` -- `undefined` for anything else:
+   * a call, a read that waits, a class's own (`Card.SUITS`).
+   */
+  private pathKey(node: P.ASTNode | undefined): string | undefined {
+    const inner = node && unwrapped(node)
+    if (inner instanceof P.ASTSelfLiteral) return "this"
+    if (inner instanceof P.ASTCoreExpression) return undefined
+    if (inner instanceof P.ASTVariableExpression) return `v:${inner.name}`
+    if (!(inner instanceof P.ASTPropertyExpression) || this.project.awaited.has(inner)) return undefined
+    const object = this.pathKey(inner.object)
+    return object === undefined ? undefined : `${object}.${inner.property.value}`
+  }
+
+  /**
+   * SIDE EFFECT:  marks each read in `node` of one of `paths` as checked -- only where it's read right away:
+   * through `and`, `not`, `?`, a property, a call of the program's own and its arguments, a `return`, a setting.
+   * - NOT into a `core` helper (it may be handed a function, `core.drawRead(() => ...)`), a function, a drawing,
+   *   or a read that waits.
+   * - A block:  its statements in turn, until one calls anything or waits.
+   */
+  private markChecked(node: P.ASTNode | undefined, paths: Set<string>) {
+    if (!node) return
+    if (node instanceof P.ASTStatementBlock) {
+      for (const statement of node.statements ?? []) {
+        this.markChecked(statement, paths)
+        if (this.callsOrWaits(statement)) return
+      }
+      return
+    }
+    if (node instanceof P.ASTExpression) {
+      const path = this.pathKey(node)
+      if (path !== undefined && paths.has(path)) this.checkedReads.add(node)
+    }
+    if (node instanceof P.ASTParenthesizedExpression || node instanceof P.ASTNotExpression) {
+      this.markChecked(node.expression, paths)
+    } else if (node instanceof P.ASTInfixExpression) {
+      this.markChecked(node.lhs, paths)
+      this.markChecked(node.rhs, paths)
+    } else if (node instanceof P.ASTTernaryExpression) {
+      this.markChecked(node.condition, paths)
+      this.markChecked(node.trueValue, paths)
+      this.markChecked(node.falseValue, paths)
+    } else if (node instanceof P.ASTPropertyExpression) {
+      if (!this.project.awaited.has(node)) this.markChecked(node.object, paths)
+    } else if (node instanceof P.ASTMethodInvocation) {
+      if (isCoreCall(node) || this.project.awaited.has(node)) return
+      if (node instanceof P.ASTScopedMethodInvocation) this.markChecked(node.thing, paths)
+      for (const arg of node.args.args ?? []) this.markChecked(arg, paths)
+    } else if (node instanceof P.ASTReturnStatement) {
+      this.markChecked(node.value, paths)
+    } else if (node instanceof P.ASTAssignmentStatement) {
+      this.markChecked(node.value, paths)
+      this.markChecked(node.thing, paths)
+    }
+  }
+
+  /** Does `statement` call anything, or wait?  After it, what was checked may have changed -- see `markChecked()`. */
+  private callsOrWaits(statement: P.ASTNode): boolean {
+    let calls = false
+    forEachNode(statement, (node) => {
+      if (node instanceof P.ASTMethodInvocation || node instanceof P.ASTAwaitExpression) calls = true
+      else if (node instanceof P.ASTExpression && this.project.awaited.has(node)) calls = true
+    })
+    return calls
+  }
+
   /**
    * May `node` be nothing?
    * - Yes for:  an item read from a list (`core.getItemAt(pile, -1)`), what's read off one,
    *   or a variable set to one.
    * - And for one of the program's things found by name or place, `core.thingNamed(Tableau, "T1")`:
    *   the program may not have made it (yet).
+   * - And for a field that holds another kind of thing, `its sprites`:  nobody may have set it yet
+   *   (a Pokémon from a list has only its name, until its own page is read) -- see `isThingField()`.
+   *   So `the other of its sprites` is nothing then, not a throw (epic `data`, I45).
+   * - And for one saved thing, by its id or its place, `the jsonplaceholder user whose id is 1`:
+   *   the place may hold none -- also read through a property set to one, `the posts of its person`
+   *   (see `isSavedThingRead()`;  epic `data` P30).
    * - Reading off it is written `?.`, so spell reads off nothing as nothing and never throws
    *   (epic `output-targets`, Q38).
+   * - NOT a read a check just before it found there, `this.page && this.page.fits` -- see `noteChecked()`.
    */
   mayBeNothing(node: P.ASTExpression): boolean {
     const inner = unwrapped(node)
+    // a read a check just before it found there:  see `noteChecked()`
+    if (this.isCheckedRead(node)) return false
     if (inner instanceof P.ASTScopedMethodInvocation && inner.thing instanceof P.ASTCoreExpression) {
       if (ProgramWriter.ITEM_READS.has(inner.methodName)) {
         // the first or last item of a list a guard found has items:  there
@@ -930,13 +1229,15 @@ export abstract class ProgramWriter extends Writer {
         return !(list && (index === 0 || index === -1) && this.hasItems(list))
       }
       // text written in another case is text, `""` for nothing
-      if (inner.methodName === "upperCase" || inner.methodName === "lowerCase") return false
+      if (TEXT_CASES.has(inner.methodName)) return false
       // a helper given what may be nothing gives nothing back, e.g. the cards of a random pile
       const [first] = inner.args.args ?? []
       return !!first && this.mayBeNothing(first)
     }
     // read off what may be nothing:  `?.`, so it may be nothing too
-    if (inner instanceof P.ASTPropertyExpression) return this.mayBeNothing(inner.object)
+    if (inner instanceof P.ASTPropertyExpression) {
+      return this.mayBeNothing(inner.object) || this.isThingField(inner) || this.isSavedThingRead(inner)
+    }
     if (inner instanceof P.ASTScopedMethodInvocation) return this.mayBeNothing(inner.thing)
     if (!(inner instanceof P.ASTVariableExpression) || inner instanceof P.ASTCoreExpression) return false
     const value = this.localValue(inner.name)
@@ -945,11 +1246,54 @@ export abstract class ProgramWriter extends Writer {
   }
 
   /**
+   * Does `node` read a field that holds another kind of thing, which may not have been set yet?  See `mayBeNothing()`.
+   * - Yes for `its sprites`, a Pokémon's `- its "sprites" is a sprite`:  a class the project has.
+   * - NOT for a field with a starting value:  `as a new pile` is made when first read, or with the thing.
+   * - NOT for a field of text, a number, yes / no, a list, or one of a list of values (`Suit`).
+   */
+  isThingField(node: P.ASTPropertyExpression): boolean {
+    if (node.object instanceof P.ASTTypeExpression) return false
+    const owner = this.kindOf(node.object)
+    const property = this.project.propertyOf(owner, node.property.value)
+    if (!property || property.initializer) return false
+    const kind = this.propertyKindOf(property.typeName, property.property.value)
+    return !!kind && this.project.isClass(kind) && !this.project.valueKinds.has(kind)
+  }
+
+  /**
+   * Does `node` read a property whose value is one saved thing, which the place may not hold?  See `mayBeNothing()`.
+   * - Yes for `its person`, a page's `<property "person">the jsonplaceholder user whose id is 1</property>`:
+   *   a getter that returns `core.savedThingWithId()` or `core.savedThingAt()`.
+   * - Only what it returns itself, never through a variable:  the getter's variables aren't the ones being written.
+   */
+  isSavedThingRead(node: P.ASTPropertyExpression): boolean {
+    if (node.object instanceof P.ASTTypeExpression) return false
+    const getter = this.project.getterOf(this.kindOf(node.object), node.property.value)
+    if (!getter) return false
+    let readsOne = false
+    forEachNode(getter.body, (each) => {
+      if (!(each instanceof P.ASTReturnStatement) || !each.value) return
+      let value = unwrapped(each.value)
+      if (value instanceof P.ASTAwaitExpression) value = unwrapped(value.expression)
+      if (value instanceof P.ASTCoreMethodInvocation && ProgramWriter.SAVED_ONE_READS.has(value.methodName)) {
+        readsOne = true
+      }
+    })
+    return readsOne
+  }
+
+  /**
    * The `core` helpers that read ONE item, which may be nothing:  see `mayBeNothing()`.
    * - one item of a list:  `getItemAt()`, `randomItemOf()`
    * - one of the program's things, by its name or place:  `tableau T1`, `the first tableau` (epic `drawable-thing` P19)
    */
   static ITEM_READS = new Set(["getItemAt", "randomItemOf", "thingNamed", "thingAtPlace"])
+
+  /**
+   * The `core` helpers that read ONE saved thing, which the place may not hold:  see `isSavedThingRead()`.
+   * - by its id, `the wiki page whose id is its name`;  by its place, `the first film`
+   */
+  static SAVED_ONE_READS = new Set(["savedThingWithId", "savedThingAt"])
 }
 
 /** A kind's file setting:  `static savedInFile = true` or `static savedInline = true` -- see `withProjectMembers()`. */

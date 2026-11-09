@@ -8,7 +8,7 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { bridgeSolid } from "spell/util"
 import { core, Place, Thing } from "spell/parser/core"
-import { MemoryPlace, type PlaceChange, type PlaceContext } from "spell/util/places"
+import { MemoryPlace, type PlaceChange, type PlaceContext } from "spell/places"
 
 /** A place in memory that keeps every change it's sent. */
 class KeepingPlace extends MemoryPlace {

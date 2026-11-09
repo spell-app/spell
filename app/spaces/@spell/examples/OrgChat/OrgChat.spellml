@@ -1,0 +1,73 @@
+# Chat
+Every thread you can read, down the side, and the one you picked, live:  a message shows on everyone's open page at once.
+Where they're kept is in OrgChat.api.spell, and only its first two lines know.
+Everyone in the org reads and writes a team's open thread;  you delete your own messages, and the team's Managers anyone's.
+
+
+## A row for each:  who sent it, when, and what it says
+
+<spell-more-of "message">
+	<draw>
+		<segment class="message">
+			<stack spacing="xs">
+				<stack direction="horizontal" spacing="md" align="center" wrap>
+					<text class="by">{its by}</text>
+					<text class="sent" color="grey">{its sent}</text>
+					<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Delete this message" title="Delete this message:  yours, or anyone's if you manage the space" onClick={remove it from the messages}/>
+				</stack>
+				<text class="text">{its text}</text>
+			</stack>
+		</segment>
+	</draw>
+</spell-more-of>
+
+
+## The page:  the threads down the side, the one picked, oldest first, and a line to write in
+
+<spell-app "chat page">
+	<property "new message">a new message</>
+	<property "picked">the first thread in every thread where its current</>
+
+	<action "send it">
+		set the sent of the new message to a new date
+		set the thread of the new message to the topic of its picked
+		add the new message to the messages
+		set its new message to a new message
+	</action>
+
+	<draw>
+		<container class="chat">
+			<stack direction="horizontal" spacing="lg" align="start">
+				<list class="threads" appearance="link" aria-label="Threads">
+					<for thread in every thread sorted by its name a-z loading="Finding your threads">
+						<item link={its link} selected={its current}>
+							<stack spacing="none">
+								<text class="name">{its name}</text>
+								<text class="side" color="grey" size="small">{its side}</text>
+							</stack>
+						</item>
+						<empty><text class="none" color="grey">No threads you can read.</text></empty>
+						<failed><text color="red">We can't find your threads right now.</text></failed>
+					</for>
+				</list>
+				<if its picked>
+					<stack>
+						<header size="large">{the name of its picked}</header>
+						<stack class="message-list" spacing="sm">
+							<for message in every message where its thread is the topic of the picked of the chat page sorted by its sent loading="Joining the thread">
+								<message/>
+								<empty><text class="none" color="grey">Nothing yet:  say hello.</text></empty>
+								<failed><text color="red">We can't join this thread right now.</text></failed>
+							</for>
+						</stack>
+						<form value={its new message}>
+							<input name="text" placeholder="Write to the thread" aria-label="Your message" fluid action>
+								<button slot="action" class="send" color="primary" disabled={the text of the new message is ""} onClick={send it}>Send</button>
+							</input>
+						</form>
+					</stack>
+				</if>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

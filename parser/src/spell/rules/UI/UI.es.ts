@@ -12,10 +12,15 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
+import { UIDefaults } from "./UIDefaults"
 import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
+import { ShowDatesAs } from "./ShowDatesAs"
+import { PlaySound } from "./PlaySound"
+import { StopSound } from "./StopSound"
+import { LoadSound } from "./LoadSound"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
@@ -87,9 +92,48 @@ UIEs.addRule(Print, {
   ]
 })
 
+// How the program shows its dates (HyperTalk's short, long and abbreviated)
+UIEs.addRule(
+  Wording.specialize({
+    ruleName: "shown_dates",
+    meanings: ["short", "long", "abbreviated", "timestamp", "plain", "reader"]
+  }),
+  {
+    syntax:
+      "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
+  }
+)
+UIEs.addRule(ShowDatesAs, {
+  syntax: "las fechas se muestran como {style:shown_dates}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["las fechas se muestran como fechas cortas", 'core.showDatesAs("short")'],
+        ["las fechas se muestran como las del lector", 'core.showDatesAs("reader")']
+      ]
+    }
+  ]
+})
+
 UIEs.addRule(ScrollToTop, {
   syntax: "desplazarse hasta arriba",
   tests: [{ compileAs: "statement", tests: [["desplazarse hasta arriba", "core.scrollToTop()"]] }]
+})
+
+UIEs.addRule(PlaySound, {
+  syntax: "reproducir {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`reproducir "cry.ogg"`, `core.play("cry.ogg")`]] }]
+})
+
+UIEs.addRule(StopSound, {
+  syntax: "parar {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`parar "cry.ogg"`, `core.stop("cry.ogg")`]] }]
+})
+
+UIEs.addRule(LoadSound, {
+  syntax: "(cargar|precargar) {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`precargar "cry.ogg"`, `core.loadSound("cry.ogg")`]] }]
 })
 
 UIEs.addRule(EndPrintGroup, {
@@ -210,6 +254,22 @@ UIEs.addRule(CSSStyles, {
       tests: [
         [`""`, `core.installStyles(undefined, \`""\`)`],
         [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(UIDefaults, {
+  tests: [
+    {
+      title: "Los valores por defecto de una app:  una etiqueta de muestra por componente",
+      compileAs: "statement",
+      // sin un paquete de componentes cargado, tal cual;  con Spell UI, en sus nombres:  `UIDefaults.test.ts`
+      tests: [
+        [
+          ["<ui-defaults>", '\t<es-boton apariencia="píldora"/>', "</ui-defaults>"],
+          'core.useDefaults("", {\n  "es-boton": { apariencia: "píldora" }\n})'
+        ]
       ]
     }
   ]

@@ -9,7 +9,7 @@ import navRaw from "spell/ui/docs-components/ui-docs-nav/UIDocsNav.css?raw"
 
 /**
  * `UIDocsNav.css`:  the sheet's source rules, and its layout on the shadow markup contract.
- * - The look is the widgets' own (`<ui-menu>`, `<ui-item>` ...), tested in their families;  this sheet only lays them
+ * - The look is the widgets' own (`<ui-site-nav>`'s tree), tested in their families;  this sheet only lays them
  *   out, so a stand-in host with the contract's markup is enough.
  */
 describe("UIDocsNav.css source", () => {
@@ -31,18 +31,13 @@ describe("UIDocsNav.css source", () => {
 })
 
 describe("UIDocsNav.css layout", () => {
-  /** The contract's panel:  a header band over a list of one group and a tall rows stand-in. */
+  /** The contract's panel:  a header band over the scrolling list, a tall stand-in for its site nav. */
   const MARKUP = `
     <div class="ui nav" part="nav">
       <div class="masthead" part="header" style="height: 100px">header</div>
-      <nav part="menu">
-        <section class="group">
-          <h2 class="heading"><button type="button" class="band" aria-expanded="true">Group</button></h2>
-          <div class="fold open"><div class="folded"><ul class="rows" style="height: 2000px">
-            <li class="row"><a class="item" href="#" aria-current="page">Row</a></li>
-          </ul></div></div>
-        </section>
-      </nav>
+      <div class="menu" part="menu">
+        <div class="list" style="height: 2000px">list</div>
+      </div>
     </div>`
 
   /** The stand-in host's shadow element matching `selector`. */
@@ -67,26 +62,21 @@ describe("UIDocsNav.css layout", () => {
     expect(find(host, "[part~=nav]").getBoundingClientRect().height).toBeGreaterThan(2100)
   })
 
-  it("draws a card:  a border, a radius;  bands full width;  the current row filled", () => {
+  it("draws a card:  a border, a radius", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, navCSS])
     const panel = getComputedStyle(find(host, "[part~=nav]"))
     expect(panel.borderTopWidth).toBe("1px")
     expect(parseFloat(panel.borderTopLeftRadius)).toBeGreaterThan(0)
-    const band = find(host, ".band")
-    expect(band.getBoundingClientRect().width).toBe(find(host, "[part~=menu]").clientWidth)
-    expect(getComputedStyle(band).textTransform).toBe("uppercase")
-    expect(getComputedStyle(find(host, ".item")).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
   })
 
-  it("folds a shut group to nothing, hidden", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, navCSS])
-    const fold = find(host, ".fold")
-    fold.classList.remove("open")
-    fold.getAnimations().forEach((animation) => animation.finish())
-    find(host, ".folded")
-      .getAnimations()
-      .forEach((animation) => animation.finish())
-    expect(fold.getBoundingClientRect().height).toBe(0)
-    expect(getComputedStyle(find(host, ".folded")).visibility).toBe("hidden")
+  it("hands its site nav the panel's colours, through the tree's nav tokens", () => {
+    const host = Sheets.host(MARKUP.replace("</div>\n    </div>", "<ui-site-nav></ui-site-nav></div>\n    </div>"), [
+      ...foundationCSS,
+      navCSS
+    ])
+    const nav = host.shadowRoot!.querySelector("ui-site-nav")!
+    const style = getComputedStyle(nav)
+    expect(style.getPropertyValue("--ui-tree-nav-band-color").trim()).not.toBe("")
+    expect(style.getPropertyValue("--ui-tree-nav-current-background").trim()).not.toBe("")
   })
 })

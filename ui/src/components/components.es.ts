@@ -47,6 +47,7 @@ import { embedEs } from "spell/ui/components/ui-embed/UIEmbed.es"
 import { emojiEs } from "spell/ui/components/ui-emoji/UIEmoji.es"
 import { feedEs } from "spell/ui/components/ui-feed/UIFeed.es"
 import { eventEs } from "spell/ui/components/ui-feed/UIFeedEvent.es"
+import { dimensionEs } from "spell/ui/components/ui-dimension/UIDimension.es"
 import { flagEs } from "spell/ui/components/ui-flag/UIFlag.es"
 import { flyoutEs } from "spell/ui/components/ui-flyout/UIFlyout.es"
 import { fieldEs } from "spell/ui/components/ui-form/UIField.es"
@@ -79,6 +80,7 @@ import { nagEs } from "spell/ui/components/ui-nag/UINag.es"
 import { panelEs } from "spell/ui/components/ui-panel/UIPanel.es"
 import { splitPanelEs } from "spell/ui/components/ui-split-panel/UISplitPanel.es"
 import { treeEs } from "spell/ui/components/ui-tree/UITree.es"
+import { siteNavEs } from "spell/ui/components/ui-site-nav/UISiteNav.es"
 import { treeItemEs } from "spell/ui/components/ui-tree/UITreeItem.es"
 import { actionsEs } from "spell/ui/components/ui-parts/UIActions.es"
 import { authorEs } from "spell/ui/components/ui-parts/UIAuthor.es"
@@ -152,6 +154,8 @@ import { toolbarEs } from "spell/ui/components/ui-toolbar/UIToolbar.es"
 import { transitionEs } from "spell/ui/components/ui-transition/UITransition.es"
 import { treeNodeEs } from "spell/ui/components/ui-tree-diagram/UITreeNode.es"
 import { treeDiagramEs } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.es"
+import { diagramEs } from "spell/ui/components/ui-diagram/UIDiagram.es"
+import { diagramNodeEs } from "spell/ui/components/ui-diagram/UIDiagramNode.es"
 import { visibilityEs } from "spell/ui/components/ui-visibility/UIVisibility.es"
 
 /** The Spanish names and texts every tag shares;  each tag's own are in its `UI<Name>.es.ts`. */
@@ -159,6 +163,7 @@ export const sharedEs = {
   lang: "es",
   attributes: {
     caption: "leyenda",
+    editable: "editable",
     styled: "estilizado",
     fluid: "fluido",
     inverted: "invertido",
@@ -176,6 +181,7 @@ export const sharedEs = {
     size: "tamano",
     active: "activo",
     color: "color",
+    background: "fondo",
     primary: "primario",
     secondary: "secundario",
     positive: "positivo",
@@ -205,6 +211,7 @@ export const sharedEs = {
     required: "requerido",
     readonly: "solo-lectura",
     placeholder: "marcador",
+    parameter: "parametro",
     horizontal: "horizontal",
     raised: "elevado",
     link: "enlace",
@@ -522,6 +529,9 @@ export const sharedEs = {
   },
   words: {
     stack: "apilado",
+    // past `massive`:  a header's and a button's own size (`PosterSizes`;  the rest are the shared `sizes`)
+    poster: "cartel",
+    "when stacked": "al apilar",
     drawer: "cajón",
     very: "muy",
     left: "izquierda",
@@ -645,7 +655,13 @@ export const sharedEs = {
     basic: "básico",
     attached: "unido",
     image: "imagen",
-    square: "cuadrado"
+    square: "cuadrado",
+    // a segment's looks (`<es-segmento apariencia="elevado apilado">`), and a button's, card's and section's `raised`
+    raised: "elevado",
+    stacked: "apilado",
+    "tall-stacked": "apilado-alto",
+    piled: "amontonado",
+    tertiary: "terciario"
   },
   texts: {
     close: "Cerrar",
@@ -691,6 +707,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   emojiEs,
   feedEs,
   eventEs,
+  dimensionEs,
   flagEs,
   flyoutEs,
   fieldEs,
@@ -723,6 +740,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   panelEs,
   splitPanelEs,
   treeEs,
+  siteNavEs,
   treeItemEs,
   actionsEs,
   actionEs,
@@ -796,6 +814,8 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   toolbarEs,
   transitionEs,
   treeDiagramEs,
+  diagramEs,
+  diagramNodeEs,
   treeNodeEs,
   visibilityEs
 ])

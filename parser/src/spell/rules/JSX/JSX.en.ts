@@ -72,6 +72,23 @@ JSX.addRule(MarkdownBlock, {
       ]
     },
     {
+      title:
+        "`<ui-markdown>` written out, with text inside:  the same block, its attributes kept (epic `language` T81)",
+      compileAs: "expression",
+      tests: [
+        [
+          ["<ui-markdown>", "\tCount:", "", "\t- **fizz**", "\t- `buzz`, then it's done.", "</ui-markdown>"],
+          'h("ui-markdown", "Count:\\n\\n- **fizz**\\n- `buzz`, then it\'s done.")',
+          '<ui-markdown>{"Count:\\n\\n- **fizz**\\n- `buzz`, then it\'s done."}</ui-markdown>'
+        ],
+        [
+          '<ui-markdown size="small">Smaller *text*</ui-markdown>',
+          'h("ui-markdown", { size: "small" }, "Smaller *text*")',
+          '<ui-markdown size="small">{"Smaller *text*"}</ui-markdown>'
+        ]
+      ]
+    },
+    {
       title: "Holes, live",
       compileAs: "expression",
       beforeEach(scope: P.Scope) {
@@ -148,6 +165,12 @@ JSX.addRule(SpellJSX, {
           ["<a A={1}>", "  <b c={1}>foo</b>", "</a>"]
         ],
         [`<a><b><c>d</c></b></a>`, 'h("a", h("b", h("c", "d")))', ["<a>", "  <b>", "    <c>d</c>", "  </b>", "</a>"]],
+        // two spaces together, kept by every target:  the JSX compiler would collapse them, so TypeScript writes a string
+        [
+          `<a>No habits yet:  add one above</a>`,
+          'h("a", "No habits yet:  add one above")',
+          '<a>{"No habits yet:  add one above"}</a>'
+        ],
         [
           `<a>\n\tBBB\n\t<c/>\n\tDDD</a>`,
           ['h("a",', '  "BBB",', '  h("c"),', '  "DDD"', ")"],

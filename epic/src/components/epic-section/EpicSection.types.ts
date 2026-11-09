@@ -241,10 +241,10 @@ export const NOTE = "note"
 
 /**
  * Statuses that DON'T count as open:  finished (`done`), made moot (`canceled`), answered (`decided`);  a phase's
- * `done`.  The old runtime's `CLOSED`, and the tool's.
+ * `done` and `dropped` (epic `epic-engine` I228).  The old runtime's `CLOSED`, and the tool's.
  * - an item's too:  a closed one's Choose pills show only while it's revisited (`<epic-option>`)
  */
-export const CLOSED_STATUSES = ["done", "decided", "canceled"] as const
+export const CLOSED_STATUSES = ["done", "decided", "canceled", "dropped"] as const
 
 /** The children a section counts:  its items, or its phases (`<epic-phase status>`). */
 export const COUNTED = ":scope > epic-item, :scope > epic-phase"
@@ -261,6 +261,7 @@ export const COUNT_ATTRIBUTES = [
   "reviewed",
   "queued",
   "working",
+  "urgent",
   "plan",
   "to-see",
   "changes",
@@ -299,17 +300,23 @@ export const TEST_ID = /^m\d+$/
 
 /**
  * Where an item stands, in the filter's order:  its state, its chip's colour, its texts' keys (the tooltip's words).
- * - the same seven as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,
- *   `replied` (Owen's turn to pick, 2026-10-09) beside `attention`:  both wait on Owen
+ * - the same as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,
+ *   `replied` (Owen's turn to pick, 2026-10-09) and `requested` (his turn to see it) beside `attention`:  all wait on Owen
+ * - `handed` counts in the blue badge with `progress` (`StateFilter.isWithClaude()`);  `quiet` and `handled` in the one
+ *   grey chip (`<epic-state-filter>`)
  */
 export const FILTER_STATES = [
   { state: "progress", color: "blue", words: "stateProgress" },
+  { state: "handed", color: "blue", words: "stateHanded" },
   { state: "attention", color: "red", words: "stateAttention" },
   { state: "replied", color: "orange", words: "stateReplied" },
+  { state: "requested", color: "light-orange", words: "stateRequested" },
   { state: "open", color: "yellow", words: "stateOpen" },
+  { state: "scheduled", color: "blue", fill: "dotted", words: "stateScheduled" },
   { state: "recent", color: "green", words: "stateRecent" },
   // handled in a phase (epic `epic-engine` P31):  grey, as quiet as canceled, counted apart
   { state: "handled", color: "grey", words: "stateHandled" },
+  { state: "quiet", color: "grey", words: "stateQuiet" },
   { state: "old", color: "grey", words: "stateOld" }
 ] as const
 
@@ -326,8 +333,11 @@ export const FILTER_STATES = [
  */
 export const PHASE_FILTER_STATES = [
   { state: "attention", color: "red", words: "phaseAttention" },
+  { state: "waiting", color: "orange", words: "phaseWaiting" },
   { state: "updated", color: "orange", words: "phaseUpdated" },
   { state: "progress", color: "blue", words: "phaseProgress" },
+  // held by Owen (epic `epic-engine` I221;  Owen, 2026-11-04:  "These are paused, red feels wrong"):  grey
+  { state: "paused", color: "grey", words: "phasePaused" },
   { state: "scheduled", color: "blue", fill: "dotted", words: "phaseScheduled" },
   { state: "recent", color: "green", words: "phaseRecent" },
   { state: "old", color: "grey", words: "phaseOld" }
@@ -369,10 +379,30 @@ export const FILTER_TEXTS = [
   { key: "stateAttention", text: "needs attention", description: "A state chip's words:  `attention` (red)." },
   {
     key: "stateReplied",
-    text: "Claude answered:  your turn to pick",
+    text: "your turn:  Claude answered or fixed it",
     description: "A state chip's words:  `replied` (orange)."
   },
+  {
+    key: "stateRequested",
+    text: "your turn:  what you asked for is finished",
+    description: "A state chip's words:  `requested` (light orange)."
+  },
+  {
+    key: "stateHanded",
+    text: "you pressed Do this, Claude hasn't started",
+    description: "A state's words, counted in the blue badge:  `handed`."
+  },
   { key: "stateOpen", text: "open, still undecided", description: "A state chip's words:  `open` (yellow)." },
+  {
+    key: "stateScheduled",
+    text: "agreed, not started",
+    description: "A state chip's words:  `scheduled` (a dotted blue outline)."
+  },
+  {
+    key: "stateQuiet",
+    text: "open, nothing to think about",
+    description: "A state chip's words:  `quiet` (grey:  a calm judgement call, a limit)."
+  },
   { key: "stateRecent", text: "decided or done", description: "A state chip's words:  `recent` (green)." },
   {
     key: "stateHandled",
@@ -389,9 +419,14 @@ export const FILTER_TEXTS = [
   },
   {
     key: "phaseAttention",
-    text: "need you:  a plan to accept, or a choice open",
+    text: "need you:  a choice open",
+    description: "A Phases chip's words:  `attention` (red:  a choice in it is open, blocking its build)."
+  },
+  {
+    key: "phaseWaiting",
+    text: "your turn:  a plan to read and accept",
     description:
-      "A Phases chip's words:  `attention` (red:  its build plan waits for Owen's Accept, or a choice in it is open)."
+      "A Phases chip's words:  `waiting` (orange:  its build plan waits for Owen's Accept;  epic `epic-engine` P63)."
   },
   {
     key: "phaseUpdated",
@@ -402,6 +437,12 @@ export const FILTER_TEXTS = [
     key: "phaseProgress",
     text: "under way, or being worked on",
     description: "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+  },
+  {
+    key: "phasePaused",
+    text: "paused, on hold till you accept it",
+    description:
+      "A Phases chip's words:  `paused` (grey, a pause glyph:  held by you, epic `epic-engine` I221;  not built till you accept its plan again)."
   },
   {
     key: "phaseScheduled",
@@ -450,6 +491,9 @@ export const DOC_REVIEW = /^doc review$/i
  */
 export const FILTER_KEY = "spell-item-state:"
 
+/** What the toolbar's orange badge counts:  an item's orange and light orange, a phase's plan waiting for his Accept. */
+export const ORANGE_STATES: ReadonlySet<string> = new Set(["replied", "requested", "waiting"])
+
 /** A section's count:  its counted children, how many of them are open, and how many need Owen. */
 export type SectionCount = {
   /** not closed (`CLOSED_STATUSES`) */
@@ -457,11 +501,11 @@ export type SectionCount = {
   /** every one */
   total: number
   /**
-   * the items that need the person (`NEEDS_PERSON`:  `state="attention"`, red, or `replied`, orange:  their turn to pick):
+   * the items that need the person (`NEEDS_PERSON`:  red, or orange or light orange, their turn):
    * what the rail counts (decision Q20:  red, only what needs him;  no pill for none)
    */
   attention: number
-  /** of those, the ones waiting on Owen's pick (`replied`, orange):  the toolbar's orange badge */
+  /** of those, the orange and light orange ones (`ORANGE_STATES`):  the toolbar's orange badge */
   replied?: number
   /**
    * the phases at work now:  under way (`status="active"`), or being worked on (the inbox's `working`, epic

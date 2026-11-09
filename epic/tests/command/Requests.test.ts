@@ -315,3 +315,18 @@ function requestsIn(root: string): Requests {
 function send({ root, home, ...props }: SendRequestProps & { root: string; home: string }) {
   return new Requests({ root, sessions: new Sessions({ home }) }).send(props)
 }
+
+// epic `epic-engine` I219 (Owen, 2026-11-04:  "So why aren't you restarting the page server when you merge to main?")
+describe("after a merge, the page server", () => {
+  test("refreshPageServer():  none running stays stopped, and nothing is said;  never throws", async () => {
+    const repo = mkdtempSync(join(tmpdir(), "no-server-"))
+    const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
+    try {
+      await expect(Requests.refreshPageServer(repo)).resolves.toBeUndefined()
+      expect(out.mock.calls.map(([text]) => String(text)).join("")).not.toContain("restarted with")
+    } finally {
+      out.mockRestore()
+      rmSync(repo, { recursive: true, force: true })
+    }
+  })
+})

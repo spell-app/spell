@@ -10,10 +10,15 @@ import { UI } from "./UI.parser"
 import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
+import { UIDefaults } from "./UIDefaults"
 import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { ScrollToTop } from "./ScrollToTop"
+import { ShowDatesAs } from "./ShowDatesAs"
+import { PlaySound } from "./PlaySound"
+import { StopSound } from "./StopSound"
+import { LoadSound } from "./LoadSound"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
@@ -78,9 +83,48 @@ UI.addRule(Print, {
   ]
 })
 
+// How the program shows its dates (HyperTalk's short, long and abbreviated)
+UI.addRule(
+  Wording.specialize({
+    ruleName: "shown_dates",
+    meanings: ["short", "long", "abbreviated", "timestamp", "plain", "reader"]
+  }),
+  {
+    syntax:
+      "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
+  }
+)
+UI.addRule(ShowDatesAs, {
+  syntax: "dates are shown as {style:shown_dates}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["dates are shown as short dates", 'core.showDatesAs("short")'],
+        ["dates are shown as the reader's", 'core.showDatesAs("reader")']
+      ]
+    }
+  ]
+})
+
 UI.addRule(ScrollToTop, {
   syntax: "scroll to the top",
   tests: [{ compileAs: "statement", tests: [["scroll to the top", "core.scrollToTop()"]] }]
+})
+
+UI.addRule(PlaySound, {
+  syntax: "play {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`play "cry.ogg"`, `core.play("cry.ogg")`]] }]
+})
+
+UI.addRule(StopSound, {
+  syntax: "stop {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`stop "cry.ogg"`, `core.stop("cry.ogg")`]] }]
+})
+
+UI.addRule(LoadSound, {
+  syntax: "(load|preload) {sound:expression}",
+  tests: [{ compileAs: "statement", tests: [[`load "cry.ogg"`, `core.loadSound("cry.ogg")`]] }]
 })
 
 UI.addRule(EndPrintGroup, {
@@ -198,6 +242,26 @@ UI.addRule(CSSStyles, {
         // a backtick in a comment, or `${`, mustn't end the template it's written in
         ['"/* `a` ${b} */"', 'core.installStyles(undefined, `"/* \\`a\\` \\${b} */"`)'],
         [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(UIDefaults, {
+  tests: [
+    {
+      title: "An app's widget defaults:  a sample tag per widget, each attribute a default",
+      compileAs: "statement",
+      tests: [
+        [
+          [
+            "<ui-defaults>",
+            '\t<ui-button appearance="pill"/>',
+            '\t<ui-segment appearance="raised" padded/>',
+            "</ui-defaults>"
+          ],
+          'core.useDefaults("", {\n  "ui-button": { appearance: "pill" },\n  "ui-segment": { appearance: "raised", padded: true }\n})'
+        ]
       ]
     }
   ]

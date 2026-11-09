@@ -3,6 +3,7 @@ import { createEffect } from "solid-js"
 import { SP } from "spell/parser/spell"
 import { editor } from "spell/app/app/editor"
 import type { EditorPage, SpellRouteParams } from "./pages.types"
+import { RunSite, runSite } from "./RunSite"
 
 /**
  * Show what the route's `params` name in `page`, now and whenever either changes.
@@ -12,8 +13,8 @@ import type { EditorPage, SpellRouteParams } from "./pages.types"
  *   so moving between a project's files re-selects without redrawing the page.
  * - SIDE EFFECT:  sets `editor.projectPage` first:  `selectPath()` reads it to redirect to the page's own URL.
  * - A bad address shows as `editor.showError()`, never a throw:  an effect that throws halts Solid for the whole page.
- * - A page of a running app, `/run/owen@spell/solitaire/rules`, runs its app:  `rules` is left for the app's own
- *   pages, which don't exist yet (`SP.SpellUrls.withoutPage()`).
+ * - A page of a running app, `/run/owen@spell/solitaire/rules`, runs its app, and a SITE shows its page `/rules`
+ *   (`RunSite.heard()`, epic `mockup` P2;  `SP.SpellUrls.withoutPage()`).
  */
 export function followRoute(params: () => Partial<SpellRouteParams>, page: () => EditorPage): void {
   createEffect(
@@ -27,6 +28,8 @@ export function followRoute(params: () => Partial<SpellRouteParams>, page: () =>
         return
       }
       editor.projectPage = page
+      // in Run, the part after the project is a running site's page:  `/run/<project>/films/4` (epic `mockup` P2)
+      if (page === "runner") runSite.heard(RunSite.siteAddressIn(tail, location.pathname))
       editor.selectPath(path).catch((error: unknown) => editor.showError(error))
     }
   )

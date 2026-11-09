@@ -160,32 +160,50 @@ describe("SpellTokensProvider.forSpellx()", () => {
     expect(after).toContain('"alias" keyword')
   })
 
-  // epic `debut` I96, Owen:  "<property-editor> in Card.spellml is not syntax coloring"
-  test("a <property-editor>'s lines colour as markup, its head as a tag;  a <description>'s stay a comment", () => {
+  // epic `debut` I96, Owen:  "<property-editor> in Card.spellml is not syntax coloring";  the prefix, epic `data` P31
+  test("a <spell-property-editor>'s lines colour as markup, its head as a tag;  a <spell-description>'s stay a comment", () => {
     const [, head, group, property, groupCloser, closer, description, text] = colour(
       [
         '<spell-view "card">',
-        "\t<property-editor>",
+        "\t<spell-property-editor>",
         '\t\t<ui-property-group label="Card">',
         '\t\t\t<ui-property name="rank" />',
         "\t\t</ui-property-group>",
-        "\t</property-editor>",
-        "\t<description>",
+        "\t</spell-property-editor>",
+        "\t<spell-description>",
         "\t\tA playing card.",
-        "\t</description>"
+        "\t</spell-description>"
       ],
       spellx
     )
-    expect(head).toEqual(['"<" delimiter', '"property-editor" keyword', '">" delimiter'])
+    expect(head).toEqual(['"<" delimiter', '"spell-property-editor" keyword', '">" delimiter'])
     expect(group).toContain('"ui-property-group" tag.html')
     expect(group).toContain('"label" attribute.name.html')
     expect(group).toContain('"\\"Card\\"" attribute.value.html')
     expect(property).toContain('"ui-property" tag.html')
     expect(property).toContain('"\\"rank\\"" attribute.value.html')
     expect(groupCloser).toContain('"ui-property-group" tag.html')
-    expect(closer).toEqual(['"</property-editor>" delimiter'])
-    expect(description).toEqual(['"<" delimiter', '"description" keyword', '">" delimiter'])
+    expect(closer).toEqual(['"</spell-property-editor>" delimiter'])
+    expect(description).toEqual(['"<" delimiter', '"spell-description" keyword', '">" delimiter'])
     expect(text).toEqual(['"A playing card." comment'])
+  })
+
+  // epic `editor` P25:  a property editors file, `Card.editor.spellml`, colours as the inline note did
+  test('a property editors file:  each `<property-editor "card">` a tag, its name a string, its lines markup', () => {
+    const [, , head, property, closer] = colour(
+      [
+        "# A card's property editor",
+        "",
+        '<property-editor "card">',
+        '\t<ui-property name="rank" />',
+        "</property-editor>"
+      ],
+      spellx
+    )
+    expect(head).toEqual(['"<" delimiter', '"property-editor" keyword', '"\\"card\\"" string', '">" delimiter'])
+    expect(property).toContain('"ui-property" tag.html')
+    expect(property).toContain('"\\"rank\\"" attribute.value.html')
+    expect(closer).toEqual(['"</property-editor>" delimiter'])
   })
 
   test("a tag's body is spell, and the lines after its closer are tags again", () => {

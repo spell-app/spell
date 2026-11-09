@@ -22,6 +22,8 @@ import type { actingMethods } from "./acting"
 import type { waitingMethods } from "./waiting"
 import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
+import type { dimensionMethods } from "./dimensions"
+import type { siteMethods } from "./sites"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -57,6 +59,7 @@ export const SPELL_CLASSES = [
   "Page",
   "TwoSidedView",
   "Notebook",
+  "Site",
   "ViewableList",
   "Place"
 ]
@@ -108,6 +111,8 @@ export type Core = typeof coreMethods &
   typeof actingMethods &
   typeof waitingMethods &
   typeof abilityMethods &
+  typeof dimensionMethods &
+  typeof siteMethods &
   typeof deprecatedMethods
 
 // ## Tests
@@ -166,7 +171,16 @@ export type TestCheck = {
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
  * | `write-refused` | the notice when a place refuses a change | `thing` |
+ * | `write-refused-role` | the same, refused as your role can't write:  a guest of a space, or no member (epic `atmosphere` P4) | `thing` |
+ * | `write-refused-taken-down` | the same, refused as Spell took it down (epic `atmosphere` P6) | `thing` |
+ * | `write-refused-editor` | the same, refused as it takes an editor (`needs`):  making a row, changing a page (epic `atmosphere` P23) | `thing` |
+ * | `write-refused-manager` | the same, refused as it takes a manager (`needs`):  making a page, installing an app (epic `atmosphere` P23) | `thing` |
+ * | `write-refused-owner` | the same, refused as it's someone else's:  their post (epic `atmosphere` P23) | `thing` |
+ * | `write-refused-full` | the same, refused as a sign-up sheet's place is taken:  someone got it first (epic `atmosphere` P27) | `thing` |
+ * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
+ * | `write-refused-used-up` | the same, refused as you've asked for every invitation you have (P31) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `read-too-soon`, `read-too-soon-seconds`, `read-too-soon-minute`, `read-too-soon-minutes` | what a read refused for being too soon says, a rate limit's (epic `data` I92) | `seconds`, `minutes` |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
  * | `write-deleted` | the notice when someone else deleted what you were editing | `thing` |
@@ -177,11 +191,22 @@ export type TestCheck = {
  * | `guest-person` | what someone with no name is called | `number` |
  * | `sign-in-signed-out` | what shows, with nobody signed in to a place where each person is someone | `place` |
  * | `sign-in-signing` | what shows while they sign in | `place` |
- * | `sign-in-as` | what shows with someone signed in | `place`, `name` |
+ * | `sign-in-as` | what shows with someone signed in, to an atmosphere account | `place`, `name` |
+ * | `sign-in-as-spell` | the same, to a Spell account | `place`, `name` |
+ * | `sign-in-menu-as` | a person menu's:  who it is, signed in | `name` |
+ * | `sign-in-spell-signed-out` | what shows with nobody signed in to a Spell account, on a place that takes them to be this machine's person | `place` |
+ * | `sign-in-cloud-signed-out` | what shows with nobody signed in, on the cloud:  what's changed is kept in this browser until someone is | `place` |
+ * | `sign-in-check-email` | what shows while it waits for the emailed link or code | `email` |
+ * | `sign-in-email`, `sign-in-code` | the fields for a Spell account's email, and its code | |
+ * | `sign-in-email-me` | the button that emails the link and code | |
  * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
  * | `sign-in-failed` | what shows when signing in didn't work | `why` |
+ * | `sign-in-abuse` | where to report abuse, the host's abuse contact, on a Spell account's bar (epic `atmosphere` P6) | `contact` |
  * | `sign-in-who` | the field for who they are | |
  * | `sign-in`, `sign-out` | its buttons | |
+ * | `sign-in-bluesky`, `sign-in-link-bluesky` | a Spell account's buttons that sign in with, or link, a Bluesky account (epic `atmosphere` P19) | |
+ * | `sign-in-linked` | what shows beside a Spell account linked to a Bluesky account | `handle` |
+ * | `sign-in-not-linked`, `sign-in-taken-down`, `sign-in-linked-elsewhere` | why coming back from Bluesky didn't sign in | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -200,12 +225,24 @@ export const CORE_MESSAGES = {
   redo: "Redo",
   "redo-step": "Redo {step}",
   "write-refused": "Couldn't save your change to {thing}",
+  "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
+  "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
+  "write-refused-editor": "Couldn't save your change to {thing}:  it takes an editor of this space",
+  "write-refused-manager": "Couldn't save your change to {thing}:  it takes a manager of this space",
+  "write-refused-owner": "Couldn't save your change to {thing}:  it's someone else's, and only they change it",
+  "write-refused-full": "Couldn't save your change to {thing}:  someone got the last place first",
+  "write-refused-not-listed": "Couldn't save your change to {thing}:  only the people its list names sign up here",
+  "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",
   "page-next": "Next",
   "page-number": "Page {page}",
   "read-failed": "Can't read this right now:  {why}",
+  "read-too-soon": "The server asks to wait:  try again in a little while",
+  "read-too-soon-seconds": "The server asks to wait:  try again in {seconds} seconds",
+  "read-too-soon-minute": "The server asks to wait:  try again in a minute",
+  "read-too-soon-minutes": "The server asks to wait:  try again in {minutes} minutes",
   "saved-added": "Add",
   "saved-removed": "Remove",
   "write-show-me": "Show me",
@@ -221,13 +258,39 @@ export const CORE_MESSAGES = {
   "sign-in-signed-out":
     "You aren't signed in to {place}, so you can read it, and what you change waits here until you do.",
   "sign-in-signing": "Signing in to {place}…",
-  "sign-in-as": "Signed in to {place} as {name}.",
+  "sign-in-as": "Signed in to {place} as {name}, with an atmosphere account.",
   "sign-in-ended":
     "Your sign-in to {place} has ended:  they last two weeks at most.  Sign in again, and what you changed goes through.",
   "sign-in-failed": "That didn't sign you in:  {why}",
+  "sign-in-abuse": "To report abuse on Spell:  {contact}",
   "sign-in-who": "Your handle, e.g. alice.bsky.social",
+  "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+  "sign-in-menu-as": "Signed in as {name}",
+  "sign-in-spell-signed-out":
+    "You aren't signed in to {place} with a Spell account:  until you are, it takes you to be this computer's person.",
+  "sign-in-cloud-signed-out":
+    "{place} is kept in this browser only, until you sign in with a Spell account:  then it's saved in the cloud, on every device you sign in on.",
+  "sign-in-check-email":
+    "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here.",
+  "sign-in-email": "Your email, e.g. ana@example.com",
+  "sign-in-email-me": "Email me a link",
+  "sign-in-code": "The six-digit code",
   "sign-in": "Sign in",
-  "sign-out": "Sign out"
+  "sign-out": "Sign out",
+  "sign-in-bluesky": "Sign in with Bluesky",
+  "sign-in-link-bluesky": "Link a Bluesky account",
+  "sign-in-linked": "You can sign in with Bluesky too, as {handle}.",
+  "sign-in-not-linked":
+    "That Bluesky account isn't linked to a Spell account here.  Spell is by invite only:  ask for an invite, sign in by email, then link it.",
+  "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
+  "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
+  "site-no-such-page": "No such page",
+  "site-create-page": "Would you like to create one?",
+  "site-create-it": "Create it",
+  "site-page-failed": "Sorry, this page couldn't be shown.",
+  "site-page-failed-why": "{page} failed:  {why}",
+  "site-menu": "Pages",
+  "table-edit": "Edit Table"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
@@ -268,4 +331,64 @@ export type PropCheck = {
  */
 export function defineCoreModule<T extends object>(methods: T): T {
   return methods
+}
+
+// ## Sites
+
+/**
+ * One page of a site, as the site's class lists it:  what its line compiled to (epic `mockup` P1).
+ * - e.g. `- it has a film page at "/films/:film", named "Film"` =>
+ *   `{ name: "film page", page: "FilmPage", address: "/films/:film", title: "Film", params: ["film"] }`
+ */
+export type SitePageEntry = {
+  /** the page's words, as the line names it:  `film page` */
+  name: string
+  /** the page's class:  `FilmPage` */
+  page: string
+  /** where it is, from the site's root:  `/films/:film`, its parameters `:name` */
+  address: string
+  /** what the site calls it, in its navigation, if the line names it:  `Film` */
+  title?: string
+  /** its address's parameters, each one of the page's own properties:  `["film"]` */
+  params?: string[]
+  /** the pages under it, as the lines under its line list them */
+  pages?: SitePageEntry[]
+}
+
+/**
+ * One dialog, sidebar, not found page or error page of a site:  named once, with no address of its own.
+ * - e.g. `- it has a settings dialog` => `{ name: "settings dialog", view: "SettingsDialog" }`
+ */
+export type SiteOverlayEntry = {
+  /** its words, as the line names it:  `settings dialog` */
+  name: string
+  /** the view it draws, when one of its name is declared:  `SettingsDialog` */
+  view?: string
+}
+
+/**
+ * Where a running site's address lives:  what the program's host hands `core.siteHost` (epic `mockup` P2).
+ * - The editor's Run:  its own URL, `/run/<project>/films/4`, so the browser's back and forward work.
+ * - None:  the site keeps its address itself, starting at `/`.
+ */
+export type SiteHost = {
+  /** The address to show now, from the site's root:  `/films/4`. */
+  address(): string
+  /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
+  go(address: string): void
+  /** Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in. */
+  listen(showAddress: (address: string) => void): void
+  /**
+   * Make a page at `address`, which the site has none for:  only while the program is being designed.
+   * - So its not found page offers it, and shows what went wrong on its error page;  a visitor sees neither.
+   */
+  createPage?(address: string): void
+  /**
+   * Theme `name`'s look, for the site alone, not the page around it:  CSS declarations its frame wears inline
+   * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
+   * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
+   * - None:  the site wears the page's theme.
+   * - Rejects on a theme the host doesn't have.
+   */
+  themeTokens?(name: string): Promise<string>
 }

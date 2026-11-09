@@ -1,0 +1,6 @@
+// Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records' shape, as Spell says it.
+// - "status" holds at most 32 bytes:  Spell says lengths in letters
+a "status" is a thing:
+	- it is published as "xyz.statusphere.status"
+	- its "status" is required text, with maximum length 1
+	- its "created at" is a required date

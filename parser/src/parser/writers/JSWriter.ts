@@ -419,6 +419,7 @@ export class JSWriter extends ProgramWriter {
     const comparison = this.comparison(node)
     if (comparison) return comparison
     const operator = JSWriter.OPERATORS[node.operator]
+    if (node.operator === "and") this.noteChecked(node.lhs, node.rhs)
     return `${this.operand(node.lhs, node.operator, "lhs")} ${operator} ${this.operand(node.rhs, node.operator, "rhs")}`
   }
 
@@ -551,6 +552,10 @@ export class JSWriter extends ProgramWriter {
    * - A `core` helper is written as javascript says it where it can:  see `coreCall()`.
    */
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
+    if (this.statements.has(node) && returnsFromLoop(node)) {
+      const loop = this.loop(node, true)
+      if (loop) return loop
+    }
     const waits = this.writesAwait(node)
     if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
     const made = this.call(node)
@@ -574,6 +579,9 @@ export class JSWriter extends ProgramWriter {
   /** `ASTScopedMethodInvocation()`'s call, before any `await`. */
   protected call(node: P.ASTScopedMethodInvocation): string {
     if (node.thing instanceof P.ASTCoreExpression) {
+      this.noteLoopItems(node)
+      const cleared = this.clearedValue(node)
+      if (cleared) return this.ASTAssignmentStatement(cleared)
       const written = this.coreCall(node)
       if (written !== undefined) return written
       return this.positionOut(
@@ -820,17 +828,22 @@ export class JSWriter extends ProgramWriter {
    * `for (const card of cards) {...}`, so the waits happen in turn -- `undefined` if it isn't one.
    * - Over a spell `List` (iterable) or a plain array, when the body takes the item only.
    * - A bare `return` in the body ends that turn only:  `continue`.
+   * - `returns`:  its body returns a value (`returnsFromLoop()`), so it MUST be a plain loop for that to leave the
+   *   function it's in;  then spell's list datatype is enough, as a `List` and a plain array both loop.
    */
-  loop(node: P.ASTExpression): string | undefined {
+  loop(node: P.ASTExpression, returns = false): string | undefined {
     const call = unwrapped(node)
     if (!isCoreCall(call) || !P.CORE_LOOPS.has((call as P.ASTScopedMethodInvocation).methodName)) return undefined
     const [collection, callback] = (call as P.ASTScopedMethodInvocation).args.args ?? []
     const method = callback && unwrapped(callback)
     if (!collection || !(method instanceof P.ASTMethodDefinition) || method.args?.length !== 1) return undefined
-    if (!this.isList(collection) && this.kindOf(collection) !== "array") return undefined
+    const datatype = unwrapped(collection).datatype ?? collection.match?.datatype
+    const isAList = typeof datatype === "string" && datatype.startsWith("list")
+    if (!this.isList(collection) && this.kindOf(collection) !== "array" && !(returns && isAList)) return undefined
     const [item] = method.args
     const previous = this.returnContinues
     this.returnContinues = true
+    this.noteLoopItems(call as P.ASTScopedMethodInvocation)
     try {
       const body = this.inBlock(() => {
         this.noteParams(method)
@@ -960,6 +973,9 @@ export class JSWriter extends ProgramWriter {
     }
     if (only instanceof P.ASTAssignmentStatement && !only.isNewVariable) return `(${this.write(only)})`
     if (only instanceof P.ASTScopedMethodInvocation) {
+      // `clear the square's mark`, text:  a set, `(square) => (square.mark = "")` -- see `clearedValue()`
+      const cleared = this.clearedValue(only)
+      if (cleared) return `(${this.write(cleared)})`
       this.statements.add(only)
       return String(this.write(only))
     }
@@ -1084,7 +1100,9 @@ export class JSWriter extends ProgramWriter {
       }
       this.statements.add(statement)
       const written = String(this.write(statement))
-      lines.push(this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written)
+      const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
+      // a line above it could run into it -- see `jsText.statement()`
+      lines.push(lines.length ? jsText.statement(code) : code)
       docStart = lines.length
     }
     return elseOnItsLine(lines.join(jsText.NEWLINE))
@@ -1105,7 +1123,18 @@ export class JSWriter extends ProgramWriter {
     while (statements[0] instanceof P.ASTBlankLine) statements.shift()
     while (statements.at(-1) instanceof P.ASTBlankLine) statements.pop()
     for (const statement of statements) this.statements.add(statement)
-    const children = this.inBlock(() => elseOnItsLine(this.list(statements, jsText.NEWLINE)))
+    this.noteCheckedElses(statements)
+    const children = this.inBlock(() =>
+      elseOnItsLine(
+        statements
+          // the first starts the block;  each after it could run into the one above -- see `jsText.statement()`
+          .map((statement, index) => {
+            const code = String(this.write(statement))
+            return index ? jsText.statement(code) : code
+          })
+          .join(jsText.NEWLINE)
+      )
+    )
     if (!children) return jsText.EMPTY_BLOCK
     // a comment last, on one line, would swallow the closing brace
     const endsInComment =
@@ -1185,9 +1214,17 @@ export class JSWriter extends ProgramWriter {
     return ""
   }
 
-  /** Bare `return` when it has no `value` (in a loop's body, `continue`), else `return value`. */
+  /**
+   * Bare `return` when it has no `value` (in a loop's body, `continue`), else `return value`.
+   * - A call of the program's own method that gives nothing is the call alone -- see `givesNothing()`.
+   */
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
+    if (this.givesNothing(node.value)) {
+      this.statements.add(node.value)
+      return this.bare(node.value)
+    }
     return `return ${this.bare(node.value)}`
   }
 
@@ -1208,10 +1245,15 @@ export class JSWriter extends ProgramWriter {
     const { type, superType, members } = node
     const superDeclarator = superType ? `extends ${this.superTypeOf(node)} ` : ""
     const declaration = `export class ${this.typeNameOf(type.name)} ${superDeclarator}`
-    if (!members?.length) return `${declaration}${jsText.EMPTY_BLOCK}`
-    const body = this.inClass(type.name, () =>
-      members.map((member) => (member instanceof P.ASTClassMember ? this.writeAsMember(member) : this.write(member)))
-    )
+    // our own class of an imported one is the one its library makes, from the start (`core.classToMake()`)
+    const registers = this.project.importedBases.has(type.name) ? ["static { core.registerClass(this) }"] : []
+    if (!members?.length && !registers.length) return `${declaration}${jsText.EMPTY_BLOCK}`
+    const body = this.inClass(type.name, () => [
+      ...registers,
+      ...(members ?? []).map((member) =>
+        member instanceof P.ASTClassMember ? this.writeAsMember(member) : this.write(member)
+      )
+    ])
       .join(jsText.NEWLINE)
       .split(jsText.NEWLINE)
       .map((line) => (line ? `${jsText.INDENT}${line}` : line))
@@ -1219,9 +1261,13 @@ export class JSWriter extends ProgramWriter {
     return `${declaration}${jsText.LEFT_CURLY}${jsText.NEWLINE}${body}${jsText.NEWLINE}${jsText.RIGHT_CURLY}`
   }
 
-  /** What `node` extends, after `extends`, e.g. `Thing`.  A typed target may say more:  see `TSWriter`. */
+  /**
+   * What `node` extends, after `extends`, e.g. `Thing`.  A typed target may say more:  see `TSWriter`.
+   * - Our own class of an imported one, by its name:
+   *   the imported one, as it's imported here, `CardsCard` (`P.WriterProject.importedBases`).
+   */
   superTypeOf(node: P.ASTClassDeclaration): string {
-    return this.typeNameOf(node.superType!.name)
+    return this.project.importedBases.get(node.type.name) ?? this.typeNameOf(node.superType!.name)
   }
 
   /** What's made, with the marks saying where it's written (`P.SourceMarks`). */
@@ -1229,10 +1275,14 @@ export class JSWriter extends ProgramWriter {
     return P.SourceMarks.markMade(this.newInstance(node), node)
   }
 
-  /** `new Type()` (empty parens) when it has no `props`, else `new Type(props)`. */
+  /**
+   * `new Type()` (empty parens) when it has no `props`, else `new Type(props)`.
+   * - One of a library's own types:  `new (core.classToMake(Card))()`, the running program's card -- see `makesByName()`.
+   */
   protected newInstance(node: P.ASTNewInstanceExpression): string {
     const props = jsText.InParens({ children: node.props ? this.write(node.props) : undefined })
-    return `new ${this.write(node.type)}${props}`
+    const type = String(this.write(node.type))
+    return this.makesByName(node.type.name) ? `new (core.classToMake(${type}))${props}` : `new ${type}${props}`
   }
 
   ASTListExpression(node: P.ASTListExpression): string {
@@ -1543,6 +1593,7 @@ export class JSWriter extends ProgramWriter {
 
   /** `if (condition) statement` -- braces only around more than one statement. */
   ASTIfStatement(node: P.ASTIfStatement): string {
+    this.noteChecked(node.condition, node.statements)
     const written = `if (${this.condition(node.condition)}) ${this.body(node.statements)}`
     this.noteGuard(node)
     return written
@@ -1570,6 +1621,8 @@ export class JSWriter extends ProgramWriter {
   /** `condition ? yes : no`:  in parentheses only where its reader puts it (an operand -- see `operand()`). */
   ASTTernaryExpression(node: P.ASTTernaryExpression): string {
     const { condition, trueValue, falseValue } = node
+    this.noteChecked(condition, trueValue)
+    this.noteChecked(condition, falseValue, "when false")
     const test = unwrapped(condition)
     const conditionText = test instanceof P.ASTTernaryExpression ? `(${this.write(test)})` : this.write(test)
     return `${conditionText} ? ${this.bare(trueValue)} : ${this.bare(falseValue)}`
@@ -1735,6 +1788,33 @@ function flattened(group: P.ASTStatementGroup): P.ASTNode[] {
       ? flattened(statement)
       : [statement]
   )
+}
+
+/**
+ * Does `node`, a loop (`core.map(list, (item) => {...})`), return a VALUE from inside its body?
+ * - Then it's written as a plain loop (`JSWriter.loop()`), so the `return` leaves the function the loop is in:
+ *   in a callback it left only the callback, and the getter went on (epic `atmosphere` I6).
+ * - A loop inside it counts too, as it's written as a plain loop the same way;  any other function doesn't.
+ * - A bare `return` in a loop's body ends that turn only (`continue`):  not this.
+ * - Nor the return an inline body is made into (`ASTMethodDefinition`), `for each card: play it`.
+ */
+function returnsFromLoop(node: P.ASTScopedMethodInvocation): boolean {
+  if (!isCoreCall(node) || !P.CORE_LOOPS.has(node.methodName)) return false
+  const [, second] = node.args.args ?? []
+  const callback = second && unwrapped(second)
+  if (!(callback instanceof P.ASTMethodDefinition)) return false
+  const visit = (each: unknown): boolean => {
+    if (Array.isArray(each)) return each.some(visit)
+    if (!(each instanceof P.ASTNode)) return false
+    // an inline body, `(card) => card.play()`, is a return its function made:  its own match
+    if (each instanceof P.ASTReturnStatement) return !!each.value && each.match !== callback.match
+    if (each instanceof P.ASTMethodDefinition) return false
+    if (each instanceof P.ASTScopedMethodInvocation && isCoreCall(each) && P.CORE_LOOPS.has(each.methodName)) {
+      return returnsFromLoop(each)
+    }
+    return Object.entries(each).some(([key, value]) => key !== "match" && visit(value))
+  }
+  return visit(callback.body)
 }
 
 /** `text` with each `else` after a block's `}` on the same line, `} else {`, as a person writes it. */

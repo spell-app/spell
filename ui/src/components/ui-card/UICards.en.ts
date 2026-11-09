@@ -7,6 +7,7 @@
 
 import type { E } from "spell/ui/core"
 import * as UIT from "spell/ui/components/components.types"
+import { TINTED_HUES } from "./UICard.en"
 
 /****************
  * ### `cardsVocabulary`
@@ -23,12 +24,28 @@ export const cardsVocabulary = {
     { name: "size", group: "appearance", kind: "size", description: "Text size of every card in the group." },
     { name: "color", group: "appearance", kind: "color", description: "Colour of every card in the group." },
     {
+      name: "background",
+      group: "appearance",
+      kind: "color",
+      classes: TINTED_HUES,
+      description: "Fills every card in the group with a light tint of this colour, as a card's `background` does."
+    },
+    {
       name: "columns",
       group: "layout",
       kind: "width",
       widthClass: "",
       values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
       description: 'Cards per row, `1` ... `10` (`columns="3"` => `three cards`);  default a fixed card width.'
+    },
+    {
+      name: "layout",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["mosaic"],
+      description:
+        "`mosaic`:  cards of different heights packed into columns, read down each column;  " +
+        "`columns` says how many, else as many as fit a card's width.  Unset:  a wrapping row, each row's cards one height."
     },
     {
       name: "doubling",

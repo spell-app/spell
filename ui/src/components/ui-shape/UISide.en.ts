@@ -31,7 +31,13 @@ export const sideVocabulary = {
     { name: "active", description: "The side shown (set by the shape)." },
     { name: "inactive", description: "Another side is shown:  hidden (set by the shape)." },
     { name: "animating", description: "Turning into view (set by the shape)." },
-    { name: "leaving", description: "Turning out of view (set by the shape)." }
+    { name: "leaving", description: "Turning out of view (set by the shape)." },
+    {
+      name: "in-flip-card",
+      description:
+        'Its shape is a flip card (`flip-on="click"`):  the sides share one place, hidden ones kept in the ' +
+        "layout, so the card is as tall as its tallest side (set by the shape)."
+    }
   ],
   texts: []
 } as const satisfies E.ComponentVocabulary

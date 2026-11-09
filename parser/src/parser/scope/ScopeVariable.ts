@@ -36,6 +36,13 @@ export class ScopeVariable {
    */
   declare isAlias: boolean
   /**
+   * `true` for a variable known AHEAD of the line declaring it, by a scan before any file is parsed:
+   * a one-of-a-kind app's (`pokedex` for spell's `pokedex is an app`) -- see `P.Parser.stubDeclaredVariables()`.
+   * - Its declaration replaces it with the real one.
+   * - So a line that reads it while it's still ahead knows the thing isn't made yet, e.g. spell's top-level lines.
+   */
+  declare ahead: boolean | undefined
+  /**
    * Match whose `mutateScope()` declared this variable, if it came from source -- for go-to-definition etc.
    * - `undefined` for built-ins and for variables tests add by hand.
    */
@@ -73,6 +80,19 @@ export class ScopeVariable {
    * - Anything else a project declares compiles as its own statements say.
    */
   declare readAs: string | undefined
+  /**
+   * The value each of its values said compiles to, when that isn't itself:
+   * a built-in template's Spanish `dirección` is `arriba` or `abajo`, which its class holds as `up` and `down`.
+   * - Only where the value is said for this property:  `una nueva carta cuyo dirección es arriba`.
+   *   A root's constants are every program's, so `arriba` alone stays `arriba`.
+   */
+  declare valueOutputs: Record<string, string> | undefined
+  /**
+   * What a number property MEASURES, and in which unit:
+   * `{ dimension: "Length", unit: "centimeter" }` for `its "height" is a length in cm` (epic `language` P23).
+   * - Its value stays a plain number in that unit;  `its height in feet` converts it (spell's `measure_in`).
+   */
+  declare measure: P.Measure | undefined
   /**
    * A property's RULES:  what its value must be, beyond its type -- see `PropRule`.
    * - e.g. `[{ type: "empty" }]` for `- its title must not be empty`
@@ -117,6 +137,8 @@ export type ScopeVariableProps = {
   initializer?: string
   /** See `ScopeVariable.isAlias`. */
   isAlias?: boolean
+  /** See `ScopeVariable.ahead`. */
+  ahead?: boolean
   /** Pointer to the scope where this variable was defined. */
   scope?: P.Scope
   /** See `ScopeVariable.declaredBy`. */
@@ -131,6 +153,10 @@ export type ScopeVariableProps = {
   exclusive?: boolean
   /** See `ScopeVariable.readAs`. */
   readAs?: string
+  /** See `ScopeVariable.valueOutputs`. */
+  valueOutputs?: Record<string, string>
+  /** See `ScopeVariable.measure`. */
+  measure?: P.Measure
   /** See `ScopeVariable.rules`. */
   rules?: readonly PropRule[]
   /** See `ScopeVariable.docstring`. */

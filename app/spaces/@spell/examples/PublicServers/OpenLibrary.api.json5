@@ -1,0 +1,789 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "open library",
+    "kind": "web server",
+    "address": "https://openlibrary.org",
+    "lookedAt": "2026-11-04T12:22:27.482Z",
+    "fingerprint": "7832c51cee4075f6",
+    "version": {
+      "says": "1.0.0",
+      "where": "its OpenAPI document"
+    },
+    "readBy": "nobody:  worked out from what came back",
+    "docsAt": "https://openlibrary.org/openapi.json",
+    "collectionsAsked": [
+      "books=/search.json?q=dune",
+      "authors=/authors/{name}.json",
+      "editions=/books/{name}.json"
+    ],
+    "picturesAsked": [
+      "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"
+    ]
+  },
+
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Nothing says:  never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It named none in its answers.",
+    "browsers": "Yes:  it says any page may read it."
+  },
+
+  "allCollections": {
+    "idField": "key",
+    "paging": "none"
+  },
+
+  "collections": {
+    "books": {
+      "type": "book",
+      "at": "/search.json",
+      "rowsSeen": 100,
+      "rowsItSays": 48293,
+      "rowsAt": "docs",
+      "searchedBy": {
+        "param": "q",
+        "field": "title"
+      },
+      "searchedOnly": true,
+      "searchedFor": "dune",
+      "fields": {
+        "author_key": {
+          "words": "authors",
+          "type": "list of text",
+          "example": [
+            "OL79034A"
+          ],
+          "linksTo": "authors"
+        },
+        "author_name": {
+          "words": "author name",
+          "type": "list of text",
+          "example": [
+            "Frank Herbert"
+          ]
+        },
+        "cover_edition_key": {
+          "words": "cover edition",
+          "type": "text",
+          "example": "OL32848840M",
+          "linksTo": "editions"
+        },
+        "cover_height": {
+          "words": "cover height",
+          "type": "number",
+          "example": 500
+        },
+        "cover_i": {
+          "words": "cover i",
+          "type": "number",
+          "example": 11481354,
+          "pictureAt": "https://covers.openlibrary.org/b/id/{id}-M.jpg"
+        },
+        "cover_width": {
+          "words": "cover width",
+          "type": "number",
+          "example": 317
+        },
+        "ebook_access": {
+          "words": "ebook access",
+          "type": "text",
+          "example": "borrowable"
+        },
+        "edition_count": {
+          "words": "edition count",
+          "type": "number",
+          "example": 155
+        },
+        "first_publish_year": {
+          "words": "first publish year",
+          "type": "number",
+          "example": 1965
+        },
+        "has_fulltext": {
+          "words": "fulltext",
+          "type": "yes or no",
+          "example": true
+        },
+        "ia": {
+          "words": "ia",
+          "type": "list of text",
+          "example": [
+            "isbn_9780340765906",
+            "diuna0000herb"
+          ]
+        },
+        "ia_collection": {
+          "words": "ia collection",
+          "type": "list of text",
+          "example": [
+            "California-State-Suggested-Reading",
+            "americana"
+          ]
+        },
+        "key": {
+          "words": "key",
+          "type": "text",
+          "example": "/works/OL893414W"
+        },
+        "language": {
+          "words": "language",
+          "type": "list of text",
+          "example": [
+            "rum",
+            "rus"
+          ]
+        },
+        "lending_edition_s": {
+          "words": "lending edition s",
+          "type": "text",
+          "example": "OL10630547M"
+        },
+        "lending_identifier_s": {
+          "words": "lending identifier s",
+          "type": "text",
+          "example": "isbn_9780340765906"
+        },
+        "public_scan_b": {
+          "words": "public scan b",
+          "type": "yes or no",
+          "example": false
+        },
+        "series_key": {
+          "words": "series key",
+          "type": "list of text",
+          "example": [
+            "OL331367L"
+          ]
+        },
+        "series_name": {
+          "words": "series name",
+          "type": "list of text",
+          "example": [
+            "Dune"
+          ]
+        },
+        "series_position": {
+          "words": "series position",
+          "type": "list of text",
+          "example": [
+            "1"
+          ]
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "Dune"
+        },
+        "subtitle": {
+          "words": "subtitle",
+          "type": "text",
+          "example": "House Harkonnen"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "authors": {
+      "type": "author",
+      "at": "/authors/{name}.json",
+      "rowsSeen": 1,
+      "samples": [
+        "OL79034A"
+      ],
+      "fields": {
+        "links": {
+          "words": "links",
+          "type": "inside",
+          "example": [
+            {
+              "title": "Official Website for Dune Novels (by Herbert Properties LLC)",
+              "url": "https://dunenovels.com",
+              "type": {
+                "key": "/type/link"
+              }
+            },
+            {
+              "title": "Fantastic Fiction Author Entry",
+              "url": "https://www.fantasticfiction.com/h/frank-herbert/",
+              "type": {
+                "key": "/type/link"
+              }
+            }
+          ],
+          "inside": {
+            "title": {
+              "words": "title",
+              "type": "text",
+              "example": "Official Website for Dune Novels (by Herbert Properties LLC)"
+            },
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://dunenovels.com"
+            },
+            "type": {
+              "words": "kind",
+              "type": "inside",
+              "example": "{\"key\":\"/type/link\"}",
+              "inside": {
+                "key": {
+                  "words": "key",
+                  "type": "text",
+                  "example": "/type/link"
+                }
+              }
+            }
+          },
+          "isListInside": true
+        },
+        "type": {
+          "words": "kind",
+          "type": "inside",
+          "example": "{\"key\":\"/type/author\"}",
+          "inside": {
+            "key": {
+              "words": "key",
+              "type": "text",
+              "example": "/type/author"
+            }
+          }
+        },
+        "key": {
+          "words": "key",
+          "type": "text",
+          "example": "/authors/OL79034A"
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "Frank Herbert"
+        },
+        "source_records": {
+          "words": "source records",
+          "type": "list of text",
+          "example": [
+            "amazon:3870703903",
+            "amazon:2253113190"
+          ]
+        },
+        "birth_date": {
+          "words": "birth date",
+          "type": "text",
+          "example": "8 October 1920"
+        },
+        "bio": {
+          "words": "bio",
+          "type": "text",
+          "example": "Franklin Patrick Herbert Jr. (October 8, 1920 – February 11, 1986) was an Americ"
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "novelist"
+        },
+        "alternate_names": {
+          "words": "alternate names",
+          "type": "list of text",
+          "example": [
+            "Herbert, Frank",
+            "herbert-frank"
+          ]
+        },
+        "remote_ids": {
+          "words": "remote ids",
+          "type": "inside",
+          "example": "{\"viaf\":\"59083797\",\"wikidata\":\"Q7934\",\"isni\":\"0000000121347853\",\"amazon\":\"B000AP",
+          "inside": {
+            "viaf": {
+              "words": "viaf",
+              "type": "number",
+              "writtenAsText": true,
+              "example": "59083797"
+            },
+            "wikidata": {
+              "words": "wikidata",
+              "type": "text",
+              "example": "Q7934"
+            },
+            "isni": {
+              "words": "isni",
+              "type": "number",
+              "writtenAsText": true,
+              "example": "0000000121347853"
+            },
+            "amazon": {
+              "words": "amazon",
+              "type": "text",
+              "example": "B000APO5OM"
+            },
+            "bookbrainz": {
+              "words": "bookbrainz",
+              "type": "text",
+              "example": "22d93ec7-ee1e-4034-9453-8c1103b98dc0"
+            },
+            "goodreads": {
+              "words": "goodreads",
+              "type": "number",
+              "writtenAsText": true,
+              "example": "58"
+            },
+            "gnd": {
+              "words": "gnd",
+              "type": "number",
+              "writtenAsText": true,
+              "example": "118897772"
+            },
+            "imdb": {
+              "words": "imdb",
+              "type": "text",
+              "example": "nm0378541"
+            },
+            "lc_naf": {
+              "words": "lc naf",
+              "type": "text",
+              "example": "n80044450"
+            },
+            "librarything": {
+              "words": "librarything",
+              "type": "text",
+              "example": "herbertfrank"
+            },
+            "musicbrainz": {
+              "words": "musicbrainz",
+              "type": "text",
+              "example": "61ab2306-3f9b-431d-97b1-39868b1b351b"
+            },
+            "storygraph": {
+              "words": "storygraph",
+              "type": "text",
+              "example": "8d85ae8e-9ec7-4efe-9d87-ee53feb2f542"
+            },
+            "inventaire": {
+              "words": "inventaire",
+              "type": "text",
+              "example": "wd:Q7934"
+            },
+            "librivox": {
+              "words": "librivox",
+              "type": "number",
+              "writtenAsText": true,
+              "example": "50"
+            },
+            "project_gutenberg": {
+              "words": "project gutenberg",
+              "type": "number",
+              "writtenAsText": true,
+              "example": "25754"
+            },
+            "opac_sbn": {
+              "words": "opac sbn",
+              "type": "text",
+              "example": "CFIV006318"
+            }
+          }
+        },
+        "photos": {
+          "words": "photos",
+          "type": "list of numbers",
+          "example": [
+            14852808,
+            14852807
+          ]
+        },
+        "death_date": {
+          "words": "death date",
+          "type": "text",
+          "example": "11 February 1986"
+        },
+        "personal_name": {
+          "words": "personal name",
+          "type": "text",
+          "example": "Herbert, Frank."
+        },
+        "latest_revision": {
+          "words": "latest revision",
+          "type": "number",
+          "example": 51
+        },
+        "revision": {
+          "words": "revision",
+          "type": "number",
+          "example": 51
+        },
+        "created": {
+          "words": "created",
+          "type": "inside",
+          "example": "{\"type\":\"/type/datetime\",\"value\":\"2008-04-01T03:28:50.625462\"}",
+          "inside": {
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "/type/datetime"
+            },
+            "value": {
+              "words": "value",
+              "type": "date",
+              "example": "2008-04-01T03:28:50.625462"
+            }
+          }
+        },
+        "last_modified": {
+          "words": "last modified",
+          "type": "inside",
+          "example": "{\"type\":\"/type/datetime\",\"value\":\"2026-07-24T15:54:06.808231\"}",
+          "inside": {
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "/type/datetime"
+            },
+            "value": {
+              "words": "value",
+              "type": "date",
+              "example": "2026-07-24T15:54:06.808231"
+            }
+          }
+        }
+      },
+      "readThrough": {
+        "rows": 1
+      }
+    },
+    "editions": {
+      "type": "edition",
+      "at": "/books/{name}.json",
+      "rowsSeen": 1,
+      "samples": [
+        "OL32848840M"
+      ],
+      "fields": {
+        "type": {
+          "words": "kind",
+          "type": "inside",
+          "example": "{\"key\":\"/type/edition\"}",
+          "inside": {
+            "key": {
+              "words": "key",
+              "type": "text",
+              "example": "/type/edition"
+            }
+          }
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "Dune"
+        },
+        "authors": {
+          "words": "authors",
+          "type": "inside",
+          "example": [
+            {
+              "key": "/authors/OL79034A"
+            }
+          ],
+          "inside": {
+            "key": {
+              "words": "key",
+              "type": "text",
+              "example": "/authors/OL79034A"
+            }
+          },
+          "isListInside": true
+        },
+        "publish_date": {
+          "words": "publish date",
+          "type": "text",
+          "example": "Jul 22, 2006"
+        },
+        "source_records": {
+          "words": "source records",
+          "type": "list of text",
+          "example": [
+            "amazon:1444738208",
+            "promise:bwb_daily_pallets_2023-05-31:P8-CJS-816"
+          ]
+        },
+        "number_of_pages": {
+          "words": "number of pages",
+          "type": "number",
+          "example": 604
+        },
+        "publishers": {
+          "words": "publishers",
+          "type": "list of text",
+          "example": [
+            "Hodder",
+            "Hodder Paperback"
+          ]
+        },
+        "isbn_10": {
+          "words": "isbn 10",
+          "type": "list of text",
+          "example": [
+            "1444738208"
+          ],
+          "leftOut": "Spell couldn't read its line:  - its \"isbn 10\" is a list of text -- Don't understand \"its \"isbn 10\" is a list of text\""
+        },
+        "isbn_13": {
+          "words": "isbn 13",
+          "type": "list of text",
+          "example": [
+            "9781444738209"
+          ],
+          "leftOut": "Spell couldn't read its line:  - its \"isbn 13\" is a list of text -- Don't understand \"its \"isbn 13\" is a list of text\""
+        },
+        "physical_format": {
+          "words": "physical format",
+          "type": "text",
+          "example": "paperback"
+        },
+        "notes": {
+          "words": "notes",
+          "type": "inside",
+          "example": "{\"type\":\"/type/text\",\"value\":\"Source title: Dune (Dune Chronicles, Book One)\"}",
+          "inside": {
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "/type/text"
+            },
+            "value": {
+              "words": "value",
+              "type": "text",
+              "example": "Source title: Dune (Dune Chronicles, Book One)"
+            }
+          }
+        },
+        "full_title": {
+          "words": "full title",
+          "type": "text",
+          "example": "Dune"
+        },
+        "covers": {
+          "words": "covers",
+          "type": "list of numbers",
+          "example": [
+            11481354
+          ]
+        },
+        "works": {
+          "words": "works",
+          "type": "inside",
+          "example": [
+            {
+              "key": "/works/OL893414W"
+            }
+          ],
+          "inside": {
+            "key": {
+              "words": "key",
+              "type": "text",
+              "example": "/works/OL893414W"
+            }
+          },
+          "isListInside": true
+        },
+        "key": {
+          "words": "key",
+          "type": "text",
+          "example": "/books/OL32848840M"
+        },
+        "local_id": {
+          "words": "local id",
+          "type": "list of text",
+          "example": [
+            "urn:bwbsku:P8-CJS-816"
+          ]
+        },
+        "latest_revision": {
+          "words": "latest revision",
+          "type": "number",
+          "example": 6
+        },
+        "revision": {
+          "words": "revision",
+          "type": "number",
+          "example": 6
+        },
+        "created": {
+          "words": "created",
+          "type": "inside",
+          "example": "{\"type\":\"/type/datetime\",\"value\":\"2021-07-22T19:56:02.774089\"}",
+          "inside": {
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "/type/datetime"
+            },
+            "value": {
+              "words": "value",
+              "type": "date",
+              "example": "2021-07-22T19:56:02.774089"
+            }
+          }
+        },
+        "last_modified": {
+          "words": "last modified",
+          "type": "inside",
+          "example": "{\"type\":\"/type/datetime\",\"value\":\"2026-07-25T12:46:42.414666\"}",
+          "inside": {
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "/type/datetime"
+            },
+            "value": {
+              "words": "value",
+              "type": "date",
+              "example": "2026-07-25T12:46:42.414666"
+            }
+          }
+        }
+      },
+      "readThrough": {
+        "rows": 1
+      }
+    }
+  },
+
+  "notes": [
+    "\"books\" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.",
+    "No row read filled book's \"subtitle\"."
+  ],
+
+  "agentNotes": [],
+
+  "spellCantSay": [
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+
+  "checkEverySeconds": 30,
+
+  "spell": [
+    "open library is a web server at \"https://openlibrary.org\":",
+    "\t- its id is its \"key\"",
+    "\t- its rows are its \"docs\"",
+    "\t- check it every 30 seconds",
+    "\t- it writes names like \"author_key\"",
+    "\t- it searches titles with \"q\"",
+    "\t- books are searched at \"/search.json\"",
+    "\t- authors are found at \"/authors/{name}.json\"",
+    "\t- editions are found at \"/books/{name}.json\"",
+    "\t- a book's \"cover i\" is a picture at \"https://covers.openlibrary.org/b/id/{id}-M.jpg\"",
+    "",
+    "a \"book\" is a thing:",
+    "\t- it lives in open library",
+    "\t- its \"authors\" is a list of authors, stored as \"author_key\"",
+    "\t- its \"author name\" is a list of text",
+    "\t- its \"cover edition\" is an edition, stored as \"cover_edition_key\"",
+    "\t- its \"cover height\" is a number",
+    "\t- its \"cover i\" is text  // a picture's address",
+    "\t- its \"cover width\" is a number",
+    "\t- its \"ebook access\" is text",
+    "\t- its \"edition count\" is a number",
+    "\t- its \"first publish year\" is a number",
+    "\t- its \"fulltext\" is yes or no, stored as \"has_fulltext\"",
+    "\t- its \"ia\" is a list of text",
+    "\t- its \"ia collection\" is a list of text",
+    "\t- its \"language\" is a list of text",
+    "\t- its \"lending edition s\" is text",
+    "\t- its \"lending identifier s\" is text",
+    "\t- its \"public scan b\" is yes or no",
+    "\t- its \"series key\" is a list of text",
+    "\t- its \"series name\" is a list of text",
+    "\t- its \"series position\" is a list of text",
+    "\t- its \"title\" is text",
+    "\t- its \"subtitle\" is text",
+    "",
+    "an \"author\" is a thing:",
+    "\t- it lives in open library",
+    "\t- its \"links\" is a list of links",
+    "\t- its \"kind\" is a kind, stored as \"type\"",
+    "\t- its \"key\" is text",
+    "\t- its \"name\" is text",
+    "\t- its \"source records\" is a list of text",
+    "\t- its \"birth date\" is text",
+    "\t- its \"bio\" is text",
+    "\t- its \"title\" is text",
+    "\t- its \"alternate names\" is a list of text",
+    "\t- its \"remote ids\" is a remote id",
+    "\t- its \"photos\" is a list of numbers",
+    "\t- its \"death date\" is text",
+    "\t- its \"personal name\" is text",
+    "\t- its \"latest revision\" is a number",
+    "\t- its \"revision\" is a number",
+    "\t- its \"created\" is a created",
+    "\t- its \"last modified\" is a last modified",
+    "",
+    "an \"edition\" is a thing:",
+    "\t- it lives in open library",
+    "\t- its \"kind\" is a kind, stored as \"type\"",
+    "\t- its \"title\" is text",
+    "\t- its \"authors\" is a list of edition authors",
+    "\t- its \"publish date\" is text",
+    "\t- its \"source records\" is a list of text",
+    "\t- its \"number of pages\" is a number",
+    "\t- its \"publishers\" is a list of text",
+    "\t- its \"physical format\" is text",
+    "\t- its \"notes\" is a note",
+    "\t- its \"full title\" is text",
+    "\t- its \"covers\" is a list of numbers",
+    "\t- its \"works\" is a list of works",
+    "\t- its \"key\" is text",
+    "\t- its \"local id\" is a list of text",
+    "\t- its \"latest revision\" is a number",
+    "\t- its \"revision\" is a number",
+    "\t- its \"created\" is a created",
+    "\t- its \"last modified\" is a last modified",
+    "",
+    "a \"link\" is a thing:",
+    "\t- its \"title\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"kind\" is a kind, stored as \"type\"",
+    "",
+    "a \"kind\" is a thing:",
+    "\t- its \"key\" is text",
+    "",
+    "a \"remote id\" is a thing:",
+    "\t- its \"viaf\" is a number",
+    "\t- its \"wikidata\" is text",
+    "\t- its \"isni\" is a number",
+    "\t- its \"amazon\" is text",
+    "\t- its \"bookbrainz\" is text",
+    "\t- its \"goodreads\" is a number",
+    "\t- its \"gnd\" is a number",
+    "\t- its \"imdb\" is text",
+    "\t- its \"lc naf\" is text",
+    "\t- its \"librarything\" is text",
+    "\t- its \"musicbrainz\" is text",
+    "\t- its \"storygraph\" is text",
+    "\t- its \"inventaire\" is text",
+    "\t- its \"librivox\" is a number",
+    "\t- its \"project gutenberg\" is a number",
+    "\t- its \"opac sbn\" is text",
+    "",
+    "a \"created\" is a thing:",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"value\" is a date",
+    "",
+    "a \"last modified\" is a thing:",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"value\" is a date",
+    "",
+    "an \"edition author\" is a thing:",
+    "\t- its \"key\" is text",
+    "",
+    "a \"note\" is a thing:",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"value\" is text",
+    "",
+    "a \"work\" is a thing:",
+    "\t- its \"key\" is text"
+  ]
+}

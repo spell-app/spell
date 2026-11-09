@@ -74,7 +74,13 @@ describe("UIComponent.define(tag, dictionary)", () => {
       "enlace",
       "destino",
       "letra",
+      "sombra",
+      "ancho",
+      "ancho-min",
+      "ancho-max",
       "ayuda",
+      "movible",
+      "redimensionable",
       "hidden"
     ])
   })

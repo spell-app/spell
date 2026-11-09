@@ -88,6 +88,12 @@ export class WriterProject {
    */
   readonly importedMembers = new Map<string, Set<string>>()
   /**
+   * Each imported class the project makes its own class of, by name, and the name its base is imported by here
+   * (epic `language` P26):  e.g. `Card` => `CardsCard`, for `export class Card extends CardsCard`.
+   * - The project's class is declared as extending ITSELF:  see `SP.subclassImportedTypes()`.
+   */
+  readonly importedBases = new Map<string, string>()
+  /**
    * Each built-in runtime class, by its name in compiled code, e.g. `Thing`, and its type in the root scope.
    * - Its members are every class's below it, e.g. `id` (epic `people-and-orgs`):
    *   never one a class gets for TypeScript only.  See `isBuiltInMember()`.
@@ -136,6 +142,8 @@ export class WriterProject {
   readonly spotsThatWait = new WeakSet<P.ASTNode>()
   /** Drawings that read what waits somewhere with no spot for a "…", an `if` or an attribute:  held whole. */
   readonly heldDrawings = new WeakSet<P.ASTPropertyDefinition>()
+  /** The functions a drawing's loops draw each item with:  part of the drawing, so they never wait, and what they read is the drawing's. */
+  readonly drawnLoopFunctions = new WeakSet<P.ASTMethodDefinition>()
   /** Has `findWaiting()` run?  With none, e.g. `JSWriter.instance` writing one node, only `core`'s own calls wait. */
   hasFoundWaiting = false
 
@@ -175,6 +183,8 @@ export class WriterProject {
     const named = new Map<P.ASTMethodDefinition, string | undefined>()
     const getters = new Set<P.ASTMethodDefinition>()
     forEachNode(files, (node) => {
+      const drawnLoop = this.drawnLoopFunctionOf(node)
+      if (drawnLoop) named.set(drawnLoop, DRAWN_LOOP_FUNCTION_NAME)
       if (node instanceof P.ASTPropertyDefinition && node.method) named.set(node.method, node.property.value)
       else if (node instanceof P.ASTPropertyDefinition && node.get) {
         named.set(node.get, node.property.value)
@@ -188,6 +198,7 @@ export class WriterProject {
       forEachNode(files, (node) => {
         if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
       })
+      this.noteLinkedElsewhere(scope)
     }
     const allowed = new Map<P.ASTMethodDefinition, boolean>()
     for (const [method, name] of named) {
@@ -270,17 +281,20 @@ export class WriterProject {
    * - a child value alone:  its own "…", `spotsThatWait`
    * - anywhere else, an `if` or an attribute:  the whole thing is held, `heldDrawings`
    * - not in a function inside it, a click's handler:  that's its own, and it waits when it's called
+   *   - but a loop's is the drawing's:  `drawnLoopFunctions`
    */
   protected noteDrawing(definition: P.ASTPropertyDefinition): void {
+    const isOwnFunction = (node: P.ASTNode) =>
+      node instanceof P.ASTMethodDefinition && !this.drawnLoopFunctions.has(node)
     const reads = (node: unknown): boolean => {
       if (Array.isArray(node)) return node.some(reads)
-      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return false
+      if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return false
       if (this.readsWaitingValue(node)) return true
       return Object.entries(node).some(([key, value]) => key !== "match" && reads(value))
     }
     const visit = (node: unknown): void => {
       if (Array.isArray(node)) return node.forEach(visit)
-      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+      if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return
       if (this.readsWaitingValue(node)) {
         this.heldDrawings.add(definition)
         return
@@ -297,6 +311,18 @@ export class WriterProject {
       }
     }
     visit(definition.method!.body)
+  }
+
+  /** SIDE EFFECT:  notes the function `node` draws each item with, if it's a drawing's loop, and returns it. */
+  protected drawnLoopFunctionOf(node: P.ASTNode): P.ASTMethodDefinition | undefined {
+    if (!isCoreCall(node)) return undefined
+    const { methodName, args } = node as P.ASTScopedMethodInvocation
+    if (!DRAWN_LOOPS.has(methodName)) return undefined
+    const arg = args.args?.[1]
+    const callback = arg && unwrapped(arg)
+    if (!(callback instanceof P.ASTMethodDefinition)) return undefined
+    this.drawnLoopFunctions.add(callback)
+    return callback
   }
 
   /**
@@ -335,6 +361,28 @@ export class WriterProject {
     const eventName = event && quotedText(event)
     if (!eventName || !(listener instanceof P.ASTMethodDefinition)) return
     this.listeners.set(eventName, [...(this.listeners.get(eventName) ?? []), listener])
+  }
+
+  /**
+   * SIDE EFFECT:  notes each field another of the project's files declares that follows an address (epic `data` P29):
+   * a page's file reading `the first item of its authors`,
+   * a field of the API file's, `its "authors" is a list of authors`.
+   * - From the declaring line's own tree:  the types' records don't say it.
+   */
+  protected noteLinkedElsewhere(scope: P.Scope | undefined): void {
+    const seen = new Set<P.TypeScope>()
+    for (let layer = scope; layer; layer = layer.parentScope) {
+      if (!(layer instanceof P.ProjectScope || layer instanceof P.FileScope)) continue
+      for (const type of layer.types?.get() ?? []) {
+        if (seen.has(type) || !type.savedPlace()) continue
+        seen.add(type)
+        for (const variable of type.variables?.get() ?? []) {
+          forEachNode([variable.declaredBy?.AST], (node) => {
+            if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
+          })
+        }
+      }
+    }
   }
 
   /** SIDE EFFECT:  notes what the project IMPORTS that waits, from its declarations:  Klondike's `turn face up`, from Cards. */
@@ -418,9 +466,12 @@ export class WriterProject {
   static of(files: P.ASTNode[][], scope?: P.Scope): WriterProject {
     const project = new WriterProject()
     const projectLayers: P.Scope[] = []
+    let imports: P.ImportScope | undefined
     for (let layer = scope; layer; layer = layer.parentScope) {
-      if (layer instanceof P.ImportScope) project.noteTypes(layer)
-      else if (layer instanceof P.ProjectScope || layer instanceof P.FileScope) projectLayers.push(layer)
+      if (layer instanceof P.ImportScope) {
+        imports = layer
+        project.noteTypes(layer)
+      } else if (layer instanceof P.ProjectScope || layer instanceof P.FileScope) projectLayers.push(layer)
       else if (layer instanceof P.RootScope) project.noteBuiltInTypes(layer)
     }
     const classes = new Map<string, P.ASTClassDeclaration>()
@@ -436,6 +487,10 @@ export class WriterProject {
         })
       }
     }
+    for (const [name, declaration] of classes) {
+      if (declaration.superType?.name !== name) continue
+      project.importedBases.set(name, WriterProject.importedBaseName(name, imports?.origins.get(name) ?? ""))
+    }
     for (const layer of projectLayers) project.noteTypes(layer, classes)
     for (const statements of files) project.moveMembers(statements, classes)
     for (const declaration of classes.values()) project.noteClass(declaration, classes)
@@ -446,13 +501,28 @@ export class WriterProject {
   }
 
   /**
+   * The name imported class `name`, from project `origin`, is imported by in a project that makes its own `name`
+   * (`importedBases`):  the project's last word, then the class's, e.g. `CardsCard` for `@spell/library/cards`'s `Card`.
+   * - The same in every language we write:  a type's case, no dashes.
+   */
+  static importedBaseName(name: string, origin: string): string {
+    const project = origin.slice(origin.lastIndexOf("/") + 1)
+    const words = project.split(/[^A-Za-z0-9]+/).filter(Boolean)
+    return `${words.map((word) => word[0]!.toUpperCase() + word.slice(1)).join("")}${name}`
+  }
+
+  /**
    * Does the built-in class `typeName` comes from have member `name`, e.g. `id` for `Person`, from `Thing`?
    * - Walks up to the first built-in class:  `Person` => `Thing`, `Pile` => `List`.
+   * - `name` as compiled code names it:  a built-in template's property said in another language is its
+   *   class's own, `direction` for Spanish's `dirección` (epic `language` T74).
    */
   isBuiltInMember(typeName: string, name: string): boolean {
     for (let type: string | undefined = typeName; type; type = this.superTypes.get(type)) {
       const builtIn = this.builtInTypes.get(type)
-      if (builtIn) return !!builtIn.getMember(name)
+      if (!builtIn) continue
+      if (builtIn.getMember(name)) return true
+      return builtIn.chain().some((each) => each.variables.get().some((variable) => variable.output === name))
     }
     return false
   }
@@ -906,6 +976,12 @@ export type ProgramPlace = {
  * A drawing's name:  `draw`, a slot's `drawFront`, a list's `draw_each_item`.
  * - NOT an action that says draw:  `to draw a card` is `draw_card`, and may wait.
  */
+/** `core`'s calls that draw a list, handed the function that draws each item. */
+const DRAWN_LOOPS = new Set(["drawEach", "drawRead"])
+
+/** What `findWaiting()` calls such a function:  a name `DRAWING_NAME` knows, so it never waits. */
+const DRAWN_LOOP_FUNCTION_NAME = "drawEach"
+
 export const DRAWING_NAME = /^draw(?:$|[A-Z]|_each_item$|_its_placeholder$)/
 
 export function quotedText(node: P.ASTExpression): string | undefined {
@@ -922,8 +998,8 @@ export function forEachNode(node: unknown, callback: (node: P.ASTNode) => void):
   }
   if (!(node instanceof P.ASTNode)) return
   callback(node)
-  // `for...in`, not `Object.entries()`:  no array per node -- every compile walks its program several times
-  // (epic `language` P22)
+  // `for...in`, not `Object.entries()`:
+  // no array per node, since every compile walks its program several times (epic `language` P22)
   const fields = node as unknown as Record<string, unknown>
   for (const key in fields) {
     if (key === "match" || !Object.hasOwn(fields, key)) continue

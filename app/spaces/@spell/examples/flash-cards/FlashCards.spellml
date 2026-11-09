@@ -1,0 +1,83 @@
+# Flash Cards
+A deck of cards to learn from:  a Spanish word on the front, what it means on the back.
+Click the card, or Show the answer, to turn it over, then say whether you knew it:
+the score keeps count, and the next card comes up at random.
+The card is this project's own, in `FlashCard.spellml`;  this file holds the quiz, and its words.
+
+<spell-app "quiz">
+	<property "deck">a new deck</>
+	<property "card" description="The card showing">a flash card</>
+	<property "known" type="number" description="How many you knew"/>
+	<property "tried" type="number" description="How many you've tried"/>
+	<property "score" description="Said in the toolbar">
+		"Nothing tried yet" if the tried is 0
+		"[known] of [tried] right" otherwise
+	</property>
+
+	<group "playing"/>
+	<action "deal a card" description="A card from the deck at random, word up:  never the one just shown">
+		set others to cards in the deck where it is not quiz's card
+		set the card to a random card in others
+		turn the card face up
+	</action>
+	<action "show the answer" title="Show the answer" shortcut="space">turn the card over</>
+	<action "say i knew it" title="I knew it" icon="check" shortcut="Y" description="Counted, then the next card">
+		set the known to the known + 1
+		set the tried to the tried + 1
+		deal a card
+	</action>
+	<action "say i missed it" title="I missed it" icon="close" shortcut="N">
+		set the tried to the tried + 1
+		deal a card
+	</action>
+	<action "start over" title="Start over" icon="redo">
+		clear the known
+		clear the tried
+		deal a card
+	</action>
+	<menu "quiz menu">
+		<action "start over"/>
+	</menu>
+
+	<draw description="The toolbar with the score, the card, then what you can do:  turn it over, or say how you did">
+		<container text>
+			<stack>
+				<toolbar menu="quiz menu" aria-label="Quiz">
+					<text slot="title" size="large">Flash Cards</text>
+					<text slot="right">{the score}</text>
+				</toolbar>
+				{draw the card}
+				<stack direction="horizontal" justify="center">
+					<if the card is face up>
+						<button color="primary" onClick={show the answer}>Show the answer</button>
+					<otherwise>
+						<button color="positive" icon="check" onClick={say i knew it}>I knew it</button>
+						<button color="negative" appearance="basic" icon="close" onClick={say i missed it}>I missed it</button>
+					</>
+				</stack>
+			</stack>
+		</container>
+	</draw>
+</spell-app>
+
+## The deck:  twelve Spanish words -- add your own
+
+<spell>
+	to add (word as text) meaning (meaning as text):
+		add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
+
+	add "el gato" meaning "the cat"
+	add "el perro" meaning "the dog"
+	add "la casa" meaning "the house"
+	add "el libro" meaning "the book"
+	add "la manzana" meaning "the apple"
+	add "el agua" meaning "the water"
+	add "la luna" meaning "the moon"
+	add "el sol" meaning "the sun"
+	add "la playa" meaning "the beach"
+	add "el tren" meaning "the train"
+	add "la llave" meaning "the key"
+	add "la mariposa" meaning "the butterfly"
+
+	start over
+</spell>

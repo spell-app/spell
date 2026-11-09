@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { ChunkFiles, FilePlace } from "spell/server/places"
-import { Places, type PlaceEvent } from "spell/util/places"
+import { Places, type PlaceEvent } from "spell/places"
 
 import { newFolder, removeFolders } from "./places.helpers"
 

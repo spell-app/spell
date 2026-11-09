@@ -396,6 +396,16 @@
         "path": "./themes/spell-midnight-dark.json"
       },
       {
+        "label": "Spell Mockup Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-mockup-light.json"
+      },
+      {
+        "label": "Spell Mockup Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-mockup-dark.json"
+      },
+      {
         "label": "Spell Paper Light",
         "uiTheme": "vs",
         "path": "./themes/spell-paper-light.json"

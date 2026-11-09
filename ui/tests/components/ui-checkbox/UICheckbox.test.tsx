@@ -574,3 +574,38 @@ describe("<ui-checkbox> accessibility", () => {
     await expectAccessible(root)
   })
 })
+
+////////////////
+// ## The address
+////////////////
+
+describe("<ui-checkbox parameter> and <ui-radio parameter>", () => {
+  /** The address's `name` parameter. */
+  const parameter = (name: string) => new URLSearchParams(location.search).get(name)
+
+  it("keeps a checkbox's chosen value in the address;  Back unchooses it, never touching `value`", async () => {
+    onTestFinished(() => history.replaceState(history.state, "", location.pathname))
+    const host = await ElementFixture.render<DOMFormControl & { selected: boolean; value: unknown }>(
+      `<ui-checkbox parameter="cats" value="yes" label="Cats"></ui-checkbox>`
+    )
+    await userEvent.click(host.shadowRoot!.querySelector("input")!)
+    expect(parameter("cats")).toBe("yes")
+    history.back()
+    await expect.poll(() => host.selected).toBe(false)
+    expect(host.value).toBe("yes")
+  })
+
+  it("chooses the radio the address names, which leaves its sibling", async () => {
+    onTestFinished(() => history.replaceState(history.state, "", location.pathname))
+    const page = await ElementFixture.render(
+      `<div><ui-radio name="size" parameter="size" value="s" label="S" selected></ui-radio>` +
+        `<ui-radio name="size" parameter="size" value="l" label="L"></ui-radio></div>`
+    )
+    const [small, large] = [...page.querySelectorAll<DOMFormControl & { selected: boolean }>("ui-radio")]
+    await userEvent.click(large!.shadowRoot!.querySelector("input")!)
+    expect(parameter("size")).toBe("l")
+    history.back()
+    await expect.poll(() => small!.selected).toBe(true)
+    expect(large!.selected).toBe(false)
+  })
+})

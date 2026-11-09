@@ -6,10 +6,13 @@ import { tabsVocabulary } from "./UITabs.en"
 import { tabVocabulary } from "./UITab.en"
 import { UITab } from "./UITab"
 import { BASIC, MENU, type TabOwner, type TabPaneState } from "./UITab.types"
-// The menu family's, beside its sheet (below):  the tab list draws a segmented menu's thumb
+// The menu family's, beside its sheets (below):  the tab list draws a segmented menu's thumb,
+// and scrolls sideways as a toolbar's row does
 import { SegmentedThumb } from "spell/ui/components/ui-menu/SegmentedThumb"
+import { ScrollingRow, START, END } from "spell/ui/components/ui-menu/ScrollingRow"
 
 import menuCSS from "spell/ui/components/ui-menu/UIMenu.css?inline"
+import scrollingRowCSS from "spell/ui/components/ui-menu/ScrollingRow.css?inline"
 import tabCSS from "./UITab.css?inline"
 
 /****************
@@ -17,10 +20,12 @@ import tabCSS from "./UITab.css?inline"
  * The component behind `<ui-tabs>`:  a tab set (WAI-ARIA APG tabs) over `<ui-tab>` panes,
  * Fomantic's tab MENU plus its `.ui.tab` panes, as one element:
  *
- *     <div class="ui … tabs" part="tabs">
+ *     <div class="ui … tabs [scrolling-row]" part="tabs">            (`scrolling-row` while its tabs overflow)
+ *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>   (shown only then)
  *       <div class="ui … menu" part="menu" role="tablist" aria-label aria-orientation>
  *         <button type="button" class="[active] [disabled] item" part="tab" role="tab" aria-selected>label</button>
  *       </div>
+ *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
  *       <slot></slot>                                   (the panes;  before the menu when `attached="bottom"`)
  *     </div>
  *
@@ -35,6 +40,13 @@ import tabCSS from "./UITab.css?inline"
  *   - A click (or, `automatic`, an arrow key) dispatches the cancelable `ui-changing` first.
  *   - Without a `value`:  the first `selected` pane, else the first enabled one;
  *     a `value` that names no pane falls back the same way.
+ * - A row of tabs too wide for its box scrolls sideways, with a `‹` / `›` key at each end (`:state(overflowing)`):
+ *   the menu family's `ScrollingRow`, as `<ui-toolbar>`'s row does.
+ *   - Only while they overflow:  a row that scrolls clips what reaches past its box (a pointing tab's arrow,
+ *     a focus ring), so a row that fits doesn't scroll.
+ *   - The chosen tab is scrolled into view as it's drawn, and smoothly whenever another is chosen.
+ * - A chosen pane with nothing in it (tabs that only choose, a program drawing the page beside them):
+ *   the set is only a bar (`:state(bar-only)`), with room under it before what follows (`--ui-tabs-bar-gap`).
  * - Keyboard (APG):  ONE Tab stop, the selected tab (`UI.focus.roving`);
  *   ArrowLeft / ArrowRight (ArrowUp / ArrowDown when vertical), Home, End;  disabled tabs are skipped.
  *   - `activation="manual"`:  the arrows move focus only, Enter / Space select;
@@ -46,16 +58,18 @@ import tabCSS from "./UITab.css?inline"
  * - The swap:  a View Transition (`document.startViewTransition`) when `UI.browser.supports.viewTransitions`
  *   and the person doesn't prefer reduced motion, else instant.
  *   - The tab list follows the selection at once;  the panes swap inside the transition (`shownValue`).
- * - `history`:  the selected value mirrors `location.hash` (see the vocabulary).
+ * - `parameter` / `history`:  the selected value kept in the page's address, a query parameter or the hash
+ *   (`AddressParameter`;  see the vocabulary).
  * - SIDE EFFECTS:
- *   `history` pushes history entries, and listens to its window's `hashchange` / `popstate` while connected.
- *   - The page globals (`window`, `document`, `location`, `history`) are the DOM element's document's,
- *     so a tab set in an iframe follows its own frame.
+ *   with either, each selection pushes a history entry, and it follows its window's Back / Forward while connected
+ *   (its document's window, so a tab set in an iframe follows its own frame).
  ****************/
 export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabOwner {
   @E.proto static vocabulary = tabsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { menu: menuCSS, tab: tabCSS },
+    styleSheets: { menu: menuCSS, scrollingRow: scrollingRowCSS, tab: tabCSS },
+    // a native form sees named tabs' `value` (`FormData`, `form.elements`);  unnamed ones send nothing
+    isAFormControl: true,
     // the tabs are the focus targets;  a click on a pane must not jump to one
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -174,7 +188,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     const applied = this.requestChange("value", value, () => this.send("ui-changing", detail))
     // Then the -ed half, once the pane is selected (epic elemental-spell P9)
     if (applied) this.send("ui-changed", detail)
-    if (applied && this.history) UITabs.pushHash(value, this.view)
+    if (applied) this.address.record(this.addressPlace)
     return applied
   }
 
@@ -190,10 +204,38 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return this.shownValue ?? this.selectedValue
   }
 
+  /**
+   * `:state(form-value)`:  tabs with a `name`:  a `<ui-form>` around them reads the selected `value` and writes it
+   * back, as a select's (`FormFields`), so a program knows which pane is chosen.
+   */
+  @E.cssState("form-value")
+  get isAFormValue(): boolean {
+    return !!this.attributes.name
+  }
+
+  /** Now a form value:  a `<ui-form>` around it binds it (`ui-form-value`). */
+  @E.onChange("isAFormValue", "isReady", { defer: true })
+  protected onFormValueChanged(isAFormValue: boolean, isReady: boolean) {
+    if (isAFormValue && isReady) E.afterSolidUpdate(() => this.send("ui-form-value", {}))
+  }
+
+  /** What a native form submits:  the selected pane's `value` while it's a form value, else nothing (`null`). */
+  @E.onChange("isAFormValue", "selectedValue")
+  protected onSubmissionChanged(isAFormValue: boolean, value: string | undefined) {
+    this.domElement.internals.setFormValue(isAFormValue && value != null ? value : null)
+  }
+
   /** The selection changed:  swap the panes. */
   @E.onChange("selectedValue")
   protected onSelectedValueChanged(value: string | undefined) {
     this.show(value)
+    this.recordChoice()
+  }
+
+  /** The page chose a pane (a form, a program):  a step in the address too, as a person's choice is. */
+  @E.untracked
+  private recordChoice() {
+    this.address.record(this.addressPlace)
   }
 
   /**
@@ -303,6 +345,58 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   /** The tab buttons, in order. */
   private buttons(): HTMLElement[] {
     return this.bar ? [...this.bar.querySelectorAll<HTMLElement>(TAB_SELECTOR)] : []
+  }
+
+  /**
+   * The chosen pane has nothing to show:  the set is only its bar of tabs,
+   * with room under it before what follows (`:state(bar-only)`).
+   */
+  @E.cssState("bar-only")
+  get isBarOnly(): boolean {
+    const pane = this.tabs[this.values.indexOf(this.displayedValue ?? NO_VALUE)]
+    return !!pane && !UITabs.componentOf(pane).hasContent
+  }
+
+  ////////////////
+  // ## Scrolling sideways
+  ////////////////
+
+  /** The tab list as a row that scrolls sideways, with a `‹` / `›` key at each end;  never while vertical. */
+  readonly scrolling = new ScrollingRow({ owner: this })
+
+  /** The tabs don't all fit in their row:  it scrolls. */
+  @E.cssState("overflowing")
+  get isOverflowing(): boolean {
+    return this.scrolling.isOverflowing
+  }
+
+  /** SIDE EFFECT:  follows the tab list's scroll and sizes while it's a row, drawn and connected;  the cleanup stops. */
+  @E.onChange("isReady", "isConnected", "isVertical")
+  protected onScrollingChanged(isReady: boolean, isConnected: boolean, isVertical: boolean) {
+    const bar = this.bar
+    if (!isReady || !isConnected || isVertical || !bar) return
+    return this.scrolling.follow(bar)
+  }
+
+  /** The chosen tab has been brought into view once:  later choices scroll to theirs smoothly. */
+  private hasShownChosenTab = false
+
+  /**
+   * The chosen tab in view, once drawn:  at once the first time, smoothly after.
+   * - On a phone the chosen tab of a long row was out of sight (design pass, epic `data` P41).
+   */
+  @E.onChange("selectedIndex", "isReady", "isConnected")
+  protected onChosenTabToView(index: number, isReady: boolean, isConnected: boolean) {
+    if (!isReady || !isConnected || index < 0) return
+    const smoothly = this.hasShownChosenTab
+    this.hasShownChosenTab = true
+    // once the tab has redrawn as chosen, and been laid out
+    E.afterSolidUpdate(() => {
+      E.beforeNextPaint(() => {
+        const tab = this.buttons()[index]
+        if (tab && !this.isVertical) this.scrolling.bringIntoView(tab, { smoothly })
+      })
+    })
   }
 
   ////////////////
@@ -415,31 +509,53 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   // ## History
   ////////////////
 
-  /** `history`, once rendered and connected:  follow the window's `hashchange` / `popstate`, and the hash now. */
-  @E.onChange("isReady", "isConnected", "history")
-  protected onHistoryChanged(isReady: boolean, isConnected: boolean, history: boolean | undefined) {
-    if (!(isReady && isConnected && history)) return
-    const listeners = new AbortController()
-    const onNavigate = (event: Event) => this.onHashChange(event)
-    for (const type of HISTORY_EVENTS) this.view.addEventListener(type, onNavigate, { signal: listeners.signal })
-    E.afterSolidUpdate(() => this.onHashChange())
-    return () => listeners.abort()
+  /**
+   * The selected pane kept in the page's address (`AddressParameter`):
+   * - `parameter="section"`:  as a query parameter, `?section=second`
+   * - `history`:  as the hash, `#second`
+   * - Each pane a person selects is a new history entry;  Back, Forward and a page opened on the address
+   *   select the pane it names, as a person would (`ui-changing`, `ui-changed`).
+   */
+  readonly address = new E.AddressParameter({
+    domElement: this.domElement,
+    read: () => this.selectedValue,
+    show: (value, event) => this.selectFromAddress(value, event)
+  })
+
+  /** Where the address keeps the selected pane:  `parameter`'s query parameter, else the hash with `history`. */
+  get addressPlace(): E.AddressPlace | undefined {
+    const parameter = this.parameter?.trim()
+    if (parameter) return { parameter }
+    return this.history ? { hash: true } : undefined
   }
 
-  /** The URL hash changed (or, `event`-less, the page opened on one):  select the pane it names. */
+  /** Follow the address while it keeps the pane, once rendered and connected. */
+  @E.onChange("parameter", "history", "isReady", "isConnected")
+  protected onAddressChanged(_parameter: unknown, _history: unknown, isReady: boolean, isConnected: boolean) {
+    return isReady && isConnected ? this.address.follow(this.addressPlace) : undefined
+  }
+
+  /**
+   * Select the pane `value` names, from the address;  a value naming no pane changes nothing.
+   * - Its panes not here yet (a program draws them after the tabs):  it waits for them (`paneFromAddress`).
+   */
   @E.untracked
-  private onHashChange(event?: Event) {
-    const value = UITabs.hashValue(this.view.location)
-    const index = this.values.indexOf(value ?? NO_VALUE)
-    const pane = this.tabs[index]
-    if (!pane || value === this.selectedValue) return
-    if (event) this.select(pane, event)
-    else this.value = value
+  private selectFromAddress(value: string | undefined, event?: Event) {
+    const pane = this.tabs[this.values.indexOf(value ?? NO_VALUE)]
+    this.paneFromAddress = pane || this.tabs.length ? undefined : value
+    if (pane) this.select(pane, event)
   }
 
-  /** The DOM element's window:  its document's, for `history` and its events. */
-  private get view(): Window {
-    return this.domElement.ownerDocument.defaultView ?? window
+  /** The pane the address named before its panes came:  selected once they do. */
+  private paneFromAddress: string | undefined
+
+  /** The panes came:  select the one the address named, if it's waiting. */
+  @E.onChange("tabs", { defer: true })
+  protected onPanesForAddress() {
+    const value = this.paneFromAddress
+    if (value === undefined) return
+    this.paneFromAddress = undefined
+    this.selectFromAddress(value)
   }
 
   ////////////////
@@ -460,10 +576,11 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
         <For each={this.tabs}>{(pane, index) => this.tab(pane, index)}</For>
       </div>
     )
+    const row = [this.scrolling.key(START), menu, this.scrolling.key(END)]
     const panes = <slot onSlotChange={() => this.refreshPanes()} />
     return (
-      <div class={this.rootClass} part={this.partForName("tabs")}>
-        {this.menuEdge === UIT.BOTTOM ? [panes, menu] : [menu, panes]}
+      <div class={[this.rootClass, { [SCROLLING_ROW]: this.isOverflowing }]} part={this.partForName("tabs")}>
+        {this.menuEdge === UIT.BOTTOM ? [panes, ...row] : [...row, panes]}
       </div>
     )
   }
@@ -506,8 +623,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   // ## Helpers
   ////////////////
 
-  // Static:  pure, passed around as values (`filter`, `map`);
-  // page globals come in as arguments, defaulting to this window's.
+  // Static:  pure, passed around as values (`filter`, `map`).
 
   /** A pane child:  an element DEFINED with the pane's noun (`<ui-tab>`, or its translated tag). */
   private static isPane(this: void, element: Element): boolean {
@@ -517,24 +633,6 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   /** The `UITab` component of an (upgraded) pane. */
   private static componentOf(this: void, pane: E.DOMElement): UITab {
     return pane.component as UITab
-  }
-
-  /** The pane value in `location.hash`, or `undefined`. */
-  private static hashValue(location: Location = window.location): string | undefined {
-    const hash = location.hash.slice(1)
-    if (!hash) return undefined
-    try {
-      return decodeURIComponent(hash)
-    } catch {
-      return hash
-    }
-  }
-
-  /** Record `value` as `view`'s URL hash, as a new history entry (no scroll, no `hashchange`). */
-  private static pushHash(value: string, view: Window = window) {
-    const hash = `#${encodeURIComponent(value)}`
-    const { history, location } = view
-    if (location.hash !== hash) history.pushState(history.state, "", hash)
   }
 }
 
@@ -547,14 +645,14 @@ type MenuEdge = typeof UIT.TOP | typeof UIT.BOTTOM
 /** The tab buttons in the tab list. */
 const TAB_SELECTOR = ":scope > [role=tab]"
 
-/** Window events `history` follows. */
-const HISTORY_EVENTS = ["hashchange", "popstate"] as const
-
 /** The `appearance` of a tab list drawn as a segmented control:  it has a sliding thumb. */
 const SEGMENTED: UIT.MenuAppearance = "segmented"
 
 /** The `direction` of tabs stacked in a column. */
 const VERTICAL = "vertical"
+
+/** Class word of a row that scrolls sideways (`ScrollingRow.css`):  the tab set's, while its tabs overflow. */
+const SCROLLING_ROW = "scrolling-row"
 
 /** A value no pane has. */
 const NO_VALUE = "\u0000"

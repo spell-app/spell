@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Dimension | Spell UI</title>
+    <meta
+      name="description"
+      content="A dimension shows one measure in the reader&#39;s own units:  5 ft 8 in in the US, 172 cm elsewhere."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Dimension">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-dimension%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Dimension
+            <ui-header>A dimension shows one measure in the reader&#39;s own units:  5 ft 8 in in the US, 172 cm elsewhere.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-in-the-readers-units" label="In the reader&#39;s units" sticky="stack" collapsible dividing>
+                <ui-example description="`value`, its `dimension` and the `unit` it&#39;s in:  shown in the reader&#39;s own units, from their region, or their choice.">
+                  <p>
+                    Luke is <ui-dimension value="172" dimension="length" unit="cm"></ui-dimension> tall, and weighs
+                    <ui-dimension value="77" dimension="weight" unit="kg"></ui-dimension>.
+                  </p>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-in-the-units-asked-for" label="In the units asked for" sticky="stack" collapsible dividing>
+                <ui-example description="`in`, the units to show it in, largest first, joined by `and`.">
+                  <p>
+                    <ui-dimension value="172" dimension="length" unit="cm" in="feet and inches"></ui-dimension>,
+                    <ui-dimension value="172" dimension="length" unit="cm" in="cm"></ui-dimension>,
+                    <ui-dimension value="100" dimension="temperature" unit="°C" in="°F"></ui-dimension>
+                  </p>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-a-percent" label="A percent" sticky="stack" collapsible dividing>
+                <ui-example description="A `proportion`, a part of a whole:  kept as its fraction (`unit=&quot;fraction&quot;`), as Spell keeps one, and shown with its % sign the reader&#39;s way, `18%`, Spanish `18 %`.">
+                  <p>
+                    The tip is <ui-dimension value="0.18" dimension="proportion" unit="fraction"></ui-dimension>, or
+                    <ui-dimension value="20" dimension="proportion" unit="%"></ui-dimension> for good service.
+                  </p>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <ui-section id="usage-overview" label="Overview" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  `<ui-dimension>` shows one measure in the reader's own units.
+
+                  - `value` is its number, in `unit`:  `cm`, `kg`, `°F`, by any of the unit's names.
+                  - `dimension` says what it measures:  `length`, `weight`, `temperature`, `volume`, `speed` or `proportion`.
+                  - A proportion is a percent:  kept as its fraction, `0.18`, and shown with its % sign the reader's way, `18%`.
+                  - A US reader sees feet and inches, pounds, °F and cups;  everyone else the metric unit nearest in size.
+                  - `in` asks for units of its own, largest first:  `in="feet and inches"`.
+                  - In Spell, `<ui-dimension value={its height}>` is told what its value measures:  its property says.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-dimension" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-dimension" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-dimension" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

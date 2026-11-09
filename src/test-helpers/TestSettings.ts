@@ -9,7 +9,7 @@ import { E } from "spell/element"
  *   - `words`:
  *     - English names;  a dictionary renames only tags and attributes (no values, events, slots or parts)
  *     - the shared attributes every element takes:  `disabled`, `loading`, `visible`, `animation`,
- *       `link`, `target`, `font`, `tooltip`, `label`
+ *       `link`, `target`, `font`, `tooltip`, `label`, `movable`, `resizable`
  *     - a converter for each kind of attribute;  only a list of values written in the vocabulary is checked
  *     - no class words, and every text is its key
  *   - `styles`, `focus`:  nothing, so elements draw unstyled
@@ -158,8 +158,14 @@ const SHARED_ATTRIBUTES: readonly E.AttributeSpec[] = [
   { name: "link", kind: "string", description: "Where a click goes." },
   { name: "target", kind: "string", description: "Where `link` opens." },
   { name: "font", kind: "multiple", values: ["bold", "italic"], description: "How its letters look." },
+  { name: "shadow", kind: "string", description: "A hard shadow behind its letters, in a hue." },
+  { name: "width", kind: "string", description: "Its box's own width." },
+  { name: "min-width", kind: "string", description: "The narrowest its box gets." },
+  { name: "max-width", kind: "string", description: "The widest its box gets." },
   { name: "tooltip", kind: "string", description: "The browser's tooltip." },
-  { name: "label", kind: "string", description: "Its accessible name." }
+  { name: "label", kind: "string", description: "Its accessible name." },
+  { name: "movable", kind: "string", description: "People drag it to a new place." },
+  { name: "resizable", kind: "string", description: "People drag its corner to resize it." }
 ]
 
 /** Spellings of false;  everything else present is true. */

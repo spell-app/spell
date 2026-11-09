@@ -84,8 +84,6 @@ function output({ command, args, output: kind }: ClipboardReader, maxBytes: numb
   // hex and base64 are longer than the bytes they hold
   const maxBuffer = (kind === "bytes" ? maxBytes : maxBytes * 2) + 1024
   return new Promise((resolve) => {
-    execFile(command, args, { maxBuffer, encoding: "buffer" }, (error, stdout) =>
-      resolve(error ? undefined : stdout)
-    )
+    execFile(command, args, { maxBuffer, encoding: "buffer" }, (error, stdout) => resolve(error ? undefined : stdout))
   })
 }

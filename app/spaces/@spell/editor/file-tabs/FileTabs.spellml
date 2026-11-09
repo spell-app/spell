@@ -1,0 +1,71 @@
+# The file tabs
+Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
+Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
+A click shows that file.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a ring.
+The bar's ⋯ is at its right, which compiled code to show beside the code.
+A right click on a tab shows that file, and its menu:  Duplicate, Rename, Delete.
+The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
+
+<spell-thing "file">
+	<property "name">text</>
+	<property "icon">text</>
+	<property "path">text</>
+	<property "status" one-of="saved or changed or drafted" alias="is (status)"/>
+	<property "place" one-of="chosen or other" alias="is (place)"/>
+	<action "show it"/>
+</spell-thing>
+
+<spell-thing "file list" template="viewable list of files">
+	<spell>
+		- to draw each item:
+			return <ui-item icon={the icon of the file} selected={the file is chosen} onClick={show the file}>{the name of the file}<if the file is changed><span class="NotSaved"/></if><if the file is drafted><span class="Drafted"/></if></ui-item>
+	</spell>
+</spell-thing>
+
+<spell-view "file tab bar">
+	<property "files">a new file list</>
+	<property "more" description="The code pane's ⋯, the editor's own">a thing</>
+	<action "duplicate file" title="Duplicate File" icon="clone outline"/>
+	<action "rename file" title="Rename File" icon="edit outline"/>
+	<action "delete file" title="Delete File" icon="trash alternate outline"/>
+	<menu "tab menu">
+		<action "duplicate file"/>
+		<action "rename file"/>
+		<action "delete file"/>
+	</menu>
+	<spell>
+		<css>
+			/* the dot on a tab whose file isn't saved:  the theme's warning hue */
+			.NotSaved {
+				display: inline-block;
+				margin-inline-start: 6px;
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--ui-warning, var(--ui-orange, #f2994a));
+			}
+			/* a tab whose file is your draft, saved but not published:  a ring in the theme's primary hue */
+			.Drafted {
+				display: inline-block;
+				margin-inline-start: 6px;
+				width: 7px;
+				height: 7px;
+				box-sizing: border-box;
+				border-radius: 50%;
+				border: 1.5px solid var(--ui-primary, var(--ui-blue, #2185d0));
+			}
+			.NotSaved[hidden],
+			.Drafted[hidden] {
+				display: none;
+			}
+		</css>
+	</spell>
+	<draw>
+		<ui-panel appearance="pane" label="Files">
+			<ui-toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first label="Files">
+				{draw each file in its files}
+				{draw its more}
+			</ui-toolbar>
+		</ui-panel>
+	</draw>
+</spell-view>

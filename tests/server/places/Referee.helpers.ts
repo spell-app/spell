@@ -7,7 +7,7 @@ import {
   type PlaceRow,
   type RoomSocket,
   type RoomSocketListeners
-} from "spell/util/places"
+} from "spell/places"
 import { SRV } from "spell/server"
 import { Referee, type RoomAction, type RoomMember } from "spell/server/places"
 

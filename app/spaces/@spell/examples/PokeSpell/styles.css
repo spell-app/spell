@@ -1,0 +1,63 @@
+/* File styles.css:  PokéSpell's theme, and Who's that Pokémon's shadow.
+   - The theme:  a bright sky (a night sky in dark mode), round friendly letters, white cards with round corners.
+     Spell UI's own tokens, so every card, header and button follows.
+   - Every other look is an attribute, in the spellml files:
+     - the logo and a Pokémon's name:  `size="poster"`, `font="heavy"`, the logo's `shadow="yellow"`
+     - each picture's sunny circle:  `background="yellow"`
+     - how wide the search, a strength bar and a card in a family are:  `width`, `min-width`, `max-width`
+     - a family's row that runs down a phone, its arrows turning:  `stackable="34em"`, `rotated="when stacked"`
+     - each kind's colour, a button's own `color`;  every button a pill, the app's `<ui-defaults>` */
+
+poke-spell-app {
+  --sky: linear-gradient(180deg, #8fd8ff 0%, #d9f4ff 45%, #fff6c9 100%);
+  --ink: #1d2b4f;
+  --ui-text-color: var(--ink);
+  --ui-header-color: var(--ink);
+  --ui-font-family: var(--ui-font-family-rounded);
+  --ui-font-family-heading: var(--ui-font-family-rounded);
+  /* A card stays white in the dark, so its words stay dark */
+  --ui-card-background: #fff;
+  --ui-card-header-color: #1d2b4f;
+  --ui-card-border-color: transparent;
+  --ui-card-margin-block: 0;
+  --ui-card-radius: 1.5em;
+  --ui-card-link-raise: 0.4em;
+  --ui-segment-radius: 1.5em;
+
+  color-scheme: light;
+  container-type: inline-size;
+  display: block;
+  min-height: 100vh;
+  padding: 1em clamp(1em, 4vw, 3em) 2em;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  poke-spell-app {
+    --sky: radial-gradient(ellipse at 50% 0%, #2c3f8f 0%, #141c45 55%, #0b1030 100%);
+    --ink: #f2f5ff;
+
+    color-scheme: dark;
+  }
+}
+
+/****************
+ * Who's that Pokémon?  Black as a shadow, until you've guessed.
+ ****************/
+
+.shadow::part(segment) {
+  background: radial-gradient(circle, #fff 0%, #ffe066 45%, #ff9f1c 100%);
+}
+
+/* No hairline round it (the theme's, for photos with white edges):  a black shape on the sunburst */
+.shadow .art::part(image) {
+  width: min(18em, 70vw);
+  outline: none;
+  filter: brightness(0);
+  transition: filter 0.6s ease;
+}
+
+.shadow.found .art::part(image) {
+  filter: none;
+}

@@ -204,10 +204,27 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     if (!count) return undefined
     const words = tokens.slice(0, count)
     const scopeType = types.get(this.mapValue(singular.slice(0, count).join("-")))
-    if (!scopeType) return undefined
+    if (!scopeType || SpellType.isOneOfAKindNamedAsAList(scope, scopeType, words)) return undefined
     const match = this.typeMatch(scope, words, scopeType, scopeType.name)
     match.data.numberWord = `${words[0]!.value}`
     return match
+  }
+
+  /**
+   * Do `words` name a one of a kind's own type (an app, a page) whose name says a list of a known type,
+   * Spanish's app `lista de tareas`?
+   * - Then they're the list, as they'd be with no app of that name:  `sus "tareas guardadas" es una lista de tareas`
+   *   holds tasks, never the app, which is one of a kind (epic `language` T63).
+   * - A one of a kind's type:  the type of the variable its words name, `kind: "only"` --
+   *   known ahead of its declaration, from any file (`SP.SpellParser.stubDeclaredVariables()`).
+   * - Its own line still names it, by its words:  `lista de tareas es una aplicación` doesn't come here.
+   */
+  private static isOneOfAKindNamedAsAList(scope: P.Scope, type: P.TypeScope, words: P.Token[]): boolean {
+    const written = words.map((word) => word.value).join(" ")
+    const oneOfAKind = scope.variables?.get(SP.SpellParser.oneOfAKindVariableName(written))
+    if (oneOfAKind?.kind !== "only" || oneOfAKind.datatype !== type.name) return false
+    const item = P.itemTypeOf(SP.typeName(written))
+    return !!item && !!scope.types?.get(item)
   }
 
   /**

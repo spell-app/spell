@@ -42,6 +42,24 @@ export const treeVocabulary = {
       group: "behaviour",
       kind: "string",
       description: "What a screen reader calls the tree."
+    },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "valueOnly",
+      values: ["nav"],
+      description:
+        "`nav`:  a site's side navigation, as the docs site's is:  taller rows, a selected row a rounded box in the " +
+        "primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands."
+    },
+    {
+      name: "sticky-path",
+      group: "behaviour",
+      kind: "keyOnly",
+      description:
+        "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, " +
+        "`Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its " +
+        "row, selecting nothing.  It shows only while one of them is scrolled out of sight."
     }
   ],
   events: [
@@ -65,7 +83,11 @@ export const treeVocabulary = {
     { name: "", description: "The top rows:  `<ui-tree-item>`s." },
     { name: "empty", description: "Shown when `filter` matches no row." }
   ],
-  parts: [{ name: "empty", description: "The box around the `empty` slot." }],
+  parts: [
+    { name: "empty", description: "The box around the `empty` slot." },
+    { name: "path", description: "`sticky-path`:  the pinned line naming the rows scrolled out of sight." },
+    { name: "path-row", description: "`sticky-path`:  each row's name in the path." }
+  ],
   states: [
     { name: "filtering", description: "It has a `filter`." },
     { name: "no-matches", description: "Its `filter` matches no row." }

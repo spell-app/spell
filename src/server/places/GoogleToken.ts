@@ -2,7 +2,7 @@ import { createSign } from "node:crypto"
 
 import { Api } from "spell/util/Api"
 import { ApiError } from "spell/util/fetching"
-import { PlaceError } from "spell/util/places/places.types"
+import { PlaceError } from "spell/places/places.types"
 
 import type { PlaceKeys } from "./PlaceKeys"
 

@@ -24,48 +24,52 @@
         }
       ],
       "returns": "text",
-      "defined": "/HowBillSplitterWorks.spell:853-1110"
+      "defined": "/HowBillSplitterWorks.spellml:851-1113"
     },
     {
       "type": "Bill",
       "superType": "App",
-      "defined": "/HowBillSplitterWorks.spell:1125-2189"
+      "defined": "/HowBillSplitterWorks.spellml:1701-2677"
     },
     {
       "property": "amount",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1180-1204"
+      "defined": "/HowBillSplitterWorks.spellml:1709-1744"
     },
     {
       "property": "percent",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1208-1233"
+      "measure": {
+        "dimension": "Proportion",
+        "unit": "fraction"
+      },
+      "defined": "/HowBillSplitterWorks.spellml:1757-1795"
     },
     {
       "property": "people",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1237-1261"
+      "defined": "/HowBillSplitterWorks.spellml:1808-1842"
     },
     {
       "property": "tip",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1350-1393"
+      "defined": "/HowBillSplitterWorks.spellml:1856-1896"
     },
     {
       "property": "total",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1397-1432"
+      "defined": "/HowBillSplitterWorks.spellml:1901-1939"
     },
     {
       "property": "each",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1436-1507"
+      "defined": "/HowBillSplitterWorks.spellml:1944-2018"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -78,7 +82,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowBillSplitterWorks.spell:1603-2189"
+      "defined": "/HowBillSplitterWorks.spellml:2034-2668"
     },
     {
       "syntax": "test money",
@@ -87,7 +91,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "money",
-      "defined": "/HowBillSplitterWorks.spell:2342-2434"
+      "defined": "/HowBillSplitterWorks.spellml:2712-2806"
     },
     {
       "syntax": "test splitting",
@@ -96,20 +100,20 @@
       "alias": "statement",
       "kind": "function",
       "name": "splitting",
-      "defined": "/HowBillSplitterWorks.spell:2436-2539"
+      "defined": "/HowBillSplitterWorks.spellml:2809-2914"
     }
   ],
   "codeLines": [
     23,
-    33,
-    37,
-    42,
+    44,
     47,
-    53,
+    52,
     57,
-    61,
-    67,
-    97,
-    104
+    62,
+    66,
+    70,
+    75,
+    100,
+    107
   ]
 }

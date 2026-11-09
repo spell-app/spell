@@ -68,12 +68,27 @@ export const epicItemVocabulary = {
     {
       name: "state",
       kind: "enum",
-      values: ["attention", "replied", "progress", "open", "recent", "handled", "old"],
+      values: [
+        "attention",
+        "replied",
+        "requested",
+        "progress",
+        "handed",
+        "open",
+        "scheduled",
+        "recent",
+        "handled",
+        "quiet",
+        "old"
+      ],
       description:
         "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` " +
-        "(orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), " +
-        "`open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), " +
-        "`handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+        "(orange:  your turn to pick or review;  a manual test whose phase isn't done), `requested` (light orange:  what " +
+        "you asked for is finished, your turn to see it), `progress` (blue:  Claude is working on it), `handed` (blue " +
+        "outlined:  you pressed Do this, Claude hasn't started), `open` (yellow:  still undecided), `scheduled` (dotted " +
+        "blue:  queued work, agreed, not started), `recent` (green:  decided or done), `handled` (grey:  its answer is in " +
+        "a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a calm judgement " +
+        "call, a limit:  nothing to think about), `old` (grey:  no longer relevant, canceled)."
     },
     {
       name: "handled",
@@ -115,7 +130,7 @@ export const epicItemVocabulary = {
       values: ["approve", "todo", "revisit", "now", "next", "drop", "skip"],
       description:
         "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into " +
-        "the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the " +
+        "the next phase, or dropped;  `skip`:  nothing to do, an older page's note box x):  the record, not drawn on the " +
         "buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
     },
     {
@@ -155,9 +170,33 @@ export const epicItemVocabulary = {
       name: "calm",
       kind: "boolean",
       description:
-        "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  " +
+        "Not urgent:  an open judgement call not reviewed yet is `quiet` (grey), an issue `open` (yellow), not " +
+        "`attention` (red).  " +
         "For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip " +
         "while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+    },
+    {
+      name: "requested",
+      kind: "boolean",
+      description:
+        "An issue filed from the person's own words (`epic add ... --requested`, `epic file`, epic `epic-engine` " +
+        "P63):  closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing " +
+        "Claude tripped over."
+    },
+    {
+      name: "urgent",
+      kind: "boolean",
+      description:
+        "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until " +
+        "reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow.  On a judgement call " +
+        "or issue, your Do this (I232):  red until handled, reviewed or not."
+    },
+    {
+      name: "fixed",
+      kind: "boolean",
+      description:
+        "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` " +
+        "(orange), your turn to review it;  Approve closes it, Do this sends it back."
     },
     {
       name: "failed",
@@ -332,6 +371,32 @@ export const epicItemVocabulary = {
       key: "stateReplied",
       text: "Claude answered:  your turn to pick",
       description: "Id chip tooltip, `state=replied`."
+    },
+    { key: "stateFixed", text: "Claude fixed it:  your turn to review", description: "Id chip tooltip, `fixed`." },
+    {
+      key: "stateRequested",
+      text: "Claude finished what you asked:  your turn to see it",
+      description: "Id chip tooltip, `state=requested` (light orange)."
+    },
+    {
+      key: "stateTestWaiting",
+      text: "A test only you can run, its phase not done yet",
+      description: "Id chip tooltip, a manual test while its phase isn't done (orange)."
+    },
+    {
+      key: "stateHanded",
+      text: "You pressed Do this:  waiting for Claude to start",
+      description: "Id chip tooltip, `state=handed` (blue outline)."
+    },
+    {
+      key: "stateScheduled",
+      text: "Agreed, not started:  nothing for you to do",
+      description: "Id chip tooltip, `state=scheduled` (blue dotted)."
+    },
+    {
+      key: "stateQuiet",
+      text: "Open, nothing to think about",
+      description: "Id chip tooltip, `state=quiet` (grey):  a calm judgement call, a limit."
     },
     { key: "stateProgress", text: "Claude is working on it", description: "Id chip tooltip, `state=progress`." },
     { key: "stateOpen", text: "Open, still undecided", description: "Id chip tooltip, `state=open`." },

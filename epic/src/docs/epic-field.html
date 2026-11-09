@@ -260,6 +260,16 @@
                           ><code>&lt;epic-phase&gt;</code></a
                         >
                       </td>
+                      <td>as <code>name="dropped"</code></td>
+                      <td>one at most</td>
+                      <td>Dropped: why a dropped phase was never built, in place of Done (epic <code>epic-engine</code> I228).</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-phase.html" target="src-packages-epics-docs-epic-phase-html"
+                          ><code>&lt;epic-phase&gt;</code></a
+                        >
+                      </td>
                       <td>as <code>name="files"</code></td>
                       <td>one at most</td>
                       <td>Files: what changes.</td>
@@ -398,12 +408,13 @@
                     <td><code>name</code></td>
                     <td>
                       <code>symptom</code>, <code>changes</code>, <code>goal</code>, <code>done</code>,
-                      <code>files</code>, <code>verify</code>, <code>to-review</code>
+                      <code>dropped</code>, <code>files</code>, <code>verify</code>, <code>to-review</code>
                     </td>
                     <td>
                       A phase's field (every field in a phase has one): <code>symptom</code> (one line),
                       <code>changes</code> (two or three), <code>goal</code> (a bullet per outcome),
-                      <code>done</code> (what was built), <code>files</code>, <code>verify</code> (both hidden until the
+                      <code>done</code> (what was built), <code>dropped</code> (why a dropped phase was never built),
+                      <code>files</code>, <code>verify</code> (both hidden until the
                       Phases title's toggles), <code>to-review</code> (the script's).
                     </td>
                     <td></td>
@@ -495,7 +506,7 @@
                   href="/guides/epic-components/colours.html"
                   target="src-guides-epic-components-colours-html"
                   >the colour scheme</a
-                >): red needs Owen, blue Claude is working on it, yellow open, green decided or done, grey no longer
+                >): red needs you, blue Claude is working on it, yellow open, green decided or done, grey no longer
                 relevant.
               </li>
               <li><b>A labelled block:</b> no icon column, a paragraph's spacing.</li>

@@ -2,6 +2,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync, statSync } from "node
 import { homedir } from "node:os"
 import { join } from "node:path"
 
+import { isProcessAlive } from "spell/server/Heartbeat"
 import { RealPath } from "spell/server/RealPath"
 
 /****************
@@ -11,7 +12,7 @@ import { RealPath } from "spell/server/RealPath"
  *
  * ```ts
  * ClaudeHome.home()                                       // => "/Users/owen/.claude"
- * ClaudeHome.liveSessions({ isAlive: SRV.isProcessAlive }) // => [{ pid, sessionId, name, cwd ... }]
+ * ClaudeHome.liveSessions()                               // => [{ pid, sessionId, name, cwd ... }]
  * ClaudeHome.transcriptOf("055da582-...")                  // => ".../projects/-Users-owen-www-spell/055da582-....jsonl"
  * ```
  *
@@ -53,11 +54,14 @@ export class ClaudeHome {
    * still runs, in its files' order.
    * - a record whose process is gone (a session that ended without cleaning up), one half-written, or one with no
    *   `pid` or `sessionId`:  skipped
-   * - `isAlive`:  the process check, handed in:  the kit's (`isProcessAlive()`) is in its server, which plain `node`
-   *   can't load;  the window script hands its own
+   * - `isAlive`:  the process check;  the kit's ONE (`isProcessAlive()`, beside its `Heartbeat`), unless a test hands
+   *   its own
    * - NEVER throws
    */
-  static liveSessions({ home = ClaudeHome.home(), isAlive }: LiveSessionsProps): RunningSession[] {
+  static liveSessions({
+    home = ClaudeHome.home(),
+    isAlive = isProcessAlive
+  }: LiveSessionsProps = {}): RunningSession[] {
     const folder = join(home, "sessions")
     if (!existsSync(folder)) return []
     const found: RunningSession[] = []
@@ -132,8 +136,8 @@ export class ClaudeHome {
 export type LiveSessionsProps = {
   /** Claude Code's folder;  default `ClaudeHome.home()` */
   home?: string
-  /** whether process `pid` still runs */
-  isAlive: (pid: number) => boolean
+  /** whether process `pid` still runs;  default the kit's `isProcessAlive()` */
+  isAlive?: (pid: number) => boolean
 }
 
 /**

@@ -1,8 +1,8 @@
 /**
- * The language commands' work (spell-parser's `spell compile`, `spell run` ...):  what spell-app's `"language"` hook
- * loads (`cli/hooks.ts`, epic `repo-split` P13).
- * - Each makes one `CliSession`, which loads projects the app's way:  addresses like `@spell/examples/Solitaire`,
- *   spaces' folders on disk, the editor's language service.
+ * The language commands' work (spell-parser's `spell compile`, `spell run` ...):
+ * what spell-app's `"language"` hook loads (`cli/hooks.ts`, epic `repo-split` P13).
+ * - Each makes one `CliSession`, which loads projects the app's way:
+ *   addresses like `@spell/examples/Solitaire`, spaces' folders on disk, the editor's language service.
  * - NOT in the barrel:  `hooks.ts` loads it after `consoleGuard.ts`, which must run before spell loads.
  */
 import type { LanguageCommands } from "spell/parser/cli"
@@ -34,7 +34,8 @@ export const appCommands = {
   create: (args: string[], options: CLI.NewOptions) => CLI.newCommand(session(options), args, options),
   serve: (args: string[], options: CLI.ServeOptions) => CLI.serveCommand(session(options), args, options),
   preview: (args: string[], options: CLI.PreviewOptions) => CLI.previewCommand(session(options), args, options),
-  projects: (args: string[], options: CLI.ProjectsOptions) => CLI.projectsCommand(session(options), args, options)
+  projects: (args: string[], options: CLI.ProjectsOptions) => CLI.projectsCommand(session(options), args, options),
+  lexicon: (args: string[], options: CLI.LexiconOptions) => CLI.lexiconCommand(session(options), args, options)
 }
 
 /** A command's session, with its flags. */

@@ -2,28 +2,42 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Task",
+    "TaskKeeper",
+    "BrowserTask",
+    "BrowserKeeper",
+    "ServerTask",
+    "ServerKeeper",
+    "SheetTask",
+    "SheetKeeper",
+    "SkyTask",
+    "SkyKeeper",
     "Checklist",
     "TaskList",
+    "BrowserStorage",
+    "TaskFile",
+    "TaskSheet",
+    "TaskSky",
     "test_checking_one_off",
-    "test_the_filter"
+    "test_the_filter",
+    "test_a_dragged_order_is_kept"
   ],
   "statements": [
     {
       "type": "Task",
       "superType": "View",
-      "defined": "/Task.spellml:289-1439"
+      "defined": "/Task.spellml:287-1722"
     },
     {
       "property": "title",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spellml:331-378"
+      "defined": "/Task.spellml:329-376"
     },
     {
       "property": "notes",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spellml:383-442"
+      "defined": "/Task.spellml:381-440"
     },
     {
       "property": "priority",
@@ -34,13 +48,19 @@
         "normal",
         "high"
       ],
-      "defined": "/Task.spellml:447-495"
+      "defined": "/Task.spellml:445-493"
     },
     {
       "property": "done",
       "of": "Task",
       "datatype": "choice",
-      "defined": "/Task.spellml:501-527"
+      "defined": "/Task.spellml:499-525"
+    },
+    {
+      "property": "order",
+      "of": "Task",
+      "datatype": "number",
+      "defined": "/Task.spellml:530-674"
     },
     {
       "syntax": "{operator:is_or_is_not} done",
@@ -50,7 +70,7 @@
       "kind": "method",
       "name": "\"is done\"",
       "returns": "choice",
-      "defined": "/Task.spellml:532-567"
+      "defined": "/Task.spellml:679-714"
     },
     {
       "syntax": "{operator:is_or_is_not} active",
@@ -60,7 +80,21 @@
       "kind": "method",
       "name": "\"is active\"",
       "returns": "choice",
-      "defined": "/Task.spellml:572-608"
+      "defined": "/Task.spellml:719-755"
+    },
+    {
+      "syntax": "throw {thisArg:expression} away",
+      "output": "throw_away",
+      "rule": "method_call",
+      "of": "Task",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "throw it away",
+      "returns": "nothing",
+      "defined": "/Task.spellml:760-926"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -73,7 +107,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Task.spellml:614-1231"
+      "defined": "/Task.spellml:932-1519"
     },
     {
       "syntax": "test checking one off",
@@ -82,13 +116,276 @@
       "alias": "statement",
       "kind": "function",
       "name": "checking one off",
-      "defined": "/Task.spellml:1243-1430"
+      "defined": "/Task.spellml:1531-1713"
+    },
+    {
+      "type": "TaskKeeper",
+      "superType": "Thing",
+      "defined": "/TaskList.api.spell:959-1238"
+    },
+    {
+      "property": "kept_tasks",
+      "asWritten": "kept tasks",
+      "of": "TaskKeeper",
+      "datatype": "list of tasks",
+      "defined": "/TaskList.api.spell:1064-1099"
+    },
+    {
+      "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
+      "output": "keep_a_new_task_titled_$title",
+      "rule": "method_call",
+      "of": "TaskKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep a new task titled (title as text)",
+      "params": [
+        {
+          "name": "title",
+          "datatype": "text"
+        }
+      ],
+      "returns": "Task",
+      "defined": "/TaskList.api.spell:1157-1238"
+    },
+    {
+      "type": "BrowserTask",
+      "superType": "Task",
+      "defined": "/TaskList.browser.api.spell:249-363"
+    },
+    {
+      "syntax": "throw {thisArg:expression} away",
+      "output": "throw_away",
+      "rule": "method_call",
+      "of": "BrowserTask",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "throw it away",
+      "returns": "nothing",
+      "defined": "/TaskList.browser.api.spell:311-363"
+    },
+    {
+      "type": "BrowserKeeper",
+      "superType": "TaskKeeper",
+      "defined": "/TaskList.browser.api.spell:365-587"
+    },
+    {
+      "property": "kept_tasks",
+      "asWritten": "kept tasks",
+      "of": "BrowserKeeper",
+      "datatype": "list of browser-tasks",
+      "defined": "/TaskList.browser.api.spell:405-443"
+    },
+    {
+      "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
+      "output": "keep_a_new_task_titled_$title",
+      "rule": "method_call",
+      "of": "BrowserKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep a new task titled (title as text)",
+      "params": [
+        {
+          "name": "title",
+          "datatype": "text"
+        }
+      ],
+      "returns": "BrowserTask",
+      "defined": "/TaskList.browser.api.spell:447-587"
+    },
+    {
+      "type": "BrowserStorage",
+      "superType": "Place",
+      "defined": "/TaskList.browser.api.spell:203-247"
+    },
+    {
+      "type": "ServerTask",
+      "superType": "Task",
+      "defined": "/TaskList.server.api.spell:392-499"
+    },
+    {
+      "syntax": "throw {thisArg:expression} away",
+      "output": "throw_away",
+      "rule": "method_call",
+      "of": "ServerTask",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "throw it away",
+      "returns": "nothing",
+      "defined": "/TaskList.server.api.spell:448-499"
+    },
+    {
+      "type": "ServerKeeper",
+      "superType": "TaskKeeper",
+      "defined": "/TaskList.server.api.spell:501-719"
+    },
+    {
+      "property": "kept_tasks",
+      "asWritten": "kept tasks",
+      "of": "ServerKeeper",
+      "datatype": "list of server-tasks",
+      "defined": "/TaskList.server.api.spell:540-577"
+    },
+    {
+      "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
+      "output": "keep_a_new_task_titled_$title",
+      "rule": "method_call",
+      "of": "ServerKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep a new task titled (title as text)",
+      "params": [
+        {
+          "name": "title",
+          "datatype": "text"
+        }
+      ],
+      "returns": "ServerTask",
+      "defined": "/TaskList.server.api.spell:581-719"
+    },
+    {
+      "type": "TaskFile",
+      "superType": "Place",
+      "defined": "/TaskList.server.api.spell:322-390"
+    },
+    {
+      "type": "SheetTask",
+      "superType": "Task",
+      "defined": "/TaskList.csv.api.spell:548-653"
+    },
+    {
+      "syntax": "throw {thisArg:expression} away",
+      "output": "throw_away",
+      "rule": "method_call",
+      "of": "SheetTask",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "throw it away",
+      "returns": "nothing",
+      "defined": "/TaskList.csv.api.spell:603-653"
+    },
+    {
+      "type": "SheetKeeper",
+      "superType": "TaskKeeper",
+      "defined": "/TaskList.csv.api.spell:655-869"
+    },
+    {
+      "property": "kept_tasks",
+      "asWritten": "kept tasks",
+      "of": "SheetKeeper",
+      "datatype": "list of sheet-tasks",
+      "defined": "/TaskList.csv.api.spell:693-729"
+    },
+    {
+      "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
+      "output": "keep_a_new_task_titled_$title",
+      "rule": "method_call",
+      "of": "SheetKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep a new task titled (title as text)",
+      "params": [
+        {
+          "name": "title",
+          "datatype": "text"
+        }
+      ],
+      "returns": "SheetTask",
+      "defined": "/TaskList.csv.api.spell:733-869"
+    },
+    {
+      "type": "TaskSheet",
+      "superType": "Place",
+      "defined": "/TaskList.csv.api.spell:458-546"
+    },
+    {
+      "type": "SkyTask",
+      "superType": "Task",
+      "defined": "/TaskList.atmosphere.api.spell:397-496"
+    },
+    {
+      "syntax": "throw {thisArg:expression} away",
+      "output": "throw_away",
+      "rule": "method_call",
+      "of": "SkyTask",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "throw it away",
+      "returns": "nothing",
+      "defined": "/TaskList.atmosphere.api.spell:448-496"
+    },
+    {
+      "property": "owner",
+      "of": "SkyTask",
+      "group": "Kept in your atmosphere account",
+      "datatype": "text",
+      "defined": "/TaskList.atmosphere.api.spell:563-594"
+    },
+    {
+      "type": "SkyKeeper",
+      "superType": "TaskKeeper",
+      "defined": "/TaskList.atmosphere.api.spell:596-893"
+    },
+    {
+      "property": "kept_tasks",
+      "asWritten": "kept tasks",
+      "of": "SkyKeeper",
+      "datatype": "list of sky-tasks",
+      "defined": "/TaskList.atmosphere.api.spell:695-757"
+    },
+    {
+      "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
+      "output": "keep_a_new_task_titled_$title",
+      "rule": "method_call",
+      "of": "SkyKeeper",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep a new task titled (title as text)",
+      "params": [
+        {
+          "name": "title",
+          "datatype": "text"
+        }
+      ],
+      "returns": "SkyTask",
+      "defined": "/TaskList.atmosphere.api.spell:761-893"
+    },
+    {
+      "type": "TaskSky",
+      "superType": "Place",
+      "defined": "/TaskList.atmosphere.api.spell:294-395"
     },
     {
       "type": "Checklist",
       "superType": "ViewableList",
       "itemType": "Task",
-      "defined": "/TaskList.spellml:326-1306"
+      "defined": "/TaskList.spellml:587-2435"
     },
     {
       "property": "showing",
@@ -99,7 +396,7 @@
         "active",
         "done"
       ],
-      "defined": "/TaskList.spellml:386-548"
+      "defined": "/TaskList.spellml:647-809"
     },
     {
       "syntax": "{operator:is_or_is_not} showing (expression:all|alls|active|actives|done|dones)",
@@ -115,7 +412,34 @@
           "done"
         ]
       },
-      "defined": "/TaskList.spellml:386-548"
+      "defined": "/TaskList.spellml:647-809"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Checklist",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/TaskList.spellml:1312-1521"
+    },
+    {
+      "syntax": "keep the order (of {thisArg:expression})?",
+      "output": "keep_the_order",
+      "rule": "method_call",
+      "of": "Checklist",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "keep the order",
+      "returns": "nothing",
+      "defined": "/TaskList.spellml:1532-1750"
     },
     {
       "syntax": "test the filter",
@@ -124,7 +448,16 @@
       "alias": "statement",
       "kind": "function",
       "name": "the filter",
-      "defined": "/TaskList.spellml:1065-1297"
+      "defined": "/TaskList.spellml:1764-1996"
+    },
+    {
+      "syntax": "test a dragged order is kept",
+      "output": "test_a_dragged_order_is_kept",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "a dragged order is kept",
+      "defined": "/TaskList.spellml:2007-2426"
     },
     {
       "property": "checklist",
@@ -132,31 +465,68 @@
       "group": "The checklist",
       "datatype": "Checklist",
       "exclusive": true,
-      "defined": "/TaskList.spellml:1371-1402"
+      "defined": "/TaskList.spellml:2500-2531"
     },
     {
       "type": "TaskList",
       "superType": "App",
-      "defined": "/TaskList.spellml:1514-4301"
+      "defined": "/TaskList.spellml:2643-7979"
     },
     {
       "property": "checklist",
       "of": "TaskList",
       "datatype": "Checklist",
-      "defined": "/TaskList.spellml:1527-1564"
+      "defined": "/TaskList.spellml:2656-2693"
     },
     {
       "property": "draft",
       "of": "TaskList",
       "datatype": "text",
-      "defined": "/TaskList.spellml:1569-1661"
+      "defined": "/TaskList.spellml:2698-2790"
     },
     {
       "property": "active_count",
       "asWritten": "active count",
       "of": "TaskList",
       "datatype": "number",
-      "defined": "/TaskList.spellml:1666-1748"
+      "defined": "/TaskList.spellml:2795-2877"
+    },
+    {
+      "property": "storage",
+      "classVariable": "Storages",
+      "of": "TaskList",
+      "group": "keeping",
+      "groupDescription": "Where the tasks are kept:  the person picks, and the app asks that keeper",
+      "enumeration": [
+        "browser",
+        "server",
+        "csv",
+        "atmosphere"
+      ],
+      "defined": "/TaskList.spellml:2991-3053"
+    },
+    {
+      "property": "keeper",
+      "of": "TaskList",
+      "group": "keeping",
+      "datatype": "TaskKeeper",
+      "defined": "/TaskList.spellml:3193-3316"
+    },
+    {
+      "syntax": "fill the checklist (of {thisArg:expression})?",
+      "output": "fill_the_checklist",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "keeping",
+      "kind": "method",
+      "name": "fill the checklist",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/TaskList.spellml:3652-4274"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -167,9 +537,36 @@
         "statement",
         "expression"
       ],
+      "group": "keeping",
       "kind": "method",
       "name": "create it",
-      "defined": "/TaskList.spellml:1754-2288"
+      "returns": "nothing",
+      "defined": "/TaskList.spellml:4288-4524"
+    },
+    {
+      "syntax": "add the starting task {callArgs:expression} with priority {callArgs:expression} (of {thisArg:expression})?",
+      "output": "add_the_starting_task_$title_with_priority_$level",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "keeping",
+      "kind": "method",
+      "name": "add the starting task (title as text) with priority (level as text)",
+      "params": [
+        {
+          "name": "title",
+          "datatype": "text"
+        },
+        {
+          "name": "level",
+          "datatype": "text"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/TaskList.spellml:4538-4792"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -180,10 +577,11 @@
         "statement",
         "expression"
       ],
+      "group": "keeping",
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/TaskList.spellml:2302-2532"
+      "defined": "/TaskList.spellml:4806-5160"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -194,10 +592,11 @@
         "statement",
         "expression"
       ],
-      "group": "filter",
+      "group": "menus",
+      "groupDescription": "The toolbar's buttons, and the list's right click:  the same actions",
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spellml:3318-4292"
+      "defined": "/TaskList.spellml:6521-7970"
     },
     {
       "syntax": "show all (of {thisArg:expression})?",
@@ -212,7 +611,9 @@
       "groupDescription": "Which tasks the list shows:  the toolbar ticks the one it's showing",
       "kind": "method",
       "name": "show all",
-      "defined": "/TaskList.spellml:2647-2762"
+      "returns": "nothing",
+      "title": "All",
+      "defined": "/TaskList.spellml:5275-5402"
     },
     {
       "syntax": "show to do (of {thisArg:expression})?",
@@ -226,7 +627,9 @@
       "group": "filter",
       "kind": "method",
       "name": "show to do",
-      "defined": "/TaskList.spellml:2767-2900"
+      "returns": "nothing",
+      "title": "To do",
+      "defined": "/TaskList.spellml:5407-5554"
     },
     {
       "syntax": "show done (of {thisArg:expression})?",
@@ -240,7 +643,9 @@
       "group": "filter",
       "kind": "method",
       "name": "show done",
-      "defined": "/TaskList.spellml:2905-3039"
+      "returns": "nothing",
+      "title": "Done",
+      "defined": "/TaskList.spellml:5559-5706"
     },
     {
       "syntax": "remove the done tasks (of {thisArg:expression})?",
@@ -254,7 +659,9 @@
       "group": "filter",
       "kind": "method",
       "name": "remove the done tasks",
-      "defined": "/TaskList.spellml:3044-3153"
+      "returns": "nothing",
+      "title": "Remove the done tasks",
+      "defined": "/TaskList.spellml:5711-5921"
     }
   ],
   "codeLines": [
@@ -263,25 +670,62 @@
     21,
     26,
     32,
-    37,
-    41,
-    46,
-    71,
-    97,
-    102,
-    108,
-    131,
+    38,
+    43,
+    47,
+    52,
+    57,
+    81,
+    111,
+    113,
+    119,
+    129,
+    132,
+    139,
+    140,
     145,
-    152,
-    155,
-    161,
-    166,
-    171,
-    184,
-    191,
-    257,
-    258,
+    156,
+    165,
+    168,
+    175,
+    176,
+    181,
+    193,
+    207,
+    210,
+    217,
+    218,
+    223,
+    236,
+    251,
+    254,
     259,
-    260
+    267,
+    269,
+    274,
+    286,
+    309,
+    314,
+    320,
+    337,
+    345,
+    356,
+    369,
+    391,
+    398,
+    401,
+    407,
+    412,
+    417,
+    424,
+    438,
+    450,
+    457,
+    465,
+    476,
+    559,
+    560,
+    561,
+    562
   ]
 }

@@ -254,7 +254,7 @@ describe("projects list and sendError shape", () => {
   })
 
   it("sendError body is { errors: [{ message, trace }] } with status 500", async () => {
-    const reply = await request("GET", "/api/projects/list/@bad/domain")
+    const reply = await request("GET", "/api/projects/list/@spell/domain")
     expect(reply.status).toBe(500)
     expect(reply.contentType).toMatch(/^application\/json/)
     const body = reply.json()
@@ -319,7 +319,7 @@ describe("GET /spaces/<project>/<file>", () => {
 
   it.each([
     ["no file after the project", `/spaces/${PLACE}`, "no file after the project"],
-    ["an unknown group", "/spaces/@nobody/Proj/top.spell", "no project group holds"],
+    ["an unknown group", "/spaces/@spell/nobody/Proj/top.spell", "no project group holds"],
     ["the two slashes from before decision Q41", `/spaces/${PLACE}//top.spell`, "an empty part"]
   ])("a URL that names no project's file (%s) => 400", async (_name, url, message) => {
     const reply = await request("GET", url)

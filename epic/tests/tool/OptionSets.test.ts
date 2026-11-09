@@ -120,6 +120,26 @@ describe("the mark (`ReviewInbox.toMark()`)", () => {
     for (const mark of bad) expect(() => ReviewInbox.toMark(mark), JSON.stringify(mark)).toThrow()
   })
 
+  test("a change to each of a holder's sets (I227):  checked each;  the lowest set's at the top", () => {
+    expect(ReviewInbox.toMark({ action: "pick", pick: "B", choices: 1, sets: [{ pick: "A", choices: 0 }] })).toEqual({
+      action: "pick",
+      pick: "A",
+      choices: 0,
+      sets: [{ pick: "B", choices: 1 }]
+    })
+    // a revisit carries every set's pick
+    expect(
+      ReviewInbox.toMark({ action: "revisit", note: "but", sets: [{ pick: "B", choices: 1 }], multiple: true })
+    ).toEqual({ action: "revisit", when: "soon", note: "but", multiple: true, sets: [{ pick: "B", choices: 1 }] })
+    const bad: unknown[] = [
+      { action: "pick", pick: "A", sets: [{ pick: "B" }] },
+      { action: "pick", pick: "A", choices: 1, sets: [{ pick: "B", choices: 1 }] },
+      { action: "pick", pick: "A", sets: [{ pick: "a", choices: 1 }] },
+      { action: "pick", pick: "A", sets: "B" }
+    ]
+    for (const mark of bad) expect(() => ReviewInbox.toMark(mark), JSON.stringify(mark)).toThrow()
+  })
+
   test("pickOf carries the whole change;  a standing set's id takes marks while open", () => {
     expect(ReviewInbox.pickOf({ pick: "A", choices: 0, removed: ["B"], multiple: true })).toEqual({
       pick: "A",
@@ -128,6 +148,12 @@ describe("the mark (`ReviewInbox.toMark()`)", () => {
       removed: ["B"]
     })
     expect(ReviewInbox.pickOf({ choices: 1 })).toEqual({})
+    // every set's change (I227)
+    expect(ReviewInbox.pickOf({ pick: "B", choices: 1, sets: [{ pick: "A", choices: 0 }, { choices: 2 }] })).toEqual({
+      pick: "A",
+      choices: 0,
+      sets: [{ pick: "B", choices: 1 }]
+    })
     expect(ReviewInbox.toItemId("s-upgrades")).toBe("s-upgrades")
     const html =
       '<epic-section id="choices" kind="choices"><epic-choices id="s-upgrades" title="Up" standing multiple>' +
@@ -199,6 +225,24 @@ describe("apply (`PlanDoc.applyMark()`)", () => {
     expect(problems(doc)).toEqual([])
   })
 
+  test("a phase's two sets (I227):  counted as the page counts them;  a pick in each applied, each its own line", () => {
+    const doc = plan()
+    doc.setPhaseFields(1, { choices: `<epic-choices>${OPTIONS}</epic-choices><epic-choices>${OPTIONS}</epic-choices>` })
+    const phase = doc.phase(1)
+    expect(PlanItem.choiceSets(phase).length).toBe(2)
+    expect(doc.optionCards(phase, 1).map((card) => card.letter)).toEqual(["A", "B", "C"])
+    const mark = { id: phase.id, action: "pick", pick: "B", choices: 0, sets: [{ pick: "C", choices: 1 }] }
+    expect(doc.pickWords(phase.id, mark)).toBe("B · Unfold it, C2 · Both")
+    expect(doc.pickWords(phase.id, { pick: "Z", choices: 1 })).toBe("Z2 (no such option card)")
+    const result = doc.applyMark(mark)
+    expect(result).toEqual({
+      applied: true,
+      did: "P1's choices:  picked B · Unfold it;  adjust its plan;  P1's choices:  picked C · Both;  adjust its plan"
+    })
+    expect(PlanItem.choiceSets(phase).map((set) => set.getAttribute("chosen"))).toEqual(["B", "C"])
+    expect(problems(doc)).toEqual([])
+  })
+
   test("Accept plan takes an open phase set's recommended option", () => {
     const doc = plan()
     doc.setPhaseFields(1, { plan: "<p>build it</p>" })
@@ -207,6 +251,31 @@ describe("apply (`PlanDoc.applyMark()`)", () => {
       did: "plan accepted:  build it;  took the recommended B · Unfold it"
     })
     expect(setOf(doc, "P1").getAttribute("chosen")).toBe("B")
+  })
+
+  test("a pick beside the thumbs up (I217):  the pick first, then Accept plan or Do this;  an item's Approve is its pick", () => {
+    const accepted = plan()
+    accepted.setPhaseFields(1, { plan: "<p>build it</p>" })
+    expect(accepted.applyMark({ id: accepted.phase(1).id, action: "approve", pick: "C" })).toEqual({
+      applied: true,
+      did: "P1's choices:  picked C · Both;  adjust its plan;  plan accepted:  build it"
+    })
+    expect(setOf(accepted, "P1").getAttribute("chosen")).toBe("C")
+    const goAhead = plan()
+    expect(goAhead.applyMark({ id: goAhead.phase(1).id, action: "todo", pick: "A" }).did).toBe(
+      "P1's choices:  picked A · Keep folds;  adjust its plan;  go ahead:  build it"
+    )
+    expect(setOf(goAhead, "P1").getAttribute("chosen")).toBe("A")
+    const item = plan()
+    expect(item.applyMark({ id: "q2", action: "approve", pick: "A" }).did).toBe("Owen picked A:  Keep folds")
+    expect(setOf(item, "q2").getAttribute("chosen")).toBe("A")
+    expect(ReviewInbox.toMark({ action: "approve", pick: "B", choices: 0 })).toEqual({
+      action: "approve",
+      pick: "B",
+      choices: 0
+    })
+    expect(ReviewInbox.toMark({ action: "todo", pick: "B" })).toEqual({ action: "todo", pick: "B" })
+    expect(ReviewInbox.toMark({ action: "approve" })).toEqual({ action: "approve" })
   })
 
   test("a standing set:  picks stamped and folded under Picked, the set open;  a closed set's mark left", () => {
@@ -251,6 +320,15 @@ describe("the commands (`OptionSets`)", () => {
     expect(sets.choose("Q2", ["A"])).toBe("Owen picked A:  Keep folds")
     expect(sets.choose("P1", ["C"], { outcome: "built" })).toBe("P1's choices:  picked C · Both")
     expect(setOf(doc, "P1").getAttribute("chosen-note")).toBe("recorded;  built")
+  })
+
+  test("choose takes a letter as people see it:  `B2` is `B` of the 2nd set (I227)", () => {
+    const doc = plan()
+    doc.setPhaseFields(1, { choices: `<epic-choices>${OPTIONS}</epic-choices><epic-choices>${OPTIONS}</epic-choices>` })
+    const sets = new OptionSets(doc)
+    expect(sets.choose("P1", ["A"], { set: 1 })).toBe("P1's choices:  picked A · Keep folds;  adjust its plan")
+    expect(sets.choose("P1", ["B2"])).toBe("P1's choices:  picked B · Unfold it;  adjust its plan")
+    expect(PlanItem.choiceSets(doc.phase(1)).map((set) => set.getAttribute("chosen"))).toEqual(["A", "B"])
   })
 
   test("option add, edit, remove, close;  a closed set refuses them;  lint stays clean", () => {

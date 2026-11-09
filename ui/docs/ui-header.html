@@ -416,6 +416,26 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-variations-capitals" label="Capitals" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`font` changes a header's case, as it does a button's, a label's and any other element's:  `title-caps` capitalizes each word (names from a service that writes them all in small letters), `all-caps` every letter."
+                >
+                  <ui-header level="3" font="title-caps">bulbasaur and ivysaur</ui-header>
+                  <ui-header level="4" font="all-caps">an eyebrow</ui-header>
+                  <ui-button font="title-caps">grass poison</ui-button>
+                  <ui-label font="title-caps">overgrow</ui-label>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-variations-poster" label="Poster" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`size=&quot;poster&quot;`:  bigger than `massive`, for a page's title.  It grows with the window, from 2.4 to 4 times the text around it, on tight lines.  `font=&quot;heavy&quot;` is heavier than `bold` (900), and `shadow` puts a hard shadow behind the letters, down and to the right, in a hue.  A button takes all three too:  a logo."
+                >
+                  <ui-header size="poster" color="red" font="heavy">Bulbasaur</ui-header>
+                  <ui-button appearance="tertiary" color="red" padding="none" size="poster" font="heavy" shadow="yellow">PokéSpell</ui-button>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-variations-link" label="Link" sticky="stack" collapsible dividing>
                 <ui-example description="With `link` a header renders a link styled as a header.">
                   <ui-header link="#link">Link header</ui-header>

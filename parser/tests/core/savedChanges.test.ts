@@ -8,7 +8,7 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { bridgeSolid } from "spell/util"
 import { core, on, Place, Thing } from "spell/parser/core"
-import { MemoryPlace, type PersonHere, type PlaceCapabilities, type WatchTarget } from "spell/util/places"
+import { MemoryPlace, type PersonHere, type PlaceCapabilities, type WatchTarget } from "spell/places"
 
 /** How long to let what's asked be answered. */
 const settled = () => new Promise((resolve) => setTimeout(resolve, 30))

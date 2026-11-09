@@ -1,9 +1,7 @@
-import { execSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type BrowserContext, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
+
+import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A change in the side bar goes into the program's text, in the running editor (epic `editor`, Sidebar Writes Source).
@@ -14,28 +12,6 @@ import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-pl
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** The code editor's chunk, in dev:  never answered, to work without it. */
 const CODE_EDITOR = /\/src\/app\/solid\/monaco\//
@@ -53,8 +29,9 @@ async function contextWithNoSaving(context: BrowserContext): Promise<void> {
       saved.set(decodeURI(pathname), request.postData() ?? "")
       return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
     }
-    // a reload reads what was "saved", wherever it reads its source
-    const tail = decodeURI(pathname).split("/").pop()!
+    // a reload reads what was "saved", wherever it reads its source:  by its group, project and name, as
+    // `@spell/notebooks/Counter` and `@spell/examples/Counter` both hold a `Counter.spellml`
+    const tail = decodeURI(pathname).split("/").slice(-3).join("/")
     const key = [...saved.keys()].find((each) => each.endsWith(`/${tail}`))
     return key ? route.fulfill({ contentType: "text/plain", body: saved.get(key)! }) : route.continue()
   })
@@ -71,20 +48,31 @@ async function open(page: Page, project: string, { codeEditor }: { codeEditor: b
   await page.waitForTimeout(1000)
 }
 
-/** Select the first element named `tag` by a click on it, as a person does;  `alt`:  a Spell UI element. */
+/**
+ * Select the first element named `tag` by a click on it, as a person does;  `alt`:  a Spell UI element.
+ * - Waits for it to be drawn:  a slow load can still be drawing when the fixed waits in `open()` end.
+ */
 async function select(page: Page, tag: string, { alt = false } = {}): Promise<void> {
-  const at = await page.evaluate((name) => {
-    const find = (root: Document | ShadowRoot): Element | undefined => {
-      for (const element of root.querySelectorAll("*")) {
-        if (element.localName === name) return element
-        const inside = element.shadowRoot && find(element.shadowRoot)
-        if (inside) return inside
+  const drawn = await page.waitForFunction(
+    (name) => {
+      const find = (root: Document | ShadowRoot): Element | undefined => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === name) return element
+          const inside = element.shadowRoot && find(element.shadowRoot)
+          if (inside) return inside
+        }
+        return undefined
       }
-      return undefined
-    }
-    const box = find(document)!.getBoundingClientRect()
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
-  }, tag)
+      const box = find(document)?.getBoundingClientRect()
+      return box && { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    },
+    tag,
+    { timeout: 30_000 }
+  )
+  const at = (await drawn.jsonValue())!
+  // the first Inspect's help popup sits over the app's top:  Counter's one button is under it
+  await page.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+  await page.waitForTimeout(300)
   if (alt) await page.keyboard.down("Alt")
   await page.mouse.click(at.x, at.y)
   if (alt) await page.keyboard.up("Alt")
@@ -149,8 +137,12 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   afterAll(async () => (await browser).close())
 
   // what this test is for:  the built-in examples stay as they are
+  let builtInProjectsBefore: string
+  beforeEach(() => {
+    builtInProjectsBefore = builtInProjectsNow()
+  })
   afterEach(() => {
-    expect(execSync("git status --short spaces", { cwd: path.join(KIT, "app") }).toString()).toBe("")
+    expect(builtInProjectsNow()).toBe(builtInProjectsBefore)
   })
 
   test("with the code editor not loaded:  edit, undo, redo, Save, reload", { timeout: 150_000 }, async () => {
@@ -221,7 +213,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
-    "a card made in a loop:  this one's to play with, and all of them can't change what each is given",
+    "a card made in a loop:  this one's to play with, and All Cards edits the card type",
     { timeout: 90_000 },
     async () => {
       const page = await context.newPage()
@@ -229,10 +221,12 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       const { text: before } = await fileState(page, "Deck.spellml")
       await select(page, "solitaire-card")
 
-      // it starts on "This", as nothing can change for all of them, and each field says so before any change:
-      // a crossed-out save icon after its info icon (Q29)
+      // it starts on the card itself, as nothing can change for all of them, and each field says so before any change:
+      // a crossed-out save icon after its info icon (Q29);  the switch is one control, [Card · Jack of Diamonds | All Cards]
       const scopes = page.locator(".InspectorScope")
-      expect(await scopes.allTextContents()).toEqual(["This", "All Cards"])
+      const words = await scopes.allTextContents()
+      expect(words[0]).toMatch(/^Card · /)
+      expect(words.slice(1)).toEqual(["All Cards"])
       expect(await scopes.first().getAttribute("selected")).not.toBeNull()
       const unsaved = page.locator("ui-property[name=suit] .unsaved")
       expect(await unsaved.getAttribute("title")).toBe("You can't save this because it is created automatically.")
@@ -250,31 +244,13 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       expect(await historyLength(page)).toBe(0)
 
-      // all cards:  its rank and suit come from the line that makes each, so they're read only, with a way to it
+      // all cards:  it edits the card type itself (Q29), so its rank and suit are its one-ofs, open to change;
+      // switching writes nothing (`thingsAndTemplates` changes them)
       await scopes.nth(1).click({ force: true })
       await page.waitForTimeout(400)
-      expect(await page.locator(".InspectorNotSaved").textContent()).toBe(
-        "Each card gets these from the code that makes it."
-      )
-      const rank = page.locator("ui-property[name=rank]")
-      expect(await rank.evaluate((field) => field.matches(":state(readonly)"))).toBe(true)
-      expect(await page.locator("ui-property[name=suit]").evaluate((field) => field.matches(":state(readonly)"))).toBe(
-        true
-      )
-      // read only means it: a press on another suit changes nothing
-      const shown = await suit()
-      await page
-        .locator("ui-property[name=suit] ui-item", { hasNotText: shown })
-        .first()
-        .click({ force: true })
-        .catch(() => undefined)
-      await page.waitForTimeout(200)
-      expect(await suit()).toBe(shown)
-      await rank.locator("button.origin").click({ force: true })
-      await page.waitForTimeout(1500)
-      expect(
-        await page.evaluate(() => (window as unknown as { editor: { file: { path: string } } }).editor.file.path)
-      ).toMatch(/Deck\.spellml$/)
+      expect(await scopes.nth(1).getAttribute("selected")).not.toBeNull()
+      expect(await page.locator(".InspectorTypeChoices[name=rank]").count()).toBe(1)
+      expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       await page.close()
     }
@@ -286,18 +262,18 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: true })
-      const { text: before } = await fileState(page, "Counter.spell")
+      const { text: before } = await fileState(page, "Counter.spellml")
       await select(page, "ui-button")
       await change(page, "color", "red")
-      const added = before.replace("<ui-button onClick", `<ui-button color="red" onClick`)
-      expect((await fileState(page, "Counter.spell")).text).toBe(added)
+      const added = before.replace("<button onClick", `<button color="red" onClick`)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(added)
       await change(page, "color", "blue")
-      expect((await fileState(page, "Counter.spell")).text).toBe(added.replace("red", "blue"))
+      expect((await fileState(page, "Counter.spellml")).text).toBe(added.replace("red", "blue"))
 
       // its text is code:  it says so, with a way to it
       await change(page, "textContent", "Press me")
       expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/comes from code/)
-      expect((await fileState(page, "Counter.spell")).text).toBe(added.replace("red", "blue"))
+      expect((await fileState(page, "Counter.spellml")).text).toBe(added.replace("red", "blue"))
 
       // one step:  the two changes to one field fold
       await page.locator("ui-item", { hasText: "Edit" }).first().click()
@@ -306,7 +282,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.keyboard.press("Escape")
       await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
       await press(page, "ControlOrMeta+z")
-      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(before)
       await page.close()
     }
   )
@@ -367,7 +343,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: false })
-      const { text: before } = await fileState(page, "Counter.spell")
+      const { text: before } = await fileState(page, "Counter.spellml")
       // its drawing is one button, which a click selects:  the thing itself comes from the Things view's call
       await page.evaluate(async () => {
         const { editor, Inspector } = window as unknown as DebugGlobals
@@ -393,8 +369,8 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         .evaluate((item) => (item as HTMLElement).click())
       await page.waitForTimeout(300)
       await change(page, "count", 5)
-      const { text } = await fileState(page, "Counter.spell")
-      expect(text).toBe(before.replace("set its count to 0", "set its count to 5"))
+      const { text } = await fileState(page, "Counter.spellml")
+      expect(text).toBe(before.replace(">0</property>", ">5</property>"))
       const counts = () =>
         page.evaluate(() => {
           const { made, moved } = window as unknown as Record<"made" | "moved", { count: number }>
@@ -404,7 +380,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // the first Inspect's help popup holds the keys until it's let go
       await press(page, "Escape")
       await press(page, "ControlOrMeta+z")
-      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(before)
       expect(await counts()).toEqual([0, 3])
       await page.close()
     }
@@ -491,12 +467,12 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
-    "a type's `to create it` sets it after the line:  this one says only all of them can",
+    "a type's declared default sets it after the line:  this one says only all of them can",
     { timeout: 90_000 },
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: false })
-      const { text: before } = await fileState(page, "Counter.spell")
+      const { text: before } = await fileState(page, "Counter.spellml")
       await page.evaluate(async () => {
         const { editor, Inspector } = window as unknown as DebugGlobals
         const { core } = await editor.loadRuntime()
@@ -507,7 +483,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       const count = page.locator("ui-property[name=count]")
       expect(await count.locator(".label").getAttribute("title")).toBe("From Counter")
       await change(page, "count", 5)
-      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect((await fileState(page, "Counter.spellml")).text).toBe(before)
       expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/All counters start with this/)
       await page.close()
     }
@@ -553,7 +529,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     }, tag)
   }
 
-  /** What's selected:  how many, and how many of them are ringed, or boxed when they can't ring themselves. */
+  /** What's selected:  how many, and how many marching ants show round them. */
   function selection(page: Page) {
     return page.evaluate(() => {
       const { Inspector } = window as unknown as {
@@ -562,7 +538,6 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       return {
         count: Inspector.allSelected.length,
         labels: Inspector.allSelected.map((part) => part.label),
-        rings: document.querySelectorAll("[data-inspect-selected]").length,
         boxes: document.querySelectorAll(".InspectorSelected:not([hidden])").length,
         treeRows: document.querySelectorAll(".InspectorTree ui-tree-item[selected]").length,
         isInspecting: Inspector.isInspecting
@@ -612,8 +587,8 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       // a modifier keeps inspecting, for more;  the new one's the main one
       const two = await selection(page)
       expect(two).toMatchObject({ count: 2, isInspecting: true, treeRows: 2 })
-      expect(two.rings + two.boxes).toBe(2)
-      expect(await page.locator(".InspectorPartTagText").first().textContent()).toBe("2 foundations")
+      expect(two.boxes).toBe(2)
+      expect(await page.locator(".InspectorScope").first().textContent()).toBe("These 2 Foundations")
 
       await page.keyboard.down("Meta")
       await page.mouse.click(foundations[0]!.x, foundations[0]!.y)
@@ -730,7 +705,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     const after = await selection(page)
     expect(after.count).toBe(2)
     expect(after.labels.every((label) => label.startsWith("Foundation"))).toBe(true)
-    expect(after.rings + after.boxes).toBe(2)
+    expect(after.boxes).toBe(2)
     expect((await gameState(page)).moves).toBe(state.moves)
     await page.close()
   })

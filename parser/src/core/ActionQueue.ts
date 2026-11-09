@@ -1,4 +1,5 @@
 import { CanceledError } from "spell/util"
+import { after } from "spell/util/timing"
 
 import { core } from "./core"
 
@@ -134,18 +135,15 @@ export class ActionQueue {
   /** A pause of `milliseconds`, which canceling the running action ends at once. */
   pause(milliseconds: number): Promise<void> {
     const signal = this.running?.controller.signal
-    return new Promise((resolve, reject) => {
-      if (signal?.aborted) return reject(new CanceledError("pause:  canceled"))
-      const stop = () => {
-        clearTimeout(timer)
-        reject(new CanceledError("pause:  canceled"))
+    if (signal?.aborted) return Promise.reject(new CanceledError("pause:  canceled"))
+    const timer = after(milliseconds / 1000)
+    signal?.addEventListener("abort", timer.cancel, { once: true })
+    return timer.then(
+      () => signal?.removeEventListener("abort", timer.cancel),
+      () => {
+        throw new CanceledError("pause:  canceled")
       }
-      const timer = setTimeout(() => {
-        signal?.removeEventListener("abort", stop)
-        resolve()
-      }, milliseconds)
-      signal?.addEventListener("abort", stop, { once: true })
-    })
+    )
   }
 
   /** When action `name` on `thing`, running or waiting its turn, ends or is dropped;  `undefined` if neither. */

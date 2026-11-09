@@ -9,26 +9,13 @@
     {
       "type": "Counter",
       "superType": "View",
-      "defined": "/Counter.spell:425-764"
+      "defined": "/Counter.spellml:213-759"
     },
     {
       "property": "count",
       "of": "Counter",
       "datatype": "number",
-      "defined": "/Counter.spell:457-480"
-    },
-    {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "Counter",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "create it",
-      "defined": "/Counter.spell:514-548"
+      "defined": "/Counter.spellml:237-345"
     },
     {
       "syntax": "count up (of {thisArg:expression})?",
@@ -41,7 +28,8 @@
       ],
       "kind": "method",
       "name": "count up",
-      "defined": "/Counter.spell:553-598"
+      "returns": "nothing",
+      "defined": "/Counter.spellml:358-407"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -54,18 +42,27 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:676-764"
+      "defined": "/Counter.spellml:413-566"
+    },
+    {
+      "syntax": "test counting",
+      "output": "test_counting",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "counting",
+      "defined": "/Counter.spellml:578-750"
     },
     {
       "type": "CounterApp",
       "superType": "App",
-      "defined": "/Counter.spell:799-932"
+      "defined": "/Counter.spellml:820-932"
     },
     {
       "property": "counter",
       "of": "CounterApp",
       "datatype": "Counter",
-      "defined": "/Counter.spell:831-861"
+      "defined": "/Counter.spellml:835-868"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -78,27 +75,17 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:866-932"
-    },
-    {
-      "syntax": "test counting",
-      "output": "test_counting",
-      "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "counting",
-      "defined": "/Counter.spell:944-1120"
+      "defined": "/Counter.spellml:873-923"
     }
   ],
   "codeLines": [
-    20,
-    23,
+    15,
+    19,
+    24,
     29,
-    33,
-    38,
-    48,
-    51,
-    56,
-    64
+    37,
+    54,
+    57,
+    62
   ]
 }

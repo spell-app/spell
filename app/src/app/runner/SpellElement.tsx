@@ -1,4 +1,4 @@
-import { createEffect } from "solid-js"
+import { createEffect, getOwner, runWithOwner, type Owner } from "solid-js"
 import { insert, type JSX } from "@solidjs/web"
 
 import { readsAsImpliedDefault, viewAttributeFor, kebabCase, whileOnlyShowing } from "spell/util"
@@ -159,12 +159,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /**
    * An app's MENU BAR, above its drawing:  the menu its template names, `- its menu bar is "game menu"`
    * (spellx's `menu-bar=`), as a toolbar of `<ui-action>`s (epic `elemental-spell` P10).
-   * - None for a thing whose template names none, or a program running elsewhere.
+   * - None for a thing whose template names none.
+   * - A program running elsewhere (Python, `core.remote`) draws its own too:  each action runs there.
    */
   private get menuBar(): JSX.Element {
     const thing = this.currentThing
     const { entry } = this
-    const items = thing && entry && !entry.core.remote ? entry.core.menuBarOf(thing) : undefined
+    const items = thing && entry ? entry.core.menuBarOf(thing) : undefined
     if (!items?.length) return null
     const name = (thing!.constructor as { menuBar?: string }).menuBar
     return (
@@ -286,11 +287,20 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
       },
       null
     )
+    this.owner = getOwner()
+    this.joinOurTag()
     this.keepThingAndElementAgreeing()
     this.loadSpellUIFamilies()
     this.numberItems()
     this.onChildrenDrawn()
-    return super.onMount()
+    const mounted = super.onMount()
+    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):  that sheet reaches in,
+    // once the runtime is loaded (a Python app's page draws before it is);  un-awaited on purpose
+    const root = this.domElement.renderRoot
+    void UI.load()
+      .then(() => UI.styles.adoptPageSheetsInto(root))
+      .catch((error: unknown) => console.error(error))
+    return mounted
   }
 
   /** The thing we draw is drawn HERE now:  if it was moving, it glides here (`Glides`). */
@@ -352,6 +362,16 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const core = this.entry?.core
     if (!thing || !core) return false
     return core.isAble(thing, "clickable") || core.isAble(thing, "selectable")
+  }
+
+  /**
+   * Is our thing's drawing our children (an app's), rather than in our shadow root (a page's, a view's)?
+   * - So the editor's "Drag something here" hint asks if an APP drew nothing (`.EmptyAppPrompt`):
+   *   a page with no children has its whole drawing in its shadow root, out of CSS's sight (epic `language` T77).
+   */
+  @E.cssState("draws-in-children")
+  get isDrawingInChildren(): boolean {
+    return !!this.currentThing && !!this.entry && drawsInItsChildren(this.entry.Class)
   }
 
   /** May things be dropped on our list?  Its type says `droppable`, or its `- on card dropped:` implies it. */
@@ -871,7 +891,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     window.addEventListener("keydown", (key) => {
       const focused = SpellElement.focusedThing()
       // an action's shortcut takes the key first (epic `elemental-spell` P10, Q35 B)
-      if (!core.remote && ActionMenus.runShortcut(core, focused, key, isMac)) return
+      if (ActionMenus.runShortcut(core, focused, key, isMac)) return
       void core.send?.(focused, "key-down", { key: key.key.toLowerCase() })?.catch(() => {})
     })
   }
@@ -901,7 +921,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   @E.on("contextmenu")
   protected onThingRightClick(event: MouseEvent) {
     const { entry } = this
-    if (entry && !entry.core.remote && !event.defaultPrevented) {
+    if (entry && !event.defaultPrevented) {
       ActionMenus.showContextMenu(event, this.domElement, this.currentThing, entry.core)
     }
     this.runThingHandler(event)
@@ -1051,7 +1071,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    */
   private fillActionMenus(root: ParentNode) {
     const { entry } = this
-    if (entry && !entry.core.remote) ActionMenus.fill(root, this.currentThing, entry.core)
+    if (entry) ActionMenus.fill(root, this.currentThing, entry.core)
   }
 
   /** Our children changed:  an app's drawing may have drawn a toolbar naming a menu. */
@@ -1104,31 +1124,69 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   and Spell UI's elements never hear their own attribute writes as a page change.
    */
   private keepThingAndElementAgreeing() {
-    const byKey = new Map(this.typeProperties.map((property) => [E.camelCase(property.spec.name), property]))
     // the page's changes, as they happen:  attribute or property, it's one store (`DOMElement.setValue()`)
     this.domElement.addPropertyChangedCallback((key, value) => {
-      const property = byKey.get(key)
+      const property = this.agreeing.get(key)
       const thing = property && this.currentThing
       if (thing) this.writeThing(property, thing, value)
     })
-    for (const property of this.typeProperties) {
-      // the thing this property last agreed with:  a new one may take the page's attributes first
-      let agreedWith: object | undefined
-      createEffect(
-        () => {
-          const thing = this.currentThing
-          return [thing, thing && this.shownValueOf(property, thing)] as const
-        },
-        ([thing]) => {
-          if (!thing) return
-          const isNew = thing !== agreedWith
-          agreedWith = thing
-          if (isNew && this.pageWrote(property)) this.writeThing(property, thing, this.elementValueOf(property))
-          else this.writeElement(property, thing)
-        }
-      )
-    }
+    for (const property of this.typeProperties) this.keepAgreeing(property)
   }
+
+  /**
+   * Keep `property` the same on our thing and our element, both ways -- see `keepThingAndElementAgreeing()`.
+   * - Once per property:  a property it already keeps is left alone.
+   */
+  private keepAgreeing(property: TypeProperty) {
+    const key = E.camelCase(property.spec.name)
+    if (this.agreeing.has(key)) return
+    this.agreeing.set(key, property)
+    // the thing this property last agreed with:  a new one may take the page's attributes first
+    let agreedWith: object | undefined
+    createEffect(
+      () => {
+        const thing = this.currentThing
+        return [thing, thing && this.shownValueOf(property, thing)] as const
+      },
+      ([thing]) => {
+        if (!thing) return
+        const isNew = thing !== agreedWith
+        agreedWith = thing
+        if (isNew && this.pageWrote(property)) this.writeThing(property, thing, this.elementValueOf(property))
+        else this.writeElement(property, thing)
+      }
+    )
+  }
+
+  /**
+   * Our type gained `properties` as the program runs, e.g. `step` once an edit adds `- its "step" is a number`
+   * (`addNewProperties()`):  keep each one agreeing too, as the ones we were drawn with.
+   * - Our tag's definition has their attributes by now.
+   */
+  keepNewPropertiesAgreeing(properties: TypeProperty[]): void {
+    if (!this.owner) return
+    runWithOwner(this.owner, () => {
+      for (const property of properties) this.keepAgreeing(property)
+    })
+  }
+
+  /**
+   * Be one of our tag's drawn elements, until we're released:  so we hear of a property our type gains as the program
+   * runs (`addNewProperties()`).
+   */
+  private joinOurTag() {
+    const ourTag = SpellElement.tagOf(this.domElement.localName)
+    if (!ourTag) return
+    const us = new WeakRef<SpellElement>(this)
+    ourTag.components.add(us)
+    this.domElement.addReleaseCallback(() => ourTag.components.delete(us))
+  }
+
+  /** Each property we keep agreeing, by its element's key, e.g. `shortRank` -- see `keepAgreeing()`. */
+  private readonly agreeing = new Map<string, TypeProperty>()
+
+  /** What we were drawn under:  what keeps a property our type gains as the program runs (`keepNewPropertiesAgreeing()`). */
+  private owner: Owner | null = null
 
   /**
    * Did the page give our tag property `property` itself, so a thing made for the tag takes it?
@@ -1223,8 +1281,18 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /** Do the element's `elementValue` and the thing's `thingValue` of `property` say the same, e.g. `"2"` and `2`? */
   private agree(property: TypeProperty, elementValue: unknown, thingValue: unknown): boolean {
     if (property.spec.kind === "json") return Object.is(elementValue, thingValue)
-    const attribute = this.elementDefinition.attribute(property.spec.name)
-    return Object.is(this.elementDefinition.convert(attribute, thingValue), elementValue)
+    const definition = this.tagDefinition
+    const attribute = definition.attribute(property.spec.name)
+    return Object.is(definition.convert(attribute, thingValue), elementValue)
+  }
+
+  /**
+   * Our tag's definition as it is NOW, with each attribute an edit has added since (`addNewProperties()`).
+   * - NOT our own `elementDefinition`:  that's the one we were made with,
+   *   which throws for a property our type gained later.
+   */
+  private get tagDefinition(): E.ElementDefinition {
+    return (this.domElement.constructor as E.DOMElementClass).tagSetup.elementDefinition
   }
 
   /** `value`, as an attribute gave it, as property `property` takes it:  `"2"` => `2`, when 2 is a legal value. */
@@ -1288,10 +1356,30 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const Base = (core.elementClassOf(Class) ?? SpellElement) as typeof SpellElement
     // never "":  `UI.styles.register()` takes that as "unregister", and the tag's elements would lose the sheet
     const css = SpellElement.sheetFor(tag, Class, Base) || `/* <${tag}>:  no styles of its own */`
-    if (customElements.get(tag)) return SpellElement.restyle(tag, css)
     const api = core.elementApiOf(Class)
     const written = SpellElement.writtenAttributesOf(Base)
     const properties = SpellElement.typePropertiesOf(api, written)
+    if (customElements.get(tag)) {
+      SpellElement.addNewProperties({ tag, Class, css, properties, api })
+      return SpellElement.restyle(tag, css)
+    }
+    const Component = SpellElement.componentFor({ tag, Class, Base, css, properties, written })
+    const TagClass = Component.define()
+    // the page's runtime has installed its settings by now (a program runs on it), so the tag is defined at once
+    if (!TagClass) throw new Error(`SpellElement:  <${tag}> isn't defined:  no runtime for its elements yet`)
+    TAGS.set(tag, { properties, written, Component, components: new Set() })
+    SpellElement.readThroughThing(TagClass, properties)
+    SpellElement.addMethods(TagClass, api.methods, Base)
+  }
+
+  /**
+   * The component class of `tag`, for view class `Class` on element class `Base`:
+   * our vocabulary under its tag, plus an attribute per one of its type's `properties`, and its sheet.
+   * - `written`:  the attributes `Base` names itself;  one that's none of the type's properties is a plain attribute.
+   * - Its `typeProperties` IS `properties`:  a property its type gains later is added to it (`addNewProperties()`).
+   */
+  private static componentFor(setup: ComponentSetup): ViewComponentClass {
+    const { tag, Class, Base, css, properties, written } = setup
     const derived = new Set(properties.map((property) => property.spec.name))
     // our names under its tag, then its type's:  typed as ours, whose tag is a literal
     const vocabulary = {
@@ -1305,7 +1393,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
         ...written.filter((attribute) => !derived.has(attribute.name))
       ]
     } as unknown as typeof spellElementVocabulary
-    const Component = class extends Base {
+    return class extends Base {
       @E.proto static vocabulary = vocabulary
       @E.proto static typeProperties = properties
       // the sheet is named for the tag, so `restyle()` can replace it
@@ -1313,11 +1401,72 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
         styleSheets: { ...Base.prototype.elementSetup.styleSheets, [tag]: css }
       }
     }
-    const TagClass = Component.define()
-    // the page's runtime has installed its settings by now (a program runs on it), so the tag is defined at once
-    if (!TagClass) throw new Error(`SpellElement:  <${tag}> isn't defined:  no runtime for its elements yet`)
-    SpellElement.readThroughThing(TagClass, properties)
+  }
+
+  /**
+   * `tag`, defined already, takes each of `properties` it doesn't have yet (epic `editor`, Live Edit Everywhere, I47):
+   * an edit added `- its "step" is a number`, and the program took it as it runs.
+   * - The platform fixed the tag's attributes when it defined it, so the tag's definition GROWS in place
+   *   (`E.DOMElement.addAttributes()`):
+   *   - each element of the tag gets the new property and attribute, `counter.step` and `step="2"`
+   *   - and hears the page write that attribute, through a watcher on the element
+   * - Each element on the page keeps the new properties agreeing with its thing, both ways, as it does the others
+   *   (`keepNewPropertiesAgreeing()`):  the same element, the same thing, nothing drawn again.
+   * - A method the type gained becomes the element's too (`addMethods()`).
+   * - A property the type lost, or whose kind of attribute changed, stays on the element until Restart:
+   *   the edit that does that isn't taken as the program runs (`LiveEdit`).
+   */
+  private static addNewProperties(edited: EditedType): void {
+    const { tag, Class, css, properties, api } = edited
+    const known = TAGS.get(tag)
+    const TagClass = customElements.get(tag) as E.DOMElementClass | undefined
+    if (!known || !TagClass?.tagSetup) return
+    const names = new Set(known.properties.map((property) => property.spec.name))
+    const added = properties.filter((property) => !names.has(property.spec.name))
+    const Base = Object.getPrototypeOf(known.Component) as typeof SpellElement
     SpellElement.addMethods(TagClass, api.methods, Base)
+    if (!added.length) return
+    const all = [...known.properties, ...added]
+    const Next = SpellElement.componentFor({ tag, Class, Base, css, properties: all, written: known.written })
+    // `register()` refuses a second vocabulary for a tag:  swap the new one in first
+    E.SpellSolid.settings.words.registerVocabulary(Next.prototype.vocabulary, "replace")
+    const definition = new E.ElementDefinition(Next.prototype.vocabulary)
+    E.UIComponent.register.call(Next, definition)
+    const components = SpellElement.liveComponentsOf(known)
+    try {
+      E.DOMElement.addAttributes(
+        TagClass,
+        E.UIComponent.tagSetupFor(Next, definition),
+        components.map((component) => component.domElement)
+      )
+    } catch (error) {
+      // e.g. a property named like one of the element's own members:  its value works, its attribute waits for Restart
+      console.warn(`<${tag}>:  a new property shows as an attribute after Restart:`, error)
+      return
+    }
+    // ONE list:  every component of the tag, old or new, reads the properties it has now
+    known.properties.push(...added)
+    Next.prototype.typeProperties = known.properties
+    known.Component = Next
+    // its properties were all put on again:  each reads through to the thing again, the new ones too
+    SpellElement.readThroughThing(TagClass, known.properties)
+    for (const component of components) component.keepNewPropertiesAgreeing(added)
+  }
+
+  /** The components of a tag's elements still in memory, drawn since it was defined. */
+  private static liveComponentsOf(known: SpellElementTag): SpellElement[] {
+    const found: SpellElement[] = []
+    for (const ref of known.components) {
+      const component = ref.deref()
+      if (component) found.push(component)
+      else known.components.delete(ref)
+    }
+    return found
+  }
+
+  /** What `tag` was defined with, page-wide -- `undefined` before it's defined. */
+  static tagOf(tag: string): SpellElementTag | undefined {
+    return TAGS.get(tag)
   }
 
   /**
@@ -1511,11 +1660,17 @@ export interface SpellElement<Thing extends object = object> extends E.Attribute
 /**
  * Let `core` define its view classes' elements:  sets `core.elementDefiner`.
  * - And `core.beforeMove`:  a thing that moves glides to where it lands (`Glides`).
+ * - And `core.giveDefaults`:  the element an app is drawn in gives what's inside it the program's widget defaults
+ *   (`<ui-defaults>`, epic `language` P29), as a `<ui-root defaults>` does (`E.RootSettings`);  none, it gives none.
  * - Called once per runtime copy, by `spellRuntime.ts`.
  */
 export function installSpellElements(core: Core): void {
   core.elementDefiner = (tag, Class) => SpellElement.defineFor(tag, Class, core)
   core.beforeMove = (things) => Glides.noteWhereThingsAre(things)
+  core.giveDefaults = (element, defaults) => {
+    if (defaults) E.RootSettings.set(element, { defaults })
+    else E.RootSettings.delete(element)
+  }
 }
 
 /** One of a type's properties, as its element shows it -- see `SpellElement.typePropertiesOf()`. */
@@ -1544,16 +1699,61 @@ type SpellElementEntry = {
   core: Core
 }
 
+/** A view template's component class, e.g. `<solitaire-card>`'s:  ours, or compiled TypeScript's on ours. */
+type ViewComponentClass = typeof SpellElement<object>
+
+/** What makes a view template's component class -- see `SpellElement.componentFor()`. */
+type ComponentSetup = {
+  /** Its tag, e.g. `solitaire-card`. */
+  tag: string
+  /** The view class, e.g. `Card`. */
+  Class: Function
+  /** The element class it's built on:  compiled TypeScript's `CardElement`, else `SpellElement`. */
+  Base: typeof SpellElement
+  /** Its sheet. */
+  css: string
+  /** Each of its type's properties, as an attribute. */
+  properties: TypeProperty[]
+  /** The attributes `Base` names itself (`writtenAttributesOf()`). */
+  written: E.AttributeSpec[]
+}
+
+/** A view type edited as its program runs, its tag defined already -- see `SpellElement.addNewProperties()`. */
+type EditedType = Pick<ComponentSetup, "tag" | "Class" | "css" | "properties"> & {
+  /** What its element shows of it:  its properties and methods. */
+  api: ElementApi
+}
+
+/** What a view template's tag was defined with, page-wide -- see `TAGS`. */
+type SpellElementTag = {
+  /** Each of its type's properties it has an attribute for:  ONE list, which grows as an edit adds one. */
+  properties: TypeProperty[]
+  /** The attributes its element class names itself. */
+  written: E.AttributeSpec[]
+  /** Its component class now:  what an element made from now on draws with. */
+  Component: ViewComponentClass
+  /** The components of its elements drawn so far, held weakly:  each takes a property its type gains. */
+  components: Set<WeakRef<SpellElement>>
+}
+
 /**
  * Each view template's tag, and what it draws with -- ONE map per page, on `globalThis`:
  * every runtime copy (each `<spell-viewer>` has its own) shares the page's custom elements.
  */
-const SPELL_ELEMENTS: Map<string, SpellElementEntry> = ((globalThis as SpellElementsGlobal)[
+const SPELL_ELEMENTS: Map<string, SpellElementEntry> = ((globalThis as PageWide<Map<string, SpellElementEntry>>)[
   Symbol.for("spell-app:spell-elements")
 ] ??= new Map())
 
-/** `globalThis`, holding `SPELL_ELEMENTS`. */
-type SpellElementsGlobal = typeof globalThis & { [key: symbol]: Map<string, SpellElementEntry> | undefined }
+/**
+ * What each view template's tag was defined with -- ONE map per page, on `globalThis`, as `SPELL_ELEMENTS`:
+ * the runtime copy that defined a tag may not be the one that edits its type.
+ */
+const TAGS: Map<string, SpellElementTag> = ((globalThis as PageWide<Map<string, SpellElementTag>>)[
+  Symbol.for("spell-app:spell-element-tags")
+] ??= new Map())
+
+/** `globalThis`, holding what's ONE per page under a symbol of its own:  `SPELL_ELEMENTS`, `TAGS`. */
+type PageWide<T> = typeof globalThis & { [key: symbol]: T | undefined }
 
 // a drop lands on the element of a viewable list its type says is droppable, or reordered,
 // and it takes it if its rules say so (`can take a card if: ...`):  `Dragging` knows only what we tell it.
@@ -1613,7 +1813,18 @@ const DRAG_EVENT_ENDINGS: Record<string, string> = {
 }
 
 /** The core's classes a program's types stand on:  their methods are no program's events. */
-const CORE_BASE_NAMES = new Set(["Thing", "View", "List", "ViewableList", "TwoSidedView", "App", "Page", "Object"])
+const CORE_BASE_NAMES = new Set([
+  "Thing",
+  "View",
+  "List",
+  "ViewableList",
+  "TwoSidedView",
+  "App",
+  "Page",
+  "SiteBase",
+  "Site",
+  "Object"
+])
 
 /** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]

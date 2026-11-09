@@ -124,21 +124,61 @@ export const words = {
       draw: "draw it"
     },
     WikiPage: {
-      title: "title",
-      about: "about",
-      summary: "summary",
+      kind: "kind",
+      displaytitle: "displaytitle",
+      namespace: "namespace",
+      wikibaseItem: "wikibase item",
+      titles: "titles",
+      pageid: "pageid",
       thumbnail: "thumbnail",
+      originalimage: "originalimage",
+      lang: "lang",
+      dir: "dir",
+      revision: "revision",
+      tid: "tid",
+      timestamp: "timestamp",
+      about: "about",
+      descriptionSource: "description source",
       contentUrls: "content urls",
+      summary: "summary",
+      extractHtml: "extract html",
+      title: "title",
       fits: "fits"
     },
+    Namespace: {
+      number: "number",
+      text: "text"
+    },
+    Title: {
+      canonical: "canonical",
+      normalized: "normalized",
+      display: "display"
+    },
     Thumbnail: {
-      source: "source"
+      source: "source",
+      width: "width",
+      height: "height"
     },
-    PageAddressBook: {
-      desktop: "desktop"
+    Originalimage: {
+      source: "source",
+      width: "width",
+      height: "height"
     },
-    PageAddress: {
-      page: "page"
+    ContentUrl: {
+      desktop: "desktop",
+      mobile: "mobile"
+    },
+    Desktop: {
+      page: "page",
+      revisions: "revisions",
+      edit: "edit",
+      talk: "talk"
+    },
+    Mobile: {
+      page: "page",
+      revisions: "revisions",
+      edit: "edit",
+      talk: "talk"
     },
     Card: {
       label: "label",

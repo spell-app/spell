@@ -1,4 +1,4 @@
-import { escapeRegExp } from "spell/util/string"
+import { compilePattern as compileAddressPattern } from "spell/util/addressPattern"
 import type { Handler, Next, RouteParams } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Reply } from "./Reply"
@@ -167,34 +167,19 @@ export function runAll(handlers: Handler[], request: Request, reply: Reply, done
 }
 
 /**
- * A matcher for route `pattern`, e.g. `/projects/file/:projectId/:filePath*`.
+ * A matcher for route `pattern`, e.g. `/projects/file/:projectId/:filePath*`:  the kit's ONE address grammar,
+ * `spell/util/addressPattern`'s, which a running Spell site matches its pages with too.
  * - each param is percent-decoded;  bad encoding throws `HttpError(400)`
  */
 export function compilePattern(pattern: string): (path: string) => RouteParams | undefined {
-  const names: string[] = []
-  let source = ""
-  if (pattern === "*") {
-    source = "(.*)"
-    names.push("0")
-  } else {
-    for (const segment of trimSlash(pattern).split("/").slice(1)) {
-      const param = /^:(\w+)(\*)?$/.exec(segment)
-      if (param) {
-        names.push(param[1]!)
-        source += param[2] ? "/(.+)" : "/([^/]+)"
-      } else if (segment === "*") {
-        names.push("0")
-        source += "(?:/(.*))?"
-      } else source += `/${escapeRegExp(segment)}`
-    }
-  }
-  const regex = new RegExp(`^${source}/?$`, "i")
+  const match = compileAddressPattern(pattern)
   return (path) => {
-    const match = regex.exec(path)
-    if (!match) return undefined
-    const params: RouteParams = {}
-    names.forEach((name, i) => (params[name] = decodeParam(match[i + 1] ?? "")))
-    return params
+    try {
+      return match(path)
+    } catch (error) {
+      if (error instanceof URIError) throw new HttpError(400, `bad encoding in:  ${path}`)
+      throw error
+    }
   }
 }
 
@@ -209,13 +194,4 @@ function matchPrefix(prefix: string, path: string): RouteParams | undefined {
 /** `path` without a trailing `/` (but `/` stays `""` for prefixes). */
 function trimSlash(path: string): string {
   return path.endsWith("/") ? path.slice(0, -1) : path
-}
-
-/** `value` percent-decoded;  `HttpError(400)` if it can't be. */
-function decodeParam(value: string): string {
-  try {
-    return decodeURIComponent(value)
-  } catch {
-    throw new HttpError(400, `bad encoding in:  ${value}`)
-  }
 }

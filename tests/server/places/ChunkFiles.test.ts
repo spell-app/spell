@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { SRV } from "spell/server"
 import { ChunkFiles } from "spell/server/places"
 import { serveHandler } from "spell/server/test/serve"
-import { ChunkedPlace, JsonChunks, WebChunks } from "spell/util/places"
+import { ChunkedPlace, JsonChunks, WebChunks } from "spell/places"
 
 import { newFolder, removeFolders } from "./places.helpers"
 

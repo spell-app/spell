@@ -11,7 +11,7 @@
     {
       "type": "Card",
       "superType": "View",
-      "defined": "/HowSolitaireWorks.spell:667-1219"
+      "defined": "/HowSolitaireWorks.spell:762-1314"
     },
     {
       "property": "rank",
@@ -32,7 +32,7 @@
         "queen",
         "king"
       ],
-      "defined": "/HowSolitaireWorks.spell:696-749"
+      "defined": "/HowSolitaireWorks.spell:791-844"
     },
     {
       "property": "suit",
@@ -44,36 +44,36 @@
         "hearts",
         "spades"
       ],
-      "defined": "/HowSolitaireWorks.spell:753-807"
+      "defined": "/HowSolitaireWorks.spell:848-902"
     },
     {
       "property": "value",
       "of": "Card",
       "datatype": "number",
-      "defined": "/HowSolitaireWorks.spell:881-920"
+      "defined": "/HowSolitaireWorks.spell:976-1015"
     },
     {
       "property": "color",
       "of": "Card",
-      "defined": "/HowSolitaireWorks.spell:924-997"
+      "defined": "/HowSolitaireWorks.spell:1019-1092"
     },
     {
       "constants": [
         "red"
       ],
-      "defined": "/HowSolitaireWorks.spell:942-979"
+      "defined": "/HowSolitaireWorks.spell:1037-1074"
     },
     {
       "constants": [
         "black"
       ],
-      "defined": "/HowSolitaireWorks.spell:982-997"
+      "defined": "/HowSolitaireWorks.spell:1077-1092"
     },
     {
       "property": "name",
       "of": "Card",
       "datatype": "text",
-      "defined": "/HowSolitaireWorks.spell:1029-1071"
+      "defined": "/HowSolitaireWorks.spell:1124-1166"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -86,7 +86,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowSolitaireWorks.spell:1111-1219"
+      "defined": "/HowSolitaireWorks.spell:1206-1314"
     },
     {
       "syntax": "try {thisArg:expression}",
@@ -100,13 +100,14 @@
       "group": "The table:  a column, and a hand of cards to try on it",
       "kind": "method",
       "name": "try (a card)",
-      "defined": "/HowSolitaireWorks.spell:2328-2597"
+      "returns": "nothing",
+      "defined": "/HowSolitaireWorks.spell:2591-2830"
     },
     {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/HowSolitaireWorks.spell:1246-1282"
+      "defined": "/HowSolitaireWorks.spell:1341-1377"
     },
     {
       "property": "pile",
@@ -114,35 +115,35 @@
       "group": "A pile, and a column",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/HowSolitaireWorks.spell:1364-1390"
+      "defined": "/HowSolitaireWorks.spell:1459-1485"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/HowSolitaireWorks.spell:1647-1883"
+      "defined": "/HowSolitaireWorks.spell:1742-1978"
     },
     {
       "type": "Table",
       "superType": "App",
-      "defined": "/HowSolitaireWorks.spell:1944-2252"
+      "defined": "/HowSolitaireWorks.spell:2039-2432"
     },
     {
       "property": "column",
       "of": "Table",
       "datatype": "Column",
-      "defined": "/HowSolitaireWorks.spell:1970-1998"
+      "defined": "/HowSolitaireWorks.spell:2065-2093"
     },
     {
       "property": "hand",
       "of": "Table",
       "datatype": "Pile",
-      "defined": "/HowSolitaireWorks.spell:2002-2026"
+      "defined": "/HowSolitaireWorks.spell:2097-2121"
     },
     {
       "property": "message",
       "of": "Table",
       "datatype": "text",
-      "defined": "/HowSolitaireWorks.spell:2030-2051"
+      "defined": "/HowSolitaireWorks.spell:2125-2146"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -155,7 +156,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowSolitaireWorks.spell:2056-2252"
+      "defined": "/HowSolitaireWorks.spell:2151-2432"
     },
     {
       "syntax": "test the column",
@@ -164,28 +165,28 @@
       "alias": "statement",
       "kind": "function",
       "name": "the column",
-      "defined": "/HowSolitaireWorks.spell:3033-3384"
+      "defined": "/HowSolitaireWorks.spell:3241-3592"
     }
   ],
   "codeLines": [
-    20,
-    23,
-    29,
-    36,
-    40,
+    21,
+    24,
+    30,
+    37,
     41,
     42,
-    46,
-    51,
-    61,
-    75,
-    82,
-    88,
-    99,
-    102,
-    107,
-    112,
-    117,
-    139
+    43,
+    47,
+    52,
+    65,
+    79,
+    86,
+    92,
+    103,
+    106,
+    111,
+    116,
+    121,
+    143
   ]
 }

@@ -3,15 +3,18 @@ import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
+import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
 import { on } from "./on"
 
 /****************
  * ### `EditorMode`
- * How the editor shows a project:  Run or Edit, picked from the top bar's `<ModeButtons>` (or its View menu).
+ * How the editor shows a project:  Run, Edit or Site, picked from the top bar's `<ModeButtons>` (or its View menu).
  * - Run:  the program alone, the whole window (the run page, `editor.showRunner()`).
  * - Edit:  the code beside the program (the editor page).
+ * - Site:  the site editor, its pages and data (`editor.showSiteEditor()`);  only for a project with a site
+ *   (`EditorMode.hasSite`, epic `mockup`).
  * - Debug went in epic `debut` P32:  its Program panel shows under the code in Edit, as `ProgramPanelShown` says.
  ****************/
 export class EditorMode {
@@ -22,7 +25,13 @@ export class EditorMode {
    */
   static show(mode: Mode): void {
     if (mode === "run") void editor.showRunner()
+    else if (mode === "site") editor.showSiteEditor()
     else editor.showEditor()
+  }
+
+  /** Does the current project declare a site, so it has a Site mode (reactive)? */
+  static get hasSite(): boolean {
+    return !!editor.project?.files.some((file) => SiteEdits.hasSite(file.contents ?? ""))
   }
 }
 
@@ -30,11 +39,12 @@ export class EditorMode {
 export type Mode = (typeof MODES)[number]
 
 /** The modes, in the top bar's order. */
-const MODES = ["run", "edit"] as const
+const MODES = ["run", "edit", "site"] as const
 /** Each mode's icon (Fomantic's names) and its name's text key. */
 const MODE_LOOKS: Record<Mode, { icon: string; text: AppTextKey }> = {
   run: { icon: "play", text: "runMode" },
-  edit: { icon: "pencil", text: "editMode" }
+  edit: { icon: "pencil", text: "editMode" },
+  site: { icon: "sitemap", text: "siteView" }
 }
 
 /****************
@@ -111,7 +121,8 @@ export function toggleCode() {
 
 /****************
  * ### `<ModeButtons>`
- * Run | Edit in the top bar, as the theme's segmented tabs:  the one showing is chosen;
+ * Run | Edit | Site in the top bar, as the theme's segmented tabs:  the one showing is chosen;
+ * Site only for a project that declares a site (`EditorMode.hasSite`);
  * then, in Edit, Inspect app (`inspect`), then the code's icon, which shows the code or closes it
  * (Owen:  "it should be part of the run|edit group";  "the "inspect" button to be between "Edit" and "Code"").
  * - Neither icon is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
@@ -134,10 +145,14 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
           if (event.detail.item.hasAttribute("aria-pressed")) event.preventDefault()
         })}
       >
-        <For each={MODES}>
+        <For each={MODES.filter((mode) => mode !== "site" || EditorMode.hasSite)}>
           {(mode) => (
-            <ui-item selected={props.current === mode} onClick={() => EditorMode.show(mode)}>
-              <ui-icon name={MODE_LOOKS[mode].icon} />
+            <ui-item
+              icon={MODE_LOOKS[mode].icon}
+              selected={props.current === mode}
+              title={appTexts.text(MODE_LOOKS[mode].text)}
+              onClick={() => EditorMode.show(mode)}
+            >
               <span class="ModeText">{appTexts.text(MODE_LOOKS[mode].text)}</span>
             </ui-item>
           )}
@@ -145,14 +160,13 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
         <Show when={props.current === "edit"}>
           {props.inspect}
           <ui-item
+            icon="code"
             class="CodeToggle"
             label={appTexts.text("menuCode")}
             title={appTexts.text("menuCode")}
             aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
             onClick={() => toggleCode()}
-          >
-            <ui-icon name="code" />
-          </ui-item>
+          />
         </Show>
       </ui-menu>
     </ui-item>

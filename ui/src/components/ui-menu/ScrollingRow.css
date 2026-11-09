@@ -1,0 +1,153 @@
+/*
+ * A row of a menu's items that scrolls sideways, with a `‹` / `›` key at each end (`ScrollingRow`):
+ * `<ui-toolbar>`'s row and `<ui-tabs>`' tab list.  Adopted after `UIMenu.css`, which draws the menu and its items.
+ * - The markup:  a box of class `scrolling-row` holding the menu (`.ui.menu`, the row that scrolls) and the two keys
+ *   (`<button class="scroll start | end">`), as siblings.
+ * - The row's own box scrolls, its scrollbar hidden;  its items stay on one line.
+ * - The keys sit over the row's ends (anchored to the row), taking no room in it:
+ *   the items never move as one comes and goes.
+ * - Tokens (public, never declared here:  read through private aliases;  the toolbar's names, as it had them first):
+ *
+ * | Token | What | Default |
+ * | --- | --- | --- |
+ * | `--ui-toolbar-button-size` | each key's width and height | `1.75em` |
+ * | `--ui-toolbar-button-background` | a key at rest | `transparent` |
+ * | `--ui-toolbar-button-hover-background` | a key under the pointer | a faint ink |
+ * | `--ui-toolbar-button-color` | its chevron | `--ui-text-muted` |
+ * | `--ui-toolbar-button-radius` | its corners | a circle;  on a segmented track, the track's corner less its inset |
+ */
+
+@layer ui.components.scrolling-row.types, ui.components.scrolling-row.states;
+
+@layer ui.components.scrolling-row.types {
+  .scrolling-row {
+    --_ui-toolbar-button-size: var(--ui-toolbar-button-size, 1.75em);
+    --_ui-toolbar-button-background: var(--ui-toolbar-button-background, transparent);
+    --_ui-toolbar-button-hover-background: var(
+      --ui-toolbar-button-hover-background,
+      oklch(from var(--ui-ink) l c h / 0.08)
+    );
+    --_ui-toolbar-button-color: var(--ui-toolbar-button-color, var(--ui-text-muted));
+    --_ui-toolbar-button-radius: var(--ui-toolbar-button-radius, 50%);
+    position: relative;
+    min-width: 0;
+  }
+
+  /* the row's own box scrolls:  its items on one line */
+  .scrolling-row > .ui.menu {
+    flex-wrap: nowrap;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .scrolling-row > .ui.menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+   * A rule under the row is drawn INSIDE its box (an inset shadow), never as its border:
+   * the box clips what it scrolls, so an item reaching over its border was cut off --
+   * a secondary pointing row's underline, a tabular row's chosen tab
+   */
+  .scrolling-row > .ui.secondary.pointing.menu:not(.vertical) {
+    --_ui-menu-item-margin: 0;
+    border-bottom-width: 0;
+    box-shadow: inset 0 -2px 0 var(--ui-border-color);
+  }
+  .scrolling-row > .ui.tabular.menu:not(.vertical, .bottom) {
+    --_ui-menu-active-margin: 0;
+    border-bottom-width: 0;
+    box-shadow: inset 0 -1px 0 var(--ui-border-color-strong);
+  }
+
+  /*
+   * the two keys:  quiet round keys OVER the row's ends (anchored to its box), taking no room in it
+   * - room kept for a hidden `‹` left the row's start further in than its end
+   * - the row fades out under a key while there's more that way
+   * - a key's press stops on a whole item (scroll snap):  without it, it could stop mid-label
+   */
+  .scrolling-row > .ui.menu {
+    anchor-name: --ui-scrolling-row;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--_ui-toolbar-button-size);
+    --_toolbar-fade-start: 0px;
+    --_toolbar-fade-end: 0px;
+    /* each end's own fade:  one shared width faded the start of a row that could only scroll on (debut I31) */
+    --_toolbar-fade-in: 0px;
+    --_toolbar-fade-out: 0px;
+    /* clear under a key, then fading in over 1em */
+    mask-image: linear-gradient(
+      to right,
+      transparent var(--_toolbar-fade-start),
+      #000 calc(var(--_toolbar-fade-start) + var(--_toolbar-fade-in)),
+      #000 calc(100% - var(--_toolbar-fade-end) - var(--_toolbar-fade-out)),
+      transparent calc(100% - var(--_toolbar-fade-end))
+    );
+  }
+  /* a toolbar's items are slotted;  a tab set's, its own buttons */
+  .scrolling-row > .ui.menu ::slotted(*),
+  .scrolling-row > .ui.menu > .item {
+    scroll-snap-align: start;
+  }
+  .scrolling-row:has(> .scroll.start[data-can]) > .ui.menu {
+    --_toolbar-fade-start: var(--_ui-toolbar-button-size);
+    --_toolbar-fade-in: 1em;
+  }
+  .scrolling-row:has(> .scroll.end[data-can]) > .ui.menu {
+    --_toolbar-fade-end: var(--_ui-toolbar-button-size);
+    --_toolbar-fade-out: 1em;
+  }
+  .scrolling-row > .scroll {
+    position: absolute;
+    position-anchor: --ui-scrolling-row;
+    top: anchor(center);
+    translate: 0 -50%;
+    z-index: 1;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--_ui-toolbar-button-size);
+    height: var(--_ui-toolbar-button-size);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--_ui-toolbar-button-radius);
+    font: inherit;
+    color: var(--_ui-toolbar-button-color);
+    background: var(--_ui-toolbar-button-background);
+    cursor: var(--ui-control-cursor);
+  }
+  .scrolling-row > .scroll.start {
+    left: anchor(left);
+  }
+  .scrolling-row > .scroll.end {
+    right: anchor(right);
+  }
+  .scrolling-row > .scroll > svg {
+    width: 0.875em;
+    height: 0.875em;
+    fill: currentColor;
+    pointer-events: none;
+  }
+}
+
+@layer ui.components.scrolling-row.states {
+  /* nothing to scroll:  no keys at all */
+  .scrolling-row > .scroll[hidden] {
+    display: none;
+  }
+  /* at that end already:  hidden (it takes no room in the row) */
+  .scrolling-row > .scroll:not([data-can]) {
+    visibility: hidden;
+  }
+  .scrolling-row > .scroll:hover {
+    color: var(--ui-text-color);
+    background: var(--_ui-toolbar-button-hover-background);
+  }
+  .scrolling-row > .scroll:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: 1px;
+  }
+}

@@ -1,0 +1,67 @@
+## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
+// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
+// `jsonplaceholder` is what this wrote, from looking at the server:
+//   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
+//     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"
+// `spell place update JSONPlaceholder.api.spell` looks again, and changes only this file and JSONPlaceholder.api.json5.
+// It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:
+// what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").
+
+jsonplaceholder is a web server at "https://jsonplaceholder.typicode.com":
+	- check it every 30 seconds
+	- it searches names and titles with "q"
+	- posts live at "/posts"
+	- comments live at "/comments"
+	- jsonplaceholder users live at "/users"
+	- todos live at "/todos"
+	- a post's comments live at "/posts/{id}/comments"
+	- a jsonplaceholder user's posts live at "/users/{id}/posts"
+	- a jsonplaceholder user's todos live at "/users/{id}/todos"
+
+a "post" is a thing:
+	- it lives in jsonplaceholder
+	- its "user id" is a number
+	- its "title" is text
+	- its "body" is text
+	- its "comments" is a list of comments
+
+a "comment" is a thing:
+	- it lives in jsonplaceholder
+	- its "post id" is a number
+	- its "name" is text
+	- its "email" is text
+	- its "body" is text
+
+a "jsonplaceholder user" is a thing:
+	- it lives in jsonplaceholder
+	- its "name" is text
+	- its "username" is text
+	- its "email" is text
+	- its "address" is an address
+	- its "phone" is text
+	- its "website" is text
+	- its "company" is a company
+	- its "posts" is a list of posts
+	- its "todos" is a list of todos
+
+a "todo" is a thing:
+	- it lives in jsonplaceholder
+	- its "user id" is a number
+	- its "title" is text
+	- its "completed" is yes or no
+
+an "address" is a thing:
+	- its "street" is text
+	- its "suite" is text
+	- its "city" is text
+	- its "zipcode" is text
+	- its "geo" is a geo
+
+a "geo" is a thing:
+	- its "lat" is a number
+	- its "lng" is a number
+
+a "company" is a thing:
+	- its "name" is text
+	- its "catch phrase" is text
+	- its "bs" is text

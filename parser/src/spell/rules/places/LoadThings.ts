@@ -5,7 +5,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { Get } from "spell/parser/spell/rules/assignment/Get"
 
 /** The rules that read things of a type:  all `load` and `fetch` take. */
-const READS = /^(?:every_thing|every_thing_where|the_things|first_few_where|list_sorted_by)$/
+const READS = /^(?:every_thing|every_thing_where|the_things|the_saved_things|first_few_where|list_sorted_by)$/
 
 /**
  * `load_things` rule:  the same as `get`, in the words people bring to a read (epic `data` P15).

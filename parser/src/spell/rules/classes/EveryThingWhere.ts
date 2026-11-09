@@ -54,15 +54,21 @@ export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnLi
     // `every recipe` is of the type, whatever else is called `recipe`
     match.data.own = SP.singularIn(scope, words) === words ? undefined : ownListOf(scope, words)
     if (!match.data.own && !EveryThing.kindOf(type)) return undefined
-    EveryThingWhere.warnAboutWhere(match, type, this.getBody(match))
+    EveryThingWhere.warnAboutWhere(match, type, () => this.predicateOf(match))
     return match
+  }
+
+  /** The test each thing must pass:  its `where`, e.g. `(recipe) => recipe.minutes === 5`. */
+  predicateOf(match: P.MatchFor<this>): P.ASTMethodDefinition {
+    return getWhereMethod(match, match.groups.type, this.getBody(match))
   }
 
   /**
    * SIDE EFFECT:  a warning, for a `where` on a saved type that can't go to its place:  it's done here, up to a ceiling.
    * - None when a search can go instead (`it searches names with "search"`):  the server narrows what's read.
+   * - `predicate`:  the test, made when the warnings are gathered.
    */
-  static warnAboutWhere(match: P.Match, type: P.Match, body: P.Match | undefined): void {
+  static warnAboutWhere(match: P.Match, type: P.Match, predicate: () => P.ASTMethodDefinition): void {
     const { scope } = match
     const message = SP.Language.of(scope).parserMessage("where-looks-through", {
       type: SP.singularIn(scope, `${type.raw}`.trim())
@@ -70,11 +76,13 @@ export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnLi
     SP.SpellWarnings.noteIf(match, message, () => {
       const saved = savedPlaceOfMatch(type)
       if (!saved) return false
-      const where = getWhereMethod(match, type, body)
+      const where = predicate()
       return !handedFilterOf(where) && !handedSearchOf(where, searchesOf(saved)?.fields ?? []).length
     })
+    // given only to a search:  this `where` has to be one
+    if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, predicate)
     const never = SP.Language.of(scope).parserMessage("never-both")
-    SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(P.matchAST(body)))
+    SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(predicate().body))
   }
 
   getAST(match: P.MatchFor<this>): P.ASTExpression {
@@ -83,14 +91,14 @@ export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnLi
     if (own) {
       return new P.ASTCoreMethodInvocation(match, {
         methodName: "filter",
-        args: [ownListAST(match, own), getWhereMethod(match, type, this.getBody(match))]
+        args: [ownListAST(match, own), this.predicateOf(match)]
       })
     }
-    const handed = EveryThing.savedAST(match, type, { predicate: getWhereMethod(match, type, this.getBody(match)) })
+    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match) })
     if (handed) return handed
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",
-      args: [EveryThing.listAST(match, type), getWhereMethod(match, type, this.getBody(match))]
+      args: [EveryThing.listAST(match, type), this.predicateOf(match)]
     })
   }
 }

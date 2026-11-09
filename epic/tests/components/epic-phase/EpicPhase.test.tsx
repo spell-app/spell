@@ -120,6 +120,65 @@ describe("<epic-phase>", () => {
     expect([pill(open!).textContent, pill(open!).classList.contains("took")]).toEqual(["1h", false])
   })
 
+  // epic `epic-engine` I127 (Owen:  "`34m / 4h` is fine, shorter is good ... explain more in the tool tip")
+  test("done, timed and spanned:  the pill says `34m / 4h`, its tooltip in words;  no span, only the time worked", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-span" title="Span" status="done" estimate="~3-4h" took="34m" span="4h"></epic-phase>` +
+        `<epic-phase id="p-no-estimate" title="No estimate" status="done" took="34m" span="4h"></epic-phase>` +
+        `<epic-phase id="p-no-start" title="No start" status="done" estimate="3-4h" took="34m"></epic-phase>` +
+        `<epic-phase id="p-open" title="Open" status="active" estimate="1h" took="5m" span="2h"></epic-phase>` +
+        `</epic-section>`,
+      "#p-span"
+    )
+    const shown = Array.from(host.parentElement!.children).map((phase) => {
+      const pill = phase.shadowRoot!.querySelector('[part~="estimate"]')!
+      return [pill.textContent, pill.getAttribute("title")]
+    })
+    expect(shown).toEqual([
+      ["34m / 4h", "34m of work over 4h, estimated ~3-4h"],
+      ["34m / 4h", "34m of work over 4h"],
+      ["34m", "~3-4h"],
+      ["1h", null]
+    ])
+  })
+
+  // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")
+  test("dropped:  its title struck through and grey, a crossed circle, its Dropped field;  grey in the chips, not open", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-mail" title="Mail" status="dropped" estimate="1-2h" plan="waiting" ` +
+        `done-at="2099-01-01T09:00-05:00">` +
+        `<epic-field name="dropped"><p>Moved to <a href="#p-mail-2">P2 · Mail</a>.</p></epic-field></epic-phase>` +
+        `<epic-phase id="p-mail-2" title="Mail" status="todo"></epic-phase>` +
+        `</epic-section>`,
+      "#p-mail"
+    )
+    const status = host.shadowRoot!.querySelector('[part~="status"]')!
+    expect({
+      classes: status.className,
+      label: status.getAttribute("aria-label"),
+      state: status.getAttribute("data-state")
+    }).toEqual({ classes: "icon dropped", label: "Dropped", state: "old" })
+    // the crossed circle's glyph, loaded with the icon set
+    await vi.waitFor(() => expect(status.querySelector("svg")).not.toBeNull())
+    const words = host.shadowRoot!.querySelector(".header > .words")!
+    expect(getComputedStyle(words).textDecorationLine).toBe("line-through")
+    // the done phase's quieter title colour, and the to-do one beside it not struck
+    const [, todo] = Array.from(host.parentElement!.children)
+    expect(getComputedStyle(todo!.shadowRoot!.querySelector(".header > .words")!).textDecorationLine).toBe("none")
+    // its body:  the Dropped field, labelled, its link kept
+    inner(host).setAttribute("open", "")
+    await ElementFixture.tick()
+    const field = host.querySelector<E.DOMElement>('epic-field[name="dropped"]')!
+    await field.ready
+    expect(flatText(field.shadowRoot!.querySelector('[part~="label"]')!).trim()).toBe("Dropped:")
+    expect(field.querySelector("a")!.getAttribute("href")).toBe("#p-mail-2")
+    // finished:  its waiting plan asks nothing
+    expect(host.shadowRoot!.querySelector("epic-review")?.getAttribute("buttons") ?? "phase").not.toBe("plan")
+    await expectAccessible(host)
+  })
+
   // r32 (Owen, 2026-10-25):  "Clicking accept or Revisit should collapse like it does for questions"
   test("an action chosen on its own review controls (`epic-chosen`) folds it, as an item's", async () => {
     const host = await render(`<epic-phase id="p1" title="One" status="todo" open><p>Body</p></epic-phase>`)
@@ -179,7 +238,7 @@ async function adoptWorking(ids: string[]): Promise<ReviewClient> {
 // Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the phase
 // header" (epic `epic-engine` I147)
 describe("<epic-phase> while Claude works on it", () => {
-  test("its status icon is a blue turning spinner, saying what he does;  a done phase's never;  passes axe", async () => {
+  test("its status icon is its own circle, spinning like a coin (I213), blue, saying what he does;  a done phase's never;  passes axe", async () => {
     await adoptWorking(["p-one-repo", "p-old"])
     try {
       const section = await render(
@@ -190,7 +249,7 @@ describe("<epic-phase> while Claude works on it", () => {
       )
       const phase = section.querySelector("#p-one-repo")!
       const status = () => phase.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
-      await vi.waitFor(() => expect(status().querySelector(".spinner")).not.toBeNull())
+      await vi.waitFor(() => expect(status().matches(".working") && status().querySelector("svg")).toBeTruthy())
       expect([status().title, status().getAttribute("aria-label")]).toEqual([
         "Claude is writing this phase's plan",
         "Claude is writing this phase's plan"
@@ -199,7 +258,10 @@ describe("<epic-phase> while Claude works on it", () => {
       // blue, as the header's step label under way:  not the grey of a to-do phase
       const blue = getComputedStyle(section.querySelector("#p-built")!.shadowRoot!.querySelector('[part~="status"]')!)
       expect(getComputedStyle(status()).color).toBe(blue.color)
-      expect(section.querySelector("#p-old")!.shadowRoot!.querySelector(".spinner")).toBeNull()
+      // under way, nobody on it:  a load indicator standing still (I226;  Owen:  "non-rotating load indicator")
+      const built = section.querySelector("#p-built")!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+      expect(getComputedStyle(built.querySelector("svg") ?? built).animationName).toBe("none")
+      expect(section.querySelector("#p-old")!.shadowRoot!.querySelector(".icon.working")).toBeNull()
       await expectAccessible(phase)
     } finally {
       ReviewClient.adopt(undefined)
@@ -222,7 +284,9 @@ describe("<epic-phase> while Claude works on it, its plan changed", () => {
       )
       const status = (id: string) =>
         section.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
-      await vi.waitFor(() => expect(status("p-changed").querySelector(".spinner")).not.toBeNull())
+      await vi.waitFor(() =>
+        expect(status("p-changed").matches(".working") && status("p-changed").querySelector("svg")).toBeTruthy()
+      )
       expect([status("p-changed").dataset.state, status("p-quiet").dataset.state]).toEqual(["updated", "progress"])
       expect(getComputedStyle(status("p-changed")).color).not.toBe(getComputedStyle(status("p-quiet")).color)
       const filter = section.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!

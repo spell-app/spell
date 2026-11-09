@@ -2,7 +2,7 @@ import type { PrefPlace, PrefPlaceName } from "spell/util"
 
 import { core } from "./core"
 import { ActionQueue } from "./ActionQueue"
-import { Eventful, type EventCallback, type SpellEvent } from "./SpellEvent"
+import { Eventful, SpellEvent, handlerOf, type EventCallback } from "./SpellEvent"
 import { defineCoreModule } from "./core.types"
 import { RememberedValues } from "./remembered"
 import { UndoHistory } from "./undoing"
@@ -22,6 +22,16 @@ export class SpellRuntime extends Eventful() {
   readonly actions = new ActionQueue()
   /** The program's app, once one is made:  the last stop up an event's chain (`send()`, `sending.ts`). */
   app?: object
+  /** The program's site, once one is made:  what `go to the film page` goes through (`sites.ts`). */
+  site?: object
+  /** The program's pages, in the order they were made (`Page`'s constructor):  each hears what `trigger()` sends. */
+  readonly pages: object[] = []
+  /**
+   * Finds a place's key by its name (`its key is the secret "GITHUB_TOKEN"`), for a run on a server side:
+   * a test, or a runner in node, hands in the environment's.
+   * - A page never sets it:  nothing in a browser holds a key, so a place that needs one refuses there (`WebPlace`).
+   */
+  keyFrom?: (name: string) => string | undefined
 }
 
 /**
@@ -48,14 +58,38 @@ export function once<Payload extends object = object>(eventType: string, callbac
 }
 
 /**
- * Trigger `event` in the running program:
+ * Trigger `event` in the running program, for everyone to hear:
  * `trigger card-click with the card` => `trigger("card-click", { card: this })`.
  * - `props` are copied onto the event, so a listener reads `event.card`.
- * - Returns what each listener returned, in the order they were added.
+ * - Who hears it, in order:
+ *   - the program's app and pages, each by its own handler, `<on fizz>` (`onFizz()`;  epic `language` T78):
+ *     one of a kind, so a page can listen for itself, with no line at a file's top
+ *   - the program's own listeners, `on fizz:` at a file's top, in the order they were added
+ * - Returns what each returned, in that order.
  * - Nothing running:  nobody hears it, `[]`.  NEVER throws:  `core.console` triggers its lines before then.
  */
 export function trigger(event: SpellEvent | string, props?: object): unknown[] {
-  return core.RUNTIME?.trigger(event, props) ?? []
+  const runtime = core.RUNTIME
+  if (!runtime) return []
+  const spellEvent = typeof event === "string" ? new SpellEvent(event) : event
+  if (props) Object.assign(spellEvent, props)
+  return [...ownHandlersHear(runtime, spellEvent), ...runtime.trigger(spellEvent)]
+}
+
+/** `event` to each of `runtime`'s app and pages that handles it itself:  what each handler returned. */
+function ownHandlersHear(runtime: SpellRuntime, event: SpellEvent): unknown[] {
+  const results: unknown[] = []
+  for (const thing of new Set([runtime.app, ...runtime.pages])) {
+    const handler = thing && handlerOf(thing, event.type)
+    if (!handler) continue
+    try {
+      results.push(handler.call(thing, event))
+    } catch (error) {
+      // one failing handler mustn't stop the others, as a listener's doesn't (`SpellEvent.trigger()`)
+      console.warn(`trigger ${event.type}:  ${thing!.constructor?.name}'s handler failed`, error)
+    }
+  }
+  return results
 }
 
 /** `core.RUNTIME`, for `on()` / `once()` -- throws, naming `method`, if no program is running. */

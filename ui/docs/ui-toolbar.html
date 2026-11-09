@@ -130,6 +130,21 @@
                   </div>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-fitting-titles-actions" label="Actions" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A row of actions, as an app's menu draws one:  each its icon, title and key, a divider between two groups.  Drag the box narrower:  with the icons only, the keys go too, so the icons fit before the row folds into `…`, whose menu shows them again."
+                >
+                  <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+                    <ui-toolbar shrinkable aria-label="Game">
+                      <ui-text slot="title" size="large">Solitaire</ui-text>
+                      <ui-action icon="redo" shortcut="N">Restart</ui-action>
+                      <ui-item kind="divider"></ui-item>
+                      <ui-action icon="fast forward" shortcut="A">Auto play</ui-action>
+                      <ui-action icon="eye" shortcut="C">Cheat</ui-action>
+                    </ui-toolbar>
+                  </div>
+                </ui-example>
+              </ui-section>
               <ui-section id="examples-fitting-titles-scroll-first" label="Scroll first" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`scroll-first`, with `shrinkable` and a `segmented` look:  a row of many scrolls with its `‹` / `›` while it has `--ui-toolbar-scroll-min` (200px) to show them in;  only then is it the dropdown.  `tabs` says they are tabs, to a screen reader."

@@ -16,6 +16,7 @@ import { Max } from "./Max"
 import { Min } from "./Min"
 import { Minus } from "./Minus"
 import { Plus } from "./Plus"
+import { RandomNumber } from "./RandomNumber"
 import { RoundNumber } from "./RoundNumber"
 import { Times } from "./Times"
 
@@ -95,6 +96,17 @@ math.addRule(Plus, {
         ["price + tax", "(price + tax)"],
         ["price+tax", "(price + tax)"],
         ["price plus tax", "(price + tax)"]
+      ]
+    },
+    {
+      title: "a date joined to text says itself, as a drawing does (epic `data`)",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "due", datatype: "date" })
+      },
+      tests: [
+        ['"at " + due', "`at ${core.dateShown(due)}`"],
+        ['"at " + the short date of the due', "`at ${core.shortDate(due)}`"]
       ]
     }
   ]
@@ -214,6 +226,23 @@ math.addRule(RoundNumber, {
         ["round price off", "Math.round(price)"],
         ["round price up", "Math.ceil(price)"],
         ["round price down", "Math.floor(price)"]
+      ]
+    }
+  ]
+})
+
+math.addRule(RandomNumber, {
+  syntax: "a random number between {low:arithmetic_expression} and {high:arithmetic_expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("sides")
+      },
+      tests: [
+        ["a random number between 1 and 6", "core.randomNumber(1, 6)"],
+        ["a random number between 1 and sides", "core.randomNumber(1, sides)"],
+        ["a random number between sides - 1 and sides + 1", "core.randomNumber(sides - 1, sides + 1)"]
       ]
     }
   ]

@@ -90,4 +90,4 @@ export const family = new FriendList({ name: "family" })
 core.append(family.relationships, new Relationship({ kind: "brother", person: matt }))
 
 core.console.log(owen.id)
-core.map(family.relationships, (relationship) => core.console.log(relationship.person.id))
+core.map(family.relationships, (relationship) => core.console.log(relationship.person?.id))

@@ -207,6 +207,22 @@ describe("ReviewClient.press()", () => {
     expect(server.inbox.marks.j2).not.toHaveProperty("choices")
   })
 
+  test("a pick and the thumbs up together (I217):  either order, one mark;  each taken back leaves the other", async () => {
+    const { client, server } = await started()
+    await client.choose("p1", "B")
+    client.press("p1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.p1).toMatchObject({ action: "approve", pick: "B" }))
+    await client.choose("p1", "C")
+    expect(server.inbox.marks.p1).toMatchObject({ action: "approve", pick: "C" })
+    client.press("p1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.p1).toMatchObject({ action: "pick", pick: "C" }))
+    client.press("p1", "todo")
+    await vi.waitFor(() => expect(server.inbox.marks.p1).toMatchObject({ action: "todo", pick: "C" }))
+    await client.choose("p1", null)
+    expect(server.inbox.marks.p1).toMatchObject({ action: "todo" })
+    expect(server.inbox.marks.p1).not.toHaveProperty("pick")
+  })
+
   test("a todo's plane (`next`) and x (`drop`) mark it as Approve does;  a note in the box goes along", async () => {
     const { client, server } = await started()
     client.press("m1", "next")
@@ -315,14 +331,33 @@ describe("ReviewClient writes", () => {
     const { client } = await started(server)
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
-    expect(await client.changeSet("q1", { pick: "B", choices: 0 })).toBe(true)
+    expect(await client.changeSet("q1", 0, { pick: "B", choices: 0 })).toBe(true)
     expect(notices).toEqual([])
-    expect(await client.changeSet("q1", { pick: "B", multiple: true, choices: 0 })).toBe(false)
+    expect(await client.changeSet("q1", 0, { pick: "B", multiple: true, choices: 0 })).toBe(false)
     expect(client.markOf("q1")).toMatchObject({ action: "pick", pick: "B", choices: 0 })
     expect(client.markOf("q1")!.multiple).toBe(undefined)
     expect(notices).toHaveLength(1)
     expect(notices[0]).toContain("spell server start")
     expect(notices[0]).toContain("`multiple`")
+  })
+
+  test("changeSet():  a change to a holder's 2nd set keeps its 1st set's, each with its `choices` (I227)", async () => {
+    const { client } = await started()
+    expect(await client.changeSet("q1", 0, { pick: "B", choices: 0 })).toBe(true)
+    expect(await client.changeSet("q1", 1, { pick: "B", choices: 1 })).toBe(true)
+    expect(client.markOf("q1")).toMatchObject({
+      action: "pick",
+      pick: "B",
+      choices: 0,
+      sets: [{ pick: "B", choices: 1 }]
+    })
+    // the 1st set's pick taken back:  the 2nd's moves to the top
+    expect(await client.changeSet("q1", 0, {})).toBe(true)
+    const mark = client.markOf("q1")!
+    expect(mark).toMatchObject({ action: "pick", pick: "B", choices: 1 })
+    expect(mark.sets).toBe(undefined)
+    expect(await client.changeSet("q1", 1, {})).toBe(true)
+    expect(client.markOf("q1")).toBe(undefined)
   })
 
   test("a stale token is refreshed from the page as served now, and the write tried again", async () => {

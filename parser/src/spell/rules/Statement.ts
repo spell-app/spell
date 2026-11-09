@@ -5,6 +5,7 @@ import { SP } from "spell/parser/spell"
 import { BODY_KEYWORDS, type StatementBodySpec } from "spell/parser/spell/spell.types"
 import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
 import { Block } from "./Block"
+import { ParseError } from "./ParseError"
 
 /**
  * Base class for all spell statement rules.
@@ -56,6 +57,12 @@ export class SpellStatement<
    * the one `scope.addRule()` recorded.  See `SpellStatement.statementRuleOf()`.
    */
   declare statementRule: P.Rule | undefined
+  /**
+   * `true`:  a line of ours is a VALUE, e.g. a call of a method, `quadruple it`:
+   * as an action's or a property's last line, it's what that gives back -- see `returnsLastLine()`.
+   */
+  declare givesValue: boolean
+  @proto static givesValue = false
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: SpellStatementProps
 
@@ -291,6 +298,10 @@ export class SpellStatement<
     if (parseAs === "block") {
       const { nestedScope } = statement
       result = nestedScope.parser?.parse([nestedBlock], "block", nestedScope)
+      // ONE line a block can't read, under a line taking a value:  that value, as if on our line (epic `language` T58)
+      result = this.oneLineValue(statement, nestedBlock, result) ?? result
+      // its last line's value is what it gives back (epic `language` I47)
+      if (this.returnsLastLine(statement)) result = this.lastLineValue(statement, nestedBlock, result) ?? result
       // wrap output in braces -- or not, see `flatBody`
       if (result?.is(Block) && !this.flatBody) result.data.enclose = true
     } else {
@@ -313,6 +324,80 @@ export class SpellStatement<
       statement.addMatch(result, "body")
       statement.data.body = result
     }
+    return result
+  }
+
+  /**
+   * The ONE line of `nestedBlock`, as an expression, when `block` (that line parsed as statements) can't read it,
+   * and our line takes a value (`inlineAs` is `expression`):  e.g. a property's list on the line below its name,
+   *   `its "days" is:` then `[the monday, the tuesday]` -- or spellx's `<property "days">` with the list under it.
+   * - Only when the WHOLE line reads as one:  else `undefined`, and the block's error stands.
+   */
+  private oneLineValue(statement: P.Match, nestedBlock: P.BlockToken, block: P.Match | undefined): P.Match | undefined {
+    if (this.bodySpec?.inlineAs !== "expression" || !block?.is(Block)) return undefined
+    if (!Block.getParseErrors(block)?.length) return undefined
+    const [line, ...more] = nestedBlock.tokens
+    if (more.length || !(line instanceof P.LineToken)) return undefined
+    const { nestedScope } = statement
+    const tokens = line.tokens.filter((token) => !(token instanceof P.CommentToken))
+    const value = nestedScope.parser?.parse(tokens, "expression", nestedScope)
+    return value?.length === tokens.length && !value.is(ParseError) ? value : undefined
+  }
+
+  /**
+   * Does our indented body give back its LAST line's value, when that line is a value (epic `language` I47, Owen's C)?
+   * - As Ruby and Rust do:  `to double it:` ending `its n * 2` returns it;  so does a property's last line,
+   *   even a call, `quadruple it`.
+   * - A value:  an expression, or a call of a method (`givesValue`).
+   *   A line that's a statement stays one:  `set`, `if`, `for each`, `print`, `return` ...
+   * - Default:  a body that takes a value, e.g. a property's (`inlineAs` is `expression`).
+   *   `MethodDefinition` says yes for its actions and `to ...` methods too.
+   */
+  returnsLastLine(_statement: P.Match): boolean {
+    return this.bodySpec?.inlineAs === "expression"
+  }
+
+  /**
+   * `block`, our indented body, giving back its last line's value -- see `returnsLastLine()`:
+   * - its last line a value already (a call, `givesValue`):  `block`, noting that line as `returnsLast`
+   * - its last line one no statement reads, but an expression does, e.g. `its n * x`:
+   *   a new block, with that line read as the expression -- but not markup, which only a drawing reads
+   * - else `undefined`, and `block` stands as it is
+   * - `SP.Block.getAST()` writes the `return`.
+   */
+  private lastLineValue(
+    statement: P.Match,
+    nestedBlock: P.BlockToken,
+    block: P.Match | undefined
+  ): P.Match | undefined {
+    if (!block?.is(Block)) return undefined
+    const line = [...block.matched].reverse().find((item) => item instanceof P.Match && Block.isCodeLine(item))
+    if (!(line instanceof P.Match)) return undefined
+    const lineStatement = (line.data as { statement?: P.Match }).statement
+    if (lineStatement) {
+      if (!(lineStatement.rule instanceof SpellStatement) || !lineStatement.rule.givesValue) return undefined
+      block.data.returnsLast = lineStatement
+      return block
+    }
+    // a line nothing read:  read as an expression, the whole of it
+    const lineToken = line.tokens[0]
+    if (!(lineToken instanceof P.LineToken) || !Block.getParseErrors(line)?.length) return undefined
+    const { nestedScope } = statement
+    const tokens = lineToken.tokens.filter((token) => !(token instanceof P.CommentToken))
+    const value = nestedScope.parser?.parse(tokens, "expression", nestedScope)
+    if (value?.length !== tokens.length || value.is(ParseError)) return undefined
+    // markup draws, only in a drawing:  anywhere else it stays an error (epic `elemental-spell` Q14)
+    if (value.AST instanceof P.ASTJSXElement) return undefined
+    const kept = line.matched.filter((item) => !(item instanceof P.Match && item.is(ParseError)))
+    const valueLine = new P.Match({
+      rule: line.rule,
+      matched: [...kept, value],
+      tokens: line.tokens,
+      scope: line.scope
+    })
+    const matched = block.matched.map((item) => (item === line ? valueLine : item)) as P.Match[]
+    const result = (block.rule as Block).assembleBlock(nestedScope, nestedBlock, matched)
+    if (result) result.data.returnsLast = value
     return result
   }
 
@@ -432,7 +517,7 @@ export class SpellStatement<
    * - Otherwise its `return` statements' (`getReturnValue()`), wherever they are, e.g. inside an `if`.
    *   - But NOT inside a body with a method scope of its own, e.g. a loop's:
    *     that compiles to a callback, whose `return` is its own.
-   *   - All the same => that;  none, or any other mix => unknown.  A bare `return` is `nothing`.
+   *   - All the same => that;  any other mix => unknown.  A bare `return` is `nothing`, and so is none at all.
    * - Reads ONLY matches:  call it once the body has parsed, e.g. from `mutateScopeFromBody()`.
    */
   getReturnedDatatype(match: P.Match): P.Datatype | undefined {
@@ -441,6 +526,12 @@ export class SpellStatement<
     if (!body.is(Block) && this.bodySpec?.inlineAs === "expression") return body.datatype
     const returned = new Set<P.Datatype | undefined>()
     visit(body)
+    // its last line's value -- see `returnsLastLine()`
+    const { returnsLast } = body.data as { returnsLast?: P.Match }
+    if (returnsLast) returned.add(returnsLast.datatype)
+    // no `return`, and no last line's value:  it gives nothing (`to turn it face up:  set its direction to up`);
+    // not a drawing or a test, whose lines aren't its value
+    if (!returned.size) return this.returnsLastLine(match) ? "nothing" : undefined
     return returned.size === 1 ? [...returned][0] : undefined
 
     /** Note the datatype of each `return` in `item`, a block, line or statement. */

@@ -216,8 +216,13 @@ describe("core.randomNumber()", () => {
     expect(core.randomNumber(1, "foo" as unknown as number)).toBe(undefined)
     expect(assert.failed).toHaveBeenCalled()
   })
-  test("returns a number if max < min", () => {
-    expect(typeof core.randomNumber(1, 0)).toBe("number")
+  test("swaps ends the wrong way round:  6 and 1 is 1 to 6", () => {
+    const rolls = new Set(Array.from({ length: 600 }, () => core.randomNumber(6, 1)))
+    expect([...rolls].sort((a, b) => a! - b!)).toEqual([1, 2, 3, 4, 5, 6])
+  })
+  test("a random number between 1 and 6:  every whole number from 1 to 6 comes up, and nothing else", () => {
+    const rolls = new Set(Array.from({ length: 600 }, () => core.randomNumber(1, 6)))
+    expect([...rolls].sort((a, b) => a! - b!)).toEqual([1, 2, 3, 4, 5, 6])
   })
   test("returns min if min === max", () => {
     expect(core.randomNumber(1, 1)).toBe(1)

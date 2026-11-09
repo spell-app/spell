@@ -1,0 +1,122 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Post",
+    "FeedPage",
+    "MyFeed"
+  ],
+  "statements": [
+    {
+      "type": "Post",
+      "superType": "Thing",
+      "defined": "/OrgFeed.api.spell:580-735"
+    },
+    {
+      "property": "text",
+      "of": "Post",
+      "datatype": "text",
+      "defined": "/OrgFeed.api.spell:627-645"
+    },
+    {
+      "property": "topic",
+      "of": "Post",
+      "datatype": "text",
+      "defined": "/OrgFeed.api.spell:649-668"
+    },
+    {
+      "property": "posted",
+      "of": "Post",
+      "datatype": "text",
+      "defined": "/OrgFeed.api.spell:672-692"
+    },
+    {
+      "property": "by",
+      "of": "Post",
+      "datatype": "text",
+      "defined": "/OrgFeed.api.spell:696-712"
+    },
+    {
+      "property": "space",
+      "of": "Post",
+      "datatype": "text",
+      "defined": "/OrgFeed.api.spell:716-735"
+    },
+    {
+      "property": "weight",
+      "of": "Post",
+      "datatype": "number",
+      "defined": "/OrgFeed.spellml:469-681"
+    },
+    {
+      "syntax": "{operator:is_or_is_not_a} favourite",
+      "output": "is_a_favourite",
+      "rule": "method_postfix",
+      "of": "Post",
+      "kind": "method",
+      "name": "\"is a favourite\"",
+      "returns": "choice",
+      "defined": "/OrgFeed.spellml:696-738"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} ordinary",
+      "output": "is_ordinary",
+      "rule": "method_postfix",
+      "of": "Post",
+      "kind": "method",
+      "name": "\"is ordinary\"",
+      "returns": "choice",
+      "defined": "/OrgFeed.spellml:743-782"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Post",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/OrgFeed.spellml:788-1147"
+    },
+    {
+      "type": "MyFeed",
+      "superType": "Place",
+      "defined": "/OrgFeed.api.spell:392-492"
+    },
+    {
+      "type": "FeedPage",
+      "superType": "App",
+      "defined": "/OrgFeed.spellml:1254-2227"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "FeedPage",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/OrgFeed.spellml:1267-2218"
+    }
+  ],
+  "codeLines": [
+    8,
+    9,
+    14,
+    19,
+    24,
+    29,
+    35,
+    42,
+    47,
+    52,
+    74,
+    102,
+    105
+  ]
+}

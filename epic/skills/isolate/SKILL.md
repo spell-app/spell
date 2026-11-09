@@ -143,7 +143,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - `<pkg>`:  this session's window's.
    - This isn't a package window (a worktree's ...):  `open` takes the whole repo's window and its look
      (`epic config windows`, its `default`).
-     - Never ask which package (Owen, 2026-10-07).
+     - Never ask which package (2026-10-07).
      - `--pkg <pkg>` only when the person names one.
    - `epic window` works before the worktree's install (`epic config installCommand`).
      - `epic` is the plugin's, with its own packages.
@@ -205,7 +205,7 @@ The turn after step 6, whatever the person sends (`continue`, typed in by the mo
 ## Session name
 
 The session MUST stay titled `🚧 <name>` while its work is under way.
-- Other icons (Owen, 2026-10-07):
+- Other icons (2026-10-07):
   - `📅 <name>`:  a future epic written down
   - `✅ <name>`:  merged (`epic session done`)
 - Why:  the handoff finds its old tab by title,
@@ -290,7 +290,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - `git log --oneline HEAD..main` empty (`main` hasn't moved):  ready, go on to step 4.
    - Else `git merge-tree --write-tree --name-only main HEAD`, which merges without touching any files:
      - exit 0, or conflicts ONLY in generated files:  `epic worktree merge-main`, then step 4.
-       - No asking (Owen, 2026-10-03);  say in one line what it regenerated.
+       - No asking (2026-10-03);  say in one line what it regenerated.
        - Generated:  the files the checkout's `.epic/generators.json5` lists.
          In spell-app:  the root `.gitattributes`' `merge=binary` paths (bundles, site and brand assets, snapshots),
          and `yarn.lock`.
@@ -359,7 +359,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - One line with the PR's URL.
    - Merged later (step 7) and `main` pushed:  GitHub marks the PR merged by itself, its commits being in `main`.
 5. NO move back:  the session stays in the window it's in (the worktree's, or the one it stayed in).
-   - Why:  Owen (2026-10-03) "we don't need to go back into the originating window.
+   - Why:  2026-10-03 "we don't need to go back into the originating window.
      That's just confusing things".
    - The worktree's window stays open for the person to read the summary;  they close it.
    - Its file goes with `epic window close <name>` later, or `/worktrees` lists it.
@@ -390,7 +390,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - It shows after the person's next message here:  a hook applies it, and nothing else can.
      - `/isolate <name>`, `/epic <name>` or `/unpark <name>` takes it off again (epic `windows-and-review` P6).
 
-7b. Agents' worktrees, WITHOUT asking (Owen, 2026-10-05), now in the main checkout.
+7b. Agents' worktrees, WITHOUT asking (2026-10-05), now in the main checkout.
    - An agent this session started with `isolation: "worktree"` (an epic's phases) got a worktree of its own.
      - worktree and branch `<name>-agent-<id>`, beside `<name>`'s
      - The `WorktreeCreate` hook names it for its owner.
@@ -416,7 +416,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
 ## Closing line
 
 A reply that closes out the session's work ends with a line of its own, `*You can close this tab*`
-(Owen, 2026-10-07;  leaving a worktree added 2026-10-17, epic `epic-eject` r1).
+(2026-10-07;  leaving a worktree added 2026-10-17, epic `epic-eject` r1).
 - Closing out, any of:
   - merged, or the worktree gone
   - a worktree LEFT (`ExitWorktree`, keep or remove)
@@ -438,5 +438,5 @@ A reply that closes out the session's work ends with a line of its own, `*You ca
   - this session's worktree (left with `keep`)
   - worktrees it made and left:  its step 0 cleans those up
   - Options:  "Run `/epic done`" (Recommended) and "Leave it", in an EPIC's session (its worktree is an epic's;
-    Owen, 2026-10-24:  an epic's prompts say `/epic done`, never `/isolate done`);  "Run `/isolate done`" otherwise.
+    2026-10-24:  an epic's prompts say `/epic done`, never `/isolate done`);  "Run `/isolate done`" otherwise.
 - A repo's own `CLAUDE.md` may say the same:  spell-app's does.

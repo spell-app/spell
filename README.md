@@ -502,8 +502,9 @@ That's its match tree:  each indented line is a rule that matched, inside the on
 The last line is the JavaScript it compiles to.
 
 **A whole program, under node** ([README/cli.md](README/cli.md)).
-[FizzBuzz.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is eight lines:
-a loop from 1 to 100, an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz
+[FizzBuzz.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spellml) is a loop from 1 to 100,
+an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz:
+each says what the number is, as an event, and its `Console.spellml` prints them
 ([the parser's front page](https://github.com/spell-app/spell/blob/main/parser/README.md#fizzbuzz) has all eight, beside what they compile to).
 Run it;  a program with a UI would open in your browser, and `--no-browser` skips anything that needs one.
 
@@ -667,6 +668,7 @@ a folder's file adds the folder's name, as `spell/ui/core` does
 | Folder | Import name | What it is | Its page |
 | --- | --- | --- | --- |
 | [src/util/](src/util/) | `spell/util` | the helpers every folder shares:  decorators, strings, the reactive engine, preferences and undo, a `fetch` that throws | [README/util.md](README/util.md) |
+| [src/places/](src/places/) | `spell/places` | where data lives:  places (Spell's word for a back-end), the cache, the copy kept on this device, writes and healing | [parser/README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#where-data-lives) |
 | [src/toolchain/](src/toolchain/) | `spell/toolchain/...` | what every folder's checks and builds share:  the lint and format rules, the decorator pre-pass, the TypeScript settings and declarations, the resolver every esbuild build uses | [README/toolchain.md](README/toolchain.md) |
 | [src/server/](src/server/) | `spell/server` | the page server, and the steps a tool runs to write a page:  links, formatting, bundles, data files | [README/server.md](README/server.md) |
 | [src/element/](src/element/) | `spell/element` | the element framework every set of web components is written on | [README/element.md](README/element.md) |
@@ -799,7 +801,7 @@ The shared code's topic pages are in [README/](README/), beside this one.
 | [app/README.md](https://github.com/spell-app/spell/blob/main/app/README.md) | <ul><li>the Spell app;  spaces:  every project has an owner and an address</li><li>the live loop, from a keystroke to the app changing</li><li>what you can do today, and 🌱 the ambition</li><li>five example apps;  its folders, a page each</li><li>setup from zero;  working on it</li></ul> |
 | [app/README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places;  a runtime per program</li><li>the editor:  one object behind every pane</li><li>the builds:  one Solid per page</li><li>App UI, a page for every component</li></ul> |
 | [app/README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in spellx and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
-| [app/README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses:  the folder is in the name</li><li>setting up your own</li><li>the models, the servers, and Python's</li><li>people and orgs;  🌱 sign-in and permissions</li></ul> |
+| [app/README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses:  the folder is in the name</li><li>setting up your own</li><li>the models, the servers, and Python's</li><li>people and orgs</li><li>project data folders, sign-in and the cloud</li><li>🌱 spaces for organizations</li></ul> |
 | [app/README-lsp.md](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) | <ul><li>the language server:  the command line and the editor can't disagree</li><li>one service, three places it runs</li><li>the compiler's parse, through one queue</li><li>what it answers, request by request;  scope packs</li><li>where it stops;  🌱 moving to spell-parser, and `spell lsp`</li></ul> |
 | [app/README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md) | <ul><li>the app's part of the page server:  three settings</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
 

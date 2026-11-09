@@ -69,13 +69,14 @@ const LINES = [
   `\t- its "title" is text`
 ]
 
-/** A server, by address:  what's been asked, oldest first. */
+/** A server, by address:  what's been asked, oldest first.  A route that's a `Response` is that answer. */
 function serve(routes: Record<string, unknown> = ROUTES): string[] {
   const asked: string[] = []
   vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
     const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
     asked.push(url)
     const route = routes[url]
+    if (route instanceof Response) return route
     return route === undefined ? new Response("no", { status: 404 }) : Response.json(route)
   })
   return asked
@@ -112,7 +113,7 @@ describe("following a link", () => {
     expect(warnings).toEqual([])
     expect(compiled).toContain(`get homeworld() { return core.linked(this, "homeworld", Planet) }`)
     expect(compiled).toContain(`get films() { return core.linked(this, "films", Film) }`)
-    expect(compiled).toContain(`(await core.answerOf(this, "homeworld")).name`)
+    expect(compiled).toContain(`(await core.answerOf(this, "homeworld"))?.name`)
     // a type that's kept in memory holds the thing itself, as ever
     const memory = [
       `a "planet" is a thing:`,
@@ -231,6 +232,41 @@ describe("following a link", () => {
   })
 })
 
+describe("a read by id, after a search brought the row (epic `data` I90)", () => {
+  /** The people found by name, read from `routes`:  a read of some of them, not every one. */
+  async function lukeFound(routes: Record<string, unknown>) {
+    const asked = serve(routes)
+    core.resetRuntime()
+    const Person = runSpell(LINES)("Person").Person as { savedIn: { select?: unknown } } & (new () => unknown)
+    delete Person.savedIn.select
+    const [found] = (await core.savedThings(Person, { filter: { name: "Luke" } })).items
+    return { asked, Person, found }
+  }
+
+  test("reads the row whole by its id, the same thing", async () => {
+    const { asked, Person, found } = await lukeFound({ ...ROUTES, [LUKE.url]: { ...LUKE, height: "173" } })
+    const luke = (await core.savedThingWithId(Person, LUKE.url)) as Person
+    expect(asked).toContain(LUKE.url)
+    expect(luke).toBe(found)
+    expect(luke.height).toBe(173)
+  })
+
+  test("a read by id that fails says so, rather than showing the row the search brought", async () => {
+    const { Person } = await lukeFound({ ...ROUTES, [LUKE.url]: new Response("slow down", { status: 429 }) })
+    await expect(core.savedThingWithId(Person, LUKE.url)).rejects.toThrow()
+  })
+
+  test("a thing a read of every one brought isn't read again", async () => {
+    const asked = serve()
+    const { run } = await people()
+    const Person = run("Person").Person as new () => unknown
+    // in a drawing, as it's read:  its read is held for the drawing, not asked for by itself
+    const reading = createRoot(() => core.savedThingWithId(Person, LUKE.url))
+    expect(((await reading) as Person).name).toBe("Luke")
+    expect(asked).not.toContain(LUKE.url)
+  })
+})
+
 describe("the wiki page whose id is its name", () => {
   const WIKI = "https://wiki.test/api"
   const lines = [
@@ -319,7 +355,7 @@ describe("what the Star Wars example needed", () => {
       `\t\t<p>{its released}</p>`
     ])
     expect(code).toContain("core.dateShown(this.released)")
-    expect(core.dateShown(new Date("1977-05-25"))).toBe("May 25, 1977")
+    expect(core.dateShown(new Date(1977, 4, 25, 23))).toBe("May 25, 1977")
     expect(core.dateShown(undefined)).toBeUndefined()
   })
 
@@ -338,7 +374,7 @@ describe("what the Star Wars example needed", () => {
       `\t- to draw it:`,
       `\t\tdraw the page of its showing`
     ])
-    expect(code).toContain("this.showing.drawPage()")
+    expect(code).toContain("this.showing?.drawPage()")
   })
 
   test("a listener on an element's own event isn't run as it's drawn", () => {

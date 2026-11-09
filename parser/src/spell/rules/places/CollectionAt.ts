@@ -6,10 +6,12 @@ import type { P } from "spell/parser/parser"
  * `collection_at` rule:  where a place keeps a type's things, when it's not where anyone would look.
  * - e.g. `- recipes live at "/dishes"`:  a web server's address for them
  * - On any other kind of place, the name they go by there.
+ * - e.g. `- wiki pages are found at "/page/summary/{name}"`:  each found by a name in its address, with no list of
+ *   them all (epic `data` P27).  Whatever the braces say, it's the thing's id:  `the wiki page whose id is its name`.
  */
 export class CollectionAt extends PlaceDetail<"collection|path"> {
   detailOf(match: P.MatchFor<this>): PlaceDetailValue {
     const name = collectionNameFor(`${match.groups.collection.raw}`.replace(/s$/, ""))
-    return { collections: { [name]: { at: textIn(match.groups.path) } } }
+    return { collections: { [name]: { at: textIn(match.groups.path).replace(/\{[^{}/]*\}/, "{id}") } } }
   }
 }

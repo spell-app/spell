@@ -1,0 +1,263 @@
+# Org Admin
+An org's Admin page:  who's in it, its teams and projects, who manages what and until when, who designs which pages,
+which apps its spaces may install, its event stages, and the log of every change.
+A toolbar with who's signed in, the sections down the side, and one section at a time beside them.
+Where they're kept is in OrgAdmin.api.spell, and only its first line knows.
+Each change goes through Spell's server, under the org's rules:  one you can't make says why, and changes nothing.
+
+
+## The page:  a toolbar, the sections down the side, and the one picked
+
+<spell-app "org admin">
+	<property "new member" description="Who to add, by their address:  ana@rs">a new member</>
+	<property "new team" description="A new standing team, by its name">a new team</>
+	<property "new project" description="A new project, under a team or, with none picked, the org itself">a new project</>
+	<property "new term">a new term</>
+	<property "new app">a new approved app</>
+	<property "new designer" description="Who designs which space's pages">a new designer</>
+	<property "new stage" description="A stage an event goes through:  its name changes the stage of that name, or adds one before the last">a new stage</>
+
+	<action "add the new member">
+		add the new member to the members
+		set its new member to a new member
+	</action>
+
+	<action "add the new team">
+		add the new team to the teams
+		set its new team to a new team
+	</action>
+
+	<action "add the new project">
+		add the new project to the projects
+		set its new project to a new project
+	</action>
+
+	<action "give the new term">
+		add the new term to the terms
+		set its new term to a new term
+	</action>
+
+	<action "approve the new app">
+		add the new app to the approved apps
+		set its new app to a new approved app
+	</action>
+
+	<action "add the new designer">
+		add the new designer to the designers
+		set its new designer to a new designer
+	</action>
+
+	<action "add the new stage">
+		add the new stage to the stages
+		set its new stage to a new stage
+	</action>
+
+	<draw description="The section picked is in the page's address, so a reload comes back to it">
+		<stack class="org-admin" spacing="none">
+			<toolbar class="top-bar" aria-label="Org Admin">
+				<for org in every org profile>
+					<text slot="title" size="large">{its name} Admin</text>
+				</for>
+				<stack slot="right" direction="horizontal">{the sign in menu}</stack>
+			</toolbar>
+			<tabs class="body" parameter="section" direction="vertical" appearance="secondary" aria-label="Sections">
+				<tab label="People" icon="users" value="people">{draw the people section of it}</tab>
+				<tab label="Teams and projects" icon="sitemap" value="teams">{draw the teams section of it}</tab>
+				<tab label="Who manages what" icon="user tie" value="roles">{draw the roles section of it}</tab>
+				<tab label="Who designs what" icon="paint brush" value="designers">{draw the designers section of it}</tab>
+				<tab label="Approved apps" icon="check circle outline" value="apps">{draw the apps section of it}</tab>
+				<tab label="Event stages" icon="stream" value="stages">{draw the stages section of it}</tab>
+				<tab label="Log" icon="history" value="log">{draw the log section of it}</tab>
+			</tabs>
+		</stack>
+	</draw>
+
+	<draw "people section">
+		<stack class="people">
+			<header size="medium">People</header>
+			<form value={its new member} class="add">
+				<input name="person" placeholder="Add someone, by their address:  ana@rs" aria-label="Add someone, by their address" fluid action>
+					<button slot="action" class="add" color="primary" disabled={the person of the new member is ""} title="Add them to the org" onClick={add the new member}>Add</button>
+				</input>
+			</form>
+			<for member in every member sorted by its name a-z as="table" appearance="very-basic" selectable unstackable loading="Finding the org's people">
+				<cell "Name">{its name}</cell>
+				<cell "Address"><text color="grey">{its person}</text></cell>
+				<cell "Role"><label size="small">{its role name}</label></cell>
+				<cell ""><button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Take them out of the org" title="Take them out of the org" onClick={remove member from the members}/></cell>
+				<empty><text class="none" color="grey">Nobody yet.</text></empty>
+				<failed><text color="red">We can't read the org's people right now.</text></failed>
+			</for>
+		</stack>
+	</draw>
+
+	<draw "teams section">
+		<stack class="teams">
+			<header size="medium">Teams</header>
+			<form value={its new team} class="add new-team">
+				<input name="name" placeholder="A new team:  Events Team" aria-label="A new team" fluid action>
+					<button slot="action" class="add" color="primary" disabled={the name of the new team is ""} title="Add this team" onClick={add the new team}>Add team</button>
+				</input>
+			</form>
+			<for team in every team sorted by its name a-z as="table" appearance="very-basic" selectable unstackable loading="Finding the teams">
+				<cell "Name">{its name}</cell>
+				<cell "Space"><text color="grey">{its space}</text></cell>
+				<empty><text class="none" color="grey">No teams yet.</text></empty>
+			</for>
+			<header size="medium">Projects</header>
+			<form value={its new project} class="add new-project">
+				<stack class="row" direction="horizontal" align="center" wrap>
+					<input name="name" placeholder="A new project:  2026 Q4" aria-label="A new project" fluid/>
+					<select name="team" placeholder="Under the org itself" aria-label="Under the team">
+						<for team in every team sorted by its name a-z>
+							<item value={its id}>{its name}</item>
+						</for>
+					</select>
+					<button class="add-project" color="primary" title="Add this project" disabled={the name of the new project is ""} onClick={add the new project}>Add project</button>
+				</stack>
+			</form>
+			<for project in every project sorted by its name a-z as="table" appearance="very-basic" selectable unstackable loading="Finding the projects">
+				<cell "Name">{its name}</cell>
+				<cell "Under">{its team}</cell>
+				<cell "Space"><text color="grey">{its space}</text></cell>
+				<empty><text class="none" color="grey">No projects yet.</text></empty>
+			</for>
+		</stack>
+	</draw>
+
+	<draw "roles section">
+		<stack class="roles">
+			<header size="medium">Who manages what</header>
+			<form value={its new term} class="add">
+				<stack class="row" direction="horizontal" align="center" wrap>
+					<select name="holder" placeholder="Who" aria-label="Who:  a person, or a team">
+						<for member in every member sorted by its name a-z>
+							<item value={its person}>{its name}</item>
+						</for>
+						<for team in every team sorted by its name a-z>
+							<item value={its id}>{its name}</item>
+						</for>
+					</select>
+					<select name="role" placeholder="Role" aria-label="Role">
+						<for one in every org role>
+							<item value={its id}>{its name}</item>
+						</for>
+					</select>
+					<select name="manages" placeholder="The whole org" aria-label="Of">
+						<for team in every team sorted by its name a-z>
+							<item value={its id}>{its name}</item>
+						</for>
+						<for project in every project sorted by its name a-z>
+							<item value={its id}>{its name}</item>
+						</for>
+					</select>
+					<input name="ends" type="date" aria-label="Until"/>
+					<button class="give" color="primary" title="Give them this role" disabled={the holder of the new term is ""} onClick={give the new term}>Name them</button>
+				</stack>
+			</form>
+			<for term in every term as="table" appearance="very-basic" selectable unstackable loading="Finding who manages what">
+				<cell "Who" class="holder" title={its holder}>{its holder name}</cell>
+				<cell "Role"><label size="small">{its role name}</label></cell>
+				<cell "Of">{its manages name}</cell>
+				<cell "Since">{its starts}</cell>
+				<cell "Until">{its ends}</cell>
+				<cell ""><button class="end" icon="close" size="mini" appearance="transparent" aria-label="End this term" title="End this term:  its record stays in the log" onClick={remove term from the terms}/></cell>
+				<empty><text class="none" color="grey">Nobody's been named yet.</text></empty>
+			</for>
+		</stack>
+	</draw>
+
+	<draw "designers section">
+		<stack class="designers">
+			<header size="medium">Who designs what</header>
+			<text color="grey">They change a space's pages, whatever their role there;  its Managers publish them.</text>
+			<form value={its new designer} class="add">
+				<stack class="row" direction="horizontal" align="center" wrap>
+					<select name="person" placeholder="Who" aria-label="Who">
+						<for member in every member sorted by its name a-z>
+							<item value={its person}>{its name}</item>
+						</for>
+					</select>
+					<select name="space" placeholder="Designs" aria-label="Designs">
+						<for org in every org profile>
+							<item value={its space}>{its name}</item>
+						</for>
+						<for team in every team sorted by its name a-z>
+							<item value={its space}>{its name}</item>
+						</for>
+						<for project in every project sorted by its name a-z>
+							<item value={its space}>{its name}</item>
+						</for>
+					</select>
+					<button class="design" color="primary" title="Let them change this space's pages" disabled={the person of the new designer is ""} onClick={add the new designer}>Let them design it</button>
+				</stack>
+			</form>
+			<for designer in every designer as="table" appearance="very-basic" selectable unstackable loading="Finding who designs what">
+				<cell "Who" title={its person}>{its person name}</cell>
+				<cell "Designs"><text color="grey">{its space}</text></cell>
+				<cell ""><button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="No longer designs it" title="No longer designs it:  their drafts stay, for a Manager" onClick={remove designer from the designers}/></cell>
+				<empty><text class="none" color="grey">Only each space's Managers, so far.</text></empty>
+			</for>
+		</stack>
+	</draw>
+
+	<draw "apps section">
+		<stack class="apps">
+			<header size="medium">Approved apps</header>
+			<form value={its new app} class="add">
+				<stack class="row" direction="horizontal" align="center" wrap>
+					<input name="name" placeholder="@spell/sign-up-sheet" aria-label="App" fluid/>
+					<input name="version" placeholder="1.0.0" aria-label="Version"/>
+					<button class="approve" color="primary" title="Let this org's spaces install it" disabled={the name of the new app is ""} onClick={approve the new app}>Approve</button>
+				</stack>
+			</form>
+			<for app in every approved app as="table" appearance="very-basic" selectable unstackable loading="Finding the approved apps">
+				<cell "App">{its name}</cell>
+				<cell "Version">{its version}</cell>
+				<cell ""><button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Take it off the list" title="Take it off the list" onClick={remove app from the approved apps}/></cell>
+				<empty><text class="none" color="grey">No apps approved yet.</text></empty>
+			</for>
+		</stack>
+	</draw>
+
+	<draw "stages section">
+		<stack class="stages">
+			<header size="medium">Event stages</header>
+			<form value={its new stage} class="add">
+				<stack class="row" direction="horizontal" align="center" wrap>
+					<input name="name" placeholder="A stage:  Rehearsal" aria-label="Stage" fluid/>
+					<select name="moves to" placeholder="Moves to" aria-label="Moves to">
+						<for stage in every stage>
+							<item value={its id}>{its name}</item>
+						</for>
+					</select>
+					<select name="moved by" placeholder="Moved by" aria-label="Moved by">
+						<item value="the team">The team</item>
+						<item value="its organizers">Its organizers</item>
+					</select>
+					<button class="stage-it" color="primary" title="Add this stage, or change the one of that name" disabled={the name of the new stage is ""} onClick={add the new stage}>Add or change</button>
+				</stack>
+			</form>
+			<for stage in every stage as="table" appearance="very-basic" selectable unstackable loading="Finding the event stages">
+				<cell "Stage">{its name}</cell>
+				<cell "Moves to"><text color="grey">{its moves to}</text></cell>
+				<cell "Moved by">{its moved by}</cell>
+				<cell ""><button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Remove this stage" title="Remove this stage:  not while an event is in it, or another moves to it" onClick={remove stage from the stages}/></cell>
+			</for>
+		</stack>
+	</draw>
+
+	<draw "log section">
+		<stack class="log">
+			<header size="medium">Log</header>
+			<for change in every role change sorted by its at, newest first as="table" appearance="very-basic" unstackable loading="Reading the log">
+				<cell "When"><text color="grey">{its at}</text></cell>
+				<cell "Who">{its who}</cell>
+				<cell "Did"><label size="small">{its did}</label></cell>
+				<cell "What">{its what}</cell>
+				<cell "Why">{its why}</cell>
+				<empty><text class="none" color="grey">Nothing's changed yet.</text></empty>
+			</for>
+		</stack>
+	</draw>
+</spell-app>

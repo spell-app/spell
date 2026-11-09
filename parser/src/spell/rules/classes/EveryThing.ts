@@ -1,8 +1,16 @@
+import { snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { isSearchedField, savedPlaceOfMatch, searchesOf } from "spell/parser/spell/rules/places/places.shared"
+import {
+  askedByOf,
+  isFoundByName,
+  isSearchedOnly,
+  isSearchedField,
+  savedPlaceOfMatch,
+  searchesOf
+} from "spell/parser/spell/rules/places/places.shared"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).
@@ -16,6 +24,96 @@ import { isSearchedField, savedPlaceOfMatch, searchesOf } from "spell/parser/spe
  *   `core.savedThings(Recipe)`.  A `where` and a `sorted by` it can tell are simple go to the place with it:  `savedAST()`.
  */
 export class EveryThing extends SpellExpression<"type"> {
+  /** `every wiki page`, refused for a type found only by name:  see `refusedIfFoundByName()`. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    // `the things` refuses for itself, once it's sure it's a read
+    if (!match || this.constructor !== EveryThing) return match
+    return EveryThing.refusedIfFoundByName(match, match.groups.type)
+  }
+
+  /**
+   * `match`, or a parse error when `type` has no list of them all:
+   * - found only by name (epic `data` P27):  `wiki pages are found at "/page/summary/{name}"`,
+   *   so `every wiki page` can't be read
+   * - given only to a search (epic `data` P29):  `books are searched at "/search.json"`,
+   *   so `every book` can't either, and the message says how to search:  `every book where its title includes ...`
+   * - asked for by a query (epic `data` P33):  `forecasts are asked for by their latitude and longitude`,
+   *   so `every forecast` can't, and the message says what to give:
+   *   `every forecast where its latitude is ... and its longitude is ...`
+   */
+  static refusedIfFoundByName(match: P.Match, type: P.Match): P.Match {
+    const saved = savedPlaceOfMatch(type)
+    if (!saved) return match
+    const language = SP.Language.of(match.scope)
+    const words = `${type.raw}`.trim()
+    const params = { things: P.pluralize(words), thing: P.singularize(words) }
+    // the line that says so may be anywhere in the project:  asked when the errors are gathered
+    // ONE refusal a line:  which it is, asked then too
+    const searched = EveryThing.refusalWithoutQuery(match, type, undefined)
+    const message = () =>
+      isFoundByName(saved) ? language.parserMessage("found-only-by-name", params) : searched.message()
+    SP.SpellWarnings.refuseIf(match, message, () => isFoundByName(saved) || searched.holds())
+    return match
+  }
+
+  /**
+   * SIDE EFFECT:  a parse error when `type` is given only to a search, and `where` hands the place none
+   * (epic `data` P29):  `books are searched at "/search.json"`, `- it searches titles with "q"`.
+   * - `where`:  the `where`'s function, made when the errors are gathered.
+   * - `every book where its title includes the search` searches;
+   *   `every book`, or `every book where it is long`, can't be read.
+   * - The same for a type asked for by a query, and a `where` that doesn't say each (epic `data` P33):
+   *   `every forecast where its latitude is 52.52 and its longitude is 13.41` asks;
+   *   `every forecast where it is cold` can't.
+   */
+  static refusedUnlessSearched(match: P.Match, type: P.Match, where: (() => P.ASTMethodDefinition) | undefined): void {
+    if (!savedPlaceOfMatch(type)) return
+    const { message, holds } = EveryThing.refusalWithoutQuery(match, type, where)
+    SP.SpellWarnings.refuseIf(match, message, holds)
+  }
+
+  /**
+   * What `refusedUnlessSearched()` says, and whether it still holds:  both asked when the errors are gathered.
+   * - Asked for by a query (`askedByOf()`):  each field it's asked for by, said in a filter, `its latitude is ...`.
+   * - Else given only to a search:  a search.
+   */
+  private static refusalWithoutQuery(
+    match: P.Match,
+    type: P.Match,
+    where: (() => P.ASTMethodDefinition) | undefined
+  ): { message: () => string; holds: () => boolean } {
+    const saved = savedPlaceOfMatch(type)
+    const language = SP.Language.of(match.scope)
+    const words = `${type.raw}`.trim()
+    const message = () => {
+      const asked = askedByOf(saved)
+      if (asked.length) {
+        return language.parserMessage("asked-by-only", {
+          things: P.pluralize(words),
+          fields: asked.map(wordsOfField).join(", "),
+          saying: asked.map((field) => `its ${wordsOfField(field)} is ...`).join(" and "),
+          thing: P.singularize(words)
+        })
+      }
+      const [field = "name"] = searchesOf(saved)?.fields ?? []
+      return language.parserMessage("searched-only", {
+        things: P.pluralize(words),
+        thing: P.singularize(words),
+        field: P.singularize(field)
+      })
+    }
+    const holds = () => {
+      const asked = askedByOf(saved)
+      if (asked.length) {
+        const said = where ? (handedFilterOf(where()) ?? []).map((part) => `${part.property.value}`) : []
+        return !asked.every((field) => said.includes(field))
+      }
+      return isSearchedOnly(saved) && !(where && handedSearchOf(where(), searchesOf(saved)?.fields ?? []).length)
+    }
+    return { message, holds }
+  }
+
   /** A list of the type, e.g. `list of piles`, `list of card-suits`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return P.listOfType(SP.typeName(`${match.groups.type.value}`))
@@ -44,7 +142,8 @@ export class EveryThing extends SpellExpression<"type"> {
    *   all of it handed over, `first` too.
    *   - Anything else stays here, `core.filter()`, over everything the place holds, up to the engine's ceiling.
    *   - Each `its X includes <a value>` in it goes too, as a search, when a line under the place says it searches X
-   *     (`it searches names with "search"`, epic `data` P26):  the server narrows the read, and `core.filter()` still checks.
+   *     (`it searches names with "search"`, epic `data` P26):
+   *     the server narrows the read, and `core.filter()` still checks.
    */
   static savedAST(
     match: P.Match,
@@ -111,6 +210,11 @@ export class EveryThing extends SpellExpression<"type"> {
   }
 }
 
+/** A field's words, from its name:  `windSpeed` => `wind speed`. */
+function wordsOfField(field: string): string {
+  return snakeCase(field).replace(/_/g, " ")
+}
+
 /** One part of a place's query. */
 function queryProperty(match: P.Match, name: string, value: P.ASTExpression): P.ASTObjectLiteralProperty {
   return new P.ASTObjectLiteralProperty(match, { property: name as never, value })
@@ -142,7 +246,8 @@ export function handedFilterOf(predicate: P.ASTMethodDefinition): P.ASTObjectLit
 
 /**
  * The parts of `predicate`, a `where`'s function, a place that searches `fields` can be handed as a search:
- * each `its X includes <a value>`, alone or joined by `and`, where X is one of `fields` and the value doesn't depend on the item.
+ * each `its X includes <a value>`, alone or joined by `and`,
+ * where X is one of `fields` and the value doesn't depend on the item.
  * - The rest of it is still checked here, all of it:  a search narrows the read, and the program decides.
  */
 export function handedSearchOf(

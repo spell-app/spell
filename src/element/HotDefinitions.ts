@@ -23,7 +23,7 @@ import { E } from "spell/element"
  *   its definition, its properties, how it builds its component.
  *   - What the platform read once at definition, and how a new version gets round it
  *     (epic `epic-engine` I171:  every epic page reloaded at a merge that added attributes):
- *     - observed attributes:  one it doesn't observe is watched on each element instead (`watchAttributes()`);
+ *     - observed attributes:  one it doesn't observe is watched on each element instead (`DOMElement.watchAttributes()`);
  *       one dropped is still reported, and ignored
  *     - a new version of the family's DOM element class (its pack ran again):  laid under the tag's class in place
  *       of the old one, when the platform's lifecycle callbacks stay the same
@@ -147,7 +147,7 @@ export class HotDefinitions {
     E.DOMElement.defineProperties(TagClass)
     for (const domElement of HotDefinitions.liveElements(TagClass)) {
       HotDefinitions.migrate(domElement, previous, definition)
-      HotDefinitions.watchAttributes(domElement)
+      E.DOMElement.watchAttributes(domElement)
     }
     HotDefinitions.pending.swapped.add(TagClass)
   }
@@ -156,11 +156,11 @@ export class HotDefinitions {
    * Why `TagClass` can't take `next`, or `undefined` if it can.
    * - The platform read these ONCE, by DOM API `customElements.define()` or by the constructor of elements that
    *   already exist.
-   * - Observed attributes changing is fine:  `watchAttributes()` hears the new ones.
+   * - Observed attributes changing is fine:  `DOMElement.watchAttributes()` hears the new ones.
    * - `Base`, the DOM element class `next` names:  the tag's own base, or a NEW VERSION of it (`isNewVersionOf()`)
    */
   static changeOf(TagClass: E.DOMElementClass, Base: E.AnyDOMElementClass, next: E.TagSetup): string | undefined {
-    HotDefinitions.observedByPlatform(TagClass)
+    E.DOMElement.observedByPlatform(TagClass)
     const Previous = Object.getPrototypeOf(TagClass) as E.AnyDOMElementClass
     if (Previous !== Base && !HotDefinitions.isNewVersionOf(Base, Previous)) return "DOM element class changed"
     const formAssociated = !!(TagClass as unknown as { formAssociated?: boolean }).formAssociated
@@ -249,64 +249,14 @@ export class HotDefinitions {
 
   /**
    * Remember `domElement` as a live element of its class;  weak, so tracking never keeps an element alive.
-   * - an element made after its tag took a new attribute the platform doesn't observe hears it too
-   *   (`watchAttributes()`)
+   * - An element made after its tag took a new attribute the platform doesn't observe hears it too:
+   *   its constructor watches it (`DOMElement.watchAttributes()`).
    */
   static track(domElement: E.DOMElement) {
     const TagClass = domElement.constructor as E.DOMElementClass
     let refs = HotDefinitions.live.get(TagClass)
     if (!refs) HotDefinitions.live.set(TagClass, (refs = new Set()))
     refs.add(new WeakRef(domElement))
-    if (HotDefinitions.unobserved(TagClass).length) HotDefinitions.watchAttributes(domElement, "replay")
-  }
-
-  /**
-   * The attributes the platform observes for `TagClass`:  fixed when it was defined.
-   * - read the first time a new version comes (`changeOf()`), before its definition changes:
-   *   `observedAttributes` reads the CURRENT definition (`DOMElement`), not what the platform took
-   */
-  static observedByPlatform(TagClass: E.DOMElementClass): string[] {
-    let names = HotDefinitions.platformObserved.get(TagClass)
-    if (!names) HotDefinitions.platformObserved.set(TagClass, (names = [...TagClass.observedAttributes]))
-    return names
-  }
-
-  /** The attributes `TagClass`'s current definition observes and the platform doesn't (`watchAttributes()`). */
-  static unobserved(TagClass: E.DOMElementClass): string[] {
-    const platform = HotDefinitions.platformObserved.get(TagClass)
-    if (!platform || !TagClass.tagSetup) return []
-    return E.DOMElement.observedAttributesFor(TagClass.tagSetup.elementDefinition).filter(
-      (name) => !platform.includes(name)
-    )
-  }
-
-  /**
-   * Hear the attributes `domElement`'s tag observes now and the platform doesn't (a new version added them), as
-   * DOM API `attributeChangedCallback()` would:  a `MutationObserver` on the element calls it.
-   * - after the platform's reports:  a mutation observer's callback runs in a microtask
-   * - `replay`:  report the ones it has already too (an element made after the swap, its markup's attributes)
-   * - none left:  stops listening
-   */
-  static watchAttributes(domElement: E.DOMElement, replay?: "replay") {
-    const names = HotDefinitions.unobserved(domElement.constructor as E.DOMElementClass)
-    HotDefinitions.watchers.get(domElement)?.disconnect()
-    HotDefinitions.watchers.delete(domElement)
-    if (!names.length) return
-    const watcher = new MutationObserver((records) => {
-      for (const { attributeName, oldValue } of records) {
-        if (attributeName)
-          domElement.attributeChangedCallback(attributeName, oldValue, domElement.getAttribute(attributeName))
-      }
-    })
-    watcher.observe(domElement, { attributes: true, attributeFilter: names, attributeOldValue: true })
-    HotDefinitions.watchers.set(domElement, watcher)
-    if (!replay) return
-    queueMicrotask(() => {
-      for (const name of names) {
-        const text = domElement.getAttribute(name)
-        if (text !== null) domElement.attributeChangedCallback(name, null, text)
-      }
-    })
   }
 
   /** Every element of `TagClass` still in memory, connected or not. */
@@ -399,12 +349,6 @@ export class HotDefinitions {
 
   /** Where each element's attribute values last came from, by key:  `migrate()` reads it. */
   private static readonly sources = new WeakMap<E.DOMElement, Record<string, E.ValueSource>>()
-
-  /** The attributes the platform observes, per tag class, as it defined it (`observedByPlatform()`). */
-  private static readonly platformObserved = new WeakMap<E.DOMElementClass, string[]>()
-
-  /** Each element's watcher of the attributes the platform doesn't observe (`watchAttributes()`). */
-  private static readonly watchers = new WeakMap<E.DOMElement, MutationObserver>()
 
   /** Swaps and refusals since the last `update()`. */
   private static readonly pending = {

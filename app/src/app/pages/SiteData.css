@@ -1,0 +1,104 @@
+/*
+ * Look of the site editor's Data tab, `<SiteData>` (`SiteData.tsx`, epic `mockup` P11):  the NERD, its turned-over
+ * boxes (`.ErdCard`, drawn like the NERD's own boxes), and a collection's sample rows.
+ */
+.SiteData {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+
+  > header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    p {
+      flex: 1 1 260px;
+      margin: 0;
+    }
+    .columns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+
+      ui-input {
+        width: 5em;
+      }
+    }
+  }
+
+  /* its own height:  the board's column scrolls, never squeezes it */
+  .nerd {
+    flex: none;
+    max-width: 100%;
+  }
+
+  .samples {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    ui-table {
+      overflow: auto;
+    }
+  }
+}
+
+/* a NERD box turned over:  both sides drawn as the NERD's boxes are, a coloured header and a white body */
+.ErdCard .box {
+  min-width: 170px;
+  border: 1.2px solid var(--box-color);
+  border-radius: 6px;
+  /* the diagram's own box and ink colours, so a turned box matches the boxes around it, light or dark */
+  background: var(--ui-diagram-box-background, var(--ui-background));
+  color: var(--ui-diagram-ink, var(--ui-text-color));
+  font-family: var(--ui-diagram-font-family, var(--ui-font-family));
+  font-size: 10.5px;
+  overflow: hidden;
+
+  .title {
+    padding: 6px 12px;
+    background: var(--box-color);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 12px;
+  }
+  .row:first-of-type {
+    padding-top: 6px;
+  }
+  .row:last-child {
+    padding-bottom: 6px;
+  }
+  .kind {
+    color: var(--ui-diagram-line-color, var(--ui-text-muted));
+  }
+  .row.id .name {
+    font-weight: 600;
+  }
+  .row.link .kind {
+    color: var(--box-color);
+  }
+}
+
+.ErdCard .box.erd {
+  cursor: pointer;
+}
+.ErdCard .box.erd:focus-visible {
+  outline: 2px solid var(--ui-focus-color, #2563eb);
+  outline-offset: 2px;
+}

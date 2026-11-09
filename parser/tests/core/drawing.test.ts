@@ -186,6 +186,22 @@ describe("@drawn", () => {
     expect(element.querySelector(".card")!.textContent).toBe("2 clubs")
   })
 
+  // epic `data`:  PokéSpell's console filled with "draw() failed AbortError" as its list scrolled
+  test("a draw() given up on (an AbortError, a link nobody's waiting for) draws nothing, and says nothing", () => {
+    class LeftCard extends Thing {
+      @drawn
+      draw(): Drawing {
+        throw new DOMException("Nobody's waiting for this link any more", "AbortError")
+      }
+    }
+    const sentErrors: unknown[] = []
+    element.addEventListener("ui-error", (event) => sentErrors.push(event))
+    draw(() => core.drawThing(new LeftCard()))
+    expect(element.querySelector(".spell-draw-error")).toBeNull()
+    expect(core.console.error).not.toHaveBeenCalled()
+    expect(sentErrors).toEqual([])
+  })
+
   test("a card added to a pile leaves a broken card's stand-in as it was:  not made again, not said again", () => {
     const pile = new PlainPile()
     pile.add(new PlainCard({ rank: "ace" }), new Card({ rank: 3, isBroken: true }))
@@ -333,6 +349,16 @@ describe("@drawn", () => {
       expect(element.innerHTML).toBe(`<slot></slot><i>hearts</i>7`)
       // the card's own boundary, and none around it:  the heap's own drawing has one
       expect(Errored).toHaveBeenCalledTimes(2)
+    })
+
+    // epic `language` T84:  Tic-Tac-Toe's board draws its squares itself;  each square, with no `to draw`, threw
+    test("by default, a thing with no drawing of its own draws nothing:  no stand-in, nothing said", () => {
+      class Square extends Thing {}
+      const heap = new Heap()
+      heap.add(new Square(), new PlainCard({ rank: "ace" }))
+      draw(() => core.drawItems(heap))
+      expect(element.innerHTML).toBe(`<i>hearts</i>`)
+      expect(core.console.error).not.toHaveBeenCalled()
     })
 
     test("by default, its wrapper shows its placeholder while it's empty, before the slot", () => {

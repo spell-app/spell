@@ -1,0 +1,148 @@
+/*
+ * Look of the site editor's board, `<SiteBoardView>`:  a block per section, one under the other, each a grid of cards
+ * of one width, so a section's columns line up with the others'.
+ * - A card's DOM element has no box (`display: contents`):  its `::part(card)` is what sits in the grid,
+ *   at its `--SiteCard-row` and `--SiteCard-column`.
+ */
+.SiteBoard {
+  --SiteBoard-card-width: 156px;
+  --SiteBoard-gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  width: max-content;
+  padding: 4px;
+}
+
+.SiteSection {
+  position: relative;
+  display: grid;
+  grid-auto-columns: var(--SiteBoard-card-width);
+  grid-auto-rows: minmax(76px, auto);
+  gap: var(--SiteBoard-gap);
+  width: max-content;
+
+  /* every spot a card can land on, behind the cards:  only while one is moving */
+  .spot {
+    pointer-events: none;
+    border-radius: 14px;
+
+    &.extra-row,
+    &.extra-column {
+      display: none;
+    }
+  }
+
+  /* where a dragged section would land:  a line above or below this one */
+  &[data-drop]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    height: 3px;
+    background: var(--ui-primary-color, var(--ui-focus-color));
+    pointer-events: none;
+  }
+  &[data-drop="before"]::after {
+    top: -14px;
+  }
+  &[data-drop="after"]::after {
+    bottom: -14px;
+  }
+}
+
+.SiteBoard[data-moving] .spot {
+  pointer-events: auto;
+  outline: 1px dashed var(--spell-pane-border-color);
+  outline-offset: -1px;
+
+  /* one more column for every section;  one more row only for the section under the pointer, so nothing above it moves */
+  &.extra-column:not(.extra-row) {
+    display: block;
+  }
+  .SiteSection[data-open] &.extra-row {
+    display: block;
+  }
+  &[data-drop] {
+    background: color-mix(in oklab, var(--ui-primary-color, var(--ui-focus-color)) 28%, transparent);
+    outline: 2px solid var(--ui-primary-color, var(--ui-focus-color));
+  }
+}
+
+.SiteCard {
+  --ui-card-width: 100%;
+  --ui-card-margin-block: 0px;
+  --ui-card-radius: 14px;
+  --ui-card-background: var(--spell-pane-background);
+  --ui-card-border-color: var(--spell-pane-border-color);
+
+  &::part(card) {
+    grid-row: var(--SiteCard-row);
+    grid-column: var(--SiteCard-column);
+    position: relative;
+    min-height: 76px;
+    z-index: 1;
+  }
+  &::part(image) {
+    pointer-events: none;
+  }
+  /* its title and line, centred in what's left under a picture */
+  &::part(content) {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  &::part(header) {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+  &::part(description) {
+    margin-top: 2px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* a dialog or sidebar is square;  a section's card bold and bigger */
+  &.kind-dialog,
+  &.kind-sidebar {
+    --ui-card-radius: 0px;
+  }
+  &.section::part(header) {
+    font-size: 15px;
+    font-weight: var(--ui-font-weight-bold);
+  }
+  &.selected::part(card) {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-primary-color, var(--ui-focus-color));
+    outline-offset: 1px;
+  }
+  &[data-being-moved]::part(card) {
+    opacity: 0.45;
+  }
+
+  /* the page's link to itself in a new tab:  8px inside the card's corner, readable over a picture */
+  .new-tab {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--ui-text-color);
+    background: var(--spell-pane-background);
+    box-shadow: 0 0 0 1px var(--spell-pane-border-color);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--ui-primary-color, var(--ui-focus-color));
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Listing",
+    "Message",
+    "PicnicLetter",
+    "PublishedSheet",
+    "MyInbox"
+  ],
+  "statements": [
+    {
+      "type": "Listing",
+      "superType": "Thing",
+      "defined": "/PicnicLetter.api.spell:569-674"
+    },
+    {
+      "property": "person",
+      "of": "Listing",
+      "datatype": "text",
+      "defined": "/PicnicLetter.api.spell:631-651"
+    },
+    {
+      "property": "shift",
+      "of": "Listing",
+      "datatype": "text",
+      "defined": "/PicnicLetter.api.spell:655-674"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Listing",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/PicnicLetter.spellml:249-298"
+    },
+    {
+      "type": "Message",
+      "superType": "Thing",
+      "defined": "/PicnicLetter.api.spell:839-932"
+    },
+    {
+      "property": "text",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/PicnicLetter.api.spell:890-908"
+    },
+    {
+      "property": "thread",
+      "of": "Message",
+      "datatype": "text",
+      "defined": "/PicnicLetter.api.spell:912-932"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Message",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/PicnicLetter.spellml:399-445"
+    },
+    {
+      "type": "PublishedSheet",
+      "superType": "Place",
+      "defined": "/PicnicLetter.api.spell:451-567"
+    },
+    {
+      "type": "MyInbox",
+      "superType": "Place",
+      "defined": "/PicnicLetter.api.spell:765-837"
+    },
+    {
+      "type": "PicnicLetter",
+      "superType": "App",
+      "defined": "/PicnicLetter.spellml:501-1972"
+    },
+    {
+      "property": "shifts",
+      "of": "PicnicLetter",
+      "datatype": "list of listings",
+      "defined": "/PicnicLetter.spellml:518-575"
+    },
+    {
+      "property": "counts",
+      "of": "PicnicLetter",
+      "datatype": "list of messages",
+      "defined": "/PicnicLetter.spellml:580-646"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "PicnicLetter",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/PicnicLetter.spellml:652-1963"
+    }
+  ],
+  "codeLines": [
+    10,
+    11,
+    16,
+    21,
+    28,
+    29,
+    34,
+    39,
+    47,
+    57,
+    82,
+    85,
+    90,
+    95
+  ]
+}

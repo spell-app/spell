@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
-import { PageStages, PhaseIds } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseStatuses } from "spell/epic/phases"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
@@ -33,13 +33,15 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-phase>`:  one phase of the plan, in the Phases section --
  * a fold (`EpicFold`) titled `P3 · <title>`.
  * - Its title line:
- *   - the status icon, its shape by its status (an outline to do, half filled under way, a check done), its COLOUR
+ *   - the status icon, its shape by its status (an outline to do, a still load indicator under way, a check done, a
+ *     crossed circle dropped), its COLOUR
  *     by where it stands, as its Phases chip (`PhaseState.of()`, epic `epic-engine` I170;  Owen, 2026-10-29):  red
- *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a DOTTED blue
- *     circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
+ *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a grey PAUSE
+ *     held by him (`plan="held"`, I221), a DOTTED blue circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
  *     inbox's `working`, I147), a turning spinner in that colour (blue, unless red or orange come first), its tooltip
  *     "Claude is writing this phase's plan" or "Claude is working on it"
- *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
+ *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter;  a DROPPED one's is struck
+ *     through and grey (`status="dropped"`, epic `epic-engine` I228:  never built), its Dropped field saying why
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
  *   - while it isn't done and has NEW updates (`to-see`, written by the tool, less the ones quiet or marked Seen since;
@@ -49,6 +51,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     - an older page's `changes` (every plan change) until the tool's next write
  *   - the estimate as a badge;  once done and timed, what it took instead (`21m`), the estimate its tooltip
  *     (`~3-4h`;  Owen, M1 and M3 on epic `epic-engine` P41)
+ *     - with its clock time too, `34m / 4h`, its tooltip in words (`span`, epic `epic-engine` I127)
  * - Its children, in order (the vocabulary's):
  *   - `<epic-field>`s (Symptom, Changes, Requests, Goal), Owen's kept notes (`<epic-reply>`)
  *   - its PLAN CHANGES, `<epic-update at summary>` blocks, at the end of its description, after Goal
@@ -99,8 +102,17 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return status && status in STATUS_ICONS ? status : "todo"
   }
 
+  /** Is it over:  done, or dropped (`PhaseStatuses.isFinished()`, epic `epic-engine` I228)?  Asks nothing, works on nothing. */
+  get isFinished(): boolean {
+    return PhaseStatuses.isFinished(this.shownStatus)
+  }
+
   /** Its status icon. */
-  readonly glyph = new E.IconGlyph({ owner: this, name: () => STATUS_ICONS[this.shownStatus] })
+  // held, still to do (I221):  a pause glyph, not the empty circle
+  readonly glyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.isHeld ? PAUSED_ICON : STATUS_ICONS[this.shownStatus])
+  })
 
   /** Its view of the review inbox, keyed by its id (`p-epic-migrate`):  is the page reviewed?  Has it a marked note? */
   readonly reviewState = new ReviewState(() => this.id)
@@ -176,18 +188,33 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return this.shownStatus === "done" ? this.took || undefined : undefined
   }
 
-  /** Its time pill's words:  what it took, once done and timed;  else its estimate;  none:  no pill. */
+  /** How long it ran by the clock (`span`), shown with what it took;  `undefined` without both. */
+  get spanShown(): string | undefined {
+    return this.tookShown ? this.span || undefined : undefined
+  }
+
+  /**
+   * Its time pill's words:  what it took, once done and timed, over how long by the clock (`34m / 4h`;  Owen, epic
+   * `epic-engine` I127:  "shorter is good");  else its estimate;  none:  no pill.
+   * - no clock time on it (no start in the log, or done before it was written):  only what it took
+   */
   get timeShown(): string | undefined {
+    if (this.spanShown) return `${this.tookShown} / ${this.spanShown}`
     return this.tookShown ?? (this.estimate || undefined)
   }
 
   /**
-   * Its time pill's tooltip while it says what it took:  the estimate it had, `~3-4h` (Owen, M3 on P41);
-   * none without one, or while the pill is the estimate itself.
+   * Its time pill's tooltip while it says what it took:
+   * - with its clock time, in words (I127):  `34m of work over 4h, estimated ~3-4h`
+   * - without:  the estimate it had, `~3-4h` (Owen, M3 on P41)
+   * - neither, or while the pill is the estimate itself:  none
    */
   get tookTip(): string | undefined {
     const estimate = this.estimate?.replace(/^~\s*/, "")
-    return this.tookShown && estimate ? this.translationForKey("tookTip", { estimate }) : undefined
+    const { tookShown: took, spanShown: span } = this
+    if (took && span && estimate) return this.translationForKey("spanEstimateTip", { took, span, estimate })
+    if (took && span) return this.translationForKey("spanTip", { took, span })
+    return took && estimate ? this.translationForKey("tookTip", { estimate }) : undefined
   }
 
   /**
@@ -197,7 +224,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    */
   get isProposed(): boolean {
     void this.layout
-    return this.shownStatus !== "done" && PageStages.of(this.page) === "phases"
+    return !this.isFinished && PageStages.of(this.page) === "phases"
   }
 
   /**
@@ -227,6 +254,14 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /**
+   * Still to do, and Owen HELD it (its accepted thumbs up un-clicked:  `plan="held"`, epic `epic-engine` I221):  paused,
+   * its circle a grey pause, its pills Accept plan and Revisit, with no ring:  it asks nothing of him.
+   */
+  get isHeld(): boolean {
+    return this.plan === "held" && this.shownStatus === "todo"
+  }
+
+  /**
    * Claude is at work on it, and it isn't done (the review inbox's `working`, keyed by its id:  `epic inbox working
    * <epic>#P20 on`, or `epic update <epic>#P20 --plan ...` by itself;  epic `epic-engine` I147).
    * - Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the
@@ -236,7 +271,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    */
   @E.cssState("working")
   get isWorkedOn(): boolean {
-    return this.shownStatus !== "done" && this.reviewState.workedOn()
+    return !this.isFinished && this.reviewState.workedOn()
   }
 
   /**
@@ -249,9 +284,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /** Which review controls it draws, by where it stands (`<epic-review buttons>`). */
-  get reviewKind(): "proposal" | "plan" | "accepted" | "phase" {
+  get reviewKind(): "proposal" | "plan" | "held" | "accepted" | "phase" {
     if (this.isProposed) return "proposal"
     if (this.isPlanWaiting) return "plan"
+    if (this.isHeld) return "held"
     return this.isPlanAccepted ? "accepted" : "phase"
   }
 
@@ -312,7 +348,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             </span>
           }
         >
-          {/* Claude at work on it:  the header's turning spinner, blue (I147) */}
+          {/* Claude at work on it:  its own circle, spinning like a coin, blue (I147;  I213) */}
           <span
             class={[ICON, WORKING]}
             part={this.partForName("status")}
@@ -321,7 +357,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             aria-label={this.workingText}
             title={this.workingText}
           >
-            <span class={SPINNER} aria-hidden="true" />
+            {this.glyph.svg}
           </span>
         </Show>
       ),
@@ -422,7 +458,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   private changedMark(): JSX.Element {
     return (
       <>
-        <Show when={Number(this.choicesOpen) > 0 && this.shownStatus !== "done"}>
+        <Show when={Number(this.choicesOpen) > 0 && !this.isFinished}>
           <span class={CHOICES_OPEN} part={this.partForName("choices-open")}>
             {this.translationForKey(Number(this.choicesOpen) === 1 ? "choiceOpen" : "choicesOpenCount", {
               count: Number(this.choicesOpen)
@@ -521,7 +557,6 @@ export interface EpicPhase extends E.AttributeValues<typeof epicPhaseVocabulary>
 const CHOICES_OPEN = "choices-open"
 /** Class of its status icon's box while Claude is at work on it, and of the spinner in it (I147). */
 const WORKING = "working"
-const SPINNER = "spinner"
 
 /** Classes of the shadow markup:  the title's mark, its plan changed;  the ✓ after it, Seen on them all. */
 const CHANGED = "changed"
@@ -530,9 +565,16 @@ const SEEN_ALL = "seen-all"
 /** A phase's status => its icon (Spell UI's names, from the docs bundle's set). */
 const STATUS_ICONS = {
   todo: "circle outline",
-  active: "circle half stroke",
-  done: "circle check"
+  // a load indicator, standing still (epic `epic-engine` I226;  Owen, 2026-11-07:  "While a phase is running, show as
+  // non-rotating load indicator"):  the half circle before
+  active: "circle notch",
+  done: "circle check",
+  // never built (epic `epic-engine` I228;  Owen, 2026-11-08:  "crossed out somehow"):  a crossed circle, as its title
+  dropped: "circle xmark"
 } as const
+
+/** A held phase's icon (epic `epic-engine` I221):  paused. */
+const PAUSED_ICON = "circle pause"
 
 /** A phase's status. */
 type PhaseStatus = keyof typeof STATUS_ICONS
@@ -541,7 +583,8 @@ type PhaseStatus = keyof typeof STATUS_ICONS
 const STATUS_TEXTS = {
   todo: "statusTodo",
   active: "statusActive",
-  done: "statusDone"
+  done: "statusDone",
+  dropped: "statusDropped"
 } as const satisfies Record<PhaseStatus, string>
 
 /** Its gear's entry for its commits. */

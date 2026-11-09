@@ -1,6 +1,6 @@
 import { basename } from "node:path"
 
-import type { PlaceRow } from "spell/util/places/places.types"
+import type { PlaceRow } from "spell/places/places.types"
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
@@ -10,6 +10,8 @@ import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
 import { AWAY_ID, isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+// Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
+import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf } from "spell/epic/review/review.types"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
 import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
 
@@ -55,9 +57,11 @@ import { SharedComments } from "./SharedComments"
  *       - `choices`:  WHICH of the item's option card sets, by position, 0 the first (`PlanItem.choiceSets()`):
  *         one item may hold several (its text's, a reply's)
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
- *     - an option set's whole change (epic `epic-engine` P50), ONE mark per set, keyed by what holds it (an item, a
+ *     - an option set's whole change (epic `epic-engine` P50), keyed by what holds it (an item, a
  *       phase, a standing set's `s-upgrades`):  `{ action: "pick", pick: "A C +1", choices, multiple, added, edited,
  *       removed }` (`PickFields`);  `pick` may be absent when it only changes the set
+ *       - ONE mark per holder, carrying a change for EACH of its sets (epic `epic-engine` I227):  the lowest set's
+ *         at the top, the others in `sets`, `[{ pick: "B", choices: 1 }]`
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
  *     - a revisit whose content is Owen's comments in the part's text (epic `epic-engine` I140):
@@ -105,8 +109,8 @@ import { SharedComments } from "./SharedComments"
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
  *   - `listening`:  `{ session, since, seen, pid? }` while a Claude session waits on this inbox, else `null`
- *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every `LISTEN_HEARTBEAT_MS`);
- *       older than `LISTEN_STALE_MS` (an old file without one:  `since` that old), the session is gone:
+ *     - `seen`:  its last heartbeat (`epic inbox wait` stamps it every 30s:  `SRV.Heartbeat`);
+ *       older than 90s (an old file without one:  `since` that old), the session is gone:
  *       `liveListener()` is `null`, and the routes answer `listening: null` (`forPage()`)
  *     - `pid`:  the session's MONITOR's process, when the monitor listens (`InboxMonitor`, epic `epic-engine` P19):
  *       live while that process runs, heartbeat or not;  gone the moment it ends
@@ -376,13 +380,15 @@ export class ReviewInbox {
    * - not a mark:  an item may hold both (approve it AND say it's not urgent)
    * - sent with the marks, as they are (`sentUrgency`),
    *   and written into the doc by `epic inbox apply` (`PlanDoc.setCalm()`)
-   * - only an open judgement call or issue is ever red for want of a review (`PlanReader.itemState()`):
-   *   only their ids (`CALM_ID`);  an `InboxError` for any other
+   * - only an open judgement call, issue or `urgent` todo is ever red for want of a review (`PlanReader.itemState()`):
+   *   only their ids (`URGENCY_ID`);  an `InboxError` for any other
+   *   - the inbox can't see the doc:  a todo that isn't `urgent` has no chip to click, and `PlanDoc.setCalm()` refuses it
    * - returns the entry set, or `null`
    */
   setUrgency(id: unknown, calm: unknown, at = isoTime()): InboxUrgency | null {
     const key = ReviewInbox.toItemId(id)
-    if (!CALM_ID.test(key)) throw new InboxError(`only a judgement call or an issue is urgent or not:  ${key}`)
+    if (!URGENCY_ID.test(key))
+      throw new InboxError(`only a call, an issue or a follow-up todo is urgent or not:  ${key}`)
     if (calm !== null && typeof calm !== "boolean") throw new InboxError("calm is true, false, or null")
     if (calm === null) {
       delete this.urgency[key]
@@ -545,6 +551,18 @@ export class ReviewInbox {
   /** Did Owen call off item `id`'s request (`cancelNow()`), and nothing asked since? */
   isCanceled(id: unknown): boolean {
     return ReviewInbox.toItemId(id) in this.canceled
+  }
+
+  /**
+   * A Send while a stage accept counts down (`heldMarks`, epic `epic-engine` I181):  each held mark goes NOW, dated
+   * `at`, so the Send carries it (I222;  Owen, 2026-11-04:  Accept Overview, then Send said "Nothing to send").
+   * - the countdown is for when he DOESN'T Send:  a Send is his go
+   * - returns how many it let go
+   */
+  releaseHeld(at = isoTime()): number {
+    const held = this.heldMarks
+    for (const { id, countdown: _countdown, ...mark } of held) this.marks[id] = { ...mark, at }
+    return held.length
   }
 
   /** Owen pressed "send to Claude":  every mark so far is sent, and every waiting comment (`unsentComments`). */
@@ -756,7 +774,7 @@ export class ReviewInbox {
   /**
    * The listening session's heartbeat:  `listening.seen` is `at`.
    * Nobody listening:  nothing (a heartbeat never starts one:  that's `watch`'s).
-   * - `epic inbox wait` calls it every `LISTEN_HEARTBEAT_MS`;  the session's other inbox commands, each time
+   * - `epic inbox wait` calls it every 30s (`SRV.Heartbeat.keep()`);  the session's other inbox commands, each time
    */
   touchListening(at = isoTime()): InboxListener | null {
     if (this.listening) this.listening.seen = at
@@ -765,16 +783,17 @@ export class ReviewInbox {
 
   /**
    * The session listening:  `null` when nobody is, or its heartbeat stopped
-   * (`seen`, an old file's `since`, older than `LISTEN_STALE_MS` at `now`, in ms).
+   * (`seen`, an old file's `since`, older than 90s at `now`, in ms).
    * - why:  a session killed without `ignore` leaves `listening` set;  the page must not claim it's there
-   * - a monitor's (`pid` set):  live exactly while the monitor's process runs (`SRV.isProcessAlive()`)
+   * - a monitor's (`pid` set):  live exactly while the monitor's process runs
+   * - the kit's ONE rule, `SRV.Heartbeat.isLive()`
    */
   liveListener(now = Date.now()): InboxListener | null {
     const listening = this.listening
     if (!listening) return null
-    if (listening.pid) return SRV.isProcessAlive(listening.pid) ? listening : null
-    const seen = Date.parse(listening.seen ?? listening.since)
-    return now - seen > LISTEN_STALE_MS ? null : listening
+    // a monitor's by its process alone;  a session's by its beat alone (it has no pid)
+    const beat = listening.pid ? { pid: listening.pid } : { seen: listening.seen ?? listening.since }
+    return SRV.Heartbeat.isLive(beat, now) ? listening : null
   }
 
   /**
@@ -836,7 +855,8 @@ export class ReviewInbox {
     if (!takes || (mark && ReviewInbox.isImmediate(mark))) return null
     const comments = [...new Set([...(mark?.comments ?? []), commentId])]
     const note = withInlineComments(mark?.note ?? "", comments)
-    if (mark?.action === "approve") this.setMark(part, { action: "approve", note, comments }, at)
+    if (mark?.action === "approve")
+      this.setMark(part, { action: "approve", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     else this.setMark(part, { action: "revisit", when: "soon", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     return part
   }
@@ -856,7 +876,12 @@ export class ReviewInbox {
       const comments = mark.comments.filter((each) => each !== commentId)
       const note = withInlineComments(mark.note ?? "", comments)
       if (mark.action === "approve") {
-        this.setMark(id, comments.length ? { action: "approve", note, comments } : { action: "approve" }, at)
+        const pick = ReviewInbox.pickOf(mark)
+        this.setMark(
+          id,
+          comments.length ? { action: "approve", note, comments, ...pick } : { action: "approve", ...pick },
+          at
+        )
         changed.push(id)
         continue
       }
@@ -985,7 +1010,7 @@ export class ReviewInbox {
       mark.action === "revisit" &&
       !ReviewInbox.isImmediate(mark) &&
       !!mark.note?.trim() &&
-      !mark.pick &&
+      !hasPick(mark) &&
       !mark.comments?.length &&
       !mark.shot
     )
@@ -1171,7 +1196,8 @@ export class ReviewInbox {
       if (typeof note !== "string") throw new InboxError("a revisit's note is text")
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
-      if (pick === undefined || pick === null)
+      // its pick, in any set (`sets`, I227)
+      if ((pick === undefined || pick === null) && !hasPick(mark as PickFields))
         return { action, when: when as RevisitWhen, note: note.trim(), ...inline, ...shot }
       return {
         action,
@@ -1185,10 +1211,12 @@ export class ReviewInbox {
     if (action === "pick") return { action, ...toPickFields(mark as Record<string, unknown>) }
     // an Approve / Accept plan that keeps Owen's comments in the part's text (epic `epic-engine` I163):  approved,
     // the comments to fold in
+    // ... and the set change Owen made beside it:  his thumbs up and a pick, one mark (epic `epic-engine` I217)
     if (action === "approve") {
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
-      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline }
-      return { action, note: note.trim(), ...inline }
+      const picked = carriedPick(mark as Record<string, unknown>)
+      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline, ...picked }
+      return { action, note: note.trim(), ...inline, ...picked }
     }
     if (action === "accept") {
       const { stage } = mark as Record<string, unknown>
@@ -1214,7 +1242,9 @@ export class ReviewInbox {
     if (action === "todo" || action === "next" || action === "drop" || action === "skip") {
       if (typeof note !== "string") throw new InboxError(`a ${action} mark's note is text`)
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
-      return note.trim() ? { action, note: note.trim(), ...shot } : { action, ...shot }
+      // a phase's Do this beside a pick in its Choices:  one mark (epic `epic-engine` I217)
+      const picked = action === "todo" ? carriedPick(mark as Record<string, unknown>) : {}
+      return note.trim() ? { action, note: note.trim(), ...shot, ...picked } : { action, ...shot, ...picked }
     }
     return { action }
   }
@@ -1239,19 +1269,11 @@ export class ReviewInbox {
   /**
    * `mark`'s pick, to carry into another mark:  `{ pick, choices? }`, or `{}` when it has none.
    * - and the rest of its set's change (epic `epic-engine` P50):  `multiple`, `added`, `edited`, `removed`
+   * - and its other sets' (`sets`, I227)
    * - "pick B, but ...":  a pick that becomes a revisit, or a revisit asked now, keeps WHICH cards it picked from
    */
   static pickOf(mark: PickFields | null | undefined): PickFields {
-    if (!mark || !hasOptionChange(mark)) return {}
-    const { pick, choices, multiple, added, edited, removed } = mark
-    return {
-      ...(pick && { pick }),
-      ...(choices !== undefined && { choices }),
-      ...(multiple !== undefined && { multiple }),
-      ...(added?.length && { added }),
-      ...(edited?.length && { edited }),
-      ...(removed?.length && { removed })
-    }
+    return pickOf(mark)
   }
 
   /**
@@ -1451,15 +1473,26 @@ export type TestFields = { result?: TestResult; shot?: string }
 export type NewItemFields = { kind?: NewKind; title?: string; near?: string }
 
 /**
- * A pick's fields, on a mark or a `now` request:  ONE option set's whole change (epic `epic-engine` P50).
+ * A pick's fields, on a mark or a `now` request:  an option set's whole change (epic `epic-engine` P50), and the
+ * holder's other sets' (`sets`, I227).
  * - `pick`:  the option's letter;  a pick-any set's whole pick list after the change, a space between (`A C +1`:
  *   `+1` the first option added);  absent when the mark only changes the set
  * - `choices`:  which of the holder's `<epic-choices>` it's from, by position:  an item's `PlanItem.choiceSets()`
  *   (none for its own, `choicesOf()`), a phase's every set in its body, a standing set itself (`OptionSets.setsOf()`)
  * - `multiple`:  the pick-one / pick-any flip:  `true` sets `multiple`, `false` removes it;  absent, unchanged
  * - `added`:  Owen's new options, `+1`, `+2` ...;  `edited`:  options edited in place;  `removed`:  letters removed
+ * - `sets`:  the changes to the holder's OTHER sets, each a `SetPick` with its own `choices` (epic `epic-engine` I227:
+ *   a pick in a phase's second set kept its first set's);  absent with one set changed
+ *   - the top-level fields are the lowest set's (`pickFieldsOf()`);  each change applies and prints on its own
+ *   - a mark from before I227 has no `sets`:  read as before
  */
-export type PickFields = {
+export type PickFields = SetPick & { sets?: SetPick[] }
+
+/**
+ * ONE option set's change (`PickFields` without `sets`):  its `pick`, `choices`, `multiple`, `added`, `edited`,
+ * `removed`, as `PickFields` says.
+ */
+export type SetPick = {
   pick?: string
   choices?: number
   multiple?: boolean
@@ -1583,6 +1616,7 @@ export const INBOX_VERSION = 1
  * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
+ * - `hold`:  an accepted phase's thumbs up un-clicked (epic `epic-engine` I218):  its plan waits for Accept again
  */
 export const ACTIONS = [
   "approve",
@@ -1600,7 +1634,8 @@ export const ACTIONS = [
   "defer",
   "move",
   "reopen",
-  "seen"
+  "seen",
+  "hold"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
@@ -1670,15 +1705,6 @@ export const REVISIT_WHEN = ["soon", "now"] as const
 /** One of `REVISIT_WHEN`. */
 export type RevisitWhen = (typeof REVISIT_WHEN)[number]
 
-/** How often a waiting session (`epic inbox wait`) stamps `listening.seen`:  one locked write. */
-export const LISTEN_HEARTBEAT_MS = 30_000
-
-/**
- * A `listening` whose heartbeat (`seen`) is older than this is a session that died without `ignore`
- * (closed tab, crash):  three missed heartbeats.
- */
-export const LISTEN_STALE_MS = 90_000
-
 /**
  * How long one wake of an epic stands (`claimWake()`), unless a session listens first:  10 minutes (J46).
  * Long enough to find the window and press Enter;  short enough that a forgotten tab doesn't block the next Send long.
@@ -1737,10 +1763,10 @@ const MAX_TITLE = 300
 
 /**
  * The items Owen may call urgent or not (`setUrgency()`):
- * judgement calls and issues, the kinds red while open and not reviewed.
- * - `PlanReader.itemState()`, the same rule:  `CALM_ID` in `planDoc.types.ts`
+ * judgement calls, issues and todos (a follow-up's), the kinds red while open and not reviewed.
+ * - `PlanReader.itemState()`, the same rule:  `CALM_ID` in `planDoc.types.ts`, plus `urgent` todos
  */
-const CALM_ID = /^[ij]\d+$/
+const URGENCY_ID = /^[ijt]\d+$/
 
 ////////////////
 // ## Helpers
@@ -1793,10 +1819,17 @@ function toLetter(pick: unknown): string {
   return pick
 }
 
-/** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed? */
+/**
+ * The set change an Approve or a phase's Do this carries beside it (`toPickFields()`), or `{}` when it carries none
+ * (epic `epic-engine` I217;  Owen, 2026-11-03:  "I should be able to choose and thumbs up at the same time").
+ */
+function carriedPick(mark: Record<string, unknown>): PickFields {
+  return hasOptionChange(mark as PickFields) ? toPickFields(mark) : {}
+}
+
+/** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed, in any set? */
 function hasOptionChange(mark: PickFields): boolean {
-  const { pick, multiple, added, edited, removed } = mark
-  return Boolean(pick || multiple !== undefined || added?.length || edited?.length || removed?.length)
+  return hasSetChange(mark)
 }
 
 /**
@@ -1806,11 +1839,39 @@ function hasOptionChange(mark: PickFields): boolean {
  * - `added`:  each `{ key, title, note?, shot? }`, its key `+N` and once;  `edited`:  `{ letter, title, note? }`;
  *   `removed`:  letters;  at most `MAX_OPTION_CHANGES` each, titles a line (`MAX_TITLE`)
  * - `+N` in `pick` must name an option in `added`
+ * - `sets`:  the holder's other sets' changes, each checked the same way, with its `choices` (epic `epic-engine` I227);
+ *   each set once, and the whole tidied by `pickFieldsOf()`:  the lowest set's at the top
  * - an `InboxError` for anything else, or a mark that changes nothing
  */
 function toPickFields(mark: Record<string, unknown>): PickFields {
+  const sets = toSets(mark.sets)
+  const fields = { ...toSetPick(mark, !!sets.length), ...(sets.length && { sets }) }
+  const given = setPicksOf(fields).map((change) => change.choices ?? 0)
+  if (new Set(given).size !== given.length) throw new InboxError("a set's change, once:  each set's `choices` once")
+  return pickFieldsOf(setPicksOf(fields))
+}
+
+/**
+ * The other sets' changes a mark carries (`sets`, epic `epic-engine` I227), each checked as `toSetPick()`, with its
+ * `choices`;  `[]` for none.
+ */
+function toSets(sets: unknown): SetPick[] {
+  if (sets === undefined || sets === null) return []
+  if (!Array.isArray(sets) || sets.length > MAX_CHOICES) throw new InboxError(`sets:  a list of at most ${MAX_CHOICES}`)
+  return sets.map((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new InboxError("a set's change is an object")
+    const change = toSetPick(entry as Record<string, unknown>, false)
+    if (change.choices === undefined) throw new InboxError("a set's change says which set:  `choices`")
+    return change
+  })
+}
+
+/**
+ * ONE set's change, checked (`toPickFields()`);  `optional`:  it may change nothing (the other sets' do), `{}` then.
+ */
+function toSetPick(mark: Record<string, unknown>, optional: boolean): SetPick {
   const { pick, choices, multiple, added, edited, removed } = mark
-  const fields: PickFields = {
+  const fields: SetPick = {
     ...(pick !== undefined && pick !== null && pick !== "" && { pick: toPick(pick) }),
     ...toChoices(choices),
     ...(multiple !== undefined && multiple !== null && { multiple: toFlag(multiple) }),
@@ -1822,7 +1883,10 @@ function toPickFields(mark: Record<string, unknown>): PickFields {
   if (keys.size !== (fields.added?.length ?? 0)) throw new InboxError("added options:  each key once (+1, +2 ...)")
   for (const token of fields.pick?.split(" ") ?? [])
     if (ADDED_KEY.test(token) && !keys.has(token)) throw new InboxError(`pick ${token}?  no option added as ${token}`)
-  if (!hasOptionChange(fields)) throw new InboxError(`pick which option?  ${pick}`)
+  if (!hasOptionChange(fields)) {
+    if (optional) return {}
+    throw new InboxError(`pick which option?  ${pick}`)
+  }
   return fields
 }
 

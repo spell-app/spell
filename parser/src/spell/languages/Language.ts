@@ -85,6 +85,7 @@ export class Language {
       const scope = new P.RootScope({ name: `spellRoot_${this.lang}`, parser })
       Language.addBuiltInTypes(scope)
       SP.loadBuiltInTemplates(scope, [this])
+      SP.loadBuiltInDimensions(scope, [this])
       SP.loadBuiltInTypes(scope, this.words)
       return scope
     }))
@@ -128,6 +129,7 @@ export class Language {
         const scope = new P.RootScope({ name: `spellRoot_${key}`, parser })
         Language.addBuiltInTypes(scope)
         SP.loadBuiltInTemplates(scope, languages)
+        SP.loadBuiltInDimensions(scope, languages)
         // each language's words for each member, the first's first:  one both say the same, e.g. `id`, once
         for (const language of languages) SP.loadBuiltInTypes(scope, language.words, { keepExisting: true })
         return scope
@@ -241,7 +243,7 @@ export class Language {
    * - Never for a language with no `articles`.
    * - Only a warning:  `SP.SpellWarnings.noteArticles()` notes it, and the line parses as it is.
    */
-  agreedForm(word: string, type: P.TypeScope | undefined, isPlural: boolean): string | undefined {
+  agreedForm(word: string, type: { gender?: string } | undefined, isPlural: boolean): string | undefined {
     return this.articles?.agreedForm?.(word, type, isPlural)
   }
 
@@ -369,8 +371,9 @@ export type ArticleAgreement = {
   /**
    * The form an agreeing word should take for things of `type`:  `undefined` if it's right, or the language has no such thing.
    * - Spanish's `ninguno` for a `receta` is `ninguna`, its `ordenados` for one `receta` is `ordenada` (epic `data` P11).
+   * - `type`:  the type, or anything with a gender, e.g. a noun's article's (`la lista`, epic `language` T89).
    */
-  agreedForm?(word: string, type: P.TypeScope | undefined, isPlural: boolean): string | undefined
+  agreedForm?(word: string, type: { gender?: string } | undefined, isPlural: boolean): string | undefined
 
   /**
    * The article `noun` should have had, if not `article`, e.g. `an` for `a apple` -- `undefined` when they agree.
@@ -421,6 +424,12 @@ export type LanguageWords = {
    * - Its tokenizer reads a quoted name after it (`P.Tokenizer.quotedNameTags`).
    */
   exampleTag: string
+  /**
+   * An app's widget defaults, a block of sample tags (epic `language` P29):  `<ui-defaults>`, in every language --
+   * see `ui_defaults`.
+   * - Spell UI's own word, as `<ui-button>` is:  a Spanish page writes it the same way.
+   */
+  defaultsTag: string
   /**
    * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
    * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
@@ -496,7 +505,12 @@ export type SpellxWords = {
   templates: Record<string, SpellxTemplateKind>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
   declarations: Record<string, SpellxDeclarationKind>
-  /** A tag holding prose about what it's in:  `<description>`, `<comment>`. */
+  /**
+   * A tag holding prose about what it's in, its word after the prefix and its dash:
+   * `description` in `<spell-description>`, `comment` in `<spell-comment>` (epic `data` P31, Q27).
+   * - The prefix keeps the short words for Spell UI:  `<comment>` in a drawing is `<ui-comment>`.
+   * - The old short tag, `<description>`, is still a note outside a drawing, with a warning.
+   */
   notes: Record<string, SpellxNoteKind>
   /** A tag whose head is a spell phrase, handling an event:  `on` in `<on mouse down>`. */
   handlers: Record<string, SpellxHandlerKind>
@@ -652,6 +666,24 @@ export type SpellxTwinWords = {
   notebookContent: string
   /** A notebook's `locked`:  a line in its body, `its lock is locked`. */
   notebookLocked: string
+  /** A site that says where it lives, `at=` (epic `mockup` P1):  `{words} is {a super} {super} at {quoted at} :`. */
+  siteAt: string
+  /** A site in the cloud, a bare `cloud`:  `{words} is {a super} {super} in the cloud :`. */
+  siteCloud: string
+  /** One of a site's pages, `<page "film page" address="/films/:film">`:  `it has {a words} {words} at {quoted address}`. */
+  sitePage: string
+  /** ... with what the site calls it, `title=`:  `..., named {quoted title}`. */
+  sitePageTitled: string
+  /** What a page's `state=` adds to its line. */
+  sitePageState: string
+  /** What a page's `picture=` adds to its line. */
+  sitePagePicture: string
+  /** What a part's `row=` and `column=` add to its line:  its place in its section of the site editor's board. */
+  siteCardPlace: string
+  /** What a part's `color=` adds to its line. */
+  siteCardColor: string
+  /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
+  siteOverlay: string
   /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
@@ -676,16 +708,32 @@ export type SpellxTemplateKind =
   | "page template"
   | "app template"
   | "notebook"
+  | "site"
   | "more of"
 
 /** What a spellx member tag declares. */
-export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
+export type SpellxDeclarationKind =
+  | "property"
+  | "alias"
+  | "action"
+  | "draw"
+  | "event"
+  | "test"
+  | "menu"
+  | "group"
+  // a site's parts, only in a `<spell-site>` (epic `mockup` P1)
+  | "page"
+  | "dialog"
+  | "sidebar"
 
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
- * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
+ * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
+ * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
+ * - Or a page's STORIES, `<spell-stories>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
+ *   `<stories>` block, compiled to its `static stories`.
  */
-export type SpellxNoteKind = "description" | "comment" | "property editor"
+export type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"
 
 /**
  * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);

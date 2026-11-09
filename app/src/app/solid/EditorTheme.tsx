@@ -55,6 +55,7 @@ export class EditorTheme {
       const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
       // its own store:  the editor's theme isn't the docs pages' (epic `epic-engine` I204)
       ThemePreference.keepIn(isStaticBuild ? "browser" : "space", EDITOR_THEME_STORE)
+      EditorTheme.markSafari()
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
@@ -72,6 +73,20 @@ export class EditorTheme {
     } catch (error) {
       console.error("EditorTheme.restore():  couldn't apply the editor's theme", error)
     }
+  }
+
+  /**
+   * Mark `<html data-spell-safari>` in Safari, where the panels' glass has no blur (`EditorTheme.css`):
+   * Safari 26 leaves a panel's blurred glass as it was, a bright violet wash over the code, after the window, a pane or
+   * the app beside it changes (epic `editor` I49).
+   * - Redrawing it after a resize (a stylesheet added and taken away) fixed only the resize:
+   *   a hover or the app's own fonts arriving brought it back.
+   * - Safari's own name in its user agent, not Chrome's or Edge's, which say "Safari" too.
+   */
+  private static markSafari(): void {
+    const agent = navigator.userAgent
+    const isSafari = /Safari\//.test(agent) && !/Chrome|Chromium|CriOS|Edg|OPR/.test(agent)
+    document.documentElement.toggleAttribute("data-spell-safari", isSafari)
   }
 
   /**
@@ -164,22 +179,36 @@ export function ThemeMenu(): JSX.Element {
 
 /****************
  * ### `<AppMark>`
- * Spell's hat and name, first in the editor's top bar:  a link to the landing page.
+ * Spell's hat and name, first in an app bar:  a link to the landing page (the home page's bar, an app bar's `mark`).
+ * - The editor's top bar has Spell's menu there instead, with the same look (`<SpellBarMenu>`).
+ * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
+ ****************/
+export function AppMark(): JSX.Element {
+  return (
+    <ui-item class="AppMark">
+      <a link="" href="/">
+        <AppMarkLabel />
+      </a>
+    </ui-item>
+  )
+}
+
+/****************
+ * ### `<AppMarkLabel>`
+ * Spell's hat and name, as `<AppMark>` and the editor's Spell menu (`<SpellBarMenu>`) draw them.
  * - The hat alone, in the theme's primary colour:  the favicon's hat without its dark square
  *   (`/static/favicon/hat.svg`, drawn as a mask, `EditorTheme.css`).
  * - On a phone, the hat alone (`.AppName` read, not shown:  `chrome.css`).
  * - A notebook's:  "Spell Notebooks" (Owen, 2026-10-27).
  * - SIDE EFFECT:  names the browser's tab for the project shown:  `Button • Spell Notebook`, `Solitaire • Spell`.
  ****************/
-export function AppMark(): JSX.Element {
+export function AppMarkLabel(): JSX.Element {
   const shown = followTabTitle()
   return (
-    <ui-item class="AppMark">
-      <a link="" href="/">
-        <span class="hat" />
-        <span class="AppName">{appTexts.text(shown().isNotebook ? "notebooksAppName" : "appName")}</span>
-      </a>
-    </ui-item>
+    <span class="AppMarkLabel">
+      <span class="hat" />
+      <span class="AppName">{appTexts.text(shown().isNotebook ? "notebooksAppName" : "appName")}</span>
+    </span>
   )
 }
 
@@ -187,7 +216,7 @@ export function AppMark(): JSX.Element {
  * Name the browser's tab for the project shown, while the calling component is up:
  * `Button • Spell Notebook`, `Solitaire • Spell`;  plain "Spell" with none.
  * - Returns what it read:  the project's title, and whether it's a notebook.
- * - Call in a component body:  `<AppMark>`'s, the editor's project menu's (`<ProjectBarMenu>`).
+ * - Call in a component body:  `<AppMarkLabel>`'s, the editor's project menu's (`<ProjectBarMenu>`).
  */
 export function followTabTitle(): () => { title: string | undefined; isNotebook: boolean } {
   const shown = tracked(() => ({

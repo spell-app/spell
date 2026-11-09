@@ -1,0 +1,2355 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "github",
+    "kind": "web server",
+    "address": "https://api.github.com",
+    "lookedAt": "2026-11-07T13:40:04.343Z",
+    "fingerprint": "3d63ab262ac902f5",
+    "readBy": "nobody:  worked out from what came back",
+    "keySecret": "GITHUB_TOKEN",
+    "keyIfSet": true,
+    "collectionsAsked": [
+      "issues=/repos/solidjs/solid/issues",
+      "contributors=/repos/solidjs/solid/contributors",
+      "users=/users/{name}",
+      "users=/search/users?q=ryansolid",
+      "repositories=/search/repositories?q=solid"
+    ]
+  },
+
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Nothing says:  never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It allows 5000 requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  x-ratelimit-limit:  5000;  x-ratelimit-remaining:  4921;  x-ratelimit-reset:  1794058793;  x-ratelimit-resource:  core;  x-ratelimit-used:  79.  Without its key, it allows 60.",
+    "browsers": "Yes:  it says any page may read it."
+  },
+
+  "collections": {
+    "issues": {
+      "type": "issue",
+      "at": "/repos/solidjs/solid/issues",
+      "rowsSeen": 39,
+      "idField": "id",
+      "paging": "link header",
+      "fields": {
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/4714",
+          "linksTo": "issues"
+        },
+        "repository_url": {
+          "words": "repository url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid"
+        },
+        "labels_url": {
+          "words": "labels url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/4714/labels{/name}"
+        },
+        "comments_url": {
+          "words": "comments url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/4714/comments"
+        },
+        "events_url": {
+          "words": "events url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/4714/events"
+        },
+        "html_url": {
+          "words": "html url",
+          "type": "link",
+          "example": "https://github.com/solidjs/solid/pull/4714"
+        },
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 6257580341
+        },
+        "node_id": {
+          "words": "node id",
+          "type": "text",
+          "example": "PR_kwDOB80jds8AAAABNfenRw"
+        },
+        "number": {
+          "words": "number",
+          "type": "number",
+          "example": 4714
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "perf(compiler): drop DOM walks to nodes nothing reads"
+        },
+        "user": {
+          "words": "user",
+          "type": "inside",
+          "example": "{\"login\":\"lxsmnsyc\",\"id\":4783372,\"node_id\":\"MDQ6VXNlcjQ3ODMzNzI=\",\"avatar_url\":\"",
+          "inside": {
+            "login": {
+              "words": "login",
+              "type": "text",
+              "example": "lxsmnsyc"
+            },
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 4783372
+            },
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "MDQ6VXNlcjQ3ODMzNzI="
+            },
+            "avatar_url": {
+              "words": "avatar url",
+              "type": "link",
+              "example": "https://avatars.githubusercontent.com/u/4783372?v=4"
+            },
+            "gravatar_id": {
+              "words": "gravatar id",
+              "type": "text"
+            },
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc"
+            },
+            "html_url": {
+              "words": "html url",
+              "type": "link",
+              "example": "https://github.com/lxsmnsyc"
+            },
+            "followers_url": {
+              "words": "followers url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/followers"
+            },
+            "following_url": {
+              "words": "following url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/following{/other_user}"
+            },
+            "gists_url": {
+              "words": "gists url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/gists{/gist_id}"
+            },
+            "starred_url": {
+              "words": "starred url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/starred{/owner}{/repo}"
+            },
+            "subscriptions_url": {
+              "words": "subscriptions url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/subscriptions"
+            },
+            "organizations_url": {
+              "words": "organizations url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/orgs"
+            },
+            "repos_url": {
+              "words": "repos url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/repos"
+            },
+            "events_url": {
+              "words": "events url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/events{/privacy}"
+            },
+            "received_events_url": {
+              "words": "received events url",
+              "type": "link",
+              "example": "https://api.github.com/users/lxsmnsyc/received_events"
+            },
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "User"
+            },
+            "user_view_type": {
+              "words": "user view type",
+              "type": "text",
+              "example": "public"
+            },
+            "site_admin": {
+              "words": "site admin",
+              "type": "yes or no",
+              "example": false
+            }
+          }
+        },
+        "labels": {
+          "words": "labels",
+          "type": "inside",
+          "example": [
+            {
+              "id": 12692211041,
+              "node_id": "LA_kwDOB80jds8AAAAC9IPFYQ",
+              "url": "https://api.github.com/repos/solidjs/solid/labels/1.x",
+              "name": "1.x",
+              "color": "ededed",
+              "default": false,
+              "description": null,
+              "archived_at": null,
+              "archived_by": null
+            }
+          ],
+          "inside": {
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 12692211041
+            },
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "LA_kwDOB80jds8AAAAC9IPFYQ"
+            },
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/repos/solidjs/solid/labels/1.x"
+            },
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "1.x"
+            },
+            "color": {
+              "words": "color",
+              "type": "text",
+              "example": "ededed"
+            },
+            "default": {
+              "words": "default",
+              "type": "yes or no",
+              "example": false
+            },
+            "description": {
+              "words": "description",
+              "type": "text",
+              "example": "New feature or request"
+            },
+            "archived_at": {
+              "words": "archived at",
+              "type": "nothing"
+            },
+            "archived_by": {
+              "words": "archived by",
+              "type": "nothing"
+            }
+          },
+          "isListInside": true
+        },
+        "state": {
+          "words": "state",
+          "type": "text",
+          "example": "open"
+        },
+        "locked": {
+          "words": "locked",
+          "type": "yes or no",
+          "example": false
+        },
+        "assignees": {
+          "words": "assignees",
+          "type": "inside",
+
+          "example": [{
+            "login": "ryansolid",
+            "id": 2768267,
+            "node_id": "MDQ6VXNlcjI3NjgyNjc=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2768267?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/ryansolid",
+            "html_url": "https://github.com/ryansolid",
+            "followers_url": "https://api.github.com/users/ryansolid/followers",
+            "following_url": "https://api.github.com/users/ryansolid/following{/other_user}",
+            "gists_url": "https://api.github.com/users/ryansolid/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/ryansolid/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/ryansolid/subscriptions",
+            "organizations_url": "https://api.github.com/users/ryansolid/orgs",
+            "repos_url": "https://api.github.com/users/ryansolid/repos",
+            "events_url": "https://api.github.com/users/ryansolid/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/ryansolid/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          }],
+
+          "inside": {
+            "login": {
+              "words": "login",
+              "type": "text",
+              "example": "ryansolid"
+            },
+
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 2768267
+            },
+
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "MDQ6VXNlcjI3NjgyNjc="
+            },
+
+            "avatar_url": {
+              "words": "avatar url",
+              "type": "link",
+              "example": "https://avatars.githubusercontent.com/u/2768267?v=4"
+            },
+
+            "gravatar_id": {
+              "words": "gravatar id",
+              "type": "text"
+            },
+
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid"
+            },
+
+            "html_url": {
+              "words": "html url",
+              "type": "link",
+              "example": "https://github.com/ryansolid"
+            },
+
+            "followers_url": {
+              "words": "followers url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/followers"
+            },
+
+            "following_url": {
+              "words": "following url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/following{/other_user}"
+            },
+
+            "gists_url": {
+              "words": "gists url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/gists{/gist_id}"
+            },
+
+            "starred_url": {
+              "words": "starred url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/starred{/owner}{/repo}"
+            },
+
+            "subscriptions_url": {
+              "words": "subscriptions url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/subscriptions"
+            },
+
+            "organizations_url": {
+              "words": "organizations url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/orgs"
+            },
+
+            "repos_url": {
+              "words": "repos url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/repos"
+            },
+
+            "events_url": {
+              "words": "events url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/events{/privacy}"
+            },
+
+            "received_events_url": {
+              "words": "received events url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/received_events"
+            },
+
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "User"
+            },
+
+            "user_view_type": {
+              "words": "user view type",
+              "type": "text",
+              "example": "public"
+            },
+
+            "site_admin": {
+              "words": "site admin",
+              "type": "yes or no",
+              "example": false
+            }
+          },
+
+          "isListInside": true
+        },
+        "milestone": {
+          "words": "milestone",
+          "type": "nothing"
+        },
+        "comments": {
+          "words": "comments",
+          "type": "number",
+          "example": 2
+        },
+        "created_at": {
+          "words": "created at",
+          "type": "date",
+          "example": "2026-11-07T09:45:57Z"
+        },
+        "updated_at": {
+          "words": "updated at",
+          "type": "date",
+          "example": "2026-11-07T10:01:07Z"
+        },
+        "closed_at": {
+          "words": "closed at",
+          "type": "nothing"
+        },
+        "assignee": {
+          "words": "assignee",
+          "type": "inside",
+          "example": "{\"login\":\"ryansolid\",\"id\":2768267,\"node_id\":\"MDQ6VXNlcjI3NjgyNjc=\",\"avatar_url\":",
+
+          "inside": {
+            "login": {
+              "words": "login",
+              "type": "text",
+              "example": "ryansolid"
+            },
+
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 2768267
+            },
+
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "MDQ6VXNlcjI3NjgyNjc="
+            },
+
+            "avatar_url": {
+              "words": "avatar url",
+              "type": "link",
+              "example": "https://avatars.githubusercontent.com/u/2768267?v=4"
+            },
+
+            "gravatar_id": {
+              "words": "gravatar id",
+              "type": "text"
+            },
+
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid"
+            },
+
+            "html_url": {
+              "words": "html url",
+              "type": "link",
+              "example": "https://github.com/ryansolid"
+            },
+
+            "followers_url": {
+              "words": "followers url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/followers"
+            },
+
+            "following_url": {
+              "words": "following url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/following{/other_user}"
+            },
+
+            "gists_url": {
+              "words": "gists url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/gists{/gist_id}"
+            },
+
+            "starred_url": {
+              "words": "starred url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/starred{/owner}{/repo}"
+            },
+
+            "subscriptions_url": {
+              "words": "subscriptions url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/subscriptions"
+            },
+
+            "organizations_url": {
+              "words": "organizations url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/orgs"
+            },
+
+            "repos_url": {
+              "words": "repos url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/repos"
+            },
+
+            "events_url": {
+              "words": "events url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/events{/privacy}"
+            },
+
+            "received_events_url": {
+              "words": "received events url",
+              "type": "link",
+              "example": "https://api.github.com/users/ryansolid/received_events"
+            },
+
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "User"
+            },
+
+            "user_view_type": {
+              "words": "user view type",
+              "type": "text",
+              "example": "public"
+            },
+
+            "site_admin": {
+              "words": "site admin",
+              "type": "yes or no",
+              "example": false
+            }
+          }
+        },
+        "author_association": {
+          "words": "author association",
+          "type": "text",
+          "example": "MEMBER"
+        },
+        "issue_field_values": {
+          "words": "issue field values",
+          "type": "list of text"
+        },
+        "type": {
+          "words": "kind",
+          "type": "nothing"
+        },
+        "active_lock_reason": {
+          "words": "active lock reason",
+          "type": "nothing"
+        },
+        "draft": {
+          "words": "draft",
+          "type": "yes or no",
+          "example": false
+        },
+        "pull_request": {
+          "words": "pull request",
+          "type": "inside",
+          "example": "{\"url\":\"https://api.github.com/repos/solidjs/solid/pulls/4714\",\"html_url\":\"https",
+          "inside": {
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/repos/solidjs/solid/pulls/4714"
+            },
+            "html_url": {
+              "words": "html url",
+              "type": "link",
+              "example": "https://github.com/solidjs/solid/pull/4714"
+            },
+            "diff_url": {
+              "words": "diff url",
+              "type": "link",
+              "example": "https://github.com/solidjs/solid/pull/4714.diff"
+            },
+            "patch_url": {
+              "words": "patch url",
+              "type": "link",
+              "example": "https://github.com/solidjs/solid/pull/4714.patch"
+            },
+            "merged_at": {
+              "words": "merged at",
+              "type": "nothing"
+            }
+          }
+        },
+        "body": {
+          "words": "body",
+          "type": "text",
+          "example": "DOM output no longer declares positional walks to nodes that nothing reads. Thes"
+        },
+        "closed_by": {
+          "words": "closed by",
+          "type": "nothing"
+        },
+        "reactions": {
+          "words": "reactions",
+          "type": "inside",
+          "example": "{\"url\":\"https://api.github.com/repos/solidjs/solid/issues/4714/reactions\",\"total",
+          "inside": {
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/repos/solidjs/solid/issues/4714/reactions"
+            },
+            "total_count": {
+              "words": "total count",
+              "type": "number",
+              "example": 0
+            },
+            "+1": {
+              "words": "+1",
+              "type": "number",
+              "example": 0,
+              "leftOut": "Spell couldn't read its line:  - its \"+1\" is a number, stored as \"+1\" -- Don't understand \"its \"+1\" is a number, stored as \"+1\"\""
+            },
+            "-1": {
+              "words": "1",
+              "type": "number",
+              "example": 0,
+              "leftOut": "Spell couldn't read its line:  - its \"1\" is a number -- Don't understand \"its \"1\" is a number\""
+            },
+            "laugh": {
+              "words": "laugh",
+              "type": "number",
+              "example": 0
+            },
+            "hooray": {
+              "words": "hooray",
+              "type": "number",
+              "example": 0
+            },
+            "confused": {
+              "words": "confused",
+              "type": "number",
+              "example": 0
+            },
+            "heart": {
+              "words": "heart",
+              "type": "number",
+              "example": 0
+            },
+            "rocket": {
+              "words": "rocket",
+              "type": "number",
+              "example": 0
+            },
+            "eyes": {
+              "words": "eyes",
+              "type": "number",
+              "example": 0
+            }
+          }
+        },
+        "timeline_url": {
+          "words": "timeline url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/4714/timeline"
+        },
+        "performed_via_github_app": {
+          "words": "performed via github app",
+          "type": "inside",
+          "example": "{\"id\":1236702,\"client_id\":\"Iv23liqTIFEtdIu6Vn1r\",\"slug\":\"claude\",\"node_id\":\"A_kw",
+          "inside": {
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 1236702
+            },
+            "client_id": {
+              "words": "client id",
+              "type": "text",
+              "example": "Iv23liqTIFEtdIu6Vn1r"
+            },
+            "slug": {
+              "words": "slug",
+              "type": "text",
+              "example": "claude"
+            },
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "A_kwHOBIuudM4AEt7e"
+            },
+            "owner": {
+              "words": "owner",
+              "type": "inside",
+              "example": "{\"login\":\"anthropics\",\"id\":76263028,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4\"",
+              "inside": {
+                "login": {
+                  "words": "login",
+                  "type": "text",
+                  "example": "anthropics"
+                },
+                "id": {
+                  "words": "number",
+                  "type": "number",
+                  "example": 76263028
+                },
+                "node_id": {
+                  "words": "node id",
+                  "type": "text",
+                  "example": "MDEyOk9yZ2FuaXphdGlvbjc2MjYzMDI4"
+                },
+                "avatar_url": {
+                  "words": "avatar url",
+                  "type": "link",
+                  "example": "https://avatars.githubusercontent.com/u/76263028?v=4"
+                },
+                "gravatar_id": {
+                  "words": "gravatar id",
+                  "type": "text"
+                },
+                "url": {
+                  "words": "url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics"
+                },
+                "html_url": {
+                  "words": "html url",
+                  "type": "link",
+                  "example": "https://github.com/anthropics"
+                },
+                "followers_url": {
+                  "words": "followers url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/followers"
+                },
+                "following_url": {
+                  "words": "following url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/following{/other_user}"
+                },
+                "gists_url": {
+                  "words": "gists url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/gists{/gist_id}"
+                },
+                "starred_url": {
+                  "words": "starred url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/starred{/owner}{/repo}"
+                },
+                "subscriptions_url": {
+                  "words": "subscriptions url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/subscriptions"
+                },
+                "organizations_url": {
+                  "words": "organizations url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/orgs"
+                },
+                "repos_url": {
+                  "words": "repos url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/repos"
+                },
+                "events_url": {
+                  "words": "events url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/events{/privacy}"
+                },
+                "received_events_url": {
+                  "words": "received events url",
+                  "type": "link",
+                  "example": "https://api.github.com/users/anthropics/received_events"
+                },
+                "type": {
+                  "words": "kind",
+                  "type": "text",
+                  "example": "Organization"
+                },
+                "user_view_type": {
+                  "words": "user view type",
+                  "type": "text",
+                  "example": "public"
+                },
+                "site_admin": {
+                  "words": "site admin",
+                  "type": "yes or no",
+                  "example": false
+                }
+              }
+            },
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "Claude"
+            },
+            "description": {
+              "words": "description",
+              "type": "text",
+              "example": "Run Claude Code from your GitHub Pull Requests and Issues to respond to reviewer"
+            },
+            "external_url": {
+              "words": "external url",
+              "type": "link",
+              "example": "https://anthropic.com/claude-code"
+            },
+            "html_url": {
+              "words": "html url",
+              "type": "link",
+              "example": "https://github.com/apps/claude"
+            },
+            "created_at": {
+              "words": "created at",
+              "type": "date",
+              "example": "2025-04-30T17:54:24Z"
+            },
+            "updated_at": {
+              "words": "updated at",
+              "type": "date",
+              "example": "2026-11-06T04:29:41Z"
+            },
+            "permissions": {
+              "words": "permissions",
+              "type": "inside",
+              "example": "{\"actions\":\"write\",\"administration\":\"read\",\"checks\":\"write\",\"contents\":\"write\",\"",
+              "inside": {
+                "actions": {
+                  "words": "actions",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "administration": {
+                  "words": "administration",
+                  "type": "text",
+                  "example": "read"
+                },
+
+                "checks": {
+                  "words": "checks",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "contents": {
+                  "words": "contents",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "discussions": {
+                  "words": "discussions",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "issues": {
+                  "words": "issues",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "members": {
+                  "words": "members",
+                  "type": "text",
+                  "example": "read"
+                },
+
+                "merge_queues": {
+                  "words": "merge queues",
+                  "type": "text",
+                  "example": "read"
+                },
+
+                "metadata": {
+                  "words": "metadata",
+                  "type": "text",
+                  "example": "read"
+                },
+
+                "pull_requests": {
+                  "words": "pull requests",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "repository_creation": {
+                  "words": "repository creation",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "repository_hooks": {
+                  "words": "repository hooks",
+                  "type": "text",
+                  "example": "write"
+                },
+
+                "statuses": {
+                  "words": "statuses",
+                  "type": "text",
+                  "example": "read"
+                },
+
+                "workflows": {
+                  "words": "workflows",
+                  "type": "text",
+                  "example": "write"
+                }
+              }
+            },
+            "events": {
+              "words": "events",
+              "type": "list of text",
+              "example": [
+                "branch_protection_rule",
+                "check_run"
+              ]
+            }
+          }
+        },
+        "state_reason": {
+          "words": "state reason",
+          "type": "text",
+          "example": "reopened"
+        },
+        "sub_issues_summary": {
+          "words": "sub issues summary",
+          "type": "inside",
+          "example": "{\"total\":0,\"completed\":0,\"percent_completed\":0}",
+          "inside": {
+            "total": {
+              "words": "total",
+              "type": "number",
+              "example": 0
+            },
+            "completed": {
+              "words": "completed",
+              "type": "number",
+              "example": 0
+            },
+            "percent_completed": {
+              "words": "percent completed",
+              "type": "number",
+              "example": 0
+            }
+          }
+        },
+        "issue_dependencies_summary": {
+          "words": "issue dependencies summary",
+          "type": "inside",
+          "example": "{\"blocked_by\":0,\"total_blocked_by\":0,\"blocking\":0,\"total_blocking\":0}",
+          "inside": {
+            "blocked_by": {
+              "words": "blocked by",
+              "type": "number",
+              "example": 0
+            },
+            "total_blocked_by": {
+              "words": "total blocked by",
+              "type": "number",
+              "example": 0
+            },
+            "blocking": {
+              "words": "blocking",
+              "type": "number",
+              "example": 0
+            },
+            "total_blocking": {
+              "words": "total blocking",
+              "type": "number",
+              "example": 0
+            }
+          }
+        },
+        "pinned_comment": {
+          "words": "pinned comment",
+          "type": "nothing"
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+
+    "contributors": {
+      "type": "contributor",
+      "at": "/repos/solidjs/solid/contributors",
+      "rowsSeen": 90,
+      "idField": "id",
+      "paging": "link header",
+      "takesLimit": false,
+      "fields": {
+        "login": {
+          "words": "login",
+          "type": "text",
+          "example": "ryansolid",
+          "linksTo": "users"
+        },
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 2768267
+        },
+        "node_id": {
+          "words": "node id",
+          "type": "text",
+          "example": "MDQ6VXNlcjI3NjgyNjc="
+        },
+        "avatar_url": {
+          "words": "avatar url",
+          "type": "link",
+          "example": "https://avatars.githubusercontent.com/u/2768267?v=4"
+        },
+        "gravatar_id": {
+          "words": "gravatar id",
+          "type": "text"
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid"
+        },
+        "html_url": {
+          "words": "html url",
+          "type": "link",
+          "example": "https://github.com/ryansolid"
+        },
+        "followers_url": {
+          "words": "followers url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/followers"
+        },
+        "following_url": {
+          "words": "following url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/following{/other_user}"
+        },
+        "gists_url": {
+          "words": "gists url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/gists{/gist_id}"
+        },
+        "starred_url": {
+          "words": "starred url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/starred{/owner}{/repo}"
+        },
+        "subscriptions_url": {
+          "words": "subscriptions url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/subscriptions"
+        },
+        "organizations_url": {
+          "words": "organizations url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/orgs"
+        },
+        "repos_url": {
+          "words": "repos url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/repos"
+        },
+        "events_url": {
+          "words": "events url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/events{/privacy}"
+        },
+        "received_events_url": {
+          "words": "received events url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/received_events"
+        },
+        "type": {
+          "words": "kind",
+          "type": "text",
+          "example": "User"
+        },
+        "user_view_type": {
+          "words": "user view type",
+          "type": "text",
+          "example": "public"
+        },
+        "site_admin": {
+          "words": "site admin",
+          "type": "yes or no",
+          "example": false
+        },
+        "contributions": {
+          "words": "contributions",
+          "type": "number",
+          "example": 1482
+        }
+      },
+      "readThrough": {
+        "rows": 5
+      }
+    },
+
+    "users": {
+      "type": "user",
+      "at": "/users/{name}",
+      "rowsSeen": 3,
+      "idField": "login",
+      "paging": "none",
+
+      "samples": [
+        "ryansolid",
+        "solidjs",
+        "octocat"
+      ],
+
+      "fields": {
+        "login": {
+          "words": "login",
+          "type": "text",
+          "example": "ryansolid"
+        },
+        "id": {
+          "words": "number",
+          "type": "number",
+          "example": 2768267
+        },
+        "node_id": {
+          "words": "node id",
+          "type": "text",
+          "example": "MDQ6VXNlcjI3NjgyNjc="
+        },
+        "avatar_url": {
+          "words": "avatar url",
+          "type": "link",
+          "example": "https://avatars.githubusercontent.com/u/2768267?v=4"
+        },
+        "gravatar_id": {
+          "words": "gravatar id",
+          "type": "text"
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid"
+        },
+        "html_url": {
+          "words": "html url",
+          "type": "link",
+          "example": "https://github.com/ryansolid"
+        },
+        "followers_url": {
+          "words": "followers url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/followers"
+        },
+        "following_url": {
+          "words": "following url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/following{/other_user}"
+        },
+        "gists_url": {
+          "words": "gists url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/gists{/gist_id}"
+        },
+        "starred_url": {
+          "words": "starred url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/starred{/owner}{/repo}"
+        },
+        "subscriptions_url": {
+          "words": "subscriptions url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/subscriptions"
+        },
+        "organizations_url": {
+          "words": "organizations url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/orgs"
+        },
+        "repos_url": {
+          "words": "repos url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/repos"
+        },
+        "events_url": {
+          "words": "events url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/events{/privacy}"
+        },
+        "received_events_url": {
+          "words": "received events url",
+          "type": "link",
+          "example": "https://api.github.com/users/ryansolid/received_events"
+        },
+        "type": {
+          "words": "kind",
+          "type": "text",
+          "example": "User"
+        },
+        "user_view_type": {
+          "words": "user view type",
+          "type": "text",
+          "example": "public"
+        },
+        "site_admin": {
+          "words": "site admin",
+          "type": "yes or no",
+          "example": false
+        },
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "Ryan Carniato"
+        },
+        "company": {
+          "words": "company",
+          "type": "text",
+          "example": "@github"
+        },
+        "blog": {
+          "words": "blog",
+          "type": "link",
+          "example": "https://dev.to/ryansolid"
+        },
+        "location": {
+          "words": "location",
+          "type": "text",
+          "example": "Portland OR"
+        },
+        "email": {
+          "words": "email",
+          "type": "text",
+          "example": "community@solidjs.com"
+        },
+        "hireable": {
+          "words": "hireable",
+          "type": "nothing"
+        },
+        "bio": {
+          "words": "bio",
+          "type": "text",
+          "example": "Simple and performant reactivity for building user interfaces."
+        },
+        "twitter_username": {
+          "words": "twitter username",
+          "type": "text",
+          "example": "RyanCarniato"
+        },
+        "public_repos": {
+          "words": "public repos",
+          "type": "number",
+          "example": 109
+        },
+        "public_gists": {
+          "words": "public gists",
+          "type": "number",
+          "example": 14
+        },
+        "followers": {
+          "words": "followers",
+          "type": "number",
+          "example": 3871
+        },
+        "following": {
+          "words": "following",
+          "type": "number",
+          "example": 26
+        },
+        "created_at": {
+          "words": "created at",
+          "type": "date",
+          "example": "2012-11-10T21:21:53Z"
+        },
+        "updated_at": {
+          "words": "updated at",
+          "type": "date",
+          "example": "2026-01-07T19:45:17Z"
+        }
+      },
+
+      "readThrough": {
+        "rows": 1
+      },
+
+      "searchedBy": {
+        "param": "q",
+        "field": "login",
+        "at": "/search/users"
+      },
+
+      "searchedFor": "ryansolid"
+    },
+
+    "repositories": {
+      "type": "repository",
+      "at": "/search/repositories",
+      "rowsSeen": 90,
+      "rowsItSays": 167998,
+      "idField": "id",
+      "paging": "link header",
+      "rowsAt": "items",
+      "takesLimit": false,
+
+      "searchedBy": {
+        "param": "q",
+        "field": "full_name"
+      },
+
+      "searchedOnly": true,
+      "searchedFor": "solid",
+
+      "fields": {
+        "id": {
+          "words": "id",
+          "type": "number",
+          "example": 130884470
+        },
+
+        "node_id": {
+          "words": "node id",
+          "type": "text",
+          "example": "MDEwOlJlcG9zaXRvcnkxMzA4ODQ0NzA="
+        },
+
+        "name": {
+          "words": "name",
+          "type": "text",
+          "example": "solid"
+        },
+
+        "full_name": {
+          "words": "full name",
+          "type": "text",
+          "example": "solidjs/solid"
+        },
+
+        "private": {
+          "words": "private",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "owner": {
+          "words": "owner",
+          "type": "inside",
+          "example": "{\"login\":\"solidjs\",\"id\":79226042,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjc5MjI2MDQy\",\"a",
+
+          "inside": {
+            "login": {
+              "words": "login",
+              "type": "text",
+              "example": "solidjs"
+            },
+
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 79226042
+            },
+
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "MDEyOk9yZ2FuaXphdGlvbjc5MjI2MDQy"
+            },
+
+            "avatar_url": {
+              "words": "avatar url",
+              "type": "link",
+              "example": "https://avatars.githubusercontent.com/u/79226042?v=4"
+            },
+
+            "gravatar_id": {
+              "words": "gravatar id",
+              "type": "text"
+            },
+
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs"
+            },
+
+            "html_url": {
+              "words": "html url",
+              "type": "link",
+              "example": "https://github.com/solidjs"
+            },
+
+            "followers_url": {
+              "words": "followers url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/followers"
+            },
+
+            "following_url": {
+              "words": "following url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/following{/other_user}"
+            },
+
+            "gists_url": {
+              "words": "gists url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/gists{/gist_id}"
+            },
+
+            "starred_url": {
+              "words": "starred url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/starred{/owner}{/repo}"
+            },
+
+            "subscriptions_url": {
+              "words": "subscriptions url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/subscriptions"
+            },
+
+            "organizations_url": {
+              "words": "organizations url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/orgs"
+            },
+
+            "repos_url": {
+              "words": "repos url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/repos"
+            },
+
+            "events_url": {
+              "words": "events url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/events{/privacy}"
+            },
+
+            "received_events_url": {
+              "words": "received events url",
+              "type": "link",
+              "example": "https://api.github.com/users/solidjs/received_events"
+            },
+
+            "type": {
+              "words": "kind",
+              "type": "text",
+              "example": "Organization"
+            },
+
+            "user_view_type": {
+              "words": "user view type",
+              "type": "text",
+              "example": "public"
+            },
+
+            "site_admin": {
+              "words": "site admin",
+              "type": "yes or no",
+              "example": false
+            }
+          }
+        },
+
+        "html_url": {
+          "words": "html url",
+          "type": "link",
+          "example": "https://github.com/solidjs/solid"
+        },
+
+        "description": {
+          "words": "description",
+          "type": "text",
+          "example": "A declarative, efficient, and flexible JavaScript library for building user inte"
+        },
+
+        "fork": {
+          "words": "fork",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid"
+        },
+
+        "forks_url": {
+          "words": "forks url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/forks"
+        },
+
+        "keys_url": {
+          "words": "keys url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/keys{/key_id}"
+        },
+
+        "collaborators_url": {
+          "words": "collaborators url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/collaborators{/collaborator}"
+        },
+
+        "teams_url": {
+          "words": "teams url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/teams"
+        },
+
+        "hooks_url": {
+          "words": "hooks url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/hooks"
+        },
+
+        "issue_events_url": {
+          "words": "issue events url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/events{/number}"
+        },
+
+        "events_url": {
+          "words": "events url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/events"
+        },
+
+        "assignees_url": {
+          "words": "assignees url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/assignees{/user}"
+        },
+
+        "branches_url": {
+          "words": "branches url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/branches{/branch}"
+        },
+
+        "tags_url": {
+          "words": "tags url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/tags"
+        },
+
+        "blobs_url": {
+          "words": "blobs url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/git/blobs{/sha}"
+        },
+
+        "git_tags_url": {
+          "words": "git tags url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/git/tags{/sha}"
+        },
+
+        "git_refs_url": {
+          "words": "git refs url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/git/refs{/sha}"
+        },
+
+        "trees_url": {
+          "words": "trees url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/git/trees{/sha}"
+        },
+
+        "statuses_url": {
+          "words": "statuses url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/statuses/{sha}"
+        },
+
+        "languages_url": {
+          "words": "languages url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/languages"
+        },
+
+        "stargazers_url": {
+          "words": "stargazers url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/stargazers"
+        },
+
+        "contributors_url": {
+          "words": "contributors url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/contributors"
+        },
+
+        "subscribers_url": {
+          "words": "subscribers url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/subscribers"
+        },
+
+        "subscription_url": {
+          "words": "subscription url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/subscription"
+        },
+
+        "commits_url": {
+          "words": "commits url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/commits{/sha}"
+        },
+
+        "git_commits_url": {
+          "words": "git commits url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/git/commits{/sha}"
+        },
+
+        "comments_url": {
+          "words": "comments url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/comments{/number}"
+        },
+
+        "issue_comment_url": {
+          "words": "issue comment url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues/comments{/number}"
+        },
+
+        "contents_url": {
+          "words": "contents url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/contents/{+path}"
+        },
+
+        "compare_url": {
+          "words": "compare url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/compare/{base}...{head}"
+        },
+
+        "merges_url": {
+          "words": "merges url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/merges"
+        },
+
+        "archive_url": {
+          "words": "archive url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/{archive_format}{/ref}"
+        },
+
+        "downloads_url": {
+          "words": "downloads url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/downloads"
+        },
+
+        "issues_url": {
+          "words": "issues url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/issues{/number}"
+        },
+
+        "pulls_url": {
+          "words": "pulls url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/pulls{/number}"
+        },
+
+        "milestones_url": {
+          "words": "milestones url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/milestones{/number}"
+        },
+
+        "notifications_url": {
+          "words": "notifications url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/notifications{?since,all,participatin"
+        },
+
+        "labels_url": {
+          "words": "labels url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/labels{/name}"
+        },
+
+        "releases_url": {
+          "words": "releases url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/releases{/id}"
+        },
+
+        "deployments_url": {
+          "words": "deployments url",
+          "type": "link",
+          "example": "https://api.github.com/repos/solidjs/solid/deployments"
+        },
+
+        "created_at": {
+          "words": "created at",
+          "type": "date",
+          "example": "2018-04-24T16:36:27Z"
+        },
+
+        "updated_at": {
+          "words": "updated at",
+          "type": "date",
+          "example": "2026-11-07T13:04:06Z"
+        },
+
+        "pushed_at": {
+          "words": "pushed at",
+          "type": "date",
+          "example": "2026-11-07T13:32:48Z"
+        },
+
+        "git_url": {
+          "words": "git url",
+          "type": "text",
+          "example": "git://github.com/solidjs/solid.git"
+        },
+
+        "ssh_url": {
+          "words": "ssh url",
+          "type": "text",
+          "example": "git@github.com:solidjs/solid.git"
+        },
+
+        "clone_url": {
+          "words": "clone url",
+          "type": "link",
+          "example": "https://github.com/solidjs/solid.git"
+        },
+
+        "svn_url": {
+          "words": "svn url",
+          "type": "link",
+          "example": "https://github.com/solidjs/solid"
+        },
+
+        "homepage": {
+          "words": "homepage",
+          "type": "text",
+          "example": "https://solidjs.com"
+        },
+
+        "size": {
+          "words": "size",
+          "type": "number",
+          "example": 45374
+        },
+
+        "stargazers_count": {
+          "words": "stargazers count",
+          "type": "number",
+          "example": 36342
+        },
+
+        "watchers_count": {
+          "words": "watchers count",
+          "type": "number",
+          "example": 36342
+        },
+
+        "language": {
+          "words": "language",
+          "type": "text",
+          "example": "TypeScript"
+        },
+
+        "has_issues": {
+          "words": "issues",
+          "type": "yes or no",
+          "example": true
+        },
+
+        "has_projects": {
+          "words": "projects",
+          "type": "yes or no",
+          "example": true
+        },
+
+        "has_downloads": {
+          "words": "downloads",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "has_wiki": {
+          "words": "wiki",
+          "type": "yes or no",
+          "example": true
+        },
+
+        "has_pages": {
+          "words": "pages",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "has_discussions": {
+          "words": "discussions",
+          "type": "yes or no",
+          "example": true
+        },
+
+        "forks_count": {
+          "words": "forks count",
+          "type": "number",
+          "example": 1158
+        },
+
+        "mirror_url": {
+          "words": "mirror url",
+          "type": "nothing"
+        },
+
+        "archived": {
+          "words": "archived",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "disabled": {
+          "words": "disabled",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "open_issues_count": {
+          "words": "open issues count",
+          "type": "number",
+          "example": 39
+        },
+
+        "license": {
+          "words": "license",
+          "type": "inside",
+          "example": "{\"key\":\"mit\",\"name\":\"MIT License\",\"spdx_id\":\"MIT\",\"url\":\"https://api.github.com/",
+
+          "inside": {
+            "key": {
+              "words": "key",
+              "type": "text",
+              "example": "mit"
+            },
+
+            "name": {
+              "words": "name",
+              "type": "text",
+              "example": "MIT License"
+            },
+
+            "spdx_id": {
+              "words": "spdx id",
+              "type": "text",
+              "example": "MIT"
+            },
+
+            "url": {
+              "words": "url",
+              "type": "link",
+              "example": "https://api.github.com/licenses/mit"
+            },
+
+            "node_id": {
+              "words": "node id",
+              "type": "text",
+              "example": "MDc6TGljZW5zZTEz"
+            }
+          }
+        },
+
+        "allow_forking": {
+          "words": "allow forking",
+          "type": "yes or no",
+          "example": true
+        },
+
+        "is_template": {
+          "words": "template",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "web_commit_signoff_required": {
+          "words": "web commit signoff required",
+          "type": "yes or no",
+          "example": false
+        },
+
+        "has_pull_requests": {
+          "words": "pull requests",
+          "type": "yes or no",
+          "example": true
+        },
+
+        "pull_request_creation_policy": {
+          "words": "pull request creation policy",
+          "type": "text",
+          "example": "all"
+        },
+
+        "topics": {
+          "words": "topics",
+          "type": "list of text",
+          "example": ["declarative", "fine-grained"],
+          "linksTo": "users"
+        },
+
+        "visibility": {
+          "words": "visibility",
+          "type": "text",
+          "example": "public"
+        },
+
+        "forks": {
+          "words": "forks",
+          "type": "number",
+          "example": 1158
+        },
+
+        "open_issues": {
+          "words": "open issues",
+          "type": "number",
+          "example": 39
+        },
+
+        "watchers": {
+          "words": "watchers",
+          "type": "number",
+          "example": 36342
+        },
+
+        "default_branch": {
+          "words": "default branch",
+          "type": "text",
+          "example": "main"
+        },
+
+        "permissions": {
+          "words": "permissions",
+          "type": "inside",
+          "example": "{\"admin\":false,\"maintain\":false,\"push\":false,\"triage\":false,\"pull\":true}",
+
+          "inside": {
+            "admin": {
+              "words": "admin",
+              "type": "yes or no",
+              "example": false
+            },
+
+            "maintain": {
+              "words": "maintain",
+              "type": "yes or no",
+              "example": false
+            },
+
+            "push": {
+              "words": "push",
+              "type": "yes or no",
+              "example": false
+            },
+
+            "triage": {
+              "words": "triage",
+              "type": "yes or no",
+              "example": false
+            },
+
+            "pull": {
+              "words": "pull",
+              "type": "yes or no",
+              "example": true
+            }
+          }
+        },
+
+        "score": {
+          "words": "score",
+          "type": "number",
+          "example": 1
+        }
+      },
+
+      "readThrough": {
+        "rows": 5
+      }
+    }
+  },
+
+  "notes": [
+    "\"users\" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.",
+    "\"repositories\" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.",
+    "\"users\" is searched at /search/users, with \"q\":  its search, not a collection of its own.",
+    "Left out reaction's \"+1\":  Spell couldn't read its line:  - its \"+1\" is a number, stored as \"+1\" -- Don't understand \"its \"+1\" is a number, stored as \"+1\"\"",
+    "Left out reaction's \"-1\":  Spell couldn't read its line:  - its \"1\" is a number -- Don't understand \"its \"1\" is a number\"",
+    "No row read filled issue's \"labels\".",
+    "No row read filled issue's \"assignees\".",
+    "No row read filled issue's \"assignee\".",
+    "No row read filled issue's \"issueFieldValues\".",
+    "No row read filled issue's \"performedViaGithubApp\".",
+    "No row read filled issue's \"stateReason\".",
+    "No row read filled user's \"company\".",
+    "No row read filled user's \"email\".",
+    "No row read filled user's \"bio\"."
+  ],
+
+  "agentNotes": [],
+
+  "spellCantSay": [
+    "A link to somewhere else:  issues.repository_url, issues.labels_url, issues.comments_url, issues.events_url, issues.html_url, issues.timeline_url, contributors.avatar_url, contributors.url, contributors.html_url, contributors.followers_url, contributors.following_url, contributors.gists_url, contributors.starred_url, contributors.subscriptions_url, contributors.organizations_url, contributors.repos_url, contributors.events_url, contributors.received_events_url, users.avatar_url, users.url, users.html_url, users.followers_url, users.following_url, users.gists_url, users.starred_url, users.subscriptions_url, users.organizations_url, users.repos_url, users.events_url, users.received_events_url, users.blog, repositories.html_url, repositories.url, repositories.forks_url, repositories.keys_url, repositories.collaborators_url, repositories.teams_url, repositories.hooks_url, repositories.issue_events_url, repositories.events_url, repositories.assignees_url, repositories.branches_url, repositories.tags_url, repositories.blobs_url, repositories.git_tags_url, repositories.git_refs_url, repositories.trees_url, repositories.statuses_url, repositories.languages_url, repositories.stargazers_url, repositories.contributors_url, repositories.subscribers_url, repositories.subscription_url, repositories.commits_url, repositories.git_commits_url, repositories.comments_url, repositories.issue_comment_url, repositories.contents_url, repositories.compare_url, repositories.merges_url, repositories.archive_url, repositories.downloads_url, repositories.issues_url, repositories.pulls_url, repositories.milestones_url, repositories.notifications_url, repositories.labels_url, repositories.releases_url, repositories.deployments_url, repositories.clone_url, repositories.svn_url hold addresses of nothing described here, so they read as text.",
+    "Rows kept somewhere different in each collection:  \"its rows are\" is for the whole place.",
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+
+  "checkEverySeconds": 2400,
+
+  "spell": [
+    "github is a web server at \"https://api.github.com\":",
+    "\t- its key is the secret \"GITHUB_TOKEN\", if it's set",
+    "\t- its next page is in its \"Link\" header",
+    "\t- check it every 40 minutes",
+    "\t- it writes names like \"repository_url\"",
+    "\t- issues live at \"/repos/solidjs/solid/issues\"",
+    "\t- contributors live at \"/repos/solidjs/solid/contributors\"",
+    "\t- users are found at \"/users/{name}\"",
+    "\t- users are searched with \"q\" at \"/search/users\"",
+    "\t- a user's id is its \"login\"",
+    "\t- repositories are searched with \"q\" at \"/search/repositories\"",
+    "",
+    "an \"issue\" is a thing:",
+    "\t- it lives in github",
+    "\t- its \"url\" is an issue",
+    "\t- its \"repository url\" is text  // an address",
+    "\t- its \"labels url\" is text  // an address",
+    "\t- its \"comments url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"node id\" is text",
+    "\t- its \"number\" is a number",
+    "\t- its \"title\" is text",
+    "\t- its \"user\" is an issue user",
+    "\t- its \"labels\" is a list of labels",
+    "\t- its \"state\" is text",
+    "\t- its \"locked\" is yes or no",
+    "\t- its \"assignees\" is a list of assignees",
+    "\t- its \"comments\" is a number",
+    "\t- its \"created at\" is a date",
+    "\t- its \"updated at\" is a date",
+    "\t- its \"assignee\" is an assignee",
+    "\t- its \"author association\" is text",
+    "\t- its \"issue field values\" is a list of text",
+    "\t- its \"draft\" is yes or no",
+    "\t- its \"pull request\" is a pull request",
+    "\t- its \"body\" is text",
+    "\t- its \"reactions\" is a reaction",
+    "\t- its \"timeline url\" is text  // an address",
+    "\t- its \"performed via github app\" is a performed via github app",
+    "\t- its \"state reason\" is text",
+    "\t- its \"sub issues summary\" is a sub issues summary",
+    "\t- its \"issue dependencies summary\" is an issue dependencies summary",
+    "",
+    "a \"contributor\" is a thing:",
+    "\t- it lives in github",
+    "\t- its \"login\" is a user",
+    "\t- its \"node id\" is text",
+    "\t- its \"avatar url\" is text  // an address",
+    "\t- its \"gravatar id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"followers url\" is text  // an address",
+    "\t- its \"following url\" is text  // an address",
+    "\t- its \"gists url\" is text  // an address",
+    "\t- its \"starred url\" is text  // an address",
+    "\t- its \"subscriptions url\" is text  // an address",
+    "\t- its \"organizations url\" is text  // an address",
+    "\t- its \"repos url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"received events url\" is text  // an address",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"user view type\" is text",
+    "\t- its \"site admin\" is yes or no",
+    "\t- its \"contributions\" is a number",
+    "",
+    "a \"user\" is a thing:",
+    "\t- it lives in github",
+    "\t- its \"login\" is text",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"node id\" is text",
+    "\t- its \"avatar url\" is text  // an address",
+    "\t- its \"gravatar id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"followers url\" is text  // an address",
+    "\t- its \"following url\" is text  // an address",
+    "\t- its \"gists url\" is text  // an address",
+    "\t- its \"starred url\" is text  // an address",
+    "\t- its \"subscriptions url\" is text  // an address",
+    "\t- its \"organizations url\" is text  // an address",
+    "\t- its \"repos url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"received events url\" is text  // an address",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"user view type\" is text",
+    "\t- its \"site admin\" is yes or no",
+    "\t- its \"name\" is text",
+    "\t- its \"company\" is text",
+    "\t- its \"blog\" is text  // an address",
+    "\t- its \"location\" is text",
+    "\t- its \"email\" is text",
+    "\t- its \"bio\" is text",
+    "\t- its \"twitter username\" is text",
+    "\t- its \"public repos\" is a number",
+    "\t- its \"public gists\" is a number",
+    "\t- its \"followers\" is a number",
+    "\t- its \"following\" is a number",
+    "\t- its \"created at\" is a date",
+    "\t- its \"updated at\" is a date",
+    "",
+    "a \"repository\" is a thing:",
+    "\t- it lives in github",
+    "\t- its \"node id\" is text",
+    "\t- its \"name\" is text",
+    "\t- its \"full name\" is text",
+    "\t- its \"private\" is yes or no",
+    "\t- its \"owner\" is an owner",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"description\" is text",
+    "\t- its \"fork\" is yes or no",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"forks url\" is text  // an address",
+    "\t- its \"keys url\" is text  // an address",
+    "\t- its \"collaborators url\" is text  // an address",
+    "\t- its \"teams url\" is text  // an address",
+    "\t- its \"hooks url\" is text  // an address",
+    "\t- its \"issue events url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"assignees url\" is text  // an address",
+    "\t- its \"branches url\" is text  // an address",
+    "\t- its \"tags url\" is text  // an address",
+    "\t- its \"blobs url\" is text  // an address",
+    "\t- its \"git tags url\" is text  // an address",
+    "\t- its \"git refs url\" is text  // an address",
+    "\t- its \"trees url\" is text  // an address",
+    "\t- its \"statuses url\" is text  // an address",
+    "\t- its \"languages url\" is text  // an address",
+    "\t- its \"stargazers url\" is text  // an address",
+    "\t- its \"contributors url\" is text  // an address",
+    "\t- its \"subscribers url\" is text  // an address",
+    "\t- its \"subscription url\" is text  // an address",
+    "\t- its \"commits url\" is text  // an address",
+    "\t- its \"git commits url\" is text  // an address",
+    "\t- its \"comments url\" is text  // an address",
+    "\t- its \"issue comment url\" is text  // an address",
+    "\t- its \"contents url\" is text  // an address",
+    "\t- its \"compare url\" is text  // an address",
+    "\t- its \"merges url\" is text  // an address",
+    "\t- its \"archive url\" is text  // an address",
+    "\t- its \"downloads url\" is text  // an address",
+    "\t- its \"issues url\" is text  // an address",
+    "\t- its \"pulls url\" is text  // an address",
+    "\t- its \"milestones url\" is text  // an address",
+    "\t- its \"notifications url\" is text  // an address",
+    "\t- its \"labels url\" is text  // an address",
+    "\t- its \"releases url\" is text  // an address",
+    "\t- its \"deployments url\" is text  // an address",
+    "\t- its \"created at\" is a date",
+    "\t- its \"updated at\" is a date",
+    "\t- its \"pushed at\" is a date",
+    "\t- its \"git url\" is text",
+    "\t- its \"ssh url\" is text",
+    "\t- its \"clone url\" is text  // an address",
+    "\t- its \"svn url\" is text  // an address",
+    "\t- its \"homepage\" is text",
+    "\t- its \"size\" is a number",
+    "\t- its \"stargazers count\" is a number",
+    "\t- its \"watchers count\" is a number",
+    "\t- its \"language\" is text",
+    "\t- its \"issues\" is yes or no, stored as \"has_issues\"",
+    "\t- its \"projects\" is yes or no, stored as \"has_projects\"",
+    "\t- its \"downloads\" is yes or no, stored as \"has_downloads\"",
+    "\t- its \"wiki\" is yes or no, stored as \"has_wiki\"",
+    "\t- its \"pages\" is yes or no, stored as \"has_pages\"",
+    "\t- its \"discussions\" is yes or no, stored as \"has_discussions\"",
+    "\t- its \"forks count\" is a number",
+    "\t- its \"archived\" is yes or no",
+    "\t- its \"disabled\" is yes or no",
+    "\t- its \"open issues count\" is a number",
+    "\t- its \"license\" is a license",
+    "\t- its \"allow forking\" is yes or no",
+    "\t- its \"template\" is yes or no, stored as \"is_template\"",
+    "\t- its \"web commit signoff required\" is yes or no",
+    "\t- its \"pull requests\" is yes or no, stored as \"has_pull_requests\"",
+    "\t- its \"pull request creation policy\" is text",
+    "\t- its \"topics\" is a list of users",
+    "\t- its \"visibility\" is text",
+    "\t- its \"forks\" is a number",
+    "\t- its \"open issues\" is a number",
+    "\t- its \"watchers\" is a number",
+    "\t- its \"default branch\" is text",
+    "\t- its \"permissions\" is a permission",
+    "\t- its \"score\" is a number",
+    "",
+    "an \"issue user\" is a thing:",
+    "\t- its \"login\" is text",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"node id\" is text",
+    "\t- its \"avatar url\" is text  // an address",
+    "\t- its \"gravatar id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"followers url\" is text  // an address",
+    "\t- its \"following url\" is text  // an address",
+    "\t- its \"gists url\" is text  // an address",
+    "\t- its \"starred url\" is text  // an address",
+    "\t- its \"subscriptions url\" is text  // an address",
+    "\t- its \"organizations url\" is text  // an address",
+    "\t- its \"repos url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"received events url\" is text  // an address",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"user view type\" is text",
+    "\t- its \"site admin\" is yes or no",
+    "",
+    "a \"label\" is a thing:",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"node id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"name\" is text",
+    "\t- its \"color\" is text",
+    "\t- its \"default\" is yes or no",
+    "\t- its \"description\" is text",
+    "",
+    "an \"assignee\" is a thing:",
+    "\t- its \"login\" is text",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"node id\" is text",
+    "\t- its \"avatar url\" is text  // an address",
+    "\t- its \"gravatar id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"followers url\" is text  // an address",
+    "\t- its \"following url\" is text  // an address",
+    "\t- its \"gists url\" is text  // an address",
+    "\t- its \"starred url\" is text  // an address",
+    "\t- its \"subscriptions url\" is text  // an address",
+    "\t- its \"organizations url\" is text  // an address",
+    "\t- its \"repos url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"received events url\" is text  // an address",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"user view type\" is text",
+    "\t- its \"site admin\" is yes or no",
+    "",
+    "a \"pull request\" is a thing:",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"diff url\" is text  // an address",
+    "\t- its \"patch url\" is text  // an address",
+    "",
+    "a \"reaction\" is a thing:",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"total count\" is a number",
+    "\t- its \"laugh\" is a number",
+    "\t- its \"hooray\" is a number",
+    "\t- its \"confused\" is a number",
+    "\t- its \"heart\" is a number",
+    "\t- its \"rocket\" is a number",
+    "\t- its \"eyes\" is a number",
+    "",
+    "a \"performed via github app\" is a thing:",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"client id\" is text",
+    "\t- its \"slug\" is text",
+    "\t- its \"node id\" is text",
+    "\t- its \"owner\" is an owner",
+    "\t- its \"name\" is text",
+    "\t- its \"description\" is text",
+    "\t- its \"external url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"created at\" is a date",
+    "\t- its \"updated at\" is a date",
+    "\t- its \"permissions\" is a permission",
+    "\t- its \"events\" is a list of text",
+    "",
+    "an \"owner\" is a thing:",
+    "\t- its \"login\" is text",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"node id\" is text",
+    "\t- its \"avatar url\" is text  // an address",
+    "\t- its \"gravatar id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"html url\" is text  // an address",
+    "\t- its \"followers url\" is text  // an address",
+    "\t- its \"following url\" is text  // an address",
+    "\t- its \"gists url\" is text  // an address",
+    "\t- its \"starred url\" is text  // an address",
+    "\t- its \"subscriptions url\" is text  // an address",
+    "\t- its \"organizations url\" is text  // an address",
+    "\t- its \"repos url\" is text  // an address",
+    "\t- its \"events url\" is text  // an address",
+    "\t- its \"received events url\" is text  // an address",
+    "\t- its \"kind\" is text, stored as \"type\"",
+    "\t- its \"user view type\" is text",
+    "\t- its \"site admin\" is yes or no",
+    "",
+    "a \"permission\" is a thing:",
+    "\t- its \"actions\" is text",
+    "\t- its \"administration\" is text",
+    "\t- its \"checks\" is text",
+    "\t- its \"contents\" is text",
+    "\t- its \"discussions\" is text",
+    "\t- its \"issues\" is text",
+    "\t- its \"members\" is text",
+    "\t- its \"merge queues\" is text",
+    "\t- its \"metadata\" is text",
+    "\t- its \"pull requests\" is text",
+    "\t- its \"repository creation\" is text",
+    "\t- its \"repository hooks\" is text",
+    "\t- its \"statuses\" is text",
+    "\t- its \"workflows\" is text",
+    "",
+    "a \"sub issues summary\" is a thing:",
+    "\t- its \"total\" is a number",
+    "\t- its \"completed\" is a number",
+    "\t- its \"percent completed\" is a number",
+    "",
+    "an \"issue dependencies summary\" is a thing:",
+    "\t- its \"blocked by\" is a number",
+    "\t- its \"total blocked by\" is a number",
+    "\t- its \"blocking\" is a number",
+    "\t- its \"total blocking\" is a number",
+    "",
+    "a \"license\" is a thing:",
+    "\t- its \"key\" is text",
+    "\t- its \"name\" is text",
+    "\t- its \"spdx id\" is text",
+    "\t- its \"url\" is text  // an address",
+    "\t- its \"node id\" is text"
+  ]
+}

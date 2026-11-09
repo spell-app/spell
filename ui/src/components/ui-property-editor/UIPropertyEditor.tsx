@@ -18,7 +18,8 @@ import {
   PROPERTY_SELECTOR,
   PROPERTY_TAG,
   VALUE_FROM_ATTRIBUTE,
-  type PropertyOrigin
+  type PropertyOrigin,
+  type PropertyWriter
 } from "./UIPropertyEditor.types"
 
 import editorCSS from "./UIPropertyEditor.css?inline"
@@ -101,6 +102,8 @@ export class DOMPropertyEditorElement extends DOMFormElement {
  *   - `show-defaults`:  a value other than its property's default shows bold.
  * - `origins`:  where each property's value comes from, handed in by whoever knows (`PropertyOrigin`):
  *   each property shows it, and a button it offers only says it was pressed.
+ * - `writer`:  writes a property's value to its thing in place of the plain set, when it says it did (`PropertyWriter`):
+ *   for a value kept somewhere that wants each change held, as an inspector's back-end data does.
  ****************/
 export class UIPropertyEditor extends UIForm {
   // the form's names under the editor's tag, the section's and its own:  TypeScript only knows the form's literals
@@ -443,6 +446,12 @@ export class UIPropertyEditor extends UIForm {
   ////////////////
   // ## Its properties and groups hear what happened
   ////////////////
+
+  /** `writer`, when it's given one:  it writes a property's value to its thing, in place of the plain set. */
+  protected writesItself(target: object, name: string, value: unknown): boolean {
+    const writer = E.Reactive.attributeValue(this, "writer")
+    return typeof writer === "function" && !!(writer as PropertyWriter)({ thing: target, name, value })
+  }
 
   /** A property was written:  `ui-changed` from the editor and the property, then its "on change" rules. */
   protected onWritten({ control, name, value, things }: WrittenProperty) {

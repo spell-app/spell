@@ -19,6 +19,7 @@ import inputCSS from "./UIInput.css?inline"
  * - A form control (see `TextControl`):  its value, native constraints + `rules`, reset, a disabled fieldset.
  * - `type` passes through to the native input.
  *   `file` submits the chosen `File`s (one `FormData` entry each), and script can't set its value, as natively.
+ *   `percent` is ours (epic `language` P34):  a number field for a part of a whole, see `isPercent`.
  * - Enter submits the form, as in a native field ("implicit submission"):
  *   it clicks the form's first submit button, else calls `requestSubmit()`.
  *   The native input can't do it itself:  inside a shadow root, it belongs to no form.
@@ -39,11 +40,13 @@ export class UIInput extends TextControl<Vocabulary> {
   // ## The label
   ////////////////
 
-  /** Where the joined label goes, if there is one. */
+  /** Where the joined label goes, if there is one:  a percent's `%` at its end, unless it says otherwise. */
   get labelPlace(): LabelPlace | undefined {
     const { labeled } = this
     if (labeled === "corner" || labeled === "left corner") return "corner"
-    if (!labeled && !this.label && !this.slots.hasContent(this.slotForName("label"))) return undefined
+    if (!labeled && !this.label && !this.slots.hasContent(this.slotForName("label"))) {
+      return this.isPercent ? "end" : undefined
+    }
     return labeled === "right" ? "end" : "start"
   }
 
@@ -75,6 +78,32 @@ export class UIInput extends TextControl<Vocabulary> {
 
   /** The glyph of the `icon` attribute. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
+
+  ////////////////
+  // ## Percent
+  ////////////////
+
+  /**
+   * `type="percent"`:  a number field for a part of a whole, kept as its fraction (epic `language` P34).
+   * - Its value is the fraction, `0.18`, as Spell keeps a percent;  the field shows and takes `18`, a `%` label at its end.
+   * - `min`, `max` and `step` are in what it shows:  `min="0" step="1"`.
+   * - The native control is a `number` one.
+   */
+  get isPercent(): boolean {
+    return this.type === "percent"
+  }
+
+  /** A percent shows its fraction times 100:  `0.18` => `18`. */
+  protected shownFor(value: string): string {
+    if (!this.isPercent || value === "" || Number.isNaN(Number(value))) return value
+    return String(Number((Number(value) * 100).toFixed(10)))
+  }
+
+  /** A percent's fraction, from what it shows:  `18` => `0.18`. */
+  protected valueFor(shown: string): string {
+    if (!this.isPercent || shown === "" || Number.isNaN(Number(shown))) return shown
+    return String(Number((Number(shown) / 100).toFixed(12)))
+  }
 
   ////////////////
   // ## Files
@@ -120,7 +149,9 @@ export class UIInput extends TextControl<Vocabulary> {
   ////////////////
 
   protected classValue(name: E.AttributeName<Vocabulary>): unknown {
-    if (name === "labeled") return this.labelPlace ? this.labeled || true : false
+    // a percent's own `%` is a right label
+    if (name === "labeled")
+      return this.labelPlace ? this.labeled || (this.labelPlace === "end" ? "right" : true) : false
     if (name === "action") return this.actionPlace ? this.action || true : false
     if (name === "icon-position") return this.hasIconBox ? this.iconPosition : undefined
     return super.classValue(name)
@@ -159,7 +190,7 @@ export class UIInput extends TextControl<Vocabulary> {
         <input
           ref={(element) => (this.control = element)}
           part={this.partForName("control")}
-          type={this.type ?? "text"}
+          type={this.isPercent ? "number" : (this.type ?? "text")}
           placeholder={this.placeholder}
           autocomplete={this.autocomplete as never}
           inputmode={this.inputmode}
@@ -203,7 +234,7 @@ export class UIInput extends TextControl<Vocabulary> {
   private labelBox(): JSX.Element {
     return (
       <span class={LABEL_CLASSES} part={this.partForName("label")}>
-        <slot name={this.slotForName("label")}>{this.label}</slot>
+        <slot name={this.slotForName("label")}>{this.label ?? (this.isPercent ? PERCENT_SIGN : undefined)}</slot>
       </span>
     )
   }
@@ -239,6 +270,9 @@ export class UIInput extends TextControl<Vocabulary> {
 }
 /** The vocabulary getters, typed;  `TextControl` types the shared ones, and owns `value`. */
 export interface UIInput extends Omit<E.AttributeValues<Vocabulary>, keyof CommonAttributes | "value"> {}
+
+/** A percent's label, when it names none (`isPercent`). */
+const PERCENT_SIGN = "%"
 
 /** Class words of a `labeled="corner"` label (`UIInput.css`). */
 const CORNER_LABEL = "ui corner label"

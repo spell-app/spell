@@ -130,6 +130,19 @@ describe("<ui-input> value", () => {
     expect(host.getAttribute("value")).toBe("Ada")
   })
 
+  it('`type="percent"`:  a number field showing the fraction as a percent, with a % label (epic `language` P34)', async () => {
+    const { host, control, root } = await input(`<ui-input type="percent" value="0.18" aria-label="Tip"></ui-input>`)
+    expect(control.type).toBe("number")
+    expect(control.value).toBe("18")
+    expect(root.querySelector("[part~=label]")?.textContent).toBe("%")
+    host.value = "0.07"
+    await ElementFixture.tick()
+    expect(control.value).toBe("7")
+    await userEvent.clear(control)
+    await userEvent.type(control, "20")
+    expect(host.value).toBe("0.2")
+  })
+
   it("typing dispatches ui-input per keystroke, then ui-changed on commit", async () => {
     const { host, control } = await input(`<ui-input aria-label="Name"></ui-input>`)
     const inputs = record(host, "ui-typed")

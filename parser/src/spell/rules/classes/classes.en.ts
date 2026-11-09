@@ -15,6 +15,12 @@ import { ClassMember } from "./ClassMember"
 import { CreateViewableListType } from "./CreateViewableListType"
 import { CreateListType } from "./CreateListType"
 import { CreateOneOfAKind } from "./CreateOneOfAKind"
+import { DefineDimension } from "./DefineDimension"
+import { UnitNames } from "./UnitNames"
+import { DimensionBase } from "./DimensionBase"
+import { DimensionUnit } from "./DimensionUnit"
+import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
+import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -28,6 +34,7 @@ import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { EveryThingWhere } from "./EveryThingWhere"
+import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE, ITEMS_DRAGGABLE, DROPPABLE_WHEN } from "./ListGuard"
@@ -55,9 +62,12 @@ import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
+import { PublishedAs } from "./PublishedAs"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
+import { TheSavedThings } from "./TheSavedThings"
+import { FieldValueFilter, SameFieldFilter, ThingFilters } from "./ThingFilter"
 import { ThingAtPlace } from "./ThingAtPlace"
 import { ThingName } from "./ThingName"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
@@ -272,6 +282,20 @@ classes.addRule(CreateType, {
     { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
   ]
+})
+
+// a kind of measure and its units (epic `language` P23):  `length is a dimension:`;  tests:  `tests/spell/Dimensions.test.ts`
+classes.addRule(DefineDimension, { syntax: "{type:type_words} is (a|an) dimension {with_nested_statements}?" })
+
+// a unit's name, and each other name it goes by:  `"centimeter", aka "cm"`
+classes.addRule(UnitNames, { syntax: "[names:{name:text} (, aka)]" })
+
+// a dimension's base unit:  `- its base is "meter", aka "m"`
+classes.addRule(DimensionBase, { syntax: "{type:subject_its} base is {unit:unit_names}" })
+
+// a dimension's other units:  `- one "inch", aka "in", is 2.54 cm`;  `- one "fahrenheit", aka "°F", is 5/9 °C, starting at 32`
+classes.addRule(DimensionUnit, {
+  syntax: "one {unit:unit_names} , is {top:number} (/ {bottom:number})? {of:unit_words} (, starting at {start:number})?"
 })
 
 classes.addRule(CreateOneOfAKind, {
@@ -514,6 +538,21 @@ classes.addRule(MarkdownDescription, {
           ["a card is a thing:", "\t<markdown>", "\t\tA playing card:  **{rank}** of *suit*.", "\t</markdown>"],
           ["export class Card extends Thing {", '  static description = "A playing card:  **{rank}** of *suit*."', "}"]
         ],
+        // a page's stories (epic `mockup` P6):  what it must let people do, its `static stories`
+        [
+          [
+            "a card is a thing:",
+            "\t<stories>",
+            "\t\t- [ ] deal a card",
+            "\t\t- [x] As a player, I want to turn a card over",
+            "\t</stories>"
+          ],
+          [
+            "export class Card extends Thing {",
+            '  static stories = "- [ ] deal a card\\n- [x] As a player, I want to turn a card over"',
+            "}"
+          ]
+        ],
         // not in an outline:  says where it goes
         [
           ["<markdown>", "\tHello", "</markdown>"],
@@ -694,8 +733,9 @@ classes.addRule(DragAndDrop, {
   ]
 })
 
-// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
-// and its short forms (epic `debut` P27, Q47):  `on` or `when`, the small words optional, "on it" understood --
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:
+// `- when a card is dropped on it:` and its short forms (epic `debut` P27, Q47):
+// `on` or `when`, the small words optional, "on it" understood --
 // `- on card dropped:`, `- when a card is dragged out of it:`, `- while card dragged over:`
 // (with no article, only a type it knows:  `something` is any thing)
 classes.addRule(DragHandler, {
@@ -782,6 +822,53 @@ classes.addRule(SavedInFile, {
 classes.addRule(SavedInFile, { syntax: "{type:subject_it} is saved in its own file" })
 
 classes.addRule(SavedInFile, { syntax: "{type:subject_implied} is saved in its own file" })
+
+classes.addRule(PublishedAs, {
+  syntax: "(a|an) {type:known_type} is published as {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("a status is a thing", "block")
+      },
+      tests: [
+        ['a status is published as "xyz.statusphere.status"', 'Status.publishedAs = "xyz.statusphere.status"'],
+        {
+          title: "a schema's name is an NSID",
+          input: 'a status is published as "statuses"',
+          js: `/* PARSE ERROR: "statuses" can't name a schema:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe" */`
+        },
+        {
+          title: "not a built-in type:  every project shares it",
+          input: 'a thing is published as "com.example.thing"',
+          js: `/* PARSE ERROR: Can't publish thing's records:  it's built in, and every project shares it */`
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PublishedAs, {
+  syntax: "(a|an) {type:known_type} is published",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("a recipe is a thing", "block")
+      },
+      tests: [["a recipe is published", "Recipe.publishedAs = true"]]
+    }
+  ]
+})
+
+// in an outline body:  `- it is published as "xyz.statusphere.status"`
+classes.addRule(PublishedAs, { syntax: "{type:subject_it} is published as {name:text}" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_implied} is published as {name:text}" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_it} is published" })
+
+classes.addRule(PublishedAs, { syntax: "{type:subject_implied} is published" })
 
 classes.addRule(VersionStep, {
   syntax: "(a|an) {type:known_type} version {version:number} renames {from:identifier} to {to:identifier}",
@@ -977,7 +1064,8 @@ classes.addRule(NewThing, {
       compileAs: "expression",
       tests: [
         ["a new Object", "new Object()"],
-        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"]
+        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"],
+        { title: "a new date is this moment", input: "a new date", js: "new Date()" }
       ]
     }
   ]
@@ -1526,6 +1614,13 @@ classes.addRule(OutlineSpecifierEnum, {
   ]
 })
 
+// a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)
+// -- before `a {type}`, which would make `percent` a type of its own
+classes.addRule(OutlineSpecifierPercent, {
+  syntax: "(a|an) (percent|percentage) (starting at {start:expression})?",
+  tests: [{ tests: [["a percent", "number"]] }]
+})
+
 classes.addRule(OutlineSpecifierDatatype, {
   syntax: "(a|an) {datatype:singular_type}",
   tests: [{ tests: [["a number", "number"]] }]
@@ -1555,6 +1650,21 @@ classes.addRule(OutlineSpecifierDatatype, {
     }
   ]
 })
+
+// a value every one must have:  `its "created at" is a required date`, `its "status" is required text`
+// -- the same as `, which must not be empty` (`DefinePropertyHas.rulesOf()`;  Owen, 2026-11-04, epic `atmosphere`)
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(a|an) (required:required) {datatype:singular_type}",
+  tests: [{ tests: [["a required date", "date"]] }]
+})
+
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(required:required) {datatype:known_type}",
+  tests: [{ tests: [["required text", "text"]] }]
+})
+
+// a property that measures something, in a unit:  `its "height" is a length in cm` (epic `language` P23)
+classes.addRule(OutlineSpecifierMeasure, { syntax: "(a|an) {datatype:singular_type} in {unit:unit_words}" })
 
 classes.addRule(OutlineSpecifierYesOrNo, {
   syntax: "either? (yes or no|true or false)",
@@ -1825,8 +1935,8 @@ classes.addRule(PropertyValueGetter, {
   syntax: "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
 })
 
-// a worked-out value from a list of its own (epic `elemental-spell` P5):  `- its "color" is one of red, black:`,
-// then its value lines -- and its aliases, bulleted, under them
+// a worked-out value from a list of its own (epic `elemental-spell` P5):
+// `- its "color" is one of red, black:`, then its value lines -- and its aliases, bulleted, under them
 classes.addRule(PropertyValueGetter, {
   syntax: "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
@@ -1843,8 +1953,9 @@ classes.addRule(PropertyValueGetter, {
     "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
 
-// ... and as a possessive (epic `language` T24):  `a card's value is its rank * 2`, `a card's "short name" is:`,
-// `a card's color is one of red, black:` -- last, so a translation finds Spanish's `el valor de una carta es` first
+// ... and as a possessive (epic `language` T24):
+// `a card's value is its rank * 2`, `a card's "short name" is:`, `a card's color is one of red, black:`
+// -- last, so a translation finds Spanish's `el valor de una carta es` first
 classes.addRule(PropertyValueGetter, {
   syntax: "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
   tests: [
@@ -2291,6 +2402,8 @@ classes.addRule(MenuBar, {
 })
 
 classes.addRule(DrawSlotOf, { syntax: "draw the {slot:member_words} of {thing:expression}" })
+// ... and as a possessive (epic `language` T49):  `draw its showing's page` -- Spanish says `dibujar la página de ...`
+classes.addRule(DrawSlotOf, { syntax: "draw {thing:possessive_owner} {possessive_mark} {slot:member_words}" })
 
 // placing a slot in a drawing:  `draw its front`
 classes.addRule(DrawSlot, {
@@ -2591,6 +2704,66 @@ classes.addRule(TheThings, {
   ]
 })
 
+classes.addRule(TheSavedThings, {
+  syntax: "the saved {type:plural_type}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a pile is a list of things", "a card is a thing"].join("\n"), "block")
+      },
+      // every pile the program has, which `the saved piles` won't compile for:  no place saves them
+      tests: [["the saved piles", "core.everyThing(Pile)"]]
+    }
+  ]
+})
+
+// `with` filters (epic `data` P32, Q29):  `every favourite with the same address and name "blah"`
+classes.addRule(SameFieldFilter, { syntax: "the same {field:declared_member_words}" })
+classes.addRule(FieldValueFilter, { syntax: "{field:declared_member_words} {value:expression}" })
+classes.addRule(ThingFilters, { syntax: "[{thing_filter} (,|and)]" })
+
+classes.addRule(EveryThingWith, {
+  syntax: "every {type:known_type} with {filters:thing_filters}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a suit as one of clubs, hearts", "a card has a short name as text"].join(
+            "\n"
+          ),
+          "block"
+        )
+        scope.variables?.add("suit")
+      },
+      tests: [
+        [
+          "every card with the same suit",
+          "core.filter(core.everyThing(Card), (card) => card.suit === suit)",
+          "core.filter(core.everyThing(Card), (card: Card) => card.suit === suit)"
+        ],
+        [
+          'every card with suit hearts and short name "x"',
+          'core.filter(core.everyThing(Card), (card) => card.suit === "hearts" && card.shortName === "x")',
+          'core.filter(core.everyThing(Card), (card: Card) => card.suit === "hearts" && card.shortName === "x")'
+        ]
+      ]
+    }
+  ]
+})
+classes.addRule(EveryThingWith, {
+  syntax: "every {type:known_type} with {filters:thing_filters} where {inline_expression}?"
+})
+classes.addRule(EveryThingWith, { syntax: "(all|the)? {type:plural_type} with {filters:thing_filters}" })
+classes.addRule(EveryThingWith, {
+  syntax: "(all|the)? {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+})
+classes.addRule(TheSavedThingsWith, { syntax: "the? saved {type:plural_type} with {filters:thing_filters}" })
+classes.addRule(TheSavedThingsWith, {
+  syntax: "the? saved {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+})
+
 classes.addRule(KindValues, {
   syntax: "{type:plural_type}",
   tests: [
@@ -2683,12 +2856,14 @@ classes.addRule(MustRule, {
 })
 
 classes.addRule(MustRule, {
-  syntax: "be {bound:at_least_or_at_most} {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
+  syntax:
+    "be {bound:at_least_or_at_most} {count:number} (letter|letters|character|characters) long {suggestion:rule_suggestion}?",
   tests: [
     {
       tests: [
         ["be at least 3 letters long", '{ type: "minLength", value: "3" }'],
-        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }']
+        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }'],
+        ["be at most 1 letter long", '{ type: "maxLength", value: "1" }']
       ]
     }
   ]

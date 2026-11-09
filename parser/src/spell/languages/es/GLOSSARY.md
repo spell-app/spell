@@ -59,7 +59,7 @@ Names people choose keep their accents.
 | list / thing / type / app | `lista` / `cosa` / `tipo` / `(aplicación|aplicacion)` |
 | a property's kind of values, `card suit` | Spanish's order, `palo de carta` (`{property} de {type}`, the pack's `propertyKindName`);  plural `palos de carta` |
 | a class's list of values, `card suits` | `palos de carta` |
-| a place's kinds | `servidor web`, `servidor graphql`, `carpeta de datos`, `archivo`, `sala`, `(hoja\|hoja de cálculo)`, `hoja de google`, `base de datos en este dispositivo`, `base de datos en memoria`, `airtable`, `(atmosphere\|cuenta de atmosphere)`, `(atmosphere personal\|cuenta personal de atmosphere)` |
+| a place's kinds | `servidor web`, `servidor graphql`, `carpeta de datos`, `archivo`, `sala`, `(hoja\|hoja de cálculo)`, `archivo de excel`, `hoja de google`, `base de datos en este dispositivo`, `base de datos en memoria`, `airtable`, `(atmosphere\|cuenta de atmosphere)`, `(atmosphere personal\|cuenta personal de atmosphere)` |
 | x is a web server (at\|from) "..." | `x es un servidor web (en\|desde) "..."` |
 | x is saved in the cloud | `x se guarda en la nube` |
 | it (is saved\|lives) in the place | `(se guarda\|vive) en el lugar` (and `su propio archivo` keeps its meaning) |
@@ -79,6 +79,7 @@ Names people choose keep their accents.
 | when someone else changes it | `cuando otra persona (lo\|la) cambia`:  agrees with its type, `la` for a `receta` |
 | they / them, their name, the person, (everyone\|the people) here | `esa persona`, `el nombre de esa persona`, `la persona`, `(todos los presentes\|las personas presentes)`:  no `su`, which means its |
 | sorted by | `(ordenado\|ordenada\|ordenados\|ordenadas) por`:  agrees with its list, `cada receta, ordenada`, `las recetas, ordenadas` |
+| newest first, highest first, reversed, z-a | `al revés`, `z-a`, `de mayor a menor`, `de más reciente a más antiguo`, `en orden inverso`;  the usual way out loud:  `a-z`, `de menor a mayor` |
 | named / called | `(llamado|llamada)` |
 | number words zero-ten | `cero`, `(uno|una|un)`, `dos`, `tres`, `cuatro`, `cinco`, `seis`, `siete`, `ocho`, `nueve`, `diez` |
 | ordinals | `(primer|primero|primera)`, `(segundo|segunda)`, `(tercer|tercero|tercera)`, `(cuarto|cuarta)`, `(quinto|quinta)`, `(sexto|sexta)`, `(séptimo|septimo|séptima|septima)`, `(octavo|octava)`, `(noveno|novena)`, `(décimo|decimo|décima|decima)`, `(penúltimo|penultimo|penúltima|penultima)`, `(último|ultimo|última|ultima)`, `final`;  top `arriba`, bottom `abajo` |

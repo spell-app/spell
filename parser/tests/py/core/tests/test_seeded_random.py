@@ -83,6 +83,14 @@ def test_seeding_repeats_the_numbers(core: Core) -> None:
     assert [core.random_number(1, 6) for _ in range(10)] == rolls
 
 
+def test_random_number_between_1_and_6_gives_each_whole_number_and_nothing_else(core: Core) -> None:
+    assert {core.random_number(1, 6) for _ in range(600)} == {1, 2, 3, 4, 5, 6}
+
+
+def test_random_number_swaps_ends_the_wrong_way_round(core: Core) -> None:
+    assert {core.random_number(6, 1) for _ in range(600)} == {1, 2, 3, 4, 5, 6}
+
+
 def test_random_number_warns_without_numbers(core: Core, capsys: pytest.CaptureFixture[str]) -> None:
     assert core.random_number("six") is None  # type: ignore[arg-type]
     assert capsys.readouterr().err == "random_number(): you must pass two numbers, got 1 six\n"

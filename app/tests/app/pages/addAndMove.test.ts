@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Adding, moving and removing parts from the running editor, by a real mouse and keys (epic `editor`, Add And Move).
@@ -13,28 +12,6 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** The file a blank program is answered for:  a project in tags, the example's text never read. */
 const FILE = "TaskList.spellml"
@@ -552,5 +529,30 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.locator(".PaletteStrip .PalettePin").click()
     await page.waitForTimeout(600)
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
+  })
+
+  test("a page that draws, its whole drawing in its shadow root, says nothing of dragging (T77)", async () => {
+    const other = await browser.newContext({ viewport: { width: 1440, height: 800 } })
+    // FizzBuzz with its Explainer turned on, as a person would in its project file;  nothing saved
+    await other.route(/\/api\/projects\/index\//, async (route) => {
+      const response = await route.fetch()
+      const index = (await response.json()) as { imports?: { path: string; active: boolean }[] }
+      for (const each of index.imports ?? []) if (each.path.endsWith("/Explainer.spellml")) each.active = true
+      await route.fulfill({ response, json: index })
+    })
+    await other.route(/\/api\/projects\/file\//, (route) =>
+      route.request().method() === "GET" ? route.continue() : route.fulfill({ status: 200, body: "{}" })
+    )
+    const explainer = await other.newPage()
+    await explainer.goto(`${EDITOR}edit/@spell/examples/fizzbuzz`, { timeout: 60_000 })
+    await explainer.waitForSelector(".AppPaneBody .App > *", { timeout: 60_000 })
+    await explainer.waitForTimeout(SETTLE_MS)
+    const shown = await explainer.evaluate(() => {
+      const element = document.querySelector(".AppPaneBody .App > *")!
+      const prompt = document.querySelector(".EmptyAppPrompt")!
+      return { drawn: element.shadowRoot!.childElementCount > 0, prompt: getComputedStyle(prompt).display }
+    })
+    expect(shown).toEqual({ drawn: true, prompt: "none" })
+    await other.close()
   })
 })

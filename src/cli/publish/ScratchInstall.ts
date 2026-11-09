@@ -1,9 +1,9 @@
 import { execFileSync } from "node:child_process"
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
-import { createServer, type Server } from "node:http"
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { extname, join, normalize } from "node:path"
+import { join } from "node:path"
 
+import { SRV } from "spell/server"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import type { PackedPackage, PublishCheck } from "spell/cli/publish"
 
@@ -111,12 +111,14 @@ export class ScratchInstall {
       .reduce((sum, count) => sum + count, 0)
     if (definitions !== 1) throw new Error(`the built page defines DOMElement ${definitions} times`)
 
-    const { server, url } = await serveFolder(built)
+    // the kit's own web server, on a free port (epic `coherence` P29:  its own little server before)
+    const server = new SRV.WebServer({ mounts: [{ prefix: "/", dir: built }] })
+    const { url } = await server.listen({ port: 0 })
     try {
       return await BrowserPage.with(async (browser) => {
         const errors: string[] = []
         const onProblem = (text: string) => errors.push(text)
-        const tab = await BrowserPage.open(browser, url, { onProblem, consoleTypes: [], settle: false })
+        const tab = await BrowserPage.open(browser, `${url}/`, { onProblem, consoleTypes: [], settle: false })
         await tab.waitForFunction(() => (window as unknown as { scratchResult?: unknown }).scratchResult, null, {
           timeout: 20_000
         })
@@ -126,7 +128,7 @@ export class ScratchInstall {
         return `<ui-button> defined, extends the page's DOMElement, drew ${result.drawn};  1 class DOMElement`
       })
     } finally {
-      server.close()
+      await server.close()
     }
   }
 
@@ -212,35 +214,6 @@ try {
   report({ defined: false, oneBase: false, drawn: "", error: String(error) })
 }
 `
-
-/** Serve `dir`'s files on a free port of this machine;  the server and its address. */
-function serveFolder(dir: string): Promise<{ server: Server; url: string }> {
-  const server = createServer((request, response) => {
-    const path = normalize(join(dir, decodeURIComponent((request.url ?? "/").split("?")[0]!)))
-    const file = path.endsWith("/") ? join(path, "index.html") : path
-    if (!file.startsWith(dir) || !existsSync(file)) {
-      response.writeHead(404).end()
-      return
-    }
-    response.writeHead(200, { "content-type": CONTENT_TYPES[extname(file)] ?? "application/octet-stream" })
-    response.end(readFileSync(file))
-  })
-  return new Promise((resolve) =>
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address() as { port: number }
-      resolve({ server, url: `http://127.0.0.1:${address.port}/` })
-    })
-  )
-}
-
-/** Content types the scratch page's files need. */
-const CONTENT_TYPES: Record<string, string> = {
-  ".html": "text/html",
-  ".js": "text/javascript",
-  ".css": "text/css",
-  ".svg": "image/svg+xml",
-  ".json": "application/json"
-}
 
 /** Write `value` as JSON. */
 function writeJson(file: string, value: unknown): void {

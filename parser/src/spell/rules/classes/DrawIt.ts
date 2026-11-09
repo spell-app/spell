@@ -138,6 +138,15 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
   }
 
   /**
+   * SIDE EFFECT:  a slot's drawing is its type's before its line parses, from the scan of a file's methods
+   * (`SP.SpellParser.stubDeclaredMethods()`):  so a drawing above it can draw it by any name,
+   * `draw the results of it` (`draw_slot_of`, epic `data` I94).
+   */
+  callAhead(match: P.MatchFor<this>) {
+    this.mutateScope(match)
+  }
+
+  /**
    * What drawing `scope` is in:  `{ drawing, slot }` for a `draw_it`'s body (`slot` for a slot's),
    * `{ drawing: "draw" }` for a method named `draw` (English's `to draw it:`) -- `undefined` anywhere else.
    * - Its nearest method's, so a line inside an `if` in a drawing is in the drawing.
@@ -160,7 +169,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
   }
 
   /** Is `scope` a loop's body, `for each ...`'s or `repeat ...`'s -- see `SpellStatement.loops`? */
-  private static isLoop(scope: P.MethodScope): boolean {
+  static isLoop(scope: P.MethodScope): boolean {
     return (scope.declaredBy?.rule as { loops?: boolean } | undefined)?.loops === true
   }
 
@@ -211,8 +220,11 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
       itDatatype: SP.typeName(type.name),
       declaredBy: match
     })
-    // the item by its type's name, `the card`, and by the language's word for it, `el elemento`
-    const names = [typeof itemType === "string" ? P.instanceCase(itemType) : undefined, DrawIt.itemWordOf(match)]
+    // the item by its type's name, `the card`, and by the language's word for it, `el elemento`:
+    // only `to draw each item`'s, which has an item -- `para dibujar eso`'s last word is the thing itself (T64)
+    const names = isEachItem
+      ? [typeof itemType === "string" ? P.instanceCase(itemType) : undefined, DrawIt.itemWordOf(match)]
+      : []
     for (const name of new Set(names)) {
       if (!name || name === ITEM) continue
       scope.variables.add({ name, output: ITEM, isAlias: true, datatype: itemType, declaredBy: match })

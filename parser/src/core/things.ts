@@ -20,6 +20,7 @@ import { View } from "./classes/View"
 import { Page } from "./classes/Page"
 import { TwoSidedView } from "./classes/TwoSidedView"
 import { Notebook } from "./classes/Notebook"
+import { Site } from "./classes/Site"
 import { ViewableList } from "./classes/ViewableList"
 
 /**
@@ -169,6 +170,8 @@ export class ThingRegistry {
    *   so one shows before that.
    * - A later class of the same name wins, e.g. the next run's `Card`.
    *   `@thing`'s wrapper keeps the name of the class it wraps:  the wrapper wins, as it's what the program makes.
+   *   - EXCEPT a class that one extends (epic `language` P26):  the cards library's `Card` never replaces Solitaire's
+   *     `Card`, which extends it, whatever order they're added in -- see `core.classToMake()`.
    * - Not a `Thing` or `List` class, e.g. a plain one:  ignored.
    */
   addClass(Class: ThingClass): void {
@@ -177,6 +180,7 @@ export class ThingRegistry {
     for (let at = Class; isProgramClass(at); at = Object.getPrototypeOf(at) as ThingClass) {
       if (named.has(at.name)) continue
       named.add(at.name)
+      if (this.classes.get(at.name)?.prototype instanceof at) continue
       this.classes.set(at.name, at)
     }
   }
@@ -453,7 +457,7 @@ export class ThingRegistry {
 }
 
 /** The built-in classes a program's classes extend -- see `classNamed()`. */
-const BUILT_IN_CLASSES: ThingClass[] = [Thing, List, App, View, Page, TwoSidedView, Notebook, ViewableList]
+const BUILT_IN_CLASSES: ThingClass[] = [Thing, List, App, View, Page, TwoSidedView, Notebook, Site, ViewableList]
 
 /** Prototypes of the built-in types a program's types extend -- where `propertiesOf()` stops. */
 const BASE_PROTOTYPES: object[] = BUILT_IN_CLASSES.map((Class) => Class.prototype)

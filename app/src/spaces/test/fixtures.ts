@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
 import JSON5 from "json5"
 import { basename, resolve } from "path"
 
@@ -57,8 +57,14 @@ export const EXAMPLES_GROUP = "@spell/examples"
 /** The Spell guides' group, `@spell/guides`:  where `GUIDE_PROJECTS` are read from. */
 export const GUIDES_GROUP = "@spell/guides"
 
-/** Every group a test project is in:  the fixtures', the examples', the Spell guides'. */
-const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
+/**
+ * Spell UI's component notebooks' group, `@spell/notebooks`:  read only as an example imports one, never tested on
+ * their own here (epic `mockup` P1:  the Spell UI site imports four).
+ */
+export const NOTEBOOKS_GROUP = "@spell/notebooks"
+
+/** Every group a test project is in, or one imports:  the fixtures', the examples', the Spell guides', the notebooks'. */
+const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP, NOTEBOOKS_GROUP]
 
 /**
  * Every built-in example, by its name with its group:  `@spell/examples/Solitaire` (epic `spanish` P21).
@@ -154,11 +160,14 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "counter",
   "counter-app",
   "fizzbuzz",
+  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40):  Task List names the Atmosphere too
+  "kept-in-places",
   "lists-from-zero",
   "people",
   "sending-events",
   `${EXAMPLES_GROUP}/Solitaire`,
-  `${EXAMPLES_GROUP}/TaskList`,
+  // a list of things each drawn with a form of its own;  Task List was this one until its tasks moved into places (epic `language` P30)
+  `${EXAMPLES_GROUP}/habit-tracker`,
   "thing-references"
 ])
 
@@ -263,7 +272,7 @@ export function fixtureWords(projectName: TestProjectName, lang = fixtureLanguag
  * - Against the projects it imports, e.g. `counter-app` the counter library, `@spell/test/counter`:
  *   - their declarations, as a compiled import's (see `fixtureImportScope()`)
  *   - NOT their code:  that's theirs
- * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would.
+ * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would (`SP.SpellProject.writerOptionsFor()`).
  * - `target`'s writer writes it, `js/solid`'s by default -- or `target` itself, a writer.
  * - `draws`:  does it hold a drawing -- see `SP.SpellProject.draws()`.
  */
@@ -278,10 +287,13 @@ function compileFixture(
   const sources = loadFixtureProject(projectName)
   // each file's language, by its name:  `Carta.es.spell` is Spanish (epic `spanish` P19)
   const languages = [...new Set(sources.map(({ path }) => SP.Language.forFile(path).lang))]
-  const { scope, files } = parseSpellProject(sources, { parentScope })
+  // at its own address, as the editor compiles it:  a line may read it (`a sheet at "tasks.csv"`, its own CSV file)
+  // - a frozen fixture's too, `@spell/test/kept-in-places`, not its bare name (epic `data` P40)
+  const { scope, files } = parseSpellProject(sources, { parentScope, projectPath: fixtureProjectId(projectName) })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
-    .filter(({ path, active }) => active !== false && /\.(spell|spellml|spellx|css)$/.test(path))
+    // never a property editors file, `Card.editor.spellml` (epic `editor` P25):  it isn't compiled
+    .filter(({ path, active }) => active !== false && (SP.isSpellSourceName(path) || path.endsWith(".css")))
     .map(({ path }) => {
       if (path.endsWith(".css")) return compiledCSS(readFileSync(resolve(projectDir, `.${path}`), "utf8"))
       const file = files.find((it) => it.path === path)!
@@ -294,7 +306,15 @@ function compileFixture(
     ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
     : undefined
   const combine = () =>
-    scope.parser!.inPlay(() => SP.SpellProject.combineCompiled(parts, writer, importLines, scope, { listsStartAt }))
+    scope.parser!.inPlay(() =>
+      SP.SpellProject.combineCompiled(
+        parts,
+        writer,
+        importLines,
+        scope,
+        SP.SpellProject.writerOptionsFor({ exports, listsStartAt, version })
+      )
+    )
   const marked = errors.join("") + (sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()) + "\n"
   const split = SP.SpellDeclarations.split(marked, scope, { version, exports, languages })
   const mapped = sourceMarks?.extract(split.code, {
@@ -416,6 +436,25 @@ export function loadCodeSpellTwin(projectName: TestProjectName): SpellSourceFile
     const path = file.path.replace(/(ml|x)$/, "")
     return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, bareNameOf(projectName), `.${path}`), "utf8") }
   })
+}
+
+/**
+ * Write test project `projectName` into folder `dir` as CODE spell:  `copyFixtureProject()`,
+ * each `.spellml` file as its code-spell twin (`loadCodeSpellTwin()`), the project file listing the twins.
+ * - For a test of code spell itself on a whole example written in spellx (the language server's, on Solitario).
+ * - SIDE EFFECT:  makes `dir`.
+ */
+export function copyCodeSpellTwin(projectName: TestProjectName, dir: string): void {
+  copyFixtureProject(projectName, dir)
+  for (const { path, contents } of loadCodeSpellTwin(projectName)) writeFileSync(resolve(dir, `.${path}`), contents)
+  const projectFile = resolve(dir, basename(projectFileFor(fixtureFolder(projectName))))
+  const project = readProjectFile(dir)
+  const imports = project.imports.map((it) => {
+    if (!SP.isSpellmlName(it.path)) return it
+    rmSync(resolve(dir, `.${it.path}`), { force: true })
+    return { ...it, path: it.path.replace(/(ml|x)$/, "") }
+  })
+  writeFileSync(projectFile, JSON.stringify({ ...project, imports }, undefined, 2))
 }
 
 /**

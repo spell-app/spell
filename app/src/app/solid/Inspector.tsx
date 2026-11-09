@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
+import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { setDebugGlobal, upperFirst } from "spell/util"
@@ -11,6 +11,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
+import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 // By file:  a click's rule is all this needs
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -21,20 +22,36 @@ import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
-import { CodeBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
+import {
+  CodeBand,
+  InspectorCard,
+  WrittenCode,
+  InspectorViews,
+  TypeActionsCard,
+  TypeEventsCard,
+  TypeTestsCard,
+  appParts
+} from "./InspectorParts"
 import {
   eventsDeclared,
   handlerPlacesInSource,
   handlersInSource,
   newEventIn,
+  oneOfAt,
+  startingValues,
+  oneOfWritten,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
+  propertyCodePlace,
+  testsDeclared,
   propertyEditorInSource,
+  withClassNames,
   type CodePlace,
   type SourceFile,
   type WrittenEvent
 } from "./InspectorSource"
-import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { InspectorData } from "./InspectorData"
+import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
@@ -177,12 +194,12 @@ export class Inspector {
   }
 
   /** Is card `panel` folded to its header (reactive)? */
-  static isFolded(panel: InspectorPanel): boolean {
+  static isFolded(panel: InspectorCardId): boolean {
     return foldedPanels().includes(panel)
   }
 
   /** Fold card `panel` to its header, or unfold it;  remember which. */
-  static toggleFolded(panel: InspectorPanel): void {
+  static toggleFolded(panel: InspectorCardId): void {
     const folded = foldedPanels()
     const next = folded.includes(panel) ? folded.filter((each) => each !== panel) : [...folded, panel]
     setFoldedPanels(next)
@@ -227,7 +244,9 @@ export class Inspector {
     setTrail(steps)
     clicks.pivot = element
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), steps)
-    PartSelector.markSelected(element ? [(part && Inspector.outlinedElement(steps, part)) || element] : [])
+    // a thing the trail leads to that nothing draws (the deck):  nothing outlined, never the part it's reached from
+    const outlined = element && (part && steps.length ? Inspector.outlinedElement(steps, part) : element)
+    PartSelector.markSelected(outlined ? [outlined] : [])
     if (element) Inspector.rememberSelection([element])
   }
 
@@ -370,7 +389,7 @@ export class Inspector {
     return {
       element: Inspector.elementDrawing(value),
       value,
-      schema: ClassSchemas.fromClass(value.constructor),
+      schema: ClassSchemas.fromClass(value.constructor, Inspector.programRoot),
       label: crumbs.at(-1)!.label,
       crumbs
     }
@@ -426,7 +445,7 @@ export class Inspector {
     if (!base) return undefined
     let value = base.value
     for (const step of steps) value = stepInto(value, step) ?? value
-    return (value !== base.value && Inspector.elementDrawing(value)) || base.element
+    return value === base.value ? base.element : Inspector.elementDrawing(value)
   }
 
   /** The element in the app that draws `thing`, if one does. */
@@ -492,9 +511,36 @@ export class Inspector {
     const found = [remembered ?? []].flat().flatMap((address) => Inspector.elementAt(address, rows) ?? [])
     // the trail from it too, as it was left
     const steps = (editorPrefs.get(Inspector.projectPref(TRAIL_PREF)) as string[] | undefined) ?? []
-    if (found.length > 1) Inspector.selectAll(found)
-    else if (found.length) Inspector.select(found[0], { trail: steps })
+    if (found.length > 1) return Inspector.selectAll(found)
+    if (found.length) return Inspector.select(found[0], { trail: steps })
+    // a part no row holds (a button in a drawn thing's own drawing):  the element drawn again from the same place
+    const redrawn = parts.flatMap((part) =>
+      part.element.isConnected ? part.element : (Inspector.redrawnElement(part.element) ?? [])
+    )
+    if (redrawn.length > 1) Inspector.selectAll(redrawn)
+    else if (redrawn.length) Inspector.select(redrawn[0], { trail: steps })
     else if (parts.length) Inspector.select(undefined)
+  }
+
+  /**
+   * The element a redraw put in place of `gone`, drawn from the same place in the code:  `undefined` if the part is gone.
+   * - A drawn thing:  the element drawing the same thing (a live edit keeps the things).
+   * - A plain tag (a button in a card's own drawing):  the tag drawn from the same place, in the same thing's drawing,
+   *   found again by that thing if its element was drawn again too.
+   */
+  private static redrawnElement(gone: Element): Element | undefined {
+    const thing = SpellElement.thingOf(gone)
+    if (thing) return Inspector.elementDrawing(thing)
+    const place = writtenKeyOf(gone)
+    const area = appArea
+    if (!place || !area) return undefined
+    const host = (gone.getRootNode() as ShadowRoot).host as Element | undefined
+    const hostThing = host && SpellElement.thingOf(host)
+    const newHost = host?.isConnected ? host : hostThing ? Inspector.elementDrawing(hostThing) : undefined
+    const where: ParentNode = newHost?.shadowRoot ?? area
+    return drawnElementsIn(where).find(
+      (element) => element.localName === gone.localName && writtenKeyOf(element) === place
+    )
   }
 
   /**
@@ -575,13 +621,20 @@ export class Inspector {
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
+   * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
+   *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
     const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
+    const letGo = (event: MouseEvent) => {
+      if (!event.defaultPrevented && !isInspecting() && Inspector.allSelected.length) Inspector.letGo()
+    }
+    area.addEventListener("click", letGo)
     return () => {
+      area.removeEventListener("click", letGo)
       stopEditing()
       if (appArea !== area) return
       setArea(undefined)
@@ -682,9 +735,10 @@ export class Inspector {
   /**
    * Where `element`'s event or ability `row` is written:  its file and lines, for its code to be edited there
    * (epic `editor`, Events In Code);  `undefined` if it can't be found.
-   * - A drawn thing's:  in its type, or a type it inherits, where the compiler says it's declared
-   *   (`placeOfDeclaredEvent()`).
-   * - A Spell UI element's (`row.key`, its DOM event):  the line holding its `onClick={...}` (`handlerPlacesInSource()`).
+   * - A drawn thing's:  in its type, or a type it inherits,
+   *   where the compiler says it's declared (`placeOfDeclaredEvent()`).
+   * - A Spell UI element's (`row.key`, its DOM event):
+   *   the line holding its `onClick={...}` (`handlerPlacesInSource()`).
    */
   static placeOfEvent(element: Element, row: WrittenEvent & { key?: string }): SlicePlace | undefined {
     const thing = SpellElement.thingOf(element)
@@ -707,6 +761,87 @@ export class Inspector {
   }
 
   /**
+   * The thing whose TYPE the side bar is editing (epic `editor` P23, Q29):  what's inspected, a thing, while its
+   * changes apply to all of its type (`scopeOf()`, All Cards);  `undefined` otherwise.
+   * - Then the properties card edits the type's fields, and its events, actions and tests are cards of their own.
+   */
+  static get typeEdited(): object | undefined {
+    const part = Inspector.inspected
+    if (!part || part.layout || !isThing(part.value) || part.crumbs.length > 1) return undefined
+    return Inspector.scopeOf(part) === "all" ? part.value : undefined
+  }
+
+  /** `thing`'s type's abilities and events, as `writtenEventsOf()` says a drawn thing's:  for its type's Events card. */
+  static eventsOfType(thing: object): WrittenEvent[] {
+    return eventsDeclared(classNamesOf(thing), declarationPlaces(), sourceFiles())
+  }
+
+  /** Where `thing`'s type's event or ability `row` is written (`placeOfEvent()`, for a thing). */
+  static placeOfTypeEvent(thing: object, row: Pick<WrittenEvent, "words">): SlicePlace | undefined {
+    return sliceOf(placeOfDeclaredEvent(row, classNamesOf(thing), declarationPlaces(), sourceFiles()))
+  }
+
+  /**
+   * `thing`'s type's tests (`<test "card setup">`), each its words, compiled name and where its code is:
+   * those written in its type's own lines (`testsDeclared()`), its own type's and those it inherits.
+   */
+  static testsOf(thing: object): { words: string; output?: string; place?: SlicePlace }[] {
+    return classNamesOf(thing).flatMap((name) =>
+      testsDeclared(name, declarationPlaces(), sourceFiles()).map((test) => ({ ...test, place: sliceOf(test.place) }))
+    )
+  }
+
+  /**
+   * How `thing`'s type writes its property `name` (its compiled name), for the All Cards fields (epic `editor` P23, Q29):
+   * - `spell`:  where the Spell that works it out is (`<property "name">its rank + ...</>`), to show and edit there
+   * - `oneOf`:  its values, as its `one-of` says them (`ace, 2 ... 10, jack ...`)
+   * - `undefined`:  the program doesn't declare it, e.g. a built-in type's
+   */
+  static propertyWritten(
+    thing: object,
+    name: string
+  ): { spell?: SlicePlace; oneOf?: NonNullable<ReturnType<typeof oneOfAt>> & { path: string } } | undefined {
+    const files = sourceFiles()
+    const key = name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
+    for (const type of classNamesOf(thing)) {
+      for (const place of declarationPlaces()) {
+        if (place.kind !== "property" || place.of !== type) continue
+        if ((place.output ?? place.name).toLowerCase().replace(/[^\p{L}\p{N}]/gu, "") !== key) continue
+        const lines = files.find((file) => file.path === place.path)?.text.split("\n")
+        if (!lines) return undefined
+        const oneOf = oneOfAt(place, lines)
+        return { spell: sliceOf(propertyCodePlace(place, lines)), oneOf: oneOf && { ...oneOf, path: place.path } }
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * What a new thing of the type `classNames` names must be told to draw (`startingValues()`):  `[]` for none.
+   * - `classNames`:  its type's compiled name, then those it inherits, its own first.
+   */
+  static startingValuesOf(classNames: readonly string[]): { words: string; value: string }[] {
+    return startingValues(classNames, declarationPlaces(), sourceFiles())
+  }
+
+  /**
+   * Write `values` as `thing`'s type's property `name`'s `one-of`, as a step of `editor.history`:
+   * All Cards' rank, its values as pills (Q29).
+   * - Nothing happens when it has no `one-of` written, or the values are the same.
+   */
+  static writeOneOf(thing: object, name: string, values: readonly string[]): void {
+    const oneOf = Inspector.propertyWritten(thing, name)?.oneOf
+    const file = oneOf && sliceOf({ path: oneOf.path, from: oneOf.line + 1, to: oneOf.line + 1 })?.file
+    if (!oneOf || !file || !values.length) return
+    const text = file.contents ?? ""
+    const before = text.split("\n")[oneOf.line]!.slice(oneOf.from, oneOf.to)
+    const after = oneOfWritten(values, oneOf.isOr)
+    if (before === after) return
+    const at = SourceEdits.offsetAt(text, { line: oneOf.line, character: oneOf.from })
+    editor.history.change({ file, at, before, after }, { title: InspectorWrites.titleOf(name) })
+  }
+
+  /**
    * A drawn thing's abilities and events, in its program's own words, each with its code (epic `debut` P28):
    * `it can give up a card if` (`the card is face up`), `on click` (`play it`).
    * - Where the compiler says its type and those it inherits declare them (`eventsDeclared()`).
@@ -721,18 +856,48 @@ export class Inspector {
   }
 
   /**
-   * The property editor `thing`'s type was written with, its markup (epic `debut` I86):  its `<property-editor>`,
-   * else the one of a type it inherits;  `""` if none, and the Inspector draws its bands.
-   * - Read from the program's spell as it is now, so an edit shows once the app runs again.
+   * The property editor `thing`'s type was written with, its markup (epic `debut` I86):
+   * its `<spell-property-editor>` (or the old short `<property-editor>`), else the one of a type it inherits;
+   * `""` if none, and the Inspector draws its bands.
+   * - Its own file first, `Card.editor.spellml` or `Solitaire.editors.spellml` (epic `editor` P25),
+   *   then inline in the type's spellml.
+   * - Read from the program's files as they are now, so an edit shows once the app runs again.
+   * - A built-in template's property, named in the program's language (`name="dirección"`):
+   *   named as its class names it, so it's bound to the thing (`withClassNames()`;  epic `language` T73).
    */
   static ownEditorOf(thing: object): string {
-    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
-    const words = [...SP.Language.all.values()].flatMap((language) =>
-      Object.entries(language.words.spellx?.notes ?? {})
+    const project = editor.project
+    const sources = project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const editors =
+      project?.files.filter((file) => SP.isPropertyEditorsName(file.path)).map((file) => file.contents ?? "") ?? []
+    const words = [...SP.Language.all.values()].flatMap((language) => {
+      const spellx = language.words.spellx
+      const shortWords = Object.entries(spellx?.notes ?? {})
         .filter(([, kind]) => kind === "property editor")
         .map(([word]) => word)
-    )
-    return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words)
+      // the prefixed tag first, `<spell-property-editor>`;  then the old short one, `<property-editor>` (epic `data` P31)
+      return [...shortWords.map((word) => `${spellx!.prefix}-${word}`), ...shortWords]
+    })
+    const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
+    const root = Inspector.programRoot
+    if (!markup || !root) return markup
+    const said = ClassSchemas.templateWordsOf(thing.constructor, root)
+    return withClassNames(markup, new Map([...said].map(([name, words]) => [words.name, name])))
+  }
+
+  /**
+   * The root scope of the program the editor has, in its languages (`SP.Language.rootScopeFor()`):
+   * what its built-in templates' properties and values are called there.
+   * - `undefined`:  no program, or one whose files name a language spell doesn't read.
+   */
+  static get programRoot(): P.Scope | undefined {
+    const project = editor.project
+    if (!project) return undefined
+    try {
+      return SP.Language.rootScopeFor(project.languages)
+    } catch {
+      return undefined
+    }
   }
 
   /** Is `element` a drawn spell thing (`<solitaire-card>`), not a Spell UI element? */
@@ -804,6 +969,8 @@ export class Inspector {
    * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
    */
   static fieldWritten(part: Inspected, name: string, value: unknown): void {
+    // a value kept in a place is the program's data, never the source's:  its change is held until it's committed
+    if (!part.layout && InspectorData.isKeptInPlace(part.value, name)) return
     const each = part.together ?? [part]
     const whys = editor.history.transaction(
       InspectorWrites.titleOf(name),
@@ -858,12 +1025,36 @@ export class Inspector {
     return ClassSchemas.fromClass(thing.constructor).attributes.map((attribute) => attribute.name)
   }
 
-  /** Where each of `part`'s fields comes from, for its `<ui-property-editor>`. */
+  /**
+   * Where each of `part`'s fields comes from, for its `<ui-property-editor>`.
+   * - A thing's value kept in a data place, or worked out from one, says so over what the code says (epic `editor` P26).
+   */
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
     const names = part.layout
       ? [...part.layout.set, ...part.layout.more].map((field) => field.name)
       : Inspector.storedNamesOf(part.value)
-    return InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    if (part.layout) return origins
+    for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
+      const origin = InspectorData.originOf(part.value, name)
+      if (origin) origins[name] = InspectorData.propertyOrigin(origin)
+    }
+    return origins
+  }
+
+  /** The names of `thing`'s stored properties, which a data place may keep:  for `<DataSourceNote>`. */
+  static dataNamesOf(thing: object): string[] {
+    return Inspector.storedNamesOf(thing)
+  }
+
+  /** The names of `thing`'s computed properties, as the running program knows them:  shown read only. */
+  private static computedNamesOf(thing: object): string[] {
+    const things = runtimeCore()?.things
+    if (!things || !isThing(thing)) return []
+    return things
+      .propertiesOf(thing as never)
+      .filter((property) => property.computed)
+      .map((property) => property.name)
   }
 
   /** Seen from "all of them", can nothing of `part`'s change?  Each one's values come from the code that makes it. */
@@ -881,6 +1072,15 @@ export class Inspector {
 
   /** The field's code button:  show where its value comes from. */
   static fieldCode(part: { element?: Element; value: object }, name: string): void {
+    // kept in a data place, or worked out from one:  the line that declares it
+    const declaredAt = InspectorData.originOf(part.value, name)?.declaredAt
+    if (declaredAt) {
+      // its name in the project, as `showCode()` finds a file:  a line in another project isn't shown
+      const project = `${editor.project?.path ?? ""}/`
+      const file = declaredAt.path.startsWith(project) ? declaredAt.path.slice(project.length) : declaredAt.path
+      void Inspector.showCode({ reason: "expression", file, span: { start: declaredAt.start, end: declaredAt.end } })
+      return
+    }
     const why = InspectorWrites.written(
       part,
       name,
@@ -891,10 +1091,10 @@ export class Inspector {
   }
 
   /**
-   * Add DOM event `event` (`click`) to `element`:  an empty handler, written in its place in the program, as a step of
-   * `editor.history` (epic `editor`, Events In Code).
-   * - A drawn thing's:  in its own type, `- on click:` after its outline header's lines (`a card:`), else
-   *   `<on click>` ... `</on>` before its tag's end.
+   * Add DOM event `event` (`click`) to `element`:  an empty handler, written in its place in the program,
+   * as a step of `editor.history` (epic `editor`, Events In Code).
+   * - A drawn thing's:  in its own type, `- on click:` after its outline header's lines (`a card:`),
+   *   else `<on click>` ... `</on>` before its tag's end.
    * - A Spell UI element's:  `onClick={}` on its tag.
    * - Its row then shows with the cursor in its code (`Inspector.justAdded`).
    * - Nothing happens where it can't be written:  an element with no place in the program.
@@ -932,7 +1132,7 @@ export class Inspector {
       return {
         element,
         value: thing,
-        schema: ClassSchemas.fromClass(thing.constructor),
+        schema: ClassSchemas.fromClass(thing.constructor, Inspector.programRoot),
         label: Inspector.labelFor(element)
       }
     }
@@ -948,9 +1148,10 @@ export class Inspector {
         layout: {
           // its text, when it holds only text:  a button's words aren't an attribute
           hasText: element.childElementCount === 0 && !!element.textContent?.trim(),
+          // a value the program's `<ui-defaults>` gives it shows among those it sets (epic `language` P29)
           ...withPositionsBesideTheirs(
-            fields.filter((field) => element.hasAttribute(field.name)),
-            fields.filter((field) => !element.hasAttribute(field.name))
+            fields.filter((field) => element.hasAttribute(field.name) || !!defaultsFileOf(element, field.name)),
+            fields.filter((field) => !element.hasAttribute(field.name) && !defaultsFileOf(element, field.name))
           )
         }
       }
@@ -1027,6 +1228,13 @@ function writtenKeyOf(element: Element): string | undefined {
 /** Can a click in the app select `element`, with no Alt held -- see `PartSelector.partAt()`? */
 function isSelectablePart(element: Element): boolean {
   return !!SpellElement.thingOf(element) || isClickableTag(element) || hasOwnHandler(element)
+}
+
+/** Every element under `root`, in document order, through drawn things' shadow roots. */
+function drawnElementsIn(root: ParentNode): Element[] {
+  return [...root.querySelectorAll("*")].flatMap((element) =>
+    element.shadowRoot ? [element, ...drawnElementsIn(element.shadowRoot)] : [element]
+  )
 }
 
 /** Where a part is written:  its thing's making, else its drawn tag -- see `Inspector.writtenPlaceOf()`. */
@@ -1205,6 +1413,18 @@ export const INSPECTOR_PANELS = ["properties", "views"] as const
 export type InspectorPanel = (typeof INSPECTOR_PANELS)[number]
 
 /**
+ * The cards of a TYPE, under what's selected while a change applies to all of its type (All Cards;  epic `editor` P23):
+ * its events, its actions and its tests, each a card of its own, resizable (Owen:  "make Events, Actions, Tests separate
+ * panes so they can be resized").
+ * - Not in the menu of cards:  they show and go with the switch (`Inspector.typeEdited`).
+ */
+export const TYPE_PANES = ["events", "actions", "tests"] as const
+/** One of a type's cards. */
+export type TypePane = (typeof TYPE_PANES)[number]
+/** Any of the Inspector's cards. */
+export type InspectorCardId = InspectorPanel | TypePane
+
+/**
  * The cards showing, in order (remembered:  `PANELS_PREF`).
  * - A card remembered that's gone (Events) is dropped, so an old pref hides nothing.
  */
@@ -1212,14 +1432,17 @@ const [shownPanels, setShownPanels] = createSignal<readonly InspectorPanel[]>(
   knownPanels(editorPrefs.get(PANELS_PREF)) ?? INSPECTOR_PANELS
 )
 /** The cards folded to their headers (remembered:  `FOLDED_PANELS_PREF`). */
-const [foldedPanels, setFoldedPanels] = createSignal<readonly InspectorPanel[]>(
-  knownPanels(editorPrefs.get(FOLDED_PANELS_PREF)) ?? []
+const [foldedPanels, setFoldedPanels] = createSignal<readonly InspectorCardId[]>(
+  knownPanels(editorPrefs.get(FOLDED_PANELS_PREF), [...INSPECTOR_PANELS, ...TYPE_PANES]) ?? []
 )
 
 /** The cards a pref names that are still cards:  `undefined` if it names none. */
-function knownPanels(remembered: unknown): InspectorPanel[] | undefined {
+function knownPanels<Card extends InspectorCardId = InspectorPanel>(
+  remembered: unknown,
+  cards: readonly Card[] = INSPECTOR_PANELS as readonly InspectorCardId[] as readonly Card[]
+): Card[] | undefined {
   if (!Array.isArray(remembered)) return undefined
-  return remembered.filter((panel): panel is InspectorPanel => (INSPECTOR_PANELS as readonly string[]).includes(panel))
+  return remembered.filter((panel): panel is Card => (cards as readonly string[]).includes(panel))
 }
 
 /**
@@ -1348,6 +1571,23 @@ let appArea = import.meta.hot?.data.appArea as HTMLElement | undefined
 const [areaMoved, setAreaMoved] = createSignal(0)
 
 /** Watch `area` from now on (`undefined`:  none), and tell its reactive readers. */
+/**
+ * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:  `""` when it's all inside, or
+ * there's no area.
+ * - An upright box only:  a turned one is left whole.
+ */
+function clipToArea(box: { left: number; top: number; width: number; height: number }): string {
+  const area = appArea?.getBoundingClientRect()
+  if (!area) return ""
+  const cut = [
+    area.top - box.top,
+    box.left + box.width - area.right,
+    box.top + box.height - area.bottom,
+    area.left - box.left
+  ].map((each) => Math.max(0, each))
+  return cut.some((each) => each > 0) ? `inset(${cut.map((each) => `${each}px`).join(" ")})` : ""
+}
+
 function setArea(area: HTMLElement | undefined): void {
   appArea = area
   if (import.meta.hot) import.meta.hot.data.appArea = area
@@ -1358,7 +1598,7 @@ function setArea(area: HTMLElement | undefined): void {
 const [justAdded, setJustAdded] = createSignal("")
 
 /** Where an event's or action's code is:  its file, and its lines, 1-based (`Inspector.placeOfEvent()`). */
-export type SlicePlace = { file: SP.AnySpellFile; from: number; to: number; column?: number }
+export type SlicePlace = { file: SP.AnySpellFile; from: number; to: number; column?: number; endColumn?: number }
 
 /** The program's spell files, by the names the compiler's marks give them, with their text. */
 function sourceFiles(): SourceFile[] {
@@ -1410,7 +1650,9 @@ function marksPathOf(file: SP.AnySpellFile): string {
 /** `place`, with the file it names. */
 function sliceOf(place: CodePlace | undefined): SlicePlace | undefined {
   const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
-  return file && place ? { file, from: place.from, to: place.to, column: place.column } : undefined
+  return file && place
+    ? { file, from: place.from, to: place.to, column: place.column, endColumn: place.endColumn }
+    : undefined
 }
 
 /** A new event's words, as a drawn thing's type writes it:  `click` => `on click`, `dblclick` => `on double click`. */
@@ -1454,18 +1696,129 @@ function drawnBox(element: Element): DOMRect {
   return new DOMRect(left, top, right - left, bottom - top)
 }
 
+/**
+ * `box`, `out` px bigger all round, its edges moved to the nearest whole device pixel.
+ * - So a line drawn along its edges is as thick on every side:
+ *   at 1.5 device pixels a pixel, a 2px line on an edge at 307.75px came out thinner on that side.
+ */
+function snapped(box: DOMRect, out: number): DOMRect {
+  const scale = devicePixelRatio
+  const snap = (at: number) => Math.round(at * scale) / scale
+  const [left, top] = [snap(box.left - out), snap(box.top - out)]
+  const [right, bottom] = [snap(box.right + out), snap(box.bottom + out)]
+  return new DOMRect(left, top, right - left, bottom - top)
+}
+
+/**
+ * How `element` is drawn when something turns it:  its own size, and the matrix taking its box to the screen.
+ * - `undefined`:  nothing turns, scales or skews it;  its upright drawn box is where it is.
+ *   A move alone (`translate`) doesn't count.
+ * - Every transform from it up to the page counts, its own and each ancestor's, through shadow roots and slots:
+ *   anchor positioning and `getBoundingClientRect()` both give an upright box, which a tilted card isn't.
+ * - Only the turning, scaling and skewing are multiplied together (`linearTransformOf()`):
+ *   where the box lands comes from its drawn box, the bounds of the turned one.
+ *   So no offsets, scrolls or transform origins are walked.
+ * - A 3D transform counts as its flat part:  a perspective tilt comes out a little off.
+ */
+function turnedBox(element: Element): { width: number; height: number; matrix: DOMMatrix } | undefined {
+  let linear: DOMMatrix | undefined
+  for (let node: Element | undefined = element; node; node = flatParentOf(node)) {
+    const own = linearTransformOf(node)
+    if (own) linear = linear ? own.multiply(linear) : own
+  }
+  if (!linear || linear.isIdentity) return undefined
+  const { width, height } = untransformedSizeOf(element)
+  const corners = [
+    [0, 0],
+    [width, 0],
+    [0, height],
+    [width, height]
+  ].map(([x, y]) => linear.transformPoint({ x, y }))
+  const drawn = element.getBoundingClientRect()
+  const left = drawn.left - Math.min(...corners.map((corner) => corner.x))
+  const top = drawn.top - Math.min(...corners.map((corner) => corner.y))
+  return { width, height, matrix: new DOMMatrix([linear.a, linear.b, linear.c, linear.d, left, top]) }
+}
+
+/** `node`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
+function flatParentOf(node: Element): Element | undefined {
+  if (node.assignedSlot) return node.assignedSlot
+  if (node.parentElement) return node.parentElement
+  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+}
+
+/**
+ * How `node` itself turns, scales and skews what it draws:  its `rotate`, `scale` and `transform`, in that order,
+ * without their moves;  `undefined`:  it doesn't.
+ */
+function linearTransformOf(node: Element): DOMMatrix | undefined {
+  const style = getComputedStyle(node)
+  const steps: string[] = []
+  if (style.rotate !== "none") {
+    const words = style.rotate.split(" ")
+    const axis =
+      words.length === 2 ? { x: "1, 0, 0", y: "0, 1, 0", z: "0, 0, 1" }[words[0]!] : words.slice(0, 3).join(", ")
+    steps.push(words.length === 1 ? `rotate(${words[0]})` : `rotate3d(${axis}, ${words.at(-1)})`)
+  }
+  if (style.scale !== "none") {
+    const [x, y = x] = style.scale.split(" ")
+    steps.push(`scale(${x}, ${y})`)
+  }
+  if (style.transform !== "none") steps.push(style.transform)
+  if (!steps.length) return undefined
+  const { a, b, c, d } = new DOMMatrix(steps.join(" "))
+  return a === 1 && b === 0 && c === 0 && d === 1 ? undefined : new DOMMatrix([a, b, c, d, 0, 0])
+}
+
+/** `element`'s border box before any transform:  its laid-out size, to the fraction of a pixel. */
+function untransformedSizeOf(element: Element): { width: number; height: number } {
+  const style = getComputedStyle(element)
+  let width = parseFloat(style.width)
+  let height = parseFloat(style.height)
+  if (Number.isNaN(width) || Number.isNaN(height)) {
+    return element instanceof HTMLElement
+      ? { width: element.offsetWidth, height: element.offsetHeight }
+      : element.getBoundingClientRect()
+  }
+  if (style.boxSizing !== "border-box") {
+    const sum = (...names: string[]) =>
+      names.reduce((total, name) => total + parseFloat(style.getPropertyValue(name)), 0)
+    width += sum("padding-left", "padding-right", "border-left-width", "border-right-width")
+    height += sum("padding-top", "padding-bottom", "border-top-width", "border-bottom-width")
+  }
+  return { width, height }
+}
+
+/**
+ * The element that draws `element`'s box:  itself, or, when it has none of its own (`display: contents`),
+ * the one box its shadow root draws;  `undefined`:  several, or none.
+ */
+function boxDrawerOf(element: Element): Element | undefined {
+  const own = element.getBoundingClientRect()
+  if (own.width || own.height || !element.shadowRoot) return element
+  const drawers = [...element.shadowRoot.children].filter((child) => {
+    const box = child.getBoundingClientRect()
+    return box.width || box.height
+  })
+  return drawers.length === 1 ? drawers[0] : undefined
+}
+
 /** Does `element` itself listen for an event through Solid (`onClick` ...)? */
 function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
 }
 
-/** The marks that ring a part, by its own `::after` (`Inspector.css`):  under the pointer, and selected. */
+/** The mark that rings the part under the pointer, by its own `::after` (`Inspector.css`). */
 const HOVER_MARK = "data-inspect-hover"
-const SELECTED_MARK = "data-inspect-selected"
+/** How far that ring is outside the part, in CSS px (`Inspector.css`). */
+const RING_OUT = 3
+/**
+ * How far the marching ants' box is outside what's selected, in CSS px:
+ * its line is 1px to 3px out (`Inspector.css`).
+ */
+const ANTS_OUT = 5
 /** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
 const INSPECTING_MARK = "data-inspecting"
-/** A ringed part that is its own ring's containing block (a transform):  its ring is inset from its own box. */
-const INSET_MARK = "data-inspect-inset"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
@@ -1475,14 +1828,17 @@ const CONTROL_ICON = "square outline"
  * ### `PartSelector`
  * The Inspector's hands in the app:  the rings, and the listeners that select.
  * - Plain DOM, no Solid.
- * - The RINGS are the part's own (epic `debut` P32):  marked `data-inspect-hover` / `data-inspect-selected`, its
- *   `::after` draws a ring 3px outside it, pinned by CSS anchor positioning (`Inspector.css`):
+ * - What a click would select:  a dashed RING, the part's own (epic `debut` P32), marked `data-inspect-hover`;
+ *   its `::after` draws it 3px outside the part, pinned by CSS anchor positioning (`Inspector.css`):
  *   the browser keeps it on the part through scrolls and drags, and no parent that hides its overflow cuts it.
- *   - the HOVER ring:  what a click would select, dashed
- *   - the PICKED ring:  what's selected, solid
- * - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead, as before:
- *   no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
- *   or an `::after` of its own;  the selected box follows it each frame
+ *   - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead:
+ *     no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
+ *     an `::after` of its own, or a ring the browser didn't place (`isRingDrawn()`)
+ * - What's selected:  MARCHING ANTS, always a box on `<body>` (`.InspectorSelected`), following it each frame.
+ *   - On `<body>`, above everything, so they can invert the whole page under them:
+ *     a part's own `::after` blends only with what's inside the part's layer, and Chrome dropped even that
+ *     (Owen, 2026-11-07:  "The ants are not actually inverting")
+ *   - Upright, their edges are put on whole device pixels (`place()`), so the line is the same on every side.
  * - The listeners are on the app's area, capturing:  they see a click before the app does, and stop it.
  ****************/
 class PartSelector {
@@ -1651,36 +2007,32 @@ class PartSelector {
     else PartSelector.place(box, element)
   }
 
-  /**
-   * Keep `elements` ringed as selected;  any that can't draw a ring gets a box following it, each frame.
-   * - Each ring is scoped to its own part (`anchor-scope`, `Inspector.css`), so many can show at once.
-   */
+  /** Keep marching ants round each of `elements`:  a box on `<body>` each, following it every frame. */
   static markSelected(elements: readonly Element[]): void {
     PartSelector.selected = elements
-    for (const marked of document.querySelectorAll(`[${SELECTED_MARK}]`)) {
-      if (!elements.includes(marked)) PartSelector.unmark(SELECTED_MARK, marked)
-    }
-    const boxed = elements.filter((element) => !PartSelector.putRing(SELECTED_MARK, element))
     const boxes = PartSelector.selectedBoxes
-    while (boxes.length < boxed.length) {
+    while (boxes.length < elements.length) {
       const box = document.body.appendChild(document.createElement("div"))
       box.className = "InspectorBox InspectorSelected"
       boxes.push(box)
     }
-    boxes.slice(boxed.length).forEach((box) => PartSelector.place(box, undefined))
+    boxes.slice(elements.length).forEach((box) => PartSelector.place(box, undefined))
     const follow = () => {
       if (PartSelector.selected !== elements) return
-      boxed.forEach((element, index) => PartSelector.place(boxes[index]!, element.isConnected ? element : undefined))
-      if (boxed.length) requestAnimationFrame(follow)
+      elements.forEach((element, index) =>
+        PartSelector.place(boxes[index]!, element.isConnected ? element : undefined, ANTS_OUT)
+      )
+      if (elements.length) requestAnimationFrame(follow)
     }
     follow()
   }
 
   /**
    * Move ring `mark` to `element` (`undefined`:  off whatever has it):  true if `element` draws it itself,
-   * false if it can't (`canRing()`), so a box stands in.
-   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a flipped card) can't
-   *   anchor to itself, so its ring is 3px outside its own box instead (`INSET_MARK`).
+   * false if it can't (`canRing()`, `isRingDrawn()`), so a box stands in.
+   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a tilted card) can't
+   *   anchor to itself, so its ring falls back to 3px outside its own box (`Inspector.css`).
+   * - Fixed, its ring is drawn inside the nearest transformed ancestor, so it turns with the part.
    */
   private static ring(mark: string, element: Element | undefined): boolean {
     if (element?.hasAttribute(mark)) return true
@@ -1691,7 +2043,6 @@ class PartSelector {
   /** Take ring `mark` off `element`. */
   private static unmark(mark: string, element: Element): void {
     element.removeAttribute(mark)
-    if (!element.hasAttribute(HOVER_MARK) && !element.hasAttribute(SELECTED_MARK)) element.removeAttribute(INSET_MARK)
   }
 
   /** Put ring `mark` on `element`:  true if it draws it, false if it can't, so a box stands in. */
@@ -1700,16 +2051,23 @@ class PartSelector {
     if (!PartSelector.canRing(element)) return false
     element.setAttribute(mark, "")
     if (PartSelector.isRingDrawn(element)) return true
-    element.setAttribute(INSET_MARK, "")
-    if (PartSelector.isRingDrawn(element)) return true
     element.removeAttribute(mark)
-    element.removeAttribute(INSET_MARK)
     return false
   }
 
-  /** Does `element`'s ring take its place, a box round it:  its anchor found, or its inset applied? */
+  /**
+   * Is `element`'s ring drawn round it:  3px bigger than it all round?
+   * - Not when the browser couldn't anchor it to the part:  then each `anchor()` falls back, and the ring is
+   *   somewhere else, or as big as the window.
+   *   Safari 26 does that for a part inside a fixed or absolutely placed box (most of the app's), where Chrome doesn't.
+   */
   private static isRingDrawn(element: Element): boolean {
-    return parseFloat(getComputedStyle(element, "::after").width) > 0
+    const ring = getComputedStyle(element, "::after")
+    const { width, height } = untransformedSizeOf(element)
+    return (
+      Math.abs(parseFloat(ring.width) - width - 2 * RING_OUT) < 1 &&
+      Math.abs(parseFloat(ring.height) - height - 2 * RING_OUT) < 1
+    )
   }
 
   /**
@@ -1720,8 +2078,7 @@ class PartSelector {
     if (element.getRootNode() !== document) return false
     if (getComputedStyle(element).display === "contents") return false
     // its own `::after`, unless it's our ring already
-    const isRinged = element.hasAttribute(HOVER_MARK) || element.hasAttribute(SELECTED_MARK)
-    return isRinged || getComputedStyle(element, "::after").content === "none"
+    return element.hasAttribute(HOVER_MARK) || getComputedStyle(element, "::after").content === "none"
   }
 
   /**
@@ -1755,20 +2112,40 @@ class PartSelector {
     return box
   }
 
-  /** Put `box` over `element`, or hide it. */
-  private static place(box: HTMLElement, element: Element | undefined): void {
+  /**
+   * Put `box` over `element`, `out` px bigger all round, or hide it.
+   * - Turned with it when something turns it (`turnedBox()`):  its own size, and the matrix to the screen.
+   * - Else upright, on its drawn box, its edges moved to the nearest whole device pixel:
+   *   a line along an edge between two device pixels comes out thinner on that side (`snapped()`).
+   */
+  private static place(box: HTMLElement, element: Element | undefined, out = 0): void {
     if (!element) {
       box.hidden = true
       return
     }
-    const { left, top, width, height } = drawnBox(element)
+    const drawer = boxDrawerOf(element)
+    const turned = drawer && turnedBox(drawer)
+    const { left, top, width, height } = turned
+      ? { left: 0, top: 0, width: turned.width + 2 * out, height: turned.height + 2 * out }
+      : snapped(drawnBox(element), out)
+    const transform = turned ? turned.matrix.translate(-out, -out).toString() : ""
     // Only when it moved:  a style written each frame over the pointer makes Chrome flicker its cursor
     // (Owen:  "Cursor flashes between arrow and drag when I mouse over a face up card")
-    const rect = `${left} ${top} ${width} ${height}`
+    const rect = `${left} ${top} ${width} ${height} ${transform}`
     if (box.dataset.rect !== rect) {
       box.dataset.rect = rect
-      Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` })
+      Object.assign(box.style, {
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        transform,
+        transformOrigin: turned ? "0 0" : ""
+      })
     }
+    // cut to the app's area:  never over the top bar or a pane beside it, as the app scrolls under them (Owen)
+    const clip = turned ? "" : clipToArea({ left, top, width, height })
+    if (box.style.clipPath !== clip) box.style.clipPath = clip
     if (box.hidden) box.hidden = false
   }
 
@@ -1807,7 +2184,12 @@ class PartSelector {
 export function InspectorColumn(): JSX.Element {
   void loadBrandTokens()
   const rows = appParts()
-  const layout = createMemo(() => cardsLayout(INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel))))
+  const shown = createMemo((): InspectorCardId[] => {
+    const cards = INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel))
+    if (!Inspector.typeEdited || !cards.includes("properties")) return cards
+    return [cards[0]!, ...TYPE_PANES, ...cards.slice(1)]
+  })
+  const layout = createMemo(() => cardsLayout(shown()))
   const cardSizes = rememberedSizes(layout)
   // on a phone, Esc puts the sheet away while it's up
   createEffect(
@@ -1855,6 +2237,21 @@ export function InspectorColumn(): JSX.Element {
             <div class="SplitPane">
               <PropertiesCard />
             </div>
+          </Show>
+          <Show when={Inspector.isShown("properties") && Inspector.typeEdited} keyed>
+            {(thing) => (
+              <>
+                <div class="SplitPane">
+                  <TypeEventsCard thing={thing} />
+                </div>
+                <div class="SplitPane">
+                  <TypeActionsCard thing={thing} />
+                </div>
+                <div class="SplitPane">
+                  <TypeTestsCard thing={thing} />
+                </div>
+              </>
+            )}
           </Show>
           <Show when={Inspector.isShown("views")}>
             <div class="SplitPane">
@@ -1954,7 +2351,7 @@ const TALLEST_SHEET = 0.9
  * the others their usual shares of the rest.
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
-function cardsLayout(shown: readonly InspectorPanel[]): { id: string; sizes: string } {
+function cardsLayout(shown: readonly InspectorCardId[]): { id: string; sizes: string } {
   const open = shown.filter((panel) => !Inspector.isFolded(panel))
   const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
   return {
@@ -1974,7 +2371,7 @@ function cardsLayout(shown: readonly InspectorPanel[]): { id: string; sizes: str
  */
 function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
   for (const pane of panes) {
-    const panel = pane.querySelector<HTMLElement>(".InspectorCard")?.dataset.panel as InspectorPanel | undefined
+    const panel = pane.querySelector<HTMLElement>(".InspectorCard")?.dataset.panel as InspectorCardId | undefined
     if (!panel || Inspector.isFolded(panel)) continue
     if (pane.getBoundingClientRect().height >= FOLDED_CARD_HEIGHT + SMALLEST_CARD_BODY) continue
     forgetSizes()
@@ -1983,7 +2380,7 @@ function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
 }
 
 /** Each card's usual share of the column, among those open. */
-const CARD_SHARES: Record<InspectorPanel, number> = { properties: 60, views: 40 }
+const CARD_SHARES: Record<InspectorCardId, number> = { properties: 45, events: 15, actions: 15, tests: 10, views: 30 }
 /** A folded card's height:  its bar's (`<ui-panel appearance="pane">`). */
 const FOLDED_CARD_HEIGHT = 40
 /** The least a card's body may show, px:  dragged smaller, it folds. */
@@ -2005,15 +2402,22 @@ const SMALLEST_CARD_BODY = 32
  *   each step a pill that goes back to it (`Inspector.inspected`).
  ****************/
 function PropertiesCard(): JSX.Element {
+  // the same part, reached again:  its card isn't drawn again, so a field being typed in keeps the cursor
+  // (a change to a thing kept in a place reworks what its trail goes through, e.g. a list that filters on it)
+  const inspected = createMemo(() => Inspector.inspected, { equals: isSameInspected })
   return (
     <InspectorCard
       panel="properties"
       class="InspectorMain"
       label={appTexts.text("inspector")}
       bar={
-        <Show when={Inspector.inspected} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
+        <Show when={inspected()} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
-            <>
+            <Show
+              when={!hasScopeSwitch(part()) || part().crumbs.length > 1}
+              // a thing alone, with no trail:  ONE segmented control, [Card · King of Diamonds | All Cards] (Owen)
+              fallback={<ScopeSwitch part={part()} />}
+            >
               <span slot="title" class="InspectorTrail">
                 <For each={part().crumbs}>
                   {(crumb) => (
@@ -2040,13 +2444,13 @@ function PropertiesCard(): JSX.Element {
                 </For>
               </span>
               <ScopeSwitch part={part()} />
-            </>
+            </Show>
           )}
         </Show>
       }
     >
       <Show
-        when={Inspector.inspected}
+        when={inspected()}
         keyed
         fallback={
           <p class="InspectorTip">
@@ -2055,72 +2459,93 @@ function PropertiesCard(): JSX.Element {
           </p>
         }
       >
-        {(part) => (
-          // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
-          <ui-property-editor
-            schema={part.schema}
-            value={part.together?.map((each) => each.value) ?? part.value}
-            origins={Inspector.originsOf(part)}
-            unsaved={Inspector.unsavedTipOf(part)}
-            compact=""
-            show-defaults=""
-            on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
-              // a field's own input says it changed too, with no name:  the field's own event follows
-              event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
-            }
-            on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
-            on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
-          >
-            <NotSavedNote part={part} />
-            <Show
-              when={
-                part.together && !part.layout && !(part.schema as { attributes: readonly unknown[] }).attributes.length
+        {(part) => {
+          // a change to data held as it's typed goes out as the part changes, or the card goes
+          onCleanup(() => InspectorData.commitEdits())
+          return (
+            // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
+            <ui-property-editor
+              schema={part.schema}
+              value={part.together?.map((each) => each.value) ?? part.value}
+              origins={Inspector.originsOf(part)}
+              unsaved={Inspector.unsavedTipOf(part)}
+              // a value kept in a data place is held as it's typed, and sent on Enter or leaving the field
+              writer={InspectorData.write}
+              ref={(form: HTMLElement) => {
+                form.addEventListener("focusout", () => InspectorData.commitEdits())
+                form.addEventListener("change", () => InspectorData.commitEdits())
+                form.addEventListener("keydown", (event) => {
+                  if (event.key === "Enter") InspectorData.commitEdits()
+                })
+              }}
+              compact=""
+              show-defaults=""
+              on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
+                // a field's own input says it changed too, with no name:  the field's own event follows
+                event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
               }
+              on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
+              on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
             >
-              <p class="InspectorTip">{appTexts.text("inspectorNothingShared")}</p>
-            </Show>
-            <Show when={part.layout}>
-              {(layout) => (
-                <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
-                  {(section) => (
-                    <ui-property-group
-                      label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
-                      collapsible=""
-                      // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
-                      open={Inspector.isGroupFolded(section.group) ? "false" : undefined}
-                      ref={(group) => {
-                        on("ui-closing", () => Inspector.setGroupFolded(section.group, true))(group)
-                        on("ui-opening", () => Inspector.setGroupFolded(section.group, false))(group)
-                      }}
-                    >
-                      <Show when={section.hasText}>
-                        <ui-property name="textContent" label={appTexts.text("inspectorText")} />
-                      </Show>
-                      <For each={section.fields}>{(field) => <Field field={field} fields={section.fields} />}</For>
-                    </ui-property-group>
-                  )}
-                </For>
-              )}
-            </Show>
-            <Show when={!part.layout}>
+              <NotSavedNote part={part} />
+              <Show when={!part.layout && !part.together}>
+                <DataSourceNote thing={part.value} names={Inspector.dataNamesOf(part.value)} />
+              </Show>
               <Show
-                when={Inspector.ownEditorOf(part.value)}
-                fallback={
-                  <ThingBands
-                    value={part.value}
-                    schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>}
-                    isTogether={!!part.together}
-                  />
+                when={
+                  part.together &&
+                  !part.layout &&
+                  !(part.schema as { attributes: readonly unknown[] }).attributes.length
                 }
               >
-                {(markup) => <OwnEditor markup={markup()} />}
+                <p class="InspectorTip">{appTexts.text("inspectorNothingShared")}</p>
               </Show>
-            </Show>
-            <Show when={!part.together}>
-              <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
-            </Show>
-          </ui-property-editor>
-        )}
+              <Show when={part.layout}>
+                {(layout) => (
+                  <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
+                    {(section) => (
+                      <ui-property-group
+                        label={appTexts.text(`inspectorGroup.${section.group}` as AppTextKey)}
+                        collapsible=""
+                        // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
+                        open={Inspector.isGroupFolded(section.group) ? "false" : undefined}
+                        ref={(group) => {
+                          on("ui-closing", () => Inspector.setGroupFolded(section.group, true))(group)
+                          on("ui-opening", () => Inspector.setGroupFolded(section.group, false))(group)
+                        }}
+                      >
+                        <Show when={section.hasText}>
+                          <ui-property name="textContent" label={appTexts.text("inspectorText")} />
+                        </Show>
+                        <For each={section.fields}>{(field) => <Field field={field} fields={section.fields} />}</For>
+                      </ui-property-group>
+                    )}
+                  </For>
+                )}
+              </Show>
+              <Show when={!part.layout}>
+                <Show
+                  // All Cards edits the type's fields, never its own editor's (Q29)
+                  when={!Inspector.typeEdited && Inspector.ownEditorOf(part.value)}
+                  fallback={
+                    <ThingBands
+                      value={part.value}
+                      schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>}
+                      isTogether={!!part.together}
+                      isType={!!Inspector.typeEdited}
+                    />
+                  }
+                >
+                  {(markup) => <OwnEditor markup={markup()} />}
+                </Show>
+              </Show>
+              {/* All Cards:  the type's events, actions and tests are cards of their own (`TYPE_PANES`) */}
+              <Show when={!part.together && !Inspector.typeEdited}>
+                <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
+              </Show>
+            </ui-property-editor>
+          )
+        }}
       </Show>
     </InspectorCard>
   )
@@ -2148,19 +2573,23 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
   const typeWords = () => wordsOfType(props.part.value)
   const scope = () => Inspector.scopeOf(props.part)
   const count = () => props.part.together?.length ?? 1
-  // several of one type:  `These 3 | All cards`;  of several types, no one type to change
-  const isOneType = () => {
-    const main = props.part.together?.[0]
-    return !main || props.part.together!.every((each) => each.value.constructor === main.value.constructor)
-  }
+  // with no trail, the first segment IS what's selected, as its chip said it (`Card · King of Diamonds`), its ✕ after
+  const isWhole = () => props.part.crumbs.length === 1
+  const these = () =>
+    count() > 1
+      ? appTexts.text("inspectorScopeThese", { count: count(), Types: titleCase(P.pluralize(typeWords())) })
+      : isWhole()
+        ? headlineCase(props.part.crumbs[0]!.label)
+        : appTexts.text("inspectorScopeThis")
   return (
-    <Show when={isThing(props.part.value) && isOneType()}>
+    <Show when={hasScopeSwitch(props.part)}>
       <ui-item
         selected={scope() === "this"}
         class="InspectorScope"
+        title={isWhole() ? Inspector.writtenPlaceTitle(props.part.element) || undefined : undefined}
         onClick={() => Inspector.setScope(props.part, "this")}
       >
-        {count() > 1 ? appTexts.text("inspectorScopeThese", { count: count() }) : appTexts.text("inspectorScopeThis")}
+        {these()}
       </ui-item>
       <ui-item
         selected={scope() === "all"}
@@ -2169,9 +2598,28 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
       >
         {appTexts.text("inspectorScopeAll", { Types: titleCase(P.pluralize(typeWords())) })}
       </ui-item>
+      <Show when={isWhole()}>
+        <LetGo label={props.part.crumbs[0]!.label} />
+      </Show>
     </Show>
   )
 }
+
+/** Does `part` get the This | All switch?  A thing, or several of one type:  a Spell UI element has no type to change. */
+function hasScopeSwitch(part: Inspected): boolean {
+  const main = part.together?.[0]
+  const isOneType = !main || part.together!.every((each) => each.value.constructor === main.value.constructor)
+  return isThing(part.value) && isOneType
+}
+
+/** `words` as a title:  `Card · king of diamonds` => `Card · King of Diamonds`, its small words left small. */
+function headlineCase(words: string): string {
+  return words.replace(/(^|\s)(\p{L}[\p{L}\p{N}]*)/gu, (all, space: string, word: string) =>
+    space && SMALL_WORDS.test(word) ? all : space + word.charAt(0).toUpperCase() + word.slice(1)
+  )
+}
+/** The words a title leaves small, after its first. */
+const SMALL_WORDS = /^(?:a|an|and|at|by|for|in|of|on|or|the|to)$/
 
 /** `words` with each one's first letter capital:  `discard piles` => `Discard Piles`. */
 function titleCase(words: string): string {
@@ -2186,6 +2634,59 @@ function wordsOfType(thing: object): string {
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
 const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
 
+/**
+ * Is `next` the part `last` was, reached the same way:  the same thing, drawn by the same element, by the same trail,
+ * with the same fields?
+ */
+function isSameInspected(last: Inspected | undefined, next: Inspected | undefined): boolean {
+  if (last === next) return true
+  if (!last || !next || last.together || next.together) return false
+  return (
+    last.value === next.value &&
+    last.element === next.element &&
+    last.layout === next.layout &&
+    last.label === next.label &&
+    // a live edit can change its type's fields:  then it's drawn again
+    JSON.stringify(last.schema) === JSON.stringify(next.schema) &&
+    last.crumbs.map((crumb) => crumb.label).join("\n") === next.crumbs.map((crumb) => crumb.label).join("\n")
+  )
+}
+
+/****************
+ * ### `<DataSourceNote>`
+ * Says where a thing kept in a data place is kept, above its fields, and whether that's the real data (epic `editor` P26).
+ * - Real data:  a warning colour, so nobody changes it unaware.
+ * - Read only, or a sample in for it:  a calm line.
+ * - Its switch puts a sample in for the place while designing, or the real place back (`InspectorData.showFrom()`).
+ * - No row of its own for a thing kept in no place.
+ ****************/
+function DataSourceNote(props: { thing: object; names: string[] }): JSX.Element {
+  const source = createMemo(() => InspectorData.sourceOf(props.thing, props.names))
+  return (
+    <Show when={source()}>
+      {(shown) => (
+        <div class={["InspectorDataSource", shown().kind.replace(" ", "-")]}>
+          <ui-icon name="database" />
+          <span class="InspectorDataSourceWords">{shown().words}</span>
+          <ui-checkbox
+            appearance="toggle"
+            size="small"
+            class="InspectorSampleSwitch"
+            selected={shown().kind === "sample" ? "" : undefined}
+            on-ui-changed={(event: CustomEvent<{ selected: boolean }>) => {
+              // its own change:  never a field's
+              event.stopPropagation()
+              void InspectorData.showFrom(shown().placeName, event.detail.selected ? "sample" : "real place")
+            }}
+          >
+            {appTexts.text("inspectorDataUseSample")}
+          </ui-checkbox>
+        </div>
+      )}
+    </Show>
+  )
+}
+
 /****************
  * ### `<NotSavedNote>`
  * Says the last change only changed the running app, and why, with a way to the code when there's code to see.
@@ -2195,6 +2696,8 @@ function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
   const why = (): NotWritten | undefined => {
     // a thing made in a loop says so on each field, its crossed-out save icon (`Inspector.unsavedTipOf()`)
+    // All Cards edits the type's own fields (Q29):  no note that its values come from the code
+    if (Inspector.typeEdited) return undefined
     if (isThing(props.part.value) && Inspector.scopeOf(props.part) === "all" && Inspector.isAllFromCode(props.part)) {
       return { reason: "allFromCode" }
     }
@@ -2325,6 +2828,11 @@ function ThingBands(props: {
   schema: ReturnType<typeof ClassSchemas.fromClass>
   /** Several are selected, `value` the last:  only the fields they share, no computed values or items. */
   isTogether: boolean
+  /**
+   * Its TYPE's fields (All Cards, Q29):  a field with a `one-of` lists its values as pills to change
+   * (`<TypeChoicesField>`);  a worked-out one shows the Spell that works it out (`<TypeSpellField>`).
+   */
+  isType?: boolean
 }): JSX.Element {
   const holds = (name: string) => (props.value as Record<string, unknown>)[name]
   const items = () => (props.isTogether ? [] : (itemsOf(props.value)?.filter(isThing) ?? []))
@@ -2368,14 +2876,23 @@ function ThingBands(props: {
               <For each={band.members}>
                 {(member) => (
                   <Show
-                    when={member.kind === "stored"}
-                    fallback={<ComputedField thing={props.value} member={member} />}
+                    when={!props.isType || !Inspector.propertyWritten(props.value, member.name)}
+                    fallback={<TypeField thing={props.value} member={member} />}
                   >
                     <Show
-                      when={isThing(holds(member.name))}
-                      fallback={<ui-property name={member.name} label={memberLabel(member)} />}
+                      when={member.kind === "stored"}
+                      fallback={<ComputedField thing={props.value} member={member} />}
                     >
-                      <ThingLink label={memberLabel(member)} thing={holds(member.name) as object} step={member.name} />
+                      <Show
+                        when={isThing(holds(member.name))}
+                        fallback={<ui-property name={member.name} label={memberLabel(member)} />}
+                      >
+                        <ThingLink
+                          label={memberLabel(member)}
+                          thing={holds(member.name) as object}
+                          step={member.name}
+                        />
+                      </Show>
                     </Show>
                   </Show>
                 )}
@@ -2387,7 +2904,10 @@ function ThingBands(props: {
       <Show when={items().length}>
         <div class="InspectorItems">
           <span class="InspectorItemsLabel">{appTexts.text("inspectorItems", { count: items().length })}</span>
-          <For each={items()}>{(item, index) => <ThingLink thing={item} step={`${ITEM_STEP}${index()}`} />}</For>
+          {/* items the app draws are in the Views tree, under it:  not listed twice (Owen:  "don't need them twice") */}
+          <Show when={!items().every((item) => Inspector.elementDrawing(item))}>
+            <For each={items()}>{(item, index) => <ThingLink thing={item} step={`${ITEM_STEP}${index()}`} />}</For>
+          </Show>
         </div>
       </Show>
     </>
@@ -2406,6 +2926,75 @@ function memberLabel(member: ThingMember): string {
 }
 
 /****************
+ * ### `<TypeField>`
+ * One of a type's fields, as All Cards edits it (epic `editor` P23, Q29;  `Inspector.propertyWritten()`):
+ * - worked out by Spell (`<property "name">its rank + " of " + its suit</>`):  that Spell, in the code editor on its
+ *   lines of the file, to read and change there (Owen:  "For derived fields, you'd show the spell to calculate it")
+ * - else a `one-of`:  its values as pills, to add, take away or type (Owen:  "rank should be a type-in field listing
+ *   the values as pills"), written back into its `one-of` as one step (`Inspector.writeOneOf()`)
+ * - else its field as This shows it:  a stored value, or a computed one's value
+ ****************/
+function TypeField(props: { thing: object; member: ThingMember }): JSX.Element {
+  const written = () => Inspector.propertyWritten(props.thing, props.member.name)
+  return (
+    <Show
+      when={written()?.spell}
+      fallback={
+        <Show
+          when={written()?.oneOf}
+          fallback={
+            <Show
+              when={props.member.kind === "stored"}
+              fallback={<ComputedField thing={props.thing} member={props.member} />}
+            >
+              <ui-property name={props.member.name} label={memberLabel(props.member)} />
+            </Show>
+          }
+        >
+          {(oneOf) => <TypeChoicesField thing={props.thing} member={props.member} values={oneOf().values} />}
+        </Show>
+      }
+    >
+      {(spell) => (
+        <ui-property name={props.member.name} label={memberLabel(props.member)} class="InspectorTypeSpell">
+          <WrittenCode place={spell()} code="" />
+        </ui-property>
+      )}
+    </Show>
+  )
+}
+
+/** A type's field's values as pills, `ace`, `2 ... 10`, `jack`:  to add, take away or type, written into its `one-of`. */
+function TypeChoicesField(props: { thing: object; member: ThingMember; values: string[] }): JSX.Element {
+  return (
+    <ui-property name={props.member.name} label={memberLabel(props.member)} class="InspectorTypeChoices">
+      <ui-dropdown
+        multiple=""
+        search=""
+        allow-additions=""
+        size="small"
+        ref={(dropdown: HTMLElement & { value?: unknown }) => {
+          // a list, as the property:  the attribute splits at spaces too, and `2 ... 10` is one value
+          createEffect(
+            () => props.values,
+            (values) => queueMicrotask(() => (dropdown.value = [...values]))
+          )
+          on<{ value: unknown }>("ui-changed", (event) => {
+            // its own write:  never the field's, which would set the running thing's value
+            event.stopPropagation()
+            const { value } = event.detail
+            const values = Array.isArray(value) ? value.map(String) : typeof value === "string" ? value.split(",") : []
+            Inspector.writeOneOf(props.thing, props.member.name, values.map((each) => each.trim()).filter(Boolean))
+          })(dropdown)
+        }}
+      >
+        <For each={props.values}>{(value) => <ui-item value={value}>{value}</ui-item>}</For>
+      </ui-dropdown>
+    </ui-property>
+  )
+}
+
+/****************
  * ### `<ComputedField>`
  * A thing's computed property (`value`, `color`, `picture`):  its value, read only, as text with no box,
  * so it doesn't look like a field to type in.
@@ -2414,6 +3003,11 @@ function memberLabel(member: ThingMember): string {
  * - One that throws shows its error, dimmed:  reading it ran the program's code.
  ****************/
 function ComputedField(props: { thing: object; member: ThingMember }): JSX.Element {
+  // worked out from what a data place holds:  its link says which (epic `editor` P26)
+  const dataOrigin = createMemo(() => {
+    const origin = InspectorData.originOf(props.thing, props.member.name)
+    return origin && InspectorData.propertyOrigin(origin)
+  })
   const read = createMemo((): { value?: unknown; error?: unknown } => {
     try {
       return { value: (props.thing as Record<string, unknown>)[props.member.name] }
@@ -2440,7 +3034,12 @@ function ComputedField(props: { thing: object; member: ThingMember }): JSX.Eleme
         </ui-property>
       }
     >
-      <ThingLink label={memberLabel(props.member)} thing={read().value as object} step={props.member.name} />
+      <ThingLink
+        label={memberLabel(props.member)}
+        thing={read().value as object}
+        step={props.member.name}
+        origin={dataOrigin()}
+      />
     </Show>
   )
 }
@@ -2457,26 +3056,65 @@ function computedText(read: { value?: unknown; error?: unknown }): string {
   return String(value as string | number | boolean | bigint | symbol)
 }
 
+/** `text`'s letters and digits alone, lower case:  `StockPile · stock` holds `Stock`. */
+function lettersOf(text: string): string {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
+}
+
 /****************
  * ### `<ThingLink>`
  * A link to a thing a property (or a list) holds:  its title, then `›`;  a click inspects it.
  * - `label`:  the property's label, above it, as a field's;  none for a list's item.
  ****************/
-function ThingLink(props: { thing: object; step: string; label?: string }): JSX.Element {
+function ThingLink(props: {
+  thing: object
+  step: string
+  label?: string
+  /** Where it comes from, when a data place holds it or it's worked out from one:  its mark, after the chip. */
+  origin?: PropertyOrigin
+}): JSX.Element {
+  // its chip already names it (`StockPile · stock` for Stock):  the label isn't said twice (Owen:  "Duplicated")
+  const label = () => {
+    const title = Inspector.thingLabel(props.thing, props.step)
+    return props.label && !lettersOf(title).includes(lettersOf(props.label)) ? props.label : undefined
+  }
   return (
     <div class={["InspectorThingLink", { item: !props.label }]}>
-      <Show when={props.label}>{(label) => <span class="InspectorThingLabel">{label()}</span>}</Show>
-      <ui-button
-        appearance="basic"
-        size="small"
-        icon="angle right"
-        icon-position="right"
-        class="InspectorThingButton"
-        onClick={() => Inspector.inspect(props.step)}
-      >
-        {Inspector.thingLabel(props.thing, props.step)}
-      </ui-button>
+      <Show when={label()}>{(shown) => <span class="InspectorThingLabel">{shown()}</span>}</Show>
+      <ThingChip label={Inspector.thingLabel(props.thing, props.step)} onClick={() => Inspector.inspect(props.step)} />
+      <Show when={props.origin?.mark}>
+        {(mark) => (
+          <span class="InspectorDataMark" title={props.origin?.from}>
+            {mark()}
+          </span>
+        )}
+      </Show>
     </div>
+  )
+}
+
+/****************
+ * ### `<ThingChip>`
+ * A thing made as the program runs, as a pill:  `Card · king of diamonds ›`.
+ * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree
+ *   (Owen:  "Full pill for items that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
+ * - `inRow`:  drawn inside a tree row, as its label:  `inert`, so a click, the keys and focus stay the row's,
+ *   and no `›`, since a click there selects rather than follows.
+ ****************/
+export function ThingChip(props: { label: string; onClick?: () => void; inRow?: boolean }): JSX.Element {
+  return (
+    <ui-button
+      appearance="basic"
+      size="small"
+      icon={props.inRow ? undefined : "angle right"}
+      icon-position={props.inRow ? undefined : "right"}
+      class={["InspectorThingButton", { InspectorRowChip: props.inRow }]}
+      slot={props.inRow ? "label" : undefined}
+      inert={props.inRow ? "" : undefined}
+      onClick={props.onClick}
+    >
+      {props.label}
+    </ui-button>
   )
 }
 
@@ -2580,14 +3218,13 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   return props.item ? (
     <ui-item
       id={props.id}
+      icon="crosshairs"
       class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
       aria-pressed={pressed()}
       title={title()}
       onClick={inspect}
-    >
-      <ui-icon name="crosshairs" />
-    </ui-item>
+    />
   ) : (
     <ui-icon
       id={props.id}
@@ -2632,9 +3269,12 @@ export function InspectHelp(props: { for: string }): JSX.Element {
 }
 
 /** Each card's name, in the menu of cards. */
-export const PANEL_TEXTS: Record<InspectorPanel, AppTextKey> = {
+export const PANEL_TEXTS: Record<InspectorCardId, AppTextKey> = {
   properties: "inspectorProperties",
-  views: "inspectorParts"
+  views: "inspectorParts",
+  events: "inspectorEvents",
+  actions: "inspectorActions",
+  tests: "inspectorTests"
 }
 
 /** The Spell Brand theme's tokens on `.Inspector`, once loaded. */

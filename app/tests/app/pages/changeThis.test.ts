@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Select something, say what should change, and the result lands with the app left running (epic `editor`, Change This).
@@ -13,31 +12,9 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  * - Headless Playwright, never a real browser window.
  */
 
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
-
 /** The file, as the session leaves it, is the text there with `OLD_WORD` changed. */
-const OLD_WORD = "Clicked {its count}"
-const NEW_WORD = "Pressed {its count}"
+const OLD_WORD = "Clicked {the count}"
+const NEW_WORD = "Pressed {the count}"
 
 describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
   let browser: Browser
@@ -57,6 +34,11 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
       await page.locator(".InspectAppButton [part~=item]").first().click()
       await page.waitForTimeout(400)
     }
+    // Inspect's first-time help opens under its button, over the app's top left since the code moved back left:  close it
+    await page.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+    // ... and the last notice, which can sit over the button:  the click would land on it, and select nothing
+    await page.evaluate(() => (window as unknown as { editor: { hideNotice(): void } }).editor.hideNotice())
+    await page.waitForTimeout(200)
     await button().click({ force: true })
     await page.waitForTimeout(400)
   }
@@ -71,7 +53,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
       }
       return route.fulfill({ json: request })
     })
-    await context.route(/\/spaces\/.*Counter\.spell/, async (route) => {
+    await context.route(/\/spaces\/.*Counter\.spellml/, async (route) => {
       if (route.request().method() !== "GET" || onDisk === undefined) return route.fallback()
       return route.fulfill({ contentType: "text/plain", body: onDisk })
     })
@@ -105,7 +87,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     await page.waitForFunction(() => document.querySelector(".ChangeThisBox ui-code"))
     expect(asked).toMatchObject({
       projectId: "@spell/examples/Counter",
-      filePath: "/Counter.spell",
+      filePath: "/Counter.spellml",
       kind: "ui-button",
       text: "say Pressed"
     })

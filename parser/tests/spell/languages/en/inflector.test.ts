@@ -19,6 +19,18 @@ describe("English's inflector", () => {
     expect(englishInflector.instanceCase("Piles")).toBe("pile")
   })
 
+  test("a name of several words changes only its last word", () => {
+    expect(englishInflector.typeCase("pokemon-species")).toBe("PokemonSpecies")
+    expect(englishInflector.singularize("pokemon species")).toBe("pokemon species")
+    expect(englishInflector.pluralize("pokemon_species")).toBe("pokemon_species")
+    expect(englishInflector.pluralize("bank account")).toBe("bank accounts")
+    expect(englishInflector.singularize("card-ranks")).toBe("card-rank")
+    expect(englishInflector.plurality("pokemon species")).toBe("either")
+    expect(englishInflector.typeCase("PokemonSpecies")).toBe("PokemonSpecies")
+    expect(englishInflector.singularize("BankAccounts")).toBe("BankAccount")
+    expect(englishInflector.singularize("ViewableList")).toBe("ViewableList")
+  })
+
   test("is the fallback out of a parse", () => {
     expect(P.Inflector.fallback).toBe(englishInflector)
     expect(P.singularize("cards")).toBe("card")

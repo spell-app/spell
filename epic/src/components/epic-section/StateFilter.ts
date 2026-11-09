@@ -28,21 +28,26 @@ export class StateFilter {
     how: ChipPick = "click"
   ): string[] {
     const next = StateFilter.nextChipsShown(StateFilter.chipStatesOf(present), shown, clicked, how)
-    return present.filter((state) => state === WITH_CLAUDE || next.includes(state))
+    return present.filter((state) => StateFilter.isWithClaude(state) || next.includes(state))
   }
 
   /** The states of `present` with a chip of their own:  all but what Claude is on (`WITH_CLAUDE`, the blue badge). */
   static chipStatesOf(present: readonly string[]): string[] {
-    return present.filter((state) => state !== WITH_CLAUDE)
+    return present.filter((state) => !StateFilter.isWithClaude(state))
   }
 
   /**
    * Does the filter hide an item (or phase) in `state` while `shown` shows?
-   * - NEVER one Claude is on (`WITH_CLAUDE`):  it has no chip to show it again
+   * - NEVER one with Claude (`WITH_CLAUDE`):  it has no chip to show it again
    */
   static hides(state: string, shown: ReadonlySet<string> | readonly string[]): boolean {
-    if (state === WITH_CLAUDE) return false
+    if (StateFilter.isWithClaude(state)) return false
     return "has" in shown ? !shown.has(state) : !shown.includes(state)
+  }
+
+  /** Is `state` with Claude (`WITH_CLAUDE`):  no chip of its own, counted in the blue badge? */
+  static isWithClaude(state: string): boolean {
+    return (WITH_CLAUDE as readonly string[]).includes(state)
   }
 
   /** `nextShown()`'s rule over the chips alone. */
@@ -69,10 +74,11 @@ export class StateFilter {
 }
 
 /**
- * The state of what Claude is working on (blue):  no chip of its own, it counts in the blue badge
- * (`<epic-state-filter>`'s `markedCount`), and NEVER hides (`StateFilter.hides()`).
+ * The states with Claude (blue):  what it's working on, and a Do this it hasn't started (`handed`, epic `epic-engine` P63).
+ * - no chip of their own:  they count in the blue badge (`<epic-state-filter>`'s `markedCount`), and NEVER hide
+ *   (`StateFilter.hides()`)
  */
-export const WITH_CLAUDE = "progress"
+export const WITH_CLAUDE = ["progress", "handed"] as const
 
 /** How a chip was picked:  a plain click (`nextShown()`'s rule), or an ⌥-click (`only` its state). */
 export type ChipPick = "click" | "only"

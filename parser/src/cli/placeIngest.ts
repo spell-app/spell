@@ -12,7 +12,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import JSON5 from "json5"
 
 import { json5Edited } from "spell/util/node/json5"
-import { schemaOf, whileOnlyShowing } from "spell/util/reactive"
+import { peekProp, schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
@@ -48,6 +48,9 @@ export type PlaceIngestOptions = {
   keySecret?: string
   docs?: string
   collections?: string
+  samples?: string
+  pictures?: string
+  tryWrites?: boolean
   ai?: boolean
 }
 
@@ -57,12 +60,15 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, docs, collections, ai = true } = options
+  const { kind, into, name, keySecret, docs, collections, samples, pictures, tryWrites, ai = true } = options
   return stoppedAsCliError(async () => {
     const result = await ingestFor(ai).add({
       address,
       ...withValues({ kind, into, name, keySecret, docs }),
-      ...(collections && { collections: collections.split(",").map((each) => each.trim()) })
+      ...(collections && { collections: collectionsIn(collections) }),
+      ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
+      ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
+      ...(tryWrites && { triesWrites: true })
     })
     printAdded(result)
     return CLI.EXIT.OK
@@ -104,6 +110,26 @@ async function stoppedAsCliError(run: () => Promise<number>): Promise<number> {
     if (error instanceof IngestStopped) throw new CLI.CliError(error.message)
     throw error
   }
+}
+
+/** A piece of `--collections` that starts one of its own:  a path, or a name and a path. */
+const NEW_COLLECTION = /^(?:[^=&?/]*=)?\//
+
+/**
+ * `--collections`, one entry each (epic `data` P33):
+ * split at its commas, but a comma in a query's value stays in it,
+ * as Open-Meteo's `forecasts=/v1/forecast?hourly=temperature_2m,precipitation` asks for both.
+ * - After one with a query, a piece is a new one only when it's a path or a name and a path, `/x`, `x=/x`:
+ *   else it's part of that query, `precipitation`, `wind_speed_10m&forecast_days=2`.
+ */
+export function collectionsIn(given: string): string[] {
+  const entries: string[] = []
+  for (const piece of given.split(",").map((each) => each.trim())) {
+    const last = entries.at(-1)
+    if (last?.includes("?") && !NEW_COLLECTION.test(piece)) entries[entries.length - 1] = `${last},${piece}`
+    else entries.push(piece)
+  }
+  return entries
 }
 
 /** `values` without what's undefined. */
@@ -177,7 +203,7 @@ function filesBeside(path: string): string[] {
 
 /**
  * Compile the Spell and really read each type through it, on `core`:  the same place, the same row reading, as a page has.
- * - Each read asks for a page, not every row.
+ * - Each read asks for a page, not every row;  one that answers only a search searches, as a program has to.
  * - For as long as it runs, `fetch` is the one it's handed, so it can't write, and it stops at a size;
  *   and a relative address means here, as no page says where it is.
  * - What the program complains of on the console is collected:  `Expected weird to be type 'number', got: 30-165`.
@@ -185,7 +211,14 @@ function filesBeside(path: string): string[] {
  * - Every field is asked for:  what a type's `select` leaves out is what the program reads, and this one reads none.
  * - NEVER throws for a read that fails:  see `ReadThrough`.
  */
-export const readThroughSpell: ReadThrough = async ({ spell, types, fetch }) => {
+export const readThroughSpell: ReadThrough = async ({
+  spell,
+  types,
+  byName = {},
+  bySearch = {},
+  byQuery = {},
+  fetch
+}) => {
   const { core } = await import("spell/parser/core")
   const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
   const held = {
@@ -214,15 +247,32 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, fetch }) => 
       try {
         const Class = classes[name] as (new () => unknown) & { savedIn: { select?: unknown } }
         delete Class.savedIn.select
-        const list = await core.savedThings(Class, { page: { size: READ_ROWS } })
+        // found by name, with no list:  one read by a name it was looked at by
+        const named = byName[words]
+        if (named !== undefined) {
+          const one = await core.savedThingWithId(Class, named)
+          byType[words] = { rows: one ? 1 : 0 }
+          for (const field of fieldsNeverFilled(Class, one ? [one] : []))
+            complaints.push(`No row read filled ${words}'s "${field}".`)
+          continue
+        }
+        // answering only a search:  searched, as a program has to
+        const searched = bySearch[words]
+        const search = searched && { search: { [searched.field]: searched.text } }
+        // asked for by a query:  asked what it was looked at with, as a program has to
+        const asked = byQuery[words]
+        const filter = asked && { filter: { ...asked } }
+        const list = await core.savedThings(Class, { page: { size: READ_ROWS }, ...search, ...filter })
         byType[words] = { rows: list.items.length }
-        for (const field of fieldsNeverFilled(Class, list.items))
+        // a list that gives only names (`its lists give only each one's "name"`):  its first, read whole, says the rest
+        const checked = givesOnly.test(spell) && list.items.length ? await readWhole(Class, list.items[0]!) : list.items
+        for (const field of fieldsNeverFilled(Class, checked))
           complaints.push(`No row read filled ${words}'s "${field}".`)
       } catch (error) {
         byType[words] = problem(error)
       }
     }
-    return { byType, complaints }
+    return { byType, complaints: withoutListsUnder(complaints, spell) }
   } finally {
     globalThis.fetch = held.fetch
     Object.assign(globalThis, { location: held.location })
@@ -231,25 +281,63 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, fetch }) => 
   }
 }
 
-/** Each field `Class` declares that all of `things` left at its usual value. */
+/** A place line saying a list is kept under each thing:  `a post's comments live at "/posts/{id}/comments"`. */
+const LIST_UNDER = /^\s*- an? (.+)'s (.+) live at /gm
+
+/**
+ * `complaints`, less those of a list kept under each thing (epic `data` P30):
+ * no row holds a post's comments, as they're read from the post's own address, the first time something reads them.
+ */
+function withoutListsUnder(complaints: readonly string[], spell: string): string[] {
+  const under = [...spell.matchAll(LIST_UNDER)].map(
+    ([, type, list]) =>
+      `No row read filled ${type}'s "${list!.replace(/ (\p{L})/gu, (_, letter: string) => letter.toUpperCase())}".`
+  )
+  return complaints.filter((complaint) => !under.includes(complaint))
+}
+
+/** A place line saying its lists give only a little of each row:  `its lists give only each one's "name"`. */
+const givesOnly = /^\s*- its lists give only each one's /m
+
+/** How long it waits for a thing read whole, a tenth of a second at a time. */
+const WHOLE_WAITS = 50
+
+/**
+ * `thing`, read whole:  reading the fields its list left out reads it from its address (`core`'s `listsGive`).
+ * - Waits until one of them fills, or a while:  `[thing]` either way.
+ */
+async function readWhole(Class: new () => unknown, thing: unknown): Promise<unknown[]> {
+  const unfilled = fieldsNeverFilled(Class, [thing])
+  const before = unfilled.length
+  if (!before) return [thing]
+  // read for real, not only looking:  what asks for it whole
+  void (thing as Record<string, unknown>)[unfilled[0]!]
+  for (let waits = 0; waits < WHOLE_WAITS && fieldsNeverFilled(Class, [thing]).length === before; waits++) {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  return [thing]
+}
+
+/**
+ * Each field `Class` declares that none of `things` filled:  the server left it out, or sent nothing (`null`).
+ * - Filled is what a row STORED (`peekProp()`), not a value unlike a new thing's (epic `data` I53):
+ *   a yes or no that's no on every row, a count always 0, text always empty, are all the server's answer.
+ * - A list is filled when one holds an item;  a date, when there is one.
+ * - Only looking:  a field holding an address isn't following it.
+ */
 function fieldsNeverFilled(Class: new () => unknown, things: readonly unknown[]): string[] {
   if (!things.length) return []
   const usual = new Class() as Record<string, unknown>
-  const isFilled = (value: unknown, field: string) => {
+  const isFilled = (thing: unknown, field: string) => {
+    const value = whileOnlyShowing(() => (thing as Record<string, unknown>)[field])
     if (value instanceof Date) return true
     if (value && typeof value === "object" && "items" in value) return (value.items as unknown[]).length > 0
-    return value !== usual[field] && value !== undefined
+    const stored = peekProp<unknown>(thing, field)
+    if (stored !== undefined) return stored !== null
+    // nothing stored:  what it reads by itself, worked out from what is
+    return value !== usual[field] && value !== undefined && value !== null
   }
-  return [...schemaOf(Class).declared.keys()].filter(
-    // only looking:  a field holding an address isn't following it
-    (field) =>
-      !things.some((thing) =>
-        isFilled(
-          whileOnlyShowing(() => (thing as Record<string, unknown>)[field]),
-          field
-        )
-      )
-  )
+  return [...schemaOf(Class).declared.keys()].filter((field) => !things.some((thing) => isFilled(thing, field)))
 }
 
 ////////////////

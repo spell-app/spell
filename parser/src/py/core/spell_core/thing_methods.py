@@ -18,7 +18,7 @@ from spell_core.js_text import js_string
 from spell_core.kinds import is_same
 from spell_core.prop_rules import broken_rule, rule_warning
 from spell_core.state import StateMirror
-from spell_core.things import Prop, ThingRegistry, things
+from spell_core.things import Prop, SpellObject, ThingRegistry, things
 
 if TYPE_CHECKING:
     from spell_core.console import SpellConsole
@@ -59,6 +59,28 @@ class ThingMethods:
             self.console.warn(f"{rule_warning(property_name, broken)}, got:", value)
             return False
         return True
+
+    def class_to_make[C: type](self, cls: C) -> C:
+        """The class to make for `cls`:  the program's newest class by its name, if it is `cls` or extends it.
+
+        - Else `cls` itself (epic `language` P26).
+        - So a library's `a new card` makes the importing program's card:  Solitaire's `Card`, which extends the
+          library's.  Compiled from a library's own new thing of a type others may extend:  `core.class_to_make(Card)()`.
+        - A class of the same name that doesn't extend `cls` (another project's own `Card`):  `cls`.
+        - The twin of the JavaScript core's `classToMake()`.
+        """
+        named = self.things.class_named(cls.__name__)
+        return named if isinstance(named, type) and issubclass(named, cls) else cls  # type: ignore[return-value]
+
+    def register_class(self, cls: type) -> None:
+        """SIDE EFFECT:  the program knows `cls` by its name now, before any of its things is made.
+
+        - Python's classes register themselves as they're defined (`SpellObject.__init_subclass__()`),
+          so compiled Python never calls it.
+        - The twin of the JavaScript core's `registerClass()`.
+        """
+        if isinstance(cls, type) and issubclass(cls, SpellObject):
+            self.things.add_class(cls)
 
     def from_json(self, data: object) -> Any:
         """Spell's JSON read back as what it was:  each object with an `"$type"` made again as its class.

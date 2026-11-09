@@ -123,6 +123,8 @@ export const englishWords: SP.LanguageWords = {
   appActions: { undo: "undo", redo: "redo" },
   // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
+  // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
+  defaultsTag: "ui-defaults",
 
   /**
    * Spell's own old words, each an error naming its new one:
@@ -158,6 +160,8 @@ export const englishWords: SP.LanguageWords = {
       "app-template": "app template",
       // a page of prose, examples and its own templates (epic `elemental-spell` P16)
       notebook: "notebook",
+      // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
+      site: "site",
       // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
       "more-of": "more of"
     },
@@ -170,10 +174,17 @@ export const englishWords: SP.LanguageWords = {
       test: "test",
       menu: "menu",
       // a heading over the members after it (epic `elemental-spell` P16)
-      group: "group"
+      group: "group",
+      // a site's parts (epic `mockup` P1):  only in a `<spell-site>`, markup anywhere else (`<sidebar>` is Spell UI's)
+      page: "page",
+      dialog: "dialog",
+      sidebar: "sidebar"
     },
-    // a template's own property editor, as markup:  what the Inspector shows for its things (epic `debut` I86)
-    notes: { description: "description", comment: "comment", "property-editor": "property editor" },
+    // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
+    // `<spell-description>`, `<spell-comment>`,
+    // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
+    // and a page's stories, `<spell-stories>` (epic `mockup` P6):  what it must let people do
+    notes: { description: "description", comment: "comment", "property-editor": "property editor", stories: "stories" },
     handlers: {
       on: "on",
       when: "when",
@@ -232,7 +243,16 @@ export const englishWords: SP.LanguageWords = {
       droppable: "droppable",
       selectable: "selectable",
       clickable: "clickable",
-      group: "group"
+      group: "group",
+      // a site's, and its pages' (epic `mockup` P1):  `<spell-site "x" at="...">`, `<page "x" address="/x">`
+      at: "at",
+      cloud: "cloud",
+      address: "address",
+      state: "state",
+      picture: "picture",
+      row: "row",
+      column: "column",
+      color: "color"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
@@ -247,7 +267,8 @@ export const englishWords: SP.LanguageWords = {
         app: "app",
         "page template": "page",
         "app template": "app",
-        notebook: "notebook"
+        notebook: "notebook",
+        site: "site"
       },
       property: {
         list: "its {name} is one of {one-of}",
@@ -286,6 +307,15 @@ export const englishWords: SP.LanguageWords = {
       group: "group {name}",
       notebookContent: "to draw its content :",
       notebookLocked: "its lock is locked",
+      siteAt: "{words} is {a super} {super} at {quoted at} :",
+      siteCloud: "{words} is {a super} {super} in the cloud :",
+      sitePage: "it has {a words} {words} at {quoted address}",
+      sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
+      sitePageState: ", {state}",
+      sitePagePicture: ", pictured in {quoted picture}",
+      siteCardPlace: ", in row {row} column {column}",
+      siteCardColor: ", colored {color}",
+      siteOverlay: "it has {a words} {words}",
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",

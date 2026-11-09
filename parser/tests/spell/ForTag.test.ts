@@ -136,6 +136,13 @@ describe("<for>", () => {
     expect(errors).toEqual([])
     expect(code).toContain("core.drawThing(film)")
   })
+
+  test("<film/> beside other markup in an element is this film, in braces (epic `atmosphere` T48)", () => {
+    const body = `\t\t<for its films>\n\t\t\t<button>\n\t\t\t\t<film/>\n\t\t\t\t<text>Pick</text>\n\t\t\t</button>\n\t\t</for>`
+    const { code, errors } = compiled(body)
+    expect(errors).toEqual([])
+    expect(code).toMatch(/h\("ui-button",[^]*\(\) => core\.drawThing\(film\)/)
+  })
 })
 
 describe("<for>'s attributes and slots read as the drawing does", () => {

@@ -344,7 +344,9 @@ and the text it had moves into a folded Original Discussion.
 | `epic calm <epic>#J3 [J4 ...]` | marks calls or issues not urgent, yellow rather than red, as clicking the id chip does;  `--loud`:  red again |
 | `epic decide <epic>#Q3 "answer"` | answers a question, writing the answer INTO it, and prints its id;  `--option A` marks the chosen option card;  `--details <html>` |
 | `epic choose <epic>#J9 <letter> ["outcome"]` | records an option you settled in conversation, on any item, as your pick on the page would:  chosen on the item's latest set of cards (`--set N`:  the Nth), the item answered, closed or reviewed, and a Noted card |
-| `epic close <epic>#J3` | closes an item:  done, never deleted |
+| `epic close <epic>#J3 [<epic>#I7 ...] [--why "<text>"]` | closes items:  done, never deleted;  `--why` closes them as obsolete, the reason a Done card on each and in the log, and refuses questions, tests and anything you want, are reviewing or must pick (the others still close) |
+| `epic close <epic> --why-file <file>` | the same with a reason per item, in one write of the page:  a JSON5 file of id => reason (`/epic tidy`) |
+| `epic stale <epic> [--json]` | the facts for judging which open calls, issues and todos have gone stale:  age from when each was written, phase, whether the files and names it mentions still exist (in its worktree or on `main`;  only what git's history has can be gone), commits since, later mentions, the todo made to follow it up, the done phases it says it waits for, its status cards;  decides nothing (`/epic tidy`) |
 | `epic reopen <epic>#J3` | opens a closed or canceled item again |
 | `epic cancel <epic>#J3 ["why"]` | strikes through an item made moot by another decision;  `reopen` undoes it |
 | `epic details <epic>#J3 --file <reply.html>` | writes an agent's details into an item, its old text moving into the Original Discussion;  `--append`:  added, as a reply;  `--more`:  a More Details card under it |
@@ -606,6 +608,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 | `epic pages voice [<page> ...] [--voice <name>] [--done <page> ...]` | lists the guides a voice hasn't gone over yet (`/voice` rewrites them), with their word counts;  `--done` stamps one as gone over |
 | `epic pages offline [<page> ...]` | lists what the docs pages load from the internet, for airplane mode |
 | `epic pages shots <page \| URL>` | the designer review's screenshots (`/designer`):  desk, mid and phone width, light and dark, and the states asked for (`--full`, `--scroll`, `--hover`, `--click`);  a JSON summary last |
+| `epic pages publish <page> --site <url> [--as <handle>]` | publishes one guide to AT Protocol, as a Standard.site record in your atmosphere account that describes the page and links to it;  signs in with an app password (`$ATMOSPHERE_APP_PASSWORD`);  then the page's head points at the record (`--no-link`:  it doesn't);  `--dry-run`:  says the record, writes nothing |
 
 ### The repo's settings
 

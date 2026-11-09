@@ -37,14 +37,20 @@ export class TheOwnProperty extends MemberReadExpression<"definite_article" | "p
     const words = `${property.raw}`
     if (scope.variables?.get(words)) return undefined
     match.data.ownerType = ownerType
+    match.data.thingName = P.MethodScope.withThing(scope)?.thingName
     this.resolveMember(match, ownerType, words)
     return match
   }
 
-  /** `this.property`, or what `getMemberAST()` makes of it;  declared further down:  its type's record knows by now. */
+  /**
+   * `this.property`, or what `getMemberAST()` makes of it;  declared further down:  its type's record knows by now.
+   * - In a template's test, `it.property`:  the test's own thing (`P.MethodScope.thingName`).
+   */
   getAST(match: P.MatchFor<this>) {
     const { property } = match.groups
+    const { thingName } = match.data
     if (!match.data.member) this.resolveMember(match, match.data.ownerType, `${property.raw}`)
-    return this.getMemberAST(match, new P.ASTSelfLiteral(match), property)
+    const thing = thingName ? new P.ASTVariableExpression(match, { name: thingName }) : new P.ASTSelfLiteral(match)
+    return this.getMemberAST(match, thing, property)
   }
 }

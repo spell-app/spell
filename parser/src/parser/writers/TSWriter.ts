@@ -469,6 +469,8 @@ export class TSWriter extends JSWriter {
    */
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a body's last line calling a method that gives nothing:  just the call -- see `givesNothing()`
+    if (this.givesNothing(node.value)) return super.ASTReturnStatement(node)
     const fallback = this.getterDefault
     if (fallback && this.mayBeNothing(node.value)) return `return ${this.tight(node.value)} ?? ${this.bare(fallback)}`
     return `return ${this.parenthesized(this.bare(node.value))}`
@@ -1031,6 +1033,7 @@ export class TSWriter extends JSWriter {
     "adoptProjectStyles",
     "adoptStyleSheets",
     "agree",
+    "agreeing",
     "animationToRun",
     "appContext",
     "attributes",
@@ -1061,21 +1064,22 @@ export class TSWriter extends JSWriter {
     "formIsDisabled",
     "gliding",
     "handedThing",
-    "hasInertContent",
     "handlerFor",
+    "hasInertContent",
     "hasThere",
     "heardPlaced",
     "hostLayout",
     "idName",
     "internalState",
     "isAcceptingDrop",
+    "isClickable",
     "isConnected",
     "isControlledByPage",
-    "isClickable",
+    "isDisabled",
     "isDraggable",
     "isDragging",
+    "isDrawingInChildren",
     "isDroppable",
-    "isDisabled",
     "isEnabled",
     "isHidden",
     "isHiding",
@@ -1091,38 +1095,43 @@ export class TSWriter extends JSWriter {
     "isSelected",
     "isStill",
     "isVisible",
+    "joinOurTag",
+    "keepAgreeing",
+    "keepNewPropertiesAgreeing",
     "keepThingAndElementAgreeing",
     "linkTarget",
     "linkTo",
     "loadSpellUIFamilies",
     "menuBar",
     "missingText",
+    "moveAndResize",
     "moveDelay",
     "moveHere",
     "nameAfterHandedThing",
+    "noteInput",
     "numberItems",
     "on",
-    "noteInput",
+    "onChildrenDrawn",
+    "onClickToSelect",
     "onConnect",
     "onDisconnect",
     "onDragEnd",
-    "onChildrenDrawn",
-    "onClickToSelect",
     "onDragEnter",
     "onDragLeave",
     "onDragOver",
     "onDragStart",
     "onDrop",
+    "onFontSizeChanged",
     "onFormAssociated",
     "onFormDisabled",
     "onFormReset",
     "onFormStateRestore",
-    "onFontSizeChanged",
     "onMount",
     "onPlacingLeft",
     "onPointerDown",
     "onReadyChanged",
     "onRuntimeLoaded",
+    "onShadowChanged",
     "onSharedLinkClick",
     "onSharedStatesChanged",
     "onSharedWordsChanged",
@@ -1138,8 +1147,10 @@ export class TSWriter extends JSWriter {
     "onThingRightClick",
     "onVisibleChange",
     "onVisibleOrReadyChanged",
-    "ownerList",
+    "onWidthsChanged",
     "ownThing",
+    "owner",
+    "ownerList",
     "pageWrote",
     "partForName",
     "placeAt",
@@ -1161,15 +1172,21 @@ export class TSWriter extends JSWriter {
     "sharedFontSize",
     "sharedLabel",
     "sharedLink",
+    "sharedMovable",
+    "sharedResizable",
+    "sharedShadow",
     "sharedTarget",
     "sharedText",
     "sharedTooltip",
+    "sharedWay",
+    "sharedWidths",
     "shownValueOf",
     "showsLoader",
     "slotForName",
     "startListeners",
     "stopPlacing",
     "styleSheetNames",
+    "tagDefinition",
     "takesDrag",
     "thing",
     "translationForKey",
@@ -1372,15 +1389,16 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * One child of an element:  text as is (`{"..."}` when it has `{`, `<`, a line break ...),
+   * One child of an element:  text as is (`{"..."}` when it has `{`, `<`, a line break, two spaces together ...),
    * an expression in braces, an element.
    * - `""` for nothing to write.
    */
   jsxChild(child: P.ASTExpression): string {
     if (child instanceof P.ASTJSXText) {
       if (!child.value) return ""
-      // a paragraph's line break (`\n\n`) in a string, or the JSX compiler would read it as a space
-      return /[{}<>\n]/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
+      // in a string:  a paragraph's line break (`\n\n`), which the JSX compiler would read as a space,
+      // and two spaces together, which it would collapse into one (javascript's `h()` keeps both;  epic `language` T56)
+      return /[{}<>\n]|\s\s/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
     }
     if (child instanceof P.ASTJSXElement) return this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child

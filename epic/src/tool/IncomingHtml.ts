@@ -33,7 +33,7 @@ export class IncomingHtml {
   /** `html`, parsed into `document`'s nodes (out of it), old shapes made elements;  blank text at the ends dropped. */
   static nodes(document: Document, html: string, { person, agent }: { person?: string; agent?: string } = {}): Node[] {
     const box = document.createElement("div")
-    box.innerHTML = html
+    box.innerHTML = IncomingHtml.quoteStrayTags(html)
     const rewrite = ProseRewrite.plain(document)
     for (const child of Array.from(box.children)) {
       if (child.matches(ProseBlocks.reply)) child.replaceWith(rewrite.reply(child))
@@ -44,6 +44,20 @@ export class IncomingHtml {
     PathTooltips.rewrite(box)
     PlanMarkup.trimWhitespace(box)
     return Array.from(box.childNodes)
+  }
+
+  /**
+   * `html` with every tag that is no page markup QUOTED, as text:  `<for x>`, `<script>` become `&lt;for x>`,
+   * `&lt;script>` (epic `epic-engine` I225, r58:  a status card quoting `<for …>` became a real element and broke
+   * language.plan.html)
+   * - page markup:  the HTML a page writes (`PAGE_TAGS`), and every `<epic-*>` and `<ui-*>` element
+   * - never a script, a style or a frame, even written on purpose:  a command's HTML is prose
+   * - a person writes a plain sentence:  a tag name in it reads as it was typed
+   */
+  static quoteStrayTags(html: string): string {
+    return html.replace(TAG_START, (whole, name: string) =>
+      PAGE_TAGS.has(name.toLowerCase()) || /^(epic|ui)-/i.test(name) ? whole : `&lt;${whole.slice(1)}`
+    )
   }
 
   /**
@@ -113,3 +127,16 @@ const CLAUDE_NAME = "Claude"
 
 /** The agent a hand-written reply is marked as when the command says none (`markAgents()`). */
 const GUESSED_AGENT = "claude"
+
+/** A tag's start, opening or closing:  its name. */
+const TAG_START = /<\/?([a-zA-Z][\w-]*)/g
+
+/** The HTML elements a page's prose writes (`quoteStrayTags()`):  no script, style, frame or form. */
+const PAGE_TAGS: ReadonlySet<string> = new Set(
+  (
+    "a abbr b bdi bdo blockquote br caption cite code col colgroup dd del details dfn div dl dt em figcaption figure " +
+    "h1 h2 h3 h4 h5 h6 hr i img ins kbd li mark ol p picture pre q rp rt ruby s samp section small source span strong " +
+    "sub summary sup table tbody td tfoot th thead time tr u ul var wbr header footer aside nav article main svg path " +
+    "g circle rect line polyline polygon ellipse text title use defs"
+  ).split(" ")
+)

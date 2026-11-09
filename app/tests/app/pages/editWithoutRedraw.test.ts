@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A drop, a move and a side-bar edit leave the running app alone (epic `editor`, Edit Without Redraw).
@@ -12,28 +11,6 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 4000
@@ -286,17 +263,18 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     expect(code).toContain("200")
   })
 
-  test("a new type says it takes effect on restart, and the game goes on until then", async () => {
+  test("a new type is taken as it runs;  taking it out says it takes effect on restart, the game going on till then", async () => {
     await noteTheGame()
     const before = await textOf("Pile.spellml")
+    // added:  nothing running can be one of it, so the run goes on (epic `mockup` P4, J15)
     await edit("Pile.spellml", /$/, '\n<spell-view "extra part"></spell-view>\n')
-    await page.waitForSelector(".RestartNeeded ui-message", { timeout: 10_000 })
-    await expectGameKept()
-    // taken back:  nothing's waiting
-    await edit("Pile.spellml", /[^]*/, before)
+    await page.waitForTimeout(SETTLE_MS)
     expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)
     await expectGameKept()
-    await edit("Pile.spellml", /$/, '\n<spell-view "extra part"></spell-view>\n')
+    // taken out again:  a type gone waits for Restart
+    await edit("Pile.spellml", /[^]*/, before)
+    await page.waitForSelector(".RestartNeeded ui-message", { timeout: 10_000 })
+    await expectGameKept()
     await page.locator(".RestartNeeded ui-button").click()
     await page.waitForTimeout(SETTLE_MS)
     expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)
@@ -340,8 +318,8 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
         }
       ).editor.shownCodeEditor
       const lines = code.getValue().split("\n")
-      const at = lines.findIndex((each) => each.includes(" times</ui-button>"))
-      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</ui-button>") + 1 })
+      const at = lines.findIndex((each) => each.includes(" times</button>"))
+      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</button>") + 1 })
     })
     await counting.keyboard.type(" now")
     // compiled at once, rather than ten seconds after typing stops
@@ -356,6 +334,52 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       }
     })
     expect(shown).toEqual({ isConnected: true, count: 3, label: "Clicked 3 times now" })
+    await counting.close()
+  })
+
+  test("a selected button in a drawn thing follows its redraw:  Counter, the side bar on the new one (T52)", async () => {
+    const counting = await context.newPage()
+    await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
+    await counting.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await counting.waitForTimeout(3000)
+    if ((await counting.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
+      await counting.locator(".InspectAppButton [part~=item]").first().click()
+      await counting.waitForTimeout(400)
+    }
+    // Inspect's first-time help opens under its button, over the app's top left since the code moved back left:  close it
+    await counting.evaluate(() => (window as unknown as { Inspector: { dismissHelp(): void } }).Inspector.dismissHelp())
+    await counting.waitForTimeout(200)
+    await counting.locator(".AppPaneBody ui-button").first().click({ force: true })
+    await counting.waitForTimeout(400)
+    const wordsSelected = () =>
+      counting.evaluate(
+        () =>
+          (window as unknown as { Inspector: { allSelected: { element: Element }[] } }).Inspector.allSelected.at(-1)
+            ?.element.textContent
+      )
+    expect(await wordsSelected()).toBe("Clicked 0 times")
+    await counting.locator('.InputEditor .view-line:has-text("Clicked")').first().click()
+    await counting.evaluate(() => {
+      const code = (
+        window as unknown as {
+          editor: {
+            shownCodeEditor: { getValue(): string; setPosition(place: { lineNumber: number; column: number }): void }
+          }
+        }
+      ).editor.shownCodeEditor
+      const lines = code.getValue().split("\n")
+      const at = lines.findIndex((each) => each.includes(" times</button>"))
+      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</button>") + 1 })
+    })
+    await counting.keyboard.type(" now")
+    await counting.keyboard.press("ControlOrMeta+Enter")
+    await counting.waitForTimeout(SETTLE_MS)
+    const selected = await counting.evaluate(() => {
+      const { Inspector } = window as unknown as { Inspector: { allSelected: { element: Element }[] } }
+      const element = Inspector.allSelected.at(-1)?.element
+      return { isConnected: element?.isConnected, words: element?.textContent }
+    })
+    expect(selected).toEqual({ isConnected: true, words: "Clicked 0 times now" })
     await counting.close()
   })
 

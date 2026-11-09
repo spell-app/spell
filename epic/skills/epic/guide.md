@@ -48,6 +48,7 @@ epic pages link <page> --show     # the page's links, to give the person
    `epic add-phase <epic> "Short Name" --symptom "..." --changes "..." --goal "..." --files "..." --verify "..."`.
 4. Write each phase's build plan, ALL of them up front:  `epic update <epic>#P1 --plan "<ol>...</ol>"`.
    The person accepts each on the page (Accept plan);  build none before it's accepted.
+   Un-clicking an accepted plan's thumbs up holds it (`plan="held"`):  build it only once it's accepted again.
 
 ## build -- Build a phase
 
@@ -57,6 +58,7 @@ epic pages link <page> --show     # the page's links, to give the person
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
 3. Do the work.  Record as you go:
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
+     (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked)
    - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
@@ -83,6 +85,10 @@ Then, for what it printed:
    (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details),
    `epic update <epic>#J3 noted "<what was written>"`, then `epic inbox done <epic>#J3`.
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
+   Do this, on an issue or a judgement call:  NO todo;  it stays in the item, red, and `apply` prints your steps.
+   Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
+   `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange, for the person to review;
+   their Approve closes it.  Never `epic close` it yourself.
    A revisit left "to talk over" (a pick "B, but ...", a picture, their comments in its text):  answer its note into
    the item, as above, then `epic inbox clear <epic>#J3`.
    A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
@@ -110,6 +116,30 @@ epic turn end
 2. Merge the worktree's branch into the base branch, when the person says so, and remove the worktree:
    `epic worktree remove <epic>`, never a bare `git worktree remove`.
 3. Say what shipped, with the page's links (`epic pages link <page> --show`).
+
+## tidy -- Close what other work made obsolete
+
+Only when the person asks (the skill's word:  `$epic tidy`).
+
+```sh
+epic stale <epic> --json     # the facts per open call, issue and todo;  it decides nothing
+epic close <epic>#J3 <epic>#I7 --why "<what made it obsolete:  the commit, phase or item>"
+epic close <epic> --why-file reasons.json5                       # a reason per item (id => text), one write
+epic update <epic>#J3 noted "Maybe obsolete:  <why>" --quiet     # doubtful:  stays open
+epic update <epic>#J3 noted "Partly obsolete:  <what's moot, what's still wanted>" --quiet
+epic update <epic>#J3 promised "<what was promised, what's there instead>"   # waits on finished work that never delivered it
+```
+
+- Skip an entry with `closeRefused` or `settled`;  an entry with `tidyNoted` never gets a second card.
+- Read each against the current code and recent commits.
+- Close only when every thing the item asked for is done or moot, and you can name what did it:  check the commit really
+  touched it.  Say where anything left over went.  Half done:  a `Partly obsolete:` note.  Unsure:  leave it open.
+- Age alone never closes anything.  A judgement call carried out as decided stays open unless a named commit, phase or
+  later item made it moot.  A limit is obsolete only when it no longer holds.  Near-identical follow-ups are judged together.
+- An item waiting on a phase that's done (`waitsOnDone`) whose promised thing never came:  `promised`, never closed.
+- `--why` is plain text, and refuses questions, tests, and anything the person wants, asked for lately, is reviewing, or
+  must pick:  the others still close.
+- Then say how many closed, how many noted, and each promised item with what's missing.
 
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 

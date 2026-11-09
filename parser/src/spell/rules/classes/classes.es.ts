@@ -24,6 +24,12 @@ import { ClassMember } from "./ClassMember"
 import { CreateViewableListType } from "./CreateViewableListType"
 import { CreateListType } from "./CreateListType"
 import { CreateOneOfAKind } from "./CreateOneOfAKind"
+import { DefineDimension } from "./DefineDimension"
+import { UnitNames } from "./UnitNames"
+import { DimensionBase } from "./DimensionBase"
+import { DimensionUnit } from "./DimensionUnit"
+import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
+import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -37,6 +43,7 @@ import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { EveryThingWhere } from "./EveryThingWhere"
+import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard } from "./ListGuard"
@@ -64,9 +71,12 @@ import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION_ES } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
+import { PublishedAs } from "./PublishedAs"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
+import { TheSavedThings } from "./TheSavedThings"
+import { FieldValueFilter, SameFieldFilter, ThingFilters } from "./ThingFilter"
 import { ThingAtPlace } from "./ThingAtPlace"
 import { ThingName } from "./ThingName"
 import { TypeSpecifierDatatype } from "./TypeSpecifierDatatype"
@@ -82,9 +92,9 @@ import { WithNestedStatements } from "./WithNestedStatements"
 /** Spanish's `classes` rules. */
 export const classesEs = new SpellParser({ module: "classes" })
 
-/** What may follow a property's declaration:  its rules, `, que debe ...` -- English's `RULES`. */
+/** What may follow a property's declaration:  its rules, `, con una longitud máxima de 1`, `, que debe ...` -- English's `RULES`. */
 const RULES =
-  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
+  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? con una? longitud ((minimum:mínima|minima)|(maximum:máxima|maxima)) de? {lengthCount:number})? (,? que {rule:must_rule})? {nested_statements}?"
 
 /** What a list takes or gives up, after its subject:  `puede tomar una carta si: ...` -- English's `CAN_MOVE`. */
 const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
@@ -196,8 +206,8 @@ classesEs.addRule(
   }
 )
 
-// el dibujo de una ranura, entre comillas:  `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
-// (épica `elemental-spell` P5)
+// el dibujo de una ranura, entre comillas (épica `elemental-spell` P5):
+// `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
 classesEs.addRule(Wording.specialize({ ruleName: "draw_its_slot", meanings: ["draw_its_slot"] }), {
   syntax: "((draw_its_slot:dibujar su|dibujar el|dibujar la))"
 })
@@ -292,6 +302,23 @@ classesEs.addRule(CreateType, {
     { compileAs: "statement", tests: [['una "card" es una cosa', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] }
   ]
+})
+
+// un tipo de medida y sus unidades (épica `language` P23):  `la longitud es una dimensión:`
+classesEs.addRule(DefineDimension, {
+  syntax: "(el|la)? {type:type_words} es una (dimensión|dimension) {with_nested_statements}?"
+})
+
+// el nombre de una unidad, y cada otro nombre que tiene:  `"centímetro", alias "cm"`
+classesEs.addRule(UnitNames, { syntax: "[names:{name:text} (, alias)]" })
+
+// la unidad base de una dimensión:  `- su base es "metro", alias "m"`
+classesEs.addRule(DimensionBase, { syntax: "{type:subject_its} base es {unit:unit_names}" })
+
+// sus otras unidades:  `- un "centímetro", alias "cm", es 1/100 m`;  `- un "fahrenheit", alias "°F", es 5/9 °C, empezando en 32`
+classesEs.addRule(DimensionUnit, {
+  syntax:
+    "(un|una) {unit:unit_names} , es {top:number} (/ {bottom:number})? {of:unit_words} (, empezando en {start:number})?"
 })
 
 classesEs.addRule(CreateOneOfAKind, {
@@ -494,6 +521,11 @@ classesEs.addRule(MarkdownDescription, {
         [
           ["una card es una cosa:", "\t<markdown>", "\t\tUna carta:  **{rank}** de *suit*.", "\t</markdown>"],
           ["export class Card extends Thing {", '  static description = "Una carta:  **{rank}** de *suit*."', "}"]
+        ],
+        // las historias de una página (épica `mockup` P6):  su `static stories`
+        [
+          ["una card es una cosa:", "\t<stories>", "\t\t- [ ] repartir una carta", "\t</stories>"],
+          ["export class Card extends Thing {", '  static stories = "- [ ] repartir una carta"', "}"]
         ],
         // not in an outline:  says where it goes
         [
@@ -744,6 +776,48 @@ classesEs.addRule(SavedInFile, { syntax: "{type:subject_it} se guarda en su prop
 
 classesEs.addRule(SavedInFile, { syntax: "{type:subject_implied} se guarda en su propio archivo" })
 
+classesEs.addRule(PublishedAs, {
+  syntax: `${A} {type:known_type} se publica como {name:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("un status es una cosa", "block")
+      },
+      tests: [
+        ['un status se publica como "xyz.statusphere.status"', 'Status.publishedAs = "xyz.statusphere.status"'],
+        {
+          title: "not a built-in type:  every project shares it",
+          input: 'una cosa se publica como "com.example.thing"',
+          js: "/* PARSE ERROR: No se pueden publicar los registros del tipo cosa:  viene incorporado, y todos los proyectos lo comparten */"
+        }
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(PublishedAs, {
+  syntax: `${A} {type:known_type} se publica`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse("una receta es una cosa", "block")
+      },
+      tests: [["una receta se publica", "Receta.publishedAs = true"]]
+    }
+  ]
+})
+
+// in an outline body:  `- se publica como "xyz.statusphere.status"`
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_it} se publica como {name:text}" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_implied} se publica como {name:text}" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_it} se publica" })
+
+classesEs.addRule(PublishedAs, { syntax: "{type:subject_implied} se publica" })
+
 classesEs.addRule(VersionStep, {
   syntax: `${A} {type:known_type} (versión|version) {version:number} renombra {from:identifier} (a|como) {to:identifier}`,
   tests: [
@@ -931,6 +1005,10 @@ classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
 })
 classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
   syntax: "{type:subject_it} es soltable cuando :? {expression_body}"
+})
+// `<soltable cuando>`'s twin, `- es soltable cuando:`:  Spanish leaves `it` out, so `subject_it` matches nothing (T52)
+classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_implied} es soltable cuando :? {expression_body}"
 })
 
 classesEs.addRule(NewThing, {
@@ -1583,6 +1661,13 @@ classesEs.addRule(OutlineSpecifierEnum, {
   ]
 })
 
+// un porcentaje, guardado como su fracción:  `su "propina" es un porcentaje` (epic `language` P34)
+// -- before `un {type}`, which would make `porcentaje` a type of its own
+classesEs.addRule(OutlineSpecifierPercent, {
+  syntax: `${A} porcentaje (empezando en {start:expression})?`,
+  tests: [{ tests: [["un porcentaje", "number"]] }]
+})
+
 classesEs.addRule(OutlineSpecifierDatatype, {
   syntax: `${A} {datatype:singular_type}`,
   tests: [{ tests: [["un número", "number"]] }]
@@ -1612,6 +1697,21 @@ classesEs.addRule(OutlineSpecifierDatatype, {
     }
   ]
 })
+
+// a value every one must have:  `su "creado en" es una fecha obligatoria`, `su "estado" es texto obligatorio`
+// -- English's `a required date`, `required text`
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: `${A} {datatype:singular_type} (required:obligatorio|obligatoria)`,
+  tests: [{ tests: [["una fecha obligatoria", "date"]] }]
+})
+
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: "{datatype:known_type} (required:obligatorio|obligatoria)",
+  tests: [{ tests: [["texto obligatorio", "text"]] }]
+})
+
+// una propiedad que mide algo, en una unidad:  `su "altura" es una longitud en cm` (épica `language` P23)
+classesEs.addRule(OutlineSpecifierMeasure, { syntax: "(un|una) {datatype:singular_type} en {unit:unit_words}" })
 
 classesEs.addRule(OutlineSpecifierYesOrNo, {
   syntax: "(o bien)? ((sí|si) o no|verdadero o falso)",
@@ -1857,8 +1957,8 @@ classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:quoted_member} ${OF} ${A} {type:known_type} es :? {expression_body}?`
 })
 
-// un valor calculado de una lista propia (épica `elemental-spell` P5):  `- su "color" es uno de rojo, negro:`,
-// luego sus líneas de valor -- y sus frases, con viñeta, debajo
+// un valor calculado de una lista propia (épica `elemental-spell` P5):
+// `- su "color" es uno de rojo, negro:`, luego sus líneas de valor -- y sus frases, con viñeta, debajo
 classesEs.addRule(PropertyValueGetter, {
   syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
 })
@@ -2123,6 +2223,7 @@ classesEs.addRule(MenuBar, {
 })
 
 classesEs.addRule(DrawSlotOf, { syntax: "dibujar (el|la) {slot:member_words} de {thing:expression}" })
+// packs: none DrawSlotOf -- Spanish has no "draw its showing's page" (epic `language` T49)
 
 // poner una ranura en un dibujo:  `dibujar su frente`
 classesEs.addRule(DrawSlot, {
@@ -2428,6 +2529,74 @@ classesEs.addRule(TheThings, {
   ]
 })
 
+classesEs.addRule(TheSavedThings, {
+  syntax: "(los|las) {type:plural_type} (guardados|guardadas)",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una pila es una lista de things"].join("\n"), "block")
+      },
+      tests: [["las pilas guardadas", "core.everyThing(Pila)"]]
+    }
+  ]
+})
+
+// filtros con `con` (epic `data` P32, Q29):  `cada favorito con la misma dirección y nombre "blah"`
+classesEs.addRule(SameFieldFilter, {
+  syntax: "(el|la|los|las)? (mismo|misma|mismos|mismas) {field:declared_member_words}"
+})
+classesEs.addRule(FieldValueFilter, { syntax: "{field:declared_member_words} {value:expression}" })
+classesEs.addRule(ThingFilters, { syntax: "[{thing_filter} (,|y|e)]" })
+
+classesEs.addRule(EveryThingWith, {
+  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un palo como uno de tréboles, corazones",
+            "una carta tiene un nombre corto como texto"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("palo")
+      },
+      tests: [
+        [
+          "cada carta con el mismo palo",
+          "core.filter(core.everyThing(Carta), (carta) => carta.palo === palo)",
+          "core.filter(core.everyThing(Carta), (carta: Carta) => carta.palo === palo)"
+        ],
+        [
+          'cada carta con palo corazones y nombre corto "x"',
+          'core.filter(core.everyThing(Carta), (carta) => carta.palo === "corazones" && carta.nombreCorto === "x")',
+          'core.filter(core.everyThing(Carta), (carta: Carta) => carta.palo === "corazones" && carta.nombreCorto === "x")'
+        ]
+      ]
+    }
+  ]
+})
+classesEs.addRule(EveryThingWith, {
+  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters} donde {inline_expression}?"
+})
+classesEs.addRule(EveryThingWith, {
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters}"
+})
+classesEs.addRule(EveryThingWith, {
+  syntax:
+    "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} donde {inline_expression}?"
+})
+classesEs.addRule(TheSavedThingsWith, {
+  syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters}"
+})
+classesEs.addRule(TheSavedThingsWith, {
+  syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} donde {inline_expression}?"
+})
+
 classesEs.addRule(KindValues, {
   syntax: "{type:plural_type}",
   tests: [
@@ -2527,7 +2696,7 @@ classesEs.addRule(MustRule, {
 
 classesEs.addRule(MustRule, {
   syntax:
-    "debe tener {bound:at_least_or_at_most} {count:number} (letras|caracteres) (de largo)? {suggestion:rule_suggestion}?",
+    "debe tener {bound:at_least_or_at_most} {count:number} (letra|letras|carácter|caracteres) (de largo)? {suggestion:rule_suggestion}?",
   tests: [
     {
       tests: [

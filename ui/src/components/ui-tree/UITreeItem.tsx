@@ -13,12 +13,19 @@ import treeCSS from "./UITree.css?inline"
  *       <span part="toggle"/>     (the triangle:  a click opens or closes it, and selects nothing)
  *       <slot name="icon"/>  <span part="label"/>  <slot name="actions"/>
  *     </div>
- *     <div part="group"><slot/></div>   (the rows inside it, while it's open)
+ *     <div part="group">                (the rows inside it, while it's open)
+ *       <div class="folded"><slot/></div>
+ *     </div>
  *
  * - Opening and closing are a `Disclosure`:  `open`, `ui-opening`, `ui-closing`, as a section's are.
  * - A click on the row isn't handled here:  it reaches `<ui-tree>`, which knows the other rows.
  * - The row is what takes the focus' ring, though the DOM element takes the focus:  the tree's keys move it.
  * - How deep it is comes from its place, read as it connects:  it pads its row, so a selected row fills the width.
+ * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
+ *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
+ *   - Its rows stay drawn while it's closed (shut, and out of the keys' and a screen reader's reach), so they ease open
+ *     and shut, as the docs site's folds do (`--ui-tree-nav-open-duration` ...).  Every other tree draws them only
+ *     while it's open.
  ****************/
 export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   @E.proto static vocabulary = treeItemVocabulary
@@ -37,6 +44,18 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
 
   /** How many rows it's inside. */
   @E.state accessor depth = 0
+
+  /** How many rows it's inside that aren't `band`s:  how far in it's drawn, as a heading band adds no step. */
+  @E.state accessor indent = 0
+
+  /** Its tree is a side navigation (`appearance="nav"`):  `:state(nav)`. */
+  @E.cssState("nav") @E.state accessor isInNav = false
+
+  /** It's a heading band over its rows:  `:state(band)`, with `band`'s value as a class of its row. */
+  @E.cssState("band")
+  get isBand(): boolean {
+    return !!this.band
+  }
 
   /** The tree's `filter` hides it. */
   @E.state @E.cssState("filtered-out") accessor isFilteredOut = false
@@ -59,6 +78,11 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   /** The rows inside it are on screen. */
   get showsRows(): boolean {
     return this.canOpen && (this.isOpen || this.isKeptOpen)
+  }
+
+  /** The box of rows inside it is drawn:  while they show, and always in a side navigation, so they ease. */
+  get drawsRows(): boolean {
+    return this.showsRows || (this.isInNav && this.canOpen)
   }
 
   /** What `ui-changed` calls it. */
@@ -93,7 +117,7 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   render() {
     return (
       <>
-        <div class="row" part={this.partForName("row")} style={{ "--_ui-tree-depth": this.depth }}>
+        <div class={["row", this.band]} part={this.partForName("row")} style={{ "--_ui-tree-depth": this.indent }}>
           <span
             class="toggle"
             part={this.partForName("toggle")}
@@ -110,13 +134,34 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
               <Show when={this.which}>{(which) => <span class="which">{which()}</span>}</Show>
             </slot>
           </span>
+          <Show when={this.count}>
+            {(count) => (
+              <ui-label class="count" part={this.partForName("count")} size="mini" appearance="circular">
+                {count()}
+              </ui-label>
+            )}
+          </Show>
+          <Show when={this.badge}>
+            {(badge) => (
+              <ui-label class="badge" part={this.partForName("badge")} size="mini" color="yellow" appearance="basic">
+                {badge()}
+              </ui-label>
+            )}
+          </Show>
           <span class="actions">
             <slot name="actions" />
           </span>
         </div>
-        <Show when={this.showsRows}>
-          <div class="rows" role="group" part={this.partForName("group")}>
-            <slot />
+        <Show when={this.drawsRows}>
+          <div
+            class={["rows", { shut: !this.showsRows }]}
+            role="group"
+            part={this.partForName("group")}
+            inert={this.showsRows ? undefined : ""}
+          >
+            <div class="folded">
+              <slot />
+            </div>
           </div>
         </Show>
       </>
@@ -130,14 +175,19 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
     this.disclosure.toggle(event)
   }
 
-  /** It connected:  how deep it is;  and a selected row scrolls into view. */
+  /** It connected:  how deep it is, and whether its tree is a side navigation. */
   onConnect() {
     super.onConnect()
     let depth = 0
-    for (let at = this.domElement.parentElement; at; at = at.parentElement) {
-      if (at.localName === this.domElement.localName) depth++
+    let indent = 0
+    let at = this.domElement.parentElement
+    for (; at && at.localName === this.domElement.localName; at = at.parentElement) {
+      depth++
+      if (!at.hasAttribute(BAND)) indent++
     }
     this.depth = depth
+    this.indent = indent
+    this.isInNav = at?.getAttribute("appearance") === NAV
   }
 
   /** It was selected, by whatever:  it shows, in the middle of the tree if it was out of sight. */
@@ -148,3 +198,9 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
 }
 
 export interface UITreeItem extends E.AttributeValues<typeof treeItemVocabulary> {}
+
+/** The tree's `appearance` that makes it a side navigation. */
+const NAV = "nav"
+
+/** The attribute of a row that's a heading band:  it adds no step in. */
+const BAND = "band"

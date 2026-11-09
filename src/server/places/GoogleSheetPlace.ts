@@ -10,9 +10,9 @@ import {
   type PlaceContext,
   type PlaceRow,
   type RateLimit
-} from "spell/util/places/places.types"
-import { SheetTable } from "spell/util/places/SheetTable"
-import { jsonIn, WebPlace } from "spell/util/places/WebPlace"
+} from "spell/places/places.types"
+import { SheetTable } from "spell/places/SheetTable"
+import { jsonIn, WebPlace } from "spell/places/WebPlace"
 
 import { GoogleToken } from "./GoogleToken"
 import type { PlaceKeys } from "./PlaceKeys"

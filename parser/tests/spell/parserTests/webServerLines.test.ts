@@ -5,7 +5,7 @@
  */
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { RestPlace } from "spell/util/places"
+import { RestPlace } from "spell/places"
 import { core } from "spell/parser/core"
 import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 
@@ -131,7 +131,8 @@ describe("RestPlace", () => {
     const asked = serve({ [`${HOST}/people/1`]: { url: `${HOST}/people/1`, name: "Luke" } })
     const place = new RestPlace({ url: HOST, allCollections: { fields: { id: "url" } } })
     const rows = await place.getMany("people", [`${HOST}/people/1`], {})
-    expect(rows).toEqual([{ id: `${HOST}/people/1`, name: "Luke" }])
+    // its id's field is still itself too (epic `data` P28)
+    expect(rows).toEqual([{ id: `${HOST}/people/1`, url: `${HOST}/people/1`, name: "Luke" }])
     expect(asked).toEqual([`${HOST}/people/1`])
   })
 
@@ -142,8 +143,8 @@ describe("RestPlace", () => {
       allCollections: { rowsAt: "rows", fields: { id: "key" } },
       collections: { b: { rowsAt: "inside", fields: { title: "name" } } }
     })
-    expect((await place.list("a", {}, {})).rows).toEqual([{ id: 1 }])
-    expect((await place.list("b", {}, {})).rows).toEqual([{ id: 2, title: "x" }])
+    expect((await place.list("a", {}, {})).rows).toEqual([{ id: 1, key: 1 }])
+    expect((await place.list("b", {}, {})).rows).toEqual([{ id: 2, key: 2, title: "x" }])
   })
 })
 
@@ -202,5 +203,98 @@ describe("a server that searches (epic `data` P26, T70)", () => {
     const found = await core.savedThings(Move as new () => unknown, { search: { name: "sky" } })
     expect((found.items as Array<{ name: string }>).map(({ name }) => name)).toEqual(["Skyfall"])
     expect(asked).toEqual([`${HOST}/moves?search=sky`])
+  })
+})
+
+describe("GitHub's way (epic `data` P28)", () => {
+  /** A server whose answers carry headers:  each route its body and headers;  what's asked, with its key if any. */
+  function serveWithHeaders(routes: Record<string, { body: unknown; headers?: Record<string, string> }>) {
+    const asked: Array<{ url: string; key: string | null }> = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push({ url, key: new Headers(init?.headers).get("authorization") })
+      const route = routes[url]
+      return route === undefined ? new Response("no", { status: 404 }) : Response.json(route.body, route)
+    })
+    return asked
+  }
+
+  const LINES = [
+    `github is a web server at "${HOST}":`,
+    `\t- its key is the secret "GITHUB_TOKEN", if it's set`,
+    `\t- its next page is in its "Link" header`,
+    `\t- contributors live at "/repos/solidjs/solid/contributors"`,
+    `a "contributor" is a thing:`,
+    `\t- it lives in github`,
+    `\t- its "login" is text`
+  ]
+  const PAGE_2 = `${HOST}/repositories/1/contributors?page=2`
+  const ROUTES = {
+    [`${HOST}/repos/solidjs/solid/contributors`]: {
+      body: [{ id: 1, login: "ryansolid" }],
+      headers: { link: `<${PAGE_2}>; rel="next", <${PAGE_2}>; rel="last"` }
+    },
+    [PAGE_2]: { body: [{ id: 2, login: "thetarnav" }], headers: { link: `<${HOST}/x?page=1>; rel="prev"` } }
+  }
+
+  test("the lines compile, in either language:  a key taken when it's set needs no server side", () => {
+    const { compiled, errors, warnings } = parseSpellProject([{ path: "/G.spell", contents: `${LINES.join("\n")}\n` }])
+      .files[0]!
+    expect(errors).toEqual([])
+    expect(String(warnings)).not.toMatch(/server side/)
+    expect(compiled).toContain(`keyNamed: "GITHUB_TOKEN"`)
+    expect(compiled).toContain(`keyIfSet: true`)
+    expect(compiled).toContain(`nextPageInLink: true`)
+    const es = [
+      `github es un servidor web en "${HOST}":`,
+      `\t- su clave es el secreto "GITHUB_TOKEN", si la hay`,
+      `\t- su página siguiente está en su cabecera "Link"`
+    ]
+    const spanish = parseSpellProject([{ path: "/G.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain(`keyIfSet: true`)
+    expect(spanish.compiled).toContain(`nextPageInLink: true`)
+  })
+
+  test("a next page in any other header won't compile, saying so;  a key it can't do without still needs a server side", () => {
+    const lines = [`github is a web server at "${HOST}":`, `\t- its next page is in its "X-Next" header`]
+    const { errors } = parseSpellProject([{ path: "/G.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors.join("\n")).toMatch(/said in a "Link" header, not "X-Next"/)
+    const needed = [`github is a web server at "${HOST}":`, `\t- its key is the secret "GITHUB_TOKEN"`]
+    const { warnings } = parseSpellProject([{ path: "/G.spell", contents: `${needed.join("\n")}\n` }]).files[0]!
+    expect(String(warnings)).toMatch(/needs a small server side/)
+  })
+
+  test("every page, by its Link header;  with no key set, each request goes without", async () => {
+    const asked = serveWithHeaders(ROUTES)
+    core.resetRuntime()
+    const { Contributor } = runSpell(LINES)("Contributor")
+    expect((await read(Contributor)).map(({ login }) => login)).toEqual(["ryansolid", "thetarnav"])
+    expect(asked.map(({ url }) => url)).toEqual([`${HOST}/repos/solidjs/solid/contributors`, PAGE_2])
+    expect(asked.map(({ key }) => key)).toEqual([null, null])
+  })
+
+  test("with the key set where it runs, it goes on each request", async () => {
+    const asked = serveWithHeaders(ROUTES)
+    core.resetRuntime().keyFrom = (name) => (name === "GITHUB_TOKEN" ? "t0ken" : undefined)
+    const { Contributor } = runSpell(LINES)("Contributor")
+    await read(Contributor)
+    expect(asked.map(({ key }) => key)).toEqual(["Bearer t0ken", "Bearer t0ken"])
+  })
+
+  test("a field that's its id is still itself too:  a user's login", async () => {
+    serveWithHeaders({ [`${HOST}/users/ryansolid`]: { body: { login: "ryansolid", name: "Ryan" } } })
+    core.resetRuntime()
+    const { User } = runSpell([
+      `github is a web server at "${HOST}":`,
+      `\t- users are found at "/users/{name}"`,
+      `\t- a user's id is its "login"`,
+      `a "user" is a thing:`,
+      `\t- it lives in github`,
+      `\t- its "login" is text`,
+      `\t- its "name" is text`
+    ])("User")
+    const user = (await core.savedThingWithId(User as never, "ryansolid")) as unknown as Record<string, unknown>
+    expect([user.id, user.login, user.name]).toEqual(["ryansolid", "ryansolid", "Ryan"])
   })
 })

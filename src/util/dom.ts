@@ -165,7 +165,7 @@ export function scrollIntoSight(element: Element): void {
 }
 
 /** The nearest ancestor of `element` that scrolls up and down, across shadow roots:  `undefined` if none does. */
-function scrollingBoxFor(element: Element): Element | undefined {
+export function scrollingBoxFor(element: Element): Element | undefined {
   for (let at = flatParentFor(element); at; at = flatParentFor(at)) {
     if (at.scrollHeight > at.clientHeight && /auto|scroll/.test(getComputedStyle(at).overflowY)) return at
   }

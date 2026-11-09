@@ -1,0 +1,40 @@
+# Una tarea
+// Algo por hacer:  su título, su prioridad, y si está hecha.
+// Cada tarea es un elemento propio en la página, `<lista-de-tareas-tarea>`.
+// Un clic la selecciona, mayúsculas y comando (ctrl) seleccionan más, para el editor de propiedades (`seleccionable`);
+// arrastrarla la mueve, y las seleccionadas van con ella (`arrastrable`).
+
+una "tarea" es una vista:
+	// Lo que hay que hacer
+	- su "título" es texto
+	// Cualquier otra cosa sobre ella
+	- su "nota" es texto
+	- su "prioridad" es uno de baja, normal o alta
+	- su "hecha" es sí o no
+	// Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve
+	- su "orden" es un número
+	- "está hecha" si su hecha es sí
+	- "está pendiente" si su hecha es no
+	// Fuera de donde se guarda:  una tarea que no se guarda en ningún lugar no tiene nada que hacer;  cada clase de tarea guardada dice cómo, en el archivo de su guardián
+	- para tirarla: devolver
+
+	// Un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea;  su prioridad se muestra solo cuando no es normal
+	- para dibujar eso:
+		<es-formulario value={eso}>
+			<es-pila direccion="horizontal" separacion="sm">
+				<es-icono name="grip vertical" color="grey" aria-label="Arrastrar"/>
+				<es-casilla name="hecha" aria-label="Hecha"/>
+				<es-entrada part="title" name="título" aria-label="Tarea" apariencia="transparent" fluido/>
+				<si la prioridad no es normal>
+					<es-etiqueta tamano="diminuto" color={"red" si la prioridad es alta de lo contrario "grey"}>{la prioridad}</es-etiqueta>
+				</si>
+			</es-pila>
+		</es-formulario>
+
+	- para probar marcar una:
+		poner la tarea a una nueva tarea con título = "Escribir las pruebas"
+		la tarea está pendiente debería ser sí
+		poner la hecha de la tarea a sí
+		la tarea está hecha debería ser sí
+	- es arrastrable
+	- es seleccionable

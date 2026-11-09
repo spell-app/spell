@@ -110,7 +110,9 @@ const KINDS: Record<string, readonly [string, string]> = {
  */
 export function epicStateFor(facts: EpicFacts, now: Date = new Date()): EpicState {
   const { phases, updated, future = false, standing = false, urgent = [], running = false, active } = facts
-  const done = phases.filter((status) => status === "done").length
+  // finished:  done, or dropped (never built:  epic `epic-engine` I228);  `PhaseStatuses.isFinished()`'s rule, said
+  // again here, which imports nothing
+  const done = phases.filter((status) => status === "done" || status === "dropped").length
   const count = phases.length ? `${done}/${phases.length}` : ""
   if (future && !phases.length) return stateOf("future", "not planned yet")
   if (phases.length && done === phases.length) {

@@ -1,0 +1,3 @@
+550:86 TS2345 Argument of type '(item: Tarea) => number' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
+550:116 TS2345 Argument of type '(tarea: Tarea) => Agenda' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
+577:5 TS2322 Type 'string' is not assignable to type '"normal" | "baja" | "alta"'.

@@ -1,9 +1,9 @@
-import { execSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 
 import { chromium, type BrowserContext, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
+
+import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Click a line of the code, a line of compiled code, a row of the tree or a thing on the screen, and the others follow
@@ -16,27 +16,6 @@ import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-pl
  * - Headless Playwright, never a real browser window.
  */
 
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 const SHOTS = process.env.SHOTS
 
 /** A browser context whose saves go nowhere near the disk. */
@@ -152,8 +131,12 @@ describe.skipIf(!SERVING)("code follows along", () => {
   afterAll(async () => (await browser).close())
 
   // what this test is for:  the built-in examples stay as they are
+  let builtInProjectsBefore: string
+  beforeEach(() => {
+    builtInProjectsBefore = builtInProjectsNow()
+  })
   afterEach(() => {
-    expect(execSync("git status --short spaces", { cwd: path.join(KIT, "app") }).toString()).toBe("")
+    expect(builtInProjectsNow()).toBe(builtInProjectsBefore)
   })
 
   test("no compiled code unless asked for, then remembered, with its language", { timeout: 150_000 }, async () => {
@@ -179,7 +162,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
     const page = await context.newPage()
     await open(page, "Solitaire")
     await chooseOutput(page, "JavaScript")
-    const place = await writtenPlace(page, "ui-item", "Moves")
+    const place = await writtenPlace(page, "ui-text", "Moves")
     expect(place.file).toBe("Solitaire.spellml")
 
     await showFile(page, "Solitaire.spellml")
@@ -187,7 +170,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
     await clickCodeLine(page, place.line)
     const state = await following(page)
     expect(state.followed).toMatchObject({ path: place.file, line: place.line, from: "code" })
-    expect(state.selected).toEqual(["ui-item"])
+    expect(state.selected).toEqual(["ui-text"])
     expect(state.treeSelected).toBeGreaterThan(0)
     expect(state.outputMarks, "compiled code marks its line").toBeGreaterThan(0)
     expect(state.codeMarks, "the code doesn't follow itself").toBe(0)
@@ -306,7 +289,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       await page.waitForTimeout(800)
       await chooseOutput(page, "JavaScript")
       const seen = await page.evaluate(() => document.documentElement.dataset.spellTheme)
-      const place = await writtenPlace(page, "ui-item", "Moves")
+      const place = await writtenPlace(page, "ui-text", "Moves")
       await showFile(page, place.file)
       await page.waitForTimeout(1500)
       await clickCodeLine(page, place.line)

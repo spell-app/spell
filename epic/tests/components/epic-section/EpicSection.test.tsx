@@ -726,7 +726,7 @@ describe("<epic-section kind=phases> state chips", () => {
         `status="active"`,
         `status="todo" plan="waiting"`,
         `status="todo" plan="accepted" choices-open="1"`,
-        // waiting for the Accept AND changed:  red first
+        // waiting for the Accept AND changed:  waiting first (orange, epic `epic-engine` P63)
         `status="active" plan="waiting" to-see="up2@${hourAgo}"`,
         // changed AND under way:  orange first
         `status="active" plan="accepted" to-see="up3@${hourAgo}"`,
@@ -734,20 +734,32 @@ describe("<epic-section kind=phases> state chips", () => {
         // its update quiet (3 days):  no news
         `status="todo" plan="accepted" to-see="up4@${weekAgo}"`,
         `status="todo" plan="accepted"`,
-        `status="todo"`
+        `status="todo"`,
+        // held by Owen (I221):  paused, grey;  never red
+        `status="todo" plan="held"`
       ])
     )
-    expect(chips(host)).toEqual({ attention: true, updated: true, scheduled: true, recent: true, old: true })
+    expect(chips(host)).toEqual({
+      attention: true,
+      waiting: true,
+      updated: true,
+      paused: true,
+      scheduled: true,
+      recent: true,
+      old: true
+    })
     expect(chipButtons(host).map((button) => `${button.dataset.state}:${button.textContent}`)).toEqual([
-      "attention:3",
+      "attention:1",
+      "waiting:2",
       "updated:2",
+      "paused:1",
       "scheduled:3",
       "recent:2",
       "old:2"
     ])
     expect(
       chipButtons(host).map((button) => [button.dataset.color, button.dataset.fill ?? ""].join(" ").trim())
-    ).toEqual(["red", "orange", "blue dotted", "green", "grey"])
+    ).toEqual(["red", "orange", "orange", "grey", "blue dotted", "green", "grey"])
     // the one under way in the filter's blue badge;  the toolbar's Phases badges:  3 red, 1 blue
     const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!
     expect(filter.shadowRoot!.querySelector(".marked")!.textContent).toBe("1")
@@ -756,16 +768,19 @@ describe("<epic-section kind=phases> state chips", () => {
     // each phase's status circle the colour of its chip
     const circle = (id: string) =>
       host.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
-    expect(["p1", "p2", "p5", "p6", "p9", "p12"].map((id) => circle(id).dataset.state)).toEqual([
+    expect(["p1", "p2", "p5", "p6", "p9", "p12", "p14"].map((id) => circle(id).dataset.state)).toEqual([
       "recent",
       "old",
       "progress",
-      "attention",
+      "waiting",
       "updated",
-      "scheduled"
+      "scheduled",
+      "paused"
     ])
+    // paused:  a grey pause, the colour of its chip
+    expect(getComputedStyle(circle("p14")).color).toBe(getComputedStyle(chip(host, "paused")).borderTopColor)
     const colorOf = (state: string) => getComputedStyle(chip(host, state)).borderTopColor
-    expect(getComputedStyle(circle("p6")).color).toBe(colorOf("attention"))
+    expect(getComputedStyle(circle("p6")).color).toBe(colorOf("waiting"))
     expect(getComputedStyle(circle("p9")).color).toBe(colorOf("updated"))
     // the scheduled chip is filled, its dots lighter:  the circle wears its fill
     expect(getComputedStyle(circle("p12")).color).toBe(getComputedStyle(chip(host, "scheduled")).backgroundColor)

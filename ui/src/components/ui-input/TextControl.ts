@@ -79,16 +79,29 @@ export abstract class TextControl<V extends E.ComponentVocabulary = E.ComponentV
   @E.untracked
   protected syncControl() {
     const { control } = this
-    const value = this.value
+    const value = this.shownFor(this.value)
     // a file input's value can only be cleared from script
     if (!control || control.value === value || (control.type === "file" && value !== "")) return
     control.value = value
   }
 
+  /**
+   * What the control shows for `value`:  the same, unless a sub-class shows it otherwise
+   * (`<ui-input type="percent">` shows `0.18` as `18`) -- `valueFor()` reads it back.
+   */
+  protected shownFor(value: string): string {
+    return value
+  }
+
+  /** The value for what the control shows, `shown`:  the same, unless a sub-class shows it otherwise (`shownFor()`). */
+  protected valueFor(shown: string): string {
+    return shown
+  }
+
   /** Typing:  `ui-input` first, then the value (unless a handler took over). */
   protected readonly onInput = (event: Event) => {
     const control = event.currentTarget as HTMLInputElement | HTMLTextAreaElement
-    const next = control.value
+    const next = this.valueFor(control.value)
     const applied = this.requestChange("value", next, () =>
       this.send("ui-typed" as never, { value: next, originalEvent: event })
     )
@@ -212,7 +225,7 @@ export abstract class TextControl<V extends E.ComponentVocabulary = E.ComponentV
    */
   protected get staticControl(): Record<string, unknown> {
     if (!isServer) return {}
-    return { [UIT.STATIC_CONTROL]: "", name: this.name, value: this.value || undefined }
+    return { [UIT.STATIC_CONTROL]: "", name: this.name, value: this.shownFor(this.value) || undefined }
   }
 }
 

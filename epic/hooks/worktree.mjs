@@ -26,7 +26,7 @@
  *   (CLI 2.1.287:  no branch or base field, whatever the docs say).
  * - Prints the worktree's absolute path on stdout, the ONLY thing on stdout;  progress goes to stderr.
  * - An agent's worktree (`isolation: "worktree"`, name `agent-<id>`) started by a session in worktree `<owner>`
- *   (an epic's) is named `<owner>-agent-<id>`, worktree and branch (Owen, 2026-10-05):
+ *   (an epic's) is named `<owner>-agent-<id>`, worktree and branch (2026-10-05):
  *   - `git worktree list` says whose it is
  *   - `remove` and `/isolate done` know its work is safe once it's in `<owner>`'s branch
  * - REFUSES `<name>` when it's an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):
@@ -131,6 +131,7 @@ import {
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
+import { pathInside } from "spell/server/RealPath"
 import { CheckoutPatches } from "spell/epic/command/CheckoutPatches.ts"
 import { CheckoutServers } from "spell/epic/command/CheckoutServers.ts"
 import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
@@ -389,7 +390,7 @@ class Worktree {
       try {
         const target = readlinkSync(link)
         const at = resolve(dirname(link), target)
-        const inside = at === path || at.startsWith(`${path}/`)
+        const inside = pathInside(path, at) !== undefined
         const mains = join(root, name)
         if (isAbsolute(target) || inside || existsSync(link) || lstatSync(at, { throwIfNoEntry: false })) continue
         if (!existsSync(mains)) continue

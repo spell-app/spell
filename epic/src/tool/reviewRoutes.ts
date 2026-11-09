@@ -17,7 +17,8 @@
  * - `GET /api/epics/review/inbox?page=<path>` -- the inbox;  the page polls it
  * - `POST /api/epics/review/mark` `{ page, id, mark }` -- set item `id`'s mark, or remove it (`mark: null`)
  *   - the mark:  `{ action, when?, note?, pick?, choices? }`, `at` stamped here;
- *     a revisit may carry a `pick` letter too;  `choices`, the pick's card set by position (I8)
+ *     a revisit may carry a `pick` letter too;  `choices`, the pick's card set by position (I8);  `sets`, the
+ *     holder's other sets' changes (epic `epic-engine` I227), checked by `ReviewInbox.toMark()`
  *   - `id` must be an item, phase, Overview sub-section or the summary (`summary`) of that doc
  *     (400 otherwise:  `ReviewInbox.itemIds()`)
  *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
@@ -192,7 +193,10 @@ function epicOf(file: string): string {
 
 /** Send:  every mark so far is sent;  whether anything was new to hand over (a Send with nothing new wakes nobody). */
 function sendMarks(inbox: ReviewInbox): boolean {
-  const fresh = inbox.hasUnsent
+  // a stage accept counting down goes with a PRESS of Send (I222);  never with Auto Send (`sendNow()`), which would cut
+  // its countdown short
+  const released = inbox.releaseHeld(new Date(Date.now() - 1).toISOString()) > 0
+  const fresh = inbox.hasUnsent || released
   inbox.markSent()
   return fresh
 }

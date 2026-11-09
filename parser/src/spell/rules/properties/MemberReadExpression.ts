@@ -125,6 +125,18 @@ export class MemberReadExpression<
   }
 
   /**
+   * Does `match` read a member its type never declares, where spell knows every member that type has?
+   * e.g. `the opening of the guide`, when a guide has no `opening` (epic `language` T90).
+   * - A loose read the project can't mean:  a call (`DynamicMethodRule`) given one steps aside for any other reading.
+   * - Reads the records as they are now:  call it WHILE PARSING.
+   */
+  static readsUndeclared(match: P.Match): boolean {
+    const read = MemberReadExpression.memberRead(match)
+    if (!read || read.member || !read.type || read.type.valueKind) return false
+    return MemberReadExpression.knowsAllMembersOf(read.type) && !read.type.getMember(`${read.property.value}`)
+  }
+
+  /**
    * Does spell know every member `type` has?  Only when the project declares it (no `stub` left),
    * and each of its super-types is the project's too, or spell's own (`Thing`, `List` ...), never an import.
    * - Reads the records as they are now:  a stub may be claimed after a read of it.
@@ -180,6 +192,8 @@ type MemberData = {
   ownerType?: P.TypeScope
   /** An enumerated property's values:  the type whose class variable holds them, e.g. `Card`. */
   enumerationOf?: string
+  /** `the_own_property`:  the variable holding the thing, where it isn't `this` -- see `P.MethodScope.thingName`. */
+  thingName?: string
 }
 
 /** What `MemberReadExpression.memberRead()` says a member read reads. */

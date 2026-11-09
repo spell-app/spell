@@ -11,6 +11,7 @@ import {
   ConsoleRoot,
   InputRoot,
   Inspector,
+  InspectorData,
   InspectorPane,
   InspectHelp,
   AddPartButton,
@@ -27,6 +28,7 @@ import {
   PROJECT_ICON,
   ProgramPanelShown,
   ProjectBarMenu,
+  SpellBarMenu,
   SpellPage,
   SpellReference,
   ThemeMenu,
@@ -39,9 +41,9 @@ import {
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
-import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
+import { EDITOR_PIECES, isDraftEditor, loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
+import editorBarSpell from "spell/app/spaces/@spell/editor/editor-bar/EditorBar.spellml"
+import editorLayoutSpell from "spell/app/spaces/@spell/editor/editor-layout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -63,7 +65,9 @@ const OUTPUT_ROOM = 440
 /****************
  * ### `<SpellEditor>`
  * A project's page, in each of the editor's modes (`mode`, `EditorMode`):
- * - Edit:  the running program (`<AppPane>`) on the left, the code (`<InputRoot>`) at the far right (Owen, 2026-11-04).
+ * - Edit:  the code (`<InputRoot>`) on the left, the running program (`<AppPane>`) to its right (Owen, 2026-11-06).
+ *   - The app takes every change of size:  dragging the code's bar gives the room to the app, or takes it,
+ *     and the window growing or shrinking is the app's too (`appGrows()`).
  * - Run:  the program alone, the code column gone.
  *   - ONE page for both (Owen:  "a discontinuity in the page when I switch between run / edit"):
  *     switching keeps the page, its bar and the running program where they are;  only the code column comes and goes.
@@ -76,9 +80,10 @@ const OUTPUT_ROOM = 440
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
  * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
- * - The Inspector, while it's open, is a pane between the app and the code (`<InspectorPane>`, epic `debut` P13):
- *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
- *   - Its own remembered sizes (`spellEditor-columns-edit-inspector`):  three panes, not two.
+ * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13);
+ *   never in Run, which shows the app alone, and back as it was in Edit.
+ *   It's a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
+ *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
  ****************/
@@ -90,7 +95,16 @@ export function SpellEditor(props: { mode: Mode }) {
   // the code's column:  hidden in Run, and for a project with its code closed
   const hidesCode = () => isRunning() || CodeShown.isClosed(editor.project?.path)
   const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
-  const columns = rememberedSizes(() => columnsFor(hidesCode(), Inspector.isOpen, !!CodeOutputShown.target))
+  // the Inspector's pane:  never in Run, which is the app alone (Owen, 2026-11-07);  still open for Edit, and a phone's sheet
+  const showsInspector = () => Inspector.isOpen && props.mode !== "run"
+  // ... and nothing stays selected in Run:  its ants would sit over the app alone (Owen, 2026-11-07)
+  createEffect(
+    () => props.mode === "run",
+    (isRun) => {
+      if (isRun && Inspector.allSelected.length) Inspector.letGo()
+    }
+  )
+  const columns = rememberedSizes(() => columnsFor(hidesCode(), showsInspector(), !!CodeOutputShown.target))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
@@ -146,14 +160,19 @@ export function SpellEditor(props: { mode: Mode }) {
     },
     inspector: {
       draw: () => (
-        <Show when={Inspector.isOpen}>
+        <Show when={showsInspector()}>
           <InspectorPane />
         </Show>
       )
     }
   }
-  const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: hidesCode() ? "run" : "edit" })
-  const layout = drawnPiece(editorLayoutSpell, "editorLayout", () => ({ ...parts, ...settings() }))
+  const settings = () => ({
+    columns: columns.sizes(),
+    codeRows: codeRows.sizes(),
+    grows: appGrows(hidesCode()),
+    mode: hidesCode() ? "run" : "edit"
+  })
+  const layout = drawnPiece(editorLayoutSpell, "editor-layout", "editorLayout", () => ({ ...parts, ...settings() }))
   createEffect(settings, (changed) => {
     const thing = layout.thing()
     if (thing) Object.assign(thing, changed)
@@ -178,13 +197,13 @@ export function SpellEditor(props: { mode: Mode }) {
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
-          <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
-            {parts.app.draw()}
-            {parts.inspector.draw()}
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows={appGrows(hidesCode())} resizable>
             <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>
+            {parts.app.draw()}
+            {parts.inspector.draw()}
           </ui-split-panel>
         </Show>
       </div>
@@ -194,12 +213,13 @@ export function SpellEditor(props: { mode: Mode }) {
 
 /**
  * The thing `name` of the layout piece `compiled`, once it's loaded, and its drawing.
+ * - `pieceProject`:  its project in the group `@spell/editor` (`editor-layout` ...), compiled from your drafts in the draft editor.
  * - `values()`:  what it's given before it first draws:  the things it draws, and its settings.
  * - The page's hero stays up while it loads (`PageLoading`).
  * - Call in a component body.
  * - NEVER throws:  a piece that won't load says so on the console, and `isBroken()`, for a plain stand-in.
  */
-function drawnPiece(compiled: string, name: string, values: () => object) {
+function drawnPiece(compiled: string, pieceProject: string, name: string, values: () => object) {
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [isBroken, setBroken] = createSignal(false)
   let isGone = false
@@ -208,7 +228,7 @@ function drawnPiece(compiled: string, name: string, values: () => object) {
     isGone = true
     release()
   })
-  void loadLayoutPiece(compiled)
+  void loadLayoutPiece(compiled, pieceProject)
     .then(
       (loaded) => {
         if (isGone) return
@@ -235,10 +255,13 @@ function drawnPiece(compiled: string, name: string, values: () => object) {
  * The running program, with no header of its own:  its tools are the top bar's (epic `debut` P32).
  * - The program's mount point (`<AppRoot>`) is drawn once, and never redrawn.
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
+ * - While a sample stands in for a data place, a bar across its top says so (`<SampleBar>`, epic `editor` P26).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
+ * - One of the editor's own pieces (the group `@spell/editor`, epic `editor` P22) shows the editor ITSELF, built from your
+ *   drafts of its pieces, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
  *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it, and what
  *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
@@ -247,6 +270,8 @@ export function AppPane() {
   const title = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
   const notebook = tracked(() => notebookOf(editor.project, editor.file))
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
+  // one of the editor's own pieces, outside the draft editor:  its app is the editor itself, from your drafts
+  const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
   return (
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
@@ -257,8 +282,12 @@ export function AppPane() {
           </NotebookHeader>
         )}
       </Show>
+      <SampleBar />
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
-        <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
+        <Show when={isEditorPiece()}>
+          <DraftEditorFrame />
+        </Show>
+        <div class={["AppPaneProgram", { hidden: !!notebook() || isEditorPiece() }]}>
           <AppRoot showToolbar={false} />
           <div class="EmptyAppPrompt">{appTexts.text("emptyAppPrompt")}</div>
         </div>
@@ -268,6 +297,50 @@ export function AppPane() {
       </div>
     </div>
   )
+}
+
+/****************
+ * ### `<SampleBar>`
+ * The app pane's header while a sample stands in for a data place (epic `editor` P26):
+ * says plainly that what shows is sample data, so nobody mistakes it for the real thing.
+ * - Its button puts the real places back (`InspectorData.showFrom()`).
+ * - No row of its own while every place is the real one.
+ ****************/
+function SampleBar(): JSX.Element {
+  const samples = tracked(() => InspectorData.samplesInUse)
+  return (
+    <Show when={samples().length}>
+      <div class="SampleBar" role="status">
+        <ui-icon name="flask" />
+        <span class="SampleBarWords">
+          {appTexts.text("sampleInUse", {
+            places: InspectorData.listWords(samples().map(InspectorData.placeWords))
+          })}
+        </span>
+        <ui-button
+          size="mini"
+          onClick={() => {
+            for (const placeName of samples()) void InspectorData.showFrom(placeName, "real place")
+          }}
+        >
+          {appTexts.text("useRealData")}
+        </ui-button>
+      </div>
+    </Show>
+  )
+}
+
+/****************
+ * ### `<DraftEditorFrame>`
+ * The editor built from your drafts of its own pieces, in a frame:  a second editor, beside the one you're using (epic `editor` P22).
+ * - A frame of its own, as the theme editor's pages are, so the two editors share nothing:  not `editor`, not Solid, not the page.
+ * - It opens on Counter, the smallest app there is, and loads again after each compile of the piece you're editing,
+ *   so a saved draft shows here first;  Publish makes it the editor you're using.
+ * - Its pieces compile in its own page, from your drafts (`isDraftEditor`, `loadLayoutPiece()`).
+ ****************/
+function DraftEditorFrame(): JSX.Element {
+  const source = tracked(() => `/edit/@spell/examples/Counter?pieces=draft&compile=${editor.edits}`)
+  return <iframe class="DraftEditorFrame" title={appTexts.text("draftEditorTitle")} src={source()} />
 }
 
 /****************
@@ -380,13 +453,22 @@ function notebookOf(
  */
 function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolean): { id: string; sizes: string } {
   const isWide = hasOutput && !isRunning
-  // Edit's are `-edit`:  its sizes from before the code moved to the right are for panes in another order
-  const id = `spellEditor-columns${isRunning ? "-run" : "-edit"}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  // Edit's are the names they had before the code's 2 days at the far right (`-edit`, 2026-11-04 to 11-06):
+  // what they remember is for panes in this order, code first
+  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
   if (!isInspecting && !isWide) return { id, sizes: "" }
   // with compiled code beside it, the code's column takes room from the app's, so both can be read
   const code = isWide ? "65%" : "*"
-  const panes = ["*", ...(isInspecting ? ["380px"] : []), ...(isRunning ? [] : [code])]
+  const panes = [...(isRunning ? [] : [code]), "*", ...(isInspecting ? ["380px"] : [])]
   return { id, sizes: panes.join(",") }
+}
+
+/**
+ * Which of the columns takes every change of size (`<ui-split-panel grows>`):  the app's, by its place across.
+ * - A hidden pane isn't counted:  with the code showing the app is 2nd, without it (Run, code closed) first.
+ */
+function appGrows(hidesCode: boolean): string {
+  return hidesCode ? "first" : "2"
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
@@ -420,7 +502,8 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
 /****************
  * ### `<EditorToolbar>`
  * The editor's top bar (epic `debut` P32, as Owen drew it):
- * - left:  the project's menu (Spell's hat, its name), then File · Edit · View · Run · Help (`MenuBar.tsx`)
+ * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
+ *   then File · Edit · View · Run · Help (`MenuBar.tsx`)
  * - middle:  Run | Edit, then in Edit, Inspect app and the code's icon, in the same group
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
@@ -432,6 +515,7 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  ****************/
 export function EditorToolbar(props: { mode: Mode }) {
   const parts = {
+    spellMenu: { draw: () => <SpellBarMenu useRunner={props.mode === "run"} /> },
     projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
     modeButtons: {
@@ -453,13 +537,14 @@ export function EditorToolbar(props: { mode: Mode }) {
     },
     you: { draw: () => <Actions.you /> }
   }
-  const bar = drawnPiece(editorBarSpell, "editorBar", () => parts)
+  const bar = drawnPiece(editorBarSpell, "editor-bar", "editorBar", () => parts)
   return (
     <div class="EditorBarPlace">
       {bar.drawing()}
       {/* no Spell:  every menu still, in a plain row, so a person can go on */}
       <Show when={bar.isBroken()}>
         <AppMenu class="EditorBar">
+          {parts.spellMenu.draw()}
           {parts.projectMenu.draw()}
           {parts.appMenus.draw()}
           {parts.modeButtons.draw()}

@@ -24,10 +24,14 @@ export const Precedence = {
   comparison: 11,
   /** The `bound` of `ArithmeticExpression`:  `+ - * /` bind tighter, comparisons don't. */
   takesSum: 12,
+  /** `& &&`:  join into text, looser than `+` so `"Total:" && price + tax` joins the sum;  out of an `arithmetic_expression` */
+  join: 12,
   /** `+ -` */
   sum: 13,
   /** `* /` */
-  product: 14
+  product: 14,
+  /** `in feet`:  converts the measure right before it, so `its height in feet + 1` adds to the feet (epic `language` P23) */
+  measure: 15
 }
 
 /** Operands passed to `compileASTExpression()`/`compileAST()` while running the shunting-yard algorithm. */

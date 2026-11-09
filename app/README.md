@@ -120,9 +120,10 @@ The Calculator says the same kind of thing in sentences, and Spell reads both.
 - Each person and organization has an id, and a file of its own that you can open and read.
   The editor's "You" panel, top right in the picture above, shows yours and lets you change it.
 - Your own space is where a new project goes, and what the editor's "Projects" list shows.
-- **Not yet:**  every space is on your own machine, one person to a machine,
-  and yours is called `owen@spell`, whoever you are:  a name fixed in the code until a machine can hold more people.
-  🌱 Sign-in, invites and sharing a space are planned ([below](#-several-people-in-one-project)).
+- On your own machine, yours is called `owen@spell`, whoever you are.
+- Spell's server holds spaces for other people too:  invite only, signed in by an emailed code or Bluesky,
+  shared by a space's members, and by an org's roles ([the spaces page](README-spaces.md#orgs--roles-decide-who-reaches-each-space)).
+- 🌱 Several people editing one project at once is planned ([below](#-several-people-in-one-project)).
 - How addresses work, and how to set up your own projects:  [the spaces page](README-spaces.md).
 
 ## The live loop:  from a keystroke to the app changing
@@ -318,7 +319,7 @@ It's the same name inside this folder as from any other.
 | Page | The folder it covers | What's on it |
 | --- | --- | --- |
 | [README-app.md](README-app.md) | [src/app/](src/app/), `spell/app/app`;  its build folder, [app/](app/) | <ul><li>four elements for any page:  `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>`</li><li>one runner in three places;  a runtime per program;  a recompile that keeps what the program made</li><li>the editor:  one object behind every pane;  three looks;  the explorers' tabs</li><li>the public preview:  the editor as plain files</li><li>the builds, one Solid per page;  App UI, a page per component</li></ul> |
-| [README-spaces.md](README-spaces.md) | [src/spaces/](src/spaces/), `spell/app/spaces` | <ul><li>addresses:  the folder is in the name</li><li>setting up spaces for your own project, in seven steps</li><li>the models, the editor's API, and the Python server</li><li>people and orgs, declared in Spell;  🌱 sign-in</li></ul> |
+| [README-spaces.md](README-spaces.md) | [src/spaces/](src/spaces/), `spell/app/spaces` | <ul><li>addresses:  the folder is in the name</li><li>setting up spaces for your own project, in seven steps</li><li>the models, the editor's API, and the Python server</li><li>people and orgs, declared in Spell</li><li>project data folders, sign-in and the cloud</li><li>🌱 spaces for organizations</li></ul> |
 | [README-examples.md](README-examples.md) | [spaces/@spell/](spaces/@spell/):  data, not code | <ul><li>fourteen apps, simplest first, each running</li><li>twelve guides, programs that read as prose</li><li>the four parts of every app, and why the Calculator's wording counts</li><li>FizzBuzz, Task List and the two solitaires, line by line</li><li>ideas for your own;  the frozen test projects</li></ul> |
 | [README-lsp.md](README-lsp.md) | [src/lsp/](src/lsp/), `spell/app/lsp` | <ul><li>one service in three places:  the browser, VS Code, the command line</li><li>it reads the parse the compiler already made;  one queue</li><li>what it answers, request by request</li><li>scope packs;  where it stops</li></ul> |
 | [README-page-server.md](README-page-server.md) | its part of the kit's page server, in [package.json](package.json);  its route module is in spaces | <ul><li>the three settings spell-app adds to the kit's page server</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
@@ -436,7 +437,7 @@ yarn ts    yarn lint    yarn format    yarn test    yarn review
 - `yarn review` runs them all, and FIXES lint and formatting as it goes.
 - `yarn test` is one Vitest run, a project per folder, then spaces' Python tests (pytest).
   - One folder's:  `yarn vp test run --project spaces`.
-    The projects:  `spaces`, `lsp`, `app:node`, `app:browser`, `cli`, `spell`.
+    The projects:  `spaces`, `lsp`, `app:node`, `app:integration`, `app:browser`, `cli`, `spell`.
 - Tests live in `tests/<folder>/`, at the same paths as the code they test:
   [projectGroups.ts](src/spaces/models/projectGroups.ts) is tested by
   [projectGroups.test.ts](tests/spaces/models/projectGroups.test.ts).

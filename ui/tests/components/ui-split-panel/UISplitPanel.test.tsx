@@ -174,6 +174,23 @@ describe("<ui-split-panel>", () => {
     expect(one.getBoundingClientRect().width).toBeLessThan(two.getBoundingClientRect().width)
   })
 
+  it("`grows`:  a bar sizes the pane past it, the growing pane takes the difference, the one between keeps its width", async () => {
+    const host = await panel('columns="*,100px,*" grows="first" resizable')
+    const [app, between, last] = widths(host)
+    // the last bar, between the middle pane and the last:  left 100 makes the last 100 wider
+    dragAcross(bars(host)[1], -100)
+    const [appAfter, betweenAfter, lastAfter] = widths(host)
+    expect(lastAfter).toBe(last + 100)
+    expect(betweenAfter).toBe(between)
+    expect(appAfter).toBe(app - 100)
+    dragAcross(bars(host)[1], 100)
+    expect(widths(host)).toEqual([app, between, last])
+    // the panel growing is the first pane's alone
+    host.style.width = "700px"
+    await vi.waitFor(() => expect(widths(host)[0]).toBe(app + 100))
+    expect(widths(host).slice(1)).toEqual([between, last])
+  })
+
   it("reads sizes as it should", () => {
     expect(UISplitPanel.sizesFor("80%", 2)).toEqual([
       { value: 80, units: "%" },

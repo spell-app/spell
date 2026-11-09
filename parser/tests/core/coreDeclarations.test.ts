@@ -96,6 +96,14 @@ describe("paramNamesOf()", () => {
     expect(paramNamesOf(() => {})).toEqual([])
     expect(paramNamesOf(function doNothing() {})).toEqual([])
   })
+  test("a method's own source, read as a class member by the kit's TypeScript reader", () => {
+    const methods = {
+      getItemAt(list: unknown, position = 1) {
+        return [list, position]
+      }
+    }
+    expect(paramNamesOf(methods.getItemAt)).toEqual(["list", "position"])
+  })
 })
 
 describe("what the writers know waits", () => {

@@ -150,8 +150,8 @@
               <epic-choices multiple chosen="A B">
                 <epic-option letter="A" title="Guides"><p>The most read.</p></epic-option>
                 <epic-option letter="B" title="Details pages" edited="2026-10-29"
-                  ><p>Owen answers on them.</p
-                  ><div slot="was" data-title="Details and review pages"><p>Both kinds Owen answers on.</p></div
+                  ><p>You answer on them.</p
+                  ><div slot="was" data-title="Details and review pages"><p>Both kinds you answer on.</p></div
                 ></epic-option>
                 <epic-option letter="C" title="Epic UI's pages" slot="removed" removed="2026-10-29"
                   ><p>They have the site's own.</p></epic-option
@@ -225,6 +225,13 @@
                   ><code>&lt;epic-item&gt;</code></a
                 >: a question's own set, last in its text; or the options a judgement call or issue weighs. An item may
                 hold several sets.
+              </li>
+              <li>
+                A holder's 2nd set is lettered <code>A2</code>, <code>B2</code> ... on the page, its 3rd
+                <code>A3</code> ..., so a pick in each reads apart (epic <code>epic-engine</code> I227). Only what's
+                shown: each option's <code>letter</code> stays <code>A</code>. The holder's one mark keeps a pick for
+                each of its sets, and <code>epic choose</code> or <code>decide --option</code> takes
+                <code>B2</code> for <code>B</code> of the 2nd set.
               </li>
               <li>
                 <a href="epic-reply.html" target="src-packages-epics-docs-epic-reply-html"
@@ -310,7 +317,7 @@
                   <tr>
                     <td><code>fixed</code></td>
                     <td>boolean</td>
-                    <td>No Add choice: Owen may not add options. Without it, every open set takes his.</td>
+                    <td>No Add choice: you may not add options. Without it, every open set takes yours.</td>
                     <td></td>
                   </tr>
                   <tr>
@@ -337,7 +344,7 @@
                     <td><code>chosen-on</code></td>
                     <td>date</td>
                     <td>
-                      The day Owen's pick was recorded (<code>epic inbox apply</code>, <code>epic choose</code>, a
+                      The day your pick was recorded (<code>epic inbox apply</code>, <code>epic choose</code>, a
                       revisit's pick kept); shown inside the unfolded Choices, with <code>chosen-note</code>.
                     </td>
                     <td></td>
@@ -455,7 +462,7 @@
                     <tr>
                       <td><code>answering</code></td>
                       <td>
-                        An <code>&lt;epic-ask&gt;</code>'s options (a page Owen answers on): one card a row, each with a
+                        An <code>&lt;epic-ask&gt;</code>'s options (a page you answer on): one card a row, each with a
                         tick box.
                       </td>
                     </tr>
@@ -521,9 +528,9 @@
                 the question's set; a question has one answer, so no other set stays chosen
               </li>
               <li>
-                <code>epic inbox apply &lt;name&gt;</code>, for Owen's pick: sets <code>chosen</code> on THAT set
-                (picks name a set by its position in the item); a question is answered with the option, any other item
-                approved with it
+                <code>epic inbox apply &lt;name&gt;</code>, for your pick: sets <code>chosen</code> on THAT set
+                (picks name a set by its position in the item or phase); a question is answered with the option, any
+                other item approved with it; a pick in each of a holder's sets applies on its own
               </li>
               <li>
                 <code>details --file</code> on an answered question keeps the chosen letter when the new options still

@@ -1,0 +1,141 @@
+# How Tic-Tac-Toe works
+The Tic-Tac-Toe example is the paper game:  X and O take turns, and three in a row wins.
+Its rules fit in three ideas:
+- each square knows its own mark
+- the game knows whose turn it is
+- after each move, the game checks every line of three for a winner
+
+This guide is the same game with one thing missing:  it only checks the ROWS, across.
+Three down, or corner to corner, doesn't win yet.  Adding those is your move, at the end.
+
+## A square:  empty, or holding an X or an O
+A `<spell-thing>` is a kind of thing the program keeps:  here, one square of the board.
+Its `<alias>` is a phrase you can say of it:  `the square is empty`.
+
+<spell-thing "square">
+	<property "mark">text</>
+	<alias "is empty">if its mark is ""</>
+</spell-thing>
+
+## The game
+The app:  its board, whose turn it is, and who won.
+- `create it` runs as the game is made:  it puts nine empty squares on the board.
+- Squares are counted 1 to 9, left to right, then down:  1 2 3 is the top row.
+
+<spell-app "tic tac toe">
+	<property "board">a new board</>
+	<property "turn" description="Whose turn it is:  X or O">text</>
+	<property "winner" description="Who won:  X or O, or empty while the game goes on">text</>
+	<property "message">
+		the turn + " to play" if the winner is ""
+		the winner + " wins!" otherwise
+	</property>
+
+	<action "create it" description="Nine empty squares, made with the game">
+		repeat 9 times
+			add a new square to tic tac toe's board
+	</action>
+	<action "start a new game" description="An empty board, X to play">
+		for square in the board
+			clear the square's mark
+		set the turn to "X"
+		clear the winner
+	</action>
+	<spell>
+		// the same mark in all three squares wins
+		- to check the line from square (a as a number) through (b as a number) to (c as a number):
+			set mark to the mark of square a of its board
+			if mark is "" return
+			if the mark of square b of its board is mark and the mark of square c of its board is mark
+				set its winner to mark
+	</spell>
+	<action "check for a winner" description="Only the three rows, for now">
+		check the line from square 1 through 2 to 3
+		check the line from square 4 through 5 to 6
+		check the line from square 7 through 8 to 9
+	</action>
+
+	<draw>
+		<stack align="center">
+			<card>
+				<content>
+					<header level="2" align="center">{the message}</header>
+					{draw the board}
+				</content>
+			</card>
+		</stack>
+	</draw>
+</spell-app>
+
+## Playing a square
+Nothing happens if someone has won, or the square is taken.
+Otherwise:  the mark goes in, the game checks for a winner, and the turn passes to the other player.
+`<spell-more-of "square">` adds this action to the square, declared above:
+it's here, after the game, because it needs the game's turn;  the board, below, draws a button that calls it.
+
+<spell-more-of "square">
+	<action "play it">
+		if tic tac toe's winner is not "" or it is not empty return
+		set its mark to tic tac toe's turn
+		check for a winner
+		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
+	</action>
+</spell-more-of>
+
+## The board:  nine squares, three a row
+A list of squares, which draws itself as Spell UI's buttons in a grid:
+- `<for square in it as="grid" columns="3">` draws a `<grid>` with a column per square
+- each column holds a big button, and a click plays its square
+- the space after `or` is a no-break space, one that doesn't vanish:  an empty square keeps its height
+
+<spell-thing "board" template="list of squares">
+	<draw>
+		<for square in it as="grid" columns="3" spacing="compact">
+			<column>
+				<button fluid size="massive" appearance="basic" onClick={play the square}>
+					{the mark of the square or " "}
+				</button>
+			</column>
+		</for>
+	</draw>
+</spell-thing>
+
+<spell>
+	// a square is on one board
+	a square belongs to one board
+</spell>
+
+## Start, and a check:  X wins across the top
+The check plays a whole game, X in squares 1, 2 and 3, then clears the board for you.
+
+<spell>
+	start a new game
+
+	to test a row
+		start a new game
+		play square 1 of tic tac toe's board
+		play square 4 of tic tac toe's board
+		play square 2 of tic tac toe's board
+		play square 5 of tic tac toe's board
+		play square 3 of tic tac toe's board
+		tic tac toe's message should be "X wins!"
+		start a new game
+</spell>
+
+## Try it
+- Play a game on the right.  Win across the top, and the line above the board says so.
+- Click ↻, above the game, for a fresh board.
+  Now win DOWN the left side:  squares 1, 4 and 7.  Nothing happens.
+
+Your move:  teach it to win down.  In "check for a winner", add three lines like the others:
+
+```spell
+check the line from square 1 through 4 to 7
+check the line from square 2 through 5 to 8
+check the line from square 3 through 6 to 9
+```
+
+Then the two corner-to-corner lines:  which squares are they?
+
+Where next:  Tic-Tac-Toe, in the Examples, which has every line, a draw when the board fills up,
+X in blue and O in red, and a New game button.

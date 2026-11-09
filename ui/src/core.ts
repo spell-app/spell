@@ -19,9 +19,10 @@
  *     - `IconGlyph`, `PartComponent` (the generic content parts)
  *     - `CloseButton`:  the close button of a box that closes (message, toast, nag, dialog)
  *     - `ClipboardCopy`:  a copy button's copy, then "Copied" for a moment
+ *     - `AddressParameter`:  a value kept in the page's address (`parameter`, `<ui-tabs history>`), so Back steps through it
  *     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker, a
  *       shrinkable menu's overflow), a `Disclosure` with its popover, overlay entry and anchor
- *     - `RootSettings`:  what each `<ui-root>` sets for its subtree (icon packs, emoji)
+ *     - `RootSettings`:  what each `<ui-root>` sets for its subtree (icon packs, emoji, attribute defaults)
  *     - the elements that show a text file:
  *       `DOMLoadableElement` + `LoadableComponent`, `SourceMarkup`,
  *       and `LoadableBody` + `DOMLoadableBodyElement` (`<ui-section source>` / `<ui-accordion source>`)
@@ -69,6 +70,7 @@ export * from "spell/ui/elements/RootSettings"
 export * from "spell/ui/elements/IconGlyph"
 export * from "spell/ui/elements/CloseButton"
 export * from "spell/ui/elements/ClipboardCopy"
+export * from "spell/ui/elements/AddressParameter"
 export * from "spell/ui/elements/PopoverPanel"
 export * from "spell/ui/elements/DOMLoadableElement"
 export * from "spell/ui/elements/LoadableComponent"

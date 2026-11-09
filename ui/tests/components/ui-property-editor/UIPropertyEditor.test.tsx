@@ -135,6 +135,34 @@ describe("<ui-property-editor> schema", () => {
     expect((family.querySelector("ui-input") as HTMLElement & { value: unknown }).value).toBe("Lora")
   })
 
+  it("shows each value by its words, `valueLabels`, and writes the value itself (epic `language` T73)", async () => {
+    const thing = { direction: "down" }
+    const host = await ElementFixture.render<Editor>(
+      `<ui-property-editor><ui-property name="direction" as="buttons"></ui-property></ui-property-editor>`
+    )
+    host.schema = {
+      name: "Carta",
+      attributes: [
+        {
+          name: "direction",
+          kind: "enum",
+          type: "choice",
+          values: ["up", "down"],
+          valueLabels: { up: "arriba", down: "abajo" },
+          description: ""
+        }
+      ]
+    } satisfies PropertySchema
+    host.value = thing
+    await settle(host)
+    const items = [...host.querySelectorAll("ui-property[name=direction] ui-item")] as HTMLElement[]
+    expect(items.map((item) => item.getAttribute("value"))).toEqual(["up", "down"])
+    expect(items.map((item) => item.textContent)).toEqual(["arriba", "abajo"])
+    await userEvent.click(items[0]!)
+    await settle(host)
+    expect(thing.direction).toBe("up")
+  })
+
   it("writes what the person types back to the thing, and sends `ui-changed` from the editor and the property", async () => {
     const thing = { title: "Spell" }
     const host = await editor(`<ui-property name="title"></ui-property>`, thing)

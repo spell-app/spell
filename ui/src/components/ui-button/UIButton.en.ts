@@ -8,9 +8,11 @@
  * - `primary` / `secondary` / `positive` / `negative` are values of `color` (epic `ui-gaps` P4, Owen's request r1);
  *   their old switches (`<ui-button primary>`) did nothing after P13, and every colour remaps `--ui-color`
  *   (`colors.css`).
- * - The looks are words of `appearance` (`basic`, `tertiary`, `circular`), the padding a value of `padding`;
+ * - The looks are words of `appearance` (`basic`, `tertiary`, `circular` or `pill`), the padding a value of `padding`;
  *   each old switch still works, through the attribute's `replaces`.
  */
+
+import * as UIT from "spell/ui/components/components.types"
 
 import type { E } from "spell/ui/core"
 import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
@@ -35,8 +37,11 @@ export const buttonVocabulary = {
       name: "size",
       group: "appearance",
       kind: "size",
+      values: UIT.PosterSizes,
       default: "medium",
-      description: "How big it is, from `mini` to `massive`.  The default is `medium`."
+      description:
+        "How big it is, from `mini` to `massive`.  The default is `medium`.  " +
+        "`poster` is bigger still, for a logo:  it grows with the window, from 2 to 3.2 times the text."
     },
     {
       name: "color",
@@ -53,9 +58,10 @@ export const buttonVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      // the words are the classes:  no key after them (`ClassBuilder`)
-      classes: {},
-      values: ["basic", "tertiary", "circular"],
+      // the words are the classes, but `pill`'s:  no key after them (`ClassBuilder`)
+      values: ["basic", "tertiary", "circular", "pill", "raised"],
+      // `pill` is another word for `circular` (epic `language` P28, as Owen wrote it)
+      classes: { pill: "circular" },
       replaces: [
         { from: "basic", value: "basic" },
         { from: "tertiary", value: "tertiary" },
@@ -65,8 +71,10 @@ export const buttonVocabulary = {
         "The look, several words at once.  " +
         "`basic` is less pronounced:  transparent, with a hairline ring.  " +
         "`tertiary` is the least:  text only, underlined on hover.  " +
-        "`circular` is pill-shaped, and round when it holds only an icon.  " +
-        "Written alone, each was its old name."
+        "`circular` (or `pill`) is pill-shaped, and round when it holds only an icon.  " +
+        "`raised` stands on a lip of its own colour, darker, and sinks into it when pressed:  a big, friendly " +
+        "button, a game's.  " +
+        "Written alone, each was its old name (but `raised`)."
     },
     {
       name: "inverted",

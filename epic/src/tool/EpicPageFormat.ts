@@ -1,5 +1,5 @@
-import type { ChunkFormat, ChunkList } from "spell/util/places/ChunkedPlace"
-import type { PlaceRow } from "spell/util/places/places.types"
+import type { ChunkFormat, ChunkList } from "spell/places/ChunkedPlace"
+import type { PlaceRow } from "spell/places/places.types"
 
 /** The parts folder, beside the skeleton:  `epics/<name>/parts/`. */
 export const PARTS_DIR = "parts"

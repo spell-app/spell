@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Diagram | Spell UI</title>
+    <meta
+      name="description"
+      content="Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill&#39;s rules."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Diagram">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-diagram%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Diagram
+            <ui-header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill&#39;s rules.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-one-main-concept" label="One main concept" sticky="stack" collapsible dividing>
+                <ui-example description="A spec in the NERD skill&#39;s own JSON:  a group with two `lanes` (the main box, then what it points at), a `legend` group in the next column.  Drag a box:  its lines follow, and `remember` keeps where you put it.  A field linking to its own box loops on the left.">
+                  <ui-diagram remember="docs-recipe-box">
+                    <script type="application/json">
+                      {
+                        "columns": [
+                          {
+                            "groups": [
+                              {
+                                "label": "Recipe Box",
+                                "color": "#047857",
+                                "lanes": [
+                                  [
+                                    {
+                                      "name": "Recipe",
+                                      "note": "One dish, written down",
+                                      "gap_before": 50,
+                                      "fields": [
+                                        "cuisine",
+                                        "tags[]",
+                                        "method",
+                                        "photos[]",
+                                        "notes[]",
+                                        "adapted_from",
+                                        "replaces",
+                                        "related_recipes[]"
+                                      ]
+                                    }
+                                  ],
+                                  [
+                                    {
+                                      "name": "Cuisine",
+                                      "note": "e.g. Thai, Basque"
+                                    },
+                                    {
+                                      "name": "Tag",
+                                      "note": "Quick, vegetarian, spicy"
+                                    },
+                                    {
+                                      "name": "Method",
+                                      "note": "Varies by cuisine",
+                                      "fields": [
+                                        "technique",
+                                        "timer"
+                                      ]
+                                    },
+                                    {
+                                      "name": "Photo",
+                                      "note": "Kept by a photo host",
+                                      "fields": [
+                                        "host / photo_id"
+                                      ]
+                                    },
+                                    {
+                                      "name": "Note",
+                                      "note": "A cook's remark"
+                                    }
+                                  ]
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "groups": [
+                              {
+                                "legend": true
+                              },
+                              {
+                                "label": "Elsewhere",
+                                "color": "#6b7280",
+                                "gap_before": 60,
+                                "nodes": [
+                                  {
+                                    "name": "Technique",
+                                    "note": "Kitchen guide",
+                                    "color": "#7c3aed"
+                                  },
+                                  {
+                                    "name": "Timer",
+                                    "note": "Kitchen guide",
+                                    "color": "#7c3aed"
+                                  },
+                                  {
+                                    "name": "Photo hosts",
+                                    "note": "Outside services"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "edges": [
+                          {
+                            "from": "Recipe.cuisine",
+                            "to": "Cuisine"
+                          },
+                          {
+                            "from": "Recipe.tags[]",
+                            "to": "Tag"
+                          },
+                          {
+                            "from": "Recipe.method",
+                            "to": "Method",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Recipe.photos[]",
+                            "to": "Photo",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Recipe.notes[]",
+                            "to": "Note",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Recipe.adapted_from",
+                            "to": "Recipe"
+                          },
+                          {
+                            "from": "Recipe.replaces",
+                            "to": "Recipe"
+                          },
+                          {
+                            "from": "Recipe.related_recipes[]",
+                            "to": "Recipe"
+                          },
+                          {
+                            "from": "Method.technique",
+                            "to": "Technique"
+                          },
+                          {
+                            "from": "Method.timer",
+                            "to": "Timer"
+                          },
+                          {
+                            "from": "Photo.host / photo_id",
+                            "to": "Photo hosts"
+                          }
+                        ]
+                      }
+                    </script>
+                  </ui-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-several-concepts" label="Several concepts" sticky="stack" collapsible dividing>
+                <ui-example description="Three columns of groups:  what&#39;s reused on the left, definitions in the middle, what runs on the right.  Links in one column bracket on the right (going down) or the left (going up);  two or more from one column to the same box merge into one bus.  A right click on it saves it as SVG or JSON.">
+                  <ui-diagram>
+                    <script type="application/json">
+                      {
+                        "columns": [
+                          {
+                            "groups": [
+                              {
+                                "legend": true
+                              },
+                              {
+                                "label": "Library",
+                                "color": "#0f766e",
+                                "nodes": [
+                                  {
+                                    "name": "Ingredient",
+                                    "note": "What a dish can use",
+                                    "bullets": [
+                                      "Flour",
+                                      "Saffron"
+                                    ]
+                                  },
+                                  {
+                                    "name": "Tool",
+                                    "note": "Reusable equipment",
+                                    "bullets": [
+                                      "Oven",
+                                      "Mandoline",
+                                      "Blowtorch"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "groups": [
+                              {
+                                "label": "Menu",
+                                "color": "#1d4ed8",
+                                "nodes": [
+                                  {
+                                    "name": "Course",
+                                    "note": "Ingredient + amounts",
+                                    "fields": [
+                                      "ingredient"
+                                    ]
+                                  },
+                                  {
+                                    "name": "Menu",
+                                    "note": "A season's plan",
+                                    "fields": [
+                                      "courses[]",
+                                      "steps[]"
+                                    ]
+                                  },
+                                  {
+                                    "name": "Step",
+                                    "note": "Tool + timing",
+                                    "fields": [
+                                      "tool",
+                                      "course",
+                                      "next_steps[]"
+                                    ]
+                                  },
+                                  {
+                                    "name": "NextStep",
+                                    "note": "Where cooking goes next",
+                                    "fields": [
+                                      "to_step"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "label": "Pantry",
+                                "color": "#047857",
+                                "nodes": [
+                                  {
+                                    "name": "Shelf",
+                                    "note": "Jar, crate, fridge"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "groups": [
+                              {
+                                "label": "Cooking",
+                                "color": "#7c3aed",
+                                "nodes": [
+                                  {
+                                    "name": "Service",
+                                    "note": "One evening's covers",
+                                    "fields": [
+                                      "menu",
+                                      "cooks[]",
+                                      "shelves[]"
+                                    ]
+                                  },
+                                  {
+                                    "name": "Cook",
+                                    "note": "One person's station",
+                                    "fields": [
+                                      "menu",
+                                      "head_cook",
+                                      "shelves[]",
+                                      "tasks[]",
+                                      {
+                                        "name": "current_tasks[]",
+                                        "derived": true
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "Task",
+                                    "note": "One step, done once",
+                                    "fields": [
+                                      "step",
+                                      "shelves[]",
+                                      "timers[]"
+                                    ]
+                                  },
+                                  {
+                                    "name": "Timer",
+                                    "note": "Set by a task",
+                                    "fields": [
+                                      "shelves[]"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "edges": [
+                          {
+                            "from": "Course.ingredient",
+                            "to": "Ingredient"
+                          },
+                          {
+                            "from": "Menu.courses[]",
+                            "to": "Course",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Menu.steps[]",
+                            "to": "Step",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Step.tool",
+                            "to": "Tool"
+                          },
+                          {
+                            "from": "Step.course",
+                            "to": "Course",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Step.next_steps[]",
+                            "to": "NextStep",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "NextStep.to_step",
+                            "to": "Step"
+                          },
+                          {
+                            "from": "Service.menu",
+                            "to": "Menu"
+                          },
+                          {
+                            "from": "Service.cooks[]",
+                            "to": "Cook"
+                          },
+                          {
+                            "from": "Service.shelves[]",
+                            "to": "Shelf"
+                          },
+                          {
+                            "from": "Cook.menu",
+                            "to": "Menu"
+                          },
+                          {
+                            "from": "Cook.head_cook",
+                            "to": "Cook"
+                          },
+                          {
+                            "from": "Cook.shelves[]",
+                            "to": "Shelf"
+                          },
+                          {
+                            "from": "Cook.tasks[]",
+                            "to": "Task",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Cook.current_tasks[]",
+                            "to": "Task"
+                          },
+                          {
+                            "from": "Task.step",
+                            "to": "Step"
+                          },
+                          {
+                            "from": "Task.shelves[]",
+                            "to": "Shelf"
+                          },
+                          {
+                            "from": "Task.timers[]",
+                            "to": "Timer",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Timer.shelves[]",
+                            "to": "Shelf"
+                          }
+                        ]
+                      }
+                    </script>
+                  </ui-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-a-flat-spec" label="A flat spec" sticky="stack" collapsible dividing>
+                <ui-example description="No `columns`:  a flat list of `nodes` and `edges` is put in columns for you, what nothing links to first.  `columns` says how many at most.">
+                  <ui-diagram columns="2">
+                    <script type="application/json">
+                      {
+                        "nodes": [
+                          {
+                            "name": "Order",
+                            "note": "One customer's basket",
+                            "fields": [
+                              "customer",
+                              "lines[]"
+                            ]
+                          },
+                          {
+                            "name": "Customer",
+                            "note": "Someone who buys"
+                          },
+                          {
+                            "name": "Line",
+                            "note": "A product and how many",
+                            "fields": [
+                              "product"
+                            ]
+                          },
+                          {
+                            "name": "Product",
+                            "note": "Something we sell"
+                          }
+                        ],
+                        "edges": [
+                          {
+                            "from": "Order.customer",
+                            "to": "Customer"
+                          },
+                          {
+                            "from": "Order.lines[]",
+                            "to": "Line",
+                            "kind": "contains"
+                          },
+                          {
+                            "from": "Line.product",
+                            "to": "Product"
+                          }
+                        ]
+                      }
+                    </script>
+                  </ui-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-content-a-box-that-flips" label="A box that flips" sticky="stack" collapsible dividing>
+                <ui-example description="A `&lt;ui-diagram-node name&gt;` fills its box with what it holds, here a `&lt;ui-shape&gt;`:  the box takes its size, and its lines follow when it turns over.  `resizable` lets people drag its corner.">
+                  <button type="button" class="ui button" commandfor="docs-diagram-order" command="--next">Turn Order over</button>
+                  <ui-diagram>
+                    <script type="application/json">
+                      {
+                        "columns": [
+                          {
+                            "groups": [
+                              {
+                                "label": "Shop",
+                                "color": "#1d4ed8",
+                                "nodes": [
+                                  {
+                                    "name": "Order",
+                                    "note": "Turned over by the button",
+                                    "fields": [
+                                      "lines[]"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "groups": [
+                              {
+                                "label": "Catalogue",
+                                "color": "#047857",
+                                "nodes": [
+                                  {
+                                    "name": "Line",
+                                    "note": "A product and how many"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "edges": [
+                          {
+                            "from": "Order.lines[]",
+                            "to": "Line",
+                            "kind": "contains"
+                          }
+                        ]
+                      }
+                    </script>
+                    <ui-diagram-node name="Order" resizable>
+                      <ui-shape id="docs-diagram-order">
+                        <ui-side><ui-segment>Order<br />lines[]</ui-segment></ui-side>
+                        <ui-side><ui-segment>Order<br />id · placed_at · total<br />customer_id · lines[]</ui-segment></ui-side>
+                      </ui-shape>
+                    </ui-diagram-node>
+                  </ui-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Give it a spec:  the `spec` property, or a `<script type="application/json">` child on a static page.
+                  The spec is the NERD skill's JSON as it is, so a NERD written for that skill's script opens here:
+
+                  - `columns`, left to right, each a stack of `groups`;  a group has a `label`, a `color`, and `nodes`
+                    (one stack) or `lanes` (stacks side by side);  `{ "legend": true }` places the legend
+                  - a node has a `name`, a `note`, its linking `fields` (or example `bullets`), and its own `color`
+                  - `edges`, each `{ "from": "Box.field", "to": "Other", "kind": "contains" }` (solid) or `"ref"` (dashed,
+                    the default);  a field `{ "name": "x", "derived": true }` is drawn italic, `x (derived)`
+                  - `gap_before` on a group or node lines it up with what links to it
+
+                  Or a flat `{ nodes, edges }`:  it's put in at most `columns` columns (3 by default).
+
+                  Drag a box to move it;  `remember="name"` keeps where each person put them, and Put back forgets.
+                  `fixed` stops moving boxes.  Each box takes focus, and the arrow keys move it (Shift for bigger steps);  Enter is a click.  A right click opens a menu:  Put back, Save as SVG, Save as JSON;  from script, `toSVG()`, `saveSVG()` and `saveJSON()`.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const diagram = document.querySelector("ui-diagram")
+                  diagram.spec = { columns: [...], edges: [...] }
+                  diagram.addEventListener("ui-node-clicked", (event) => console.log(event.detail.name))
+                  diagram.addEventListener("ui-node-moved", (event) => console.log(event.detail))
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  | Key | What it does |
+                  | --- | --- |
+                  | Tab | Moves to the next box |
+                  | Arrow keys | Move the box a little;  with Shift, further |
+                  | Enter or Space | A click on the box (a NERD box turns over) |
+                  | Shift F10 or the menu key | Opens the menu:  Put back, Save as SVG, Save as JSON |
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The drawing is a group (`role="group"`), named by how many boxes and links it has:  "Diagram:  9 boxes,
+                  11 links".  Each box is a button named by its name, its description saying the arrow keys move it;
+                  its fields are real text in it.  A page that relies on the diagram should
+                  say what it shows in words too.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-diagram" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-diagram" playground></ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.  The spec's own colours (headers, groups) stay;  the page, box bodies, text and lines follow the theme and dark mode.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

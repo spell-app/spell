@@ -1,0 +1,80 @@
+## REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names
+// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spellml.
+// `rest countries` is what this wrote, from looking at the server:
+//   spell place ingest https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0 --into RestCountries.api.spell
+//     --name "rest countries" --no-ai --collections "countries=/countries.json"
+// `spell place update RestCountries.api.spell` looks again, and changes only this file and RestCountries.api.json5.
+// It's the data restcountries.com serves, from the repository that keeps it:  every country in one answer, with no paging.
+// Its money, its languages and its names come keyed by a code, `"EUR": { ... }`, `"fra": "French"`:
+// each is a list of things, each with its code, `the first translation in its translations where its code is "fra"`.
+
+rest countries is a web server at "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0":
+	- check it every 30 seconds
+	- countries live at "/countries.json"
+
+a "country" is a thing:
+	- it lives in rest countries
+	- its "name" is a name
+	- its "tld" is a list of text
+	- its "cca2" is text
+	- its "ccn3" is text
+	- its "cca3" is text
+	- its "cioc" is text
+	- its "independent" is yes or no
+	- its "status" is text
+	- its "un member" is yes or no
+	- its "un regional group" is text
+	- its "currencies" is a list of currencies
+	- its "idd" is an idd
+	- its "capital" is a list of text
+	- its "alt spellings" is a list of text
+	- its "region" is text
+	- its "subregion" is text
+	- its "languages" is a list of languages
+	- its "translations" is a list of translations
+	- its "latlng" is a list of numbers
+	- its "landlocked" is yes or no
+	- its "borders" is a list of text
+	- its "area" is a number
+	- its "flag" is text
+	- its "demonyms" is a demonym
+
+a "name" is a thing:
+	- its "common" is text
+	- its "official" is text
+	- its "native" is a list of natives
+
+a "native" is a thing:
+	- its "code" is text
+	- its "official" is text
+	- its "common" is text
+
+a "currency" is a thing:
+	- its "code" is text
+	- its "name" is text
+	- its "symbol" is text
+
+an "idd" is a thing:
+	- its "root" is text
+	- its "suffixes" is a list of text
+
+a "language" is a thing:
+	- its "code" is text
+	- its "name" is text
+
+a "translation" is a thing:
+	- its "code" is text
+	- its "official" is text
+	- its "common" is text
+
+a "demonym" is a thing:
+	- its "eng" is an eng
+	- its "fra" is a fra
+
+an "eng" is a thing:
+	- its "f" is text
+	- its "m" is text
+
+a "fra" is a thing:
+	- its "f" is text
+	- its "m" is text

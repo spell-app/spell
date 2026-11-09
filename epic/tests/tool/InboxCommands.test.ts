@@ -9,11 +9,12 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
-import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
@@ -79,7 +80,7 @@ test("apply:  the SENT urgency from the id chips goes into the doc, logged, and 
     inbox.markSent(M3)
   })
   await commands().inbox.run("x", file, ["apply"], {})
-  expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.getAttribute("state")).toBe("open")
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.getAttribute("state")).toBe("quiet")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
@@ -132,11 +133,22 @@ test("apply:  a sent todo gets a status card born NOTED, saying what was recorde
   await commands().inbox.run("x", file, ["apply"], {})
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   const card = plan.findItem("j1")!.querySelector(':scope > epic-status[slot="status"]')!
-  expect([card.getAttribute("state"), card.innerHTML]).toEqual([
-    "noted",
-    '<p>Made todo <a href="#t1">T1</a> to follow this up.</p>'
-  ])
+  expect([card.getAttribute("state"), card.innerHTML]).toEqual(["noted", "<p>Go ahead: fix this here</p>"])
+  expect(plan.findItem("j1")!.hasAttribute("urgent")).toBe(true)
   expect(plan.findItem("j2")!.querySelector("epic-status")).toBeNull()
+})
+
+test("inbox:  an issue's or a call's Do this says what the agent does;  update ... fixed turns it orange", async () => {
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("j1", { action: "todo" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain("do this, in J1 itself (no todo):  no fix proposed yet:  write one first")
+  await commands().inbox.run("x", file, ["apply"], {})
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.fixedForReview("j1", "Done now")
+  expect(plan.itemState(plan.findItem("j1")!)).toBe("replied")
 })
 
 test("apply:  a todo's plane queues it into the first phase still to do, with a Noted card;  its x cancels it", async () => {
@@ -545,7 +557,7 @@ test("apply:  sent new items are made, a phase's todo a go-ahead (I181), the sum
     [
       "NEW1  made question Q1:  window or aisle?",
       "P1  go ahead:  build it (his note kept)",
-      "SUMMARY  to todo T1"
+      'SUMMARY  to todo T1:  no fix proposed yet, write one in its "Proposed fix" field'
     ].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -581,6 +593,31 @@ test("print:  a new item by its kind and title, with its note and what it's abou
   const text = printed.join("\n")
   expect(text).toContain('new (1):\n  - NEW1  todo:  pack  · "chargers" · about J1 · unsent')
   expect(text).toContain('revisit (1):\n  - P1  Offline Pages  · soon · "too big?" · unsent')
+})
+
+test("wait and print:  a phase's two sets, a pick in each:  both named, `B2` the 2nd's, with their cards' titles (I227)", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Offline Pages")
+  const set = (titles: string[]) =>
+    `<epic-choices>${titles.map((title, n) => `<epic-option letter="${"ABC"[n]}" title="${title}"></epic-option>`).join("")}</epic-choices>`
+  plan.setPhaseFields(1, { choices: `${set(["Keep", "Bananas"])}${set(["Apples", "Cherries"])}` })
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p1", { action: "pick", pick: "B", choices: 0, sets: [{ pick: "B", choices: 1 }] }, M1)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain("P1  Offline Pages  · picks B · picks B2 · unsent")
+  printed = []
+  ReviewInbox.update(inboxFile, (inbox) => inbox.markSent(M2))
+  await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
+  expect(printed.join("\n")).toContain("picks B · Bananas, B2 · Cherries")
+  expect(printed.join("\n")).not.toContain("no such option card")
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(Array.from(after.phase(1).querySelectorAll("epic-choices"), (each) => each.getAttribute("chosen"))).toEqual([
+    "B",
+    "B"
+  ])
 })
 
 test("clear:  a phase's note kept as Owen's reply in the phase (a picture's);  a new item's note is never a reply", async () => {
@@ -776,6 +813,28 @@ test("apply:  a phase's sent Defer moves it after the others, still to do;  its 
   ])
   expect(printed.join("\n")).toContain("P-ONE  deferred:  after the other phases, now P3, still to do")
   expect(printed.join("\n")).toContain("P-TWO  approved")
+})
+
+// epic `epic-engine` I218 (Owen, 2026-11-04:  "I have approved the plan, but want to wait on these")
+test("apply:  a phase's sent Hold puts its accepted plan back to waiting;  a done phase's is dropped", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two"])
+    plan.addPhase(name, { goal: `<ul><li>${name}</li></ul>`, plan: "<ol><li>Go.</li></ol>" })
+  for (const n of [1, 2]) plan.acceptPlan(plan.phase(n))
+  plan.phase(2).setAttribute("status", "done")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p-one", { action: "hold" }, M1)
+    inbox.setMark("p-two", { action: "hold" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.phase(1).getAttribute("plan")).toBe("held")
+  expect(after.phase(1).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(false)
+  expect(after.phase(2).getAttribute("plan")).toBe("accepted")
+  expect(printed.join("\n")).toContain("P-ONE  on hold:  paused, not built till its plan is accepted again")
+  expect(printed.join("\n")).toContain("built already, nothing to hold:  dropped")
 })
 
 ////////////////
@@ -1074,7 +1133,7 @@ test("a stale line never lingers:  ignore clears it;  the page reads none once t
   inbox.setListening("s1", M1)
   inbox.setDoing({ text: "Building P35" }, M1)
   expect(inbox.forPage(Date.parse(M1) + 1000).doing?.text).toBe("Building P35")
-  expect(inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1000).doing).toBeNull()
+  expect(inbox.forPage(Date.parse(M1) + SRV.Heartbeat.STALE_MS + 1000).doing).toBeNull()
   inbox.setListening(null)
   expect(inbox.doing).toBeNull()
 })

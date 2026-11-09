@@ -39,6 +39,14 @@ export const linkVocabulary = {
   events: [],
   slots: [{ name: "", description: "The link's words." }],
   parts: [{ name: "text", description: "The link (`<a>`), or a span without a `link` or while `disabled`." }],
-  states: [{ name: "disabled", description: "Faded, and no longer a link." }],
+  states: [
+    { name: "disabled", description: "Faded, and no longer a link." },
+    {
+      name: "icon-only",
+      description:
+        "It holds only an icon:  it never wraps alone onto a line of its own, and, in a header, keeps a small gap " +
+        "from the word before it."
+    }
+  ],
   texts: []
 } as const satisfies E.ComponentVocabulary

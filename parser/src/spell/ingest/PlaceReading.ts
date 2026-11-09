@@ -183,7 +183,8 @@ function applyReading(
   if (reading.checkEverySeconds >= 1 && description.checkEverySeconds !== undefined) {
     description.checkEverySeconds = Math.round(reading.checkEverySeconds)
   }
-  description.notes.push(...reading.notes.filter(Boolean))
+  // the agent's own, kept from look to look:  what it said before stays, said once
+  description.agentNotes = [...new Set([...(description.agentNotes ?? []), ...reading.notes.filter(Boolean)])]
   for (const said of reading.collections) {
     const collection = description.collections[said.name]
     if (!collection) continue
@@ -216,9 +217,14 @@ export function renameCollections(description: PlaceDescription): void {
   description.collections = Object.fromEntries(
     Object.entries(description.collections).map(([name, collection]) => [renamed.get(name)!, collection])
   )
-  for (const { fields } of Object.values(description.collections)) {
-    for (const field of Object.values(fields))
+  for (const collection of Object.values(description.collections)) {
+    for (const field of Object.values(collection.fields))
       if (field.linksTo) field.linksTo = renamed.get(field.linksTo) ?? field.linksTo
+    // the lists under each of its things, by the collection each is of (epic `data` P30)
+    if (collection.listsUnder) {
+      const lists = Object.entries(collection.listsUnder).map(([list, at]) => [renamed.get(list) ?? list, at])
+      collection.listsUnder = Object.fromEntries(lists)
+    }
   }
 }
 

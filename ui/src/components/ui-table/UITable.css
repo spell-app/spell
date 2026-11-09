@@ -472,6 +472,17 @@
   .ui.collapsing.table {
     inline-size: auto;
   }
+  /*
+   * In rows mode the DOM element IS the table box, a block:  `auto` filled its container (epic `data` I91).
+   * - So it hugs its columns, never wider than the room it has.
+   * - Not a size container:  one's width can't come from what's inside it,
+   *   so a collapsing table stacks by the viewport, never by its own width (`stack-by="container"`).
+   */
+  .ui.collapsing.table:state(rows) {
+    container-type: normal;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+  }
 
   /* Fixed */
   .ui.fixed.table {
@@ -480,6 +491,81 @@
   .ui.fixed.table :is(th, td) {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /*
+   * Editable (`editable`, epic `mockup` P9):  a spreadsheet, in every theme.
+   * - Square cells on a hairline grid:  no rounded corners, the grid's lines the table's own border colour.
+   * - The cursor cell outlined in the focus colour;  its editor fills it edge to edge, with no border or padding.
+   * - A row's delete button shows at its last cell's end, on hover or while the cursor is in the row.
+   */
+  .ui.editable.table {
+    border-radius: 0;
+    border-collapse: collapse;
+  }
+  .ui.editable.table > :is(thead, tbody) > tr > :is(th, td) {
+    border: 1px solid var(--_ui-table-border-color);
+    border-radius: 0;
+    padding: 0.3em 0.5em;
+    position: relative;
+    min-width: 4em;
+  }
+  .ui.editable.table > tbody > tr > td {
+    cursor: cell;
+  }
+  .ui.editable.table > tbody > tr > td:focus,
+  .ui.editable.table > tbody > tr > td.cursor {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+  .ui.editable.table > tbody > tr > td[aria-readonly="true"] {
+    color: var(--ui-text-muted, inherit);
+  }
+  .ui.editable.table .cell-editor {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0.3em 0.5em;
+    font: inherit;
+    color: inherit;
+    background: var(--_ui-table-background);
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+  .ui.editable.table .cell-tick {
+    margin: 0;
+    vertical-align: middle;
+  }
+  /* A long table's spacer rows:  as tall as the rows not drawn, and nothing else (epic `mockup` P14). */
+  .ui.table > tbody > tr.spacer > td {
+    padding: 0;
+    border: none;
+  }
+
+  .ui.editable.table > tbody > tr.new-row > td {
+    block-size: 1.8em;
+  }
+  .ui.editable.table .delete-row {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 1.6em;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--ui-text-muted, inherit);
+    font: inherit;
+    cursor: pointer;
+    opacity: 0;
+  }
+  .ui.editable.table > tbody > tr:is(:hover, :focus-within) .delete-row,
+  .ui.editable.table .delete-row:focus-visible {
+    opacity: 1;
   }
 
   /* Selectable:  the pointer, and a selectable cell's link filling it. */
@@ -1563,14 +1649,14 @@
 
   /* Light DOM:  rows span every column, as subgrids;  cells are its items. */
   /* `container: none`:  the grid's sheet makes a row a size container, and a contained box can't be a subgrid */
-  .ui.table:state(rows) > ui-row {
+  .ui.table:state(rows) > :is(ui-row, es-fila) {
     container: none;
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
     --_table-mark-shadow: 0 0 transparent;
   }
-  .ui.table:state(rows) > ui-row > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     --ui-color: initial;
     --ui-color-text: initial;
     --ui-color-header: initial;
@@ -1590,33 +1676,35 @@
       background var(--_ui-table-duration) var(--ui-ease),
       color var(--_ui-table-duration) var(--ui-ease);
   }
-  .ui.table:state(rows) > ui-row:first-child > ui-cell,
-  .ui.table:state(rows) > ui-row:state(header) + ui-row > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila):first-child > :is(ui-cell, es-celda),
+  .ui.table:state(rows) > :is(ui-row, es-fila):state(header) + ui-row > :is(ui-cell, es-celda) {
     border-block-start: none;
   }
 
   /* Header row:  the column headers. */
-  .ui.table:state(rows) > ui-row:state(header) > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda) {
     padding-block: var(--_ui-table-header-padding-block);
     border-block-end: var(--_ui-table-header-border);
     background: var(--_ui-table-header-background);
     color: var(--_ui-table-header-color);
     font-weight: var(--ui-font-weight-bold);
+    /* a column is never narrower than its heading's longest word:  "Temperature" ran into "Rain" at phone width */
+    min-inline-size: min-content;
   }
-  .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:first-child {
+  .ui.table:state(rows):not(:state(captioned)) > :is(ui-row, es-fila):state(header):first-child > :is(ui-cell, es-celda):first-child {
     border-start-start-radius: var(--_ui-table-radius);
   }
-  .ui.table:state(rows):not(:state(captioned)) > ui-row:state(header):first-child > ui-cell:last-child {
+  .ui.table:state(rows):not(:state(captioned)) > :is(ui-row, es-fila):state(header):first-child > :is(ui-cell, es-celda):last-child {
     border-start-end-radius: var(--_ui-table-radius);
   }
 
   /* A header cell in a body row:  its row's name. */
-  .ui.table:state(rows) > ui-row:not(:state(header)) > ui-cell:state(header) {
+  .ui.table:state(rows) > :is(ui-row, es-fila):not(:state(header)) > :is(ui-cell, es-celda):state(header) {
     font-weight: var(--ui-font-weight-bold);
   }
 
   /* Footer row */
-  .ui.table:state(rows) > ui-row:state(footer) > ui-cell {
+  .ui.table:state(rows) > :is(ui-row, es-fila):state(footer) > :is(ui-cell, es-celda) {
     border-block-start: var(--_ui-table-footer-border);
     background: var(--_ui-table-footer-background);
     color: var(--_ui-table-footer-color);
@@ -1625,86 +1713,86 @@
 
 @layer ui.components.table.variations {
   /* Celled */
-  .ui.celled.table:state(rows) > ui-row > ui-cell + ui-cell {
+  .ui.celled.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) + ui-cell {
     border-inline-start: var(--_ui-table-cell-border);
   }
 
   /* Striped:  every other body row. */
-  .ui.striped.table:state(rows) > ui-row:nth-child(2n of :not(:state(header), :state(footer))) {
+  .ui.striped.table:state(rows) > :is(ui-row, es-fila):nth-child(2n of :not(:state(header), :state(footer))) {
     background-color: var(--_ui-table-striped-background);
   }
-  .ui.inverted.striped.table:state(rows) > ui-row:nth-child(2n of :not(:state(header), :state(footer))) {
+  .ui.inverted.striped.table:state(rows) > :is(ui-row, es-fila):nth-child(2n of :not(:state(header), :state(footer))) {
     background-color: var(--_ui-table-inverted-striped-background);
   }
 
   /* Basic */
-  .ui.basic.table:state(rows) > ui-row:state(header) > ui-cell {
+  .ui.basic.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda) {
     background: transparent;
   }
 
   /* Very basic:  no padding at the edges. */
-  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > ui-row > ui-cell:first-child {
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):first-child {
     padding-inline-start: 0;
   }
-  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > ui-row > ui-cell:last-child {
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):last-child {
     padding-inline-end: 0;
   }
 
   /* Padding */
-  .ui.padded.table:state(rows) > ui-row > ui-cell {
+  .ui.padded.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-padded);
   }
-  .ui[class*="very padded"].table:state(rows) > ui-row > ui-cell {
+  .ui[class*="very padded"].table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-very-padded);
   }
-  .ui.compact.table:state(rows) > ui-row > ui-cell {
+  .ui.compact.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-compact-padding-block) var(--_ui-table-compact-padding-inline);
   }
-  .ui[class*="very compact"].table:state(rows) > ui-row > ui-cell {
+  .ui[class*="very compact"].table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     padding: var(--_ui-table-very-compact-padding-block) var(--_ui-table-very-compact-padding-inline);
   }
 
   /* Single line */
-  .ui[class*="single line"].table:state(rows) > ui-row > ui-cell {
+  .ui[class*="single line"].table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     white-space: nowrap;
   }
 }
 
 @layer ui.components.table.states {
   /* Selectable:  body rows light up on hover. */
-  .ui.selectable.table:state(rows) > ui-row:not(:state(header), :state(footer)):hover {
+  .ui.selectable.table:state(rows) > :is(ui-row, es-fila):not(:state(header), :state(footer)):hover {
     background: var(--_ui-table-selectable-background);
     color: var(--_ui-table-selectable-color);
   }
-  .ui.inverted.selectable.table:state(rows) > ui-row:not(:state(header), :state(footer)):hover {
+  .ui.inverted.selectable.table:state(rows) > :is(ui-row, es-fila):not(:state(header), :state(footer)):hover {
     background: var(--_ui-table-inverted-selectable-background);
   }
 
   /* Sortable:  a header cell is a control. */
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]) {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda):not([data-sortable="false"]) {
     cursor: var(--ui-control-cursor);
     user-select: none;
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell:not([data-sortable="false"]):hover {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda):not([data-sortable="false"]):hover {
     background: var(--_ui-table-sortable-hover-background);
     color: var(--_ui-table-sortable-hover-color);
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort] {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort] {
     background: var(--_ui-table-sortable-active-background);
     color: var(--_ui-table-sortable-active-color);
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[tabindex]:focus-visible {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[tabindex]:focus-visible {
     outline: var(--ui-focus-width) solid var(--ui-focus-color);
     outline-offset: calc(-1 * var(--ui-focus-width));
   }
   /* The direction caret, drawn only on the sorted header:  the native table's. */
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort="ascending"] {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort="ascending"] {
     --_table-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 2l4 6H1z'/%3E%3C/svg%3E");
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort="descending"] {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort="descending"] {
     --_table-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8L1 2h8z'/%3E%3C/svg%3E");
   }
-  .ui.sortable.table:state(rows) > ui-row:state(header) > ui-cell[aria-sort]::after {
+  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda)[aria-sort]::after {
     content: "";
     display: inline-block;
     inline-size: 0.8em;
@@ -1721,17 +1809,17 @@
     :host(:state(rows)) > .scroller {
       display: block;
     }
-    .ui.table:state(rows) > ui-row {
+    .ui.table:state(rows) > :is(ui-row, es-fila) {
       display: block;
       padding-block: var(--_ui-table-responsive-row-padding);
       box-shadow: var(--_ui-table-responsive-row-shadow);
     }
-    .ui.table:state(rows) > ui-row > ui-cell {
+    .ui.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
       padding: var(--_ui-table-responsive-cell-padding);
       border: none;
       background: none;
     }
-    .ui.table:state(rows) > ui-row > ui-cell:first-child {
+    .ui.table:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):first-child {
       font-weight: var(--ui-font-weight-bold);
     }
   }

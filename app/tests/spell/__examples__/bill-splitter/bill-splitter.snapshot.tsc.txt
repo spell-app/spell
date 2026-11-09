@@ -1,1 +1,1 @@
-111:28 TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.
+12:28 TS2345 Argument of type 'number' is not assignable to parameter of type 'string'.

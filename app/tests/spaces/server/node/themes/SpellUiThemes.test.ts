@@ -3,6 +3,7 @@ import { tmpdir } from "os"
 import { join, resolve } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
+import type { SRV } from "spell/server"
 import { SpellUiThemes } from "spell/app/spaces/server/node/themes/SpellUiThemes"
 import { isSpellAdmin } from "spell/app/spaces/server/node/themes/themesRoutes"
 import { PeopleStore, orgFile } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -53,6 +54,9 @@ describe("SpellUiThemes", () => {
   })
 })
 
+/** A request from a device nobody's signed in on:  it's this machine's person asking. */
+const NOBODY_SIGNED_IN = { person: undefined } as SRV.Request
+
 describe("isSpellAdmin()", () => {
   test("only `spell-admin` in Spell's own org:  a member is refused", async () => {
     const spaces = mkdtempSync(resolve(tmpdir(), "spell-admin-"))
@@ -71,9 +75,9 @@ describe("isSpellAdmin()", () => {
           })
         )
       await write("member")
-      expect(await isSpellAdmin(people)).toBe(false)
+      expect(await isSpellAdmin(NOBODY_SIGNED_IN, people)).toBe(false)
       await write("spell-admin")
-      expect(await isSpellAdmin(new PeopleStore(storage))).toBe(true)
+      expect(await isSpellAdmin(NOBODY_SIGNED_IN, new PeopleStore(storage))).toBe(true)
     } finally {
       storage.close()
       rmSync(spaces, { recursive: true, force: true })

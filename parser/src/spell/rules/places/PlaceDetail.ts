@@ -7,8 +7,20 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /** What a detail adds to what a place's lines say:  `core.place()`'s second argument, merged. */
 export type PlaceDetailValue = {
-  collections?: Record<string, { at?: string; fields?: Record<string, string> }>
+  collections?: Record<
+    string,
+    {
+      at?: string
+      fields?: Record<string, string>
+      searchedOnly?: boolean
+      pictures?: Record<string, string>
+      askedBy?: string[]
+      /** How this one is searched, at its own address:  see `CollectionSearchedWith`. */
+      searches?: { param: string; fields: string[]; at?: string }
+    }
+  >
   keyNamed?: string
+  keyIfSet?: boolean
   checkedEvery?: number
   checkedAt?: { hour: number; minute: number; utc?: boolean }
   versionsIn?: string
@@ -16,9 +28,46 @@ export type PlaceDetailValue = {
   accounts?: string[]
   rowsIn?: string
   nextPageIn?: string
+  nextPageInLink?: boolean
   namesLike?: string
   numbersLike?: string
-  searches?: { param: string; fields: string[] }
+  listsGive?: string[]
+  pageSize?: number
+  searches?: { param: string; fields: string[]; at?: string }
+  mostPerSecond?: number
+  keptOnDevice?: boolean | number
+  listsUnder?: Record<string, Record<string, string>>
+  /** What a projection's lines say (epic `atmosphere` P17):  see `ProjectionOf`. */
+  projection?: ProjectionLines
+  /**
+   * What a sign-up sheet's lines say (epic `atmosphere` P27):  `SignUpsFrom`, `RowsOnlyFrom`, `MostRowsEach`;
+   * `RowsAllowedEach`, `ConfirmedJoin` (P31).
+   */
+  sheet?: SheetLines
+}
+
+/** What a sign-up sheet's lines say:  the kit's `SheetRules`, each line one part of it. */
+export type SheetLines = {
+  /** The space whose readers sign up here:  `picnic@rs`. */
+  signUpsFrom?: string
+  /** The collection listing who may add rows:  `attendees`. */
+  onlyFrom?: string
+  /** At most `most` rows with the same `field`;  several, each line its own (P31). */
+  mostEach?: { field: string; most: number } | { field: string; most: number }[]
+  /** Each person's allowance:  as many rows in `collection` as their row on the list says in `field` (P31). */
+  allowance?: { collection: string; field: string }
+  /** A confirmed row of `collection` joins the space at `address` (P31). */
+  joins?: { collection: string; address: string }
+}
+
+/** What a projection's lines say:  where it's written, which fields it shows, which things. */
+export type ProjectionLines = {
+  /** The space it's written into, by its address:  `@rs/picnic`. */
+  into?: string
+  /** The fields shown, by the names compiled code gives them:  `["person", "shift"]`. */
+  fields?: string[]
+  /** Only things whose field has this text, by field:  `{ status: "confirmed" }`. */
+  where?: Record<string, string>
 }
 
 /**
@@ -61,7 +110,7 @@ export abstract class PlaceDetail<Groups extends string> extends SpellStatement<
 }
 
 /** The groups that name a field of the place's answer. */
-const FIELD_GROUPS = ["name", "field", "inner", "outer"]
+const FIELD_GROUPS = ["name", "field", "inner", "outer", "more"]
 
 /** A text's words, without its quotes. */
 export function textIn(text: P.Match | undefined): string {

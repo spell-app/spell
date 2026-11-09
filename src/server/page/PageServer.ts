@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, statSync } from "node:fs"
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { escapeRegExp } from "spell/util/string"
@@ -22,7 +22,8 @@ import {
   type PageScript,
   type PageServerSettings,
   type RouteContext,
-  type RouteModule
+  type RouteModule,
+  type ServerReport
 } from "spell/server/page"
 
 /** The mark on every script tag the page server adds to a page (`withPageScripts()`). */
@@ -109,6 +110,9 @@ export class PageServer {
   /** run on `stop()`, from route modules */
   private stops: (() => unknown)[] = []
 
+  /** What route modules said to ask for `spell server start all`'s table. */
+  private reports: ServerReport[] = []
+
   /** more fields for every page's `window.SPELL_SERVER`, from route modules (`addPageConfig()`) */
   private pageConfigs: PageConfig[] = []
 
@@ -179,7 +183,7 @@ export class PageServer {
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
         // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
-        writable: this.writes.writable.some((folder) => isInside(served.file, folder)),
+        writable: this.writes.writable.some((folder) => SRV.pathInside(folder, served.file)),
         // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
         staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
@@ -216,6 +220,7 @@ export class PageServer {
       )
     router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
+    router.get(SERVER_REPORTS_API, this.onReportsAsked)
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -249,7 +254,11 @@ export class PageServer {
     }
     const { port: actual } = await this.web.listen({ port })
     this.info.port = actual
-    if (pidFile) this.pidFile.write(this.info)
+    if (pidFile) {
+      this.pidFile.write(this.info)
+      // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
+      this.pidFile.writeToken(this.web.guard.token)
+    }
     for (const start of this.listenings)
       await Promise.resolve(start()).catch((error: unknown) => {
         console.error("page server:  a route module's onListening failed:", error)
@@ -279,8 +288,11 @@ export class PageServer {
    */
   static ensure(_root: string, port = DEFAULT_PORT) {
     const root = kitRootOf(_root)
-    // its code:  the server's folder, and its route modules' folders;  a server older than them restarts (I5 of `skillz`)
-    const routes = (pageServerSettings(root).routes ?? []).map((path) => dirname(join(root, path)))
+    // its code:  the server's folder, and the whole `src/` each route module is in;  a server older than them restarts
+    // (I5 of `skillz`).  The whole `src/`, not the route's folder (epic `epic-engine` I219):  a route imports far
+    // beyond its own folder, and a merge that changed only `epic/src/tool/ReviewInbox.ts` left the server refusing
+    // the new `hold` mark
+    const routes = (pageServerSettings(root).routes ?? []).map((path) => codeFolderOf(join(root, path)))
     return new SRV.PidFile(root).ensure({
       command: [process.execPath, "--import", "tsx", CLI, "serve", "--root", resolve(root), "--port", String(port)],
       env: { TSX_TSCONFIG_PATH: TSCONFIG },
@@ -368,7 +380,7 @@ export class PageServer {
 
   /** An epic folder's page's `SPELL_SERVER.file`:  its path from the epic folder;  `{}` for any other file. */
   private contentFileConfig(file: string): { file?: string } {
-    if (!this.content || !isInside(file, this.content)) return {}
+    if (!this.content || !SRV.pathInside(this.content, file)) return {}
     return { file: `/${relative(this.content, file).split(sep).map(encodeURIComponent).join("/")}` }
   }
 
@@ -383,9 +395,9 @@ export class PageServer {
     path
   }: ServedFile): Partial<Record<"branch" | "worktree" | "worktrees" | "worktreesPath", string>> {
     if (!this.worktrees.length) return {}
-    const name = this.content && isInside(file, this.content) ? WORKTREE_ADDRESS.exec(path)?.[1] : undefined
+    const name = this.content && SRV.pathInside(this.content, file) ? WORKTREE_ADDRESS.exec(path)?.[1] : undefined
     const at = name ? this.worktrees.map((each) => join(each, name)).find((each) => existsSync(each)) : file
-    const folder = (at && this.worktrees.find((each) => isInside(at, each))) ?? this.worktrees[0]!
+    const folder = (at && this.worktrees.find((each) => SRV.pathInside(each, at))) ?? this.worktrees[0]!
     return { ...(at && worktreeOf(at, folder)), worktrees: folder, worktreesPath: urlPathOf(this.root, folder) }
   }
 
@@ -553,8 +565,22 @@ export class PageServer {
       serveContent: (dir) => void this.serveContent(dir),
       addPageConfig: (add) => void this.addPageConfig(add),
       onListening: (start) => this.listenings.push(start),
-      onStop: (stop) => this.stops.push(stop)
+      onStop: (stop) => this.stops.push(stop),
+      addServerReport: (report) => this.reports.push(report)
     }
+  }
+
+  /**
+   * The router handler for `GET SERVER_REPORTS_API`:  the servers route modules run, for `spell server start all`.
+   * - A report that fails is left out:  a table row is never worth an error.
+   */
+  private onReportsAsked = async (_request: SRV.Request, reply: SRV.Reply): Promise<void> => {
+    const asked = this.reports.map((report) =>
+      Promise.resolve()
+        .then(report)
+        .catch(() => undefined)
+    )
+    reply.set("Cache-Control", "no-store").json((await Promise.all(asked)).filter(Boolean))
   }
 }
 
@@ -568,6 +594,15 @@ export function urlPathOf(root: string, dir: string): string {
 }
 
 /** `page/cli.ts`:  `spell server`. */
+/**
+ * The code folder holding route module `file`:  the nearest `src/` above it (`<kit>/epic/src`), else its own folder.
+ */
+function codeFolderOf(file: string): string {
+  const parts = file.split(sep)
+  const src = parts.lastIndexOf("src")
+  return src > 0 ? parts.slice(0, src + 1).join(sep) : dirname(file)
+}
+
 const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url))
 
 /** The server's folder, `src/server/`:  the code a page server runs. */
@@ -591,6 +626,9 @@ const SERVER_API = SRV.SERVER_API
 /** Where a page tells of a stale generated file (`SPELL_SERVER.reportStale()`, `onStaleReport()`). */
 const STALE_API = `${SERVER_API}/stale`
 
+/** The servers route modules run, for `spell server start all`'s table (`ReportedServer`). */
+export const SERVER_REPORTS_API = `${SERVER_API}/reports`
+
 /**
  * `PageServer.start()` options.
  * - `port`:  wanted
@@ -604,8 +642,9 @@ export type StartOptions = { port?: number; routes?: boolean; pidFile?: boolean 
  * - cached per worktree:  every page served asks
  */
 function worktreeOf(file: string, worktrees: string): { branch?: string; worktree?: string } {
-  if (!isInside(file, worktrees)) return {}
-  const name = relative(worktrees, file).split(sep)[0]!
+  const inside = SRV.pathInside(worktrees, file)
+  if (!inside) return {}
+  const name = inside.split("/")[0]!
   const folder = join(worktrees, name)
   let found = WORKTREES.get(folder)
   // its name is its folder's, in the worktrees' folder
@@ -622,12 +661,6 @@ function subfolders(dir: string): string[] {
   } catch {
     return []
   }
-}
-
-/** Whether `file` is inside folder `dir`, below it (never `dir` itself). */
-function isInside(file: string, dir: string): boolean {
-  const inside = relative(dir, file)
-  return Boolean(inside) && !inside.startsWith("..") && !isAbsolute(inside)
 }
 
 /** `worktreeOf()`'s cache, by worktree folder:  two worktrees folders may each hold a `<w>`. */

@@ -11,9 +11,32 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
-  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
-    `spell content check [--bless]`, `spell content compare [--against <ref>] [--target <name>]` and
-    `spell content update [--json] [--done]`
+  - the app's OWN commands:
+    - the editor:  `spell app create | serve | vscode [build|install]`, `spell projects`
+    - the built-in projects:
+      - `spell content check [--bless]`
+      - `spell content compare [--against <ref>] [--target <name>]`
+      - `spell content update [--json] [--done]`
+    - taking things down (epic `atmosphere` P6):  `spell space takedown hide | delete | restore | list`
+    - keeping spaces safe (P7, [spaceCommand.ts](commands/spaceCommand.ts)):
+      `spell space backup now | list | status | restore`, `spell space export`, `spell space delete`;
+      and what a space projects (P17):  `spell space projection list | rebuild`
+    - Spell's server for people outside this machine (P8, [cloudCommand.ts](commands/cloudCommand.ts)):
+      `spell space cloud serve | status | invite | mail | service`
+    - the cloud at real-looking addresses, for one house network, on a Mac (T57,
+      [localCommand.ts](commands/localCommand.ts)):  `spell space local setup | start | mail | sign-in`
+    - Spell's own Spaces host on this machine (P13, [orgCommand.ts](commands/orgCommand.ts)):
+      `spell space org host start | stop`
+    - an org set up on Spell's own server in one go (P35, Q29, [orgCreateCommand.ts](commands/orgCreateCommand.ts),
+      its work spaces' `OrgSetup`):  `spell space org create <org> --name "RS" --admin ana@example.org [--team ...]`
+    - an org's recovery codes, and its Board taking it back with them
+      (P21, [orgRecoverCommand.ts](commands/orgRecoverCommand.ts)):  `spell space org codes | recover <org>`
+    - an org's member lists, audited against its roles (P24, [orgAuditCommand.ts](commands/orgAuditCommand.ts)):
+      `spell space org audit <org>`
+    - someone leaving an org, their own space there offered to them
+      (P28, [orgLeaveCommand.ts](commands/orgLeaveCommand.ts)):  `spell space org leave <org> <who> [--to <space>]`
+    - a library type's Lexicon (P10, [lexiconCommand.ts](commands/lexiconCommand.ts), through `loadApp()`):
+      `spell space lexicon read | publish`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)

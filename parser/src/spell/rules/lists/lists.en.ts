@@ -22,6 +22,7 @@ import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
+import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
@@ -36,6 +37,7 @@ import { ListRemovePosition } from "./ListRemovePosition"
 import { ListRemoveRange } from "./ListRemoveRange"
 import { ListRemoveRangeOrdinal } from "./ListRemoveRangeOrdinal"
 import { ListRemoveWhere } from "./ListRemoveWhere"
+import { ListRemoveWith } from "./ListRemoveWith"
 import { ListReverse } from "./ListReverse"
 import { ListShuffle } from "./ListShuffle"
 import { MergeLists } from "./MergeLists"
@@ -566,6 +568,28 @@ lists.addRule(SortKeyField, {
   syntax: "{property:member_words}"
 })
 
+lists.addRule(SortKeyOrder, {
+  syntax:
+    ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z))",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("my-list")
+      },
+      tests: [
+        ["my-list sorted by its sent, newest first", "core.sortedBy(myList, (item) => core.descending(item.sent))"],
+        ["my-list sorted by its points highest first", "core.sortedBy(myList, (item) => core.descending(item.points))"],
+        ["my-list sorted by its sent, oldest first", "core.sortedBy(myList, (item) => item.sent)"],
+        ["my-list sorted by its name, reversed", "core.sortedBy(myList, (item) => core.descending(item.name))"],
+        ["my-list sorted by its name z-a", "core.sortedBy(myList, (item) => core.descending(item.name))"],
+        ["my-list sorted by its name a-z", "core.sortedBy(myList, (item) => item.name)"]
+      ]
+    }
+  ]
+})
+
 lists.addRule(ListSortedBy, {
   syntax: ",? sorted by {inline_expression}?",
   tests: [
@@ -817,6 +841,31 @@ lists.addRule(ListRemoveWhere, {
           'core.removeWhere(deck, (card) => card.suit === "clubs")'
         ],
         ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")']
+      ]
+    }
+  ]
+})
+
+lists.addRule(ListRemoveWith, {
+  syntax: "remove {list:things_with}",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a suit as one of clubs, hearts"].join("\n"), "block")
+        scope.variables?.add("suit")
+      },
+      tests: [
+        [
+          "remove every card with the same suit",
+          "core.removeWhere(core.everyThing(Card), (card) => card.suit === suit)",
+          "core.removeWhere(core.everyThing(Card), (card: Card) => card.suit === suit)"
+        ],
+        [
+          "remove cards with suit hearts",
+          'core.removeWhere(core.everyThing(Card), (card) => card.suit === "hearts")',
+          'core.removeWhere(core.everyThing(Card), (card: Card) => card.suit === "hearts")'
+        ]
       ]
     }
   ]

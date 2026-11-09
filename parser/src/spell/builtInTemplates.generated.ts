@@ -46,6 +46,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "turn it face up",
+          returns: "nothing",
           defined: "/TwoSidedView.spell:467-512"
         },
         {
@@ -56,6 +57,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "turn it face down",
+          returns: "nothing",
           defined: "/TwoSidedView.spell:516-565"
         },
         {
@@ -66,6 +68,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "turn it over",
+          returns: "nothing",
           defined: "/TwoSidedView.spell:569-658"
         },
         {
@@ -107,7 +110,11 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           of: "TwoSidedView",
           enumeration: ["abajo", "arriba"],
           defined: "/TwoSidedView.es.spell:443-475",
-          output: "direction"
+          output: "direction",
+          enumerationOutputs: {
+            abajo: "down",
+            arriba: "up"
+          }
         },
         {
           syntax: "{operator:is_or_is_not} boca (expression:abajo|abajos|arriba|arribas)",
@@ -135,6 +142,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla boca arriba",
+          returns: "nothing",
           defined: "/TwoSidedView.es.spell:506-563"
         },
         {
@@ -145,6 +153,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla boca abajo",
+          returns: "nothing",
           defined: "/TwoSidedView.es.spell:567-622"
         },
         {
@@ -155,6 +164,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla",
+          returns: "nothing",
           defined: "/TwoSidedView.es.spell:626-733"
         }
       ],
@@ -221,10 +231,57 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           of: "Notebook",
           enumeration: ["desbloqueado", "bloqueado"],
           defined: "/Notebook.es.spell:556-596",
-          output: "lock"
+          output: "lock",
+          enumerationOutputs: {
+            desbloqueado: "unlocked",
+            bloqueado: "locked"
+          }
         }
       ],
       codeLines: [10, 13, 16]
+    }
+  },
+  site: {
+    en: {
+      spellVersion: "0.8.0",
+      provides: ["Site"],
+      statements: [
+        {
+          type: "Site",
+          superType: "App",
+          defined: "/Site.spell:498-636"
+        },
+        {
+          property: "current_address",
+          asWritten: "current address",
+          of: "Site",
+          datatype: "text",
+          defined: "/Site.spell:589-636"
+        }
+      ],
+      codeLines: [10, 14]
+    },
+    es: {
+      spellVersion: "0.8.0",
+      languages: ["es"],
+      provides: ["Site"],
+      statements: [
+        {
+          type: "Site",
+          superType: "App",
+          gender: "masculine",
+          defined: "/Site.es.spell:537-685"
+        },
+        {
+          property: "dirección_actual",
+          asWritten: "dirección actual",
+          of: "Site",
+          datatype: "text",
+          defined: "/Site.es.spell:635-685",
+          output: "current_address"
+        }
+      ],
+      codeLines: [10, 14]
     }
   }
 }

@@ -18,7 +18,7 @@
 		set its direction to down
 	</action>
 	<action "turn it over">
-		<description>Flips it:  face up becomes face down, and back.</>
+		<spell-description>Flips it:  face up becomes face down, and back.</>
 		if it is face up
 			turn it face down
 		otherwise
@@ -27,7 +27,7 @@
 	</action>
 
 	<draw>
-		<description>The front when it's face up, the back when it's face down.</>
+		<spell-description>The front when it's face up, the back when it's face down.</>
 		<if it is face up>
 			<draw "front" />
 		<otherwise>

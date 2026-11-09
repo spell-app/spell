@@ -45,7 +45,7 @@ export class TheThings extends EveryThing {
     // what `property_expression` asks, as `caja de recetas` is a name, not a `caja` of the recipes
     ;(match.data as { isBare?: boolean }).isBare = isBare
     const own = ownListOf(scope, words)
-    if (!own) return match
+    if (!own) return EveryThing.refusedIfFoundByName(match, type)
     if (own.isAction || (own.variable && isBare) || Wording.reads(scope, "definite_article", first)) return undefined
     ;(match.data as { own?: OwnList }).own = own
     return match

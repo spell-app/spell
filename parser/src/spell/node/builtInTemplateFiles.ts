@@ -114,8 +114,10 @@ function classFile(className: string, typescript: string): string {
   const lines = code.split("\n")
   const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled TypeScript`)
-  // what it extends:  `View` for a two sided view, `Page` for a notebook
-  const superClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
+  // what it extends:  `View` for a two sided view, `Page` for a notebook;  in the core, a hand-written base of that,
+  // when it has one (`HAND_WRITTEN_BASES`)
+  const spellSuperClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
+  const superClass = HAND_WRITTEN_BASES[className] ?? spellSuperClass
   const end = lines.findIndex((line, index) => index > start && line === "}")
   const types = lines.slice(0, start).filter((line) => line.startsWith("export type "))
   const body = lines
@@ -135,7 +137,10 @@ function classFile(className: string, typescript: string): string {
     "// template, then run that (epic `elemental-spell` Q71).",
     ...(drawsSlots ? ['import h from "@solidjs/h"', ""] : []),
     ...(usesProp ? ['import { prop } from "spell/util"'] : []),
-    'import type { Drawing } from "spell/parser/core/drawing"',
+    // a template that draws nothing has no use for it:  a site's parts are drawn by its pages
+    ...(body.some((line) => line.includes("Drawing")) || slotMethods.length
+      ? ['import type { Drawing } from "spell/parser/core/drawing"']
+      : []),
     "",
     "// Import directly to avoid circular import",
     `import { ${superClass} } from "./${superClass}"`,
@@ -144,7 +149,7 @@ function classFile(className: string, typescript: string): string {
     "",
     "/**",
     ` * \`${className}\`:  spell's built-in template \`${templateWords(className)}\`, compiled from \`templates/${className}.spell\`.`,
-    ` * - What a ${superClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
+    ` * - What ${articleFor(spellSuperClass)} ${spellSuperClass.toLowerCase()} made from it extends, e.g. \`${exampleOf(className)}\`:  its members are here, once.`,
     " * - Every language's words for them read these members -- see spell's `loadBuiltInTemplates()`.",
     " */",
     `export class ${className} extends ${superClass} {`,
@@ -154,6 +159,13 @@ function classFile(className: string, typescript: string): string {
     ""
   ].join("\n")
 }
+
+/**
+ * The core's hand-written base for a template's class, where it has one, by the template's class:  what spell can't say.
+ * - `Site`:  `SiteBase`, a site's pages by address (epic `mockup` P2), under the `App` spell says it is.
+ * - The JavaScript core only:  Python's keeps spell's own base, and runs no site yet.
+ */
+const HAND_WRITTEN_BASES: Record<string, string> = { Site: "SiteBase" }
 
 /** Where Python's core keeps template `className`, from spell-parser's root:  `spell_core/two_sided_view.py`. */
 function pythonPathOf(className: string): string {
@@ -231,7 +243,14 @@ function slotMethod(slot: string): string {
 
 /** A line making something from template `className`, for its class's docstring:  `a card is a two sided view`. */
 function exampleOf(className: string): string {
-  return className === "Notebook" ? "counter notebook is a notebook" : `a card is a ${templateWords(className)}`
+  if (className === "Notebook") return "counter notebook is a notebook"
+  if (className === "Site") return "spell ui is a site"
+  return `a card is a ${templateWords(className)}`
+}
+
+/** `a` or `an`, for `word`:  `an app`, `a page`. */
+function articleFor(word: string): string {
+  return /^[aeiou]/i.test(word) ? "an" : "a"
 }
 
 /** The words template `className` is written as, e.g. `two sided view`. */
@@ -249,13 +268,14 @@ function templateWords(className: string): string {
  *   its property with the property, its Nth rule with the Nth rule.
  * - Each paired statement keeps its own words (syntax, names, values as said) and takes the English one's compiled
  *   names:
- *   - a property:  `output`, the English property (`dirección` reads `.direction`)
+ *   - a property:  `output`, the English property (`dirección` reads `.direction`),
+ *     and what each of its values said compiles to, `enumerationOutputs` (`arriba` is `up`)
  *   - slots:  `slotOutputs` (`frente` draws `drawFront()`)
  *   - a rule:  the English `output`, its `values` keyed as the English ones (`$direction`), and what each value
  *     said compiles to, `valueOutputs` (`está boca arriba` is `isFaceDirection("up")`)
  * - NOT its values as constants:  a root's constants are every program's, so `arriba` compiling to `'up'` would
- *   change a Spanish program's own `arriba`.  So a Spanish file sets a two sided view's direction by its words
- *   (`voltearla boca arriba`), not by `poner su dirección a arriba`.
+ *   change a Spanish program's own `arriba`.
+ *   So only where a value is said FOR the property, `una nueva carta cuyo dirección es arriba`, is it its English one.
  * - Throws for a twin statement with no English partner:  its words would name a member the class doesn't have.
  */
 function speakingEnglish(
@@ -287,6 +307,10 @@ function rolesOf(statements: SP.SpellDeclaration[]): Array<{ role: string; state
 function paired(twin: SP.SpellDeclaration, english: SP.SpellDeclaration): SP.SpellDeclaration {
   const result: SP.SpellDeclaration = { ...twin }
   if (twin.property && english.property && twin.property !== english.property) result.output = english.property
+  const enumerationOutputs = zipped(twin.enumeration?.map(String), english.enumeration?.map(String), (said, value) =>
+    said !== value ? [said, value] : undefined
+  )
+  if (twin.property && enumerationOutputs) result.enumerationOutputs = enumerationOutputs
   const slotOutputs = zipped(twin.slots, english.slots, (said, slot) => (said !== slot ? [said, slot] : undefined))
   if (slotOutputs) result.slotOutputs = slotOutputs
   if (twin.rule && english.output) result.output = english.output

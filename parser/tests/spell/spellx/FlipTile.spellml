@@ -8,7 +8,7 @@
 		description="Sent each time it turns over"
 	/>
 	<action "flip it" shortcut="meta+F" enabled-when="it is showing up" undone-as="Flip Tile">
-		<description>Turns it over.</>
+		<spell-description>Turns it over.</>
 		if it is showing up
 			set its side to down
 		otherwise

@@ -252,13 +252,13 @@ export default function languageCommands(spell: Command): void {
       "look at a data source for real, and write what it found, in a .spell file of its own:  the Spell to reach it, in " +
         "<Name>.api.spell, and a description of it beside that, <Name>.api.json5 -- its collections, fields, ids, links, " +
         "paging and limits -- named in the project's file, development.apis;  through the Claude API with " +
-        "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes, and checks the Spell compiles " +
-        "and that a read through it returns rows.  Exits 1 if something needs a person"
+        "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes (but with --try-writes), " +
+        "and checks the Spell compiles and that a read through it returns rows.  Exits 1 if something needs a person"
     )
     .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
     .option(
       "--kind <kind>",
-      "its kind:  web server, graphql server, sheet, google sheet -- default worked out from the address, else it asks"
+      "its kind:  web server, graphql server, sheet (a CSV file, or an Excel .xlsx), google sheet -- default worked out from the address, else it asks"
     )
     .option(
       "--into <file>",
@@ -268,7 +268,28 @@ export default function languageCommands(spell: Command): void {
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
     .option("--docs <address>", "where its docs are, over those it finds by itself")
-    .option("--collections <paths>", "its collections' paths, comma-separated, for a source that doesn't list them")
+    .option(
+      "--collections <paths>",
+      "its collections' paths, comma-separated, for a source that doesn't list them;  name=path names one, and a " +
+        'name in braces is found by name, with no list:  "wiki pages=/page/summary/{name}";  one asked with a search ' +
+        'is searched:  "books=/search.json?q=dune"'
+    )
+    .option(
+      "--samples <names>",
+      "names to read a collection found by name by, comma-separated:  Tatooine,Hoth;  name=sample for one " +
+        "collection's own:  authors=OL79034A,editions=OL7353617M"
+    )
+    .option(
+      "--pictures <fields>",
+      "fields holding a picture's id on another server, comma-separated, each field=address, its braces where the id " +
+        'goes:  "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"'
+    )
+    .option(
+      "--try-writes",
+      "try one write of each kind -- adding, changing, deleting -- and say what each answered, and whether it keeps " +
+        "them:  only for a server that keeps nothing (JSONPlaceholder) or one you don't mind writing to;  without it, " +
+        "it never writes"
+    )
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((address: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))
@@ -285,6 +306,20 @@ export default function languageCommands(spell: Command): void {
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((file: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))
+    )
+
+  place
+    .command("nerd")
+    .description(
+      "draw a place's NERD, the shape of its data, by the NERD skill's rules:  a box per collection with only its " +
+        "links, solid for what it holds, dashed for what it refers to -- read from its <Name>.api.json5, which " +
+        "spell place ingest wrote;  printed as the skill's JSON spec, or written with --output"
+    )
+    .argument("<file>", "the place's .spell file or its description, e.g. StarWars.api.spell")
+    .option("--output <file>", "where to write it:  .svg draws it, .json writes the spec")
+    .option("--columns <n>", "its most columns -- default 3")
+    .action((file: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeNerd")).placeNerd(file, command.optsWithGlobals()))
     )
 
   // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)

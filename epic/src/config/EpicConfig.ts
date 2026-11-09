@@ -10,6 +10,7 @@ import JSON5 from "json5"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { peerRepos } from "spell/server/page/settings"
 import { PeopleColors } from "./PeopleColors.ts"
 import { Editor, EDITOR_IDS } from "./Editor.ts"
 import { VoiceColor } from "./VoiceColor.ts"
@@ -17,6 +18,7 @@ import { VoiceColor } from "./VoiceColor.ts"
 /****************
  * ### `EpicConfig`
  * Where a repo keeps its epic things, read from ONE file in it:  `.epic/config.json5` (epic `epic-eject` P4).
+ * - NOT how the tooling behaves for a person:  that's `LayeredSettings`, `epic_settings.json5` (epic `epic-engine` I235).
  *
  * ```ts
  * const config = EpicConfig.of(process.cwd())   // the main checkout's file, from any worktree
@@ -354,7 +356,8 @@ export class EpicConfig {
   /**
    * The repos BESIDE this one that its repos file lists as PEERS (epic-engine's P49, Q48 A):
    * `{ "name": "spell-brand", "path": "../spell-brand", "peer": true }` in the kit's `repos.json5`.
-   * - each one's MAIN checkout:  `path` (else `../<name>`), from this repo's main checkout
+   * - each one's MAIN checkout:  `path` (else `../<name>`), from this repo's main checkout;  one not there is left out
+   * - read by the page server's `peerRepos()`, the one reader of them
    * - a project of its own, with its own install and its own worktrees (`<name>.worktrees/` beside it, Q50 D):
    *   never part of an epic's worktree of this repo (`repos` and `repoCheckouts()` leave it out)
    * - `[]` with no repos file, or one that won't read
@@ -364,19 +367,10 @@ export class EpicConfig {
     const written = this.settings.repos
     let peers: EpicPeer[] = []
     if (typeof written === "string" && written) {
-      try {
-        const file = resolve(this.main, written)
-        const data = EpicConfig.parse(readFileSync(file, "utf8"), file) as { repos?: unknown } | unknown[]
-        const list = Array.isArray(data) ? data : (data as { repos?: unknown }).repos
-        peers = (Array.isArray(list) ? list : []).flatMap((each) => {
-          const entry = (each ?? {}) as { name?: unknown; path?: unknown; peer?: unknown }
-          if (entry.peer !== true || typeof entry.name !== "string" || !/^[\w.-]+$/.test(entry.name)) return []
-          const path = typeof entry.path === "string" && entry.path ? entry.path : `../${entry.name}`
-          return [{ name: entry.name, main: resolve(this.main, path) }]
-        })
-      } catch {
-        // `repos` says it already
-      }
+      // the kit's one reader of its peers (epic `coherence` P29):  from this repo's main checkout, never a worktree
+      peers = peerRepos(this.main, { file: written, beside: "kit" })
+        .filter(({ name }) => /^[\w.-]+$/.test(name))
+        .map(({ name, folder }) => ({ name, main: folder }))
     }
     this.peersFound = peers
     return peers

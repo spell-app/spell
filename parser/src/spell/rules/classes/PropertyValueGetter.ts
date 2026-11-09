@@ -9,6 +9,7 @@ import { PossessiveProperty } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
 import { BlockLine } from "spell/parser/spell/rules/BlockLine"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { DRAFT_DATATYPE } from "spell/parser/spell/rules/places/DraftOf"
 import { type MethodBody } from "./classes.shared"
 
 /** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
@@ -28,6 +29,8 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  * - Or as a possessive, in English (epic `language` T24):  `a card's value is its name`, the same getter.
  *   `a card' value is ...` is refused, saying to write `a card's value`.
  *   A plural with no article, `cards' value is ...`, is the same getter, warning to write `a card's value` (T26).
+ * - A draft kept in a property, for separate Save and Cancel actions (epic `data` T135):
+ *   `- its "draft" is a draft of its recipe` => `get draft() { return core.draftOf(this.recipe) }`.
  * - A worked-out value from a list of its own (epic `elemental-spell` P5, Q13):
  *
  *   ```spell
@@ -71,6 +74,9 @@ export class PropertyValueGetter extends SpellStatement<
     // with a list of its own, `- its "color" is one of red, black:`, it's a declaration too:  it outranks the
     // stored property's line, `define_property_has`, which would read the line all but its colon (epic `elemental-spell` P5)
     if (match.groups.specifier) match.priority = Priority.declaration
+    // a draft kept in a property, `- its "draft" is a draft of its recipe`:  the stored property's line would read
+    // `a draft` as a type named `Draft`, which there's none of (epic `data` T135)
+    if (this.getBody(match)?.datatype === DRAFT_DATATYPE) match.priority = Priority.aboveDeclaration
     match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
     this.warnIfAlwaysTheSame(match)
     this.warnIfReadsAfterWait(match)

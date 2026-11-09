@@ -8,6 +8,8 @@
     "Page",
     "TwoSidedView",
     "Notebook",
+    "SiteBase",
+    "Site",
     "ViewableList",
     "h",
     "css",
@@ -66,6 +68,32 @@
       ],
       "section": "Meta-programming",
       "description": "Create an new, \"empty\" instance of `thing.constructor`."
+    },
+    {
+      "kind": "method",
+      "name": "classToMake",
+      "of": "core",
+      "module": "core",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "section": "Meta-programming",
+      "description": "The class to make for `Class`:  the running program's newest class by its name, if it IS `Class` or extends it, else `Class` itself (epic `language` P26)."
+    },
+    {
+      "kind": "method",
+      "name": "registerClass",
+      "of": "core",
+      "module": "core",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "section": "Meta-programming",
+      "description": "SIDE EFFECT:  the running program knows `Class` by its name now, before any of its things is made (`ThingRegistry.addClass()`;  epic `language` P26)."
     },
     {
       "kind": "method",
@@ -941,6 +969,19 @@
     },
     {
       "kind": "method",
+      "name": "descending",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "key"
+        }
+      ],
+      "section": "iteration",
+      "description": "`key` read backwards, as a sort key:  `sorted by its sent, newest first` (epic `atmosphere` T48)."
+    },
+    {
+      "kind": "method",
       "name": "firstFew",
       "of": "core",
       "module": "collection-other",
@@ -1227,7 +1268,131 @@
           "name": "date"
         }
       ],
-      "description": "A date for people to read:  `May 25, 1977`."
+      "description": "A date for people to read, as the program shows dates:  `November 7, 2026` unless it says otherwise."
+    },
+    {
+      "kind": "method",
+      "name": "showDatesAs",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "style"
+        }
+      ],
+      "description": "Show every date the program draws or joins to text as `style` from now on:  `dates are shown as short dates`."
+    },
+    {
+      "kind": "method",
+      "name": "dateAs",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        },
+        {
+          "name": "style"
+        }
+      ],
+      "description": "`date` said as `style`, e.g. `dateAs(date, \"short\")` is `11/7/26`:  `its time as a short date`."
+    },
+    {
+      "kind": "method",
+      "name": "now",
+      "of": "core",
+      "module": "string",
+      "description": "This moment, as a date:  what spell's `now` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "joined",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "left"
+        },
+        {
+          "name": "right"
+        },
+        {
+          "name": "separator"
+        }
+      ],
+      "description": "`left` and `right` joined into one text, `separator` between:  what `&` and `&&` compile to (HyperTalk's)."
+    },
+    {
+      "kind": "method",
+      "name": "shortDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, short:  `11/7/26` -- `the short date of its time`, HyperTalk's `the short date`."
+    },
+    {
+      "kind": "method",
+      "name": "longDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, in full:  `Saturday, November 7, 2026` -- HyperTalk's `the long date`."
+    },
+    {
+      "kind": "method",
+      "name": "abbreviatedDate",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's day, its names cut short:  `Sat, Nov 7, 2026` -- HyperTalk's `the abbreviated date`."
+    },
+    {
+      "kind": "method",
+      "name": "shortTime",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's time of day:  `9:14 AM` -- HyperTalk's `the short time`."
+    },
+    {
+      "kind": "method",
+      "name": "longTime",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date's time of day, to the second:  `9:14:42 AM` -- HyperTalk's `the long time`."
+    },
+    {
+      "kind": "method",
+      "name": "timestamp",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date as an ISO 8601 timestamp, in UTC:  `2026-11-07T17:14:42.000Z` -- `the timestamp of its time`."
     },
     {
       "kind": "method",
@@ -1255,6 +1420,18 @@
     },
     {
       "kind": "method",
+      "name": "titleCase",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "string"
+        }
+      ],
+      "description": "Stringify, with each word's first letter a capital:  `\"ace of spades\"` is `\"Ace Of Spades\"`."
+    },
+    {
+      "kind": "method",
       "name": "unicode",
       "of": "core",
       "module": "string",
@@ -1277,6 +1454,45 @@
       "of": "core",
       "module": "ui",
       "description": "Bring the top of the app back into view:  what `scroll to the top` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "play",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "sound"
+        }
+      ],
+      "section": "Sound",
+      "description": "Play `sound`, a sound file's address, from its start:  what `play its sound` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "loadSound",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "sound"
+        }
+      ],
+      "section": "Sound",
+      "description": "Start loading `sound` now, so a later `play` starts it at once:  what `load its sound` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "stop",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "sound"
+        }
+      ],
+      "section": "Sound",
+      "description": "Stop `sound`, if it's playing, and put it back to its start:  what `stop its sound` compiles to."
     },
     {
       "property": "TIME_UNITS_MAP",
@@ -1413,6 +1629,50 @@
       "module": "ui",
       "section": "Styles",
       "description": "The project's `.css` as one sheet, which each view adopts into its shadow root, so a person's stylesheet styles what they drew, wherever they drew it (epic `language`, Q13)."
+    },
+    {
+      "kind": "method",
+      "name": "useDefaults",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "file"
+        },
+        {
+          "name": "defaults"
+        }
+      ],
+      "section": "Widget defaults",
+      "description": "The app's widget defaults from `file`:  what an app's `<ui-defaults>` block compiles to (epic `language` P29)."
+    },
+    {
+      "kind": "method",
+      "name": "uiDefaults",
+      "of": "core",
+      "module": "ui",
+      "section": "Widget defaults",
+      "description": "This run's widget defaults, merged in the order their files gave them (`useDefaults()`):"
+    },
+    {
+      "property": "giveDefaults",
+      "of": "core",
+      "module": "ui",
+      "section": "Widget defaults",
+      "description": "How the page gives an element widget defaults for everything drawn inside it (`useDefaults()`): the app's runner sets it, as Spell UI's `RootSettings` (`E.RootSettings.set(element, { defaults })`)."
+    },
+    {
+      "kind": "method",
+      "name": "handDefaultsTo",
+      "of": "core",
+      "module": "ui",
+      "params": [
+        {
+          "name": "element"
+        }
+      ],
+      "section": "Widget defaults",
+      "description": "Give `element`, where the app is drawn, this run's widget defaults (`giveDefaults`):  none clears them."
     },
     {
       "kind": "method",
@@ -2768,6 +3028,21 @@
     },
     {
       "kind": "method",
+      "name": "waitedValueKeyFor",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "...parts"
+        }
+      ],
+      "description": "ONE object for `thing` and each of `parts`, the `thing` of a `waitedValue()` with a loop's item in it: `rows={every review where its film is film}` is another read for each film, in the same words."
+    },
+    {
+      "kind": "method",
       "name": "whileWaiting",
       "of": "core",
       "module": "waiting",
@@ -2859,6 +3134,18 @@
         }
       ],
       "description": "The thing of `Class` with this id, from the place it's saved in:  what `the wiki page whose id is its name` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "savedIdOf",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "The id `thing` is kept under in the place it's saved in:  what a site's address names it by (epic `mockup` P2)."
     },
     {
       "kind": "method",
@@ -2975,6 +3262,13 @@
     },
     {
       "kind": "method",
+      "name": "signInMenu",
+      "of": "core",
+      "module": "saved",
+      "description": "The person menu, for a program's own toolbar:  what `the sign in menu` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "isCurrentPerson",
       "of": "core",
       "module": "saved",
@@ -3002,7 +3296,7 @@
           "name": "Class"
         }
       ],
-      "description": "Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.  - NEVER throws"
+      "description": "Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to."
     },
     {
       "kind": "method",
@@ -3090,6 +3384,168 @@
       "description": "Can people do `ability` to `thing` now:  drag it, click it, select it, drop something on it?"
     },
     {
+      "kind": "method",
+      "name": "defineDimension",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "units"
+        }
+      ],
+      "description": "Declare dimension `name`, with its compiled `units` if it has them yet:  `data size is a dimension:` compiles to this, each unit line under it to `defineUnit()`."
+    },
+    {
+      "kind": "method",
+      "name": "defineUnit",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "unit"
+        }
+      ],
+      "description": "Add `unit` to dimension `dimension`, replacing one of the same id:  `- one \"kilobyte\", aka \"KB\", is 1000 B` compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "dimensionNamed",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Dimension `name`, e.g. `Length`."
+    },
+    {
+      "kind": "method",
+      "name": "convertMeasure",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "from"
+        },
+        {
+          "name": "to"
+        }
+      ],
+      "description": "`value` of dimension `dimension`'s unit `from`, in unit `to`:  `its height in feet` compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "measureText",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "from"
+        },
+        {
+          "name": "to"
+        }
+      ],
+      "description": "`value` of dimension `dimension`'s unit `from`, written for people, in `to` -- see `Dimension.text()`: `its height in feet and inches` compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "measureShown",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "from"
+        }
+      ],
+      "description": "`value` of dimension `dimension`'s unit `from`, written in the READER's units:  `5 ft 8 in` in the US, `172 cm` elsewhere (epic `language` P24, Q27) -- a measure printed, or put in text, compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "useMeasureSystem",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "system"
+        }
+      ],
+      "description": "Show every measure in `system` from now on, whatever the reader chose (`undefined`:  theirs again):  for a host, or a test -- see `MeasureSystem.use()`."
+    },
+    {
+      "property": "siteHost",
+      "of": "core",
+      "module": "sites",
+      "description": "Where a running site's address lives, as the host keeps it:  `undefined` for none, and the site keeps its own."
+    },
+    {
+      "kind": "method",
+      "name": "showSitePart",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "Show the site's page `name`, its parameter filled with `thing`, or open its dialog or sidebar of that name: what `go to the film page for this film` and `show the settings dialog` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "closeSitePart",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Close the site's dialog or sidebar `name`, if it's open:  what `close the review dialog` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "siteAddressOf",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "The address of the site's page `name`, its parameter filled with `thing`: what `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"
@@ -3128,6 +3584,18 @@
       "superType": "Page",
       "module": "classes/Notebook",
       "description": "`Notebook`:  spell's built-in template `notebook`, compiled from `templates/Notebook.spell`."
+    },
+    {
+      "type": "SiteBase",
+      "superType": "App",
+      "module": "classes/SiteBase",
+      "description": "`SiteBase`:  what a running site DOES, under spell's built-in template `site` (`Site`, compiled from `templates/Site.spell`, extends it): showing the page its address names, and the dialogs and sidebars its pages open (epic `mockup` P2)."
+    },
+    {
+      "type": "Site",
+      "superType": "SiteBase",
+      "module": "classes/Site",
+      "description": "`Site`:  spell's built-in template `site`, compiled from `templates/Site.spell`."
     },
     {
       "type": "ViewableList",

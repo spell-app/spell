@@ -18,7 +18,7 @@ inside the element's own shadow root, with a toolbar holding Restart and Debug.
 - It never loads the editor.
   Monaco, the code editor inside VS Code, is a 4.2 MB file of its own, and only a `<spell-editor>` asks for it.
 - The JavaScript comes from the page server, which compiles
-  [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell) when it starts, or the first time it's asked.
+  [Calculator.spellml](spaces/@spell/examples/calculator/Calculator.spellml) when it starts, or the first time it's asked.
 
 The same code runs that calculator in three places:  in this element, in the editor in your browser,
 and in VS Code's Run Project panel.
@@ -103,7 +103,7 @@ their styles and headings left out._
 Where it stops:
 - **An editor saves.**
   Every compile saves the files edited since, and Cmd+S saves, back to the project on disk,
-  through the page server's API, which has no sign-in.
+  through the page server's API:  saved as this machine's person, whoever's signed in.
   A page with a `<spell-editor>` is for your own machine, not the open web.
 - The pack defines all four tags as it registers, so it fetches `spell-editor.js`, 2.0 MB, even where no editor is.
   Monaco still waits for an editor to open.
@@ -457,16 +457,18 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
 ### The editor in Spell
 
 The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
-The file tabs, the top bar's arrangement and how the panes are arranged are the first pieces:
+Its pieces are projects of their own, in the group `@spell/editor`, beside the examples:
+you open and change them in the editor, as any project (epic `editor` P22).
+The group is listed on your own machine only, never in the public preview.
 
 ```text
-app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
-app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
-app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
-app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
-app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
-app/src/app/layout/AppMenus/AppMenus.spellml     the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
-app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and titles that follow its state (Undo's)
+app/spaces/@spell/editor/file-tabs/FileTabs.spellml          the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                               the editor's side:  which files there are, what showing one does
+app/spaces/@spell/editor/editor-bar/EditorBar.spellml        the top bar:  its three sections, in Spell
+app/spaces/@spell/editor/editor-layout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
+app/src/app/pages/SpellEditor.tsx                            what's in each section and pane, each a thing that draws itself
+app/spaces/@spell/editor/app-menus/AppMenus.spellml          the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
+app/src/app/solid/MenuBar.tsx                                the editor's side:  what each item does, and titles that follow its state (Undo's)
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
@@ -492,6 +494,11 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   in the file's order (rank, suit, names, drawing), then those it inherits (two sided view).
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
+  - A type may lay its card out itself, in spellml:  Solitaire's card does, in
+    [Card.editor.spellml](spaces/@spell/examples/Solitaire/Card.editor.spellml), a `<spell-property-editor "card">`.
+    - Its own file, `<Type>.editor.spellml`, or one for the project, `<Project>.editors.spellml`:
+      never compiled, read by the Inspector (`propertyEditorInSource()`).
+    - Or inline, a `<spell-property-editor>` in the type's own tag.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
@@ -637,7 +644,7 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
 | Mode | What shows |
 | --- | --- |
 | Run | the app alone, the whole window:  the same page without its code column, `/run/<address>` |
-| Edit | the app on the left, the code at the far right;  the Program panel under the code, while it shows |
+| Edit | the code on the left, the app to its right;  the Program panel under the code, while it shows |
 
 - Run is a page of its own, with its own address.
 - A phone only runs:  no Edit, for now.
@@ -759,6 +766,24 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   through `LazyMonaco` in the app, and `loadMonaco()` in `<spell-editor>`.
 
 </details>
+
+### The site editor:  pages, their jobs, and the data
+
+For a project that is a site, View › Site opens its own page, `/site/<project>`, beside Run and Edit.
+
+![Star Wars Site open in the Spell editor:  its Spell on the left, the site running on the right](docs/images/examples/StarWarsSite.png)
+
+*The Star Wars site, the example the site editor was built on.*
+
+- **Pages:**  a tree of the site's pages, dialogs and sidebars (drag a row to move it), a board of cards
+  (double-click opens the page in Edit, with Back to the site there), and the picked page's form:
+  its name, title, address, parameters and jobs.
+- **Data:**  each place the site reads as a NERD, only its linking fields, on `<ui-diagram>`;
+  click a box and it turns over to every field, and its sample rows show in `<ui-table editable>`.
+- Every change is one undo step in the site file;  renaming a page renames every `go to` naming it, in every file.
+- Adding a page doesn't restart the running site:  the editor takes a newly added type as the program runs.
+- The code:  [SiteEditorPage.tsx](src/app/pages/SiteEditorPage.tsx), its writes [SiteWrites.ts](src/app/pages/SiteWrites.ts).
+- **The catch:**  cards show tiles, not pictures of the pages, and only the tree's rows can be dragged, not the cards.
 
 ## The public preview:  the editor as plain files
 
@@ -966,11 +991,12 @@ It's 31 pages in seven groups, from the four web components through the panes an
   - The editor is Vite, so an edit to the app's own code shows at once.
   - `yarn stop` stops a Vite left running.
 - The tests are in [tests/app/](tests/app/), at the same paths as the code:
-  node tests, and `*.browser.test.tsx` in headless Chromium.
+  node tests, `*.browser.test.tsx` in headless Chromium,
+  and `tests/app/pages/`, which drive the running editor one file at a time.
 
   ```sh
   cd ~/www/spell/app
-  yarn vp test run --project app:node --project app:browser
+  yarn vp test run --project app:node --project app:integration --project app:browser
   ```
 
 - Two rules that bite:

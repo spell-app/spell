@@ -32,10 +32,22 @@ export const epicFieldVocabulary = {
     {
       name: "name",
       kind: "enum",
-      values: ["symptom", "changes", "requests", "goal", "choices", "plan", "done", "files", "verify", "to-review"],
+      values: [
+        "symptom",
+        "changes",
+        "requests",
+        "goal",
+        "choices",
+        "plan",
+        "done",
+        "dropped",
+        "files",
+        "verify",
+        "to-review"
+      ],
       description:
         "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` " +
-        "(a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's " +
+        "(a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `dropped` (why a dropped phase was never built, in place of Done:  epic `epic-engine` I228), `files`, `verify` (both hidden until the Phases title's " +
         "toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
     },
     {
@@ -94,6 +106,7 @@ export const epicFieldVocabulary = {
     { key: "plan", text: "Claude's plan:", description: "A phase's build plan, waiting for your Accept." },
     { key: "planAccepted", text: "Claude's plan, accepted:", description: "A phase's build plan you accepted." },
     { key: "done", text: "Done:" },
+    { key: "dropped", text: "Dropped:", description: "A dropped phase's field:  why it was never built (I228)." },
     { key: "files", text: "Files:" },
     { key: "verify", text: "Verify:" },
     { key: "toReview", text: "To review:" },

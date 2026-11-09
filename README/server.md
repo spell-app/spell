@@ -850,11 +850,13 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 | --- | --- |
 | `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  every answer `Cache-Control: no-store` with an ETag;  hooks to rewrite HTML or transform by extension |
 | `Router`, `Request`, `Reply` | the part of Express the app's API uses, with Express's names;  one difference:  `:name*` holds the whole rest of the path |
-| `LiveReload` | the watcher and the websocket;  its page-side client is served at `/api/server/live.js` |
+| `LiveReload` | the websocket that tells pages a file changed;  its page-side client is served at `/api/server/live.js` |
+| `FolderWatch` | a folder watched for changes:  dot files, `node_modules`, lock files and editors' temp files skipped;  a burst reported once it's quiet, if asked |
 | `Guard` | the host check, the per-run write token, same-origin writes |
 | `FileLock` | `<file>.lock`, so tools writing one file take turns (waits up to 20 s;  takes a lock older than 60 s) |
 | `FileOperations` | save, create, rename, duplicate, delete:  under the lock, written all at once (a temp file, then a rename) |
-| `PidFile` | a background server's `.spell-server.json`:  status, ensure, stop (which waits for the process to end, so the port is free);  and `isProcessAlive(pid)`, which spell-epic's review inbox asks too |
+| `PidFile` | a background server's `.spell-server.json`:  status, ensure, stop (which waits for the process to end, so the port is free) |
+| `Heartbeat` | a waiting process says it's there:  a beat every 30 s, gone 90 s after the last one or once its process ends;  and `isProcessAlive(pid)`, the one process check |
 | `ports` | `isFree()`, `freePort()`, `listenPreferred()` |
 | openers | a browser, a new window, or a Chrome tab reused by its address |
 | `resolveInside()` | the one path check:  a URL path to a file under a root, never outside it |

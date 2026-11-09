@@ -202,6 +202,12 @@
     --_ui-menu-hover-color: var(--ui-menu-hover-color, var(--ui-text-selected));
     --_ui-menu-pressed-background: var(--ui-menu-pressed-background, oklch(from var(--ui-ink) l c h / 0.03));
     --_ui-menu-pressed-color: var(--ui-menu-pressed-color, var(--ui-text-selected));
+    /* a toggle held down:  a segmented menu's `toggles`, and a pressed item in any menu (States) */
+    --_ui-menu-segmented-pressed-shadow: var(
+      --ui-menu-segmented-pressed-shadow,
+      inset 0 1px 3px rgb(0 0 0 / 0.28),
+      inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)
+    );
     --_ui-menu-active-background: var(--ui-menu-active-background, oklch(from var(--ui-ink) l c h / 0.05));
     --_ui-menu-active-color: var(--ui-menu-active-color, var(--ui-text-selected));
     --_ui-menu-active-fill: var(--ui-menu-active-fill, initial);
@@ -389,6 +395,17 @@
   .ui.menu .item:last-child::before {
     display: var(--_ui-menu-divider-last-display);
   }
+  /*
+   * A divider item (`<ui-item kind="divider">`, an action menu's `-`):  a hairline between two groups of items,
+   * upright in a row (a toolbar's), across a column (a context menu's);  with room each side
+   */
+  :host(:state(in-menu)) > .divider {
+    flex: none;
+    align-self: stretch;
+    width: var(--ui-border-width);
+    margin: 0.5em 0.375em;
+    background: var(--ui-border-color);
+  }
   /* Right items / a right sub-menu's items:  the divider moves to the start edge. */
   :host(:state(in-menu)) > .right.item::before,
   .ui.menu .right.item::before {
@@ -540,6 +557,11 @@
     width: calc(15em * sqrt(var(--ui-scale, 1)));
   }
   @container style(--_ui-menu-layout: vertical) {
+    :host(:state(in-menu)) > .divider {
+      width: auto;
+      height: var(--ui-border-width);
+      margin: 0.25em 0;
+    }
     /*
      * A `<button>` item (a `link` menu's) shrinks to its text even as a block,
      * where an `<a>` / `<div>` fills the column:
@@ -831,9 +853,18 @@
     display: inline-block;
     width: auto;
   }
-  /* An icon-only item. */
+  /*
+   * An icon-only item (`icon item`:  a `<ui-item>` drawing its icon and nothing beside it says so itself):
+   * the icon centred, with no gap after it, its shorthand's box or a slotted `<ui-icon>` (through its owner token).
+   * - Before, the gap for words that weren't there pushed the glyph 2-3px left of the item's centre.
+   */
+  :host(:state(in-menu)) > .icon.item,
+  .ui.menu .icon.item {
+    --_ui-icon-owner-margin: 0;
+  }
   :host(:state(in-menu)) > .icon.item > .icon,
   .ui.menu .icon.item > .icon {
+    float: none;
     width: auto;
     margin: 0 auto;
   }
@@ -970,6 +1001,8 @@
    *     `--ui-menu-thumb-duration`, how long it slides (`200ms`)
    * - `choose="many"` (class word `toggles`):  no thumb;  each option on is filled as the thumb is, and pressed IN:
    *   `--ui-menu-segmented-pressed-shadow` (an inset shadow), instead of `-active-shadow`
+   * - A toggle beside the options (`aria-pressed="true"` on its `<ui-item>`, never chosen:  the editor's Inspect):
+   *   while on, the same fill, pressed in (States, below)
    */
   .ui.segmented.menu {
     --_ui-menu-segmented-background: var(--ui-menu-segmented-background, var(--ui-surface));
@@ -1170,11 +1203,6 @@
   }
   .ui.segmented.toggles.menu {
     --_ui-menu-active-shadow: var(--_ui-menu-segmented-pressed-shadow);
-    --_ui-menu-segmented-pressed-shadow: var(
-      --ui-menu-segmented-pressed-shadow,
-      inset 0 1px 3px rgb(0 0 0 / 0.28),
-      inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)
-    );
   }
   .ui.segmented.vertical.menu {
     --_ui-menu-first-radius: var(--_menu-segmented-inner-radius) var(--_menu-segmented-inner-radius)
@@ -1502,6 +1530,23 @@
     background: var(--_ui-menu-pressed-background);
   }
 
+  /*
+   * Pressed:  a toggle the page marks on (`aria-pressed="true"` on its `<ui-item>`), which is never the chosen one,
+   * e.g. the editor's Inspect and Code beside Run | Edit.
+   * - In a segmented menu:  the thumb's fill and on-colour, pressed IN (`--ui-menu-segmented-pressed-shadow`),
+   *   so it reads as one family with the chosen option, held down.
+   * - Elsewhere:  the menu's active look, pressed in the same way.
+   */
+  :host([aria-pressed="true"]:state(in-menu)) > .item:not(.active) {
+    color: var(--_ui-menu-segmented-active-color, var(--_ui-menu-active-color));
+    background: var(--_ui-menu-segmented-active-background, var(--_ui-menu-active-background));
+    border-radius: var(--_ui-menu-segmented-item-radius, var(--_ui-menu-active-radius));
+    box-shadow: var(--_ui-menu-segmented-pressed-shadow);
+  }
+  :host([aria-pressed="true"]:state(in-menu)) > .item:not(.active):hover {
+    background: var(--_ui-menu-segmented-active-hover-background, var(--_ui-menu-active-hover-background));
+  }
+
   /* Active:  the current item;  a coloured menu (or item) paints it in `--ui-color`. */
   :host(:state(in-menu)) > .active.item,
   .ui.menu .active.item {
@@ -1627,7 +1672,7 @@
     }
   }
   @container style(--_menu-fit: overflow) {
-    :host(:state(in-menu)) > .item:has(> .title) {
+    :host(:state(in-menu)) > :is(.item:has(> .title), .divider) {
       display: none;
     }
   }

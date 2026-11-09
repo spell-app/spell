@@ -12,7 +12,8 @@ core.heading("Cómo funciona Lista de tareas")
 // - la lista elige tareas con "donde":  "tareas en sus tareas donde está pendiente"
 // - la lista dibuja cada tarea, o la salta, según dice su filtro
 //
-// Esta guía tiene esas tres, sin arrastrar, seleccionar ni el editor de propiedades.
+// Esta guía tiene esas tres, sin arrastrar, seleccionar, el editor de propiedades,
+// ni dónde se guardan las tareas:  aquí están en memoria, y empiezan de nuevo cada vez.
 // Abre Lista de tareas, en los Ejemplos, para verlo todo.  Task List es la misma lista, en inglés.
 
 core.heading("Una tarea")
@@ -41,9 +42,9 @@ export class Tarea extends View {
   // un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
   draw() {
     return h("es-formulario", { value: this },
-      h("div", { part: "row" },
+      h("es-pila", { direccion: "horizontal", separacion: "sm" },
         h("es-casilla", { name: "hecha", "aria-label": "Hecha" }),
-        h("span", { part: "title" }, () => this.título)
+        h("es-texto", () => this.título)
       )
     )
   }
@@ -93,7 +94,7 @@ export class ListaDeTareas extends App {
   }
 
   draw() {
-    return h("es-contenedor", { class: "ListaDeTareas" },
+    return h("es-contenedor", { texto: true },
       h("es-menu", { apariencia: "secundario" },
         h("es-elemento", { clase: "encabezado" }, () => `${this.cuentaPendiente} pendientes`),
         h("es-elemento", {
@@ -149,8 +150,41 @@ core.heading("Pruébalo")
 //
 // Y después:  Lista de tareas, en los Ejemplos, donde escribes tareas nuevas, las arrastras para ordenarlas,
 // y seleccionas varias para cambiarlas todas a la vez.
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the list looks -- a menu over the tasks, each a row:  its checkbox, then its title. */¬¬.ListaDeTareas {¬  max-width: 30em;¬  padding-block: 1.5em;¬}¬¬como-funciona-lista-de-tareas-tarea::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  padding-block: 0.4em;¬}¬`)
+
+core.heading("Dónde guarda sus tareas el ejemplo")
+////////////////////////////////////////
+// ## Dónde guarda sus tareas el ejemplo
+////////////////////////////////////////
+// Las tareas de esta guía viven en memoria:  recarga, y empiezan otra vez.
+// Lista de tareas las guarda en uno de cuatro lugares, el que la persona elige en "Guardarlas en", sobre la lista:
+// - Este navegador, con el que empieza:  "almacén del navegador es una base de datos en este dispositivo"
+// - Un archivo JSON en el servidor, un archivo por tarea:  "archivos de tareas es una carpeta de datos en "tareas""
+// - Un archivo CSV en el servidor, una fila por tarea:  "hoja de tareas es una hoja en "tareas.csv"", el archivo propio del proyecto
+// - Tu cuenta de atmosphere, el AT Protocol de Bluesky, como Statusphere:  "cielo de tareas es una cuenta personal de atmosphere"
+//
+// Cada lugar es un archivo de API propio, y cada uno tiene un GUARDIÁN con las mismas tres cosas:
+//       - sus "tareas guardadas" es cada tarea del navegador
+//       - para apuntar (título como texto):
+//           poner tarea a una nueva tarea del navegador con título = título
+//           agregar tarea a las tareas del navegador
+//           devolver tarea
+// y su clase de tarea dice cómo se tira:
+//       una "tarea del navegador" es una tarea:
+//           - vive en almacén del navegador
+//           - para tirarla:
+//               quitar eso de las tareas del navegador
+//
+// La aplicación nunca nombra un lugar.  Le pregunta a su guardián:
+//       para tarea en (las tareas guardadas de su guardián) ordenadas por su orden
+//       poner tarea a apuntar (el borrador) de su guardián
+//       tirar la tarea
+// Elegir otro lugar en "Guardarlas en" cambia su "almacén";  "cuando su almacén cambia", la aplicación toma el guardián
+// de ese lugar, y llena la lista con sus tareas.  Una tarea guardada en cualquier lugar se guarda sola al cambiar:
+// no hay paso de guardar.
+// Su lugar en la lista se guarda igual, como su "orden":  al soltar, cada tarea toma su lugar como orden,
+//       - cuando una tarea se suelta sobre ella:
+//           guardar el orden
+// así las tareas vuelven en el orden en que se arrastraron, sea cual sea el lugar que las guarda.
 // -----------
 if (!core.isCarryingOver) listaDeTareas.start()
 // -----------

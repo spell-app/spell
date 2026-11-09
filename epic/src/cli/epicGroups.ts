@@ -2,12 +2,12 @@
  * The verbs of `epic`'s groups (`GroupName`), for their help (epic `epic-workflow` P19), and every verb's FLAGS:
  * - `epic ask create --help` prints that verb's usage, what it does, its flags and an example
  * - `epic ask --help` lists them
- * - a verb's flags (`flags`, and `VERB_FLAGS` for the verbs of no group):  its help lists them, and `EpicProgram`
- *   refuses any other `--flag` before the verb runs (epic `coherence` P20:  `epic summary seo --jsn` printed text, and
- *   exited 0)
+ * - a verb's flags (`flags`, and `VERB_FLAGS` for the verbs of no group):
+ *   its help lists them, and `EpicProgram` refuses any other `--flag` before the verb runs
+ *   (epic `coherence` P20:  `epic summary seo --jsn` printed text, and exited 0)
  *
- * - Help and that check only:  each group's tool or class still READS its own arguments, passed through verbatim
- *   (`parseVerbArgs()`).
+ * - Help and that check only:  each group's tool or class still READS its own arguments,
+ *   passed through verbatim (`parseVerbArgs()`).
  *   - the tools' header comments (`src/tools/`, `src/window.mjs`, the page server's `cli.ts`)
  *     and the classes' (`Worktrees`, `Sessions` ...) say the same in more words:  keep them agreeing
  *   - a flag a tool reads and its verb doesn't list here is refused:  list it
@@ -1117,6 +1117,23 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
         "--hover <selector>": "desk, the pointer over it;  again for more",
         "--click <selector>": "desk, after clicking it;  again for more"
       }
+    },
+    {
+      name: "publish",
+      usage: "<page> --site <url> [--as <handle>] [--dry-run] [--no-link] [--json]",
+      description:
+        "publish one guide to AT Protocol, as a Standard.site document in your atmosphere account:  its title, " +
+        "description and address, linking back to the page;  then its head points at the record.  Signs in with an " +
+        "app password, $ATMOSPHERE_APP_PASSWORD;  publishing again updates the one record",
+      example:
+        "epic pages publish guides/atmosphere/spaces-and-spell.html --site https://spell.example --as owen.bsky.social",
+      flags: {
+        "--site <url>": "where the guides are on the web, https://  (else $SPELL_GUIDES_SITE)",
+        "--as <handle>": "the atmosphere account, a handle or DID (else $ATMOSPHERE_HANDLE)",
+        "--dry-run": "say the record, sign in to nothing, write nothing",
+        "--no-link": "leave the page's head alone",
+        "--json": "print what it did as JSON"
+      }
     }
   ]
 }
@@ -1213,6 +1230,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
+  stale: { "--json": "print them as JSON" },
   summaries: {},
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",
@@ -1239,6 +1257,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--before <phase>": "in that phase's place:  --before 4 makes it P4"
   },
   update: {
+    "--quiet": "a noted card:  leaves the item's change stamp alone",
     "--symptom <html>": "a phase's symptom",
     "--changes <html>": "a phase's changes",
     "--goal <html>": "a phase's goal",
@@ -1250,8 +1269,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",
     "--title <title>": "a phase's or an item's new title:  links that say the old one follow",
     "--html": "the title is HTML",
-    "--calm": "an item not urgent (yellow)",
+    "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again",
+    "--requested": "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
@@ -1264,6 +1284,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
   phase: {
     "--done <html>": "done:  what was built, a <ul>",
+    "--why <html>": 'dropped:  why it was never built ("Moved to P38", the P38 linked), in place of Done',
     "--no-open": "done:  don't bring the page forward in VS Code",
     "--dry-run": "took:  only say the time"
   },
@@ -1280,7 +1301,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  items
   add: {
     "--details <html>": "its details",
-    "--calm": "not urgent (yellow):  a judgement or issue that wouldn't surprise you",
+    "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
+    "--requested": "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
@@ -1300,7 +1322,13 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--title <title>": "edit:  the option's new title",
     "--note <html>": "edit:  the option's new text (HTML, or plain text)"
   },
-  close: {},
+  close: {
+    "--why <text>":
+      "close as obsolete:  the reason, naming the commit, phase or item that made it so, saved on the item and in " +
+      "the log, plain text;  refuses questions, tests, items Owen wants or asked for lately, fixes waiting for him, " +
+      "items waiting on his pick, promised items",
+    "--why-file <file>": "a reason per item in one write:  a JSON5 file of id => reason;  no ids or --why beside it"
+  },
   reopen: {},
   cancel: {},
   details: {
@@ -1369,6 +1397,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   status: { "--json": "print it as JSON" },
   loc: { "--print": "the by-repo table only;  the page is left as it is", "--json": "the numbers, as JSON" },
   config: { "--json": "print it as JSON" },
+  settings: { "--json": "print it as JSON" },
   voice: { "--for <kind>": "the voice that kind of page is written in", "--json": "print it as JSON" },
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",

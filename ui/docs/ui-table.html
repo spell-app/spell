@@ -544,6 +544,20 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-content-editable" label="Editable" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`editable` turns a data-mode table into a spreadsheet:  arrows, Tab and Enter move the cursor, typing or F2 edits a cell by its column's `type`, Escape puts it back.  Type in the empty last row to add one;  Delete clears a cell, ⌘ / Ctrl + Delete removes its row;  paste a block of cells from Excel or Sheets.  Each change goes out as one `ui-editing`, which a page cancels when it writes its own data."
+                >
+                  <ui-table
+                    editable
+                    celled
+                    caption="Reviews"
+                    column-defs='[{"key":"film","header":"Film"},{"key":"stars","header":"Stars","type":"number","textAlign":"right"},{"key":"seen","header":"Seen in a cinema","type":"yes-no"},{"key":"mood","header":"Mood","choices":[{"value":"glad","text":"Glad"},{"value":"sad","text":"Sad"},{"value":"thrilled","text":"Thrilled"}]},{"key":"words","header":"What they thought"}]'
+                    rows='[{"film":"A New Hope","stars":5,"seen":true,"mood":"thrilled","words":"Where it all began."},{"film":"The Empire Strikes Back","stars":5,"seen":false,"mood":"sad","words":"Better every time."},{"film":"Return of the Jedi","stars":4,"seen":true,"mood":"glad","words":"Ewoks!"}]'
+                  ></ui-table>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-content-row-spanned" label="Row spanned" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A `rowspanned` cell is a hidden stand-in for a cell spanning down from the row above, so every row keeps a full set of cells (and stacks right on phones)."

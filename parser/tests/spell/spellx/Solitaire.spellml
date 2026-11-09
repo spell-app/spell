@@ -22,7 +22,7 @@
 	</menu>
 
 	<on mouse down>
-		<comment>A press a card passed on.</>
+		<spell-comment>A press a card passed on.</>
 		print "pressed"
 	</>
 

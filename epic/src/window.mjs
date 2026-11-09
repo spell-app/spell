@@ -190,14 +190,17 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
+import { findUp } from "spell/util/node/findUp"
+import { after, waitUntil } from "spell/util/timing.ts"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
+import { isProcessAlive } from "spell/server/Heartbeat"
 import { Processes } from "spell/server/Processes"
-import { RealPath } from "spell/server/RealPath"
+import { RealPath, pathInside } from "spell/server/RealPath"
 
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { Editor } from "spell/epic/config/Editor.ts"
@@ -257,10 +260,7 @@ export function codeEnv(env = process.env) {
 
 /** The nearest folder at or above `dir` holding `.git` (a checkout, or a worktree);  `dir` itself if none. */
 function checkoutAround(dir) {
-  for (let at = resolve(dir); ; at = dirname(at)) {
-    if (existsSync(join(at, ".git"))) return at
-    if (dirname(at) === at) return resolve(dir)
-  }
+  return findUp(dir, ".git") ?? resolve(dir)
 }
 
 /**
@@ -717,10 +717,11 @@ export class Window {
    * the colours are written either way.
    */
   static async applyColors(file, colors, { wait = 1500 } = {}) {
-    const deadline = Date.now() + WINDOW_START_TIMEOUT
-    let seen = false
-    while (!(seen = Boolean(Window.windowOf(file))) && Date.now() < deadline) await delay(500)
-    if (seen) await delay(wait)
+    // Until its window is up, looking every 0.5s;  gives up after `WINDOW_START_TIMEOUT`
+    const seen = Boolean(
+      await waitUntil(() => Window.windowOf(file), { timeout: WINDOW_START_TIMEOUT / 1000, every: 0.5 })
+    )
+    if (seen) await after(wait / 1000)
     refresh(file, (workspace) => {
       workspace.settings ??= {}
       workspace.settings["workbench.colorCustomizations"] = colors
@@ -830,7 +831,7 @@ export class Window {
     return liveSessions()
       .filter(({ title, cwd }) => {
         const at = cwd ? real(cwd) : ""
-        return titledFor(title, name) || at === worktree || at.startsWith(worktree + sep)
+        return titledFor(title, name) || pathInside(worktree, at) !== undefined
       })
       .map(({ pid, sessionId, title }) => ({
         sessionId,
@@ -843,12 +844,8 @@ export class Window {
 
   /** The registry entry of the window opened from `file`, once it's up;  throws after `WINDOW_START_TIMEOUT`. */
   static async waitFor(file) {
-    const deadline = Date.now() + WINDOW_START_TIMEOUT
-    let window = Window.windowOf(file)
-    while (!window && Date.now() < deadline) {
-      await delay(500)
-      window = Window.windowOf(file)
-    }
+    // Until its window is up, looking every 0.5s;  gives up after `WINDOW_START_TIMEOUT`
+    const window = await waitUntil(() => Window.windowOf(file), { timeout: WINDOW_START_TIMEOUT / 1000, every: 0.5 })
     if (!window) throw new Error(`${file} didn't open within ${WINDOW_START_TIMEOUT / 1000}s`)
     return window
   }
@@ -1062,7 +1059,7 @@ export class Window {
         if (!/^\d+\.json$/.test(name)) continue
         try {
           const entry = JSON.parse(readFileSync(join(dir, name), "utf8"))
-          if (Number.isInteger(entry.pid) && isAlive(entry.pid) && !entries.has(entry.pid))
+          if (Number.isInteger(entry.pid) && isProcessAlive(entry.pid) && !entries.has(entry.pid))
             entries.set(entry.pid, entry)
         } catch {
           // half-written or not ours:  skip it
@@ -1096,7 +1093,7 @@ export class Window {
       // the first folder counts only when it's a worktree's (a worktree-only window):  else it's the repo root
       const folders = (entry.folders ?? []).filter((folder, at) => at > 0 || worktreeOf(folder) !== null).map(real)
       for (const folder of folders) {
-        const inside = cwd === folder || cwd.startsWith(folder + sep)
+        const inside = pathInside(folder, cwd) !== undefined
         if (inside && folder.length > bestLength) [best, bestLength] = [entry, folder.length]
       }
     }
@@ -1535,8 +1532,8 @@ export function movedWorkspace(text, fromDir, toDir) {
  */
 export function movedWindowFile(file, oldFolder, newFolder) {
   if (existsSync(file)) return file
-  const within = relative(resolve(oldFolder), resolve(file))
-  if (!within || within.startsWith("..") || isAbsolute(within)) return file
+  const within = pathInside(oldFolder, file)
+  if (!within) return file
   const moved = join(newFolder, within)
   return existsSync(moved) ? moved : file
 }
@@ -1557,19 +1554,6 @@ function closingBracket(text, start) {
     else if (char === "]" && --depth === 0) return at
   }
   return text.length
-}
-
-/**
- * Whether a process `pid` exists:  signal 0 checks without signalling;  EPERM means it exists, someone else's.
- * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` runs this script, and can't load the kit's `PidFile`
- */
-function isAlive(pid) {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return error.code === "EPERM"
-  }
 }
 
 /**
@@ -1762,11 +1746,6 @@ function hslHex(hue, saturation, lightness) {
   }
 }
 
-/** Resolve after `ms` milliseconds. */
-function delay(ms) {
-  return new Promise((done) => setTimeout(done, ms))
-}
-
 /**
  * The pids of the Claude Code sessions in the window whose extension host is `hostPid`:  its `claude` children.
  * - one per session, in a tab or the side bar.  NOT a `claude` in the window's terminal:
@@ -1841,7 +1820,7 @@ function launchedLine(name, prompt, { action, file, sessions }) {
  */
 function liveSessions() {
   const home = ClaudeHome.home()
-  return ClaudeHome.liveSessions({ home, isAlive }).map((record) => ({
+  return ClaudeHome.liveSessions({ home }).map((record) => ({
     pid: record.pid,
     sessionId: record.sessionId,
     title: SessionFolders.recordTitle(record, home),

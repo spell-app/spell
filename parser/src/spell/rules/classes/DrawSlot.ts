@@ -11,9 +11,10 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * `draw_slot_of` rule:  draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).
  * - e.g. `draw the page of its showing`, for a thing that draws as a card here, and as a whole page there.
  * - Compiles to `showing.drawPage()`:  in the drawing of whatever's placing it, so it has no element of its own.
+ * - Or as a possessive, in English (epic `language` T49):  `draw its showing's page`.
  * - A property of that name is `draw_thing`'s:  `draw the card of the player` draws the player's card.
  */
-export class DrawSlotOf extends SpellStatement<"slot|thing"> {
+export class DrawSlotOf extends SpellStatement<"slot|thing|possessive_mark?"> {
   @proto static alias = "expression"
   @proto static priority = Priority.specific
 
@@ -22,10 +23,23 @@ export class DrawSlotOf extends SpellStatement<"slot|thing"> {
     if (!match || !DrawIt.drawingIn(scope)) return undefined
     const { slot, thing } = match.groups
     const type = scope.getType(thing.datatype)
-    // a word for many is `draw_items`'s:  `draw the items of the pile`
+    if (!type) return undefined
+    // a drawing of that name is drawn, whatever it's called (epic `data` I94, I95):  `draw the results of it`
     const word = `${slot.value}`
-    if (!type || type.getMember(word) || P.pluralize(word) === word) return undefined
+    if (DrawSlotOf.isDrawingOf(type, word)) return match
+    // else a word for many is `draw_items`'s, `draw the items of the pile`;  a property's, `draw_thing`'s
+    if (type.getMember(word) || P.pluralize(word) === word) return undefined
     return match
+  }
+
+  /**
+   * Does `type` have a drawing called `words`, `<draw "results">` (`to draw its results:`)?
+   * - Its own, or a type's it's built on:  only one declared so far, as a slot is (`P.TypeScope.hasSlot()`).
+   * - Then `draw the results of it` draws it, though the name reads as many (`draw_items`) or names a property
+   *   (`draw_thing`, epic `data` I94, I95).
+   */
+  static isDrawingOf(type: P.TypeScope, words: string): boolean {
+    return type.hasSlot(type.slotOutput(DrawIt.slotName(words)))
   }
 
   /** `thing.drawPage()`. */

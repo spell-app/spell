@@ -18,6 +18,7 @@
 import { existsSync, statSync } from "fs"
 import { basename, dirname, resolve } from "path"
 
+import { findUp } from "spell/util/node/findUp"
 import { SP } from "spell/parser/spell"
 import { hasProjectFile } from "spell/parser/spell/node/projectFile"
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
@@ -94,13 +95,19 @@ async function resolveSpellPath(arg: string): Promise<CLI.CliProject> {
 
 /** What full spell path `path` names:  a project, or a spell file in one. */
 async function resolveLocation(arg: string, path: string): Promise<CLI.CliProject> {
+  const unknown = new CLI.CliError(`'${arg}' isn't a project, a spell file or a project root -- see \`spell --help\``)
   let location: SP.SpellLocation
   try {
     location = new SP.SpellLocation(path)
   } catch {
-    throw new CLI.CliError(`'${arg}' isn't a project, a spell file or a project root -- see \`spell --help\``)
+    throw unknown
   }
-  if (location.isProjectRoot) return resolveRoots(arg, [SP.SpellSetup.projectSpectForRootPath(location.projectRoot)])
+  if (location.isProjectRoot) {
+    const root = SP.SpellSetup.projectSpectForRootPath(location.projectRoot)
+    // an org's group is found by its address alone, so `@nope` has one:  only its folder says it's there
+    if (!existsSync(projectUtils.serverPathForRoot(root.path))) throw unknown
+    return resolveRoots(arg, [root])
+  }
 
   const projectDir = new SP.SpellLocation(location.projectId).serverPath
   if (!hasProjectFile(projectDir))
@@ -154,8 +161,5 @@ async function resolveDiskPath(arg: string, path: string): Promise<CLI.CliProjec
 
 /** Nearest folder at or above `folder` holding a project file (`__project.json5`, or an old `project.json`), if any. */
 export function projectDirAbove(folder: string): string | undefined {
-  for (let dir = folder; ; dir = dirname(dir)) {
-    if (hasProjectFile(dir)) return dir
-    if (dirname(dir) === dir) return undefined
-  }
+  return findUp(folder, hasProjectFile)
 }

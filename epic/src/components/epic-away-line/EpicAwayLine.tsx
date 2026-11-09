@@ -19,13 +19,15 @@ import awayLineCSS from "./EpicAwayLine.css?inline"
  *   `epic inbox apply` writes when he read it into the page (`<epic-page away-seen>`), and the section is drawn again
  *   without it.  A heading's (`done`, `todo`) takes its whole part.
  * - Read and not applied yet:  faded at once (`:state(read)`), as an update block goes quiet.
+ *   - and the same the moment Owen marks the item the line is about (Do this, Approve ...):  it leaves the section
+ *     when that's applied (`NightSummary.isAddressed()`, epic `epic-engine` I235)
  * - The epic tool writes every one (`PlanDoc.refreshAway()`);  no one writes it by hand.
  ****************/
 export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
   @E.proto static vocabulary = epicAwayLineVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { "epic-away-line": awayLineCSS },
-    cssStates: ["heading"],
+    cssStates: ["heading", "working"],
     // a line of text:  a click on its words must not jump to its tick
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -39,20 +41,23 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     return this.review.connect()
   }
 
-  /** Its Read mark is in the inbox:  faded until it's applied. */
+  /** Its Read mark is in the inbox, or a mark on the item it's about:  faded until it's applied. */
   @E.cssState("read")
   get isRead(): boolean {
-    return this.review.mark()?.action === "seen"
+    return this.review.mark()?.action === "seen" || (!!this.line && this.review.isMarked(this.line))
   }
 
-  /** Read shows:  a line to key it by, the page reviewed. */
+  /** Read shows:  a line to key it by, the page reviewed, and not still under way. */
   get showsRead(): boolean {
-    return !!this.line && this.review.reviewing()
+    return !!this.line && !this.working && this.review.reviewing()
   }
 
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
+        <Show when={this.working}>
+          <ui-icon name={WORKING_ICON} part={this.partForName("working")} />
+        </Show>
         <Show when={this.showsRead}>
           <epic-review
             of={`${AWAY_ID}:${this.line}`}
@@ -69,6 +74,9 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     )
   }
 }
+
+/** A phase under way:  the load indicator its row shows, standing still (epic `epic-engine` I226). */
+const WORKING_ICON = "circle notch"
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicAwayLine extends E.AttributeValues<typeof epicAwayLineVocabulary> {}

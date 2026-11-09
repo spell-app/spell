@@ -1,5 +1,6 @@
 import { describe, test, expect, afterEach, vi } from "vite-plus/test"
 
+import { observe } from "spell/util"
 import { List, Thing } from "spell/parser/core"
 import { isPlainValue, SpellConsole } from "spell/parser/core/console"
 
@@ -61,5 +62,24 @@ describe("SpellConsole:  a dump goes through printDump(), plain data to the nati
     const card = new Thing()
     new SpellConsole().log(card)
     expect(log).toHaveBeenCalledWith(card)
+  })
+})
+
+// epic `language` T84:  a drawing that failed logged its error while it drew, followed the console's lines, and drew
+// again at its own line -- forever:  Tic-Tac-Toe's board, as a viewable list of squares, hung the editor's page
+describe("SpellConsole:  a line logged while something runs that follows what it reads", () => {
+  test("never makes it follow the console:  a later line doesn't run it again", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    const spellConsole = new SpellConsole()
+    let runs = 0
+    const stop = observe(() => {
+      runs++
+      // at most a few:  the old way, each of its own lines ran it again
+      if (runs < 5) spellConsole.error("Square:  draw() failed")
+    })
+    spellConsole.error("another line")
+    stop()
+    expect(runs).toBe(1)
+    expect(spellConsole.lines).toHaveLength(2)
   })
 })

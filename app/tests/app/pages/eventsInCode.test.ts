@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
-
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The Inspector's Code band, on Solitaire (epic `editor`, Events In Code):  each event's, ability's and action's code
@@ -12,28 +11,6 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 2500
@@ -120,7 +97,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
     expect(await putOn.locator("ui-button, ui-select, ui-input").count()).toBe(0)
     expect((await action.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " ")).toContain(
-      "if the pile of the card"
+      "if the card's pile is the solitaire's stock"
     )
     // found where the compiler says it's declared, not by its words:  one whose words name another type (J58)
     const points = page
@@ -165,7 +142,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     const field = row("clickable when").locator(".CodeSlice")
     await expect
       .poll(async () => (await field.locator(".view-lines").innerText()).replace(/\s+/g, " ").trim())
-      .toMatch(/^it is face up or its pile is the stock/)
+      .toMatch(/^it is face up or its pile is the solitaire's stock/)
     await field.locator(".view-line").first().click()
     await page.keyboard.press("Home")
     await page.keyboard.type("really ")
@@ -188,9 +165,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     )
     await page.waitForTimeout(SETTLE_MS)
     const after = await mainFile()
-    expect(after).toContain(
-      '- on drag cancelled set the hint of the solitaire to " -- Not there"\n\t\t- on double click:'
-    )
+    expect(after).toContain(`- on drag cancelled set the solitaire's hint to " -- Not there"\n\t\t- on double click:`)
     expect(await row("on double click").locator(".CodeSlice").count()).toBe(1)
     expect(await page.evaluate(() => !!document.activeElement?.closest(".CodeSlice"))).toBe(true)
     // put it back, as the editor's own undo would

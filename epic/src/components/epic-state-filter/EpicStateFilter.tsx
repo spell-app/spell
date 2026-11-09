@@ -24,9 +24,9 @@ import filterCSS from "./EpicStateFilter.css?inline"
  * ### `<epic-state-filter>`
  * The state filter's CHIPS (epic `airplane` P8, ONE element since epic `epic-engine` P3):  a pill per state the items
  * are in, in the state's colour, with how many (Owen, 2026-10-10:  no filter icon).
- * - the Phases section's phases the same (`phases`), by a phase's six states in Owen's order (epic `epic-engine` I157,
+ * - the Phases section's phases the same (`phases`), by a phase's seven states in Owen's order (epic `epic-engine` I157,
  *   I170):  red needs him, orange changed since he looked, blue under way (in the blue badge, as an item's
- *   `progress`), a DOTTED blue outline scheduled, green done lately, grey done before
+ *   `progress`), grey paused (held, I221), a DOTTED blue outline scheduled, green done lately, grey done before
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
  * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
@@ -53,14 +53,14 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /**
    * How many items are in each state, from `counts`.
-   * - `handled` counts with `old`:  ONE grey chip for everything settled (Owen, 2026-10-26:  "why are there two grey
+   * - `handled` and `quiet` count with `old`:  ONE grey chip for everything settled or asking nothing (Owen, 2026-10-26:  "why are there two grey
    *   pills?";  two before, the same grey);  the row's "in P4" chip still tells them apart
    */
   get stateCounts(): ReadonlyMap<string, number> {
     const counts = new Map<string, number>()
     for (const pair of (this.counts ?? "").split(/\s+/)) {
       const [raw, count] = pair.split(":")
-      const state = raw === SETTLED_TOO ? SETTLED : raw
+      const state = SETTLED_TOO.includes(raw!) ? SETTLED : raw
       if (state && Number(count) > 0) counts.set(state, (counts.get(state) ?? 0) + Number(count))
     }
     return counts
@@ -89,12 +89,12 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /**
    * The ONE blue badge's count:  everything handed to Claude, whatever its kind -- the items marked in this pass, and
-   * the items he's working on (`progress`);  0, no badge (Owen, 2026-10-25:  "just need one blue badge for all things
+   * the items with him (`WITH_CLAUDE`:  working on, or a Do this not started);  0, no badge (Owen, 2026-10-25:  "just need one blue badge for all things
    * submitted, no matter the type";  a blue `progress` chip beside it before)
    */
   get markedCount(): number {
     const marked = Math.max(0, Number(this.marked ?? 0))
-    return marked + (this.stateCounts.get(WITH_CLAUDE) ?? 0)
+    return WITH_CLAUDE.reduce((count, state) => count + (this.stateCounts.get(state) ?? 0), marked)
   }
 
   /** The chips drawn:  every state present but `progress`, which counts in the blue badge. */
@@ -174,15 +174,15 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     const present = this.present.map((it) => it.state as string)
     // what Claude is on has no chip of its own:  `nextShown()` keeps it showing
     const next = StateFilter.nextShown(present, [...this.showing], state, how)
-    // the grey chip is `old` and `handled` both:  shown or hidden together
-    const shown = next.includes(SETTLED) ? [...next, SETTLED_TOO] : next
+    // the grey chip is `old`, `handled` and `quiet`:  shown or hidden together
+    const shown = next.includes(SETTLED) ? [...next, ...SETTLED_TOO] : next
     this.send(STATE_PICK, { state, shown, how } satisfies StatePickDetail)
   }
 }
 
-/** The grey chip's state, and the one that counts in it (`handled`, epic `epic-engine` P31):  one chip for both. */
+/** The grey chip's state, and the ones that count in it (`handled`, P31;  `quiet`, P63):  one chip for all (epic `epic-engine`). */
 const SETTLED = "old"
-const SETTLED_TOO = "handled"
+const SETTLED_TOO: readonly string[] = ["handled", "quiet"]
 
 /** Class of the blue badge, the items marked in this pass (P43). */
 const MARKED = "marked"

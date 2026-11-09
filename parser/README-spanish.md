@@ -9,14 +9,13 @@ The right-hand file isn't a translation of the left one's output, or a comment i
 It's a Spell program, written in Spanish, and it compiles:
 
 ```js
-  /** "la carta es una figura" */
   get esUnaFigura() {
     return core.includes(["jota", "dama", "rey"], this.rango)
   }
 ```
 
-_Line 9 of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
-`- "es una figura" si su rango es jota, dama o rey`, as the compiler writes it (below, "Try it")._
+_Line 10 of [Carta.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spellml),
+`<frase "es una figura">si su rango es jota, dama o rey</>`, as the compiler writes it (below, "Try it")._
 
 Spanish is Spell's second human language.
 A file says it's Spanish in its name, `Carta.es.spell`, and Spell reads it with Spanish words, plurals and articles,
@@ -27,7 +26,8 @@ The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `cla
 
 The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/) is the Solitaire example
-written again in Spanish, line for line, cards and all, as Solitaire was in the outline style before it was spellx:
+written again in Spanish, file for file, cards and all, in spellx as Solitaire is, its tags Spanish too
+(`<encanto-vista "carta">`, `<propiedad "rango">`):
 it deals, plays and passes six tests, as Solitaire does, two of them its jokers'.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
@@ -53,11 +53,11 @@ spell test @spell/examples/Solitario
 
 ```text
 ✓ Compiling @spell/examples/Solitario
-✓ test la preparación de la carta  (25 checks)
+✓ test la preparación de la carta  (19 checks)
 ✓ test los comodines  (15 checks)
-✓ test la creación del mazo  (10 checks)
+✓ test la creación del mazo  (6 checks)
 ✓ test el mazo con comodines  (5 checks)
-✓ test las pilas  (9 checks)
+✓ test las pilas  (8 checks)
 ✓ test los movimientos  (11 checks)
 
 6 passed
@@ -107,17 +107,14 @@ spell explain carta --in @spell/examples/Solitario
 <summary>Output</summary>
 
 ```text
-...Carta.es.spell:4
-plantilla Carta, subplantilla de View
+...Carta.es.spellml:6
+plantilla Carta, subplantilla de TwoSidedView
 
-La carta dice cuáles son sus palos, rangos y colores:  un mazo, una pila o un juego solo los leen.
-Una vista:  cada carta es un elemento propio en la página, p. ej. <solitario-carta>.
+propiedades:  rango, valor, palo, color, símbolo, nombre, estado, imagen, pila
+enumeraciones:  Rangos, Palos, Colores
+declarado en Carta.es.spellml:6
 
-propiedades:  rango, valor, palo, color, nombre, dirección, imagen, cara, símbolo, estado, pila
-enumeraciones:  Rangos, Palos, Direcciones
-declarado en Carta.es.spell:4
-
-export class Carta extends View {
+export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "Solitario")
 }
 ```
@@ -125,7 +122,7 @@ export class Carta extends View {
 </details>
 
 The labels are the language server's, in the file's language:  `propiedades`, `declarado en`.
-`View` is the runtime's own name, and stays English.
+`TwoSidedView`, the built-in `vista reversible`, is the runtime's own name, and stays English.
 
 **See what it compiles to.**
 
@@ -138,18 +135,16 @@ spell compile @spell/examples/Solitario --stdout
 
 ```text
 ...
-  /** "la carta es una figura" */
   get esUnaFigura() {
     return core.includes(["jota", "dama", "rey"], this.rango)
   }
 
-  /** "la carta es una carta numérica" */
   get esUnaCartaNumérica() {
     return !this.esUnaFigura
   }
 ...
   get color() {
-    if (core.includes(["diamantes", "corazones"], this.palo)) return "rojo"
+    if (this.esUnPalo("diamantes") || this.esUnPalo("corazones")) return "rojo"
     return "negro"
   }
 ...
@@ -285,19 +280,18 @@ espadas
 
 A Spanish page names Spell UI's components in Spanish:  `<ui-root lang="es">`, or the document's `lang="es"`,
 and every component loads on demand as an `es-*` tag, its attributes and texts in Spanish.
-Solitario's menu is one:
+Solitario's toolbar is one:
 
-```spell
-devolver <es-contenedor>
-	<es-menu>
-		<es-elemento tipo="encabezado">Solitario Klondike</es-elemento>
-		<es-elemento>{"Puntos: " + su puntuación}</es-elemento>
-		<es-menu posicion="derecha">
-			<es-elemento onClick={jugar solo}>Jugar solo</es-elemento>
+```html
+<contenedor>
+	<barra-herramientas menu="menú del juego" aria-label="Juego" encogible>
+		<texto slot="titulo" tamano="grande">Solitario Klondike</texto>
+		<texto slot="derecha">Movimientos: {los movimientos} · Puntos: {la puntuación}{la pista}</texto>
+	</barra-herramientas>
 ```
 
-_From [Solitario.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spell),
-its `para dibujarlo`._
+_From [Solitario.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spellml),
+its `<dibujar>`:  a bare name is Spell UI's tag, `<texto>` for `<es-texto>`._
 
 - Tag and attribute names are plain ASCII, `es-boton`, `tamano`;  values keep their accents,
   and are found without them too:  `pequeno` finds `pequeño`.

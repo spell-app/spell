@@ -12,6 +12,9 @@ import { ListItemExpression } from "./ListItemExpression"
  * - Rejects what isn't a numeric position:
  *   - a yes / no, which counts no place in a list:
  *     Spanish's `thing no es uno de theList` would read `no es uno` (`false == 1`) as the position of `thing`
+ *   - anything else known not to be a number, e.g. text:
+ *     Spanish's `apuntar borrador de su guardián` would read `borrador` as the position of `apuntar`,
+ *     where it's the method `apuntar (título)` called with it (epic `language` T62)
  *   - an ordinal for `{arg}`, which is `ordinal_position_expression`'s:
  *     Spanish's `la última carta de la pile` would read `carta` as the position of `última`
  */
@@ -23,7 +26,7 @@ export class PositionExpression extends ListItemExpression<"arg|position|express
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { arg, position } = match.groups
-    if (position.datatype === "choice" || Wording.reads(scope, "ordinal", `${arg.raw}`)) return undefined
+    if (!couldBeAPosition(position.datatype) || Wording.reads(scope, "ordinal", `${arg.raw}`)) return undefined
     return match
   }
 
@@ -34,4 +37,9 @@ export class PositionExpression extends ListItemExpression<"arg|position|express
       args: [P.matchAST(expression), P.matchAST(position)]
     })
   }
+}
+
+/** Could a value of `datatype` be a place in a list:  a number, or a value we don't know the type of? */
+function couldBeAPosition(datatype: P.Datatype | undefined): boolean {
+  return datatype === undefined || datatype === "number" || datatype === "integer"
 }

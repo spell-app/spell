@@ -34,6 +34,43 @@ function rootOf(host: Element): HTMLElement {
   return host.shadowRoot!.querySelector<HTMLElement>("[part~=card], [part~=group]")!
 }
 
+describe("<ui-card background>", () => {
+  /** A tinted card's background, as painted. */
+  const fill = (host: Element) => getComputedStyle(rootOf(host)).backgroundColor
+
+  it("fills the card with a light tint of the colour, a different one per hue", async () => {
+    const red = await render(`<ui-card background="red" heading="Red"></ui-card>`)
+    const blue = await render(`<ui-card background="blue" heading="Blue"></ui-card>`)
+    expect(rootOf(red).classList.contains("tinted")).toBe(true)
+    expect(fill(red)).not.toBe(fill(blue))
+    expect(fill(red)).toMatch(/^oklch\(0\.9 /)
+  })
+
+  it("stays light with dark text on a dark page", async () => {
+    const card = await render(
+      `<div style="color-scheme: dark"><ui-card background="teal" heading="Teal"></ui-card></div>`
+    )
+    const host = card.querySelector("ui-card")!
+    expect(getComputedStyle(rootOf(host)).colorScheme).toBe("light")
+    expect(fill(host)).toMatch(/^oklch\(0\.9 /)
+  })
+
+  it("takes its group's", async () => {
+    const group = await render(`<ui-cards background="olive"><ui-card heading="One"></ui-card></ui-cards>`)
+    const card = group.querySelector("ui-card")!
+    await ElementFixture.settle(group)
+    expect(rootOf(card).classList.contains("tinted")).toBe(true)
+    expect(fill(card)).toMatch(/^oklch\(0\.9 /)
+  })
+
+  it("draws no tint without one, and no colour word from it", async () => {
+    const plain = await render(`<ui-card heading="Plain"></ui-card>`)
+    const tinted = await render(`<ui-card background="red" heading="Red"></ui-card>`)
+    expect(rootOf(plain).classList.contains("tinted")).toBe(false)
+    expect(rootOf(tinted).classList.contains("red")).toBe(false)
+  })
+})
+
 /** The root of a part element (`<ui-header>` ...). */
 function partRoot(host: Element): HTMLElement {
   return host.shadowRoot!.firstElementChild as HTMLElement
@@ -418,6 +455,32 @@ describe("<ui-cards>", () => {
     // (1000 + 2 * 16) / 3 - 2 * 16:  the group's negative margins take up the outer spacing
     for (const box of widths) expect(box.width).toBeCloseTo((1000 + 32) / 3 - 32, 0)
     expect(widths[0]!.top).toBe(widths[2]!.top)
+  })
+
+  it('`layout="mosaic"` packs cards of different heights into columns, each card whole', async () => {
+    const tall = `<ui-card heading="Tall" description="${"A long description that wraps onto many lines. ".repeat(6)}"></ui-card>`
+    const wrapper = await ElementFixture.render(
+      `<div style="width: 1000px"><ui-cards layout="mosaic" columns="3">${tall}${THREE}</ui-cards></div>`
+    )
+    const group = wrapper.querySelector("ui-cards")!
+    expect(rootOf(group).className).toBe("ui mosaic three cards")
+    const boxes = cardsOf(group).map((card) => rootOf(card).getBoundingClientRect())
+    // the tall card fills column one;  the short ones go down the next two
+    expect(boxes[0]!.height).toBeGreaterThan(boxes[1]!.height * 1.5)
+    const lefts = new Set(boxes.map((box) => Math.round(box.left)))
+    expect(lefts.size).toBe(3)
+    for (const box of boxes) expect(box.width).toBeCloseTo(boxes[0]!.width, 0)
+    expect(style(rootOf(cardsOf(group)[0]!)).breakInside).toBe("avoid")
+  })
+
+  it("a mosaic never pulls what follows it up over its last row", async () => {
+    const tall = `<ui-card heading="Tall" description="${"A long description that wraps onto many lines. ".repeat(6)}"></ui-card>`
+    const wrapper = await ElementFixture.render(
+      `<div style="width: 1000px"><ui-cards layout="mosaic" columns="3">${tall}${THREE}</ui-cards><p style="margin: 0">After</p></div>`
+    )
+    const group = wrapper.querySelector("ui-cards")!
+    const lastRow = Math.max(...cardsOf(group).map((card) => rootOf(card).getBoundingClientRect().bottom))
+    expect(wrapper.querySelector("p")!.getBoundingClientRect().top).toBeGreaterThanOrEqual(lastRow)
   })
 
   it("doubles and stacks by its OWN width (container queries)", async () => {

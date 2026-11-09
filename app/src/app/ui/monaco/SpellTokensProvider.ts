@@ -15,8 +15,8 @@ import { monaco } from "./monaco"
  *   - The tag's own words, which its twin never holds:  `property` a keyword, `one-of` an attribute name,
  *     and `<`, `>`, `/>`, `</>` punctuation.
  *   - A line of prose, or a note's, is a comment;  so is each line of a `<!-- ... -->` comment.
- *     - EXCEPT a `<property-editor>`'s lines:  markup as written, coloured as markup (`markupPieces()`).
- *     - A note's head alone on its line, `<description>`, colours as any tag does.
+ *     - EXCEPT a `<spell-property-editor>`'s lines:  markup as written, coloured as markup (`markupPieces()`).
+ *     - A note's head alone on its line, `<spell-description>`, colours as any tag does.
  * - Blocks of another language are coloured as that language, by Monaco's own colouring (`EMBEDDED_BLOCKS`):
  *   - a type's `<css>` block as CSS -- see `LSP.SpellCSS`
  *   - a `<markdown>` block as markdown, in a drawing or a type's outline -- see spell's `markdown_block`
@@ -242,18 +242,23 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * Pieces of a note's own head line, `<description>` or `<property-editor>` alone on its line:
+   * Pieces of a note's own head line, `<spell-description>` or `<spell-property-editor>` alone on its line:
    * as any spellx tag's, its word a `keyword` between `delimiter`s.
    */
   private noteHeadPieces(line: string, head: SP.SpellxProseToken): Piece[] {
     const pieces: Piece[] = [{ start: head.start, end: head.end, scopes: "delimiter" }]
-    const word = /^<([^\s/>]+)/.exec(line.slice(head.start, head.end))?.[1]
+    const text = line.slice(head.start, head.end)
+    const word = /^<([^\s/>]+)/.exec(text)?.[1]
     if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
+    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spellml`)
+    const name = /"[^"]*"/.exec(text)
+    if (name)
+      pieces.push({ start: head.start + name.index, end: head.start + name.index + name[0].length, scopes: "string" })
     return pieces
   }
 
   /**
-   * Pieces of markup from `start` to `end` of `line`:  a drawing's, or a `<property-editor>`'s lines,
+   * Pieces of markup from `start` to `end` of `line`:  a drawing's, or a `<spell-property-editor>`'s lines,
    * as `markupTokens()` colours them.
    */
   private markupPieces(line: string, start: number, end: number): Piece[] {

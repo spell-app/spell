@@ -1,0 +1,198 @@
+# Sign-Up Sheet
+A picnic's sign-up sheet:  pick a shift and sign up, then see yourself on the published sheet.
+Where it's all kept is in SignUpSheet.api.spell, and only its first lines know.
+Then your invitations:  ask for a ticket for a guest, as many as yours allow.
+The organizers' part shows only to them:  the master sheet with its notes, the tickets to confirm, and who may sign up.
+
+
+## A row for each:  who's on which shift
+
+<spell-more-of "published volunteer">
+	<draw>
+		<stack class="signed-up" direction="horizontal" spacing="md" align="center" wrap>
+			<label>{its shift}</label>
+			<text>{its person}</text>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "volunteer">
+	<draw>
+		<form value={it} class="master-row">
+			<stack direction="horizontal" spacing="md" align="center" wrap>
+				<label>{its shift}</label>
+				<text>{its person}</text>
+				<input name="note" placeholder="A note only organizers see" aria-label="Organizers' note" fluid/>
+			</stack>
+		</form>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "ticket">
+	<draw>
+		<stack class="ticket" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its person}</text>
+			<text color="grey">for {its guest}</text>
+			<label class="status">{its status}</label>
+			<button class="confirm" size="small" disabled={its status is "confirmed"} title="Confirm it:  its guest gets into the attendees' space" onClick={set its status to "confirmed"}>Confirm</button>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "message">
+	<draw>
+		<text class="count">{its text}</text>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "attendee">
+	<draw>
+		<stack class="attendee" direction="horizontal" spacing="md" align="center">
+			<text>{its person}</text>
+			<text color="grey">{its standing}</text>
+			<text class="invitations" color="grey">{its invitations} invitations</text>
+			<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Take them off the list" title="Take them off the list" onClick={remove it from the attendees}/>
+		</stack>
+	</draw>
+</spell-more-of>
+
+
+## The page:  sign up, the published sheet, then the organizers' part
+
+<spell-app "sign up page">
+	<property "new volunteer">a new volunteer</>
+	<property "new attendee">a new attendee</>
+	<property "new ticket">a new ticket</>
+	<property "counts">every message where its thread is "invitations"</>
+	<property "new letter">a new message</>
+
+	<action "take the shift">
+		set the person of the new volunteer to their id
+		add the new volunteer to the volunteers
+		set its new volunteer to a new volunteer
+	</action>
+
+	<action "take setup">
+		set the shift of the new volunteer to "setup"
+		take the shift
+	</action>
+
+	<action "take serving">
+		set the shift of the new volunteer to "serving"
+		take the shift
+	</action>
+
+	<action "take cleanup">
+		set the shift of the new volunteer to "cleanup"
+		take the shift
+	</action>
+
+	<action "ask for the ticket">
+		set the person of the new ticket to their id
+		set the event of the new ticket to "picnic"
+		add the new ticket to the tickets
+		set its new ticket to a new ticket
+	</action>
+
+	<action "work out the invitations" description="Two for a member, one for a guest, and one more for each shift they took">
+		for each attendee in every attendee:
+			set shifts to the number of volunteers where its person is the person of attendee
+			set the invitations of attendee to shifts + 1
+			if the standing of attendee is "member"
+				set the invitations of attendee to shifts + 2
+	</action>
+
+	<action "send the letter" description="The picnic's letter to every attendee:  a pointer to its page in their inboxes, which reads what's theirs as each one opens it">
+		set everyone to ""
+		for each attendee in every attendee:
+			set everyone to everyone + the person of attendee + ", "
+		set the recipients of the new letter to everyone
+		set the text of the new letter to "Your letter for the picnic"
+		set the page of the new letter to "picnic@rs/PicnicLetter"
+		set the title of the new letter to "The Picnic:  your letter"
+		set the line of the new letter to "The day's details, your shifts, and your invitations"
+		add the new letter to the messages
+		set its new letter to a new message
+	</action>
+
+	<action "add the new attendee">
+		add the new attendee to the attendees
+		set its new attendee to a new attendee
+	</action>
+
+	<draw>
+		<container class="sign-up-sheet">
+			<stack>
+				<header size="large">The Picnic:  sign up for a shift</header>
+				<text color="grey">Two people a shift.  Signed up, you're on the sheet below.</text>
+
+				<segment class="sign-up">
+					<header size="medium">Sign up for</header>
+					<stack direction="horizontal" spacing="sm" wrap>
+						<button class="setup" color="primary" onClick={take setup}>Setup, 9 to 11</button>
+						<button class="serving" color="primary" onClick={take serving}>Serving, 11 to 2</button>
+						<button class="cleanup" color="primary" onClick={take cleanup}>Cleanup, 2 to 4</button>
+					</stack>
+				</segment>
+
+				<segment class="published">
+					<header size="medium">Who's on which shift</header>
+					<stack class="published-rows" spacing="sm">
+						<for volunteer in every published volunteer loading="Reading the sheet">
+							<empty><text class="none" color="grey">Nobody yet:  be the first.</text></empty>
+							<failed><text color="red">We can't read the sheet right now.</text></failed>
+						</for>
+					</stack>
+				</segment>
+
+				<segment class="invitations">
+					<header size="medium">Your invitations</header>
+					<stack class="counts" spacing="sm">
+						<for message in its counts>
+							<empty><text color="grey">You haven't asked for any yet.</text></empty>
+							<failed><text color="grey">Sign in to see your invitations.</text></failed>
+						</for>
+					</stack>
+					<form value={its new ticket}>
+						<input name="guest" placeholder="Who it's for:  their name, or address" aria-label="Who the ticket is for" fluid action>
+							<button slot="action" class="ask" color="primary" disabled={the guest of the new ticket is ""} onClick={ask for the ticket}>Ask for a ticket</button>
+						</input>
+					</form>
+				</segment>
+
+				<segment class="organizers">
+					<header size="medium">Organizers</header>
+					<header size="small">The master sheet</header>
+					<stack class="master" spacing="sm">
+						<for volunteer in every volunteer loading="Reading the master sheet">
+							<empty><text color="grey">Nobody's signed up yet.</text></empty>
+							<failed><text class="organizers-only" color="grey">Only the picnic's organizers see this.</text></failed>
+						</for>
+					</stack>
+					<header size="small">Tickets</header>
+					<stack class="tickets" spacing="sm">
+						<for ticket in every ticket loading="Reading the tickets">
+							<empty><text color="grey">Nobody's asked for one yet.</text></empty>
+							<failed><text color="grey">Only the picnic's organizers see this.</text></failed>
+						</for>
+					</stack>
+					<header size="small">Who may sign up</header>
+					<stack direction="horizontal" spacing="sm" wrap>
+						<button class="work-out" size="small" onClick={work out the invitations}>Work out the invitations</button>
+						<button class="send-letter" size="small" onClick={send the letter}>Send the letter</button>
+					</stack>
+					<form value={its new attendee}>
+						<input name="person" placeholder="bo@rs" aria-label="Add an attendee, by their address" fluid action>
+							<button slot="action" class="add" color="primary" disabled={the person of the new attendee is ""} onClick={add the new attendee}>Add</button>
+						</input>
+					</form>
+					<stack class="attendees" spacing="sm">
+						<for attendee in every attendee loading="Reading the list">
+							<failed><text color="grey">Only the picnic's organizers see this.</text></failed>
+						</for>
+					</stack>
+				</segment>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

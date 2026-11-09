@@ -62,6 +62,14 @@ describe("SP.SpellDeclarationPlaces", () => {
     )
   })
 
+  test("a `to test ...` method is marked a test:  the side bar's Tests pane lists it", () => {
+    const places = placesOf([{ path: "Card.spell", contents: [CARD, "to test card setup:", "\tprint 3"].join("\n") }])
+    expect(places).toContainEqual(
+      expect.objectContaining({ kind: "function", test: true, path: "Card.spell", line: 5 })
+    )
+    expect(places.filter((place) => place.test)).toHaveLength(1)
+  })
+
   test("each type lists the project's other types it names", () => {
     const pile = placesOf([
       { path: "Card.spell", contents: CARD },

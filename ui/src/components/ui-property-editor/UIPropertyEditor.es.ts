@@ -15,6 +15,7 @@ export const propertyEditorEs = {
   attributes: {
     schema: "esquema",
     origins: "origenes",
+    writer: "escritor",
     "show-defaults": "mostrar-predeterminados",
     unsaved: "sin-guardar"
   },

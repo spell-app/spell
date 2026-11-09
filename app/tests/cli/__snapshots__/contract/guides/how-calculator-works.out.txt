@@ -1,11 +1,9 @@
 ✅ test adding up
-  ▶️ Executing   `set machine to a new adding machine`
-  ▶️ Executing   `clear the machine`
-  ▶️ Executing   `press "1" on the machine`
-  ▶️ Executing   `press "2" on the machine`
-  ▶️ Executing   `add the input to the machine`
-  ▶️ Executing   `press "5" on the machine`
-  ▶️ Executing   `add the input to the machine`
-  ✅ As expected `the total of the machine` is `17`
+  ▶️ Executing   `press "1"`
+  ▶️ Executing   `press "2"`
+  ▶️ Executing   `add it up`
+  ▶️ Executing   `press "5"`
+  ▶️ Executing   `add it up`
+  ✅ As expected `the total` is `17`
 
-<div id="spell-app-root"><test-project-app><div class="Adder"><ui-segment appearance="raised"><div class="Display">0</div><div class="Keys"><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">1</ui-button><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">2</ui-button><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">5</ui-button><ui-button color="primary" fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">+</ui-button><ui-button color="negative" fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">C</ui-button></div></ui-segment></div></test-project-app></div>
+<div id="spell-app-root"><test-project-app><ui-stack align="center"><ui-card><ui-segment align="right" appearance="secondary"><ui-text size="huge">0</ui-text></ui-segment><ui-content><ui-grid columns="5" spacing="compact"><ui-column><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">1</ui-button></ui-column><ui-column><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">2</ui-button></ui-column><ui-column><ui-button fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">5</ui-button></ui-column><ui-column><ui-button color="primary" fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">+</ui-button></ui-column><ui-column><ui-button color="negative" fluid="" style="cursor:var(--ui-control-cursor,pointer);user-select:none">C</ui-button></ui-column></ui-grid></ui-content></ui-card></ui-stack></test-project-app></div>

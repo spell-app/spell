@@ -1,69 +1,84 @@
-import { core, List, App, View, h } from "@spell/core"
+import { core, List, App, TwoSidedView, h } from "@spell/core"
 
-core.heading("Flash Cards")
-/////////////////
-// ## Flash Cards
-/////////////////
-// A deck of cards to learn from:  a word on the front, what it means on the back.
-// Click the card to turn it over, then say whether you knew it:  the score keeps count,
-// and the next card comes up at random.
-// What's where, top to bottom:
-//   a card:  its two sides, and turning it over
-//   the quiz:  the deck, the card showing, the score, and its drawing
-//   the deck:  the words to learn
-//   start
-//   tests
+core.heading("A flash card")
+//////////////////
+// ## A flash card
+//////////////////
+// A word on its front, what it means on its back.
+// It's a two sided view, as Solitaire's cards are:  face up it shows the word, face down what it means.
+// A click turns it over.
 
-core.heading("A card:  a word on the front, what it means on the back")
-/** A card:  a word on the front, what it means on the back */
-export class FlashCard extends View {
+export class FlashCard extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
-  // - its "front" is text
-  static { this.declareProp("front", { type: "text" }) }
-  get front() { return this.getProp("front") }
-  set front(value) { this.setProp("front", value) }
+  /** The Spanish word, on its front */
+  // - its "word" is text
+  static { this.declareProp("word", { type: "text" }) }
+  get word() { return this.getProp("word") }
+  set word(value) { this.setProp("word", value) }
 
-  // - its "back" is text
-  static { this.declareProp("back", { type: "text" }) }
-  get back() { return this.getProp("back") }
-  set back(value) { this.setProp("back", value) }
+  /** What it means, on its back */
+  // - its "meaning" is text
+  static { this.declareProp("meaning", { type: "text" }) }
+  get meaning() { return this.getProp("meaning") }
+  set meaning(value) { this.setProp("meaning", value) }
 
-  /** which side is up */
-  // - its "side" is one of front or back
-  static Sides = ["front", "back"]
-  static { this.declareProp("side", { oneOf: FlashCard.Sides }) }
-  get side() { return this.getProp("side") }
-  set side(value) { this.setProp("side", value) }
-
-  get isTurnedOver() {
-    return this.side === "back"
+  /** A click turns it over */
+  onClick(event) {
+    this.turnOver()
   }
 
-  turnOver() {
-    this.side = this.side === "front" ? "back" : "front"
-  }
-
-  /** one side at a time:  a click turns it over */
-  draw() {
-    return h("div", {
-      part: "card",
-      onClick: core.pressed(this, () => this.turnOver()),
-      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-    },
-      h("div", { part: "hint" }, () => this.side === "back" ? "What it means" : "Spanish"),
-      h("div", { part: "word" }, () => this.isTurnedOver ? this.back : this.front)
+  drawFront() {
+    return h("ui-segment", { appearance: "raised", color: "blue", align: "center", padding: "lg", part: "front" },
+      h("ui-text", { size: "small", color: "grey", "all-caps": true }, "Spanish"),
+      h("ui-space"),
+      h("ui-text", { size: "huge", bold: true }, () => this.word)
     )
   }
+
+  drawBack() {
+    return h("ui-segment", { appearance: "raised", color: "green", align: "center", padding: "lg", part: "back" },
+      h("ui-text", { size: "small", color: "grey", "all-caps": true }, "What it means"),
+      h("ui-space"),
+      h("ui-text", { size: "huge", bold: true }, () => this.meaning)
+    )
+  }
+
+  static clickable = true
 }
 
-/** the cards to learn */
+/** The cards to learn */
 export class Deck extends List {
   static instanceType = FlashCard
 }
 
-core.heading("The quiz:  the deck, the card showing, and the score")
-/** The quiz:  the deck, the card showing, and the score */
+export function testTurningACardOver() {
+  return core.test("test turning a card over", function testTurningACardOver() {
+    const it = new FlashCard()
+    core.echoTestAction(`set the card to a new flash card with word = "el gato", meaning = "the cat"`)
+    const card = new FlashCard({ word: "el gato", meaning: "the cat" })
+    core.echoTestAction(`turn the card face up`)
+    card.turnFaceUp()
+    core.expect(card.isFaceDirection("up"), `the card is face up`, true, `yes`)
+    core.echoTestAction(`turn the card over`)
+    card.turnOver()
+    core.expect(card.isFaceDirection("down"), `the card is face down`, true, `yes`)
+    core.echoTestAction(`turn the card over`)
+    card.turnOver()
+    core.expect(card.isFaceDirection("up"), `the card is face up`, true, `yes`)
+  })
+}
+
+// -----------
+core.heading("Flash Cards")
+/////////////////
+// ## Flash Cards
+/////////////////
+// A deck of cards to learn from:  a Spanish word on the front, what it means on the back.
+// Click the card, or Show the answer, to turn it over, then say whether you knew it:
+// the score keeps count, and the next card comes up at random.
+// The card is this project's own, in `FlashCard.spellml`;  this file holds the quiz, and its words.
+
 export class Quiz extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -72,36 +87,77 @@ export class Quiz extends App {
   get deck() { return this.getProp("deck") }
   set deck(value) { this.setProp("deck", value) }
 
-  /** the card showing */
+  /** The card showing */
   // - its "card" is a flash card
   static { this.declareProp("card", { type: "FlashCard" }) }
   get card() { return this.getProp("card") }
   set card(value) { this.setProp("card", value) }
 
-  /** how many you knew, and how many you've tried */
+  /** How many you knew */
   // - its "known" is a number
   static { this.declareProp("known", { type: "number" }) }
   get known() { return this.getProp("known") }
   set known(value) { this.setProp("known", value) }
 
+  /** How many you've tried */
   // - its "tried" is a number
   static { this.declareProp("tried", { type: "number" }) }
   get tried() { return this.getProp("tried") }
   set tried(value) { this.setProp("tried", value) }
 
+  /** Said in the toolbar */
   get score() {
     if (this.tried === 0) return "Nothing tried yet"
     return `${this.known} of ${this.tried} right`
   }
 
-  /** a card from the deck at random, front up:  never the one just shown */
+  /** A card from the deck at random, word up:  never the one just shown */
   dealACard() {
     const others = this.deck.filter((card) => card !== this.card)
     this.card = others.randomItem()
-    this.card.side = "front"
+    this.card?.turnFaceUp()
   }
 
-  /** you knew it, or you didn't:  counted, then the next card */
+  /** The toolbar with the score, the card, then what you can do:  turn it over, or say how you did */
+  draw() {
+    return h("ui-container", { text: true },
+      h("ui-stack",
+        h("ui-toolbar", { menu: "quiz menu", "aria-label": "Quiz" },
+          h("ui-text", { slot: "title", size: "large" }, "Flash Cards"),
+          h("ui-text", { slot: "right" }, () => this.score)
+        ),
+        () => core.drawThing(this.card),
+        h("ui-stack", { direction: "horizontal", justify: "center" },
+          h("ui-button", {
+            color: "primary",
+            onClick: core.pressed(this, () => this.showTheAnswer()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+            hidden: () => this.card?.isFaceDirection("up") ? undefined : true
+          }, "Show the answer"),
+          h("ui-button", {
+            color: "positive",
+            icon: "check",
+            onClick: core.pressed(this, () => this.sayIKnew()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+            hidden: () => !this.card?.isFaceDirection("up") ? undefined : true
+          }, "I knew it"),
+          h("ui-button", {
+            color: "negative",
+            appearance: "basic",
+            icon: "close",
+            onClick: core.pressed(this, () => this.sayIMissed()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
+            hidden: () => !this.card?.isFaceDirection("up") ? undefined : true
+          }, "I missed it")
+        )
+      )
+    )
+  }
+
+  showTheAnswer() {
+    this.card?.turnOver()
+  }
+
   sayIKnew() {
     this.known = this.known + 1
     this.tried = this.tried + 1
@@ -118,98 +174,41 @@ export class Quiz extends App {
     this.tried = 0
     this.dealACard()
   }
-
-  /** the score, the card, then what you can do:  turn it over, or say how you did */
-  draw() {
-    return h("div", { class: "Quiz" },
-      h("ui-menu", { appearance: "secondary" },
-        h("ui-item", { kind: "header" }, "Flash Cards"),
-        h("ui-item", () => this.score),
-        h("ui-menu", { position: "right" },
-          h("ui-item", {
-            onClick: core.pressed(this, () => this.startOver()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          },
-            h("ui-icon", { name: "redo" }),
-            "Start over"
-          )
-        )
-      ),
-      () => core.drawThing(this.card),
-      h("div", { class: "Answers" },
-        () => !this.card.isTurnedOver ? h("ui-button", {
-          color: "primary",
-          onClick: core.pressed(this, () => this.card.turnOver()),
-          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "Show the answer") : [
-          h("ui-button", {
-            color: "positive",
-            icon: "check",
-            onClick: core.pressed(this, () => this.sayIKnew()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "I knew it"),
-          h("ui-button", {
-            color: "negative",
-            appearance: "basic",
-            icon: "close",
-            onClick: core.pressed(this, () => this.sayIMissed()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "I missed it")
-        ]
-      )
-    )
-  }
 }
 export const quiz = new Quiz()
 
+core.describeAction(Quiz, "showTheAnswer", { title: "Show the answer", shortcuts: ["space"] })
+/** Counted, then the next card */
+core.describeAction(Quiz, "sayIKnew", { title: "I knew it", shortcuts: ["Y"], icon: "check" })
+
+core.describeAction(Quiz, "sayIMissed", { title: "I missed it", shortcuts: ["N"], icon: "close" })
+
+core.describeAction(Quiz, "startOver", { title: "Start over", icon: "redo" })
+
+// - its "quiz menu" is a menu of "start over"
+core.describeMenu(Quiz, "quizMenu", { items: ["startOver"] })
+
 core.heading("The deck:  twelve Spanish words -- add your own")
-/** The deck:  twelve Spanish words -- add your own */
-export function addWordMeaningTranslation(word, translation) {
-  quiz.deck.append(new FlashCard({
-    front: word,
-    back: translation,
-    side: "front"
-  }))
+//## The deck:  twelve Spanish words -- add your own
+
+export function addWordMeaningMeaning(word, meaning) {
+  quiz.deck.append(new FlashCard({ word: word, meaning: meaning }))
 }
 
-addWordMeaningTranslation("el gato", "the cat")
-addWordMeaningTranslation("el perro", "the dog")
-addWordMeaningTranslation("la casa", "the house")
-addWordMeaningTranslation("el libro", "the book")
-addWordMeaningTranslation("la manzana", "the apple")
-addWordMeaningTranslation("el agua", "the water")
-addWordMeaningTranslation("la luna", "the moon")
-addWordMeaningTranslation("el sol", "the sun")
-addWordMeaningTranslation("la playa", "the beach")
-addWordMeaningTranslation("el tren", "the train")
-addWordMeaningTranslation("la llave", "the key")
-addWordMeaningTranslation("la mariposa", "the butterfly")
+addWordMeaningMeaning("el gato", "the cat")
+addWordMeaningMeaning("el perro", "the dog")
+addWordMeaningMeaning("la casa", "the house")
+addWordMeaningMeaning("el libro", "the book")
+addWordMeaningMeaning("la manzana", "the apple")
+addWordMeaningMeaning("el agua", "the water")
+addWordMeaningMeaning("la luna", "the moon")
+addWordMeaningMeaning("el sol", "the sun")
+addWordMeaningMeaning("la playa", "the beach")
+addWordMeaningMeaning("el tren", "the train")
+addWordMeaningMeaning("la llave", "the key")
+addWordMeaningMeaning("la mariposa", "the butterfly")
 
-core.heading("Start")
-//## Start
 quiz.startOver()
-
-core.heading("Tests")
-/** Tests */
-export function testTurningACardOver() {
-  return core.test("test turning a card over", function testTurningACardOver() {
-    core.echoTestAction(`set the card to a new flash card with front = "el gato", back = "the cat", side = front`)
-    const card = new FlashCard({
-      front: "el gato",
-      back: "the cat",
-      side: "front"
-    })
-    core.expect(card.isTurnedOver, `the card is turned over`, false, `no`)
-    core.echoTestAction(`turn the card over`)
-    card.turnOver()
-    core.expect(card.isTurnedOver, `the card is turned over`, true, `yes`)
-    core.echoTestAction(`turn the card over`)
-    card.turnOver()
-    core.expect(card.side, `the side of the card`, "front", `front`)
-  })
-}
-// -----------
-core.installStyles(undefined, `/* File styles.css:  how the quiz looks.¬   - The card showing, <flash-cards-flash-card>, draws one side at a time:  ::part(card) holds its hint and its word.¬   - Turned over, it says so:  its side is an attribute, [side="back"]. */¬¬.Quiz {¬  max-width: 30em;¬  margin-inline: auto;¬  padding-block: 1em;¬}¬¬/****************¬ * The card:  big, centred, a different tint on its back¬ ****************/¬¬flash-cards-flash-card {¬  display: block;¬  margin-block: 1.5em;¬}¬¬flash-cards-flash-card::part(card) {¬  display: flex;¬  flex-direction: column;¬  align-items: center;¬  justify-content: center;¬  gap: 0.5em;¬  min-height: 12em;¬  padding: 1.5em;¬  border-radius: 1em;¬  background: rgb(33 133 208 / 0.1);¬  box-shadow: 0 0.25em 1em rgb(0 0 0 / 0.08);¬  cursor: pointer;¬}¬¬flash-cards-flash-card[side="back"]::part(card) {¬  background: rgb(33 186 69 / 0.12);¬}¬¬flash-cards-flash-card::part(hint) {¬  opacity: 0.6;¬  font-size: 0.85em;¬  letter-spacing: 0.05em;¬  text-transform: uppercase;¬}¬¬flash-cards-flash-card::part(word) {¬  font-size: 2.2em;¬  font-weight: bold;¬}¬¬/****************¬ * What you can do:  turn it over, or say how you did¬ ****************/¬¬.Answers {¬  display: flex;¬  justify-content: center;¬  gap: 0.75em;¬  min-height: 2.75em;¬}¬`)
 // -----------
 if (!core.isCarryingOver) quiz.start()
 // -----------

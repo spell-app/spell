@@ -137,7 +137,6 @@ export class ThreadFacts {
     return { people: colorsIn(said?.people), agents: colorsIn(said?.agents) }
   }
 
-
   /** Are `a` and `b` the same person's name:  the same words, any case, spaces trimmed? */
   static sameName(this: void, a: string | undefined, b: string | undefined): boolean {
     return sameName(a ?? "", b ?? "")
@@ -423,7 +422,6 @@ const OLD_PERSON_TURN = "owen"
 
 /** What a page server from before epic `epic-friend` P10 calls an agent's turn:  read for one release (`asTurn()`). */
 const OLD_AGENT_TURN = "claude"
-
 
 /** A typed comment id:  `C3`, `c3`, the old `cm3`, a `#` before it (`M3` is a manual test's:  epic `epic-engine` P44). */
 const TYPED_ID = /^#?cm?(\d+)$/i

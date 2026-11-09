@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { parseCsv } from "spell/util/places"
+import { parseCsv } from "spell/places"
 import { DEMO_TOKEN, type WireRecipe } from "spell/server/test/recipeServers"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 
@@ -158,8 +158,9 @@ describe("the demo's servers:  one source, several ways in", () => {
   describe("one folder", () => {
     /** Everyone in the room's steps, as they come, with what stops hearing them. */
     async function inTheRoom() {
-      const url = `${servers.url.replace("http", "ws")}/api/rooms/recipes?token=${DEMO_TOKEN}`
-      const socket = new WebSocket(url)
+      // the token as the socket's sub-protocol, never in its address (epic `atmosphere` P3)
+      const url = `${servers.url.replace("http", "ws")}/api/rooms/recipes`
+      const socket = new WebSocket(url, [`spell-token.${DEMO_TOKEN}`])
       const steps: { from: string; changes: { id: string; fields?: Record<string, unknown> }[] }[] = []
       socket.addEventListener("message", ({ data }) => {
         const message = JSON.parse(`${data}`) as { kind: string; entry?: (typeof steps)[number] }

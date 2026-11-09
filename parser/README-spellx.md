@@ -100,7 +100,8 @@ reversible:`, and reads to the same tree as the English card.
 | A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
 | A notebook's example, in a drawing | `<example "...">` | `<ejemplo "...">` |
 | A block of markup drawn as written | `<html>` | `<html>` |
-| A block of prose | `<description>` `<comment>` | `<descripción>` `<comentario>` |
+| A block of prose, with the prefix | `<spell-description>` `<spell-comment>` | `<encanto-descripción>` `<encanto-comentario>` |
+| A type's property editor, its markup as written | `<spell-property-editor>` | `<encanto-editor-de-propiedades>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
 | A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for ...>`, and in a `<for>`, `<loading>` `<empty>` `<failed>`;  `else` for `otherwise`, `<for each ...>` for `<for ...>` | `<si ...>` `<si no si ...>` `<si no>` `<para ...>`, `<cargando>` `<vacío>` `<fallo>`;  `sino`, `de lo contrario` too, `<para cada ...>` |
@@ -109,6 +110,14 @@ reversible:`, and reads to the same tree as the English card.
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
 - In a drawing, a tag that isn't a Spell word is a component's:  `<text>`, `<image>`, `<solitaire-card>`.
+- The notes carry the prefix, as templates do, so their short words are Spell UI's:
+  `<comment>` in a drawing is `<ui-comment>`, as `<button>` is `<ui-button>`.
+  - An old short note, `<description>`, outside a drawing still reads as a note, with a warning naming its new tag.
+  - Controls and handlers stay short (`<if>`, `<on>`):  a test fails if a Spell UI element ever takes one of their words.
+- A type's property editor, the layout of its Inspector card, can live in a file of its own:
+  `Card.editor.spellml`, or one for the project, `Solitaire.editors.spellml`, a `<spell-property-editor "card">` per type.
+  - The editor opens and colours it as spellml, and the Inspector reads it;  it's never compiled.
+  - Not the property editor page, `Card.editor.html`, which New Property Editor... makes.
 - `<spell-more-of "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
   so a place's fields can stay in a plain `.spell` file, and what's drawn in a `.spellml` file beside it.
 
@@ -126,7 +135,7 @@ reversible:`, and reads to the same tree as the English card.
   the name, the attribute values and a handler's phrase are the file's own tokens, right where they sit.
 - **Prose is markdown, headings included**, read as comments:  the lines just above a member are its docstring.
 - **A comment, `<!-- ... -->`, is one anywhere**, never drawn:  each of its lines reads as a `//` line.
-  A `description=`, or a `<description>` first in a tag, is that tag's docstring too.
+  A `description=`, or a `<spell-description>` first in a tag, is that tag's docstring too.
 - **A drawing's body is markup**, as plain Spell's is:  `<if>` chains and `<draw "front" />` placing a slot are
   tags of their own between its elements.
 - **A view's slots are filled where it's drawn**, with the web's `slot=`:  `<card><text slot="front">Ace</text></card>`.
@@ -190,7 +199,7 @@ for (const { node, depth } of file.walk()) ...
 | `prose` | markdown between tags | -- |
 | `declaration` | `<property>`, `<alias>`, `<action>`, `<draw>`, `<event>`, `<test>`, `<menu>` | a body;  a drawing's markup;  a menu's `<action>`s |
 | `handler` | `<on ...>`, `<when ...>`, `<while ...>`, its `phrase` | a body |
-| `note` | `<description>`, `<comment>`, its markdown `text` | -- |
+| `note` | `<spell-description>`, `<spell-comment>`, `<spell-property-editor>`, its markdown `text` | -- |
 | `code` | a run of a body's Spell `lines` | -- |
 | `element` | a component in a drawing, `<text>`, `<button>` | markup |
 | `text`, `hole` | markup text;  a `{spell expression}` | -- |
@@ -284,6 +293,8 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 - Its body may still sit on its line, `<action "deal" shortcut="meta+D">deal the cards</>`:
   the twin puts it under the details.
+- Its last line is its value, when that line is a value (an expression or a call):  it gives it back, no `return`.
+  A worked-out `<property>`'s body does the same;  a last line that's a step (`set`, `if` ...) stays one.
 - An action that pauses waits, with no word for it;  run again by a person while it's running, it does nothing.
   - The old attribute `animated` (Spanish `animada`) is an error, which `spell lint --fix` takes out.
 
@@ -335,6 +346,8 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   `it` works too.  `each` isn't written any more, but `<for each film in films>` still reads.
 - With no body, each item draws itself, as `draw the film` does;  in a body, `<film/>` is this film.
 - Read from a place, it shows a loader while it waits, and a message with Try again if the read fails, by itself.
+  - A read the server turned away for being too soon, a rate limit, is a quiet warning, not a red error:
+    it says when to try again, where the server says (`retry-after`, or when its limit resets).
 - Its own attributes, in English and Spanish:
   - `title="..."` (`título`):  a `<ui-section>` around it, titled
   - `as="cards"` (`como`):  what's around its items, `cards`, `list`, `table` or any component;
@@ -354,6 +367,18 @@ the next, as text sits under a `##` heading;  a member before any group is in no
 - Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
   `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
   `if that fails say "..."`.
+- It can sit inside an element too, among that element's other children (epic `language` I19):
+  a card for a new recipe, then a card each, in one group.
+
+  ```html
+  <cards columns="3" doubling>
+  	<card class="new">...</card>
+  	<for recipe in the matches loading="Finding your recipes" />
+  </cards>
+  ```
+
+  - It reads exactly as it would on a line of its own:  its attributes, its `<empty>` and its body the same;
+    so does its phrase, quotes and parens too, `<for every repository matching ("user:" + its login) />`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 
@@ -421,7 +446,7 @@ its body a drawing of markdown, markup and examples, with templates of its own.
   - An ability has its own tag:  `<clickable when it is face down/>`, a list's `<cards draggable when ... />`.
 - A quoted value in an attribute:  `selected-when="its showing is \"done\""` can't be written.
   A one-of value read bare there can be taken for an alias of the same word (`is done`):
-  the Task List reads it through its own alias, `selected-when="its checklist is showing done"`.
+  the Task List reads it through its own alias, `selected-when="the checklist is showing done"`.
 - A `<spellx>` block back inside a `<spell>` chunk.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
 - Completion in a tag's head offers types, not spellx's own words.

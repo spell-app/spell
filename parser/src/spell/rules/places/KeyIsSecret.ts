@@ -16,6 +16,9 @@ const LONGEST_SECRET_NAME = 40
  * - A browser program can't read one:  the place needs a small server side, and it says so.
  */
 export class KeyIsSecret extends PlaceDetail<"type|name"> {
+  /** A browser can't go without it, so the place needs a server side:  said as a warning.  See `KeyIfSet`. */
+  protected needsServerSide = true
+
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
@@ -24,7 +27,7 @@ export class KeyIsSecret extends PlaceDetail<"type|name"> {
     if (!SECRET_NAME.test(name) || name.length > LONGEST_SECRET_NAME) {
       return SpellStatement.refuse(match, language.parserMessage("key-not-a-name", { name }))
     }
-    SP.SpellWarnings.note(match, language.parserMessage("key-needs-server-side", { name }))
+    if (this.needsServerSide) SP.SpellWarnings.note(match, language.parserMessage("key-needs-server-side", { name }))
     return match
   }
 

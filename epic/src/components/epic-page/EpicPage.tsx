@@ -3,11 +3,11 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
-import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell/epic/list/EpicState"
+import { URGENT_SELECTOR, URGENT_STATES, epicStateFor, type EpicState } from "spell/epic/list/EpicState"
 
 import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
-import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import {
   AUTO_SEND_CHOICES,
   NOBODY_LISTENING,
@@ -41,7 +41,6 @@ import {
   BAR,
   CRUMB_LINKS,
   CRUMBS,
-  DONE,
   COPIED_TOAST_ID,
   SEE_ALSO,
   SEE_ALSO_KINDS,
@@ -116,7 +115,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   instead (`OVERVIEW`, `PHASES`, grey), since its phases may not show yet, and none while the stage button shows,
  *   which says it in its words:
  *   - the active one (outlined blue:  Claude is on it;  links to it)
- *   - else DONE (solid green) once every phase is done;  else the next one (grey)
+ *   - else DONE (solid green) once every phase is finished (done, or dropped:  I228);  else the next one (grey)
  *   - none without phases;  FUTURE (grey:  not started) for a future epic
  *   - read from the `<epic-phase>`s below, so it follows the live update:  a `MutationObserver` bumps `layout`
  * - The epic's state (Owen, 2026-10-10, epic `airplane` P8), by the ONE rule the Epics list uses too
@@ -316,7 +315,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       return { color: "blue", icon: ACTIVE_ICON, words, tip, href: `#${active[0]!.id}` }
     }
     if (active.length) return this.phaseLabel(active[0]!, "blue", ACTIVE_ICON, "")
-    const next = phases.find((phase) => phase.status !== DONE)
+    // the next:  the first not finished (a dropped phase is never next:  I228)
+    const next = phases.find((phase) => !PhaseStatuses.isFinished(phase.status))
     // a standing epic is never done:  it waits for the next request (epic `epic-workflow`)
     if (!next && this.standing)
       return { color: "blue", icon: "arrows rotate", words: this.translationForKey("standing") }
@@ -421,6 +421,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const label = this.phaseStep()
     const state = this.state()
     if (!label || !state) return label
+    // red for items that need Owen only while no badge says so:  the toolbar's red and orange chips count them
+    // already (Owen, 2026-11-03:  "Why is STANDING red, to tell me there are bedtime things?  The badge on bedtime
+    // does that";  epic `epic-engine` I216)
+    if (state.color === "red" && this.filterChips?.().some((chip) => URGENT_CHIPS.has(chip.state) && chip.count > 0))
+      return { ...label, tip: `${label.tip ?? label.words}\n${state.tip}` }
     // the phase's OWN icon, as its row draws it (Owen, 2026-10-24:  "phase icon + top 'P26' are inconsistent");
     // the epic's state colours it and says itself in the tooltip
     return {
@@ -754,7 +759,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     appearance={step().color === "green" ? undefined : "basic"}
                     color={pillColorOf(step().color)}
                     icon={step().icon}
-                    data-spins={step().icon === ACTIVE_ICON ? "" : undefined}
                     link={step().href}
                     title={step().tip}
                   >
@@ -1762,7 +1766,7 @@ const SECTIONS = "epic-section"
 
 /** The phases whose build plan waits for Owen's Accept, not done (`plansWaiting()`). */
 const PLANS_WAITING =
-  ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"], [title="Doc Review" i])'
+  ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"], [status="dropped"], [title="Doc Review" i])'
 
 /** The step label's texts while the page is in a stage (`step()`), by stage. */
 const STAGE_TEXTS = {
@@ -1798,5 +1802,8 @@ function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] 
   return !color || color === "blue" ? "grey" : color
 }
 
-/** The step label's icon while a phase is under way:  it spins like a coin (I211). */
-const ACTIVE_ICON = "circle half stroke"
+/** The step label's icon while a phase is under way:  a load indicator, standing still (I226;  a coin spinning, I211). */
+const ACTIVE_ICON = "circle notch"
+
+/** The toolbar chips whose badge already says items need Owen:  the step label isn't red for them too (I216). */
+const URGENT_CHIPS: ReadonlySet<string> = new Set(URGENT_STATES)

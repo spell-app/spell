@@ -8,56 +8,53 @@
     {
       "type": "AddingMachine",
       "superType": "App",
-      "defined": "/HowCalculatorWorks.spell:768-795"
+      "defined": "/HowCalculatorWorks.spellml:1398-2870"
     },
     {
       "property": "total",
       "of": "AddingMachine",
-      "group": "What it keeps",
       "datatype": "number",
-      "defined": "/HowCalculatorWorks.spell:796-837"
+      "defined": "/HowCalculatorWorks.spellml:1416-1446"
     },
     {
       "property": "input",
       "of": "AddingMachine",
-      "group": "What it keeps",
       "datatype": "text",
-      "defined": "/HowCalculatorWorks.spell:913-951"
+      "defined": "/HowCalculatorWorks.spellml:1451-1510"
     },
     {
-      "syntax": "press {callArgs:expression} on {thisArg:expression}",
-      "output": "press_$digit_on_adding_machine",
+      "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
+      "output": "press_$digit",
       "rule": "method_call",
       "of": "AddingMachine",
       "alias": [
         "statement",
         "expression"
       ],
-      "group": "What its keys do",
       "kind": "method",
-      "name": "press (digit as text) on (an adding machine)",
+      "name": "press (digit as text)",
       "params": [
         {
           "name": "digit",
           "datatype": "text"
         }
       ],
-      "defined": "/HowCalculatorWorks.spell:1094-1182"
+      "returns": "nothing",
+      "defined": "/HowCalculatorWorks.spellml:1516-1666"
     },
     {
-      "syntax": "add the input to {thisArg:expression}",
-      "output": "add_the_input_to_adding_machine",
+      "syntax": "add {thisArg:expression} up",
+      "output": "add_up",
       "rule": "method_call",
       "of": "AddingMachine",
       "alias": [
         "statement",
         "expression"
       ],
-      "group": "What its keys do",
       "kind": "method",
-      "name": "add the input to (an adding machine)",
+      "name": "add it up",
       "returns": "nothing",
-      "defined": "/HowCalculatorWorks.spell:1419-1582"
+      "defined": "/HowCalculatorWorks.spellml:1679-1922"
     },
     {
       "syntax": "clear {thisArg:expression}",
@@ -68,10 +65,10 @@
         "statement",
         "expression"
       ],
-      "group": "What its keys do",
       "kind": "method",
-      "name": "clear (an adding machine)",
-      "defined": "/HowCalculatorWorks.spell:1615-1685"
+      "name": "clear it",
+      "returns": "nothing",
+      "defined": "/HowCalculatorWorks.spellml:1935-2032"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -82,10 +79,9 @@
         "statement",
         "expression"
       ],
-      "group": "How it draws:  the display, then the keys",
       "kind": "method",
-      "name": "draw (an adding machine)",
-      "defined": "/HowCalculatorWorks.spell:1888-2453"
+      "name": "draw it",
+      "defined": "/HowCalculatorWorks.spellml:2046-2715"
     },
     {
       "syntax": "test adding up",
@@ -94,17 +90,17 @@
       "alias": "statement",
       "kind": "function",
       "name": "adding up",
-      "defined": "/HowCalculatorWorks.spell:2547-2797"
+      "defined": "/HowCalculatorWorks.spellml:2727-2861"
     }
   ],
   "codeLines": [
-    23,
-    26,
-    32,
+    41,
     44,
-    53,
+    50,
+    56,
     61,
-    73,
-    118
+    69,
+    74,
+    128
   ]
 }

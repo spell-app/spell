@@ -474,7 +474,7 @@
         "read",
         "seen"
       ],
-      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
       "noun": "away line",
       "attributes": [
         {
@@ -483,9 +483,14 @@
           "description": "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  Its Read mark goes under `away:<line>`."
         },
         {
+          "name": "working",
+          "kind": "boolean",
+          "description": "A phase still under way:  a half-filled circle spinning like a coin in place of the tick, nothing to read yet (Owen, 2026-11-03:  \"P23 icon should be the spinning coin half-circle\")."
+        },
+        {
           "name": "heading",
           "kind": "boolean",
-          "description": "A part's heading (What was done, Still to do):  read, the whole part leaves the section."
+          "description": "A part's heading (What was done, Under way, Still to do):  read, the whole part leaves the section."
         }
       ],
       "slots": [
@@ -505,6 +510,10 @@
           "description": "Its ✓ Read, while the page is reviewed:  an `<epic-review buttons=\"away-line\">`."
         },
         {
+          "name": "working",
+          "description": "A phase under way:  its spinning half circle."
+        },
+        {
           "name": "body",
           "description": "Its words."
         }
@@ -517,6 +526,10 @@
         {
           "name": "heading",
           "description": "A part's heading."
+        },
+        {
+          "name": "working",
+          "description": "A phase still under way."
         }
       ],
       "texts": [
@@ -2092,11 +2105,12 @@
             "choices",
             "plan",
             "done",
+            "dropped",
             "files",
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `dropped` (why a dropped phase was never built, in place of Done:  epic `epic-engine` I228), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
         },
         {
           "name": "accepted",
@@ -2192,6 +2206,11 @@
         {
           "key": "done",
           "text": "Done:"
+        },
+        {
+          "key": "dropped",
+          "text": "Dropped:",
+          "description": "A dropped phase's field:  why it was never built (I228)."
         },
         {
           "key": "files",
@@ -2537,13 +2556,17 @@
           "values": [
             "attention",
             "replied",
+            "requested",
             "progress",
+            "handed",
             "open",
+            "scheduled",
             "recent",
             "handled",
+            "quiet",
             "old"
           ],
-          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  your turn to pick or review;  a manual test whose phase isn't done), `requested` (light orange:  what you asked for is finished, your turn to see it), `progress` (blue:  Claude is working on it), `handed` (blue outlined:  you pressed Do this, Claude hasn't started), `open` (yellow:  still undecided), `scheduled` (dotted blue:  queued work, agreed, not started), `recent` (green:  decided or done), `handled` (grey:  its answer is in a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a calm judgement call, a limit:  nothing to think about), `old` (grey:  no longer relevant, canceled)."
         },
         {
           "name": "handled",
@@ -2587,7 +2610,7 @@
             "drop",
             "skip"
           ],
-          "description": "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
+          "description": "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  nothing to do, an older page's note box x):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
         },
         {
           "name": "deferred",
@@ -2627,7 +2650,22 @@
         {
           "name": "calm",
           "kind": "boolean",
-          "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+          "description": "Not urgent:  an open judgement call not reviewed yet is `quiet` (grey), an issue `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+        },
+        {
+          "name": "requested",
+          "kind": "boolean",
+          "description": "An issue filed from the person's own words (`epic add ... --requested`, `epic file`, epic `epic-engine` P63):  closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing Claude tripped over."
+        },
+        {
+          "name": "urgent",
+          "kind": "boolean",
+          "description": "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow.  On a judgement call or issue, your Do this (I232):  red until handled, reviewed or not."
+        },
+        {
+          "name": "fixed",
+          "kind": "boolean",
+          "description": "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` (orange), your turn to review it;  Approve closes it, Do this sends it back."
         },
         {
           "name": "failed",
@@ -2781,7 +2819,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -2861,6 +2899,36 @@
           "key": "stateReplied",
           "text": "Claude answered:  your turn to pick",
           "description": "Id chip tooltip, `state=replied`."
+        },
+        {
+          "key": "stateFixed",
+          "text": "Claude fixed it:  your turn to review",
+          "description": "Id chip tooltip, `fixed`."
+        },
+        {
+          "key": "stateRequested",
+          "text": "Claude finished what you asked:  your turn to see it",
+          "description": "Id chip tooltip, `state=requested` (light orange)."
+        },
+        {
+          "key": "stateTestWaiting",
+          "text": "A test only you can run, its phase not done yet",
+          "description": "Id chip tooltip, a manual test while its phase isn't done (orange)."
+        },
+        {
+          "key": "stateHanded",
+          "text": "You pressed Do this:  waiting for Claude to start",
+          "description": "Id chip tooltip, `state=handed` (blue outline)."
+        },
+        {
+          "key": "stateScheduled",
+          "text": "Agreed, not started:  nothing for you to do",
+          "description": "Id chip tooltip, `state=scheduled` (blue dotted)."
+        },
+        {
+          "key": "stateQuiet",
+          "text": "Open, nothing to think about",
+          "description": "Id chip tooltip, `state=quiet` (grey):  a calm judgement call, a limit."
         },
         {
           "key": "stateProgress",
@@ -3080,7 +3148,7 @@
         {
           "key": "boxSkip",
           "text": "Skip this",
-          "description": "Note box button (the x):  its name."
+          "description": "A skip mark's name, on the id chip (an older page's note box x)."
         }
       ]
     },
@@ -3582,7 +3650,7 @@
         {
           "name": "letter",
           "kind": "string",
-          "description": "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name."
+          "description": "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name.  Shown `A2`, `B2` ... in its holder's 2nd set, `A3` in its 3rd (epic `epic-engine` I227);  the attribute stays `A`."
         },
         {
           "name": "title",
@@ -3701,7 +3769,7 @@
         },
         {
           "name": "recommended",
-          "description": "The recommended one's violet thumbs-up, after its title, labelled `Recommended`."
+          "description": "The recommended one's terracotta thumbs-up, after its title, labelled `Recommended`."
         },
         {
           "name": "actions",
@@ -4116,7 +4184,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -4929,9 +4997,10 @@
           "values": [
             "todo",
             "active",
-            "done"
+            "done",
+            "dropped"
           ],
-          "description": "`todo`, `active` (one at a time, blue:  under way) or `done` (green)."
+          "description": "`todo`, `active` (one at a time, blue:  under way), `done` (green) or `dropped` (never built, and won't be:  its title struck through and grey, a crossed circle, its Dropped field saying why;  finished, as `done` is:  epic `epic-engine` I228)."
         },
         {
           "name": "estimate",
@@ -4942,6 +5011,11 @@
           "name": "took",
           "kind": "string",
           "description": "How long Claude really worked on it, written by the epic tool when it's done (`epic phase … done`, or `… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, side by side counted once, never the time waiting on you.  A done phase shows it in place of its estimate, the estimate in its tooltip (`~3-4h`)."
+        },
+        {
+          "name": "span",
+          "kind": "string",
+          "description": "How long it was under way by the clock, from going active to done, waits on you included, written beside `took` from the page's log (epic `epic-engine` I127):  `4h`, `1h 30m`.  A done phase's pill then reads `34m / 4h`.  None when the log has no start for it:  the pill shows only `took`."
         },
         {
           "name": "source",
@@ -4978,9 +5052,10 @@
           "kind": "enum",
           "values": [
             "waiting",
-            "accepted"
+            "accepted",
+            "held"
           ],
-          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not loaded."
+          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140), or `held` (you un-clicked that thumbs up:  paused, a grey pause, not built till you accept it again, epic `epic-engine` I221);  written by the epic tool, so the title row knows with its body not loaded."
         },
         {
           "name": "done-at",
@@ -5089,7 +5164,7 @@
         },
         {
           "name": "estimate",
-          "description": "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and timed, what it `took` (`21m`), the estimate its tooltip."
+          "description": "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and timed, what it `took` (`21m`), the estimate its tooltip;  with a `span` too, `34m / 4h`, its tooltip in words (`34m of work over 4h, estimated ~3-4h`)."
         },
         {
           "name": "gear",
@@ -5101,7 +5176,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -5161,6 +5236,11 @@
           "description": "The status icon's name:  `done`."
         },
         {
+          "key": "statusDropped",
+          "text": "Dropped",
+          "description": "The status icon's name:  `dropped` (I228)."
+        },
+        {
           "key": "workingPlan",
           "text": "Claude is writing this phase's plan",
           "description": "Its spinner while Claude is at work on it and its plan isn't accepted yet:  its tooltip and name."
@@ -5194,6 +5274,16 @@
           "key": "tookTip",
           "text": "~{estimate}",
           "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
+        },
+        {
+          "key": "spanTip",
+          "text": "{took} of work over {span}",
+          "description": "A done phase's time pill with its clock time, no estimate:  its tooltip (I127)."
+        },
+        {
+          "key": "spanEstimateTip",
+          "text": "{took} of work over {span}, estimated ~{estimate}",
+          "description": "A done phase's time pill with its clock time and an estimate:  its tooltip (I127)."
         },
         {
           "key": "choiceOpen",
@@ -5235,7 +5325,7 @@
         "request",
         "quote"
       ],
-      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the ivory of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
+      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the faint violet of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
       "noun": "prompt",
       "attributes": [],
       "slots": [
@@ -6037,7 +6127,7 @@
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange changed since you looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last 3 days, grey done before."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange changed since you looked, blue under way (in the blue badge), a grey pause held by you, dotted blue scheduled, green done in the last 3 days, grey done before."
         },
         {
           "name": "hidden-note",
@@ -6053,7 +6143,7 @@
         },
         {
           "name": "note-box",
-          "description": "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, Revisit Later, the x (drop it)."
+          "description": "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
         },
         {
           "name": "said",
@@ -6592,7 +6682,7 @@
         {
           "name": "counts",
           "kind": "string",
-          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, updated, progress, scheduled, recent, old."
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, updated, progress, paused, scheduled, recent, old."
         },
         {
           "name": "marked",
@@ -6602,7 +6692,7 @@
         {
           "name": "phases",
           "kind": "boolean",
-          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
+          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), grey paused (held by you), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
         },
         {
           "name": "shown",
@@ -6686,13 +6776,33 @@
         },
         {
           "key": "stateReplied",
-          "text": "Claude answered:  your turn to pick",
+          "text": "your turn:  Claude answered or fixed it",
           "description": "A state chip's words:  `replied` (orange)."
+        },
+        {
+          "key": "stateRequested",
+          "text": "your turn:  what you asked for is finished",
+          "description": "A state chip's words:  `requested` (light orange)."
+        },
+        {
+          "key": "stateHanded",
+          "text": "you pressed Do this, Claude hasn't started",
+          "description": "A state's words, counted in the blue badge:  `handed`."
         },
         {
           "key": "stateOpen",
           "text": "open, still undecided",
           "description": "A state chip's words:  `open` (yellow)."
+        },
+        {
+          "key": "stateScheduled",
+          "text": "agreed, not started",
+          "description": "A state chip's words:  `scheduled` (a dotted blue outline)."
+        },
+        {
+          "key": "stateQuiet",
+          "text": "open, nothing to think about",
+          "description": "A state chip's words:  `quiet` (grey:  a calm judgement call, a limit)."
         },
         {
           "key": "stateRecent",
@@ -6716,8 +6826,13 @@
         },
         {
           "key": "phaseAttention",
-          "text": "need you:  a plan to accept, or a choice open",
-          "description": "A Phases chip's words:  `attention` (red:  its build plan waits for Owen's Accept, or a choice in it is open)."
+          "text": "need you:  a choice open",
+          "description": "A Phases chip's words:  `attention` (red:  a choice in it is open, blocking its build)."
+        },
+        {
+          "key": "phaseWaiting",
+          "text": "your turn:  a plan to read and accept",
+          "description": "A Phases chip's words:  `waiting` (orange:  its build plan waits for Owen's Accept;  epic `epic-engine` P63)."
         },
         {
           "key": "phaseUpdated",
@@ -6728,6 +6843,11 @@
           "key": "phaseProgress",
           "text": "under way, or being worked on",
           "description": "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+        },
+        {
+          "key": "phasePaused",
+          "text": "paused, on hold till you accept it",
+          "description": "A Phases chip's words:  `paused` (grey, a pause glyph:  held by you, epic `epic-engine` I221;  not built till you accept its plan again)."
         },
         {
           "key": "phaseScheduled",
@@ -7734,7 +7854,7 @@
       "folder": "epic-ask",
       "mainTag": "epic-ask",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
+      "summary": "A question you answer on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7854,7 +7974,7 @@
       "folder": "epic-comment-pane",
       "mainTag": "epic-comment-pane",
       "title": "<epic-comment-pane>",
-      "summary": "The <epic-comment-pane> element: the floating pane Owen writes a new comment in.",
+      "summary": "The <epic-comment-pane> element: the floating pane you write a new comment in.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8106,7 +8226,7 @@
       "folder": "epic-reply",
       "mainTag": "epic-reply",
       "title": "<epic-reply>",
-      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's violet, Owen's ivory.",
+      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's terracotta, yours violet.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8118,7 +8238,7 @@
       "folder": "epic-run",
       "mainTag": "epic-run",
       "title": "<epic-run>",
-      "summary": "The <epic-run> element: a run page's body: a command asks, Owen answers each row, Send.",
+      "summary": "The <epic-run> element: a run page's body: a command asks, you answer each row, Send.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8130,7 +8250,7 @@
       "folder": "epic-run-row",
       "mainTag": "epic-run-row",
       "title": "<epic-run-row>",
-      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then Owen's answer.",
+      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then your answer.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8202,7 +8322,7 @@
       "folder": "epic-status",
       "mainTag": "epic-status",
       "title": "<epic-status>",
-      "summary": "Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done.",
+      "summary": "Claude's status card on an item: what Claude took your mark to mean, then that it's done.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8226,7 +8346,7 @@
       "folder": "epic-text-box",
       "mainTag": "epic-text-box",
       "title": "<epic-text-box>",
-      "summary": "A box Owen types in on a page he answers on: notes, a comment, Other, feedback.",
+      "summary": "A box you type in on a page you answer on: notes, a comment, Other, feedback.",
       "status": "done",
       "docs": false,
       "tags": [

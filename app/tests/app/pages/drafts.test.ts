@@ -5,6 +5,7 @@ import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import environment from "spell/app/spaces/server/node/environment"
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Drafts, Publish and versions in the editor (epic `editor` P24):  a save is your draft, Discard deletes it, Publish
@@ -14,28 +15,6 @@ import environment from "spell/app/spaces/server/node/environment"
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** The project this test makes, in your space. */
 const PROJECT = `owen@spell/drafts-test-${process.pid}`
@@ -82,7 +61,8 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     await page.goto(`${EDITOR}edit/${PROJECT}`, { timeout: 60_000 })
     await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
     await page.waitForTimeout(1500)
-  })
+    // the editor's first load, and its code editor's:  well over a hook's 10 seconds on a cold server
+  }, 120_000)
 
   afterAll(async () => {
     await api("/api/projects/remove/project", "DELETE", { projectId: PROJECT }).catch(() => undefined)
@@ -107,7 +87,12 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
 
   test("Publish makes it public, keeps a version, and the draft goes", async () => {
     await edit('"words"', '"text"')
-    await page.evaluate(() => (window as any).editor.publish())
+    // while there's a draft:  Draft | Publish beside the project's name, and a ring on its tab (I44)
+    await page.waitForSelector(".DraftPill", { timeout: 5000 })
+    expect(await page.locator(".Drafted:visible").count()).toBe(1)
+    await page.locator(".DraftPill").click()
+    await page.waitForSelector(".DraftPill", { state: "detached", timeout: 10_000 })
+    expect(await page.locator(".Drafted:visible").count()).toBe(0)
     expect(published()).toContain('"text"')
     expect(drafts()).toEqual([])
     expect(readdirSync(path.join(FOLDER, "versions"))).toHaveLength(1)

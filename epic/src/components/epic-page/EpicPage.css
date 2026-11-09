@@ -99,6 +99,9 @@
      */
     --epic-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
     --epic-state-replied-on: var(--ui-orange-on);
+    /* light orange:  what Owen asked for is finished, his turn to see it (`requested`, epic `epic-engine` P63) */
+    --epic-state-requested: light-dark(oklch(0.86 0.1 66), oklch(0.89 0.08 68));
+    --epic-state-requested-on: var(--ui-yellow-on);
     --epic-state-open: var(--ui-yellow);
     --epic-state-open-on: var(--ui-yellow-on);
     --epic-state-progress: var(--ui-blue);
@@ -317,23 +320,6 @@
   .step-pill ui-label + epic-agents:state(running) {
     --epic-agents-radius: 0 999px 999px 0;
     --epic-agents-border-start: 0;
-  }
-  /*
-   * a phase under way:  its half-filled circle spins like a coin on a table, about its upright axis (Owen, 2026-11-03,
-   * epic `epic-engine` I211:  "spinning like in 3d like a coin")
-   */
-  .status ui-label[data-spins]::part(icon) {
-    animation: epic-page-coin 1.6s linear infinite;
-  }
-  @keyframes epic-page-coin {
-    to {
-      rotate: y 1turn;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .status ui-label[data-spins]::part(icon) {
-      animation: none;
-    }
   }
   /* a label as tall as the git toggle, its icon and text on the row's middle */
   .status ui-label::part(label) {

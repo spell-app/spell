@@ -42,12 +42,21 @@ export class EditorServer {
   /**
    * Start vite, talking to the page server on `pagePort`;  resolves at once (vite takes seconds:  the page server
    * doesn't wait), and records the editor's URL once it answers.
+   * - `guard`:  the page server's;  vite gets its write token, which its proxy adds to the project data folders'
+   *   requests alone (`pageServerProxy()`), and the editor's origin may write (epic `language` T68)
    */
-  async start(pagePort: number): Promise<void> {
+  async start(pagePort: number, guard: SRV.Guard): Promise<void> {
     if (process.env.SPELL_NO_EDITOR || this.child) return
     const port = await editorPort()
     const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
-    const env = { ...process.env, VITE_PORT: String(port), PORT: String(pagePort), API_SERVER: "127.0.0.1" }
+    guard.allowOriginPort(port)
+    const env = {
+      ...process.env,
+      VITE_PORT: String(port),
+      PORT: String(pagePort),
+      API_SERVER: "127.0.0.1",
+      SPELL_SERVER_TOKEN: guard.token
+    }
     const child = spawn(process.execPath, [VP, "dev", "--port", String(port), "--strictPort"], {
       cwd: APP_DIR,
       env,

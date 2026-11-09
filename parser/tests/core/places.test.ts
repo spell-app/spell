@@ -16,9 +16,9 @@ import {
   type PlacesProps,
   type WriteAnswer,
   type WriteQuestion
-} from "spell/util/places"
+} from "spell/places"
 import { UndoStack } from "spell/util/persist/UndoStack"
-import { useRealPlace, useSample } from "spell/util/places/SamplePlace"
+import { useRealPlace, useSample } from "spell/places/SamplePlace"
 import { SRV } from "spell/server"
 import { Referee } from "spell/server/places"
 import { App, core, List, Thing } from "spell/parser/core"
@@ -81,8 +81,9 @@ class Recipe extends Thing {
   }
 }
 
-/** `a person is a thing`, with a name. */
+/** `a person is a thing`, with a name, saved in the cookbook:  so a recipe's author is a reference to one. */
 class Person extends Thing {
+  static savedIn = { place: "cookbook", collection: "people" }
   get name(): string {
     return this.getProp("name")
   }
@@ -338,6 +339,52 @@ describe("PlaceThings, a refresh", () => {
     expect(recipe.tags).toBe(tags)
     expect(recipe.tags.items).toEqual(["hot", "quick"])
     expect(recipe.added).toEqual(new Date("2026-11-01T00:00:00.000Z"))
+  })
+
+  test("a date with no time zone is in the reader's own:  its day, its hour and how it's shown agree", async () => {
+    for (const [added, day, hour, shown] of [
+      ["2026-11-06T23:00", 6, 23, "November 6, 2026"],
+      ["1977-05-25", 25, 0, "May 25, 1977"]
+    ] as const) {
+      const { recipe } = await aRecipe([{ id: "r-1", title: "Soup", added }])
+      const date = recipe.added as Date
+      expect([date.getDate(), date.getHours(), core.dateShown(date)]).toEqual([day, hour, shown])
+    }
+  })
+
+  test("a date said as HyperTalk says it:  short, long and abbreviated;  its time short and long", () => {
+    const morning = new Date(2026, 10, 7, 9, 14, 42)
+    expect([
+      core.shortDate(morning),
+      core.longDate(morning),
+      core.abbreviatedDate(morning),
+      core.shortTime(morning),
+      core.longTime(new Date(2026, 10, 7, 0, 5, 3)),
+      core.shortDate("x")
+    ]).toEqual(["11/7/26", "Saturday, November 7, 2026", "Sat, Nov 7, 2026", "9:14 AM", "12:05:03 AM", "x"])
+  })
+
+  test("`&` and `&&` join into text, a date said in words, nothing as nothing", () => {
+    const due = new Date(2026, 10, 7)
+    expect([core.joined("due", due, " "), core.joined(1, 2), core.joined("a", undefined, " ")]).toEqual([
+      "due November 7, 2026",
+      "12",
+      "a "
+    ])
+    expect(core.now()).toBeInstanceOf(Date)
+  })
+
+  test("a date as a timestamp, as the reader's, and as the program shows dates", () => {
+    const morning = new Date(Date.UTC(2026, 10, 7, 17, 14, 42))
+    expect(core.dateAs(morning, "timestamp")).toBe("2026-11-07T17:14:42.000Z")
+    expect(core.dateAs(morning, "reader")).toBe(morning.toLocaleDateString(undefined, { dateStyle: "medium" }))
+    expect(core.dateAs(morning, "nonsense")).toBe(core.dateAs(morning, "plain"))
+    try {
+      core.showDatesAs("short")
+      expect(core.dateShown(morning)).toBe(core.shortDate(morning))
+    } finally {
+      core.showDatesAs("plain")
+    }
   })
 
   test("a list type's row keeps its items in place too", async () => {
@@ -790,6 +837,83 @@ describe("core.notify's actions", () => {
   })
 })
 
+describe("PlaceThings, a saved list of things saved nowhere else (epic `language` T66)", () => {
+  /** `a step is a thing`, saved in no place:  only inside the list that holds it. */
+  class Step extends Thing {
+    get title(): string {
+      return this.getProp("title")
+    }
+    set title(title: string) {
+      this.setProp("title", title)
+    }
+  }
+  /** `a saved checklist is a list of steps:  - it lives in the cookbook`. */
+  class Checklist extends List<Step> {
+    static savedIn = { place: "cookbook", collection: "checklists" }
+  }
+  const classes: Record<string, typeof Step | typeof Checklist> = { Step, Checklist }
+
+  /** A program reading checklist `c-1` from `place`, as a page does after a reload. */
+  async function checklistIn(place: MemoryPlace) {
+    const places = new Places({ wait: 0 }).add("cookbook", place)
+    const things = new PlaceThings({ places, classNamed: (name) => classes[name] })
+    const result = places.read({ placeName: "cookbook", collection: "checklists", type: "Checklist" })
+    await result.load()
+    const [checklist] = things.thingsFrom(result) as Checklist[]
+    const pending = places.pendingFor("cookbook")
+    const allSent = () => vi.waitFor(() => expect(pending.hasPending).toBe(false))
+    return { checklist: checklist!, allSent }
+  }
+
+  test("its items are saved inside its row, whole:  added, changed and dragged, each comes back after a reload", async () => {
+    const place = new MemoryPlace({ collections: { checklists: [{ id: "c-1", $items: [] }] } })
+    const first = await checklistIn(place)
+    first.checklist.add(new Step({ title: "Milk" }))
+    first.checklist.add(new Step({ title: "Bread" }))
+    await first.allSent()
+    first.checklist.items[0]!.title = "Eggs"
+    await first.allSent()
+    first.checklist.items = [first.checklist.items[1]!, first.checklist.items[0]!]
+    await first.allSent()
+    const [row] = await place.getMany("checklists", ["c-1"])
+    expect(row!.$items).toMatchObject([
+      { $type: "Step", title: "Bread" },
+      { $type: "Step", title: "Eggs" }
+    ])
+
+    const again = await checklistIn(place)
+    expect(again.checklist.items.map((step) => step.title)).toEqual(["Bread", "Eggs"])
+    expect(again.checklist.items[0]).toBeInstanceOf(Step)
+  })
+})
+
+describe("PlaceThings, yes or no from a sheet's cell (epic `language` T65)", () => {
+  /** `a chore is a thing`, done yes or no. */
+  class Chore extends Thing {
+    static {
+      this.declareProp("done", { type: "choice" })
+    }
+    get done(): unknown {
+      return this.getProp("done")
+    }
+    set done(done: unknown) {
+      this.setProp("done", done)
+    }
+  }
+
+  test("true, yes and 1 read as yes;  false, no, 0 and an empty cell as no;  other text as it is", async () => {
+    const cells = ["true", "Yes", "1", "false", "no", "0", "", "maybe"]
+    const place = new MemoryPlace({ collections: { chores: cells.map((done, at) => ({ id: `c-${at}`, done })) } })
+    const places = new Places().add("chores", place)
+    const things = new PlaceThings({ cache: places.cache, classNamed: () => Chore })
+    const result = places.read({ placeName: "chores", collection: "chores", type: "Chore" })
+    await result.load()
+    vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const read = (things.thingsFrom(result) as Chore[]).map((chore) => chore.done)
+    expect(read).toEqual([true, true, true, false, false, false, false, "maybe"])
+  })
+})
+
 describe("PlaceThings, a new saved thing", () => {
   test("it goes whole, under the id it made in the browser", async () => {
     const { things, places, place, allSent } = await writing()
@@ -841,6 +965,18 @@ describe("PlaceDraft", () => {
     await new Promise((resolve) => setTimeout(resolve, 5))
     expect(place.sent).toEqual([])
     expect(things.draftOf(recipe)).not.toBe(draft)
+  })
+
+  test("what reads a thing's draft hears when it ends, and gets a new one:  a draft kept in a property (T135)", async () => {
+    const { things, recipe } = await writing()
+    const copies: unknown[] = []
+    const stop = observe(() => void copies.push(things.draftOf(recipe).thing))
+    const first = copies[0] as Recipe
+    first.title = "Half typed"
+    things.draftOf(recipe).cancel()
+    expect(copies).toHaveLength(2)
+    expect((copies[1] as Recipe).title).toBe("Soup")
+    stop()
   })
 
   test("saved, its changes go out together, as one group", async () => {
@@ -1517,7 +1653,7 @@ describe("rowsMadeFrom()", () => {
     expect(row).toEqual({
       title: "Sample title 1",
       serves: 1,
-      added: "2026-01-01T00:00:00.000Z",
+      added: "2026-01-01",
       tags: []
     })
   })

@@ -6,6 +6,7 @@ import { UI } from "spell/ui/runtime"
 import { RUNTIME_KEY, type RuntimeGlobal } from "spell/ui/runtime/runtime.types"
 import * as UIT from "spell/ui/components/components.types"
 import { ClassBuilder } from "./ClassBuilder"
+import { RootSettings } from "./RootSettings"
 
 /****************
  * ### `SpellUISettings`
@@ -20,6 +21,7 @@ import { ClassBuilder } from "./ClassBuilder"
  *   - `styles`, `focus`:  the runtime's `UI.styles`, `UI.focus`
  *   - `motion`:  Fomantic's animations (`UIT.Animations`), run by `UI.transitions`;  `--ui-motion`
  *   - `warn`:  `Warnings.warn()`, `[spell-ui] ...`
+ *   - `defaults`:  the attribute defaults each `<ui-root>` gives its subtree (`RootSettings.defaultsFor()`)
  * - SIDE EFFECT:  installs them;  listed in `package.json`'s `sideEffects`.
  * - Imported for that by `core.ts`, AND by `spell-ui`'s barrel (`index.ts`) and the root's (`ui-root/index.ts`):
  *   - `core.ts` alone isn't enough in a bundle, since it's only re-exports:
@@ -79,7 +81,10 @@ export class SpellUISettings {
           direction: visible ? UIT.IN : UIT.OUT
         })
     },
-    warn: (source, message, ...data) => Warnings.warn(source, message, ...data)
+    warn: (source, message, ...data) => Warnings.warn(source, message, ...data),
+    defaults: {
+      for: (element, definition) => RootSettings.defaultsFor(element, definition)
+    }
   }
 }
 

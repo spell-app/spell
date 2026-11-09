@@ -24,6 +24,7 @@ import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
+import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 
 import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicGroups"
 
@@ -207,6 +208,12 @@ export class EpicProgram {
       "epic summary seo"
     ).usage("<epic> [--json]")
     this.page(
+      epic.command("stale"),
+      "the facts for judging which open calls, issues and todos have gone stale:  age, phase, whether the files and " +
+        "names they mention still exist, commits since, later mentions;  decides nothing (for /epic tidy)",
+      "epic stale seo --json"
+    ).usage("<epic> [--json]")
+    this.page(
       epic.command("summaries"),
       "`summary --json` of each page, by path (worktrees' too), for /epics",
       "epic summaries epics/seo/seo.plan.html"
@@ -268,9 +275,11 @@ export class EpicProgram {
     this.page(
       epic.command("update"),
       "set a phase's or an item's fields, or the page's flags;  or Claude's status card on an item:  underway " +
-        "(spinner on), done, or noted"
+        "(spinner on), done, fixed, or noted"
     )
-      .usage('<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | noted ["<html>"]')
+      .usage(
+        '<epic>#P3 | <epic>#J3 | <epic>  --field <value> ...  |  <epic>#J3 underway | done | fixed | noted | promised ["<html>"]'
+      )
       .addHelpText("after", UPDATE_HELP)
     this.page(
       epic.command("updated"),
@@ -280,12 +289,14 @@ export class EpicProgram {
     ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."] [--for <item ids>]')
     this.page(
       epic.command("phase"),
-      "set a phase's status;  done:  --done writes what was built, and the time Claude took (took, from the " +
-        "transcripts);  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
+      "set a phase's status;  done:  --done writes what was built, the time Claude took (took, from the " +
+        "transcripts) and how long by the clock (span, from the log);  dropped:  never built, and won't be (struck through, finished as done is), --why writes why " +
+        "in place of Done, a phase it names (P38) linked;  took:  that time worked out again, for a phase done before;  planning:  Claude is writing " +
         "its plan, a blue spinner on its page (off:  ends it;  writing --plan ends it by itself)",
       'epic phase seo#P3 done --done "<ul><li>the sitemap, written on build</li></ul>"'
     ).usage(
-      "<epic>#P3 todo | active | done [--done <html>] [--no-open]  |  <epic>#P3 took [--dry-run]  |  " +
+      "<epic>#P3 todo | active | done | dropped [--done <html>] [--why <html>] [--no-open]  |  " +
+        "<epic>#P3 took [--dry-run]  |  " +
         "<epic>#P3 planning [off]"
     )
     this.page(
@@ -321,7 +332,7 @@ export class EpicProgram {
 
     this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, T todo, M manual test, D decision)")
       .usage(
-        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
+        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm] [--requested]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
       )
       .addHelpText("after", ADD_HELP)
     this.page(
@@ -350,7 +361,11 @@ export class EpicProgram {
       'add <epic>#Q4 "Title" ["note"] [--image <png>]  |  edit <epic>#Q4 B [--title "..."] [--note "..."]  |  ' +
         "remove <epic>#Q4 B  |  close <epic>#Q4  [--set N]"
     )
-    this.page(epic.command("close"), "close an item:  done", "epic close seo#J3").usage("<epic>#J3")
+    this.page(
+      epic.command("close"),
+      "close items:  done;  --why closes them as obsolete, the reason saved on each, some refused (its help)",
+      'epic close seo#J3 seo#I7 --why "P9 removed the file:  commit abc123"  |  epic close seo --why-file reasons.json5'
+    ).usage('<epic>#J3 [<epic>#I7 | I7 ...] [--why "<text>"]  |  <epic> --why-file <file>')
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
       epic.command("cancel"),
@@ -620,6 +635,11 @@ export class EpicProgram {
       .usage("[<key>] [--json]")
       .addHelpText("after", CONFIG_HELP)
 
+    this.verb(epic.command("settings"), (args) => EpicProgram.settings(args))
+      .description("how the epic tooling behaves for you (epic_settings.json5):  each value and which file set it")
+      .usage("[<key>] [--json]")
+      .addHelpText("after", SETTINGS_HELP)
+
     this.verb(epic.command("voice"), (args) => EpicProgram.voice(args))
       .description(
         "the VOICE a kind of page is written in (readme, code ...):  its file, for a skill to read;  or every voice"
@@ -829,6 +849,43 @@ export class EpicProgram {
     if (!(key in values))
       throw new EpicCommandError(`epic config ${key}?  no such key.  The keys:  ${Object.keys(values).join(", ")}`)
     process.stdout.write(json ? `${JSON.stringify(values[key])}\n` : `${values[key]}\n`)
+    return EXIT.OK
+  }
+
+  /**
+   * `epic settings [<key>] [--json]`:  how the epic tooling behaves for you, its three layers merged
+   * (`LayeredSettings`, epic `epic-engine` I235).
+   * - `<key>`:  that value alone (`epic settings away.finishedPhaseDays`), for a skill
+   * - no key:  each value with the layer that set it, then the layers' files and what was wrong with them;
+   *   `--json`:  all of it
+   * - Returns 0.
+   * - Throws `EpicCommandError`:  exit 2 for an unknown key, listing the keys
+   * - static:  needs no tree
+   */
+  static async settings(args: string[]): Promise<number> {
+    const json = args.includes("--json")
+    const [key] = args.filter((arg) => !arg.startsWith("--"))
+    const settings = LayeredSettings.read(EpicConfig.of(EpicCheckout.nearest({ marker: ".git" })).contentFolder)
+    const { entries, layers } = settings
+    if (key !== undefined) {
+      const entry = entries.find((each) => each.key === key)
+      if (!entry)
+        throw new EpicCommandError(
+          `epic settings ${key}?  no such key.  The keys:  ${entries.map((each) => each.key).join(", ")}`
+        )
+      process.stdout.write(json ? `${JSON.stringify(entry.value)}\n` : `${entry.value}\n`)
+      return EXIT.OK
+    }
+    if (json) {
+      process.stdout.write(`${JSON.stringify({ values: settings.values, entries, layers }, null, 2)}\n`)
+      return EXIT.OK
+    }
+    const lines = entries.map(({ key: name, value, source }) => `${name}:  ${value}  (${source})`)
+    for (const { name, file, found, problems } of layers) {
+      lines.push(`${name}:  ${file}${found ? "" : "  (none)"}`)
+      lines.push(...problems.map((problem) => `  ${problem}`))
+    }
+    process.stdout.write(`${lines.join("\n")}\n`)
     return EXIT.OK
   }
 
@@ -1063,6 +1120,20 @@ Examples:
   epic config contentFolder
   epic config --json`
 
+/** After `epic settings --help`. */
+const SETTINGS_HELP = `
+Three files of the same name and shape, epic_settings.json5, merged key by key, the later winning:
+  default    the kit's own, epic/epic_settings.json5, every key with its value
+  org        at the root of the epic repo, checked in there;  optional
+  developer  ~/.spell/epic_settings.json5, in no repo;  optional
+A file that won't read, or a bad value in one, is said on stderr, and the layer below stands.
+Where a repo keeps things is .epic/config.json5 (epic config), the same for everyone.
+
+Examples:
+  epic settings
+  epic settings away.finishedPhaseDays
+  epic settings --json`
+
 /** After `epic voice --help`. */
 const VOICE_HELP = `
 A VOICE is how a kind of page is written:  who reads it, what it opens with, what it never does.
@@ -1152,7 +1223,7 @@ A phase (seo#P3):
   --title "New name" [--html]                             rename it:  links that say the old name follow
 An item (seo#J3):
   --title "New title" [--html]                            retitle it
-  --calm  /  --loud                                       not urgent (yellow)  /  urgent (red)
+  --calm  /  --loud                                       not urgent  /  urgent (red)
   --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
                                                           on its line, a Noted card linking it, left open)  /  not;
                                                           closing it takes the mark off too
@@ -1163,6 +1234,8 @@ word after the target, never with fields:
   underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
+  fixed ["<what changed>"]                                an issue or judgement call fixed, for your review:  orange
+                                                          until Approve closes it;  a Do this's done means this too
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
 
@@ -1173,6 +1246,7 @@ Examples:
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"
+  epic update seo#I3 fixed "Writes the file on build now"
   epic update seo#J3 noted "Answered his note:  options A and B"`
 
 /** After `epic saga --help`. */
@@ -1199,7 +1273,7 @@ Prints the new item's id.  The letter after # is its kind:
   J judgement   Q question   I issue   T todo   M manual test (checked by hand)   D decision (a question born answered)
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
---calm (last):  a judgement or issue that wouldn't surprise you, yellow rather than red.
+--calm (last):  a judgement call (grey) or issue (yellow) that wouldn't surprise you, rather than red.
 A manual test (M), answered by you on the epic page, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> a page to open;

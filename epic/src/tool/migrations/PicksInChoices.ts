@@ -25,7 +25,8 @@ export class PicksInChoices implements Migration {
   readonly kind = "epic"
   readonly date = "2026-10-29"
   readonly everyEdit = false
-  readonly description = "each pick's Noted card (`Chose B · ...`) moves into its item's Choices (`chosen-on`, `chosen-note`)"
+  readonly description =
+    "each pick's Noted card (`Chose B · ...`) moves into its item's Choices (`chosen-on`, `chosen-note`)"
 
   /** Move every such card of `document`, IN PLACE;  did it change the page? */
   run(document: Document, context: MigrationContext): boolean {
@@ -51,7 +52,8 @@ export class PicksInChoices implements Migration {
         context.notes?.push(`picks-in-choices:  ${label}'s "${text}" moved into its Choices`)
       }
     }
-    if (moved.length) PicksInChoices.log(document, `Picks' Noted cards moved into their Choices:  ${moved.join(", ")}`, context.now)
+    if (moved.length)
+      PicksInChoices.log(document, `Picks' Noted cards moved into their Choices:  ${moved.join(", ")}`, context.now)
     return moved.length > 0
   }
 
@@ -62,7 +64,10 @@ export class PicksInChoices implements Migration {
   private static noteOf(text: string, set: Element, letter: string): string {
     const recorded = /\brecorded\b.*$/.exec(text)?.[0]
     if (recorded) return recorded
-    const title = PlanItem.optionsIn(set).find((option) => option.letter === letter)?.title.replace(/\s+/g, " ").trim()
+    const title = PlanItem.optionsIn(set)
+      .find((option) => option.letter === letter)
+      ?.title.replace(/\s+/g, " ")
+      .trim()
     const head = `Chose ${letter} · ${title}:`
     return title && text.startsWith(head) ? text.slice(head.length).trim() : ""
   }

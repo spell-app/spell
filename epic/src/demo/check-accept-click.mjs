@@ -28,6 +28,8 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { after } from "spell/util/timing.ts"
+
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
 
@@ -120,7 +122,7 @@ console.log(`${results.length} clicks, every one took, nothing moved`)
 async function clickOnce(window, place, button) {
   const tag = `${button.what}-${place}-${window.width}x${window.height}${window.framed ? "-framed" : ""}`
   writeInbox()
-  await new Promise((settled) => setTimeout(settled, SETTLE_MS))
+  await after(SETTLE_MS / 1000)
   const { page, frame } = await openPage(window, tag)
   try {
     // the first such button from its `nth` on that can be placed:  `stuck` needs an open body taller than the window

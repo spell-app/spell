@@ -125,6 +125,97 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   `is` / `has` / `can` for our own members (`isOpen`).
 - **Decided:**  WWOD §3 › "Boolean getters prefixed `is` / `has` / `can`" (Owen, 2026-10-06).
 
+### member, and a space's roles
+
+- **Say:**  member, for everyone on a space's list (or in an org), whatever their role, as AT Protocol's Spaces say it.
+  - A space's roles:  viewer (reads, and posts), editor (also changes any page, sheet or row), manager (also makes
+    pages and apps, removes anything, adds people and changes the space):  the app's `SPACE_ROLES`, `SpaceRole`.
+  - What a role may do depends on the KIND of thing (epic `atmosphere` P23):  a post (posts, comments, messages),
+    a row, a file, an app (the kit's `ThingKind`, `thingKindOf()`).
+  - Not the same word as "viewer" above, the person reading a docs page:  a space's viewer is a role.
+- **Not:**  guest, for a member who only reads;  "member" for a role.
+  - Older membership files' `guest`, `member` and `admin` are still read, as viewer, editor and manager
+    (`spaceRoleFor()`).
+- **Score:**  `role: "(guest|member|admin)"` · in `app/src/`
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q21 (D);  built in its P20.
+
+### manager / Admin
+
+- **Say:**  manager, for a space's role that manages its list and settings (its flag, `canManage`).
+  - Admin, capital A, only for an org's technical Admins, who keep its Admin space (`@rs/__admin`).
+  - Org Manager, Team Manager, Project Manager, for the org's roles that manage the org, a team or a project:
+    each is its spaces' manager.  The Board are the org's Org Managers.
+  - "Who manages this space", never "who leads it".
+- **Not:**  admin, for a space's role.
+  - `spell-admin` stays:  Spell's own, a role in Spell's org.
+  - Lead (Team Lead, Project Lead):  two words for nearly one idea.
+    An older roster's `team-lead` and `project-lead` are still read, as `team-manager` and `project-manager`.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q20 (A) and Q28;  built in its P20.
+
+### design / designer
+
+- **Say:**  design, for changing a space's PROGRAM:  drafting and saving its projects' pages and source;
+  a designer, for someone who may ("Ana designs the picnic pages").
+  - A space role (viewer, editor, manager) decides its DATA;  the design right, `canDesign`, its program.
+  - A space's managers design it by their role;  the org lets anyone else design one, person by person
+    (`OrgRoles.giveDesign()`, the Admin page's "Who designs what").
+  - Publishing what a designer drafted stays a manager's (`canPublish`).
+- **Not:**  build / builder, author, maker, developer, editor of pages:  "editor" is a space role.
+- **Decided:**  Owen, 2026-11-07, epic `atmosphere` J117 (two settings, option 3) and its name;  built in its T47.
+
+### shared space / private space
+
+- **Say:**  shared space, for the one of an org's (or team's, or project's) two spaces everyone in the org reads;
+  private space, for the one only its Managers reach (`PairedSpace`'s `side`;  its folder `__private`).
+  - "Public" means only `publicRead`:  anyone at all, on the internet.
+- **Not:**  public space, for one everyone in the org reads.
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q22 (A) and Q25 (A);  built in its P22.
+- An event's third, its ATTENDEES' SPACE (`side: "attendees"`, its folder `__attendees`;  P31):  read by those whose
+  ticket an organizer confirmed;  not "guest space".
+
+### inbox, message, pointer, update
+
+- **Say:**  inbox, for a person's space in an org where Spell writes what's sent to them (`ana@rs/__inbox`);
+  in code `PersonInbox`, never `Inbox` alone.
+  - message:  what someone sends, a copy in each inbox it's to, never edited once sent
+  - pointer:  a message naming a trusted page, worked out when it's opened
+  - update:  what's new in a space a person follows, reaching their inbox (P30)
+  - subscribe, a subscription:  following a shared space of the org, so its new things reach your inbox as updates
+    (P30);  not "follow" in code, where `Followers` is the look-up of who hears of what
+  - mail choice:  how a person hears of their inbox by mail, one mail per message, a daily digest or none (P30)
+- **Not:**  the epic engine's review inbox, in a person's code or words;  mailbox;  notice, for an inbox item
+  (`editor.showNotice()`'s line on screen is a notice).
+- **Decided:**  Owen, 2026-11-06, epic `atmosphere` Q23 (A) and Q24 (A);  built in its P29 and P30.
+
+### feed, ranking
+
+- **Say:**  feed, for what's new across every space of an org a person may read, put together as they ask
+  (`ana@rs/__feed`;  in code `PersonFeed`, never `Feed` alone);  each thing in it a post.
+  - ranking:  what a feed's program says each post is worth to its reader, `weight` in the built-in Feed;
+    changed by changing their own copy of the program
+- **Not:**  timeline, stream, news;  "following", which is a subscription to one space (above);
+  a feed is no space and has no folder.
+- **Decided:**  epic `atmosphere` P33.
+
+### thread, message (in chat)
+
+- **Say:**  thread, for a live conversation in a space:  a room of its `messages`, each message a post
+  (`events_team@rs/messages`, the team's open thread;  `events_team@rs/__private/messages`, its organizers');
+  an ad-hoc thread is a record in the org's `threads`, its messages naming it.
+- **Not:**  channel, chat room, conversation (an inbox's replies are a conversation, in a person's inbox);
+  room alone, for people:  a room is the live connection under it.
+- **Decided:**  epic `atmosphere` P36.
+
+### an org's event, its stages
+
+- **Say:**  event, for something an org runs (RS's picnic), from someone's proposal to a quiet record;
+  in code `OrgEvent`, `OrgEvents`, never `Event` alone, which is the DOM's.
+  - stage:  where an event is, one of its org's program's (Proposed, Approved, Planning, Open, Analysis, Quiet)
+  - propose, move (it on), approve:  what people do to one;  quiet:  its last stage, its spaces read only
+  - organizers:  the people it names, its Project Managers once approved
+- **Not:**  status or state, for an event's stage;  a DOM event, a lifecycle event, in these words.
+- **Decided:**  epic `atmosphere` P32 (its plan's words, accepted 2026-11-06).
+
 ## Pages
 
 ### Each kind of page has one name
@@ -241,16 +332,37 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### place
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
-  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
-  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`.
+  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `excel file`, `google sheet`,
+  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`,
+  `the cloud`.
+  - `the cloud`:  each person's own project data folder on Spell's server, in their space,
+    kept in the browser until they sign in.
+    - Its line is `family cookbook is saved in the cloud`, never `is a cloud`.
+    - `the cloud` is also its kind's word in the side bar (`CLOUD_KIND`),
+      and the server's in a command (`spell space cloud`).
   - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
-  - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
+  - `sheet` and `spreadsheet` are one kind, a CSV file, or an Excel workbook when its address ends `.xlsx`;
+    `excel file` names a workbook whatever its address ends in;  `google sheet` is its own.
   - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.
 - **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads;
-  web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind), the cloud (as a kind).
+  web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind);
+  `a cloud`, `is a cloud`, `cloud storage`, `cloud server`:  the cloud is always `the cloud`, said one way.
 - **Score:**  `\b(web service|graph service|live room|airtable base|at protocol account)\b` · in `parser/src/spell/rules/`
-- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up;  Owen's picks, 2026-10-31, its P15.
+- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up;  Owen's picks, 2026-10-31, its P15;
+  `the cloud` settled as a place's line and its kind's word by epic `atmosphere` P8 (2026-11-04), as it's built.
+
+### Lexicon
+
+- **Say:**  Lexicon, capitalised, for AT Protocol's schema language and one document of it (`Recipe.lexicon.json`).
+  - A type is `published` when its records are for other apps too:
+    `- it is published`, `- it is published as "<name>"` (Spanish `- se publica`, `- se publica como`).
+  - Its name, an NSID, is `the schema's name` in what a person reads.
+- **Not:**
+  - lexicon (lowercase) for the language
+  - `schema` alone for a Lexicon, which says JSON Schema in this repo
+  - `exported`, `shared`, `public` for a published type:  every atmosphere record is public, published or not
+- **Decided:**  epic `atmosphere` P10 (2026-11-04), as it's built;  the word on a type's declaration its J item.
 
 ### the details under a place
 
@@ -279,6 +391,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  `it (is saved|lives) in the family cookbook`.
   `family cookbook is saved in the cloud` is the same words' other job:  a new name on its left, and only `the cloud` on its right.
+  - A type's own line, `- it is saved in the cloud`, is refused:  name the place first, then `- it lives in family cookbook`.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.
 
 ### reading
@@ -317,6 +430,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
     there, `the cook` is the recipe's own, whatever the program has by that name.  Spanish:  `recetas donde esa persona es el cocinero`.
   - In code:  `core.currentPerson()`, `core.isCurrentPerson()`.
   - Spanish:  `esa persona`, `la persona`, `el nombre de esa persona`:  no `su`, which already means its.
+  - The person menu, in a program's own toolbar:  `the sign in menu`;  Spanish:  `el menú de acceso` (epic `atmosphere` T56).
 - **Not:**  me, my, the current person, the user.
 - A program's own wins:  in `for person in everyone here`, `the person` is the loop's, and `them` still the one using it.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15:  "you are speaking about the person using the program, which may not be 'you'".

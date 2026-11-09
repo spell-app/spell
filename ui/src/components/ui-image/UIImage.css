@@ -92,6 +92,9 @@
     --_ui-image-floated-margin-y: var(--ui-image-floated-margin-y, var(--ui-space-m));
     --_ui-image-disabled-opacity: var(--ui-image-disabled-opacity, var(--ui-disabled-opacity));
     --_ui-image-focus-width: var(--ui-image-focus-width, var(--ui-focus-width, 2px));
+    /* `background`:  the hue's light tint (the hue from its class, `colors.css`), and the room round the picture */
+    --_ui-image-background: var(--ui-image-background, oklch(from var(--ui-color) 0.96 calc(c * 0.5) h));
+    --_ui-image-background-padding: var(--ui-image-background-padding, 0.75em);
     /* Fomantic's width ladder (35px ... 960px at 16px), following `--ui-font-size`. */
     --_ui-image-width-mini: var(--ui-image-width-mini, calc(var(--ui-font-size) * 2.1875));
     --_ui-image-width-tiny: var(--ui-image-width-tiny, calc(var(--ui-font-size) * 5));
@@ -243,10 +246,24 @@
     --_ui-images-border: var(--_ui-image-border);
   }
 
+  /* Background (`background="yellow"`, `ui yellow background image`):  the hue's light tint behind the picture,
+     with room round it;  a circle with `circular` (below).  No hairline:  the theme's (`rules/modern.css`) leaves it out. */
+  .ui.background.image {
+    padding: var(--_ui-image-background-padding);
+    background-color: var(--_ui-image-background);
+  }
+
   /* Circular */
   .ui.circular.image {
     --_image-radius: var(--_ui-image-circular-radius);
     overflow: hidden;
+  }
+  /* Circular with a background:  the background is a disc inside the room round the picture, the picture whole on
+     it, never cropped (a drawing's tail or wing reaches past the disc) */
+  .ui.circular.background.image {
+    --_image-radius: 0;
+    overflow: visible;
+    background: radial-gradient(circle closest-side, var(--_ui-image-background) 99%, transparent 100%) content-box;
   }
   .ui.circular.images > *,
   .ui.circular.images > ::slotted(*) {
@@ -283,6 +300,46 @@
     --_ui-images-width: var(--_ui-image-avatar-size);
     --_ui-images-height: var(--_ui-image-avatar-size);
     --_ui-images-radius: var(--_ui-image-circular-radius);
+  }
+
+  /* Shaped (`aspect-ratio`, `:state(shaped)`):  that shape, the whole picture inside it;
+     cropped (`crop`, `ui [top] cropped image`):  it fills the shape, keeping the part `crop` names.
+     - The component writes the ratio as the image box's token;  the part kept is `crop`'s class words.
+     - The shape applies only while it's set:  otherwise the `<img>`'s `width` / `height` give its shape. */
+  :host(:state(shaped)) .ui.image {
+    --_image-inner-width: 100%;
+    --_image-inner-height: 100%;
+    aspect-ratio: var(--_image-ratio);
+    object-fit: var(--_image-fit, contain);
+  }
+  .ui.cropped.image,
+  .ui.cropped.image img {
+    --_image-fit: cover;
+    object-position: var(--_image-crop, center);
+  }
+  .ui[class*="top cropped"].image {
+    --_image-crop: top;
+  }
+  .ui[class*="bottom cropped"].image {
+    --_image-crop: bottom;
+  }
+  .ui[class*="left cropped"].image {
+    --_image-crop: left;
+  }
+  .ui[class*="right cropped"].image {
+    --_image-crop: right;
+  }
+  .ui[class*="top left cropped"].image {
+    --_image-crop: top left;
+  }
+  .ui[class*="top right cropped"].image {
+    --_image-crop: top right;
+  }
+  .ui[class*="bottom left cropped"].image {
+    --_image-crop: bottom left;
+  }
+  .ui[class*="bottom right cropped"].image {
+    --_image-crop: bottom right;
   }
 
   /* Spaced:  room on both sides (or one) from the text around it. */

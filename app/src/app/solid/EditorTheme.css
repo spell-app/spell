@@ -25,6 +25,13 @@
         Every theme's values
 *******************************/
 
+/* Safari:  no blur in any glass, the editor's or a component's, so each is its theme's partly see-through fill alone
+   (`EditorTheme.markSafari()`, epic `editor` I49):  the themes' blur settings, read inside every shadow root too */
+:root[data-spell-safari] {
+  --glass-blur: none !important;
+  --ui-panel-pane-filter: none !important;
+}
+
 :root[data-spell-theme] {
   /*
    * room under the bar and between panels, and along the window's other edges:
@@ -131,9 +138,10 @@
   & ui-menu.AppMenu::part(menu) {
     padding-inline: max(0px, calc(var(--spell-gap) - 8px)) max(0px, calc(var(--spell-gap) - 6px));
   }
-  /* its sections take the room their items need, never less:  the hat goes first */
+  /* its sections take the room their items need, never less, so no group ever runs over the next (I30):
+     the middle one moves aside for a long left side, rather than sitting on the bar's centre over its menus */
   & ui-menu.AppMenu > ui-menu.third::part(menu) {
-    min-width: 0;
+    min-width: max-content;
     flex-shrink: 0;
   }
   /* too narrow for every item:  the bar scrolls sideways, never overlaps or wraps */
@@ -188,6 +196,14 @@
     backdrop-filter: var(--spell-pane-filter);
     pointer-events: none;
   }
+  /* ... in Safari, no blur:  the theme's surface instead, near the same look (`EditorTheme.markSafari()`);  Safari 26 left
+     the blurred glass stale, a bright violet wash over the code, after a resize, a hover or the app's fonts arriving
+     (epic `editor` I49) */
+  &[data-spell-safari] .SplitPane::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--ui-surface);
+  }
 
   /* a panel's menu:  its plain header, over a hairline */
   & ui-menu.PanelMenu::part(menu) {
@@ -223,12 +239,17 @@
           The top bar's items
 *******************************/
 
-/* `<AppMark>`:  the hat and Spell's name, a link home */
-ui-menu.AppMenu ui-item.AppMark::part(item) {
+/* `<AppMark>`:  the hat and Spell's name, a link home;  the editor's Spell menu (`<SpellBarMenu>`) the same */
+ui-menu.AppMenu :is(ui-item.AppMark, ui-item.SpellBarMenu)::part(item) {
   padding-inline: 6px 12px;
 }
 .AppMark a {
   cursor: var(--ui-control-cursor, default);
+  display: inline-flex;
+  text-decoration: none;
+}
+/* `<AppMarkLabel>`:  the hat, then the name */
+.AppMarkLabel {
   display: inline-flex;
   align-items: center;
   gap: 8px;

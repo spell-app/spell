@@ -25,13 +25,13 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 
 	<test "piles">
 		set the stock to a new pile with name = "stock"
-		the color of the stock should be "none"
-		the value of the stock should be 0
+		the stock's color should be "none"
+		the stock's value should be 0
 		add (a new card whose rank is queen, suit is spades and direction is up) to the stock
 		add (a new card whose rank is 7, suit is hearts and direction is down) to the stock
-		the color of the stock should be red
-		the value of the stock should be 7
-		the state of the stock should be "stock: Q♠↑ 7♥↓"
+		the stock's color should be red
+		the stock's value should be 7
+		the stock's state should be "stock: Q♠↑ 7♥↓"
 
 		// a card is in one pile at a time
 		set the discards to a new pile with name = "discards"
@@ -39,7 +39,7 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 		add it to the discards
 		its pile is the discards should be yes
 		the number of cards in the stock should be 1
-		the state of the discards should be "discards: 7♥↓"
+		the discards' state should be "discards: 7♥↓"
 	</test>
 </spell-view>
 

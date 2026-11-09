@@ -1,0 +1,144 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "open meteo",
+    "kind": "web server",
+    "address": "https://api.open-meteo.com",
+    "lookedAt": "2026-11-05T03:08:37.367Z",
+    "fingerprint": "cce27e96c0ac9f7b",
+    "readBy": "nobody:  worked out from what came back",
+    "collectionsAsked": [
+      "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2"
+    ]
+  },
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "It says it takes GET, POST, OPTIONS.  Never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It allows 600.0 requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  x-ratelimit-cost:  1.0;  x-ratelimit-limit:  600.0;  x-ratelimit-remaining:  598.0;  x-ratelimit-reset:  1793848134;  x-ratelimit-window:  60",
+    "browsers": "Yes:  it says any page may read it."
+  },
+  "collections": {
+    "forecasts": {
+      "type": "forecast",
+      "at": "/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2",
+      "rowsSeen": 1,
+      "paging": "none",
+      "askedBy": {
+        "latitude": "52.52",
+        "longitude": "13.41"
+      },
+      "fields": {
+        "latitude": {
+          "words": "latitude",
+          "type": "number",
+          "example": 52.512604
+        },
+        "longitude": {
+          "words": "longitude",
+          "type": "number",
+          "example": 13.419517
+        },
+        "generationtime_ms": {
+          "words": "generationtime ms",
+          "type": "number",
+          "example": 0.13005733489990234
+        },
+        "utc_offset_seconds": {
+          "words": "utc offset seconds",
+          "type": "number",
+          "example": 3600
+        },
+        "timezone": {
+          "words": "timezone",
+          "type": "text",
+          "example": "Europe/Berlin"
+        },
+        "timezone_abbreviation": {
+          "words": "timezone abbreviation",
+          "type": "text",
+          "example": "GMT+1"
+        },
+        "elevation": {
+          "words": "elevation",
+          "type": "number",
+          "example": 38
+        },
+        "hourly_units": {
+          "words": "hourly units",
+          "type": "inside",
+          "example": "{\"time\":\"iso8601\",\"temperature_2m\":\"°C\",\"precipitation\":\"mm\",\"wind_speed_10m\":\"k",
+          "unitsOf": "hourly",
+          "leftOut": "Its units are each on the field it names, in \"hourly\":  `its \"temperature\" is a temperature in °C`."
+        },
+        "hourly": {
+          "words": "hours",
+          "type": "inside",
+          "example": "{\"time\":[\"2026-11-05T00:00\",\"2026-11-05T01:00\",\"2026-11-05T02:00\",\"2026-11-05T03",
+          "inside": {
+            "time": {
+              "words": "time",
+              "type": "date",
+              "example": "2026-11-05T00:00"
+            },
+            "temperature_2m": {
+              "words": "temperature",
+              "type": "number",
+              "example": 6.8,
+              "unit": "°C"
+            },
+            "precipitation": {
+              "words": "precipitation",
+              "type": "number",
+              "example": 0,
+              "unit": "mm"
+            },
+            "wind_speed_10m": {
+              "words": "wind speed",
+              "type": "number",
+              "example": 6,
+              "unit": "km/h"
+            }
+          },
+          "isListInside": true,
+          "isSideBySide": true
+        }
+      },
+      "readThrough": {
+        "rows": 1
+      }
+    }
+  },
+  "notes": [],
+  "agentNotes": [],
+  "spellCantSay": [
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+  "checkEverySeconds": 30,
+  "spell": [
+    "open meteo is a web server at \"https://api.open-meteo.com\":",
+    "\t- check it every 30 seconds",
+    "\t- it writes names like \"generationtime_ms\"",
+    "\t- forecasts live at \"/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2\"",
+    "\t- forecasts are asked for by their latitude and longitude",
+    "",
+    "a \"forecast\" is a thing:",
+    "\t- it lives in open meteo",
+    "\t- its \"latitude\" is a number",
+    "\t- its \"longitude\" is a number",
+    "\t- its \"generationtime ms\" is a number",
+    "\t- its \"utc offset seconds\" is a number",
+    "\t- its \"timezone\" is text",
+    "\t- its \"timezone abbreviation\" is text",
+    "\t- its \"elevation\" is a number",
+    "\t- its \"hours\" is a list of hours, stored as \"hourly\"",
+    "",
+    "an \"hour\" is a thing:",
+    "\t- its \"time\" is a date",
+    "\t- its \"temperature\" is a temperature in °C, stored as \"temperature_2m\"",
+    "\t- its \"precipitation\" is a length in mm",
+    "\t- its \"wind speed\" is a speed in km/h, stored as \"wind_speed_10m\""
+  ]
+}

@@ -9,7 +9,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/Statement.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Base class for all spell statement rules.",
           "syntaxes": [],
           "aliases": []
@@ -656,6 +656,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheDate",
+          "ruleNames": ["the_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/TheDate.ts",
+          "line": 16,
+          "purpose": "Today's date or the time now, as text, the way HyperTalk says them.",
+          "syntaxes": [
+            {
+              "syntax": "the {form:date_form}? {what:date_or_time}",
+              "example": "the date",
+              "outputs": {
+                "js": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "ts": {
+                  "code": "core.shortDate(core.now())"
+                },
+                "py": {
+                  "code": "core.short_date(core.now())"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "Now",
+          "ruleNames": ["now"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Now.ts",
+          "line": 12,
+          "purpose": "This moment, as a date, e.g. `set the added of the note to now` => `core.now()`.",
+          "syntaxes": [
+            {
+              "syntax": "now",
+              "example": "now",
+              "outputs": {
+                "js": {
+                  "code": "core.now()"
+                },
+                "ts": {
+                  "code": "core.now()"
+                },
+                "py": {
+                  "code": "core.now()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "HexLiteral",
           "ruleNames": ["hex_literal"],
           "internal": false,
@@ -755,6 +807,20 @@
                   "code": "core.unicode(code)"
                 }
               }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "MeasureLiteral",
+          "ruleNames": ["measure_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/MeasureLiteral.ts",
+          "line": 19,
+          "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`.",
+          "syntaxes": [
+            {
+              "syntax": "{number} {unit:unit_words}"
             }
           ],
           "aliases": ["expression"]
@@ -868,7 +934,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -1180,6 +1246,58 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "Joined",
+          "ruleNames": ["joined"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Joined.ts",
+          "line": 15,
+          "purpose": "Joins two things into one text, as HyperTalk's `&` and `&&` do.",
+          "syntaxes": [
+            {
+              "syntax": "{operator:join_mark} {expression:operand}",
+              "example": "\"Total:\" && price",
+              "outputs": {
+                "js": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                },
+                "ts": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                },
+                "py": {
+                  "code": "core.joined(\"Total:\", price, \" \")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsADate",
+          "ruleNames": ["as_a_date"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsADate.ts",
+          "line": 15,
+          "purpose": "A date said one of HyperTalk's ways, or as a timestamp, e.g. `its time as a short date`.",
+          "syntaxes": [
+            {
+              "syntax": "as (a|an)? {style:date_style}",
+              "example": "due as a short date",
+              "outputs": {
+                "js": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "ts": {
+                  "code": "core.dateAs(due, \"short\")"
+                },
+                "py": {
+                  "code": "core.date_as(due, \"short\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "WithCommas",
           "ruleNames": ["with_commas"],
           "internal": false,
@@ -1225,6 +1343,32 @@
                 },
                 "py": {
                   "code": "\"foo\".lower()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "AsTitleCase",
+          "ruleNames": ["as_title_case"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsTitleCase.ts",
+          "line": 11,
+          "purpose": "The text itself with each word's first letter a capital, e.g. `\"ace of spades\" as title case`.",
+          "syntaxes": [
+            {
+              "syntax": "as (title case|titlecase)",
+              "example": "\"ace of spades\" as title case",
+              "outputs": {
+                "js": {
+                  "code": "core.titleCase(\"ace of spades\")"
+                },
+                "ts": {
+                  "code": "core.titleCase(\"ace of spades\")"
+                },
+                "py": {
+                  "code": "core.title_case(\"ace of spades\")"
                 }
               }
             }
@@ -1348,7 +1492,10 @@
             "is_or_are",
             "has_or_belongs",
             "event_name_link",
-            "receiver_of"
+            "receiver_of",
+            "each_persons_own",
+            "site_dialog",
+            "site_sidebar"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
@@ -1372,6 +1519,15 @@
             },
             {
               "syntax": "of"
+            },
+            {
+              "syntax": "personal"
+            },
+            {
+              "syntax": "(dialog|modal)"
+            },
+            {
+              "syntax": "(sidebar|flyout)"
             }
           ],
           "aliases": []
@@ -1380,6 +1536,10 @@
           "className": "Wording",
           "ruleNames": [
             "and_or",
+            "join_mark",
+            "date_form",
+            "date_or_time",
+            "date_style",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
@@ -1390,6 +1550,7 @@
             "toast_color",
             "toast_position",
             "toast_progress",
+            "shown_dates",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1409,8 +1570,13 @@
             "check_unit",
             "day_half",
             "clock_zone",
+            "size_unit",
             "numbers_or_names",
             "there_are_how_many",
+            "site_page_state",
+            "site_card_color",
+            "site_not_found_page",
+            "site_error_page",
             "spell_jsx_tag",
             "spell_jsx_attribute"
           ],
@@ -1421,6 +1587,18 @@
           "syntaxes": [
             {
               "syntax": "((and:and)|(or:or))"
+            },
+            {
+              "syntax": "((spaced:&&)|&)"
+            },
+            {
+              "syntax": "((short:short)|(long:long)|(abbreviated:abbreviated|abbrev|abbr))"
+            },
+            {
+              "syntax": "((date:date)|(time:time)|(timestamp:timestamp))"
+            },
+            {
+              "syntax": "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(timestamp:timestamp))"
             },
             {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
@@ -1451,6 +1629,9 @@
             },
             {
               "syntax": "((top_up:with a progress bar filling up at the top)|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
+            },
+            {
+              "syntax": "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
             },
             {
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
@@ -1492,7 +1673,7 @@
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
             },
             {
-              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
             },
             {
               "syntax": "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
@@ -1510,10 +1691,25 @@
               "syntax": "((utc:UTC|utc)|(local:local time))"
             },
             {
+              "syntax": "((kb:KB|kilobytes)|(mb:MB|megabytes)|(gb:GB|gigabytes))"
+            },
+            {
               "syntax": "((numbers:numbers)|(names:names))"
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
+            },
+            {
+              "syntax": "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
+            },
+            {
+              "syntax": "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey))"
+            },
+            {
+              "syntax": "(not found page|missing page)"
+            },
+            {
+              "syntax": "(error page|failure page)"
             },
             {
               "syntax": "((slot:children)|slot)"
@@ -1523,6 +1719,20 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "MeasureIn",
+          "ruleNames": ["measure_in"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/MeasureIn.ts",
+          "line": 18,
+          "purpose": "A measure in other units, e.g. `its height in feet`, `its height in feet and inches` (epic `language` P23, Q26).",
+          "syntaxes": [
+            {
+              "syntax": "in [units:{unit:unit_words} (,|and)]"
+            }
+          ],
+          "aliases": ["expression_suffix"]
         },
         {
           "className": "HexDigits",
@@ -1541,6 +1751,16 @@
           "file": "src/spell/rules/expressions/UnicodeCode.ts",
           "line": 15,
           "purpose": "A code point written in hex, e.g. `1F0A0`, `2665`, `A0` (epic page `outline-spell`, P26).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "UnitWords",
+          "ruleNames": ["unit_words"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/UnitWords.ts",
+          "line": 13,
+          "purpose": "The words of one UNIT of a dimension the scope knows, e.g. `cm`, `feet`, `°F`, `fl oz` (epic `language` P23).",
           "syntaxes": [],
           "aliases": []
         }
@@ -1647,6 +1867,32 @@
                 },
                 "py": {
                   "code": "math.floor(price + 0.5)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "RandomNumber",
+          "ruleNames": ["random_number"],
+          "internal": false,
+          "file": "src/spell/rules/math/RandomNumber.ts",
+          "line": 13,
+          "purpose": "A random whole number from one number to another, both included.",
+          "syntaxes": [
+            {
+              "syntax": "a random number between {low:arithmetic_expression} and {high:arithmetic_expression}",
+              "example": "a random number between 1 and 6",
+              "outputs": {
+                "js": {
+                  "code": "core.randomNumber(1, 6)"
+                },
+                "ts": {
+                  "code": "core.randomNumber(1, 6)"
+                },
+                "py": {
+                  "code": "core.random_number(1, 6)"
                 }
               }
             }
@@ -1829,7 +2075,7 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 28,
+          "line": 35,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -2019,6 +2265,31 @@
           "aliases": []
         },
         {
+          "className": "DeclaredMemberWords",
+          "ruleNames": ["declared_member_words"],
+          "internal": false,
+          "file": "src/spell/rules/properties/DeclaredMemberWords.ts",
+          "line": 13,
+          "purpose": "The longest run of words naming a property some type in reach declares (epic `data` P32), e.g. `short name` in `short name \"foo\"`, `suit` in `suit hearts`.",
+          "syntaxes": [
+            {
+              "example": "short name",
+              "outputs": {
+                "js": {
+                  "code": "shortName"
+                },
+                "ts": {
+                  "code": "shortName"
+                },
+                "py": {
+                  "code": "short_name"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
           "className": "QuotedMember",
           "ruleNames": ["quoted_member"],
           "internal": false,
@@ -2100,7 +2371,7 @@
           "ruleNames": ["flag_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 41,
+          "line": 42,
           "purpose": "`jokers` -- a property's name alone, meaning `jokers = yes` (epic `outline-spell` P26).",
           "syntaxes": [
             {
@@ -2115,6 +2386,73 @@
                 },
                 "py": {
                   "code": "\"jokers\": True"
+                }
+              }
+            },
+            {
+              "syntax": "{property:declared_member_words}",
+              "example": "face up",
+              "outputs": {
+                "js": {
+                  "code": "faceUp: true"
+                },
+                "ts": {
+                  "code": "faceUp: true"
+                },
+                "py": {
+                  "code": "\"face_up\": True"
+                }
+              }
+            }
+          ],
+          "aliases": ["object_literal_property"]
+        },
+        {
+          "className": "SaidObjectLiteralProperty",
+          "ruleNames": ["said_object_literal_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
+          "line": 73,
+          "purpose": "`suit hearts`, `short name \"foo\"` -- a property and its value, no `=` (epic `data` P32, I68).",
+          "syntaxes": [
+            {
+              "syntax": "{property:declared_member_words} {value:expression}",
+              "example": "suit hearts",
+              "outputs": {
+                "js": {
+                  "code": "suit: \"hearts\""
+                },
+                "ts": {
+                  "code": "suit: \"hearts\""
+                },
+                "py": {
+                  "code": "\"suit\": \"hearts\""
+                }
+              }
+            }
+          ],
+          "aliases": ["object_literal_property"]
+        },
+        {
+          "className": "TheObjectLiteralProperty",
+          "ruleNames": ["the_object_literal_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
+          "line": 88,
+          "purpose": "`the suit` -- the property `suit`, set to what `the suit` means where the line is (epic `data` P32, Q30).",
+          "syntaxes": [
+            {
+              "syntax": "the {property:declared_member_words}",
+              "example": "the suit",
+              "outputs": {
+                "js": {
+                  "code": "suit: suit"
+                },
+                "ts": {
+                  "code": "suit: suit"
+                },
+                "py": {
+                  "code": "\"suit\": suit"
                 }
               }
             }
@@ -2172,7 +2510,7 @@
           "ruleNames": ["possessive_owner"],
           "internal": false,
           "file": "src/spell/rules/properties/PossessiveOwner.ts",
-          "line": 15,
+          "line": 25,
           "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16) -- or before a plural's apostrophe alone, `the cards` in `the cards' names` (T23).",
           "syntaxes": [],
           "aliases": []
@@ -2802,7 +3140,7 @@
           "ruleNames": ["position_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/PositionExpression.ts",
-          "line": 18,
+          "line": 21,
           "purpose": "Numeric-position index expression, e.g. `card 1 of the pile`, `card #2 of the pile`.",
           "syntaxes": [
             {
@@ -3131,7 +3469,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3172,7 +3510,7 @@
           "ruleNames": ["list_iteration_named_for_list"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 91,
+          "line": 95,
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
@@ -3337,6 +3675,32 @@
           "aliases": []
         },
         {
+          "className": "SortKeyOrder",
+          "ruleNames": ["sort_key_order"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyOrder.ts",
+          "line": 19,
+          "purpose": "Which way a sort goes, after its key (epic `atmosphere` T48).",
+          "syntaxes": [
+            {
+              "syntax": ",? ((descending:(newest|latest|highest|largest|biggest|most) first|reversed|in reverse|z-a)|(ascending:(oldest|earliest|lowest|smallest|fewest|least) first|a-z))",
+              "example": "my-list sorted by its sent, newest first",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(myList, (item) => core.descending(item.sent))"
+                },
+                "ts": {
+                  "code": "core.sortedBy(myList, (item) => core.descending(item.sent))"
+                },
+                "py": {
+                  "code": "core.sorted_by(my_list, lambda item: core.descending(item.sent))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListSortedBy",
           "ruleNames": ["list_sorted_by"],
           "internal": false,
@@ -3393,7 +3757,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3445,7 +3809,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -3627,7 +3991,7 @@
           "ruleNames": ["list_remove"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemove.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Remove all instances of something from a list.",
           "syntaxes": [
             {
@@ -3653,7 +4017,7 @@
           "ruleNames": ["list_remove_where"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveWhere.ts",
-          "line": 13,
+          "line": 28,
           "purpose": "Remove all items from list where condition is true: e.g. `remove items from my-list where item is not \"ace\"`.",
           "syntaxes": [
             {
@@ -3668,6 +4032,32 @@
                 },
                 "py": {
                   "code": "core.remove_where(my_list, _each_1)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ListRemoveWith",
+          "ruleNames": ["list_remove_with"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListRemoveWith.ts",
+          "line": 20,
+          "purpose": "Remove every thing a `with` read finds (epic `data` P32): e.g. `remove saved favourites with the same address and name \"blah\"`.",
+          "syntaxes": [
+            {
+              "syntax": "remove {list:things_with}",
+              "example": "remove every card with the same suit",
+              "outputs": {
+                "js": {
+                  "code": "core.removeWhere(core.everyThing(Card), (card) => card.suit === suit)"
+                },
+                "ts": {
+                  "code": "core.removeWhere(core.everyThing(Card), (card: Card) => card.suit === suit)"
+                },
+                "py": {
+                  "code": "core.remove_where(core.every_thing(Card), lambda card: card.suit == suit)"
                 }
               }
             }
@@ -3848,7 +4238,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -3952,11 +4342,14 @@
           "ruleNames": ["draw_slot_of"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "Draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).",
           "syntaxes": [
             {
               "syntax": "draw the {slot:member_words} of {thing:expression}"
+            },
+            {
+              "syntax": "draw {thing:possessive_owner} {possessive_mark} {slot:member_words}"
             }
           ],
           "aliases": ["expression"]
@@ -3966,7 +4359,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 59,
+          "line": 73,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -4047,7 +4440,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 18,
+          "line": 26,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -4128,6 +4521,84 @@
             }
           ],
           "aliases": ["expression"]
+        },
+        {
+          "className": "TheSavedThings",
+          "ruleNames": ["the_saved_things"],
+          "internal": false,
+          "file": "src/spell/rules/classes/TheSavedThings.ts",
+          "line": 14,
+          "purpose": "`the saved todos` -- every thing of a saved type, in its place (epic `data` I61).",
+          "syntaxes": [
+            {
+              "syntax": "the saved {type:plural_type}",
+              "example": "the saved piles",
+              "outputs": {
+                "js": {
+                  "code": "core.everyThing(Pile)"
+                },
+                "ts": {
+                  "code": "core.everyThing(Pile)"
+                },
+                "py": {
+                  "code": "core.every_thing(Pile)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "EveryThingWith",
+          "ruleNames": ["every_thing_with"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EveryThingWith.ts",
+          "line": 30,
+          "purpose": "Every thing of a type whose fields hold these values (epic `data` P32, Q29).",
+          "syntaxes": [
+            {
+              "syntax": "every {type:known_type} with {filters:thing_filters}",
+              "example": "every card with the same suit",
+              "outputs": {
+                "js": {
+                  "code": "core.filter(core.everyThing(Card), (card) => card.suit === suit)"
+                },
+                "ts": {
+                  "code": "core.filter(core.everyThing(Card), (card: Card) => card.suit === suit)"
+                },
+                "py": {
+                  "code": "core.filter(core.every_thing(Card), lambda card: card.suit == suit)"
+                }
+              }
+            },
+            {
+              "syntax": "every {type:known_type} with {filters:thing_filters} where {inline_expression}?"
+            },
+            {
+              "syntax": "(all|the)? {type:plural_type} with {filters:thing_filters}"
+            },
+            {
+              "syntax": "(all|the)? {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression", "things_with"]
+        },
+        {
+          "className": "TheSavedThingsWith",
+          "ruleNames": ["the_saved_things_with"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EveryThingWith.ts",
+          "line": 99,
+          "purpose": "`the saved favourites with the same address` -- as `every_thing_with`, of the things in their place, as `the_saved_things` says it (epic `data` P32).",
+          "syntaxes": [
+            {
+              "syntax": "the? saved {type:plural_type} with {filters:thing_filters}"
+            },
+            {
+              "syntax": "the? saved {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression", "things_with"]
         },
         {
           "className": "KindValues",
@@ -4404,7 +4875,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 29,
+          "line": 46,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -4627,11 +5098,64 @@
           "aliases": ["statement"]
         },
         {
+          "className": "PublishedAs",
+          "ruleNames": ["published_as"],
+          "internal": false,
+          "file": "src/spell/rules/classes/PublishedAs.ts",
+          "line": 25,
+          "purpose": "A type's records are published as a Lexicon, AT Protocol's schema language, so other apps can read them (epic `atmosphere` P10).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {type:known_type} is published as {name:text}",
+              "example": "a status is published as \"xyz.statusphere.status\"",
+              "outputs": {
+                "js": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "ts": {
+                  "code": "Status.publishedAs = \"xyz.statusphere.status\""
+                },
+                "py": {
+                  "code": "Status.published_as = \"xyz.statusphere.status\""
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type:known_type} is published",
+              "example": "a recipe is published",
+              "outputs": {
+                "js": {
+                  "code": "Recipe.publishedAs = true"
+                },
+                "ts": {
+                  "code": "Recipe.publishedAs = true"
+                },
+                "py": {
+                  "code": "Recipe.published_as = True"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} is published as {name:text}"
+            },
+            {
+              "syntax": "{type:subject_implied} is published as {name:text}"
+            },
+            {
+              "syntax": "{type:subject_it} is published"
+            },
+            {
+              "syntax": "{type:subject_implied} is published"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "VersionStep",
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 22,
+          "line": 24,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -4864,11 +5388,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 60,
+          "line": 62,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "a player has a name as text",
               "outputs": {
                 "js": {
@@ -4883,7 +5407,7 @@
               }
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "cards have a direction as either up or down",
               "outputs": {
                 "js": {
@@ -4898,28 +5422,28 @@
               }
             },
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -4959,6 +5483,32 @@
                 },
                 "py": {
                   "code": "[\"up\", \"down\"]"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "OutlineSpecifierPercent",
+          "ruleNames": ["outline_specifier_percent"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierPercent.ts",
+          "line": 14,
+          "purpose": "A property that's a PERCENT (epic `language` P34, Owen's C1 on I47): `its \"tip\" is a percent`, `its \"tip\" is a percent starting at 18%`; Spanish `su \"propina\" es un porcentaje`.",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) (percent|percentage) (starting at {start:expression})?",
+              "example": "a percent",
+              "outputs": {
+                "js": {
+                  "code": "number"
+                },
+                "ts": {
+                  "code": "number"
+                },
+                "py": {
+                  "code": "number"
                 }
               }
             }
@@ -5021,6 +5571,36 @@
             {
               "syntax": "{datatype:known_type}",
               "example": "text",
+              "outputs": {
+                "js": {
+                  "code": "text"
+                },
+                "ts": {
+                  "code": "text"
+                },
+                "py": {
+                  "code": "text"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) (required:required) {datatype:singular_type}",
+              "example": "a required date",
+              "outputs": {
+                "js": {
+                  "code": "date"
+                },
+                "ts": {
+                  "code": "date"
+                },
+                "py": {
+                  "code": "date"
+                }
+              }
+            },
+            {
+              "syntax": "(required:required) {datatype:known_type}",
+              "example": "required text",
               "outputs": {
                 "js": {
                   "code": "text"
@@ -5145,7 +5725,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 47,
+          "line": 50,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -5490,7 +6070,7 @@
               }
             },
             {
-              "syntax": "be {bound:at_least_or_at_most} {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
+              "syntax": "be {bound:at_least_or_at_most} {count:number} (letter|letters|character|characters) long {suggestion:rule_suggestion}?",
               "example": "be at least 3 letters long",
               "outputs": {
                 "js": {
@@ -5603,6 +6183,48 @@
             }
           ],
           "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "DefineDimension",
+          "ruleNames": ["define_dimension"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DefineDimension.ts",
+          "line": 22,
+          "purpose": "A kind of measure and its units, written in spell (epic `language` P23, Owen's C5): ```spell data size is a dimension.",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is (a|an) dimension {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DimensionBase",
+          "ruleNames": ["dimension_base"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DimensionBase.ts",
+          "line": 16,
+          "purpose": "The unit a dimension converts through, `- its base is \"meter\", aka \"m\"` (epic `language` P23).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} base is {unit:unit_names}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DimensionUnit",
+          "ruleNames": ["dimension_unit"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DimensionUnit.ts",
+          "line": 19,
+          "purpose": "One more unit of a dimension, and its size in a unit named before it (epic `language` P23): `- one \"inch\", aka \"in\", aka \"\\\"\", is 2.54 cm`, `- one \"centimeter\", aka \"cm\", is 1/100 m`.",
+          "syntaxes": [
+            {
+              "syntax": "one {unit:unit_names} , is {top:number} (/ {bottom:number})? {of:unit_words} (, starting at {start:number})?"
+            }
+          ],
+          "aliases": ["statement"]
         },
         {
           "className": "ReopenType",
@@ -5779,6 +6401,34 @@
           "aliases": ["statement"]
         },
         {
+          "className": "UnitNames",
+          "ruleNames": ["unit_names"],
+          "internal": false,
+          "file": "src/spell/rules/classes/UnitNames.ts",
+          "line": 7,
+          "purpose": "A unit's name, then each other name it goes by: `\"centimeter\", aka \"cm\"` (epic `language` P23).",
+          "syntaxes": [
+            {
+              "syntax": "[names:{name:text} (, aka)]"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "OutlineSpecifierMeasure",
+          "ruleNames": ["outline_specifier_measure"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierMeasure.ts",
+          "line": 13,
+          "purpose": "A property that MEASURES something, in a unit (epic `language` P23, Q26): `its \"height\" is a length in cm`, `its \"mass\" is a weight in kg`.",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {datatype:singular_type} in {unit:unit_words}"
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
           "className": "ThePropertyOfAThing",
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
@@ -5837,6 +6487,48 @@
             }
           ],
           "aliases": ["type_property"]
+        },
+        {
+          "className": "SameFieldFilter",
+          "ruleNames": ["same_field_filter"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ThingFilter.ts",
+          "line": 13,
+          "purpose": "`the same address` -- a field of the things looked through, matching the value of that name where the line is (epic `data` P32, Q29).",
+          "syntaxes": [
+            {
+              "syntax": "the same {field:declared_member_words}"
+            }
+          ],
+          "aliases": ["thing_filter"]
+        },
+        {
+          "className": "FieldValueFilter",
+          "ruleNames": ["field_value_filter"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ThingFilter.ts",
+          "line": 33,
+          "purpose": "`name \"blah\"` -- a field of the things looked through, and the value it holds (epic `data` P32, Q29).",
+          "syntaxes": [
+            {
+              "syntax": "{field:declared_member_words} {value:expression}"
+            }
+          ],
+          "aliases": ["thing_filter"]
+        },
+        {
+          "className": "ThingFilters",
+          "ruleNames": ["thing_filters"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ThingFilter.ts",
+          "line": 43,
+          "purpose": "One or more `thing_filter`s, joined by `,` or `and` (epic `data` P32): `the same address and name \"blah\"`.",
+          "syntaxes": [
+            {
+              "syntax": "[{thing_filter} (,|and)]"
+            }
+          ],
+          "aliases": []
         }
       ]
     },
@@ -6066,7 +6758,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -6111,7 +6803,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 29,
+          "line": 78,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6181,6 +6873,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "EveryThingMatching",
+          "ruleNames": ["every_thing_matching"],
+          "internal": false,
+          "file": "src/spell/rules/places/EveryThingMatching.ts",
+          "line": 19,
+          "purpose": "Every thing a web server finds for some text, by its own search (epic `data` P34).",
+          "syntaxes": [
+            {
+              "syntax": "every {type:known_type} matching {words:expression}",
+              "example": "every artwork matching search",
+              "outputs": {
+                "js": {
+                  "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
+                },
+                "ts": {
+                  "code": "await core.savedThings(Artwork, { search: { \"*\": search } })"
+                },
+                "py": {
+                  "code": "await core.saved_things(Artwork, {\"search\": {\"*\": search}})"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "FirstFewWhere",
           "ruleNames": ["first_few_where"],
           "internal": false,
@@ -6213,14 +6931,14 @@
           "ruleNames": ["there_are_things"],
           "internal": false,
           "file": "src/spell/rules/places/ThereAreThings.ts",
-          "line": 31,
+          "line": 32,
           "purpose": "A question about how many of them there are, anywhere a condition reads (epic `data` P15).",
           "syntaxes": [
             {
-              "syntax": "there (is|are) {compare:there_are_how_many}? (one:one)? {count:number}? ({type:known_type}|{list:member_words}) where {inline_expression}?"
+              "syntax": "there (is|are) {compare:there_are_how_many}? ((one:one)|a|an)? {count:number}? ({type:known_type}|{list:member_words}) where {inline_expression}?"
             },
             {
-              "syntax": "there (is|are) {compare:there_are_how_many}? (one:one)? {count:number}? ({type:known_type}|{list:member_words})"
+              "syntax": "there (is|are) {compare:there_are_how_many}? ((one:one)|a|an)? {count:number}? ({type:known_type}|{list:member_words})"
             }
           ],
           "aliases": ["expression"]
@@ -6278,11 +6996,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "SignInMenu",
+          "ruleNames": ["sign_in_menu"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 44,
+          "purpose": "The person menu, for a program with a toolbar of its own (epic `atmosphere` T56).",
+          "syntaxes": [
+            {
+              "syntax": "the sign in menu",
+              "example": "the sign in menu",
+              "outputs": {
+                "js": {
+                  "code": "core.signInMenu()"
+                },
+                "ts": {
+                  "code": "core.signInMenu()"
+                },
+                "py": {
+                  "code": "core.sign_in_menu()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "TheirField",
           "ruleNames": ["their_field"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 49,
+          "line": 64,
           "purpose": "Something about the person using the program (T48, P15).",
           "syntaxes": [
             {
@@ -6308,7 +7052,7 @@
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 97,
+          "line": 112,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {
@@ -6334,11 +7078,11 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 50,
+          "line": 77,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {address:text} {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} (at|from) {personal:each_persons_own}? {address:text} {with_nested_statements}?",
               "example": "family cookbook is a web server from \"https://api.example.com/v1\"",
               "outputs": {
                 "js": {
@@ -6365,6 +7109,272 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 39,
+          "purpose": "A place in the signed-in person's own space on Spell's server (epic `atmosphere` P8; epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?",
+              "example": "family cookbook is saved in the cloud",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/family-cookbook\",\n  checkedEvery: 5\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"the cloud\",\n  at: \"/api/places/spaces/personal/family-cookbook\",\n  checkedEvery: 5\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\n        \"name\": \"family_cookbook\",\n        \"kind\": \"the cloud\",\n        \"at\": \"/api/places/spaces/personal/family-cookbook\",\n        \"checked_every\": 5,\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectionOf",
+          "ruleNames": ["projection_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectionOf.ts",
+          "line": 27,
+          "purpose": "Part of a space's data, written where other people can see it (epic `atmosphere` P17, Q16 A).",
+          "syntaxes": [
+            {
+              "syntax": "the? {type:type_words} is a projection of {source:expression} {with_nested_statements}?",
+              "example": "the published sheet is a projection of the sign up sheet\n\t- into \"@rs/picnic\"\n\t- showing each row's person and shift\n\t- only where its \"status\" is \"confirmed\"",
+              "outputs": {
+                "js": {
+                  "code": "export class PublishedSheet extends Place {}\nexport const publishedSheet = core.place(new PublishedSheet(), {\n  name: \"published_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/@rs/picnic\",\n  projection: {\n    into: \"@rs/picnic\",\n    of: \"/api/places/spaces/@rs/picnic-private/signups\",\n    fields: [\"person\", \"shift\"],\n    where: { status: \"confirmed\" }\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class PublishedSheet extends Place {}\nexport const publishedSheet = core.place(new PublishedSheet(), {\n  name: \"published_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/@rs/picnic\",\n  projection: {\n    into: \"@rs/picnic\",\n    of: \"/api/places/spaces/@rs/picnic-private/signups\",\n    fields: [\"person\", \"shift\"],\n    where: { status: \"confirmed\" }\n  }\n})"
+                },
+                "py": {
+                  "code": "class PublishedSheet(Place):\n    pass\n\npublished_sheet = core.place(\n    PublishedSheet(),\n    {\n        \"name\": \"published_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/@rs/picnic\",\n        \"projection\": {\n            \"into\": \"@rs/picnic\",\n            \"of\": \"/api/places/spaces/@rs/picnic-private/signups\",\n            \"fields\": [\"person\", \"shift\"],\n            \"where\": {\"status\": \"confirmed\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SignUpsFrom",
+          "ruleNames": ["sign_ups_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/SignUpsFrom.ts",
+          "line": 11,
+          "purpose": "Who signs up on a sign-up sheet, though they can't read it (epic `atmosphere` P27).",
+          "syntaxes": [
+            {
+              "syntax": "open to (sign-ups|sign ups) from {address:text}",
+              "example": "sign up sheet is a data folder at \"picnic@rs/__private/signups\"\n\t- open to sign-ups from \"picnic@rs/sheet\"\n\t- only its attendees add rows\n\t- at most 2 rows for each shift",
+              "outputs": {
+                "js": {
+                  "code": "export class SignUpSheet extends Place {}\nexport const signUpSheet = core.place(new SignUpSheet(), {\n  name: \"sign_up_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/signups\",\n  sheet: {\n    signUpsFrom: \"picnic@rs/sheet\",\n    onlyFrom: \"attendees\",\n    mostEach: { field: \"shift\", most: 2 }\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class SignUpSheet extends Place {}\nexport const signUpSheet = core.place(new SignUpSheet(), {\n  name: \"sign_up_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/signups\",\n  sheet: {\n    signUpsFrom: \"picnic@rs/sheet\",\n    onlyFrom: \"attendees\",\n    mostEach: { field: \"shift\", most: 2 }\n  }\n})"
+                },
+                "py": {
+                  "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"sign_ups_from\": \"picnic@rs/sheet\",\n            \"only_from\": \"attendees\",\n            \"most_each\": {\"field\": \"shift\", \"most\": 2},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsAllowedEach",
+          "ruleNames": ["rows_allowed_each"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsAllowedEach.ts",
+          "line": 14,
+          "purpose": "How many rows each person may add, as their row on the sheet's list says (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "each person (asks for|adds) at most their {field:text} {collection:identifier}",
+              "example": "sign up sheet is a data folder at \"picnic@rs/__private/signups\"\n\t- only its attendees add rows\n\t- at most 2 rows for each shift\n\t- at most 40 rows for each event\n\t- each person asks for at most their \"invitations\" tickets\n\t- confirmed tickets join \"picnic@rs/__attendees\"",
+              "outputs": {
+                "js": {
+                  "code": "export class SignUpSheet extends Place {}\nexport const signUpSheet = core.place(new SignUpSheet(), {\n  name: \"sign_up_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/signups\",\n  sheet: {\n    onlyFrom: \"attendees\",\n    mostEach: [{ field: \"shift\", most: 2 }, { field: \"event\", most: 40 }],\n    allowance: { collection: \"tickets\", field: \"invitations\" },\n    joins: { collection: \"tickets\", address: \"picnic@rs/__attendees\" }\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class SignUpSheet extends Place {}\nexport const signUpSheet = core.place(new SignUpSheet(), {\n  name: \"sign_up_sheet\",\n  kind: \"data folder\",\n  at: \"/api/places/spaces/picnic@rs/__private/signups\",\n  sheet: {\n    onlyFrom: \"attendees\",\n    mostEach: [{ field: \"shift\", most: 2 }, { field: \"event\", most: 40 }],\n    allowance: { collection: \"tickets\", field: \"invitations\" },\n    joins: { collection: \"tickets\", address: \"picnic@rs/__attendees\" }\n  }\n})"
+                },
+                "py": {
+                  "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"only_from\": \"attendees\",\n            \"most_each\": [{\"field\": \"shift\", \"most\": 2}, {\"field\": \"event\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"tickets\", \"field\": \"invitations\"},\n            \"joins\": {\"collection\": \"tickets\", \"address\": \"picnic@rs/__attendees\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeptOnDevice",
+          "ruleNames": ["kept_on_device"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeptOnDevice.ts",
+          "line": 18,
+          "purpose": "Keep a copy of what a place reads on this device (epic `data` P36).",
+          "syntaxes": [
+            {
+              "syntax": "keep a copy on this device (, up to {size:number} {unit:size_unit})?",
+              "example": "film archive is a web server at \"https://swapi.py4e.com/api\"\n\t- keep a copy on this device",
+              "outputs": {
+                "js": {
+                  "code": "export class FilmArchive extends Place {}\nexport const filmArchive = core.place(new FilmArchive(), {\n  name: \"film_archive\",\n  kind: \"web server\",\n  at: \"https://swapi.py4e.com/api\",\n  keptOnDevice: true\n})"
+                },
+                "ts": {
+                  "code": "export class FilmArchive extends Place {}\nexport const filmArchive = core.place(new FilmArchive(), {\n  name: \"film_archive\",\n  kind: \"web server\",\n  at: \"https://swapi.py4e.com/api\",\n  keptOnDevice: true\n})"
+                },
+                "py": {
+                  "code": "class FilmArchive(Place):\n    pass\n\nfilm_archive = core.place(\n    FilmArchive(),\n    {\n        \"name\": \"film_archive\",\n        \"kind\": \"web server\",\n        \"at\": \"https://swapi.py4e.com/api\",\n        \"kept_on_device\": True,\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ListsUnder",
+          "ruleNames": ["lists_under"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsUnder.ts",
+          "line": 12,
+          "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
+              "example": "typicode is a web server at \"https://jsonplaceholder.typicode.com\"\n\t- a post's comments live at \"/posts/{id}/comments\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Typicode extends Place {}\nexport const typicode = core.place(new Typicode(), {\n  name: \"typicode\",\n  kind: \"web server\",\n  at: \"https://jsonplaceholder.typicode.com\",\n  listsUnder: { posts: { comments: \"/posts/{id}/comments\" } }\n})"
+                },
+                "ts": {
+                  "code": "export class Typicode extends Place {}\nexport const typicode = core.place(new Typicode(), {\n  name: \"typicode\",\n  kind: \"web server\",\n  at: \"https://jsonplaceholder.typicode.com\",\n  listsUnder: { posts: { comments: \"/posts/{id}/comments\" } }\n})"
+                },
+                "py": {
+                  "code": "class Typicode(Place):\n    pass\n\ntypicode = core.place(\n    Typicode(),\n    {\n        \"name\": \"typicode\",\n        \"kind\": \"web server\",\n        \"at\": \"https://jsonplaceholder.typicode.com\",\n        \"lists_under\": {\"posts\": {\"comments\": \"/posts/{id}/comments\"}},\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RequestsASecond",
+          "ruleNames": ["requests_a_second"],
+          "internal": false,
+          "file": "src/spell/rules/places/RequestsASecond.ts",
+          "line": 10,
+          "purpose": "The most requests a web server takes a second, its pace (epic `data` P34).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} takes up to {most:number} requests a second",
+              "example": "met museum is a web server at \"https://collectionapi.metmuseum.org\"\n\t- it takes up to 80 requests a second",
+              "outputs": {
+                "js": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  mostPerSecond: 80\n})"
+                },
+                "ts": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  mostPerSecond: 80\n})"
+                },
+                "py": {
+                  "code": "class MetMuseum(Place):\n    pass\n\nmet_museum = core.place(\n    MetMuseum(),\n    {\n        \"name\": \"met_museum\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"most_per_second\": 80,\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SearchesEverything",
+          "ruleNames": ["searches_everything"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchesEverything.ts",
+          "line": 14,
+          "purpose": "A web server that searches all of each thing for text, not one field, and the query parameter it takes (epic `data` P34).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} searches everything with {param:text} (at {path:text})?",
+              "example": "met museum is a web server at \"https://collectionapi.metmuseum.org\"\n\t- it searches everything with \"q\" at \"/v1.1/search\"",
+              "outputs": {
+                "js": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/v1.1/search\"\n  }\n})"
+                },
+                "ts": {
+                  "code": "export class MetMuseum extends Place {}\nexport const metMuseum = core.place(new MetMuseum(), {\n  name: \"met_museum\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/v1.1/search\"\n  }\n})"
+                },
+                "py": {
+                  "code": "class MetMuseum(Place):\n    pass\n\nmet_museum = core.place(\n    MetMuseum(),\n    {\n        \"name\": \"met_museum\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/v1.1/search\"},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CollectionSearchedWith",
+          "ruleNames": ["collection_searched_with"],
+          "internal": false,
+          "file": "src/spell/rules/places/CollectionSearchedWith.ts",
+          "line": 16,
+          "purpose": "How ONE collection of a web server is searched, at an address of its own, when its collections don't all search the same way (epic `data` P41).",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are searched with {param:text} (at {path:text})?",
+              "example": "github is a web server at \"https://api.github.com\"\n\t- users are found at \"/users/{name}\"\n\t- users are searched with \"q\" at \"/search/users\"\n\t- repositories are searched with \"q\" at \"/search/repositories\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://api.github.com\",\n  collections: { users: { at: \"/users/{id}\", searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/search/users\"\n  } }, repositories: {\n    searches: {\n      param: \"q\",\n      fields: [],\n      at: \"/search/repositories\"\n    },\n    at: \"/search/repositories\",\n    searchedOnly: true\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://api.github.com\",\n  collections: { users: { at: \"/users/{id}\", searches: {\n    param: \"q\",\n    fields: [],\n    at: \"/search/users\"\n  } }, repositories: {\n    searches: {\n      param: \"q\",\n      fields: [],\n      at: \"/search/repositories\"\n    },\n    at: \"/search/repositories\",\n    searchedOnly: true\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Github(Place):\n    pass\n\ngithub = core.place(\n    Github(),\n    {\n        \"name\": \"github\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.github.com\",\n        \"collections\": {\n            \"users\": {\"at\": \"/users/{id}\", \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/search/users\"}},\n            \"repositories\": {\n                \"searches\": {\"param\": \"q\", \"fields\": [], \"at\": \"/search/repositories\"},\n                \"at\": \"/search/repositories\",\n                \"searched_only\": True,\n            },\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AskedBy",
+          "ruleNames": ["asked_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/AskedBy.ts",
+          "line": 16,
+          "purpose": "The fields a web server's things are asked for by, each a query parameter (epic `data` P33).",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are asked for by (their|its)? {fields:searched_fields}",
+              "example": "open meteo is a web server at \"https://api.open-meteo.com\"\n\t- forecasts are asked for by their latitude and longitude",
+              "outputs": {
+                "js": {
+                  "code": "export class OpenMeteo extends Place {}\nexport const openMeteo = core.place(new OpenMeteo(), {\n  name: \"open_meteo\",\n  kind: \"web server\",\n  at: \"https://api.open-meteo.com\",\n  collections: { forecasts: { askedBy: [\"latitude\", \"longitude\"] } }\n})"
+                },
+                "ts": {
+                  "code": "export class OpenMeteo extends Place {}\nexport const openMeteo = core.place(new OpenMeteo(), {\n  name: \"open_meteo\",\n  kind: \"web server\",\n  at: \"https://api.open-meteo.com\",\n  collections: { forecasts: { askedBy: [\"latitude\", \"longitude\"] } }\n})"
+                },
+                "py": {
+                  "code": "class OpenMeteo(Place):\n    pass\n\nopen_meteo = core.place(\n    OpenMeteo(),\n    {\n        \"name\": \"open_meteo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.open-meteo.com\",\n        \"collections\": {\"forecasts\": {\"asked_by\": [\"latitude\", \"longitude\"]}},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "InOneGo",
           "ruleNames": ["in_one_go"],
           "internal": false,
@@ -6383,7 +7393,7 @@
                   "code": "await core.inOneGo(() => core.console.log(1))"
                 },
                 "py": {
-                  "code": "core.in_one_go(lambda: print(1))"
+                  "code": "await core.in_one_go(lambda: print(1))"
                 }
               }
             }
@@ -6405,18 +7415,85 @@
           "aliases": ["assignment", "statement"]
         },
         {
-          "className": "SavedInTheCloud",
-          "ruleNames": ["saved_in_the_cloud"],
+          "className": "ProjectedInto",
+          "ruleNames": ["projected_into"],
           "internal": false,
-          "file": "src/spell/rules/places/SavedInTheCloud.ts",
-          "line": 23,
-          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
+          "file": "src/spell/rules/places/ProjectedInto.ts",
+          "line": 10,
+          "purpose": "The space a projection is written into, by its address (epic `atmosphere` P17).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is saved in the cloud {with_nested_statements}?"
-            },
+              "syntax": "into {address:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectedFields",
+          "ruleNames": ["projected_fields"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedFields.ts",
+          "line": 11,
+          "purpose": "Which of each thing's fields a projection shows (epic `atmosphere` P17).",
+          "syntaxes": [
             {
-              "syntax": "{type:subject_it} (is saved|lives) in the cloud"
+              "syntax": "showing (each|every) {thing:identifier}'s {fields:searched_fields}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ProjectedOnlyWhere",
+          "ruleNames": ["projected_only_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/ProjectedOnlyWhere.ts",
+          "line": 11,
+          "purpose": "Which things a projection shows, by one field's text (epic `atmosphere` P17).",
+          "syntaxes": [
+            {
+              "syntax": "only where its {field:text} is {value:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsOnlyFrom",
+          "ruleNames": ["rows_only_from"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsOnlyFrom.ts",
+          "line": 12,
+          "purpose": "A sign-up sheet takes rows only from the people its list names (epic `atmosphere` P27, J101).",
+          "syntaxes": [
+            {
+              "syntax": "only its {list:identifier} add rows"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MostRowsEach",
+          "ruleNames": ["most_rows_each"],
+          "internal": false,
+          "file": "src/spell/rules/places/MostRowsEach.ts",
+          "line": 10,
+          "purpose": "How many rows a sign-up sheet takes with the same field (epic `atmosphere` P27).",
+          "syntaxes": [
+            {
+              "syntax": "at most {most:number} rows (for|per) each {field:identifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ConfirmedJoin",
+          "ruleNames": ["confirmed_join"],
+          "internal": false,
+          "file": "src/spell/rules/places/ConfirmedJoin.ts",
+          "line": 13,
+          "purpose": "A confirmed row puts its guest in a space, an event's attendees' space (epic `atmosphere` P31).",
+          "syntaxes": [
+            {
+              "syntax": "confirmed {collection:identifier} join {address:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6426,11 +7503,45 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 10,
+          "line": 12,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
               "syntax": "{collection:plural_type} live at {path:text}"
+            },
+            {
+              "syntax": "{collection:plural_type} are found at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SearchedAt",
+          "ruleNames": ["searched_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchedAt.ts",
+          "line": 14,
+          "purpose": "Where a web server keeps a type's things that it gives only to a search, with no list of them all (epic `data` P29).",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are searched at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PictureAt",
+          "ruleNames": ["picture_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/PictureAt.ts",
+          "line": 14,
+          "purpose": "A field holding a picture's id, on another server, and where its pictures are (epic `data` P29).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} is a picture at {path:text}"
+            },
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} is a picture at {path:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6448,6 +7559,20 @@
             },
             {
               "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyIfSet",
+          "ruleNames": ["key_if_set"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyIfSet.ts",
+          "line": 13,
+          "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key is the secret {name:text}, if it's set"
             }
           ],
           "aliases": ["statement"]
@@ -6566,6 +7691,48 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageInLink",
+          "ruleNames": ["next_page_in_link"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageInLink.ts",
+          "line": 17,
+          "purpose": "A web server says where its next page is in its `Link` header, not in its answer (epic `data` P28).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} next page is in its {header:text} header"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ListsGiveOnly",
+          "ruleNames": ["lists_give_only"],
+          "internal": false,
+          "file": "src/spell/rules/places/ListsGiveOnly.ts",
+          "line": 12,
+          "purpose": "A web server whose lists hold only a little of each row, its whole at the row's own address (epic `data` P27).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PageSizeIs",
+          "ruleNames": ["page_size_is"],
+          "internal": false,
+          "file": "src/spell/rules/places/PageSizeIs.ts",
+          "line": 9,
+          "purpose": "How many a web server gives at a time, when asked (epic `data` P27).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} gives up to {size:number} at a time"
             }
           ],
           "aliases": ["statement"]
@@ -6763,7 +7930,7 @@
           "ruleNames": ["save_draft"],
           "internal": false,
           "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "A draft's changes go out, together (epic `data` Q9).",
           "syntaxes": [
             {
@@ -6882,6 +8049,163 @@
       ]
     },
     {
+      "module": "sites",
+      "rules": [
+        {
+          "className": "ShowSitePart",
+          "ruleNames": ["show_site_part"],
+          "internal": false,
+          "file": "src/spell/rules/sites/ShowSitePart.ts",
+          "line": 27,
+          "purpose": "Go to one of the site's pages, or open one of its dialogs or sidebars (epic `mockup` P2).",
+          "syntaxes": [
+            {
+              "syntax": "go to the {part:site_part_words} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "go to the {part:quoted_member} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "show the {part:site_part_words} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "show the {part:quoted_member} ((for|with) {thing:expression})?"
+            },
+            {
+              "syntax": "(close:close) the {part:site_part_words}"
+            },
+            {
+              "syntax": "(close:close) the {part:quoted_member}"
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "SiteAddressOf",
+          "ruleNames": ["site_address_of"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteAddressOf.ts",
+          "line": 21,
+          "purpose": "The address of one of the site's pages, for a link (epic `mockup` P2).",
+          "syntaxes": [
+            {
+              "syntax": "the address of the {part:site_part_words} ((for|with) {thing:expression})?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "SitePartWords",
+          "ruleNames": ["site_part_words"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePartWords.ts",
+          "line": 16,
+          "purpose": "The words naming one of a site's parts, `of` (Spanish's `de`) included (epic `mockup` P3, T5).",
+          "syntaxes": [
+            {
+              "example": "film page",
+              "outputs": {
+                "js": {
+                  "code": "filmPage"
+                },
+                "ts": {
+                  "code": "filmPage"
+                },
+                "py": {
+                  "code": "film_page"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "CreateSite",
+          "ruleNames": ["create_site"],
+          "internal": false,
+          "file": "src/spell/rules/sites/CreateSite.ts",
+          "line": 24,
+          "purpose": "A SITE, and its one instance (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
+              "example": "a \"film\" is a thing where:\n\t- its \"title\" is text\na \"films page\" is a page\na \"film page\" is a page where:\n\t- it has a film\ngalaxy guide is a site at \"owen@spell/galaxy\":\n\t- it has a films page at \"/films\", named \"Films\"\n\t\t- it has a film page at \"/films/:film\"\n\t- it has a settings dialog\n\t- it has a film sidebar",
+              "outputs": {
+                "js": {
+                  "code": "export class Film extends Thing {\n  static { this.declareProp(\"title\", { type: \"text\" }) }\n  get title() { return this.getProp(\"title\") }\n  set title(value) { this.setProp(\"title\", value) }\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  get film() { return this.getProp(\"film\") }\n  set film(value) { this.setProp(\"film\", value) }\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class Film extends Thing {\n  @prop({ type: \"text\" })\n  accessor title!: string\n}\nexport class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class FilmPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  @prop() accessor film!: any\n}\n\nexport class FilmPageElement extends SpellElement<FilmPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-film-page\", \"film page\", [\n    { name: \"film\", kind: \"string\", description: \"Its film.\" }\n  ])\n}\ncore.useElement(FilmPage, FilmPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    title: \"Films\",\n    pages: [{\n      name: \"film page\",\n      page: \"FilmPage\",\n      address: \"/films/:film\",\n      params: [\"film\"]\n    }]\n  }]\n  static dialogs = [{ name: \"settings dialog\" }]\n  static sidebars = [{ name: \"film sidebar\" }]\n  static livesAt = \"owen@spell/galaxy\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class Film(Thing):\n    title = prop(type=\"text\")\n\nclass FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass FilmPage(Page):\n    element_tag = \"syntax-block-film-page\"\n\n    film = prop()\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"title\": \"Films\",\n            \"pages\": [\n                {\"name\": \"film page\", \"page\": \"FilmPage\", \"address\": \"/films/:film\", \"params\": [\"film\"]},\n            ],\n        },\n    ]\n    dialogs = [{\"name\": \"settings dialog\"}]\n    sidebars = [{\"name\": \"film sidebar\"}]\n    lives_at = \"owen@spell/galaxy\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SitePage",
+          "ruleNames": ["site_page"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SitePage.ts",
+          "line": 33,
+          "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, {state:site_page_state})? (, pictured in {picture:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteOverlay",
+          "ruleNames": ["site_overlay"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteOverlay.ts",
+          "line": 37,
+          "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_not_found_page} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_not_found_page} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an) {part:site_error_page} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) {part:site_error_page} (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
+            }
+          ],
+          "aliases": ["statement"]
+        }
+      ]
+    },
+    {
       "module": "JSX",
       "rules": [
         {
@@ -6899,7 +8223,7 @@
           "ruleNames": ["markdown_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/MarkdownBlock.ts",
-          "line": 37,
+          "line": 40,
           "purpose": "Formatted text in a drawing, drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -6949,7 +8273,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 55,
+          "line": 56,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -7019,7 +8343,7 @@
           "ruleNames": ["jsxExpression"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXExpression.ts",
-          "line": 12,
+          "line": 14,
           "purpose": "Match a `{...}` JSX expression container (a `jsxChild`, e.g. `<div>{1 + 2}</div>`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]
@@ -7039,7 +8363,7 @@
           "ruleNames": ["jsxAttribute"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXAttribute.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Match a single JSX attribute (`name`, `name=value`, or `name={expression}`).",
           "syntaxes": [],
           "aliases": []
@@ -7292,7 +8616,7 @@
           "ruleNames": ["assignment"],
           "internal": false,
           "file": "src/spell/rules/assignment/AssignmentStatement.ts",
-          "line": 35,
+          "line": 36,
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {
@@ -7651,7 +8975,7 @@
           "ruleNames": ["print"],
           "internal": false,
           "file": "src/spell/rules/UI/Print.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "Print an expression (to the console currently).",
           "syntaxes": [
             {
@@ -7666,6 +8990,32 @@
                 },
                 "py": {
                   "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowDatesAs",
+          "ruleNames": ["show_dates_as"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowDatesAs.ts",
+          "line": 14,
+          "purpose": "How the program shows every date it draws or joins to text, from then on.",
+          "syntaxes": [
+            {
+              "syntax": "dates are shown as {style:shown_dates}",
+              "example": "dates are shown as short dates",
+              "outputs": {
+                "js": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "ts": {
+                  "code": "core.showDatesAs(\"short\")"
+                },
+                "py": {
+                  "code": "core.show_dates_as(\"short\")"
                 }
               }
             }
@@ -7692,6 +9042,84 @@
                 },
                 "py": {
                   "code": "core.scroll_to_top()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PlaySound",
+          "ruleNames": ["play_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/PlaySound.ts",
+          "line": 14,
+          "purpose": "Play a sound file, from its start, as a click or a key asks (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "play {sound:expression}",
+              "example": "play \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.play(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.play(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopSound",
+          "ruleNames": ["stop_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopSound.ts",
+          "line": 13,
+          "purpose": "Stop a sound `play` started (epic `data` Q40, T145).",
+          "syntaxes": [
+            {
+              "syntax": "stop {sound:expression}",
+              "example": "stop \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.stop(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.stop(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "LoadSound",
+          "ruleNames": ["load_sound"],
+          "internal": false,
+          "file": "src/spell/rules/UI/LoadSound.ts",
+          "line": 14,
+          "purpose": "Start loading a sound now, so a later `play` starts it at once (epic `data` J215).",
+          "syntaxes": [
+            {
+              "syntax": "(load|preload) {sound:expression}",
+              "example": "load \"cry.ogg\"",
+              "outputs": {
+                "js": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "ts": {
+                  "code": "core.loadSound(\"cry.ogg\")"
+                },
+                "py": {
+                  "code": "core.load_sound(\"cry.ogg\")"
                 }
               }
             }
@@ -7878,6 +9306,31 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "UIDefaults",
+          "ruleNames": ["ui_defaults"],
+          "internal": false,
+          "file": "src/spell/rules/UI/UIDefaults.ts",
+          "line": 32,
+          "purpose": "An app's widget defaults, a block of sample tags, one per widget (epic `language` P29).",
+          "syntaxes": [
+            {
+              "example": "<ui-defaults>\n\t<ui-button appearance=\"pill\"/>\n\t<ui-segment appearance=\"raised\" padded/>\n</ui-defaults>",
+              "outputs": {
+                "js": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "ts": {
+                  "code": "core.useDefaults(\"\", {\n  \"ui-button\": { appearance: \"pill\" },\n  \"ui-segment\": { appearance: \"raised\", padded: true }\n})"
+                },
+                "py": {
+                  "code": "core.use_defaults(\n    \"\",\n    {\n        \"ui-button\": {\"appearance\": \"pill\"},\n        \"ui-segment\": {\"appearance\": \"raised\", \"padded\": True},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },
@@ -7889,7 +9342,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/DynamicMethodRule.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "Rule `constructor` for a plain (non-instance, non-operator) dynamically-defined method's CALL SITE, e.g. matching `notify 1` after `to notify (message): ...` defined it.",
           "syntaxes": [],
           "aliases": []
@@ -8171,7 +9624,7 @@
           "ruleNames": ["bare_type_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/BareTypeArg.ts",
-          "line": 15,
+          "line": 19,
           "purpose": "A KNOWN type after `a` / `an`, with no parens, in a method's signature: a parameter, as `(a card)` is.",
           "syntaxes": [
             {

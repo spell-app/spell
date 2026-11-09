@@ -1,4 +1,4 @@
-import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal, LoadableFile } from "spell/util"
+import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile } from "spell/util"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -6,16 +6,20 @@ import { SPACES } from "spell/app/spaces"
 import type { SpellConsole } from "spell/parser/core/console"
 import type { LSP } from "spell/app/lsp"
 import type { SpellRuntime } from "spell/app/app/runner"
+import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import type { monaco } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
-import { THEME_PAGE } from "spell/app/app/pages/pages.types"
+import { runSite } from "spell/app/app/pages/RunSite"
+import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
+// By file:  the runner barrel brings the runners themselves
+import { loadRuntime } from "spell/app/app/runner/loadRuntime"
 import { EditorHistory } from "spell/app/app/EditorHistory"
 import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
@@ -80,6 +84,21 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * Show the site editor (`<SiteEditorPage>`, epic `mockup` P4) for the project at `projectPath`, default the current
+   * one:  its pages, as a tree and a board.
+   */
+  showSiteEditor(projectPath = editor.project?.path): void {
+    if (projectPath) navigate(siteEditorUrlFor(projectPath))
+  }
+
+  /**
+   * The site whose editor opened a page in Edit:  its project's path, for the editor's "Back to the site" link
+   * (`<BackToSite>`);  none once another project is shown.
+   */
+  @prop({ type: "text" })
+  accessor cameFromSite: string | undefined
+
+  /**
    * Show `<SpellEditor>` for `path` (default:  current file), and compile.
    * - Updates the URL, whose route calls `selectPath()`.
    */
@@ -142,11 +161,11 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Last project page shown:  `"editor"` or `"runner"`.
-   * - Set by `<SpellEditor>`'s route:  `runner` for `/run/`.
+   * Last project page shown:  `"editor"`, `"runner"` or `"site"`.
+   * - Set by the page's route:  `runner` for `/run/`, `site` for the site editor's `/site/` (epic `mockup` P4).
    */
   @prop({ type: "text", default: "editor" })
-  accessor projectPage!: "editor" | "runner"
+  accessor projectPage!: "editor" | "runner" | "site"
 
   /**
    * Select a `path` to show in `<SpellEditor>`, in Edit or Run.
@@ -186,6 +205,7 @@ export class EditorStore extends Observable {
     if (!sameProject) {
       console.info("selecting project", project)
       editor.history.clear()
+      if (editor.cameFromSite !== project.path) editor.cameFromSite = undefined
       // stop current compilation
       editor.clearCompileAppSoon()
       // remember this project was selected for projectRoot
@@ -206,11 +226,17 @@ export class EditorStore extends Observable {
 
     const file: EditorFile | undefined = project.getFile(filePath)
     if (!file) throw new Error(`editor.selectPath('${path}'): no file found for '${filePath}'.`)
-    // if we landed on something else other than the original path, navigate to it
-    if (path !== file.path) {
+    // if we landed on something else other than the original path, navigate to it --
+    // but not in Run showing a site's page:  its URL names that page (`RunSite`, epic `mockup` P2)
+    // the site editor's URL names the project, whichever file is shown (epic `mockup` P4)
+    const showsSitePage =
+      (editor.projectPage === "runner" && runSite.address() !== "/") || editor.projectPage === "site"
+    if (path !== file.path && !showsSitePage) {
       // console.warn({ path, file: file.path })
       const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
-      navigate(url, { replace: true })
+      // keep the address's query and hash, which name no file:  a program's own (`?server=met`, its tab)
+      const { search, hash } = globalThis.location ?? { search: "", hash: "" }
+      navigate(`${url}${search}${hash}`, { replace: true })
       return
     }
 
@@ -263,23 +289,48 @@ export class EditorStore extends Observable {
     // since defaults are part of the member's type.
     projectRoot ??= editor.rootForNew
     try {
+      projectId ??= await editor.askForProjectId(
+        projectRoot,
+        appTexts.text("askNewAppName", appTexts.groupWords(projectRoot))
+      )
+      if (!projectId) return
       const project = await projectRoot.createApp(projectId)
-      if (project) {
-        editor.showEditor(project.path)
-        editor.showKept(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
-      }
+      editor.showEditor(project.path)
+      editor.showKept(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
     } catch (e) {
       editor.showError(e)
     }
   }
 
-  /** Duplicate current `project` under `newProjectId` (auto-generated if omitted) and show it. */
+  /**
+   * Ask for a project's name in Spell's dialog, and answer its new id;  `undefined` if cancelled or empty.
+   * - `basedOn`:  the project it's made from, whose name it starts with, and whose group it goes in.
+   */
+  async askForProjectId(
+    projectRoot: SPACES.SpellProjectRoot,
+    message: string,
+    basedOn?: SP.SpellProject
+  ): Promise<string | undefined> {
+    const name = await editor.prompt({ message, defaultValue: basedOn?.projectName ?? NEW_PROJECT_NAME })
+    return name ? projectRoot.projectIdForName(name, basedOn?.projectId) : undefined
+  }
+
+  /** Duplicate current `project` under `newProjectId` (no id:  asks for its name) and show it. */
   async duplicateApp(newProjectId?: string): Promise<void> {
     try {
+      const { project, projectRoot } = editor
+      if (editor.canChangeProject) {
+        newProjectId ??= await editor.askForProjectId(
+          projectRoot!,
+          appTexts.text("askNewAppName", appTexts.groupWords(projectRoot)),
+          project!
+        )
+        if (!newProjectId) return
+      }
       // the static build:  a copy of a built-in project is the visitor's own
       const newProject = editor.canChangeProject
-        ? await editor.projectRoot!.duplicateApp(editor.project!.projectId, newProjectId)
-        : await editor.rootForNew.copyHere(editor.project!.projectId)
+        ? await projectRoot!.duplicateApp(project!.projectId, newProjectId!)
+        : await editor.rootForNew.copyHere(project!.projectId)
       if (newProject) {
         editor.showEditor(newProject.path)
         editor.showKept(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
@@ -288,9 +339,15 @@ export class EditorStore extends Observable {
       editor.showError(e)
     }
   }
-  /** Rename current `project` to `newProjectId` and show it. */
+  /** Rename current `project` to `newProjectId` (no id:  asks for its name) and show it. */
   async renameApp(newProjectId?: string): Promise<void> {
     try {
+      newProjectId ??= await editor.askForProjectId(
+        editor.projectRoot!,
+        appTexts.text("askRenameApp", appTexts.groupWords(editor.projectRoot)),
+        editor.project!
+      )
+      if (!newProjectId) return
       const project = await editor.projectRoot!.renameApp(editor.project!.projectId, newProjectId)
       if (project) {
         editor.showEditor(project.path)
@@ -300,11 +357,16 @@ export class EditorStore extends Observable {
       editor.showError(e)
     }
   }
-  /** Delete current `project` (after `CONFIRM`), then navigate to `projectRoot`, which selects another project. */
+  /** Delete current `project` (after asking), then navigate to `projectRoot`, which selects another project. */
   async deleteApp(): Promise<void> {
     try {
       const { projectRoot, project } = editor
-      const removed = await projectRoot!.deleteApp(project!.projectId, CONFIRM)
+      const message = appTexts.text("confirmRemoveApp", {
+        ...appTexts.groupWords(projectRoot),
+        name: project!.projectName!
+      })
+      if (!(await editor.confirm({ message }))) return
+      const removed = await projectRoot!.deleteApp(project!.projectId)
       if (removed) {
         // Navigate to nextProject, or the projectRoot, which will select another project
         editor.showEditor(projectRoot!.path)
@@ -333,8 +395,11 @@ export class EditorStore extends Observable {
       // every file's loaded now, whichever was shown first
       startingPoints.note(project.path, project.files)
       editor.edits++
+      // from the compile cache, nothing's parsed or compiled:  the side bar, the Types tab, the code's marks and the
+      // compiled-code pane compile it now, behind the running app (epic `language` P27, r11)
+      if (project.compiledFrom === "cache") void editor.compileBehind(project)
       // the Types tab:  its tree follows the code, compiled or not
-      await editor.refreshScopes()
+      else await editor.refreshScopes()
       const { compiled } = project
 
       if (compiled) {
@@ -463,6 +528,8 @@ export class EditorStore extends Observable {
     const { project } = editor
     const compiled = project?.outputFile.contents ?? project?.compiled
     if (!project || !compiled) return
+    // the site editor shows no app:  run, it'd draw over the page (epic `mockup` P4)
+    if (editor.projectPage === "site") return
     const runtime = await editor.loadRuntime()
     const output = runtime.core.console
     const words = appTexts.groupWords(editor.projectRoot)
@@ -492,11 +559,40 @@ export class EditorStore extends Observable {
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
       sourceMap,
-      placesFrom: sourceMap
+      placesFrom: sourceMap,
+      siteHost: runSite
     })
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
     else output.info(appTexts.text("consoleExecuted", words))
+  }
+
+  /**
+   * Run the program's tests, as `spell test` does (`testApp()`), on a copy of the runtime of their own:
+   * the program the editor ran last, afresh, so the running app keeps its game (epic `editor` P23, the Tests card).
+   * - Answers how each went;  `undefined` when nothing has run yet.
+   * - In dev, the copy is the runtime with a query of its own, so its modules are its own (`runtimeCopyInDev()`).
+   * - NEVER throws:  a copy that won't load answers its error as the run's `problem`.
+   */
+  async runTests(): Promise<TestRun | undefined> {
+    const compiled = editor.lastExecutedProgram
+    const project = editor.project
+    if (!compiled || !project) return undefined
+    try {
+      testsCopy ??= import.meta.env.DEV
+        ? (import(/* @vite-ignore */ `${runtimeUrl()}${TESTS_COPY}`) as Promise<SpellRuntime>).then((runtime) => ({
+            runtime,
+            coreUrl: `${runtimeUrl()}${TESTS_COPY}`
+          }))
+        : loadRuntime(runtimeUrl())
+      const { runtime, coreUrl } = await testsCopy
+      const lang = project.wordsLanguages[0]
+      const messages = lang ? SP.SpellWords.messagesFor(lang) : undefined
+      return await runtime.testApp(compiled, { coreUrl, loadImport: fetchCompiled, messages })
+    } catch (problem) {
+      testsCopy = undefined
+      return { problem: problem instanceof Error ? problem.message : String(problem), results: [] }
+    }
   }
 
   /** Timer id for a pending `compileAppSoon()`, if any. */
@@ -597,6 +693,22 @@ export class EditorStore extends Observable {
   setScopeExplorer(explorer: LSP.ScopeExplorer): void {
     scopeExplorer = explorer
     void editor.refreshScopes()
+  }
+
+  /**
+   * Compile `project` again, taken from the compile cache, for what reads its parse and each file's compile:
+   * the side bar, the Types tab, the code's marks, the compiled-code pane (`compiled`, `codeWithMapFor()`).
+   * - Not from the cache, and saving nothing:  the running app keeps the cached program, which this compile matches.
+   * - NEVER throws:  a parse error shows on its line, as a compile's would;  anything else goes to devtools.
+   */
+  async compileBehind(project: SP.SpellProject): Promise<void> {
+    try {
+      await project.compile(undefined, { save: false, cached: false })
+      editor.edits++
+      await editor.refreshScopes()
+    } catch (error) {
+      console.error("editor.compileBehind():  couldn't compile", project.projectId, error)
+    }
   }
 
   /**
@@ -868,14 +980,38 @@ export class EditorStore extends Observable {
   @prop()
   accessor draftedFiles: readonly string[] | undefined
 
+  /**
+   * May you make a new page in current `project`, by your role in its space (`canCreate`, a manager's;
+   * epic `atmosphere` P25)?  "New File" shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayCreate!: boolean
+
+  /**
+   * May you draft and save current `project`'s pages and source:  design it (`canDesign`, epic `atmosphere` T47)?
+   * A manager of its space, or anyone its org lets design it, whatever their role there.  Save shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayDesign!: boolean
+
+  /**
+   * May you publish current `project`'s pages, by your role in its space (`canPublish`, a manager's;
+   * epic `atmosphere` P26)?  Publish shows only then.
+   * - Asked with your drafts (`refreshDrafts()`);  yes until the server says, and always in the preview.
+   */
+  @prop({ type: "choice", default: true })
+  accessor mayPublish!: boolean
+
   /** Do you have a draft of `file`? */
   hasDraft(file: SP.AnySpellFile): boolean {
     return !!editor.draftedFiles?.includes(file.path)
   }
 
-  /** Has the project anything to publish?  Never in the preview, which has no server. */
+  /** Has the project anything you may publish?  Never in the preview, which has no server. */
   get canPublish(): boolean {
-    return !isStaticBuild && !!editor.draftedFiles?.length
+    return !isStaticBuild && editor.mayPublish && !!editor.draftedFiles?.length
   }
 
   /** Ask which files of current `project` you have drafts of.  NEVER throws:  a failure is logged. */
@@ -883,9 +1019,12 @@ export class EditorStore extends Observable {
     const { project } = editor
     if (!project || isStaticBuild) return
     try {
-      const { drafts } = await new SPACES.ProjectFiles(project).drafts()
+      const { drafts, mayCreate, mayDesign, mayPublish } = await new SPACES.ProjectFiles(project).drafts()
       if (editor.project !== project) return
       editor.draftedFiles = drafts.map(({ filePath }) => `${project.path}${filePath}`)
+      editor.mayCreate = mayCreate
+      editor.mayDesign = mayDesign
+      editor.mayPublish = mayPublish
     } catch (error) {
       console.error("couldn't list your drafts:", error)
     }
@@ -968,11 +1107,11 @@ export class EditorStore extends Observable {
   async createFile(filePath?: string, contents?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
+      filePath ||= await editor.prompt({ message: appTexts.text("askNewFileName"), defaultValue: NEW_FILE_NAME })
+      if (!filePath) return
       const newFile = await new SPACES.ProjectFiles(editor.project!).create(filePath, contents)
-      if (newFile) {
-        editor.showEditor(newFile.path)
-        editor.showNotice(appTexts.text("fileCreated"))
-      }
+      editor.showEditor(newFile.path)
+      editor.showNotice(appTexts.text("fileCreated"))
     } catch (e) {
       editor.showError(e)
     }
@@ -981,11 +1120,11 @@ export class EditorStore extends Observable {
   async duplicateFile(newPath?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
+      newPath ||= await editor.prompt({ message: appTexts.text("askNewFileName"), defaultValue: editor.file!.file })
+      if (!newPath) return
       const newFile = await new SPACES.ProjectFiles(editor.project!).duplicate(editor.file!.filePath!, newPath)
-      if (newFile) {
-        editor.showEditor(newFile.path)
-        editor.showNotice(appTexts.text("fileDuplicated"))
-      }
+      editor.showEditor(newFile.path)
+      editor.showNotice(appTexts.text("fileDuplicated"))
     } catch (e) {
       editor.showError(e)
     }
@@ -994,16 +1133,21 @@ export class EditorStore extends Observable {
   async renameFile(newPath?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
-      const renamedFile = await new SPACES.ProjectFiles(editor.project!).rename(editor.file!.filePath!, newPath)
-      if (renamedFile) {
-        editor.showEditor(renamedFile.path)
-        editor.showNotice(appTexts.text("fileRenamed"))
+      const { project, file } = editor
+      if (!newPath) {
+        const name = await editor.prompt({ message: appTexts.text("askRenameFile"), defaultValue: file!.file })
+        if (!name) return
+        newPath = SP.SpellLocation.getFileLocation(project!.projectId, name).filePath!
+        if (newPath === file!.filePath) return
       }
+      const renamedFile = await new SPACES.ProjectFiles(project!).rename(file!.filePath!, newPath)
+      editor.showEditor(renamedFile.path)
+      editor.showNotice(appTexts.text("fileRenamed"))
     } catch (e) {
       editor.showError(e)
     }
   }
-  /** Delete current `file` (after `CONFIRM`), then show next import or `project`. */
+  /** Delete current `file` (after asking), then show next import or `project`. */
   async deleteFile(): Promise<void> {
     editor.clearCompileAppSoon()
     try {
@@ -1014,7 +1158,8 @@ export class EditorStore extends Observable {
       const fileIndex = files.indexOf(file)
       const nextFile = files[fileIndex + (fileIndex === files.length - 1 ? -1 : 1)]
       // actually remove the file
-      const removed = await new SPACES.ProjectFiles(project).delete(file.filePath!, CONFIRM)
+      if (!(await editor.confirm({ message: appTexts.text("confirmRemoveFile", { name: file.file! }) }))) return
+      const removed = await new SPACES.ProjectFiles(project).delete(file.filePath!)
       if (removed) {
         // select the nextFile, or the project (which will select another file)
         editor.showEditor(nextFile?.path || project.path)
@@ -1345,6 +1490,12 @@ const EDIT_COMPILE_DELAY = 10
 
 /** The preference that remembers AutoSave. */
 const AUTO_SAVE_PREF = "autoSave"
+
+/** The name a new project starts with, in the dialog that asks for it. */
+const NEW_PROJECT_NAME = "untitled"
+
+/** The name a new file starts with, in the dialog that asks for it. */
+const NEW_FILE_NAME = "Untitled.spell"
 editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: isStaticBuild })
 
 /** Where each file started, for Discard Changes. */
@@ -1500,6 +1651,11 @@ function dialogs() {
  * - a build:  its own entry, at a FIXED name -- see `vite.config.ts`
  * - NOTE: NOT `new URL(..., import.meta.url)`:  vite takes that for an asset to bundle, and inlines it.
  */
+/** The copy of the runtime the tests run on (`editor.runTests()`), loaded the first time they run. */
+let testsCopy: Promise<{ runtime: SpellRuntime; coreUrl: string }> | undefined
+/** The query that makes the tests' copy in dev (`runtimeCopyInDev()`). */
+const TESTS_COPY = "?tests-copy"
+
 export function runtimeUrl(): string {
   if (import.meta.env.DEV)
     return `${import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)}runner/spellRuntime.ts`

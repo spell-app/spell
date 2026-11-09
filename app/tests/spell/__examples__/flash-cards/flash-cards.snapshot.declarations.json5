@@ -4,113 +4,76 @@
     "FlashCard",
     "Deck",
     "Quiz",
-    "add_$word_meaning_$translation",
-    "test_turning_a_card_over"
+    "test_turning_a_card_over",
+    "add_$word_meaning_$meaning"
   ],
   "statements": [
     {
       "type": "FlashCard",
-      "superType": "View",
-      "defined": "/FlashCards.spell:498-1041"
+      "superType": "TwoSidedView",
+      "defined": "/FlashCard.spellml:189-1213"
     },
     {
-      "property": "front",
+      "property": "word",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/FlashCards.spell:533-552"
+      "defined": "/FlashCard.spellml:252-318"
     },
     {
-      "property": "back",
+      "property": "meaning",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/FlashCards.spell:556-574"
-    },
-    {
-      "property": "side",
-      "classVariable": "Sides",
-      "of": "FlashCard",
-      "enumeration": [
-        "front",
-        "back"
-      ],
-      "defined": "/FlashCards.spell:599-633"
-    },
-    {
-      "syntax": "{operator:is_or_is_not} turned over",
-      "output": "is_turned_over",
-      "rule": "method_postfix",
-      "of": "FlashCard",
-      "kind": "method",
-      "name": "\"is turned over\"",
-      "returns": "choice",
-      "defined": "/FlashCards.spell:637-676"
-    },
-    {
-      "syntax": "turn {thisArg:expression} over",
-      "output": "turn_over",
-      "rule": "method_call",
-      "of": "FlashCard",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "turn it over",
-      "defined": "/FlashCards.spell:681-757"
-    },
-    {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "FlashCard",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/FlashCards.spell:809-1041"
+      "defined": "/FlashCard.spellml:323-388"
     },
     {
       "type": "Deck",
       "superType": "List",
       "itemType": "FlashCard",
-      "defined": "/FlashCards.spell:1065-1098"
+      "defined": "/FlashCard.spellml:1229-1278"
+    },
+    {
+      "syntax": "test turning a card over",
+      "output": "test_turning_a_card_over",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "turning a card over",
+      "defined": "/FlashCard.spellml:922-1204"
     },
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/FlashCards.spell:1157-2834"
+      "defined": "/FlashCards.spellml:357-2368"
     },
     {
       "property": "deck",
       "of": "Quiz",
       "datatype": "Deck",
-      "defined": "/FlashCards.spell:1182-1206"
+      "defined": "/FlashCards.spellml:365-392"
     },
     {
       "property": "card",
       "of": "Quiz",
       "datatype": "FlashCard",
-      "defined": "/FlashCards.spell:1231-1257"
+      "defined": "/FlashCards.spellml:397-457"
     },
     {
       "property": "known",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spell:1310-1333"
+      "defined": "/FlashCards.spellml:462-492"
     },
     {
       "property": "tried",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spell:1337-1360"
+      "defined": "/FlashCards.spellml:529-559"
     },
     {
       "property": "score",
       "of": "Quiz",
       "datatype": "text",
-      "defined": "/FlashCards.spell:1365-1474"
+      "defined": "/FlashCards.spellml:600-731"
     },
     {
       "syntax": "deal a card (of {thisArg:expression})?",
@@ -121,48 +84,11 @@
         "statement",
         "expression"
       ],
+      "group": "playing",
       "kind": "method",
       "name": "deal a card",
-      "defined": "/FlashCards.spell:1551-1711"
-    },
-    {
-      "syntax": "say i knew {thisArg:expression}",
-      "output": "say_i_knew",
-      "rule": "method_call",
-      "of": "Quiz",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "say i knew it",
-      "defined": "/FlashCards.spell:1777-1874"
-    },
-    {
-      "syntax": "say i missed {thisArg:expression}",
-      "output": "say_i_missed",
-      "rule": "method_call",
-      "of": "Quiz",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "say i missed it",
-      "defined": "/FlashCards.spell:1878-1944"
-    },
-    {
-      "syntax": "start over (of {thisArg:expression})?",
-      "output": "start_over",
-      "rule": "method_call",
-      "of": "Quiz",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "start over",
-      "defined": "/FlashCards.spell:1949-2019"
+      "returns": "nothing",
+      "defined": "/FlashCards.spellml:767-998"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -173,63 +99,117 @@
         "statement",
         "expression"
       ],
+      "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/FlashCards.spell:2105-2834"
+      "defined": "/FlashCards.spellml:1606-2359"
+    },
+    {
+      "syntax": "show the answer (of {thisArg:expression})?",
+      "output": "show_the_answer",
+      "rule": "method_call",
+      "of": "Quiz",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "playing",
+      "kind": "method",
+      "name": "show the answer",
+      "returns": "nothing",
+      "title": "Show the answer",
+      "defined": "/FlashCards.spellml:1011-1096"
+    },
+    {
+      "syntax": "say i knew {thisArg:expression}",
+      "output": "say_i_knew",
+      "rule": "method_call",
+      "of": "Quiz",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "playing",
+      "kind": "method",
+      "name": "say i knew it",
+      "returns": "nothing",
+      "title": "I knew it",
+      "defined": "/FlashCards.spellml:1101-1291"
+    },
+    {
+      "syntax": "say i missed {thisArg:expression}",
+      "output": "say_i_missed",
+      "rule": "method_call",
+      "of": "Quiz",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "playing",
+      "kind": "method",
+      "name": "say i missed it",
+      "returns": "nothing",
+      "title": "I missed it",
+      "defined": "/FlashCards.spellml:1304-1423"
+    },
+    {
+      "syntax": "start over (of {thisArg:expression})?",
+      "output": "start_over",
+      "rule": "method_call",
+      "of": "Quiz",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "playing",
+      "kind": "method",
+      "name": "start over",
+      "returns": "nothing",
+      "title": "Start over",
+      "defined": "/FlashCards.spellml:1436-1538"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
-      "output": "add_$word_meaning_$translation",
+      "output": "add_$word_meaning_$meaning",
       "rule": "method_call",
       "alias": [
         "statement",
         "expression"
       ],
       "kind": "function",
-      "name": "add (word as text) meaning (translation as text)",
+      "name": "add (word as text) meaning (meaning as text)",
       "params": [
         {
           "name": "word",
           "datatype": "text"
         },
         {
-          "name": "translation",
+          "name": "meaning",
           "datatype": "text"
         }
       ],
-      "defined": "/FlashCards.spell:2888-3036"
-    },
-    {
-      "syntax": "test turning a card over",
-      "output": "test_turning_a_card_over",
-      "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "turning a card over",
-      "defined": "/FlashCards.spell:3483-3754"
+      "returns": "nothing",
+      "defined": "/FlashCards.spellml:2444-2576"
     }
   ],
   "codeLines": [
-    18,
-    21,
-    26,
-    32,
-    38,
-    42,
-    47,
-    60,
-    66,
-    69,
-    75,
+    10,
+    14,
+    20,
+    50,
+    54,
     81,
-    86,
-    91,
-    97,
-    104,
-    110,
-    115,
-    122,
-    166,
+    84,
+    90,
+    96,
+    102,
+    108,
+    114,
+    121,
+    179,
+    181,
+    183,
+    185,
     193
   ]
 }

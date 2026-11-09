@@ -3,13 +3,14 @@ import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
+import fileTabs from "spell/app/spaces/@spell/editor/file-tabs/FileTabs.spellml"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"
 import { SpellMenuRows, titled, type SpellMenuAction } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
+import { tracked } from "./tracked"
 
 import "./FileTabs.css"
 
@@ -25,11 +26,12 @@ import "./FileTabs.css"
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
+  const drafted = tracked(() => editor.draftedFiles ?? [])
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [bar, setBar] = createSignal<FileTabBar>()
   let isGone = false
   onCleanup(() => (isGone = true))
-  void loadLayoutPiece(fileTabs).then(
+  void loadLayoutPiece(fileTabs, "file-tabs").then(
     (loaded) => {
       if (isGone) return
       setPiece(() => loaded)
@@ -42,8 +44,8 @@ export function FileTabs() {
   )
 
   createEffect(
-    () => [bar(), state()] as const,
-    ([it, { files, path }]) => {
+    () => [bar(), state(), drafted()] as const,
+    ([it, { files, path }, drafts]) => {
       if (!it) return
       const File = piece()!.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
@@ -52,7 +54,8 @@ export function FileTabs() {
         file.path = each.path
         file.name = each.name
         file.icon = fileIconFor(each.name)
-        file.status = each.isDirty ? "changed" : "saved"
+        // not saved beats a draft:  the dot, else the ring (epic `editor` I44)
+        file.status = each.isDirty ? "changed" : drafts.includes(each.path) ? "drafted" : "saved"
         file.place = each.path === path ? "chosen" : "other"
         file.show = () => editor.showEditor(file.path)
         return file
@@ -65,7 +68,9 @@ export function FileTabs() {
   const openMenu = (event: MouseEvent) => {
     const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as Element | undefined
     if (!tab?.parentElement) return
-    const file = bar()?.files.getValues()[[...tab.parentElement.children].indexOf(tab)]
+    // by its place among the TABS:  the bar's ⋯ (a `<ui-dropdown>`) sits among them too (epic `editor` T50)
+    const tabs = [...tab.parentElement.children].filter((each) => each.localName === "ui-item")
+    const file = bar()?.files.getValues()[tabs.indexOf(tab)]
     if (!file) return
     event.preventDefault()
     editor.showEditor(file.path)
@@ -121,7 +126,7 @@ type TabFile = {
   path: string
   name: string
   icon: string
-  status: "saved" | "changed"
+  status: "saved" | "changed" | "drafted"
   place: "chosen" | "other"
   /** Spell's `show it`, which the editor fills in. */
   show: () => void

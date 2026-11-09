@@ -10,6 +10,7 @@
  *   (`InputOwnerTokens.weight`).
  * - Where its value comes from (`PropertyOrigin`):  `:state(here)`, a dot before its label;  `:state(inherited)`,
  *   a quieter label;  `.origin`, its small button at the row's end:  a reset only while it's hovered or focused.
+ * - `:state(data)`, kept in a place outside the program:  a square before its label, and `.origin.mark`, its few words.
  * - A run of yes-or-no properties (`FlagRun`):  the one heading it shows only its pills' select;  the rest hide.
  */
 
@@ -100,6 +101,33 @@
   }
   .field > .row > .origin:hover {
     color: var(--ui-text);
+  }
+  /* a value kept in a place outside the program:  its mark says where, in short */
+  :host(:state(data)) .field > .row > .label::before {
+    content: "";
+    display: inline-block;
+    width: 0.45em;
+    height: 0.45em;
+    margin-inline-end: 0.35em;
+    vertical-align: 0.12em;
+    border-radius: 0.1em;
+    background: var(--ui-warning, currentColor);
+  }
+  /* the label keeps its room:  the mark gives way first */
+  .field > .row:has(> .origin.mark) > .label {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .field > .row > .origin.mark {
+    flex: 0 100 auto;
+    max-width: 60%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.1em 0.4em;
+    border-radius: 0.6em;
+    background: var(--ui-surface-muted);
   }
   .field > .row > .origin.reset {
     opacity: 0;

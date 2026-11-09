@@ -11,6 +11,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
  * RealPath.same(session.cwd, worktree)                       // the same folder, however each is spelled
  * RealPath.isIn(session.cwd, worktree)                       // that folder or inside it
  * RealPath.from(worktreesFolder, cwd)                        // => "seo/src":  the path inside, `/`-separated
+ * pathInside(kit, file)                                      // the same, as spelled:  links NOT followed
  * ```
  *
  * - Why:  one folder has several spellings once a repo moves behind a compat link (repo-split's move to `~/www/spell/`):
@@ -56,13 +57,27 @@ export class RealPath {
    */
   static from(folder: string | null | undefined, path: string | null | undefined): string | undefined {
     if (!folder || !path) return undefined
-    return insideOf(resolve(folder), resolve(path)) ?? insideOf(RealPath.of(folder), RealPath.of(path))
+    return pathInside(folder, path) ?? pathInside(RealPath.of(folder), RealPath.of(path))
   }
 }
 
-/** `path` from `folder`, `/`-separated;  `""` for the folder itself, `undefined` outside it. */
-function insideOf(folder: string, path: string): string | undefined {
-  const inside = relative(folder, path)
-  if (inside.startsWith("..") || isAbsolute(inside)) return undefined
+/**
+ * `path` from `folder`, `/`-separated:  `""` for the folder itself, `undefined` outside it (or either empty).
+ * - the ONE inside check (epic `coherence` P29):  every "is this path in that folder?" calls it, or `isInside()` (the
+ *   server's yes / no, on it), or `RealPath.from()` when links must be followed
+ * - links NOT followed:  both made absolute (`path.resolve()`), as spelled;  a folder linked in is inside its parent
+ * - a name that only STARTS with two dots (`..x`) is inside;  a sibling `<folder>-x` isn't
+ * - NEVER touches the disk
+ *
+ * ```ts
+ * pathInside("/kit", "/kit/src/cli")    // => "src/cli"
+ * pathInside("/kit", "/kit")            // => ""
+ * pathInside("/kit", "/kit-x/src")      // => undefined
+ * ```
+ */
+export function pathInside(folder: string | null | undefined, path: string | null | undefined): string | undefined {
+  if (!folder || !path) return undefined
+  const inside = relative(resolve(folder), resolve(path))
+  if (inside === ".." || inside.startsWith(`..${sep}`) || isAbsolute(inside)) return undefined
   return inside.split(sep).join("/")
 }

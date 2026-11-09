@@ -1,0 +1,150 @@
+<!doctype html>
+<!--
+  A sign-in link's page (epic `atmosphere` P3):  `SignInCheck`'s, at `/sign-in/confirm?key=...`.
+  - First it says where the request came from, so nobody can trick someone into approving their own sign-in;
+    then ONE button, which signs THIS device in.  The page that asked signs in a moment later, by itself.
+  - Plain DOM, its words set as text:  it loads nothing, so it opens on any device.
+  - At its foot, where to report abuse:  the server's abuse contact, from `GET /api/sign-in/me` (epic `atmosphere` P6).
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in to Spell</title>
+    <style>
+      :root {
+        --page: #fafaf8;
+        --text: #1d1d1b;
+        --quiet: #6b6b66;
+        --accent: #2f5fd0;
+        --on-accent: #ffffff;
+        --problem: #b3261e;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #1b1b1a;
+          --text: #ecece8;
+          --quiet: #a3a39d;
+          --accent: #7aa2ff;
+          --on-accent: #10172a;
+          --problem: #ff8a80;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font:
+          17px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 28rem;
+        margin: 12vh auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 0.75rem;
+      }
+      .quiet {
+        color: var(--quiet);
+      }
+      .problem {
+        color: var(--problem);
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.6rem 1.2rem;
+        border: 0;
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--on-accent);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button[hidden],
+      p[hidden] {
+        display: none;
+      }
+      .small {
+        margin-top: 2.5rem;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Sign in to Spell</h1>
+      <p id="what">Looking up this link…</p>
+      <p id="where" class="quiet"></p>
+      <button id="confirm" type="button" hidden>Yes, sign me in</button>
+      <p id="after"></p>
+      <p id="abuse" class="quiet small" hidden></p>
+    </main>
+    <script type="module">
+      const what = document.getElementById("what")
+      const where = document.getElementById("where")
+      const button = document.getElementById("confirm")
+      const after = document.getElementById("after")
+      const abuse = document.getElementById("abuse")
+      const key = new URLSearchParams(location.search).get("key") ?? ""
+
+      /** The server's answer, or its words for why not. */
+      async function asked(url, body) {
+        const response = await fetch(url, {
+          method: body ? "POST" : "GET",
+          cache: "no-store",
+          ...(body && { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        })
+        const answer = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(answer.error ?? `the server answered ${response.status}`)
+        return answer
+      }
+
+      /** A problem, said plainly. */
+      function problem(error) {
+        what.textContent = error.message
+        what.className = "problem"
+        where.textContent = ""
+        button.hidden = true
+      }
+
+      // where to report abuse, as the server's settings say;  a server with none shows nothing
+      asked("/api/sign-in/me")
+        .then(({ abuseContact }) => {
+          if (!abuseContact) return
+          abuse.textContent = `To report abuse on Spell:  ${abuseContact}`
+          abuse.hidden = false
+        })
+        .catch(() => undefined)
+
+      try {
+        const { email, kind, from } = await asked(`/api/sign-in/link?key=${encodeURIComponent(key)}`)
+        what.textContent = kind === "invite" ? `You're invited:  sign in as ${email}?` : `Sign in as ${email}?`
+        const parts = [from.browser, from.system && `on ${from.system}`, from.near].filter(Boolean)
+        where.textContent = parts.length
+          ? `It was asked for from ${parts.join(", ")}.  If that wasn't you, close this page.`
+          : "This server can't tell where it was asked for.  If it wasn't you, close this page."
+        button.hidden = false
+        button.addEventListener("click", async () => {
+          button.disabled = true
+          try {
+            const { person } = await asked("/api/sign-in/confirm", { key })
+            button.hidden = true
+            what.textContent = `Signed in as ${person}.`
+            where.textContent = ""
+            after.textContent =
+              "This device is signed in, and so is the page that asked, in a moment.  You can close this page."
+          } catch (error) {
+            problem(error)
+          }
+        })
+      } catch (error) {
+        problem(error)
+      }
+    </script>
+  </body>
+</html>

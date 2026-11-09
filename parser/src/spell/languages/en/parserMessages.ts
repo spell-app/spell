@@ -37,10 +37,22 @@ export const PARSER_MESSAGES = {
   /** Two types whose new things make each other, for good. */
   "made-from-each-other":
     '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
+  /**
+   * A line that runs as the program starts, reading a one-of-a-kind made further on (epic `data` I44).
+   * - `{name}`:  its name, `pokedex`
+   */
+  "not-made-yet":
+    "{name} isn't made yet when this line runs:  it's made further on.  Say it inside an action, as in \"to start:\"",
   /** A loop or a draw on its own line in an element, which shows as text. */
   "statement-in-markup":
     '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for book in its books: draw book}"',
   /** `if it is empty`, `it` a thing that holds no items. */
+  /** A dimension's unit line under a type that isn't one (epic `language` P23). */
+  "not-a-dimension": '{AType} isn\'t a dimension:  a unit goes under a line like "length is a dimension:"',
+  /** A unit no dimension has, in a measure. */
+  "unknown-unit": '{Dimension} has no unit "{unit}"',
+  /** A measure converted to another dimension's unit:  `its height in kg`. */
+  "units-differ": "Can't give {aDimension} in {unit}:  {unit} is {aOther}",
   "never-empty": "{AType} isn't a list, so it's never empty:  say which, as in \"if its books is empty\"",
   /** `its "books" is a new list`, the `is` already said. */
   "untyped-list-property-is": 'Say what "{name}" holds, e.g. "{line} a list of {items}"',
@@ -59,6 +71,24 @@ export const PARSER_MESSAGES = {
   /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
   "place-read-only":
     "The {place} is a {kind}, which is read only here:  this can't change it.  Keep what changes somewhere else, or read it from a place that takes writes",
+  /**
+   * An add or append to a property worked out from a place, `add it to its todos` (epic `data` I61):
+   * the read's copy changes, and nothing's saved.
+   * - `{theSavedThings}`:  the list that saves, `the saved todos`
+   */
+  "adds-to-a-read": "This adds only to what was read, and saves nothing:  to save it, add it to {theSavedThings}",
+  /** A remove from a property worked out from a place:  `{theSavedThings}` as for `adds-to-a-read`. */
+  "removes-from-a-read":
+    "This removes only from what was read, and nothing leaves the place:  to remove it there, remove it from {theSavedThings}",
+  /** The phrase for every saved thing of a type, as `the_saved_things` reads it:  `{things}` is the type's plural. */
+  "the-saved-things": "the saved {things}",
+  /** Every thing of a type, by its plural:  `the piles`. */
+  "the-things": "the {things}",
+  /** `the saved piles`, of a type saved in no place:  won't compile.  `{theThings}` is `the piles`. */
+  "not-saved": 'No place saves {things}:  for every {thing} the program has, write "{theThings}"',
+  /** `every favourite with the same address`, with nothing called `address` here:  won't compile. */
+  "nothing-the-same":
+    'Nothing here is called "{field}", for "the same {field}" to match:  set it first, e.g. "set {field} to ...", or say the value, e.g. "every {thing} with {field} "...""',
   /** A key written into a program:  won't compile. */
   "key-written":
     'A key written here can be read by anyone with the program:  name it instead, e.g. "its key is the secret "COOKBOOK_KEY"", and keep it on a server side',
@@ -112,8 +142,12 @@ export const PARSER_MESSAGES = {
   /** `belongs to one` a saved owner with no list of them. */
   "belongs-to-saved-needs-list":
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
-  /** The cloud, before it's built. */
-  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** The cloud's line, at the line:  what it is, plainly (epic `atmosphere` P8). */
+  "place-cloud-is":
+    "{place} is kept in each person's own space on Spell's server, its folder \"{folder}\":  until they sign in, in their browser",
+  /** A type's line saying the cloud, with no place line to name it. */
+  "place-cloud-name-it":
+    'Name the place first, then say it\'s saved there:  "family cookbook is saved in the cloud", then "- it lives in family cookbook"',
   /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
   "atmosphere-public":
     "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",
@@ -122,7 +156,7 @@ export const PARSER_MESSAGES = {
     "In this {kind} each person changes only their own records:  changing someone else's is refused, and \"everyone here\" means everyone with records here, not who's looking now",
   /** An atmosphere account's line:  a host hands out pages, and that's all. */
   "atmosphere-reads-here":
-    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps whole numbers only, no decimals',
+    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
   /** A personal atmosphere account's address that isn't the start of a collection's name. */
@@ -134,6 +168,35 @@ export const PARSER_MESSAGES = {
   /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
   "version-step-no-rename-there":
     "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
+  /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
+  "personal-folder-a-name":
+    '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
+  /** A site's line naming no page of the program (epic `mockup` P1):  `- it has a flim page at "/films"`. */
+  "site-part-not-a-page":
+    '"{part}" isn\'t one of this program\'s pages:  name a page it declares, e.g. a "film page" is a page',
+  /** A site's page whose address doesn't start with `/`. */
+  "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
+  /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */
+  "site-param-not-on-page":
+    'The {page} has nothing called {param} for ":{param}" to fill:  say what it is on the page, e.g. - it has a {param}',
+  /** Two pages of a site at one address. */
+  "site-address-taken": 'The {page} is already at "{address}":  each page needs an address of its own',
+  /** A place in a section that's no row and column:  `in row 0 column 2`. */
+  "site-card-place-not-whole": "A card's row and column count from 1, in whole numbers:  {row} and {column} aren't",
+  /** `go to the ...` naming a part no site of the program lists (epic `mockup` P3, T6):  `go to the flim page`. */
+  "site-part-not-listed": 'The site has no "{part}":  its pages, dialogs and sidebars are {parts}',
+  /** A projection of something that's no project data folder in a space (epic `atmosphere` P17). */
+  "projection-not-a-folder":
+    'A projection shows part of a space\'s data folder:  "{source}" isn\'t one.  Name a place written like this:  family cookbook is a data folder at "@family/recipes"',
+  /** A projection with no `into` line, or one that names no space. */
+  "projection-needs-a-space":
+    'Say which space it\'s written into, by its address, in a line under it:  - into "@rs/picnic"',
+  /** A projection with no `showing` line:  nothing would be shown. */
+  "projection-needs-fields":
+    "Say which fields it shows, in a line under it:  - showing each row's person and shift.  Only the fields named are shown",
+  /** `check it every` below what a project data folder takes:  `{seconds}`, its least. */
+  "checked-at-most-every":
+    "A project data folder is asked at most every {seconds} seconds, as each ask looks at its folder:  this checks every {seconds} seconds",
   /** An Airtable's address that names no base. */
   "airtable-not-a-base":
     '"{address}" isn\'t an Airtable base:  its id starts "app", e.g. "appXXXXXXXXXXXXXX", and it\'s in the base\'s address on Airtable',
@@ -272,9 +335,31 @@ export const PARSER_MESSAGES = {
     'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
   /** A dot in a field's name, under a place. */
   "check-time-not-a-time": '"{time}" isn\'t a time of day:  say one as 5am, 5:30pm or 17:00',
+  /** `its next page is in its "{header}" header`, a header other than `Link`. */
+  "next-page-header-not-link":
+    'A next page is said in a "Link" header, not "{header}":  `its next page is in its "Link" header`, or name the field of its answer that says it',
+  "searched-only":
+    '{things} are only found by a search, with no list of them all:  search them, "every {thing} where its {field} includes ..."',
+  "matching-needs-search":
+    '{things} are found this way only in a place that searches all of each thing:  say so under it, "- it searches everything with ..."',
+  "asked-by-only":
+    '{things} are only found by their {fields}, with no list of them all:  say each, "every {thing} where {saying}"',
+  "found-only-by-name":
+    '{things} are only found by name, with no list of them all:  read one at a time, "the {thing} whose id is ..."',
   "no-dotted-field":
     'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
+  /** A built-in type published:  `a thing is published as "..."` (epic `atmosphere` P10). */
+  "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",
+  /** `- it is published as "x"`, a name that isn't an NSID (epic `atmosphere` P10). */
+  "published-not-a-name":
+    '"{name}" can\'t name a schema:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe"',
+  /** A published type with decimal numbers:  `{fields}` is their words, `price, weight` (epic `atmosphere` P10). */
+  "published-decimals":
+    'A schema has no decimal numbers:  {fields} will be kept as text, "12.50", and read back as numbers here, but other apps see text.  A whole number is "an integer"',
+  /** A published type's field renamed by a version line (epic `atmosphere` P10). */
+  "published-rename":
+    "A published schema's fields never change:  other apps go on reading the old name.  This line only changes how records read here;  to rename it for everyone, publish it under a new name",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",
   /** `a card belongs to a pile` before both are declared:  `{example}` is `example-type` or `example-list-type`. */
@@ -311,6 +396,31 @@ export const PARSER_MESSAGES = {
   "spellx-unknown-word": '"{tag}" isn\'t a spellx word:  did you mean "{suggestion}"?',
   /** A tag word spellx doesn't know, nothing close:  `{words}` are the ones it could be here. */
   "spellx-unknown-word-here": '"{tag}" isn\'t a spellx word:  here, use one of {words}',
+  /** `<ui-defaults>` (`ui_defaults`, epic `language` P29):  a child that isn't a sample tag. */
+  "ui-defaults-not-a-sample":
+    '<ui-defaults> holds sample tags, one per widget, each with its defaults:  <ui-button appearance="pill"/>',
+  /** `<ui-defaults>`:  an attribute written `{...}`, which a default can't be. */
+  "ui-defaults-not-written": '<{tag} {attribute}>:  a default is written out, e.g. {attribute}="pill", not {...}',
+  /** `<ui-defaults>`:  a tag no component pack has. */
+  "ui-defaults-unknown-tag": "{tag} isn't a widget Spell UI has",
+  /** `<ui-defaults>`:  an attribute the widget doesn't take;  `{attributes}`, the ones it does. */
+  "ui-defaults-unknown-attribute": '{tag} has no "{attribute}":  it takes {attributes}',
+  /** `<ui-defaults>`:  what the widget shows, rather than how it looks. */
+  "ui-defaults-content": '"{attribute}" is what each {tag} shows, not how it looks:  it takes no default',
+  /** `<ui-defaults>`:  a value the attribute doesn't take;  `{takes}`, its values, or one of the next three. */
+  "ui-defaults-bad-value": '{tag}\'s "{attribute}" takes {takes}, not "{value}"',
+  "ui-defaults-takes-number": "a number",
+  "ui-defaults-takes-boolean": "true or false",
+  "ui-defaults-takes-text": "text",
+  /** `<ui-defaults source>` with no address. */
+  "ui-defaults-source":
+    '<ui-defaults source="..."> names a defaults file:  source="@spell/library/theme/ui-defaults.spell"',
+  /** `<ui-defaults source>` with samples of its own too. */
+  "ui-defaults-source-and-samples":
+    "<ui-defaults> takes its defaults from its source, or from the sample tags inside it:  not both",
+  /** `<ui-defaults source>` naming a file no imported project has, with defaults. */
+  "ui-defaults-source-unknown":
+    "can't find <ui-defaults> in {source}:  import {project} in the project file, and compile it first",
   /** An attribute its tag doesn't take, with the closest it does. */
   "spellx-unknown-attribute": '{tag} has no "{attribute}":  did you mean "{suggestion}"?',
   /** An attribute its tag doesn't take, nothing close:  `{attributes}` are the ones it has. */
@@ -357,6 +467,8 @@ export const PARSER_MESSAGES = {
   "spellx-typed-body":
     'a property with type= is stored, and starts at one value on its tag\'s line:  <property "{name}" type="number">0</>',
   "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
+  /** A note by its old short word, `<property-editor>`, outside a drawing (epic `data` P31, Q27). */
+  "spellx-short-note": "{tag} is now {new}:  the short name is Spell UI's, as <button> is <ui-button>",
 
   ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`

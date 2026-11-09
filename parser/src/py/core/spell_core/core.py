@@ -22,10 +22,12 @@ from typing import Any, cast
 from spell_core.collection_methods import CollectionMethods
 from spell_core.console import SpellConsole
 from spell_core.described import DescribedMethods
+from spell_core.dimensions import DimensionMethods
 from spell_core.drawing_methods import DrawingMethods
 from spell_core.kinds import TypeMethods
 from spell_core.messages import MessageMethods
 from spell_core.numbers import NumberMethods
+from spell_core.places import PlaceMethods
 from spell_core.reference_methods import ReferenceMethods
 from spell_core.runtime_methods import RuntimeMethods
 from spell_core.seeded_random import DEFAULT_SEED, ParkMiller, RandomMethods
@@ -51,11 +53,14 @@ class Core(
     ReferenceMethods,
     MessageMethods,
     DescribedMethods,
+    DimensionMethods,
+    PlaceMethods,
 ):
     """Everything compiled Python calls on `core`, each part in a module of its own:
 
     - types and equality:  `kinds.py`
     - counting:  `numbers.py`
+    - numbers with units:  `dimensions.py`
     - random numbers:  `seeded_random.py`
     - spell's tests:  `spell_tests.py`
     - list words for plain lists, dicts and unknown values:  `collection_methods.py`
@@ -66,6 +71,7 @@ class Core(
     - spell's wording of a program's members, for reflection:  `word_methods.py`
     - what it says to the person running the program, in the program's language:  `messages.py`
     - the things a program made, found by name, place or reference:  `reference_methods.py`, `references.py`
+    - what's saved in a place, and what's behind each kind:  `places.py`, `place_kinds.py`
     - what its templates say about their actions and events:  `described.py`
     - the console, `core.console`:  `console.py`
     - the classes compiled Python extends, `Thing`, `List` and `App`:  `things.py`, `lists.py`, `apps.py`

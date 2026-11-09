@@ -39,6 +39,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Its words for the parser:  spell's `loadBuiltInTemplates()`, from the declarations the same run writes.
   - The generator is spell's ([builtInTemplateFiles.ts](../spell/node/builtInTemplateFiles.ts)):  core never imports
     spell, the templates are data here.
+- [dimensions/](dimensions/) holds spell's built-in DIMENSIONS, kinds of measure and their units, written in spell:
+  [dimensions.spell](dimensions/dimensions.spell) and its Spanish twin (epic `language` P23).
+  - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
+    (what [dimensions.ts](dimensions.ts), Spell UI and the compiler read) and Python's `spell_core/dimensions_generated.py`.
+    NEVER edit those:  edit the source, run that.
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
   - `core.shuffled()` is lodash's shuffle, step for step.
@@ -255,7 +260,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     NEVER `Loader.load()`:  it forgets the undo history, and hands a known thing back unchanged.
   - All of it `whileReading()` (`core.ts`):  what it changes joins no undo step and goes to no program elsewhere,
     so a refresh never comes back as a write.
-  - Places themselves are `spell/util/places`, which knows nothing of things.
+  - Places themselves are `spell/places`, which knows nothing of things.
   - Handed `places`, what's done to those things goes back (epic `data` P3):
     - Every write is heard at `noteSetting()` and `noteItems()` (`onPlaceWrite()`), the two points undo hears,
       never `whileReading()`.  A thing with no place costs a lookup;  a program with no places, one check.
@@ -274,21 +279,70 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
       history it's handed, the program's by default;  `cancel()` puts it back (epic `data` P9).
     - `describeValue()` is what `Places.originOf()` asks about a thing.
-    - A sample going in or out (`spell/util/places/SamplePlace`), through `Places.onSwapped()`:
+    - A sample going in or out (`spell/places/SamplePlace`), through `Places.onSwapped()`:
       the program's undo steps go, as when saved state loads, and a `PlaceEdit`'s step or a draft from before does nothing,
       so nothing done to a sample reaches the real place.
     - `rowsMadeFrom()`:  a sample's records from what a class declares.
       By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
 - WHAT COMPILED SPELL CALLS, for a type saved in a place ([saved.ts](saved.ts), epic `data` P11):  `core.place()`, `core.savedThings()`,
   `core.saveThing()`, `core.removeSaved()`, `core.draftOf()`, `core.inOneGo()`, `core.drawRead()` ...
-  - In the barrel, with `places.ts`;  `spell/util/places` itself is a chunk loaded when a program first names a place,
+  - In the barrel, with `places.ts`;  `spell/places` itself is a chunk loaded when a program first names a place,
     so a program with no place pays for `places.ts` and this, and no more.
     That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
   - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
-    A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
+    - A PROGRAM'S OWN CSV FILE (epic `language` T65):  `task sheet is a sheet at "tasks.csv"`, a file's name alone.
+      - The compiler turns it into the page server's address, `<project>/__data/tasks.csv` (`CreatePlace.csvAddressFor()`).
+      - This makes a `RemotePlace` that takes writes, its id column `id` unless a line names another, sent with each request.
+    - A PROJECT DATA FOLDER (epic `atmosphere` P1):  a data folder in spaces, on the page server.
+      - The compiler turns its address into the page server's (`CreatePlace.folderAddressFor()`):
+        `at "owen@spell/recipes"`, `"recipes"` and `personal "recipes"`.
+      - This makes a `RemotePlace` that says what that server does (`spaceFolderCapabilities()`).
+      - Who may write it is its address's (P4):
+        a space's own folder its members, a program's own data each row's owner.
+      - A space's own folder is read direct (P5):  the place gets its read address, `spaceReadAddressFor()`'s.
+        Its lists come straight from the files, with a credential for the whole space;  only its writes go through Spell.
+      - `- keep a copy on this device` keeps each list it read whole on this device, each person's apart, and reads
+        only what changed after (`RemotePlace`'s `deviceCopy`, epic `atmosphere` T51):  the built-in Feed's.
+      - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3),
+        its bar drawn by [signInBar.ts](signInBar.ts):
+        - until someone signs in, its bar says it takes them to be this machine's person (`identifiesBy: "this machine"`)
+        - it offers to email a link and a code
+        - signed out, it also says where to report abuse:  the server's abuse contact (`sign-in-abuse`, epic `atmosphere` P6)
+    - A SPACE'S LIVE ROOM (epic `atmosphere` P36):  `team chat is a room at "events_team@rs/messages"`, a Spell address.
+      - The compiler turns it into the page server's room of that space's collection (`CreatePlace.roomAddressFor()`):
+        `/api/rooms/spaces/events_team@rs/messages`.
+      - This makes a `LiveRoomPlace` signed in by a Spell account, `SpellSignIn`, as a data folder is.
+      - A room at `"@rs/__thread"` is the thread the page's address picks (epic `atmosphere` P37, the kit's
+        `roomForPage()`), and a data folder at `"@rs/__threads"` marks that one `current`:  the built-in Chat's list.
+        This browser's last thread per org is kept under `spell-last-threads`.
+    - THE CLOUD (epic `atmosphere` P8):  `family cookbook is saved in the cloud`.
+      - It compiles to kind `the cloud`, at `personal "family-cookbook"`'s address.
+      - A remote place that takes nobody to be this machine's person:
+        `cloudCapabilities()`, `identifiesBy: "a sign-in"`.
+      - Signed out, what's changed is kept in this browser, and the bar says so (`sign-in-cloud-signed-out`);
+        signed in, it goes up.
+      - Its sign-in is followed as the program starts;  its bar shows once the program first reads or writes it
+        (epic `language` T67).
+    - A place's `checkedAtMostEvery` raises `check it every` to it.
+    - A refused write's notice says why, by the refusal's `whyNot`:
+      - their role can't write (`role`, P4):  `write-refused-role`;  naming the role it takes (its `needs`, P23):
+        `write-refused-editor`, `write-refused-manager`
+      - it's someone else's (`owner`, P23):  `write-refused-owner`
+      - Spell took it down (`taken down`, P6):  `write-refused-taken-down`
+      - a sign-up sheet's last place is taken (`full`, P27):  `write-refused-full`;  its list doesn't name you
+        (`not listed`):  `write-refused-not-listed`
+    - A SIGN-UP SHEET's lines (epic `atmosphere` P27, J101), `sheet`:  its space keeps them, told as the place opens
+      (`setSheet`), for a manager.
+    - ONE sign-in bar for each sign-in:  two places on one server (a sign-up sheet and its published sheet) share one,
+      and show one bar (`showSignIn()`).
+    - A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
     the last one letting go aborts its request.  It still hears rows, so its list stays true.
+    - A link followed (`core.linked()`) whose read was given up on that way, and is held again by its answer
+      (the same page drawn again a moment later):  `follow()` asks again for whoever holds it now.
+      Only with nobody holding it does the wait end in an `AbortError`.
+      [links.test.ts](../../tests/core/links.test.ts) pins it.
   - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
     - `firstReads`, on the place's line:  what a first draw reads, asked for together when the place is first read, each
       held a while for the draw that wants it.  Two or more only:  a read alone asks for itself.
@@ -298,6 +352,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.
     - A type a program removes is read whole:  undo writes the whole row back.
   - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
+    - So is a thing of a type saved in no place, which has nowhere else to be:  a saved checklist's tasks are in its
+      row's `$items`, whole, and a change to one rewrites them (epic `language` T66;  they went as references to
+      nothing, and came back empty after a reload).
   - What changed, told to the program (epic `data` P13):  `PlaceThings.noteChanged()`, each thing once in a moment, with its fields.
     - `a-recipe-change`, `when a recipe changes:`:  to the thing, up its chain (`core.send()`), for anyone's change, this page's too.
     - `someone-else-change`, `- when someone else changes it:`:  only when it wasn't this page.
@@ -309,9 +366,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Who's here (epic `data` P13):  `core.currentPerson()`, `core.peopleHere()`, from the first place that has people.
     - Plain data, one object per page:  so `everyone here` is one list for the program's life, and two windows of one person are two.
     - With no sign-in, who someone says they are:  `personOnThisPage()`.
-    - A place where each person is someone (`Place.signIn`, an atmosphere account;  epic `data` P16) is made as the program starts:
-      whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
-      [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
+    - A place where each person is someone (`Place.signIn`) is made as the program starts:
+      an atmosphere account (epic `data` P16), the cloud (epic `atmosphere` P8).
+      - Whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
+      - Its bar shows only once the program first reads or writes the place (`startSignIn()`, epic `language` T67):
+        a program that picks among places (Task List) shows none for a place it hasn't picked.
+      - [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
+        - A program with a toolbar of its own draws it there:  `{the sign in menu}`, `signInMenu()` (epic `atmosphere` T56),
+          a button naming who it is and a drop-down with the way in and out;  it takes the program's first sign-in, and a
+          bar already up goes.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.
@@ -322,6 +385,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The code:  cli's `writeSchemas()`.
   - Both read a property's kind through ONE function, `kindOf()`, so they can't disagree.
   - In `spell/parser/core/model` too:  the people store checks with it.
+- A type as a LEXICON, AT Protocol's schema language ([lexicon.ts](lexicon.ts), epic `atmosphere` P10):
+  - `lexiconFor(Class, { id })`:  its records' shape for other apps, by the same `kindOf()`.
+    - `spell compile` writes a library's beside its JSON Schema, `Person.lexicon.json` (cli's `writeSchemas()`).
+  - Its name:
+    - `Class.publishedAs`, from `- it is published as "..."`
+    - else `nsidFor(address, type)`:  `space.spell.owen.recipes.recipe`
+  - Where the two differ:
+    - a decimal is a string, its description saying so (`DECIMAL_NOTE`)
+    - a field's words are its description
+    - `must not be empty` is `required`
+    - letters are graphemes
+  - `spellTypeFor(lexicon)`:  another app's Lexicon as Spell source, the declaration a person would write
+    (`spell space lexicon read`).
+    What Spell can't hold yet is left out, and said.
+  - `a new date` is this moment (`new Date()`):  a status's `created at`.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):
   - `startPage()`:
     - mirrors the program's state
@@ -332,6 +410,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each thing by its reference (`Card#ace-of-hearts`, P27), else by its id.
     - An event's thing as its `"target"`, a call's as its `"on"`.
   - The state names properties as Python does:  the page reads each by its javascript name (`javascriptName()`).
+  - Its actions and menus are the program's, from its drawing half (`core.describeAction()`, `describeMenu()`):
+    the page fills its toolbars and right-click menus, its keys run actions,
+    and `core.runAction()` sends each to the program by its name (epic `language` T51).
   - Python's side is `spell_core.page`'s `PageSession`.
 
 ## Remembered props
@@ -390,6 +471,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `canUndo`, `canRedo`:  live
   - `undoTitle`, `redoTitle`:  live, in the program's language
     - the core's messages `undo`, `undo-step` ...
+- A `<ui-table editable>` of the program's things writes them, everything one edit asks for ONE step, `Edit Table`
+  (`listenForTableEdits()`, in [ui.ts](ui.ts);  epic `mockup` P9):  `core.mountApp()` starts it.
+  - It cancels Spell UI's `ui-editing` for a table of things, so the table follows the things.
+  - A list of a class's things names its table columns (`nameTableColumns()`):  a saved read's, `everyThing()`'s.
 - ⌘Z and ⇧⌘Z go through the page's Spell UI keyboard registry, while the app has the focus or nothing does.
   - `listenForUndoKeys()`, in [ui.ts](ui.ts), started by `core.mountApp()`.
   - A text field and a modal keep their own.
@@ -406,6 +491,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the one that runs takes it, unless it calls `event.pass()`;  `event.cancel()` sets `canceled`, which the sender
     reads (compiled spell checks it only for a name still happening, `closing`)
   - nobody takes it:  dropped, silently;  a handler that throws is warned about, and the event stops there
+- `trigger(type, params)` ([runtime.ts](runtime.ts)) is everyone's:  no chain, nothing takes it.
+  - The app and each page hear it first, by their own handler (`core.RUNTIME.app`, `core.RUNTIME.pages`;
+    epic `language` T78):  a page's `<on fizz>` hears `trigger fizz`.
+  - Then the program's own listeners, `on fizz:` at a file's top.
 - `core.input` ([input.ts](input.ts)):  the mouse and keys, readable anywhere, reactive.
   - The page's runner calls `listen(window, { isMac })` once per core;
     the meta key is command on a Mac, control elsewhere.

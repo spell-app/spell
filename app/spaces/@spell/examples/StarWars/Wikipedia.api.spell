@@ -1,27 +1,72 @@
 ## Wikipedia:  a page each, by its name.  Not every name has one
 // A server other people run:  what Star Wars shows of a character, a planet or a ship, and its picture.
-// Written by hand:  Wikipedia's page summaries are found by a name, so there's no list to look at.
+// `wikipedia` is what this wrote, from reading a few pages by name, as there's no list of them all:
+//   spell place ingest https://en.wikipedia.org/api/rest_v1 --kind "web server" --into Wikipedia.api.spell
+//     --name wikipedia --collections "wiki pages=/page/summary/{name}" --samples "Luke Skywalker,Tatooine,Millennium Falcon"
+// `spell place update Wikipedia.api.spell` looks again, by the same names, and changes only this file and Wikipedia.api.json5.
+// A wiki page's "about" and "summary" are Star Wars' words for Wikipedia's "description" and "extract".
+//
 // Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.
 
 wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
+	- its id is its "title"
 	- check it once a day
-	- wiki pages live at "/page/summary"
-	- a wiki page's id is its "pageid"
+	- it writes names like "wikibase_item"
+	- wiki pages are found at "/page/summary/{name}"
 
 a "wiki page" is a thing:
 	- it lives in wikipedia
-	- its "title" is text
-	- its "about" is text, stored as "description"
-	- its "summary" is text, stored as "extract"
+	- its "kind" is text, stored as "type"
+	- its "displaytitle" is text
+	- its "namespace" is a namespace
+	- its "wikibase item" is text
+	- its "titles" is a title
+	- its "pageid" is a number
 	- its "thumbnail" is a thumbnail
-	- its "content urls" is a page address book
+	- its "originalimage" is an originalimage
+	- its "lang" is text
+	- its "dir" is text
+	- its "revision" is a number
+	- its "tid" is text
+	- its "timestamp" is a date
+	- its "about" is text, stored as "description"
+	- its "description source" is text
+	- its "content urls" is a content url
+	- its "summary" is text, stored as "extract"
+	- its "extract html" is text
+	- its "title" is text
 
-// What's inside a page's answer, read in words:  `the source of its thumbnail`
+a "namespace" is a thing:
+	- its "number" is a number, stored as "id"
+	- its "text" is text
+
+a "title" is a thing:
+	- its "canonical" is text
+	- its "normalized" is text
+	- its "display" is text
+
 a "thumbnail" is a thing:
-	- its "source" is text
+	- its "source" is text  // an address
+	- its "width" is a number
+	- its "height" is a number
 
-a "page address book" is a thing:
-	- its "desktop" is a page address
+an "originalimage" is a thing:
+	- its "source" is text  // an address
+	- its "width" is a number
+	- its "height" is a number
 
-a "page address" is a thing:
-	- its "page" is text
+a "content url" is a thing:
+	- its "desktop" is a desktop
+	- its "mobile" is a mobile
+
+a "desktop" is a thing:
+	- its "page" is text  // an address
+	- its "revisions" is text  // an address
+	- its "edit" is text  // an address
+	- its "talk" is text  // an address
+
+a "mobile" is a thing:
+	- its "page" is text  // an address
+	- its "revisions" is text  // an address
+	- its "edit" is text  // an address
+	- its "talk" is text  // an address

@@ -1,0 +1,16 @@
+# A square
+// One of the board's nine:  empty, or holding an X or an O.
+
+a "square" is a thing:
+	// X or O, or empty while nobody has played it
+	- its "mark" is text
+	- it "is empty" if its mark is ""
+	// The mark's color:  X blue, O red
+	- its "color" is:
+		"blue" if its mark is "X"
+		"red" if its mark is "O"
+		"grey" otherwise
+	// What its button says:  its mark, or a no-break space so an empty square keeps its height
+	- its "label" is:
+		" " if it is empty
+		its mark otherwise

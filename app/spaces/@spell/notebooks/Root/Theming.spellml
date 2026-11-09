@@ -8,6 +8,7 @@
 	<section>
 		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#tokens">Tokens</>
+			<item link="#defaults">Defaults</>
 			<item link="#themes">Themes</>
 		</>
 	</>
@@ -43,6 +44,38 @@
 					</>
 				</>
 			</>
+		</>
+	</>
+
+	<section label="Defaults">
+		<markdown>
+			A root gives the widgets inside it attribute values they don't set themselves:  every button a pill, every
+			segment raised.  A widget's own attribute still wins.
+
+			An app says its defaults in Spell, in a `<ui-defaults>` block of sample tags, one per widget, at a file's top:
+
+			```spell
+			<ui-defaults>
+			  <ui-button appearance="pill"/>
+			  <ui-segment appearance="raised"/>
+			</ui-defaults>
+			```
+
+			- Any attribute but what a widget shows (`label`, `value`, `text`).  A widget, attribute or value Spell UI
+			  doesn't have is an error naming what it takes.
+			- A Spanish file writes the same block in Spell UI's Spanish words:  `<es-boton apariencia="píldora"/>`.
+			- Another project's defaults:  `<ui-defaults source="@spell/library/theme/ui-defaults.spell"/>`, with that
+			  project in your project file's imports.
+			- The Inspector says "From ui-defaults" on a value that came from them, naming the file.
+
+			On a page, the root's `defaults` takes the same, tag by tag, as JSON or as a property:
+
+			```html
+			<ui-root defaults='{"ui-button": {"appearance": "pill"}}'>
+			  <ui-button color="primary">Save</ui-button>
+			  <ui-button appearance="basic">Cancel</ui-button>
+			</ui-root>
+			```
 		</>
 	</>
 

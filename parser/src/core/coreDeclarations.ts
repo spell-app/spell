@@ -9,7 +9,7 @@
  *   see `SP.SpellDeclarationsData`, with one key more, `module`:  the core's file that has it.
  * - Read from the core itself, as it runs:  each module's methods object, so nothing is listed by hand.
  *   - Parameters by name, from each function's own source:  `getItemAt(collection, position, startAt)`.
- *   - Its section and description, from the module's source file (`docsIn()`):
+ *   - Its section and description, from the module's source file's syntax tree (`docsIn()`):
  *     what the core reference page shows (`guides/targets/core-reference.html`, epic `python-target` P29).
  * - Left out:
  *   - `deprecated.ts`:  old names, for programs compiled before they changed.  A new core has none.
@@ -20,6 +20,7 @@
 import { readFileSync } from "fs"
 import { resolve } from "path"
 
+import { readTypeScript, walk, type SourceNode } from "spell/util/node/typescript"
 import { P } from "spell/parser/parser"
 import {
   App,
@@ -35,6 +36,8 @@ import {
   Thing,
   TwoSidedView,
   Notebook,
+  SiteBase,
+  Site,
   View,
   ViewableList,
   trigger
@@ -62,6 +65,8 @@ import { actingMethods } from "./acting"
 import { waitingMethods } from "./waiting"
 import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
+import { dimensionMethods } from "./dimensions"
+import { siteMethods } from "./sites"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -91,7 +96,9 @@ const CORE_MODULES: Record<string, object> = {
   acting: actingMethods,
   waiting: waitingMethods,
   saved: savedMethods,
-  abilities: abilityMethods
+  abilities: abilityMethods,
+  dimensions: dimensionMethods,
+  sites: siteMethods
 }
 
 /**
@@ -106,6 +113,8 @@ const CORE_EXPORTS: Record<string, { value: unknown; module: string }> = {
   Page: { value: Page, module: "classes/Page" },
   TwoSidedView: { value: TwoSidedView, module: "classes/TwoSidedView" },
   Notebook: { value: Notebook, module: "classes/Notebook" },
+  SiteBase: { value: SiteBase, module: "classes/SiteBase" },
+  Site: { value: Site, module: "classes/Site" },
   ViewableList: { value: ViewableList, module: "classes/ViewableList" },
   h: { value: h, module: "drawing" },
   css: { value: css, module: "elements" },
@@ -186,50 +195,37 @@ function isClass(value: unknown): value is AnyFunction {
  * - A rest parameter keeps its dots, as javascript writes it:  `...things`.
  * - A destructured one has no name:  `options`.
  * - Defaults are dropped, with everything nested in them, e.g. `units = "seconds"`.
+ * - Read by the kit's TypeScript reader:  a method's source (`getItemAt(...) { ... }`) parsed as a class member,
+ *   anything else (`function`, an arrow) as an expression.
  */
 export function paramNamesOf(method: AnyFunction): string[] {
   const source = Function.prototype.toString.call(method)
-  // NOTE: misses an arrow function's bare parameter, `card => ...`:  the formatter always writes `(card) => ...`
-  const open = source.indexOf("(")
-  if (open < 0) return []
-
-  const params: string[] = []
-  let depth = 0
-  let quote = ""
-  let current = ""
-  for (let index = open + 1; index < source.length; index++) {
-    const char = source[index]!
-    if (quote) {
-      if (char === "\\") index++
-      else if (char === quote) quote = ""
-      if (depth === 0) current += char
-      continue
-    }
-    if (char === '"' || char === "'" || char === "`") quote = char
-    else if ("([{".includes(char)) depth++
-    else if (")]}".includes(char)) {
-      if (depth === 0) break
-      depth--
-    } else if (char === "," && depth === 0) {
-      params.push(current)
-      current = ""
-      continue
-    }
-    current += char
-  }
-  params.push(current)
-  return params.map(paramName).filter((name) => name !== "")
+  const asMember = readTypeScript(FUNCTION_FILE, `class Method { ${source} }`)
+  const read = asMember.errors.length ? readTypeScript(FUNCTION_FILE, `(${source})`) : asMember
+  let params: SourceNode[] = []
+  walk(read.program, (node) => {
+    if (!FUNCTION_TYPES.has(node.type)) return true
+    params = node.params as SourceNode[]
+    return false
+  })
+  return params.map(paramName)
 }
 
-/** One parameter's name, from its source:  `startAt = 1` => `startAt`, `{ capture }` => `options`. */
-function paramName(source: string): string {
-  const [declared = ""] = source.split("=", 1)
-  const name = declared.trim()
-  return /^[[{]/.test(name) ? DESTRUCTURED_PARAM : name
+/** One parameter's name:  `startAt = 1` => `startAt`, `...things`, `{ capture }` => `options`. */
+function paramName(param: SourceNode): string {
+  if (param.type === "AssignmentPattern") return paramName(param.left as SourceNode)
+  if (param.type === "RestElement") return `...${paramName(param.argument as SourceNode)}`
+  return param.type === "Identifier" ? (param.name as string) : DESTRUCTURED_PARAM
 }
 
 /** What a destructured parameter is called, having no name of its own. */
 const DESTRUCTURED_PARAM = "options"
+
+/** The nodes that are a function, whose `params` `paramNamesOf()` reads. */
+const FUNCTION_TYPES = new Set(["FunctionExpression", "ArrowFunctionExpression", "FunctionDeclaration"])
+
+/** The name the reader is handed for a function's source:  it reads it as javascript. */
+const FUNCTION_FILE = "function.js"
 
 /** `declaration`, with the section and description its module's source gives its name -- when it has them. */
 function withDocs(declaration: CoreDeclaration): CoreDeclaration {
@@ -257,19 +253,73 @@ export function docsIn(module: string): Map<string, MemberDocs> {
   MODULE_DOCS.set(module, docs)
   const source = sourceOf(`${module}.ts`) ?? sourceOf(`${module}/index.ts`)
   if (source === undefined) return docs
+  const read = readTypeScript(`${module}.ts`, source)
   // last first, so the first before a name is the one it's under
-  const sections = [...source.matchAll(SECTION_HEADING)]
-    .map((match) => ({ at: match.index ?? 0, title: match[1]!.trim() }))
+  const sections = read.comments
+    .filter((comment) => comment.type === "Line" && isOwnLine(source, comment.start))
+    .flatMap((comment) => {
+      const title = SECTION_HEADING.exec(comment.value)?.[1]
+      return title ? [{ at: comment.start, title: title.trim() }] : []
+    })
     .reverse()
-  for (const match of source.matchAll(DOCUMENTED_NAME)) {
-    const name = match[2]!
-    const section = sections.find(({ at }) => at < (match.index ?? 0))?.title.replaceAll("`", "")
+  // the outermost node starting at each place:  what a docstring above it documents
+  const nodesAt = new Map<number, SourceNode>()
+  walk(read.program, (node) => {
+    if (!nodesAt.has(node.start)) nodesAt.set(node.start, node)
+  })
+  for (const comment of read.comments) {
+    if (comment.type !== "Block" || !comment.value.startsWith("*")) continue
+    const next = nodesAt.get(comment.end + (/^\s*/.exec(source.slice(comment.end))?.[0].length ?? 0))
+    const name = next && documentedName(next)
+    if (!name) continue
+    const section = sections.find(({ at }) => at < comment.start)?.title.replaceAll("`", "")
     const kept = docs.get(name)
     if (kept && (kept.section || !section)) continue
-    const description = leadOf(match[1]!)
+    const description = leadOf(comment.value.slice(1))
     docs.set(name, { ...(section && { section }), ...(description && { description }) })
   }
   return docs
+}
+
+/**
+ * The name `node` declares, which a docstring right above it documents:
+ * a member (`getItemAt(`, `console:`, `get console()`), a function, a class, a constant or a re-export (`export { h }`),
+ * past any decorators.
+ * - A type's own declaration (an interface, a type alias) names none:  the list holds values, so `List`'s docs are
+ *   its class's, never those of the interface of members declared beside it.  Its members still do.
+ * - none:  `undefined`
+ */
+function documentedName(node: SourceNode): string | undefined {
+  switch (node.type) {
+    case "ExportNamedDeclaration": {
+      const declaration = node.declaration as SourceNode | null
+      if (declaration) return documentedName(declaration)
+      const [first] = node.specifiers as SourceNode[]
+      return first && nameOf(first.local as SourceNode)
+    }
+    case "ExportDefaultDeclaration":
+      return documentedName(node.declaration as SourceNode)
+    case "VariableDeclaration":
+      return nameOf((node.declarations as SourceNode[])[0]?.id as SourceNode | undefined)
+    case "Identifier":
+      return nameOf(node)
+    case "TSInterfaceDeclaration":
+    case "TSTypeAliasDeclaration":
+      return undefined
+    default:
+      return nameOf((node.id ?? node.key) as SourceNode | undefined)
+  }
+}
+
+/** A name node's name:  an identifier, or a string key (`"getItemAt"`). */
+function nameOf(node: SourceNode | undefined | null): string | undefined {
+  if (node?.type === "Identifier") return node.name as string
+  return node?.type === "Literal" && typeof node.value === "string" ? node.value : undefined
+}
+
+/** Is the comment at `offset` the first thing on its line? */
+function isOwnLine(text: string, offset: number): boolean {
+  return /^\s*$/.test(text.slice(text.lastIndexOf("\n", offset - 1) + 1, offset))
 }
 
 /** The text of `file`, under `src/`:  `undefined` if there's none. */
@@ -295,15 +345,8 @@ function leadOf(docstring: string): string {
   return lead.join(" ")
 }
 
-/**
- * A docstring and the name it documents:  a member (`getItemAt(`, `console:`, `get console()`), a function, a class,
- * a constant or a re-export (`export { h }`), past any decorators.
- */
-const DOCUMENTED_NAME =
-  /\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*(?:@\w+(?:\([^)]*\))?\s*)*(?:export\s+)?(?:\{\s*)?(?:default\s+)?(?:abstract\s+)?(?:async\s+)?(?:static\s+)?(?:get\s+|set\s+)?(?:function\*?\s+|class\s+|const\s+|let\s+)?(\w+)/g
-
-/** A section heading in a module:  `// ## Events`. */
-const SECTION_HEADING = /^\s*\/\/ ## (.+)$/gm
+/** A section heading in a module, the text of its `//` comment:  `// ## Events`. */
+const SECTION_HEADING = /^ ## (.+)$/
 
 /** What a name's docs add to its declaration. */
 export type MemberDocs = { section?: string; description?: string }

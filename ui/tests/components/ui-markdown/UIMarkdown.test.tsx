@@ -609,7 +609,14 @@ describe("<ui-markdown editable> formatting", () => {
 
   /** Press `key` (a code, `KeyB`) in the box, with ⌘ (or Ctrl);  returns whether it was prevented. */
   async function command(host: DOMMarkdownElement, code: string, shiftKey = false): Promise<boolean> {
-    const event = new KeyboardEvent("keydown", { code, key: code.slice(3).toLowerCase(), metaKey: true, shiftKey, bubbles: true, cancelable: true })
+    const event = new KeyboardEvent("keydown", {
+      code,
+      key: code.slice(3).toLowerCase(),
+      metaKey: true,
+      shiftKey,
+      bubbles: true,
+      cancelable: true
+    })
     box(host).dispatchEvent(event)
     await ElementFixture.settle(host)
     return event.defaultPrevented
@@ -660,7 +667,9 @@ describe("<ui-markdown editable> formatting", () => {
     await enter(host)
     expect(host.content).toBe("## first\n\nsecond")
     await open(host, "second")
-    const bullet = [...bar(host).querySelectorAll("ui-button")].find((button) => button.getAttribute("icon") === "list ul")!
+    const bullet = [...bar(host).querySelectorAll("ui-button")].find(
+      (button) => button.getAttribute("icon") === "list ul"
+    )!
     bullet.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     await enter(host)
     expect(host.content).toBe("## first\n\n- second")

@@ -1,0 +1,77 @@
+# Org Events
+An org's events, from someone's idea to a finished, quiet record.
+Anyone in the org proposes one;  the Events Team's Managers say yes;  its organizers move it on.
+Where they're kept is in OrgEvents.api.spell, and only its first line knows.
+A move you may not make says why, and changes nothing.
+
+
+## A row for each event:  where it is, and a button to move it on
+
+<spell-more-of "event">
+	<draw>
+		<stack class="event" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+			<label size="tiny">{its stage name}</label>
+			<text color="grey">{its organizers}</text>
+			<button class="move" size="small" disabled={its onward is ""} title="Move it on to its next stage" onClick={set its stage to its onward}>Move on</button>
+		</stack>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "event stage">
+	<draw>
+		<stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
+			<text>{its name}</text>
+			<text color="grey">{its moved by}</text>
+		</stack>
+	</draw>
+</spell-more-of>
+
+
+## The page:  a form to propose one, the events, and the stages they go through
+
+<spell-app "events page">
+	<property "new event" description="An event proposed:  its name, and its organizers' addresses, comma-separated">a new event</>
+
+	<action "propose the new event">
+		add the new event to the events
+		set its new event to a new event
+	</action>
+
+	<draw>
+		<container class="org-events">
+			<stack>
+				<header size="large">Events</header>
+				<text color="grey">Propose one;  the Events Team says yes;  its organizers take it from there.</text>
+
+				<segment class="propose">
+					<header size="medium">Propose an event</header>
+					<form value={its new event}>
+						<stack direction="horizontal" wrap>
+							<input name="name" placeholder="Picnic" aria-label="Its name" fluid/>
+							<input name="organizers" placeholder="cy@rs, dee@rs" aria-label="Its organizers"/>
+						</stack>
+					</form>
+					<button class="propose" color="primary" disabled={the name of the new event is ""} onClick={propose the new event}>Propose it</button>
+				</segment>
+
+				<segment class="events">
+					<header size="medium">Events</header>
+					<stack class="events" spacing="sm">
+						<for event in every event loading="Finding the events">
+							<empty><text class="none" color="grey">No events yet.</text></empty>
+							<failed><text color="red">We can't read the events right now.</text></failed>
+						</for>
+					</stack>
+				</segment>
+
+				<segment class="stages">
+					<header size="medium">Stages</header>
+					<stack class="stages" spacing="sm">
+						<for step in every event stage loading="Finding the stages"/>
+					</stack>
+				</segment>
+			</stack>
+		</container>
+	</draw>
+</spell-app>

@@ -1,8 +1,15 @@
 import { existsSync, readFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
+import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
-import { PageServer, pageServerRoot, pageServerSettings } from "spell/server/page"
+import {
+  PageServer,
+  pageServerRoot,
+  pageServerSettings,
+  SERVER_REPORTS_API,
+  type ReportedServer
+} from "spell/server/page"
 import { CLI } from "spell/cli"
 
 /**
@@ -41,7 +48,8 @@ export function pageServer(args: string[]): Promise<number> {
  * - SPELL UI's docs site:  static pages the page server itself serves at `/components/ui/`;  this checks its bundle
  *   answers (`/components/ui/_assets/site.js`:  not committed;  the page server builds it when it starts, if stale).
  *   Only where the settings name Spell UI's component set (`ui`).
- * - Prints one row per server:  name, port, URL, state.  Exits 1 if any didn't come up.
+ * - Whatever else a route module runs and reports (`reportedRows()`):  its row, never its failure.
+ * - Prints one row per server:  name, port, URL, state.  Exits 1 if any of the three above didn't come up.
  * - Was spell-app's `scripts/serve.mjs` (`yarn serve`) until epic `repo-split` P13.
  */
 export async function startAll(): Promise<number> {
@@ -58,8 +66,24 @@ export async function startAll(): Promise<number> {
   ]
   if (settings.routes?.some((route) => route.includes("appRoutes"))) rows.push(await editorRow(root))
   if (settings.componentSets?.ui) rows.push(await spellUIRow(page.base))
+  rows.push(...(await reportedRows(page.base, { launched: page.launched })))
   CLI.out(serverLines(root, rows).join("\n"))
   return rows.some((row) => row.failed) ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+}
+
+/**
+ * The rows of the servers route modules run, as they report them (`RouteContext.addServerReport`):  the kit names none.
+ * - `running` reads `started` when the page server was started just now.
+ * - NEVER fails `start all`:  they're the modules' extras, and each row says why it isn't running.
+ */
+async function reportedRows(base: string, { launched }: { launched: boolean }): Promise<ServerRow[]> {
+  try {
+    const answer = await fetch(`${base}${SERVER_REPORTS_API}`, { signal: AbortSignal.timeout(REPORTS_TIMEOUT_MS) })
+    const rows = (await answer.json()) as ReportedServer[]
+    return rows.map((row) => ({ ...row, state: launched && row.state === "running" ? "started" : row.state }))
+  } catch {
+    return []
+  }
 }
 
 /** One server `start all` reports. */
@@ -68,16 +92,20 @@ type ServerRow = { name: string; url: string; what: string; state: string; faile
 /** The editor's row, once its record answers -- or why not. */
 async function editorRow(root: string): Promise<ServerRow> {
   const row = { name: "editor", what: "the spell app (vite)" }
-  const started = Date.now()
-  while (Date.now() - started < EDITOR_TIMEOUT_MS) {
-    try {
-      const { url } = JSON.parse(readFileSync(join(root, EDITOR_FILE), "utf8")) as { url: string }
-      await fetch(url, { signal: AbortSignal.timeout(2000) })
-      return { ...row, url, state: "running" }
-    } catch {
-      await new Promise((done) => setTimeout(done, 250))
-    }
-  }
+  // Until its record names a URL that answers, looking every 0.25s;  gives up after `EDITOR_TIMEOUT_MS`
+  const url = await waitUntil(
+    async () => {
+      try {
+        const { url } = JSON.parse(readFileSync(join(root, EDITOR_FILE), "utf8")) as { url: string }
+        await fetch(url, { signal: AbortSignal.timeout(2000) })
+        return url
+      } catch {
+        return undefined
+      }
+    },
+    { timeout: EDITOR_TIMEOUT_MS / 1000, every: 0.25 }
+  )
+  if (url) return { ...row, url, state: "running" }
   return { ...row, url: "-", state: "didn't answer:  see .spell-server.editor.log", failed: true }
 }
 
@@ -99,7 +127,11 @@ async function spellUIRow(base: string): Promise<ServerRow> {
 /** `rows` as aligned lines:  name, port, URL, what it serves, state;  under a line naming checkout `root`. */
 export function serverLines(root: string, rows: ServerRow[]): string[] {
   const width = (key: "name" | "url" | "what") => Math.max(...rows.map((row) => row[key].length))
-  const port = (url: string) => (url === "-" ? "-" : new URL(url).port)
+  const port = (url: string) => {
+    if (url === "-") return "-"
+    const { port: named, protocol } = new URL(url)
+    return named || (protocol === "https:" ? "443" : "80")
+  }
   return [
     `Spell servers of ${root}:`,
     ...rows.map(
@@ -118,6 +150,9 @@ const EDITOR_TIMEOUT_MS = 90_000
 
 /** How long the Spell UI check may take:  a static file from the page server, which may wait for its build. */
 const UI_TIMEOUT_MS = 130_000
+
+/** How long the route modules' servers may take to report:  one may be stopping what's on its port first. */
+const REPORTS_TIMEOUT_MS = 30_000
 
 ////////////////
 // ## `spell server stop`

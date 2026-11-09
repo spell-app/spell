@@ -2,7 +2,8 @@
  * `<epic-phase>` (EpicPhase.tsx):  one phase, on top of the fold (`EpicFold.css`).
  * - A nested block:  its title on the row band, reaching past the Phases section's inset, edge to edge;  a small
  *   gap below it open, none folded (a rule instead).
- * - The status icon in its Phases chip's colour and fill (`data-state`, I170);  a done phase's title quieter.
+ * - The status icon in its Phases chip's colour and fill (`data-state`, I170);  a done phase's title quieter;  a
+ *   dropped one's struck through too (I228).
  * - Its plan changed:  the title's orange pen and count while it isn't done (the changes themselves are
  *   `<epic-update>` blocks among its children, which draw themselves).
  * - Public tokens (`--epic-phase-*`) are never declared here:  read through private aliases.
@@ -33,8 +34,15 @@
   ui-section::part(icon) {
     margin-inline-end: 2px;
   }
-  :host([status="done"]) {
+  :host(:is([status="done"], [status="dropped"])) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
+  }
+  /*
+   * DROPPED (epic `epic-engine` I228;  Owen, 2026-11-08:  "crossed out somehow"):  never built, so its title struck
+   * through, as a canceled item's (`EpicItem.css`);  its number too, its badge and body as any phase's
+   */
+  :host([status="dropped"]) .header > .words {
+    text-decoration: line-through;
   }
   ui-section {
     /*
@@ -109,7 +117,7 @@
   .icon[data-state="attention"] {
     color: var(--epic-state-attention, var(--ui-red));
   }
-  .icon[data-state="updated"] {
+  .icon:is([data-state="waiting"], [data-state="updated"]) {
     color: var(--epic-state-replied, var(--ui-orange));
   }
   .icon[data-state="progress"],
@@ -119,7 +127,8 @@
   .icon[data-state="recent"] {
     color: var(--epic-state-recent, var(--ui-green));
   }
-  .icon[data-state="old"] {
+  .icon[data-state="old"],
+  .icon[data-state="paused"] {
     color: var(--ui-grey, #767676);
   }
   /* scheduled:  the chip's DOTTED outline, drawn as the glyph's circle (no dotted circle in the icon set) */
@@ -139,24 +148,28 @@
   .icon.working {
     cursor: help;
   }
-  .spinner {
-    display: block;
-    flex: none;
-    width: 1em;
-    height: 1em;
-    box-sizing: border-box;
-    border: 1.5px solid color-mix(in oklab, currentColor 25%, transparent);
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: epic-phase-turn 1.1s linear infinite;
+  /*
+   * Claude at work on it:  its circle spins like a coin on a table, a turn then a second's rest (Owen,
+   * 2026-11-03, epic `epic-engine` I213:  "Slow it down a bit and have it pause for 1 second ... any time you are doing
+   * something");  the same timing as every working mark on the page
+   * - under way alone, it stands still:  a load indicator (I226)
+   */
+  .icon.working > svg {
+    animation: epic-phase-coin 3.4s ease-in-out infinite;
   }
-  @keyframes epic-phase-turn {
-    to {
-      rotate: 1turn;
+  @keyframes epic-phase-coin {
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .spinner {
+    .icon.working > svg {
       animation: none;
     }
   }

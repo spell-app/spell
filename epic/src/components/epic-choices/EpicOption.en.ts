@@ -23,7 +23,9 @@ export const epicOptionVocabulary = {
       kind: "string",
       required: true,
       format: "letter",
-      description: "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name."
+      description:
+        "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name.  Shown `A2`, `B2` ... in its holder's 2nd set, " +
+        "`A3` in its 3rd (epic `epic-engine` I227);  the attribute stays `A`."
     },
     {
       name: "title",
@@ -123,7 +125,7 @@ export const epicOptionVocabulary = {
     { name: "title", description: "`A · A named palette`." },
     {
       name: "recommended",
-      description: "The recommended one's violet thumbs-up, after its title, labelled `Recommended`."
+      description: "The recommended one's terracotta thumbs-up, after its title, labelled `Recommended`."
     },
     { name: "actions", description: "While the page is reviewed:  the box at the header's end holding the pill." },
     {

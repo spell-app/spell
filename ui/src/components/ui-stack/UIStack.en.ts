@@ -63,11 +63,35 @@ export const stackVocabulary = {
         "(`between`:  the first and last at the ends, `around`:  equal space around each).  " +
         '`<ui-stack direction="horizontal" justify="between">` puts one thing left and one right.'
     },
-    { name: "fluid", group: "layout", kind: "boolean", description: "Takes the full width of its container." }
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "boolean",
+      description: "Takes the full width of its container;  in another stack's row, the room left."
+    },
+    {
+      name: "stackable",
+      group: "layout",
+      kind: "string",
+      description:
+        'A row that becomes a column when the room it\'s in is narrower than a length:  `stackable="34em"`;  ' +
+        "bare, a phone's width (768px).  The room:  the nearest container around it (a form, a table, an app " +
+        "that's a size container), or the window, whichever is narrower;  so it works in a side bar too.  " +
+        'An icon in it with `rotated="when stacked"` turns a quarter while it\'s a column:  an arrow points down.'
+    }
   ],
   events: [],
-  slots: [{ name: "", description: "What it lays out:  any elements." }],
+  slots: [
+    {
+      name: "",
+      description:
+        "What it lays out:  any elements.  In a row, a `fluid` one (`<ui-input fluid>` ...) takes the room left."
+    }
+  ],
   parts: [],
-  states: [],
+  states: [
+    { name: "horizontal", description: 'A row (`direction="horizontal"`):  a `fluid` child takes the room left.' },
+    { name: "stackable", description: "`stackable`:  a row that becomes a column when its room is narrow." }
+  ],
   texts: []
 } as const satisfies E.ComponentVocabulary

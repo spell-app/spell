@@ -137,6 +137,8 @@
   }
   .header {
     --_ui-part: header;
+    /* an icon-only link after a word in it (a person's name, then their GitHub link):  a small gap (`UIText.css`) */
+    --_link-icon-gap: 0.35em;
   }
   .description {
     --_ui-part: description;
@@ -232,6 +234,10 @@
     --_ui-header-size-big: var(--ui-header-size-big, 1.85714);
     --_ui-header-size-huge: var(--ui-header-size-huge, 2);
     --_ui-header-size-massive: var(--ui-header-size-massive, 2.28571);
+    /* `poster`:  past massive, growing with the window between a floor and a ceiling (em of the surrounding text) */
+    --_ui-header-poster-min: var(--ui-header-poster-min, 2.4em);
+    --_ui-header-poster-grow: var(--ui-header-poster-grow, 7vw);
+    --_ui-header-poster-max: var(--ui-header-poster-max, 4em);
     /* Page header ladder (`level`), relative to `--ui-font-size`:  absolute, like Fomantic's rem. */
     --_ui-header-h1: var(--ui-header-h1, 2);
     --_ui-header-h2: var(--ui-header-h2, 1.71428);
@@ -266,16 +272,21 @@
     color: var(--ui-color-header, var(--_ui-header-color));
     font-family: var(--ui-font-family-heading);
     font-size: calc(var(--_header-base, 1em * var(--_ui-header-size-medium)) * var(--ui-scale, 1));
-    font-weight: var(--_ui-header-font-weight);
+    font-weight: var(--_ui-font-weight, var(--_ui-header-font-weight));
     line-height: var(--_ui-header-line-height);
-    text-transform: none;
+    text-transform: var(--_ui-font-case, none);
   }
   /* Its scale comes from its own size class only, never a parent's;  nor does it hand its own on. */
-  .ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive) {
+  .ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster) {
     --ui-scale: 1;
   }
   .ui.header > slot {
     --ui-scale: initial;
+  }
+  /* A poster's title (`size="poster"`):  bigger than massive on a desktop, smaller on a phone, on tight lines */
+  .ui.poster.header {
+    font-size: clamp(var(--_ui-header-poster-min), var(--_ui-header-poster-grow), var(--_ui-header-poster-max));
+    line-height: 1;
   }
   .ui.header:first-child {
     --_header-margin-top: calc(var(--_ui-header-offset) * -1);
@@ -295,22 +306,22 @@
   }
 
   /* Page headers:  sized by level unless a size is given, or `sub` (Fomantic's `h2.ui.sub.header` is a sub header). */
-  h1.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .sub) {
+  h1.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster, .sub) {
     --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h1));
   }
-  h2.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .sub) {
+  h2.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster, .sub) {
     --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h2));
   }
-  h3.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .sub) {
+  h3.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster, .sub) {
     --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h3));
   }
-  h4.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .sub) {
+  h4.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster, .sub) {
     --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h4));
   }
-  h5.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .sub) {
+  h5.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster, .sub) {
     --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h5));
   }
-  h6.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .sub) {
+  h6.ui.header:not(.mini, .tiny, .small, .medium, .large, .big, .huge, .massive, .poster, .sub) {
     --_header-base: calc(var(--ui-font-size) * var(--_ui-header-h6));
   }
 

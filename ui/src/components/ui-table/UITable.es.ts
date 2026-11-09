@@ -25,6 +25,10 @@ export const tableEs = {
     "column-defs": "definiciones-columnas"
   },
   values: { appearance: { striped: "rayado", structured: "estructurado" } },
-  events: { "ui-sorting": "ordenando" },
-  texts: { label: "Tabla" }
+  events: { "ui-sorting": "ordenando", "ui-editing": "editando" },
+  texts: {
+    label: "Tabla",
+    "delete-row": "Borrar fila",
+    "new-row": "Fila nueva:  escribe para añadirla"
+  }
 } as const satisfies E.TagDictionary

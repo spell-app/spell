@@ -201,6 +201,17 @@ export class Parser extends Derivative {
   }
 
   /**
+   * Variables `texts` declare for the whole project, found WITHOUT parsing them, known ahead in `scope`:
+   * e.g. spell's `pokedex` for `pokedex is an app`, a one-of-a-kind's one instance (epic `data` I44).
+   * - Why:  so any file, or a line above the declaration, can name it.
+   * - Run BEFORE a project's files parse, after `stubDeclaredTypes()`, so its type is there.
+   * - Each is `ahead` (`P.ScopeVariable.ahead`) until its declaration replaces it.
+   * - Through `scope.variables.add()`:  journaled, if there's a journal.
+   * - Default:  nothing.  Languages override, e.g. `SpellParser`.
+   */
+  stubDeclaredVariables(_scope: P.Scope, _texts: string[]): void {}
+
+  /**
    * First lines of the methods `text` defines, found WITHOUT parsing it, e.g. `to play a card`.
    * - Why:  so a line can call a method defined further down, or in a later file -- see `stubDeclaredMethods()`.
    * - Each is what `stubDeclaredMethods()` parses, in the language's own form:

@@ -29,6 +29,7 @@ import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
+import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
@@ -43,6 +44,7 @@ import { ListRemovePosition } from "./ListRemovePosition"
 import { ListRemoveRange } from "./ListRemoveRange"
 import { ListRemoveRangeOrdinal } from "./ListRemoveRangeOrdinal"
 import { ListRemoveWhere } from "./ListRemoveWhere"
+import { ListRemoveWith } from "./ListRemoveWith"
 import { ListReverse } from "./ListReverse"
 import { ListShuffle } from "./ListShuffle"
 import { MergeLists } from "./MergeLists"
@@ -618,6 +620,34 @@ listsEs.addRule(SortKeyField, {
   syntax: "{property:member_words}"
 })
 
+listsEs.addRule(SortKeyOrder, {
+  syntax:
+    ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso|z-a)|(ascending:a-z|de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("mi-lista")
+      },
+      tests: [
+        [
+          "mi-lista ordenada por su enviado, de más reciente a más antiguo",
+          "core.sortedBy(miLista, (item) => core.descending(item.enviado))"
+        ],
+        [
+          "mi-lista ordenada por sus puntos de mayor a menor",
+          "core.sortedBy(miLista, (item) => core.descending(item.puntos))"
+        ],
+        ["mi-lista ordenada por su enviado, de menor a mayor", "core.sortedBy(miLista, (item) => item.enviado)"],
+        ["mi-lista ordenada por su nombre, al revés", "core.sortedBy(miLista, (item) => core.descending(item.nombre))"],
+        ["mi-lista ordenada por su nombre z-a", "core.sortedBy(miLista, (item) => core.descending(item.nombre))"],
+        ["mi-lista ordenada por su nombre a-z", "core.sortedBy(miLista, (item) => item.nombre)"]
+      ]
+    }
+  ]
+})
+
 listsEs.addRule(ListSortedBy, {
   // agrees with its list:  `cada carta, ordenada por ...`, `las cartas, ordenadas por ...`
   syntax: ",? (ordenado|ordenada|ordenados|ordenadas) por {inline_expression}?",
@@ -836,6 +866,34 @@ listsEs.addRule(ListRemoveWhere, {
           'core.removeWhere(deck, (carta) => carta.suit === "clubs")'
         ],
         ["quitar cartas en deck donde su suit es clubs", 'core.removeWhere(deck, (carta) => carta.suit === "clubs")']
+      ]
+    }
+  ]
+})
+
+listsEs.addRule(ListRemoveWith, {
+  syntax: "(quitar|eliminar) {list:things_with}",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["una carta es una cosa", "una carta tiene un palo como uno de tréboles, corazones"].join("\n"),
+          "block"
+        )
+        scope.variables?.add("palo")
+      },
+      tests: [
+        [
+          "quitar cada carta con el mismo palo",
+          "core.removeWhere(core.everyThing(Carta), (carta) => carta.palo === palo)",
+          "core.removeWhere(core.everyThing(Carta), (carta: Carta) => carta.palo === palo)"
+        ],
+        [
+          "quitar las cartas con palo corazones",
+          'core.removeWhere(core.everyThing(Carta), (carta) => carta.palo === "corazones")',
+          'core.removeWhere(core.everyThing(Carta), (carta: Carta) => carta.palo === "corazones")'
+        ]
       ]
     }
   ]

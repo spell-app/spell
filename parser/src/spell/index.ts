@@ -23,6 +23,7 @@ export * from "./spell.types"
 
 export * from "./SpellLocation"
 export * from "./SpellProject"
+export * from "./CompileCache"
 export * from "./SpellDeclarationPlaces"
 export * from "./SpellFile"
 export * from "./SpellJSFile"
@@ -36,6 +37,7 @@ export * from "./SpellxTwin"
 export * from "./ComponentPacks"
 export * from "./builtinTypes"
 export * from "./builtInTemplates"
+export * from "./builtInDimensions"
 
 /**
  * `spellParser`: shared `SpellParser` instance with spell's "core" rules already applied.
@@ -59,6 +61,8 @@ export {
   type JSXMatchData,
   MarkdownDescription,
   MarkdownBlock,
+  ShowSitePart,
+  SiteAddressOf,
   MemberReadExpression
 } from "./rules"
 

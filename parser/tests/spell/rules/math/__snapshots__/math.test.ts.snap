@@ -10,6 +10,7 @@ exports[`testing spell module math > rule group specs > match snapshot -- if thi
   "min": "operator|argument?|expression",
   "minus": "operator|expression",
   "plus": "operator|expression",
+  "random_number": "low|high",
   "round_number": "expression|operator?",
   "times": "operator|expression",
 }

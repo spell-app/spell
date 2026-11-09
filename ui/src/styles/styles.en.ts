@@ -289,10 +289,14 @@ export const fonts = {
   subhead: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Noto Sans", "Arial", "sans-serif"],
   /** a typewriter's letters, every one the same width:  `<ui-text typewriter>` (epic `elemental-spell` P26) */
   typewriter: ["American Typewriter", "Courier Prime", "Courier New", "Courier", "monospace"],
-  /** a rounded sans, the platform's own where it has one:  Pop, and the theme editor's "Rounded" (J77) */
+  /**
+   * a rounded sans, the platform's own where it has one:  Pop, and the theme editor's "Rounded" (J77)
+   * - macOS names its Arial Rounded "Arial Rounded MT Bold":  Chrome finds it only by that name (epic `language` T88)
+   */
   rounded: [
     "ui-rounded",
     "SF Pro Rounded",
+    "Arial Rounded MT Bold",
     "Arial Rounded MT",
     "Varela Round",
     "Quicksand",
@@ -309,7 +313,9 @@ export const fontWeights = {
   light: 300,
   normal: 400,
   semibold: 600,
-  bold: 700
+  bold: 700,
+  /** `font="heavy"`:  a poster's title (epic `language` P35) */
+  heavy: 900
 } as const satisfies Record<string, number>
 
 /** Unitless line heights by role. */

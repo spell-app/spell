@@ -86,12 +86,17 @@ export class ScopeExplorer {
    * Pack of spell's built-in types, e.g. `Thing` and `List`, from `SP.BUILT_IN_TYPE_TABLE` -- see `LSP.ScopePack`.
    * - What `yarn lsp:scopes --builtins` writes to spell-parser's `src/core/core.scopes.js`, for pages with no parser.
    * - That file is GENERATED, so its docs live in the table.
+   * - `coreUri`:  core's `src/` folder, as a `file:` URI.
+   *   Given, each built-in template's file under it is written relative to it (`templates/Notebook.spell`),
+   *   as the pack sits there:  so the committed file holds no checkout's own path.
    */
-  exportBuiltIns(): LSP.ScopePack {
+  exportBuiltIns(coreUri?: string): LSP.ScopePack {
     const tree = this.newTree([])
     this.addBuiltIns(tree)
     const entries = tree.entries.map((entry) => ScopeExplorer.packEntry(entry, tree.details.get(entry.path)?.()))
-    return { id: ScopeExplorer.BUILT_INS_PACK_ID, entries }
+    const pack = { id: ScopeExplorer.BUILT_INS_PACK_ID, entries }
+    if (!coreUri) return pack
+    return JSON.parse(JSON.stringify(pack).replaceAll(`${coreUri.replace(/\/$/, "")}/`, "")) as LSP.ScopePack
   }
 
   /**
@@ -281,7 +286,7 @@ export class ScopeExplorer {
   }
 
   /**
-   * Entries for `file`:  the file, then the types, functions and variables it declares,
+   * Entries for `file`:  the file, then the types, functions and variables it declares, the project's among them,
    * in the order it declares them -- each type followed by its members, wherever they're declared.
    * - Its description is the `#` heading comments at its top -- see `SpellLanguageService.fileDescription()`.
    */
@@ -300,7 +305,13 @@ export class ScopeExplorer {
     const functions = tree.methods.filter(
       (rule) => ScopeExplorer.declarationOf(rule)?.kind === "function" && this.service.fileOf(rule.declaredBy!) === file
     )
-    const variables = (file.scope as P.FileScope).variables.get()
+    // its own, and the project's it declares:  a one-of-a-kind app's, `pokedex` (epic `data` I44)
+    const variables = [
+      ...(file.scope as P.FileScope).variables.get(),
+      ...(project.scope?.variables.get() ?? []).filter(
+        (record) => record.declaredBy && this.service.fileOf(record.declaredBy) === file
+      )
+    ]
     const declared: DeclaredEntries[] = [
       ...types.map((type) => ({ at: type.declaredBy, add: () => this.addType(type, tree) })),
       ...functions.map((rule) => ({ at: rule.declaredBy, add: () => this.addMethod(rule, "function", path, tree) })),

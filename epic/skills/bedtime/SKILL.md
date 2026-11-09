@@ -46,7 +46,7 @@ The EPIC PAGE is the record, as on any day:
 
 ## 2. Pick phases (modal, or one page with step 3)
 
-More than fits ONE modal call:  steps 2 and 3 go on ONE details page instead (Owen, 2026-10-03),
+More than fits ONE modal call:  steps 2 and 3 go on ONE details page instead (2026-10-03),
 so they answer everything in one sitting.
 - "More than fits":  the phase pick plus step 3's questions, over 4 questions, or over 4 options in one.
 - The spec:
@@ -146,8 +146,9 @@ Everything else stands:
        an `<epic-choices>` of `<epic-option letter title [recommended]>`
      - the outcome:  an `<epic-net-effect>`
      - code:  an `<epic-code>`
-   - CALM by default:  add `--calm` (last), so it shows yellow (open) rather than red.  An issue too.
-     - Owen:  "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
+   - CALM by default:  add `--calm` (last), so a call shows grey and an issue yellow, rather than red.
+   - An issue filed from the person's own words:  add `--requested` too;  closed, it turns light orange until they've looked.
+     - "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
        (2026-10-10, "the principle of least surprise").
      - RED (no `--calm`) only when it would surprise them:
        - it goes against something they said
@@ -190,7 +191,7 @@ Everything else stands:
     Done reading takes it off.  The Epics page's card says it's there.
   - Nothing to commit for the doc (in the epic repo, committed for you).
 - Final reply:  a VERY high-level summary, a few lines (what was built, what needs them), then the section's link pair
-  (`epic pages link <epic page> --hash away`);  the detail is in the section, never repeated here (Owen's C4).
+  (`epic pages link <epic page> --hash away`);  the detail is in the section, never repeated here (the person's C4).
   - Then ONE AskUserQuestion (the person answers in the morning):  "Go through the night?".
   - "Review it now (Recommended)":  runs `/epic review <name>`, judgement calls first.
     That's [the epic skill](../epic/SKILL.md), "7. Review".

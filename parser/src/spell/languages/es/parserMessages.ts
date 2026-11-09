@@ -29,8 +29,14 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
   "made-from-each-other":
     '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
+  "not-made-yet":
+    '{name} aún no existe cuando corre esta línea:  se crea más adelante.  Dilo dentro de una acción, como en "para empezar:"',
   "statement-in-markup":
     '"{line}" se muestra como texto:  no puede ir dentro de un elemento en una línea propia.  Escríbelo entre llaves, como en "{para libro en sus libros: dibujar libro}"',
+  "not-a-dimension":
+    '{AType} no es una dimensión:  una unidad va debajo de una línea como "la longitud es una dimensión:"',
+  "unknown-unit": '{Dimension} no tiene la unidad "{unit}"',
+  "units-differ": "No se puede dar {aDimension} en {unit}:  {unit} es {aOther}",
   "never-empty":
     '{AType} no es una lista, así que no tiene nada que vaciar:  di cuál, como en "si sus libros está vacío"',
   "untyped-list-property-is": 'Di qué contiene "{name}", p. ej. "{line} una lista de {items}"',
@@ -45,6 +51,15 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "place-read-only":
     "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
+  "adds-to-a-read": "Esto añade solo a lo que se leyó, y no guarda nada:  para guardarlo, añádelo a {theSavedThings}",
+  "removes-from-a-read":
+    "Esto quita solo de lo que se leyó, y nada sale del lugar:  para quitarlo de allí, quítalo de {theSavedThings}",
+  /** Each word but `{things}` agrees with the type:  `las recetas guardadas`, `los mazos guardados`. */
+  "the-saved-things": "los {things} guardados",
+  "the-things": "los {things}",
+  "not-saved": 'Ningún lugar guarda {things}:  para leer lo que tiene el programa, escribe "{theThings}"',
+  "nothing-the-same":
+    'Aquí nada se llama "{field}" para comparar con él:  ponlo antes, p. ej. "poner {field} a ...", o di el valor, p. ej. "cada {thing} con {field} "...""',
   "key-written":
     'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":
@@ -85,13 +100,16 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "- vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
-  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en ..."',
+  "place-cloud-is":
+    '{place} se guarda en el espacio propio de cada persona en el servidor de Encanto, su carpeta "{folder}":  hasta que inicie sesión, en su navegador',
+  "place-cloud-name-it":
+    'Nombra el lugar primero, y luego di que se guarda ahí:  "recetario familiar se guarda en la nube", y luego "- vive en recetario familiar"',
   "atmosphere-public":
     "Todo lo que se guarda en esta {kind} es público:  cualquiera puede leerlo, y queda ahí para siempre.  No guardes nada privado aquí",
   "atmosphere-your-own":
     'En esta {kind} cada persona cambia solo sus propios registros:  cambiar los de otra se rechaza, y "todos los presentes" son todos los que tienen registros aquí, no quienes miran ahora',
   "atmosphere-reads-here":
-    'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda solo números enteros, sin decimales',
+    'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda un número decimal como texto, "12.50", que otras aplicaciones leen como texto',
   "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
   "atmosphere-not-a-corner":
     '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
@@ -99,6 +117,26 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{address}" no es una colección allí:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
   "version-step-no-rename-there":
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
+  "personal-folder-a-name":
+    '"personal" hace una carpeta para cada persona, por un nombre:  escribe solo un nombre, p. ej. carpeta de datos personal en "recetas", no "{address}"',
+  "site-part-not-a-page":
+    '"{part}" no es una de las páginas de este programa:  nombra una página que declare, p. ej. una "página de película" es una página',
+  "site-address-not-a-path":
+    'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
+  "site-param-not-on-page":
+    'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
+  "site-address-taken": 'La {page} ya está en "{address}":  cada página necesita su propia dirección',
+  "site-card-place-not-whole":
+    "La fila y la columna de una tarjeta se cuentan desde 1, en números enteros:  {row} y {column} no lo son",
+  "site-part-not-listed": 'El sitio no tiene "{part}":  sus páginas, diálogos y paneles son {parts}',
+  "projection-not-a-folder":
+    'Una proyección muestra parte de la carpeta de datos de un espacio:  "{source}" no lo es.  Nombra un lugar escrito así:  recetario familiar es una carpeta de datos en "@familia/recetas"',
+  "projection-needs-a-space":
+    'Di en qué espacio se escribe, por su dirección, en una línea debajo:  - dentro de "@rs/picnic"',
+  "projection-needs-fields":
+    "Di qué campos muestra, en una línea debajo:  - mostrando de cada fila su persona y turno.  Solo se muestran los campos nombrados",
+  "checked-at-most-every":
+    "A una carpeta de datos de un proyecto se le pregunta como mucho cada {seconds} segundos, ya que cada pregunta mira su carpeta:  esto la revisa cada {seconds} segundos",
   "airtable-not-a-base":
     '"{address}" no es una base de Airtable:  su id empieza por "app", p. ej. "appXXXXXXXXXXXXXX", y está en la dirección de la base en Airtable',
   "airtable-last-save-wins":
@@ -182,10 +220,28 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "on-line": "en la línea {line}",
   "on-line-of-file": "en la línea {line} de {file}",
   "check-time-not-a-time": '"{time}" no es una hora del día:  dila como 5, 5:30 o 17:00',
+  "next-page-header-not-link":
+    'La página siguiente se dice en una cabecera "Link", no "{header}":  `su página siguiente está en su cabecera "Link"`, o nombra el campo de su respuesta que la dice',
+  "searched-only":
+    'Las cosas de "{thing}" solo se encuentran buscándolas, sin una lista de todas:  búscalas por lo que dice su "{field}"',
+  "matching-needs-search":
+    'Las cosas de "{thing}" no se encuentran así:  solo un lugar que busca en todo cada cosa, "- busca en todo con ..."',
+  "asked-by-only":
+    'Las cosas de "{thing}" solo se piden por su {fields}, sin una lista de todas:  di cada uno, "donde su ... es ..."',
+  "found-only-by-name":
+    'Las cosas de "{thing}" solo se encuentran por su nombre, sin una lista de todas:  léelas una a una, por su identificador',
   "no-dotted-field":
     'El nombre de un campo no lleva punto:  lo que hay dentro de "{field}" es una cosa aparte, un tipo con sus propios campos, y se lee con palabras',
   "cant-save-built-in-inline":
     "No se puede guardar el tipo {type} dentro:  viene incorporado, y todos los proyectos lo comparten",
+  "cant-publish-built-in":
+    "No se pueden publicar los registros del tipo {type}:  viene incorporado, y todos los proyectos lo comparten",
+  "published-not-a-name":
+    '"{name}" no puede nombrar un esquema:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
+  "published-decimals":
+    'Un esquema no tiene números decimales:  {fields} se guardarán como texto, "12.50", y aquí se leerán de nuevo como números, pero otras aplicaciones ven texto.  Un número entero es "un entero"',
+  "published-rename":
+    "Los campos de un esquema publicado nunca cambian:  otras aplicaciones siguen leyendo el nombre antiguo.  Esta línea solo cambia cómo se leen aquí los registros;  para cambiarlo para todos, publícalo con un nombre nuevo",
   "cant-save-built-in-in-file":
     "No se puede guardar el tipo {type} en su propio archivo:  viene incorporado, y todos los proyectos lo comparten",
   "belongs-to-undeclared": 'Todavía no se puede decir {sentence}:  declara "{example}" antes',
@@ -211,6 +267,23 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
 
   "spellx-unknown-word": '"{tag}" no es una palabra de spellx:  ¿querías decir "{suggestion}"?',
   "spellx-unknown-word-here": '"{tag}" no es una palabra de spellx:  aquí, usa una de {words}',
+  "ui-defaults-not-a-sample":
+    '<ui-defaults> lleva etiquetas de muestra, una por componente, cada una con sus valores:  <es-boton apariencia="píldora"/>',
+  "ui-defaults-not-written":
+    '<{tag} {attribute}>:  un valor por defecto se escribe tal cual, p. ej. {attribute}="píldora", no {...}',
+  "ui-defaults-unknown-tag": "{tag} no es un componente de Spell UI",
+  "ui-defaults-unknown-attribute": '{tag} no tiene "{attribute}":  lleva {attributes}',
+  "ui-defaults-content": '"{attribute}" es lo que muestra cada {tag}, no su aspecto:  no lleva valor por defecto',
+  "ui-defaults-bad-value": '"{attribute}" de {tag} lleva {takes}, no "{value}"',
+  "ui-defaults-takes-number": "un número",
+  "ui-defaults-takes-boolean": "verdadero o falso",
+  "ui-defaults-takes-text": "texto",
+  "ui-defaults-source":
+    '<ui-defaults source="..."> nombra un archivo de valores:  source="@spell/library/tema/ui-defaults.spell"',
+  "ui-defaults-source-and-samples":
+    "<ui-defaults> toma sus valores de su source, o de las etiquetas de muestra que lleva dentro:  no de ambos",
+  "ui-defaults-source-unknown":
+    "no encuentro <ui-defaults> en {source}:  importa {project} en el archivo del proyecto, y compílalo antes",
   "spellx-unknown-attribute": '{tag} no tiene "{attribute}":  ¿querías decir "{suggestion}"?',
   "spellx-unknown-attribute-here": '{tag} no tiene "{attribute}":  lleva {attributes}',
   "spellx-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
@@ -240,6 +313,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-typed-body":
     'una propiedad con tipo= se guarda, y empieza en un valor en la línea de su etiqueta:  <propiedad "{name}" tipo="número">0</>',
   "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
+  "spellx-short-note": "{tag} ahora es {new}:  el nombre corto es de Spell UI, como <botón> es <ui-button>",
 
   ////////////////
   // ## Long forms

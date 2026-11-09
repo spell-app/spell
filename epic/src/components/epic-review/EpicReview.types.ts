@@ -29,6 +29,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
 /**
  * Whose controls (`buttons`), which picks the buttons:
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
+ * - `issue`:  an issue's or a judgement call's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `part`:  a part of the plan -- an Overview sub-section, the summary:  no Approve (`PART_BUTTONS`)
  * - `phase`:  a phase, still to do (epic `epic-engine` I181):  Do this, Revisit (`PHASE_BUTTONS`);  its note box a part's
@@ -47,11 +48,14 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   (`AWAY_BUTTONS`), a Seen that takes the section off;  no note box
  * - `away-line`:  one line or part of it (`<epic-away-line>`, epic `epic-engine` I206):  Read (`AWAY_LINE_BUTTONS`),
  *   a Seen that takes only that line off;  no note box
+ * - `held`:  a to-do phase Owen held (`<epic-phase plan="held">`, epic `epic-engine` I221):  Accept plan and Revisit
+ *   (`HELD_BUTTONS`), no ring:  paused, it asks nothing of him
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
  *   I140):  the thumbs up of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`), then Revisit (`ACCEPTED_BUTTONS`)
  */
 export const REVIEW_KINDS = [
   "item",
+  "issue",
   "todo",
   "part",
   "phase",
@@ -61,6 +65,7 @@ export const REVIEW_KINDS = [
   "change",
   "update",
   "plan",
+  "held",
   "accepted",
   "away",
   "away-line"
@@ -98,7 +103,7 @@ export type ReviewButtonSpec = {
   /**
    * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen" | "hold"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -136,6 +141,7 @@ export type ReviewButtonSpec = {
     | "readLineTip"
     | "acceptPlanTip"
     | "doThisTip"
+    | "doThisIssueTip"
 }
 
 /**
@@ -151,6 +157,16 @@ export const REVIEW_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
   { action: "approve", color: "green", icon: "check", label: "approve", tip: "approveTip" }
 ]
+
+/**
+ * An issue's or a judgement call's review buttons (epic `epic-engine` I232;  Owen, 2026-11-08):  Do this, Revisit, Approve.
+ * - Do this, a thumbs up (a `todo` mark, as a phase's):  fix it, in the item itself;
+ *   no todo made, it stays red until handled (`PlanDoc.doThis()`)
+ * - Approve:  on a fix waiting for him (orange), closes it
+ */
+export const ISSUE_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.map((spec) =>
+  spec.action === "todo" ? { ...spec, icon: "thumbs up", label: "doThis", tip: "doThisIssueTip" } : spec
+)
 
 /**
  * A TODO's review buttons (Owen, 2026-10-09), one group, in this order:
@@ -218,6 +234,12 @@ export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
+ * A HELD phase's buttons (`<epic-phase plan="held">`, epic `epic-engine` I221):  a waiting plan's Accept plan and
+ * Revisit, no Defer;  drawn with no ring, since a held phase asks nothing of Owen till he picks it up again.
+ */
+export const HELD_BUTTONS: readonly ReviewButtonSpec[] = PLAN_BUTTONS.filter((spec) => spec.action !== "defer")
+
+/**
  * A change mark's button (`<epic-change>`, epic `epic-engine` P30;  Q13, B), in the popup a click on its words opens
  * (I160), while it's new:
  * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it
@@ -253,6 +275,7 @@ export const AWAY_LINE_BUTTONS: readonly ReviewButtonSpec[] = [
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
+  issue: ISSUE_BUTTONS,
   todo: TODO_BUTTONS,
   part: PART_BUTTONS,
   phase: PHASE_BUTTONS,
@@ -262,6 +285,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   change: CHANGE_BUTTONS,
   update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
+  held: HELD_BUTTONS,
   accepted: ACCEPTED_BUTTONS,
   away: AWAY_BUTTONS,
   "away-line": AWAY_LINE_BUTTONS
@@ -273,9 +297,13 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
  * - last in the group, where an item's Approve is, drawn as a chosen Approve, its mark sent:  outlined green
  * - a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than
  *   'make this a todo'"):  a check before
- * - a STATE, not a mark:  a click does nothing (Revisit is how the plan is talked over again);  no `data-action`
+ * - a click UN-CLICKS it (epic `epic-engine` I218;  Owen, 2026-11-04:  "I have approved the plan, but want to wait on
+ *   these ... Seems like I should un-click the thumbs up?"):  a `hold` mark, the thumbs up drawn plain;  sent,
+ *   `inbox apply` holds the phase (`plan="held"`, I221:  paused, grey), so it's not built until he accepts it again;  a second click before
+ *   then takes the hold back
  */
 export const ACCEPTED_CHECK = {
+  action: "hold",
   color: "green",
   icon: "thumbs up",
   label: "planAccepted",
@@ -343,64 +371,6 @@ export const THREAD_BUTTONS_OF: Readonly<Partial<Record<ReviewKind, readonly Thr
   closed: CLOSED_BUTTONS
 }
 
-/** One note box button:  what it makes of the note (`how`), its colour, icon, name and tooltip. */
-export type NoteButtonSpec = {
-  /** the mark it makes of the note (`ReviewClient.useNote()`) */
-  how: "soon" | "next" | "drop" | "skip"
-  color: ReviewColor
-  icon: string
-  label: "boxSoon" | "boxNext" | "boxDrop" | "boxSkip"
-  tip: "boxSoonTip" | "boxNextTip" | "boxDropTip" | "boxSkipTip"
-}
-
-/**
- * The note box's buttons:  Revisit Later (queued for the next send), then the x, Skip This
- * (Owen, 2026-10-09, in place of Make Todo, which he never used there:  the line keeps its Make Todo).
- * - Revisit Later wears the line's Revisit icon:  both end in the same mark, a revisit
- * - the x (`skip`, grey:  no longer relevant):  nothing to do here;
- *   `inbox apply` marks it reviewed and keeps a typed note as Owen's reply
- * - every box but a todo's (below):  an item's, an Overview section's, a phase's, the summary's
- * - no Do Now:  gone from the box (Q20), then from the line (Owen, 2026-10-25)
- */
-export const NOTE_BUTTONS: readonly NoteButtonSpec[] = [
-  { how: "soon", color: "blue", icon: "history", label: "boxSoon", tip: "boxSoonTip" },
-  { how: "skip", color: "grey", icon: "xmark", label: "boxSkip", tip: "boxSkipTip" }
-]
-
-/**
- * A TODO's note box buttons, in its line's order
- * (Owen, 2026-10-09:  "the icons next to the field", the plane and the x, to match the line):
- * - the plane:  do it in the next phase, with this note
- * - Revisit Later:  just the note, for Claude (the line's Revisit:  "I'm adding text for you")
- * - the x:  drop it, the note saying why
- *   (every other box's x is Skip This:  on a todo, skipping it IS dropping it)
- */
-export const TODO_NOTE_BUTTONS: readonly NoteButtonSpec[] = [
-  { how: "next", color: "green", icon: "paper plane", label: "boxNext", tip: "boxNextTip" },
-  { how: "soon", color: "blue", icon: "history", label: "boxSoon", tip: "boxSoonTip" },
-  { how: "drop", color: "grey", icon: "xmark", label: "boxDrop", tip: "boxDropTip" }
-]
-
-/** A note box button's `how`. */
-export type NoteHow = NoteButtonSpec["how"]
-
-/** The note box's buttons of each `buttons`:  a todo's, else every other box's. */
-export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpec[]>> = {
-  item: NOTE_BUTTONS,
-  todo: TODO_NOTE_BUTTONS,
-  part: NOTE_BUTTONS,
-  phase: NOTE_BUTTONS,
-  thread: [],
-  closed: [],
-  proposal: NOTE_BUTTONS,
-  change: [],
-  update: [],
-  plan: NOTE_BUTTONS,
-  accepted: NOTE_BUTTONS,
-  away: [],
-  "away-line": []
-}
-
 ////////////////
 // ## "do it"
 ////////////////
@@ -421,9 +391,6 @@ export const DO_IT_NOTE = "do it"
  */
 export const DO_IT_ID = /^[jt]\d+$/i
 
-/** A manual test's id (`m3`):  its note box's x says "no longer applies" (epic `epic-engine` P51). */
-export const TEST_ITEM_ID = /^m\d+$/i
-
 ////////////////
 // ## Shadow markup
 ////////////////
@@ -439,9 +406,9 @@ export const NOTE_INPUT = "note-input"
 export const NOTE_SAVED = "note-saved"
 export const NOTE_FIELD = "note-field"
 export const NOTE_PICK = "note-pick"
+export const NOTE_TOOLS = "note-tools"
 export const NOTE_PICTURE = "note-picture"
 export const SAID_PICTURE = "said-picture"
-export const NOTE_ACTIONS = "note-actions"
 export const SAID = "said"
 export const SAID_WHAT = "said-what"
 export const SAID_EDIT = "said-edit"
@@ -508,8 +475,8 @@ export const REVIEW_PARTS = [
   {
     name: "note-box",
     description:
-      "The note box (an `<epic-review>`):  the note, then Revisit Later and the x (skip this);  a todo's:  the plane, " +
-      "Revisit Later, the x (drop it)."
+      "The note box (an `<epic-review>`):  the note, as tall as its field, its Saved floppy and picture button in one " +
+      "row in its lower right corner;  no buttons of its own:  the line's take the note along (epic `epic-engine` I212)."
   },
   {
     name: "said",
@@ -568,7 +535,7 @@ export const REVIEW_NAME_TEXTS = [
     description: '"0. While you were out"\'s button (the check):  its name.'
   },
   { key: "readLine", text: "Read", description: 'A line of "0. While you were out"\'s button (the check):  its name.' },
-  { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
+  { key: "boxSkip", text: "Skip this", description: "A skip mark's name, on the id chip (an older page's note box x)." }
 ] as const
 
 /** The rest of `<epic-review>`'s texts. */
@@ -585,6 +552,11 @@ export const REVIEW_TEXTS = [
     text: "Yes:  build this phase",
     description: "A to-do phase's review button:  what Do this does."
   },
+  {
+    key: "doThisIssueTip",
+    text: "Yes:  fix this, right here, then I'll review it",
+    description: "An issue's or a judgement call's review button:  what Do this does."
+  },
   { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
   {
     key: "revisitCommentsTip",
@@ -599,8 +571,19 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "planAcceptedTip",
-    text: "ready to build:  you accepted Claude's plan for this phase",
-    description: "A to-do phase's green check:  what it says.  A state:  a click does nothing."
+    text: "ready to build:  you accepted Claude's plan for this phase;  click to hold it",
+    description: "A to-do phase's green check:  what it says, and that a click un-clicks it (epic `epic-engine` I218)."
+  },
+  {
+    key: "planOnHold",
+    text: "On hold",
+    description: "A to-do phase's thumbs up, un-clicked to hold it (epic `epic-engine` I218):  its name."
+  },
+  {
+    key: "planOnHoldTip",
+    text: "not built until you accept its plan again;  click to take the hold back",
+    description:
+      "A to-do phase's thumbs up, un-clicked:  what it means once sent, and that a click before then undoes it."
   },
   {
     key: "nextTip",
@@ -669,26 +652,6 @@ export const REVIEW_TEXTS = [
   { key: "noteUnsent", text: "Your note, not sent yet:  {note}", description: "The note bubble:  a mark's note." },
   { key: "notePlaceholder", text: "Your note:  a question, instructions, why", description: "The empty note box." },
   { key: "noteLabel", text: "{id}:  your note", description: "The note box, for a screen reader." },
-  { key: "boxSoon", text: "Revisit Later", description: "Note box button:  its name." },
-  { key: "boxSoonTip", text: "Revisit Later:  talk it over in the next batch", description: "Note box:  Later." },
-  { key: "boxNext", text: "Do it in the next phase", description: "A todo's note box button (the plane):  its name." },
-  {
-    key: "boxNextTip",
-    text: "Do it in the next phase, with this note",
-    description: "A todo's note box:  the plane."
-  },
-  { key: "boxDrop", text: "Drop it", description: "A todo's note box button (the x):  its name." },
-  { key: "boxDropTip", text: "Drop it:  this note says why", description: "A todo's note box:  the x." },
-  {
-    key: "boxSkipTip",
-    text: "Skip this:  nothing to do, marked reviewed once Claude applies it;  a note here says why",
-    description: "Note box:  the x."
-  },
-  {
-    key: "boxSkipTestTip",
-    text: "No longer applies:  cancel this test;  a note here says why",
-    description: "A manual test's note box:  the x (epic `epic-engine` P51, as a test run's Skip)."
-  },
   {
     key: "pictureAdd",
     text: "Add a picture:  paste one (⌘V) or drop it in the box, or choose a file",
@@ -705,6 +668,11 @@ export const REVIEW_TEXTS = [
   { key: "howSoon", text: "revisit soon", description: "A marked note's kind." },
   { key: "howNow", text: "revisit now", description: "A marked note's kind." },
   { key: "howTodo", text: "todo", description: "A marked note's kind." },
+  {
+    key: "howDoThis",
+    text: "do this",
+    description: "A marked note's kind:  an issue's, a call's or a phase's Do this."
+  },
   { key: "howNext", text: "next phase", description: "A marked note's kind:  a todo's plane." },
   { key: "howDrop", text: "drop", description: "A marked note's kind:  a todo's x." },
   { key: "howSkip", text: "skip", description: "A marked note's kind:  the note box's x." },

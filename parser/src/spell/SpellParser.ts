@@ -30,13 +30,17 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
   // TODO: backtick as alternative quote, for embedding double quotes?
   quoteSymbols: [`"`],
+  // a `"` straight after a digit is an inch, `3 1/2"`, not text (epic `language` P23)
+  marksAfterDigits: true,
   // Remove "normal" whitespace (leaving newlines and indents) when parsing
   whitespacePolicy: P.WhitespacePolicy.LEADING_ONLY,
   // never read as spell:  a view type's own styles (`css_block`),
-  // and formatted text (`markdown_block`, `markdown_description`);
+  // and formatted text (`markdown_block`, `markdown_description`), a page's stories too (`<stories>`, epic `mockup` P6);
   // the web's own raw-text tags, their contents as written, as the web reads them (epic `elemental-spell` P24);
   // and data, whose `{` and `[` are JSON's, not spell's (`<json>` is `<ui-json>`, P31)
-  rawTextTags: ["css", "json", "ui-json", "es-json", "markdown", "script", "style"],
+  rawTextTags: ["css", "json", "ui-json", "es-json", "markdown", "stories", "script", "style"],
+  // never drawn, so a block of its own:  a page's `<stories>` with its `<markdown>` on the next line (epic `mockup` T26)
+  standAloneTags: ["stories"],
   // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
   // `elemental-spell` P16);  and a tree diagram's node, by its label:  `<tree-node "If">` (P32);  each language's word
   quotedNameTags: {
@@ -390,6 +394,56 @@ export class SpellParser extends P.Parser {
     const onlyOnes = this.oneOfAKindsIn(text, scope).filter((name) => !types.includes(name))
     const kinds = [...text.matchAll(this.declarations.valueKindDeclaration)].map(([, plural]) => P.singularize(plural!))
     return [...types, ...onlyOnes, ...kinds, ...this.declaredPropertyKinds(text, new Set(onlyOnes))]
+  }
+
+  /**
+   * Make each one-of-a-kind's variable `texts` declare known ahead, for the whole project (epic `data` I44):
+   * `pokedex` for `pokedex is an app`, `klondike` for `klondike is a card game`
+   * -- see `P.Parser.stubDeclaredVariables()`.
+   * - Its type is its own:  `stubDeclaredTypes()` stubbed it.
+   * - Named as `create_one_of_a_kind` names it, `CreateOneOfAKind.variableName()`:  `my_game` for `my game is an app`.
+   * - Its declaration replaces it (`CreateOneOfAKind.mutateScope()`);
+   *   until then a line that runs as the program starts can't read it:  `CreateOneOfAKind.refuseIfNotMadeYet()`.
+   */
+  stubDeclaredVariables(scope: P.Scope, texts: string[]): void {
+    this.inPlay(() => {
+      for (const words of texts.flatMap((text) => this.declaredOneOfAKinds(text, scope))) {
+        const name = SpellParser.oneOfAKindVariableName(words)
+        if (scope.variables?.get(name, "LOCAL_ONLY")) continue
+        const datatype = scope.getType(words)?.name ?? P.classCase(words)
+        scope.variables?.add({ name, datatype, kind: "only", ahead: true })
+      }
+    })
+  }
+
+  /**
+   * Name of the variable holding a one-of-a-kind, from its words:  `my_game` for `my game is an app`, or `my-game`.
+   * - The ONE place it's worked out:  `CreateOneOfAKind.variableName()` and the scan both ask here.
+   */
+  static oneOfAKindVariableName(words: string): string {
+    return words
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_")
+  }
+
+  /**
+   * One-of-a-kinds `text` declares, as written, with no article:
+   * `pokedex` for `pokedex is an app`, `card-game`'s `klondike` -- see `stubDeclaredVariables()`.
+   */
+  private declaredOneOfAKinds(text: string, scope: P.Scope): string[] {
+    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
+    const apps = [...text.matchAll(this.declarations.typeDeclaration)].flatMap(([, , , , onlyOne]) =>
+      onlyOne
+        ? [
+            onlyOne
+              .trim()
+              .split(/[ \t]+/)
+              .join("-")
+          ]
+        : []
+    )
+    return [...new Set([...apps, ...this.oneOfAKindsIn(text, scope)])]
   }
 
   /**

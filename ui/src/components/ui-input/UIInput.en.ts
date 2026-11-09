@@ -32,7 +32,8 @@ const INPUT_TYPES = [
   "month",
   "week",
   "color",
-  "file"
+  "file",
+  "percent"
 ] as const
 
 /****************
@@ -141,7 +142,9 @@ export const inputVocabulary = {
       kind: "enum",
       values: INPUT_TYPES,
       default: "text",
-      description: "Native input type;  `file` also adds the `file` class."
+      description:
+        "Native input type;  `file` also adds the `file` class.  `percent` is a number field for a part of a whole:  " +
+        "its value the fraction (`0.18`), shown as `18` with a `%` label at its end."
     },
     {
       name: "value",
@@ -152,6 +155,7 @@ export const inputVocabulary = {
         "Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input."
     },
     UIT.FormControlAttributes.name,
+    UIT.FormControlAttributes.parameter,
     UIT.FormControlAttributes.placeholder,
     { ...UIT.FormControlAttributes.required, description: "Constraint:  must not be empty (`valueMissing`)." },
     {

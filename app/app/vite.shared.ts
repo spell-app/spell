@@ -1,12 +1,12 @@
 import { spawnSync } from "node:child_process"
-import { existsSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import solid from "@solidjs/vite-plugin"
-import type { Plugin, PluginOption, UserConfig } from "vite"
+import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
-import { CSS_TARGETS, SOLID_DEDUPE } from "spell/element-tools/elementConfig"
+import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE } from "spell/element-tools/elementConfig"
 import { emitIconPacks } from "spell/ui/vite.config.ts"
 
 /**
@@ -63,7 +63,7 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
     // every import a package name, found through `package.json`s' `exports` (epic `repo-split` P14):  no aliases
     resolve: { dedupe: SOLID_DEDUPE },
     // every repo's files, beside spell-app (`TOP_REPO`)
-    server: { fs: { allow: [TOP_REPO] } },
+    server: { ...DEV_SERVER_SETTINGS, fs: { allow: [TOP_REPO] } },
     css: {
       transformer: "lightningcss",
       lightningcss: {
@@ -77,6 +77,46 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
     }
   } satisfies UserConfig
 }
+
+////////////////
+// ## The page server, behind the editor
+////////////////
+
+/**
+ * The editor's dev server passing the page server's paths on to it:  the API, a project's files, the elements' bundles,
+ * the component sets' and epics' pages (`vite.config.ts`'s `server.proxy`).
+ * - `target`:  the page server, by IP:  `localhost` may be ::1 first, where it doesn't listen (`EditorServer`)
+ * - `token`:  the page server's write token, which `EditorServer` hands vite as `SPELL_SERVER_TOKEN`
+ *   - added to every request to a project data folder (`/api/places/...`) as the proxy sends it on,
+ *     so a program run in the editor reads and writes its places as a page the page server served does
+ *     (epic `language` T68:  without it, every request there answered 403, "bad token")
+ *   - NEVER handed to the page:  vite listens on every address, and the token stays on this machine's side of it
+ *   - the page server's guard still checks the `Origin`:  it takes the editor's own (`EditorServer`), no other site's
+ *   - only there:  the rest of the API takes no token, and the token's other doors (an invite) stay shut to the editor
+ * - Every one with `changeOrigin`:  the page server checks its own `Host`.
+ * - The live channel's websocket too (`/api`'s `ws`):  it tells the editor the person's theme changed.
+ */
+export function pageServerProxy({ target, token }: { target: string; token?: string }): Record<string, ProxyOptions> {
+  const passed = { target, changeOrigin: true }
+  return {
+    // FIRST:  vite takes the first entry a path starts with
+    "/api/places": { ...passed, ...(token && { headers: { [SERVER_TOKEN_HEADER]: token } }) },
+    "/api": { ...passed, ws: true },
+    // a project's files, by their URL:  `/spaces/<project>/<file>` (`SP.SpellUrls`)
+    "/spaces": passed,
+    "/element": passed,
+    // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
+    // (`@spell/notebooks/Avatar`, epic `elemental-spell` P18)
+    "/components": passed,
+    // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
+    // epic `debut` P24)
+    "/epics": passed,
+    "/_epic": passed
+  }
+}
+
+/** The header the page server's guard reads its write token from (`SRV.Guard`). */
+const SERVER_TOKEN_HEADER = "x-server-token"
 
 ////////////////
 // ## One Solid per page
@@ -261,21 +301,31 @@ function iconPacksBesideBuiltIns(): Plugin {
   }
 }
 
-/** The editor's layout pieces:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
-const LAYOUT_FOLDER = "/src/app/layout/"
+/** The editor's own pieces, the group `@spell/editor`:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
+const LAYOUT_FOLDER = "/spaces/@spell/editor/"
+
+/** Where the editor's pieces keep their last good compiles:  the app's `build/`, never committed, one file per piece. */
+const LAST_GOOD_FOLDER = "app/build/editor-pieces"
 
 /**
- * A `.spellml` file in the layout's folder, imported, is its project's compiled javascript, as text:  the editor's own layout pieces,
- * in Spell (`layoutSpell.ts`).
- * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`, which writes nothing.
+ * A `.spellml` file of the editor's own pieces (the group `@spell/editor`), imported,
+ * is its project's compiled javascript, as text (`layoutSpell.ts`).
+ * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`.
  * - Compiled in a process of its own, as the preview build compiles, so no config loads the parser.
- * - A piece that doesn't compile stops the build, saying why:  a dev server shows it on the page.
  * - Text, not a module:  it can only run on a copy of the runtime, which isn't in this bundle.
+ * - Each good compile is kept (`LAST_GOOD_FOLDER`), so a broken edit can't lock you out of the editor (epic `editor` P22):
+ *   - the dev server:  a piece that doesn't compile falls back to its last good compile, and the module tells the
+ *     editor why (`layoutPieceBroken()`), which says so in plain words
+ *   - a build, or a test, or a piece never compiled before:  it stops, saying why, so nothing broken ships
  */
 function compiledSpell(): Plugin {
+  let canFallBack = false
   return {
     name: "spell-app:compiled-spell",
     enforce: "pre",
+    configResolved(config) {
+      canFallBack = config.command === "serve" && !process.env.VITEST
+    },
     load(id) {
       const file = id.split("?")[0]!
       if (!file.endsWith(".spellml") || !file.includes(LAYOUT_FOLDER)) return null
@@ -284,8 +334,20 @@ function compiledSpell(): Plugin {
       const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {
         encoding: "utf8"
       })
-      if (status !== 0) this.error(`${file} doesn't compile:\n${stderr}`)
-      return `export default ${JSON.stringify(stdout)}`
+      const piece = path.basename(path.dirname(file))
+      const lastGood = path.join(TOP_REPO, LAST_GOOD_FOLDER, `${piece}.js`)
+      if (status === 0) {
+        mkdirSync(path.dirname(lastGood), { recursive: true })
+        writeFileSync(lastGood, stdout)
+        return `export default ${JSON.stringify(stdout)}`
+      }
+      if (!canFallBack || !existsSync(lastGood)) return this.error(`${file} doesn't compile:\n${stderr}`)
+      this.warn(`${file} doesn't compile, so the editor runs its last good compile:\n${stderr}`)
+      return [
+        `import { layoutPieceBroken } from "spell/app/app/layout/layoutSpell"`,
+        `layoutPieceBroken(${JSON.stringify(piece)}, ${JSON.stringify(stderr.trim())})`,
+        `export default ${JSON.stringify(readFileSync(lastGood, "utf8"))}`
+      ].join("\n")
     }
   }
 }

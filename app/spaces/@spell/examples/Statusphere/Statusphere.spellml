@@ -1,0 +1,71 @@
+# Statusphere
+Bluesky's example app, in Spell:  set your status, an emoji, and see everyone's as they arrive.
+Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.
+
+// Every emoji to pick is a big, plain button
+<ui-defaults>
+	<ui-button size="large" appearance="basic"/>
+</ui-defaults>
+
+## A status:  the emoji, who set it, and when
+
+<spell-more-of "status">
+	<property "who" description="Its owner's handle, once their account says so;  else the account itself">
+		set account to its owner
+		set person to the first person in everyone here where its id is account
+		if person is nothing
+			return account
+		return person's name
+	</property>
+
+	<draw>
+		<stack direction="horizontal" align="center">
+			<text size="big">{its status}</text>
+			<text>@{its who}</text>
+			<text color="grey" size="small">{its created at}</text>
+		</stack>
+	</draw>
+</spell-more-of>
+
+
+## The app:  the emoji to pick, then everyone's statuses, newest first
+
+<spell-app "statusphere">
+	<property "recent" description="Newest first:  by when each was set, the other way round">
+		set found to every status sorted by its created at
+		reverse found
+		return found
+	</property>
+
+	<action "post (emoji as text)" description="Your status:  a new record in your own account, as Statusphere writes one">
+		add (a new status with status = emoji, created at = a new date) to the statuses
+	</action>
+
+	<draw description="One narrow column:  its title, the emoji to pick, then the statuses">
+		<container text>
+			<stack align="start">
+				<header size="large">Statusphere</header>
+				<text color="grey">Set your status on the Atmosphere</text>
+			</stack>
+			<card fluid>
+				<content>
+					<header size="small">Set your status</header>
+					<stack direction="horizontal" wrap>
+						<button onClick={post "👍"}>👍</button>
+						<button onClick={post "👎"}>👎</button>
+						<button onClick={post "💙"}>💙</button>
+						<button onClick={post "😎"}>😎</button>
+						<button onClick={post "🦋"}>🦋</button>
+						<button onClick={post "🚀"}>🚀</button>
+					</stack>
+				</content>
+			</card>
+			<header size="small">Recent</header>
+			<for status in the recent loading="Finding statuses">
+				<empty>
+					<text color="grey">No statuses yet. Be the first!</text>
+				</empty>
+			</for>
+		</container>
+	</draw>
+</spell-app>

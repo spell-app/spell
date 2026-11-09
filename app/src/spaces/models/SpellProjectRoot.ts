@@ -1,4 +1,5 @@
-import { JSON5File, CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { JSON5File, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
 import { LOCAL_PERSON } from "./projectGroups"
@@ -50,6 +51,10 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   static get fixtures(): SpellProjectRoot {
     return new SpellProjectRoot("@spell/test")
   }
+  /** Singleton `@spell/editor` root -- the editor's own pieces in Spell (epic `editor` P22);  listed in the UI in dev only. */
+  static get editorPieces(): SpellProjectRoot {
+    return new SpellProjectRoot("@spell/editor")
+  }
   /** Singleton `@spell/library` root -- projects others import, e.g. `@spell/library/people` in a project file. */
   static get library(): SpellProjectRoot {
     return new SpellProjectRoot("@spell/library")
@@ -69,6 +74,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     if (name.startsWith("notebooks")) return SpellProjectRoot.notebooks
     if (name.startsWith("library")) return SpellProjectRoot.library
     if (name.startsWith("fixtures")) return SpellProjectRoot.fixtures
+    if (name.startsWith("editor")) return SpellProjectRoot.editorPieces
     return undefined
   }
 
@@ -184,27 +190,15 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   ////////////////
 
   /**
-   * Show `prompt()` to get new filename.
-   * - If you're basing off of a different project, pass its `projectId` (which MUST be valid!!!).
-   * - Returns `projectId` or `undefined`.
+   * The project id for a name someone typed, beside project `basedOn` (which MUST be valid) or in this group.
+   * - The editor asks for the name:  models never show a dialog.
+   * - Returns `undefined` for a name with nothing left in it.
    * - SIDE EFFECT:  notes the title typed for it, in `titlesTyped`.
    */
-  promptForProjectId({
-    projectId,
-    defaultName,
-    message = `Name for the new ${this.type}?`,
-    die
-  }: {
-    projectId?: string
-    defaultName?: string
-    message?: string
-    die?: ReturnType<typeof getDier>
-  } = {}): string | undefined {
-    const originalLocation = projectId ? new SP.SpellLocation(projectId, die) : undefined
-    if (!defaultName) defaultName = originalLocation?.projectName || "untitled"
-
+  projectIdForName(name: string, basedOn?: string): string | undefined {
+    const originalLocation = basedOn ? new SP.SpellLocation(basedOn) : undefined
     // lower-kebab, as every project's name (decision Q39):  `My Thing` => `my-thing`
-    const typed = (prompt(message, defaultName) ?? "").trim()
+    const typed = name.trim()
     const projectName = SP.SpellLocation.kebab(typed)
     if (!projectName) return undefined
     const newProjectId = `${originalLocation?.projectRoot ?? this.path}/${projectName}`
@@ -213,27 +207,20 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   }
 
   /**
-   * The title typed for each project `promptForProjectId()` named, by its id:
+   * The title typed for each project `projectIdForName()` named, by its id:
    * sent with its create, copy or rename (decision Q45).
    * - text:  what was typed, when the name made from the folder can't say it, `Todos - Form Based`
    * - `null`:  it can, so the project file keeps no title
-   * - none:  not prompted for;  the project file's title stays as it is
+   * - none:  no name typed;  the project file's title stays as it is
    */
   protected titlesTyped = new Map<string, string | null>()
 
   /**
    * Create a new project at `projectId`, starting as `first` (default:  a blank app, with a drawing to add things to).
-   * Returns new project, `undefined` if cancelled, or throws on error.
+   * Returns new project, or throws on error.
    */
-  async createApp(
-    projectId?: string,
-    first?: { filePath: string; contents: string }
-  ): Promise<SP.SpellProject | undefined> {
+  async createApp(projectId: string, first?: { filePath: string; contents: string }): Promise<SP.SpellProject> {
     const die = getDier(this, `creating ${this.type}`, { projectId })
-
-    if (!projectId) projectId = this.promptForProjectId({ die })
-    if (!projectId) return undefined
-    die.params.projectId = projectId
 
     const location = new SP.SpellLocation(projectId, die)
     if (!location.isProjectPath) die("You must pass a projectId.")
@@ -330,17 +317,13 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
    * Duplicate an existing project.
    * Returns new project, `undefined` if cancelled, or throws on error.
    */
-  async duplicateApp(projectId: string, newProjectId?: string): Promise<SP.SpellProject | undefined> {
+  async duplicateApp(projectId: string, newProjectId: string): Promise<SP.SpellProject> {
     const die = getDier(this, `duplicating ${this.type}`, { projectId, newProjectId })
 
     new SP.SpellLocation(projectId, die)
 
     await this.loadOrDie(die)
     if (!this.getProject(projectId)) die(`${this.Type} does not exist.`)
-
-    if (!newProjectId) newProjectId = this.promptForProjectId({ projectId, die })
-    if (!newProjectId) return undefined
-    die.params.newProjectId = newProjectId
 
     const newLocation = new SP.SpellLocation(newProjectId, die)
     if (!newLocation.isProjectPath) die("You must pass a newProjectId.")
@@ -366,7 +349,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
    * Rename an existing project.
    * Returns new project, `undefined` if cancelled, or throws on error.
    */
-  async renameApp(projectId: string, newProjectId?: string): Promise<SP.SpellProject | undefined> {
+  async renameApp(projectId: string, newProjectId: string): Promise<SP.SpellProject | undefined> {
     const die = getDier(this, `renaming ${this.type}`, { projectId, newProjectId })
 
     new SP.SpellLocation(projectId, die)
@@ -374,10 +357,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     await this.loadOrDie(die)
     const project = this.getProject(projectId) || die(`${this.Type} does not exist.`)
 
-    if (!newProjectId)
-      newProjectId = this.promptForProjectId({ projectId, message: `New name for the ${this.type}?`, die })
-    if (!newProjectId || newProjectId === projectId) return undefined
-    die.params.newProjectId = newProjectId
+    if (newProjectId === projectId) return undefined
 
     const newLocation = new SP.SpellLocation(newProjectId, die)
     if (!newLocation.isProjectPath) die("You must pass a newProjectId.")
@@ -393,7 +373,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
       })
       this.contents = newContents
       // Have the project clean itself up in a tick (doing it at once trips whatever is drawing it)
-      setTimeout(() => project.onRemove(), 10)
+      void after(0.01, () => project.onRemove()).catch(console.error)
     } catch (e) {
       die(`Server error renaming ${this.type}`, e)
     }
@@ -404,18 +384,14 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
 
   /**
    * Remove an existing project.
-   * Returns `true` on success, `false` if cancelled, or throws on error.
+   * Returns `true` on success, or throws on error.
    */
-  async deleteApp(projectId: string, shouldConfirm?: typeof CONFIRM): Promise<boolean> {
+  async deleteApp(projectId: string): Promise<boolean> {
     const die = getDier(this, `removing ${this.type}`, { projectId })
     new SP.SpellLocation(projectId, die)
 
     await this.loadOrDie(die)
     const project = this.getProject(projectId) || die(`${this.Type} does not exist.`)
-
-    if (shouldConfirm === CONFIRM) {
-      if (!confirm(`Really remove ${this.type} '${project.projectName}'?`)) return false
-    }
 
     // Tell the server to remove the project, which returns new projects list
     try {
@@ -434,7 +410,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     if (this.getProject(projectId)) die(`Server didn't delete ${this.type}.`)
 
     // Have the project clean itself up in a tick (doing it at once trips whatever is drawing it)
-    setTimeout(() => project.onRemove(), 10)
+    void after(0.01, () => project.onRemove()).catch(console.error)
     return true
   }
 

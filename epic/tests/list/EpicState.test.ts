@@ -31,6 +31,12 @@ describe("epicStateFor()", () => {
     expect(state({ phases: ["todo"] }).name).toBe("progress")
   })
 
+  // epic `epic-engine` I228:  a dropped phase is finished, as a done one is
+  it("counts a dropped phase as finished:  `2/3` done, and done once every phase is done or dropped", () => {
+    expect(state({ phases: ["done", "dropped", "todo"], updated: "2026-10-10" }).count).toBe("2/3")
+    expect(state({ phases: ["done", "dropped"], updated: "2026-01-01" }).name).toBe("done")
+  })
+
   it("is done or has errors once every phase is done:  errors while items need Owen", () => {
     expect(state({ phases: ["done", "done"], updated: "2026-01-01" })).toMatchObject({ name: "done", color: "green" })
     expect(state({ phases: ["done"], urgent: ["j3", "q1", "j4"] })).toMatchObject({

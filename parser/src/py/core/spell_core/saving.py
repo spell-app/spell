@@ -386,9 +386,9 @@ def default_ref_of(thing: SpellObject) -> str:
 def iso_text(date: datetime) -> str:
     """`date` as JavaScript's `toISOString()` writes it:  in UTC, to the millisecond, `1970-01-01T00:00:00.000Z`.
 
-    - A date with no time zone is read as UTC, as JavaScript reads ISO text with none.
+    - A date with no time zone is in the reader's own, as `_date_if_declared()` reads one (epic `data` I73).
     """
-    in_utc = date.replace(tzinfo=UTC) if date.tzinfo is None else date.astimezone(UTC)
+    in_utc = date.astimezone(UTC)
     return in_utc.isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
@@ -405,7 +405,9 @@ def _is_reference(json: object) -> bool:
 def _date_if_declared(cls: type, key: str, value: object) -> object:
     """`value` as a `datetime`, if `cls` declares `key` a date and `value` is its ISO text;  else `value`.
 
-    - Text with no time zone is read as UTC, as JavaScript reads ISO text with none.
+    - Text with no time zone is in the reader's own time, as the JavaScript core reads it (epic `data` I73):
+      `"2026-11-06T14:00"` is 2 pm here, and `"1977-05-25"`, a day alone, that day's midnight here;
+      so its day and its hour agree.
     """
     declared = getattr(cls, key, None)
     if not isinstance(value, str) or not isinstance(declared, Prop) or declared.type != "date":
@@ -414,4 +416,4 @@ def _date_if_declared(cls: type, key: str, value: object) -> object:
         date = datetime.fromisoformat(value)
     except ValueError:
         return value
-    return date.replace(tzinfo=UTC) if date.tzinfo is None else date
+    return date.astimezone() if date.tzinfo is None else date

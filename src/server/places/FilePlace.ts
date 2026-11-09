@@ -1,4 +1,4 @@
-import { oneAtATime } from "spell/util/places/ChunkedPlace"
+import { oneAtATime } from "spell/places/ChunkedPlace"
 import {
   PlaceError,
   idOfRow,
@@ -14,7 +14,7 @@ import {
   type PlaceRow,
   type SelectingContext,
   type WatchTarget
-} from "spell/util/places/places.types"
+} from "spell/places/places.types"
 import { SRV } from "spell/server"
 
 import type { FolderStorage } from "./FolderPlace"

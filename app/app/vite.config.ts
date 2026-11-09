@@ -4,7 +4,7 @@ import { defineConfig, type Plugin } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
 import environment from "spell/app/spaces/server/node/environment"
-import { TOP_REPO, appConfig } from "./vite.shared.ts"
+import { appConfig, pageServerProxy } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
 const RUNTIME_ENTRY = "spell-runtime"
@@ -29,44 +29,15 @@ export default defineConfig({
   ...APP_CONFIG,
   plugins: [...APP_CONFIG.plugins, repoSourceInDev(), runtimeCopyInDev()],
   server: {
-    // every repo's files, beside spell-app (`appConfig()`'s, which this `server` replaces)
-    fs: { allow: [TOP_REPO] },
+    ...APP_CONFIG.server,
     port: environment.vitePort,
     host: "0.0.0.0",
-    // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's pages
-    proxy: {
-      // its websocket too:  the live channel, which tells the editor the person's theme changed (`ThemePreference`)
-      "/api": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true,
-        ws: true
-      },
-      // a project's files, by their URL:  `/spaces/<project>/<file>` (`SP.SpellUrls`)
-      "/spaces": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      "/element": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
-      // (`@spell/notebooks/Avatar`, epic `elemental-spell` P18)
-      "/components": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
-      // epic `debut` P24)
-      "/epics": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      },
-      "/_epic": {
-        target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
-      }
-    }
+    // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's
+    // pages;  its write token added for the project data folders (`pageServerProxy()`)
+    proxy: pageServerProxy({
+      target: `http://${environment.api_server}:${environment.expressPort}`,
+      ...(environment.serverToken !== undefined && { token: environment.serverToken })
+    })
   },
   build: {
     outDir: "dist",
@@ -114,13 +85,14 @@ function repoSourceInDev(): Plugin {
   }
 }
 
-/** The query that marks a module as the layout's copy:  `layoutSpell.ts`'s. */
-const LAYOUT_COPY = "?layout-copy"
+/** The queries that mark a module as a copy of its own:  the layout's (`layoutSpell.ts`), the tests' (`editor.runTests()`). */
+const COPY_QUERY = /\?(?:layout|tests)-copy$/
 /** The folders holding what a runtime keeps per copy:  its `core`, and what runs on it. */
 const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
 /**
- * In dev, the layout's copy of the runtime, as `layoutSpell.ts` asks for it, gets modules of its own.
+ * In dev, the layout's copy of the runtime, as `layoutSpell.ts` asks for it, gets modules of its own;  so does the
+ * copy the tests run on (`editor.runTests()`).
  * - A build's copy is the runtime's text from a new URL, holding all of `core`.
  *   Vite serves a module per file instead, so a copy of the top file would still share `core` with the first.
  * - So the query follows the imports through the folders that hold a runtime's state.
@@ -132,10 +104,11 @@ function runtimeCopyInDev(): Plugin {
     apply: "serve",
     enforce: "pre",
     async resolveId(id, importer) {
-      if (!importer?.includes(LAYOUT_COPY)) return null
+      const copy = importer && COPY_QUERY.exec(importer)?.[0]
+      if (!copy) return null
       const resolved = await this.resolve(id, importer.split("?")[0], { skipSelf: true })
       if (!resolved || !PER_COPY.test(resolved.id) || resolved.id.includes("?")) return resolved
-      return { ...resolved, id: resolved.id + LAYOUT_COPY }
+      return { ...resolved, id: resolved.id + copy }
     }
   }
 }

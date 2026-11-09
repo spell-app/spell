@@ -1,0 +1,84 @@
+## Administración de la org:  dónde se guardan los roles de una org
+// Los roles de una org viven en su espacio de administración:  quién está, sus equipos y proyectos, quién dirige qué, y
+// hasta cuándo.  Cada cambio pasa por el servidor de Encanto, con las reglas de la org, y queda en el registro:
+// tampoco desde esta página puede un Project Manager quitar a un Team Manager.
+// La página de tu org nombra su propia org en la línea siguiente:  "@rs" es la de la Rock Society.
+roles de la org es una carpeta de datos en "@rs/__admin/roles":
+	- se revisa cada 30 segundos
+	- los perfiles están en "org_profiles"
+	- las funciones están en "org_roles"
+	- los miembros están en "members"
+	- los equipos están en "teams"
+	- los proyectos están en "projects"
+	- los mandatos están en "terms"
+	- las aprobaciones están en "approved_apps"
+	- los diseñadores están en "designers"
+	- las etapas están en "event_stages"
+	- los cambios están en "role_changes"
+
+// La org misma, para el título de la página y como espacio que diseñar.
+un "perfil" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+	- su "espacio" es texto, guardado como "space"
+
+// Un rol de la org, por su nombre.
+una "función" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+
+un "miembro" es una cosa:
+	- vive en roles de la org
+	- su "persona" es texto, guardado como "person"
+	- su "nombre" es texto, guardado como "name"
+	- su "rol" es texto, guardado como "role"
+	- su "cargo" es texto, guardado como "roleName"
+
+un "equipo" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+	- su "espacio" es texto, guardado como "space"
+
+un "proyecto" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+	- su "equipo" es texto, guardado como "team"
+	- su "espacio" es texto, guardado como "space"
+
+un "mandato" es una cosa:
+	- vive en roles de la org
+	- su "rol" es texto, guardado como "role"
+	- su "titular" es texto, guardado como "holder"
+	- su "ámbito" es texto, guardado como "manages"
+	- su "cargo" es texto, guardado como "roleName"
+	- su "nombre titular" es texto, guardado como "holderName"
+	- su "nombre ámbito" es texto, guardado como "managesName"
+	- su "inicio" es texto, guardado como "starts"
+	- su "fin" es texto, guardado como "ends"
+
+una "aprobación" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+	- su "versión" es texto, guardado como "version"
+
+// Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica.
+un "diseñador" es una cosa:
+	- vive en roles de la org
+	- su "persona" es texto, guardado como "person"
+	- su "espacio" es texto, guardado como "space"
+	- su "nombre persona" es texto, guardado como "personName"
+
+// Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers".
+una "etapa" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+	- su "siguiente" es texto, guardado como "movesTo"
+	- su "quién mueve" es texto, guardado como "movedBy"
+
+un "cambio" es una cosa:
+	- vive en roles de la org
+	- su "cuándo" es texto, guardado como "at"
+	- su "quién" es texto, guardado como "who"
+	- su "hecho" es texto, guardado como "did"
+	- su "qué" es texto, guardado como "what"
+	- su "por qué" es texto, guardado como "why"

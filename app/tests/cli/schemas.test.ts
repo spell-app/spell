@@ -7,7 +7,7 @@ import { afterAll, describe, test, expect } from "vite-plus/test"
 import { CLI } from "spell/app/cli"
 
 /**
- * Each type of a compiled library, as JSON Schema for VS Code (`CLI.writeSchemas()`, epic `people-and-orgs` P5):
+ * Each type of a compiled library, as JSON Schema for VS Code and as a Lexicon (`CLI.writeSchemas()`, epic `people-and-orgs` P5):
  * People's, the frozen test project's library, written into a temp folder -- never its build folder.
  */
 describe("writeSchemas()", () => {
@@ -18,15 +18,12 @@ describe("writeSchemas()", () => {
   afterAll(() => rmSync(folder, { recursive: true, force: true }))
 
   test("one schema per type the library exports", async () => {
-    const wrote = await CLI.writeSchemas(library, folder)
-    expect(wrote.map((path) => path.slice(folder.length + 1)).sort()).toEqual([
-      "DatedEvent.schema.json",
-      "FriendList.schema.json",
-      "Note.schema.json",
-      "Person.schema.json",
-      "Relationship.schema.json"
-    ])
-    expect(readdirSync(folder)).toHaveLength(5)
+    const wrote = await CLI.writeSchemas(library, folder, "@spell/library/people")
+    const types = ["DatedEvent", "FriendList", "Note", "Person", "Relationship"]
+    expect(wrote.map((path) => path.slice(folder.length + 1)).sort()).toEqual(
+      types.flatMap((type) => [`${type}.lexicon.json`, `${type}.schema.json`])
+    )
+    expect(readdirSync(folder)).toHaveLength(10)
   })
 
   test("a type's schema holds its declared properties, and refuses others", () => {
@@ -37,5 +34,17 @@ describe("writeSchemas()", () => {
     )
     expect(person.properties.emails).toEqual({ type: "array", items: { type: ["string", "null"] } })
     expect(person.additionalProperties).toBe(false)
+  })
+
+  test("its Lexicon beside it, named by the library's address (epic `atmosphere` P10)", () => {
+    const person = JSON.parse(readFileSync(resolve(folder, "Person.lexicon.json"), "utf8"))
+    expect(person).toMatchObject({ lexicon: 1, id: "space.spell.spell.library.people.person" })
+    expect(person.defs.main).toMatchObject({ type: "record", key: "any" })
+    expect(person.defs.main.record.properties.name).toMatchObject({ type: "string", description: "name" })
+  })
+
+  test("a type marked for publishing:  what `spell space lexicon publish` would publish", async () => {
+    // the frozen library marks none
+    expect([...(await CLI.publishedLexicons(library, "@spell/library/people")).keys()]).toEqual([])
   })
 })

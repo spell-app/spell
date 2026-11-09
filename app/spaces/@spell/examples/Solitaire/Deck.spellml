@@ -22,8 +22,8 @@ The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if yo
 		the deck is a new deck
 		the number of cards in the deck should be 52
 		the number of (cards in the deck where it is a queen) should be 4
-		the state of the first card of the deck should be "A♣↓"
-		the name of the last card of the deck should be "king of spades"
+		the deck's first card's state should be "A♣↓"
+		the deck's last card's name should be "king of spades"
 		a random card of the deck is a joker should be no
 		shuffle the deck
 		the number of cards in the deck should be 52
@@ -36,6 +36,6 @@ The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if yo
 		the number of cards in wild cards should be 2
 		the first card of the deck is the ace of clubs should be yes
 		the last card of the deck is the black joker should be yes
-		the name of the bottom card of the deck should be "black joker"
+		the deck's bottom card's name should be "black joker"
 	</test>
 </spell-thing>

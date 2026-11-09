@@ -347,6 +347,8 @@ const FIELD_LOOKS = {
   choices: { icon: "square check", label: "choices" },
   plan: { icon: "route", label: "plan" },
   done: { icon: "circle check", label: "done" },
+  // a dropped phase's why (epic `epic-engine` I228):  its status icon's glyph
+  dropped: { icon: "circle xmark", label: "dropped" },
   files: { icon: "folder", label: "files" },
   verify: { icon: "flask", label: "verify" },
   "to-review": { icon: "list check", label: "toReview" }

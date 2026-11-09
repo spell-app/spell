@@ -35,20 +35,34 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 
 | Example | Address | What it shows | Running |
 | --- | --- | --- | --- |
-| FizzBuzz | [`@spell/examples/fizzbuzz`](spaces/@spell/examples/fizzbuzz/) | Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and `print`, in eight lines | <a href="docs/images/examples/fizzbuzz.png"><img src="docs/images/examples/fizzbuzz.png" width="360" alt="FizzBuzz open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| FizzBuzz | [`@spell/examples/fizzbuzz`](spaces/@spell/examples/fizzbuzz/) | Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and an event for each number, which the console prints;  turn on Explainer.spellml for a page that explains it and shows the results | <a href="docs/images/examples/fizzbuzz.png"><img src="docs/images/examples/fizzbuzz.png" width="360" alt="FizzBuzz open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Counter | [`@spell/examples/Counter`](spaces/@spell/examples/Counter/) | A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines | <a href="docs/images/examples/Counter.png"><img src="docs/images/examples/Counter.png" width="360" alt="Counter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Calculator | [`@spell/examples/calculator`](spaces/@spell/examples/calculator/) | A pocket calculator on Spell UI:  an app with text properties, actions like `to clear (a calculator)`, and a keypad of buttons whose clicks are Spell | <a href="docs/images/examples/calculator.png"><img src="docs/images/examples/calculator.png" width="360" alt="Calculator open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Tic-Tac-Toe | [`@spell/examples/tic-tac-toe`](spaces/@spell/examples/tic-tac-toe/) | Noughts and crosses on a grid of squares that draw themselves:  whose turn it is, and three in a row, written as sentences | <a href="docs/images/examples/tic-tac-toe.png"><img src="docs/images/examples/tic-tac-toe.png" width="360" alt="Tic-Tac-Toe open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Bill Splitter | [`@spell/examples/bill-splitter`](spaces/@spell/examples/bill-splitter/) | Who owes what after a meal:  a form of people and what each ordered, a tip shared out the same way, and sums that follow every keystroke | <a href="docs/images/examples/bill-splitter.png"><img src="docs/images/examples/bill-splitter.png" width="360" alt="Bill Splitter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Flash Cards | [`@spell/examples/flash-cards`](spaces/@spell/examples/flash-cards/) | A deck of Spanish words to quiz yourself on:  a card turns over on a click, you say whether you knew it, and a score keeps count | <a href="docs/images/examples/flash-cards.png"><img src="docs/images/examples/flash-cards.png" width="360" alt="Flash Cards open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Calculator | [`@spell/examples/calculator`](spaces/@spell/examples/calculator/) | A pocket calculator on Spell UI:  an app whose total is worked out as it's read, actions like `clear it` and `press (digit) on it`, and a keypad of buttons in a grid, whose clicks are Spell | <a href="docs/images/examples/calculator.png"><img src="docs/images/examples/calculator.png" width="360" alt="Calculator open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Tic-Tac-Toe | [`@spell/examples/tic-tac-toe`](spaces/@spell/examples/tic-tac-toe/) | Noughts and crosses on Spell UI:  nine squares drawn as buttons in a grid, whose turn it is, and three in a row, written as sentences | <a href="docs/images/examples/tic-tac-toe.png"><img src="docs/images/examples/tic-tac-toe.png" width="360" alt="Tic-Tac-Toe open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Bill Splitter | [`@spell/examples/bill-splitter`](spaces/@spell/examples/bill-splitter/) | Who owes what after a meal:  a row of Spell UI's fields per person and what each ordered, a tip shared out the same way, and sums that follow every keystroke | <a href="docs/images/examples/bill-splitter.png"><img src="docs/images/examples/bill-splitter.png" width="360" alt="Bill Splitter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Flash Cards | [`@spell/examples/flash-cards`](spaces/@spell/examples/flash-cards/) | A deck of Spanish words to quiz yourself on:  each card a two sided view that turns over on a click, you say whether you knew it, and a toolbar keeps the score | <a href="docs/images/examples/flash-cards.png"><img src="docs/images/examples/flash-cards.png" width="360" alt="Flash Cards open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Habit Tracker | [`@spell/examples/habit-tracker`](spaces/@spell/examples/habit-tracker/) | A week of checkboxes per habit:  each habit its own element with a form of its own, its days done and its longest streak worked out as you tick | <a href="docs/images/examples/habit-tracker.png"><img src="docs/images/examples/habit-tracker.png" width="360" alt="Habit Tracker open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Task List | [`@spell/examples/TaskList`](spaces/@spell/examples/TaskList/) | A to-do list in spellx, Spell in tags:  each task its own element, with Spell UI's controls;  a toolbar of actions filters it, ticking the one it shows, and a click selects tasks (shift and command for more) for a property editor that changes them all at once | <a href="docs/images/examples/TaskList.png"><img src="docs/images/examples/TaskList.png" width="360" alt="Task List open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Lista de tareas | [`@spell/examples/ListaDeTareas`](spaces/@spell/examples/ListaDeTareas/) | Task List's Spanish twin:  a to-do list in the outline style, in Spanish, each task its own element with Spell UI's controls, a click selecting tasks for a property editor that changes them all at once | <a href="docs/images/examples/ListaDeTareas.png"><img src="docs/images/examples/ListaDeTareas.png" width="360" alt="Lista de tareas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Solitaire | [`@spell/examples/Solitaire`](spaces/@spell/examples/Solitaire/) | Klondike solitaire in spellx, Spell in tags:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, with keys and a right-click menu;  `pause for` animates the deal | <a href="docs/images/examples/Solitaire.png"><img src="docs/images/examples/Solitaire.png" width="360" alt="Solitaire open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in the outline style, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Task List | [`@spell/examples/TaskList`](spaces/@spell/examples/TaskList/) | A to-do list in spellx, Spell in tags:  each task its own element, with Spell UI's controls;  a toolbar of actions filters it, ticking the one it shows, and a click selects tasks (shift and command for more) for a property editor that changes them all at once;  the tasks are kept in this browser, a JSON file on the server, a CSV file on the server or your atmosphere account, each a keeper in an API file of its own, picked in the app | <a href="docs/images/examples/TaskList.png"><img src="docs/images/examples/TaskList.png" width="360" alt="Task List open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Lista de tareas | [`@spell/examples/ListaDeTareas`](spaces/@spell/examples/ListaDeTareas/) | Task List's Spanish twin:  a to-do list in spellx, in Spanish, each task its own element with Spell UI's controls, a click selecting tasks for a property editor that changes them all at once;  the tasks kept in this browser, a JSON file on the server, a CSV file on the server or your atmosphere account, each a keeper in an API file of its own, picked in the app | <a href="docs/images/examples/ListaDeTareas.png"><img src="docs/images/examples/ListaDeTareas.png" width="360" alt="Lista de tareas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Solitaire | [`@spell/examples/Solitaire`](spaces/@spell/examples/Solitaire/) | Klondike solitaire in spellx, Spell in tags:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, each with its title, icon and key, drawn as its toolbar and its right-click menu;  `pause for` animates the deal | <a href="docs/images/examples/Solitaire.png"><img src="docs/images/examples/Solitaire.png" width="360" alt="Solitaire open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in spellml, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has;  the card a reversible view, a joker a card of its own, the game's moves its actions, drawn as its toolbar and its right-click menu | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Administración de la org | [`@spell/examples/AdministracionDeLaOrg`](spaces/@spell/examples/AdministracionDeLaOrg/) | La página de administración de una org:  agrega personas, crea equipos y proyectos, nombra quién dirige qué y hasta cuándo, aprueba aplicaciones, cambia las etapas de sus eventos y lee el registro de cada cambio.  Cada cambio pasa por el servidor de Encanto, con las reglas de la org. | <a href="docs/images/examples/AdministracionDeLaOrg.png"><img src="docs/images/examples/AdministracionDeLaOrg.png" width="360" alt="Administración de la org open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Family Cookbook | [`@spell/examples/FamilyCookbook`](spaces/@spell/examples/FamilyCookbook/) | Your recipes on cards, saved in the cloud:  kept in this browser until you sign in, then on every device you sign in on.  One line of its API file says so, FamilyCookbook.api.spell | <a href="docs/images/examples/FamilyCookbook.png"><img src="docs/images/examples/FamilyCookbook.png" width="360" alt="Family Cookbook open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Inbox | [`@spell/examples/Inbox`](spaces/@spell/examples/Inbox/) | Your inbox in an org:  messages people in it send you, and pages its Managers send, worked out when you open them.  Write to anyone in the org;  a copy lands in each inbox, and the Board and the Admins can read yours. | <a href="docs/images/examples/Inbox.png"><img src="docs/images/examples/Inbox.png" width="360" alt="Inbox open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Org Admin | [`@spell/examples/OrgAdmin`](spaces/@spell/examples/OrgAdmin/) | An org's Admin page:  add people, make teams and projects, name who manages what and until when, approve apps, and read the log of every change.  Each change goes through Spell's server, under the org's rules. | <a href="docs/images/examples/OrgAdmin.png"><img src="docs/images/examples/OrgAdmin.png" width="360" alt="Org Admin open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Chat | [`@spell/examples/OrgChat`](spaces/@spell/examples/OrgChat/) | A team's open thread in its org, live:  a message shows on everyone's open page at once.  Everyone in the org writes in it;  you delete your own messages, and the team's Managers anyone's.  Its organizers' thread is beside it, in the team's private space. | <a href="docs/images/examples/OrgChat.png"><img src="docs/images/examples/OrgChat.png" width="360" alt="Chat open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Org Events | [`@spell/examples/OrgEvents`](spaces/@spell/examples/OrgEvents/) | An org's events, from someone's idea to a quiet record:  anyone proposes one, the Events Team's Managers say yes, which makes its project from a template, and its organizers move it through Planning, Open and Analysis to Quiet, when its spaces turn read only. | <a href="docs/images/examples/OrgEvents.png"><img src="docs/images/examples/OrgEvents.png" width="360" alt="Org Events open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Feed | [`@spell/examples/OrgFeed`](spaces/@spell/examples/OrgFeed/) | What's new across your org:  every post in every space of it you may read, newest first, a quiet event's left out.  What you see more of, and none of, is the program's to say:  change your copy of it. | <a href="docs/images/examples/OrgFeed.png"><img src="docs/images/examples/OrgFeed.png" width="360" alt="Feed open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Picnic Letter | [`@spell/examples/PicnicLetter`](spaces/@spell/examples/PicnicLetter/) | The picnic's letter to each attendee:  the day's details the same for everyone, then your own shifts from the published sheet, and how many invitations you've used, from your inbox. | <a href="docs/images/examples/PicnicLetter.png"><img src="docs/images/examples/PicnicLetter.png" width="360" alt="Picnic Letter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| PokéSpell | [`@spell/examples/PokeSpell`](spaces/@spell/examples/PokeSpell/) | A Pokédex for kids, playful and bright:  every Pokémon from PokéAPI, its API in a file of its own as `spell place ingest` wrote it;  favourites kept on this device beside them, in a second place;  browse by kind, search, Surprise me!, a page with its artwork, its cry and how strong it is, and Who's that Pokémon? | <a href="docs/images/examples/PokeSpell.png"><img src="docs/images/examples/PokeSpell.png" width="360" alt="PokéSpell open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Public Servers | [`@spell/examples/PublicServers`](spaces/@spell/examples/PublicServers/) | Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely.  Open Library:  books found only by a search, refused at compile time without one;  each book's authors linked by their ids;  its covers on another server, each address built from the book's cover id.  JSONPlaceholder:  writes for real, adding, changing and deleting, each answered as if saved, and kept nowhere;  a post's comments read from the post's own address.  Open-Meteo:  a forecast asked for by a latitude and a longitude, refused at compile time without them;  its hours come as lists side by side, each hour read as one of each;  each measure in the unit the answer names, shown in the reader's own.  The Met Museum:  a list of over 500,000 ids, each artwork read whole from its own address only when it's drawn, a page at a time;  its search answers ids too, looking at all of each artwork;  its docs' pace, 80 requests a second, kept.  REST Countries:  every country in one request, with no paging;  its money, its languages and its names keyed by a code, each read as a list of things with that code | <a href="docs/images/examples/PublicServers.png"><img src="docs/images/examples/PublicServers.png" width="360" alt="Public Servers open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  Where they're kept is one line of its API file, RecipeBox.api.spell | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Sign-Up Sheet | [`@spell/examples/SignUpSheet`](spaces/@spell/examples/SignUpSheet/) | A picnic's sign-up sheet:  attendees sign up for a shift from the picnic's shared space, two to a shift, while its organizers keep notes on the master that nobody else sees. | <a href="docs/images/examples/SignUpSheet.png"><img src="docs/images/examples/SignUpSheet.png" width="360" alt="Sign-Up Sheet open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Spell UI Site | [`@spell/examples/SpellUISite`](spaces/@spell/examples/SpellUISite/) | Spell UI's component pages as ONE site:  four components' notebooks, each tab a page at its own address (/button, /button/api ...), the side navigation's order the site's;  the notebooks are their own projects, imported, nothing copied | <a href="docs/images/examples/SpellUISite.png"><img src="docs/images/examples/SpellUISite.png" width="360" alt="Spell UI Site open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  each server's API in a file of its own, Star Wars' as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Star Wars Site | [`@spell/examples/StarWarsSite`](spaces/@spell/examples/StarWarsSite/) | The whole Star Wars example as a site, and its click-through mockup in the Mockup theme:  a list page and a page for one of each of its six collections (films, people, planets, species, vehicles, starships), each at its own address with what it shows in it (/films/:film);  a person opens in a sidebar, a film takes a review in a dialog, kept on this device, and the settings open from every page | <a href="docs/images/examples/StarWarsSite.png"><img src="docs/images/examples/StarWarsSite.png" width="360" alt="Star Wars Site open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Statusphere | [`@spell/examples/Statusphere`](spaces/@spell/examples/Statusphere/) | Bluesky's example app, Statusphere, in Spell:  set your status, an emoji, in your own atmosphere account, and see everyone's as they arrive.  Its status type is read in from Statusphere's Lexicon, Status.spell | <a href="docs/images/examples/Statusphere.png"><img src="docs/images/examples/Statusphere.png" width="360" alt="Statusphere open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | People | [`@spell/library/people`](spaces/@spell/library/people/) | People, orgs, notes and relationships, each saved in a readable JSON5 file;  compiled to TypeScript for the app's "You" panel and the people store | a library:  no app of its own |
 
 <!-- examples:end -->
@@ -177,9 +191,9 @@ clear the calculator
 ```
 
 - The whole program, its other four actions too:
-  [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell).
-- The keypad's grid, four keys a row, is its own CSS:
-  [styles.css](spaces/@spell/examples/calculator/styles.css).
+  [Calculator.spellml](spaces/@spell/examples/calculator/Calculator.spellml).
+- The keypad's grid, four keys a row, is a `<grid columns="4">` in the same file:
+  no CSS.
 
 </details>
 
@@ -205,7 +219,7 @@ Two more things the picture won't tell you:
 
 The classic programming exercise:
 count to 100, saying "fizz" for multiples of 3, "buzz" for multiples of 5, and "fizzbuzz" for both.
-Here's all of [FizzBuzz.spell](spaces/@spell/examples/fizzbuzz/FizzBuzz.spell), not an excerpt:
+Here's all of [FizzBuzz.spellml](spaces/@spell/examples/fizzbuzz/FizzBuzz.spellml), not an excerpt:
 
 ```spell
 ## File FizzBuzz.spell
@@ -280,10 +294,10 @@ Each is one file of Spell and a stylesheet, and each shows one thing the languag
 
 | App | What to look at | Its edge |
 | --- | --- | --- |
-| [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spell) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `the board of tic tac toe` there |
-| [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spell) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
-| [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spell) | a random card, never the one just shown:  `cards in its deck where it is not the card of quiz` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
-| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for day in its days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
+| [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spellml) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `tic tac toe's board` there |
+| [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spellml) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
+| [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spellml) | a random card, never the one just shown:  `cards in the deck where it is not quiz's card` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
+| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spellml) | a streak, worked out from a week of yes and no:  `for day in the days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
 
 ```spell
 // the same mark in all three squares wins
@@ -303,9 +317,11 @@ _From Tic-Tac-Toe:  a phrase with three blanks, which the game says eight times,
 ## Task List:  things that draw themselves, a list, and a property editor
 
 Every framework has its to-do list, and this is Spell's:
-[Task List](spaces/@spell/examples/TaskList/), 141 lines of Spell in two files, and a style sheet.
+[Task List](spaces/@spell/examples/TaskList/), in two files of Spell, an API file for each place it can keep its tasks,
+and two lines of style.
 - [Task.spellml](spaces/@spell/examples/TaskList/Task.spellml):  what a task is, and how it draws.
 - [TaskList.spellml](spaces/@spell/examples/TaskList/TaskList.spellml):  the list of tasks, then the app around it.
+- [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell) and the four beside it:  where the tasks are kept (below).
 
 It's written in spellx, Spell in tags:  a tag for each template, and inside it a tag for each property, alias and drawing,
 with Markdown around them for a person to read
@@ -318,8 +334,10 @@ First, what a task IS:
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
+	<property "order" description="Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back">number</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
+	<action "throw it away" description="...">return</>
 ```
 
 - `<spell-view "task" selectable draggable>` declares a new template, and what people may do to a task on the page:
@@ -335,29 +353,27 @@ a form of its own, bound to the task.
 
 ```html
 <draw description="A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal">
-	<html>
-		<ui-form value={it}>
-			<div part="row">
-				<ui-icon part="grip" name="grip vertical" aria-label="Drag"/>
-				<ui-checkbox name="done" aria-label="Done"/>
-				<ui-input part="title" name="title" aria-label="Task" appearance="transparent"/>
-				<if its priority is not normal>
-					<ui-label part="priority" size="tiny" color={"red" if its priority is high otherwise "grey"}>{its priority}</ui-label>
-				</>
-			</div>
-		</ui-form>
-	</html>
+	<form value={it}>
+		<stack direction="horizontal" spacing="sm">
+			<icon name="grip vertical" color="grey" aria-label="Drag"/>
+			<checkbox name="done" aria-label="Done"/>
+			<input part="title" name="title" aria-label="Task" appearance="transparent" fluid/>
+			<if the priority is not normal>
+				<label size="tiny" color={"red" if the priority is high otherwise "grey"}>{the priority}</label>
+			</>
+		</stack>
+	</form>
 </draw>
 ```
 
-- `<html>` draws its markup exactly as written, Spell UI's elements and the web's own `<div>`;
-  Spell goes inside the braces, `{its priority}`.
+- Every tag is Spell UI's, by its bare name:  `<stack>` is `<ui-stack>`, `<checkbox>` is `<ui-checkbox>`.
+  Spell goes inside the braces, `{the priority}`.
 - There's no change handler anywhere.
   The form is bound to the task (`value={it}`):
   each named field shows its task's property, and writes it back as you type or tick.
 - `<if its priority is not normal>` inside the row keeps the label on the page, hidden while the task's priority is
   normal:  changing it shows or hides the same label, never makes a new one.
-- The style sheet fades a task that's done.
+- The style sheet's two rules:  the title fills the row, and a task that's done fades.
 - A press in the title field or on the checkbox is theirs:  a drag starts from the grip, or the task's bare row.
 
 Then the list, which decides which tasks to show:
@@ -372,19 +388,31 @@ Then the list, which decides which tasks to show:
 	<spell>
 		// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 		- its items can be reordered immediately
+		// a drop has moved its tasks:  each keeps its new place
+		- when a task is dropped on it:
+			keep the order
 		// each task, unless the filter hides it
 		- to draw each item:
 			if it is showing active and the task is done return nothing
 			if it is showing done and the task is active return nothing
 			return draw the task
 	</spell>
-	<draw "placeholder" description="What it shows while it's empty">
-		<text part="placeholder">Nothing to do</text>
+	<draw description="Its tasks one under the other;  while it's empty, a line saying so">
+		<stack spacing="xs">
+			<if it is empty>
+				<text color="grey">Nothing to do</text>
+			</if>
+			<children/>
+		</stack>
 	</draw>
+	<action "keep the order" description="Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time">
+		for task, place in it
+			set the order of task to place
+	</action>
 ```
 
 - A viewable list is an element too, `<task-list-checklist>`, around its tasks' elements.
-- Each task draws itself;  the list only says which to leave out, and what to show when it's empty.
+- Each task draws itself;  the list only says which to leave out, and lays them out:  `<children/>` is where they go.
 - `alias="is showing (showing)"` lets a line ask `it is showing active`, one alias for each of its three values.
 - `its items can be reordered immediately`:  drag a task, and it moves as the pointer goes, dimmed, each task gliding
   to its new place.
@@ -392,6 +420,8 @@ Then the list, which decides which tasks to show:
     rest the pointer there 2 seconds (or `after 1 second`), and it moves;  let go, and it moves at once.
   - Drag a selected task, and every selected one goes with it.
   - The page's `move-delay="0.5"` on the list sets the wait for that one list.
+- `when a task is dropped on it` runs once the dragged tasks are in their new places:
+  `keep the order` sets each task's `order` to its place, from 1, and each task saves itself (below).
 
 <details>
 <summary>What the checklist compiles to</summary>
@@ -413,9 +443,12 @@ export class Checklist extends ViewableList {
     return core.drawThing(item)
   }
 
-  // What it shows while it's empty
-  drawItsPlaceholder() {
-    return h("ui-text", { part: "placeholder" }, "Nothing to do")
+  // Its tasks one under the other;  while it's empty, a line saying so
+  draw() {
+    return h("ui-stack", { spacing: "xs" },
+      h("ui-text", { color: "grey", hidden: () => this.isEmpty ? undefined : true }, "Nothing to do"),
+      h("slot")
+    )
   }
 
   static reorderItemsAfter = 0
@@ -436,26 +469,32 @@ And last, the app:  `<spell-app "task list">`, with its checklist, the new task'
 
 ```html
 <action "add the draft" description="The draft, as a new task at the end of the list;  the field empties">
-	if its draft is "" return
-	add (a new task with title = its draft, priority = normal) to its checklist
-	clear its draft
+	if the draft is "" return
+	set title to the draft
+	set task to keep a new task titled title of the keeper
+	set the priority of task to normal
+	add task to the checklist
+	set the order of task to the length of the checklist
+	clear the draft
 </action>
 
 <group "filter" description="Which tasks the list shows:  the toolbar ticks the one it's showing"/>
-<action "show all" icon="list" selected-when="its checklist is showing all">set the showing of its checklist to all</>
-<action "show to do" icon="square outline" selected-when="its checklist is showing active">set the showing of its checklist to active</>
-<action "show done" icon="check square outline" selected-when="its checklist is showing done">set the showing of its checklist to done</>
-<action "remove the done tasks" icon="trash alternate outline">remove tasks in its checklist where it is done</>
+<action "show all" title="All" icon="list" selected-when="the checklist is showing all">set the showing of the checklist to all</>
+<action "show to do" title="To do" icon="square outline" selected-when="the checklist is showing active">set the showing of the checklist to active</>
+<action "show done" title="Done" icon="check square outline" selected-when="the checklist is showing done">set the showing of the checklist to done</>
 ```
 
-- An action's body is plain Spell, its steps one a line.
-- `icon` and `selected-when` are how a toolbar shows it:  a button with that icon, ticked while the line is true.
+- An action's body is plain Spell, its steps one a line;  `the draft` is the app's own.
+- `title`, `icon` and `selected-when` are how a toolbar shows it:  a button with that icon and title,
+  ticked while the line is true.
+- A menu can hold a menu:  a right click on the list shows `Show`, a sub-menu of the three, then Remove the done tasks.
 
 How it draws:
 - a toolbar across the top:  its title, how many tasks are left to do,
-  then the tasks menu's actions as icon buttons, the filter it's showing ticked
+  then the tasks menu's actions as buttons, the filter it's showing ticked
+- "Keep them in", a `<select>` of the places it can keep its tasks (below)
 - the new task's field, and its Add button, which stays disabled while the field is empty
-- the list, and beside it a property editor, `<ui-property-editor>`, bound to `the selection of its checklist`
+- the list, and beside it a property editor, `<ui-property-editor>`, bound to `the selection of the checklist`
 
 The property editor edits every selected task at once.
 Select three tasks, set the priority to high, and all three change;
@@ -488,17 +527,53 @@ spell test @spell/examples/TaskList
 <summary>Output</summary>
 
 ```text
-✓ Compiling @spell/examples/TaskList
+✓ Compiling @spell/examples/TaskList  3 warnings
+...
 ✓ test checking one off  (2 checks)
 ✓ test the filter  (1 check)
+✓ test a dragged order is kept  (3 checks)
 
-2 passed
+3 passed
 ```
 
 </details>
 
-Nothing is saved, though.
-The tasks last as long as the program runs, and Restart starts again from the four it makes.
+### Where it keeps its tasks
+
+The person picks, from "Keep them in":  this browser (where it starts, so it needs no server and no sign-in),
+a JSON file on the server, a CSV file on the server, or their own atmosphere account, Bluesky's AT Protocol,
+as Statusphere does.
+Each place is an API file of its own, and the app never names one:  it asks its KEEPER.
+
+```spell
+browser storage is a database on this device
+
+a "browser task" is a task:
+	- it lives in browser storage
+	- to throw it away:
+		remove it from the browser tasks
+
+a "browser keeper" is a task keeper:
+	- its "kept tasks" is every browser task
+	- to keep a new task titled (title as text):
+		set task to a new browser task with title = title
+		add task to the browser tasks
+		return task
+```
+
+_TaskList.browser.api.spell, whole:  a place, its kind of task, and its keeper._
+
+- Every keeper does the three things [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell) says:
+  its kept tasks, keeping a new one, and (its kind of task's own) throwing one away.
+- The server's is a project data folder, `task files is a data folder at "tasks"`, a JSON file a task;
+  the CSV file's, `task sheet is a sheet at "tasks.csv"`, a row a task, in the project's `__data/tasks.csv`
+  (a file's name alone is the program's own, and the server writes it, changing only the lines that change);
+  the atmosphere's, `task sky is a personal atmosphere account`, reading only your own.
+- Picking another place changes the app's `storage`;  `when its storage changes`, it takes that place's keeper,
+  and fills the list from it.  A keeper with no tasks starts with the four starting ones.
+- A task saves itself as it changes:  there's no save step.
+- The order you drag the tasks into is kept too:  each task keeps its own `order`, which the drop sets,
+  and the app fills the list `sorted by its order`, so it comes back from every place the same way.
 
 <img src="docs/images/examples/TaskList.png" width="640" alt="Task List open in the Spell editor:  its Spell on the left;  on the right, the menu with 3 to do and four icon buttons, the new task's field, four tasks, the first ticked and marked high, and the property editor below">
 
@@ -506,25 +581,26 @@ _Task List in the editor:  the first task is ticked, because the program makes i
 
 ### Lista de tareas:  the same list, in Spanish
 
-[Lista de tareas](spaces/@spell/examples/ListaDeTareas/) is Task List written in Spanish, in the outline style,
-as Solitario is Solitaire (below):  its own `tarea`, in `Tarea.es.spell`.
+[Lista de tareas](spaces/@spell/examples/ListaDeTareas/) is Task List written in Spanish, in spellx too:
+its own `tarea`, in `Tarea.es.spellml`, and the same four places, each a `guardián`.
 
-```spell
-una "tarea" es una vista donde:
-	- su "título" es texto
-	- su "nota" es texto
-	- su "prioridad" es una de baja, normal o alta
-	- su "hecha" es sí o no
-	- "está hecha" si su hecha es sí
-	- "está pendiente" si su hecha es no
+```html
+<encanto-vista "tarea" seleccionable arrastrable>
+	<propiedad "título" descripción="Lo que hay que hacer">texto</>
+	<propiedad "nota" descripción="Cualquier otra cosa sobre ella">texto</>
+	<propiedad "prioridad" uno-de="baja, normal o alta" />
+	<propiedad "hecha">sí o no</>
+	<propiedad "orden" descripción="Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve">número</>
+	<frase "está hecha">si su hecha es sí</>
+	<frase "está pendiente">si su hecha es no</>
 ```
 
-_A task, in Spanish:  the seven lines of Task List's task, as an outline, their comments left out._
+_A task, in Spanish:  Task List's task, in Spanish tags._
 
-- Its tests are the same two, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
-- It draws with Spell UI's Spanish tags (`<es-formulario>`, `<es-casilla>`), and its menu says "3 pendientes".
+- Its tests are the same three, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
+- It draws with Spell UI's Spanish names (`<formulario>`, `<casilla>`, `<pila>`), and its toolbar says "3 pendientes".
 
-<img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spell on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
+<img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spellml on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
 
 _Lista de tareas in the editor:  the same list, its words in Spanish._
 
@@ -540,7 +616,9 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- its id is its "url"
 	- its rows are its "results"
 	- its next page is its "next"
-	- check it every day
+	- it searches names and titles with "search"
+	- check it once a day at 5am
+	- keep a copy on this device
 
 wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 	- wiki pages live at "/page/summary"
@@ -551,6 +629,7 @@ _From [StarWars.api.spell](spaces/@spell/examples/StarWars/StarWars.api.spell) a
 
 Its rows link to each other by address:  a character says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
 Say what a field links to, and reading it follows the link.
+
 What's inside a field is a thing of its own, read in words, `the source of its thumbnail`:
 
 ```spell
@@ -574,17 +653,22 @@ _From the same file, shortened._
 What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spellml), in Spell UI's elements, adding to those types:
 `<spell-more-of "character">`.
 So looking at the server again never touches a line of it.
+
 A long list says nothing of how long it is:  it draws what fits, and more as you scroll.
 
 Then `the name of its homeworld` is the planet's name, and `<for its films />` draws the films.
-Each field finds the server's own spelling by its words:  `its "hair color"` reads `hair_color`,
-and `"172"` reads as a number, `"unknown"` as nothing.
+
+Each field finds the server's own spelling by its words:  `its "hair color"` reads `hair_color`.
+And `"172"` reads as a number, `"unknown"` as nothing.
 - One read per address, shared, and none for a thing another read has already brought.
 - A drawing that leaves gives up the reads it was waiting on.
 - It's only for a web server:  elsewhere a field holds the thing itself.
 
-`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server,
-and its description beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
+It keeps a copy of what it reads on this device:  its first load sends 6 requests to swapi, and a reload before 5am sends none.
+A search goes to the server, `?search=sky`, one request a collection rather than every page.
+
+`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server.
+Its description went beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
 
 Its pictures come from Wikipedia as it runs, and not every name has a page:
 about one in five of its 260 names has a picture that's really of it, and the rest are an initial on a colour.
@@ -625,6 +709,8 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 - The card is a `two sided view` ([Card.spellml](spaces/@spell/examples/Solitaire/Card.spellml)):
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `<draw "front">` and its `<draw "back">` look like.
+- Its Inspector card is laid out in a file of its own, [Card.editor.spellml](spaces/@spell/examples/Solitaire/Card.editor.spellml):
+  a `<spell-property-editor "card">` of Spell UI's property controls, which the program never compiles.
 - It draws both sides at once, one over the other (its own `<draw>`):
   [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
   and turns the card about its middle as its direction changes, the other side taking over halfway.
@@ -749,7 +835,7 @@ a "square" is a view where:
 	- it "is empty" if its mark is ""
 ```
 
-_The top of [How Tic-Tac-Toe works](spaces/@spell/guides/how-tic-tac-toe-works/HowTicTacToeWorks.spell):
+_The top of [How Tic-Tac-Toe works](spaces/@spell/guides/how-tic-tac-toe-works/HowTicTacToeWorks.spellml):
 the story in comments, the program between them._
 
 A guide is a Spell project like any example, so it runs:

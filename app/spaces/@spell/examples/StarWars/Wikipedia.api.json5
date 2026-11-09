@@ -1,0 +1,330 @@
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
+// A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
+{
+  "about": {
+    "name": "wikipedia",
+    "kind": "web server",
+    "address": "https://en.wikipedia.org/api/rest_v1",
+    "lookedAt": "2026-11-04T12:23:05.872Z",
+    "fingerprint": "0b32cc3338e1592e",
+    "readBy": "nobody:  worked out from what came back",
+    "collectionsAsked": ["wiki pages=/page/summary/{name}"]
+  },
+
+  "canDo": {
+    "read": "Yes:  it's been read.",
+    "write": "Nothing says:  never tried.",
+    "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
+    "limits": "It named none in its answers.",
+    "browsers": "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front."
+  },
+
+  "collections": {
+    "wiki_pages": {
+      "type": "wiki page",
+      "at": "/page/summary/{name}",
+      "rowsSeen": 3,
+      "idField": "title",
+      "paging": "none",
+      "samples": [
+        "Luke Skywalker",
+        "Tatooine",
+        "Millennium Falcon"
+      ],
+      "fields": {
+        "type": {
+          "words": "type",
+          "type": "text",
+          "example": "standard"
+        },
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "Luke Skywalker"
+        },
+        "displaytitle": {
+          "words": "displaytitle",
+          "type": "text",
+          "example": "<span lang=\"en\" dir=\"ltr\"><span class=\"mw-page-title-main\">Luke Skywalker</span>"
+        },
+        "namespace": {
+          "words": "namespace",
+          "type": "inside",
+          "example": "{\"id\":0,\"text\":\"\"}",
+          "inside": {
+            "id": {
+              "words": "number",
+              "type": "number",
+              "example": 0
+            },
+            "text": {
+              "words": "text",
+              "type": "text"
+            }
+          }
+        },
+        "wikibase_item": {
+          "words": "wikibase item",
+          "type": "text",
+          "example": "Q51746"
+        },
+        "titles": {
+          "words": "titles",
+          "type": "inside",
+          "example": "{\"canonical\":\"Luke_Skywalker\",\"normalized\":\"Luke Skywalker\",\"display\":\"<span lan",
+          "inside": {
+            "canonical": {
+              "words": "canonical",
+              "type": "text",
+              "example": "Luke_Skywalker"
+            },
+            "normalized": {
+              "words": "normalized",
+              "type": "text",
+              "example": "Luke Skywalker"
+            },
+            "display": {
+              "words": "display",
+              "type": "text",
+              "example": "<span lang=\"en\" dir=\"ltr\"><span class=\"mw-page-title-main\">Luke Skywalker</span>"
+            }
+          }
+        },
+        "pageid": {
+          "words": "pageid",
+          "type": "number",
+          "example": 53602
+        },
+        "thumbnail": {
+          "words": "thumbnail",
+          "type": "inside",
+          "example": "{\"source\":\"https://upload.wikimedia.org/wikipedia/commons/6/67/Luke_Skywalker_-_",
+          "inside": {
+            "source": {
+              "words": "source",
+              "type": "link",
+              "example": "https://upload.wikimedia.org/wikipedia/commons/6/67/Luke_Skywalker_-_Welcome_Ban"
+            },
+            "width": {
+              "words": "width",
+              "type": "number",
+              "example": 254
+            },
+            "height": {
+              "words": "height",
+              "type": "number",
+              "example": 323
+            }
+          }
+        },
+        "originalimage": {
+          "words": "originalimage",
+          "type": "inside",
+          "example": "{\"source\":\"https://upload.wikimedia.org/wikipedia/commons/6/67/Luke_Skywalker_-_",
+          "inside": {
+            "source": {
+              "words": "source",
+              "type": "link",
+              "example": "https://upload.wikimedia.org/wikipedia/commons/6/67/Luke_Skywalker_-_Welcome_Ban"
+            },
+            "width": {
+              "words": "width",
+              "type": "number",
+              "example": 254
+            },
+            "height": {
+              "words": "height",
+              "type": "number",
+              "example": 323
+            }
+          }
+        },
+        "lang": {
+          "words": "lang",
+          "type": "text",
+          "example": "en"
+        },
+        "dir": {
+          "words": "dir",
+          "type": "text",
+          "example": "ltr"
+        },
+        "revision": {
+          "words": "revision",
+          "type": "number",
+          "writtenAsText": true,
+          "example": "1381772818"
+        },
+        "tid": {
+          "words": "tid",
+          "type": "text",
+          "example": "c8dd6060-cfd9-11f1-9a43-f881d5ad4b5e"
+        },
+        "timestamp": {
+          "words": "timestamp",
+          "type": "date",
+          "example": "2026-10-24T18:36:11Z"
+        },
+        "description": {
+          "words": "description",
+          "type": "text",
+          "example": "Star Wars character"
+        },
+        "description_source": {
+          "words": "description source",
+          "type": "text",
+          "example": "local"
+        },
+        "content_urls": {
+          "words": "content urls",
+          "type": "inside",
+          "example": "{\"desktop\":{\"page\":\"https://en.wikipedia.org/wiki/Luke_Skywalker\",\"revisions\":\"h",
+          "inside": {
+            "desktop": {
+              "words": "desktop",
+              "type": "inside",
+              "example": "{\"page\":\"https://en.wikipedia.org/wiki/Luke_Skywalker\",\"revisions\":\"https://en.w",
+              "inside": {
+                "page": {
+                  "words": "page",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Luke_Skywalker"
+                },
+                "revisions": {
+                  "words": "revisions",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Luke_Skywalker?action=history"
+                },
+                "edit": {
+                  "words": "edit",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Luke_Skywalker?action=edit"
+                },
+                "talk": {
+                  "words": "talk",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Talk:Luke_Skywalker"
+                }
+              }
+            },
+            "mobile": {
+              "words": "mobile",
+              "type": "inside",
+              "example": "{\"page\":\"https://en.wikipedia.org/wiki/Luke_Skywalker\",\"revisions\":\"https://en.w",
+              "inside": {
+                "page": {
+                  "words": "page",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Luke_Skywalker"
+                },
+                "revisions": {
+                  "words": "revisions",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Special:History/Luke_Skywalker"
+                },
+                "edit": {
+                  "words": "edit",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Luke_Skywalker?action=edit"
+                },
+                "talk": {
+                  "words": "talk",
+                  "type": "link",
+                  "example": "https://en.wikipedia.org/wiki/Talk:Luke_Skywalker"
+                }
+              }
+            }
+          }
+        },
+        "extract": {
+          "words": "extract",
+          "type": "text",
+          "example": "Luke Skywalker is a fictional character in the Star Wars franchise. He was intro"
+        },
+        "extract_html": {
+          "words": "extract html",
+          "type": "text",
+          "example": "<p><b>Luke Skywalker</b> is a fictional character in the <i>Star Wars</i> franch"
+        }
+      },
+      "readThrough": {
+        "rows": 1
+      }
+    }
+  },
+
+  "notes": [],
+  "agentNotes": [],
+
+  "spellCantSay": [
+    "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+  ],
+
+  "checkEverySeconds": 30,
+
+  "spell": [
+    "wikipedia is a web server at \"https://en.wikipedia.org/api/rest_v1\":",
+    "\t- its id is its \"title\"",
+    "\t- check it every 30 seconds",
+    "\t- it writes names like \"wikibase_item\"",
+    "\t- wiki pages are found at \"/page/summary/{name}\"",
+    "",
+    "a \"wiki page\" is a thing:",
+    "\t- it lives in wikipedia",
+    "\t- its \"type\" is text",
+    "\t- its \"title\" is text",
+    "\t- its \"displaytitle\" is text",
+    "\t- its \"namespace\" is a namespace",
+    "\t- its \"wikibase item\" is text",
+    "\t- its \"titles\" is a title",
+    "\t- its \"pageid\" is a number",
+    "\t- its \"thumbnail\" is a thumbnail",
+    "\t- its \"originalimage\" is an originalimage",
+    "\t- its \"lang\" is text",
+    "\t- its \"dir\" is text",
+    "\t- its \"revision\" is a number",
+    "\t- its \"tid\" is text",
+    "\t- its \"timestamp\" is a date",
+    "\t- its \"description\" is text",
+    "\t- its \"description source\" is text",
+    "\t- its \"content urls\" is a content url",
+    "\t- its \"extract\" is text",
+    "\t- its \"extract html\" is text",
+    "",
+    "a \"namespace\" is a thing:",
+    "\t- its \"number\" is a number, stored as \"id\"",
+    "\t- its \"text\" is text",
+    "",
+    "a \"title\" is a thing:",
+    "\t- its \"canonical\" is text",
+    "\t- its \"normalized\" is text",
+    "\t- its \"display\" is text",
+    "",
+    "a \"thumbnail\" is a thing:",
+    "\t- its \"source\" is text  // an address",
+    "\t- its \"width\" is a number",
+    "\t- its \"height\" is a number",
+    "",
+    "an \"originalimage\" is a thing:",
+    "\t- its \"source\" is text  // an address",
+    "\t- its \"width\" is a number",
+    "\t- its \"height\" is a number",
+    "",
+    "a \"content url\" is a thing:",
+    "\t- its \"desktop\" is a desktop",
+    "\t- its \"mobile\" is a mobile",
+    "",
+    "a \"desktop\" is a thing:",
+    "\t- its \"page\" is text  // an address",
+    "\t- its \"revisions\" is text  // an address",
+    "\t- its \"edit\" is text  // an address",
+    "\t- its \"talk\" is text  // an address",
+    "",
+    "a \"mobile\" is a thing:",
+    "\t- its \"page\" is text  // an address",
+    "\t- its \"revisions\" is text  // an address",
+    "\t- its \"edit\" is text  // an address",
+    "\t- its \"talk\" is text  // an address"
+  ]
+}

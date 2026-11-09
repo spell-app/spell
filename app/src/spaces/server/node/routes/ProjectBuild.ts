@@ -4,6 +4,7 @@ import { createRequire } from "module"
 import { dirname, join } from "path"
 import { createInterface } from "readline"
 
+import { within } from "spell/util/timing"
 import type { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
@@ -100,8 +101,9 @@ export class ProjectBuild {
     const { projectId } = location
     if (!hasProjectFile(SP.SpellLocation.getProjectLocation(projectId).serverPath)) return false
     const deadline = Date.now() + this.timeout
+    const secondsLeft = () => Math.max(0, deadline - Date.now()) / 1000
     if (this.startup) {
-      await within(this.startup, deadline)
+      await within(this.startup, secondsLeft())
       if (existsSync(file)) return true
     }
     let compile = this.compiles.get(projectId)
@@ -110,7 +112,7 @@ export class ProjectBuild {
       this.compiles.set(projectId, compile)
       void compile.then(() => this.compiles.delete(projectId))
     }
-    await within(compile, deadline)
+    await within(compile, secondsLeft())
     return existsSync(file)
   }
 
@@ -194,14 +196,6 @@ export type SpawnBuild = (command: string, args: string[], options: SpawnOptions
  * - `spawn`:  starts a child (default `child_process`'s);  tests pass a stub
  */
 export type ProjectBuildProps = { root?: string; timeout?: number; spawn?: SpawnBuild }
-
-/** Wait for `work`, or until `deadline` (ms since the epoch), whichever comes first. */
-async function within(work: Promise<void>, deadline: number): Promise<void> {
-  let timer: NodeJS.Timeout | undefined
-  const timedOut = new Promise<void>((done) => (timer = setTimeout(done, Math.max(0, deadline - Date.now()))))
-  await Promise.race([work, timedOut])
-  clearTimeout(timer)
-}
 
 /**
  * The kit's `spell` command (`spell`'s `bin/spell.mjs`), as checkout `root`'s install resolves the kit:

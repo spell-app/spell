@@ -1,8 +1,10 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
-import { dirname, join, posix, relative, resolve, sep } from "node:path"
+import { dirname, join, posix, resolve, sep } from "node:path"
 
+import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
+import { PhaseStatuses } from "spell/epic/phases"
 
 /**
  * The STANDING epic for every page no epic owns (epic `epic-engine` T9, J7):  guides no epic claims, Epic UI's pages,
@@ -274,7 +276,7 @@ function factsOf(root: string, name: string): EpicFacts | undefined {
   const phases = Array.from(html.matchAll(/<epic-phase\b[^>]*>/g), ([tag]) => /\sstatus="([^"]*)"/.exec(tag)?.[1])
   const standing = /\sstanding(?:[\s=>]|$)/.test(page)
   return {
-    open: standing || !phases.length || phases.some((status) => status !== "done"),
+    open: standing || !phases.length || phases.some((status) => !PhaseStatuses.isFinished(status)),
     updated: /\supdated="([^"]*)"/.exec(page)?.[1] ?? "",
     touched: statSync(file).mtimeMs
   }
@@ -328,10 +330,7 @@ function pathOf(root: string, file: string, href: string): string | undefined {
     return undefined
   }
   if (decoded.startsWith("/")) return decoded.slice(1)
-  const path = relative(root, resolve(dirname(file), decoded))
-    .split(sep)
-    .join("/")
-  return path.startsWith("..") ? undefined : path
+  return pathInside(root, resolve(dirname(file), decoded))
 }
 
 /** Epic `name`'s own pages, from the epic folder:  every `.html` in its `details/` folder, sorted. */

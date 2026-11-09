@@ -60,6 +60,8 @@ recipe box is an app:
 			add (a new recipe with title = "two", minutes = 2) to the recipes
 	- to add one:
 		add (a new recipe with title = "half", minutes = 1) to the recipes
+	- to clear the quick ones:
+		remove recipes in every recipe where its minutes is 5
 `
 
 /** The box, and how to read its values:  each waits. */
@@ -159,6 +161,28 @@ describe("what compiles", () => {
     }
     const plainWithQuery = 'family cookbook is a sheet at "https://example.com/x.csv?from=/api/places/recipes"'
     expect(compiled(plainWithQuery, plain, ...set).errors.join()).toContain("read only")
+  })
+
+  it("I46:  `remove recipes in every recipe where ...` removes each from the place, in one go;  read only, it won't compile", () => {
+    const go = ["recipe box is an app:", "\t- to go:"]
+    const removes =
+      'core.inOneGo(async () => core.map(core.filter(await core.savedThings(Recipe, { filter: { title: "x" } }), (recipe) => recipe.title === "x"), (recipe) => core.removeSaved(recipe)))'
+    for (const line of [
+      'remove recipes in every recipe where its title is "x"',
+      'remove recipes from the recipes where its title is "x"',
+      'remove recipes from every recipe where its title is "x"'
+    ]) {
+      const made = compiled(PLACE, RECIPE, ...go, `\t\t${line}`)
+      expect(made.errors).toEqual([])
+      expect(made.compiled).toContain(removes)
+    }
+    const plain = RECIPE.split("\n\t- to throw")[0]!
+    const sheet = 'family cookbook is a sheet at "recipes.csv"'
+    const refused = compiled(sheet, plain, ...go, '\t\tremove recipes in every recipe where its title is "x"')
+    expect(refused.errors.join()).toContain("read only")
+    // a list kept in memory, as before
+    const own = compiled("set my-list to [1, 2, 3]", "remove numbers from my-list where number is 2").compiled
+    expect(own).toContain("core.removeWhere(myList, (number) => number === 2)")
   })
 
   it("a sort key that waits won't compile;  a rider outside a drawing won't", () => {
@@ -365,6 +389,24 @@ set the_box to recipe_box
     expect(stew.ingredients.items.map(({ name }: { name: string }) => name)).toEqual(["shallot"])
   })
 
+  it("I46:  removing with a `where` takes them from the place, and one undo brings them all back", async () => {
+    const { box, titlesOf } = runBox()
+    box.addStew()
+    box.addSoup()
+    box.addToast()
+    await settled()
+    expect(await titlesOf("matches")).toEqual(["Soup", "stew", "Toast"])
+    core.RUNTIME.history.clear()
+    await box.clearTheQuickOnes()
+    await settled()
+    await core.reloadSaved()
+    expect(await titlesOf("matches")).toEqual(["stew"])
+    core.RUNTIME.history.undo()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+    await settled()
+    expect(await titlesOf("matches")).toEqual(["Soup", "stew", "Toast"])
+  })
+
   it("in one go:  they go together, or none do", async () => {
     const { box, titlesOf } = runBox()
     await box.addTwo()
@@ -399,6 +441,21 @@ una receta es una vista:
     expect(code).toContain('core.savedThings(Receta, { filter: { título: "Sopa" }, sort: [{ field: "título" }] })')
   })
 
+  it("I46:  `quitar las recetas en cada receta donde ...` removes each from the place;  read only, it won't compile", () => {
+    const action = [
+      "caja de recetas es una aplicación:",
+      "\t- para vaciar:",
+      '\t\tquitar las recetas en cada receta donde su título es "x"'
+    ]
+    const { errors, compiled: code } = inSpanish(CASA, ...action)
+    expect(errors).toEqual([])
+    expect(code).toContain(
+      'core.inOneGo(async () => core.map(core.filter(await core.savedThings(Receta, { filter: { título: "x" } }), (receta) => receta.título === "x"), (receta) => core.removeSaved(receta)))'
+    )
+    const hoja = CASA.replace("una base de datos en memoria", 'una hoja en "recetas.csv"')
+    expect(inSpanish(hoja, ...action).errors.length).toBeGreaterThan(0)
+  })
+
   it("agreement:  `ordenadas` of one, and `ninguno` of a feminine type, are said", () => {
     expect(inSpanish(CASA, "poner x a cada receta, ordenadas por su título").warnings.join()).toContain('"ordenada"')
     expect(inSpanish(CASA, "poner x a cada receta, ordenada por su título").warnings).toEqual([])
@@ -428,12 +485,28 @@ una receta es una vista:
 })
 
 describe("what a target can't do, it says", () => {
-  it("Python, and a library:  a project with a place doesn't compile, and says why", () => {
+  it("a library, and Python for a kind it doesn't keep:  a project with a place doesn't compile, and says why", () => {
     const parts = parseSpellProject([{ path: "/Test.spell", contents: `${PLACE}\n` }]).files.map(
       ({ match }) => match?.AST
     )
     expect(SP.SpellProject.keepsThingsInPlaces(parts as never)).toBe(true)
-    expect(SP.TARGETS.py!.can.places).toBe(false)
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS["ts/lib"]!, parts as never)).toBe("any")
+    // Python keeps things in three kinds (epic `data` P40):  any other is refused by its word
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS.py!, parts as never)).toBe("in memory database")
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS["js/solid"]!, parts as never)).toBeUndefined()
+  })
+
+  it("Python keeps things on this device, in a data folder and in a sheet (epic `data` P40)", () => {
+    const lines = [
+      "this device is a database on this device",
+      'note folder is a data folder at "notes"',
+      'note sheet is a sheet at "notes.csv"'
+    ]
+    const parts = parseSpellProject([{ path: "/Test.spell", contents: `${lines.join("\n\n")}\n` }]).files.map(
+      ({ match }) => match?.AST
+    )
+    expect(SP.SpellProject.placeKindsIn(parts as never)).toEqual(["database on this device", "data folder", "sheet"])
+    expect(SP.SpellProject.placeKindRefusedBy(SP.TARGETS.py!, parts as never)).toBeUndefined()
   })
 })
 

@@ -7,7 +7,7 @@
  *   `choicesRoutes.ts`):  `epics` never imports `docs` (the root's dependency rule).
  * - Data, types and the one-line answer box's rule (`keepOneLine()`):  nothing here runs at import.
  */
-import type { SaveState } from "spell/util/places/SaveQueue"
+import type { SaveState } from "spell/places/SaveQueue"
 
 ////////////////
 // ## Routes

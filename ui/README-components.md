@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-76 families, 124 tags;  3 families in progress.
+84 families, 135 tags;  3 families in progress.
 
 ### Elements
 
@@ -283,11 +283,12 @@ Ways to present a kind of content.
 |  | [Advertisement](docs/ui-ad.html) | `<ui-ad>` | An ad displays third-party promotional content. | advertisement, banner ad, ad slot |
 | <img src="docs/images/components/ui-card.png" alt="Card, its first example" width="61" height="96"> | [Card](docs/ui-card.html) | `<ui-card>` `<ui-cards>` | A card displays site content in a manner similar to a playing card. | tile, panel, profile card |
 | <img src="docs/images/components/ui-comment.png" alt="Comment, its first example" width="115" height="96"> | [Comment](docs/ui-comment.html) | `<ui-comment>` `<ui-comments>` | One comment:  who wrote it, when, what, and the replies to it. | reply, post, message |
+|  | [Diagram](docs/ui-diagram.html) | `<ui-diagram>` `<ui-diagram-node>` | A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it. | graph, node graph, network diagram, boxes and lines |
 | <img src="docs/images/components/ui-feed.png" alt="Feed, its first example" width="96" height="96"> | [Feed](docs/ui-feed.html) | `<ui-feed>` `<ui-event>` | A feed presents people's activity chronologically. | activity feed, timeline, news feed, activity stream |
 |  | [Item](docs/ui-item.html) | `<ui-item>` | An item of a dropdown, list, menu or Items view. | list item, media object, row |
 | <img src="docs/images/components/ui-items.png" alt="Items, its first example" width="144" height="96"> | [Items](docs/ui-items.html) | `<ui-items>` | A group of items:  site content, each an image beside its header, meta, description and extra. | item list, media list, product list, results |
 | <img src="docs/images/components/ui-statistic.png" alt="Statistic, its first example" width="175" height="80"> | [Statistic](docs/ui-statistic.html) | `<ui-statistic>` `<ui-statistics>` | A statistic emphasizes the current value of an attribute. | stat, kpi, metric, counter |
-| <img src="docs/images/components/ui-tree-diagram.png" alt="Tree diagram, its first example" width="167" height="96"> | [Tree diagram](docs/ui-tree-diagram.html) | `<ui-tree-diagram>` | A tree diagram draws a tree top-down:  a box for each node, a line to each of its children. | tree, tree chart, hierarchy, hierarchy diagram |
+| <img src="docs/images/components/ui-tree-diagram.png" alt="Tree diagram, its first example" width="167" height="96"> | [Tree diagram](docs/ui-tree-diagram.html) | `<ui-tree-diagram>` `<ui-tree-node>` | A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON. | tree, tree chart, hierarchy, hierarchy diagram |
 
 ### Modules
 
@@ -304,7 +305,7 @@ Elements with behaviour:  they open, pick, move.
 | <img src="docs/images/components/ui-embed.png" alt="Embed, its first example" width="171" height="96"> | [Embed](docs/ui-embed.html) | `<ui-embed>` | An embed displays content from other websites, like YouTube videos, loaded only when asked for. | iframe, video, youtube, vimeo |
 |  | [Flyout](docs/ui-flyout.html) | `<ui-flyout>` | A flyout is a modal that slides in from a side of the page. | drawer, sheet, side panel, off canvas |
 | <img src="docs/images/components/ui-include.png" alt="Include, its first example" width="200" height="40"> | [Include](docs/ui-include.html) | `<ui-include>` | An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view. | island, partial, fragment, server-side include |
-|  | [JSON data](docs/ui-json.html) | `<ui-json>` | JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it. | data, data island, json script, application/json, data block, datos |
+|  | [JSON data](docs/ui-json.html) | `<ui-json>` | JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it. | data, data island, json script, application/json |
 |  | [Modal](docs/ui-modal.html) | `<ui-modal>` | A modal displays content that temporarily blocks interactions with the main view of a site. | dialog, popup window, lightbox, confirm |
 | <img src="docs/images/components/ui-nag.png" alt="Nag, its first example" width="200" height="18"> | [Nag](docs/ui-nag.html) | `<ui-nag>` | A nag is a persistent message that stays until dismissed, and can remember the dismissal. | banner, cookie notice, announcement bar, sticky banner |
 |  | [Popup](docs/ui-popup.html) | `<ui-popup>` | A popup displays additional information on top of a page. | tooltip, popover, hint, hover card |
@@ -337,6 +338,7 @@ Elements with no Fomantic counterpart.
 | --- | --- | --- | --- | --- |
 |  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
+|  | [Dimension](docs/ui-dimension.html) | `<ui-dimension>` | A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere. | measure, measurement, unit, number with units |
 |  | [Example](docs/ui-example.html) | `<ui-example>` | An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
 |  | [Keys](docs/ui-keys.html) | `<ui-keys>` | Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it. | kbd, keyboard shortcut, key caps, hotkey |
@@ -346,12 +348,16 @@ Elements with no Fomantic counterpart.
 |  | [Quote](docs/ui-quote.html) | `<ui-quote>` | A quote holds someone else's words:  a block of its own, or a few words inside a sentence. | blockquote, quotation, q, pull quote |
 | <img src="docs/images/components/ui-root.png" alt="Root, its first example" width="200" height="51"> | [Root](docs/ui-root.html) | `<ui-root>` | A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready. | app shell, app root, provider, loader |
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
-|  | [Space](docs/ui-space.html) | `<ui-space>` | A space is a gap between things:  a line break, a gap in a line, or the room left in a row.  It has no look of its own. | spacer, gap, line break, br |
+|  | [Sides](docs/ui-sides.html) | `<ui-sides>` | Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side. | margin, padding, box model, spacing |
+|  | [Site nav](docs/ui-site-nav.html) | `<ui-site-nav>` | A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page. | site navigation, side navigation, sidebar menu, nav menu |
+|  | [Space](docs/ui-space.html) | `<ui-space>` | A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, it takes the room left in its row or column.  It has no look of its own. | spacer, gap, line break, br |
+|  | [Split Panel](docs/ui-split-panel.html) | `<ui-split-panel>` | A split panel lays its children out side by side or one above the other, with bars to resize them. | split view, split pane, resizable panes, panes |
 |  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |
 |  | [Table of contents](docs/ui-toc.html) | `<ui-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept. | table of contents, on this page, page index, scrollspy |
 |  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` `<ui-color-chip>` `<ui-theme-token>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser. | theme editor, theme builder, theme bench, theme creator |
 |  | [Theme Menu](docs/ui-theme-menu.html) | `<ui-theme-menu>` | A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
-|  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it;  the arrow keys step to the next or previous zoomable on the page, bouncing at either end. | lightbox, zoom, full size, image viewer |
+|  | [Tree](docs/ui-tree.html) | `<ui-tree>` `<ui-tree-item>` | A tree shows rows nested in rows, which open and close, and can be selected one or many at a time. | tree view, outline, hierarchy, file tree |
+|  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it. | lightbox, zoom, full size, image viewer |
 
 <details>
 <summary>The docs site's own elements:  6 families, never in the library</summary>

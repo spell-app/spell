@@ -124,8 +124,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `SPELL_SERVER.worktreesPath`, by `urlPathOf()`.
         So worktrees beside the repo work too (epic `epic-eject` P7).
   - `Guard` -- `Host` check, per-run token, same-origin writes
-  - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop;
-    and `isProcessAlive(pid)`, for whoever needs to know a process still runs (spell-epic's review inbox).
+    - more hosts by a test (`allowHosts()`):  the app's cloud lets in its AT Protocol handles' hosts,
+      `ana.rs.spell.space`, for their look-up alone (epic `atmosphere` P16);  hosts only, never origins
+    - a device signed in (`request.person`, from `SignInCheck`) needs no token (epic `atmosphere` P3);
+      `tokenCheck` wants the token, whoever's signed in
+  - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop.
     - `ensure` restarts a server that started before its code last changed.
       So after a merge, the next opener gets the new routes.
       - its code:  the `sources` folders, by `newestChange()`
@@ -135,6 +138,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Why:  it stops answering before it lets go of its port.
         `ensure` started the new one while the old one held the port, so the new one took another port,
         and pages on the old one found the server down (epic `airplane`, 2026-10-10).
+  - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
+    - 90s without a beat, or its process gone, and it's gone (`isLive()`)
+    - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;
+      `keep(beat, end)`:  a beat kept inside a bigger file (the review inbox's `listening`)
+    - who beats:  a command run's wait, `epic ask wait`, `epic inbox wait`, `spell app changes wait`
+    - beside it, the ONE process check:  `isProcessAlive(pid)`, `endProcess(pid, wait)` (`PidFile` re-exports them)
+    - plain `node` loads it by its own name, `spell/server/Heartbeat`
+  - `FolderWatch` -- a folder watched, the ONE way every tool watches files (epic `coherence` P28):
+    `new FolderWatch(dir, { ignore, only, quiet }, onChange)`, `close()`
+    - skips dot files, `node_modules`, lock files and editors' temp files;  `quiet` reports a burst once, after it
+    - who:  live reload's watching half, the bundles' rebuild, the running epics, a command run's answers, the app's
+      disk storage, `spell app watch`
   - [mainServer.ts](mainServer.ts) -- `mainServerUrl()`:  a worktree's file on the MAIN checkout's page server.
     - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
       `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
@@ -144,10 +159,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The epic folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
         the one beside the epic repo whose pid file names it (`contentServerOf()`).
+  - `FileStorage` -- a browser's `localStorage`, kept in ONE JSON file:  where the kit's `SaveQueue` keeps a server's
+    unsent work (epic `atmosphere` P14, Q19 A:  ONE retry queue for the server's writes, mail and alerts)
+    - each change written whole, through a temporary file and a rename;  synchronous, as `localStorage` is
+  - `DiskCache` -- text kept on disk by key, for ONE version of whatever made it at a time (epic `language` P27)
+    - `<folder>/<version>/<key>`:  a new version starts empty;  only the newest `keep` versions' folders stay
+    - only the current version takes writes;  over HTTP, `router()`:  `GET /version`, `GET` / `PUT /<version>/<key>`
+    - CAPPED (`limit`, 200 MB by default;  epic `language` Q41):  past it, a write drops the entries used least
+      recently first, every version's together;  a read marks its entry used (its file's time)
+      - the page server's setting `cacheLimit` sets it (below), `sizeInBytes()` reading `"200MB"`, `"1GB"` ...
+    - `codeVersion(paths)`:  a version for some code, a hash of its files' text, read again only when one changes
+    - `DiskCache.home`:  Spell's caches on this machine, `~/.spell/cache`
+    - Today one:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects.
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
     from spell-epic, epic `coherence` P7)
+    - and `pathInside(folder, path)` beside it, the ONE inside check (epic `coherence` P29):  the path from the
+      folder, `/`-separated, or `undefined`;  links NOT followed;  a `..x` folder is inside, a sibling `<folder>-x`
+      isn't.  `isInside()` (`safePath.ts`) is its yes / no.
   - `Processes` -- what's running, asked the same way on macOS, Linux and Windows (epic `epic-friend` P15):
     `table()` (pid => parent and command), `parents()`, `folderOf()`, `portsOf()`, `openFiles()`, and `run()` /
     `call()`, which start a bare command name (`code`, `npx`) through the shell on Windows;  `ps` and `lsof`, Linux's
@@ -215,7 +245,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         And `spell/server/places/airtableRoutes` (epic `data` P19), which registers nothing without a base and key in its environment.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
-        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
+        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout;  the ONE
+        reader of the kit's peers, each one's name and folder, epic `coherence` P29),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
         - every path in a part is from ITS folder;
@@ -224,9 +255,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
-        local copies, what's gone, the site header's tabs
+        local copies, what's gone, the site header's tabs, the caches' cap
+    - THE CACHES' CAP (`"cacheLimit"`, epic `language` Q41):  the most the server's caches on disk may take, every
+      version's entries together, e.g. `"200MB"`, `"1GB"`, `"512KB"` (`SRV.sizeInBytes()`);  200 MB by default
+      - the kit's part says `"200MB"`;  a later part's wins, so the epic repo's `page-server.json5` may change it
+      - past it, a write drops the entries used least recently first (`SRV.DiskCache`)
+      - today one cache:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts)
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
-        node built-ins, `json5`, `spell/server/contentFolder` and type imports only,
+        node built-ins, `json5`, `spell/server/contentFolder`, `spell/server/kitFolders`, `spell/util/node/findUp`
+        and type imports only,
         and `./settings.ts` with its extension.
     - LOCAL COPIES (`"localCopies"`):  a CDN URL pages load, and the URL this server serves the same file at.
       Every page it serves gets the local one (`withLocalCopies()`), so pages load offline.
@@ -382,17 +419,95 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       app's `DiskStorage` as it stands)
       - the files are the truth:  each read checks each file's version against the list file, and reads only what differs
       - a file that isn't JSON yet answers as it last read
+      - a thing's version is made from its content (`contentVersion()`, epic `atmosphere` P1):
+        a save that changes nothing moves nothing;  each file's own stamp is kept beside it in the list (`stamps`)
+      - `whoWrites: "only the owner"`:  each thing is its maker's (`owner`, from `PlaceContext.identity`)
+        - someone else's is refused, `"owner"`, unless `mayChangeAnyRow()` says yes
+        - for a program's own project data folder
+      - `whoWrites: "its members"` (epic `atmosphere` P4):
+        every thing is the space's, written as its own id (`owner` is `@family`)
+        - a member whose role writes changes any of it;  anyone else is refused, `"role"` ("your role can't write")
+        - who's a member is handed in (`space.memberOf()`):  the app's `SpaceMembers`
+        - and, handed one, a write check by KIND of thing (`space.changeOrDie()`, epic `atmosphere` P23):  asked of
+          each change a member makes, its kind (`thingKindOf()`:  a post, a row, a file, an app), made, changed or
+          removed, and who wrote it last;  it knows nothing of roles
+        - and, handed one, a SIGN-UP check (`space.signUpOrDie()`, epic `atmosphere` P27):  asked first, of every write;
+          a sign-up makes things, and changes only its own, from someone who doesn't write the space (the app's
+          `SpaceSheets`)
+        - ONE WRITE AT A TIME (P27):  each write checked and made before the next is checked, so a check that counts (a
+          sheet's last place) holds for two at once
+        - and read by its members only (P5, T15):  anyone else's read is refused, `"role"`
+        - unless its settings say otherwise (`space.settings()`, P7, Q13):
+          - `publicRead`:  anyone reads
+          - `publicWrite`:  anyone signed in adds things, and changes only the ones whose `by` is them;
+            anyone else's is refused, `"owner"`
+      - LIMITS (epic `atmosphere` P7, `limits`, `bytesInUse()`):
+        a thing's file and the whole folder, each at most so many bytes
+        - a save past either is refused, `"over the ceiling"` (413), saying how big, and the page keeps it
+      - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
+      - told of each write once it's on the disk (`onWritten`, epic `atmosphere` P14):  the app copies a space's writes
+        into its real AT Protocol Space this way
+      - for what keeps more than things in the folder (epic `atmosphere` P15):  `roomForOrDie()`, the space's limit asked
+        of more bytes;  `everyThingKept()`, every thing taken down or not, for its own keeping and never a reader
+      - TAKEN DOWN (epic `atmosphere` P6):  what its host says is down
+        - `takenDown`, a `TakenDown`, asked afresh for each request, for who's asking
+        - the whole folder down:  it refuses every read, write and operation
+        - a thing down:  left out of every read, and a change to it refused
+        - a watcher hears it removed, and back when it's restored
+      - `takenDown.ts`:  the shape, and the ONE refusal, `takenDownError()`
+        - its `whyNot` is `"taken down"`, and it names the abuse contact
+        - `PlaceServer` answers it 451 (`TAKEN_DOWN_STATUS`)
+    - `FolderFiles`:  a space's FILES on its folder (epic `atmosphere` P15), the kit's `SpaceFiles` (a real Space's is
+      `AtProtoSpaceFiles`, in `spell/places`)
+      - each file its bytes and ONE record naming it, as a Space keeps one:  the record a thing in `__files`
+        (`FILES_COLLECTION`), its id the name's key (`fileKeyFor()`);  the bytes by their hash (`contentHash()`), in a
+        `FileBytes` the host hands in (the app's:  the space's `__blobs/`)
+      - every check is the folder's:  members, roles, public settings, takedowns, the space's limit (its bytes counted
+        through `roomForOrDie()`, not a second count)
+      - several at once:  bytes first, then ONE `apply()` of their records;  refused, the new bytes go again
+      - bytes go once no record points to them, a taken-down one's included (`everyThingKept()`)
+      - nobody sees a hash:  a reader gets a name, a type and a size
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
       - holds keys (`PlaceKeys`), and scrubs them from every answer
-      - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
-        to answer
+      - or opens a place by its name, as it's first asked for (`open`, epic `atmosphere` P1):
+        - a name may then be an address, `/`s and all
+        - who's asking (`identityOf`) reaches the place as `PlaceContext.identity`
+        - the app's `SpaceFolders` serves every project data folder this way, at `/api/places/spaces/<address>/`
+      - who's asking, by default:  whoever's signed in, `request.person` (`SignInCheck`, epic `atmosphere` P3);
+        a device signed in needs no run token
+      - a place read direct (epic `atmosphere` P5):  `POST <name>/credential` hands who's asking a credential to read it,
+        as a cookie, and answers where (`credentialFor`, `{ readsAt }`)
+    - `DirectReads`:  a space's files read straight, apart from the server that writes them (epic `atmosphere` P5, Q6 C)
+      - a plain `GET` of its list file and each thing's, as `JsonChunks` lays them out, so `WebChunks` reads them
+      - with a credential for the WHOLE space, in a cookie only that space's read address gets
+        (`HttpOnly`, `SameSite=Strict`)
+        - none good:  401
+        - someone who's no reader now (`mayRead`, the member list):  403
+      - a space ANYONE reads (`publicRead`, epic `atmosphere` P7):  no credential needed (`mayRead(space, undefined)`)
+      - never a `__` name, a dot file or a folder of its own
+      - opens no place, writes nothing:  reads work while nothing's written
+        - its host may bring the files into step first (`onRead`):  the app's watches a space while pages read it (T17)
+      - the app's `SpaceFolders` serves every space's own folder this way, at `/api/reads/spaces/<address>/`
+      - THROUGH TO A REAL HOST (epic `atmosphere` P14, `hostOf`):  a space kept in a real AT Protocol Space is read
+        there, at `<prefix>/<address>/__host/xrpc/<method>`
+        - a pass-through that keeps nothing:  each reader's own Space credential goes on to the host, which decides
+        - only a Space's reading calls, only to the host that space names:  never an open proxy
+      - taken down (epic `atmosphere` P6, `takenDown`):
+        - the whole space, or the reader's own account:  451
+        - a thing:  left out of its list file as it's served, and its own file answered 451
+        - the disk stays as it is
     - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
       - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
       - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
       - each batch is written to the store before it's numbered, so a store's "no" is a "no"
-      - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
+      - behind `Guard` (epic `atmosphere` P3):
+        - signed in (its `signIn`, the server's `SignInCheck`):  its cookie rides with the socket, from any machine
+        - not signed in:  this machine only, with this run's token as the socket's sub-protocol
+          (`ROOM_TOKEN_PROTOCOL`), never in its address
       - named actions re-run on it (`actions`):  a server side says which;  the compiler sends none there yet, as a program's code is in the browser
+      - each write reaches its store as its page's person (`identityOf`, else whoever's signed in;  epic `atmosphere` T38),
+        so a store with rules of its own checks it:  a space's `FolderPlace`, its members, roles, takedowns and limits
       - who's here:  each page says who it is as it opens, and a page joining or leaving is told to everyone (`peopleHere`);  never numbered or logged
     - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
       - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
@@ -403,10 +518,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `CsvPlace`:  a CSV file as a place that takes writes (epic `data` P14)
       - each save compares new rows with old (`CsvFile`), so only the lines that changed change, byte for byte
       - read, changed and written under the file's `FileLock`, synchronously, all at once:  two writers both stand
-      - a row's version is a hash of its cells, so only a change to that row is refused, and the engine merges it per field
+      - a row's version is a hash of its cells (`contentVersion()`, shared with `FolderPlace`;  its hash, `contentHash()`,
+        is the ONE sha1 for a space's files' bytes and the app's drafts too):
+        so only a change to that row is refused, and the engine merges it per field
       - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
       - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
       - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)
+    - `ExcelPlace`:  an Excel workbook (`.xlsx`) as a place that takes writes, each sheet a collection (epic `data` P38)
+      - the same rules as `CsvPlace`'s:  a row's version a hash of its cells, a stale one refused, no id column adds only
+      - the rows are `Workbook`'s, in `spell/places`;  SheetJS is loaded before the file's lock, so what's under it is
+        synchronous
+      - a save keeps the other sheets, unknown columns, formulas and widths, not cell colours and fonts:
+        its answer says so (`ApplyAnswer.notes`)
+      - `ChunkFiles.writeChanged()` writes it, as bytes, all at once
     - `AirtablePlace`:  an Airtable base as a place, each table a collection (epic `data` P19)
       - its key on the server side;  a program's lines come with each request (`Place.withLines()`), so the program stays the one source of them
       - one read, however many tabs, for a window (`checkedEvery`);  `watch()` shares it, on one `every()`
@@ -414,8 +538,76 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - no version check:  the last save wins a field.  A `Referee` can sit in front, and each of its steps then waits for Airtable
       - `airtableRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`
       - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
+    - `SpacesHost`:  Spell's own AT Protocol Spaces host, both sides, as Bluesky's alpha answers (epic `atmosphere` P13, Q14 B)
+      - why:  a member's own host has to run Spaces (T35), and an ordinary Bluesky account's doesn't yet
+      - spaces, member lists, records, delegation tokens and credentials (real ES256 JWTs), signed reads, MACs, the
+        writer set;  and a directory of its accounts (their documents, both keys) and handles, on a port of its own
+      - blobs (P12):  uploaded into no space, read through a space only while a record there points to one, deleted
+        once none does;  `putRecord` takes no `swapRecord`, as the alpha's lexicon has none
+      - THROWAWAY:  kept in memory;  `spell space org host start` runs one on this machine with two accounts
+      - an app password's session is a random token, good while it runs
+      - it shares `SpaceCredential`'s byte helpers, so only the trial on Bluesky's alpha proves those
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says
-    - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
+    - It imports the kit's places by file (`spell/places/places.types` ...), and nothing in `spell/server` imports it.
+  - `spell/server/signIn` -- signing in to a Spell account by email, a link and a code (epic `atmosphere` P3)
+    - `SignInCheck`:  the ONE sign-in check of a server
+      - `check`, first:  puts who's signed in on every request, `request.person`
+        - from the `spell-session` cookie:  `HttpOnly`, `SameSite=Strict`
+      - `route()`:  its routes under `/api/sign-in/`, and two pages
+        - the routes:  `me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`;  `atproto` (below)
+      - the link's page, `/sign-in/confirm` ([confirm.html](signIn/confirm.html)):
+        where the request came from (browser, system, this machine or this network), then one button
+        - where it came from:  `askerOf()`, by `addressOf()`, which takes `X-Forwarded-For`'s last address only when the
+          request's socket is this machine (a tunnel, epic `atmosphere` T41), never otherwise
+      - the mail catcher's list, `/sign-in/mail` ([mail.html](signIn/mail.html))
+      - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
+      - on a server people reach from outside (epic `atmosphere` P8, the app's `SpellCloud`):
+        - `address`:  how its mails' links start
+        - `alsoAt`:  its other addresses, each a sign-in's own:  its link and Bluesky's return go to the one it was
+          asked at (`addressFor()`);  a `Host` naming anywhere else picks the main one
+        - `caughtMail: "hidden"`:  the mail catcher's list is never served
+        - `Guard.allowAddress()` lets its host in
+      - an account Spell took down (`SignInAccounts.isTakenDown()`, epic `atmosphere` P6):
+        refused 451, naming the abuse contact (`abuseContact`)
+        - `GET me` answers that contact too, for the sign-in bar and the link's page
+    - `SignIns`:  the rules, no HTTP
+      - a request is good once, for 20 minutes (`SignInsProps.minutes`), nothing done:  its code (5 wrong tries) or its link
+      - a link confirmed on another device signs both in
+      - a device stays signed in for 30 days, only its token's hash kept, in a file
+    - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);
+      a real mail service waits on the epic's Real Sign-In Mail (Postmark, Q12 A);
+      sign-in mail and inbox mail (P30) both go through it
+    - `SendmailSender` (epic `atmosphere` T55):  real mail through this machine's own `/usr/sbin/sendmail -t`, for a
+      machine whose mail is set up (a Mac's postfix relaying to a mail service);  `mailerFor()` picks it
+      - on only with `SPELL_MAIL=sendmail`, its From `SPELL_MAIL_FROM`;  unset, only the catcher;  never in a test
+      - run without a shell, a `To` only ever one plain address, so a mail can't add a recipient
+      - throws when the command fails, so a sign-in says so and the retry queue tries again;  once sent, kept in the
+        catcher too, so `spell space cloud mail` still shows it
+    - `ReadCredentials`:  credentials to read a whole space straight from its files (epic `atmosphere` P5)
+      - signed by this server's key, kept in a file, so a restart keeps them good
+      - good 30 days;  `DirectReads` checks them
+      - `sign()` / `isSigned()`:  the same key signs anything else the server hands out and must know again,
+        as a mail's stop link (the app's `InboxMail`, epic `atmosphere` P30)
+    - `cookiesOf()`:  the ONE reader of a request's cookies, every one of a name (each space's credential has its own path)
+    - OR A LINKED BLUESKY (atmosphere) ACCOUNT, given `atProto` (epic `atmosphere` P19, Q26 A):
+      - `AtProtoIdentity`:  who someone is, asked of their own host by the server, on AT Protocol's server sign-in
+        library (`@atproto/oauth-client-node`, loaded the first time someone signs in)
+        - it asks only who they are (`atproto`), never the right to write;  what the host hands back is let go at once
+        - on this machine, the protocol's development client (no file);  on an `https` address, its client file at
+          `/api/sign-in/atproto/client.json`
+        - a host sends the browser back to `127.0.0.1`, never `localhost`:  a page at `localhost` comes back signed in
+          at `127.0.0.1`
+      - the routes:  `POST atproto { who, mode, back }` (where to send the browser), `GET atproto/back` (the host
+        sends it back here;  then on to `back`, how it went in its address, `?spell-sign-in=...`)
+      - `mode: "link"`:  the Spell account signed in is linked to it, its DID kept, the handle only for show;
+        the account signed in rides in the pending sign-in, as the `SameSite=Strict` cookie doesn't come back with the
+        host's redirect
+      - `mode: "sign in"`:  the account linked to that DID gets the same session the emailed code makes
+        (`SignIns.signInLinked()`);  none:  `"not linked"`, invite only still;  taken down:  `"taken down"`
+      - `back` must be this server's own page:  never sent on somewhere else, signed in
+      - its seam, `AtProtoIdentities`;  a test's, `spell/server/test/FakeAtProtoIdentity`
+    - It knows no people:  the accounts are handed in (`SignInAccounts`, the app's `SpellAccounts`).
+    - Its page half is `SpellSignIn`, in `spell/places`.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):
@@ -530,9 +722,15 @@ The steps between a page's content and its file on disk, for every tool that wri
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
 - `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
 - `spell/server/test/airtableStub`:  a stub of Airtable's API, for `AirtablePlace`'s tests and the recipe box demo:  checks the token, the limit and batches of 10.
-- `spell/server/test/fakeAtmosphere`:  a fake of AT Protocol's network, hosts on their own ports, a directory, a relay and a Jetstream, for
-  `AtProtoPlace`'s tests, a program's and the recipe box demo's (epic `data` P16).
-  `spell/server/test/FakeSignIn`:  someone signed in on it, in node or a page.
+- `spell/server/test/fakeAtmosphere`:  a fake of AT Protocol's network (epic `data` P16)
+  - hosts on their own ports, a directory, a relay and a Jetstream
+  - for `AtProtoPlace`'s tests, a program's and the recipe box demo's
+  - an account given a `password` signs in by `createSession`, as `AtProtoPasswordSignIn` does (epic `atmosphere` P9)
+- `spell/server/test/FakeSignIn`:  someone signed in on that fake network, in node or a page.
+- `spell/server/test/FakeAtProtoIdentity`:  a Bluesky account's host for `SignInCheck`'s `atProto` (epic `atmosphere`
+  P19):  no network;  `route()` on a test's own server makes a browser's trip there and back real.
+- `spell/server/test/fakeSpaces`:  `FakeSpaces`, Spell's own Spaces host (`SpacesHost`, above) under a test's name
+  (epic `atmosphere` P11, P13);  for `AtProtoSpace`'s tests
 - `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
@@ -546,10 +744,10 @@ As WWOD §8, plus our self-namespace:
 - `SRV` ~== `spell/server`
 - Every file by its package name and path under `src/` (epic `repo-split` P14), the kit's own included:
   `spell/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`.
-  - Eleven that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
-    `/checkout`, `/Git`, `/RealPath`, `/Processes`, `/Links`, `/FileLock`, `/open`, `/page/settings`, `/page/prune`,
-    `/DataFile`, `/contentFolder` (node's modules, `json5`, type imports and each other only).
+  - Twelve that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
+    `/checkout`, `/Git`, `/RealPath`, `/Processes`, `/Links`, `/FileLock`, `/Heartbeat`, `/open`, `/page/settings`,
+    `/page/prune`, `/DataFile`, `/contentFolder` (node's modules, `json5`, type imports and each other only).
     - Those import their peers WITH `.ts` (`./Git.ts`, `./server.types.ts`), and `server.types.ts` stays strip-safe:
       no `enum`, no parameter property.
-    - Eleven, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
+    - Twelve, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
       `spell` command loads `RealPath` and `Git` by file to stay clear of linkedom.

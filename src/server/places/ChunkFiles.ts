@@ -2,7 +2,7 @@ import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, wri
 import { readdir, readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 
-import { PlaceError } from "spell/util/places/places.types"
+import { PlaceError } from "spell/places/places.types"
 import { SRV } from "spell/server"
 
 /** How long a file must be quiet before it's told:  an editor's save is often two or three writes. */
@@ -138,7 +138,7 @@ export class ChunkFiles {
   }
 
   /**
-   * Write each `[file, text]` whose file doesn't already hold `text`, in order, each all at once (a temp file beside it,
+   * Write each `[file, text]` (or bytes) whose file doesn't already hold `text`, in order, each all at once (a temp file beside it,
    * then a rename:  a reader, or the page server's watcher, never sees half a file), making its folders:  the files written.
    * - Takes no lock:  the caller holds its own.
    * - The temp name ends `.tmp`:  live reload never reports it (`LiveReload`'s `IGNORED`).
@@ -146,7 +146,7 @@ export class ChunkFiles {
   static writeChanged(outputs: readonly ChunkFileOutput[]): string[] {
     const written: string[] = []
     for (const [file, text] of outputs) {
-      if (existsSync(file) && readFileSync(file, "utf8") === text) continue
+      if (existsSync(file) && holds(readFileSync(file), text)) continue
       mkdirSync(dirname(file), { recursive: true })
       const temp = `${file}.${process.pid}.tmp`
       try {
@@ -187,8 +187,8 @@ export type BodyFilePlace = {
   ending: string
 }
 
-/** One file to write, and its text. */
-export type ChunkFileOutput = readonly [file: string, text: string]
+/** One file to write, and its text:  or its bytes, for a file that isn't text (`ExcelPlace`'s workbook). */
+export type ChunkFileOutput = readonly [file: string, text: string | Uint8Array]
 
 /** What `ChunkFiles.writeListAndBodies()` writes. */
 export type ChunkFilesWrite = {
@@ -221,4 +221,9 @@ class DiskChanges extends SRV.LiveReload {
     const { path } = data as { path: string }
     this.onPath(path.slice(1).split("/").map(decodeURIComponent).join("/"))
   }
+}
+
+/** Does a file's `bytes` hold `contents` already? */
+function holds(bytes: Buffer, contents: string | Uint8Array): boolean {
+  return typeof contents === "string" ? bytes.toString("utf8") === contents : bytes.equals(contents)
 }

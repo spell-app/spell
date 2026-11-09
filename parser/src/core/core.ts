@@ -28,6 +28,8 @@ let generator = new ParkMiller(ParkMiller.randomSeed())
 /**
  * Random whole number from `min` to `max`, BOTH included.
  * - One number only:  from 1 to it, so `randomNumber(6)` rolls a die.
+ * - The wrong way round, the same:  `randomNumber(6, 1)` ~== `randomNumber(1, 6)`.
+ * - What spell's `a random number between 1 and 6` compiles to (`random_number` rule).
  * - Comes from `core.random()`, so `seedRandom()` makes it repeatable.
  */
 export function randomNumber(): number | undefined
@@ -39,6 +41,7 @@ export function randomNumber(min?: number, max?: number): number | undefined {
     !assert(core.isANumber(min) && core.isANumber(max), "core.randomNumber(): you must pass two numbers, got", min, max)
   )
     return undefined
+  if (min! > max!) [min, max] = [max, min]
   return Math.floor(core.random() * (max! - min! + 1)) + min!
 }
 
@@ -280,6 +283,31 @@ export const coreMethods = defineCoreModule({
     } catch (e) {
       return {}
     }
+  },
+
+  /**
+   * The class to make for `Class`:  the running program's newest class by its name, if it IS `Class` or extends it,
+   * else `Class` itself (epic `language` P26).
+   * - So a library's `a new card` makes the importing program's card:  Solitaire's `Card`, which extends the library's.
+   * - Compiled from a library's own `new` of a type others may extend:  `new (core.classToMake(Card))()`.
+   * - No running program (the model's core, a library run by itself), or one with no such class:  `Class`.
+   * - A class of the same name that doesn't extend `Class` (another project's own `Card`):  `Class`.
+   */
+  classToMake<C extends abstract new (...args: never[]) => unknown>(Class: C): C {
+    const named = programThings()?.classNamed(Class.name) as unknown
+    const isBelow = typeof named === "function" && (named === Class || named.prototype instanceof Class)
+    return isBelow ? (named as C) : Class
+  },
+
+  /**
+   * SIDE EFFECT:  the running program knows `Class` by its name now, before any of its things is made
+   * (`ThingRegistry.addClass()`;  epic `language` P26).
+   * - Compiled into a project's own class of an imported one, `static { core.registerClass(this) }`:
+   *   so the library's `a new card` makes it (`classToMake()`) even while the program's first lines run.
+   * - No running program (the model's core):  nothing.
+   */
+  registerClass(Class: abstract new (...args: never[]) => unknown): void {
+    programThings()?.addClasses({ [Class.name]: Class })
   },
 
   /**

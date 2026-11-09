@@ -4,15 +4,18 @@ import { createRouter, defineRoutes, useNavigate, type RouterHistory, type Route
 
 import { setNavigator } from "./navigation"
 import { ProjectChooser } from "./ProjectChooser"
+import { SiteEditorRoute } from "./SiteEditorPage"
 import { ProjectPageRoute } from "./SpellEditor"
 import { ThemeEditorPage } from "./ThemeEditorPage"
-import { THEME_PAGE } from "./pages.types"
+import { SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
  * The app's routes (`@solidjs/router`):  `/edit/` or `/run/`, then an address (decision Q40, epic `people-and-orgs` P4).
  * - `/edit/<address>`:  `<SpellEditor>` in Edit or Debug, e.g. `/edit/@spell/examples/Solitaire/Solitaire.spell`
  * - `/run/<address>`:  the same page in Run, e.g. `/run/owen@spell/errors`
  * - `/theme`:  the theme editor (`<ThemeEditorPage>`)
+ * - `/site/<project>`:  a site's editor, its pages and their addresses (`<SiteEditorPage>`, epic `mockup` P4)
+ * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
  * - ONE route for both (`ProjectPageRoute`), so switching between them keeps the page.
  * - anything else:  `<ProjectChooser>`
  * - Each page is ONE route:  it stays mounted while only its address changes, e.g.
@@ -25,6 +28,7 @@ export const ROUTES = defineRoutes([
     component: ProjectPageRoute
   },
   { path: THEME_PAGE, component: ThemeEditorPage },
+  { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
   { path: "*", component: ProjectChooser }
 ])
 

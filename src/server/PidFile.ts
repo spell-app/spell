@@ -2,10 +2,15 @@ import { spawn } from "node:child_process"
 import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
+import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
+import { endProcess, isProcessAlive } from "./Heartbeat"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 import { SERVER_API } from "./WebServer"
+
+// The process check, beside the heartbeat since epic `coherence` P28:  re-exported, so `SRV.isProcessAlive()` stays
+export { endProcess, isProcessAlive } from "./Heartbeat"
 
 /**
  * The file where a background server says where it is, holding its `ServerInfo`:
@@ -43,9 +48,40 @@ export class PidFile {
     writeFileSync(this.file, `${JSON.stringify(info, null, 2)}\n`)
   }
 
-  /** remove the file if it's `pid`'s (default:  this process's) -- a newer server may own it by now */
+  /**
+   * The running server's write token, beside its pid file, for a program this machine's person runs against it
+   * (epic `data` P40):  `spell run --target py` hands it to a Python program, which writes its places with it.
+   * - `<file>` with `.token.json` for `.json`:  `{ pid, token }`, readable by this machine's person only
+   *   (mode 0600), as the cloud keeps its own (`cloud.json`)
+   * - NOT in `ServerInfo`:  `/api/server` answers that, and must never answer the token
+   */
+  get tokenFile(): string {
+    return this.file.replace(/\.json$/, ".token.json")
+  }
+
+  /** SIDE EFFECT:  write this process's server's write `token` -- see `tokenFile` */
+  writeToken(token: string): void {
+    writeFileSync(this.tokenFile, `${JSON.stringify({ pid: process.pid, token })}\n`, { mode: 0o600 })
+  }
+
+  /** The running server's write token -- see `tokenFile`;  `undefined` with none, or one a server that's gone left */
+  readToken(): string | undefined {
+    try {
+      const { pid, token } = JSON.parse(readFileSync(this.tokenFile, "utf8")) as { pid?: number; token?: string }
+      return pid !== undefined && isProcessAlive(pid) ? token : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  /** remove the file if it's `pid`'s (default:  this process's) -- a newer server may own it by now;  its token's too */
   removeIfOurs(pid = process.pid): void {
     if (this.read()?.pid === pid) rmSync(this.file, { force: true })
+    try {
+      if ((JSON.parse(readFileSync(this.tokenFile, "utf8")) as { pid?: number }).pid === pid) rmSync(this.tokenFile)
+    } catch {
+      // none, or unreadable:  nothing of ours to remove
+    }
   }
 
   /** the running server's info and base URL (`http://127.0.0.1:<port>`), or `undefined` */
@@ -84,12 +120,9 @@ export class PidFile {
       stdio: ["ignore", out, out],
       env: { ...process.env, ...env }
     }).unref()
-    const deadline = Date.now() + timeout
-    while (Date.now() < deadline) {
-      await new Promise((done) => setTimeout(done, 100))
-      const status = await this.status()
-      if (status) return { ...status, launched: true }
-    }
+    // Until it answers, looking every 0.1s;  gives up after `timeout`
+    const status = await waitUntil(() => this.status(), { timeout: timeout / 1000 })
+    if (status) return { ...status, launched: true }
     throw new HttpError(503, `the server for ${this.root} didn't start in ${timeout / 1000}s:  see its log`)
   }
 
@@ -147,44 +180,8 @@ export async function serverAt(base: string): Promise<ServerInfo | undefined> {
   }
 }
 
-/**
- * End process `pid`, and wait until it's gone:  `SIGTERM`, then `SIGKILL` if it's still there after `wait` ms.
- * - gone means `isProcessAlive()` says so, not that it stopped answering:  its port is free then
- * - NEVER throws (it may end between the checks)
- */
-export async function endProcess(pid: number, wait: number): Promise<void> {
-  const signal = (name: NodeJS.Signals) => {
-    try {
-      process.kill(pid, name)
-    } catch {
-      // gone already
-    }
-  }
-  signal("SIGTERM")
-  const deadline = Date.now() + wait
-  while (isProcessAlive(pid) && Date.now() < deadline) await new Promise((done) => setTimeout(done, 100))
-  if (!isProcessAlive(pid)) return
-  signal("SIGKILL")
-  for (let tries = 0; tries < 40 && isProcessAlive(pid); tries++) await new Promise((done) => setTimeout(done, 50))
-}
-
 /** How long `stop()` lets a server end by itself before `SIGKILL`, in ms. */
 const STOP_WAIT_MS = 10_000
-
-/**
- * Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours.
- * - also the review inbox's listener check:  a session's monitor listens while its session's process runs
- *   (spell-epic's `ReviewInbox.liveListener()`)
- * - NEVER throws
- */
-export function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
-}
 
 /** A server that answered:  its info and base URL, `http://127.0.0.1:<port>`. */
 export type RunningServer = ServerInfo & { base: string }

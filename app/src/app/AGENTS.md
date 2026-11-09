@@ -20,12 +20,14 @@ and in the app's build folder, `app/` at the app folder's root.
     `core`'s [drawing.ts](../../../parser/src/core/drawing.ts).
   - No React:  every `.tsx` is Solid.
   - `build.test.ts` pins that no chunk holds React, `spell-runtime.js` included.
-  - Two test projects (the root's `vitest.config.ts`):
-    - Both read the app folder's `tests/app/`, where the tests live at the same paths as the code:
+  - Three test projects (the root's `vitest.config.ts`):
+    - All read the app folder's `tests/app/`, where the tests live at the same paths as the code:
       the test of this folder's `index.tsx` is [solid.test.tsx](../../tests/app/solid.test.tsx).
     - `app:node`, for most tests:  there Solid is its SERVER build
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
+    - `app:integration`, for `tests/app/pages/*.test.ts`:  headless Playwright over this checkout's running editor,
+      one file at a time
   - `spell/app/app/solid` is the app's UI, all Solid (P8).
     - the pages' shell (`SpellPage`, `AppRoot`)
     - menus, panes, dialogs, and the plumbing
@@ -35,7 +37,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - `tracked()` is a memo over such a read.
 - `src/` is the app:
   - `solid/`:  the UI
-  - `pages/`:  the pages and the router
+  - `pages/`:  the pages and the router;  among them a site's editor, `/site/<project>` (`SiteEditorPage`, epic
+    `mockup` P4), which changes the site's file through `SiteWrites`;  a page's stories, `PageStories` (P6);
+    its board of sections and cards, `SiteBoard` and `<SiteBoardView>` (T31);  a group's sites, `/site/<group>` (`SiteGroupPage`)
   - `ui/`:  `UI`, shared UI types, Monaco's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
@@ -45,8 +49,15 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
-  - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
+  - `layout/`:  how the editor loads its own pieces written in Spell (`layoutSpell.ts`);  the pieces themselves, the file tabs,
+    the top bar, the menus and the panes, are projects of the group `@spell/editor`, in `spaces/@spell/editor/` (P22;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
+  - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
+    installed by `index.tsx`, never in the static build
+    - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept at once, then
+      compiles behind it, not from the cache and saving nothing, for what reads the parse and each file's compile:
+      the side bar, the code's marks, the compiled-code pane (`editor.compileBehind()`;  epic `language` r11)
+    - the counts:  `SpellProject.compileCache.counts` in devtools, and a `compile-cache` line per compile
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`
   - in spaces' [route modules folder](../spaces/server/node/routes/)
@@ -171,9 +182,16 @@ and in the app's build folder, `app/` at the app folder's root.
     - No import map:  `runCompiled()` links each program's imports.
     - A recompile of the same program with an app on the page takes the edit as it runs ([LiveEdit](runner/LiveEdit.ts),
       epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
-      - What it can't take (a new type, a line at the top level) waits for Restart, and the editor says so
+      - What it can't take (a type removed or renamed, a line at the top level) waits for Restart, and the editor says so
         (`editor.restartNeededBecause`, `<RestartNeeded>`):  never a surprise reload.
-      - A program with no app, or one that imports another, runs again instead.
+      - A type ADDED is taken as it runs, with its top-level thing (epic `mockup` P4, J15):
+        nothing running can be one of it yet, e.g. a site's new page.
+      - A program that imports other projects takes it too, each import weighed the same way, deepest first
+        (epic `editor`, Live Edit Everywhere);  one whose imports become other projects runs again.
+      - A program with no app runs again instead:  nothing is drawn to keep.
+      - A property an edit adds shows as its element's attribute at once, both ways (epic `editor` I47):
+        the tag's definition grows in place (`E.DOMElement.addAttributes()`), and the page hears of the new classes
+        only once the running things are theirs (core's `takeNewClasses()`).
     - A recompile of the same program keeps its things, e.g. the game in progress
       (`keepThings`, epic `drawable-thing` P16).
       - Restart starts afresh, on purpose:  each runner's own (`restart()`, `editor.restartApp()`).

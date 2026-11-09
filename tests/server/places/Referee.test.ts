@@ -2,12 +2,12 @@ import { createServer } from "node:http"
 import type { AddressInfo } from "node:net"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { LiveRoomPlace, MemoryPlace, PlaceError, positionBetween, type PlaceRow } from "spell/util/places"
+import { LiveRoomPlace, MemoryPlace, PlaceError, positionBetween, type PlaceRow } from "spell/places"
 import { SRV } from "spell/server"
 import { Referee } from "spell/server/places"
 
 import { TestPage, newRoom, seededRandom, withoutMarks, type Trouble } from "./Referee.helpers"
-import { TroubledPlace } from "../../util/places/fakePlaces"
+import { TroubledPlace } from "../../places/fakePlaces"
 
 /** Everyone on the screen, and the referee, the same? */
 function sameEverywhere(referee: Referee, pages: TestPage[]): void {
@@ -439,21 +439,22 @@ describe("Referee, over a real socket", () => {
     stop()
   })
 
-  test("a wrong token, or none, is turned away, and says why", async () => {
+  test("a wrong token, or none, is turned away;  the token rides as the socket's sub-protocol, never in its address", async () => {
     const { port, stop } = await served()
-    const statusOf = (path: string) =>
+    const statusOf = (path: string, protocols: string[] = []) =>
       new Promise<string>((resolve) => {
-        const socket = new WebSocket(`ws://127.0.0.1:${port}${path}`)
-        socket.addEventListener("open", () => resolve("open"))
+        const socket = new WebSocket(`ws://127.0.0.1:${port}${path}`, protocols)
+        socket.addEventListener("open", () => (socket.close(), resolve("open")))
         socket.addEventListener("error", () => resolve("refused"))
       })
-    expect(await statusOf("/room?token=wrong")).toBe("refused")
+    expect(await statusOf("/room", ["spell-token.wrong"])).toBe("refused")
     expect(await statusOf("/room")).toBe("refused")
-    expect(await statusOf("/room?token=the-token")).toBe("open")
+    expect(await statusOf("/room?token=the-token")).toBe("refused")
+    expect(await statusOf("/room", ["spell-token.the-token"])).toBe("open")
     stop()
   })
 
-  test("asked from another machine, it says a hosted room needs a sign-in", async () => {
+  test("asked from another machine with no sign-in, it says to sign in", async () => {
     const { referee, stop } = await served()
     const written: string[] = []
     const socket = {
@@ -461,20 +462,21 @@ describe("Referee, over a real socket", () => {
       end: (text: string) => written.push(text),
       destroyed: false
     }
+    const headers = { "sec-websocket-protocol": "spell-token.the-token" }
     referee.upgrade(
-      { headers: { host: "127.0.0.1:1" }, url: "/room?token=the-token" } as never,
+      { headers: { host: "127.0.0.1:1", ...headers }, url: "/room" } as never,
       socket as never,
       Buffer.alloc(0)
     )
     expect(written[0]).toMatch(/403/)
-    expect(written[0]).toMatch(/hosted room needs its own sign-in/)
+    expect(written[0]).toMatch(/unless you're signed in/)
     written.length = 0
     referee.upgrade(
-      { headers: { host: "rooms.example.com" }, url: "/room?token=the-token" } as never,
+      { headers: { host: "rooms.example.com", ...headers }, url: "/room" } as never,
       { ...socket, remoteAddress: "127.0.0.1" } as never,
       Buffer.alloc(0)
     )
-    expect(written[0]).toMatch(/hosted room needs its own sign-in/)
+    expect(written[0]).toMatch(/unless you're signed in/)
     stop()
   })
 })

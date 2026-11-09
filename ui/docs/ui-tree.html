@@ -117,6 +117,35 @@
                   </ui-tree>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-states-sticky-path" label="Sticky path" sticky="stack" collapsible dividing>
+                <ui-example description="With `sticky-path`, scroll down:  one line pinned at the top names the open rows the first row in view is inside.  A click on one scrolls back to it, selecting nothing.">
+                  <div style="height: 12em; overflow-y: auto; width: 18em">
+                    <ui-tree sticky-path label="Views">
+                      <ui-tree-item label="Solitaire" icon="cube" open>
+                        <ui-tree-item label="Container" icon="cube" open>
+                          <ui-tree-item label="Grid" icon="cube" open>
+                            <ui-tree-item label="StockPile" which="stock" icon="cube" open>
+                              <ui-tree-item label="Card" which="3 of spades" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="queen of clubs" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="king of diamonds" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="king of spades" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="king of clubs" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="10 of clubs" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="5 of diamonds" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="8 of diamonds" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="ace of hearts" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="2 of hearts" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="7 of spades" icon="cube"></ui-tree-item>
+                              <ui-tree-item label="Card" which="jack of hearts" icon="cube"></ui-tree-item>
+                            </ui-tree-item>
+                            <ui-tree-item label="DiscardPile" which="discards" icon="cube"></ui-tree-item>
+                          </ui-tree-item>
+                        </ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree>
+                  </div>
+                </ui-example>
+              </ui-section>
             </ui-section>
           </ui-tab>
 

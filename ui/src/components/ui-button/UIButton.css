@@ -119,6 +119,10 @@
     --_ui-button-font-size: var(--ui-button-font-size, var(--ui-font-size));
     --_ui-button-font-weight: var(--ui-button-font-weight, var(--ui-font-weight-semibold));
     --_ui-button-line-height: var(--ui-button-line-height, 1);
+    /* `size="poster"`:  past massive, growing with the window between a floor and a ceiling (em of the text around) */
+    --_ui-button-poster-min: var(--ui-button-poster-min, 2em);
+    --_ui-button-poster-grow: var(--ui-button-poster-grow, 6vw);
+    --_ui-button-poster-max: var(--ui-button-poster-max, 3.2em);
     /* ## Colours:  rest, hover, down (pressed), active (on) */
     --_ui-button-background: var(--ui-button-background, oklch(from var(--ui-ink) l c h / 0.08));
     --_ui-button-background-hover: var(--ui-button-background-hover, oklch(from var(--ui-ink) l c h / 0.13));
@@ -151,6 +155,8 @@
       --ui-button-labeled-icon-background,
       oklch(from var(--ui-shadow-ink) l c h / 0.06)
     );
+    --_ui-button-raised-lip: var(--ui-button-raised-lip, 0.25em);
+    --_ui-button-raised-shade: var(--ui-button-raised-shade, 0.18);
     --_ui-button-compact-ratio: var(--ui-button-compact-ratio, 0.75);
     --_ui-button-circular-min-width: var(--ui-button-circular-min-width, 2.5em);
     --_ui-button-attached-padding-inline: var(--ui-button-attached-padding-inline, var(--ui-space-s));
@@ -229,12 +235,13 @@
     font-family: var(--_ui-button-font-family);
     font-size: calc(var(--_ui-button-font-size) * var(--ui-scale, 1));
     font-style: normal;
-    font-weight: var(--_button-weight, var(--_ui-button-font-weight));
+    font-weight: var(--_ui-font-weight, var(--_button-weight, var(--_ui-button-font-weight)));
     line-height: var(--_ui-button-line-height);
     text-align: center;
     text-decoration: none;
-    text-shadow: none;
-    text-transform: none;
+    /* the shared `font`'s weight and `shadow` reach the button through these (`reset.css`) */
+    text-shadow: var(--_ui-font-shadow, none);
+    text-transform: var(--_ui-font-case, none);
     /* One line, unless `wrapped` */
     white-space: nowrap;
     vertical-align: baseline;
@@ -633,6 +640,11 @@
 *******************************/
 
 @layer ui.components.button.variations {
+  /* A logo (`size="poster"`):  bigger than massive on a desktop, smaller on a phone (epic `language` P35, I63) */
+  .ui.poster.button {
+    font-size: clamp(var(--_ui-button-poster-min), var(--_ui-button-poster-grow), var(--_ui-button-poster-max));
+  }
+
   /* Compact:  three quarters of the padding. */
   .ui.compact:is(.button, .buttons) {
     --_button-density: var(--_ui-button-compact-ratio);
@@ -661,6 +673,20 @@
     --_button-radius: var(--ui-radius-pill);
     --_button-min-width: var(--_ui-button-circular-min-width);
     --_button-icon-width: 1em;
+  }
+
+  /* Raised:  it stands on a lip of its own colour, darker, and sinks into it when pressed.
+     - The lip is its bottom border, so it takes room of its own:  a margin would go in a stack, a shadow overlap
+       what comes next.
+     - Pressed, the lip moves to the top, see-through:  the button sinks, and nothing around it moves. */
+  .ui.raised.button {
+    border-block-end: var(--_ui-button-raised-lip) solid
+      oklch(from var(--ui-color, var(--_ui-button-background)) calc(l - var(--_ui-button-raised-shade)) c h);
+    background-clip: padding-box;
+  }
+  .ui.raised.button:active {
+    border-block-start: var(--_ui-button-raised-lip) solid transparent;
+    border-block-end-width: 0;
   }
 
   /* Toggle:  `active` means "on", in the positive colour. */

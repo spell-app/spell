@@ -15,7 +15,6 @@ export const markdownEs = {
     breaks: "saltos",
     "heading-offset": "desfase-titulos",
     "skip-title": "omitir-titulo",
-    editable: "editable",
     sanitized: "saneado"
   },
   values: { editable: { tabs: "solapas" } },

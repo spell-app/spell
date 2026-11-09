@@ -1,7 +1,10 @@
 /**
  * Regenerate Spell's favicon:  `yarn favicon` (at the kit's root), after the hat mark (`LOGO_MARK`) changes.
- * - The icon:  the brand's app icon, `.sp-appicon--aubergine` (`brand/spell-design-system`):  the white hat
- *   on an aubergine square, corners 22.5% of the width, the hat `HAT` of it, centred.
+ * - The favicon:  the hat alone, no tile, as wide as the icon (`HAT_ALONE`), so it reads bigger in a tab;
+ *   violet on a light tab bar, lavender on a dark one (the SVG follows the browser's scheme;  the 32px PNG is violet).
+ *   Owen, 2026-11-06:  "the non-inverted hat ... slightly bigger".
+ * - The apple touch icon keeps the brand's app icon, `.sp-appicon--aubergine` (`brand/spell-design-system`):
+ *   the white hat on an aubergine square, the hat `HAT` of it, centred:  a home screen wants a tile.
  * - Writes:
  *   - `src/server/site/favicon.ts` -- the SVG and PNGs as strings, what `WebServer` serves at `/favicon.*` and the
  *     site header puts on `file://` pages.  Strings, not files:  the VS Code extension bundles `WebServer` (esbuild),
@@ -9,10 +12,10 @@
  *   - `app/app/static/favicon/` -- the app's copies, which vite serves (and bundles into `dist/`);  spell-app
  *     found as a package, as node finds it from here, and skipped when it isn't installed
  * - PNGs:  headless Chromium (Playwright, the repo root's) screenshots of the SVG.
- *   - `favicon-32.png`:  the SVG as is, for browsers without SVG favicons
+ *   - `favicon-32.png`:  the SVG, light, for browsers without SVG favicons
  *   - `apple-touch-icon.png` (180):  SQUARE corners, since iOS masks the icon with its own;  transparent corners
  *     would show black there
- * - Usage:  `yarn favicon [--hat 0.74]`
+ * - Usage:  `yarn favicon [--hat 0.74]`  (`--hat`:  the apple touch icon's hat)
  */
 import { mkdirSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
@@ -34,14 +37,18 @@ const APP_DIR = APP && join(APP, "app", "static", "favicon")
 /** The brand's aubergine (`--spell-aubergine`, `--violet-900`). */
 const AUBERGINE = "#2A1D60"
 
-/** Corner radius, as a fraction of the width (`--radius-app-icon`). */
-const RADIUS = 0.225
-
-/** The hat's width, as a fraction of the icon's:  `--hat <fraction>`, else the default. */
+/** The apple touch icon's hat width, as a fraction of the icon's:  `--hat <fraction>`, else the default. */
 const HAT = Number(argument("--hat") ?? 0.74)
 
-const svg = faviconSvg(HAT, true)
-const square = faviconSvg(HAT, false)
+/** The favicon's hat width, as a fraction of the icon's:  all of it, but a hair for anti-aliasing. */
+const HAT_ALONE = 0.98
+
+/** The hat alone:  violet on light, lavender on dark (the loading page's colours, `app/app/index.html`). */
+const HAT_LIGHT = "#5b4bd6"
+const HAT_DARK = "#b9a7ff"
+
+const svg = hatSvg()
+const square = appIconSvg(HAT)
 if (svg.includes("'")) throw new Error("favicon:  the SVG has a `'`;  `module()` single-quotes it")
 const browser = await chromium.launch()
 try {
@@ -63,21 +70,35 @@ try {
 // ## The icon
 ////////////////
 
-/**
- * The icon's SVG:  the mark, white, centred on an aubergine square `hat` times its width.
- * - `rounded`:  the brand's 22.5% corners;  `false`:  square (the apple touch icon)
- * - the mark's own box is its `viewBox`, `12 39 218 192`
- */
-function faviconSvg(hat: number, rounded: boolean): string {
+/** The favicon's SVG:  the mark alone, centred, `HAT_ALONE` of the width, in the scheme's colour. */
+function hatSvg(): string {
+  const { side, d } = centredMark(HAT_ALONE)
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(side)} ${num(side)}">` +
+    `<style>path{fill:${HAT_LIGHT}}@media (prefers-color-scheme:dark){path{fill:${HAT_DARK}}}</style>` +
+    `<path fill-rule="evenodd" d="${d}"/></svg>`
+  )
+}
+
+/** The mark's path centred in a square `hat` times its width wide:  its side, and its path. */
+function centredMark(hat: number): { side: number; d: string } {
   const [x, y, width, height] = /viewBox="([^"]+)"/.exec(LOGO_MARK)![1]!.split(" ").map(Number) as number[]
   const side = round(width! / hat)
   const dx = (side - width!) / 2 - x!
   const dy = (side - height!) / 2 - y!
-  const d = tidyPath(/ d="([^"]+)"/.exec(LOGO_MARK)![1]!, dx, dy)
-  const corner = rounded ? ` rx="${num(side * RADIUS)}"` : ""
+  return { side, d: tidyPath(/ d="([^"]+)"/.exec(LOGO_MARK)![1]!, dx, dy) }
+}
+
+/**
+ * The apple touch icon's SVG:  the mark, white, centred on an aubergine square `hat` times its width.
+ * - square corners:  iOS rounds them itself
+ * - the mark's own box is its `viewBox`, `12 39 218 192`
+ */
+function appIconSvg(hat: number): string {
+  const { side, d } = centredMark(hat)
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(side)} ${num(side)}">` +
-    `<rect width="${num(side)}" height="${num(side)}"${corner} fill="${AUBERGINE}"/>` +
+    `<rect width="${num(side)}" height="${num(side)}" fill="${AUBERGINE}"/>` +
     `<path fill="#fff" fill-rule="evenodd" d="${d}"/></svg>`
   )
 }
@@ -145,22 +166,23 @@ async function render(svg: string, size: number): Promise<Buffer> {
 /** `src/site/favicon.ts`'s source, as `oxfmt` writes it:  the SVG has `"`s and no `'`, so it's single-quoted. */
 function module(svg: string, png32: Buffer, touch: Buffer): string {
   return `/**
- * Spell's favicon:  the brand's app icon (white hat on aubergine), as strings.
+ * Spell's favicon:  the hat alone, violet (lavender on dark);  the apple touch icon, the brand's app icon
+ * (white hat on aubergine):  as strings.
  * - GENERATED by \`yarn favicon\` (the kit's \`scripts/favicon.ts\`), from \`LOGO_MARK\`:  NEVER edit by hand
  * - served by \`WebServer\` at \`/favicon.svg\` / \`/favicon-32.png\` / \`/apple-touch-icon.png\` (and
  *   \`/favicon.ico\`);  the site header puts the SVG on \`file://\` pages as a \`data:\` URI
  * - browser-safe (no node imports):  the site header bundles it
  */
 
-/** The icon, as SVG:  ${HAT} of its width is hat, corners ${RADIUS * 100}%. */
+/** The favicon, as SVG:  the hat alone, ${HAT_ALONE} of its width, its colour following the browser's scheme. */
 export const FAVICON_SVG =
   '${svg}'
 
-/** 32px PNG, base64:  for browsers without SVG favicons. */
+/** 32px PNG, base64, the light one:  for browsers without SVG favicons. */
 export const FAVICON_PNG_32 =
   "${png32.toString("base64")}"
 
-/** 180px PNG, base64, square corners (iOS rounds them):  \`apple-touch-icon\`. */
+/** 180px PNG, base64:  the app icon, ${HAT} of its width hat, square corners (iOS rounds them):  \`apple-touch-icon\`. */
 export const APPLE_TOUCH_ICON_PNG =
   "${touch.toString("base64")}"
 `

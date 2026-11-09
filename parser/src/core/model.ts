@@ -55,6 +55,17 @@ export {
   type LoaderOptions
 } from "./saving"
 export { checkEntry, jsonSchemaFor, kindOf, type EntryProblem, type CheckOptions, type Kind } from "./checking"
+export {
+  lexiconFor,
+  nsidFor,
+  spellTypeFor,
+  DECIMAL_NOTE,
+  type LexiconDocument,
+  type LexiconField,
+  type LexiconObject,
+  type LexiconRecord,
+  type SpellTypeFromLexicon
+} from "./lexicon"
 export { SPELL_CORE_MODULE, type Core, type PropCheck } from "./core.types"
 export type { ThingsToSearch } from "./references"
 export type { ListCallback } from "./classes/List"

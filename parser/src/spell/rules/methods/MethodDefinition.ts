@@ -268,11 +268,17 @@ export class MethodDefinition<
     // Generic `Groups` keeps `MatchFor<this>` from narrowing to a plain `P.Match` -- cast once.
     const declaredBy = match as P.Match
     // a template's test:  `it` is a new one of the template, made as the test starts -- see `getAST()`
-    // a variable, not an alias:  so a `get` in it declares `it_2`, as after any `it`
+    // - a variable, not an alias:  so a `get` in it declares `it_2`, as after any `it`
+    // - the thing its lines run on, as an action's are on `this`:  `the total`, a bare `add the input` (epic `language` T86)
     if (testOf) {
-      const testScope = new P.MethodScope({ parentScope: match.scope, name: methodName, declaredBy })
-      testScope.variables.add({ name: "it", datatype: SP.typeName(testOf), declaredBy })
-      return testScope
+      return new P.MethodScope({
+        parentScope: match.scope,
+        name: methodName,
+        thisVar: "it",
+        itDatatype: SP.typeName(testOf),
+        thingName: "it",
+        declaredBy
+      })
     }
     // a value kind's phrase:  `it` / `the rank` are its argument, the value -- see `MethodSignatureData.valueKindOf`
     if (valueKindOf && instanceType) {
@@ -330,6 +336,17 @@ export class MethodDefinition<
   mutateScope(match: P.MatchFor<this>): void {
     this.getRule(match)
     this.addMethod(match)
+  }
+
+  /**
+   * An action or `to ...` method gives back its last line's value, as a property does (epic `language` I47, Owen's C):
+   * `to double it:` ending `its n * 2` returns it.  See `SpellStatement.returnsLastLine()`.
+   * - NOT a test's body:  a test gives back nothing.
+   * - NOT a drawing's (`to draw:`):  its lines draw, gathered by `DrawnLines`.
+   */
+  returnsLastLine(statement: P.Match): boolean {
+    if ((statement.groups as { asTest?: P.Match }).asTest) return false
+    return !/^draw/.test((statement.nestedScope as P.Scope & { name?: string }).name ?? "")
   }
 
   /**

@@ -636,4 +636,49 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     await settle()
     expect(markOf(routes, "s-upgrades")).toEqual({ action: "pick", pick: "B", choices: 0 })
   })
+
+  test("a phase's 2nd set is lettered `A2`, `B2`;  a pick in each kept, both in the phase's ONE mark (I227)", async () => {
+    const { routes } = await reviewing()
+    const phase = await choices(
+      `<epic-phase id="p-two"><epic-field name="choices"><epic-choices>${OPTIONS}</epic-choices>` +
+        `<epic-choices>${OPTIONS}</epic-choices></epic-field></epic-phase>`
+    )
+    await settle()
+    const sets = Array.from(phase.host.closest("epic-phase")!.querySelectorAll("epic-choices"))
+    const [first, second] = sets.map((set) => Array.from(set.querySelectorAll("epic-option")))
+    expect(first!.map((option) => part(option, "title")!.textContent!.trim())).toEqual([
+      "A · A named palette",
+      "B · Any CSS colour"
+    ])
+    expect(second!.map((option) => part(option, "title")!.textContent!.trim())).toEqual([
+      "A2 · A named palette",
+      "B2 · Any CSS colour"
+    ])
+    expect(pillOf(second![1]!)!.title).toBe("Pick B2")
+    pillOf(first![1]!)!.click()
+    await settle()
+    pillOf(second![1]!)!.click()
+    await settle()
+    expect(markOf(routes, "p-two")).toEqual({
+      action: "pick",
+      pick: "B",
+      choices: 0,
+      sets: [{ pick: "B", choices: 1 }]
+    })
+    expect(pills([first![1]!, second![1]!])).toEqual([
+      ["Chosen · not sent", "true"],
+      ["Chosen · not sent", "true"]
+    ])
+    expect(pillOf(second![1]!)!.title).toBe("B2 is picked:  click to un-pick · not sent yet")
+  })
+
+  test("a 2nd set answered names its pick `B2` in its folded heading (I227)", async () => {
+    const phase = await choices(
+      `<epic-phase id="p-three"><epic-choices chosen="A">${OPTIONS}</epic-choices>` +
+        `<epic-choices chosen="B">${OPTIONS}</epic-choices></epic-phase>`
+    )
+    const [first, second] = Array.from(phase.host.closest("epic-phase")!.querySelectorAll("epic-choices"))
+    expect(part(first!, "chosen")!.textContent).toBe("Chosen:  A · A named palette")
+    expect(part(second!, "chosen")!.textContent).toBe("Chosen:  B2 · Any CSS colour")
+  })
 })

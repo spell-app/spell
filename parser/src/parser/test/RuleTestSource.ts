@@ -6,7 +6,8 @@
  * - Knows no language:  it finds tests by their shape, the `P.RuleTest`s in any `tests: [...]` array.
  */
 import { readFileSync, writeFileSync } from "node:fs"
-import { parseSync } from "vite-plus"
+
+import { readTypeScript, walk, type SourceNode } from "spell/util/node/typescript"
 
 /****************
  * ### `RuleTestSource`
@@ -45,10 +46,10 @@ export class RuleTestSource {
    * - throws if the file doesn't parse
    */
   get tests(): SourceTest[] {
-    const { program, errors } = parseSync(this.path, this.text, { lang: "ts" })
-    if (errors.length) throw new SyntaxError(`RuleTestSource:  can't parse ${this.path}:  ${errors[0]!.message}`)
+    const { program, errors } = readTypeScript(this.path, this.text, { lang: "ts" })
+    if (errors.length) throw new SyntaxError(`RuleTestSource:  can't parse ${this.path}:  ${errors[0]}`)
     const found: SourceTest[] = []
-    walk(program as unknown as SourceNode, (node) => {
+    walk(program, (node) => {
       if (node.type !== "Property" || propertyName(node) !== "tests") return
       const list = node.value as SourceNode
       if (list.type !== "ArrayExpression") return
@@ -175,9 +176,6 @@ export type BlessedTest = {
   ts: unknown
 }
 
-/** A node of the source's syntax tree, as `parseSync()` gives it:  ESTree, with offsets. */
-type SourceNode = { type: string; start: number; end: number; [key: string]: unknown }
-
 /** Replace `start` ... `end` of the text with `text`. */
 type TextEdit = { start: number; end: number; text: string }
 
@@ -272,19 +270,4 @@ function propertyName(property: SourceNode): string | undefined {
   const key = property.key as SourceNode
   if (key.type === "Identifier") return key.name as string
   return key.type === "Literal" && typeof key.value === "string" ? key.value : undefined
-}
-
-/** Call `visit` for `node` and every node inside it. */
-function walk(node: SourceNode, visit: (node: SourceNode) => void) {
-  visit(node)
-  for (const value of Object.values(node)) {
-    if (Array.isArray(value)) {
-      for (const it of value) if (isNode(it)) walk(it, visit)
-    } else if (isNode(value)) walk(value, visit)
-  }
-}
-
-/** Is `value` a syntax tree node? */
-function isNode(value: unknown): value is SourceNode {
-  return typeof value === "object" && value !== null && typeof (value as SourceNode).type === "string"
 }

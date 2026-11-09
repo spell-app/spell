@@ -28,13 +28,32 @@ describe("<ui-container> classes and layout", () => {
     // the old names (epic ui-gaps P4), and the new
     ['grid spacing="xl"', "ui very relaxed grid container"],
     ['grid spacing="lg"', "ui relaxed grid container"],
-    ['scrolling="very short" resizable', "ui resizable very short scrolling container"]
+    ['scrolling="very short" resizable', "ui resizable very short scrolling container"],
+    ['width="20em"', "ui set-width container"]
   ])("<ui-container %s>", async (attributes, classes) => {
     const host = await ElementFixture.render<DOMElement>(`<ui-container ${attributes}><p>x</p></ui-container>`)
     const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=container]")!
     expect(root.className).toBe(classes)
     expect(root.localName).toBe("div")
     expect(root.querySelector("slot")).not.toBeNull()
+  })
+
+  // epic `language` T76:  Calculator and Tic-Tac-Toe were 20em boxes, with a style sheet only to say so
+  it("takes a width of its own, any CSS length, centred;  never wider than the page", async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ui-container width="20em"><p>x</p></ui-container>`)
+    const root = host.shadowRoot!.querySelector<HTMLElement>("[part~=container]")!
+    const style = getComputedStyle(root)
+    expect(style.width).toBe(`${20 * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`)
+    expect(style.marginLeft).toBe(style.marginRight)
+    expect(style.maxWidth).toBe("100%")
+
+    host.setAttribute("width", "320px")
+    await host.ready
+    expect(getComputedStyle(root).width).toBe("320px")
+    host.removeAttribute("width")
+    await host.ready
+    expect(root.className).toBe("ui container")
+    expect(root.style.getPropertyValue("--_container-set-width")).toBe("")
   })
 
   it("centres a fixed width on wide pages", async () => {

@@ -60,6 +60,9 @@ methodsEs.addRule(TypeMethodArg, {
   syntax: `(un|una) {type}`
 })
 
+// a new one, its word after the type:  `una tarea nueva` is words, as English's `a new task` -- see `BareTypeArg` (T62)
+methodsEs.addRule(Synonyms.specialize({ ruleName: "new_after_type" }), { syntax: "(nuevo|nueva|nuevos|nuevas)" })
+
 methodsEs.addRule(BareTypeArg, {
   syntax: `(un|una) {type:known_type}`
 })
@@ -383,7 +386,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrarEnPile = function (pile) {",
             "  return core.console.log(1)",
             "}",
-            "(new Joker()).mostrarEnPile(new Pile())",
+            ";(new Joker()).mostrarEnPile(new Pile())",
             '/* PARSE ERROR: No entiendo "mostrar una nueva card en una nueva card" */'
           ],
           ts: [
@@ -392,7 +395,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrarEnPile = function (this: Card, pile: Pile) {",
             "  return core.console.log(1)",
             "}",
-            "(new Joker()).mostrarEnPile(new Pile())",
+            ";(new Joker()).mostrarEnPile(new Pile())",
             '/* PARSE ERROR: No entiendo "mostrar una nueva card en una nueva card" */'
           ]
         },
@@ -403,14 +406,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function () {",
             "  return core.console.log(this)",
             "}",
-            "(new Card()).mostrar()"
+            ";(new Card()).mostrar()"
           ],
           ts: [
             "export interface Card { mostrar(): any /* spell: type unknown */ }",
             "Card.prototype.mostrar = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            "(new Card()).mostrar()"
+            ";(new Card()).mostrar()"
           ]
         },
         {
@@ -423,14 +426,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.jugarEnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).jugarEnPile(new Pile())"
+            ";(new Card()).jugarEnPile(new Pile())"
           ],
           ts: [
             "export interface Card { jugarEnPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.jugarEnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).jugarEnPile(new Pile())"
+            ";(new Card()).jugarEnPile(new Pile())"
           ]
         },
         {
@@ -440,14 +443,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.jugarEnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).jugarEnPile(new Pile())"
+            ";(new Card()).jugarEnPile(new Pile())"
           ],
           ts: [
             "export interface Card { jugarEnPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.jugarEnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            "(new Card()).jugarEnPile(new Pile())"
+            ";(new Card()).jugarEnPile(new Pile())"
           ]
         },
         {

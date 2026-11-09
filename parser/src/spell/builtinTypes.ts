@@ -548,10 +548,11 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         words: "(a text) as upper case",
         kind: "method",
         datatype: "text",
-        rules: ["as_uppercase", "as_lowercase"],
+        rules: ["as_uppercase", "as_lowercase", "as_title_case"],
         docstring: md(
           "The same text in CAPITALS, e.g. `the name as upper case` -- or `as uppercase`.",
-          "- `as lower case` for small letters."
+          "- `as lower case` for small letters.",
+          '- `as title case` for a capital at the start of each word:  `"ace of spades"` is `"Ace Of Spades"`.'
         )
       }
     ]
@@ -560,7 +561,9 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     name: "date",
     docstring: md(
       "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.",
-      "- Its parts are numbers:  `the year of the due date of the todo`."
+      "- Its parts are numbers:  `the year of the due date of the todo`.",
+      "- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.",
+      '- Joined to text with `+`, it says itself as a drawing does:  `"due " + its due date` is `due November 7, 2026`.'
     ),
     members: [
       {
@@ -576,6 +579,59 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         datatype: "number",
         readAs: "{it}.getDate()",
         docstring: md("Its day of the month, from 1 to 31.")
+      },
+      {
+        words: "hour",
+        kind: "property",
+        datatype: "number",
+        readAs: "{it}.getHours()",
+        docstring: md(
+          "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
+        )
+      },
+      {
+        words: "short date",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.shortDate({it})",
+        docstring: md("Its day, short, e.g. `11/7/26`:  `the short date of its time`, as HyperTalk's `the short date`.")
+      },
+      {
+        words: "long date",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.longDate({it})",
+        docstring: md("Its day in full, e.g. `Saturday, November 7, 2026`.")
+      },
+      {
+        words: "abbreviated date",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.abbreviatedDate({it})",
+        docstring: md("Its day, its names cut short, e.g. `Sat, Nov 7, 2026`.")
+      },
+      {
+        words: "short time",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.shortTime({it})",
+        docstring: md("Its time of day, e.g. `9:14 AM`.")
+      },
+      {
+        words: "long time",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.longTime({it})",
+        docstring: md("Its time of day to the second, e.g. `9:14:42 AM`.")
+      },
+      {
+        words: "timestamp",
+        kind: "property",
+        datatype: "text",
+        readAs: "core.timestamp({it})",
+        docstring: md(
+          "It as an ISO 8601 timestamp, in UTC, e.g. `2026-11-07T17:14:42.000Z`:  what a program sends or saves."
+        )
       }
     ]
   }
@@ -619,6 +675,10 @@ export const TYPE_WORDS: P.TypeWords = {
   "two-sided-view": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   notebook: "notebook",
+  // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
+  site: "site",
+  // a kind of measure:  `length is a dimension:` (epic `language` P23)
+  dimension: "dimension",
   nothing: "nothing",
   undefined: "nothing",
   null: "nothing"

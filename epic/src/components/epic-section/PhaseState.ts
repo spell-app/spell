@@ -1,4 +1,5 @@
 import { PlanDates } from "spell/epic/dates"
+import { PhaseStatuses } from "spell/epic/phases"
 
 import { DOC_REVIEW, type PhaseStateName } from "./EpicSection.types"
 
@@ -6,15 +7,20 @@ import { DOC_REVIEW, type PhaseStateName } from "./EpicSection.types"
  * ### `PhaseState`
  * Where a phase stands, as its Phases chip counts it and its status circle draws it (epic `epic-engine` I157;  Owen's
  * colours and order since I170):  ONE state, the first that holds.
- * 1. `attention` (red):  needs Owen, not done:
- *    - its build plan waits for his Accept (`plan="waiting"`, but the doc pass:  `DOC_REVIEW`)
- *    - or a choice set inside it is still open (`choices-open`, written by the epic tool:  epic `epic-engine` P50)
- * 2. `updated` (orange):  its plan changed since he looked, not done:  update blocks in `to-see` neither marked Seen
+ * 1. `attention` (red):  a choice set inside it, not done, is still open (`choices-open`, written by the epic tool:  epic
+ *    `epic-engine` P50)
+ * 2. `waiting` (orange):  its build plan waits for his Accept, not done (`plan="waiting"`, but the doc pass:
+ *    `DOC_REVIEW`):  a plan to read is a review, not a blocker (epic `epic-engine` P63;  red before)
+ * 3. `updated` (orange):  its plan changed since he looked, not done:  update blocks in `to-see` neither marked Seen
  *    nor quiet (`PlanDates.isQuiet()`, 3 days);  an older page's `changes` until the tool's next write
- * 3. `progress` (blue):  under way (`status="active"`), or Claude at work on it (the review inbox's `working`)
- * 4. `scheduled` (dotted blue):  still to do, nothing above
- * 5. `recent` (green):  done in the last 3 days (`done-at`, the same `isQuiet()` window)
- * 6. `old` (grey):  done longer ago, or done with no `done-at`
+ * 4. `progress` (blue):  under way (`status="active"`), or Claude at work on it (the review inbox's `working`)
+ * 5. `paused` (grey, a pause glyph):  still to do, held by Owen (`plan="held"`, epic `epic-engine` I221;  Owen,
+ *    2026-11-04:  "These are paused, red feels wrong"):  not built till he accepts its plan again
+ * 6. `scheduled` (dotted blue):  still to do, nothing above
+ * 7. `recent` (green):  done in the last 3 days (`done-at`, the same `isQuiet()` window)
+ * 8. `old` (grey):  done longer ago, or done with no `done-at`;  DROPPED, at once (never built:  epic `epic-engine`
+ *    I228)
+ * - "not done" above means not FINISHED:  a dropped phase asks nothing either (`PhaseStatuses.isFinished()`)
  * - Owen, 2026-10-29:  "The order, one chip per phase:  red, orange, blue (working), dotted blue, green, grey."
  * - Pure:  NEVER reads the page.  The caller hands it the fields (`fieldsOf()`, or a component's own) and what the
  *   review inbox says now (`live`).
@@ -23,18 +29,27 @@ import { DOC_REVIEW, type PhaseStateName } from "./EpicSection.types"
 export class PhaseState {
   /** `fields`' state, with the review inbox saying `live`, at `now`. */
   static of(fields: PhaseFields, live: PhaseLive = NO_PHASE_LIVE, now: Date = new Date()): PhaseStateName {
+    // dropped (I228):  never built, nothing to celebrate:  grey at once
+    if (fields.status === "dropped") return "old"
     if (fields.status === "done") {
       return fields.doneAt && !PlanDates.isQuiet(fields.doneAt, now) ? "recent" : "old"
     }
-    if (PhaseState.isPlanWaiting(fields) || Number(fields.choicesOpen) > 0) return "attention"
+    if (Number(fields.choicesOpen) > 0) return "attention"
+    if (PhaseState.isPlanWaiting(fields)) return "waiting"
     if (PhaseState.newUpdates(fields, live, now).length) return "updated"
     if (fields.status === "active" || live.workedOn) return "progress"
+    if (PhaseState.isHeld(fields)) return "paused"
     return "scheduled"
+  }
+
+  /** Is it HELD by Owen (`plan="held"`, epic `epic-engine` I221), and not done?  Paused:  not built till he accepts it. */
+  static isHeld({ status, plan }: PhaseFields): boolean {
+    return plan === "held" && !PhaseStatuses.isFinished(status)
   }
 
   /** Does its build plan wait for Owen's Accept (`plan="waiting"`), and it isn't done?  Never the doc pass. */
   static isPlanWaiting({ status, plan, title }: PhaseFields): boolean {
-    return plan === "waiting" && status !== "done" && !DOC_REVIEW.test(title)
+    return plan === "waiting" && !PhaseStatuses.isFinished(status) && !DOC_REVIEW.test(title)
   }
 
   /**
@@ -43,7 +58,7 @@ export class PhaseState {
    * - an older page, with `changes` and no `to-see` yet:  that many, unnamed (`""`), until the tool's next write
    */
   static newUpdates({ status, toSee, changes }: PhaseFields, live: PhaseLive, now: Date): string[] {
-    if (status === "done") return []
+    if (PhaseStatuses.isFinished(status)) return []
     if ((toSee === null || toSee === undefined) && Number(changes) > 0)
       return Array.from({ length: Number(changes) }, () => "")
     return PhaseState.ids(toSee)
@@ -78,7 +93,7 @@ export class PhaseState {
 
 /** What `PhaseState.of()` reads of a phase. */
 export type PhaseFields = {
-  /** `todo`, `active`, `done` */
+  /** `todo`, `active`, `done`, `dropped` */
   status: string | null | undefined
   /** its build plan:  `waiting` for Owen, `accepted` */
   plan: string | null | undefined

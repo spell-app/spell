@@ -1,5 +1,5 @@
-import type { AtProtoAccess } from "spell/util/places/AtProtoSignIn"
-import type { SignInStatus } from "spell/util/places/places.types"
+import type { AtProtoAccess } from "spell/places/AtProtoSignIn"
+import type { SignInStatus } from "spell/places/places.types"
 
 /****************
  * ### `FakeSignIn`

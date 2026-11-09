@@ -285,15 +285,15 @@
     {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
+      uri: "templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/property:direction", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
+      uri: "templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/enumeration:Directions", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
+      uri: "templates/TwoSidedView.spell"
     },
     {
       path: "type:ViewableList",
@@ -348,15 +348,16 @@
     },
     {
       path: "type:Text/method:(a text) as upper case",
-      description: "The same text in CAPITALS, e.g. `the name as upper case` -- or `as uppercase`.\n- `as lower case` for small letters.",
+      description: "The same text in CAPITALS, e.g. `the name as upper case` -- or `as uppercase`.\n- `as lower case` for small letters.\n- `as title case` for a capital at the start of each word:  `\"ace of spades\"` is `\"Ace Of Spades\"`.",
       rules: [
         { name: "as_uppercase", syntax: "as (upper case|uppercase)" },
-        { name: "as_lowercase", syntax: "as (lower case|lowercase)" }
+        { name: "as_lowercase", syntax: "as (lower case|lowercase)" },
+        { name: "as_title_case", syntax: "as (title case|titlecase)" }
       ]
     },
     {
       path: "type:Date",
-      description: "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.\n- Its parts are numbers:  `the year of the due date of the todo`."
+      description: "A day and a time of day, e.g. a property declared `as date`:  `a todo has a due date as date`.\n- Its parts are numbers:  `the year of the due date of the todo`.\n- Said as HyperTalk says it:  `the short date of it` (`11/7/26`), `long date`, `abbreviated date`, `short time`, `long time`, `timestamp`;  or `its due date as a short date`.\n- Joined to text with `+`, it says itself as a drawing does:  `\"due \" + its due date` is `due November 7, 2026`."
     },
     {
       path: "type:Date/property:year",
@@ -369,21 +370,72 @@
       description: "Its day of the month, from 1 to 31."
     },
     {
+      path: "type:Date/property:hour",
+      detail: "number",
+      description: "Its hour of the day, from 0 to 23:  an hour of a forecast, `the hour of its time` (epic `data` P33)."
+    },
+    {
+      path: "type:Date/property:short_date",
+      name: "short date",
+      detail: "text",
+      description: "Its day, short, e.g. `11/7/26`:  `the short date of its time`, as HyperTalk's `the short date`."
+    },
+    {
+      path: "type:Date/property:long_date",
+      name: "long date",
+      detail: "text",
+      description: "Its day in full, e.g. `Saturday, November 7, 2026`."
+    },
+    {
+      path: "type:Date/property:abbreviated_date",
+      name: "abbreviated date",
+      detail: "text",
+      description: "Its day, its names cut short, e.g. `Sat, Nov 7, 2026`."
+    },
+    {
+      path: "type:Date/property:short_time",
+      name: "short time",
+      detail: "text",
+      description: "Its time of day, e.g. `9:14 AM`."
+    },
+    {
+      path: "type:Date/property:long_time",
+      name: "long time",
+      detail: "text",
+      description: "Its time of day to the second, e.g. `9:14:42 AM`."
+    },
+    {
+      path: "type:Date/property:timestamp",
+      detail: "text",
+      description: "It as an ISO 8601 timestamp, in UTC, e.g. `2026-11-07T17:14:42.000Z`:  what a program sends or saves."
+    },
+    {
       path: "type:Place",
       super: "type:Thing"
     },
     {
       path: "type:Notebook", line: [5, 11],
       super: "type:Page",
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
+      uri: "templates/Notebook.spell"
     },
     {
       path: "type:Notebook/property:lock", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
+      uri: "templates/Notebook.spell"
     },
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
+      uri: "templates/Notebook.spell"
+    },
+    {
+      path: "type:Site", line: [6, 8],
+      super: "type:App",
+      uri: "templates/Site.spell"
+    },
+    {
+      path: "type:Site/property:current_address", line: 8,
+      name: "current address",
+      detail: "text",
+      uri: "templates/Site.spell"
     }
   ]
 }

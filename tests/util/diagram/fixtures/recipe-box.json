@@ -1,0 +1,66 @@
+{
+  "columns": [
+    {
+      "groups": [
+        {
+          "label": "Recipe Box",
+          "color": "#047857",
+          "lanes": [
+            [
+              {
+                "name": "Recipe",
+                "note": "One dish, written down",
+                "gap_before": 50,
+                "fields": [
+                  "cuisine",
+                  "tags[]",
+                  "method",
+                  "photos[]",
+                  "notes[]",
+                  "adapted_from",
+                  "replaces",
+                  "related_recipes[]"
+                ]
+              }
+            ],
+            [
+              { "name": "Cuisine", "note": "e.g. Thai, Basque" },
+              { "name": "Tag", "note": "Quick, vegetarian, spicy" },
+              { "name": "Method", "note": "Varies by cuisine", "fields": ["technique", "timer"] },
+              { "name": "Photo", "note": "Kept by a photo host", "fields": ["host / photo_id"] },
+              { "name": "Note", "note": "A cook's remark" }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "groups": [
+        { "legend": true },
+        {
+          "label": "Elsewhere",
+          "color": "#6b7280",
+          "gap_before": 60,
+          "nodes": [
+            { "name": "Technique", "note": "Kitchen guide", "color": "#7c3aed" },
+            { "name": "Timer", "note": "Kitchen guide", "color": "#7c3aed" },
+            { "name": "Photo hosts", "note": "Outside services" }
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    { "from": "Recipe.cuisine", "to": "Cuisine" },
+    { "from": "Recipe.tags[]", "to": "Tag" },
+    { "from": "Recipe.method", "to": "Method", "kind": "contains" },
+    { "from": "Recipe.photos[]", "to": "Photo", "kind": "contains" },
+    { "from": "Recipe.notes[]", "to": "Note", "kind": "contains" },
+    { "from": "Recipe.adapted_from", "to": "Recipe" },
+    { "from": "Recipe.replaces", "to": "Recipe" },
+    { "from": "Recipe.related_recipes[]", "to": "Recipe" },
+    { "from": "Method.technique", "to": "Technique" },
+    { "from": "Method.timer", "to": "Timer" },
+    { "from": "Photo.host / photo_id", "to": "Photo hosts" }
+  ]
+}

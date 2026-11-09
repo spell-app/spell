@@ -5,7 +5,8 @@ import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
 import {
   refuseWriteIfReadOnly,
   savedPlaceOfMatch,
-  savedTypeMatchOf
+  savedTypeMatchOf,
+  warnIfWritesARead
 } from "spell/parser/spell/rules/places/places.shared"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
@@ -14,10 +15,14 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 export class ListAppend extends SpellStatement<"thing|list"> {
   @proto static alias = "statement"
 
-  /** SIDE EFFECT:  it won't compile if `the things` it changes are saved in a read-only place. */
+  /**
+   * SIDE EFFECT:  it won't compile if `the things` it changes are saved in a read-only place.
+   * - SIDE EFFECT:  warns when its list is a property worked out from a place, which saves nothing (`warnIfWritesARead()`).
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (match) refuseWriteIfReadOnly(match, EveryThing.kindOf(savedTypeMatchOf(match.groups.list) ?? match))
+    if (match) warnIfWritesARead(match, match.groups.list, "add")
     return match
   }
 

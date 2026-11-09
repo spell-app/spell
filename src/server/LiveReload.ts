@@ -1,10 +1,11 @@
 import { createHash, randomUUID } from "node:crypto"
-import { readFileSync, statSync, watch, type FSWatcher } from "node:fs"
+import { readFileSync, statSync } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
 import type { PageSource, UpgradeHandler } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { FolderWatch } from "./FolderWatch"
 import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
 
 /**
@@ -27,7 +28,7 @@ import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
  * - a file rewritten with the SAME contents (a build that made the same bundle, a `touch`, a checkout) is not reported
  *   once it's been seen:  every report is a page's reason to reload (epic `epic-engine` I116)
  * - a ping every `heartbeat` ms (30s) keeps proxies and sleeping laptops from dropping the socket
- * - never reports dot files, `node_modules`, lock files or editor temp files
+ * - never reports dot files, `node_modules`, lock files or editor temp files:  its watching is `FolderWatch`'s
  * - From the goals server's `/api/events`.
  */
 export class LiveReload {
@@ -47,7 +48,7 @@ export class LiveReload {
   private clients = new Set<Duplex>()
 
   /** one per watched folder */
-  private watchers: FSWatcher[] = []
+  private watchers: FolderWatch[] = []
 
   /** pending reports, by URL path */
   private timers = new Map<string, NodeJS.Timeout>()
@@ -99,7 +100,7 @@ export class LiveReload {
    *   - or a function of the URL paths it's served at NOW, each change reported at every one:
    *     e.g. the page server's epic folder, at `/` and under every worktree's address (`PageServer.serveContent()`)
    * - a missing folder is skipped
-   * - SIDE EFFECT:  an `fs.watch` per call, closed by `close()`
+   * - SIDE EFFECT:  a `FolderWatch` per call, closed by `close()`
    */
   watch(dir: string, { ignore, servedAt }: { ignore?: RegExp; servedAt?: string | (() => string[]) } = {}): this {
     const folder = resolve(dir)
@@ -107,19 +108,11 @@ export class LiveReload {
       servedAt === undefined
         ? [undefined]
         : (typeof servedAt === "string" ? [servedAt] : servedAt()).map((at) => at.replace(/\/?$/, "/"))
-    try {
-      const watcher = watch(folder, { recursive: true }, (_event, name) => {
-        if (!name) return
-        const inside = name.split(sep).join("/")
-        if (IGNORED.test(inside) || ignore?.test(inside)) return
-        const path = inside.split("/").map(encodeURIComponent).join("/")
-        for (const at of places()) this.changed(join(folder, name), at && `${at}${path}`)
-      })
-      watcher.on("error", () => {})
-      this.watchers.push(watcher)
-    } catch {
-      // missing folder:  nothing to watch
-    }
+    const watcher = new FolderWatch(folder, { ignore }, ([inside]) => {
+      const path = inside!.split("/").map(encodeURIComponent).join("/")
+      for (const at of places()) this.changed(join(folder, inside!), at && `${at}${path}`)
+    })
+    if (watcher.isWatching) this.watchers.push(watcher)
     return this
   }
 
@@ -204,6 +197,3 @@ export class LiveReload {
  * - `debounce` / `heartbeat`:  ms (see the class)
  */
 export type LiveReloadProps = { root: string; debounce?: number; heartbeat?: number }
-
-/** Paths (relative, `/`-separated) never reported:  dot files and folders, `node_modules`, locks, temp files. */
-const IGNORED = /(^|\/)(\.|node_modules\/)|\.lock$|~$|\.tmp$|\.swp$/

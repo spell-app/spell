@@ -2,7 +2,8 @@ import { elementTagFor, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawIt } from "spell/parser/spell/rules/classes"
+import { DrawIt, DrawnLines } from "spell/parser/spell/rules/classes"
+import { ParseError } from "spell/parser/spell/rules/ParseError"
 import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
@@ -97,6 +98,11 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     element: P.JSXElementToken | P.JSXFragmentToken,
     codeSpell: boolean
   ) {
+    // a spellx drawing's `<for ...>` inside an element:  read as on a line of its own, its children its body (I19)
+    const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
+    if (isSpellx && element instanceof P.JSXElementToken && SpellJSX.isSpellxLoop(scope, element)) {
+      return SpellJSX.parseLoop(scope, match, element)
+    }
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
     // call `scope.parser.parse()` directly instead, as `SpellCSSFile.parse()` does.
     match.data.children = element.children?.map(
@@ -108,7 +114,6 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (element.chain) return SpellJSX.parseBranch(scope, match, element)
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
-    const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
     if (isSpellx && !element.attributes?.length && !element.children?.length) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
       if (match.data.loopItem) return match
@@ -143,6 +148,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - Spell's own tag words as the web's, found by `parse()`:  `<children/>` => `<slot/>` (`SPELL_TAG_WORDS`).
    */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
+    if (match.data.loop) return SpellJSX.loopAST(match, match.data.loop) as unknown as P.ASTJSXElement
     const { loopItem } = match.data
     if (loopItem) {
       const value = new P.ASTVariableExpression(match, { name: loopItem.name, variable: loopItem })
@@ -159,9 +165,31 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const children = this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,
-      attrs: SpellJSX.clickableAttrs(match, attrs),
+      attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
       children: match.data.view ? SpellJSX.withSlotNames(match.data.view, children) : children
     })
+  }
+
+  /**
+   * `attrs`, and for a `<ui-dimension value={its height}>` what its value measures, `dimension="Length"
+   * unit="centimeter"` (epic `language` P24, Owen's C4):  its value is a plain number, so the element can't tell.
+   * - Not when the element says them itself.
+   */
+  private static withMeasure(
+    match: P.MatchFor<SpellJSX>,
+    tagName: string,
+    attrs: P.ASTJSXAttribute[] | undefined
+  ): P.ASTJSXAttribute[] | undefined {
+    if (tagName !== MEASURE_TAG || !attrs) return attrs
+    const attributes = match.data.attributes ?? []
+    const said = (name: string) =>
+      attributes.some((attr) => (attr?.data as JSXMatchData | undefined)?.attribute === name)
+    const value = attributes.find((attr) => (attr?.data as JSXMatchData | undefined)?.attribute === "value")
+    const measure = SP.measureOf((value?.data as JSXMatchData | undefined)?.expression)
+    if (!measure || said("dimension") || said("unit")) return attrs
+    const attribute = (name: string, text: string) =>
+      new P.ASTJSXAttribute(match, { name, value: new P.ASTStringLiteral(match, { value: text, quote: '"' }) })
+    return [...attrs, attribute("dimension", measure.dimension), attribute("unit", measure.unit)]
   }
 
   /**
@@ -253,6 +281,53 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     return phrases.some((phrase) => phrase.split(" ")[0] === word)
   }
 
+  ////////////////
+  // ## A `<for>` inside an element
+  ////////////////
+
+  /** Is `element` spellx's `<for ...>`, its word the language's (`<for>`, `<para>`)? */
+  private static isSpellxLoop(scope: P.Scope, element: P.JSXElementToken): boolean {
+    const controls = SP.Language.of(scope).words.spellx?.controls ?? {}
+    return controls[element.tagName.toLowerCase()] === "for each"
+  }
+
+  /**
+   * A `<for ...>` inside a spellx drawing's element (epic `language` I19):  `<cards>` holding a card, then a card each.
+   * - Its text is read again as a drawing's lines (`SpellxTokenizer.tokenizeDrawingLines()`), then parsed as they'd be
+   *   on a line of their own:  its attributes riders, its `<empty>`, its children what it draws for each item.
+   * - Its tokens are placed where its text sits in the file, so errors point at it.
+   * - Its errors are its element's:  `parseErrorsIn()` reports them.
+   */
+  private static parseLoop(scope: P.Scope, match: P.MatchFor<SpellJSX>, element: P.JSXElementToken) {
+    const parser = scope.parser as SP.SpellParser
+    const tokenizer = parser.tokenizer as SP.SpellxTokenizer
+    const { raw = "", start, line = 0, ch = 0 } = element.record
+    // its first line indented as it is in the file, the same way its later lines are
+    const indent = /\n( ?)/.exec(raw)?.[1] ? " " : "\t"
+    const blocks = tokenizer.tokenizeDrawingLines(indent.repeat(ch) + raw)
+    P.Tokenizer.forEachToken(blocks, (token) => {
+      token.record.start += start - ch
+      token.record.line = (token.record.line ?? 0) + line
+    })
+    let block: P.BlockToken | undefined = blocks[0]
+    while (block?.tokens.length === 1 && block.tokens[0] instanceof P.BlockToken) block = block.tokens[0]
+    match.data.loop = block && parser.parse([block], "block", scope)
+    if (!match.data.loop) match.data.error = parser.parse([element], "parse_error", scope)
+    return match
+  }
+
+  /**
+   * What a `<for>` inside an element draws, as one of its children:  `core.drawEach(...)`, or `core.drawRead(...)`
+   * with its riders -- gathered as a drawing's lines are (`DrawnLines`), in a `{...}` so it follows what it reads.
+   */
+  private static loopAST(match: P.MatchFor<SpellJSX>, loop: P.Match): P.ASTExpression {
+    const statements = (loop.AST as P.ASTStatementGroup | undefined)?.statements ?? []
+    const gathered = DrawnLines.gather(statements as never) as P.ASTNode[]
+    const drawing = gathered.filter((line): line is P.ASTReturnStatement => line instanceof P.ASTReturnStatement).at(-1)
+    const value = drawing?.value ?? new P.ASTNothingLiteral(match)
+    return new P.ASTJSXExpression(match, { expression: value as P.ASTExpression })
+  }
+
   /** The packs `scope`'s project draws with:  its project file's `packs`, else `SP.ComponentPacks.DEFAULT`. */
   static packsFor(scope: P.Scope): readonly string[] {
     return (scope.parser as SP.SpellParser | undefined)?.packs ?? SP.ComponentPacks.DEFAULT
@@ -289,7 +364,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         continue
       }
       const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
-      if (ast) asts.push(ast)
+      // `<film/>`, a loop's item beside other markup:  `draw the film`, in braces (epic `atmosphere` T48)
+      if (ast && child?.is(SpellJSX) && child.data.loopItem)
+        asts.push(new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression }))
+      else if (ast) asts.push(ast)
     }
     return asts
   }
@@ -436,10 +514,14 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         if (match.data.error) errors.push(match.data.error)
         if (match.is(SpellJSX) && match.data.aloneError && !match.data.inMarkup) errors.push(match.data.aloneError)
         if (match.is(SpellJSX) && match.data.condition) below.push(match.data.condition)
+        // a `<for>` inside an element:  its lines' errors (I19)
+        if (match.is(SpellJSX) && match.data.loop) errors.push(...(SP.Block.getParseErrors(match.data.loop) ?? []))
         below.push(...(match.data.attributes ?? []), ...(match.data.children ?? []))
       }
       if (match.is(SpellJSXContent)) {
         if (match.data.error) errors.push(match.data.error)
+        // an expression its rule refused, saying why (`SpellStatement.refuse()`):  compiled as its error (epic `language` T48)
+        if (match.data.expression?.is(ParseError)) errors.push(match.data.expression)
         below.push(match.data.expression, match.data.statement)
       }
       if (match.is(MarkdownBlock)) errors.push(...(match.data.errors ?? []))
@@ -471,3 +553,6 @@ const UNTIL_FOUND = "until-found"
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
 const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:none"
+
+/** Spell UI's element that shows one measure:  `<ui-dimension value={its height}>`. */
+const MEASURE_TAG = "ui-dimension"
