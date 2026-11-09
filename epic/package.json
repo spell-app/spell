@@ -118,6 +118,8 @@
       "templates",
       "voices",
       "skills",
+      "designer",
+      "coherence",
       "hooks",
       "monitors",
       ".claude-plugin",
