@@ -1,7 +1,7 @@
 {
   "name": "epic",
   "displayName": "Spell Epic",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "Epics for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command, for any repo with an .epic/config.json5",
   "author": {
     "name": "Owen Williams"
