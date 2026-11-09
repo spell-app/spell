@@ -244,8 +244,9 @@ The settings it wrote are in the file, not printed._
 
 - That runs the clone's `spell epic`, which runs the epic tool beside it.
   Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
-- 🌱 No clone, once a `spell@next` with `spell epic` is published:  `npx spell@next epic init`.
-  The extension still needs a clone (below).
+- **Not yet:  `npx spell@next epic init` instead of a clone.**
+  It sets up your repo, the plugin and the extension, but the epic server can't start from an npm install,
+  so no page shows.
 
 In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow, then sums up the
 answers (`> Your name  :  Ana`, the values bold) before it does anything.
@@ -896,8 +897,7 @@ What you'd trip on today, roughly in the order you'd meet it.
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
-- setting up without a clone:  `npx spell@next epic init` needs a `spell@next` with `spell epic` in it, which isn't
-  published yet, and the VS Code extension is built in a clone
+- setting up without a clone:  `npx spell@next epic init` sets up everything but a working epic server
 - Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
 - a host other than GitHub, without making the epic repo by hand
