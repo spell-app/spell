@@ -5,11 +5,19 @@ export const words = {
     Receta: {
       título: "título",
       porciones: "porciones",
-      notas: "notas"
+      notas: "notas",
+      editar: "editarla"
+    },
+    EditorDeReceta: {
+      receta: "receta",
+      borrador: "borrador",
+      aceptarLosCambios: "aceptar los cambios",
+      olvidarLosCambios: "olvidar los cambios"
     },
     CajaDeRecetas: {
       búsqueda: "búsqueda",
       recetaNueva: "receta nueva",
+      editando: "editando",
       create: "crearla",
       coincidencias: "coincidencias",
       agregarLaRecetaNueva: "agregar la receta nueva"

@@ -1,34 +1,80 @@
 # Caja de recetas
-Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
+Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes o en su pantalla de edición, quita una y deshazlo.
 Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
 
 // Cada caja de notas crece mientras escribes
 <ui-defaults>
-	<ui-textarea grow/>
+	<área-texto crece/>
 </ui-defaults>
 
 ## Una receta:  una tarjeta que puedes leer y cambiar
 
 <encanto-más-de "receta">
+	<acción "editarla" descripción="Su pantalla de edición:  nada cambia hasta Guardar">
+		fijar el editando de la caja de recetas a eso
+	</acción>
+
 	<dibujar>
-		<ui-card>
-			<ui-content>
-				<ui-form value={eso} class="recipe">
-					<ui-field label="Nombre de la receta">
-						<ui-button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Quitar" title="Quitar" onClick={quitar eso de las recetas}/>
-						<ui-input name="título" class="title" size="large"/>
-					</ui-field>
-					<ui-field label="Para" inline>
-						<ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas"/>
-					</ui-field>
-					<ui-field label="Notas">
-						<ui-textarea name="notas" rows="2"/>
-					</ui-field>
-				</ui-form>
-			</ui-content>
-		</ui-card>
+		<tarjeta>
+			<contenido>
+				<formulario value={eso} class="recipe">
+					<campo etiqueta="Nombre de la receta">
+						<botón slot="acciones" class="edit" icono="pencil" tamano="mini" apariencia="transparent" aria-label="Editar" title="Editar" onClick={editar eso}/>
+						<botón slot="acciones" class="remove" icono="close" tamano="mini" apariencia="transparent" aria-label="Quitar" title="Quitar" onClick={quitar eso de las recetas}/>
+						<entrada name="título" class="title" tamano="grande"/>
+					</campo>
+					<campo etiqueta="Para" en-linea>
+						<entrada class="serves" name="porciones" type="number" min="1" etiquetado="derecha" etiqueta="personas"/>
+					</campo>
+					<campo etiqueta="Notas">
+						<área-texto name="notas" rows="2"/>
+					</campo>
+				</formulario>
+			</contenido>
+		</tarjeta>
 	</dibujar>
 </encanto-más-de>
+
+
+## Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar
+
+<encanto-vista "editor de receta">
+	<propiedad "receta" tipo="receta" descripción="La receta que se está cambiando"/>
+	<propiedad "borrador" descripción="Una copia para cambiar:  la receta sigue igual hasta Guardar">un borrador de su receta</propiedad>
+
+	<acción "aceptar los cambios" descripción="Todos los campos cambiados, enviados juntos">
+		guardar su borrador
+		fijar el editando de la caja de recetas a nada
+	</acción>
+
+	<acción "olvidar los cambios" descripción="Olvida la copia:  la receta no cambió">
+		descartar su borrador
+		fijar el editando de la caja de recetas a nada
+	</acción>
+
+	<dibujar>
+		<tarjeta class="editor">
+			<contenido>
+				<formulario value={su borrador}>
+					<encabezado tamano="pequeño">Editar {el título de su receta}</encabezado>
+					<campo etiqueta="Nombre de la receta">
+						<entrada name="título" class="edit-title" tamano="grande"/>
+					</campo>
+					<campo etiqueta="Para" en-linea>
+						<entrada class="serves" name="porciones" type="number" min="1" etiquetado="derecha" etiqueta="personas"/>
+					</campo>
+					<campo etiqueta="Notas">
+						<área-texto name="notas" rows="2"/>
+					</campo>
+				</formulario>
+			</contenido>
+			<extra>
+				<botón class="save" tamano="pequeño" color="primario" desactivado={el título de su borrador es ""} onClick={aceptar los cambios}>Guardar</botón>
+				<botón class="cancel" tamano="pequeño" onClick={olvidar los cambios}>Cancelar</botón>
+			</extra>
+		</tarjeta>
+	</dibujar>
+</encanto-vista>
 
 
 ## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
@@ -36,6 +82,7 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 <encanto-aplicación "caja de recetas">
 	<propiedad "búsqueda">texto</>
 	<propiedad "receta nueva">una nueva receta con porciones = 4</>
+	<propiedad "editando" tipo="receta" descripción="La receta en su pantalla de edición, mientras haya una"/>
 	<propiedad "menú de la caja">un menú de "deshacer"</>
 
 	<acción "crearla" descripción="Si todavía no hay nada guardado, unas cuantas para empezar">
@@ -45,10 +92,8 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 			agregar (una nueva receta con título = "Pizza Margarita", porciones = 2, notas = "El horno bien caliente.") a las recetas
 	</acción>
 
-	<propiedad "coincidencias" descripción="Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés">
-		fijar halladas a cada receta donde su título incluye la búsqueda
-		invertir halladas
-		devolver halladas
+	<propiedad "coincidencias" descripción="Las más nuevas primero, por cuándo se guardó cada una">
+		devolver cada receta donde su título incluye la búsqueda, ordenadas por su creado, de más reciente a más antiguo
 	</propiedad>
 
 	<acción "agregar la receta nueva">
@@ -57,51 +102,59 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 	</acción>
 
 	<dibujar>
-		<ui-container>
-			<ui-stack direction="horizontal" wrap align="end" justify="between">
-				<ui-stack align="start">
-					<ui-header size="large">Caja de recetas</ui-header>
-					<ui-text color="grey">Todo lo que escribes se guarda al instante.</ui-text>
-				</ui-stack>
-				<ui-toolbar class="undo" menu="menú de la caja" aria-label="Recetas"/>
-				<ui-form value={eso} class="find">
-					<ui-field label="Buscar">
-						<ui-input name="búsqueda" class="search" icon="search"/>
-					</ui-field>
-				</ui-form>
-			</ui-stack>
-			<ui-cards columns="3" doubling>
-				<ui-card class="new">
-					<ui-content>
-						<ui-form value={su receta nueva}>
-							<ui-header size="small">Agrega una receta</ui-header>
-							<ui-field label="Nombre de la receta">
-								<ui-input name="título" class="draft" size="large"/>
-							</ui-field>
-							<ui-field label="Para" inline>
-								<ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas"/>
-							</ui-field>
-							<ui-field label="Notas">
-								<ui-textarea name="notas" rows="2"/>
-							</ui-field>
-						</ui-form>
-					</ui-content>
-					<ui-extra>
-						<ui-button class="add" size="small" color="primary" disabled={el título de su receta nueva es ""} onClick={agregar la receta nueva}>Agregar receta</ui-button>
-					</ui-extra>
-				</ui-card>
+		<contenedor>
+			<pila direccion="horizontal" ajustar alinear="fin" repartir="entre">
+				<pila alinear="inicio">
+					<encabezado tamano="grande">Caja de recetas</encabezado>
+					<texto color="gris">Todo lo que escribes se guarda al instante.</texto>
+				</pila>
+				<barra-herramientas class="undo" menu="menú de la caja" aria-label="Recetas"/>
+				<formulario value={eso} class="find">
+					<campo etiqueta="Buscar">
+						<entrada name="búsqueda" class="search" icono="search"/>
+					</campo>
+				</formulario>
+			</pila>
+			{dibujar la pantalla de eso}
+		</contenedor>
+	</dibujar>
+
+	<dibujar "pantalla" descripción="Su pantalla de edición, mientras se cambia una receta;  si no, las tarjetas:  su propio dibujo, para que su `si` elija solo una">
+		<si su editando>
+			dibujar (un nuevo editor de receta con receta = su editando)
+		<de lo contrario>
+			<tarjetas columnas="3" duplicable>
+				<tarjeta class="new">
+					<contenido>
+						<formulario value={su receta nueva}>
+							<encabezado tamano="pequeño">Agrega una receta</encabezado>
+							<campo etiqueta="Nombre de la receta">
+								<entrada name="título" class="draft" tamano="grande"/>
+							</campo>
+							<campo etiqueta="Para" en-linea>
+								<entrada class="serves" name="porciones" type="number" min="1" etiquetado="derecha" etiqueta="personas"/>
+							</campo>
+							<campo etiqueta="Notas">
+								<área-texto name="notas" rows="2"/>
+							</campo>
+						</formulario>
+					</contenido>
+					<extra>
+						<botón class="add" tamano="pequeño" color="primario" desactivado={el título de su receta nueva es ""} onClick={agregar la receta nueva}>Agregar receta</botón>
+					</extra>
+				</tarjeta>
 				<para receta en las coincidencias cargando="Buscando tus recetas">
 					<vacío>
-						<ui-text class="none" color="grey">{"Todavía no hay recetas. Agrega la primera." si la búsqueda es "" sino "Ninguna receta coincide con tu búsqueda."}</ui-text>
+						<texto class="none" color="gris">{"Todavía no hay recetas. Agrega la primera." si la búsqueda es "" sino "Ninguna receta coincide con tu búsqueda."}</texto>
 					</vacío>
 					<fallo>
-						<ui-message class="failed" color="red">
+						<mensaje class="failed" color="rojo">
 							No podemos llegar a tus recetas ahora mismo.
-							<ui-button class="again" onClick={reintentar}>Reintentar</ui-button>
-						</ui-message>
+							<botón class="again" onClick={reintentar}>Reintentar</botón>
+						</mensaje>
 					</fallo>
 				</para>
-			</ui-cards>
-		</ui-container>
+			</tarjetas>
+		</>
 	</dibujar>
 </encanto-aplicación>

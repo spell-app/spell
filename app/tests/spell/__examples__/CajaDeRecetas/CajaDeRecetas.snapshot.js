@@ -1,4 +1,4 @@
-import { core, Thing, App, Place, h } from "@spell/core"
+import { core, Thing, App, View, Place, h } from "@spell/core"
 
 core.heading("Caja de recetas:  dónde se guardan las recetas")
 ////////////////////////////////////////////////////
@@ -21,28 +21,51 @@ export class Receta extends Thing {
   get notas() { return this.getProp("notas") }
   set notas(value) { this.setProp("notas", value) }
 
+  /** Su pantalla de edición:  nada cambia hasta Guardar */
+  editar() {
+    cajaDeRecetas.editando = this
+  }
+
   draw() {
-    return h("ui-card",
-      h("ui-content",
-        h("ui-form", { class: "recipe", value: this },
-          h("ui-field", { label: "Nombre de la receta" },
-            h("ui-button", {
+    return h("es-tarjeta",
+      h("es-contenido",
+        h("es-formulario", { class: "recipe", value: this },
+          h("es-campo", { etiqueta: "Nombre de la receta" },
+            h("es-boton", {
+              class: "edit",
+              slot: "acciones",
+              icono: "pencil",
+              tamano: "mini",
+              apariencia: "transparent",
+              "aria-label": "Editar",
+              title: "Editar",
+              onClick: core.pressed(this, () => this.editar()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }),
+            h("es-boton", {
               class: "remove",
-              slot: "actions",
-              icon: "close",
-              size: "mini",
-              appearance: "transparent",
+              slot: "acciones",
+              icono: "close",
+              tamano: "mini",
+              apariencia: "transparent",
               "aria-label": "Quitar",
               title: "Quitar",
               onClick: core.pressed(this, () => core.removeSaved(this)),
               style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
             }),
-            h("ui-input", { class: "title", name: "título", size: "large" })
+            h("es-entrada", { class: "title", name: "título", tamano: "grande" })
           ),
-          h("ui-field", { label: "Para", inline: true },
-            h("ui-input", { class: "serves", name: "porciones", type: "number", min: "1", labeled: "right", label: "personas" })
+          h("es-campo", { etiqueta: "Para", "en-linea": true },
+            h("es-entrada", {
+              class: "serves",
+              name: "porciones",
+              type: "number",
+              min: "1",
+              etiquetado: "derecha",
+              etiqueta: "personas"
+            })
           ),
-          h("ui-field", { label: "Notas" }, h("ui-textarea", { name: "notas", rows: "2" }))
+          h("es-campo", { etiqueta: "Notas" }, h("es-area-texto", { name: "notas", rows: "2" }))
         )
       )
     )
@@ -86,16 +109,87 @@ core.heading("Caja de recetas")
 /////////////////////
 // ## Caja de recetas
 /////////////////////
-// Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
+// Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes o en su pantalla de edición, quita una y deshazlo.
 // Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
 
 // Cada caja de notas crece mientras escribes
+
+export class EditorDeReceta extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  /** La receta que se está cambiando */
+  // su "receta" es una receta
+  static { this.declareProp("receta", { type: "Receta" }) }
+  get receta() { return this.getProp("receta") }
+  set receta(value) { this.setProp("receta", value) }
+
+  /** Una copia para cambiar:  la receta sigue igual hasta Guardar */
+  get borrador() {
+    return core.draftOf(this.receta)
+  }
+
+  /** Todos los campos cambiados, enviados juntos */
+  aceptarLosCambios() {
+    core.saveDraft(this.borrador)
+    cajaDeRecetas.editando = undefined
+  }
+
+  /** Olvida la copia:  la receta no cambió */
+  olvidarLosCambios() {
+    core.discardDraft(this.borrador)
+    cajaDeRecetas.editando = undefined
+  }
+
+  draw() {
+    return h("es-tarjeta", { class: "editor" },
+      h("es-contenido",
+        h("es-formulario", { "prop:value": () => this.borrador },
+          h("es-encabezado", { tamano: "pequeño" }, "Editar ", () => this.receta?.título),
+          h("es-campo", { etiqueta: "Nombre de la receta" },
+            h("es-entrada", { class: "edit-title", name: "título", tamano: "grande" })
+          ),
+          h("es-campo", { etiqueta: "Para", "en-linea": true },
+            h("es-entrada", {
+              class: "serves",
+              name: "porciones",
+              type: "number",
+              min: "1",
+              etiquetado: "derecha",
+              etiqueta: "personas"
+            })
+          ),
+          h("es-campo", { etiqueta: "Notas" }, h("es-area-texto", { name: "notas", rows: "2" }))
+        )
+      ),
+      h("es-extra",
+        h("es-boton", {
+          class: "save",
+          tamano: "pequeño",
+          color: "primario",
+          desactivado: () => this.borrador.título === "",
+          onClick: core.pressed(this, () => this.aceptarLosCambios()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Guardar"),
+        h("es-boton", {
+          class: "cancel",
+          tamano: "pequeño",
+          onClick: core.pressed(this, () => this.olvidarLosCambios()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Cancelar")
+      )
+    )
+  }
+}
+
 core.useDefaults("/CajaDeRecetas.es.spellml", {
   "ui-textarea": { grow: true }
 })
 
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
 //## Una receta:  una tarjeta que puedes leer y cambiar
+
+core.heading("Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar")
+//## Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar
 
 core.heading("La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta")
 //## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
@@ -112,6 +206,12 @@ export class CajaDeRecetas extends App {
   static { this.declareProp("recetaNueva", { init: () => new Receta({ porciones: 4 }), early: true }) }
   get recetaNueva() { return this.getProp("recetaNueva") }
   set recetaNueva(value) { this.setProp("recetaNueva", value) }
+
+  /** La receta en su pantalla de edición, mientras haya una */
+  // su "editando" es una receta
+  static { this.declareProp("editando", { type: "Receta" }) }
+  get editando() { return this.getProp("editando") }
+  set editando(value) { this.setProp("editando", value) }
 
   /** Si todavía no hay nada guardado, unas cuantas para empezar */
   async create() {
@@ -134,12 +234,10 @@ export class CajaDeRecetas extends App {
     }
   }
 
-  /** Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1857, end: 2094 }, readsFrom: ["recetario_familiar"] }) }
+  /** Las más nuevas primero, por cuándo se guardó cada una */
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 3873, end: 4083 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
-    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda))
-    core.reverse(halladas)
-    return halladas
+    return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda)), (item) => core.descending(item.creado))
   }, () => [this.búsqueda]) }
 
   agregarLaRecetaNueva() {
@@ -148,52 +246,67 @@ export class CajaDeRecetas extends App {
   }
 
   draw() {
-    return h("ui-container",
-      h("ui-stack", { direction: "horizontal", wrap: true, align: "end", justify: "between" },
-        h("ui-stack", { align: "start" },
-          h("ui-header", { size: "large" }, "Caja de recetas"),
-          h("ui-text", { color: "grey" }, "Todo lo que escribes se guarda al instante.")
+    return h("es-contenedor",
+      h("es-pila", { direccion: "horizontal", ajustar: true, alinear: "fin", repartir: "entre" },
+        h("es-pila", { alinear: "inicio" },
+          h("es-encabezado", { tamano: "grande" }, "Caja de recetas"),
+          h("es-texto", { color: "gris" }, "Todo lo que escribes se guarda al instante.")
         ),
-        h("ui-toolbar", { class: "undo", menu: "menú de la caja", "aria-label": "Recetas" }),
-        h("ui-form", { class: "find", value: this },
-          h("ui-field", { label: "Buscar" },
-            h("ui-input", { class: "search", name: "búsqueda", icon: "search" })
+        h("es-barra-herramientas", { class: "undo", menu: "menú de la caja", "aria-label": "Recetas" }),
+        h("es-formulario", { class: "find", value: this },
+          h("es-campo", { etiqueta: "Buscar" },
+            h("es-entrada", { class: "search", name: "búsqueda", icono: "search" })
           )
         )
       ),
-      h("ui-cards", { columns: "3", doubling: true },
-        h("ui-card", { class: "new" },
-          h("ui-content",
-            h("ui-form", { "prop:value": () => this.recetaNueva },
-              h("ui-header", { size: "small" }, "Agrega una receta"),
-              h("ui-field", { label: "Nombre de la receta" },
-                h("ui-input", { class: "draft", name: "título", size: "large" })
+      () => this.drawPantalla()
+    )
+  }
+
+  // Su pantalla de edición, mientras se cambia una receta;  si no, las tarjetas:  su propio dibujo, para que su `si` elija solo una
+  drawPantalla() {
+    if (this.editando) return core.drawThing(new EditorDeReceta({ receta: this.editando }))
+    else {
+      return h("es-tarjetas", { columnas: "3", duplicable: true, part: "pantalla" },
+        h("es-tarjeta", { class: "new" },
+          h("es-contenido",
+            h("es-formulario", { "prop:value": () => this.recetaNueva },
+              h("es-encabezado", { tamano: "pequeño" }, "Agrega una receta"),
+              h("es-campo", { etiqueta: "Nombre de la receta" },
+                h("es-entrada", { class: "draft", name: "título", tamano: "grande" })
               ),
-              h("ui-field", { label: "Para", inline: true },
-                h("ui-input", { class: "serves", name: "porciones", type: "number", min: "1", labeled: "right", label: "personas" })
+              h("es-campo", { etiqueta: "Para", "en-linea": true },
+                h("es-entrada", {
+                  class: "serves",
+                  name: "porciones",
+                  type: "number",
+                  min: "1",
+                  etiquetado: "derecha",
+                  etiqueta: "personas"
+                })
               ),
-              h("ui-field", { label: "Notas" }, h("ui-textarea", { name: "notas", rows: "2" }))
+              h("es-campo", { etiqueta: "Notas" }, h("es-area-texto", { name: "notas", rows: "2" }))
             )
           ),
-          h("ui-extra",
-            h("ui-button", {
+          h("es-extra",
+            h("es-boton", {
               class: "add",
-              size: "small",
-              color: "primary",
-              disabled: () => this.recetaNueva.título === "",
+              tamano: "pequeño",
+              color: "primario",
+              desactivado: () => this.recetaNueva.título === "",
               onClick: core.pressed(this, () => this.agregarLaRecetaNueva()),
               style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
             }, "Agregar receta")
           )
         ),
         () => core.drawRead(() => this.coincidencias, (receta) => core.drawThing(receta), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando tus recetas"),
-          none: () => h("ui-text", { class: "none", color: "grey" },
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "pantalla" }, "Buscando tus recetas"),
+          none: () => h("es-texto", { class: "none", color: "gris", part: "pantalla" },
             () => this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."
           ),
-          failed: () => h("ui-message", { class: "failed", color: "red" },
+          failed: () => h("es-mensaje", { class: "failed", color: "rojo", part: "pantalla" },
             "No podemos llegar a tus recetas ahora mismo.",
-            h("ui-button", {
+            h("es-boton", {
               class: "again",
               onClick: core.pressed(this, () => core.reloadSaved()),
               style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
@@ -201,7 +314,7 @@ export class CajaDeRecetas extends App {
           )
         })
       )
-    )
+    }
   }
 }
 export const cajaDeRecetas = new CajaDeRecetas()

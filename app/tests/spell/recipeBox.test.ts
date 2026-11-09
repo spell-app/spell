@@ -130,13 +130,17 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
    */
   function serve(name: string, { path, source, more }: Program, { token }: { token?: "none" } = {}): string {
     programs.set(`/programs/${name}.js`, compiledProgram(path, source, more))
-    programs.set(`/${name}.html`, pageFor(name, token === "none" ? undefined : DEMO_TOKEN))
+    programs.set(`/${name}.html`, pageFor(name, token === "none" ? undefined : DEMO_TOKEN, languageOf(path)))
     return `${servers.url}/${name}.html`
   }
 
-  /** A page:  `<spell-viewer>`, and nothing else.  `token`:  what its server hands it, as the demo's own does. */
-  function pageFor(name: string, token: string | undefined = DEMO_TOKEN): string {
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+  /**
+   * A page:  `<spell-viewer>`, and nothing else.
+   * - `token`:  what its server hands it, as the demo's own does
+   * - `lang`:  the page's language, which loads a Spanish program's `<es-tarjeta>` tags, as the editor's words file does
+   */
+  function pageFor(name: string, token: string | undefined = DEMO_TOKEN, lang = "en"): string {
+    return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
 <script type="module" src="/element/spell-viewer.js"></script>
 <style>body { margin: 0 }</style>
@@ -1249,7 +1253,10 @@ start the box
     await page.close()
   })
 
-  /** Each built-in example, and what it should say:  the words differ, the classes don't. */
+  /**
+   * Each built-in example, and what it should say:  the words differ, the classes don't.
+   * - So each is found by its class alone:  `<card>` is `<ui-card>` in English, `<tarjeta>` is `<es-tarjeta>` in Spanish (T87).
+   */
   const SHIPPED = [
     {
       path: "RecipeBox/RecipeBox.api.spell",
@@ -1288,13 +1295,13 @@ start the box
   /** The titles an example's cards show. */
   const cardsOn = (page: Page) =>
     page
-      .locator("ui-form.recipe ui-input.title input")
+      .locator(".recipe .title input")
       .evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value))
 
   /** Undo:  the one item of the box's own toolbar. */
   const undoOn = (page: Page) =>
     page
-      .locator("ui-toolbar.undo")
+      .locator(".undo")
       .getByText(/Undo|Deshacer/)
       .first()
 
@@ -1305,55 +1312,97 @@ start the box
       async () => {
         const name = `example-${path.replace(/\W/g, "")}`
         const { page, problems } = await opened(serve(name, shipped(path)))
-        const none = page.locator("ui-text.none")
-        const add = page.locator("ui-button.add")
-        const isAddOff = () => add.evaluate((button) => (button as HTMLButtonElement).disabled)
+        const none = page.locator(".none")
+        const add = page.locator(".add")
+        const isAddOff = () => add.evaluate((button) => button.matches(":state(disabled)"))
         await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
-        expect(await isAddOff()).toBe(true)
+        // a page language's tags load after the page's first drawing:  `<es-boton>` may not be defined yet
+        await expect.poll(isAddOff, WAITING).toBe(true)
 
         // every field shown, and labelled
-        const firstCard = page.locator("ui-form.recipe").first()
-        expect(await firstCard.locator("ui-field").count()).toBe(3)
-        expect(await firstCard.locator("ui-input.serves input").inputValue()).toBe("2")
+        const firstCard = page.locator(".recipe").first()
+        expect(await firstCard.locator("ui-field, es-campo").count()).toBe(3)
+        expect(await firstCard.locator(".serves input").inputValue()).toBe("2")
         expect(await firstCard.locator("textarea").inputValue()).not.toBe("")
 
         // a search follows every letter typed, and says when it finds nothing
-        await page.locator("ui-input.search input").fill("Dal")
+        await page.locator(".search input").fill("Dal")
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["Dal"])
-        await page.locator("ui-input.search input").fill("birria")
+        await page.locator(".search input").fill("birria")
         await expect.poll(() => none.textContent(), WAITING).toBe(noMatches)
-        await page.locator("ui-input.search input").fill("")
+        await page.locator(".search input").fill("")
         await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
 
         // a new one:  first of all, with what was typed, and the new card is empty again
-        await page.locator("ui-input.draft input").fill("birria")
-        await page.locator("ui-card.new textarea").pressSequentially("Slowly")
+        await page.locator(".draft input").fill("birria")
+        await page.locator(".new textarea").pressSequentially("Slowly")
         await expect.poll(isAddOff, WAITING).toBe(false)
         await add.click()
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria", ...examples])
-        expect(await page.locator("ui-input.draft input").inputValue()).toBe("")
+        expect(await page.locator(".draft input").inputValue()).toBe("")
 
         // typing in a card stays in that card, whatever it now says
-        const card = page.locator("ui-form.recipe ui-input.title input").first()
+        const card = page.locator(".recipe .title input").first()
         await card.click()
         await card.press(END_OF_LINE)
         await page.keyboard.type(" again")
         await expect.poll(() => cardsOn(page), WAITING).toContain("birria again")
 
         // remove, and undo:  back where it was, with what it said
-        await page.locator("ui-button.remove").first().click()
+        await page.locator(".remove").first().click()
         await expect.poll(() => cardsOn(page), WAITING).not.toContain("birria again")
         await undoOn(page).click()
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria again", ...examples])
         expect(await firstCard.locator("textarea").inputValue()).toBe("Slowly")
 
         // with none left, it says so
-        while (await page.locator("ui-button.remove").count()) await page.locator("ui-button.remove").first().click()
+        while (await page.locator(".remove").count()) await page.locator(".remove").first().click()
         await expect.poll(() => none.textContent(), WAITING).toBe(noRecipes)
         expect(problems).toEqual([])
         await page.close()
       }
     )
+
+    test(
+      `the example ${path}'s Edit screen:  nothing changes until Save, and Cancel forgets`,
+      { timeout: 60_000 },
+      async () => {
+        const name = `edit-${path.replace(/\W/g, "")}`
+        const { page, problems } = await opened(serve(name, shipped(path)))
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+        const title = page.locator(".editor .edit-title input")
+
+        // Cancel:  the copy is forgotten, and the recipe never changed
+        await page.locator(".edit").first().click()
+        await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])
+        await title.fill("Scratch")
+        await page.locator(".editor .cancel").click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+
+        // Save:  the new words land
+        await page.locator(".edit").first().click()
+        await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])
+        await title.fill("Saved dish")
+        await page.locator(".editor .save").click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["Saved dish", ...examples.slice(1)])
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+
+    test(`the example ${path}, a new one stays on top after a reload`, { timeout: 60_000 }, async () => {
+      const name = `reload-${path.replace(/\W/g, "")}`
+      const { page, problems } = await opened(serve(name, shipped(path)))
+      await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+      await page.locator(".draft input").fill("Newest of all")
+      await page.locator(".add").click()
+      await expect.poll(() => cardsOn(page), WAITING).toEqual(["Newest of all", ...examples])
+      await page.waitForTimeout(500)
+      await page.reload()
+      await expect.poll(() => cardsOn(page), WAITING).toEqual(["Newest of all", ...examples])
+      expect(problems).toEqual([])
+      await page.close()
+    })
   }
 
   // Changing its first lines is all a different back-end takes:  the example as it ships, not a copy
@@ -1383,6 +1432,25 @@ start the box
       await page.close()
     })
   }
+
+  test("the example RecipeBox in a room:  a new one stays on top after a reload", { timeout: 60_000 }, async () => {
+    const url = serve(
+      "shipped-room-reload",
+      withPlace(shipped("RecipeBox/RecipeBox.api.spell"), BACK_ENDS["a room"]!(servers.url))
+    )
+    const { page, problems } = await opened(url)
+    await page.locator(".recipe").first().waitFor(WAITING)
+    await page.locator(".draft input").fill("Roomy stew")
+    await page.locator(".add").click()
+    await expect.poll(() => cardsOn(page), WAITING).toContain("Roomy stew")
+    await expect.poll(() => cardsOn(page).then(([first]) => first), WAITING).toBe("Roomy stew")
+    await page.waitForTimeout(500)
+    await page.reload()
+    await expect.poll(() => cardsOn(page).then(([first]) => first), WAITING).toBe("Roomy stew")
+    await page.locator(".remove").first().click()
+    expect(problems).toEqual([])
+    await page.close()
+  })
 
   test(
     "the example, when its place can't be reached:  it says so, in words, with Try again",
@@ -2913,6 +2981,9 @@ the published sheet is a projection of the sign up sheet:
     )
   })
 })
+
+/** A program's language, by its file's name:  `/CajaDeRecetas.api.es.spell` is Spanish. */
+const languageOf = (path: string) => (/\.es\./.exec(path) ? "es" : "en")
 
 /** `source`, one file, as a runner is handed it:  with its imports. */
 function compiledProgram(path: string, source: string, more: { path: string; contents: string }[] = []): string {
