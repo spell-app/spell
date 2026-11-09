@@ -1,3 +1,5 @@
+import { textChecksum } from "spell/util/string"
+
 import { isListPosition, POSITIONS_KEY, withListEdits } from "./positions"
 import {
   PlaceError,
@@ -58,6 +60,35 @@ export type RoomEntry = {
 /** Who an entry's from when someone changed the store itself:  a file saved by hand. */
 export const FROM_THE_PLACE = "the place"
 
+/** What a named action can see and do:  on the referee, and on a page that runs it first. */
+export type RoomActionAsk = {
+  /** The rows of `collection`, as they are in the one order. */
+  rows(collection: string): PlaceRow[]
+  /** This row of `collection`. */
+  row(collection: string, id: string): PlaceRow | undefined
+  /** What it was called with. */
+  input: unknown
+  /** Who called it. */
+  from: string
+}
+
+/**
+ * A named action:  it reads rows and says what to change, and nothing else.
+ * - On the referee, in the one order, so "check, then write" holds for two at once.
+ * - A page that has the same code runs it first, on its own copy, to show what it'll do:  `LiveRoomPlace`'s `actions`.
+ * - A check that fails throws `PlaceError`, `"refused"`:  the last seat's gone, and that's the answer.
+ * - The result goes back as `result`.
+ */
+export type RoomAction = (ask: RoomActionAsk) => RoomActionAnswer | Promise<RoomActionAnswer>
+
+/** What a named action makes. */
+export type RoomActionAnswer = {
+  /** What to change. */
+  changes: PlaceChange[]
+  /** What to answer. */
+  result?: unknown
+}
+
 /** What a page says to a referee. */
 export type RoomAsk =
   /** Get me back in step:  what's happened since `since`, or everything. */
@@ -68,8 +99,11 @@ export type RoomAsk =
   | { kind: "call"; from: string; callId: string; name: string; input: unknown }
   /** Am I in step?  Here's what I hold. */
   | { kind: "check"; run?: string; seq: number; checksum: string }
-  /** Here I am, and who I am:  sent each time the connection opens. */
-  | { kind: "here"; from: string; person: PlacePerson }
+  /**
+   * Here I am, and who I am:  sent each time the connection opens.
+   * - `version`:  a mark of the program this page runs;  `loadedAt`, when the page got it, ms:  see `Referee`.
+   */
+  | { kind: "here"; from: string; person: PlacePerson; version?: string; loadedAt?: number }
 
 /** What a referee says to a page. */
 export type RoomAnswer =
@@ -91,6 +125,8 @@ export type RoomAnswer =
   | { kind: "at"; run: string; seq: number }
   /** Everyone here now, in the order they came:  to everyone, each time it changes. */
   | { kind: "people"; people: PersonHere[] }
+  /** This page runs an older version of the program than others here:  it should reload.  To that page. */
+  | { kind: "reload" }
 
 /****************
  * ### `RoomCopy`
@@ -226,7 +262,7 @@ export function rowForStore(row: PlaceRow): PlaceRow {
   return kept
 }
 
-/** Two rounds of FNV-1a over a stable text of every row:  not for security, only for noticing a difference. */
+/** A mark of a stable text of every row:  not for security, only for noticing a difference. */
 function checksumOf(collections: Map<string, Map<string, PlaceRow>>): string {
   const parts: string[] = []
   for (const collection of [...collections.keys()].sort()) {
@@ -235,15 +271,7 @@ function checksumOf(collections: Map<string, Map<string, PlaceRow>>): string {
     parts.push(collection)
     for (const id of [...rows.keys()].sort()) parts.push(id, stableText(rows.get(id)))
   }
-  const text = parts.join("\n")
-  let one = 0x811c9dc5
-  let other = 0x9747b28c
-  for (let at = 0; at < text.length; at++) {
-    const code = text.charCodeAt(at)
-    one = Math.imul(one ^ code, 0x01000193)
-    other = Math.imul(other ^ code, 0x5bd1e995)
-  }
-  return `${(one >>> 0).toString(36)}-${(other >>> 0).toString(36)}`
+  return textChecksum(parts.join("\n"))
 }
 
 /** `value` as JSON, its keys in order. */

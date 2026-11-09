@@ -248,6 +248,9 @@ export function rowsMatching(rows: PlaceRow[], filter: Record<string, unknown>):
 export function rowsInOrder(rows: PlaceRow[], sort: readonly SortField[]): PlaceRow[] {
   return [...rows].sort((one, other) => {
     for (const { field, descending } of sort) {
+      // whichever way it's sorted:  a thing with no value goes last, in the order it had
+      const hasNone = Number(isNothing(one[field])) - Number(isNothing(other[field]))
+      if (hasNone) return hasNone
       const order = compareValues(one[field], other[field])
       if (order) return descending ? -order : order
     }
@@ -255,15 +258,18 @@ export function rowsInOrder(rows: PlaceRow[], sort: readonly SortField[]): Place
   })
 }
 
+/** Is a field's value no value at all? */
+function isNothing(value: unknown): boolean {
+  return value === undefined || value === null
+}
+
 /** `row` with only these `fields`, the ones it has:  its values aren't copied. */
 export function rowWithFields(row: PlaceRow, fields: readonly string[]): PlaceRow {
   return Object.fromEntries(fields.filter((field) => field in row).map((field) => [field, row[field]]))
 }
 
-/** Which of two field values comes first:  nothing comes after everything. */
+/** Which of two values, both something, comes first. */
 function compareValues(one: unknown, other: unknown): number {
-  if (one === other) return 0
-  if (one === undefined) return 1
-  if (other === undefined) return -1
+  if (one === other || isNothing(one)) return 0
   return (one as string) < (other as string) ? -1 : 1
 }

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
+import { SiteBoard } from "spell/app/app/pages/SiteBoard"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 
 /**
@@ -175,7 +176,92 @@ describe("SiteEdits", () => {
     expect(renamed).toContain(declared)
     expect(renamed).toContain(listed)
     expect(() => SiteEdits.withPartRenamed(text, "film page", "films page")).toThrow(/has a "films page" already/)
-    expect(() => SiteEdits.withPartRenamed(text, "film page", "movie")).toThrow(/ends in "page"/)
+    expect(() => SiteEdits.withPartRenamed(text, "film page", 'a "quoted" name')).toThrow(/isn't a name/)
+    expect(SiteEdits.withPartRenamed(text, "film page", "Boxes & Blades")).toContain("Boxes & Blades")
+  })
+
+  describe("a site of its routing alone (P17)", () => {
+    const ROUTING = [
+      '<spell-site "galaxy guide">',
+      '\t<group "Home" color="red"/>',
+      '\t<page "Home" address="/"/>',
+      '\t<sidebar "System Notices" address="/notices"/>',
+      '\t<group "My Stuff"/>',
+      '\t<page "My Inbox" address="/inbox"/>',
+      '\t<page "My Team" address="/team">',
+      '\t\t<page "Roster" address="/team/roster"/>',
+      "\t</>",
+      "</>",
+      ""
+    ].join("\n")
+
+    test("its file is named for it", () => {
+      expect(SiteEdits.isRoutingOnly("/Galaxy.site.spellml")).toBe(true)
+      expect(SiteEdits.isRoutingOnly("/Galaxia.site.es.spellml")).toBe(true)
+      expect(SiteEdits.isRoutingOnly("/Galaxy.spellml")).toBe(false)
+    })
+
+    test("a group holds the lines after it, and is known apart from a page of its name", () => {
+      const parts = SiteEdits.partsIn(ROUTING)!
+      expect(parts.map((part) => [part.kind, part.name, part.title])).toEqual([
+        ["group", SiteEdits.groupKey("Home"), "Home"],
+        ["group", SiteEdits.groupKey("My Stuff"), "My Stuff"]
+      ])
+      expect(parts[0]!.color).toBe("red")
+      expect(parts[0]!.parts.map((part) => part.name)).toEqual(["Home", "System Notices"])
+      expect(parts[1]!.parts.map((part) => part.name)).toEqual(["My Inbox", "My Team"])
+      expect(SiteBoard.sectionsOf(parts).map((section) => section.cards.length)).toEqual([3, 4])
+    })
+
+    test("a page moves into another group;  a group moves with its lines", () => {
+      const into = SiteEdits.withPartMoved(ROUTING, "My Inbox", { where: "into", part: SiteEdits.groupKey("Home") })
+      expect(SiteEdits.partsIn(into)![0]!.parts.map((part) => part.name)).toEqual([
+        "My Inbox",
+        "Home",
+        "System Notices"
+      ])
+      const swapped = SiteEdits.withPartMoved(ROUTING, SiteEdits.groupKey("My Stuff"), {
+        where: "before",
+        part: SiteEdits.groupKey("Home")
+      })
+      expect(SiteEdits.partsIn(swapped)!.map((part) => part.title)).toEqual(["My Stuff", "Home"])
+      expect(SiteEdits.partsIn(swapped)![0]!.parts.map((part) => part.name)).toEqual(["My Inbox", "My Team"])
+    })
+
+    test("a group renamed:  only its own line", () => {
+      const renamed = SiteEdits.withPartRenamed(ROUTING, SiteEdits.groupKey("Home"), "Start")
+      expect(renamed).toContain('<group "Start" color="red"/>')
+      expect(renamed).toContain('<page "Home" address="/"/>')
+    })
+
+    test("a page added lists only its line:  it's made when it's first opened", () => {
+      const added = SiteEdits.withPageAdded(ROUTING, "Help", "/help", { listOnly: true })
+      expect(added).toContain('\t<page "Help" address="/help"/>\n</>')
+      expect(added).not.toContain("<spell-page")
+    })
+
+    test("a live link is written, read back and taken out;  only a web address", () => {
+      const live = SiteEdits.withPartChanged(ROUTING, "Home", { live: "https://example.com/" })
+      expect(live).toContain('<page "Home" address="/" live="https://example.com/"/>')
+      expect(SiteEdits.partNamed(live, "Home").live).toBe("https://example.com/")
+      expect(SiteEdits.withPartChanged(live, "Home", { live: "" })).toBe(ROUTING)
+      expect(() => SiteEdits.withPartChanged(ROUTING, "Home", { live: "javascript:alert(1)" })).toThrow(/https/)
+    })
+
+    test("a card's own file:  named for it, its name free, showing its name", () => {
+      expect(SiteEdits.fileNameFor("Boxes & Blades", [])).toBe("boxes-blades.spellml")
+      expect(SiteEdits.fileNameFor("Home", ["home.spellml"])).toBe("home-2.spellml")
+      expect(SiteEdits.fileNameFor("Películas", [], "es")).toBe("peliculas.es.spellml")
+      const page = SiteEdits.partNamed(ROUTING, "My Inbox")
+      expect(SiteEdits.stubFor(page)).toBe('<spell-page "My Inbox">\n\t<header size="large">My Inbox</header>\n</>\n')
+      const sidebar = SiteEdits.partNamed(ROUTING, "System Notices")
+      expect(SiteEdits.stubFor(sidebar)).toContain('<spell-view "System Notices">\n\t<draw>')
+    })
+
+    test("a declaration is found in any file:  a page or a view", () => {
+      const view = '<spell-view "System Notices">\n\t<draw>\n\t</draw>\n</>\n'
+      expect(SiteEdits.declarationOf(view, "System Notices")).toEqual({ start: 0, end: view.length })
+    })
   })
 
   test.each([

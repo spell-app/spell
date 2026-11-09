@@ -619,7 +619,5 @@ function warnNotANumber(Class: SpellClass, key: string, value: string): void {
   const field = `${Class.name}.${key}`
   if (WARNED_NOT_A_NUMBER.has(field)) return
   WARNED_NOT_A_NUMBER.add(field)
-  core.console.warn(
-    `${field} is a number, but its place sent "${value}", which reads as nothing;  if that's how it says it has none, say so:  \`is a number or "${value}"\``
-  )
+  core.console.warn(core.message("number-sent-as-other-text", { field, value }))
 }

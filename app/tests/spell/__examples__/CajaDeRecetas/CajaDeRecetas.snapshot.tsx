@@ -40,7 +40,19 @@ export class Receta extends Thing {
     )
   }
 
-  static savedIn = { place: "recetario_familiar", collection: "recetas" }
+  static savedIn = {
+    place: "recetario_familiar",
+    collection: "recetas",
+    times: ["created", "modified"]
+  }
+
+  // vive en recetario familiar
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // vive en recetario familiar
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } })
+  accessor modificado!: any /* spell: type unknown */
 }
 
 /**

@@ -452,7 +452,7 @@ describe("GitHub's way (epic `data` P28)", () => {
 
   const LINES = [
     `github is a web server at "${HOST}":`,
-    `\t- its key is the secret "GITHUB_TOKEN", if it's set`,
+    `\t- its optional key is the secret "GITHUB_TOKEN"`,
     `\t- its next page is in its "Link" header`,
     `\t- contributors live at "/repos/solidjs/solid/contributors"`,
     `a "contributor" is a thing:`,
@@ -478,13 +478,45 @@ describe("GitHub's way (epic `data` P28)", () => {
     expect(compiled).toContain(`nextPageInLink: true`)
     const es = [
       `github es un servidor web en "${HOST}":`,
-      `\t- su clave es el secreto "GITHUB_TOKEN", si la hay`,
+      `\t- su clave opcional es el secreto "GITHUB_TOKEN"`,
       `\t- su página siguiente está en su cabecera "Link"`
     ]
     const spanish = parseSpellProject([{ path: "/G.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
     expect(spanish.errors).toEqual([])
     expect(spanish.compiled).toContain(`keyIfSet: true`)
     expect(spanish.compiled).toContain(`nextPageInLink: true`)
+  })
+
+  test("where a key goes, in either language (T73):  a header's name or the address's question, each compiled", () => {
+    const compiled = (lines: string[], path = "/G.spell") => {
+      const { compiled, errors, warnings } = parseSpellProject([{ path, contents: `${lines.join("\n")}\n` }]).files[0]!
+      return { compiled, errors: errors.join("\n"), warnings: warnings.join("\n") }
+    }
+    const en = (line: string, key = true) => [
+      `cookbook is a web server at "${HOST}":`,
+      ...(key ? [`\t- its key is the secret "COOKBOOK_KEY"`] : []),
+      `\t- ${line}`
+    ]
+    expect(compiled(en(`its key goes in its "X-Api-Key" header`)).compiled).toContain(
+      `keyGoes: { header: "X-Api-Key" }`
+    )
+    expect(compiled(en(`its key goes in the address as "api_key"`)).compiled).toContain(
+      `keyGoes: { inAddress: "api_key" }`
+    )
+    expect(compiled(en(`its key goes in its "Not a header" header`)).errors).toMatch(/can't be a header's name/)
+    expect(compiled(en(`its key goes in the address as "two words"`)).errors).toMatch(/can't be asked in an address/)
+    expect(compiled(en(`its key goes in its "X-Api-Key" header`, false)).warnings).toMatch(/no line names one/)
+    const es = (line: string) => [
+      `recetario es un servidor web en "${HOST}":`,
+      `\t- su clave es el secreto "CLAVE"`,
+      `\t- ${line}`
+    ]
+    expect(compiled(es(`su clave va en su cabecera "X-Api-Key"`), "/G.es.spell").compiled).toContain(
+      `keyGoes: { header: "X-Api-Key" }`
+    )
+    expect(compiled(es(`su clave va en la dirección como "api_key"`), "/G.es.spell").compiled).toContain(
+      `keyGoes: { inAddress: "api_key" }`
+    )
   })
 
   test("a next page in any other header won't compile, saying so;  a key it can't do without still needs a server side", () => {
@@ -503,6 +535,88 @@ describe("GitHub's way (epic `data` P28)", () => {
     expect((await read(Contributor)).map(({ login }) => login)).toEqual(["ryansolid", "thetarnav"])
     expect(asked.map(({ url }) => url)).toEqual([`${HOST}/repos/solidjs/solid/contributors`, PAGE_2])
     expect(asked.map(({ key }) => key)).toEqual([null, null])
+  })
+
+  test("a key that goes in the address goes there, in a running program (T73)", async () => {
+    const asked = serveWithHeaders({
+      [`${HOST}/repos/solidjs/solid/contributors?api_key=t0ken`]: { body: [{ login: "ryansolid" }] }
+    })
+    core.resetRuntime().keyFrom = (name) => (name === "GITHUB_TOKEN" ? "t0ken" : undefined)
+    const { Contributor } = runSpell([
+      `${LINES[0]}`,
+      `\t- its key goes in the address as "api_key"`,
+      ...LINES.slice(1)
+    ])("Contributor")
+    expect((await read(Contributor)).map(({ login }) => login)).toEqual(["ryansolid"])
+    expect(asked.map(({ key }) => key)).toEqual([null])
+  })
+
+  test("a page size by another name asks for it there (T112), in either language", async () => {
+    const lines = [
+      ...LINES.slice(0, 2),
+      `\t- it gives up to 100 at a time, asked for with "per_page"`,
+      ...LINES.slice(2)
+    ]
+    const { compiled } = parseSpellProject([{ path: "/G.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(compiled).toContain('pageSizeAskedWith: "per_page"')
+    const es = [`github es un servidor web en "${HOST}":`, `\t- da hasta 100 a la vez, pedidos con "per_page"`]
+    const spanish = parseSpellProject([{ path: "/G.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain('pageSizeAskedWith: "per_page"')
+  })
+
+  test("a link column's one parent:  a list of one id reads as the thing it names (T63)", async () => {
+    serveWithHeaders({
+      [`${HOST}/recipes`]: {
+        body: [
+          { id: "r-1", parent: ["b-1"] },
+          { id: "r-2", parent: [] }
+        ]
+      },
+      [`${HOST}/books/b-1`]: { body: { id: "b-1", title: "Joy of Cooking" } }
+    })
+    core.resetRuntime()
+    const { Recipe } = runSpell([
+      `github is a web server at "${HOST}":`,
+      `a "book" is a thing:`,
+      `\t- it lives in github`,
+      `\t- its "title" is text`,
+      `a "recipe" is a thing:`,
+      `\t- it lives in github`,
+      `\t- its "parent" is a book`,
+      `\t- to name its parent:`,
+      `\t\treturn the title of its parent`
+    ])("Recipe")
+    const [one, two] = (await read(Recipe)) as unknown as Array<{ nameItsParent(): Promise<string> }>
+    expect(await one!.nameItsParent()).toBe("Joy of Cooking")
+    await expect(two!.nameItsParent()).resolves.toBeFalsy()
+  })
+
+  test("a graphql server's version line:  each read asks for it, and an update sends it back (T19)", async () => {
+    const bodies: string[] = []
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+      const body = init.body as string
+      bodies.push(body)
+      const node = { id: "r-1", title: "Soup", version: 3 }
+      return Response.json(
+        body.includes("mutation")
+          ? { data: { changeRecipe: { ...node, version: 4 } } }
+          : { data: { recipes: { edges: [{ node }], pageInfo: { hasNextPage: false } } } }
+      )
+    })
+    core.resetRuntime()
+    const { Recipe } = runSpell([
+      `cookbook is a graphql server at "${HOST}/graphql":`,
+      `\t- its version is its "version"`,
+      `a "recipe" is a thing:`,
+      `\t- it lives in cookbook`,
+      `\t- its "title" is text`
+    ])("Recipe")
+    const [recipe] = await read(Recipe)
+    expect(bodies[0]).toMatch(/\bversion\b/)
+    recipe!.title = "Mine"
+    await vi.waitFor(() => expect(bodies).toHaveLength(2))
+    expect(JSON.parse(bodies[1]!).variables.input).toEqual({ title: "Mine", version: 3 })
   })
 
   test("with the key set where it runs, it goes on each request", async () => {
@@ -527,5 +641,177 @@ describe("GitHub's way (epic `data` P28)", () => {
     ])("User")
     const user = (await core.savedThingWithId(User as never, "ryansolid")) as unknown as Record<string, unknown>
     expect([user.id, user.login, user.name]).toEqual(["ryansolid", "ryansolid", "Ryan"])
+  })
+})
+
+describe("the place kinds' other words", () => {
+  const errorsOf = (contents: string) => parseSpellProject([{ path: "/Lines.spell", contents }]).files[0]!.errors
+
+  test("an atmosphere space's address has to be a space's", () => {
+    expect(errorsOf('family cookbook is an atmosphere space at "at://did:plc:abc/space/family"')).toEqual([])
+    expect(errorsOf('family cookbook is an atmosphere space at "https://example.com"').join()).toMatch(/isn't a space/)
+  })
+
+  test("reading an atmosphere space says it can't be reached yet", async () => {
+    const { Note } = runSpell([
+      'family cookbook is an atmosphere space at "at://did:plc:abc/space/family"',
+      "a note is a thing",
+      "\t- it is saved in family cookbook"
+    ])("Note")
+    await expect(read(Note)).rejects.toThrow(/atmosphere space.*can't reach those yet/)
+  })
+
+  test("a whole-list read of a searching server by its plural:  all, the, or nothing", () => {
+    const lines = (read: string) =>
+      errorsOf(
+        [
+          'met museum is a web server at "https://met.test"',
+          '\t- it searches everything with "q"',
+          "an artwork is a thing",
+          "\t- it lives in met museum",
+          "a shelf is a thing",
+          '\t- its "search" is text',
+          `\t- to look:  return ${read}`
+        ].join("\n")
+      )
+    expect(lines("all artworks matching its search")).toEqual([])
+    expect(lines("artworks which match its search")).toEqual([])
+  })
+
+  test("which match:  still refused for a place that doesn't search", () => {
+    const errors = errorsOf(
+      [
+        'met museum is a web server at "https://met.test"',
+        "an artwork is a thing",
+        "\t- it lives in met museum",
+        "a shelf is a thing",
+        '\t- its "search" is text',
+        "\t- to look:  return artworks which match its search"
+      ].join("\n")
+    )
+    expect(errors.join()).toMatch(/search/)
+  })
+
+  test("settings stored on this device, for each tab", () => {
+    expect(errorsOf("scratch is stored on this device, for each tab")).toEqual([])
+    expect(errorsOf("settings is stored on this device")).toEqual([])
+    expect(errorsOf("settings is a database on this device")).toEqual([])
+  })
+})
+
+describe("the checks that moved to compile (epic `data` P42)", () => {
+  const compiled = (contents: string) => parseSpellProject([{ path: "/Lines.spell", contents }]).files[0]!
+
+  test("a quoted name with a number in it", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        "a book is a thing:",
+        '\t- its "isbn 10" is text',
+        '\t- its "top 3 movies" is text',
+        "\t- to f:  return its isbn 10",
+        "\t- to g:  return the top 3 movies of it"
+      ].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("return this.isbn10")
+    expect(code).toContain("return this.top3Movies")
+  })
+
+  test("an operation named create is refused, on a type:  it would run as each one is made", () => {
+    const lines = (operation: string) =>
+      compiled(
+        [
+          `films is a web server at "${HOST}":`,
+          `\t- ${operation}`,
+          "a recipe is a thing:",
+          "\t- it lives in films"
+        ].join("\n")
+      ).errors
+    expect(lines('to create a recipe is at "/recipes"').join()).toMatch(/can't be called "create"/)
+    expect(lines('to create is at "/recipes"')).toEqual([])
+  })
+
+  test("a place's operation is known above its line", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        "to go with a film:",
+        "\trefresh",
+        "\tpublish the film",
+        "a film is a thing",
+        `archive is a web server at "${HOST}":`,
+        '\t- to refresh is at "/refresh:all"',
+        '\t- to publish a film is at "/publish"'
+      ].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.callPlace("archive", "refresh")')
+    const es = parseSpellProject([
+      {
+        path: "/Lines.es.spell",
+        contents: [
+          "para ir:",
+          "\trefrescar",
+          `archivo es un servidor web en "${HOST}":`,
+          '\t- para refrescar está en "/r"'
+        ].join("\n")
+      }
+    ]).files[0]!
+    expect(es.errors).toEqual([])
+  })
+
+  const FILMS = [`films is a web server at "${HOST}":`, "\t- it is read only", '\t- reviews live at "/r"'].join("\n")
+  const REVIEW = (drawing: string) =>
+    `${FILMS}\na review is a thing:\n\t- it lives in films\n\t- its "title" is text\n\tto draw it:\n\t\t${drawing}`
+
+  test("a form bound to a read-only saved thing is refused", () => {
+    expect(compiled(REVIEW('<ui-form value={it}><ui-input name="title"/></ui-form>')).errors.join()).toMatch(
+      /read only here/
+    )
+    expect(compiled(REVIEW('<ui-form value={a draft of it}><ui-input name="title"/></ui-form>')).errors).toEqual([])
+    expect(compiled(REVIEW('<ui-form value={it} disabled><ui-input name="title"/></ui-form>')).errors).toEqual([])
+  })
+
+  test("a sort key reading a getter that waits, through another's name", () => {
+    const shelf = (key: string) =>
+      compiled(
+        [
+          `films is a web server at "${HOST}":`,
+          '\t- reviews live at "/r"',
+          "a review is a thing:",
+          "\t- it lives in films",
+          '\t- its "title" is text',
+          '\t- its "score" is the number of reviews where its title is "x"',
+          '\t- its "other" is its score',
+          '\t- its "plain" is its title',
+          "a shelf is a thing:",
+          `\t- to f:  return every review, sorted by ${key}`
+        ].join("\n")
+      ).errors
+    expect(shelf("its score").join()).toMatch(/can't wait/)
+    expect(shelf("its other").join()).toMatch(/can't wait/)
+    expect(shelf("other").join()).toMatch(/can't wait/)
+    expect(shelf("its plain")).toEqual([])
+    expect(shelf("its title")).toEqual([])
+  })
+
+  test("if that fails, on a read in an action", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        `films is a web server at "${HOST}":`,
+        '\t- reviews live at "/r"',
+        "a review is a thing:",
+        "\t- it lives in films",
+        "to go:",
+        "\tset found to every review",
+        "\tif that fails:",
+        '\t\tprint "Oops"',
+        "\tprint found"
+      ].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("let found = undefined")
+    expect(code).toContain("found = await core.savedThings(Review)")
+    expect(code).toMatch(/catch \(error\) \{\n\s*core\.console\.log\("Oops"\)/)
+    expect(compiled('to go:\n\tif that fails:\n\t\tprint "x"').errors.join()).toMatch(/under the line/)
   })
 })

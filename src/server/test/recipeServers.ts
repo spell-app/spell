@@ -366,7 +366,11 @@ function answerTo(box: RecipeBox, { name, args, inside }: Selected, variables: R
     }
     case "changeRecipe": {
       known()
-      return row(box.change(id, value("input") as Partial<WireRecipe>))
+      const { version, ...fields } = value("input") as Partial<WireRecipe>
+      if (version !== undefined && box.recipes.get(id)!.version !== version) {
+        throw new GraphFailure(`${id} has moved on`, "CONFLICT")
+      }
+      return row(box.change(id, fields))
     }
     case "removeRecipe":
       known()

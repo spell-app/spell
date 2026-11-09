@@ -6,6 +6,7 @@
  * - `spell bundle [names...]` / `spell bundle check`:  the bundles the page server serves, built on demand
  * - `spell commands [list|check]`:  every command against the commands page
  * - `spell wwod [check]`:  WWOD's citations and paths
+ * - `spell deps [check]`:  the lockfile's advisories and deprecated packages, before a push
  * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
  *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
  * - `spell map install | status | build | query | explain | uses`:  a map of every repo's code, and one of the
@@ -129,6 +130,17 @@ export default function kitCommands(spell: Command): void {
     .option("--json", "print the report as JSON")
     .action((verb: string | undefined, files: string[], options: CLI.WwodOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/wwodCommand")).wwodCommand(verb, files, options))
+    )
+
+  spell
+    .command("deps")
+    .description(
+      "the dependencies:  fail on a deprecated package or a critical or high advisory not on the known-open list"
+    )
+    .argument("[verb]", "check (default)")
+    .option("--json", "print the report as JSON")
+    .action((verb: string | undefined, options: CLI.DepsOptions) =>
+      CLI.runCommand(async () => (await import("spell/cli/commands/depsCommand")).depsCommand(verb, options))
     )
 
   ////////////////

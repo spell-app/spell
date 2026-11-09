@@ -22,7 +22,18 @@ export class Listing extends Thing {
     return <ui-label class="shift">{this.shift}</ui-label>
   }
 
-  static savedIn = { place: "published_sheet", collection: "listings" }
+  static savedIn = {
+    place: "published_sheet",
+    collection: "listings",
+    times: ["created", "modified"], select: ["person", "shift"] }
+
+  // - it lives in the published sheet
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in the published sheet
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Message extends Thing {
@@ -38,7 +49,18 @@ export class Message extends Thing {
     return <ui-text class="count">{this.text}</ui-text>
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"], select: ["text", "thread"] }
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /** Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection. */

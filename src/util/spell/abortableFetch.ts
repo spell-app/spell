@@ -1,5 +1,3 @@
-import global from "global"
-
 /** `true` if an `Error` is result of an `AbortController.abort()` call, e.g. inside a `.catch()`. */
 export function isAbortError(error: Error) {
   if (error.name === "AbortError") return true
@@ -44,7 +42,7 @@ export function isAbortError(error: Error) {
 export function abortableFetch(url: string, fetchParams: RequestInit = {}, fetcher: typeof fetch = fetch) {
   // Semaphore set first thing when `fetch()` completes.
   let completed = false
-  const abortController = new global.AbortController()
+  const abortController = new AbortController()
 
   /** Wrap `promise` so `.cancel()` survives `.then()`/`.catch()`/`.finally()` chaining -- see caveats above. */
   function wrapPromise(promise: Promise<unknown>) {

@@ -20,7 +20,19 @@ export class Receta extends View {
     )
   }
 
-  static savedIn = { place: "recetario_familiar", collection: "recetas" }
+  static savedIn = {
+    place: "recetario_familiar",
+    collection: "recetas",
+    times: ["created", "modified"]
+  }
+
+  // se guarda en el recetario familiar
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/SalaEnVivo.es.spell", start: 860, end: 894 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // se guarda en el recetario familiar
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/SalaEnVivo.es.spell", start: 860, end: 894 } })
+  accessor modificado!: any /* spell: type unknown */
 }
 
 /**
@@ -31,7 +43,9 @@ export class Receta extends View {
  */
 export class RecetaElement extends SpellElement<Receta> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-receta", "receta", [
-    { name: "título", kind: "string", description: "Its título." }
+    { name: "título", kind: "string", description: "Its título." },
+    { name: "creado", kind: "json", description: "Its creado." },
+    { name: "modificado", kind: "json", description: "Its modificado." }
   ])
 
   onSomeoneElseChange(event: any /* spell: type unknown */) {

@@ -36,9 +36,19 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 				</stack>
 			</form>
 			{draw the found of it}
+			{draw the issues of it}
 			<text size="small" paragraph>
 				From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
 			</text>
+		</stack>
+	</draw>
+
+	<draw "issues" description="Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request">
+		<stack spacing="sm">
+			<header size="medium">Solid's issues</header>
+			<for the first 6 issues where its pull request is nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open issues." />
+			<header size="medium">Solid's pull requests</header>
+			<for the first 6 issues where its pull request is not nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open pull requests." />
 		</stack>
 	</draw>
 
@@ -110,6 +120,23 @@ A search gives only a little of each:  their page reads them whole, by their log
 				<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="Nothing public yet." />
 			</stack>
 		</stack>
+	</draw>
+</spell-more-of>
+
+
+# An issue
+GitHub lists a pull request among a repository's issues:  this page tells them apart by its "pull request".
+
+<spell-more-of "issue">
+	<draw>
+		<ui-card>
+			<content>
+				<header>
+					{its title} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+				</header>
+				<meta>#{its number} · {its state}</meta>
+			</content>
+		</ui-card>
 	</draw>
 </spell-more-of>
 

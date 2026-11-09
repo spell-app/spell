@@ -120,7 +120,7 @@
     --_ui-dropdown-icon-opacity: var(--ui-dropdown-icon-opacity, 0.5);
     --_ui-dropdown-placeholder-color: var(--ui-dropdown-placeholder-color, var(--ui-text-light));
     --_ui-dropdown-placeholder-focus-color: var(--ui-dropdown-placeholder-focus-color, var(--ui-text-muted));
-    --_ui-dropdown-menu-background: var(--ui-dropdown-menu-background, var(--ui-surface));
+    --_ui-dropdown-menu-background: var(--ui-dropdown-menu-background, var(--ui-popup-background, var(--ui-surface)));
     --_ui-dropdown-menu-color: var(--ui-dropdown-menu-color, var(--ui-text-color));
     --_ui-dropdown-menu-border-color: var(--ui-dropdown-menu-border-color, var(--ui-border-color));
     --_ui-dropdown-menu-radius: var(--ui-dropdown-menu-radius, var(--ui-radius));

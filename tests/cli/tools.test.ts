@@ -12,7 +12,7 @@ describe("toolArgs()", () => {
   test("tsx:  the kit's loader first, then the run-time alias hook", () => {
     expect(CLI.toolArgs({ tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" }, "/kit")).toEqual([
       "--import",
-      CLI.TSX_LOADER,
+      CLI.tsxLoader(),
       "/kit/src/server/page/cli.ts"
     ])
   })

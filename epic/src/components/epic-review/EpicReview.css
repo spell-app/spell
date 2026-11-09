@@ -37,7 +37,10 @@
     /* a todo's x (drop it):  no longer relevant, as a canceled item's chip;  darker than a button at rest */
     --_epic-act-grey: var(--ui-grey, light-dark(#767676, #a0a0a0));
     /* Owen's voice:  the ivory of his answer card (`EpicAnswer.css`), its accent the brown ink */
-    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
     --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
     /* the ring of a group WAITING on Owen (Owen, 2026-10-25:  "try 2px border, #666") */

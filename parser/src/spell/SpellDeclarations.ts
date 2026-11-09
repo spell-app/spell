@@ -184,6 +184,8 @@ export class SpellDeclarations {
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
       } else if (item instanceof P.ScopeVariable) {
+        // a saved type's two times come with its `savedIn`:  `loadSaved()`
+        if (item.isSavedTime) continue
         if (item.scope instanceof P.TypeScope) merge(SpellDeclarations.variableDeclaration(item, item.scope, mine))
       } else if (item instanceof P.ScopeConstant) {
         constants.push(item.name)
@@ -380,7 +382,7 @@ export class SpellDeclarations {
           loaded.units = declaration.units
           declaration.units.forEach(SP.noteUnitNames)
         }
-        if (loaded && declaration.place) SpellDeclarations.loadPlace(loaded, declaration.place)
+        if (loaded && declaration.place) SpellDeclarations.loadPlace(scope, loaded, declaration.place)
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
       SpellDeclarations.loadConstants(scope, from, names, declaration, declaredAt)
@@ -398,9 +400,14 @@ export class SpellDeclarations {
     for (const declaration of saved) SpellDeclarations.loadSaved(scope, names, declaration)
   }
 
-  /** SIDE EFFECT:  `type` is the place `place` says, for what the compiler asks of it (epic `data` I19). */
-  private static loadPlace(type: P.TypeScope, { name, kind, at, details }: SP.DeclaredPlace) {
+  /**
+   * SIDE EFFECT:  `type` is the place `place` says, for what the compiler asks of it (epic `data` I19).
+   * - And its one instance, `family_cookbook`, as the words `the family cookbook` mean:
+   *   so a project can name it on its own type's line, `a note is saved in the family cookbook` (T161).
+   */
+  private static loadPlace(scope: P.RootScope, type: P.TypeScope, { name, kind, at, details }: SP.DeclaredPlace) {
     Object.assign(type, definedOnly({ placeName: name, placeKind: kind, placeAt: at, importedPlaceDetails: details }))
+    scope.variables.add({ name, datatype: type.name, kind: "only" })
   }
 
   /**
@@ -412,10 +419,15 @@ export class SpellDeclarations {
   private static loadSaved(scope: P.RootScope, names: Set<string>, { type: name, savedIn }: SP.SpellDeclaration) {
     const type = name && names.has(name) ? scope.types.get(name, "LOCAL_ONLY") : undefined
     if (!type || !savedIn) return
-    const { place, placeType: placeTypeName, collection } = savedIn
+    const { place, placeType: placeTypeName, collection, keepsNoTimes } = savedIn
     const placeType = scope.types.get(placeTypeName, "LOCAL_ONLY") ?? new P.TypeScope(placeTypeName)
     placeType.placeName ??= place
     type.saved = { place, placeType, collection }
+    if (keepsNoTimes) return
+    for (const word of Object.values(SP.Language.of(scope).words.savedTimeWords)) {
+      if (!type.variables.get(word, "LOCAL_ONLY"))
+        type.variables.add({ name: word, datatype: "date", isSavedTime: true })
+    }
   }
 
   /**
@@ -1051,8 +1063,15 @@ const PROP_ORDER = [
 ]
 
 /** Where `type` itself is saved, for its declaration:  `undefined` for a type kept in memory, or one inheriting it. */
-function savedDeclaration({ saved }: P.TypeScope): SP.DeclaredSaved | undefined {
-  return saved && { place: saved.place, placeType: saved.placeType.name, collection: saved.collection }
+function savedDeclaration({ saved, keepsNoTimes }: P.TypeScope): SP.DeclaredSaved | undefined {
+  return (
+    saved && {
+      place: saved.place,
+      placeType: saved.placeType.name,
+      collection: saved.collection,
+      ...(keepsNoTimes && { keepsNoTimes })
+    }
+  )
 }
 
 /** Is `item` a `P.ScopeRule`, the record `scope.addRule()` notes? */

@@ -59,7 +59,19 @@ export class Message extends Thing {
     )
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 580, end: 600 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 580, end: 600 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -85,7 +97,18 @@ export class MailChoice extends Thing {
     )
   }
 
-  static savedIn = { place: "my_inbox", collection: "mail_choices" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "mail_choices",
+    times: ["created", "modified"], select: ["how"] }
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 996, end: 1016 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 996, end: 1016 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /** A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update. */
@@ -103,7 +126,19 @@ export class Subscription extends Thing {
     )
   }
 
-  static savedIn = { place: "my_inbox", collection: "subscriptions" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "subscriptions",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1184, end: 1204 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1184, end: 1204 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**

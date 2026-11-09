@@ -227,9 +227,9 @@ describe("an action at a place's address (Q17's C)", () => {
     expect(js).toContain("await refresh()")
   })
 
-  it("is known below its line:  a place's lines come first, as a saved type needs them to", () => {
+  it("is known above its line too", () => {
     const { errors } = compiled("to go:", "\trefresh", ...PLACE)
-    expect(errors.join()).toMatch(/refresh/)
+    expect(errors).toEqual([])
   })
 
   it("Spanish", () => {
@@ -283,7 +283,9 @@ describe("an action at a place's address (Q17's C)", () => {
 
   it("what a place sends is read whole, whatever the program reads of it", () => {
     const { js } = compiled(...PLACE, ...RECIPE, "print every recipe")
-    expect(js).toContain('static savedIn = { place: "family_cookbook", collection: "recipes" }')
+    expect(js).toMatch(
+      /static savedIn = \{\s*place: "family_cookbook",\s*collection: "recipes",\s*times: \["created", "modified"\]\s*\}/
+    )
   })
 
   it("the two-line form is gone", () => {

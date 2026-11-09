@@ -1,4 +1,3 @@
-import global from "global"
 import { For, Show, createContext, createMemo, useContext } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
@@ -169,7 +168,7 @@ export function ConsoleValue(props: ConsoleValueProps) {
   function onClick(): void {
     const thing = props.observable
     if (!thing) return
-    global.it = thing
+    Object.assign(globalThis, { it: thing })
     console.log(`it =`, thing)
     inspector.inspect?.(thing)
   }

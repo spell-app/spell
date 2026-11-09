@@ -210,10 +210,11 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
+| `spell deps [check]` | fails on a deprecated package, or a critical or high advisory not on `deps-known-open.json5`;  runs by itself before a push to `main` |
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
-| `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
+| `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, which the published `spell` ships too, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -255,6 +256,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell wwod check` | the default, and the only verb |
 | `spell wwod check <files...>` | those files too, beyond the default set |
 | `spell wwod --json` | the report as JSON |
+| `spell deps --json` | the report as JSON |
 | `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
 | `spell publish --no-scratch` | skips the scratch install, which needs the network |
 | `spell publish --json` | the packed packages and every check as JSON |
@@ -278,6 +280,9 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 - `spell publish`:  three packages, `spell` first (epic `repo-split` Q65).
   - `spell`:  the ONE package, the kit's `src/` and every folder's, built into `dist/<folder>/`
     (`spell/ui/core` is `dist/ui/core.js`).
+    - Lean by default (epic `epic-engine` P66):  npm installs only what the `spell` and `epic` commands need.
+      The rest (Monaco, Solid, Vite+ ...) publishes as optional peers, the kit's `"spellPublish": { "optionalPeers" }`.
+    - A command that needs one prints the `npm install spell@next ...` line to paste.
   - `spell-ui`:  Spell UI on its own, its Vite library build, with the element code inside.
   - `spell-epic`:  the epic plugin for Claude Code, its parts at its root, its code `spell`'s.
   - The code is built to JavaScript, one file per source file, so every name its `exports` gives still finds its file;
@@ -286,8 +291,11 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     no `private`, `workspaces`, scripts or dev dependencies;  the checkout's own never changes.
   - One version for all, the kit's `package.json` `version`.
   - Then `npm pack` into `dist-packs/`, the checks (built code only, every `exports` file packed, one `DOMElement`),
-    and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`,
-    `npx spell help`, `npx epic --help`, and the epic server started from the install, its page and pack answering.
+    and two scratch projects outside the checkout:
+    - lean, `spell` alone:  under a size limit, `npx spell help`, `spell epic init` starting the epic server with its page and
+      pack answering, an item saved, and the line to paste for a package left out
+    - whole, every package and the add-ons:  a node import, a Vite page that draws a `<ui-button>`, `npx spell help`,
+      a command that needs an add-on, `npx epic --help`, and the epic server again
   - Without `--dry-run`, and only when every check passed:  `npm publish --tag <tag>` for each, lowest first.
   - Logging in with a token, the tags, and what trips people up:  [Publishing to npm](npm.md).
   - The tag is `next` unless you say otherwise:  `npm install spell@next` gets the new version,
@@ -874,6 +882,8 @@ spell place update StarWars.api.spell
 | `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
 | `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
+| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its key goes in its "X-Api-Key" header` |
+| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its key goes in the address as "api_key"` |
 | `--docs <address>` | where its docs are, over those it finds by itself |
 | `--collections <paths>` | its collections' paths, comma-separated, for a source that doesn't list them.  `name=path` names one;  a name in braces is found by name, with no list (`"wiki pages=/page/summary/{name}"`);  one asked with a search is searched (`"books=/search.json?q=dune"`) |
 | `--samples <names>` | names to read a collection found by name by:  `Tatooine,Hoth`;  `name=sample` for one collection's own (`authors=OL79034A`) |
@@ -924,7 +934,8 @@ spell site screenshots owen@spell/my-site --size 1440x900 --signed-in work
 ```
 
 - A small bar on top of each page takes the picture's name and the site's page it's of, picked or new.
-- Save writes `snapshots/<name>.jpg` into the site's project and sets that page's `thumbnail`.
+- Save writes `snapshots/<name>.jpg` into the site's project, sets that page's `thumbnail`,
+  and records the address it was taken at as its `live` link, what its card's new-tab icon opens.
 - A new page is added at the address the browser is on.
 
 ## spell-ui
@@ -1352,7 +1363,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
   - `Ctrl-C` reaches the child, which stops cleanly, and we exit with its code
   - killed by a signal:  `128 +` its number, as a shell reports it
 - a repo's tool script:  `runTool()`, from the nearest checkout that has it, under `tsx` when its `ToolSpec` says so
-- `spell-epic`'s `epic`:  `runEpic()`, the nearest checkout's `epic/bin/epic`, else the installed `spell-epic`'s
+- `spell-epic`'s `epic`:  `runEpic()`, the nearest checkout's `epic/bin/epic` (the published `spell` has one too), else the
+  installed `spell-epic`'s
   (`publishedEpicBin()`), else the one on the `PATH`
   - `spell epic`:  `runSpellEpic()`, the same first two, else `npx -y spell-epic@<spell's version>`, never the `PATH`'s
 

@@ -216,44 +216,46 @@ export function ProjectCards(props: ProjectCardsProps) {
   const listed = () =>
     root().projects.filter((project) => (props.sitesOnly ? project.isSite : project.onHome !== false))
   return (
-    <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
-      <header>
-        <h2>
-          {props.heading ?? root().words.title}. <span class="line">{props.line}</span>
-        </h2>
-        {props.create}
-      </header>
-      <div class="cards">
-        <Show
-          when={root().loaded}
-          fallback={
-            <EmptyCard>
-              {root().failed ? appTexts.text("couldNotLoadGroup", root().words) : appTexts.text("loadingGroup")}
-            </EmptyCard>
-          }
-        >
-          <For
-            each={listed().filter((project) => !project.language)}
-            fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
+    <Show when={!props.hideWhenNone || listed().length > 0}>
+      <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
+        <header>
+          <h2>
+            {props.heading ?? root().words.title}. <span class="line">{props.line}</span>
+          </h2>
+          {props.create}
+        </header>
+        <div class="cards">
+          <Show
+            when={root().loaded}
+            fallback={
+              <EmptyCard>
+                {root().failed ? appTexts.text("couldNotLoadGroup", root().words) : appTexts.text("loadingGroup")}
+              </EmptyCard>
+            }
           >
-            {(project) => <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />}
-          </For>
-          {/* those written in another language:  after the rest, under a quiet line naming it */}
-          <For each={languagesIn(listed())}>
-            {(language) => (
-              <>
-                <h3 class="language">{languageTitle(language)}</h3>
-                <For each={listed().filter((project) => project.language === language)}>
-                  {(project) => (
-                    <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />
-                  )}
-                </For>
-              </>
-            )}
-          </For>
-        </Show>
-      </div>
-    </section>
+            <For
+              each={listed().filter((project) => !project.language)}
+              fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
+            >
+              {(project) => <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />}
+            </For>
+            {/* those written in another language:  after the rest, under a quiet line naming it */}
+            <For each={languagesIn(listed())}>
+              {(language) => (
+                <>
+                  <h3 class="language">{languageTitle(language)}</h3>
+                  <For each={listed().filter((project) => project.language === language)}>
+                    {(project) => (
+                      <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />
+                    )}
+                  </For>
+                </>
+              )}
+            </For>
+          </Show>
+        </div>
+      </section>
+    </Show>
   )
 }
 
@@ -297,8 +299,8 @@ export type ProjectCardsProps = {
   projectRoot: SPACES.SpellProjectRoot
   /** Its title, in place of its group's own (the group's word for what it holds). */
   heading?: string
-  /** The quiet line after its title. */
-  line: string
+  /** The quiet line after its title, if any. */
+  line?: string
   /** Its "create" button, in its header. */
   create?: JSX.Element
   /** What its one card says while it's empty;  default "No examples yet!". */
@@ -309,6 +311,8 @@ export type ProjectCardsProps = {
   small?: boolean
   /** Only its projects that hold a site, each opening in the site editor (`<SiteGroupPage>`). */
   sitesOnly?: boolean
+  /** Show nothing at all while it lists nothing, or hasn't loaded:  for a page of many groups (`<SitesHomePage>`). */
+  hideWhenNone?: boolean
 }
 
 /**

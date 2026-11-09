@@ -5,17 +5,18 @@
  *   (`spell run` couldn't:  it compiles into a temporary folder each time.)
  * - Its data folder and CSV file:  on a page server's place routes the test starts (`SpaceFolders`), in a temporary
  *   spell.spaces, reached with the server's write token, as `spell run --target py` hands them over.
- * - Task List still can't compile to Python:  it keeps tasks in the Atmosphere, which Python doesn't yet.
+ * - Task List keeps its tasks in all four kinds of place, the Atmosphere too, on a fake AT Protocol host (epic `data` P46),
+ *   signed in with the handle and the app password `spell run --target py` hands on from the environment.
  */
-import { spawn, spawnSync } from "child_process"
+import { spawn } from "child_process"
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { createServer } from "http"
-import { createRequire } from "module"
 import { tmpdir } from "os"
-import { dirname, join, resolve } from "path"
+import { join, resolve } from "path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
+import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
 import { SP } from "spell/parser/spell"
 import { compiledFixture } from "spell/app/spaces/test"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
@@ -27,9 +28,6 @@ const TOKEN = "python-places-token"
 
 /** The test project. */
 const PROJECT = "kept-in-places"
-
-/** The real `spell` command:  the kit's `bin/spell.mjs`. */
-const SPELL = resolve(dirname(createRequire(import.meta.url).resolve("spell/package.json")), "bin/spell.mjs")
 
 /** `spell_core`'s uv project, which runs the program. */
 const SPELL_CORE = resolve(import.meta.dirname, "../../../parser/src/py/core")
@@ -49,6 +47,31 @@ if sys.argv[2] == "keep":
     keeper.keep_the_draft()
 asyncio.run(keeper.count_the_notes())
 print(json.dumps({"device": keeper.device_count, "folder": keeper.folder_count, "sheet": keeper.sheet_count}))
+`
+
+/** Task List, as a test project. */
+const TASK_LIST = "@spell/examples/TaskList"
+
+/**
+ * Each of Task List's keepers in turn, as the person picks where to keep them:  each fills the checklist from its place,
+ * adding its starting tasks when it holds none.  Its last line, as JSON:  each keeper's task titles.
+ */
+const TASK_LIST_DRIVER = `
+import asyncio, json, sys
+from spell_core.run import run_program
+
+names = run_program(sys.argv[1], seed=1, pauses=False)
+app = names["task_list"]
+
+async def main():
+    titles = {}
+    for keeper in ("BrowserKeeper", "ServerKeeper", "SheetKeeper", "SkyKeeper"):
+        app.keeper = names[keeper]()
+        await app.fill_the_checklist()
+        titles[keeper] = [task.title for task in app.checklist]
+    print(json.dumps(titles))
+
+asyncio.run(main())
 `
 
 /** The org file:  owen, this machine's person, is in Spell's org. */
@@ -103,10 +126,11 @@ describe("a Python program's places, over a restart", () => {
    */
   function driven(
     args: string[],
-    env: Record<string, string>
+    env: Record<string, string>,
+    program = join(kept, "KeptInPlaces.spell.py"),
+    driver = DRIVER
   ): Promise<{ status: number | null; out: string; err: string }> {
-    const program = join(kept, "KeptInPlaces.spell.py")
-    const child = spawn("uv", ["run", "--quiet", "--project", SPELL_CORE, "python", "-c", DRIVER, program, ...args], {
+    const child = spawn("uv", ["run", "--quiet", "--project", SPELL_CORE, "python", "-c", driver, program, ...args], {
       env: { ...process.env, ...env }
     })
     let out = ""
@@ -149,16 +173,72 @@ describe("a Python program's places, over a restart", () => {
     expect(status).not.toBe(0)
     expect(err).toMatch(/spell run --target py/)
   }, 60_000)
-})
 
-describe("Task List in Python", () => {
-  test("doesn't compile:  it keeps tasks in the Atmosphere, which Python doesn't yet", () => {
-    const { status, stdout, stderr } = spawnSync(
-      process.execPath,
-      [SPELL, "compile", "--stdout", "--target", "py", "@spell/examples/TaskList"],
-      { encoding: "utf8" }
-    )
-    expect(status).not.toBe(0)
-    expect(`${stdout}\n${stderr}`).toMatch(/personal atmosphere account, which target 'py' can't:  not in Python yet/)
-  }, 60_000)
+  describe("Task List in Python", () => {
+    /** The account it signs in as, on the fake host. */
+    const DID = "did:plc:ana"
+
+    /** Task List's atmosphere collection. */
+    const TASKS = "spaces.spell.examples.tasklist.task"
+
+    /** The tasks a checklist starts with, as the program's first run adds them. */
+    const STARTING_TASKS = [
+      "Write the Task List example",
+      "Teach it to draw",
+      "Select some tasks, then edit them together",
+      "Drag tasks to reorder them"
+    ]
+
+    let atmosphere: FakeAtmosphere
+
+    beforeAll(async () => {
+      atmosphere = await new FakeAtmosphere().start(["host-1"])
+      atmosphere.addAccount(DID, { handle: "ana.test", host: "host-1", password: "an-app-password" })
+      writeFileSync(join(kept, "TaskList.spell.py"), compiledFixture(TASK_LIST, "py"))
+    })
+
+    afterAll(() => atmosphere?.close())
+
+    /** Task List's driver, run with `env`:  its exit status and what it printed. */
+    function ranTaskList(env: Record<string, string>): Promise<{ status: number | null; out: string; err: string }> {
+      return driven([], env, join(kept, "TaskList.spell.py"), TASK_LIST_DRIVER)
+    }
+
+    test("signed in, its tasks are kept in all four places, the atmosphere account's after a restart too", async () => {
+      const env = {
+        SPELL_SERVER_URL: `http://127.0.0.1:${port}`,
+        SPELL_SERVER_TOKEN: TOKEN,
+        SPELL_ATMOSPHERE: JSON.stringify(atmosphere.network),
+        ATMOSPHERE_HANDLE: "ana.test",
+        ATMOSPHERE_APP_PASSWORD: "an-app-password"
+      }
+      const first = await ranTaskList(env)
+      expect(first.status, `${first.out}\n${first.err}`).toBe(0)
+      const shown = JSON.parse(first.out.trim().split("\n").at(-1)!) as Record<string, string[]>
+      for (const keeper of ["BrowserKeeper", "ServerKeeper", "SheetKeeper", "SkyKeeper"]) {
+        expect(shown[keeper]).toEqual(STARTING_TASKS)
+      }
+      expect([...atmosphere.recordsOf(DID, TASKS).values()].map(({ value }) => value.title)).toContain(
+        "Teach it to draw"
+      )
+
+      // the tasks are read back:  in order, and not added again
+      const second = await ranTaskList(env)
+      expect(second.status, `${second.out}\n${second.err}`).toBe(0)
+      expect(JSON.parse(second.out.trim().split("\n").at(-1)!)).toEqual(shown)
+      expect(atmosphere.recordsOf(DID, TASKS).size).toBe(STARTING_TASKS.length)
+    }, 120_000)
+
+    test("with no sign-in, its read says how to", async () => {
+      const { status, err } = await ranTaskList({
+        SPELL_SERVER_URL: `http://127.0.0.1:${port}`,
+        SPELL_SERVER_TOKEN: TOKEN,
+        SPELL_ATMOSPHERE: JSON.stringify(atmosphere.network),
+        ATMOSPHERE_HANDLE: "",
+        ATMOSPHERE_APP_PASSWORD: ""
+      })
+      expect(status).not.toBe(0)
+      expect(err).toMatch(/ATMOSPHERE_HANDLE and ATMOSPHERE_APP_PASSWORD/)
+    }, 60_000)
+  })
 })

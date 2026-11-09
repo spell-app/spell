@@ -65,7 +65,7 @@ export type TargetAbilities = {
    * Keep things in a place (epic `data`, J10):  left out, every kind.
    * - `false`:  none yet, and a project that keeps things in one is told.
    * - A list of kinds' words (`"data folder"`):  only those;  a place of any other kind is refused by its kind's word,
-   *   the Atmosphere too (`"personal atmosphere account"`), as Python's are (epic `data` P40).
+   *   a web server's too (`"web server"`), as Python's are (epic `data` P40).
    */
   places?: false | readonly string[]
 }

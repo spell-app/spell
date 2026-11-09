@@ -78,7 +78,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## Node-only helpers (`node/`)
 
 - Generic helpers that need node:  imported by deep path, NEVER through a barrel, so no browser code pulls them in.
-- [json5.ts](node/json5.ts):  JSON5 written with its comments kept, on json5-writer.
+- [json5.ts](node/json5.ts):  JSON5 written with its comments kept, by editing the text in place (`Json5Editor`).
   - `json5Edited()`, `keepingComments()`, `readJSON5File()`
   - `spell/util/node/json5`.
   - The kit's node program checks it (`tsconfig.node.json`), not the browser-safe one.

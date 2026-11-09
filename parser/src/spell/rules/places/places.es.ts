@@ -15,11 +15,14 @@ import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
+import { StoredOnThisDevice } from "./StoredOnThisDevice"
 import { DraftOf } from "./DraftOf"
 import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
+import { KeyGoesInAddress } from "./KeyGoesInAddress"
+import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
@@ -46,12 +49,14 @@ import {
   IfThereAreNone,
   ShowItAllIn,
   ShowThemAll,
+  ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
   WhileWaiting
 } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
+import { KeepsNoTimes } from "./KeepsNoTimes"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
@@ -117,12 +122,13 @@ placesEs.addRule(
       "excel_file",
       "google_sheet",
       "airtable",
+      "atmosphere_space",
       "atmosphere_account"
     ]
   }),
   {
     syntax:
-      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
   }
 )
 
@@ -171,6 +177,39 @@ placesEs.addRule(CreatePlace, {
 placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?` })
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
+})
+placesEs.addRule(StoredOnThisDevice, {
+  syntax: "{type:type_words} se guarda en este dispositivo (each_tab:, para cada pestaña)? {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "ajustes se guarda en este dispositivo",
+          [
+            "export class Ajuste extends Place {}",
+            "export const ajustes = core.place(new Ajuste(), {",
+            '  name: "ajustes",',
+            '  kind: "database on this device",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          "borrador se guarda en este dispositivo, para cada pestaña",
+          [
+            "export class Borrador extends Place {}",
+            "export const borrador = core.place(new Borrador(), {",
+            '  name: "borrador",',
+            '  kind: "database on this device",',
+            '  unclearNumbers: ",",',
+            "  forEachTab: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
 })
 placesEs.addRule(SavedInTheCloud, {
   syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?",
@@ -306,9 +345,55 @@ placesEs.addRule(FieldCalled, {
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })
-placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave es el secreto {name:text}, si la hay" })
+placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
+placesEs.addRule(KeyGoesInHeader, {
+  syntax: "{type:subject_its} clave va en su cabecera {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://example.com"\n\t- su clave va en su cabecera "X-Api-Key"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://example.com",',
+            '  keyGoes: { header: "X-Api-Key" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(KeyGoesInAddress, {
+  syntax: "{type:subject_its} clave va en la dirección como {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://example.com"\n\t- su clave va en la dirección como "api_key"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://example.com",',
+            '  keyGoes: { inAddress: "api_key" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
   syntax: "((second:segundo|segundos)|(minute:minuto|minutos)|(hour:hora|horas)|(day:día|días|dia|dias))"
 })
@@ -653,7 +738,9 @@ placesEs.addRule(ListsUnder, {
 placesEs.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"
 })
-placesEs.addRule(PageSizeIs, { syntax: "{type:subject_implied} da hasta {size:number} a la vez" })
+placesEs.addRule(PageSizeIs, {
+  syntax: "{type:subject_implied} da hasta {size:number} a la vez (, pedidos con {param:text})?"
+})
 placesEs.addRule(RequestsASecond, {
   syntax: "{type:subject_implied} acepta hasta {most:number} peticiones por segundo",
   tests: [
@@ -774,11 +861,26 @@ placesEs.addRule(SavedInPlace, { syntax: "{type:subject_it} (se guarda|vive) en 
 placesEs.addRule(SavedInPlace, { syntax: `${A} {type:known_type} (se guarda|vive) en {place:expression}` })
 placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive) en {place:expression}" })
 
+placesEs.addRule(KeepsNoTimes, { syntax: "{type:subject_implied} no guarda fechas" })
+placesEs.addRule(KeepsNoTimes, { syntax: `${A} {type:known_type} no guarda fechas` })
+
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })
 placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })
 placesEs.addRule(ShowThemPaged, { syntax: "mostrarlos en (páginas|paginas)" })
 placesEs.addRule(ShowThemAll, { syntax: "mostrarlos todos" })
+placesEs.addRule(ShowThemAtATime, {
+  syntax: "mostrarlos de {size:number} en {same:number}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["mostrarlos de 12 en 12", 'core.readRider("pageSize", () => 12)'],
+        { title: "the same number, twice", input: "mostrarlos de 12 en 10", js: undefined }
+      ]
+    }
+  ]
+})
 placesEs.addRule(ShowThemIn, { syntax: "mostrarlos en :? {statement_body}?" })
 placesEs.addRule(ShowItAllIn, { syntax: "mostrar todo en :? {statement_body}?" })
 placesEs.addRule(IfThatFails, { syntax: "si falla :? {statement_body}?" })
@@ -824,6 +926,30 @@ placesEs.addRule(EveryThingMatching, {
         scope.variables?.add("búsqueda")
       },
       tests: [["cada obra que coincide con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })']]
+    }
+  ]
+})
+placesEs.addRule(EveryThingMatching, {
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} que (coinciden|coincidan) con {words:expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'museo met es un servidor web en "https://collectionapi.metmuseum.org"',
+            '\t- busca en todo con "q"',
+            "una obra es una cosa",
+            "\t- vive en museo met"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("búsqueda")
+      },
+      tests: [
+        ["todas las obras que coinciden con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })'],
+        ["las obras que coinciden con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })']
+      ]
     }
   ]
 })

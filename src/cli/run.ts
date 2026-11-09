@@ -1,4 +1,6 @@
 import chalk from "chalk"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import { emitKeypressEvents } from "node:readline"
 import { createInterface } from "node:readline/promises"
 
@@ -8,7 +10,8 @@ import { CLI } from "spell/cli"
 
 /**
  * Run `work`, then exit with the code it resolves to:  every command's action ends here.
- * - A `CliError` prints just its message, and exits with its code;  anything else is a crash, and prints its stack.
+ * - A `CliError` prints just its message, and exits with its code;  a package the basic install left out says what
+ *   to install (`missingAddOnMessage()`);  anything else is a crash, and prints its stack.
  * - NOTE: exits explicitly:  a parse can leave timers running, which would keep the process alive.
  * - Never resolves.
  */
@@ -18,7 +21,10 @@ export async function runCommand(work: () => Promise<number>): Promise<never> {
     exitCode = await work()
   } catch (error) {
     const isCliError = error instanceof CLI.CliError
-    process.stderr.write(`${chalk.red(isCliError ? error.message : ((error as Error)?.stack ?? String(error)))}\n`)
+    const message = isCliError
+      ? error.message
+      : (missingAddOnMessage(error) ?? (error as Error)?.stack ?? String(error))
+    process.stderr.write(`${chalk.red(message)}\n`)
     exitCode = isCliError ? error.exitCode : CLI.EXIT.ERRORS
   }
   // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short -- but never wait long for it:
@@ -26,6 +32,50 @@ export async function runCommand(work: () => Promise<number>): Promise<never> {
   const drained = new Promise<void>((done) => process.stdout.write("", () => done()))
   await within(drained, DRAIN_WAIT_MS / 1000)
   process.exit(exitCode)
+}
+
+/**
+ * What to say when `error` is a package the published `spell` left out (`"optionalPeers"`):  the command to paste,
+ * naming every one of them, so one paste is enough;  `undefined` for any other error.
+ * - Read from the `package.json` of `kit`, so it's the versions this `spell` was built with.
+ * - `spell@next`, not this version:  the people we tell this to are following the docs' `npx spell@next`.
+ * - NEVER throws.
+ */
+export function missingAddOnMessage(error: unknown, kit = CLI.KIT_ROOT): string | undefined {
+  const missing = missingPackageOf(error)
+  if (!missing) return undefined
+  try {
+    const manifest = JSON.parse(readFileSync(join(kit, "package.json"), "utf8")) as {
+      peerDependencies?: Record<string, string>
+      peerDependenciesMeta?: Record<string, { optional?: boolean }>
+    }
+    const meta = manifest.peerDependenciesMeta ?? {}
+    if (!meta[missing]?.optional) return undefined
+    const addOns = Object.entries(manifest.peerDependencies ?? {})
+      .filter(([name]) => meta[name]?.optional)
+      .map(([name, version]) => shellWord(`${name}@${version}`))
+    return [
+      `This needs ${missing}, which the basic install of Spell leaves out.`,
+      "Add the rest of Spell to this project, then run the command again with `npx spell`:",
+      "",
+      `  npm install spell@${CLI.PUBLISH_TAG} ${addOns.join(" ")}`
+    ].join("\n")
+  } catch {
+    return undefined
+  }
+}
+
+/** The package Node couldn't find, from its error;  `undefined` for any other error. */
+function missingPackageOf(error: unknown): string | undefined {
+  const { code, message } = (error ?? {}) as NodeJS.ErrnoException
+  if (code !== "ERR_MODULE_NOT_FOUND" && code !== "MODULE_NOT_FOUND") return undefined
+  const specifier = /(?:package|module) '([^']+)'/i.exec(String(message))?.[1]
+  return specifier?.match(/^(@[^/]+\/[^/]+|[^./][^/]*)/)?.[1]
+}
+
+/** `word`, quoted when a shell would otherwise read part of it. */
+function shellWord(word: string): string {
+  return /^[\w@./:=+-]+$/.test(word) ? word : `"${word}"`
 }
 
 /** How long `runCommand()` waits for stdout to drain before it exits anyway. */

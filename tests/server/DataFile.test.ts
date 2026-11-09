@@ -74,7 +74,7 @@ describe("textFor():  the text a save writes", () => {
     expect(text).toContain("// Owen:  why this list exists")
   })
 
-  test("a null anywhere (json5-writer throws on one:  DataFile works around it)", () => {
+  test("a null anywhere stays a null", () => {
     const text = DataFile.textFor(COMMENTED, { version: null, marks: { j1: null }, list: [null, { a: null }] })
     expect(DataFile.parse(text)).toEqual({ version: null, marks: { j1: null }, list: [null, { a: null }] })
     expect(text).toContain("// never 2")

@@ -24,6 +24,23 @@ setTimeout(() => {
 `
 
 describe("runCode()", () => {
+  test("a place's key is found in the environment:  `spell run` is a server side", async () => {
+    process.env.SPELL_TEST_PLACE_KEY = "from-the-environment"
+    try {
+      const code = `
+import { core } from "@spell/core"
+core.console.log("set:", core.RUNTIME.keyFrom("SPELL_TEST_PLACE_KEY"))
+core.console.log("not set:", core.RUNTIME.keyFrom("SPELL_TEST_NO_SUCH_KEY"))
+`
+      const { exitCode, output } = await CLI.runCode("run", "Keys", code, { capture: true })
+      expect(exitCode, output).toBe(CLI.EXIT.OK)
+      expect(output).toContain("set: from-the-environment")
+      expect(output).toContain("not set: undefined")
+    } finally {
+      delete process.env.SPELL_TEST_PLACE_KEY
+    }
+  }, 30_000)
+
   test("builds a .tsx and runs it:  it draws, a click handler runs, and <Show> follows the card it flipped", async () => {
     const code = solidSample() + CLICKS
     const { exitCode, output } = await CLI.runCode("run", "Cards", code, {

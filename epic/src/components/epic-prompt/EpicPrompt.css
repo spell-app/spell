@@ -19,7 +19,10 @@
   details {
     border-radius: 10px;
     border: 1px solid var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
-    background: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    background: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
   }
   .title {
     display: flex;

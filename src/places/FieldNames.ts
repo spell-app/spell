@@ -13,6 +13,9 @@ const WORD_BREAK = /[\s_-]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/
 /** Our name for a row's id. */
 const ID = "id"
 
+/** Spell's two times, as a program names a server's field to be one (epic `data` T57). */
+const TIMES = ["created", "modified"]
+
 /****************
  * ### `FieldNames`
  * One collection's field names:  ours (`hairColor`, what compiled Spell calls them) and the server's (`hair_color`).
@@ -56,6 +59,24 @@ export class FieldNames {
     return names
   }
 
+  /**
+   * Of `fields`, those a sheet has a column for under that very word, which no line of the program's named:
+   * what Spell may write there by itself, so it never adds a column, or writes one a program only reads (epic `data` T57).
+   */
+  columnsHeld(fields: readonly string[], named: Readonly<Record<string, string>> = {}): string[] {
+    return fields.filter((field) => this.theirs.has(field) && !(field in named))
+  }
+
+  /** Of `fields`, those every sheet read so far holds (`columnsHeld()`):  a place says one answer for all its sheets. */
+  static columnsHeldInEvery(
+    sheets: Iterable<readonly [FieldNames, Readonly<Record<string, string>> | undefined]>,
+    fields: readonly string[]
+  ): string[] {
+    let held: string[] | undefined
+    for (const [names, named] of sheets) held = names.columnsHeld(held ?? fields, named)
+    return held ?? []
+  }
+
   /** Remember how each of `columns` is spelled, for writing:  a sheet's header, or a schema. */
   note(columns: Iterable<string>): void {
     for (const column of columns) if (column) this.ourName(column)
@@ -80,6 +101,11 @@ export class FieldNames {
     // a field that's its id is still itself too:  GitHub's user `login`, Wikipedia's `title`, which a page shows
     const theirId = this.theirs.get(ID)
     if (theirId !== undefined && theirId in row) read[ourNameFor(theirId)] ??= row[theirId]
+    // so is one that's named as one of Spell's two times:  `a post's created is its "created_at"`, and `its created at` still reads
+    for (const time of TIMES) {
+      const theirTime = this.theirs.get(time)
+      if (theirTime !== undefined && theirTime in row) read[ourNameFor(theirTime)] ??= row[theirTime]
+    }
     return read
   }
 

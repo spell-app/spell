@@ -27,12 +27,12 @@ const PAGE_2 = `${GITHUB}/repositories/130884470/contributors?page=2`
 
 /** GitHub's answers, cut down to a few fields of each, with the headers it sends. */
 const ANSWERS: Record<string, { body: unknown; headers?: Record<string, string> }> = {
-  [`${GITHUB}/repos/solidjs/solid/contributors`]: {
+  [`${GITHUB}/repos/solidjs/solid/contributors?per_page=100`]: {
     body: [{ login: "ryansolid", id: 15204625, contributions: 1907, type: "User" }],
     headers: { link: `<${PAGE_2}>; rel="next", <${GITHUB}/repositories/130884470/contributors?page=5>; rel="last"` }
   },
   [PAGE_2]: { body: [{ login: "thetarnav", id: 24491503, contributions: 50, type: "User" }] },
-  [`${GITHUB}/repos/solidjs/solid/issues`]: {
+  [`${GITHUB}/repos/solidjs/solid/issues?per_page=100`]: {
     body: [{ url: `${GITHUB}/repos/solidjs/solid/issues/2500`, number: 2500, title: "Hydration", state: "open" }]
   },
   [`${GITHUB}/users/ryansolid`]: {
@@ -77,7 +77,7 @@ describe("GitHub, through its Spell", () => {
       ["ryansolid", 1907],
       ["thetarnav", 50]
     ])
-    expect(asked.map(({ url }) => url)).toEqual([`${GITHUB}/repos/solidjs/solid/contributors`, PAGE_2])
+    expect(asked.map(({ url }) => url)).toEqual([`${GITHUB}/repos/solidjs/solid/contributors?per_page=100`, PAGE_2])
     expect(asked.every(({ key }) => key === null)).toBe(true)
   })
 
@@ -116,6 +116,11 @@ const OPEN_LIBRARY_ANSWERS: Record<string, unknown> = {
       { key: "/works/OL893461W", title: "Dune Messiah", author_key: ["OL79034A"], cover_i: 980253 }
     ]
   },
+  [`${OPEN_LIBRARY}/works/OL893414W/editions.json`]: {
+    links: { self: "/works/OL893414W/editions.json" },
+    size: 1,
+    entries: [{ key: "/books/OL1M", title: "Dune (Ace)", publish_date: "1990" }]
+  },
   [`${OPEN_LIBRARY}/authors/OL79034A.json`]: {
     key: "/authors/OL79034A",
     name: "Frank Herbert",
@@ -123,18 +128,24 @@ const OPEN_LIBRARY_ANSWERS: Record<string, unknown> = {
   }
 }
 
+/** Open Library's answers, noting each address asked. */
+function answerAsOpenLibrary(): string[] {
+  const asked: string[] = []
+  vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+    const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+    asked.push(url)
+    const answer = OPEN_LIBRARY_ANSWERS[url]
+    return answer ? Response.json(answer) : new Response("Not Found", { status: 404 })
+  })
+  return asked
+}
+
 /** A line of our own beside the ingest's, as a page adds one:  whoever wrote a book first, by name. */
 const WRITER = ["a book:", "\t- to name its writer:", "\t\treturn the name of the first item of its authors"].join("\n")
 
 describe("Open Library, through its Spell", () => {
   test("a search for a book:  its cover's address on the covers server, and its first author, read from their record", async () => {
-    const asked: string[] = []
-    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
-      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
-      asked.push(url)
-      const answer = OPEN_LIBRARY_ANSWERS[url]
-      return answer ? Response.json(answer) : new Response("Not Found", { status: 404 })
-    })
+    const asked = answerAsOpenLibrary()
     core.resetRuntime()
     const { Book } = runSpellFiles([
       { path: "/OpenLibrary.api.spell", contents: readFileSync(OPEN_LIBRARY_FILE, "utf8") },
@@ -149,6 +160,24 @@ describe("Open Library, through its Spell", () => {
     expect(dune!.coverI).toBe("https://covers.openlibrary.org/b/id/11481354-M.jpg")
     expect(await dune!.nameItsWriter()).toBe("Frank Herbert")
     expect(asked).toEqual([`${OPEN_LIBRARY}/search.json?q=dune`, `${OPEN_LIBRARY}/authors/OL79034A.json`])
+  })
+
+  test("a book's editions, read from its own list when something reads them (T114)", async () => {
+    const asked = answerAsOpenLibrary()
+    core.resetRuntime()
+    const { Book, Edition } = runSpellFiles([
+      { path: "/OpenLibrary.api.spell", contents: readFileSync(OPEN_LIBRARY_FILE, "utf8") },
+      { path: "/Editions.spell", contents: "a book:\n\t- to list its printings:\n\t\treturn its editions\n" }
+    ])("Book, Edition") as Record<string, (new () => unknown) & { savedIn: { select?: unknown } }>
+    delete Book!.savedIn.select
+    delete Edition!.savedIn.select
+    const [dune] = (await core.savedThings(Book!, { search: { title: "dune" } })).items as Array<
+      Record<string, unknown> & { listItsPrintings(): Promise<{ items: Array<Record<string, unknown>> }> }
+    >
+    expect(asked).toEqual([`${OPEN_LIBRARY}/search.json?q=dune`])
+    const [edition] = (await dune!.listItsPrintings()).items
+    expect([edition!.id, edition!.title]).toEqual(["/books/OL1M", "Dune (Ace)"])
+    expect(asked.at(-1)).toBe(`${OPEN_LIBRARY}/works/OL893414W/editions.json`)
   })
 
   test("every book, with no search, won't compile:  it says how to search", () => {
@@ -250,14 +279,17 @@ function artworkAnswer(id: number) {
   }
 }
 
+/** Its search, as a program asks it:  a page of 500 at a time, by offset. */
+const SEARCH_ASKED = `${MET}/v1.1/search?q=sunflowers&limit=500&offset=0`
+
 /** The Met's answers, noting each address asked. */
 function answerAsTheMet(): string[] {
   const asked: string[] = []
   vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
     const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
     asked.push(url)
-    if (url === `${MET}/v1.1/search?q=sunflowers`) return Response.json({ total: 178, objectIDs: SUNFLOWER_IDS })
-    if (url === `${MET}/v1/objects`) return Response.json({ total: 4, objectIDs: [1, 2, 3, 4] })
+    if (url === SEARCH_ASKED) return Response.json({ total: 178, objectIDs: SUNFLOWER_IDS })
+    if (url === `${MET}/v1/objects?limit=500&offset=0`) return Response.json({ total: 4, objectIDs: [1, 2, 3, 4] })
     const id = /\/v1\/objects\/(\d+)$/.exec(url)?.[1]
     return id ? Response.json(artworkAnswer(Number(id))) : new Response("Not Found", { status: 404 })
   })
@@ -283,7 +315,7 @@ describe("The Met Museum, through its Spell", () => {
     >
     // a thing's id is text, whatever the server sends
     expect(found.map(({ id }) => id)).toEqual(SUNFLOWER_IDS.map(String))
-    expect(asked).toEqual([`${MET}/v1.1/search?q=sunflowers`])
+    expect(asked).toEqual([SEARCH_ASKED])
     // the first three drawn:  each read whole the first time something reads what the list left out
     for (const artwork of found.slice(0, 3)) void artwork.title
     await vi.waitFor(() => expect(found.slice(0, 3).every(({ title }) => title)).toBe(true))
@@ -293,7 +325,7 @@ describe("The Met Museum, through its Spell", () => {
       ["Artwork 436526", "Vincent van Gogh"]
     ])
     expect(asked).toEqual([
-      `${MET}/v1.1/search?q=sunflowers`,
+      SEARCH_ASKED,
       `${MET}/v1/objects/436524`,
       `${MET}/v1/objects/436525`,
       `${MET}/v1/objects/436526`
@@ -305,7 +337,24 @@ describe("The Met Museum, through its Spell", () => {
     const Artwork = metMuseum()
     const every = (await core.savedThings(Artwork)).items as Array<Record<string, unknown>>
     expect(every.map(({ id }) => id)).toEqual(["1", "2", "3", "4"])
-    expect(asked).toEqual([`${MET}/v1/objects`])
+    expect(asked).toEqual([`${MET}/v1/objects?limit=500&offset=0`])
+  })
+
+  test("its search reads past its first page, by offset:  a full page, then the rest (T122)", async () => {
+    const ids = Array.from({ length: 500 }, (_each, index) => index + 1)
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input as string}`)
+      return Response.json({ objectIDs: `${input as string}`.includes("offset=0") ? ids : [501, 502] })
+    })
+    const found = (await core.savedThings(metMuseum(), { search: { "*": "sunflowers" } })).items
+    expect(found).toHaveLength(502)
+    expect(asked).toEqual([SEARCH_ASKED, `${MET}/v1.1/search?q=sunflowers&limit=500&offset=500`])
+  })
+
+  test("a search that finds nothing answers no list at all, and that's no artworks (T122)", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ total: 0, objectIDs: null }))
+    expect((await core.savedThings(metMuseum(), { search: { "*": "zzqqx" } })).items).toEqual([])
   })
 
   test("its pace, from its docs:  80 requests a second, each waiting its turn", async () => {

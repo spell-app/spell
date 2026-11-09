@@ -207,9 +207,9 @@ Give the page at the top this import map instead, and open it from any static se
 {
   "imports": {
     "spell-ui/": "https://cdn.jsdelivr.net/npm/spell-ui@next/dist/",
-    "solid-js": "https://esm.sh/solid-js@2.0.0-rc.17",
-    "solid-js/": "https://esm.sh/solid-js@2.0.0-rc.17/",
-    "@solidjs/web": "https://esm.sh/@solidjs/web@2.0.0-rc.17?external=solid-js"
+    "solid-js": "https://esm.sh/solid-js@2.0.0-rc.21",
+    "solid-js/": "https://esm.sh/solid-js@2.0.0-rc.21/",
+    "@solidjs/web": "https://esm.sh/@solidjs/web@2.0.0-rc.21?external=solid-js"
   }
 }
 ```
@@ -221,7 +221,7 @@ Give the page at the top this import map instead, and open it from any static se
 **In a program with a bundler:**
 
 ```sh
-npm install spell-ui@next solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
+npm install spell-ui@next solid-js@2.0.0-rc.21 @solidjs/web@2.0.0-rc.21
 ```
 
 ```js
@@ -447,7 +447,7 @@ Spell UI assumes a current browser, with no polyfills:
   and the element takes another way (invoker commands, for one).
 
 And one more edge to plan around:  Solid 2 is a release candidate.
-Spell UI pins `solid-js` and `@solidjs/web` at 2.0.0-rc.17 exactly, as peers,
+Spell UI pins `solid-js` and `@solidjs/web` at 2.0.0-rc.21 exactly, as peers,
 so your app and Spell UI share the one copy, and your app runs that release candidate too.
 
 ## Working on it

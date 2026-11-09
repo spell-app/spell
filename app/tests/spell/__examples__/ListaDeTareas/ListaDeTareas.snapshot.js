@@ -134,7 +134,21 @@ export class TareaDelNavegador extends Tarea {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "almacén_del_navegador", collection: "tareas_del_navegador" }
+  static savedIn = {
+    place: "almacén_del_navegador",
+    collection: "tareas_del_navegador",
+    times: ["created", "modified"]
+  }
+
+  // vive en almacén del navegador
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 371, end: 400 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // vive en almacén del navegador
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 371, end: 400 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDelNavegador extends GuardiánDeTareas {
@@ -174,7 +188,21 @@ export class TareaDelServidor extends Tarea {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "archivos_de_tareas", collection: "tareas_del_servidor" }
+  static savedIn = {
+    place: "archivos_de_tareas",
+    collection: "tareas_del_servidor",
+    times: ["created", "modified"]
+  }
+
+  // vive en archivos de tareas
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 507, end: 533 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // vive en archivos de tareas
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 507, end: 533 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDelServidor extends GuardiánDeTareas {
@@ -217,7 +245,21 @@ export class TareaDeLaHoja extends Tarea {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "hoja_de_tareas", collection: "tareas_de_la_hoja" }
+  static savedIn = {
+    place: "hoja_de_tareas",
+    collection: "tareas_de_la_hoja",
+    times: ["created", "modified"]
+  }
+
+  // vive en hoja de tareas
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 697, end: 719 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // vive en hoja de tareas
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 697, end: 719 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDeLaHoja extends GuardiánDeTareas {
@@ -268,7 +310,21 @@ export class TareaDelCielo extends Tarea {
   get dueño() { return this.getProp("dueño") }
   set dueño(value) { this.setProp("dueño", value) }
 
-  static savedIn = { place: "cielo_de_tareas", collection: "tareas_del_cielo" }
+  static savedIn = {
+    place: "cielo_de_tareas",
+    collection: "tareas_del_cielo",
+    times: ["created", "modified"]
+  }
+
+  // vive en cielo de tareas
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 511, end: 534 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // vive en cielo de tareas
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 511, end: 534 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDelCielo extends GuardiánDeTareas {

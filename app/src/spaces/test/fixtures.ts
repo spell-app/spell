@@ -162,7 +162,7 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "counter",
   "counter-app",
   "fizzbuzz",
-  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40):  Task List names the Atmosphere too
+  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40)
   "kept-in-places",
   "lists-from-zero",
   "people",
@@ -170,6 +170,8 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   `${EXAMPLES_GROUP}/Solitaire`,
   // a list of things each drawn with a form of its own;  Task List was this one until its tasks moved into places (epic `language` P30)
   `${EXAMPLES_GROUP}/habit-tracker`,
+  // the tasks in all four kinds of place:  this browser's storage, a data folder, a CSV file, the Atmosphere (epic `data` P46)
+  `${EXAMPLES_GROUP}/TaskList`,
   "thing-references"
 ])
 

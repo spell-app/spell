@@ -6,6 +6,7 @@
 //     --samples authors=OL79034A,editions=OL32848840M --pictures "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"
 // `spell place update OpenLibrary.api.spell` looks again, and changes only this file and OpenLibrary.api.json5.
 // It has no list of every book:  a program searches it, `every book where its title includes ...`.
+// A book's editions are read from its own list of them, when its page shows them.
 // Each book's authors are their ids, each read from the author's own record when something reads it;
 // its cover is a picture on another server, covers.openlibrary.org, its address built from the book's cover id.
 
@@ -19,6 +20,7 @@ open library is a web server at "https://openlibrary.org":
 	- authors are found at "/authors/{name}.json"
 	- editions are found at "/books/{name}.json"
 	- a book's "cover i" is a picture at "https://covers.openlibrary.org/b/id/{id}-M.jpg"
+	- a book's editions live at "{id}/editions.json"
 
 a "book" is a thing:
 	- it lives in open library
@@ -38,6 +40,7 @@ a "book" is a thing:
 	- its "lending edition s" is text
 	- its "lending identifier s" is text
 	- its "public scan b" is yes or no
+	- its "editions" is a list of editions
 	- its "series key" is a list of text
 	- its "series name" is a list of text
 	- its "series position" is a list of text

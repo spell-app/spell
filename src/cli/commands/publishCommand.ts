@@ -23,7 +23,8 @@ import {
  * `spell publish [--dry-run] [--no-scratch] [--json] [--tag <tag>]`:  the packages built, packed and checked, then published to
  * npm (epic `repo-split` P19;  three packages since P20, One Repo, Q65).
  * - `spell`:  the ONE package (Q62), the kit's `src/` and every folder's (`dist/ui/...`, `dist/parser/...`), with
- *   every name the checkout has (`spell/ui/core`), its commands, and every folder's runtime dependency.
+ *   every name the checkout has (`spell/ui/core`), its commands, and what those commands need
+ *   (the rest are optional peers:  epic `epic-engine` P66).
  * - `spell-ui`:  Spell UI on its own, its Vite library build with the element code inside (Q63, `UIBundle`).
  * - `spell-epic`:  the epic plugin, its parts at its root, its code `spell`'s (Q64, `PluginPackage`).
  * - Which folders publish on their own:  by their package's name, `spell-ui` and `spell-epic` (`BUNDLED`, `PLUGIN`).
@@ -31,9 +32,8 @@ import {
  * - Each one:  declarations rebuilt (`spell-types`, where a program lists them), then staged and packed into the
  *   kit's `dist-packs/` (git-ignored), its file list summed up and checked.
  * - ONE version for all:  the kit's `package.json` `version`.
- * - Then the scratch install (`ScratchInstall`):  the packed files installed outside the checkout, a node import,
- *   a Vite page with a `<ui-button>`, `npx spell help`, `npx epic --help`.  `--no-scratch` skips it (it needs the
- *   network).
+ * - Then the scratch installs (`ScratchInstall`):  `spell` alone, then every package with its add-ons, outside the
+ *   checkout, each tried out.  `--no-scratch` skips them (they need the network).
  * - `--dry-run`:  stops there;  publishes nothing.
  *   Without it, and only when every check passed:  `npm publish <tgz> --tag <tag>` for each.
  *   - `--tag`:  the npm dist-tag, `next` when not given (`CLI.PUBLISH_TAG`;  Owen, 2026-10-29, epic `repo-split`

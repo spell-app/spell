@@ -95,7 +95,7 @@
       color-mix(in oklab, var(--ui-text-light) 55%, transparent)
     );
     --_ui-select-placeholder-style: var(--ui-select-placeholder-style, normal);
-    --_ui-select-picker-background: var(--ui-select-picker-background, var(--ui-surface));
+    --_ui-select-picker-background: var(--ui-select-picker-background, var(--ui-popup-background, var(--ui-surface)));
     --_ui-select-picker-color: var(--ui-select-picker-color, var(--ui-text-color));
     --_ui-select-picker-border-color: var(--ui-select-picker-border-color, var(--ui-border-color));
     --_ui-select-picker-radius: var(--ui-select-picker-radius, var(--ui-radius));

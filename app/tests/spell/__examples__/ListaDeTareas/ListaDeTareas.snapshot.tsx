@@ -152,7 +152,19 @@ export class TareaDelNavegador extends Tarea {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "almacén_del_navegador", collection: "tareas_del_navegador" }
+  static savedIn = {
+    place: "almacén_del_navegador",
+    collection: "tareas_del_navegador",
+    times: ["created", "modified"]
+  }
+
+  // vive en almacén del navegador
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 371, end: 400 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // vive en almacén del navegador
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 371, end: 400 } })
+  accessor modificado!: any /* spell: type unknown */
 }
 
 /**
@@ -162,7 +174,10 @@ export class TareaDelNavegador extends Tarea {
  * - What every view's element does, e.g. drawing its tarea del navegador, is `SpellElement`'s.
  */
 export class TareaDelNavegadorElement extends SpellElement<TareaDelNavegador> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-del-navegador", "tarea del navegador", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-del-navegador", "tarea del navegador", [
+    { name: "creado", kind: "json", description: "Its creado." },
+    { name: "modificado", kind: "json", description: "Its modificado." }
+  ])
 
   tirar() {
     return this.currentThing?.tirar()
@@ -207,7 +222,19 @@ export class TareaDelServidor extends Tarea {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "archivos_de_tareas", collection: "tareas_del_servidor" }
+  static savedIn = {
+    place: "archivos_de_tareas",
+    collection: "tareas_del_servidor",
+    times: ["created", "modified"]
+  }
+
+  // vive en archivos de tareas
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 507, end: 533 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // vive en archivos de tareas
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 507, end: 533 } })
+  accessor modificado!: any /* spell: type unknown */
 }
 
 /**
@@ -217,7 +244,10 @@ export class TareaDelServidor extends Tarea {
  * - What every view's element does, e.g. drawing its tarea del servidor, is `SpellElement`'s.
  */
 export class TareaDelServidorElement extends SpellElement<TareaDelServidor> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-del-servidor", "tarea del servidor", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-del-servidor", "tarea del servidor", [
+    { name: "creado", kind: "json", description: "Its creado." },
+    { name: "modificado", kind: "json", description: "Its modificado." }
+  ])
 
   tirar() {
     return this.currentThing?.tirar()
@@ -265,7 +295,19 @@ export class TareaDeLaHoja extends Tarea {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "hoja_de_tareas", collection: "tareas_de_la_hoja" }
+  static savedIn = {
+    place: "hoja_de_tareas",
+    collection: "tareas_de_la_hoja",
+    times: ["created", "modified"]
+  }
+
+  // vive en hoja de tareas
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 697, end: 719 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // vive en hoja de tareas
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 697, end: 719 } })
+  accessor modificado!: any /* spell: type unknown */
 }
 
 /**
@@ -275,7 +317,10 @@ export class TareaDeLaHoja extends Tarea {
  * - What every view's element does, e.g. drawing its tarea de la hoja, is `SpellElement`'s.
  */
 export class TareaDeLaHojaElement extends SpellElement<TareaDeLaHoja> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-de-la-hoja", "tarea de la hoja", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-de-la-hoja", "tarea de la hoja", [
+    { name: "creado", kind: "json", description: "Its creado." },
+    { name: "modificado", kind: "json", description: "Its modificado." }
+  ])
 
   tirar() {
     return this.currentThing?.tirar()
@@ -330,7 +375,19 @@ export class TareaDelCielo extends Tarea {
   @prop({ type: "text", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 664, end: 709 } })
   accessor dueño!: string
 
-  static savedIn = { place: "cielo_de_tareas", collection: "tareas_del_cielo" }
+  static savedIn = {
+    place: "cielo_de_tareas",
+    collection: "tareas_del_cielo",
+    times: ["created", "modified"]
+  }
+
+  // vive en cielo de tareas
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 511, end: 534 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // vive en cielo de tareas
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 511, end: 534 } })
+  accessor modificado!: any /* spell: type unknown */
 }
 
 /**
@@ -341,7 +398,9 @@ export class TareaDelCielo extends Tarea {
  */
 export class TareaDelCieloElement extends SpellElement<TareaDelCielo> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-tarea-del-cielo", "tarea del cielo", [
-    { name: "dueño", kind: "string", description: "Its dueño." }
+    { name: "dueño", kind: "string", description: "Its dueño." },
+    { name: "creado", kind: "json", description: "Its creado." },
+    { name: "modificado", kind: "json", description: "Its modificado." }
   ])
 
   tirar() {

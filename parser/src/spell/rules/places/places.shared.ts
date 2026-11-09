@@ -54,6 +54,8 @@ export const PLACE_KIND_ABILITIES: Readonly<
   "excel file": { isReadOnly: true },
   "google sheet": { isReadOnly: true, isAtomic: true },
   airtable: {},
+  // a group's private space, every member writing to it:  none of an account's warnings hold (epic `atmosphere` P11)
+  "atmosphere space": { saysWhatChanged: true },
   "atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },
   "personal atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },
   "database on this device": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false },

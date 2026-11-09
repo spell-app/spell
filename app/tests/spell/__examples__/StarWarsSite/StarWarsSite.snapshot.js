@@ -22,7 +22,21 @@ export class Review extends Thing {
   get words() { return this.getProp("words") }
   set words(value) { this.setProp("words", value) }
 
-  static savedIn = { place: "galaxy_reviews", collection: "reviews" }
+  static savedIn = {
+    place: "galaxy_reviews",
+    collection: "reviews",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in galaxy reviews
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in galaxy reviews
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**
@@ -221,7 +235,7 @@ export class ReviewDialog extends View {
 export class FilmsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see every film, in the order they came out\n- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order\n  - done when:  a switch flips the list between release and story order\n- [x] open a film's page from its row"
+  static stories = "<story \"S1\" done>see every film, in the order they came out</story>\n<story \"S2\">\n  As a fan, I want to sort the films by when they're set, so that I can watch them in story order\n  - done when:  a switch flips the list between release and story order\n</story>\n<story \"S3\" done>open a film's page from its row</story>"
 
   draw() {
     return [
@@ -242,7 +256,7 @@ export const filmsPage = new FilmsPage()
 export class FilmPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] read the film's opening crawl\n- [x] As a fan, I want to see who's in a film, so that I can find their other films\n  - done when:  its people are listed, each a link to their page\n- [x] see the planets, starships and vehicles it shows\n- [x] As a fan, I want to say what I thought of a film, so that I remember it\n  - done when:  \"Add a review\" asks for stars and words, and the film's page lists the reviews"
+  static stories = "<story \"S1\" done>read the film's opening crawl</story>\n<story \"S2\" done>\n  As a fan, I want to see who's in a film, so that I can find their other films\n  - done when:  its people are listed, each a link to their page\n</story>\n<story \"S3\" done>see the planets, starships and vehicles it shows</story>\n<story \"S4\" done>\n  As a fan, I want to say what I thought of a film, so that I remember it\n  - done when:  \"Add a review\" asks for stars and words, and the film's page lists the reviews\n</story>"
 
   /** The film the address names:  /films/:film */
   // - its "film" is a film
@@ -251,7 +265,7 @@ export class FilmPage extends Page {
   set film(value) { this.setProp("film", value) }
 
   /** What's been said of it, on this device */
-  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 2464, end: 2621 }, readsFrom: ["galaxy_reviews"] }) }
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 2621, end: 2778 }, readsFrom: ["galaxy_reviews"] }) }
   get reviews() { return core.waitedValue(this, "reviews", async () => {
     const title = (await core.answerOf(this, "film"))?.title
     return await core.savedThings(Review, { filter: { filmTitle: title } })
@@ -308,7 +322,7 @@ core.heading("The people")
 export class PeoplePage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [ ] find a person by name as I type\n- [x] see each person's home planet and species at a glance\n- [x] open a person in the side panel without leaving the list"
+  static stories = "<story \"S1\">find a person by name as I type</story>\n<story \"S2\" done>see each person's home planet and species at a glance</story>\n<story \"S3\" done>open a person in the side panel without leaving the list</story>"
 
   draw() {
     return [
@@ -336,7 +350,7 @@ export const peoplePage = new PeoplePage()
 export class PersonPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see a person's height, birth year and home planet\n- [x] As a fan, I want to see every film a person is in, so that I can follow their story\n  - done when:  their films are listed in release order, each a link"
+  static stories = "<story \"S1\" done>see a person's height, birth year and home planet</story>\n<story \"S2\" done>\n  As a fan, I want to see every film a person is in, so that I can follow their story\n  - done when:  their films are listed in release order, each a link\n</story>"
 
   /** The person the address names:  /people/:person */
   // - its "person" is a character
@@ -362,7 +376,7 @@ core.heading("The planets")
 export class PlanetsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see every planet, with its climate and terrain\n- [ ] sort the planets by how many people live there"
+  static stories = "<story \"S1\" done>see every planet, with its climate and terrain</story>\n<story \"S2\">sort the planets by how many people live there</story>"
 
   draw() {
     return [
@@ -383,7 +397,7 @@ export const planetsPage = new PlanetsPage()
 export class PlanetPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see who comes from a planet\n- [x] see the films a planet appears in"
+  static stories = "<story \"S1\" done>see who comes from a planet</story>\n<story \"S2\" done>see the films a planet appears in</story>"
 
   /** The planet the address names:  /planets/:planet */
   // - its "planet" is a planet
@@ -423,7 +437,7 @@ core.heading("The species")
 export class SpeciesListPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see every species, with its classification and language\n- [ ] filter the species by how long they live"
+  static stories = "<story \"S1\" done>see every species, with its classification and language</story>\n<story \"S2\">filter the species by how long they live</story>"
 
   draw() {
     return [
@@ -444,7 +458,7 @@ export const speciesListPage = new SpeciesListPage()
 export class SpeciesPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see the people of a species\n- [ ] see a species' home world"
+  static stories = "<story \"S1\" done>see the people of a species</story>\n<story \"S2\">see a species' home world</story>"
 
   /** The species the address names:  /species/:species */
   // - its "species" is a species
@@ -479,7 +493,7 @@ core.heading("The vehicles and starships")
 export class VehiclesPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see every vehicle, with its class and crew\n- [ ] sort the vehicles by speed"
+  static stories = "<story \"S1\" done>see every vehicle, with its class and crew</story>\n<story \"S2\">sort the vehicles by speed</story>"
 
   draw() {
     return [
@@ -499,7 +513,7 @@ export const vehiclesPage = new VehiclesPage()
 export class VehiclePage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see who has piloted a vehicle\n- [x] see the films it appears in"
+  static stories = "<story \"S1\" done>see who has piloted a vehicle</story>\n<story \"S2\" done>see the films it appears in</story>"
 
   /** The vehicle the address names:  /vehicles/:vehicle */
   // - its "vehicle" is a vehicle
@@ -537,7 +551,7 @@ export const vehiclePage = new VehiclePage()
 export class StarshipsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see every starship, with its class and hyperdrive rating\n- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one\n  - done when:  picking two starships shows their numbers in two columns"
+  static stories = "<story \"S1\" done>see every starship, with its class and hyperdrive rating</story>\n<story \"S2\">\n  As a pilot, I want to compare two starships side by side, so that I can pick the faster one\n  - done when:  picking two starships shows their numbers in two columns\n</story>"
 
   draw() {
     return [
@@ -557,7 +571,7 @@ export const starshipsPage = new StarshipsPage()
 export class StarshipPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see a starship's pilots\n- [x] see its length, crew and cost"
+  static stories = "<story \"S1\" done>see a starship's pilots</story>\n<story \"S2\" done>see its length, crew and cost</story>"
 
   /** The starship the address names:  /starships/:starship */
   // - its "starship" is a starship
@@ -599,7 +613,7 @@ core.heading("Every review, edited like a spreadsheet")
 export class ReviewsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "- [x] see every review written on this device, in one table\n- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again\n  - done when:  a cell edits as a spreadsheet's does, and Enter keeps it\n- [x] add or remove a review right in the table\n- [x] paste a block of reviews copied from a spreadsheet"
+  static stories = "<story \"S1\" done>see every review written on this device, in one table</story>\n<story \"S2\" done>\n  As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again\n  - done when:  a cell edits as a spreadsheet's does, and Enter keeps it\n</story>\n<story \"S3\" done>add or remove a review right in the table</story>\n<story \"S4\" done>paste a block of reviews copied from a spreadsheet</story>"
 
   static drawsWaiting = true
   draw() {

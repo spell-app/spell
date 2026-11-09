@@ -51,7 +51,8 @@ export type SiteScreenshotsWays = {
 /****************
  * ### `SiteScreenshots`
  * Pictures of a site's old pages, taken by a person walking the site (epic `mockup` P12):  what `spell site screenshots` saves.
- * - Each is a file of the project, `snapshots/<name>.jpg`, and the site's page is pointed at it, its line's `thumbnail`.
+ * - Each is a file of the project, `snapshots/<name>.jpg`, and the site's page is pointed at it, its line's `thumbnail`;
+ *   the address it was taken at becomes its line's `live`, what its card's new-tab icon opens (epic `mockup` P17).
  * - A page the site doesn't have yet is added, at the address the browser is on.
  * - Plain files in and out:  the window is `siteScreenshots()`'s.
  ****************/
@@ -104,15 +105,17 @@ export class SiteScreenshots {
   }
 
   /** SIDE EFFECT:  the plan's page is added if it's new, and pointed at its picture, already written. */
-  pointPageAt({ picture, pageName, newAt }: ScreenshotPlan): void {
+  pointPageAt({ picture, pageName, newAt, live }: ScreenshotPlan): void {
     if (!pageName) return
-    const text = newAt ? SiteEdits.withPageAdded(this.text, pageName, newAt) : this.text
-    writeFileSync(this.siteFile, SiteEdits.withPartChanged(text, pageName, { thumbnail: picture }))
+    const listOnly = SiteEdits.isRoutingOnly(this.siteFile)
+    const text = newAt ? SiteEdits.withPageAdded(this.text, pageName, newAt, { listOnly }) : this.text
+    writeFileSync(this.siteFile, SiteEdits.withPartChanged(text, pageName, { thumbnail: picture, live }))
   }
 
   /** Take the picture `page` shows, and do the plan:  what the bar then says.  The bar isn't in the picture. */
   async save(page: Page, asked: ScreenshotAsked): Promise<string> {
-    const plan = this.planFor(asked, page.url())
+    const address = page.url()
+    const plan = { ...this.planFor(asked, address), ...(SiteEdits.isLiveLink(address) && { live: address }) }
     const file = join(this.folder, plan.picture)
     mkdirSync(dirname(file), { recursive: true })
     await page.evaluate((id) => (document.getElementById(id)!.style.display = "none"), BAR_ID)
@@ -135,6 +138,8 @@ export type ScreenshotPlan = {
   pageName?: string
   /** It's a new page, at this address. */
   newAt?: string
+  /** The real address the picture was taken at:  its card's live link. */
+  live?: string
 }
 
 /** The picture's file for words:  `Rack Matrix` => `snapshots/rack-matrix.jpg`. */
