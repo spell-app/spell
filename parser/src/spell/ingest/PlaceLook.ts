@@ -1,16 +1,19 @@
 import { parseCsv } from "spell/places/csv"
-import { googleSheetCsvAddress } from "spell/places/places.types"
+import { googleSheetCsvAddress, isPlaceServerAddress } from "spell/places/places.types"
 import { Workbook } from "spell/places/Workbook"
 
 import {
   IngestStopped,
   type CollectionLook,
   type IngestAsk,
+  type IngestFiles,
   type PagingSeen,
   type PlaceLook,
-  type SearchSeen
+  type SearchSeen,
+  type ServerTakes
 } from "./ingest.types"
 import { listsFoundUnder } from "./ListsUnderLook"
+import { lookAtAirtable, lookAtAtmosphere, lookAtFolder, lookAtPlaceServer, lookAtRoom } from "./PlaceLookOthers"
 import { keptHeaders, PoliteReader, type ReadAnswer } from "./PoliteReader"
 
 /** How many collections it reads:  a source with more says so, and `--collections` names the ones wanted. */
@@ -55,12 +58,19 @@ const VERSION_HEADER = /^(?:x-)?api-version$|^[a-z]+-version$/i
 /** An address anyone can fetch. */
 export const IS_WEB_ADDRESS = /^(?:https?|file):/i
 
+/** A referee's address on the page server:  `/api/rooms/recipes`. */
+const ROOM_ADDRESS = /\/api\/rooms\//
+
 /** What each kind's look needs. */
-type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samples"> & {
+export type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samples"> & {
   /** Reads it. */
   reader: PoliteReader
   /** Looking again:  `collections`, and whatever else it now lists. */
   addListed?: boolean
+  /** The kind it's looking at, as a message says it. */
+  kind?: string
+  /** The names of what's in a folder on this disk:  see `IngestFiles.namesInFolder`. */
+  namesInFolder?: IngestFiles["namesInFolder"]
 }
 
 /** The kinds it knows how to look at, and how:  a new kind adds a look here. */
@@ -68,7 +78,13 @@ const LOOKS: Readonly<Record<string, (ask: LookAsk) => Promise<PlaceLook>>> = {
   "web server": lookAtWebServer,
   "graphql server": lookAtGraphServer,
   sheet: lookAtSheet,
-  "google sheet": ({ address, reader }) => lookAtSheet({ address: googleSheetCsvAddress(address), reader }, address)
+  "google sheet": ({ address, reader }) => lookAtSheet({ address: googleSheetCsvAddress(address), reader }, address),
+  room: lookAtRoom,
+  "data folder": lookAtFolder,
+  // always on a server side:  `core.place()` reaches one no other way
+  file: lookAtPlaceServer,
+  airtable: lookAtAirtable,
+  "atmosphere account": lookAtAtmosphere
 }
 
 /** The kinds it can look at. */
@@ -85,7 +101,7 @@ export function lookAtPlace(kind: string, ask: LookAsk): Promise<PlaceLook> {
       `can't look at a ${kind} yet:  only ${KINDS_IT_CAN_LOOK_AT.join(", ")};  write its lines by hand, from the "place" guide's words`
     )
   }
-  return look(ask)
+  return look({ ...ask, kind })
 }
 
 /**
@@ -93,7 +109,7 @@ export function lookAtPlace(kind: string, ask: LookAsk): Promise<PlaceLook> {
  * - Each is plainly one kind's own address;  anything at a web address has to be looked at.
  */
 export function kindReadFrom(address: string): string | undefined {
-  if (/^wss?:/i.test(address)) return "room"
+  if (/^wss?:/i.test(address) || ROOM_ADDRESS.test(address)) return "room"
   if (/^did:/i.test(address)) return "atmosphere account"
   if (/^app[A-Za-z0-9]{14}$|airtable\.com\//i.test(address)) return "airtable"
   if (/docs\.google\.com\/spreadsheets\//i.test(address)) return "google sheet"
@@ -108,6 +124,11 @@ export function kindReadFrom(address: string): string | undefined {
  */
 export async function kindFoundAt(address: string, reader: PoliteReader, tried: string[]): Promise<string | undefined> {
   if (!IS_WEB_ADDRESS.test(address)) return undefined
+  // a place server says what's behind it:  its `kind`, one only it can reach
+  if (isPlaceServerAddress(address)) {
+    tried.push("place server")
+    return kindAtPlaceServer(address, reader)
+  }
   tried.push("graphql server", "sheet", "web server")
   try {
     const saysGraph = /graphql|gql/i.test(address)
@@ -149,6 +170,21 @@ export async function answersUnder(
   }
 }
 
+/**
+ * What a place server says is behind it (`capabilities.kind`), when it's one this can look at:  `undefined` for no answer.
+ * - NEVER throws.
+ */
+async function kindAtPlaceServer(address: string, reader: PoliteReader): Promise<string | undefined> {
+  try {
+    reader.readPlaceServer()
+    const answer = await reader.read(address)
+    const { capabilities } = (jsonOf(answer.text) as { capabilities?: { kind?: string } } | undefined) ?? {}
+    return capabilities?.kind && capabilities.kind in LOOKS ? capabilities.kind : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /** Does it answer a GraphQL query? */
 async function answersGraphQL(address: string, reader: PoliteReader): Promise<boolean> {
   const answer = await reader.read(address, { query: "{ __typename }" })
@@ -166,8 +202,16 @@ function isJSON(text: string): boolean {
   return jsonOf(text) !== undefined
 }
 
+/**
+ * Of a place's `held` collections, those `asked` names, as given;  all of them when none's asked for.
+ * - No more than a look reads:  a source with more says so, in `--collections`.
+ */
+export function keptNames(held: readonly string[], asked: readonly string[] | undefined): string[] {
+  return (asked?.length ? [...asked] : [...held]).slice(0, MOST_COLLECTIONS)
+}
+
 /** The JSON in `text`:  `undefined` if it isn't. */
-function jsonOf(text: string): unknown {
+export function jsonOf(text: string): unknown {
   try {
     return JSON.parse(text) as unknown
   } catch {
@@ -259,10 +303,12 @@ async function lookAtWebServer({
   await foldSearchesIntoLists(place, read, notes, reader)
   // the lists under each thing, as a post's comments:  asked only where one collection's rows name another's
   const listsUnder = await listsFoundUnder(place, read, reader)
+  const serverTakes = await serverTakesOf(place, read, reader)
   return {
     address: place,
     collections: read,
     ...(listsUnder.length && { listsUnder }),
+    ...(serverTakes && { serverTakes }),
     // what its lists answered with too:  an address that's a page for people (Open Library's) says nothing of pages
     headers: { ...read[0]?.headers, ...keptHeaders(first.headers) },
     ...(found.text !== undefined && { docs: found.text, docsAt: found.at! }),
@@ -417,7 +463,7 @@ async function readFoundByName(
 }
 
 /** Refuse an answer that's no use:  - throws `IngestStopped`, saying what would help */
-function refuseAnswer(address: string, { status }: ReadAnswer): void {
+export function refuseAnswer(address: string, { status }: ReadAnswer): void {
   if (status === 401 || status === 403) {
     throw new IngestStopped(
       `${address} answered ${status}:  it wants a key, so name one, --key-secret NAME, read from the environment`
@@ -521,6 +567,165 @@ async function readCollection(
     }
   }
   return look
+}
+
+////////////////
+// ## What it takes when it's asked
+////////////////
+
+/** How many fields of a list it tries to filter by, and to sort by. */
+const MOST_FIELDS_TRIED = 3
+
+/** The longest value a filter is tried with:  a field holding a paragraph is no filter. */
+const LONGEST_FILTERED = 40
+
+/** What a server usually calls a sort. */
+const SORT_PARAMS = ["sort", "_sort", "order_by", "orderBy", "ordering"]
+
+/** What a server usually calls the fields it should give. */
+const FIELDS_PARAMS = ["fields", "_fields", "select", "response_fields"]
+
+/** What a server usually calls how many and where from, when its answers say nothing of paging. */
+const OFFSET_PARAMS = [
+  { limit: "limit", offset: "offset" },
+  { limit: "_limit", offset: "_start" },
+  { limit: "limit", offset: "skip" }
+]
+
+/**
+ * What the server does when it's asked, tried on its first plain list (epic `data` T162):  `undefined` if it does none of it.
+ * - Reads only, as every look is, and few:  a server that ignores these answers as if it hadn't been asked.
+ * - A list of a page or two's rows is enough to tell by.
+ * - NEVER throws, but `IngestStopped` past the reader's limits.
+ */
+async function serverTakesOf(
+  place: string,
+  read: readonly CollectionLook[],
+  reader: PoliteReader
+): Promise<ServerTakes | undefined> {
+  const list = read.find(
+    ({ at, rows, searchedOnly, listsGive, answersOne, isCut }) =>
+      rows.length >= 2 &&
+      !IS_FOUND_BY_NAME.test(at) &&
+      !at.includes("?") &&
+      !searchedOnly &&
+      !listsGive &&
+      !answersOne &&
+      !isCut
+  )
+  if (!list) return undefined
+  const url = `${place}${list.at}`
+  const askFor = async (query: string) => {
+    try {
+      const answer = await reader.read(`${url}?${query}`)
+      if (answer.status >= 400 || answer.isCut) return undefined
+      const body = jsonOf(answer.text)
+      return (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
+    } catch (error) {
+      if (error instanceof IngestStopped) throw error
+      return undefined
+    }
+  }
+  const takes: ServerTakes = {
+    ...(await filtersOf(list, askFor)),
+    ...(await sortsOf(list, askFor)),
+    ...(await fieldsNamedOf(list, askFor)),
+    ...(list.paging === "none" && (await pagesAskedOf(list, askFor)))
+  }
+  return Object.keys(takes).length ? takes : undefined
+}
+
+/** A list of rows, or `undefined`:  what asking a list something answers. */
+type AskFor = (query: string) => Promise<Array<Record<string, unknown>> | undefined>
+
+/** A value as a query says it:  a plain text or number, short enough to be a filter. */
+function isFilterValue(value: unknown): value is string | number {
+  return typeof value === "number" || (typeof value === "string" && !!value.trim() && value.length <= LONGEST_FILTERED)
+}
+
+/** The fields a filter or a sort is tried on:  plain values, not all the same, and no links. */
+function fieldsToTry(rows: ReadonlyArray<Record<string, unknown>>): string[] {
+  const names = [...new Set(rows.flatMap((row) => Object.keys(row)))]
+  return names
+    .filter((name) => {
+      if (name === "id" || name === "url") return false
+      const values = rows.map((row) => row[name])
+      return (
+        values.every(isFilterValue) && !values.every((value) => /^https?:/.test(`${value}`)) && new Set(values).size > 1
+      )
+    })
+    .slice(0, MOST_FIELDS_TRIED)
+}
+
+/** Which fields narrow a list to the rows holding a value:  `?cuisine=thai`. */
+async function filtersOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick<ServerTakes, "filters">> {
+  const filters: string[] = []
+  for (const name of fieldsToTry(rows)) {
+    const value = rows[0]![name]!
+    const found = await askFor(`${encodeURIComponent(name)}=${encodeURIComponent(`${value as string | number}`)}`)
+    if (
+      found?.length &&
+      found.length < rows.length &&
+      found.every((row) => `${row[name] as string}` === `${value as string}`)
+    ) {
+      filters.push(name)
+    }
+  }
+  return filters.length ? { filters } : {}
+}
+
+/** Which fields a list answers in order by, and what it calls a sort. */
+async function sortsOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick<ServerTakes, "sorts" | "sortedWith">> {
+  const inOrder = (list: ReadonlyArray<Record<string, unknown>>, name: string) =>
+    list.every((row, at) => !at || compareValues(list[at - 1]![name], row[name]) <= 0)
+  const unsorted = fieldsToTry(rows).filter((name) => !inOrder(rows, name))
+  const [first, ...more] = unsorted
+  if (first === undefined) return {}
+  for (const param of SORT_PARAMS) {
+    const found = await askFor(`${param}=${encodeURIComponent(first)}`)
+    if (!found || found.length < 2 || !inOrder(found, first)) continue
+    const sorts = [first]
+    for (const name of more) {
+      const next = await askFor(`${param}=${encodeURIComponent(name)}`)
+      if (next && next.length >= 2 && inOrder(next, name)) sorts.push(name)
+    }
+    return { sorts, ...(param !== "sort" && { sortedWith: param }) }
+  }
+  return {}
+}
+
+/** Which of two values comes first:  by number, or by words. */
+function compareValues(one: unknown, other: unknown): number {
+  return typeof one === "number" && typeof other === "number"
+    ? one - other
+    : `${one as string}`.localeCompare(`${other as string}`)
+}
+
+/** Which question names the fields it should give:  each row then holds only those. */
+async function fieldsNamedOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick<ServerTakes, "fieldsNamedIn">> {
+  const names = Object.keys(rows[0]!)
+  if (names.length <= 3) return {}
+  const asked = names.slice(0, 2)
+  for (const param of FIELDS_PARAMS) {
+    const found = await askFor(`${param}=${asked.map(encodeURIComponent).join(",")}`)
+    if (
+      found?.length &&
+      found.every((row) => Object.keys(row).length <= asked.length + 1 && asked.some((name) => name in row))
+    ) {
+      return { fieldsNamedIn: param }
+    }
+  }
+  return {}
+}
+
+/** What a list that says nothing of paging calls how many and where from:  the second row is what comes of asking for it. */
+async function pagesAskedOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick<ServerTakes, "pagesWith">> {
+  const second = JSON.stringify(rows[1])
+  for (const { limit, offset } of OFFSET_PARAMS) {
+    const found = await askFor(`${limit}=1&${offset}=1`)
+    if (found?.length === 1 && JSON.stringify(found[0]) === second) return { pagesWith: { limit, offset } }
+  }
+  return {}
 }
 
 /** Is this an id, as a list of ids holds one:  a number or a text? */
@@ -948,6 +1153,6 @@ async function lookAtWorkbook(address: string, reader: PoliteReader): Promise<Pl
 }
 
 /** `error`'s message. */
-function messageOf(error: unknown): string {
+export function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
