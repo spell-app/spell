@@ -29,10 +29,26 @@ export type PlaceDetailValue = {
   rowsIn?: string
   nextPageIn?: string
   nextPageInLink?: boolean
+  /** What a web server calls how many and where from:  see `NextPageByOffset`. */
+  pagesByOffset?: { limit?: string; offset: string }
+  /** What a web server calls how many and which page:  see `NextPageByNumber`. */
+  pagesByNumber?: { limit?: string; page: string; first?: number }
+  /** What it calls the cursor it's sent back:  see `NextPageIn`. */
+  nextPageSentAs?: string
   namesLike?: string
   numbersLike?: string
   listsGive?: string[]
   pageSize?: number
+  /** Which fields it filters by itself:  see `FiltersBy`. */
+  filters?: "every field" | string[]
+  /** Which fields it sorts by itself:  see `SortsBy`. */
+  sorts?: "every field" | string[]
+  /** What it calls a sort, when that isn't `sort`. */
+  sortedWith?: string
+  /** What it calls the fields it's asked for:  see `GivesFieldsNamedIn`. */
+  fieldsNamedIn?: string
+  /** It takes no writes:  see `IsReadOnly`. */
+  readOnly?: boolean
   searches?: { param: string; fields: string[]; at?: string }
   mostPerSecond?: number
   keptOnDevice?: boolean | number
@@ -124,6 +140,12 @@ export function textIn(text: P.Match | undefined): string {
 export function fieldPathOf(groups: { field: P.Match; inner?: P.Match; outer?: P.Match }): string {
   const { field, inner, outer } = groups
   return [field, outer, inner].flatMap((each) => (each ? [textIn(each)] : [])).join(".")
+}
+
+/** The fields a line names, as compiled code names them;  no fields named:  every field. */
+export function fieldsOrEvery(fields: P.Match | undefined): "every field" | string[] {
+  if (!fields) return "every field"
+  return (fields as P.Match & { items: P.Match[] }).items.map((item) => fieldNamed(textIn(item)))
 }
 
 /** A property's name as its row calls it, from its words:  what compiled code names it. */

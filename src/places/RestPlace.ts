@@ -49,6 +49,12 @@ const NEXT_LINK = /<([^>]+)>\s*;[^,]*\brel="?next"?/
 /** A cursor that's a whole address, as a `Link` header gives. */
 const IS_ADDRESS = /^(https?:)?\/\//
 
+/**
+ * A next page written as a path on the same server:  `/items?page=2`, `?page=2`.
+ * - Needs its `?`, as a cursor starting with `/` is no address:  base64's can.
+ */
+const IS_PATH_WITH_QUERY = /^\/[^?]*\?|^\?/
+
 /****************
  * ### `RestPlace`
  * A plain web server as a place:  a mapping of its paths and field names, and nothing else (epic `data` P4).
@@ -95,6 +101,10 @@ export class RestPlace extends WebPlace implements Place {
   private readonly pageSize: number
   /** It was told how many to ask for, so a server that pages by its own next link is asked for that many too. */
   private readonly asksForPageSize: boolean
+  /** A place that pages by offset counts pages, not rows, from this number:  `pageNumbers`. */
+  private readonly firstPageNumber: number | undefined
+  /** A place that pages by offset is never told how many to give:  `sendsNoCount`. */
+  private readonly sendsNoCount: boolean
   /** Each thing's version, as last read or written, by collection and id. */
   private readonly seenVersions = new Map<string, string>()
   /** Each named operation's address. */
@@ -116,12 +126,16 @@ export class RestPlace extends WebPlace implements Place {
     update = "PATCH",
     params,
     pageSize,
+    pageNumbers,
+    sendsNoCount = false,
     operations,
     namesLike,
     searches,
     ...rest
   }: RestPlaceProps) {
     super(rest)
+    this.firstPageNumber = pageNumbers?.first
+    this.sendsNoCount = sendsNoCount
     this.namesLike = namesLike
     this.searches = searches
     this.operations = operations ?? {}
@@ -185,7 +199,10 @@ export class RestPlace extends WebPlace implements Place {
     // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
     const asked = this.paramsFor(collection, query, handled)
     const data = page === "cursor" && at && IS_ADDRESS.test(at) ? {} : asked
-    if (page === "offset") Object.assign(data, { [this.params.limit]: size, [this.params.offset]: Number(at ?? 0) })
+    if (page === "offset") {
+      if (!this.sendsNoCount) data[this.params.limit] = size
+      data[this.params.offset] = Number(at ?? this.firstPageNumber ?? 0)
+    }
     if (page === "cursor") {
       // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
       if (query.page?.size !== undefined) data[this.params.limit] = query.page.size
@@ -215,9 +232,12 @@ export class RestPlace extends WebPlace implements Place {
         `RestPlace.list():  "${collection}" didn't answer with a list${rowsAt ? ` at "${rowsAt}"` : ""};  say where it is with \`rowsAt\``
       )
     }
-    const nextPage = this.nextPageOf({ page, at, size, count: rows.length, body, nextAt, response })
+    // told no count, it gives what it gives:  a read asking for fewer takes the first of them
+    const kept = this.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
+    const sizeIsKnown = this.asksForPageSize || query.page?.size !== undefined
+    const nextPage = this.nextPageOf({ page, at, size, sizeIsKnown, count: kept.length, body, nextAt, response })
     return {
-      rows: (rows as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
+      rows: (kept as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
       ...(nextPage !== undefined && { nextPage }),
       handled
     }
@@ -423,15 +443,31 @@ export class RestPlace extends WebPlace implements Place {
   /**
    * What to ask for next.
    * - By offset:  a full page means there may be more.
+   *   - Counting pages:  the next number.
+   *   - Told no count and not told its size:  only an empty page says that was the last, and it goes on by what it got.
    * - By cursor:  what the answer says at `nextAt`, else its `Link` header.
    */
-  private nextPageOf({ page, at, size, count, body, nextAt, response }: NextPageAsk): string | undefined {
-    if (page === "offset") return count === size ? String(Number(at ?? 0) + size) : undefined
+  private nextPageOf({ page, at, size, sizeIsKnown, count, body, nextAt, response }: NextPageAsk): string | undefined {
+    if (page === "offset") {
+      const isFull = this.sendsNoCount ? (sizeIsKnown ? count >= size : count > 0) : count === size
+      if (!isFull) return undefined
+      if (this.firstPageNumber !== undefined) return String(Number(at ?? this.firstPageNumber) + 1)
+      return String(Number(at ?? 0) + (this.sendsNoCount ? count : size))
+    }
     if (page !== "cursor") return undefined
     const named = valueAt(body, nextAt)
     if (nextAt !== undefined)
-      return named === null || named === undefined || named === "" ? undefined : `${named as string}`
-    return NEXT_LINK.exec(response.headers.get("Link") ?? "")?.[1]
+      return named === null || named === undefined || named === ""
+        ? undefined
+        : this.wholeAddressOf(`${named as string}`, response)
+    const link = NEXT_LINK.exec(response.headers.get("Link") ?? "")?.[1]
+    return link === undefined ? undefined : this.wholeAddressOf(link, response)
+  }
+
+  /** A next page written as a path on this server, as a whole address;  anything else as it is. */
+  private wholeAddressOf(next: string, response: Response): string {
+    const base = response.url || this.url
+    return IS_PATH_WITH_QUERY.test(next) && URL.canParse(next, base) ? new URL(next, base).href : next
   }
 
   /** `collection`'s mapping:  what it says, over what's said of every collection;  all defaults if neither says. */
@@ -522,6 +558,16 @@ export type RestPlaceProps = WebPlaceProps & {
    *   (`it gives up to 2000 at a time`).
    */
   pageSize?: number
+  /**
+   * On a place that pages by offset, it counts pages, not rows, from `first`:  `?page=3` (epic `data` I35).
+   * - `params.offset` names the page's question.
+   */
+  pageNumbers?: { first: number }
+  /**
+   * On a place that pages by offset, it's never told how many to give:  `?start=40` alone, its page size its own.
+   * - Without `pageSize`, a read goes on until a page comes back empty, one request more.
+   */
+  sendsNoCount?: boolean
   /** How the server spells a field's name it hasn't sent yet, for a write or a query:  `snake` for `hair_color`.  Left out:  ours. */
   namesLike?: NameStyle
   /**
@@ -653,6 +699,8 @@ type NextPageAsk = {
   at: string | undefined
   /** How many rows it asked for. */
   size: number
+  /** Was it told that size, rather than taking the default? */
+  sizeIsKnown: boolean
   /** How many it got. */
   count: number
   /** The answer's JSON. */
