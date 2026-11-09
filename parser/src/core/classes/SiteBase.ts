@@ -204,11 +204,7 @@ export class SiteBase extends App {
     if (this.currentAddressHere !== address) return
     const page = this.pageInstance(found.entry)
     if (!page) {
-      this.setState("showing", {
-        kind: "failed",
-        name: found.entry.name,
-        error: noPageMade(found.entry)
-      } satisfies Showing)
+      this.setState("showing", { kind: "waiting", entry: found.entry } satisfies Showing)
       return
     }
     try {
@@ -419,20 +415,48 @@ export class SiteBase extends App {
    */
   navPages(): SiteNavPage[] {
     const listed = (entries: SitePageEntry[] | undefined): SiteNavPage[] =>
-      (entries ?? [])
-        .filter((entry) => !entry.params?.length)
-        .map((entry) => {
-          const pages = listed(entry.pages)
-          const page: SiteNavPage = {
-            title: entry.title ?? entry.name,
-            href: entry.address,
-            id: entry.name,
-            ...(entry.tab && { tab: entry.tab }),
-            ...(entry.tags && { tags: entry.tags })
-          }
-          return pages.length ? { ...page, pages } : page
-        })
+      SiteBase.underGroups(entries ?? [], (group) => listed(group))
     return listed(this.siteClass.pages)
+  }
+
+  /**
+   * `entries` as navigation rows:  those under a `<group>` together, under a heading of its name;  the rest as themselves.
+   * - `listed` reads a run of entries that share a group, or none.
+   */
+  private static underGroups(
+    entries: SitePageEntry[],
+    listed: (entries: SitePageEntry[]) => SiteNavPage[]
+  ): SiteNavPage[] {
+    if (!entries.some((entry) => entry.group)) return SiteBase.navRows(entries, listed)
+    const rows: SiteNavPage[] = []
+    for (let at = 0; at < entries.length;) {
+      const { group } = entries[at]!
+      let end = at + 1
+      while (end < entries.length && entries[end]!.group === group) end++
+      const run = entries.slice(at, end)
+      const pages = SiteBase.navRows(run, listed)
+      if (group) rows.push({ title: group, id: `group:${group}`, band: "heading", pages })
+      else rows.push(...pages)
+      at = end
+    }
+    return rows
+  }
+
+  /** `entries` as navigation rows, each with its pages:  one with a parameter isn't listed. */
+  private static navRows(entries: SitePageEntry[], listed: (entries: SitePageEntry[]) => SiteNavPage[]): SiteNavPage[] {
+    return entries
+      .filter((entry) => !entry.params?.length)
+      .map((entry) => {
+        const pages = listed(entry.pages ?? [])
+        const page: SiteNavPage = {
+          title: entry.title ?? entry.name,
+          href: entry.address,
+          id: entry.name,
+          ...(entry.tab && { tab: entry.tab }),
+          ...(entry.tags && { tags: entry.tags })
+        }
+        return pages.length ? { ...page, pages } : page
+      })
   }
 
   /**
@@ -490,7 +514,18 @@ export class SiteBase extends App {
     // a page with nothing to draw yet (a new one, a mockup still to lay out) is an empty page, not a broken one
     if (showing.kind === "page") return showing.page.draw === Thing.prototype.draw ? null : core.drawThing(showing.page)
     if (showing.kind === "missing") return this.drawMissing(showing.address)
+    if (showing.kind === "waiting") return this.drawWaiting(showing.entry)
     return this.drawFailed(showing.name, showing.error)
+  }
+
+  /** A page the site lists that no file declares yet:  its title, and that it's still to make. */
+  private drawWaiting(entry: SitePageEntry): unknown {
+    return h(
+      "div",
+      { class: "spell-site-missing" },
+      h("h1", null, entry.title ?? entry.name),
+      h("p", null, core.message("site-page-waiting"))
+    )
   }
 
   /** The not found page:  the program's own, else a plain one;  while designing, one that offers to make the page. */
@@ -607,7 +642,15 @@ export class SiteBase extends App {
 ////////////////
 
 /** One page as `<ui-site-nav pages>` takes it (Spell UI's `SiteNavPage`:  the core never imports Spell UI). */
-type SiteNavPage = { title: string; href: string; id: string; tab?: string; tags?: string[]; pages?: SiteNavPage[] }
+type SiteNavPage = {
+  title: string
+  href?: string
+  id: string
+  tab?: string
+  tags?: string[]
+  band?: "heading"
+  pages?: SiteNavPage[]
+}
 
 /** A site's two columns:  its navigation, then the page. */
 const SITE_LAYOUT =
@@ -644,6 +687,7 @@ const NARROW_SITE_CSS = `
 type Showing =
   | { kind: "page"; page: Page; entry: SitePageEntry }
   | { kind: "missing"; address: string }
+  | { kind: "waiting"; entry: SitePageEntry }
   | { kind: "failed"; name: string; error: unknown }
 
 /** The dialog or sidebar open over the page, and the view it draws, if it has one. */
@@ -745,11 +789,6 @@ function firstPropertyOf(View: Function, thing: unknown): string | undefined {
     const Class = core.things.classNamed(schema.typeOf(name))
     return Class && thing instanceof Class
   })
-}
-
-/** The error for a page the site lists that the program never made. */
-function noPageMade(entry: SitePageEntry): Error {
-  return new TypeError(`SiteBase:  no ${entry.page} was made;  declare "${entry.name}" as a page`)
 }
 
 export type { SiteHost }

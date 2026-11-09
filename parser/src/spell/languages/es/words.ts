@@ -287,6 +287,7 @@ export const spanishWords: SP.LanguageWords = {
       pestana: "tab",
       etiquetas: "tags",
       miniatura: "thumbnail",
+      "en-vivo": "live",
       fila: "row",
       columna: "column",
       color: "color"
@@ -358,9 +359,12 @@ export const spanishWords: SP.LanguageWords = {
       sitePageTags: ", etiquetada {quoted tags}",
       sitePageState: ", {state}",
       sitePageThumbnail: ", miniatura {quoted thumbnail}",
+      sitePageLive: ", en vivo {quoted live}",
       siteCardPlace: ", en la fila {row} columna {column}",
       siteCardColor: ", de color {color}",
       siteOverlay: "tiene {a words} {words}",
+      siteOverlayOf: { dialog: "tiene un diálogo {words}", sidebar: "tiene un panel {words}" },
+      siteOverlayWords: "diálogo|dialogo|modal|panel|lateral",
       viewFlags: {
         draggable: "es arrastrable",
         droppable: "es soltable",

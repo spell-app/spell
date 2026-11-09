@@ -776,8 +776,11 @@ For a project that is a site, View › Site opens its own page, `/site/<project>
 *The Star Wars site, the example the site editor was built on.*
 
 - **Pages:**  a tree of the site's pages, dialogs and sidebars (drag a row to move it), a board of cards
-  (double-click opens the page in Edit, with Back to the site there), and the picked page's form:
-  its name, title, address, parameters and jobs.
+  (double-click opens the page's own file in Edit, making it first if there's none, with Back to the site there),
+  and the picked page's form:  its name, title, address, live link, parameters and stories.
+- A card's new-tab icon opens the real page it stands for, and only shows when its line has a `live=` link.
+- A site can be its routing alone, `Galaxy.site.spellml`:  titles and addresses, `<group>` lines heading the board's
+  sections, and each page a file of its own.
 - **Data:**  each place the site reads as a NERD, only its linking fields, on `<ui-diagram>`;
   click a box and it turns over to every field, and its sample rows show in `<ui-table editable>`.
 - Every change is one undo step in the site file;  renaming a page renames every `go to` naming it, in every file.

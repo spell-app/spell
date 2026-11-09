@@ -16,7 +16,10 @@
     --_epic-form-rule: var(--epic-rule, var(--ui-border-color, GrayText));
     --_epic-form-green: var(--ui-green, #00853a);
     --_epic-form-green-on: var(--ui-green-on, #fff);
-    --_epic-form-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-form-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
     --_epic-form-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-form-focus: var(--ui-focus-color, Highlight);
     display: block;

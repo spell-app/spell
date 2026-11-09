@@ -524,8 +524,12 @@ classesEs.addRule(MarkdownDescription, {
         ],
         // las historias de una página (épica `mockup` P6):  su `static stories`
         [
-          ["una card es una cosa:", "\t<stories>", "\t\t- [ ] repartir una carta", "\t</stories>"],
-          ["export class Card extends Thing {", '  static stories = "- [ ] repartir una carta"', "}"]
+          ["una card es una cosa:", "\t<stories>", '\t\t<historia "H1">repartir una carta</historia>', "\t</stories>"],
+          [
+            "export class Card extends Thing {",
+            '  static stories = "<historia \\"H1\\">repartir una carta</historia>"',
+            "}"
+          ]
         ],
         // not in an outline:  says where it goes
         [

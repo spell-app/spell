@@ -57,6 +57,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-linked` | a Spell account linked to Bluesky:  the JavaScript core's | `handle` |
 | `sign-in-not-linked`, `sign-in-taken-down`, `sign-in-linked-elsewhere` | why Bluesky didn't sign in:  JS core's | |
 | `site-no-such-page`, `site-create-page`, `site-create-it` | a site's not found page:  JS core's | |
+| `site-page-waiting` | a page a site lists that isn't made yet:  JS core's | |
 | `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 | `site-menu` | a narrow site's button that opens its navigation:  JS core's | |
 | `table-edit` | the undo step of an editable table's change:  JS core's | |
@@ -159,6 +160,7 @@ MESSAGES: dict[str, str] = {
     "page-next": "Next",
     "page-number": "Page {page}",
     "site-no-such-page": "No such page",
+    "site-page-waiting": "This page hasn't been made yet.",
     "site-create-page": "Would you like to create one?",
     "site-create-it": "Create it",
     "site-page-failed": "Sorry, this page couldn't be shown.",

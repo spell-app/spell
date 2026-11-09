@@ -466,7 +466,13 @@ export const FILTER_TEXTS = [
 ] as const
 
 /** Each chip click (`StateFilter.clickDoes()`) => its words' text key. */
-export const CHIP_CLICK_KEYS = { all: "showAll", also: "chipAlso", hide: "chipHide", next: "chipNext", stays: "chipStays" } as const
+export const CHIP_CLICK_KEYS = {
+  all: "showAll",
+  also: "chipAlso",
+  hide: "chipHide",
+  next: "chipNext",
+  stays: "chipStays"
+} as const
 
 /** One of `FILTER_STATES`. */
 export type FilterState = (typeof FILTER_STATES)[number]

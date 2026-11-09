@@ -189,9 +189,8 @@ export const PARSER_MESSAGES = {
   /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
   "personal-folder-a-name":
     '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
-  /** A site's line naming no page of the program (epic `mockup` P1):  `- it has a flim page at "/films"`. */
-  "site-part-not-a-page":
-    '"{part}" isn\'t one of this program\'s pages:  name a page it declares, e.g. a "film page" is a page',
+  /** A page's stories written any other way than `<story>` tags (epic `mockup` P17), e.g. the old `- [ ] words`. */
+  "stories-not-tags": "A page's stories are tags:  <story \"S1\">words</story>, one for each;  this isn't one:  {text}",
   /** A site's page whose address doesn't start with `/`. */
   "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
   /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */

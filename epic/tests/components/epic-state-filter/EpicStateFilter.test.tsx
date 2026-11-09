@@ -113,7 +113,9 @@ describe("<epic-state-filter>", () => {
     expect(heard).toHaveBeenLastCalledWith({ state: "attention", shown: ["attention", "open"], how: "click" })
     chip(host, "open").click()
     // the last one showing:  the next one instead
-    expect(chip(host, "open").title).toBe("2 open, still undecided:  show the next ones instead\n⌥-click:  show only these")
+    expect(chip(host, "open").title).toBe(
+      "2 open, still undecided:  show the next ones instead\n⌥-click:  show only these"
+    )
     expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["recent"], how: "click" })
   })
 
