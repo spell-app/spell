@@ -552,12 +552,12 @@ export class SpellxTwin {
   }
 
   /**
-   * Template `block` with each `<spell-stories>` note written as code spell's `<stories>` block, its twin (epic `mockup` P6):
-   * ONE line, a raw-text element holding the note's markdown, which `markdown_description` compiles to the
+   * Template `block` with each `<stories>` note written as code spell's `<stories>` block, its twin (epic `mockup` P6):
+   * ONE line, a raw-text element holding the note's `<story>` tags, which `markdown_description` compiles to the
    * template's `static stories`.
    * - `undefined` when it has none:  `block` as it is.
-   * - Its text:  the note's lines as written, less the indent its first line has, so a nested list stays nested;
-   *   a job on the head's own line, `<spell-stories>- [ ] see the films</>`, first.
+   * - Its text:  the note's lines as written, less the indent its first line has, so a story's own lines stay indented;
+   *   a story on the head's own line, `<stories><story "S1">see the films</story></>`, first.
    */
   private static withStoriesAsBlocks(block: P.BlockToken): P.BlockToken | undefined {
     const items = block.tokens
@@ -670,22 +670,37 @@ export class SpellxTwin {
         return this.lineAndBlock(
           this.expand(
             [
-              this.attribute("title") ? words.sitePageTitled : words.sitePage,
+              this.pageTitle ? words.sitePageTitled : words.sitePage,
               this.attribute("tab") ? words.sitePageTab : "",
               this.attribute("tags") ? words.sitePageTags : "",
               // the state is a word of the line, not a text:  `state="old"` is `, old`
               this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
               this.attribute("thumbnail") ? words.sitePageThumbnail : "",
+              this.attribute("live") ? words.sitePageLive : "",
               this.siteCardWords()
-            ].join(" ")
+            ].join(" "),
+            { title: this.pageTitle }
           )
         )
       case "dialog":
       case "sidebar":
-        return this.lineAndBlock(this.expand(`${words.siteOverlay} ${this.siteCardWords()}`))
+        return this.lineAndBlock(this.expand(`${this.overlayShape(tag.kind)} ${this.siteCardWords()}`))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
+  }
+
+  /** What a page's line calls it:  `title=`;  else, when its name can't be read as words as written, its name. */
+  private get pageTitle(): SP.SpellxText | undefined {
+    const { name } = this.tag
+    return this.attribute("title") ?? (name && this.isPunctuated(name) ? name : undefined)
+  }
+
+  /** The line for dialog or sidebar `kind`:  saying which it is, when its name doesn't (`System Notices`). */
+  private overlayShape(kind: "dialog" | "sidebar"): string {
+    const { siteOverlay, siteOverlayOf, siteOverlayWords } = this.words
+    const says = new RegExp(`(^|\\s)(${siteOverlayWords})(\\s|$)`, "iu").test(this.tag.name?.text ?? "")
+    return says ? siteOverlay : siteOverlayOf[kind]
   }
 
   /**
@@ -940,10 +955,20 @@ export class SpellxTwin {
       } else if (name === "name") {
         if (text?.quoted) tokens.push(text.quoted)
         else if (text) tokens.push(this.quote(text))
-      } else tokens.push(...(text?.tokens ?? []))
+      } else if (name === "words" && text && this.isPunctuated(text))
+        tokens.push(...this.synthetic(SP.plainPartName(text.text)))
+      else tokens.push(...(text?.tokens ?? []))
       spaceAfter(tokens)
     }
     return tokens
+  }
+
+  /**
+   * Does name `text`, a page's, a view's or one of a site's parts', hold what no type's name can, `&` or `?`:
+   * its words are then read without them.  An action's name keeps its own, `open (a text)`.
+   */
+  private isPunctuated(text: SP.SpellxText): boolean {
+    return TITLED_KINDS.has(this.tag.kind) && SP.plainPartName(text.text) !== text.text.trim()
   }
 
   /**
@@ -983,6 +1008,8 @@ export class SpellxTwin {
     const paging = own("paging")?.value?.text
     if (paging === words.pages) lines.push(words.inPages)
     else if (paging === words.none_) lines.push(words.allAtOnce)
+    const pageSize = own("page-size")?.value?.text.trim()
+    if (pageSize) lines.push(words.atATime.replaceAll("{size}", pageSize))
     const layout = own("as")?.value?.text
     if (layout) {
       const handedOn = tag.attributes.filter((attribute) => !FOR_OWN_ATTRIBUTES.has(attribute.name))
@@ -1162,6 +1189,9 @@ function childrenOf(token: P.Token): P.Token[] {
   return token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
 }
 
+/** What a name may be a title for:  what's written `<spell-page "Pinned Screens & Hardware">`. */
+const TITLED_KINDS: ReadonlySet<string> = new Set(["page", "view", "dialog", "sidebar"])
+
 /** A page's stories' tag in code spell, `<stories>`:  `STORIES_TAG` (the rules' own;  spellx doesn't import them). */
 const STORIES = "stories"
 
@@ -1169,4 +1199,4 @@ const STORIES = "stories"
 const NOT_PARAMS = new Set(["name", "description", "group"])
 
 /** `<for>`'s own attributes, by their English names:  any other goes on what's around its items. */
-const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "as"])
+const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "page-size", "as"])

@@ -2031,7 +2031,7 @@
 
   "spell": [
     "github is a web server at \"https://api.github.com\":",
-    "\t- its key is the secret \"GITHUB_TOKEN\", if it's set",
+    "\t- its optional key is the secret \"GITHUB_TOKEN\"",
     "\t- its next page is in its \"Link\" header",
     "\t- check it every 40 minutes",
     "\t- it writes names like \"repository_url\"",

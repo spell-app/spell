@@ -205,3 +205,30 @@ describe("in Spanish", () => {
     expect(compiled).toContain("core.savedThings(Receta)")
   })
 })
+
+describe("a project names an imported place on its own type's line (epic `data` T161)", () => {
+  const declarations = libraryDeclarations(LIBRARY)
+
+  it("its own type is saved there", () => {
+    const { errors, compiled } = importerOf(
+      declarations,
+      ["a note is a thing:", "\t- it is saved in the family cookbook", '\t- its "text" is text'].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(compiled).toContain('static savedIn = { place: "family_cookbook", collection: "notes"')
+  })
+
+  it("its top-level line says so too, and Spanish reads the same", () => {
+    const es = importerOf(
+      libraryDeclarations(LIBRARY_ES, "/Library.es.spell"),
+      ["una nota es una cosa:", "\t- vive en el recetario familiar"].join("\n"),
+      { path: "/Program.es.spell" }
+    )
+    expect(es.errors).toEqual([])
+    const en = importerOf(
+      declarations,
+      ["a note is a thing:", '\t- its "text" is text', "a note is saved in the family cookbook"].join("\n")
+    )
+    expect(en.errors).toEqual([])
+  })
+})

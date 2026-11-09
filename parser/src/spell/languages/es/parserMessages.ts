@@ -90,6 +90,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
+  "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",
   "rider-only-in-a-drawing":
     "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
   "in-one-go-not-atomic":
@@ -111,6 +112,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "atmosphere-reads-here":
     'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda un número decimal como texto, "12.50", que otras aplicaciones leen como texto',
   "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
+  "operation-named-create":
+    'Una acción de {thing} no puede llamarse "create":  es lo que se ejecuta al crear cada {thing}.  Llámala de otro modo, p. ej. "para añadir una {thing} está en ..."',
+  "page-size-a-whole-number": "Una página tiene un número entero de cosas, 1 o más",
+  "atmosphere-not-a-space": '"{address}" no es un espacio:  se escribe "at://did:plc:.../space/familia"',
   "atmosphere-not-a-corner":
     '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
   "atmosphere-not-a-collection":
@@ -119,8 +124,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
   "personal-folder-a-name":
     '"personal" hace una carpeta para cada persona, por un nombre:  escribe solo un nombre, p. ej. carpeta de datos personal en "recetas", no "{address}"',
-  "site-part-not-a-page":
-    '"{part}" no es una de las páginas de este programa:  nombra una página que declare, p. ej. una "página de película" es una página',
+  "stories-not-tags":
+    'Las historias de una página son etiquetas:  <historia "H1">palabras</historia>, una por cada una;  esto no lo es:  {text}',
   "site-address-not-a-path":
     'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
   "site-param-not-on-page":

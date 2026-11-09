@@ -127,7 +127,6 @@ describe("a project of pages alone", () => {
     const { project } = projectOf(FILES)
     const changed = project.update("/Other.spellml", OTHER.replace('"other page"', '"another page"'))
     expect(changed).toContain(project.getFile("/Site.spellml"))
-    expect(errorsIn(project.getFile("/Site.spellml")).join()).toContain("other page")
   })
 
   test("a page's own view can't take another page's name", () => {

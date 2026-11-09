@@ -404,6 +404,7 @@ def test_the_drawing_helpers(program: Core) -> None:
     assert program.joined("a", None, " ") == "a "
     assert isinstance(program.now(), datetime)
     assert program.date_as(datetime(2026, 11, 7, 17, 14, 42, tzinfo=UTC), "timestamp") == "2026-11-07T17:14:42.000Z"
+    assert program.date_as(morning, "date and time") == "Nov 7, 2026, 9:14 AM"
     assert program.date_as(morning, "nonsense") == "November 7, 2026"
     program.show_dates_as("short")
     assert program.date_shown(morning) == "11/7/26"

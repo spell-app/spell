@@ -86,8 +86,7 @@ export function spellPartsFor(
   const every = shown.map(([, collection]) => collection)
   const placeLines: SpellLine[] = []
   if (withKey && keySecret) {
-    const ifSet = keyIfSet ? ", if it's set" : ""
-    placeLines.push({ key: "key", text: `- its key is the secret "${keySecret}"${ifSet}` })
+    placeLines.push({ key: "key", text: `- its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
   }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"

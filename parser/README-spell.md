@@ -790,8 +790,23 @@ galaxy guide is a site at "owen@spell/galaxy":
 - `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
 - The tag form is `<spell-site>`, a tag per part inside it.
 - Every site lists a not found page and an error page.
-- A line naming a page the site doesn't list, a `:name` the page has no property for, or two pages at one address
-  is refused at its line.
+- A `:name` the page has no property for, or two pages at one address, is refused at its line.
+- A site can be its titles and addresses alone, `Galaxy.site.spellml`, each page a file of its own.
+  A page's name is then its title, `<page "My Inbox" address="/my-inbox"/>`, and `<group "Hardware"/>` heads the lines
+  after it:
+
+```html
+<spell-site "galaxy guide">
+	<group "Home"/>
+	<page "Home" address="/"/>
+	<sidebar "System Notices" address="/notices"/>
+	<group "My Stuff"/>
+	<page "My Inbox" address="/my-inbox" live="https://example.com/inbox"/>
+</spell-site>
+```
+
+- A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
+- `live=` is the real page it stands for:  its card in the site editor opens it.
 
 Every move names the page, never its address:
 
@@ -807,14 +822,20 @@ A page says what it must let people do before it's laid out, first in its own de
 
 ```html
 <spell-page "film page">
-	<spell-stories>
-		- [x] read the film's opening crawl
-		- [x] As a fan, I want to see who's in a film, so that I can find their other films
-			- done when:  its people are listed, each a link to their page
-	</>
+	<stories>
+		<story "S1" done>read the film's opening crawl</story>
+		<story "S2" done>
+			As a fan, I want to see who's in a film, so that I can find their other films
+
+
+			Done when its people are listed, each a link to their page
+		</story>
+	</stories>
 ```
 
-- Nothing draws the stories:  they're the page's description, kept for good;  code Spell writes `<stories>`.
+- Nothing draws the stories:  they're kept with the page for good;  code Spell writes the same block.
+- A story is its words, then two blank lines and its description, if it has one;  `done` ticks it off.
+- In Spanish:  `<encanto-historias>` and `<historia "H1" hecha>`.
 - The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spellml).
 - **Not yet:**  Python runs no site, and a page has no state
   (old, new, mocked, built).
@@ -1108,7 +1129,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | app | `start (an app)` |
 | view, viewable list | what a thing or list that draws itself adds |
 | text | `length`;  `characters`;  `character (n) of (a text)`;  `(a text) as upper case`, `as lower case`, `as title case` |
-| date | `year`, `day`, `hour`;  HyperTalk's ways to say it, `short date`, `long date`, `abbreviated date`, `short time`, `long time`, and `timestamp` (also `(a date) as a short date` ...) |
+| date | `year`, `day`, `hour`;  HyperTalk's ways to say it, `short date`, `long date`, `abbreviated date`, `short time`, `long time`, and `timestamp`;  `as a date and time` shows both, `Nov 7, 2026, 9:14 AM` (also `(a date) as a short date` ...) |
 
 </details>
 
@@ -1207,7 +1228,8 @@ recipe box is an app:
     but not its cell colours and fonts.
   - `an airtable at`, `an atmosphere account at`
   - `a personal atmosphere account`
-  - `a database on this device`, `an in memory database`
+  - `an atmosphere space at` (it compiles;  reading one says Spell can't reach those yet)
+  - `a database on this device`, or `is stored on this device`, and `is stored on this device, for each tab`;  `an in memory database`
   - `a data folder at` names a project data folder, three ways:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person
@@ -1236,7 +1258,7 @@ recipe box is an app:
   - A field holding another thing may be nothing, and the X of nothing is nothing:
     `the name of its homeworld`, with no homeworld, is nothing, not a throw.
 - What a real server is like, a line each under it, which the ingest writes when it finds it:
-  - a key it can go without:  `its key is the secret "GITHUB_TOKEN", if it's set`
+  - a key it can go without:  `its optional key is the secret "GITHUB_TOKEN"`
   - paging by a header:  `its next page is in its "Link" header`
   - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
   - no list, only a search:  `books are searched at "/search.json"`;  then `every book` won't compile
@@ -1253,6 +1275,10 @@ recipe box is an app:
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
 - A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
   `if that fails:` with lines under it draws them instead.
+  - In an action, `if that fails:` runs under the line above it:  `set found to every recipe`, then `if that fails:`.
+- How many a list draws at a time:  `show them 12 at a time`, or `page-size="12"` on a `<for>`;
+  a page holds that many, and scrolling draws that many more.
+- A name in quotes can hold a number:  `its "isbn 10" is text`, and `its isbn 10` reads it.
 - A field finds the server's own spelling by its words:  `its "cook name" is text`.
   - It reads `cook_name` or `cookName`.
   - Even `Cook Name`.

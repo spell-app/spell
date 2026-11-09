@@ -127,6 +127,8 @@ export const PARSER_MESSAGES = {
   /** A sort key that waits:  won't compile. */
   "sort-key-waits":
     "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",
+  /** `if that fails:` in an action with nothing above it. */
+  "rider-needs-a-line-above": "This goes under the line it's about, as a read of a place",
   /** A rider outside a drawing:  won't compile. */
   "rider-only-in-a-drawing":
     "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
@@ -159,6 +161,13 @@ export const PARSER_MESSAGES = {
     'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** `to create a recipe is at "..."` (epic `data` T56). */
+  "operation-named-create":
+    'A {thing}\'s action can\'t be called "create":  that\'s what runs as each {thing} is made.  Call it something else, e.g. "to add a {thing} is at ..."',
+  /** `show them 0 at a time`. */
+  "page-size-a-whole-number": "A page holds a whole number of things, 1 or more",
+  /** An atmosphere space's address that isn't one. */
+  "atmosphere-not-a-space": '"{address}" isn\'t a space:  it looks like "at://did:plc:.../space/family"',
   /** A personal atmosphere account's address that isn't the start of a collection's name. */
   "atmosphere-not-a-corner":
     '"{address}" isn\'t a corner of an account:  it reads like a domain written backwards, e.g. "com.example.cookbook"',
@@ -171,9 +180,8 @@ export const PARSER_MESSAGES = {
   /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
   "personal-folder-a-name":
     '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
-  /** A site's line naming no page of the program (epic `mockup` P1):  `- it has a flim page at "/films"`. */
-  "site-part-not-a-page":
-    '"{part}" isn\'t one of this program\'s pages:  name a page it declares, e.g. a "film page" is a page',
+  /** A page's stories written any other way than `<story>` tags (epic `mockup` P17), e.g. the old `- [ ] words`. */
+  "stories-not-tags": "A page's stories are tags:  <story \"S1\">words</story>, one for each;  this isn't one:  {text}",
   /** A site's page whose address doesn't start with `/`. */
   "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
   /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */

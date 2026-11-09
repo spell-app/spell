@@ -46,8 +46,12 @@ export class DevicePlace implements Place {
   /** Where the values are kept:  STATIC for the place's life. */
   readonly prefPlace: PrefPlace
 
-  /** Over `prefPlace`;  left out, the browser's own storage, the one `new PrefStore(name)` uses. */
-  constructor({ prefPlace = new PrefStore(DEFAULT_STORE).place, wholeRows = false }: DevicePlaceProps = {}) {
+  /** Over `prefPlace`;  left out, the browser's own storage, the one `new PrefStore(name)` uses, or this tab's. */
+  constructor({
+    forEachTab = false,
+    prefPlace = new PrefStore(DEFAULT_STORE, { place: forEachTab ? "session" : "local" }).place,
+    wholeRows = false
+  }: DevicePlaceProps = {}) {
     this.prefPlace = prefPlace
     this.wholeRows = wholeRows
   }
@@ -118,8 +122,10 @@ export class DevicePlace implements Place {
 
 /** Constructor props of a `DevicePlace`. */
 export type DevicePlaceProps = {
-  /** Where the values are kept. */
+  /** Where the values are kept:  `forEachTab` says which of the browser's own, when it's left out. */
   prefPlace?: PrefPlace
+  /** Kept for this tab only, gone when it closes:  `scratch is stored on this device, for each tab`. */
+  forEachTab?: boolean
   /**
    * Each key's value is a whole row, as JSON, for things kept on this device:  `family cookbook is this device`.
    * - Left out:  each row is one key and its `value`, a preference.

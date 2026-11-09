@@ -31,6 +31,9 @@ const WORDS_READ = new Map<string, boolean>()
 /** An account's name, as the protocol has it:  a DID. */
 const ACCOUNT_DID = /^did:(?:plc|web):[A-Za-z0-9._:%-]+$/
 
+/** An AT Protocol Space's address:  `at://<its owner's DID>/space/...`. */
+const ATMOSPHERE_SPACE = /^at:\/\/did:(?:plc|web):[^/\s]+\/space\/\S+$/
+
 /** The start of a collection's name:  a domain, backwards, of two parts or more. */
 const CORNER_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$/i
 
@@ -51,6 +54,10 @@ const CSV_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.csv$/iu
  * - The lines under it say the rest (`PlaceDetail`), and name its operations.
  * - Declares a type and its one instance, the variable `family_cookbook`, as `solitaire is an app` does.
  * - e.g. `family cookbook is an atmosphere account at "did:plc:abc123"`:  one account's records, anyone's to read (epic `data` P16).
+ * - e.g. `family cookbook is an atmosphere space at "at://did:plc:abc123/space/family"`:  a group's own private space,
+ *   every member writing to it (epic `data` Q32).
+ *   - Only the words for now:  it compiles, and reading one says Spell can't reach those yet, until epic `atmosphere` takes
+ *     Spaces out of trial.
  * - e.g. `family cookbook is an airtable at "appXXXXXXXXXXXXXX"`:  a base, through a server side that holds its key (epic `data` P19).
  * - A PROJECT DATA FOLDER, a data folder in spaces, served by the page server (epic `atmosphere` P1, `folderAddressFor()`):
  *   - `family cookbook is a data folder at "owen@spell/recipes"`:  a full address, that folder in that space
@@ -75,7 +82,7 @@ const CSV_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.csv$/iu
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
  */
 export class CreatePlace extends TypeDeclaration<
-  "type|aka?|kind?|superType?|personal?|address?|with_nested_statements?|body?",
+  "type|aka?|kind?|superType?|personal?|address?|each_tab?|with_nested_statements?|body?",
   {
     placeKind?: string
     /** A project data folder's address on the page server, as `folderAddressFor()` worked it out. */
@@ -175,6 +182,9 @@ export class CreatePlace extends TypeDeclaration<
     const language = SP.Language.of(match.scope)
     if (placeKind === "atmosphere account" && !ACCOUNT_DID.test(address)) {
       return SpellStatement.refuse(match, language.parserMessage("atmosphere-not-an-account", { address }))
+    }
+    if (placeKind === "atmosphere space" && !ATMOSPHERE_SPACE.test(address)) {
+      return SpellStatement.refuse(match, language.parserMessage("atmosphere-not-a-space", { address }))
     }
     if (placeKind === "personal atmosphere account" && match.groups.address && !CORNER_NAME.test(address)) {
       return SpellStatement.refuse(match, language.parserMessage("atmosphere-not-a-corner", { address }))

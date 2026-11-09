@@ -553,11 +553,11 @@ expressions.addRule(TheDate, {
 expressions.addRule(
   Wording.specialize({
     ruleName: "date_style",
-    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "timestamp"]
+    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "date_and_time", "timestamp"]
   }),
   {
     syntax:
-      "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(timestamp:timestamp))"
+      "((short:short date)|(long:long date)|(abbreviated:(abbreviated|abbrev|abbr) date)|(short_time:short time)|(long_time:long time)|(date_and_time:date and time)|(timestamp:timestamp))"
   }
 )
 expressions.addRule(AsADate, {
@@ -572,6 +572,7 @@ expressions.addRule(AsADate, {
         ["due as a short date", 'core.dateAs(due, "short")'],
         ["due as an abbreviated date", 'core.dateAs(due, "abbreviated")'],
         ["due as a long time", 'core.dateAs(due, "long time")'],
+        ["due as a date and time", 'core.dateAs(due, "date and time")'],
         ["due as a timestamp", 'core.dateAs(due, "timestamp")']
       ]
     }
