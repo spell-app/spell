@@ -265,10 +265,10 @@ export class FilmPage extends Page {
   set film(value) { this.setProp("film", value) }
 
   /** What's been said of it, on this device */
-  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 2621, end: 2778 }, readsFrom: ["galaxy_reviews"] }) }
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 2621, end: 2815 }, readsFrom: ["galaxy_reviews"] }) }
   get reviews() { return core.waitedValue(this, "reviews", async () => {
     const title = (await core.answerOf(this, "film"))?.title
-    return await core.savedThings(Review, { filter: { filmTitle: title } })
+    return await core.savedThings(Review, { filter: { filmTitle: title }, sort: [{ field: "created", descending: true }] })
   }) }
 
   static drawsWaiting = true
