@@ -26,12 +26,16 @@
 # The films
 
 <spell-page "films page">
-	<spell-stories>
-		- [x] see every film, in the order they came out
-		- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order
+	<stories>
+		<story "S1" done>see every film, in the order they came out</story>
+		<story "S2">
+			As a fan, I want to sort the films by when they're set, so that I can watch them in story order
+
+
 			- done when:  a switch flips the list between release and story order
-		- [x] open a film's page from its row
-	</>
+		</story>
+		<story "S3" done>open a film's page from its row</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "Films")
 		<for film in every film as="table" celled selectable loading="Asking the galaxy for its films">
@@ -44,14 +48,22 @@
 </>
 
 <spell-page "film page">
-	<spell-stories>
-		- [x] read the film's opening crawl
-		- [x] As a fan, I want to see who's in a film, so that I can find their other films
+	<stories>
+		<story "S1" done>read the film's opening crawl</story>
+		<story "S2" done>
+			As a fan, I want to see who's in a film, so that I can find their other films
+
+
 			- done when:  its people are listed, each a link to their page
-		- [x] see the planets, starships and vehicles it shows
-		- [x] As a fan, I want to say what I thought of a film, so that I remember it
+		</story>
+		<story "S3" done>see the planets, starships and vehicles it shows</story>
+		<story "S4" done>
+			As a fan, I want to say what I thought of a film, so that I remember it
+
+
 			- done when:  "Add a review" asks for stars and words, and the film's page lists the reviews
-	</>
+		</story>
+	</stories>
 	<property "film" type="film" description="The film the address names:  /films/:film"/>
 	<property "reviews" description="What's been said of it, on this device">
 		set title to its film's title
@@ -95,11 +107,11 @@
 # The people
 
 <spell-page "people page">
-	<spell-stories>
-		- [ ] find a person by name as I type
-		- [x] see each person's home planet and species at a glance
-		- [x] open a person in the side panel without leaving the list
-	</>
+	<stories>
+		<story "S1">find a person by name as I type</story>
+		<story "S2" done>see each person's home planet and species at a glance</story>
+		<story "S3" done>open a person in the side panel without leaving the list</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "People")
 		<for person in every character as="table" celled selectable loading="Asking the galaxy for its people">
@@ -112,11 +124,15 @@
 </>
 
 <spell-page "person page">
-	<spell-stories>
-		- [x] see a person's height, birth year and home planet
-		- [x] As a fan, I want to see every film a person is in, so that I can follow their story
+	<stories>
+		<story "S1" done>see a person's height, birth year and home planet</story>
+		<story "S2" done>
+			As a fan, I want to see every film a person is in, so that I can follow their story
+
+
 			- done when:  their films are listed in release order, each a link
-	</>
+		</story>
+	</stories>
 	<property "person" type="character" description="The person the address names:  /people/:person"/>
 	<draw>
 		draw (a new page top with title = its person's name)
@@ -153,10 +169,10 @@
 # The planets
 
 <spell-page "planets page">
-	<spell-stories>
-		- [x] see every planet, with its climate and terrain
-		- [ ] sort the planets by how many people live there
-	</>
+	<stories>
+		<story "S1" done>see every planet, with its climate and terrain</story>
+		<story "S2">sort the planets by how many people live there</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "Planets")
 		<for planet in every planet as="table" celled selectable loading="Asking the galaxy for its planets">
@@ -169,10 +185,10 @@
 </>
 
 <spell-page "planet page">
-	<spell-stories>
-		- [x] see who comes from a planet
-		- [x] see the films a planet appears in
-	</>
+	<stories>
+		<story "S1" done>see who comes from a planet</story>
+		<story "S2" done>see the films a planet appears in</story>
+	</stories>
 	<property "planet" type="planet" description="The planet the address names:  /planets/:planet"/>
 	<draw>
 		draw (a new page top with title = its planet's name)
@@ -192,10 +208,10 @@
 # The species
 
 <spell-page "species list page">
-	<spell-stories>
-		- [x] see every species, with its classification and language
-		- [ ] filter the species by how long they live
-	</>
+	<stories>
+		<story "S1" done>see every species, with its classification and language</story>
+		<story "S2">filter the species by how long they live</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "Species")
 		<for one in every species as="table" celled selectable loading="Asking the galaxy for its species">
@@ -208,10 +224,10 @@
 </>
 
 <spell-page "species page">
-	<spell-stories>
-		- [x] see the people of a species
-		- [ ] see a species' home world
-	</>
+	<stories>
+		<story "S1" done>see the people of a species</story>
+		<story "S2">see a species' home world</story>
+	</stories>
 	<property "species" type="species" description="The species the address names:  /species/:species"/>
 	<draw>
 		draw (a new page top with title = its species's name)
@@ -227,10 +243,10 @@
 # The vehicles and starships
 
 <spell-page "vehicles page">
-	<spell-stories>
-		- [x] see every vehicle, with its class and crew
-		- [ ] sort the vehicles by speed
-	</>
+	<stories>
+		<story "S1" done>see every vehicle, with its class and crew</story>
+		<story "S2">sort the vehicles by speed</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "Vehicles")
 		<for vehicle in every vehicle as="table" celled selectable loading="Asking the galaxy for its vehicles">
@@ -242,10 +258,10 @@
 </>
 
 <spell-page "vehicle page">
-	<spell-stories>
-		- [x] see who has piloted a vehicle
-		- [x] see the films it appears in
-	</>
+	<stories>
+		<story "S1" done>see who has piloted a vehicle</story>
+		<story "S2" done>see the films it appears in</story>
+	</stories>
 	<property "vehicle" type="vehicle" description="The vehicle the address names:  /vehicles/:vehicle"/>
 	<draw>
 		draw (a new page top with title = its vehicle's name)
@@ -262,11 +278,15 @@
 </>
 
 <spell-page "starships page">
-	<spell-stories>
-		- [x] see every starship, with its class and hyperdrive rating
-		- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one
+	<stories>
+		<story "S1" done>see every starship, with its class and hyperdrive rating</story>
+		<story "S2">
+			As a pilot, I want to compare two starships side by side, so that I can pick the faster one
+
+
 			- done when:  picking two starships shows their numbers in two columns
-	</>
+		</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "Starships")
 		<for starship in every starship as="table" celled selectable loading="Asking the galaxy for its starships">
@@ -278,10 +298,10 @@
 </>
 
 <spell-page "starship page">
-	<spell-stories>
-		- [x] see a starship's pilots
-		- [x] see its length, crew and cost
-	</>
+	<stories>
+		<story "S1" done>see a starship's pilots</story>
+		<story "S2" done>see its length, crew and cost</story>
+	</stories>
 	<property "starship" type="starship" description="The starship the address names:  /starships/:starship"/>
 	<draw>
 		draw (a new page top with title = its starship's name)
@@ -297,13 +317,17 @@
 # Every review, edited like a spreadsheet
 
 <spell-page "reviews page">
-	<spell-stories>
-		- [x] see every review written on this device, in one table
-		- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again
+	<stories>
+		<story "S1" done>see every review written on this device, in one table</story>
+		<story "S2" done>
+			As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again
+
+
 			- done when:  a cell edits as a spreadsheet's does, and Enter keeps it
-		- [x] add or remove a review right in the table
-		- [x] paste a block of reviews copied from a spreadsheet
-	</>
+		</story>
+		<story "S3" done>add or remove a review right in the table</story>
+		<story "S4" done>paste a block of reviews copied from a spreadsheet</story>
+	</stories>
 	<draw>
 		draw (a new page top with title = "Reviews")
 		<table editable celled rows={every review}/>

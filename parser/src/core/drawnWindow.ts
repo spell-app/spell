@@ -1,6 +1,7 @@
 /**
  * A long list draws what fits, and more as you scroll:  what every loop in a drawing stands on (epic `data` T76, T43).
  * - No program says so, or writes a Show more:  `for each ... draw`, `draw each card in the deck` and a read of a place all come here.
+ * - A program can say how many at a time:  `show them 12 at a time` (`atOnce`);  else `MOST_AT_ONCE`.
  * - Up to `MOST_AT_ONCE` items:  all of them, at once, exactly as a plain `<For>` draws them.
  *   So a list that fits in that is drawn as it always was:  no extra element, no waiting.
  * - Past that:  the first `MOST_AT_ONCE`, then a small empty element after them, which says when it comes near the view.
@@ -52,6 +53,8 @@ export type DrawnWindow<Item> = {
   key?: () => object | undefined
   /** A place's further pages. */
   more?: () => MorePages | undefined
+  /** How many it draws at a time, when it isn't `MOST_AT_ONCE`:  `show them 12 at a time`. */
+  atOnce?: number
 }
 
 /** A list whose next page hasn't been read. */
@@ -94,7 +97,13 @@ export function canDrawInWindows(): boolean {
  * - Kept by identity:  an item added, removed or moved changes only its own node.
  * - Call in an owner:  a component, or a drawing's memo.
  */
-export function drawnInWindow<Item>({ items, drawItem, key, more }: DrawnWindow<Item>): JSX.Element {
+export function drawnInWindow<Item>({
+  items,
+  drawItem,
+  key,
+  more,
+  atOnce = MOST_AT_ONCE
+}: DrawnWindow<Item>): JSX.Element {
   const each = (drawnItems: () => readonly Item[]) =>
     createComponent(
       For as never,
@@ -108,7 +117,7 @@ export function drawnInWindow<Item>({ items, drawItem, key, more }: DrawnWindow<
   if (!canDrawInWindows()) return each(items)
   // a cell, not a signal:  a signal's write waits for whatever else is pending on the page, and an action may be waiting all this while
   const countChanged = new Cell()
-  let drawnCount = MOST_AT_ONCE
+  let drawnCount = atOnce
   const count = () => {
     countChanged.read()
     return drawnCount
@@ -128,7 +137,7 @@ export function drawnInWindow<Item>({ items, drawItem, key, more }: DrawnWindow<
     REMEMBERED.set(list, remembered)
     if (!kept) return
     Object.assign(remembered, kept)
-    drawnCount = Math.max(kept.count, MOST_AT_ONCE)
+    drawnCount = Math.max(kept.count, atOnce)
     if (kept.scrollTop && !isGoingToTheTop()) goBackTo(remembered)
   }
   const shown = createMemo<readonly Item[]>(() => {
@@ -143,7 +152,7 @@ export function drawnInWindow<Item>({ items, drawItem, key, more }: DrawnWindow<
   const drawMore = () => {
     const all = items()
     if (all.length > count()) {
-      setCount(count() + MOST_AT_ONCE)
+      setCount(count() + atOnce)
       remembered.count = count()
     } else void morePages()?.readNextPage()
   }

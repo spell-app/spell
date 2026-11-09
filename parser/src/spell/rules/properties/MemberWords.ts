@@ -2,7 +2,6 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
-import { SpellType } from "spell/parser/spell/rules/types"
 
 /**
  * `member_words` rule:  1..N words naming a member, e.g. `short rank`, `short-rank`, `rank`.
@@ -16,6 +15,7 @@ import { SpellType } from "spell/parser/spell/rules/types"
  * - `raw` is its words as written, e.g. `short rank`.
  * - A member someone declared with a stop word in its name is read whole, longest first (epic `spanish` P14):
  *   `the side of play of the card`, after `its "side of play" is a number`.
+ *   - A number too, after its first word (epic `data` T113):  `its isbn 10`, after `its "isbn 10" is text`.
  *   - Any type's, as what's read comes after:  `declaredWithStopWords()`.
  * - Greedy:  a rule wanting FEWER, e.g. the longest run a type declares (`its short rank + 1`),
  *   re-parses with fewer tokens -- see `declaredPrefix()`.
@@ -35,7 +35,9 @@ export class MemberWords extends P.Pattern {
     let count = 0
     while (count < tokens.length && MemberWords.isMemberWord(tokens[count]!, this.pattern, count === 0)) count++
     if (!count) return undefined
-    if (tokens[count] instanceof P.WordToken) count = Math.max(count, MemberWords.declaredWithStopWords(scope, tokens))
+    if (tokens[count] instanceof P.WordToken || tokens[count] instanceof P.NumberToken) {
+      count = Math.max(count, MemberWords.declaredWithStopWords(scope, tokens))
+    }
     const words = tokens.slice(0, count)
     return new P.Match({
       rule: this,
@@ -52,14 +54,14 @@ export class MemberWords extends P.Pattern {
   }
 
   /**
-   * How many of `tokens` name a member some type in `scope` declares with a stop word in its name, the longest
-   * -- 0 for none, e.g. 3 for `side of play of the card`.
+   * How many of `tokens` name a member some type in `scope` declares with a stop word or a number in its name, the longest
+   * -- 0 for none, e.g. 3 for `side of play of the card`, 2 for `isbn 10 of the book`.
    * - Any type's:  `the X of Y` takes its words before what it reads is known.
    *   It then reads only a member Y's type declares (`property_expression`).
    */
   static declaredWithStopWords(scope: P.Scope, tokens: P.Token[]): number {
     const { memberStopWords } = SP.Language.active.words
-    const isStopWord = (word: string) => memberStopWords.has(word)
+    const isStopWord = (word: string) => memberStopWords.has(word) || ALL_DIGITS.test(word)
     const names: string[] = []
     for (let types = scope.types; types; types = types.parent) {
       for (const type of types.get()) {
@@ -67,7 +69,7 @@ export class MemberWords extends P.Pattern {
       }
     }
     if (!names.length) return 0
-    return longestNameIn(SpellType.lowerWords(tokens, tokens.length), names)
+    return longestNameIn(wordsAndNumbersIn(tokens), names)
   }
 
   /**
@@ -82,6 +84,19 @@ export class MemberWords extends P.Pattern {
     const { memberStopWords, memberLeadingWords } = SP.Language.active.words
     return !memberStopWords.has(word) || (first && memberLeadingWords.has(word))
   }
+}
+
+/** A whole number, as a member's name holds one. */
+const ALL_DIGITS = /^\d+$/
+
+/** The words of `tokens` up to the first that's neither a word nor a number, in lower case. */
+function wordsAndNumbersIn(tokens: P.Token[]): string[] {
+  const words: string[] = []
+  for (const token of tokens) {
+    if (!(token instanceof P.WordToken || token instanceof P.NumberToken)) break
+    words.push(`${token.value}`.toLowerCase())
+  }
+  return words
 }
 
 /** A member's words, from its name, e.g. `side_of_play` => `["side", "of", "play"]`. */

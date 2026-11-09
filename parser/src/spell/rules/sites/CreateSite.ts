@@ -1,11 +1,11 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
-import { CreateOneOfAKind } from "spell/parser/spell/rules/classes"
+import { CreateOneOfAKind, DefineGroup } from "spell/parser/spell/rules/classes"
 import { plainValueAST, textIn } from "spell/parser/spell/rules/places"
 import { SiteOverlay } from "./SiteOverlay"
 import { SitePage } from "./SitePage"
-import type { SiteOverlayEntry, SitePageEntry } from "./sites.shared"
+import { overlayViewNamed, type SiteOverlayEntry, type SitePageEntry } from "./sites.shared"
 
 /**
  * `create_site` rule:  a SITE, and its one instance (epic `mockup` P1).
@@ -15,7 +15,7 @@ import type { SiteOverlayEntry, SitePageEntry } from "./sites.shared"
  * - A site is made from spell's built-in template `site`, an app (`Site`, in the core);
  *   so it's one of a kind, as `solitaire is an app` is.
  * - Gathers what the lines under it say into its class, for whatever shows its pages:
- *   - `static pages`, nested as its lines nest (`site_page`)
+ *   - `static pages`, nested as its lines nest (`site_page`), each under the `<group>` above it, if any
  *   - `static dialogs` and `static sidebars` (`site_overlay`)
  *   - `static notFoundPage` and `static errorPage`, when it lists them (`site_overlay`, epic `mockup` P2)
  *   - `static livesAt`, when its line says where it lives:  an address, or `"cloud"`
@@ -71,19 +71,28 @@ export class CreateSite extends CreateOneOfAKind {
     const pagesUnder = (under: P.Match | undefined): SitePageEntry[] => {
       const pages: SitePageEntry[] = []
       const seen = new Set<P.Match>()
+      // the `<group>` the lines from here on are under:  only the site's own, as nothing nests in a group
+      let group: string | undefined
       const visit = (each: P.Match) => {
         if (seen.has(each)) return
         seen.add(each)
+        if (each.rule instanceof DefineGroup) {
+          group = DefineGroup.nameOf(each as never)
+          return
+        }
         if (each.rule instanceof SitePage) {
           const entry = (each.data as { entry?: SitePageEntry }).entry
           if (!entry) return
           const below = pagesUnder((each.rule as SitePage).getBody(each as never))
-          pages.push(below.length ? { ...entry, pages: below } : entry)
+          pages.push({ ...entry, ...(group && { group }), ...(below.length && { pages: below }) })
           return
         }
         if (each.rule instanceof SiteOverlay) {
-          const { kind, entry } = each.data as { kind?: string; entry?: SiteOverlayEntry }
-          if (!entry) return
+          const { kind, entry: read } = each.data as { kind?: string; entry?: SiteOverlayEntry }
+          if (!read) return
+          // its view may be in a file parsed after this one:  all of them are read by now
+          const view = read.view ?? overlayViewNamed(match.scope, read.name)?.name
+          const entry = view ? { ...read, view } : read
           if (kind === "notFound") notFoundPage = entry
           else if (kind === "error") errorPage = entry
           else (kind === "dialog" ? dialogs : sidebars).push(entry)

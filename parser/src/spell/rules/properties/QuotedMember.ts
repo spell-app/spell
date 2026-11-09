@@ -54,7 +54,9 @@ export class QuotedMember extends P.Rule {
     const isMemberWord = (word: string, index: number) => {
       const lower = word.toLowerCase()
       return (
-        QUOTED_MEMBER_WORD.test(word) && (index > 0 || !memberStopWords.has(lower) || memberLeadingWords.has(lower))
+        // a word after the first can be a number:  `"isbn 10"`, `"top 3 movies"`
+        (QUOTED_MEMBER_WORD.test(word) || (index > 0 && /^\d+$/.test(word))) &&
+        (index > 0 || !memberStopWords.has(lower) || memberLeadingWords.has(lower))
       )
     }
     return words[0] && words.every(isMemberWord) ? words : undefined

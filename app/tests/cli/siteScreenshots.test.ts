@@ -80,6 +80,8 @@ describe("what a Save does", () => {
     shots.pointPageAt({ picture: "snapshots/matrix.jpg", pageName: "matrix page", newAt: "/matrix" })
     expect(siteText()).toContain(`<spell-page "matrix page"/>`)
     expect(siteText()).toContain(`<page "matrix page" address="/matrix" thumbnail="snapshots/matrix.jpg"/>`)
+    shots.pointPageAt({ picture: "snapshots/matrix.jpg", pageName: "matrix page", live: "https://example.com/matrix" })
+    expect(siteText()).toContain(`live="https://example.com/matrix"/>`)
   })
 })
 

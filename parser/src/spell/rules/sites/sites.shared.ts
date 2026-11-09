@@ -24,6 +24,10 @@ export type SitePageEntry = {
   state?: string
   /** a thumbnail of it, if the line names one:  a file of the project, `snapshots/films.png` */
   thumbnail?: string
+  /** the real page it stands for, on the live site, if the line says:  `https://example.com/films` */
+  live?: string
+  /** the `<group>` it's under, at the site's top level:  `Hardware` */
+  group?: string
   /** which row of its section on the site editor's board its card is in, from 1, if the line says */
   row?: number
   /** which column of its section, from 1 */
@@ -98,9 +102,32 @@ export function siteOf(scope: P.Scope): P.TypeScope | undefined {
  * - Read as a type is named everywhere:  a name of several words dashed, `film-page`, then class-cased.
  */
 export function typeNamed(scope: P.Scope, words: string): P.TypeScope | undefined {
-  const name = SP.typeName(words.trim().split(/\s+/).join("-"))
-  const type = scope.getType(P.isValueType(name) ? name : P.classCase(name))
+  const type = scope.getType(classFor(words))
   return type instanceof P.TypeScope && !type.stub ? type : undefined
+}
+
+/**
+ * The class `words` name:  `film page` => `FilmPage`, whether or not anything declares it yet.
+ * - A site may list a page before any file declares it:  it waits under this name (epic `mockup` P17).
+ */
+export function classFor(words: string): string {
+  const name = SP.typeName(words.trim().split(/\s+/).join("-"))
+  return P.isValueType(name) ? name : P.classCase(name)
+}
+
+/**
+ * The view of a dialog or sidebar named `name`:  by its whole name, else without the word that says what it is
+ * (`System Notices sidebar` => the view `System Notices`).
+ */
+export function overlayViewNamed(scope: P.Scope, name: string): P.TypeScope | undefined {
+  const whole = typeNamed(scope, name)
+  if (whole?.isA("View")) return whole
+  const words = name.trim().split(/\s+/)
+  const shorter = overlayKindOf(scope, words.at(-1))
+    ? words.slice(0, -1)
+    : overlayKindOf(scope, words[0]) && words.slice(1)
+  const view = shorter && shorter.length ? typeNamed(scope, shorter.join(" ")) : undefined
+  return view?.isA("View") ? view : undefined
 }
 
 /**
