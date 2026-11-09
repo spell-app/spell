@@ -261,8 +261,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - THE ADMIN PAGE (epic `atmosphere` P25):  the built-in program `@spell/examples/OrgAdmin`, plain Spell, reading
     and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
     ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
-    - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `terms`,
+    - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `org_profiles` (the org itself, for its title and as a space to design), `terms`,
       `approved_apps`, `designers` (T47), `event_stages` (T50), `role_changes` (the log).
+    - A toolbar with who's signed in (`{the sign in menu}`, the core's), the sections down the side as vertical tabs, one at
+      a time, the one picked kept in the page's address;  each section a table with its add form on one row (epic `atmosphere` T56).
+      Its rows carry what people read beside what the place stores:  `roleName`, `holderName`, `managesName`, `personName`.
     - Its event stages (T50, J153):  the Board and the Admins add, change and remove the org's event stages there
       (`OrgEvents.setProgram()`);  a new one goes in before the last, and one an event is in, or another moves to,
       can't be removed.
@@ -313,6 +316,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     [PersonInbox.ts](server/node/places/PersonInbox.ts)):  `ana@rs/__inbox`, where Spell writes what people send her.
     - Its list is worked out (`SpaceMembers`):  Ana an editor, the org's Board and Admins viewers, who read it;
       the inbox page says so plainly.  Nobody else reads or writes it.
+    - Someone in the org by their Spell account (`owen@spell`, J163) has theirs at their id there, `owen@rs/__inbox`:
+      `PeopleStore.memberCalled()` says who that is;  their feed and thread list are read as `owen@spell` (I16).
     - SENDING is adding a message to her own inbox's `messages` (`INBOX_MESSAGES`), `{ text, recipients, thread? }`:
       Spell then writes a copy into each inbox it's to, the same id in each, as itself, and fills in hers
       (`from`, `thread`, `sent`).  Deleting hers leaves theirs.
@@ -464,6 +469,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `/editor`
   - It starts the editor once the page server listens, and stops it with the page server:
     [EditorServer.ts](server/node/routes/EditorServer.ts), vite's dev server, run in `app/`.
+  - The house-network test site the same way:  [LocalSiteServer.ts](server/node/routes/LocalSiteServer.ts),
+    the cloud and Caddy, from the main checkout's page server alone, on a Mac `spell space local setup` has set up
+    (epic `atmosphere` T58).
+    - Quiet anywhere else;  a failure is one line in the log, and never stops the page server.
+    - Its row in `spell server start all`:  the route module's `addServerReport`, so the kit names none of it.
+    - A test's page server never starts it (`VITEST`);  `SPELL_NO_LOCAL_SITE=1` turns it off.
 - PROJECT DATA FOLDERS ([SpaceFolders.ts](server/node/places/SpaceFolders.ts), epic `atmosphere` P1):
   where a program's rows live, on disk.
   - E.g. `family cookbook is a data folder at "owen@spell/recipes"` keeps its rows in `@spell/owen@/recipes/`.
@@ -678,6 +689,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     the same folders and sign-in, for people OUTSIDE this machine.
     - A plain web server of its own, never the page server:  `spell space cloud serve`, port 4949.
     - Behind a tunnel or proxy, which gives it its `https` address.
+      - It may have several, `--address https://spell.app --address https://spell.space` (`alsoAt`), the first its main
+        one:  a sign-in begun at one finishes at that one, and a browser's cookie is per host, so people sign in once at
+        each.
     - Who's asking is whoever's signed in, nobody else (`signedInPerson()`):  its pages carry no write token.
     - What it serves, and nothing else:
       - the sign-in, the project data folders, `/terms`, `/element/`
@@ -685,7 +699,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
         - someone who can't yet gets `cloudSignIn.html` at its address, whatever the name:
           a program's files are the org's, so it can't load to draw its own sign-in bar
+          - STAYING SIGNED IN (epic `atmosphere` I20):  the session cookie is `SameSite=Strict`, so a link from another
+            site brings no cookie and gets this page;  the page asks `GET /api/sign-in/me` (which does bring it) and,
+            signed in, goes to its own address once more.
+            Once only (`sessionStorage`):  someone who really has no access is told so, and it never loops.
         - `spell space org create` copies the Admin, Inbox, Feed and Chat programs there, each naming the org (`OrgSetup`)
+      - THE HOME PAGES (epic `atmosphere` T59;  [CloudHomes.ts](server/node/routes/CloudHomes.ts), `cloudHome.html`):
+        - `/`, the spaces home:  each org the person asking reads, their own space, and anything else public or whose
+          list names them;  nobody signed in, the public ones and Sign in (`/sign-in`)
+        - `/@rs`, an org's home, for whoever reads the org:  its programs and its other spaces;  anyone else gets the
+          sign-in page, the same whether the org is there or not
+        - Their lists come from `/api/cloud/home` and `/api/cloud/home/orgs/<org>`, only what the person asking may read
+          (`SpaceFolders.mayReadSpace()`);  only an org has a home yet, so a team's or a person's space has no link
       - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
     - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
       it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.

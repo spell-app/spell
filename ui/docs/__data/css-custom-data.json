@@ -828,6 +828,20 @@
       }
     },
     {
+      "name": "--ui-card-tint-lightness",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-card>`'s token.  Default:  `0.9`"
+      }
+    },
+    {
+      "name": "--ui-card-tint-chroma",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-card>`'s token.  Default:  `0.4`"
+      }
+    },
+    {
       "name": "--ui-card-link-raise",
       "description": {
         "kind": "markdown",
@@ -10296,6 +10310,27 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-tree>`'s token.  Default:  `light-dark(var(--ui-primary-text), var(--ui-primary-on))`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-open-duration",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `320ms`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-close-duration",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `140ms`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-ease",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `var(--ui-ease-out)`"
       }
     },
     {

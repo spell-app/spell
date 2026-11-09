@@ -29,6 +29,7 @@ describe("projectChoices()", () => {
       "@spell/test/counter/",
       "@spell/test/counter-app/",
       "@spell/test/fizzbuzz/",
+      "@spell/test/kept-in-places/",
       "@spell/test/lists-from-zero/",
       "@spell/test/live-room/",
       "@spell/test/people/",

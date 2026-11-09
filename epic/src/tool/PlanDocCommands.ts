@@ -6,6 +6,7 @@ import { SRV } from "spell/server"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 import { Markup } from "spell/epic/markup"
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
@@ -39,6 +40,7 @@ import type { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { ReviewBackfill } from "./ReviewBackfill"
 import { ReviewInbox } from "./ReviewInbox"
+import { StaleFacts } from "./StaleFacts"
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
@@ -50,7 +52,7 @@ import { TestCommands } from "./TestCommands"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
- * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`,
+ * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`, `stale`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
@@ -310,6 +312,13 @@ export class PlanDocCommands {
         const lines = await this.edit(file, (plan) => rest.map((id) => calmItem(plan, id, !flags.loud)))
         return this.print(lines.join("\n"))
       }
+      case "requested": {
+        if (!rest.length) need(undefined, "an issue id")
+        const lines = await this.edit(file, (plan) =>
+          rest.map((id) => `${id.toUpperCase()} ${plan.setRequested(id) ?? "requested already"}`)
+        )
+        return this.print(lines.join("\n"))
+      }
       case "failed": {
         // a manual test that failed, filed as an issue by the session (epic `epic-engine` I174);  `off` takes it off
         const test = need(rest[0], "a manual test's id")
@@ -337,11 +346,14 @@ export class PlanDocCommands {
         if (!flags.backfill) throw new PlanDocError(`commits what?  --backfill  (${USAGE_HINT})`)
         return this.backfillCommits(file, flags.merged)
       case "close":
+        return this.closeItems(file, rest, flags)
       case "reopen":
         return this.edit(file, (plan) => {
-          const title = plan.setItem(need(rest[0], "an item id"), command === "close" ? "done" : "open")
-          plan.log(`${rest[0].toUpperCase()} ${command === "close" ? "closed" : "reopened"}:  ${title}`)
+          const title = plan.setItem(need(rest[0], "an item id"), "open")
+          plan.log(`${rest[0].toUpperCase()} reopened:  ${title}`)
         })
+      case "stale":
+        return this.printStale(name, file, Boolean(flags.json))
       case "cancel":
         return this.edit(file, (plan) => {
           const title = plan.setItem(need(rest[0], "an item id"), "canceled")
@@ -474,8 +486,8 @@ export class PlanDocCommands {
 
   /**
    * `phase <name> <N> took [--dry-run]`:  phase `N`'s time worked out again from the transcripts, for a phase done
-   * before (its log's last `active` to its `done`);  written as `took` unless `dryRun`, and printed (`P38 took
-   * 58m`).
+   * before (its log's last `active` to its `done`);  written as `took`, with its `span` by the clock (epic
+   * `epic-engine` I127), unless `dryRun`, and printed (`P38 took 58m`).
    * - throws when it isn't done, or the log doesn't say when it was active
    */
   private async tookAgain(name: string, file: string, phase: string, dryRun: boolean): Promise<void> {
@@ -851,9 +863,14 @@ export class PlanDocCommands {
    *   - `inbox apply` writes these itself for picks, todos and new items (Q19)
    *   - `done --filed "<what>"`, the older spelling, means `noted` too:  what was filed is a record
    * - reading, summary:  HTML, as `updated` takes (plain text works as it is)
+   * - `promised`:  `/epic tidy`'s:  the item waits on finished work and the promised thing never came
+   *   (`PlanDoc.promiseUnkept()`):  its card starts `Promised, not delivered:`, and it's back on Owen's list
+   * - `--quiet`, on a noted card:  the item's change stamp left alone (`/epic tidy`'s doubtful items)
    * - NOT logged:  the mark it answers already is (`inbox apply`, `details`)
    */
   private async status(file: string, [id, state, text]: string[], flags: Flags): Promise<void> {
+    const quiet = Boolean(flags.quiet)
+    if (quiet && state !== "noted") throw new PlanDocError("--quiet goes with a noted card")
     need(id, "an item id")
     const filed = flags.filed
     if (filed === true) throw new PlanDocError(`--filed needs what was filed ("Chose B · Keep one file per template")`)
@@ -863,7 +880,7 @@ export class PlanDocCommands {
       title = await this.edit(file, (plan) => plan.addStatus(id, need(text, "the reading (html)")))
     else if (state === "noted" || (state === "done" && filed !== undefined)) {
       const what = state === "noted" ? need(text, "what was recorded (html)") : String(filed)
-      title = await this.edit(file, (plan) => plan.noteStatus(id, what))
+      title = await this.edit(file, (plan) => plan.noteStatus(id, what, { quiet }))
       said = "noted"
     } else if (state === "done") {
       const done = await this.edit(file, (plan) => plan.finishWork(id, text))
@@ -873,13 +890,96 @@ export class PlanDocCommands {
     } else if (state === "fixed") {
       title = await this.edit(file, (plan) => plan.fixedForReview(id, text))
       said = FIXED_WORDS
+    } else if (state === "promised") {
+      title = await this.edit(file, (plan) =>
+        plan.promiseUnkept(id, need(text, "what was promised and never came (html)"))
+      )
+      said = "promised, not delivered:  back on Owen's list"
     } else
       throw new PlanDocError(
-        `epic update <name>#${id} underway | done | fixed | noted, not '${state ?? ""}'  (${USAGE_HINT})`
+        `epic update <name>#${id} underway | done | fixed | noted | promised, not '${state ?? ""}'  (${USAGE_HINT})`
       )
     // a status card says Claude has the item's mark:  the page shows it taken (I190)
     this.inbox.setWorking(file, id, state === "underway", { took: true })
     this.print(`${id.toUpperCase()} ${said}:  ${title}`)
+  }
+
+  /**
+   * `close <name> <id>... [--why "<text>"]`, `close <name> --why-file <file>`:  each item done (epic `epic-engine` Q69).
+   * - no reason:  as ever, whatever the item
+   * - `--why`:  closed as OBSOLETE (`PlanDoc.closeObsolete()`):  the reason a Done card on it and in the log
+   *   - plain TEXT, a tag in it shown as typed
+   *   - each id on its own:  a refused one (`closeRefusal()`) is said on stderr, the others still close;  exit 1 if any was
+   * - `--why-file`:  a JSON5 file of id => reason, a reason per item, in ONE write of the page
+   */
+  private async closeItems(file: string, ids: string[], flags: Flags): Promise<number | undefined> {
+    const reasons = flags.whyFile === undefined ? undefined : PlanDocCommands.reasonsIn(flags.whyFile, ids, flags)
+    if (!reasons) need(ids[0], "an item id")
+    if (flags.why === undefined && !reasons) {
+      await this.edit(file, (plan) => {
+        for (const id of ids) plan.log(`${id.toUpperCase()} closed:  ${plan.setItem(id, "done")}`)
+      })
+      return undefined
+    }
+    const why = stringFlag(flags.why)?.trim()
+    if (!reasons && !why) throw new PlanDocError('--why needs the reason:  --why "P9 removed it (abc123)"')
+    const closing = reasons ?? new Map(ids.map((id) => [id, why!]))
+    const marked = PlanDocCommands.pendingMarks(file)
+    const said = await this.edit(file, (plan) =>
+      Array.from(closing, ([id, reason]) => {
+        const refused = plan.closeRefusal(id, { marked })
+        return refused ? { id, refused } : { id, title: plan.closeObsolete(id, reason, { marked }) }
+      })
+    )
+    for (const line of said)
+      if (line.refused) this.warn(`${line.id.toUpperCase()} not closed:  ${line.refused}`)
+      else this.print(`${line.id.toUpperCase()} closed:  ${line.title}`)
+    return said.some((line) => line.refused) ? 1 : undefined
+  }
+
+  /**
+   * `--why-file`'s JSON5:  id (`J3`, `seo#J3`, any case) => reason, in file order.
+   * - throws for ids given as well, `--why` as well, a file that won't read, or a reason that isn't text
+   */
+  private static reasonsIn(path: unknown, ids: string[], flags: Flags): Map<string, string> {
+    const file = need(stringFlag(path as Flags[string]), "--why-file <json5 of id => reason>")
+    if (ids.length || flags.why !== undefined)
+      throw new PlanDocError("--why-file names its own ids and reasons:  no ids, no --why beside it")
+    const read = DataFile.read<Record<string, unknown>>(file)
+    if (!read || typeof read !== "object") throw new PlanDocError(`--why-file:  can't read ${file}`)
+    return new Map(
+      Object.entries(read).map(([id, reason]) => {
+        if (typeof reason !== "string" || !reason.trim())
+          throw new PlanDocError(`--why-file:  ${id} needs its reason, as text`)
+        return [id.replace(/^.*#/, "").toLowerCase(), reason.trim()]
+      })
+    )
+  }
+
+  /** The item ids (lower case) holding a mark of Owen's nobody has taken yet, or taken and in hand. */
+  private static pendingMarks(file: string): Set<string> {
+    const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
+    return new Set([...Object.keys(inbox.marks), ...Object.keys(inbox.taken)].map((id) => id.toLowerCase()))
+  }
+
+  /**
+   * `stale <name> [--json]`:  the facts for judging which open items have gone stale (`StaleFacts`), decided by
+   * nobody here;  in the epic's own worktree, when it has one, else the main checkout.
+   */
+  private printStale(name: string, file: string, json: boolean): void {
+    const main = this.files.mainRoot()
+    const where = this.files.epicCheckout(name, main)
+    const checkout = where === PlanDocFiles.MAIN_CHECKOUT ? main : resolve(main, where)
+    const report = new StaleFacts({
+      plan: this.read(file),
+      epic: name,
+      checkout,
+      marked: PlanDocCommands.pendingMarks(file),
+      main,
+      file,
+      epics: new Set(this.files.epicNames())
+    }).report()
+    this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
   }
 
   /**
@@ -1130,8 +1230,9 @@ export class PlanDocCommands {
     const lines = [`${summary.title}`]
     for (const phase of summary.phases) {
       const mark = PHASE_MARKS[phase.status as keyof typeof PHASE_MARKS] ?? "[?]"
-      // done and timed:  what it took, against its estimate (epic `epic-engine` P41)
-      const time = phase.took ? `took ${phase.took}${phase.estimate ? `, ~${phase.estimate}` : ""}` : phase.estimate
+      // done and timed:  what it took, over how long by the clock, against its estimate (epic `epic-engine` P41, I127)
+      const took = phase.span ? `${phase.took} / ${phase.span}` : phase.took
+      const time = phase.took ? `took ${took}${phase.estimate ? `, ~${phase.estimate}` : ""}` : phase.estimate
       lines.push(`  ${mark} P${phase.number} · ${phase.name}${time ? `  (${time})` : ""}`)
     }
     if (summary.estimate) lines.push(`estimate:  ${summary.estimate}`)
@@ -1363,22 +1464,24 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    (labels, prose updates;  its plan changes stay), and
                                                    --done writes its Done field (a <ul> of what was built);
                                                    done also writes the time Claude took (took, from the
-                                                   transcripts:  epic epic-engine P41);
+                                                   transcripts:  epic epic-engine P41) and how long by the
+                                                   clock (span, from the log:  I127);
                                                    dropped (never built, and won't be:  struck through,
                                                    finished as done is) drops them too, and --why writes its
                                                    Dropped field in place of Done ("Moved to P38":  the P38
                                                    becomes a link to it;  epic epic-engine I228);
                                                    brings the doc forward in VS Code (it updates itself)
-  phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
+  phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts,
+                                                   and its span from the log
   phase <name> <N> planning [off]                  Claude is writing its plan:  a blue spinner on its page (off
                                                    by itself once --plan is written;  phase-body sets it too)
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
-  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm]
+  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
-                                                   wouldn't surprise you, yellow (open) rather than red
+                                                   wouldn't surprise you, grey (a call) or yellow (an issue) rather than red
   add <name> test "title" --step html --should html [--example <png> | "text"] [--if-not html]
                                                    a test your test run steps you through:  what to do (a
                                                    Step may hold <a class="epic-test-action" href> links,
@@ -1390,7 +1493,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    run's order (deferred ones last)
   test --all [--list] [--json]                     every epic with open tests, in your saga order;  the
                                                    first opened in test mode (?test=1&all=1)
-  calm <name> <id>... [--loud]                     calls / issues not urgent (yellow, open), as the page's
+  requested <name> <id>...                         issues filed from the person's own words:  light orange once
+                                                   Claude closes them, until they review them (--requested on add)
+  calm <name> <id>... [--loud]                     calls / issues not urgent (a call grey, an issue yellow), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
   failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"
                                                    on its line, a Noted card linking it, the test left open;
@@ -1413,7 +1518,14 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    or the set closed (done);  on an item, a phase or a standing set
   add <name> choices "title" [--multiple] [--note "..."]
                                                    a standing option set (s-<slug>), in the Choices section
-  close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
+  close <name> <id>... [--why "<text>"]            close items (done);  --why closes them as obsolete:  the reason (plain
+                                                   text) a Done card on each and in the log;  refused, the rest still
+                                                   closed:  questions, tests, urgent, fixed, waiting on his pick or his
+                                                   mark, asked for lately, promised and not delivered
+  close <name> --why-file <file>                   the same, a reason per item:  a JSON5 file of id => reason, one write
+  reopen <name> <id>                               open an item again
+  stale <name> [--json]                            the facts for judging which open calls, issues and todos have gone
+                                                   stale;  decides nothing (for /epic tidy)
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it
   commit <name> <sha> --phase N | --item <id> "sentence"
@@ -1511,6 +1623,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    Refused with no underway card
   status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange,
                                                    still open;  Approve closes it.  A Do this's done means this too
+  status <name> <id> promised "html"               /epic tidy:  it waits on finished work and what it promised never
+                                                   came:  a "Promised, not delivered:" card, back on your list
   status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
                                                    an answer, details or a summary written, a request called
                                                    off:  a calm "Claude • Noted" card saying what was done and

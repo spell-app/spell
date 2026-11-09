@@ -114,9 +114,13 @@ export class PersonInbox {
     if (this.unsent.length) this.queue.changed({ now: true })
   }
 
-  /** `bo@rs/__inbox`, the inbox of person `person` (`bo@rs`). */
-  static addressOf(person: string): string {
-    return `${person}/${INBOX_SPACE}`
+  /**
+   * `bo@rs/__inbox`, the inbox of person `person` (`bo@rs`) in org `org`, default their own.
+   * - A Spell account in an org (`owen@spell` in RS, J163) has theirs under their id there:  `owen@rs/__inbox`.
+   */
+  static addressOf(person: string, org?: string): string {
+    const [id, home] = person.split("@")
+    return `${id}@${org ?? home}/${INBOX_SPACE}`
   }
 
   /** Resolves once every copy has gone, or failed and waits to try again:  `true` when nothing's left. */
@@ -171,7 +175,8 @@ export class PersonInbox {
     const recipients = recipientsOf(fields.recipients)
     if (!recipients.length) refuse("A message is sent to someone:  name them, as bo@rs")
     const inOrg = await this.peopleInOrg()
-    const outside = recipients.filter((each) => !inOrg.includes(each))
+    const named = await Promise.all(recipients.map((each) => this.people.memberCalled(this.owner.org, each)))
+    const outside = recipients.filter((_each, index) => !inOrg.includes(named[index]!))
     if (outside.length) refuse(`${outside.join(", ")} ${outside.length > 1 ? "aren't" : "isn't"} in @${this.owner.org}`)
     if (fields.from !== undefined && fields.from !== "" && fields.from !== sender) {
       refuse(`A message is from whoever sends it:  ${sender}, not ${JSON.stringify(fields.from)}`)
@@ -253,7 +258,7 @@ export class PersonInbox {
     }
     fields.thread = textOf(row.thread) || id
     fields.sent = textOf(row.sent) || new Date().toISOString()
-    return { into: PersonInbox.addressOf(person), id, fields }
+    return { into: PersonInbox.addressOf(person, this.owner.org), id, fields }
   }
 
   /** Send every queued copy, oldest first, each kept until it's gone.  - throws an inbox's refusal for now */
@@ -274,7 +279,7 @@ export class PersonInbox {
     const change: PlaceChange = { kind: "insert", collection: INBOX_MESSAGES, id, fields }
     await inbox.apply([change])
     const person = into.slice(0, -`/${INBOX_SPACE}`.length)
-    if (fields.from !== person) this.onArrived?.({ person, id, fields })
+    if (into !== PersonInbox.addressOf(textOf(fields.from), this.owner.org)) this.onArrived?.({ person, id, fields })
   }
 
   /** Everyone in the inbox's org, by address. */

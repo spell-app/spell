@@ -293,9 +293,10 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
 - Add Details (`details --more`, P3 of `windows-and-review`): the item's text stays on top ("Original Reply"), the
   new text goes under it in a "More Details" card; a second Add Details replaces the card, the old one into the
   Original Discussion.
+- An issue filed from Owen's own words takes `--requested`: closed by Claude, it's light orange until he's reviewed it.
 - An item's colour (its state), from its status and review marks, rewritten by the tool on every edit: "Colours",
   "Item states", below.
-- A judgement call or issue is CALM by default (`--calm`: yellow, open), RED only when it would surprise Owen
+- A judgement call or issue is CALM by default (`--calm`: a call grey, an issue yellow), RED only when it would surprise Owen
   (2026-10-10: "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow",
   the principle of least surprise). Red when:
   - it goes against something he said
@@ -309,7 +310,7 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   `unqueue` write them):
   - reviewed: gone through with Owen, that day. Deferred: put off for now; still not reviewed. Queued, with
     its work: work a review decided on, not started yet; the next review offers it first.
-  - the label shows the strongest: "to do" (yellow: open, not started), else "deferred" (grey, its date on
+  - the label shows the strongest: "to do" (blue: queued, not started), else "deferred" (grey, its date on
     hover), else "reviewed 10-03" (green while the item is `recent`, then grey)
   - REVIEWED also counts: closed (`done`, `canceled`), `decided`, or linked (`href="#i4"`) from an answered
     question's details
@@ -323,11 +324,12 @@ element takes its colour from this table, never a colour that means something el
 
 | Colour | Means                                       | Examples                                                                                                                                                                                                            |
 | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| red    | needs you (Owen)                            | an open question's chip; an unreviewed judgement call or issue; a phase whose plan waits for your Accept, or with a choice open in it; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
-| yellow | open, still undecided                       | an open todo or test (a todo a review queued too); a reviewed issue or judgement call; "to do"; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
-| blue   | do it now, or Claude is working on it       | Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
+| red    | needs you (Owen)                            | an open question's chip; an unreviewed judgement call or issue, unless calm; a phase with a choice open in it; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
+| yellow | open, still undecided                       | an open todo; a test whose phase is done; a calm issue; a reviewed issue or judgement call; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
+| light orange | what you asked for is finished: your turn to see it | an issue filed from your own words (`requested`), closed by Claude, until you review it. DARK text |
+| blue   | do it now, or it's with Claude              | a Do this not started (outlined, `handed`); a todo a review queued and "to do" (dotted, `scheduled`); Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
 | green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
-| orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09); an issue or call Claude fixed, waiting for your review (I232) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
+| orange | your turn to read: changed since you looked, a plan waiting for your Accept, a manual test whose phase isn't done, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09); an issue or call Claude fixed, waiting for your review (I232) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | a person's voice (you, everyone alike): `--epic-voice-person`, `-text`, `-fill`, `-rule` | a person's reply cards (their mark, name, faint fill and rule); the note box; "recommended" (a thumbs-up, no word) |
 | terracotta | an agent's voice (Claude's, Codex's ...): `--epic-voice-agent`, `-text` | an agent's reply cards: their round mark, and their name (the card stays white); an agent's comment-thread messages (their light box) and its "thinking…" stub; a page note's Claude replies and its "answered" chip; a comment's quote while it waits for an agent (epic `epic-friend` P10, Q16: violet before) |
 | ivory  | the page's own warm ground (the brand's brown tint) | the answer card; a marked note (what you said, once marked); the toolbar; a comment thread's ground, where a person's words sit plain |
@@ -344,8 +346,8 @@ element takes its colour from this table, never a colour that means something el
 - Colour-blind readers tell red and green apart least: the chip's id, the icons and the words keep them readable.
 - A PHASE takes ONE of these, the first that holds (epic `epic-engine` I170; Owen, 2026-10-29: "The order, one chip
   per phase: red, orange, blue (working), dotted blue, green, grey"): its Phases chip and its status circle alike.
-  - red: its plan waits for your Accept, or a choice in it is open
-  - orange: changed since you looked (new updates, not Seen, under 3 days old)
+  - red: a choice in it is open
+  - orange: its plan waits for your Accept; or changed since you looked (new updates, not Seen, under 3 days old)
   - blue: under way, or Claude at work on it (counted in the blue badge)
   - DOTTED blue: scheduled, still to do
   - green: done in the last 3 days (`done-at`)
@@ -384,10 +386,10 @@ over ... leaning into outlines in the item chips". The chip's FILL says how far 
 
 While your own mark is live (dashed, or outlined once sent) the chip keeps its state's colour, and the Colour column
 below is the button's. Once Claude has it in hand, the outline takes the column's colour: a pick taken, a todo
-queued (green), work underway (blue).
+queued (a dotted blue chip), work with Claude (blue).
 
-So a dashed or outlined chip is ANSWERED: don't answer it again. A solid red (needs you) or orange (Claude's options,
-your pick) chip waits on you, and only those (the toolbar counts them).
+So a dashed or outlined chip is ANSWERED: don't answer it again. A solid red (needs you), orange (Claude's options,
+your pick) or light orange (what you asked for, finished) chip waits on you, and only those (the toolbar counts them).
 
 | Your answer                                        | Colour | Dashed: not sent | Outlined: sent, Claude has it, or still due                       | Solid: done                                                    |
 | -------------------------------------------------- | ------ | ---------------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -412,7 +414,7 @@ so the pick stays in sight.
 On an item's line, ONE group, in this order:
 
 1. Make Todo (list check), green:  a new todo, work to follow it up
-   - on an issue or a judgement call:  Do this (thumbs up), green:  fix it right there, no todo;  red until handled,
+   - on an issue or a judgement call:  Do this (thumbs up), green:  fix it right there, no todo;  blue outlined until handled,
      orange once fixed, for you to review (I232)
 2. Revisit (history), blue
 3. Approve (check), green
@@ -438,7 +440,7 @@ Todo:
 
 1. Do it in the next phase (paper plane), green:  `inbox apply` queues it into the first phase still to do
    (`queue <name>#<id> "P10 · <name>"`, a Noted card "Queued for P10 · ...";  no phase to do:  "the next phase");
-   its chip stays outlined green while it's queued
+   its chip is dotted blue while it's queued
 2. Revisit (history), blue:  "I'm adding a note for you"
 3. Drop it (x), grey:  `inbox apply` cancels it ("dropped by Owen in review":  struck through, grey)
 
@@ -455,12 +457,16 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
 | `progress`  | blue   | Claude is working on it: an Underway status card, or the working spinner (closed or not)     |
 | `old`       | grey   | canceled: no longer relevant (made moot, struck through)                                     |
 | `recent`    | green  | decided or done (decided, done), however long ago                                            |
-| `open`      | yellow | work a review queued (a Make Todo or plane mark), not started                                              |
+| `requested` | light orange | an issue filed from your own words (`requested`), closed done, not reviewed yet: your turn to see it |
+| `scheduled` | blue, dotted | work a review queued (a Make Todo or plane mark), agreed, not started |
 | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet: your turn to pick      |
 | `replied`   | orange | an issue or call Claude has fixed (`fixed`): your turn to review it; Approve closes it        |
 | `attention` | red    | an open question; an open judgement call or issue not reviewed, unless `calm` (not urgent)   |
+| `handed`    | blue, outlined | a judgement call or issue you pressed Do this on, Claude hasn't started |
+| `quiet`     | grey   | open, nothing to think about: a `calm` judgement call not reviewed, a limit |
 | `recent`    | green  | open, settled by a review: approved as it stands, or made a todo                           |
-| `open`      | yellow | anything else open: still undecided, not urgent (todos, tests; reviewed issues and judgement calls; a revisit or request for now Claude answered) |
+| `replied`   | orange | a manual test whose phase isn't done |
+| `open`      | yellow | anything else open: still undecided, not urgent (todos; calm issues; tests whose phase is done; reviewed issues and judgement calls; a revisit or request for now Claude answered) |
 
 - Green across the board for what's decided; grey only for what no longer matters (Owen, 2026-10-08). Neither age
   nor a `/bedtime` run colours a chip any more.
@@ -859,7 +865,7 @@ command prints the usage.
 | `updated <name>#<N> "<html>"` / `--file <path>` `[--summary "..."]`                                                                           | a change to phase N's plan: an `<epic-update>` block at the end of its description, **Update**: <summary> and its date; kept once done; a pen + count on N's title while it isn't done                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `phase <name>#<N> todo\|active\|done\|dropped [--done <html>] [--why <html>] [--no-open]` | set a phase's status; `done` removes its UPDATE markers, and `--done` writes its Done field; `dropped` (never built, and won't be: struck through, finished as `done` is) removes them too, and `--why` writes its Dropped field in place of Done, a phase it names linked; brings the doc forward in VS Code |
 | `update <name>#P<N> --estimate "1-2h"`                                                                                                        | change a phase's estimate (its title's badge); the Overview's total follows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `add <name>#Q\|J\|T\|I\|M\|D "<title>" [--details "<html>"] [--calm]`                                                                        | append an item, print its id; `#T` a todo, work still to do (`--limit`:  a limit to know about); `#M` a manual test (`#C` and `#V`, the letters before epic-engine P44, refused); a decision (`#D`) is a question born answered (`Q7`); `--calm` (last): a judgement call or issue that wouldn't surprise Owen (the default, "What phases and items say"), yellow (open) rather than red                                                                                                                                                                                                                                                                                                                                              |
+| `add <name>#Q\|J\|T\|I\|M\|D "<title>" [--details "<html>"] [--calm] [--requested]`                                                                        | append an item, print its id; `#T` a todo, work still to do (`--limit`:  a limit to know about); `#M` a manual test (`#C` and `#V`, the letters before epic-engine P44, refused); a decision (`#D`) is a question born answered (`Q7`); `--calm` (last): a judgement call or issue that wouldn't surprise Owen (the default, "What phases and items say"), yellow (open) rather than red                                                                                                                                                                                                                                                                                                                                              |
 | `calm <name>#<id> [<id>...] [--loud]`                                                                                                         | judgement calls / issues already written made not urgent (yellow, open), as a click on the id chip does; logged; `--loud` (last): urgent (red) again                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `change <name> [--for <item id>]`                                                                                                                | stamp the change marks written by hand (`<epic-change item>`:  id, time, answer;  every edit does too) and list them, new first;  `--for`:  the item of the marks that name none (P30) |
 | `close <name>#<id>` / `reopen <name>#<id>`                                                                                                    | close an item (`done`) / open it again                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |

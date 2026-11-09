@@ -4,7 +4,7 @@ import { defineConfig, type Plugin } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
 import environment from "spell/app/spaces/server/node/environment"
-import { TOP_REPO, appConfig, pageServerProxy } from "./vite.shared.ts"
+import { appConfig, pageServerProxy } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
 const RUNTIME_ENTRY = "spell-runtime"
@@ -29,8 +29,7 @@ export default defineConfig({
   ...APP_CONFIG,
   plugins: [...APP_CONFIG.plugins, repoSourceInDev(), runtimeCopyInDev()],
   server: {
-    // every repo's files, beside spell-app (`appConfig()`'s, which this `server` replaces)
-    fs: { allow: [TOP_REPO] },
+    ...APP_CONFIG.server,
     port: environment.vitePort,
     host: "0.0.0.0",
     // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's

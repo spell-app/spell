@@ -62,6 +62,23 @@ describe("<ui-tree>", () => {
     expect(onScreen(host)).toEqual(["a", "b", "c", "e"])
   })
 
+  it("draws a closed row's rows only in a side navigation:  shut, inert and hidden there", async () => {
+    const plain = await tree()
+    expect(row(plain, "c").shadowRoot!.querySelector(".rows")).toBeNull()
+
+    const nav = await tree(`appearance="nav"`)
+    const rows = row(nav, "c").shadowRoot!.querySelector<HTMLElement>(".rows")!
+    const folded = rows.querySelector<HTMLElement>(".folded")!
+    expect(rows.classList.contains("shut")).toBe(true)
+    expect(rows.hasAttribute("inert")).toBe(true)
+    expect(rows.getBoundingClientRect().height).toBe(0)
+    expect(getComputedStyle(folded).visibility).toBe("hidden")
+
+    const open = row(nav, "a").shadowRoot!.querySelector<HTMLElement>(".rows")!
+    expect(open.classList.contains("shut")).toBe(false)
+    expect(open.getBoundingClientRect().height).toBeGreaterThan(0)
+  })
+
   it("indents a row by how deep it is, the row still the tree's full width", async () => {
     const host = await tree()
     const rowOf = (label: string) => row(host, label).shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!

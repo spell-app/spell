@@ -31,6 +31,7 @@ import { EpicCommandError, parseVerbArgs } from "./command.types"
 export function planDocArgs(verb: string, args: string[]): string[][] {
   if (verb === "inbox") return [inboxArgs(args)]
   if (verb === "option") return [optionArgs(args)]
+  if (verb === "close") return [closeArgs(args)]
   const at = args.findIndex((arg) => !arg.startsWith("--"))
   const target = at === -1 ? undefined : parseTarget(args[at]!)
   // the command line with the target swapped for `epic`, plus `inserted` right after it
@@ -160,6 +161,35 @@ function optionArgs(args: string[]): string[] {
 }
 
 /**
+ * `epic close <epic>#<id> ... [--why "<text>"]` as the tool takes it, `close <epic> <id>... [--why ...]`
+ * (epic `epic-engine` Q69);  `epic close <epic> --why-file <file>`, its ids in the file (I237):
+ * - each id may repeat its epic (`seo#J3 seo#I7`), or follow the first bare (`seo#J3 I7`)
+ * - throws `EpicCommandError` (a usage error) for ids of two epics, and for no epic or no id, spelling it right
+ */
+function closeArgs(args: string[]): string[] {
+  const { positional, flags } = parseVerbArgs(args)
+  if (!positional.length) throw new EpicCommandError("close:  which epic?  epic close --help")
+  const first = parseTarget(positional[0]!)
+  if (first.ref === undefined) {
+    if (flags.whyFile !== undefined && positional.length === 1)
+      return ["close", first.epic, "--why-file", String(flags.whyFile)]
+    refuseOldOrder("close", args, args.indexOf(positional[0]!), first.epic)
+    throw new EpicCommandError(`close:  which item?  epic close ${first.epic}#J3`)
+  }
+  const ids = positional.map((word, at) => {
+    if (at === 0 || !word.includes("#")) return at === 0 ? first.ref! : word
+    const { epic, ref } = parseTarget(word)
+    if (epic !== first.epic) throw new EpicCommandError(`close:  one epic at a time, not ${first.epic} and ${epic}`)
+    return ref!
+  })
+  const rest = Object.entries(flags).flatMap(([key, value]) => [
+    `--${kebabCase(key)}`,
+    ...(value === true ? [] : [value])
+  ])
+  return ["close", first.epic, ...ids, ...rest]
+}
+
+/**
  * `<epic>` or `<epic>#<ref>`, split.
  * - throws `EpicCommandError` for an empty epic or ref (`#J3`, `seo#`)
  */
@@ -230,7 +260,7 @@ export function phaseRanges(text: string): string {
  *   - `--choices`:  its option sets, `<epic-choices>` HTML, its Choices field (epic `epic-engine` P50)
  *   - `--plan` [`--accepted`:  written accepted, his comments folded in;  epic `epic-engine` I163]
  *   - `--estimate` (`estimate`), `--title` [`--html`] (`rename`)
- * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`)
+ * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`), `--requested` (`requested`)
  *   - a manual test:  `--failed I12`, filed as that issue, `off` the mark taken off (`failed`;  epic `epic-engine` I174)
  * - the page (`seo`):  `--standing` [`on` | `off`], `--no-standing` (`standing`)
  * - Claude's status CARD on an item (or an Overview sub-section, a phase, the summary), a state word after the
@@ -279,6 +309,7 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     if (flags.calm && flags.loud) throw new EpicCommandError("update:  --calm or --loud, not both")
     if (flags.calm) runs.push(["calm", epic, ref])
     if (flags.loud) runs.push(["calm", epic, ref, "--loud"])
+    if (flags.requested) runs.push(["requested", epic, ref])
     if ("failed" in flags) runs.push(["failed", epic, ref, value("failed")])
     rename(ref)
   }
@@ -297,7 +328,7 @@ function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: 
   if (ref === undefined)
     throw new EpicCommandError(`update ${epic} ${state}:  which item?  epic update ${epic}#J3${CARD_EXAMPLES[state]}`)
   const rest = args.slice(at + 1)
-  const fields = rest.filter((arg) => arg.startsWith("--") && arg !== "--filed")
+  const fields = rest.filter((arg) => arg.startsWith("--") && arg !== "--filed" && arg !== "--quiet")
   if (fields.length)
     throw new EpicCommandError(
       `update:  a card (${state}) or fields (${fields.join(", ")}), not both:  ` +
@@ -314,7 +345,7 @@ function flagsOf(args: string[]): Record<string, string | true> {
   const { positional, flags } = parseVerbArgs(args)
   if (positional.length)
     throw new EpicCommandError(
-      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | noted`
+      `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | fixed | noted | promised`
     )
   return flags
 }
@@ -421,7 +452,8 @@ const ITEM_VERBS = [
   "defer",
   "queue",
   "unqueue",
-  "calm"
+  "calm",
+  "requested"
 ]
 
 /**
@@ -509,11 +541,12 @@ const OPTION_VERBS = ["add", "edit", "remove", "close"]
 const CHOICES_REF = "choices"
 
 /** A status card's states, the word after the target that makes `update` write one:  `epic update seo#J3 done`. */
-const CARD_STATES = ["underway", "done", "noted"]
+const CARD_STATES = ["underway", "done", "fixed", "noted"]
 
 /** What follows the item in a card's example, by its state. */
 const CARD_EXAMPLES: Record<string, string> = {
   underway: ' underway "<reading>"',
+  fixed: ' fixed ["<what changed>"]',
   done: ' done ["<summary>"]',
   noted: ' noted "<what was recorded>"'
 }
@@ -522,7 +555,7 @@ const CARD_EXAMPLES: Record<string, string> = {
 const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
 
 /** What `update` sets on an item. */
-const ITEM_FIELDS = ["title", "html", "calm", "loud", "failed"]
+const ITEM_FIELDS = ["title", "html", "calm", "loud", "requested", "failed"]
 
 /** What `update` sets on the page, camelCased as `flagsOf()` reads them (`--no-standing`). */
 const PAGE_FIELDS = ["standing", "noStanding"]

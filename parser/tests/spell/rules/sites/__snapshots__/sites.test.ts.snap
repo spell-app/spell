@@ -5,7 +5,7 @@ exports[`testing spell module sites > rule group specs > match snapshot -- if th
   "create_site": "type|superType|address?|cloud?|with_nested_statements?|body?",
   "show_site_part": "part|thing?|close?",
   "site_address_of": "part|thing?",
-  "site_overlay": "type|part",
-  "site_page": "type|part|address|title?|state?|picture?|with_nested_statements?|body?",
+  "site_overlay": "type|part|row?|column?|color?",
+  "site_page": "type|part|address|title?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
 }
 `;

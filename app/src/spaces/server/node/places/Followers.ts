@@ -50,7 +50,7 @@ export class Followers {
     for (const { person } of members) {
       if (!person) continue
       const address = this.people.addressOf(person)
-      if ((await this.subscriptionsOf(address)).some((row) => row.space === space)) subscribers.push(address)
+      if ((await this.subscriptionsOf(address, org)).some((row) => row.space === space)) subscribers.push(address)
     }
     return subscribers
   }
@@ -60,14 +60,14 @@ export class Followers {
     return this.rowsIn(person, INBOX_MAIL)
   }
 
-  /** What `person` subscribes to, as their inbox keeps it:  each `{ space }`, with its id. */
-  async subscriptionsOf(person: string): Promise<PlaceRow[]> {
-    return this.rowsIn(person, INBOX_SUBSCRIPTIONS)
+  /** What `person` subscribes to in org `org`, default their own, as their inbox keeps it:  each `{ space }`, with its id. */
+  async subscriptionsOf(person: string, org?: string): Promise<PlaceRow[]> {
+    return this.rowsIn(person, INBOX_SUBSCRIPTIONS, org)
   }
 
-  /** The rows of `collection` in `person`'s inbox, whole, as Spell reads them:  none for no inbox. */
-  private async rowsIn(person: string, collection: string): Promise<PlaceRow[]> {
-    const inbox = await this.placeAt(PersonInbox.addressOf(person))
+  /** The rows of `collection` in `person`'s inbox in org `org`, whole, as Spell reads them:  none for no inbox. */
+  private async rowsIn(person: string, collection: string, org?: string): Promise<PlaceRow[]> {
+    const inbox = await this.placeAt(PersonInbox.addressOf(person, org))
     if (!inbox) return []
     const ids = (await inbox.list(collection, {})).rows.map(({ id }) => String(id))
     return ids.length ? inbox.getMany(collection, ids) : []

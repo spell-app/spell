@@ -40,6 +40,7 @@ export const ORG_ROLES_COLLECTIONS = [
   "teams",
   "projects",
   "org_roles",
+  "org_profiles",
   "terms",
   "approved_apps",
   "designers",
@@ -179,24 +180,41 @@ export class OrgRolesPlace implements Place {
       const members = (await this.people.org(org))?.members.items ?? []
       return members.flatMap((each) => {
         const person = each.person && this.people.addressOf(each.person)
-        return person ? [{ id: person, person, name: each.person?.names ?? "", role: each.role }] : []
+        return person
+          ? [{ id: person, person, name: each.person?.names ?? "", role: each.role, roleName: roleNameOf(each.role) }]
+          : []
       })
     }
-    if (collection === "teams") return roster.teams.items.map((team) => ({ id: team.folder, name: team.name }))
+    if (collection === "teams") {
+      return roster.teams.items.map((team) => ({ id: team.folder, name: team.name, space: `${team.folder}@${org}` }))
+    }
     if (collection === "projects") {
       return roster.projects.items.map((project) => ({
         id: project.folder,
         name: project.name,
-        team: project.team?.folder ?? ""
+        team: project.team?.folder ?? "",
+        space: project.team ? `${project.team.folder}@${org}/${project.folder}` : `${project.folder}@${org}`
       }))
     }
     if (collection === "org_roles") {
       return roster.roles.items.map((role) => ({ id: role.key, name: role.name, manages: role.manages }))
     }
-    if (collection === "terms") return (await this.orgRoles.terms(org)).map(termRowOf)
+    if (collection === "org_profiles") {
+      return [{ id: org, name: (await this.people.org(org))?.name || org, space: `@${org}` }]
+    }
+    if (collection === "terms") {
+      const names = await this.namesOf(roster)
+      return (await this.orgRoles.terms(org)).map((term) => namedTermRowOf(term, names))
+    }
     if (collection === "approved_apps")
       return (await this.orgRoles.approvedApps(org)).map((app) => ({ id: app.name, ...app }))
-    if (collection === "designers") return (await this.orgRoles.designers(org)).map(designerRowOf)
+    if (collection === "designers") {
+      const names = await this.namesOf(roster)
+      return (await this.orgRoles.designers(org)).map((each) => ({
+        ...designerRowOf(each),
+        personName: names.get(each.person) ?? each.person
+      }))
+    }
     if (collection === "events") {
       const program = await this.events.program(org)
       return (await this.events.events(org)).map((each) => eventRowOf(each, program))
@@ -209,7 +227,21 @@ export class OrgRolesPlace implements Place {
         movedBy: each.movedBy
       }))
     }
-    return (await this.orgRoles.log(org)).map(changeRowOf)
+    const names = await this.namesOf(roster)
+    return (await this.orgRoles.log(org)).map((change, index) => changeRowOf(change, index, names))
+  }
+
+  /** What the page calls each person, team and project of the org, by its address or folder. */
+  private async namesOf(roster: OrgRoster): Promise<Map<string, string>> {
+    const members = (await this.people.org(this.org))?.members.items ?? []
+    const names = new Map<string, string>()
+    for (const each of members) {
+      if (each.person) names.set(this.people.addressOf(each.person), each.person.names || "")
+    }
+    for (const team of roster.teams.items) names.set(team.folder, team.name)
+    for (const project of roster.projects.items) names.set(project.folder, project.name)
+    for (const role of roster.roles.items) names.set(role.key, role.name)
+    return names
   }
 
   ////////////////
@@ -449,10 +481,12 @@ async function placeErrorOf<T>(make: () => Promise<T>): Promise<T> {
  * A change of the log as a row:  `who` made it (never `by`, a place's own field), `did` what, `what` it was about, in
  * one line, and `why`;  its `id` its place in the log.
  */
-function changeRowOf(change: RoleChange, index: number): PlaceRow {
+function changeRowOf(change: RoleChange, index: number, names: Map<string, string>): PlaceRow {
   const { at, by, action, why = "", person, team, role, of, name, project, version, space } = change
-  const what = [person ?? team, role, of && `of ${of}`, project, name, version, space].filter(Boolean).join(" ")
-  return { id: `${index + 1}`, at: at.slice(0, 16).replace("T", " "), who: by, did: action, what, why }
+  const named = (key: string | undefined) => (key && names.get(key)) || key
+  const parts = [named(person ?? team), named(role), of && `of ${named(of)}`, named(project), name, version, space]
+  const what = [...new Set(parts.filter(Boolean))].join(" ")
+  return { id: `${index + 1}`, at: at.slice(0, 19).replace("T", " "), who: named(by) ?? "", did: action, what, why }
 }
 
 /** A term as a row:  its id says all of it, so a delete names the term (`grantOfId()`). */
@@ -461,6 +495,26 @@ function termRowOf(term: TermView): PlaceRow {
   const starts = term.start?.slice(0, 10) ?? ""
   const id = [term.role, holder, term.of ?? "", starts].join(TERM_ID_SEPARATOR)
   return { id, role: term.role, holder, manages: term.of ?? "", starts, ends: term.end?.slice(0, 10) ?? "" }
+}
+
+/** A space role, as a page shows it:  `Editor`. */
+function roleNameOf(role: string): string {
+  return role.charAt(0).toUpperCase() + role.slice(1)
+}
+
+/** An org's roster, as the people store reads it. */
+type OrgRoster = NonNullable<Awaited<ReturnType<PeopleStore["roster"]>>>
+
+/** A term's row, with what the page shows people:  its role's name, and who holds it and of what, by name. */
+function namedTermRowOf(term: TermView, names: Map<string, string>): PlaceRow {
+  const row = termRowOf(term)
+  const nameOf = (key: unknown) => (typeof key === "string" && key ? names.get(key) || key : "")
+  return {
+    ...row,
+    roleName: nameOf(term.role),
+    holderName: nameOf(row.holder),
+    managesName: nameOf(row.manages)
+  }
 }
 
 /** An event as a row, its stages named as `program` names them:  its organizers comma-separated. */

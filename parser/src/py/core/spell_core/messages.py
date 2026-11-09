@@ -119,6 +119,7 @@ MESSAGES: dict[str, str] = {
     "sign-in-abuse": "To report abuse on Spell:  {contact}",
     "sign-in-who": "Your handle, e.g. alice.bsky.social",
     "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
+    "sign-in-menu-as": "Signed in as {name}",
     "sign-in-spell-signed-out": (
         "You aren't signed in to {place} with a Spell account:  "
         "until you are, it takes you to be this computer's person."

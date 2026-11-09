@@ -102,6 +102,8 @@
     --_ui-card-raised-shadow: var(--ui-card-raised-shadow, var(--ui-shadow-floating));
     --_ui-card-raised-hover-shadow: var(--ui-card-raised-hover-shadow, var(--ui-shadow-floating-hover));
     --_ui-card-colored-width: var(--ui-card-colored-width, 2px);
+    --_ui-card-tint-lightness: var(--ui-card-tint-lightness, 0.9);
+    --_ui-card-tint-chroma: var(--ui-card-tint-chroma, 0.4);
     --_ui-card-link-raise: var(--ui-card-link-raise, 3px);
     --_ui-card-image-background: var(--ui-card-image-background, oklch(from var(--ui-ink) l c h / 0.05));
     --_ui-card-horizontal-width: var(--ui-card-horizontal-width, calc(var(--ui-font-size) * 25));
@@ -472,6 +474,19 @@
   .ui.basic.cards > .card,
   .ui.cards > .basic.card {
     --_card-bg: var(--ui-color-background, var(--_ui-card-background));
+  }
+
+  /*
+   * Tinted (`background`, ours, not Fomantic's):  a light tint of the hue the card names (`--_card-tint`, `UICard`).
+   * - As light on a dark page as on a light one, so its own scheme is light:  every `light-dark()` token inside it
+   *   re-resolves, and its text reads on the tint.  Its opposite is `inverted`, below.
+   */
+  .ui.tinted.card,
+  .ui.tinted.cards > .card,
+  .ui.cards > .tinted.card {
+    --_card-bg: oklch(from var(--_card-tint) var(--_ui-card-tint-lightness) calc(c * var(--_ui-card-tint-chroma)) h);
+    --ui-scheme: light;
+    color-scheme: light;
   }
 
   /* Centered */

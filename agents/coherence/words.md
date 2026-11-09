@@ -430,6 +430,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
     there, `the cook` is the recipe's own, whatever the program has by that name.  Spanish:  `recetas donde esa persona es el cocinero`.
   - In code:  `core.currentPerson()`, `core.isCurrentPerson()`.
   - Spanish:  `esa persona`, `la persona`, `el nombre de esa persona`:  no `su`, which already means its.
+  - The person menu, in a program's own toolbar:  `the sign in menu`;  Spanish:  `el menú de acceso` (epic `atmosphere` T56).
 - **Not:**  me, my, the current person, the user.
 - A program's own wins:  in `for person in everyone here`, `the person` is the loop's, and `them` still the one using it.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15:  "you are speaking about the person using the program, which may not be 'you'".

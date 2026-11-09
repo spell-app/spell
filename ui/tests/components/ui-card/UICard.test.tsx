@@ -34,6 +34,43 @@ function rootOf(host: Element): HTMLElement {
   return host.shadowRoot!.querySelector<HTMLElement>("[part~=card], [part~=group]")!
 }
 
+describe("<ui-card background>", () => {
+  /** A tinted card's background, as painted. */
+  const fill = (host: Element) => getComputedStyle(rootOf(host)).backgroundColor
+
+  it("fills the card with a light tint of the colour, a different one per hue", async () => {
+    const red = await render(`<ui-card background="red" heading="Red"></ui-card>`)
+    const blue = await render(`<ui-card background="blue" heading="Blue"></ui-card>`)
+    expect(rootOf(red).classList.contains("tinted")).toBe(true)
+    expect(fill(red)).not.toBe(fill(blue))
+    expect(fill(red)).toMatch(/^oklch\(0\.9 /)
+  })
+
+  it("stays light with dark text on a dark page", async () => {
+    const card = await render(
+      `<div style="color-scheme: dark"><ui-card background="teal" heading="Teal"></ui-card></div>`
+    )
+    const host = card.querySelector("ui-card")!
+    expect(getComputedStyle(rootOf(host)).colorScheme).toBe("light")
+    expect(fill(host)).toMatch(/^oklch\(0\.9 /)
+  })
+
+  it("takes its group's", async () => {
+    const group = await render(`<ui-cards background="olive"><ui-card heading="One"></ui-card></ui-cards>`)
+    const card = group.querySelector("ui-card")!
+    await ElementFixture.settle(group)
+    expect(rootOf(card).classList.contains("tinted")).toBe(true)
+    expect(fill(card)).toMatch(/^oklch\(0\.9 /)
+  })
+
+  it("draws no tint without one, and no colour word from it", async () => {
+    const plain = await render(`<ui-card heading="Plain"></ui-card>`)
+    const tinted = await render(`<ui-card background="red" heading="Red"></ui-card>`)
+    expect(rootOf(plain).classList.contains("tinted")).toBe(false)
+    expect(rootOf(tinted).classList.contains("red")).toBe(false)
+  })
+})
+
 /** The root of a part element (`<ui-header>` ...). */
 function partRoot(host: Element): HTMLElement {
   return host.shadowRoot!.firstElementChild as HTMLElement

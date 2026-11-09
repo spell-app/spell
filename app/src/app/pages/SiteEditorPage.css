@@ -47,17 +47,39 @@
     font-size: 15px;
   }
 
-  /* the board:  a card per part, pages under pages a little in */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 10px;
-    align-content: start;
+  /* the board's title, with the way back to the group's sites */
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
   }
 
-  /* the row a dragged part would go before */
-  ui-tree-item[data-drop-before]::part(row) {
+  /* what the board scrolls in, both ways, wider than the pane or not (`<SiteBoardView>`) */
+  .cards {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* where a dragged part would land:  a line above the row;  a line below it and its pages;  or the row lit up, inside it */
+  ui-tree-item[data-drop="before"]::part(row) {
     box-shadow: inset 0 2px 0 var(--ui-primary-color, var(--ui-focus-color));
+  }
+  ui-tree-item[data-drop="after"] {
+    position: relative;
+    &::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 2px;
+      background: var(--ui-primary-color, var(--ui-focus-color));
+      pointer-events: none;
+    }
+  }
+  ui-tree-item[data-drop="into"]::part(row) {
+    background: color-mix(in oklab, var(--ui-primary-color, var(--ui-focus-color)) 22%, transparent);
+    box-shadow: inset 0 0 0 2px var(--ui-primary-color, var(--ui-focus-color));
   }
 
   .actions {
@@ -70,8 +92,8 @@
     color: var(--ui-text-muted);
   }
 
-  /* a page's jobs, under its form (P6):  a row each, its box, its words and details, its buttons */
-  .SitePageJobs {
+  /* a page's stories, under its form (P6):  a row each, its box, its words and details, its buttons */
+  .SitePageStories {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -127,11 +149,11 @@
       font-size: 12px;
       color: var(--ui-text-muted);
     }
-    /* an empty details field shows only on the job being pointed at or typed in:  not a hint under every job */
+    /* an empty details field shows only on the story being pointed at or typed in:  not a hint under every story */
     li:not(:hover, :focus-within) textarea.details:placeholder-shown {
       display: none;
     }
-    /* a job done:  its words struck, quiet */
+    /* a story done:  its words struck, quiet */
     li.done textarea.text {
       text-decoration: line-through;
       color: var(--ui-text-muted);
@@ -180,6 +202,10 @@
     }
     > main {
       order: -1;
+    }
+    .cards {
+      flex: none;
+      overflow-y: visible;
     }
   }
 }

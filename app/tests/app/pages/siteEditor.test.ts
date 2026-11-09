@@ -1,8 +1,7 @@
-import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
+import { chromium, type Browser, type Locator, type Page } from "playwright"
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { chromium, type Browser, type Page } from "playwright"
-import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The site editor, `/site/<project>` (epic `mockup` P4):  its tree and board of the site's parts, a page's form,
@@ -13,28 +12,6 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
-
-/** The kit's root, where the page server leaves its note of the editor's address. */
-const KIT = path.resolve(import.meta.dirname, "../../../..")
-
-/** The running editor's address, from that note;  `undefined`:  none noted. */
-function editorAddress(): string | undefined {
-  const note = path.join(KIT, ".spell-server.editor.json")
-  return existsSync(note) ? (JSON.parse(readFileSync(note, "utf8")) as { url: string }).url : undefined
-}
-
-/** Does it answer? */
-async function isServing(address: string | undefined): Promise<boolean> {
-  if (!address) return false
-  try {
-    return (await fetch(address)).ok
-  } catch (ignored) {
-    return false
-  }
-}
-
-const EDITOR = editorAddress()
-const SERVING = await isServing(EDITOR)
 
 /** The project, and its site's file. */
 const PROJECT = "@spell/examples/StarWarsSite"
@@ -54,6 +31,40 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       return project.spellFiles.find((each) => each.path.endsWith(`/${file}`))!.contents
     }, FILE)
 
+  /** The box of the card saying `words`. */
+  const cardWith = (words: string) => page.locator(".SiteCard", { hasText: words }).locator("[part~=card]")
+
+  /** The box of part `name`'s card. */
+  const cardOf = (name: string) => page.locator(`.SiteCard[data-part="${name}"]`).locator("[part~=card]")
+
+  /** Press on `from`'s middle and move to `x`, `y`;  the press stays down, for the caller to end. */
+  const dragTo = async (from: Locator, to: () => Promise<{ x: number; y: number }>) => {
+    const box = (await from.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 + 12, box.y + box.height / 2 + 12, { steps: 3 })
+    const { x, y } = await to()
+    await page.mouse.move(x, y, { steps: 6 })
+    // the browser hands out pointer moves a frame at a time
+    await page.waitForTimeout(150)
+  }
+
+  /** The middle of spot `row`, `column` of section `section`. */
+  const spotCentre = async (section: string, row: number, column: number) => {
+    const spot = page.locator(
+      `.SiteSection[data-section="${section}"] .spot[data-row="${row}"][data-column="${column}"]`
+    )
+    const box = (await spot.boundingBox())!
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  }
+
+  /** ⌘Z, from the board's title, and what it settles to. */
+  const undo = async () => {
+    await page.locator(".SiteEditorPage h1").click()
+    await page.keyboard.press("Meta+z")
+    await page.waitForTimeout(SETTLE_MS)
+  }
+
   beforeAll(async () => {
     browser = await chromium.launch()
     const context = await browser.newContext({ viewport: { width: 1400, height: 860 } })
@@ -64,7 +75,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     })
     page = await context.newPage()
     await page.goto(`${EDITOR}site/${PROJECT}`)
-    await page.locator(".SiteEditorPage .TileCard").first().waitFor({ timeout: 30_000 })
+    await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
   })
 
   afterAll(async () => {
@@ -73,7 +84,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
 
   test("shows every part of the site, as a tree and as cards", async () => {
     // six collections, a list and a page each, the reviews page, two dialogs, a sidebar, the not found and error pages
-    expect(await page.locator(".SiteEditorPage .TileCard").count()).toBe(18)
+    expect(await page.locator(".SiteCard").count()).toBe(18)
     expect(await page.locator("ui-tree-item").count()).toBe(18)
     // the app isn't run here:  nothing of the site is drawn over the page
     expect(await page.locator(".spell-site").count()).toBe(0)
@@ -86,7 +97,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   })
 
   test("a page's title changed in its form:  written into its line", async () => {
-    await page.locator(".SiteEditorPage .TileCard", { hasText: "/films/:film" }).click()
+    await cardWith("/films/:film").click()
     const title = page.locator("ui-property-editor input").nth(1)
     await title.fill("Movie")
     await title.press("Enter")
@@ -111,14 +122,78 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await page.mouse.move(from.x + 40, from.y + 8)
     await page.mouse.down()
     await page.mouse.move(from.x + 40, from.y - 20, { steps: 5 })
-    await page.mouse.move(to.x + 40, to.y + 8, { steps: 10 })
+    await page.mouse.move(to.x + 40, to.y + 3, { steps: 10 })
     await page.mouse.up()
     await page.waitForTimeout(SETTLE_MS)
     const after = await text()
     expect(after.indexOf('<dialog "settings dialog"/>')).toBeLessThan(after.indexOf('<page "films page"'))
   })
+
+  /** Press part `name`'s row and drag it to `y` pixels down part `over`'s row:  still held, for its mark to be read. */
+  async function dragOver(name: string, over: string, y: number) {
+    const from = (await page.locator(`ui-tree-item[value="${name}"]`).boundingBox())!
+    const to = (await page.locator(`ui-tree-item[value="${over}"]`).boundingBox())!
+    await page.mouse.move(from.x + 40, from.y + 8)
+    await page.mouse.down()
+    await page.mouse.move(from.x + 40, from.y + 40, { steps: 5 })
+    await page.mouse.move(to.x + 40, to.y + y, { steps: 10 })
+  }
+
+  /** The drop mark on part `name`'s row:  `before`, `after`, `into`;  `null`:  none. */
+  const markOn = (name: string) => page.locator(`ui-tree-item[value="${name}"]`).getAttribute("data-drop")
+
+  /** Let go of a drag with Escape, so nothing moves. */
+  async function cancelDrag() {
+    await page.keyboard.press("Escape")
+    await page.mouse.up()
+  }
+
+  test("a row's top, middle and bottom each have their own mark;  a dialog's row has no middle", async () => {
+    await dragOver("reviews page", "people page", 3)
+    expect(await markOn("people page")).toBe("before")
+    const to = (await page.locator('ui-tree-item[value="people page"]').boundingBox())!
+    await page.mouse.move(to.x + 40, to.y + 11, { steps: 3 })
+    expect(await markOn("people page")).toBe("into")
+    await page.mouse.move(to.x + 40, to.y + 19, { steps: 3 })
+    expect(await markOn("people page")).toBe("after")
+    const dialog = (await page.locator('ui-tree-item[value="settings dialog"]').boundingBox())!
+    await page.mouse.move(dialog.x + 40, dialog.y + dialog.height / 2 - 2, { steps: 3 })
+    expect(await markOn("settings dialog")).toBe("before")
+    await page.mouse.move(dialog.x + 40, dialog.y + dialog.height / 2 + 2, { steps: 3 })
+    expect(await markOn("settings dialog")).toBe("after")
+    await cancelDrag()
+    expect(await markOn("settings dialog")).toBeNull()
+  })
+
+  test("a row can't be dropped on itself or one of its own pages:  no mark, nothing moves", async () => {
+    const before = await text()
+    await dragOver("planets page", "planet page", 11)
+    expect(await markOn("planet page")).toBeNull()
+    await page.mouse.up()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toBe(before)
+  })
+
+  test("a row dropped on a page's middle:  its first page, and ⌘Z takes it back in one step", async () => {
+    const before = await text()
+    await dragOver("starship page", "reviews page", 11)
+    expect(await markOn("reviews page")).toBe("into")
+    await page.mouse.up()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toContain(
+      [
+        '\t<page "reviews page" address="/reviews" title="Reviews">',
+        '\t\t<page "starship page" address="/starships/:starship" title="Starship"/>',
+        "\t</>"
+      ].join("\n")
+    )
+    await page.locator(".SiteEditorPage h1").click()
+    await page.keyboard.press("Meta+z")
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text()).toBe(before)
+  })
   test("a page with pages under it:  asked first, then all of them go, as one step ⌘Z takes back", async () => {
-    await page.locator(".SiteEditorPage .TileCard", { hasText: "/planets" }).first().click()
+    await cardWith("/planets").first().click()
     await page.locator(".SiteEditorPage .form ui-button", { hasText: "Delete" }).click()
     const ask = page.getByText("Delete planets page and its 1 page(s) under it (Planet)?")
     await ask.waitFor({ timeout: 10_000 })
@@ -132,27 +207,132 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await text()).toContain('<spell-page "planets page">')
   })
 
-  test("a page's jobs:  one added, then ticked off, each one step written into the page;  its card counts them", async () => {
-    await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · " }).click()
-    const jobs = page.locator(".SitePageJobs")
-    await jobs.locator("li").first().waitFor({ timeout: 10_000 })
-    expect(await jobs.locator("li").count()).toBe(3)
-    await jobs.locator("ui-button", { hasText: "Add a job" }).click()
+  test("a page's stories:  one added, then ticked off, each one step written into the page;  its card counts them", async () => {
+    await cardWith("/films · ").click()
+    const stories = page.locator(".SitePageStories")
+    await stories.locator("li").first().waitFor({ timeout: 10_000 })
+    expect(await stories.locator("li").count()).toBe(3)
+    await stories.locator("ui-button", { hasText: "Add a story" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [x] open a film's page from its row\n\t\t- [ ] New job\n\t</>")
-    await jobs.locator("li").last().locator('input[type="checkbox"]').check()
+    expect(await text()).toContain("\t\t- [x] open a film's page from its row\n\t\t- [ ] \n\t</>")
+    await stories.locator("li").last().locator('input[type="checkbox"]').check()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [x] New job\n")
-    expect(await page.locator(".SiteEditorPage .TileCard", { hasText: "/films · 3 of 4 jobs" }).count()).toBe(1)
+    expect(await text()).toContain("\t\t- [x] \n")
+    expect(await cardWith("/films · 3 of 4 stories").count()).toBe(1)
+  })
+
+  describe("moving on the board", () => {
+    // every section in sight at once, whatever the tests before scrolled to
+    beforeEach(async () => {
+      await page.setViewportSize({ width: 1400, height: 1500 })
+      await page.locator(".SiteEditorPage .cards").evaluate((pane) => {
+        pane.scrollTop = 0
+      })
+    })
+
+    test("a press that doesn't move still picks", async () => {
+      await cardOf("people page").click()
+      await page.locator(".SiteCard.selected[data-part='people page']").waitFor({ state: "attached", timeout: 5000 })
+    })
+
+    test("a section's card moves the whole section, a line showing where;  ⌘Z takes it back", async () => {
+      const before = await text()
+      const films = (await page.locator('.SiteSection[data-section="films page"]').boundingBox())!
+      await dragTo(cardOf("people page"), async () => ({ x: films.x + 40, y: films.y + 4 }))
+      expect(await page.locator('.SiteSection[data-section="films page"][data-drop="before"]').count()).toBe(1)
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      const after = await text()
+      expect(after.indexOf('<page "people page"')).toBeLessThan(after.indexOf('<page "films page"'))
+      // the tree and the board show the one order
+      const inTree = await page
+        .locator("ui-tree > ui-tree-item")
+        .evaluateAll((rows) => rows.map((row) => row.getAttribute("value")))
+      const onBoard = await page
+        .locator(".SiteSection[data-headed]")
+        .evaluateAll((blocks) => blocks.map((block) => block.getAttribute("data-section")))
+      expect(inTree.filter((name) => onBoard.includes(name!))).toEqual(onBoard)
+      expect(onBoard.indexOf("people page")).toBeLessThan(onBoard.indexOf("films page"))
+      await undo()
+      expect(await text()).toBe(before)
+    })
+
+    test("a card to an empty spot of its section:  the spot lights up, its place is written", async () => {
+      const before = await text()
+      await dragTo(cardOf("film page"), () => spotCentre("films page", 1, 3))
+      expect(await page.locator(".SiteBoard[data-moving] .spot[data-drop]").count()).toBe(1)
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toMatch(/<page "film page"[^>]*row="1" column="3"/)
+      expect(await page.locator(".SiteBoard[data-moving]").count()).toBe(0)
+      await undo()
+      expect(await text()).toBe(before)
+    })
+
+    test("a card into another section goes under it, in the tree too", async () => {
+      const before = await text()
+      await dragTo(cardOf("review dialog"), () => spotCentre("reviews page", 1, 2))
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toMatch(
+        /<page "reviews page"[^>]*>\n\t+<dialog "review dialog" row="1" column="2"\/>\n\t+<\/>/
+      )
+      await undo()
+      expect(await text()).toBe(before)
+    })
+
+    test("Escape moves nothing", async () => {
+      const before = await text()
+      await dragTo(cardOf("film page"), () => spotCentre("films page", 1, 3))
+      await page.keyboard.press("Escape")
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toBe(before)
+      expect(await page.locator(".SiteBoard[data-moving], [data-drop]").count()).toBe(0)
+    })
+
+    test("a drop nowhere moves nothing", async () => {
+      const before = await text()
+      await dragTo(cardOf("film page"), async () => ({ x: 700, y: 8 }))
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toBe(before)
+    })
+  })
+
+  describe("a group's sites, /site/<group>", () => {
+    test("lists the group's sites, each opening in the site editor, and its editor comes back", async () => {
+      await page.goto(`${EDITOR}site/@spell/examples`)
+      const card = page.locator('#sites .TileCard[href="/site/@spell/examples/StarWarsSite"]')
+      await card.waitFor({ timeout: 30_000 })
+      // only sites:  Solitaire is an example, and no site
+      expect(await page.locator("#sites .TileCard", { hasText: "Solitaire" }).count()).toBe(0)
+      await card.click()
+      await page.waitForURL(/\/site\/@spell\/examples\/StarWarsSite$/, { timeout: 30_000 })
+      await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
+      await page.locator(".SiteEditorPage ui-button", { hasText: "All sites" }).click()
+      await page.waitForURL(/\/site\/@spell\/examples$/, { timeout: 30_000 })
+      await card.waitFor({ timeout: 30_000 })
+      await card.click()
+      await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
+    })
+
+    test("a group with no sites says so, and how to make one", async () => {
+      const other = await page.context().newPage()
+      await other.goto(`${EDITOR}site/@spell/guides`)
+      await other.getByText("No sites here yet").waitFor({ timeout: 30_000 })
+      expect(await other.locator("#sites .TileCard:not(.empty)").count()).toBe(0)
+      await other.close()
+    })
   })
 
   test("a double click opens the page in Edit, and Back to the site comes back", async () => {
-    await page.locator(".SiteEditorPage .TileCard", { hasText: "/people/:person" }).dblclick()
+    await cardWith("/people/:person").dblclick()
     await page.waitForURL(/\/edit\//, { timeout: 30_000 })
     const back = page.locator(".BackToSite ui-button")
     await back.waitFor({ timeout: 30_000 })
     await back.click()
     await page.waitForURL(/\/site\//, { timeout: 30_000 })
-    await page.locator(".SiteEditorPage .TileCard").first().waitFor({ timeout: 30_000 })
+    await page.locator(".SiteCard [part~=card]").first().waitFor({ timeout: 30_000 })
   })
 })

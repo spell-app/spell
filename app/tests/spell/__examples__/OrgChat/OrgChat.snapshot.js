@@ -139,6 +139,7 @@ export class ChatPage extends App {
     this.newMessage = new Message()
   }
 
+  static drawsWaiting = true
   draw() {
     return h("ui-container", { class: "chat" },
       h("ui-stack", { direction: "horizontal", spacing: "lg", align: "start" },
@@ -154,7 +155,7 @@ export class ChatPage extends App {
             failed: () => h("ui-text", { color: "red" }, "We can't find your threads right now.")
           })
         ),
-        h("ui-stack",
+        h("ui-stack", { hidden: () => this.picked ? undefined : true },
           h("ui-header", { size: "large" }, () => core.whileWaiting(() => this.picked.name)),
           h("ui-stack", { class: "message-list", spacing: "sm" },
             () => core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message) => core.drawThing(message), {

@@ -62,7 +62,7 @@ export class CajaDeRecetas extends App {
 
   agregarElBorrador() {
     if (this.borrador === "") return
-    core.saveThing(new Receta({ título: this.borrador, porciones: 2 }))
+    core.saveThing(new (core.classToMake(Receta))({ título: this.borrador, porciones: 2 }))
     this.borrador = ""
   }
 

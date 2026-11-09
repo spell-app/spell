@@ -130,7 +130,7 @@ describe("The design right", () => {
       orgMembers
     })
     const { rows } = await place.list("designers", {}, { identity: "ada@rs" })
-    expect(rows).toEqual([{ id: "vic@rs~events_team@rs", person: "vic@rs", space: "events_team@rs" }])
+    expect(rows).toMatchObject([{ id: "vic@rs~events_team@rs", person: "vic@rs", space: "events_team@rs" }])
 
     await place.apply([{ kind: "delete", collection: "designers", id: "vic@rs~events_team@rs" }], { identity: "bo@rs" })
     expect(await orgRoles.designers("rs")).toEqual([])

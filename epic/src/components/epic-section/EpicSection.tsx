@@ -35,6 +35,7 @@ import {
   FILTER,
   FILTER_KEY,
   FILTER_STATES,
+  ORANGE_STATES,
   ITEM_KINDS,
   NEW_HERE,
   NUMBERED_BLOCKS,
@@ -1182,7 +1183,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    *   DRAWN (`drawnStateOf()`), as its section's chips count it (Owen, 2026-10-26:  "badges don't match up"):
    *   - one being worked on is blue, not red
    *   - one Owen marked in this pass is with Claude (the blue badge), in neither
-   * - `replied`:  of those, the ones waiting on his pick (orange)
+   * - `replied`:  of those, the orange and light orange ones (`ORANGE_STATES`)
    * - `running`:  the phases drawn blue (`PhaseState.of()`, I170):  under way or being worked on (I147), and needing
    *   nothing of Owen first, nor changed since he looked;  a phase drawn red counts in `attention`
    */
@@ -1204,7 +1205,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             : this.drawnStateOf(child)
     )
     const attention = states.filter((state) => NEEDS_PERSON.has(state)).length
-    const replied = states.filter((state) => state === "replied").length
+    const replied = states.filter((state) => ORANGE_STATES.has(state)).length
     // a phase drawn blue (I170):  under way or worked on, and neither red nor orange first
     const running = children.filter((child, at) => child.localName === "epic-phase" && states[at] === "progress").length
     return { open, total: children.length, attention, replied, running }

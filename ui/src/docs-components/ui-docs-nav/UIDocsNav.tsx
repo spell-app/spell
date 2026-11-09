@@ -75,21 +75,15 @@ export class DOMDocsNavElement extends E.DOMElement<UIDocsNav> {
  *   - `<div class="masthead" part="header">`:  the `header` slot (a logo),
  *     then the site search `<ui-docs-search>` beside the A-Z / Topics `<ui-buttons>`,
  *     and a visually hidden live status
- *   - `<nav part="menu">` (the landmark, the panel's scroll box) of GROUPS,
- *     each a heading band (`<h2><button aria-expanded>`) over a fold:
+ *   - `<div part="menu">` (the panel's scroll box):  a `<ui-site-nav appearance="nav">`, its groups heading bands:
  *     - Get started (the intro pages)
  *     - Favourites
- *     - Components (A-Z rows, or a lighter `<h3>` band per TOPIC, each folding its rows)
+ *     - Components (A-Z rows, or a lighter subheading band per TOPIC, each folding its rows);
+ *       loading, the load error and "no matches" show inside this band (`notes()`, in a slot of the site nav)
  *     - Foundation
  *     - then the `footer` slot
- * - A row is `<li>`:  a native link `<a>` (an icon, or a status badge),
- *   plus, for a component, its star (a `toggle` `<ui-button>`).
- *   The links are native:  ~100 rows needn't be ~100 more widgets.
- * - Folding:  every group stays rendered (its fold goes `inert` when shut).
- *   - A topic renders its rows only while open, and while its fold eases shut
- *     (`closingTopics`, ended by the fold's `transitionend`).
- *   - The motion is the sheet's, only under `prefers-reduced-motion: no-preference`;
- *     a topic opened after `:state(settled)` eases open too.
+ * - Folding:  every band's rows ease open and shut, the tree's `appearance="nav"` does it
+ *   (not under reduced motion;  a search's folds change at once).
  * - Data:  `SiteData` (`components.json5`), fetched once;  `NavIndex` makes the rows and topics.
  *   - Docs-only tags are never listed.
  *   - Links are `base` + the data's `href`.
@@ -461,6 +455,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
       )
     }
     const components = this.band("components", "components", this.componentPages)
+    components.slot = NOTES_SLOT
     if (this.navIndex) components.count = this.matchingTags.size
     pages.push(components)
     const foundationPages = this.foundationPages
@@ -515,6 +510,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
       title: row.name,
       href: this.href(row.href),
       id: prefix + row.tag,
+      copyOf: prefix ? row.tag : undefined,
       badge: row.status ? this.translationForKey(row.status === "planned" ? "planned" : "inProgress") : undefined,
       starred: this.favorites.has(row.tag)
     }
@@ -574,8 +570,9 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
             label={this.attributes["aria-label"] ?? this.translationForKey("navLabel")}
             current={this.markedPage}
             pages={this.navPages}
-          />
-          {this.notes()}
+          >
+            <div slot={NOTES_SLOT}>{this.notes()}</div>
+          </ui-site-nav>
           <Show when={this.slots.hasContent(this.slotForName("footer"))}>
             <div class={[SLOTTED, FOOTER]}>
               <slot name={this.slotForName("footer")} />
@@ -618,7 +615,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     )
   }
 
-  /** Under the list:  loading, the load error, or "no matches". */
+  /** Inside the Components band, in its slot of the site nav:  loading, the load error, or "no matches". */
   private notes(): JSX.Element {
     return (
       <Switch>
@@ -765,6 +762,9 @@ const FOOTER = "footer"
 
 /** Class word of the box holding the search field and the view switch. */
 const TOOLS = "tools"
+
+/** The site nav's slot for the Components band's notes:  `SiteNavPage.slot`. */
+const NOTES_SLOT = "components-notes"
 
 /** Class word of a note in the list (loading, no matches). */
 const NOTE = "note"

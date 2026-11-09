@@ -13,7 +13,9 @@ import treeCSS from "./UITree.css?inline"
  *       <span part="toggle"/>     (the triangle:  a click opens or closes it, and selects nothing)
  *       <slot name="icon"/>  <span part="label"/>  <slot name="actions"/>
  *     </div>
- *     <div part="group"><slot/></div>   (the rows inside it, while it's open)
+ *     <div part="group">                (the rows inside it, while it's open)
+ *       <div class="folded"><slot/></div>
+ *     </div>
  *
  * - Opening and closing are a `Disclosure`:  `open`, `ui-opening`, `ui-closing`, as a section's are.
  * - A click on the row isn't handled here:  it reaches `<ui-tree>`, which knows the other rows.
@@ -21,6 +23,9 @@ import treeCSS from "./UITree.css?inline"
  * - How deep it is comes from its place, read as it connects:  it pads its row, so a selected row fills the width.
  * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
  *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
+ *   - Its rows stay drawn while it's closed (shut, and out of the keys' and a screen reader's reach), so they ease open
+ *     and shut, as the docs site's folds do (`--ui-tree-nav-open-duration` ...).  Every other tree draws them only
+ *     while it's open.
  ****************/
 export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   @E.proto static vocabulary = treeItemVocabulary
@@ -73,6 +78,11 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   /** The rows inside it are on screen. */
   get showsRows(): boolean {
     return this.canOpen && (this.isOpen || this.isKeptOpen)
+  }
+
+  /** The box of rows inside it is drawn:  while they show, and always in a side navigation, so they ease. */
+  get drawsRows(): boolean {
+    return this.showsRows || (this.isInNav && this.canOpen)
   }
 
   /** What `ui-changed` calls it. */
@@ -142,9 +152,16 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
             <slot name="actions" />
           </span>
         </div>
-        <Show when={this.showsRows}>
-          <div class="rows" role="group" part={this.partForName("group")}>
-            <slot />
+        <Show when={this.drawsRows}>
+          <div
+            class={["rows", { shut: !this.showsRows }]}
+            role="group"
+            part={this.partForName("group")}
+            inert={this.showsRows ? undefined : ""}
+          >
+            <div class="folded">
+              <slot />
+            </div>
           </div>
         </Show>
       </>

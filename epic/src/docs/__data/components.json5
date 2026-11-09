@@ -2556,13 +2556,17 @@
           "values": [
             "attention",
             "replied",
+            "requested",
             "progress",
+            "handed",
             "open",
+            "scheduled",
             "recent",
             "handled",
+            "quiet",
             "old"
           ],
-          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  your turn to pick or review;  a manual test whose phase isn't done), `requested` (light orange:  what you asked for is finished, your turn to see it), `progress` (blue:  Claude is working on it), `handed` (blue outlined:  you pressed Do this, Claude hasn't started), `open` (yellow:  still undecided), `scheduled` (dotted blue:  queued work, agreed, not started), `recent` (green:  decided or done), `handled` (grey:  its answer is in a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a calm judgement call, a limit:  nothing to think about), `old` (grey:  no longer relevant, canceled)."
         },
         {
           "name": "handled",
@@ -2646,7 +2650,12 @@
         {
           "name": "calm",
           "kind": "boolean",
-          "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+          "description": "Not urgent:  an open judgement call not reviewed yet is `quiet` (grey), an issue `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+        },
+        {
+          "name": "requested",
+          "kind": "boolean",
+          "description": "An issue filed from the person's own words (`epic add ... --requested`, `epic file`, epic `epic-engine` P63):  closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing Claude tripped over."
         },
         {
           "name": "urgent",
@@ -2895,6 +2904,31 @@
           "key": "stateFixed",
           "text": "Claude fixed it:  your turn to review",
           "description": "Id chip tooltip, `fixed`."
+        },
+        {
+          "key": "stateRequested",
+          "text": "Claude finished what you asked:  your turn to see it",
+          "description": "Id chip tooltip, `state=requested` (light orange)."
+        },
+        {
+          "key": "stateTestWaiting",
+          "text": "A test only you can run, its phase not done yet",
+          "description": "Id chip tooltip, a manual test while its phase isn't done (orange)."
+        },
+        {
+          "key": "stateHanded",
+          "text": "You pressed Do this:  waiting for Claude to start",
+          "description": "Id chip tooltip, `state=handed` (blue outline)."
+        },
+        {
+          "key": "stateScheduled",
+          "text": "Agreed, not started:  nothing for you to do",
+          "description": "Id chip tooltip, `state=scheduled` (blue dotted)."
+        },
+        {
+          "key": "stateQuiet",
+          "text": "Open, nothing to think about",
+          "description": "Id chip tooltip, `state=quiet` (grey):  a calm judgement call, a limit."
         },
         {
           "key": "stateProgress",
@@ -4979,6 +5013,11 @@
           "description": "How long Claude really worked on it, written by the epic tool when it's done (`epic phase … done`, or `… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, side by side counted once, never the time waiting on you.  A done phase shows it in place of its estimate, the estimate in its tooltip (`~3-4h`)."
         },
         {
+          "name": "span",
+          "kind": "string",
+          "description": "How long it was under way by the clock, from going active to done, waits on you included, written beside `took` from the page's log (epic `epic-engine` I127):  `4h`, `1h 30m`.  A done phase's pill then reads `34m / 4h`.  None when the log has no start for it:  the pill shows only `took`."
+        },
+        {
           "name": "source",
           "kind": "string",
           "description": "Its body's part file (`parts/p2.html`), loaded into its children when it opens."
@@ -5125,7 +5164,7 @@
         },
         {
           "name": "estimate",
-          "description": "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and timed, what it `took` (`21m`), the estimate its tooltip."
+          "description": "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and timed, what it `took` (`21m`), the estimate its tooltip;  with a `span` too, `34m / 4h`, its tooltip in words (`34m of work over 4h, estimated ~3-4h`)."
         },
         {
           "name": "gear",
@@ -5235,6 +5274,16 @@
           "key": "tookTip",
           "text": "~{estimate}",
           "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
+        },
+        {
+          "key": "spanTip",
+          "text": "{took} of work over {span}",
+          "description": "A done phase's time pill with its clock time, no estimate:  its tooltip (I127)."
+        },
+        {
+          "key": "spanEstimateTip",
+          "text": "{took} of work over {span}, estimated ~{estimate}",
+          "description": "A done phase's time pill with its clock time and an estimate:  its tooltip (I127)."
         },
         {
           "key": "choiceOpen",
@@ -6731,9 +6780,29 @@
           "description": "A state chip's words:  `replied` (orange)."
         },
         {
+          "key": "stateRequested",
+          "text": "your turn:  what you asked for is finished",
+          "description": "A state chip's words:  `requested` (light orange)."
+        },
+        {
+          "key": "stateHanded",
+          "text": "you pressed Do this, Claude hasn't started",
+          "description": "A state's words, counted in the blue badge:  `handed`."
+        },
+        {
           "key": "stateOpen",
           "text": "open, still undecided",
           "description": "A state chip's words:  `open` (yellow)."
+        },
+        {
+          "key": "stateScheduled",
+          "text": "agreed, not started",
+          "description": "A state chip's words:  `scheduled` (a dotted blue outline)."
+        },
+        {
+          "key": "stateQuiet",
+          "text": "open, nothing to think about",
+          "description": "A state chip's words:  `quiet` (grey:  a calm judgement call, a limit)."
         },
         {
           "key": "stateRecent",
@@ -6757,8 +6826,13 @@
         },
         {
           "key": "phaseAttention",
-          "text": "need you:  a plan to accept, or a choice open",
-          "description": "A Phases chip's words:  `attention` (red:  its build plan waits for Owen's Accept, or a choice in it is open)."
+          "text": "need you:  a choice open",
+          "description": "A Phases chip's words:  `attention` (red:  a choice in it is open, blocking its build)."
+        },
+        {
+          "key": "phaseWaiting",
+          "text": "your turn:  a plan to read and accept",
+          "description": "A Phases chip's words:  `waiting` (orange:  its build plan waits for Owen's Accept;  epic `epic-engine` P63)."
         },
         {
           "key": "phaseUpdated",

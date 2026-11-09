@@ -8,7 +8,7 @@ import { fileURLToPath } from "url"
 import { atProtoClientMetadata, PROGRAM_CLIENT_FILE } from "spell/places"
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { AtProtoIdentity, MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import type { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
@@ -17,6 +17,7 @@ import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { folderForPlace } from "spell/app/spaces/server/node/projects/project-utils"
 import { projectBuild, spaceFiles } from "./api"
+import { CloudHomes, PROJECT_FILE } from "./CloudHomes"
 import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR } from "./EditorServer"
 
@@ -38,8 +39,14 @@ const APP_PAGE = fileURLToPath(new URL("cloudApp.html", import.meta.url))
 /** The page someone gets at an org's program they can't read yet:  signing in, or who they're signed in as. */
 const SIGN_IN_PAGE = fileURLToPath(new URL("cloudSignIn.html", import.meta.url))
 
-/** The file that makes a folder a program. */
-const PROJECT_FILE = "__project.json5"
+/** The cloud's home pages:  the spaces home (`/`) and each org's (`/@willzalone`). */
+const HOME_PAGE = fileURLToPath(new URL("cloudHome.html", import.meta.url))
+
+/** What the home pages list, and for whom:  `CloudHomes`. */
+const HOMES_API = "/api/cloud/home"
+
+/** Where someone with nothing gated in front of them signs in:  the spaces home's Sign in. */
+const SIGN_IN_ADDRESS = "/sign-in"
 
 /** Spell's terms page (epic `atmosphere` P7). */
 const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
@@ -78,6 +85,10 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *     - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
  *       - someone who can't yet gets `cloudSignIn.html` at its address:  a program can't load to draw its own sign-in bar
  *       - never a private space or the Admin space, nor anyone's own projects
+ *       - it first asks who's signed in:  someone arriving by another site's link is, though the browser left their
+ *         cookie off the page, so it goes to its own address once more (`cloudSignIn.html`)
+ *   - `/`:  the spaces home;  `/@rs`:  an org's home, for whoever reads the org, else the same sign-in page, whether
+ *     the org is there or not (`CloudHomes`, epic `atmosphere` T59);  `/sign-in`, the spaces home's way in
  *   - `/element/...`:  `<spell-viewer>` and the runtime
  *   - `/terms`;  `/hello`, liveness
  *   - AT Protocol's handle look-up, on a handle's own host (epic `atmosphere` P16):
@@ -94,6 +105,10 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *   - It listens on this machine alone (`127.0.0.1`).
  *   - Its host is let in, writes from its origin;  its mails' links start with it.
  *   - An `https` address marks every cookie it sets `Secure`.
+ *   - It may have more than one (`alsoAt`):  `address` is the main one, and each other is let in the same way.
+ *     - A sign-in begun at one finishes at that one, its mail's link and Bluesky's return alike.
+ *     - A browser keeps a cookie per host, so someone signs in once at each.
+ *     - What no request asked for, the inbox's mail, links to the main one.
  * - THE DAILY ROUND (`spacesDailyRound()`, epic `atmosphere` P24), as the main checkout's page server runs it:
  *   - BACKUPS:  every space, each night, a week kept (`SpaceBackups`)
  *   - each real Space's member list, in step with its org's roles (`MemberLists`)
@@ -116,6 +131,8 @@ export class SpellCloud {
   private readonly folderFor: (address: string) => string
   /** Spell accounts:  who signs in, and whose handle is whose. */
   private readonly accounts: SpellAccounts
+  /** What its home pages list. */
+  private readonly homes: CloudHomes
   /** Each org's own domain, to its id, as `listen()` read them:  their handles' hosts. */
   private orgDomains: Record<string, string> = {}
   /** What stops its daily round:  the nightly backups, real Spaces' lists. */
@@ -123,6 +140,7 @@ export class SpellCloud {
 
   constructor({
     address,
+    alsoAt = [],
     dir = environment.cloudDir,
     people = peopleStore(),
     folderFor = folderForPlace,
@@ -134,8 +152,9 @@ export class SpellCloud {
     mkdirSync(dir, { recursive: true })
     this.server = new SRV.WebServer({ live: false })
     if (this.address) this.server.guard.allowAddress(this.address)
-    // the ONE mail seam:  sign-in mail and inbox mail (P30), to the local catcher until P18's sender
-    const mailer = new MailCatcher({ folder: join(dir, "mail") })
+    for (const each of alsoAt) this.server.guard.allowAddress(each)
+    // the ONE mail seam:  sign-in mail and inbox mail (P30) both go through it
+    const mailer = mailerFor({ folder: join(dir, "mail"), ...environment.mail })
     this.folders = new SpaceFolders({
       credentials: new ReadCredentials({ file: join(dir, "space-reads.key") }),
       mailer,
@@ -146,6 +165,7 @@ export class SpellCloud {
       folderFor
     })
     this.accounts = new SpellAccounts(people, { takedowns: this.folders.takedowns })
+    this.homes = new CloudHomes({ folders: this.folders, people })
     this.server.guard.allowHosts((host) => this.isHandleHost(host))
     this.signIn = new SignInCheck({
       signIns: new SignIns({ file: join(dir, "sessions.json"), minutes: environment.signInMinutes }),
@@ -153,7 +173,7 @@ export class SpellCloud {
       accounts: this.accounts,
       abuseContact,
       caughtMail: "hidden",
-      ...(this.address && { address: this.address }),
+      ...(this.address && { address: this.address, alsoAt }),
       // a linked Bluesky account (epic `atmosphere` P19):  its host sends the browser back to the cloud's address
       atProto: new AtProtoIdentity({ address: () => this.address ?? `http://127.0.0.1:${this.server.port}` })
     })
@@ -233,6 +253,26 @@ export class SpellCloud {
       if (!(await this.folders.mayReadSpace(program.space, request.person))) return reply.sendFile(SIGN_IN_PAGE)
       if (!program.exists) throw new SRV.HttpError(404, "no such program here")
       return reply.sendFile(APP_PAGE)
+    })
+    router.get(HOMES_API, async (request, reply) =>
+      reply.set("Cache-Control", "no-store").json({
+        ...(request.person && { person: request.person }),
+        spaces: await this.homes.spacesFor(request.person)
+      })
+    )
+    router.get(`${HOMES_API}/orgs/:org`, async (request, reply) => {
+      const org = await this.homes.orgFor(`${request.params.org}`, request.person)
+      if (!org) throw new SRV.HttpError(404, "no such org here")
+      reply.set("Cache-Control", "no-store").json({ ...(request.person && { person: request.person }), org })
+    })
+    router.get("/", (_request, reply) => reply.set("Cache-Control", "no-store").sendFile(HOME_PAGE))
+    router.get(SIGN_IN_ADDRESS, (_request, reply) => reply.set("Cache-Control", "no-store").sendFile(SIGN_IN_PAGE))
+    router.get("/:org", async (request, reply, next) => {
+      const address = `${request.params.org}`
+      if (!address.startsWith("@")) return next()
+      reply.set("Cache-Control", "no-store")
+      const org = await this.homes.orgFor(address.slice(1), request.person)
+      return reply.sendFile(org ? HOME_PAGE : SIGN_IN_PAGE)
     })
     router.use("/spaces", this.onlyServedPrograms, spaceFiles)
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
@@ -336,6 +376,8 @@ function hostName(host: string): string {
 export type SpellCloudProps = {
   /** Where people reach it, `https://spell.example.org`:  left out, this machine alone (a test, a try). */
   address?: string
+  /** The other addresses people reach it at, `https://spell.space`:  all `https`, or none, as `address` is. */
+  alsoAt?: string[]
   /** Where it keeps its own files:  default `environment.cloudDir`. */
   dir?: string
   /** People and orgs, the accounts among them:  default spell.spaces' (`peopleStore()`). */

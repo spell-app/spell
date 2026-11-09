@@ -57,7 +57,7 @@ const ID_JOIN = "~"
 export class PersonThreads implements Place {
   /** Its org's id:  `rs`. */
   readonly org: string
-  /** Whose it is, by address:  `bo@rs`. */
+  /** Whose it is, as the org's file names them:  `bo@rs`, or a Spell account, `owen@spell`. */
   readonly person: string
   /** Every paired space of the org, with its name. */
   private readonly spacesOf: PersonThreadsProps["spacesOf"]
@@ -68,9 +68,9 @@ export class PersonThreads implements Place {
   /** The place of the space at `address`. */
   private readonly placeAt: PersonThreadsProps["placeAt"]
 
-  constructor({ person, spacesOf, isInOrg, managersOf, placeAt }: PersonThreadsProps) {
+  constructor({ person, org, spacesOf, isInOrg, managersOf, placeAt }: PersonThreadsProps) {
     this.person = person
-    this.org = person.slice(person.indexOf("@") + 1)
+    this.org = org
     this.spacesOf = spacesOf
     this.isInOrg = isInOrg
     this.managersOf = managersOf
@@ -130,8 +130,10 @@ export class PersonThreads implements Place {
 
 /** Constructor props of `PersonThreads`. */
 export type PersonThreadsProps = {
-  /** Whose it is, by address:  `bo@rs`. */
+  /** Whose it is, as the org's file names them:  `bo@rs`, or a Spell account, `owen@spell`. */
   person: string
+  /** Its org's id:  `rs`.  Not the person's own:  a Spell account's is `spell`. */
+  org: string
   /** Every paired space of org `org`, with its name:  `OrgRoles.pairedSpacesOf()`. */
   spacesOf: (org: string) => Promise<NamedSpace[]>
   /** Is `who` in org `org`:  `OrgRoles.isInOrg()`. */

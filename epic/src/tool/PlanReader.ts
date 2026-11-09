@@ -1,11 +1,16 @@
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
 
+import { PhaseStatuses } from "spell/epic/phases"
+
 import {
   CALM_ID,
   CANCELED,
   CLOSED,
+  ISSUE_ID,
+  JUDGEMENT_ID,
   KINDS,
+  MANUAL_TEST_ID,
   OLD_DECISION,
   OPEN_KINDS,
   PlanDocError,
@@ -285,16 +290,25 @@ export abstract class PlanReader {
    *   decided question is work too)
    * - canceled (made moot, struck through):  `old`, grey -- the ONE "no longer relevant"
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
+   * - an issue Claude found and fixed itself, never needing Owen (epic `epic-engine` I236):  `handled`, grey:
+   *   closed done, `calm`, never reviewed, not one he asked for (Owen:  "I don't need to worry about transient stuff")
+   * - an issue filed from his own words (`requested`), closed done, never reviewed:  `requested`, light orange
+   *   (epic `epic-engine` P63;  Owen, 2026-11-08:  "light orange until reviewed")
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
    * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  `replied`, orange, Owen's turn
-   * - work a review queued, not started (`queued`):  `open`, still to do (Q20:  no longer `progress`)
+   * - work a review queued, not started (`queued`):  `scheduled`, blue dotted:  agreed, nothing for him to do
+   *   (epic `epic-engine` P63)
    * - Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`):  `replied`, Owen's
    *   turn to pick (Owen, 2026-10-09);  a pick, a newer reply from Owen, or closing it ends that
    * - waiting on Owen:  `attention`:  an open question;  an open judgement call, issue or `urgent` todo not reviewed,
-   *   unless it's `calm` (not urgent:  it wouldn't surprise Owen, or he said so from its id chip):  then `open`
-   *   - a judgement call or issue he asked for with Do this (`urgent`, I232):  red whether reviewed or not, until handled
+   *   unless it's `calm` (not urgent:  it wouldn't surprise Owen, or he said so from its id chip):  then a call is
+   *   `quiet` (grey) and the rest `open` (yellow;  epic `epic-engine` P63)
+   * - a judgement call or issue he pressed Do this on (`urgent`, I232), not handled yet:  `handed`, blue outlined:  his
+   *   part is over, reviewed or not (epic `epic-engine` P63)
    * - settled by a review, though still open (`SETTLED_AS`:  approved, made a todo):  `recent`
+   * - a limit, nobody's work (`limit`, epic `epic-engine` P63):  `quiet`, grey
+   * - a manual test:  `manualTestState()`
    * - else `open`:  a revisit or Do Now Claude answered leaves it open, yellow (J10)
    */
   itemState(item: Element): ItemState {
@@ -302,17 +316,33 @@ export abstract class PlanReader {
     if (facts.underway || facts.working) return "progress"
     if (facts.status === CANCELED) return "old"
     // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
-    if (facts.handled) return "handled"
+    if (facts.handled || isSelfFixed(facts)) return "handled"
+    if (isRequestedFix(facts)) return "requested"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
     if (facts.fixed) return "replied"
-    if (facts.queued !== undefined) return "open"
+    if (facts.queued !== undefined) return "scheduled"
     if (facts.awaitsPick) return "replied"
     if (QUESTION_ID.test(facts.id)) return "attention"
-    const wanted = facts.urgent && CALM_ID.test(facts.id)
-    if (wanted || ((CALM_ID.test(facts.id) || facts.urgent) && facts.reviewed === undefined))
-      return facts.calm ? "open" : "attention"
+    if (facts.urgent && CALM_ID.test(facts.id)) return "handed"
+    if ((CALM_ID.test(facts.id) || facts.urgent) && facts.reviewed === undefined) {
+      if (!facts.calm) return "attention"
+      return JUDGEMENT_ID.test(facts.id) ? "quiet" : "open"
+    }
     if (SETTLED_AS.has(facts.reviewAs ?? "")) return "recent"
+    if (facts.limit) return "quiet"
+    if (MANUAL_TEST_ID.test(facts.id)) return this.manualTestState(facts.phase)
     return "open"
+  }
+
+  /**
+   * An open manual test's state:  orange until its phase is done, then yellow (epic `epic-engine` P63, typed by Owen on
+   * One Color Each:  "orange until its phase is done, then yellow").
+   * - `phase`:  the number of the phase active when the test was added;  none, or no such phase:  nothing to wait for
+   * - the ONE place this rule lives:  swap the two states to flip it
+   */
+  manualTestState(phase: string | undefined): ItemState {
+    const status = this.phases.find(({ number }) => number === phase)?.status
+    return status && !PhaseStatuses.isFinished(status) ? "replied" : "open"
   }
 
   /**
@@ -415,3 +445,25 @@ const SOMEONE = "someone"
 
 /** Which agent wrote it, when nobody said (`PlanDocOptions.agent`):  as `EpicHome.agent()` guesses. */
 const GUESSED_AGENT = "claude"
+
+/** Is it an issue Claude found and fixed itself:  closed done, `calm`, never reviewed, not wanted (`itemState()`)? */
+function isSelfFixed({
+  id,
+  status,
+  calm,
+  reviewed,
+  urgent,
+  requested
+}: Pick<ItemFacts, "id" | "status" | "calm" | "reviewed" | "urgent" | "requested">): boolean {
+  return ISSUE_ID.test(id) && status === "done" && !!calm && reviewed === undefined && !urgent && !requested
+}
+
+/** Is it an issue filed from Owen's own words, closed done, that he hasn't seen yet (`itemState()`)? */
+function isRequestedFix({
+  id,
+  status,
+  reviewed,
+  requested
+}: Pick<ItemFacts, "id" | "status" | "reviewed" | "requested">): boolean {
+  return ISSUE_ID.test(id) && status === "done" && reviewed === undefined && requested
+}

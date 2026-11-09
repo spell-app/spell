@@ -783,7 +783,7 @@ For a project that is a site, View › Site opens its own page, `/site/<project>
 - Every change is one undo step in the site file;  renaming a page renames every `go to` naming it, in every file.
 - Adding a page doesn't restart the running site:  the editor takes a newly added type as the program runs.
 - The code:  [SiteEditorPage.tsx](src/app/pages/SiteEditorPage.tsx), its writes [SiteWrites.ts](src/app/pages/SiteWrites.ts).
-- **The catch:**  cards show tiles, not pictures of the pages, and a row drops only before another.
+- **The catch:**  cards show tiles, not pictures of the pages, and only the tree's rows can be dragged, not the cards.
 
 ## The public preview:  the editor as plain files
 
@@ -941,11 +941,12 @@ It's 31 pages in seven groups, from the four web components through the panes an
   - The editor is Vite, so an edit to the app's own code shows at once.
   - `yarn stop` stops a Vite left running.
 - The tests are in [tests/app/](tests/app/), at the same paths as the code:
-  node tests, and `*.browser.test.tsx` in headless Chromium.
+  node tests, `*.browser.test.tsx` in headless Chromium,
+  and `tests/app/pages/`, which drive the running editor one file at a time.
 
   ```sh
   cd ~/www/spell/app
-  yarn vp test run --project app:node --project app:browser
+  yarn vp test run --project app:node --project app:integration --project app:browser
   ```
 
 - Two rules that bite:
