@@ -1288,10 +1288,10 @@
     "@atproto/oauth-client-browser": "0.5.11",
     "@atproto/oauth-client-node": "0.5.13",
     "@inkjs/ui": "^2",
-    "@solidjs/h": "2.0.0-rc.17",
-    "@solidjs/router": "2.0.0-next.41",
-    "@solidjs/vite-plugin": "3.0.0-next.51",
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/h": "2.0.0-rc.21",
+    "@solidjs/router": "2.0.0-next.44",
+    "@solidjs/vite-plugin": "3.0.0-next.57",
+    "@solidjs/web": "2.0.0-rc.21",
     "browser-or-node": "^3.0.0",
     "chalk": "^5.6.0",
     "commander": "^14",
@@ -1315,7 +1315,7 @@
     "query-string": "^10.0.0",
     "react": "^18.2.0",
     "semver": "^7.8.5",
-    "solid-js": "2.0.0-rc.17",
+    "solid-js": "2.0.0-rc.21",
     "temporal-polyfill": "^1.0.5",
     "tsx": "4.20.3",
     "vite-plus": "catalog:",
@@ -1328,7 +1328,7 @@
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@playwright/test": "1.63.0",
-    "@solidjs/compiler": "2.0.0-rc.17",
+    "@solidjs/compiler": "2.0.0-rc.21",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.17",
     "@types/lodash-es": "^4.17.12",
@@ -1352,9 +1352,9 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/web": "2.0.0-rc.21",
     "axe-core": "^4.13.0",
-    "solid-js": "2.0.0-rc.17"
+    "solid-js": "2.0.0-rc.21"
   },
   "peerDependenciesMeta": {
     "@solidjs/web": {
@@ -1368,13 +1368,14 @@
     }
   },
   "resolutions": {
-    "@solidjs/babel-plugin": "2.0.0-rc.17",
-    "@solidjs/compiler": "2.0.0-rc.17",
-    "@solidjs/h": "2.0.0-rc.17",
-    "@solidjs/signals": "2.0.0-rc.17",
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/babel-plugin": "2.0.0-rc.21",
+    "@solidjs/compiler": "2.0.0-rc.21",
+    "@solidjs/h": "2.0.0-rc.21",
+    "@solidjs/signals": "2.0.0-rc.21",
+    "@solidjs/web": "2.0.0-rc.21",
     "axe-core": "4.13.0",
-    "solid-js": "2.0.0-rc.17",
+    "dompurify": "3.4.17",
+    "solid-js": "2.0.0-rc.21",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.5.1",
     "vitest": "5.1.0"
   },
