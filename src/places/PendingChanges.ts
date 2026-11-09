@@ -551,7 +551,8 @@ export class PendingChanges {
       end: () => {
         if (!this.openGroups.delete(number)) return
         this.keepCopy()
-        if (this.pending.some(({ group }) => group === number)) this.queue.changed({ now: true })
+        // set aside, it sends nothing until it's back:  `comeBack()` sends these
+        if (!this.placeAside && this.pending.some(({ group }) => group === number)) this.queue.changed({ now: true })
       },
       cancel: () => {
         if (!this.openGroups.delete(number)) return

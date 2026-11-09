@@ -1596,6 +1596,24 @@ describe("a sample, under things", () => {
     expect(keysOf(dish)).not.toContain("day")
   })
 
+  test("an edit left open as a sample goes in keeps the place it started on", async () => {
+    const { places, things, result, dish, applied, allSent } = await aDish()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Meant for the real one")
+    await useSample(places, "family cookbook")
+    things.thingsFrom(result)
+    edit.set("Set too late")
+    expect(dish.title).not.toBe("Set too late")
+    edit.commit()
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+
+    await useRealPlace(places, "family cookbook")
+    await vi.waitFor(() => expect(applied).toHaveBeenCalled())
+    expect(JSON.stringify(applied.mock.calls)).toContain("Meant for the real one")
+    expect(JSON.stringify(applied.mock.calls)).not.toContain("Set too late")
+  })
+
   test("the program's undo can't carry a sample's change into the real place", async () => {
     const { places, dish, applied, allSent, things } = await aDish()
     await useSample(places, "family cookbook")

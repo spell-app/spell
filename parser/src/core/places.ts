@@ -1194,12 +1194,18 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
  * - Its changes are a group, so nothing leaves and nothing's kept on the device until `commit()`.
  * - The undo step is recorded at `commit()`:  until then there's nothing to undo but `cancel()`.
  * - A thing in no place works the same, with nothing to send.
+ * - An open edit keeps the place it started on:  another place going behind the name ends what it can take.
+ *   - Its held changes stay that place's, and nothing set after reaches the one there now.
  * - A step undone after another place went behind the name does nothing:
  *   so a change made to a sample can't be undone into the real place.
  ****************/
 export class PlaceEdit {
   /** What the property held before:  what `cancel()` and undo put back. */
   private readonly was: unknown
+  /** The place behind the thing as this began:  what its changes are for. */
+  private readonly startedOn: object | undefined
+  /** What the property held after the last `set()`. */
+  private lastSet: unknown
   /** Holds what's written until it's committed:  none, for a thing in no place. */
   private readonly group: (PendingGroup & { number: number }) | undefined
   /** Has it been set yet? */
@@ -1210,14 +1216,21 @@ export class PlaceEdit {
   constructor(private readonly props: PlaceEditProps) {
     const { things, thing, property } = props
     this.was = heldValue(valueOf(thing, property))
+    this.startedOn = things.placeBehind(thing)
     this.group = things.pendingOf(thing)?.startGroup()
   }
 
-  /** The property is now `value`:  shown at once, held until `commit()`. */
+  /** Has another place gone behind the name since this began? */
+  private get hasMoved(): boolean {
+    return this.props.things.placeBehind(this.props.thing) !== this.startedOn
+  }
+
+  /** The property is now `value`:  shown at once, held until `commit()`.  Another place is behind it by now:  nothing happens. */
   set(value: unknown): void {
-    if (this.isOver) return
+    if (this.isOver || this.hasMoved) return
     this.isChanged = true
     this.write(value)
+    this.lastSet = heldValue(valueOf(this.props.thing, this.props.property))
   }
 
   /** It's done:  one undo step, and the change goes out.  Nothing was set:  no step, and nothing goes. */
@@ -1227,11 +1240,10 @@ export class PlaceEdit {
     this.group?.end()
     if (!this.isChanged) return
     const { history, title, thing, property, things } = this.props
-    const after = heldValue(valueOf(thing, property))
+    const after = this.lastSet
     if (isSameHeld(after, this.was)) return
-    const placeThen = things.placeBehind(thing)
     const putIf = (value: unknown) => {
-      if (things.placeBehind(thing) === placeThen) writeInto(thing, property, value, "write")
+      if (things.placeBehind(thing) === this.startedOn) writeInto(thing, property, value, "write")
     }
     const record: UndoRecord = { undo: () => putIf(this.was), redo: () => putIf(after) }
     history?.record(record, { title })
@@ -1242,7 +1254,7 @@ export class PlaceEdit {
     if (this.isOver) return
     this.isOver = true
     this.group?.cancel()
-    if (this.isChanged) whileReading(() => writeInto(this.props.thing, this.props.property, this.was))
+    if (this.isChanged && !this.hasMoved) whileReading(() => writeInto(this.props.thing, this.props.property, this.was))
   }
 
   /** Write `value`, in this edit's group. */
