@@ -577,6 +577,62 @@ describe("AtProtoPlace", () => {
     expect(metadata.grant_types).toContain("authorization_code")
   })
 
+  it("makes a program's own file, for an address many programs share", () => {
+    const file = "/apps/@rs/Chat/oauth-client-metadata.json"
+    const metadata = atProtoClientMetadata({
+      origin: "https://cloud.example",
+      redirect: "https://cloud.example/apps/@rs/Chat",
+      name: "Chat",
+      file
+    })
+    expect(metadata.client_id).toBe(`https://cloud.example${file}`)
+    expect(metadata.redirect_uris).toEqual(["https://cloud.example/apps/@rs/Chat"])
+  })
+
+  describe("the client file a sign-in reads", () => {
+    const load = vi.fn()
+
+    beforeEach(() => {
+      load.mockReset()
+      load.mockResolvedValue({ signInRedirect: async () => undefined })
+      vi.doMock("@atproto/oauth-client-browser", () => ({ BrowserOAuthClient: { load } }))
+    })
+
+    afterEach(() => {
+      vi.doUnmock("@atproto/oauth-client-browser")
+      vi.unstubAllGlobals()
+    })
+
+    /** What a sign-in on page `address` told the library the program is. */
+    async function clientIdAt(address: string, clientFile?: string) {
+      vi.stubGlobal("location", new URL(address))
+      await new AtProtoSignIn({ clientFile }).signIn("ana.example")
+      return (load.mock.calls[0][0] as { clientId: string }).clientId
+    }
+
+    it("is at the top of a real address, unless the page says where", async () => {
+      expect(await clientIdAt("https://cookbook.example/")).toBe("https://cookbook.example/oauth-client-metadata.json")
+      load.mockClear()
+      expect(await clientIdAt("https://cloud.example/apps/x", "/apps/x/oauth-client-metadata.json")).toBe(
+        "https://cloud.example/apps/x/oauth-client-metadata.json"
+      )
+    })
+
+    it("is none on a local address, whatever the page says", async () => {
+      expect(await clientIdAt("http://127.0.0.1:4949/apps/x", "/apps/x/oauth-client-metadata.json")).toMatch(
+        /^http:\/\/localhost\?redirect_uri=/
+      )
+    })
+
+    it("says which address it couldn't read", async () => {
+      load.mockRejectedValue(new Error("404"))
+      vi.stubGlobal("location", new URL("https://cookbook.example/"))
+      const signIn = new AtProtoSignIn()
+      await expect(signIn.signIn("ana.example")).rejects.toThrow(/needs the file https:\/\/cookbook\.example\/oauth/)
+      expect(signIn.problem).toContain("couldn't be read:  404")
+    })
+  })
+
   it("never loads the sign-in library for a page with nobody signed in", async () => {
     const signIn = new AtProtoSignIn()
     await signIn.ready
