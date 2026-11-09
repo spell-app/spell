@@ -116,7 +116,7 @@ export class EveryThing extends SpellExpression<"type"> {
 
   /** A list of the type, e.g. `list of piles`, `list of card-suits`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    return P.listOfType(SP.typeName(`${match.groups.type.value}`))
+    return P.listOf(SP.typeName(`${match.groups.type.value}`))
   }
 
   getAST(match: P.MatchFor<this>): P.ASTExpression {

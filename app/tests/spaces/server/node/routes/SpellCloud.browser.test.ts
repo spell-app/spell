@@ -3,7 +3,7 @@
  * - The cloud is at `127.0.0.1`, and "another site" is the same server at `localhost`:  to a browser, two sites.
  * - A program's own files are refused here:  whether the sign-in lets someone in is all that's being looked at.
  */
-import { existsSync, mkdtempSync, rmSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
 import { fileURLToPath } from "url"
@@ -35,6 +35,28 @@ const TEST_MS = 90_000
 /** `yarn build:element` has run:  the home pages draw with Spell UI, from its output. */
 const hasElements = existsSync(fileURLToPath(new URL("../../../../../app/dist-element/spell-ui.js", import.meta.url)))
 
+/** The page's gutter at phone width, px. */
+const GUTTER = 16
+
+/** The widths and the schemes the home pages are looked at in. */
+const WIDTHS = { desktop: { width: 1280, height: 800 }, phone: { width: 390, height: 844 } }
+const SCHEMES = ["light", "dark"] as const
+
+/** The org's name, and a second org's. */
+const ORG_NAME = "Rock Springs Co-op"
+const SECOND_ORG = "kettle"
+const SECOND_ORG_NAME = "Kettle Club"
+
+/** A long org name and person's address:  what the bar must give way to, at phone width. */
+const LONG_ORG_NAME = "The Rock Springs Neighbourhood Allotment and Seed Sharing Co-operative"
+const LONG_PERSON = "alexandria.featherstonehaugh@spell"
+
+/** How tall the top bar is on every page, px. */
+const BAR_HEIGHT = 51
+
+/** Set it to a folder and every page tested below is saved there as a picture, to look at. */
+const PICTURES = process.env.SPELL_CLOUD_PICTURES
+
 describe("staying signed in, in a browser", () => {
   const spaces = mkdtempSync(join(tmpdir(), "spell-cloud-browser-spaces-"))
   const dir = mkdtempSync(join(tmpdir(), "spell-cloud-browser-"))
@@ -54,8 +76,13 @@ describe("staying signed in, in a browser", () => {
   beforeAll(async () => {
     await start()
     const folders = new SpaceFolders({ folderFor, people })
-    await new OrgSetup({ people, roles: folders.orgRoles, folderFor }).create({ org: "rs", admins: [ANA] })
+    const setup = new OrgSetup({ people, roles: folders.orgRoles, folderFor })
+    await setup.create({ org: "rs", name: ORG_NAME, admins: [ANA] })
+    await setup.create({ org: SECOND_ORG, name: SECOND_ORG_NAME, admins: [ANA] })
     folders.close()
+    const open = join(folderFor("@rs/noticeboard"), "__settings")
+    mkdirSync(open, { recursive: true })
+    writeFileSync(join(open, "space.json5"), JSON.stringify({ publicRead: true }))
     await new SpellAccounts(people).invite(BO)
     browser = await chromium.launch()
   })
@@ -161,38 +188,128 @@ describe("staying signed in, in a browser", () => {
     async () => {
       const { context, page } = await newPage("elements")
       await page.goto(here("/"))
-      await page.locator('ui-button[link="/sign-in"]').click({ timeout: SETTLE_MS })
+      await page.locator('#who ui-button[link="/sign-in"]').click({ timeout: SETTLE_MS })
       await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
       await signIn(page, ANA)
       await page.waitForURL(here("/"), { timeout: SETTLE_MS })
-      const org = page.locator('ui-item[link="/@rs"]')
-      await org.waitFor({ timeout: SETTLE_MS })
-      expect(await page.locator("#who ui-text").textContent()).toBe("ana@spell")
+      const org = page.locator('ui-card[link="/@rs"]')
+      await org.waitFor({ state: "attached", timeout: SETTLE_MS })
+      expect(await page.locator("#who > ui-button").textContent()).toBe("ana@spell")
 
-      await org.click()
+      await page.locator('ui-card[link="/@rs"] a').click()
       await page.waitForURL(here("/@rs"), { timeout: SETTLE_MS })
-      const program = page.locator('ui-item[link="/apps/@rs/OrgAdmin"]')
-      await program.waitFor({ timeout: SETTLE_MS })
-      expect(await page.locator("#title").textContent()).toBe("rs")
-
-      const left = (selector: string) =>
-        page.locator(selector).evaluate((each) => {
-          const range = document.createRange()
-          range.selectNodeContents(each)
-          return Math.round(range.getBoundingClientRect().left)
-        })
-      expect(await left("#title")).toBe(await left('ui-item[link="/apps/@rs/OrgAdmin"]'))
-      // the drawn button, inside the element:  the element's own box is wider than what shows
-      const signOut = (await page.locator("#who ui-button button").boundingBox())!
-      expect(Math.round(page.viewportSize()!.width - (signOut.x + signOut.width))).toBe(await left("#title"))
+      const program = page.locator('ui-card[link="/apps/@rs/OrgAdmin"]')
+      await program.waitFor({ state: "attached", timeout: SETTLE_MS })
+      expect(await page.locator("#title").textContent()).toBe(ORG_NAME)
+      expect(await page.locator("#heading").textContent()).toBe(ORG_NAME)
 
       // a link from another site to a home that gates:  still in
       await arriveFromAnotherSite(page, "/@rs")
-      await program.waitFor({ timeout: SETTLE_MS })
+      await program.waitFor({ state: "attached", timeout: SETTLE_MS })
+
+      // the drop-down, and signing out from it:  back to the sign-in page, as this org isn't public
+      await page.locator("#who > ui-button button").click()
+      await page.getByRole("button", { name: "Sign out" }).click()
+      await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
       await context.close()
     },
     TEST_MS
   )
+
+  describe.skipIf(!hasElements)("the home pages' look", () => {
+    /** A signed-in browser's cookies, for each of the pages below. */
+    let signedIn: Awaited<ReturnType<BrowserContext["storageState"]>>
+
+    beforeAll(async () => {
+      const { context, page } = await newPage("elements")
+      await page.goto(here("/sign-in"))
+      await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+      await signIn(page, ANA)
+      await page.waitForURL(here("/"), { timeout: SETTLE_MS })
+      signedIn = await context.storageState()
+      await context.close()
+    }, TEST_MS)
+
+    /** What's measured of `page`'s top bar:  how far in each end of it is drawn, and any sideways scroll. */
+    const measured = (page: Page) =>
+      page.evaluate(() => {
+        const brand = document.querySelector(".brand img")!.getBoundingClientRect()
+        // the drawn button, inside the element:  the element's own box is wider than what shows
+        const right = document.querySelector("#who > ui-button")
+        const drawn = right?.shadowRoot?.querySelector("a, button")?.getBoundingClientRect()
+        const firstCard = document.querySelector("ui-card")?.shadowRoot?.firstElementChild?.getBoundingClientRect()
+        const width = document.documentElement.clientWidth
+        return {
+          scrolls: document.documentElement.scrollWidth - width,
+          barHeight: Math.round(document.querySelector(".top-bar")!.getBoundingClientRect().height),
+          brandLeft: Math.round(brand.left),
+          rightGap: drawn && Math.round(width - drawn.right),
+          cardLeft: firstCard && Math.round(firstCard.left),
+          headingLeft: Math.round(document.querySelector("h1")!.getBoundingClientRect().left)
+        }
+      })
+
+    for (const [widthName, viewport] of Object.entries(WIDTHS)) {
+      for (const colorScheme of SCHEMES) {
+        test(
+          `${widthName}, ${colorScheme}:  the bar's ends at the gutter, the cards under the heading, no sideways scroll`,
+          async () => {
+            /** `answer` stands in for what the page's list asked the server. */
+            const look = async (
+              path: string,
+              name: string,
+              state: "signed in" | "signed out",
+              { answer, openMenu }: { answer?: object; openMenu?: boolean } = {}
+            ) => {
+              const context = await browser.newContext({
+                viewport,
+                colorScheme,
+                ...(state === "signed in" && { storageState: signedIn })
+              })
+              const page = await context.newPage()
+              if (answer) await page.route("**/api/cloud/home**", (route) => route.fulfill({ json: answer }))
+              await page.goto(here(path))
+              await page
+                .locator(path === "/sign-in" ? "#email" : "#who ui-button")
+                .first()
+                .waitFor({
+                  timeout: SETTLE_MS
+                })
+              await page.waitForTimeout(400)
+              if (openMenu) {
+                await page.locator("#who > ui-button button").click()
+                await page.getByRole("button", { name: "Sign out" }).waitFor({ timeout: SETTLE_MS })
+                // its fade finishes
+                await page.waitForTimeout(400)
+              }
+              if (PICTURES) await page.screenshot({ path: join(PICTURES, `${name}-${widthName}-${colorScheme}.png`) })
+              const size = await measured(page)
+              expect(size.scrolls, name).toBe(0)
+              expect(size.barHeight, name).toBe(BAR_HEIGHT)
+              expect(size.brandLeft, name).toBe(GUTTER)
+              if (size.rightGap !== undefined) expect(size.rightGap, name).toBe(GUTTER)
+              if (size.cardLeft !== undefined) expect(size.cardLeft, name).toBe(size.headingLeft)
+              if (widthName === "phone" && path !== "/sign-in") expect(size.headingLeft, name).toBe(GUTTER)
+              await context.close()
+            }
+            await look("/", "spaces-signed-in", "signed in")
+            await look("/", "spaces-signed-out", "signed out")
+            await look("/@rs", "org-home", "signed in")
+            await look("/sign-in", "sign-in", "signed out")
+            await look("/", "menu-open", "signed in", { openMenu: true })
+            await look("/", "spaces-empty", "signed out", { answer: { spaces: [] } })
+            await look("/@rs", "org-long-names", "signed in", {
+              answer: {
+                person: LONG_PERSON,
+                org: { id: "rs", name: LONG_ORG_NAME, programs: [], spaces: [] }
+              }
+            })
+          },
+          TEST_MS
+        )
+      }
+    }
+  })
 
   test(
     "arriving from another site signed out, then signing in, goes on to the page",

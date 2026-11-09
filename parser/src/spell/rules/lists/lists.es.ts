@@ -50,6 +50,7 @@ import { ListShuffle } from "./ListShuffle"
 import { MergeLists } from "./MergeLists"
 import { NumberRange } from "./NumberRange"
 import { Ordinal } from "./Ordinal"
+import { OrdinalOfExpression } from "./OrdinalOfExpression"
 import { OrdinalPositionExpression } from "./OrdinalPositionExpression"
 import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
@@ -472,6 +473,25 @@ listsEs.addRule(OrdinalPositionExpression.specialize({ priority: Priority.specif
       tests: [
         ["la carta de arriba del deck", "core.getItemAt(deck, 0)"],
         ["la carta de abajo de deck", "core.getItemAt(deck, -1)"]
+      ]
+    }
+  ]
+})
+
+listsEs.addRule(OrdinalOfExpression, {
+  syntax: "(el|la)? {ordinal} (en|de|del) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add({ name: "autores", datatype: "list of persons" })
+        scope.variables?.add("suelto")
+      },
+      tests: [
+        ["el primero de autores", "core.getItemAt(autores, 0)"],
+        ["la última de autores", "core.getItemAt(autores, -1)"],
+        ["primero de autores", "core.getItemAt(autores, 0)"],
+        ["el primero de suelto", "core.getItemAt(suelto, 0)"]
       ]
     }
   ]

@@ -12,6 +12,9 @@ const DEFAULT_SCOPE = "atproto repo:*"
 /** What turns a handle into an account, for signing in. */
 const DEFAULT_HANDLE_RESOLVER = "https://public.api.bsky.app"
 
+/** The name of the file a host reads to learn who's asking:  at the top of a program's address, or beside its page. */
+export const PROGRAM_CLIENT_FILE = "oauth-client-metadata.json"
+
 /**
  * What a place needs of a person's sign-in:  who they are, and requests sent as them.
  * - `AtProtoSignIn` is the real one;  a test hands in its own.
@@ -45,7 +48,10 @@ type SignInSession = NonNullable<Awaited<ReturnType<SignInClient["init"]>>>["ses
  *   - When it ends, or a host says so, it's `"ended"` rather than `"signed out"`:  what shows says why, and what's pending stays.
  * - WHO the program is, to a host:
  *   - on a local address (`127.0.0.1`, `localhost`):  no file needed, the library's development client
- *   - anywhere else, `<origin>/oauth-client-metadata.json`, which has to be there:  `atProtoClientMetadata()` makes it
+ *   - anywhere else, a file on its own address, which has to be there:  `atProtoClientMetadata()` makes it
+ *     - at the top of the address, unless `clientFile` says where
+ *     - Spell's cloud answers one for each program, beside its page (`SpellCloud`), so publishing there takes no step
+ *     - not there, a sign-in says which address it couldn't read
  * - What it asks for:  `DEFAULT_SCOPE`, to change their records, of every kind, and nothing else about the account.
  *   - The narrower `repo:<collection>` can't name a corner, only each collection in full, and what a program will save isn't known
  *     until it's read.  The wider `transition:generic` adds what a program here never needs.  `scope` says otherwise.
@@ -71,13 +77,17 @@ export class AtProtoSignIn implements AtProtoAccess {
   private readonly handleResolver: string
   /** What it asks for. */
   private readonly scope: string
-  /** Who the program is, when it isn't worked out from the page's address. */
-  private readonly clientId: string | undefined
+  /** Where its client file is on a real address, from the top of it. */
+  private readonly clientFile: string
 
-  constructor({ handleResolver = DEFAULT_HANDLE_RESOLVER, scope = DEFAULT_SCOPE, clientId }: AtProtoSignInProps = {}) {
+  constructor({
+    handleResolver = DEFAULT_HANDLE_RESOLVER,
+    scope = DEFAULT_SCOPE,
+    clientFile = `/${PROGRAM_CLIENT_FILE}`
+  }: AtProtoSignInProps = {}) {
     this.handleResolver = handleResolver
     this.scope = scope
-    this.clientId = clientId
+    this.clientFile = clientFile
     this.ready = this.restore()
   }
 
@@ -159,16 +169,23 @@ export class AtProtoSignIn implements AtProtoAccess {
     const { BrowserOAuthClient } = await import("@atproto/oauth-client-browser")
     const { handleResolver } = this
     const { location } = globalThis
-    const clientId =
-      this.clientId ??
-      (isLocalAddress(location) ? localClientId(location, this.scope) : `${location.origin}/oauth-client-metadata.json`)
-    return BrowserOAuthClient.load({
-      clientId,
-      handleResolver,
-      onSessionDeleted: (did) => {
-        if (did === this.did && !this.isSigningOut) this.forget("ended")
-      }
-    })
+    const isLocal = isLocalAddress(location)
+    const clientId = isLocal ? localClientId(location, this.scope) : `${location.origin}${this.clientFile}`
+    try {
+      return await BrowserOAuthClient.load({
+        clientId,
+        handleResolver,
+        onSessionDeleted: (did) => {
+          if (did === this.did && !this.isSigningOut) this.forget("ended")
+        }
+      })
+    } catch (error) {
+      if (isLocal) throw error
+      const why = `${(error as Error)?.message ?? error}`
+      throw new TypeError(`Signing in here needs the file ${clientId}, and it couldn't be read:  ${why}`, {
+        cause: error
+      })
+    }
   }
 
   /** Nobody's signed in now, for this reason. */
@@ -192,8 +209,12 @@ export type AtProtoSignInProps = {
   handleResolver?: string
   /** What it asks a host to allow.  Left out:  `DEFAULT_SCOPE`. */
   scope?: string
-  /** Who the program is.  Left out:  worked out from the page's address (see the class). */
-  clientId?: string
+  /**
+   * Where its client file is on a real address, from the top of it:  `/apps/@rs/Chat/oauth-client-metadata.json`.
+   * - Left out:  `/oauth-client-metadata.json`.
+   * - A local address has none, so there it's ignored.
+   */
+  clientFile?: string
 }
 
 /**
@@ -210,15 +231,17 @@ export function handleFor(typed: string): string {
 }
 
 /**
- * What goes at `<origin>/oauth-client-metadata.json`, for a program served from `origin`:  how a host knows who it's being asked by.
+ * What goes in a program's client file, for a program served from `origin`:  how a host knows who it's being asked by.
  * - A program on a local address needs none.
  * - `redirect`:  the page coming back from signing in, on `origin`.
+ * - `file`:  where it's served, from the top of `origin`:  a host checks the file names the address it was read from.
  */
 export function atProtoClientMetadata({
   origin,
   redirect,
   name,
-  scope = DEFAULT_SCOPE
+  scope = DEFAULT_SCOPE,
+  file = `/${PROGRAM_CLIENT_FILE}`
 }: {
   /** Where it's served from:  `https`, with no port. */
   origin: string
@@ -228,9 +251,11 @@ export function atProtoClientMetadata({
   name: string
   /** What it asks for.  Left out:  `DEFAULT_SCOPE`. */
   scope?: string
+  /** Where it's served, from the top of `origin`.  Left out:  `/oauth-client-metadata.json`. */
+  file?: string
 }) {
   return {
-    client_id: `${origin}/oauth-client-metadata.json`,
+    client_id: `${origin}${file}`,
     client_name: name,
     client_uri: origin,
     application_type: "web",

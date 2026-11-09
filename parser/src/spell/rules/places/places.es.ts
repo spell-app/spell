@@ -69,6 +69,12 @@ import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
+import { NextPageByOffset } from "./NextPageByOffset"
+import { NextPageByNumber } from "./NextPageByNumber"
+import { FiltersBy } from "./FiltersBy"
+import { SortsBy } from "./SortsBy"
+import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
+import { IsReadOnly } from "./IsReadOnly"
 import { RowsIn } from "./RowsIn"
 import { ListsGiveOnly } from "./ListsGiveOnly"
 import { PageSizeIs } from "./PageSizeIs"
@@ -353,9 +359,204 @@ placesEs.addRule(RowsIn, {
   syntax: "{type:subject_its} filas están en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
 placesEs.addRule(NextPageIn, {
-  syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+  syntax:
+    "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text} (, devuelta como {param:text})?"
 })
 placesEs.addRule(NextPageInLink, { syntax: "{type:subject_its} página siguiente está en su cabecera {header:text}" })
+placesEs.addRule(NextPageByOffset, {
+  syntax: "{type:subject_its} página siguiente se pide con ({limit:text} y)? {offset:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'museo met es un servidor web en "https://collectionapi.metmuseum.org"\n\t- su página siguiente se pide con "limit" y "offset"',
+          [
+            "export class MuseoMet extends Place {}",
+            "export const museoMet = core.place(new MuseoMet(), {",
+            '  name: "museo_met",',
+            '  kind: "web server",',
+            '  at: "https://collectionapi.metmuseum.org",',
+            '  pagesByOffset: { limit: "limit", offset: "offset" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(NextPageByNumber, {
+  syntax:
+    "{type:subject_its} página siguiente se pide por número con ({limit:text} y)? {page:text} (, contando desde {first:number})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github es un servidor web en "https://github.test"\n\t- su página siguiente se pide por número con "per_page" y "page"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://github.test",',
+            '  pagesByNumber: { limit: "per_page", page: "page" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'spring es un servidor web en "https://spring.test"\n\t- su página siguiente se pide por número con "size" y "page", contando desde 0',
+          [
+            "export class Spring extends Place {}",
+            "export const spring = core.place(new Spring(), {",
+            '  name: "spring",',
+            '  kind: "web server",',
+            '  at: "https://spring.test",',
+            "  pagesByNumber: {",
+            '    limit: "size",',
+            '    page: "page",',
+            "    first: 0",
+            "  },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'blog es un servidor web en "https://blog.test"\n\t- su página siguiente se pide por número con "p"',
+          [
+            "export class Blog extends Place {}",
+            "export const blog = core.place(new Blog(), {",
+            '  name: "blog",',
+            '  kind: "web server",',
+            '  at: "https://blog.test",',
+            '  pagesByNumber: { page: "p" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(FiltersBy, {
+  syntax: "{type:subject_implied} filtra por todos los campos",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- filtra por todos los campos',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            '  filters: "every field",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(FiltersBy, {
+  syntax: "{type:subject_implied} filtra por {fields:searched_fields}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- filtra por cocina y tiempo',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            '  filters: ["cocina", "tiempo"],',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(SortsBy, { syntax: "{type:subject_implied} ordena por todos los campos (con {param:text})?" })
+placesEs.addRule(SortsBy, {
+  syntax: "{type:subject_implied} ordena por {fields:searched_fields} (con {param:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- ordena por titulo y fecha con "order"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            '  sorts: ["titulo", "fecha"],',
+            '  sortedWith: "order",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(GivesFieldsNamedIn, {
+  syntax: "{type:subject_implied} da solo los campos nombrados en {param:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'paises es un servidor web en "https://paises.test"\n\t- da solo los campos nombrados en "response_fields"',
+          [
+            "export class Paise extends Place {}",
+            "export const paises = core.place(new Paise(), {",
+            '  name: "paises",',
+            '  kind: "web server",',
+            '  at: "https://paises.test",',
+            '  fieldsNamedIn: "response_fields",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(IsReadOnly, {
+  syntax: "{type:subject_implied} es de solo lectura",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'paises es un servidor web en "https://paises.test"\n\t- es de solo lectura',
+          [
+            "export class Paise extends Place {}",
+            "export const paises = core.place(new Paise(), {",
+            '  name: "paises",',
+            '  kind: "web server",',
+            '  at: "https://paises.test",',
+            "  readOnly: true,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(ListsUnder, {
   syntax: `${THE} {property:member_words} de ${A} {owner:known_type} están en {path:text}`,
   tests: [

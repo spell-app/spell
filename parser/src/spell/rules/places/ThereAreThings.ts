@@ -59,7 +59,7 @@ export class ThereAreThings extends SpellExpression<
     const named = ThereAreThings.namedBy(match)
     const words = `${named.raw}`.trim()
     const own = ownListOf(match.scope, words) ?? ownListOf(match.scope, P.pluralize(words))
-    const datatype = own ? own.datatype : P.listOfType(SP.typeName(`${named.value}`))
+    const datatype = own ? own.datatype : P.listOf(SP.typeName(`${named.value}`))
     return getWhereScope(match, named, { datatype }, P.instanceCase(SP.singularIn(match.scope, words)))
   }
 

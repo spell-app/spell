@@ -43,13 +43,13 @@ export class CloudHomes {
   async spacesFor(person: string | undefined): Promise<HomeSpace[]> {
     const spaces = new Map<string, HomeSpace>()
     if (person && (await this.folders.mayReadSpace(person, person))) {
-      spaces.set(person, { address: person, name: "Your space" })
+      spaces.set(person, { address: person, name: "Your space", kind: "your space" })
     }
     const { orgs } = await this.people.orgs()
     for (const org of orgs) {
       const address = `@${org.id}`
       if (await this.folders.mayReadSpace(address, person)) {
-        spaces.set(address, { address, name: org.name || org.id, link: `/${address}` })
+        spaces.set(address, { address, name: org.name || org.id, kind: "org", link: `/${address}` })
         continue
       }
       for (const space of await this.readableSpacesOf(org.id, person)) {
@@ -101,7 +101,8 @@ export class CloudHomes {
     const readable: HomeSpace[] = []
     for (const address of addresses) {
       if (await this.folders.mayReadSpace(address, person)) {
-        readable.push({ address, name: nameOf.get(address) ?? address })
+        const kind = (await this.folders.isPublicSpace(address)) ? "public" : "members"
+        readable.push({ address, name: nameOf.get(address) ?? address, kind })
       }
     }
     return readable
@@ -122,9 +123,20 @@ export type HomeSpace = {
   address: string
   /** What people call it. */
   name: string
+  /** What it is, for the page to say. */
+  kind: HomeSpaceKind
   /** Where it opens:  left out for a space with no page of its own yet. */
   link?: string
 }
+
+/**
+ * What a space on a home page is:
+ * - `org`:  an org the person reads
+ * - `your space`:  the person's own
+ * - `public`:  anyone reads it
+ * - `members`:  the people on its list, the person among them
+ */
+export type HomeSpaceKind = "org" | "your space" | "public" | "members"
 
 /** One program on an org's home. */
 export type HomeProgram = {

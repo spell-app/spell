@@ -153,6 +153,11 @@
     {
       "type": "BrowserTask",
       "superType": "Task",
+      "savedIn": {
+        "place": "browser_storage",
+        "placeType": "BrowserStorage",
+        "collection": "browser_tasks"
+      },
       "defined": "/TaskList.browser.api.spell:249-363"
     },
     {
@@ -204,11 +209,20 @@
     {
       "type": "BrowserStorage",
       "superType": "Place",
+      "place": {
+        "name": "browser_storage",
+        "kind": "database on this device"
+      },
       "defined": "/TaskList.browser.api.spell:203-247"
     },
     {
       "type": "ServerTask",
       "superType": "Task",
+      "savedIn": {
+        "place": "task_files",
+        "placeType": "TaskFile",
+        "collection": "server_tasks"
+      },
       "defined": "/TaskList.server.api.spell:392-499"
     },
     {
@@ -260,11 +274,24 @@
     {
       "type": "TaskFile",
       "superType": "Place",
+      "place": {
+        "name": "task_files",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@spell/examples/TaskList/__data/tasks",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/TaskList.server.api.spell:322-390"
     },
     {
       "type": "SheetTask",
       "superType": "Task",
+      "savedIn": {
+        "place": "task_sheet",
+        "placeType": "TaskSheet",
+        "collection": "sheet_tasks"
+      },
       "defined": "/TaskList.csv.api.spell:548-653"
     },
     {
@@ -316,11 +343,24 @@
     {
       "type": "TaskSheet",
       "superType": "Place",
+      "place": {
+        "name": "task_sheet",
+        "kind": "sheet",
+        "at": "/api/places/spaces/@spell/examples/TaskList/__data/tasks.csv",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/TaskList.csv.api.spell:458-546"
     },
     {
       "type": "SkyTask",
       "superType": "Task",
+      "savedIn": {
+        "place": "task_sky",
+        "placeType": "TaskSky",
+        "collection": "sky_tasks"
+      },
       "defined": "/TaskList.atmosphere.api.spell:397-496"
     },
     {
@@ -379,6 +419,17 @@
     {
       "type": "TaskSky",
       "superType": "Place",
+      "place": {
+        "name": "task_sky",
+        "kind": "personal atmosphere account",
+        "details": {
+          "collections": {
+            "sky_tasks": {
+              "at": "spaces.spell.examples.tasklist.task"
+            }
+          }
+        }
+      },
       "defined": "/TaskList.atmosphere.api.spell:294-395"
     },
     {

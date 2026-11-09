@@ -241,6 +241,101 @@ export function hoistClassDeclarations(statements: HoistableStatement[]): Hoista
 }
 
 /**
+ * `files`, a whole PROJECT's top levels, with each class the program needs as it loads moved above what needs it.
+ * - So what a file makes as the program loads can be of a type in a later file:
+ *   an app's `- its "library" is a new open library page`, made as the app is, with that page's file listed after it
+ *   (epic `data` I59).  The order of a project's files shouldn't matter.
+ * - What it needs:  each top-level `x is a new y` needs `y`, then what making a `y` needs (`classesToMake()`).
+ * - Only a class declared after what needs it moves, just above it, so its base comes first:
+ *   every other program compiles as it did.
+ * - NOT every class:  a place's line is running code too, and most programs would change order for nothing.
+ * - `hoistClassDeclarations()` moves every class inside one file:  this is the across-files half.
+ * - NEVER mutates what it's given.
+ */
+export function hoistClassesMadeAsItLoads(files: HoistableStatement[][]): HoistableStatement[][] {
+  const declared = new Map<string, { file: number; at: number; statement: HoistableStatement }>()
+  const classes = new Map<string, P.ASTClassDeclaration>()
+  files.forEach((statements, file) =>
+    statements.forEach((statement, at) =>
+      forEachClass(statement, (declaration) => {
+        classes.set(declaration.type.name, declaration)
+        if (declaresClass(statement)) declared.set(declaration.type.name, { file, at, statement })
+      })
+    )
+  )
+  const moved = new Set<HoistableStatement>()
+  const movedAbove = new Map<HoistableStatement, HoistableStatement[]>()
+  files.forEach((statements, file) =>
+    statements.forEach((statement, at) => {
+      for (const type of typesMadeBy(statement)) {
+        for (const name of classesToMake(type, classes)) {
+          const where = declared.get(name)
+          if (!where || moved.has(where.statement)) continue
+          if (where.file < file || (where.file === file && where.at <= at)) continue
+          moved.add(where.statement)
+          movedAbove.set(statement, [...(movedAbove.get(statement) ?? []), where.statement])
+        }
+      }
+    })
+  )
+  if (!moved.size) return files
+  return files.map((statements) =>
+    tidyBlankLines(
+      statements
+        .filter((statement) => !moved.has(statement))
+        .flatMap((statement) => {
+          const above = movedAbove.get(statement) ?? []
+          return [...above.flatMap((each) => [each, new P.ASTBlankLine(each.match)]), statement]
+        })
+    )
+  )
+}
+
+/** The types `statement`, at a file's top level, makes as it runs:  `shelf = new Shelf()`, looking inside groups. */
+function typesMadeBy(statement: HoistableStatement): string[] {
+  if (statement instanceof P.ASTStatementGroup) return (statement.statements ?? []).flatMap(typesMadeBy)
+  if (!(statement instanceof P.ASTAssignmentStatement)) return []
+  const { value } = statement
+  return value instanceof P.ASTNewInstanceExpression ? [value.type.name] : []
+}
+
+/**
+ * The classes making a `type` needs, each after what it needs:  its base, what its `early` properties make
+ * (`- its "page" is a new book page`, `ProgramWriter.madeEarly()`), and what its `create()` hook makes.
+ * - Only those run as one is made:  what its other methods make is made later.
+ */
+function classesToMake(type: string, classes: ReadonlyMap<string, P.ASTClassDeclaration>): string[] {
+  const needed: string[] = []
+  const seen = new Set<string>()
+  const visit = (name: string) => {
+    if (seen.has(name)) return
+    seen.add(name)
+    const declaration = classes.get(name)
+    if (!declaration) return
+    if (declaration.superType) visit(declaration.superType.name)
+    for (const member of declaration.members ?? []) typesMadeWithOne(member).forEach(visit)
+    needed.push(name)
+  }
+  visit(type)
+  return needed
+}
+
+/** The types class member `member` makes as a thing of its class is made. */
+function typesMadeWithOne(member: ClassBodyItem): string[] {
+  if (member instanceof P.ASTReactiveProperty) {
+    const { initializer } = member
+    return initializer instanceof P.ASTNewInstanceExpression ? [initializer.type.name] : []
+  }
+  let isCreate = false
+  const made: string[] = []
+  P.forEachNode(member, (node) => {
+    if (node instanceof P.ASTMethodDefinition && node.methodName === "create") isCreate = true
+    if (node instanceof P.ASTNewInstanceExpression) made.push(node.type.name)
+  })
+  return isCreate ? made : []
+}
+
+/**
  * Is `statement` QUIET:  does it run nothing that could need a class declared below it?
  * - comments, blank lines, headings' calls
  * - a member patched onto a class declared elsewhere, e.g. a property a `set` declared, at a file's top

@@ -1728,6 +1728,19 @@
     },
     {
       "kind": "method",
+      "name": "listShown",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A list written in braces in a drawing, as Solid can draw it:  `{its author name}`, `{the cards}` (epic `data` I57)."
+    },
+    {
+      "kind": "method",
       "name": "drawItems",
       "of": "core",
       "module": "drawing",

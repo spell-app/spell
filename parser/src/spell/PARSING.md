@@ -402,6 +402,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - An enumeration's instance twin compiles to its class variable:  `the suits of the card` => `Card.Suits`.
   - LOOSE:  ONE word, which nothing need declare, blacklisted words out:  `the is-set-up of it`.
     - Several undeclared words are NOT a property read, so `the first card of the deck` stays the ordinal rule's.
+    - `the first of its authors` is an item too, not a property named `first`:
+      [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
+      (never a property the owner declares, nor `the top of its card`).
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
     - its syntax:  `the {property:member_words} of {expression:operand}`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`
@@ -1067,7 +1070,7 @@ A kind that says so is saved in a file of its own.
     - Its type's name, `CardSuit`, `PaloDeCarta`:  `SP.Language.propertyKindType()`.
     - Its plural is any name's of several words:  `card suits`;  `palos de carta`, up to the `de`.
   - A `P.TypeScope` whose `valueKind` names its `property`:  `{ values, listOn: "Card", listName: "Suits", property: "suit" }`.
-  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOfType()`):
+  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOf()`):
     so a loop over `card suits` knows each is a card suit.
 - What it gives another type, and the program:
   - `its "suit" is a card suit`:  `{ oneOf: () => Card.Suits }`, as for a value kind.
@@ -1713,6 +1716,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
 - `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
   - Compiled:  `static savedIn = { place, collection }`.
+  - The project's declarations say it too (epic `data` I19):  `savedIn` on the type, `place` on the place's type,
+    so in a project importing the type the words below read the place as well (`SP.SpellDeclarations.load()`).
+    - A project can't yet name an imported place on its own type's line:  the place's one instance isn't imported.
 - The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
   while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
   - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
@@ -2200,6 +2206,11 @@ sidebars any of them opens.
   - Banners, headings' calls and the code under them stay where they are.
   - A patch onto another file's class doesn't count as running code.
   - A one-of-a-kind app IS running code (P21, `create_one_of_a_kind`), e.g. `solitaire is an app where:`.
+- What a project makes as it loads has its classes before it, whichever file each is in (epic `data` I59):
+  `SP.hoistClassesMadeAsItLoads()`, from `SP.SpellProject.combineCompiled()`.
+  - So an app can make a thing of a type in a file listed after it:  `- its "library" is a new open library page`.
+  - Only a class that's made then, by a top-level `new` or by what making one makes, and declared later, moves:
+    every other program compiles as it did.
     Its line compiles to its class, then `export const solitaire = new Solitaire()`.
     - So every class declared below it moves above it, and its properties' starting values can make them.
     - Its variable is of kind `only` (`P.ScopeVariable.kind`), in the project's scope (epic `data` I44).

@@ -34,6 +34,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "list_sorted_by": "body?",
   "merge_lists": "expression|type?",
   "number_range": "start|end",
+  "ordinal_of_expression": "ordinal|expression",
   "ordinal_position_expression": "ordinal|arg|expression",
   "ordinal_where_expression": "ordinal|arg|list|body?",
   "position_expression": "arg|position|expression",

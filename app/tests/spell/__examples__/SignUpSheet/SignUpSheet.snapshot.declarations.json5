@@ -15,6 +15,11 @@
     {
       "type": "Volunteer",
       "superType": "Thing",
+      "savedIn": {
+        "place": "sign_up_sheet",
+        "placeType": "SignUpSheet",
+        "collection": "volunteers"
+      },
       "defined": "/SignUpSheet.api.spell:1315-1442"
     },
     {
@@ -51,6 +56,11 @@
     {
       "type": "Attendee",
       "superType": "Thing",
+      "savedIn": {
+        "place": "sign_up_sheet",
+        "placeType": "SignUpSheet",
+        "collection": "attendees"
+      },
       "defined": "/SignUpSheet.api.spell:1618-1759"
     },
     {
@@ -87,6 +97,11 @@
     {
       "type": "Ticket",
       "superType": "Thing",
+      "savedIn": {
+        "place": "sign_up_sheet",
+        "placeType": "SignUpSheet",
+        "collection": "tickets"
+      },
       "defined": "/SignUpSheet.api.spell:1832-1981"
     },
     {
@@ -129,6 +144,11 @@
     {
       "type": "Message",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_inbox",
+        "placeType": "MyInbox",
+        "collection": "messages"
+      },
       "defined": "/SignUpSheet.api.spell:2242-2430"
     },
     {
@@ -183,6 +203,11 @@
     {
       "type": "PublishedVolunteer",
       "superType": "Thing",
+      "savedIn": {
+        "place": "published_sheet",
+        "placeType": "PublishedSheet",
+        "collection": "published_volunteers"
+      },
       "defined": "/SignUpSheet.api.spell:2432-2549"
     },
     {
@@ -213,16 +238,44 @@
     {
       "type": "SignUpSheet",
       "superType": "Place",
+      "place": {
+        "name": "sign_up_sheet",
+        "kind": "data folder",
+        "at": "/api/places/spaces/picnic@rs/__private/signups",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/SignUpSheet.api.spell:684-1028"
     },
     {
       "type": "PublishedSheet",
       "superType": "Place",
+      "place": {
+        "name": "published_sheet",
+        "kind": "data folder",
+        "details": {
+          "checkedEvery": 30,
+          "collections": {
+            "published_volunteers": {
+              "at": "volunteers"
+            }
+          }
+        }
+      },
       "defined": "/SignUpSheet.api.spell:1117-1313"
     },
     {
       "type": "MyInbox",
       "superType": "Place",
+      "place": {
+        "name": "my_inbox",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@rs/__inbox",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/SignUpSheet.api.spell:2072-2144"
     },
     {
