@@ -122,7 +122,7 @@
   }
   /*
    * the note box, last:  the drawer's bottom, side to side, its rounded corners the drawer's;  one thin rule above it,
-   * a lighter shadow than its own ring (its ivory says it's Owen's)
+   * a lighter shadow than its own ring (its violet says it's a person's)
    */
   .item.unfolded > .details > [part~="note-box"]:last-child {
     bottom: 0;

@@ -222,6 +222,12 @@ describe("epic repos", () => {
 describe("EpicProgram.checkFlags()", () => {
   const FLAGS = { "--json": "print it as JSON", "--dry-run": "only say", "--epic <epic>": "that epic's" }
 
+  test("--requested is a flag of `add` and `update`:  what the skills tell agents to file with (epic `epic-engine` I240)", () => {
+    for (const verb of ["add", "update"]) {
+      expect(EpicProgram.checkFlags(`epic ${verb}`, VERB_FLAGS[verb]!, ["seo#I3", "--requested"])).toContain("--requested")
+    }
+  })
+
   test("a flag the verb hasn't got:  a usage error naming the nearest it has", () => {
     expect(() => EpicProgram.checkFlags("epic summary", FLAGS, ["seo", "--jsn"])).toThrow(
       "epic summary --jsn?  no such flag;  did you mean --json?  epic summary --help lists its flags"

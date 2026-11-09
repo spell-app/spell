@@ -20,7 +20,7 @@ Airplane mode:  the person works on the pages ALONE, with no internet and no Cla
   - While it's on, the page server tells every page.
   - Then the review controls say "queued for when you land", instead of "start `/epic review`".
 - Works from ANY session, a worktree's too.
-  - Owen, 2026-10-10:  "when I land in any session, all should come back online".
+  - 2026-10-10:  "when I land in any session, all should come back online".
   - Its commands act on the MAIN checkout:  its page server is the one the side bar uses.
   - So run each `epic ...` here from the main checkout's root:
 
@@ -48,7 +48,7 @@ Airplane mode:  the person works on the pages ALONE, with no internet and no Cla
      list them for the person, one line each, and ask (modal, multi-select) which to `/park` first.
      - In Codex:  ask in the chat, the sessions as a numbered list, and take the numbers the person gives.
    - Nothing running:  skip.
-3. The docs first?  Ask, ALWAYS (Owen, 2026-10-10, epic `airplane` J20:
+3. The docs first?  Ask, ALWAYS (2026-10-10, epic `airplane` J20:
    "When I airplane, ask if I want to do docs-check first").
    - Which epics:  the ones `/docs-check` alone offers ([its skill](../docs-check/SKILL.md), "Forms"):
      merged since the last flight, or done in the last week, newest first.
@@ -117,7 +117,7 @@ The person is back online.  Gather everything, work through it in the background
    - Nothing waiting AND nothing parked:  say so in one line, and stop.
 3. Reply at once, short:  the counts by place, and that the work runs in the background now.
 4. Per epic, in the session itself (quick):  `epic inbox apply <name> --all`.
-   - Into the doc go, sent or not (Owen's decision Q3 of `airplane`):
+   - Into the doc go, sent or not (the person's decision Q3 of `airplane`):
      - approvals, picks, todos made, and new items
      - a todo's plane:  queued into the next phase
      - a todo's x:  dropped, canceled
@@ -152,7 +152,7 @@ The person is back online.  Gather everything, work through it in the background
        `done` only when the work FINISHED the item (an issue fixed, a todo built):  it closes an open issue or todo.
    - A mark that only asked to RECORD a choice (no answer to write):
      `status ... noted "<what was recorded;  what happens next>"`.
-     - Never `done` (Owen, 2026-10-10, and epic `epic-engine` I148:  a Done card means the item is finished).
+     - Never `done` (2026-10-10, and epic `epic-engine` I148:  a Done card means the item is finished).
      - The cards `apply --all` makes for picks, todos and new items are Noted already.
    - Each comment on an epic page (`epics[].comments`):  as `/epic review` answers one ("7.3", step 3b).
      - First `epic inbox working <name>#C3 on`:  their thread shows "Claude: thinking…" until the answer lands.
@@ -166,7 +166,7 @@ The person is back online.  Gather everything, work through it in the background
    - Nothing is decided for the person:  an answer that needs them ends in option cards, and the item stays red.
 
 5b. New epics, made with the Epics page's New epic (`newEpics`):
-   ask which to start, with CHECKBOXES (Owen, 2026-10-09).
+   ask which to start, with CHECKBOXES (2026-10-09).
    - AskUserQuestion, `multiSelect`, "Start which new epics?"
      - In Codex:  the new epics as a numbered list in the chat;  the person answers with the numbers.
    - One option per epic:  its title for the label;  `<name>` and the prompt's first line for the description.

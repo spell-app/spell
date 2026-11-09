@@ -50,7 +50,7 @@
             on the section's title.
           </p>
           <p class="meta">
-            For anyone writing a page Owen answers on (a details or choice page), or changing this element.<br />
+            For anyone writing a page you answer on (a details or choice page), or changing this element.<br />
             <ui-label size="mini" color="green">built</ui-label> in
             <a
               href="/epic/src/components/epic-choice-rows/"
@@ -94,7 +94,7 @@
               ></epic-choice-row> </epic-choice-rows
             ><ui-section id="1-reorder" label="With reorder" sticky="stack" collapsible dividing open="false">
               <p>
-                <code>reorder</code>: Owen puts the rows in order. Each row's place comes first, with move up and move
+                <code>reorder</code>: you put the rows in order. Each row's place comes first, with move up and move
                 down; the badge says <code>moved</code> once they're out of the order proposed.
               </p>
               <epic-choice-rows no-file reorder>
@@ -124,7 +124,7 @@
                 ></epic-choice-row> </epic-choice-rows></ui-section
             ><ui-section id="1-blank" label="With blank" sticky="stack" collapsible dividing open="false">
               <p>
-                <code>blank</code> (epic <code>epic-engine</code> P13): boxes Owen types into, not recommendations.
+                <code>blank</code> (epic <code>epic-engine</code> P13): boxes you type into, not recommendations.
                 Today's text comes first with an empty box under it, and blank means no change. A click on today's text
                 copies it into the box. The badge counts the rows and the changes (<code>noun</code> names them).
               </p>
@@ -227,7 +227,7 @@
                     <td><code>reorder</code></td>
                     <td>present or absent</td>
                     <td>
-                      Owen puts the rows in order (a section's <code>reorder: true</code>): a first column, Order, with
+                      You put the rows in order (a section's <code>reorder: true</code>): a first column, Order, with
                       each row's place and its move up / move down buttons. The order goes with the draft and "Do it".
                     </td>
                     <td></td>
@@ -236,7 +236,7 @@
                     <td><code>blank</code></td>
                     <td>present or absent</td>
                     <td>
-                      Boxes Owen types into, not recommendations (<code>blank: true</code>; epic
+                      Boxes you type into, not recommendations (<code>blank: true</code>; epic
                       <code>epic-engine</code> P13): one first column, today's text with an EMPTY box under it, then
                       Purpose. Blank means no change; a click on today's text copies it into the box.
                     </td>
@@ -322,10 +322,10 @@
               <li>
                 <code>reorder</code> (epic <code>epic-workflow</code> P15): an Order column first, as narrow as a place
                 and two buttons. The badge counts the rows (<code>9 in order</code>), then <code>· moved</code>. The
-                order Owen left comes back on load (<code>ChoicesForm</code>'s <code>restoredOrder</code>).
+                order you left comes back on load (<code>ChoicesForm</code>'s <code>restoredOrder</code>).
               </li>
               <li>
-                <code>blank</code> (epic <code>epic-engine</code> P13, Owen's layout A): today's text and its box in one
+                <code>blank</code> (epic <code>epic-engine</code> P13, your layout A): today's text and its box in one
                 column, first, then Purpose. No <code>stays</code> tag; the round button clears the box. The badge reads
                 <code>42 commands · 3 changed</code>.
               </li>

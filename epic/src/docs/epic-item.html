@@ -412,7 +412,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     </td>
                     <td>
                       Its id chip's colour, written by the script on every edit: <code>attention</code> (red: needs
-                      Owen), <code>progress</code> (blue: Claude is working on it), <code>open</code> (yellow: still
+                      you), <code>progress</code> (blue: Claude is working on it), <code>open</code> (yellow: still
                       undecided, or queued work), <code>recent</code> (green: decided or done, however long ago),
                       <code>old</code> (grey: no longer relevant, canceled).
                     </td>
@@ -439,14 +439,14 @@ holding its id (Q7).  Its colour says where the item stands."
                   <tr>
                     <td><code>reviewed</code></td>
                     <td>a date, <code>2026-10-06</code></td>
-                    <td>Gone through with Owen, that day.</td>
+                    <td>Gone through with you, that day.</td>
                     <td></td>
                   </tr>
                   <tr>
                     <td><code>review-as</code></td>
                     <td><code>approve</code>, <code>todo</code>, <code>revisit</code>, <code>now</code></td>
                     <td>
-                      How Owen's review mark was handled (<code>now</code>: a request for now, done): the record, not
+                      How your review mark was handled (<code>now</code>: a request for now, done): the record, not
                       drawn on the buttons (they clear once handled); <code>approve</code> or <code>todo</code> on an
                       open item make it <code>recent</code> (green).
                     </td>
@@ -496,7 +496,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     <td><code>failed</code></td>
                     <td>item id</td>
                     <td>
-                      A test that FAILED in Owen's test run (epic <code>epic-engine</code> P4): the issue it was filed as
+                      A test that FAILED in your test run (epic <code>epic-engine</code> P4): the issue it was filed as
                       (<code>i42</code>). Drawn on its line as a red "failed → I42" linking the issue. It stays open;  gone
                       once a run passes it.
                     </td>
@@ -521,7 +521,7 @@ holding its id (Q7).  Its colour says where the item stands."
                       Not urgent: an open judgement call or issue not reviewed yet is <code>open</code> (yellow), not
                       <code>attention</code> (red). For a call that simply follows WWOD (<code
                         >plan-doc add ... --calm</code
-                      >); Owen flips it by clicking the id chip while the page is reviewed (the inbox's
+                      >); you flip it by clicking the id chip while the page is reviewed (the inbox's
                       <code>urgency</code>, applied by <code>epic inbox apply</code>).
                     </td>
                     <td></td>
@@ -530,7 +530,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     <td><code>urgent</code></td>
                     <td>present or absent</td>
                     <td>
-                      A todo that asks Owen to act (Make Todo's follow-up): red (<code>attention</code>) until it's
+                      A todo that asks you to act (Make Todo's follow-up): red (<code>attention</code>) until it's
                       reviewed, queued or done, as an open issue is. Its details say the Problem and the Proposed fix,
                       read from what it came from. Its id chip flips it to yellow (<code>calm</code>) and back. On a
                       judgement call or issue it's your Do this: red until handled, reviewed or not.
@@ -608,7 +608,7 @@ holding its id (Q7).  Its colour says where the item stands."
                       <td><code>status</code></td>
                       <td>
                         Claude's status cards (<code>&lt;epic-status slot=&quot;status&quot;&gt;</code>, P13): drawn
-                        last in its details, under Owen's marked note, above the note box. A note Claude has taken
+                        last in its details, under your marked note, above the note box. A note Claude has taken
                         shows there read-only and quiet (<code>You, 10:11 · ...</code>), and the box under the cards
                         empties for a new note (epic-engine I190).
                       </td>
@@ -843,7 +843,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     <tr>
                       <td><code>attention</code></td>
                       <td><ui-label size="mini" color="red">red</ui-label></td>
-                      <td>needs Owen: an open question; an open judgement call or issue not reviewed yet</td>
+                      <td>needs you: an open question; an open judgement call or issue not reviewed yet</td>
                     </tr>
                     <tr>
                       <td><code>progress</code></td>
@@ -871,12 +871,12 @@ holding its id (Q7).  Its colour says where the item stands."
               <ul>
                 <li>
                   Its title: always in full, as many lines as it needs, folded or open. The buttons after it sit on its
-                  first line, so nothing moves as it folds (Owen, 2026-10-19).
+                  first line, so nothing moves as it folds (2026-10-19).
                 </li>
                 <li>A canceled item's title is struck through.</li>
                 <li>An item made overnight (<code>overnight</code>) has a small bed icon at the end of its line.</li>
                 <li>
-                  While Owen's review mark on it is live (pressed, or sent but not yet handled), the chip wears that
+                  While your review mark on it is live (pressed, or sent but not yet handled), the chip wears that
                   button's colour and fill instead (see below). Once Claude has handled the mark, the chip goes back to
                   its state's colour: the result.
                 </li>
@@ -889,18 +889,18 @@ holding its id (Q7).  Its colour says where the item stands."
             <ui-section id="item-review" label="The review buttons" sticky="stack" collapsible dividing open="false">
               <p>
                 While an epic page is being reviewed (<code>&lt;epic-page reviewing&gt;</code>, served by the page
-                server), its marks go to the doc's review inbox: the file of Owen's marks that Claude reads
+                server), its marks go to the doc's review inbox: the file of your marks that Claude reads
                 (<code>&lt;name&gt;.inbox.json</code>).
               </p>
               <p>
                 Then the line ends with three buttons in one group: Make Todo (green), Revisit (blue), Approve
                 (green); on an issue or a judgement call the first is Do this, a thumbs up, worked in the item itself
-                with no todo made. No Do Now (the wand) since Owen, 2026-10-25: "In practice, I'm never using the wand." Each
+                with no todo made. No Do Now (the wand) since 2026-10-25: "In practice, I'm never using the wand." Each
                 wears the fill rule, which says how far a mark has got:
               </p>
               <ul>
                 <li>a grey outline: available</li>
-                <li>dashed in its colour: Owen pressed it, not sent yet</li>
+                <li>dashed in its colour: you pressed it, not sent yet</li>
                 <li>outlined in its colour: sent (or a revisit now taken, its icon turning while Claude works)</li>
                 <li>
                   a revisit now with nobody listening stays dashed, "waiting for a session": the page server wakes the
@@ -910,29 +910,29 @@ holding its id (Q7).  Its colour says where the item stands."
               </ul>
               <p>
                 Revisit (the history icon) opens the item's note box, the cursor in it. TYPING in the box turns Revisit
-                on, at the first key, and the box stays open while he types (Owen, 2026-10-22, epic
-                <code>epic-engine</code> P20): Send hands his words over with no press of Later.
+                on, at the first key, and the box stays open while you type (2026-10-22, epic
+                <code>epic-engine</code> P20): Send hands your words over with no press of Later.
               </p>
               <p>
                 A PICTURE goes in any note box (epic <code>epic-engine</code> P51): pasted (⌘V) or dropped on the box,
                 or chosen with the small picture button in the field's corner. It's saved beside the epic page, shown as
                 a thumbnail under the words (a click opens it full size), and goes with the note's mark, so Send hands it
-                to Claude too; its ✕ takes it out. On a manual test, that's how Owen shows what he saw, and the box's ✕
+                to Claude too; its ✕ takes it out. On a manual test, that's how you show what you saw, and the box's ✕
                 says the test no longer applies.
               </p>
               <p>
-                With Owen's comments waiting in its text (a bullhorn's, or selected text's) and nothing typed, Revisit
+                With your comments waiting in its text (a bullhorn's, or selected text's) and nothing typed, Revisit
                 opens no box: it turns on at once, its note "see my comments in its text: C1", and Send hands those
-                comments over as its content (Owen, 2026-10-26, epic <code>epic-engine</code> I140: "The inline
+                comments over as its content (2026-10-26, epic <code>epic-engine</code> I140: "The inline
                 mark(s) are my comment"). The same on a phase and an Overview part.
               </p>
               <p>
                 On a judgement call or a todo whose box is empty (no draft, no earlier note), the box already holds
-                <code>do it</code>, selected, as if Owen had typed it (Owen, 2026-10-19: "When I press the 'review'
+                <code>do it</code>, selected, as if you had typed it (2026-10-19: "When I press the 'review'
                 button in a Judgement call or todo, I generally want you to just do it"):
               </p>
               <ul>
-                <li>his first key replaces it;  a box that holds his words is left alone</li>
+                <li>your first key replaces it;  a box that holds your words is left alone</li>
                 <li>Revisit turns on with it at once, so a reload keeps it, and Send takes it along</li>
                 <li>Claude reads a revisit note <code>do it</code> as: do it, no question back</li>
                 <li>questions, issues, limits, manual tests and the plan's parts: an empty box, as before</li>
@@ -956,18 +956,18 @@ holding its id (Q7).  Its colour says where the item stands."
                   <code>Original reply</code>.
                 </li>
                 <li>
-                  The talk after its question (epic <code>epic-engine</code> P27, Owen's layout A):
+                  The talk after its question (epic <code>epic-engine</code> P27, your layout A):
                   <ul>
                     <li>
-                      Owen's and Claude's replies are ONE section, the THREAD, in the order said: one card frame round them all, a thin rule between them, and the first reply's fold folds the whole thread; Claude's status
+                      Your and Claude's replies are ONE section, the THREAD, in the order said: one card frame round them all, a thin rule between them, and the first reply's fold folds the whole thread; Claude's status
                       cards are ONE line (<code>✓ Noted 15:21 → Done 15:25 · what Claude did</code>), last in it.
                     </li>
                     <li>
-                      A status taken before Owen's first reply (a DRIVE-BY, about an earlier comment of his) is a line
+                      A status taken before your first reply (a DRIVE-BY, about an earlier comment of yours) is a line
                       first in its details, above the Choices.
                     </li>
                     <li>No Answer strip when its Choices already say "Chosen: X".</li>
-                    <li>Claude's newest reply: an orange edge and <code>NEW</code> until Owen has seen it.</li>
+                    <li>Claude's newest reply: an orange edge and <code>NEW</code> until you have seen it.</li>
                     <li>
                       Worked out by the item from its light children (<code
                         title="epic/src/components/epic-item/AnswerThread.ts"
