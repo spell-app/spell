@@ -71,6 +71,7 @@ import {
   ITEMS_KEY,
   keysOf,
   schemaOf,
+  getProp,
   sourcesReadBy,
   TYPE_KEY,
   untrackCells,
@@ -108,6 +109,18 @@ import { Thing } from "./classes/Thing"
 
 /** A thing or a list:  what a row becomes. */
 type SpellObject = Thing | List
+
+/** A list made by following a field of addresses:  `rememberLinkedList()`. */
+export type LinkedListHome = {
+  /** Whose field it is. */
+  owner: SpellObject
+  /** Its name. */
+  field: string
+  /** `items` as the field holds them:  each followed thing as the field had it, a new one by its address. */
+  entriesFor(items: readonly unknown[]): unknown[]
+  /** Those are what the field holds now:  a read of it finds them. */
+  wrote(entries: readonly unknown[]): void
+}
 
 /** Options for `PlaceThings`. */
 export type PlaceThingsOptions = Pick<LoaderOptions, "classNamed"> & {
@@ -183,6 +196,14 @@ const PLACE_WRITES: PlaceWriteListener = {
     if (holder) noteWriteToHeld(target as SpellObject, holder, property, value)
   },
   items(list, before, after) {
+    const linked = LINKED_LISTS.get(list)
+    if (linked) {
+      const home = HOMES.get(linked.owner)
+      if (!home) return
+      const entries = linked.entriesFor(after)
+      home.things.noteWrite(home, linked.field, linked.entriesFor(before), entries)
+      return linked.wrote(entries)
+    }
     const held = LIST_FIELDS.get(list)
     if (held) {
       noteHeldItems(after, held.owner, held.field)
@@ -197,6 +218,30 @@ const PLACE_WRITES: PlaceWriteListener = {
     noteHeldItems(after, list as SpellObject, ITEMS_KEY)
     home.things.noteWrite(home, ITEMS_KEY, before, after)
   }
+}
+
+/** Lists made by following a field of addresses:  a change to one writes the addresses back (`rememberLinkedList()`). */
+const LINKED_LISTS = new WeakMap<object, LinkedListHome>()
+
+/**
+ * `list` is what following `owner`'s `field` of addresses made:  a change to it is a write of that field's addresses.
+ * - What `core.linked()` does with a list of addresses it follows (epic `data` T74).
+ */
+export function rememberLinkedList(list: List, home: LinkedListHome): void {
+  LINKED_LISTS.set(list, home)
+}
+
+/** Does `field` of `Class` hold things by their addresses? */
+function isLinkField(Class: never, field: string): boolean {
+  return !!schemaOf(Class as Function).info(field)?.link
+}
+
+/** A thing as a field holding addresses holds it:  a list of them, or a thing by its id, which is its address at its place. */
+export function addressOfLinked(value: unknown): unknown {
+  if (value instanceof List) return value.items.map(addressOfLinked)
+  if (Array.isArray(value)) return value.map(addressOfLinked)
+  if (!(value instanceof Thing) && !(value instanceof List)) return value
+  return HOMES.get(value)?.id ?? value.id
 }
 
 /** Note that `list`, a plain one, is `owner`'s `field`, so a change to it is a write to that field. */
@@ -481,11 +526,25 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     )
   }
 
-  /** Every field of `thing` as its place wants it:  a number it sent as text goes back as text (`valueAsWritten()`). */
+  /** Every field of `thing` as its place wants it:  `fieldAsWritten()`. */
   private rowAsWritten(thing: SpellObject): PlaceRow {
     const Class = thing.constructor as never
-    const row = this.writer.rowFor(thing)
-    return Object.fromEntries(Object.entries(row).map(([key, value]) => [key, valueAsWritten(Class, key, value)]))
+    return Object.fromEntries(
+      Object.entries(this.writer.rowFor(thing)).map(([field, json]) => [
+        field,
+        isLinkField(Class, field) ? addressOfLinked(getProp(thing, field)) : valueAsWritten(Class, field, json)
+      ])
+    )
+  }
+
+  /**
+   * `value`, held in `field` of `Class`, as its place wants it.
+   * - A number it sent as text goes back as text (`valueAsWritten()`).
+   * - A field that links to things:  their addresses, never a reference (`addressOfLinked()`).
+   */
+  private fieldAsWritten(Class: never, field: string, value: unknown): unknown {
+    if (!Class) return this.writer.jsonFor(value)
+    return valueAsWritten(Class, field, isLinkField(Class, field) ? addressOfLinked(value) : this.writer.jsonFor(value))
   }
 
   /**
@@ -752,12 +811,13 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   private remember(thing: SpellObject, home: ThingHome): void {
     HOMES.set(thing, home)
     if (thing instanceof List) noteHeldItems(thing.items, thing, ITEMS_KEY)
-    for (const key of keysOf(thing)) {
-      const value = (thing as unknown as Record<string, unknown>)[key]
-      if (value instanceof List) rememberListField(value, thing, key)
-    }
     // a list property is made the first time it's read, which may be after this:  it's made now, so a change to it is heard
+    // - while reading, as this is no one asking for it:  a field that links to a thing would go and follow its address
     whileReading(() => {
+      for (const key of keysOf(thing)) {
+        const value = (thing as unknown as Record<string, unknown>)[key]
+        if (value instanceof List) rememberListField(value, thing, key)
+      }
       for (let schema = schemaOf(thing.constructor) as Schema | undefined; schema; schema = schema.parent) {
         for (const [key, info] of schema.declared) {
           if (!info.itemType) continue
@@ -782,8 +842,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const group = this.groupNumberFor(pending)
     // a number its place sent as text goes back as text, and nothing as its word for nothing:  `valueAsWritten()`
     const Class = this.classNamed(type) as never
-    const asJson = Class ? valueAsWritten(Class, field, this.writer.jsonFor(value)) : this.writer.jsonFor(value)
-    const wasJson = Class ? valueAsWritten(Class, field, this.writer.jsonFor(was)) : this.writer.jsonFor(was)
+    const asJson = this.fieldAsWritten(Class, field, value)
+    const wasJson = this.fieldAsWritten(Class, field, was)
     const thing = { collection, type, id, field, ...(group !== undefined && { group }) }
     this.writing(() => {
       if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })

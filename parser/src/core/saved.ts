@@ -40,7 +40,7 @@ import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { after } from "spell/util/timing"
 
-import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
+import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import type * as PlacesFolder from "spell/places"
 import type { Places } from "spell/places/Places"
 import type { PlaceResult } from "spell/places/PlaceResult"
@@ -55,7 +55,7 @@ import { defineCoreModule } from "./core.types"
 import { nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
-import { PlaceThings, heldBy } from "./places"
+import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
@@ -543,8 +543,12 @@ class ProgramPlaces {
     return known && whole?.list.items.some((item) => item === known) ? known : undefined
   }
 
-  /** One list for `owner`'s `field`, holding `things`, the same one while `addresses` are. */
-  linkedList(owner: object, field: string, addresses: readonly string[], things: readonly unknown[]): List {
+  /**
+   * One list for `owner`'s `field`, the same one while `addresses` are:  each of `found` that's there, in order.
+   * - `found` is `addresses`' things, each in its place, nothing where the place holds nothing.
+   * - A change to it writes the addresses back (`rememberLinkedList()`).
+   */
+  linkedList(owner: object, field: string, addresses: readonly string[], found: readonly unknown[]): List {
     let lists = this.linkedLists.get(owner)
     if (!lists) this.linkedLists.set(owner, (lists = new Map()))
     const said = addresses.join("\n")
@@ -553,11 +557,37 @@ class ProgramPlaces {
     const list = core.newScratch(List) as List
     untrackCells(() => {
       whileReading(() => {
-        list.items = [...things]
+        list.items = found.filter(Boolean)
       })
     })
-    lists.set(field, { addresses: said, list })
+    const madeNow = { addresses: said, list }
+    lists.set(field, madeNow)
+    this.heedLinkedList(madeNow, owner, field, found)
     return list
+  }
+
+  /** SIDE EFFECT:  a change to `kept.list`, `owner`'s `field` followed, writes the addresses back. */
+  private heedLinkedList(
+    kept: { addresses: string; list: List },
+    owner: object,
+    field: string,
+    found: readonly unknown[]
+  ): void {
+    const stored = getProp(owner, field) as unknown
+    const entries = stored instanceof List ? stored.items.filter((item) => addressIn(item) !== undefined) : []
+    const entryOf = new Map<unknown, unknown>()
+    found.forEach((thing, at) => {
+      if (thing) entryOf.set(thing, entries[at])
+    })
+    rememberLinkedList(kept.list, {
+      owner: owner as Thing,
+      field,
+      entriesFor: (items) => items.map((item) => entryOf.get(item) ?? addressOfLinked(item)),
+      wrote: (now) => {
+        kept.addresses = now.flatMap((entry) => addressIn(entry) ?? []).join("\n")
+        if (stored instanceof List) whileReading(() => void (stored.items = [...now]))
+      }
+    })
   }
 
   /** Make what `start()` needs of a read:  a result, read by nobody yet. */
@@ -1299,15 +1329,14 @@ export const savedMethods = defineCoreModule({
       if (!said.length) return held
       const known = said.map((address) => program.linkKnown(saved, address))
       if (known.every((one) => one !== undefined)) {
-        const things = known.filter(Boolean)
-        return untrackCells(() => program.linkedList(owner, name, said, things))
+        return untrackCells(() => program.linkedList(owner, name, said, known))
       }
       for (const address of said) program.holdLink(saved, address)
       return core.waitedValue(owner, name, async () => {
         const now = addresses() ?? []
         try {
           const things = await Promise.all(now.map((address) => program.follow(saved, address)))
-          return program.linkedList(owner, name, now, things.filter(Boolean))
+          return program.linkedList(owner, name, now, things)
         } catch (error) {
           if (isAbandoned(error)) forgetWaitedValue(owner, name)
           throw error
