@@ -163,12 +163,12 @@ describe("<NotebookPage>", () => {
     Object.assign(file, { match: parsed!.match, scope: parsed!.scope })
     await until(() => editorsIn(mount).length === 2)
     const place = placeOf(mount.querySelector("spell-example")!)
-    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe("<test-project-counter/>")
+    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe("<test-project-counter-notebook-counter/>")
     controller.setCodeView("spell")
     // a signal's write is staged until the flush, as the switch's click is long before the typing
     flush()
     try {
-      controller.editExample(place, "<test-project-counter/>\n<ui-button>Go</ui-button>")
+      controller.editExample(place, "<test-project-counter-notebook-counter/>\n<ui-button>Go</ui-button>")
     } finally {
       controller.setCodeView("spellx")
       flush()
