@@ -547,7 +547,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       })
     )
     // shown even where the place can't keep them:  what's added here stays on top until it's read again
-    this.showStamps(thing, allTimes.filter((field) => field !== CREATED_FIELD || !createdBefore), now)
+    this.showStamps(
+      thing,
+      allTimes.filter((field) => field !== CREATED_FIELD || !createdBefore),
+      now
+    )
   }
 
   /** Now, later than any stamp this page made before:  things saved in one moment still have an order. */
