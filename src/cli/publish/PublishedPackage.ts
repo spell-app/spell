@@ -267,6 +267,8 @@ export class PublishedPackage {
   /** `npm pack` the staging folder into `packsDir`:  the packed file and its list.  Throws when npm fails. */
   pack(packsDir: string): PackedPackage {
     const json = execFileSync("npm", ["pack", this.stageDir, "--json", "--pack-destination", packsDir], {
+      // its JSON lists every file:  thousands, past the default 1 MB
+      maxBuffer: 1 << 28,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"]
     })
