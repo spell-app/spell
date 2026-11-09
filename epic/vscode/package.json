@@ -59,6 +59,11 @@
         "icon": "$(home)"
       },
       {
+        "command": "spellEpic.docView.showWindowEpic",
+        "title": "This Window's Epic Page",
+        "icon": "$(checklist)"
+      },
+      {
         "command": "spellEpic.reviewView.back",
         "title": "Review:  Back",
         "category": "Spell Epic",
@@ -235,14 +240,19 @@
           "group": "navigation@4"
         },
         {
-          "command": "spellEpic.docView.restartServer",
+          "command": "spellEpic.docView.showWindowEpic",
           "when": "view == spellEpic.docView",
           "group": "navigation@5"
         },
         {
-          "command": "spellEpic.docView.openExternal",
+          "command": "spellEpic.docView.restartServer",
           "when": "view == spellEpic.docView",
           "group": "navigation@6"
+        },
+        {
+          "command": "spellEpic.docView.openExternal",
+          "when": "view == spellEpic.docView",
+          "group": "navigation@7"
         },
         {
           "command": "spellEpic.reviewView.back",
