@@ -64,15 +64,15 @@
         "icon": "$(checklist)"
       },
       {
-        "command": "spellEpic.toolbarGap1",
-        "title": " ",
-        "icon": "$(blank)",
+        "command": "spellEpic.toolbarDivider1",
+        "title": "Divider",
+        "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
         "enablement": "false"
       },
       {
-        "command": "spellEpic.toolbarGap2",
-        "title": " ",
-        "icon": "$(blank)",
+        "command": "spellEpic.toolbarDivider2",
+        "title": "Divider",
+        "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
         "enablement": "false"
       },
       {
@@ -232,12 +232,12 @@
     "menus": {
       "view/title": [
         {
-          "command": "spellEpic.toolbarGap1",
+          "command": "spellEpic.toolbarDivider1",
           "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
           "group": "navigation@5"
         },
         {
-          "command": "spellEpic.toolbarGap2",
+          "command": "spellEpic.toolbarDivider2",
           "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
           "group": "navigation@8"
         },
@@ -396,11 +396,11 @@
       ],
       "commandPalette": [
         {
-          "command": "spellEpic.toolbarGap1",
+          "command": "spellEpic.toolbarDivider1",
           "when": "false"
         },
         {
-          "command": "spellEpic.toolbarGap2",
+          "command": "spellEpic.toolbarDivider2",
           "when": "false"
         },
         {

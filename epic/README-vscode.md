@@ -181,7 +181,7 @@ Two quirks you'll meet in the first minute:
 
 ### The buttons
 
-Every title bar carries the same row, in three groups with a gap between them, and Review adds a list button right of Home:
+Every title bar carries the same row, in three groups with a thin bar between them, and Review adds a list button right of Home:
 
 | Button | What it does |
 | --- | --- |

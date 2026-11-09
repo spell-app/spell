@@ -12,8 +12,8 @@
 	<page "icons page" address="/icons" title="Icons" picture="snapshots/icons.jpg"/>
 	<page "utilities page" address="/utilities" title="Utilities" picture="snapshots/utilities.jpg"/>
 	<page "component index page" address="/components" title="Components" picture="snapshots/components.jpg"/>
-	<page "kitchen sink page" address="/kitchen-sink" title="Kitchen Sink"/>
-	<page "theme bench page" address="/theme-bench" title="Theme bench"/>
+	<page "kitchen sink page" address="/kitchen-sink" title="Kitchen Sink" picture="snapshots/kitchen-sink.jpg"/>
+	<page "theme bench page" address="/theme-bench" title="Theme bench" picture="snapshots/theme-bench.jpg"/>
 	<page "accordion usage page" address="/accordion" title="Accordion" tab="Usage" tags="Containers, Navigation, Data display, Modules" picture="snapshots/accordion.jpg">
 		<page "accordion examples page" address="/accordion/examples" title="Examples" picture="snapshots/accordion-examples.jpg"/>
 		<page "accordion api page" address="/accordion/api" title="API" picture="snapshots/accordion-api.jpg"/>
@@ -75,7 +75,7 @@
 		<page "code api page" address="/code/api" title="API" picture="snapshots/code-api.jpg"/>
 		<page "code theming page" address="/code/theming" title="Theming" picture="snapshots/code-theming.jpg"/>
 	</>
-	<page "comment usage page" address="/comment" title="Comment" tab="Usage" tags="Data display, Lists, Social, Content parts, Views">
+	<page "comment usage page" address="/comment" title="Comment" tab="Usage" tags="Data display, Lists, Social, Content parts, Views" picture="snapshots/comment.jpg">
 		<page "comment examples page" address="/comment/examples" title="Examples" picture="snapshots/comment-examples.jpg"/>
 		<page "comment api page" address="/comment/api" title="API" picture="snapshots/comment-api.jpg"/>
 		<page "comment theming page" address="/comment/theming" title="Theming" picture="snapshots/comment-theming.jpg"/>
@@ -243,7 +243,7 @@
 		<page "markdown theming page" address="/markdown/theming" title="Theming" picture="snapshots/markdown-theming.jpg"/>
 	</>
 	<page "menu usage page" address="/menu" title="Menu" tab="Usage" tags="Basic, Navigation, Menus, Collections" picture="snapshots/menu.jpg">
-		<page "menu examples page" address="/menu/examples" title="Examples"/>
+		<page "menu examples page" address="/menu/examples" title="Examples" picture="snapshots/menu-examples.jpg"/>
 		<page "menu api page" address="/menu/api" title="API" picture="snapshots/menu-api.jpg"/>
 		<page "menu theming page" address="/menu/theming" title="Theming" picture="snapshots/menu-theming.jpg"/>
 	</>
@@ -272,7 +272,7 @@
 		<page "page theming page" address="/page/theming" title="Theming" picture="snapshots/page-theming.jpg"/>
 	</>
 	<page "panel usage page" address="/panel" title="Panel" tab="Usage" tags="Layout, Containers" picture="snapshots/panel.jpg">
-		<page "panel examples page" address="/panel/examples" title="Examples"/>
+		<page "panel examples page" address="/panel/examples" title="Examples" picture="snapshots/panel-examples.jpg"/>
 		<page "panel api page" address="/panel/api" title="API" picture="snapshots/panel-api.jpg"/>
 		<page "panel theming page" address="/panel/theming" title="Theming" picture="snapshots/panel-theming.jpg"/>
 	</>
@@ -282,7 +282,7 @@
 		<page "placeholder theming page" address="/placeholder/theming" title="Theming" picture="snapshots/placeholder-theming.jpg"/>
 	</>
 	<page "popup usage page" address="/popup" title="Popup" tab="Usage" tags="Feedback, Overlays, Popups, Modules" picture="snapshots/popup.jpg">
-		<page "popup examples page" address="/popup/examples" title="Examples"/>
+		<page "popup examples page" address="/popup/examples" title="Examples" picture="snapshots/popup-examples.jpg"/>
 		<page "popup api page" address="/popup/api" title="API" picture="snapshots/popup-api.jpg"/>
 		<page "popup theming page" address="/popup/theming" title="Theming" picture="snapshots/popup-theming.jpg"/>
 	</>
@@ -367,7 +367,7 @@
 	<page "site-tabs usage page" address="/site-tabs" title="Site tabs" tab="Usage" tags="Navigation, Menus" picture="snapshots/site-tabs.jpg">
 		<page "site-tabs examples page" address="/site-tabs/examples" title="Examples" picture="snapshots/site-tabs-examples.jpg"/>
 		<page "site-tabs api page" address="/site-tabs/api" title="API" picture="snapshots/site-tabs-api.jpg"/>
-		<page "site-tabs theming page" address="/site-tabs/theming" title="Theming"/>
+		<page "site-tabs theming page" address="/site-tabs/theming" title="Theming" picture="snapshots/site-tabs-theming.jpg"/>
 	</>
 	<page "slider usage page" address="/slider" title="Slider" tab="Usage" tags="Forms, Inputs, Controls, Modules" picture="snapshots/slider.jpg">
 		<page "slider examples page" address="/slider/examples" title="Examples" picture="snapshots/slider-examples.jpg"/>
