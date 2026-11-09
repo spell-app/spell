@@ -7798,7 +7798,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 17,
+          "line": 19,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
