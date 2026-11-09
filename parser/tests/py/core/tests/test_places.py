@@ -345,7 +345,7 @@ def test_a_wrong_token_is_refused_saying_why(page_server: str, program: Core, mo
 ################
 
 
-@pytest.mark.parametrize("kind", ["personal atmosphere account", "web server", "graphql server", "the cloud"])
+@pytest.mark.parametrize("kind", ["atmosphere space", "web server", "graphql server", "the cloud"])
 def test_any_other_kind_is_refused_by_name(kind: str) -> None:
     with pytest.raises(PlaceError, match=f"is a {kind}:  not in Python yet"):
         place_behind({"name": "sky", "kind": kind}, None)

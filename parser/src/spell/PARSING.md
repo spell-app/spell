@@ -1840,8 +1840,8 @@ What a program's lines about where data lives compile to, and what reads the res
     changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
     `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
 - A target that says `places: false` (a library) refuses a project that names one;  one that lists the kinds it keeps
-  (Python's:  a database on this device, a data folder, a sheet, an Excel file;  `PY.PLACE_KINDS`, epic `data` P40)
-  refuses a place of any other kind, by its word:  the Atmosphere is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
+  (Python's:  a database on this device, a data folder, a sheet, an Excel file, an atmosphere account;  `PY.PLACE_KINDS`, epic `data` P40, P46)
+  refuses a place of any other kind, by its word:  a web server is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
 
 ## Sites
 

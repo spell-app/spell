@@ -28,6 +28,8 @@ if (spec.dom) await fakeDom()
 else headless()
 // a fresh state bag + event hub for the project, e.g. for `on card-click` -- as the app's runners do
 core.resetRuntime()
+// a place's key, `its key is the secret "GITHUB_TOKEN"`, from the environment:  this run is a server side (epic `data` T111)
+core.RUNTIME.keyFrom = (name) => process.env[name] || undefined
 // `--seed`, and the core contract:  the same random numbers every run, so a shuffle deals the same cards
 if (spec.seed !== undefined) core.seedRandom(spec.seed)
 // a test's lines in the language the program speaks, e.g. Spanish:  English when it has no messages
