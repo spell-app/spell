@@ -45,6 +45,9 @@ end every turn with `epic turn end` ([the `epic/` folder's AGENTS.md](epic/AGENT
     - each merged in with its history:  [the merge script](tools/one-repo/one-repo.ts)
     - each old commit's new SHA:  `tools/one-repo/commit-map-<folder>.txt`
 - ONE npm package, `spell` (Q35;  unscoped, Q36):  its root [package.json](package.json), one version.
+  - Its published form is lean (epic `epic-engine` P66):  npm installs only what the `spell` and `epic` commands need.
+    Every other dependency is listed in `"spellPublish": { "optionalPeers" }`.
+    A new dependency those commands don't import goes on that list;  the scratch install's size limit catches one that doesn't.
   - Every file is imported by ONE name, from anywhere:  the package's name and the file's path
     under `src/`, no extension (`spell/util/string`, `spell/server/page`, `spell/element`);
     a big folder's adds the folder (`spell/ui/components/ui-button`, `spell/parser/parser`).
@@ -153,7 +156,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
     `spell help` lists them, grouped by folder.
   - A word two folders both want goes under each one's short name (`spell parser check`, `spell app check`).
 - `spell publish` publishes three packages:
-  - `spell`:  the one package, the kit and every folder, built into `dist/<folder>/`
+  - `spell`:  the one package, the kit and every folder, built into `dist/<folder>/`;  it holds the epic command too,
+    so `npx spell@next epic init` needs nothing else
   - `spell-ui`:  Spell UI's Vite library build, the element code inside (Q63)
   - `spell-epic`:  the epic plugin, its parts at its root, depending on `spell` (Q64)
   - spell-parser and spell-app are held names, not published again (Q65).

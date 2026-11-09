@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { PassThrough } from "node:stream"
 import { describe, expect, test } from "vite-plus/test"
 
@@ -90,5 +93,49 @@ describe("choose()", () => {
     input.write("\x1b")
     await new Promise((resolve) => setTimeout(resolve, 600))
     expect(await answer).toBe("public")
+  })
+})
+
+describe("missingAddOnMessage() (epic-engine P66)", () => {
+  const missing = (name: string) =>
+    Object.assign(new Error("Cannot find package '" + name + "' imported from /x/dist/y.js"), {
+      code: "ERR_MODULE_NOT_FOUND"
+    })
+
+  function withKit(work: (kit: string) => void): void {
+    const kit = mkdtempSync(join(tmpdir(), "spell-addons-"))
+    writeFileSync(
+      join(kit, "package.json"),
+      JSON.stringify({
+        peerDependencies: { heavy: "^1.2", "@scope/thing": "2.0.0", needed: "1" },
+        peerDependenciesMeta: { heavy: { optional: true }, "@scope/thing": { optional: true } }
+      })
+    )
+    try {
+      work(kit)
+    } finally {
+      rmSync(kit, { recursive: true, force: true })
+    }
+  }
+
+  test("a package left out:  every add-on, on one line to paste, quoted where a shell needs it", () => {
+    withKit((kit) => {
+      const message = CLI.missingAddOnMessage(missing("heavy"), kit)!
+      expect(message).toContain("This needs heavy")
+      expect(message).toContain('npm install spell@next "heavy@^1.2" @scope/thing@2.0.0')
+      expect(message).not.toContain("needed")
+    })
+  })
+
+  test("a subpath of a scoped package names the package", () => {
+    withKit((kit) => expect(CLI.missingAddOnMessage(missing("@scope/thing/deep"), kit)).toContain("@scope/thing"))
+  })
+
+  test("anything else stays what it was", () => {
+    withKit((kit) => {
+      expect(CLI.missingAddOnMessage(missing("needed"), kit)).toBeUndefined()
+      expect(CLI.missingAddOnMessage(new Error("boom"), kit)).toBeUndefined()
+      expect(CLI.missingAddOnMessage(missing("heavy"), join(kit, "nowhere"))).toBeUndefined()
+    })
   })
 })

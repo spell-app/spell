@@ -213,7 +213,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
-| `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
+| `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, which the published `spell` ships too, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -278,6 +278,9 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 - `spell publish`:  three packages, `spell` first (epic `repo-split` Q65).
   - `spell`:  the ONE package, the kit's `src/` and every folder's, built into `dist/<folder>/`
     (`spell/ui/core` is `dist/ui/core.js`).
+    - Lean by default (epic `epic-engine` P66):  npm installs only what the `spell` and `epic` commands need.
+      The rest (Monaco, Solid, Vite+ ...) publishes as optional peers, the kit's `"spellPublish": { "optionalPeers" }`.
+    - A command that needs one prints the `npm install spell@next ...` line to paste.
   - `spell-ui`:  Spell UI on its own, its Vite library build, with the element code inside.
   - `spell-epic`:  the epic plugin for Claude Code, its parts at its root, its code `spell`'s.
   - The code is built to JavaScript, one file per source file, so every name its `exports` gives still finds its file;
@@ -286,8 +289,11 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     no `private`, `workspaces`, scripts or dev dependencies;  the checkout's own never changes.
   - One version for all, the kit's `package.json` `version`.
   - Then `npm pack` into `dist-packs/`, the checks (built code only, every `exports` file packed, one `DOMElement`),
-    and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`,
-    `npx spell help`, `npx epic --help`, and the epic server started from the install, its page and pack answering.
+    and two scratch projects outside the checkout:
+    - lean, `spell` alone:  under a size limit, `npx spell help`, `spell epic init` starting the epic server with its page and
+      pack answering, an item saved, and the line to paste for a package left out
+    - whole, every package and the add-ons:  a node import, a Vite page that draws a `<ui-button>`, `npx spell help`,
+      a command that needs an add-on, `npx epic --help`, and the epic server again
   - Without `--dry-run`, and only when every check passed:  `npm publish --tag <tag>` for each, lowest first.
   - Logging in with a token, the tags, and what trips people up:  [Publishing to npm](npm.md).
   - The tag is `next` unless you say otherwise:  `npm install spell@next` gets the new version,
@@ -1352,7 +1358,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
   - `Ctrl-C` reaches the child, which stops cleanly, and we exit with its code
   - killed by a signal:  `128 +` its number, as a shell reports it
 - a repo's tool script:  `runTool()`, from the nearest checkout that has it, under `tsx` when its `ToolSpec` says so
-- `spell-epic`'s `epic`:  `runEpic()`, the nearest checkout's `epic/bin/epic`, else the installed `spell-epic`'s
+- `spell-epic`'s `epic`:  `runEpic()`, the nearest checkout's `epic/bin/epic` (the published `spell` has one too), else the
+  installed `spell-epic`'s
   (`publishedEpicBin()`), else the one on the `PATH`
   - `spell epic`:  `runSpellEpic()`, the same first two, else `npx -y spell-epic@<spell's version>`, never the `PATH`'s
 

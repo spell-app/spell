@@ -21,7 +21,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     NOT in the barrel:  importing it runs the command line.
   - [program.ts](program.ts) -- `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()`
   - [repos.ts](repos.ts) -- `spellRepos()`, `commandLists()`, `hook()` / `needHook()`
-  - [run.ts](run.ts) -- `runCommand()`, `rawArgsAfter()`, `out()` / `err()`, `relativePath()`;
+  - [run.ts](run.ts) -- `runCommand()` (`missingAddOnMessage()`, the line to paste for a package the npm install left out),
+    `rawArgsAfter()`, `out()` / `err()`, `relativePath()`;
     `ask()`, a question asked only in a real terminal;  `choose()`, a pick-one list there (arrows and Enter, or a
     number key;  no library:  the app's Ink pickers are a folder above);  both draw the question bold yellow
   - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`, `runSpellEpic()` (`spell epic`)
