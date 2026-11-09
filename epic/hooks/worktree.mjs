@@ -16,6 +16,8 @@
  *   - checked with CLI 2.1.287
  * - Names agree:  worktree `../<repo>.worktrees/<name>`, branch `<name>` (Claude's own adds `worktree-`).
  * - Branches from the LOCAL base branch (unpushed work included), not `origin/main`.
+ *   - where it takes only pull requests (`baseBranchProtected`), fast-forwarded from `origin` first when that's safe
+ *     (`BaseBranch.catchUp()`):  nothing else ever moves it there
  * - The folders and the branch come from the repo's `.epic/config.json5` (`EpicConfig`):
  *   `worktreesFolder`, `baseBranch`, `contentFolder`;  a key left out, the repo's own (`EpicConfig.defaultsFor()`).
  *   - `worktreesFolder` BESIDE the repo since epic `epic-eject` P8:  new worktrees go there,
@@ -132,14 +134,16 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from "node:pat
 
 import { Git } from "spell/server/Git"
 import { pathInside } from "spell/server/RealPath"
+import { BaseBranch } from "spell/epic/command/BaseBranch.ts"
 import { CheckoutPatches } from "spell/epic/command/CheckoutPatches.ts"
 import { CheckoutServers } from "spell/epic/command/CheckoutServers.ts"
 import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 
-/** This plugin's `bin/epic`:  `hooks/` is beside `bin/`. */
-const EPIC = join(dirname(import.meta.dirname), "bin", "epic")
+/** The `epic` command of the code this plugin runs on (`EngineFiles.bin`). */
+const EPIC = EngineFiles.bin
 
 /** The main checkout's git-ignored page server settings, copied into a new worktree (`copyLocalServer()`). */
 const LOCAL_SERVER = "page-server.local.json5"
@@ -231,6 +235,7 @@ class Worktree {
       return path
     }
     const reused = Worktree.hasBranch(root, name)
+    if (!reused) Worktree.catchUpBase(root, config)
     const args = reused ? [path, name] : ["-b", name, path, config.baseBranch]
     console.error(`worktree hook:  git worktree add ${args.join(" ")}`)
     mkdirSync(dirname(path), { recursive: true })
@@ -287,8 +292,10 @@ class Worktree {
         console.error(`worktree hook:  reusing ${worktree}`)
         continue
       }
-      const base = new EpicConfig(main).baseBranch
+      const repoConfig = new EpicConfig(main)
+      const base = repoConfig.baseBranch
       const reused = Worktree.hasBranch(main, name)
+      if (!reused) Worktree.catchUpBase(main, repoConfig)
       const args = reused ? [worktree, name] : ["-b", name, worktree, base]
       console.error(`worktree hook:  ${repo}:  git worktree add ${args.join(" ")}`)
       mkdirSync(dirname(worktree), { recursive: true })
@@ -303,6 +310,18 @@ class Worktree {
     if (top.linkSessionFolders) for (const each of made) Worktree.linkSessions(each, top.main)
     if (top.installOnCreate && top.installCommand) Worktree.installAll(path, top)
     return path
+  }
+
+  /**
+   * A new worktree is cut from the LOCAL base branch:  where that takes only pull requests (`baseBranchProtected`),
+   * bring it up to date with `origin` first (`BaseBranch.catchUp()`), so the worktree starts from what GitHub merged.
+   * - can't, safely (offline, diverged, uncommitted changes):  one line on stderr, and the worktree is cut as it is
+   * - NEVER throws
+   */
+  static catchUpBase(root, config) {
+    if (!config.baseBranchProtected) return
+    const { line } = BaseBranch.catchUp(root, config.baseBranch)
+    if (line) console.error(`worktree hook:  ${line}`)
   }
 
   /**

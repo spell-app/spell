@@ -651,6 +651,11 @@ than just being able to move on").
        the repo's text-rewriting skill (spell-app's `/fussbudget`) on the files the phase changed,
        and the guide and the READMEs the phase made untrue brought in line, in the readme voice
        ("6. Doc Review"), before the commit.
+     - `epic config baseBranchProtected` prints `true`:  the base branch takes only pull requests, so `epic merge` refuses
+       and steps 1-2 below don't apply.
+       No asking, as below:  `epic worktree merge-main`, `git push -u origin <name>`, and `gh pr create` unless one's open
+       ([the isolate skill](../isolate/SKILL.md), "Finish, when the base branch takes only pull requests").
+       The phase reaches `main` when GitHub merges it;  its changelog entry stays under "2. In worktrees" until then.
      - Then, no asking (the standing epic is the ask):
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
           - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A
@@ -1318,7 +1323,8 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
      - a rough size
    - one question per HIGH-LEVEL open choice (what, where, how far, when):  options side by side, one recommended.
      Not the small ones:  those are the plan's.
-   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, from the kit's root
+   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, run from the plugin's own folder (`${CLAUDE_PLUGIN_ROOT}`), never
+     your repo's root (no `vp` there:  skip this step)
      ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
    - Then `epic ask show <name>/analysis --wait`:  Bash, in the background.
      It opens in the side bar's Review tab.

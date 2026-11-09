@@ -8,6 +8,7 @@ import { parseHTML } from "linkedom"
 import { RealPath } from "spell/server/RealPath"
 // By file:  the barrel brings every place and their server, which an `epic` command doesn't need
 import { ChunkFiles } from "spell/server/places/ChunkFiles"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { LayeredSettings } from "spell/epic/config/LayeredSettings"
@@ -125,7 +126,7 @@ export class PlanDocFiles {
     this.epics = join(this.content, "epics")
     this.template = template
     this.details = join(this.content, "pages", "details")
-    this.docsPackage = resolve(DOCS_TOOLS, "..", "..")
+    this.docsPackage = EngineFiles.root
     this.docsTools = DOCS_TOOLS
     // under the checkout the content is served in, which isn't this one for spell-epic's own epics (I22);  told its
     // served addresses, so `components/epics/` and `templates/` check as the folders they serve (I27)
@@ -912,8 +913,8 @@ export const EPIC_STATUSES = ["in progress", "future", "done"] as const
 /** One of `EPIC_STATUSES`. */
 export type EpicStatus = (typeof EPIC_STATUSES)[number]
 
-/** The checkout this file is in (`src/tool/` is two folders down):  the default root. */
-const CHECKOUT = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+/** The engine's folder (`EngineFiles.root`):  the default root. */
+const CHECKOUT = EngineFiles.root
 
 /** The docs tools beside this code:  `src/tools`. */
 const DOCS_TOOLS = fileURLToPath(new URL("../tools", import.meta.url))

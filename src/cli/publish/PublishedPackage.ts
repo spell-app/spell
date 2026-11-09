@@ -76,7 +76,8 @@ export class PublishedPackage {
   /**
    * One of the kit's folders, built into the ONE package:  its code into `dist/<folder>/`, its `files` into
    * `<folder>/`, and a `<folder>/package.json` naming its commands (`"spell": { "commands" }`), which the published
-   * kit finds by its `"spell": { "folders" }` (`kitFolders()`).
+   * kit finds by its `"spell": { "folders" }` (`kitFolders()`), and its `"pageServer"`, at the built paths:
+   * the folder's own settings stay readable (the epic server's route modules, `repoSettings()`).
    */
   private async stageFolder(folder: PublishedRepo): Promise<BuildReport> {
     const name = basename(folder.root)
@@ -86,16 +87,18 @@ export class PublishedPackage {
       mkdirSync(dirname(join(folderStage, file)), { recursive: true })
       cpSync(join(folder.root, file), join(folderStage, file), { recursive: true })
     }
+    const fromFolder = (path: string) => builtPath(path).replace(/^(\.\/)?dist\//, `../${DIST}/${name}/`)
     const entry = folder.manifest.spell as Record<string, string> | undefined
     const shipped = Object.entries(entry ?? {})
-      .map(([key, path]) => [key, builtPath(path).replace(/^(\.\/)?dist\//, `../${DIST}/${name}/`)] as const)
+      .map(([key, path]) => [key, fromFolder(path)] as const)
       .filter(([, path]) => existsSync(join(folderStage, path)))
     const manifest = {
       name: folder.manifest.name,
       version: this.version,
       private: true,
       type: "module",
-      ...(shipped.length && { spell: Object.fromEntries(shipped) })
+      ...(shipped.length && { spell: Object.fromEntries(shipped) }),
+      ...(folder.manifest.pageServer ? { pageServer: mapStrings(folder.manifest.pageServer, fromFolder) } : {})
     }
     mkdirSync(folderStage, { recursive: true })
     writeFileSync(join(folderStage, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`)

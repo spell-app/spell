@@ -239,8 +239,13 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - no `ExitWorktree` and back:  entering asks the person every time (epic `epic-engine` P12)
        - In Codex:  the same:  stay in the worktree's folder.
 - `/isolate done` in a standing epic's session:  say it stands, and ask first ("Stop standing, and finish?").
+- The base branch takes only pull requests (`epic config baseBranchProtected`):  `epic merge` refuses;  the epic skill's
+  step 5 says what a phase does instead.
 
 ## Finish:  `/isolate done`
+
+Read `epic config baseBranchProtected` first.
+It prints `true`:  steps 2, 4, 7 and 8 are the ones in "Finish, when the base branch takes only pull requests", below.
 
 0. Not in a worktree:  say so in one line, then offer to clean up.
    - Not in one:  the session's folder isn't a worktree's, in `.claude/worktrees/` or beside the repo.
@@ -412,6 +417,36 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - Not merged:  how to merge later (`git merge <name>` from the main checkout), then the same cleanup.
    - Agents' worktrees:  how many step 7b removed, and any it kept.
    - Then close the reply as "Closing line" below says.
+
+## Finish, when the base branch takes only pull requests
+
+`epic config baseBranchProtected` prints `true`:  `main` can't be pushed to, and `epic merge` refuses.
+These replace steps 2, 4, 7 and 8 of "Finish" above;  the other steps stand.
+
+2. Unmerged commits (`main..HEAD` not empty):  AskUserQuestion, listing the commits in the question.
+   - In Codex:  ask in the chat, the two options numbered.
+   - "Push `<name>` and open a pull request?", options "Push and open a pull request" and "Leave it".
+     No "Merge now":  nothing merges from here.
+   - "Leave it":  go on to step 5.
+   - On "Push and open a pull request":
+     - the changelog, if the repo keeps one:  this branch's entry, under "2. In worktrees":  it isn't merged yet
+     - `epic worktree merge-main`, so the pull request starts from what GitHub has:
+       it fast-forwards local `main` from `origin` first, when that's safe.
+       Conflicts:  step 3 above, with "Exit anyway" going on to step 5.
+     - `git push -u origin <name>`:  never `--force`, never `main`.
+       Refused:  say why, and stop here.
+     - `gh pr list --head <name> --state open --json number,url`:  one open already, the push updated it.
+       Else `gh pr create`, its title and body as step 4 says.
+     - No `gh`, or logged out:  print the `gh pr create` line to run.
+     - One line with the pull request's URL.
+4. Nothing more:  step 2 did it.
+   - The check step 4 makes above doesn't apply.
+     `git rev-list --count origin/main..main` not 0 means local `main` holds commits no pull request has:
+     say so in one line, and leave them.
+7. Nothing to merge here:  `epic session done` waits until the pull request is merged.
+8. One line, where the rest happens, then close the reply as "Closing line" below says:
+   "Once GitHub merges it:  `git pull` on main in the main checkout, then `epic worktree remove <name> --branches`."
+   - `--branches` deletes the branch if its pull request was merged, a squash included:  never unmerged work.
 
 ## Closing line
 

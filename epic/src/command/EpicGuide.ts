@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname } from "node:path"
+
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 
@@ -102,7 +104,7 @@ export type GuideTopic = {
 }
 
 /** The guide:  the epic skill's `guide.md`, in the plugin's `skills/epic/`. */
-const GUIDE_FILE = join(dirname(dirname(import.meta.dirname)), "skills", "epic", "guide.md")
+const GUIDE_FILE = EngineFiles.path("skills/epic/guide.md")
 
 /** A topic's heading:  `## build -- Build a phase`. */
 const TOPIC_HEADING = /^## ([\w-]+) -- (.+)$/m

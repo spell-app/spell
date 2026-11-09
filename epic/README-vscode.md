@@ -47,8 +47,9 @@ flowchart LR
 _Two jobs in one window:  the tabs show live pages from a server,
 and a session in the same window puts a page in one through the bridge._
 
-You build it from your clone:  it isn't on the Marketplace, and git ignores the built file,
-so a fresh clone has nothing to install until you've built it.
+`npx spell@next epic init` installs it for you, from the npm package.
+It isn't on the Marketplace, and git ignores the built file, so in a clone of Spell you build it first:
+a fresh clone has nothing to install until you have.
 
 **The views need no agent.**
 Any epic page opens from the Review tab's own list, with Claude switched off, on a plane included.
