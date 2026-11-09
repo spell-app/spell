@@ -519,7 +519,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     this.noteChanged(thing, { kind: "added" })
     const group = this.groupNumberFor(pending)
     const times = this.placesOrDie("saveNew").timesStampedOn(type, this.places!.placeForOrDie(placeName))
-    const now = new Date()
+    const now = this.nextStampTime()
     const stamps = Object.fromEntries(times.map((field) => [field, now.toISOString()]))
     this.writing(() =>
       pending.insert({
@@ -530,8 +530,18 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
         ...(group !== undefined && { group })
       })
     )
-    this.showStamps(thing, times, now)
+    // shown even where the place can't keep them:  what's added here stays on top until it's read again
+    this.showStamps(thing, (thing.constructor as { savedIn?: { times?: string[] } }).savedIn?.times ?? [], now)
   }
+
+  /** Now, later than any stamp this page made before:  things saved in one moment still have an order. */
+  private nextStampTime(): Date {
+    this.lastStampMs = Math.max(Date.now(), this.lastStampMs + 1)
+    return new Date(this.lastStampMs)
+  }
+
+  /** The last time it stamped, ms:  `nextStampTime()`. */
+  private lastStampMs = 0
 
   /** SIDE EFFECT:  `thing`'s `fields`, Spell's two times, say `now`:  reading in, so it's no change anybody made. */
   private showStamps(thing: SpellObject, fields: readonly string[], now: Date): void {

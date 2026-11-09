@@ -339,7 +339,6 @@ export class AtProtoPlace implements Place {
     return {
       kind: this.kind,
       idOf: ID_FIELD,
-      timesHeld: "every field",
       filter: "none",
       sort: "none",
       select: "none",

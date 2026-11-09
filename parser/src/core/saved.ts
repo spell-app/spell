@@ -602,20 +602,32 @@ class ProgramPlaces {
       placeName: name,
       collection,
       type: Class.name,
-      query: this.withTimesAsRowsCallThem(Class, select ? { ...query, select } : query)
+      query: this.withTimesAsRowsCallThem(Class, behind, select ? { ...query, select } : query)
     })
   }
 
-  /** `query`, a sort by `its creado` asking for the row's `created`:  a saved time's field has the same name in every language. */
-  private withTimesAsRowsCallThem(Class: SavedClass, query: ListQuery): ListQuery {
-    if (!query.sort?.length || !savedInOf(Class).times?.length) return query
-    const { sort } = query
+  /**
+   * `query`, as `behind` can take it where it names Spell's two times (epic `data` T57):
+   * - a sort by `its creado` asks for the row's `created`:  a saved time's field has the same name in every language
+   * - a place that can't hold one has no such field, and may refuse it:  neither asked for nor sorted by there
+   *   (the things are put in order here, those with none last)
+   */
+  private withTimesAsRowsCallThem(Class: SavedClass, behind: PlaceBehind, query: ListQuery): ListQuery {
+    const { times = [] } = savedInOf(Class)
+    if (!times.length) return query
     const schema = schemaOf(Class)
+    const { timesHeld } = behind.describe()
+    const fieldIn = (name: string) => schema.info(name)?.storedAs ?? name
+    const isTime = (name: string) => times.includes(fieldIn(name))
+    const isHeld = (name: string) => timesHeld === "every field" || !!timesHeld?.includes(fieldIn(name))
+    const { sort, select, ...rest } = query
     return {
-      ...query,
-      sort: sort.map((each) => {
-        const stored = schema.info(each.field)?.storedAs
-        return stored && savedInOf(Class).times!.includes(stored) ? { ...each, field: stored } : each
+      ...rest,
+      ...(select && { select: select.filter((name) => !isTime(name) || isHeld(name)) }),
+      ...(sort && {
+        sort: sort
+          .filter(({ field }) => !isTime(field) || isHeld(field))
+          .map((each) => (isTime(each.field) ? { ...each, field: fieldIn(each.field) } : each))
       })
     }
   }
