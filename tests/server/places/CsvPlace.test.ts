@@ -3,6 +3,7 @@ import { join } from "node:path"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { RemotePlace, Places, PlaceError, type PlaceConflict, type PlaceChange } from "spell/places"
+import { positionAtIndex } from "spell/places/positions"
 import { SRV } from "spell/server"
 import { CSV_SAVE_ROWS, CsvPlace, PlaceServer, type CsvSaveRowsAnswer } from "spell/server/places"
 import { serveHandler, type Served } from "spell/server/test/serve"
@@ -358,6 +359,25 @@ r-1,Soup,4,"Roast first, then blend.",top
       await expect(remote.apply([update("r-1", { title: "No" })], {})).rejects.toThrow(/can't be saved over/)
       await server.close()
     })
+  })
+})
+
+describe("CsvPlace, its ceiling and its positions (epic `data` T55)", () => {
+  test("a file past its rows or bytes is refused, naming the file", async () => {
+    const byRows = aFile(FIRST, { idColumn: "id" })
+    const small = new CsvPlace({ file: byRows.file, collection: RECIPES, idColumn: "id", ceiling: { rows: 2 } })
+    await expect(small.list(RECIPES, {}, {})).rejects.toMatchObject({
+      kind: "over the ceiling",
+      message: expect.stringContaining("recipes.csv")
+    })
+    const bySize = new CsvPlace({ file: byRows.file, collection: RECIPES, idColumn: "id", ceiling: { bytes: 10 } })
+    await expect(bySize.list(RECIPES, {}, {})).rejects.toMatchObject({ kind: "over the ceiling" })
+  })
+
+  test("positions still sort by text past 46,656 rows", () => {
+    const place = (index: number) => positionAtIndex(index, 5)
+    expect(place(46_655) < place(46_656)).toBe(true)
+    expect(place(46_656) < place(1_000_000)).toBe(true)
   })
 })
 

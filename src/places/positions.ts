@@ -81,9 +81,15 @@ function jitter(random: () => number): string {
   return digits + DIGITS[1 + Math.floor(random() * (DIGITS.length - 1))]!
 }
 
-/** The position an item at `index` of a list has until one's given it:  the same on every machine. */
-export function positionAtIndex(index: number): string {
-  return `${index.toString(36).padStart(3, "0")}1`
+/** How many digits a list's item's made-up position has:  3 holds 46,656 items, far more than a list keeps. */
+const INDEX_DIGITS = 3
+
+/**
+ * The position an item at `index` of a list has until one's given it:  the same on every machine.
+ * - `digits`:  how many to pad its place to:  positions of different widths don't sort together, so a list keeps to one.
+ */
+export function positionAtIndex(index: number, digits = INDEX_DIGITS): string {
+  return `${index.toString(36).padStart(digits, "0")}1`
 }
 
 /**
