@@ -46,7 +46,7 @@ function listOf(...items: unknown[]) {
 /** A thing that draws itself as its `name` in a `<b>`. */
 class Card extends Thing {
   draw() {
-    return h("b", () => this.name as string)
+    return h("b", () => (this as unknown as { name: string }).name) as never
   }
 }
 
@@ -79,7 +79,7 @@ describe("a list in braces", () => {
   })
 
   test("of things that draw:  each one draws", () => {
-    drawn(() => listOf(new Card({ name: "Ace" }), new Card({ name: "King" })))
+    drawn(() => listOf(new Card({ name: "Ace" } as never), new Card({ name: "King" } as never)))
     expect([...box.querySelectorAll("b")].map((card) => card.textContent)).toEqual(["Ace", "King"])
   })
 
