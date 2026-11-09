@@ -499,7 +499,8 @@ export class SpellxTokenizer extends P.Tokenizer {
 
     if (word.category === "note") {
       const note = word.kind as SP.SpellxNoteKind
-      const warning = word.isShortNote ? this.shortNoteWarning(word) : undefined
+      // `<stories>`, the short way, is how a page's stories are written:  nothing else reads that word (epic `mockup` P17)
+      const warning = word.isShortNote && note !== "stories" ? this.shortNoteWarning(word) : undefined
       if (closerAtEnd) {
         const token = this.prose(text, start, lineEnd, text.slice(head.end, closerAtEnd.start).trim(), note)
         if (closerAtEnd.word && !this.isWordFor(closerAtEnd.word, word))

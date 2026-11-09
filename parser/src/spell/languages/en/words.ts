@@ -184,7 +184,7 @@ export const englishWords: SP.LanguageWords = {
     // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
     // `<spell-description>`, `<spell-comment>`,
     // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
-    // and a page's stories, `<spell-stories>` (epic `mockup` P6):  what it must let people do
+    // and a page's stories, `<stories>` or `<spell-stories>` (epic `mockup` P6):  what it must let people do
     notes: { description: "description", comment: "comment", "property-editor": "property editor", stories: "stories" },
     handlers: {
       on: "on",
@@ -255,6 +255,7 @@ export const englishWords: SP.LanguageWords = {
       tab: "tab",
       tags: "tags",
       thumbnail: "thumbnail",
+      live: "live",
       row: "row",
       column: "column",
       color: "color"
@@ -324,9 +325,12 @@ export const englishWords: SP.LanguageWords = {
       sitePageTags: ", tagged {quoted tags}",
       sitePageState: ", {state}",
       sitePageThumbnail: ", thumbnail {quoted thumbnail}",
+      sitePageLive: ", live {quoted live}",
       siteCardPlace: ", in row {row} column {column}",
       siteCardColor: ", colored {color}",
       siteOverlay: "it has {a words} {words}",
+      siteOverlayOf: { dialog: "it has {a words} {words} dialog", sidebar: "it has {a words} {words} sidebar" },
+      siteOverlayWords: "dialog|modal|sidebar|flyout",
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",

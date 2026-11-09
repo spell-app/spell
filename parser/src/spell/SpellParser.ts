@@ -407,7 +407,12 @@ export class SpellParser extends P.Parser {
     if (this.form !== "spellx") return undefined
     const name = SP.alonePageName(text, this.language ?? SP.Language.default)
     if (!name) return undefined
-    return new SP.AlonePage(this, name, SP.alonePageProperties(text, this.language ?? SP.Language.default), path)
+    return new SP.AlonePage(
+      this,
+      SP.plainPartName(name),
+      SP.alonePageProperties(text, this.language ?? SP.Language.default),
+      path
+    )
   }
 
   /** A clone of us, as `P.Parser.clone()`, but none of our twins:  a family is one project's (`twinFor()`). */

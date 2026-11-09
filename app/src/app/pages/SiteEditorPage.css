@@ -153,12 +153,7 @@
       cursor: grab;
       touch-action: none;
     }
-    .words {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
+
     textarea {
       field-sizing: content;
       resize: none;
@@ -173,17 +168,7 @@
       border: 1px solid var(--spell-pane-border-color);
       border-radius: var(--ui-radius-s, 4px);
     }
-    textarea.details {
-      font-size: 12px;
-      color: var(--ui-text-muted);
-    }
-    /*
-     * an empty details field shows only on the story being pointed at or typed in, not a hint under every story;
-     * a story just added shows it too, its words still to write
-     */
-    li:not(:hover, :focus-within):has(textarea.text:not(:placeholder-shown)) textarea.details:placeholder-shown {
-      display: none;
-    }
+
     /* a story done:  its words struck, quiet */
     li.done textarea.text {
       text-decoration: line-through;
