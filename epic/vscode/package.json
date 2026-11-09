@@ -65,13 +65,13 @@
       },
       {
         "command": "spellEpic.toolbarDivider1",
-        "title": " ",
+        "title": "Divider",
         "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
         "enablement": "false"
       },
       {
         "command": "spellEpic.toolbarDivider2",
-        "title": " ",
+        "title": "Divider",
         "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
         "enablement": "false"
       },
