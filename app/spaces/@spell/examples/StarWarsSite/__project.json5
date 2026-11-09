@@ -1,7 +1,6 @@
 {
   "title": "Star Wars Site",
   "description": "The whole Star Wars example as a site, and its click-through mockup in the Mockup theme:  a list page and a page for one of each of its six collections (films, people, planets, species, vehicles, starships), each at its own address with what it shows in it (/films/:film);  a person opens in a sidebar, a film takes a review in a dialog, kept on this device, and the settings open from every page",
-  "readsOtherPeoplesServers": true,
   "imports": [
     {
       "path": "@spell/examples/StarWars",

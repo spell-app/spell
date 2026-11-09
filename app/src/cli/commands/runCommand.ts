@@ -208,6 +208,7 @@ export async function runCompiled(
  * - `pauses`:  `false`, a pause doesn't wait -- Python only, so far (`runPython()`).
  * - `messages`:  what the core says, in the language the program speaks, e.g. a test's lines -- see `CLI.RunSpec`.
  * - `env`:  more of its environment -- Python only, so far (`runPython()`).
+ * - `offline`:  no server is ever asked -- see `CLI.RunSpec`.  Javascript only, so far.
  * - A `.py` (the `py` target's Python) runs under Python instead -- see `runPython()`.
  * - Used by the core contract test, `contract.test.ts`, to run each target's code the same way.
  */
@@ -225,6 +226,7 @@ export async function runCode(
     reports,
     sourceMap,
     env,
+    offline,
     ...options
   }: CLI.TestOptions & {
     extension?: string
@@ -237,6 +239,7 @@ export async function runCode(
     /** the program's source map (its `.spell.js.map`):  inlined into the temp file, so a stack names spell lines */
     sourceMap?: string
     env?: Record<string, string>
+    offline?: boolean
   } = {}
 ): Promise<ChildResult> {
   if (extension === PY) {
@@ -263,7 +266,8 @@ export async function runCode(
       dom,
       seed: options.seed,
       messages,
-      reports
+      reports,
+      offline
     }
     return await runChild(spec, capture)
   } finally {
