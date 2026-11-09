@@ -148,7 +148,10 @@ function headless() {
  *   and what it prints shouldn't follow what they say.
  */
 function noNetwork() {
-  globalThis.fetch = (input) => Promise.reject(new TypeError(`fetch failed:  this run is offline (${String(input)})`))
+  globalThis.fetch = (input) => {
+    const address = input instanceof Request ? input.url : input.toString()
+    return Promise.reject(new TypeError(`fetch failed:  this run is offline (${address})`))
+  }
   Reflect.deleteProperty(globalThis, "WebSocket")
 }
 
