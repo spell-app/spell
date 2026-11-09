@@ -23,6 +23,7 @@ const ID = "id"
  * - A field named to be our `id` (`its id is its "login"`) reads as itself too, `login`,
  *   unless the row has one already.
  * - Before it's read anything:  `style`, how the server spells names (`it writes names like "hair_color"`), else ours.
+ * - A sheet's columns, known before a row is read:  `FieldNames.ofColumns()`.
  * - NEVER throws.
  ****************/
 export class FieldNames {
@@ -39,14 +40,41 @@ export class FieldNames {
     for (const [our, their] of Object.entries(named)) this.pair(our, their)
   }
 
+  /**
+   * The names of a sheet's `columns`, each known before anything's written.
+   * - `named`:  the columns a program's lines name, by our names
+   * - `asWritten`:  the fields that keep their name:  the id column, which a place's `idOf` says as it's written
+   */
+  static ofColumns(
+    columns: Iterable<string>,
+    named: Readonly<Record<string, string>> = {},
+    asWritten: Iterable<string | undefined> = []
+  ): FieldNames {
+    const names = new FieldNames(named)
+    for (const field of asWritten) if (field !== undefined) names.pair(field, field)
+    names.note(columns)
+    return names
+  }
+
+  /** Remember how each of `columns` is spelled, for writing:  a sheet's header, or a schema. */
+  note(columns: Iterable<string>): void {
+    for (const column of columns) if (column) this.ourName(column)
+  }
+
+  /** Our name for the server's field `their`;  its spelling remembered, for writing. */
+  ourName(their: string): string {
+    const our = this.ours.get(their) ?? ourNameFor(their)
+    if (!this.theirs.has(our)) this.pair(our, their)
+    return our
+  }
+
   /** `row` from the server, each field by our name;  each spelling remembered, for writing. */
   fromServer(row: Readonly<Record<string, unknown>>): Record<string, unknown> {
     const read: Record<string, unknown> = {}
     for (const [their, value] of Object.entries(row)) {
-      const our = this.ours.get(their) ?? ourNameFor(their)
+      const our = this.ourName(their)
       // two of the server's spellings for one of ours:  the one named, else the first, wins
-      if (our in read) continue
-      if (!this.theirs.has(our)) this.pair(our, their)
+      if (our in read && this.theirs.get(our) !== their) continue
       read[our] = value
     }
     // a field that's its id is still itself too:  GitHub's user `login`, Wikipedia's `title`, which a page shows

@@ -124,7 +124,7 @@ function isBlank(cell: unknown): boolean {
 }
 
 /** `cell` as a number, if it reads as one. */
-function numberOrText(cell: unknown): unknown {
+export function numberOrText(cell: unknown): unknown {
   if (typeof cell !== "string" || !cell.trim()) return cell
   const number = Number(cell)
   return Number.isNaN(number) ? cell : number

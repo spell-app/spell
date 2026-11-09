@@ -42,7 +42,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from spell_core.lists import List
-from spell_core.place_kinds import ID_FIELD, Change, PlaceBehind, PlaceError, Row, place_behind
+from spell_core.place_kinds import ID_FIELD, Change, PlaceBehind, PlaceError, Row, javascript_name, place_behind
 from spell_core.things import (
     CHANGE_WATCHERS,
     TYPE_KEY,
@@ -58,8 +58,6 @@ if TYPE_CHECKING:
 
 # How a reference to a thing kept elsewhere is written in a row:  `{"$ref": "Planet#tatooine"}`.
 REF_KEY = "$ref"
-# Words of a Python name, as javascript joins them:  `device_count` is `deviceCount`.
-SNAKE_WORD = re.compile(r"_([a-z0-9])")
 # A javascript name's capitals, as Python splits them:  `deviceCount` is `device_count`.
 CAMEL_CAPITAL = re.compile(r"(?<!^)(?=[A-Z])")
 # The most digits after the point a number shown with commas keeps, as javascript's `toLocaleString()` does.
@@ -425,11 +423,6 @@ def _number_in(text: str) -> float | int | str:
     except ValueError:
         return text
     return int(number) if number.is_integer() else number
-
-
-def javascript_name(name: str) -> str:
-    """Python's `name` as javascript names it:  `device_count` is `deviceCount`, `class_` is `class`."""
-    return SNAKE_WORD.sub(lambda match: match.group(1).upper(), name.rstrip("_"))
 
 
 def python_name(name: str) -> str:

@@ -11,8 +11,10 @@ import {
   type PlaceCapabilities,
   type PlaceChange,
   type PlaceContext,
+  type PlaceLines,
   type PlaceRow
 } from "spell/places/places.types"
+import { FieldNames } from "spell/places/FieldNames"
 import { WORKBOOK_STYLES_NOTE, Workbook, type SheetJs } from "spell/places/Workbook"
 import { SRV } from "spell/server"
 
@@ -40,6 +42,8 @@ import { contentVersion } from "./contentVersion"
  *   - SheetJS is loaded first (`Workbook.sheetJs()`), so what happens under the lock is synchronous, as `CsvPlace`'s is.
  * - A workbook it can't read, or a sheet with a blank or repeated id, refuses a write, and says so, rather than be saved over.
  * - Reads the whole file each time, so a save in Excel is in the next read;  polled, as a file has nothing to say by itself.
+ * - Each column is a field by the program's name for it, reading and writing (`FieldNames`):
+ *   a line's (`withLines()`), else by its words.
  * - Node only.  Takes an absolute path:  who may name which file is whoever makes the place.
  ****************/
 export class ExcelPlace implements Place {
@@ -49,13 +53,42 @@ export class ExcelPlace implements Place {
   private readonly idColumn: string | undefined
   /** The columns that hold numbers. */
   private readonly numbers: readonly string[] | undefined
+  /** Each collection's columns a program's lines name. */
+  private readonly collections: PlaceLines["collections"]
   /** Each row's version when it was last read, by its collection, then its id. */
   private versions = new Map<string, Map<string, string>>()
+  /** The same file as each program's lines describe it. */
+  private readonly withThoseLines = new Map<string, ExcelPlace>()
 
-  constructor({ file, idColumn, numbers }: ExcelPlaceProps) {
+  constructor({ file, idColumn, numbers, collections }: ExcelPlaceProps) {
     this.file = file
     this.idColumn = idColumn
     this.numbers = numbers
+    this.collections = collections
+  }
+
+  /** The same file with the columns a program's lines name, made once for each description. */
+  withLines({ collections }: PlaceLines): ExcelPlace {
+    if (!collections || !Object.values(collections).some(({ fields }) => fields)) return this
+    const name = JSON.stringify(collections)
+    let place = this.withThoseLines.get(name)
+    if (!place) {
+      const { file, idColumn, numbers } = this
+      place = new ExcelPlace({
+        file,
+        collections,
+        ...(idColumn !== undefined && { idColumn }),
+        ...(numbers && { numbers })
+      })
+      this.withThoseLines.set(name, place)
+    }
+    return place
+  }
+
+  /** The names of the columns of `collection`'s sheet:  none yet for a new workbook's first sheet. */
+  private namesOf(workbook: Workbook, collection: string): FieldNames {
+    const columns = workbook.sheets.length ? workbook.rowsOf(collection).columns : []
+    return FieldNames.ofColumns(columns, this.collections?.[collection]?.fields, [this.idColumn])
   }
 
   /** What it can do:  all at once.  With no id column it can only add:  nothing says which row a change means. */
@@ -91,7 +124,13 @@ export class ExcelPlace implements Place {
     this.holdVersions(workbook, collection)
     const why = workbook.whyUnclear(collection)
     const all = why ? [...notes, why] : notes
-    return { rows, ...this.versionAnswer(), handled: {}, ...(all.length && { notes: all }) }
+    const names = this.namesOf(workbook, collection)
+    return {
+      rows: rows.map((row) => names.fromServer(row)),
+      ...this.versionAnswer(),
+      handled: {},
+      ...(all.length && { notes: all })
+    }
   }
 
   /** The version of this row when it was last read. */
@@ -155,9 +194,10 @@ export class ExcelPlace implements Place {
     let bytes: Uint8Array | undefined
     for (const [collection, ofIt] of byCollection) {
       const rows = this.rowsToWrite(workbook, collection)
+      const names = this.namesOf(workbook, collection)
       for (const change of ofIt) {
-        const row = this.madeIn(rows, workbook, change)
-        if (row) answered.push(row)
+        const row = this.madeIn(rows, workbook, change, names)
+        if (row) answered.push(names.fromServer(row))
       }
       bytes = workbook.saved(collection, rows).bytes
     }
@@ -185,10 +225,10 @@ export class ExcelPlace implements Place {
   }
 
   /** Make `change` in `rows`:  the row, unless it's gone.  - throws as `apply()` */
-  private madeIn(rows: PlaceRow[], workbook: Workbook, change: PlaceChange): PlaceRow | undefined {
+  private madeIn(rows: PlaceRow[], workbook: Workbook, change: PlaceChange, names: FieldNames): PlaceRow | undefined {
     const { kind, collection, id, version } = change
     const { idColumn } = this
-    const fields = fieldsIn(change)
+    const fields = names.toServer(fieldsIn(change))
     if (idColumn === undefined) {
       if (kind !== "insert") {
         this.refuse(
@@ -249,6 +289,8 @@ export type ExcelPlaceProps = {
   idColumn?: string
   /** The columns that hold numbers, for text that reads as one:  a workbook's cells say so themselves. */
   numbers?: readonly string[]
+  /** Each collection's columns a program's lines name:  `{ recipes: { fields: { title: "Dish Name" } } }`. */
+  collections?: PlaceLines["collections"]
 }
 
 /** What `change` writes to cells:  nothing of the engine's. */
