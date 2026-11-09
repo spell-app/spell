@@ -17,6 +17,20 @@ From that line, the agent:
 
 _An epic page:  everything on it has a short id, and buttons for answering it._
 
+## Contents
+
+- Start here:  [why you'd want it](#why-youd-want-it) · [how you'll use it](#how-youll-use-it) · [try it](#try-it)
+- Setting up:
+  - [on GitHub or GitLab](#setting-it-up--one-command-and-an-extension)
+  - **[on GitLab:  what's different](#on-gitlab)**
+  - [when main takes only pull or merge requests](#when-main-takes-only-pull-requests)
+- Working with others:  [joining, syncing, two people on one page](#working-with-others) · [with Codex](#with-codex)
+- Reference:
+  - [where the plans live](#the-plans-live-beside-your-repo-not-in-it) · [the epic folder](#the-epic-folder--your-plans-in-a-repo-of-their-own)
+  - [your settings](#your-settings) · [the config file](#the-config-file)
+  - [worktrees](#worktrees--beside-your-repo-one-per-epic) · [your AGENTS.md](#your-agentsmd-fills-in-the-rest)
+  - [the epic server](#one-epic-server-for-the-machine) · [what's still Spell-shaped](#whats-still-spell-shaped)
+
 ## Why you'd want it
 
 If you've used a coding agent on anything bigger than a small fix, you've met these:
@@ -62,10 +76,26 @@ A question or a bug has an id you can say out loud:  "approve J3" works in the c
 
 ## Try it
 
-In your repo, a git repo with at least one commit:
+You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's command, logged in.
+
+**On GitHub:**
 
 ```sh
-npx spell@next epic init
+brew install gh
+gh auth login
+```
+
+**On GitLab** ([what's different](#on-gitlab)):
+
+```sh
+brew install glab
+glab auth login                          # your own GitLab:  glab auth login --hostname git.acme.com
+```
+
+Then in your repo, a git repo with at least one commit:
+
+```sh
+npx spell@next epic init                 # a self-hosted GitLab whose address doesn't say so:  add --host gitlab
 ```
 
 It asks your name and a colour, installs the Claude Code plugin and the VS Code extension,
@@ -144,17 +174,25 @@ You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's co
 ([On GitLab](#on-gitlab)).
 These steps are for the FIRST person on a team;  everyone after them:  "A teammate joins", below.
 
-### 1. GitHub's command, logged in
+### 1. Your code host's command, logged in
 
 `epic init` uses it to make the team's epic repo, so install it first.
-On macOS, with Homebrew:
+On macOS, with Homebrew, on GitHub:
 
 ```sh
 brew install gh
 gh auth login
 ```
 
-- Other systems:  https://cli.github.com.
+Or on GitLab:
+
+```sh
+brew install glab
+glab auth login                          # your own GitLab:  glab auth login --hostname git.acme.com
+```
+
+- GitLab's differences, self-hosted included:  [On GitLab](#on-gitlab).
+- Other systems:  https://cli.github.com, https://gitlab.com/gitlab-org/cli.
 - `gh auth login` asks a few questions and opens your browser;  SSH or HTTPS, as you like:
   the epic repo's address follows your choice.
 - Without it, `epic init` still sets everything else up, and says how to get it.
@@ -334,6 +372,37 @@ Its epic page, `~/www/my-app.epics/epics/seo/seo.plan.html`, opens in the Review
 
 What happens from there:  [the epic engine's front page](epic/README.md).
 
+## <a id="on-gitlab"></a>On GitLab
+
+`epic init` works on GitLab, self-hosted too, as it does on GitHub:  the shared epic repo made, and a setup merge request
+where `main` is protected.
+**So far this has run only against a stand-in `glab`**:  a script that answers as GitLab's API documents,
+with real `git` pushes to a local repo whose hook refuses `main`.
+No real GitLab has been tried yet, so expect rough edges and tell us.
+
+You need GitLab's command, `glab`, logged in:
+
+```sh
+brew install glab                        # other systems:  https://gitlab.com/gitlab-org/cli
+glab auth login                          # gitlab.com
+glab auth login --hostname git.acme.com  # your own GitLab
+```
+
+- **Which host:**  `codeHost` in `.epic/config.json5`, `"github"` or `"gitlab"`.
+  Left out, it's read off the `origin` address each time:  a host with `gitlab` in it is GitLab, `github.com` GitHub,
+  anything else GitHub.
+- **A self-hosted GitLab whose address doesn't say so** (`git.acme.com`):  `epic init --host gitlab`.
+  In a terminal it asks;  with no terminal it stays on GitHub and says so in one line.
+- **Groups and subgroups:**  the epic repo goes under the group your code is in (`group/sub/my-app.epics`),
+  else your own namespace.
+- **The epic repo must take pushes from teammates, every turn.**
+  GitLab protects a new project's default branch, so Developers can't push.
+  `epic init` unprotects it right after the first push.
+  If it can't (no right to), it says so in one line:  unprotect it in the project's
+  Settings › Repository › Protected branches, or nobody else can sync.
+  An epic repo you made yourself (`--remote`) is yours to open up.
+- **Commit links** on the epic pages go to GitLab's `/-/commit/<sha>`.
+
 ## <a id="working-with-others"></a>Working with others
 
 Everyone runs their own Claude Code, their own epic server and their own worktrees.
@@ -500,37 +569,6 @@ To push a branch and open its pull request by hand:  `epic pr <name>` ([the CLI 
 git pull
 epic worktree remove <name> --branches
 ```
-
-## <a id="on-gitlab"></a>On GitLab
-
-`epic init` works on GitLab, self-hosted too, as it does on GitHub:  the shared epic repo made, and a setup merge request
-where `main` is protected.
-**So far this has run only against a stand-in `glab`**:  a script that answers as GitLab's API documents,
-with real `git` pushes to a local repo whose hook refuses `main`.
-No real GitLab has been tried yet, so expect rough edges and tell us.
-
-You need GitLab's command, `glab`, logged in:
-
-```sh
-brew install glab                        # other systems:  https://gitlab.com/gitlab-org/cli
-glab auth login                          # gitlab.com
-glab auth login --hostname git.acme.com  # your own GitLab
-```
-
-- **Which host:**  `codeHost` in `.epic/config.json5`, `"github"` or `"gitlab"`.
-  Left out, it's read off the `origin` address each time:  a host with `gitlab` in it is GitLab, `github.com` GitHub,
-  anything else GitHub.
-- **A self-hosted GitLab whose address doesn't say so** (`git.acme.com`):  `epic init --host gitlab`.
-  In a terminal it asks;  with no terminal it stays on GitHub and says so in one line.
-- **Groups and subgroups:**  the epic repo goes under the group your code is in (`group/sub/my-app.epics`),
-  else your own namespace.
-- **The epic repo must take pushes from teammates, every turn.**
-  GitLab protects a new project's default branch, so Developers can't push.
-  `epic init` unprotects it right after the first push.
-  If it can't (no right to), it says so in one line:  unprotect it in the project's
-  Settings › Repository › Protected branches, or nobody else can sync.
-  An epic repo you made yourself (`--remote`) is yours to open up.
-- **Commit links** on the epic pages go to GitLab's `/-/commit/<sha>`.
 
 ## <a id="with-codex"></a>With Codex (or another agent)
 
