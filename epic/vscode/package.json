@@ -64,6 +64,18 @@
         "icon": "$(checklist)"
       },
       {
+        "command": "spellEpic.toolbarGap1",
+        "title": " ",
+        "icon": "$(blank)",
+        "enablement": "false"
+      },
+      {
+        "command": "spellEpic.toolbarGap2",
+        "title": " ",
+        "icon": "$(blank)",
+        "enablement": "false"
+      },
+      {
         "command": "spellEpic.reviewView.back",
         "title": "Review:  Back",
         "category": "Spell Epic",
@@ -220,6 +232,16 @@
     "menus": {
       "view/title": [
         {
+          "command": "spellEpic.toolbarGap1",
+          "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
+          "group": "navigation@5"
+        },
+        {
+          "command": "spellEpic.toolbarGap2",
+          "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
+          "group": "navigation@8"
+        },
+        {
           "command": "spellEpic.docView.back",
           "when": "view == spellEpic.docView",
           "group": "navigation@1"
@@ -237,22 +259,22 @@
         {
           "command": "spellEpic.docView.home",
           "when": "view == spellEpic.docView",
-          "group": "navigation@4"
+          "group": "navigation@6"
         },
         {
           "command": "spellEpic.docView.showWindowEpic",
           "when": "view == spellEpic.docView",
-          "group": "navigation@5"
+          "group": "navigation@7"
         },
         {
           "command": "spellEpic.docView.restartServer",
           "when": "view == spellEpic.docView",
-          "group": "navigation@6"
+          "group": "navigation@10"
         },
         {
           "command": "spellEpic.docView.openExternal",
           "when": "view == spellEpic.docView",
-          "group": "navigation@7"
+          "group": "navigation@4"
         },
         {
           "command": "spellEpic.reviewView.back",
@@ -272,22 +294,22 @@
         {
           "command": "spellEpic.reviewView.home",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@4"
+          "group": "navigation@6"
         },
         {
           "command": "spellEpic.reviewView.restartServer",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@6"
+          "group": "navigation@10"
         },
         {
           "command": "spellEpic.reviewView.openExternal",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@7"
+          "group": "navigation@4"
         },
         {
           "command": "spellEpic.reviewView.openEpic",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@5"
+          "group": "navigation@7"
         },
         {
           "command": "spellEpic.detailsView.back",
@@ -307,22 +329,22 @@
         {
           "command": "spellEpic.detailsView.list",
           "when": "view == spellEpic.detailsView",
-          "group": "navigation@4"
+          "group": "navigation@6"
         },
         {
           "command": "spellEpic.detailsView.restartServer",
           "when": "view == spellEpic.detailsView",
-          "group": "navigation@6"
+          "group": "navigation@10"
         },
         {
           "command": "spellEpic.detailsView.openExternal",
           "when": "view == spellEpic.detailsView",
-          "group": "navigation@7"
+          "group": "navigation@4"
         },
         {
           "command": "spellEpic.docView.inspect",
           "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
-          "group": "navigation@8"
+          "group": "navigation@9"
         }
       ],
       "webview/context": [
@@ -373,6 +395,14 @@
         }
       ],
       "commandPalette": [
+        {
+          "command": "spellEpic.toolbarGap1",
+          "when": "false"
+        },
+        {
+          "command": "spellEpic.toolbarGap2",
+          "when": "false"
+        },
         {
           "command": "spellEpic.docMenu.cut",
           "when": "false"
