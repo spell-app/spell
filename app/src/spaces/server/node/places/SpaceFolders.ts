@@ -884,6 +884,12 @@ export class SpaceFolders {
     return !(await this.takedowns.takenDownIn(address, person)).isWhole
   }
 
+  /** Does anyone at all read the space at `address`, signed in or not?  `false` for an address that's no space's. */
+  async isPublicSpace(address: string): Promise<boolean> {
+    const folder = this.spaceFolderAt(address)
+    return !!folder && (await folder.members.settings()).publicRead
+  }
+
   private spaceFolderAt(address: string): SpaceFolder | undefined {
     if (!SP.SpellLocation.isAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
     return this.folderAt(address)

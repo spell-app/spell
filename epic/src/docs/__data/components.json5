@@ -5325,7 +5325,7 @@
         "request",
         "quote"
       ],
-      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the ivory of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
+      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the faint violet of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
       "noun": "prompt",
       "attributes": [],
       "slots": [

@@ -711,6 +711,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           sign-in page, the same whether the org is there or not
         - Their lists come from `/api/cloud/home` and `/api/cloud/home/orgs/<org>`, only what the person asking may read
           (`SpaceFolders.mayReadSpace()`);  only an org has a home yet, so a team's or a person's space has no link
+        - Their look (epic `atmosphere` T62):  the org programs' top bar, Spell's name on the left, who's signed in on
+          the right as a drop-down with Sign out (or a Sign in button);  each space a card saying what it is (`kind`),
+          each program a card with its icon;  `cloudSignIn.html` draws the same bar with nothing on its right
       - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
     - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
       it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
