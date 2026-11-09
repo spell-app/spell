@@ -74,7 +74,6 @@ export const words = {
       draw: "draw it"
     },
     ReviewsPage: {
-      reviews: "reviews",
       draw: "draw it"
     },
     GalaxyGuide: {

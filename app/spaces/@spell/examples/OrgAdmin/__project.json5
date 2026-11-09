@@ -9,6 +9,10 @@
     {
       "path": "/OrgAdmin.spellml",
       "active": true
+    },
+    {
+      "path": "/OrgAdmin.css",
+      "active": true
     }
   ]
 }

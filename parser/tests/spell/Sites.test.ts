@@ -66,6 +66,73 @@ describe("a site", () => {
     expect(code).toContain('picture: "snapshots/a.png"')
   })
 
+  test("a card says its place in its section, and its colour;  a dialog under a page too (T31)", () => {
+    const { code, errors } = compiled(
+      [
+        'a "films page" is a page',
+        'a "film page" is a page',
+        'a "add film dialog" is a view',
+        "galaxy guide is a site:",
+        '\t- it has a "films page" at "/films", named "Films", colored blue',
+        '\t\t- it has a "film page" at "/films/one", in row 2 column 3',
+        '\t\t- it has a "add film dialog", in row 1 column 2, colored teal'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('color: "blue"')
+    expect(code).toContain("row: 2,")
+    expect(code).toContain("column: 3")
+    expect(code).toContain('name: "add film dialog"')
+    expect(code).toContain('color: "teal"')
+  })
+
+  test("in spellx, `row=`, `column=` and `color=` say the same, on a `<dialog>` under a `<page>` too (T31)", () => {
+    const { code, errors } = compiled(
+      [
+        '<spell-page "films page"/>',
+        '<spell-view "settings dialog"/>',
+        '<spell-site "galaxy guide">',
+        '\t<page "films page" address="/films" row="1" column="2" color="blue">',
+        '\t\t<dialog "settings dialog" row="1" column="3" color="teal"/>',
+        "\t</>",
+        "</spell-site>"
+      ],
+      "/Galaxy.spellml"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('color: "blue"')
+    expect(code).toContain("row: 1,")
+    expect(code).toContain('color: "teal"')
+    expect(code).toContain("static dialogs")
+  })
+
+  test("in Spanish:  `en la fila 2 columna 3`, `de color azul` (T31)", () => {
+    const { code, errors } = compiled(
+      [
+        'una "página de películas" es una página',
+        "galaxia es un sitio:",
+        '\t- tiene una "página de películas" en "/peliculas", en la fila 2 columna 3, de color azul'
+      ],
+      "/Galaxia.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('color: "blue"')
+    expect(code).toContain("column: 3")
+  })
+
+  test("a row counted from 0 is refused, saying why (T31)", () => {
+    const { errors } = compiled(
+      [
+        'a "films page" is a page',
+        "galaxy guide is a site:",
+        '\t- it has a "films page" at "/films", in row 0 column 2'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors.join("\n")).toContain("count from 1")
+  })
+
   test("in the cloud:  where it lives", () => {
     const { code, errors } = compiled(
       ['a "home page" is a page', "galaxy guide is a site in the cloud:", '\t- it has a home page at "/"'],

@@ -59,7 +59,7 @@ Keep, exactly:
 - every fact, number, name, command, path, caveat and link;  every section and its id (other pages link to them)
 - the markup:  <ui-section>, <ui-table>, <epic-*> and every other element and attribute stay as they are;
   you change the TEXT inside them, and may split a paragraph into a list or join two short ones
-- code blocks, tables' data, quotes of people ("Owen, 2026-10-10:  ..."), dated history (feeds, "before <date>" notes)
+- code blocks, tables' data, quotes of people ("2026-10-10:  ..."), dated history (feeds, "before <date>" notes)
 - anything between generated markers (index:start / index:end, areas:start / areas:end)
 - a guide's internal names:  these pages are for the team, so repos and tools are named as they are
 

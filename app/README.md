@@ -437,7 +437,7 @@ yarn ts    yarn lint    yarn format    yarn test    yarn review
 - `yarn review` runs them all, and FIXES lint and formatting as it goes.
 - `yarn test` is one Vitest run, a project per folder, then spaces' Python tests (pytest).
   - One folder's:  `yarn vp test run --project spaces`.
-    The projects:  `spaces`, `lsp`, `app:node`, `app:browser`, `cli`, `spell`.
+    The projects:  `spaces`, `lsp`, `app:node`, `app:integration`, `app:browser`, `cli`, `spell`.
 - Tests live in `tests/<folder>/`, at the same paths as the code they test:
   [projectGroups.ts](src/spaces/models/projectGroups.ts) is tested by
   [projectGroups.test.ts](tests/spaces/models/projectGroups.test.ts).

@@ -28,6 +28,18 @@ sitesEs.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["ol
   syntax: "((old:antigua|antiguo)|(new:nueva|nuevo)|(mocked:maquetada|maquetado)|(built:construida|construido))"
 })
 
+// el color de la tarjeta de una parte en el tablero del editor, uno de los de Spell UI
+sitesEs.addRule(
+  Wording.specialize({
+    ruleName: "site_card_color",
+    meanings: ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"]
+  }),
+  {
+    syntax:
+      "((red:rojo)|(orange:naranja)|(yellow:amarillo)|(olive:oliva)|(green:verde)|(teal:turquesa)|(blue:azul)|(violet:violeta)|(purple:morado)|(pink:rosa)|(brown:marrón)|(brown:marron)|(grey:gris))"
+  }
+)
+
 // the words naming a site's part, `of` / `de` included (epic `mockup` P3, T5)
 sitesEs.addRule(SitePartWords, {
   tests: [
@@ -113,34 +125,37 @@ sitesEs.addRule(CreateSite, {
   ]
 })
 
+/** Con lo que puede terminar la línea de cualquier parte:  su lugar en su sección del tablero del editor, y su color. */
+const CARD_DETAILS = "(, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})?"
+
 // una página del sitio, en su dirección:  `- tiene una página de película en "/peliculas/:pelicula", llamada "Película"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_it} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
+  syntax: `{type:subject_it} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... sin el sujeto, como se dice en español:  `- tiene una página de película en "/peliculas/:pelicula"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
+  syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // un diálogo o un panel del sitio:  `- tiene un diálogo de ajustes`, `- tiene un panel de sintaxis`
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_part_words}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_part_words} ${CARD_DETAILS}` })
 
 // ... sin el sujeto:  `- tiene un diálogo de ajustes`
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_part_words}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} ${CARD_DETAILS}` })
 
 // ... con el nombre entre comillas, como se nombra en español lo que lleva `de`:
 // `- tiene una "página de película" en "/peliculas/:película"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_it} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
+  syntax: `{type:subject_it} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? {with_nested_statements}?`
+  syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... y un diálogo o un panel:  `- tiene un "diálogo de ajustes"`, `- tiene un "panel de películas"`
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:quoted_member}` })
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:quoted_member}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:quoted_member} ${CARD_DETAILS}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} ${CARD_DETAILS}` })
 
 ////////////////
 // ## Sus páginas de no encontrada y de error (epic `mockup` P2)
@@ -157,10 +172,10 @@ sitesEs.addRule(Wording.specialize({ ruleName: "site_error_page", meanings: [] }
 })
 
 // `no` y `de` no caben en el nombre de un miembro:  cada una tiene su propia línea
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_not_found_page}` })
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_not_found_page}` })
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_error_page}` })
-sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_error_page}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_not_found_page} ${CARD_DETAILS}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_not_found_page} ${CARD_DETAILS}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:site_error_page} ${CARD_DETAILS}` })
+sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:site_error_page} ${CARD_DETAILS}` })
 
 ////////////////
 // ## Ir a sus páginas (epic `mockup` P2)

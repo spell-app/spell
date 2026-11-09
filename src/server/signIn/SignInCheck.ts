@@ -161,6 +161,8 @@ export class SignInCheck {
   private readonly abuseContact: string
   /** Where people reach this server, its mails' links' start:  `undefined`, whatever host a request named, over http. */
   private readonly address: string | undefined
+  /** The other addresses people reach it at:  a sign-in begun at one finishes there. */
+  private readonly alsoAt: string[]
   /** Does it show what the local mail catcher caught (`GET mail`, its page)? */
   private readonly caughtMail: "shown" | "hidden"
   /** Who someone is on the atmosphere:  left out, no signing in that way. */
@@ -174,6 +176,7 @@ export class SignInCheck {
     accounts,
     abuseContact = "",
     address,
+    alsoAt = [],
     caughtMail = "shown",
     atProto
   }: SignInCheckProps) {
@@ -182,6 +185,7 @@ export class SignInCheck {
     this.accounts = accounts
     this.abuseContact = abuseContact
     this.address = address?.replace(/\/+$/, "")
+    this.alsoAt = alsoAt.map((each) => each.replace(/\/+$/, ""))
     this.caughtMail = caughtMail
     this.atProto = atProto
   }
@@ -222,8 +226,8 @@ export class SignInCheck {
       router.get(ATPROTO_BACK_PAGE, guard.hostCheck, this.check, async (request, reply) =>
         this.atProtoBack(request, reply)
       )
-      router.get(ATPROTO_CLIENT_FILE, guard.hostCheck, (_request, reply) => {
-        const file = this.atProto?.clientFile?.()
+      router.get(ATPROTO_CLIENT_FILE, guard.hostCheck, (request, reply) => {
+        const file = this.atProto?.clientFile?.(this.addressFor(request))
         if (!file) throw new SRV.HttpError(404, "this server's address is local:  a host needs no client file")
         answer(reply, file)
       })
@@ -238,9 +242,18 @@ export class SignInCheck {
     return this
   }
 
-  /** The link a mail carries:  this server's confirm page, at its `address`, else the one the request reached it by. */
+  /**
+   * Which of this server's addresses `request` came to:  one of `alsoAt` when its `Host` is that one's, else `address`.
+   * - So a `Host` naming anywhere else never picks where a mail's link goes.
+   */
+  private addressFor(request: SRV.Request): string | undefined {
+    const host = request.get("host")?.toLowerCase()
+    return this.alsoAt.find((each) => new URL(each).host === host) ?? this.address
+  }
+
+  /** The link a mail carries:  this server's confirm page, at the address asked at, else the one the request reached. */
   private linkFor(request: SRV.Request, linkKey: string): string {
-    return `${this.address ?? `http://${request.get("host")}`}${CONFIRM_PAGE}?key=${linkKey}`
+    return `${this.addressFor(request) ?? `http://${request.get("host")}`}${CONFIRM_PAGE}?key=${linkKey}`
   }
 
   ////////////////
@@ -380,7 +393,7 @@ export class SignInCheck {
       ...(mode === "link" && { person: request.person })
     })
     try {
-      return { url: await this.atProto!.start(who, state) }
+      return { url: await this.atProto!.start(who, state, this.addressFor(request)) }
     } catch (error) {
       this.atProtoPending.delete(state)
       throw new SRV.HttpError(502, `Can't sign in as ${who}:  ${(error as Error)?.message ?? error}`)
@@ -408,7 +421,7 @@ export class SignInCheck {
     let did: string
     let handle: string | undefined
     try {
-      ;({ did, handle } = await this.atProto!.finish(params))
+      ;({ did, handle } = await this.atProto!.finish(params, this.addressFor(request)))
     } catch (error) {
       return goBack("failed", `${(error as Error)?.message ?? error}`)
     }
@@ -436,7 +449,8 @@ export class SignInCheck {
   private backOrDie(request: SRV.Request, back: string): string {
     const here = `http://${request.get("host")}`
     const url = new URL(back || "/", here)
-    const isHere = url.host === request.get("host") || (this.address && url.origin === new URL(this.address).origin)
+    const addresses = [...(this.address ? [this.address] : []), ...this.alsoAt]
+    const isHere = url.host === request.get("host") || addresses.some((each) => url.origin === new URL(each).origin)
     if (!isHere) throw new SRV.HttpError(400, `"${back}" isn't a page of this server's to come back to`)
     return `${url.pathname}${url.search}${url.hash}`
   }
@@ -469,6 +483,8 @@ export type SignInCheckProps = {
    * `atmosphere` P8):  its mails' links start with it.  Default whatever host a request named, over http.
    */
   address?: string
+  /** The other addresses people reach it at:  a sign-in begun at one has its link, and comes back, there. */
+  alsoAt?: string[]
   /**
    * Does it show what the local mail catcher caught (`GET mail`, `MAIL_PAGE`)?  Default `"shown"`, for this machine;
    * `"hidden"` on a server people reach from outside, where it would hand anyone everyone's codes.

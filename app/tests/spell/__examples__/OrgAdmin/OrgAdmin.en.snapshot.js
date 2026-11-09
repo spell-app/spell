@@ -2,20 +2,24 @@
 export const words = {
   lang: "en",
   types: {
+    OrgProfile: {
+      name: "name",
+      space: "space"
+    },
     Member: {
       person: "person",
       name: "name",
       role: "role",
-      draw: "draw it"
+      roleName: "role name"
     },
     Team: {
       name: "name",
-      draw: "draw it"
+      space: "space"
     },
     Project: {
       name: "name",
       team: "team",
-      draw: "draw it"
+      space: "space"
     },
     OrgRole: {
       name: "name",
@@ -25,33 +29,32 @@ export const words = {
       role: "role",
       holder: "holder",
       manages: "manages",
+      roleName: "role name",
+      holderName: "holder name",
+      managesName: "manages name",
       starts: "starts",
-      ends: "ends",
-      draw: "draw it"
+      ends: "ends"
     },
     ApprovedApp: {
       name: "name",
-      version: "version",
-      draw: "draw it"
+      version: "version"
     },
     Designer: {
       person: "person",
       space: "space",
-      draw: "draw it"
+      personName: "person name"
     },
     Stage: {
       name: "name",
       movesTo: "moves to",
-      movedBy: "moved by",
-      draw: "draw it"
+      movedBy: "moved by"
     },
     RoleChange: {
       at: "at",
       who: "who",
       did: "did",
       what: "what",
-      why: "why",
-      draw: "draw it"
+      why: "why"
     },
     OrgAdmin: {
       newMember: "new member",

@@ -13,6 +13,8 @@
  *   - signed in:  "Link a Bluesky account", or which one is linked
  *   - coming back refused:  why, in the page's language (`PlaceSignIn.refused`)
  * - A program writes nothing for it:  as with a read's riders, a person should never be left guessing.
+ * - A program with a toolbar of its own can draw it there instead:  `{the sign in menu}`, a button and a drop-down
+ *   (`signInMenu()`, epic `atmosphere` T56).
  * - On the page's Spell UI, by its tags, as a read's failure message is:  core never imports Spell UI.
  * - Plain DOM, drawn again as the sign-in changes:  no Solid, as nothing here belongs to the program's drawing.
  * - Above the app, in `core.domRoot()`.  With no page, as under `spell run`:  nothing.
@@ -66,50 +68,156 @@ const COLORS: Record<SignInStatus, string> = {
   ended: "yellow"
 }
 
-/** Each sign-in a bar shows already. */
+/** Each sign-in a bar or a menu shows already. */
 const SHOWN = new WeakSet<object>()
 
+/** What each running program shows of its sign-ins:  the menu it draws, if it does, and what shows as a bar. */
+const SHOWING = new WeakMap<object, ProgramSignIns>()
+
+/** Stands for the running program where none is:  a test of this file. */
+const NO_PROGRAM = {}
+
 /**
- * SIDE EFFECT:  shows the sign-in of `place`, called `name`, until the page goes.
- * - One bar for each sign-in:  two places on one server, which share it, show one.
+ * SIDE EFFECT:  shows the sign-in of `place`, called `name`, until the page goes:
+ * in the person menu, if the program draws one and it's free, else on a bar above the app.
+ * - One for each sign-in:  two places on one server, which share it, show one.
  * - NEVER throws:  a page that can't show it still reads.
  */
 export function showSignIn(name: string, place: Place): void {
   const { signIn } = place
   if (!signIn || typeof document === "undefined") return
-  // two places on one server share one sign-in (a sign-up sheet and its published sheet):  one bar for both
+  // two places on one server share one sign-in (a sign-up sheet and its published sheet):  one for both
   if (SHOWN.has(signIn)) return
   SHOWN.add(signIn)
   try {
-    const bar = document.createElement("ui-message")
-    bar.classList.add("spell-sign-in")
-    const root = core.domRoot()
-    ;(root === document ? document.body : (root as ShadowRoot))?.prepend(bar)
-    const draw = () => drawInto(bar, name.replace(/_/g, " "), place)
-    signIn.onChange(draw)
-    place.onPeopleHere?.(draw)
-    draw()
+    const showing = programSignIns()
+    const shown: ShownSignIn = { name: name.replace(/_/g, " "), place, draw: () => undefined }
+    if (showing.menu && !showing.menu.shown) putInMenu(showing.menu, shown)
+    else putOnBar(showing, shown)
+    signIn.onChange(() => shown.draw())
+    place.onPeopleHere?.(() => shown.draw())
   } catch (ignored) {
     console.error(`core.place():  can't show who's signed in to ${name}`, ignored)
   }
 }
 
-/** The bar, as things stand. */
-function drawInto(bar: HTMLElement, placeName: string, place: Place): void {
+/**
+ * The person menu:  what `the sign in menu` compiles to, for a program with a toolbar of its own.
+ * - A button naming who's signed in, or saying Sign in, opening what the bar would have said and offered.
+ * - It takes the program's first sign-in:  a bar that's already up goes.  A second sign-in still gets a bar.
+ * - The same element every time it's drawn, as the sign-in belongs to the program, not to one drawing.
+ * - A Spell UI button and popup, by their tags:  core never imports Spell UI.
+ * - With no page, as under `spell run`:  nothing.
+ */
+export function signInMenu(): HTMLElement | undefined {
+  if (typeof document === "undefined") return undefined
+  const showing = programSignIns()
+  if (showing.menu) return showing.menu.element
+  const menu = newMenu()
+  showing.menu = menu
+  const waiting = showing.bars.shift()
+  if (waiting) {
+    waiting.bar?.remove()
+    delete waiting.bar
+    putInMenu(menu, waiting)
+  }
+  return menu.element
+}
+
+/** What the running program shows of its sign-ins. */
+function programSignIns(): ProgramSignIns {
+  const program = core.RUNTIME ?? NO_PROGRAM
+  let showing = SHOWING.get(program)
+  if (!showing) {
+    showing = { bars: [] }
+    SHOWING.set(program, showing)
+  }
+  return showing
+}
+
+/** SIDE EFFECT:  `shown` draws on a bar of its own, above the app. */
+function putOnBar(showing: ProgramSignIns, shown: ShownSignIn): void {
+  const bar = document.createElement("ui-message")
+  bar.classList.add("spell-sign-in")
+  const root = core.domRoot()
+  ;(root === document ? document.body : (root as ShadowRoot))?.prepend(bar)
+  shown.bar = bar
+  shown.draw = () => drawBar(bar, shown)
+  showing.bars.push(shown)
+  shown.draw()
+}
+
+/** SIDE EFFECT:  `shown` draws in `menu`. */
+function putInMenu(menu: PersonMenu, shown: ShownSignIn): void {
+  menu.shown = shown
+  shown.draw = () => drawMenu(menu, shown)
+  shown.draw()
+}
+
+/** A person menu with nothing to show yet:  it stays out of sight until a place has a sign-in. */
+function newMenu(): PersonMenu {
+  const element = document.createElement("span")
+  element.classList.add("spell-sign-in-menu")
+  element.style.display = "none"
+  const button = document.createElement("ui-button")
+  button.setAttribute("icon", "user circle")
+  button.setAttribute("appearance", "basic")
+  const popup = document.createElement("ui-popup")
+  popup.setAttribute("open-on", "click")
+  popup.setAttribute("position", "bottom right")
+  const panel = document.createElement("ui-stack")
+  panel.setAttribute("spacing", "sm")
+  panel.style.minWidth = "16rem"
+  popup.append(panel)
+  element.append(button, popup)
+  return { element, button, popup, panel }
+}
+
+/** The menu, as things stand:  its button says who, and turns the bar's colour when something's wrong. */
+function drawMenu(menu: PersonMenu, shown: ShownSignIn): void {
+  const { place } = shown
   const signIn = place.signIn!
   const { status, problem, refused } = signIn
+  menu.element.style.display = ""
+  if (problem || refused) menu.button.setAttribute("color", "red")
+  else if (status === "ended") menu.button.setAttribute("color", COLORS.ended)
+  else menu.button.removeAttribute("color")
+  // signing in or out is done:  the menu is in the way of the page
+  if (status !== menu.status && (status === "signed in" || status === "signed out")) menu.popup.visible = false
+  menu.status = status
+  const name = personName(place)
+  const words = status === "signed in" && !problem ? core.message("sign-in-menu-as", { name }) : undefined
+  menu.button.textContent = status === "signed in" ? name : core.message("sign-in")
+  menu.button.title = words ?? core.message("sign-in")
+  menu.panel.replaceChildren(...partsFor(shown, words))
+}
+
+/** The bar, as things stand. */
+function drawBar(bar: HTMLElement, shown: ShownSignIn): void {
+  const { status, problem, refused } = shown.place.signIn!
   bar.setAttribute("color", problem || refused ? "red" : COLORS[status])
+  bar.replaceChildren(...partsFor(shown))
+}
+
+/** Who's signed in to `place`, as the page calls them. */
+function personName(place: Place): string {
+  return place.signIn?.person?.name ?? place.currentPerson?.().name ?? ""
+}
+
+/** What the sign-in says and offers, as things stand:  `words` in place of what the bar would say, if given. */
+function partsFor({ name: placeName, place }: ShownSignIn, words?: string): HTMLElement[] {
+  const signIn = place.signIn!
+  const { status, problem, refused } = signIn
   const isCloud = place.describe().identifiesBy === "a sign-in"
   const key =
     (isCloud && CLOUD_WORDS[status]) || (signIn.account === "Spell account" && SPELL_WORDS[status]) || WORDS[status]
-  const name = signIn.person?.name ?? place.currentPerson?.().name ?? ""
-  const words = core.message(key, { place: placeName, name, email: signIn.sentTo ?? "" })
+  const said = words ?? core.message(key, { place: placeName, name: personName(place), email: signIn.sentTo ?? "" })
   const text = document.createElement("span")
   text.textContent = problem
     ? core.message("sign-in-failed", { why: problem })
     : refused
       ? core.message(REFUSED_WORDS[refused])
-      : words
+      : said
   const parts: HTMLElement[] = [text]
   if (status === "signed in") {
     parts.push(buttonFor("sign-out", () => void signIn.signOut()))
@@ -117,7 +225,43 @@ function drawInto(bar: HTMLElement, placeName: string, place: Place): void {
   } else if (status === "waiting for a code" && signIn.enterCode) parts.push(...codeParts(signIn))
   else if (status !== "signing in") parts.push(...signInParts(signIn))
   if (status !== "signed in" && signIn.abuseContact) parts.push(abuseLine(signIn.abuseContact))
-  bar.replaceChildren(...parts)
+  return parts
+}
+
+/** One sign-in, as a program shows it. */
+type ShownSignIn = {
+  /** The place's name, as the bar says it. */
+  name: string
+  /** The place it's the sign-in of. */
+  place: Place
+  /** Its bar, while it's on one. */
+  bar?: HTMLElement
+  /** Draws it again, wherever it shows. */
+  draw: () => void
+}
+
+/** A program's person menu (`signInMenu()`). */
+type PersonMenu = {
+  /** What the program draws. */
+  element: HTMLElement
+  /** The button that opens it. */
+  button: HTMLElement
+  /** What the button opens. */
+  popup: HTMLElement & { visible?: boolean }
+  /** What it says and offers. */
+  panel: HTMLElement
+  /** Where the sign-in stood when it last drew. */
+  status?: SignInStatus
+  /** The sign-in it shows, once one's there. */
+  shown?: ShownSignIn
+}
+
+/** What one running program shows of its sign-ins. */
+type ProgramSignIns = {
+  /** Its person menu, once it's drawn one. */
+  menu?: PersonMenu
+  /** Each sign-in showing as a bar. */
+  bars: ShownSignIn[]
 }
 
 /**

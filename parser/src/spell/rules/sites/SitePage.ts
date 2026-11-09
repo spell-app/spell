@@ -6,13 +6,16 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 import { textIn } from "spell/parser/spell/rules/places"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { pageNamed, paramsIn, siteOf, type SitePageEntry } from "./sites.shared"
+import { cardDetailsOf, cardPlaceMessage, pageNamed, paramsIn, siteOf, type SitePageEntry } from "./sites.shared"
 
 /**
  * `site_page` rule:  one of a site's pages, and its address (epic `mockup` P1).
  * - e.g. `- it has a film page at "/films/:film", named "Film"`, in a site's body
  * - e.g. `- it has a film page at "/films/:film", named "Film", old, pictured in "snapshots/film.png"`:
  *   how far along it is, and a picture of it, a file of the project (epic `mockup` P13, T14)
+ * - e.g. `- it has a film page at "/films/:film", in row 2 column 3, colored blue`:
+ *   where its card sits in its section of the site editor's board, and its colour (epic `mockup` T31);
+ *   any part's line may end so
  * - e.g. `- it has a button usage page at "/button"`:  a page named for a notebook, `button usage`, its last word
  *   "page" read as a word, not the type's
  * - The SITE holds each page's address and name, never the page:  so a page moves, or is named in another language,
@@ -28,7 +31,7 @@ import { pageNamed, paramsIn, siteOf, type SitePageEntry } from "./sites.shared"
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.
  */
 export class SitePage extends SpellStatement<
-  "type|part|address|title?|state?|picture?|with_nested_statements?|body?",
+  "type|part|address|title?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
   { entry?: SitePageEntry }
 > {
   @proto static priority = Priority.declaration + 1
@@ -67,6 +70,8 @@ export class SitePage extends SpellStatement<
     const title = match.groups.title ? textIn(match.groups.title) : undefined
     const state = Wording.meaningOf(match.groups.state)
     const picture = match.groups.picture ? textIn(match.groups.picture) : undefined
+    const card = cardDetailsOf(match.groups)
+    if (!card) return SpellStatement.refuse(match, cardPlaceMessage(language, match.groups))
     match.data.entry = {
       name,
       page: page.name,
@@ -74,6 +79,7 @@ export class SitePage extends SpellStatement<
       ...(title && { title }),
       ...(state && { state }),
       ...(picture && { picture }),
+      ...card,
       ...(params.length && { params })
     }
     return match

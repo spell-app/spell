@@ -114,6 +114,7 @@
       "demo/**"
     ],
     "files": [
+      "epic_settings.json5",
       "templates",
       "voices",
       "skills",

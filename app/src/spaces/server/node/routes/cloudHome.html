@@ -1,0 +1,140 @@
+<!doctype html>
+<!--
+  The cloud's home pages (epic `atmosphere` T59, `SpellCloud`):  one file, for two addresses.
+  - `/`:  the spaces home, the spaces the person asking may read
+  - `/@willzalone`:  an org's home, its programs and its other spaces
+  - What it lists comes from `/api/cloud/...`, which answers only what the person asking may read (`CloudHomes`).
+    - Asked from the page, so a person arriving by another site's link is still signed in here:
+      the browser leaves the cookie off the page itself, but not off the page's own requests.
+  - Spell UI's elements, made with the DOM:  no markup built in strings.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spell</title>
+    <script type="module" src="/element/spell-ui.js"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        color: CanvasText;
+        background: var(--ui-background, Canvas);
+        font-family: var(--ui-font-family, system-ui, sans-serif);
+      }
+      /* Its right slot has an inset of its own:  the two sides end up the same 15px in. */
+      .top-bar {
+        padding-inline: 15px 11px;
+        padding-block: 5px;
+        border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color, GrayText);
+      }
+      main {
+        max-width: 40em;
+        padding: 1em 15px 3em;
+      }
+      h2 {
+        font-size: 1em;
+        margin-block: 1.5em 0.5em;
+      }
+      .note {
+        opacity: 0.7;
+      }
+      [hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <ui-root>
+      <ui-toolbar class="top-bar" aria-label="Spell">
+        <ui-text id="title" slot="title" size="large">Spell</ui-text>
+        <ui-stack id="who" slot="right" direction="horizontal" align="center"></ui-stack>
+      </ui-toolbar>
+      <main>
+        <section id="programs-section" hidden>
+          <h2>Programs</h2>
+          <ui-list id="programs" divided spacing="lg"></ui-list>
+        </section>
+        <section id="spaces-section" hidden>
+          <h2 id="spaces-title">Spaces</h2>
+          <ui-list id="spaces" divided spacing="lg"></ui-list>
+        </section>
+        <p id="empty" class="note" hidden></p>
+        <p id="problem" role="alert" hidden></p>
+      </main>
+    </ui-root>
+    <script type="module">
+      /** What a person's told when there's nothing to list:  signed in, or not. */
+      const NOTHING_SIGNED_IN = "There's nothing here for you to read yet."
+      const NOTHING_SIGNED_OUT = "Nothing here is public yet. Sign in to see your spaces."
+
+      const element = (id) => document.getElementById(id)
+
+      /** A `tag` element saying `text`, with `attributes`. */
+      const made = (tag, text, attributes = {}) => {
+        const each = document.createElement(tag)
+        each.textContent = text
+        for (const [name, value] of Object.entries(attributes)) each.setAttribute(name, value)
+        return each
+      }
+
+      /** SIDE EFFECT:  the list `id` shows `rows`, each a link if it has one. */
+      const fill = (id, rows) => {
+        element(id).replaceChildren(...rows.map(({ name, link }) => made("ui-item", name, link ? { link } : {})))
+        element(`${id}-section`).hidden = rows.length === 0
+      }
+
+      /** SIDE EFFECT:  the top bar says who's signed in, with Sign out;  or offers Sign in. */
+      const showWho = (person) => {
+        if (!person) {
+          element("who").replaceChildren(made("ui-button", "Sign in", { link: "/sign-in" }))
+          return
+        }
+        const signOut = made("ui-button", "Sign out")
+        signOut.addEventListener("click", () => {
+          fetch("/api/sign-in/out", { method: "POST" })
+            .then(() => location.replace(location.href))
+            .catch(showProblem)
+        })
+        element("who").replaceChildren(made("ui-text", person), signOut)
+      }
+
+      const showProblem = (error) => {
+        element("problem").hidden = false
+        element("problem").textContent = error.message
+      }
+
+      /** What the server answers `path`:  - throws if it said no */
+      const ask = async (path) => {
+        const response = await fetch(path, { cache: "no-store" })
+        if (!response.ok) throw new Error(`the server answered ${response.status}`)
+        return response.json()
+      }
+
+      const orgId = /^\/@([^/]+)/.exec(location.pathname)?.[1]
+      try {
+        if (orgId) {
+          const { person, org } = await ask(`/api/cloud/home/orgs/${encodeURIComponent(orgId)}`)
+          document.title = org.name
+          element("title").textContent = org.name
+          element("spaces-title").textContent = "Its other spaces"
+          showWho(person)
+          fill("programs", org.programs)
+          fill("spaces", org.spaces)
+          element("empty").hidden = org.programs.length + org.spaces.length > 0
+          element("empty").textContent = NOTHING_SIGNED_IN
+        } else {
+          const { person, spaces } = await ask("/api/cloud/home")
+          showWho(person)
+          fill("spaces", spaces)
+          element("empty").hidden = spaces.length > 0
+          element("empty").textContent = person ? NOTHING_SIGNED_IN : NOTHING_SIGNED_OUT
+        }
+      } catch (error) {
+        showProblem(error)
+      }
+    </script>
+  </body>
+</html>

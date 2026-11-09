@@ -6,7 +6,7 @@ import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/li
 // Import directly to avoid circular import
 import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
 import { EveryThingWhere } from "spell/parser/spell/rules/classes/EveryThingWhere"
-import { isInDrawing, ownListAST, ownListOf, readableInDrawing, type OwnList } from "./places.shared"
+import { loopItemsInDrawing, ownListAST, ownListOf, readableInDrawing, type OwnList } from "./places.shared"
 
 /** What each way of saying how many compares a count with, by `there_are_how_many`'s meaning. */
 const COMPARED_BY: Record<string, P.ASTOperator> = {
@@ -31,7 +31,7 @@ const COMPARED_BY: Record<string, P.ASTOperator> = {
  */
 export class ThereAreThings extends SpellExpression<
   "compare?|none?|one?|count?|type?|list?|body?",
-  { own?: OwnList; inDrawing?: boolean }
+  { own?: OwnList; loopItems?: string[] }
 > {
   @proto static datatype: P.Datatype | undefined = "choice"
 
@@ -42,7 +42,7 @@ export class ThereAreThings extends SpellExpression<
     const { how, number } = ThereAreThings.howManyOf(match)
     if (how === "none" && number !== undefined) return undefined
     if (how && how !== "none" && number === undefined) return undefined
-    match.data.inDrawing = isInDrawing(scope)
+    match.data.loopItems = loopItemsInDrawing(scope)
     const named = ThereAreThings.namedBy(match)
     const words = `${named.raw}`.trim()
     match.data.own = ownListOf(scope, words) ?? ownListOf(scope, P.pluralize(words))
@@ -102,6 +102,6 @@ export class ThereAreThings extends SpellExpression<
       operator: isAny ? "greater than" : ((how ? COMPARED_BY[how] : undefined) ?? "equals"),
       rhs: new P.ASTNumericLiteral(match, { value: number ?? 0 })
     })
-    return readableInDrawing(match, compared, match.data.inDrawing)
+    return readableInDrawing(match, compared, match.data.loopItems)
   }
 }

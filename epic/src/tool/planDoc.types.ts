@@ -76,6 +76,11 @@ export type Phase = {
   estimate: string | undefined
   /** how long Claude worked on it (`21m`, `<epic-phase took>`, epic `epic-engine` P41);  `undefined` until measured */
   took: string | undefined
+  /**
+   * how long it was under way by the clock, from going active to done, waits on Owen included (`4h`,
+   * `<epic-phase span>`, epic `epic-engine` I127);  `undefined` when `took` is, or the log has no start
+   */
+  span: string | undefined
 }
 
 /**
@@ -179,6 +184,28 @@ export const QUESTION_ID = /^q\d+$/
  */
 export const CALM_ID = /^[ij]\d+$/
 
+/** A judgement call's id:  grey once it's `calm`, where a calm issue stays yellow (epic `epic-engine` P63). */
+export const JUDGEMENT_ID = /^j\d+$/
+
+/** An issue's id. */
+export const ISSUE_ID = /^i\d+$/
+
+/** A manual test's id. */
+export const MANUAL_TEST_ID = /^m\d+$/
+
+/**
+ * The items an agent may close because they've become obsolete (`epic close --why`, `PlanDoc.closeRefusal()`):
+ * judgement calls, issues and todos.
+ * - never a question (it's decided) or a manual test (a run closes it)
+ */
+export const OBSOLETE_ID = /^[ijt]\d+$/
+
+/**
+ * How a status card starts when an item says it waits for finished work, and the promised thing never came
+ * (`PlanDoc.promiseUnkept()`):  a later `/epic tidy` knows it by this.
+ */
+export const PROMISED_CARD = "Promised, not delivered:"
+
 /**
  * Item statuses that are closed:  not counted open, not on a "To review" line.
  * - coloured `recent` (green, decided or done), but `canceled` is `old` (grey, no longer relevant)
@@ -251,8 +278,12 @@ export type ItemFacts = {
   bedtime: boolean
   /** not urgent:  blue while open and not reviewed, not red (`<epic-item calm>`) */
   calm: boolean
-  /** a todo asking Owen to act, red until reviewed;  an issue or call he wants done (Do this), red until handled */
+  /** a todo asking Owen to act, red until reviewed;  an issue or call he pressed Do this on, blue outlined until handled */
   urgent: boolean
+  /** filed from Owen's own words (`<epic-item requested>`, epic `epic-engine` P63):  light orange once Claude closes it */
+  requested: boolean
+  /** a thing to know about, nobody's work (`<epic-item limit>`):  grey while open (epic `epic-engine` P63) */
+  limit: boolean
   /** fixed, waiting for his review:  orange (`<epic-item fixed>`, I232) */
   fixed: boolean
   /** Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`) */
@@ -288,6 +319,8 @@ export type AddItemOptions = {
   calm?: boolean
   /** a todo that asks Owen to act:  red until reviewed (`PlanDoc.followUp()`) */
   urgent?: boolean
+  /** an issue filed from Owen's own words (`--requested`):  closed by Claude, light orange until he reviews it */
+  requested?: boolean
 }
 
 /** `PlanDoc.decide()`'s options. */
@@ -363,23 +396,33 @@ export type OptionCard = {
  * what the page paints its id chip with, and the review picker its state icon (`ItemPicker`).
  * One meaning per colour (decision Q20 of epic `epic-components`, Owen, 2026-10-08):
  * - `attention` (red):  needs Owen (an open question;  an open judgement call or issue not reviewed)
- * - `replied` (orange):  Claude answered it with options, and it waits for Owen's pick (Owen, 2026-10-09)
+ * - `replied` (orange):  Owen's turn:  Claude answered it with options, or fixed it (Owen, 2026-10-09;  I232);
+ *   a manual test whose phase isn't done yet (epic `epic-engine` P63)
+ * - `requested` (light orange):  an issue filed from Owen's own words, closed by Claude, not reviewed:  his turn to
+ *   see it (epic `epic-engine` P63);  the picker's icons have no light orange, so plain orange there
  * - `progress` (blue):  Claude is working on it (an underway status card, or `working`)
+ * - `handed` (blue, outlined):  he pressed Do this, Claude hasn't started (epic `epic-engine` P63)
  * - `open` (yellow):  open, still undecided, not urgent
- *   (todos, limits, manual tests;  reviewed issues and judgement calls;  work a review queued, not started;
+ *   (todos;  manual tests whose phase is done;  calm issues;  reviewed issues and judgement calls;
  *   a revisit or Do Now Claude answered, the item still open)
+ * - `scheduled` (blue, dotted):  work a review queued, agreed, not started (epic `epic-engine` P63)
  * - `recent` (green):  decided or done, however long ago (Owen, 2026-10-08:  "green across the board is good"):
  *   closed, or open and settled by a review (`SETTLED_AS`)
  * - `handled` (grey):  handled in a phase, its answer that phase's text now (`handled`, epic `epic-engine` P31)
+ * - `quiet` (grey):  open, nothing to think about:  a calm judgement call not reviewed, a limit (epic `epic-engine` P63)
  * - `old` (grey):  no longer relevant:  canceled (made moot, struck through)
  */
 export const STATE_COLORS = {
   attention: "red",
   replied: "orange",
+  requested: "orange",
   progress: "blue",
+  handed: "blue",
   open: "yellow",
+  scheduled: "blue",
   recent: "green",
   handled: "grey",
+  quiet: "grey",
   old: "grey"
 } as const
 
@@ -415,6 +458,14 @@ export const UNDERWAY_CARD = ':scope > epic-status[state="underway"]'
  *   (a pick, a todo made or queued, a new item made;  a calm outline:  Owen, 2026-10-10, epic `airplane` P8)
  */
 export type StatusState = "underway" | "done" | "noted"
+
+/** `PlanDoc.addStatus()`'s options. */
+export type AddStatusOptions = {
+  /** the card's state;  default `underway` */
+  state?: StatusState
+  /** leave the item's `changed` stamp alone */
+  quiet?: boolean
+}
 
 /** How an underway card finishes (`PlanDoc.finishStatus()`):  work `done`, or Owen's choice only `noted`. */
 export type FinishedState = Exclude<StatusState, "underway">

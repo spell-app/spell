@@ -5,6 +5,8 @@
 // La página de tu org nombra su propia org en la línea siguiente:  "@rs" es la de la Rock Society.
 roles de la org es una carpeta de datos en "@rs/__admin/roles":
 	- se revisa cada 30 segundos
+	- los perfiles están en "org_profiles"
+	- las funciones están en "org_roles"
 	- los miembros están en "members"
 	- los equipos están en "teams"
 	- los proyectos están en "projects"
@@ -14,26 +16,43 @@ roles de la org es una carpeta de datos en "@rs/__admin/roles":
 	- las etapas están en "event_stages"
 	- los cambios están en "role_changes"
 
+// La org misma, para el título de la página y como espacio que diseñar.
+un "perfil" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+	- su "espacio" es texto, guardado como "space"
+
+// Un rol de la org, por su nombre.
+una "función" es una cosa:
+	- vive en roles de la org
+	- su "nombre" es texto, guardado como "name"
+
 un "miembro" es una cosa:
 	- vive en roles de la org
 	- su "persona" es texto, guardado como "person"
 	- su "nombre" es texto, guardado como "name"
 	- su "rol" es texto, guardado como "role"
+	- su "cargo" es texto, guardado como "roleName"
 
 un "equipo" es una cosa:
 	- vive en roles de la org
 	- su "nombre" es texto, guardado como "name"
+	- su "espacio" es texto, guardado como "space"
 
 un "proyecto" es una cosa:
 	- vive en roles de la org
 	- su "nombre" es texto, guardado como "name"
 	- su "equipo" es texto, guardado como "team"
+	- su "espacio" es texto, guardado como "space"
 
 un "mandato" es una cosa:
 	- vive en roles de la org
 	- su "rol" es texto, guardado como "role"
 	- su "titular" es texto, guardado como "holder"
 	- su "ámbito" es texto, guardado como "manages"
+	- su "cargo" es texto, guardado como "roleName"
+	- su "nombre titular" es texto, guardado como "holderName"
+	- su "nombre ámbito" es texto, guardado como "managesName"
 	- su "inicio" es texto, guardado como "starts"
 	- su "fin" es texto, guardado como "ends"
 
@@ -47,6 +66,7 @@ un "diseñador" es una cosa:
 	- vive en roles de la org
 	- su "persona" es texto, guardado como "person"
 	- su "espacio" es texto, guardado como "space"
+	- su "nombre persona" es texto, guardado como "personName"
 
 // Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers".
 una "etapa" es una cosa:

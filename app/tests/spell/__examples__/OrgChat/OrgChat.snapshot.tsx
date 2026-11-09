@@ -123,6 +123,7 @@ export class ChatPage extends App {
     this.newMessage = new Message()
   }
 
+  static drawsWaiting = true
   @drawn draw() {
     return (
       <ui-container class="chat">
@@ -139,7 +140,7 @@ export class ChatPage extends App {
               failed: () => <ui-text color="red">We can't find your threads right now.</ui-text>
             })}
           </ui-list>
-          <ui-stack>
+          <ui-stack hidden={this.picked ? undefined : true}>
             <ui-header size="large">{core.whileWaiting(() => this.picked.name)}</ui-header>
             <ui-stack class="message-list" spacing="sm">
               {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {

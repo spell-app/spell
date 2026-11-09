@@ -29,6 +29,13 @@ describe("<epic-state-filter>", () => {
     expect(chips(host)).toEqual(["attention:1+", "recent:3+"])
     expect(host.shadowRoot!.querySelector(".marked")!.textContent).toBe("2")
     // `handled` counts in the one grey chip, with `old` (Owen, 2026-10-26:  "why are there two grey pills?")
+    const quiet = await ElementFixture.render(
+      `<epic-state-filter counts="handed:2 progress:1 quiet:3 old:1 requested:1"></epic-state-filter>`
+    )
+    // One Color Each (epic `epic-engine` P63):  a Do this in the blue badge, calm calls in the grey chip, light orange its own
+    expect(quiet.shadowRoot!.querySelector(".marked")!.textContent).toBe("3")
+    expect(chip(quiet, "old").textContent).toBe("4")
+    expect(chip(quiet, "requested").dataset.color).toBe("light-orange")
     const grey = await ElementFixture.render(`<epic-state-filter counts="old:3 handled:2 open:1"></epic-state-filter>`)
     expect(chips(grey)).toEqual(["open:1+", "old:5+"])
     expect(chip(host, "attention").dataset.color).toBe("red")
@@ -55,9 +62,7 @@ describe("<epic-state-filter>", () => {
       "1",
       "1 with Claude:  under way, being worked on, or marked in this pass"
     ])
-    expect(chip(host, "attention").title).toBe(
-      "1 need you:  a plan to accept, or a choice open:  hide these\n⌥-click:  show only these"
-    )
+    expect(chip(host, "attention").title).toBe("1 need you:  a choice open:  hide these\n⌥-click:  show only these")
     expect(chip(host, "updated").title).toBe("3 changed since you looked:  hide these\n⌥-click:  show only these")
     expect(chip(host, "scheduled").title).toBe("5 scheduled, not running yet:  hide these\n⌥-click:  show only these")
     expect(chip(host, "recent").title).toBe("2 done in the last 3 days:  show these too\n⌥-click:  show only these")
@@ -124,7 +129,7 @@ describe("<epic-state-filter>", () => {
     const grey = await ElementFixture.render(`<epic-state-filter counts="open:1 old:1 handled:2"></epic-state-filter>`)
     grey.addEventListener("epic-state-changed", (event) => heard((event as CustomEvent).detail))
     altClick(chip(grey, "old"))
-    expect(heard).toHaveBeenLastCalledWith({ state: "old", shown: ["old", "handled"], how: "only" })
+    expect(heard).toHaveBeenLastCalledWith({ state: "old", shown: ["old", "handled", "quiet"], how: "only" })
   })
 
   // epic `epic-engine` P43 (Owen, 2026-10-25:  "a blue badge with dotted outline to the left")

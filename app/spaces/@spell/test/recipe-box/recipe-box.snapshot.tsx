@@ -72,7 +72,7 @@ export class RecipeBox extends App {
 
   addTheDraft() {
     if (this.draft === "") return
-    core.saveThing(new Recipe({ title: this.draft, servings: 2 }))
+    core.saveThing(new (core.classToMake(Recipe))({ title: this.draft, servings: 2 }))
     this.draft = ""
   }
 

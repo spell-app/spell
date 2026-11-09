@@ -26,7 +26,18 @@ export const CSS_TARGETS = { chrome: 125 << 16, safari: 26 << 16, firefox: 147 <
 export const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 
 /**
- * The plugins, aliases, dedupe and CSS an element build needs.
+ * What every dev server of ours sets.
+ * - `forwardConsole` off:  Vite turns it on by itself when an agent starts the server,
+ *   sending each `console.*` call's arguments to the terminal.
+ *   - It turns them into text with `JSON.stringify()`, which runs every getter it reaches.
+ *   - Solid's dev warnings hand the console a live element, and from there it reaches a `<Show>`'s `children`:
+ *     they're drawn though the `<Show>` is false, and one that throws stops Solid on the whole page for good
+ *     (epic `mockup` I8:  a right-click menu that never opened, about 1 run in 5).
+ */
+export const DEV_SERVER_SETTINGS = { forwardConsole: false }
+
+/**
+ * The plugins, aliases, dedupe, CSS and dev server settings an element build needs.
  * - `standardDecorators()` MUST come first:  both it and the Solid plugin are `enforce: "pre"`, and the Solid
  *   compiler must see decorator-free code.
  * - Aliases come from the nearest `tsconfig.json` of each file (`resolve.tsconfigPaths`):  each repo's own table.
@@ -40,6 +51,7 @@ export function elementBaseConfig({ solid: solidOptions = {} }: { solid?: SolidO
       tsconfigPaths: true,
       dedupe: SOLID_DEDUPE
     },
+    server: DEV_SERVER_SETTINGS,
     css: {
       transformer: "lightningcss" as const,
       lightningcss: {

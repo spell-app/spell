@@ -28,8 +28,10 @@ export const siteNavVocabulary = {
         '`{ title, href, id?, pages? }`, e.g. `[{ "title": "Films", "href": "/films" }]`.  ' +
         "A page with no `href` only holds pages:  a click opens or closes it.  " +
         "Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages), `count`, " +
-        "`badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite) and `open` " +
-        "(open or closed, whatever the person did:  the page decides)."
+        "`badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` " +
+        "(open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element " +
+        "whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  " +
+        "marked as shown whenever that page is)."
     },
     {
       name: "current",

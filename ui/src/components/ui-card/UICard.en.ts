@@ -13,6 +13,30 @@
 
 import type { E } from "spell/ui/core"
 
+/**
+ * The class word of every hue a card's `background` can be:  one word, `tinted`, as ONE rule draws them all.
+ * - Which hue it is reaches the rule as a token:  `UICard.tintHue`.
+ */
+export const TINTED_HUES = {
+  primary: "tinted",
+  secondary: "tinted",
+  red: "tinted",
+  orange: "tinted",
+  yellow: "tinted",
+  olive: "tinted",
+  green: "tinted",
+  teal: "tinted",
+  blue: "tinted",
+  violet: "tinted",
+  purple: "tinted",
+  pink: "tinted",
+  brown: "tinted",
+  grey: "tinted",
+  black: "tinted",
+  positive: "tinted",
+  negative: "tinted"
+} as const
+
 /****************
  * ### `cardVocabulary`
  * The names of `<ui-card>`, a card of content parts, with shorthands:
@@ -40,6 +64,15 @@ export const cardVocabulary = {
       group: "appearance",
       kind: "color",
       description: "A coloured line along the bottom edge (a tinted fill when `basic`)."
+    },
+    {
+      name: "background",
+      group: "appearance",
+      kind: "color",
+      classes: TINTED_HUES,
+      description:
+        "Fills the card with a light tint of this colour, its text dark enough to read in the light and dark schemes;  " +
+        "`--ui-card-tint-lightness` and `--ui-card-tint-chroma` set how light and how strong."
     },
     {
       name: "direction",

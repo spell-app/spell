@@ -7,7 +7,7 @@
  *   (or its `max-height`, through `--ui-input-textarea-grow-max-height`), then scrolls.
  *   - this box's look on its native `<textarea>`, its `control` part:  these rules win over its own sheet's
  * - A notes box's KEPT text (P18), above its field:  the page changed under Owen, a warning, so an ORANGE edge and
- *   title;  the texts are his own words, so his IVORY (`templates/epics/plan-doc.md`, "Colours").
+ *   title;  the texts are his own words, so their VIOLET (`templates/epics/plan-doc.md`, "Colours").
  * - Public tokens (`--epic-text-box-*`) are never declared here:  read through private aliases.
  */
 
@@ -57,8 +57,8 @@
   }
   .kept {
     --_epic-text-box-warn: var(--ui-orange, #f2711c);
-    --_epic-text-box-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
-    --_epic-text-box-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    --_epic-text-box-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-text-box-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     margin: 0 0 0.75em;
     padding: 8px 10px;
     border: 1px solid var(--_epic-text-box-warn);
@@ -84,8 +84,8 @@
     margin-top: 6px;
     padding: 6px 8px;
     border-radius: 6px;
-    background: var(--_epic-text-box-ivory);
-    color: var(--_epic-text-box-ivory-ink);
+    background: var(--_epic-text-box-person);
+    color: var(--_epic-text-box-person-ink);
   }
   .kept-label {
     grid-column: 1;

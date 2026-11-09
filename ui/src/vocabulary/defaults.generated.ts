@@ -200,6 +200,7 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-card": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
+    { name: "background", kind: "color", group: "appearance" },
     { name: "direction", kind: "valueOnly", group: "layout", values: ["horizontal"] },
     { name: "appearance", kind: "multiple", group: "appearance", values: ["raised", "link", "basic", "dashed"] },
     { name: "fluid", kind: "keyOnly", group: "layout" },
@@ -219,6 +220,7 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-cards": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
+    { name: "background", kind: "color", group: "appearance" },
     { name: "columns", kind: "width", group: "layout", values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] },
     { name: "layout", kind: "valueOnly", group: "layout", values: ["mosaic"] },
     { name: "doubling", kind: "keyOnly", group: "layout" },

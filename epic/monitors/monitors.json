@@ -2,6 +2,6 @@
   {
     "name": "review-inbox",
     "command": "node \"${CLAUDE_PLUGIN_ROOT}/monitors/listen.mjs\"",
-    "description": "Owen's sends from this session's epic page (marks, comments, Do Now)"
+    "description": "the person's sends from this session's epic page (marks, comments, Do Now)"
   }
 ]

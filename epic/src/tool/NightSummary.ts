@@ -21,6 +21,12 @@ import { PlanItem } from "./PlanItem"
  *   bedtime or not;  J198).
  * - A line Owen ticked Read leaves it (epic `epic-engine` I206):  `seen`, when he read each line (by its phase's or item's
  *   id) or each part (`done`, `todo`);  a change to it after that brings it back.
+ * - An item Owen addressed leaves Still to do, however recently it changed (epic `epic-engine` I235):  `isAddressed()`
+ *   - review stamps `changed`, so before this addressing an item made it look like news
+ *   - a fix Claude made since (orange, `fixed`) is back, his to review
+ * - A finished phase ages out after `finishedPhaseDays` (I235), by its `done-at`;  so does the bedtime lead line;
+ *   a phase with no time recorded stays until read:  how old is a guess
+ * - Worked out from the page each time it's drawn:  no record of what's been addressed is kept, so no migration.
  * - Pure over the doc, but `isMerged`, which the caller hands in (it runs git);  without it, nothing is said of merging.
  ****************/
 export class NightSummary {
@@ -43,8 +49,15 @@ export class NightSummary {
    * The summary of `plan` since `since`.
    * - `isMerged(sha)`:  whether a commit is in `main`;  `undefined` (or none given):  unknown, so not said
    */
-  static of(plan: PlanDoc, since: Date, { isMerged, seen = {} }: SummaryOptions = {}): NightSummary {
+  static of(
+    plan: PlanDoc,
+    since: Date,
+    { isMerged, seen = {}, answered, finishedPhaseDays }: SummaryOptions = {}
+  ): NightSummary {
     const from = since.getTime()
+    // past its days?  `finishedPhaseDays` unset:  nothing ages (a caller with no settings)
+    const isAged = (at: number) =>
+      finishedPhaseDays !== undefined && plan.now.getTime() - at > finishedPhaseDays * DAY_MS
     // read since it last changed:  by itself, or with its whole part
     const isRead = (id: string, part: AwayPart, at: number) =>
       NightSummary.timeOf(seen[id]) >= at || NightSummary.timeOf(seen[part]) >= at
@@ -52,17 +65,19 @@ export class NightSummary {
       .reviewLines()
       .filter((line) => {
         const at = NightSummary.timeOf(line.at)
-        return at >= from && BEDTIME_DONE.test(line.text) && NightSummary.timeOf(seen.done) < at
+        return at >= from && BEDTIME_DONE.test(line.text) && NightSummary.timeOf(seen.done) < at && !isAged(at)
       })
       .map((line) => line.text.replace(BEDTIME_DONE, "").trim())
     const done: DoneLine[] = []
     for (const phase of plan.phases) {
       const element = plan.phase(phase.n)
-      const doneAt = Date.parse(element.getAttribute("done-at") ?? "")
+      // none recorded:  `NO_TIME`, before any real time, so a Read still counts and it never ages (I235)
+      const doneAt = Date.parse(element.getAttribute("done-at") ?? "") || NO_TIME
       const window = phase.status === "active" ? plan.activeWindow(phase.n) : undefined
       // finished:  done, or dropped (epic `epic-engine` I228), in the same part:  "P18 · ... dropped:  Moved to P38"
       const dropped = phase.status === "dropped"
-      const isDone = PhaseStatuses.isFinished(phase.status) && doneAt >= from
+      const hasTime = doneAt !== NO_TIME
+      const isDone = PhaseStatuses.isFinished(phase.status) && (!hasTime || (doneAt >= from && !isAged(doneAt)))
       const isUnderWay = phase.status === "active" && !!window && window.from >= from
       if (!isDone && !isUnderWay) continue
       const changedAt = isDone ? doneAt : window!.from
@@ -90,7 +105,7 @@ export class NightSummary {
       return (
         changed >= from &&
         !CLOSED.test(item.getAttribute("status") ?? "") &&
-        !NightSummary.isFollowedUp(item) &&
+        !NightSummary.isAddressed(item, answered) &&
         !isRead(item.id, "todo", changed)
       )
     })
@@ -106,14 +121,18 @@ export class NightSummary {
   }
 
   /**
-   * Did Owen turn `item` into a todo (Make Todo:  its Noted card "Made todo T45 to follow this up.")?  Then it waits
-   * on that todo, not on him:  never in Still to do (epic `epic-engine` r57, I224;  🚧 language:  I11-I14 stayed
-   * "open issue" after each was made a todo).
-   * - the same for an issue or a call he asked for with Do this (I232):  it waits on Claude, red, until it's `fixed`,
-   *   when it's his to review again
+   * Has Owen addressed `item`, so it no longer waits on him (epic `epic-engine` I235;  Owen, 2026-11-08:  "When I
+   * address todos or issues, e.g. by saying \"do this now\", they should be removed")?
+   * - yes:  he reviewed it (Do this, Approve, Skip, a Next, a test's answer:  `reviewed`), put it off (`deferred`,
+   *   `queued`), made it a todo (its Noted card, r57, I224), or a sent mark of his on it waits to be applied (`answered`)
+   * - NOT when it waits on him again:  a fix Claude made since (`fixed`, orange, I232), or Claude asking him to pick
+   *   (`state="replied"`)
    */
-  static isFollowedUp(item: Element): boolean {
-    if (item.hasAttribute("fixed")) return false
+  static isAddressed(item: Element, answered: ReadonlySet<string> = new Set()): boolean {
+    // a manual test's orange (its phase isn't done yet) is no ask of Claude's:  a mark of his on it addresses it
+    if (item.hasAttribute("fixed") || (item.getAttribute("state") === "replied" && !/^m\d/.test(item.id))) return false
+    if (answered.has(item.id)) return true
+    if (ADDRESSED_ATTRIBUTES.some((name) => item.hasAttribute(name))) return true
     if (item.hasAttribute("urgent") && CALM_ID.test(item.id)) return true
     return Array.from(item.querySelectorAll("epic-status")).some((card) => FOLLOWED_UP.test(card.textContent ?? ""))
   }
@@ -181,10 +200,23 @@ export type SummaryOptions = {
    * times;  read before its last change, it shows again (`<epic-page away-seen>`, I206)
    */
   seen?: Readonly<Record<string, string>>
+  /** the ids of items with a mark of Owen's sent and not applied yet:  addressed, though the page can't say so yet */
+  answered?: ReadonlySet<string>
+  /** how many days a finished phase and a bedtime lead line stay;  `undefined`:  no limit (`LayeredSettings`) */
+  finishedPhaseDays?: number
 }
 
 /** A part of the section, as its heading's tick names it. */
 export type AwayPart = "done" | "underway" | "todo"
+
+/** An item's own marks that Owen has dealt with it (`PlanDoc.review()`, `defer()`, `queue()`). */
+const ADDRESSED_ATTRIBUTES = ["reviewed", "deferred", "queued"]
+
+/** A phase with no `done-at`:  before any real time. */
+const NO_TIME = 1
+
+/** A day, in ms. */
+const DAY_MS = 86_400_000
 
 /** A Noted card saying the item was made a todo (`PlanDoc`'s `filedTodo()`). */
 const FOLLOWED_UP = /\bMade todo T\d+ to follow this up\b/
@@ -197,12 +229,14 @@ const CLOSED = /^(done|decided|canceled)$/
 
 /**
  * What needs Owen, in the order to look at it, each with what picks it:
+ * - a fix Claude made, his to review (orange):  it's why it's back in the list (I235)
  * - a call or a question waiting on him (drawn red)
  * - an open issue
  * - a manual test to run
  */
 const NEED_ORDER: readonly [string, (item: Element) => boolean][] = [
+  ["fixed, to review", (item) => item.hasAttribute("fixed")],
   ["needs your call", (item) => item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)],
-  ["open issue", (item) => /^i\d/.test(item.id)],
+  ["open issue", (item) => /^i\d/.test(item.id) && !item.hasAttribute("fixed")],
   ["to test", (item) => /^m\d/.test(item.id)]
 ]

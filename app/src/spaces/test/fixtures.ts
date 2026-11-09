@@ -298,7 +298,7 @@ function compileFixture(
         writer,
         importLines,
         scope,
-        SP.SpellProject.writerOptionsFor({ exports, listsStartAt })
+        SP.SpellProject.writerOptionsFor({ exports, listsStartAt, version })
       )
     )
   const marked = errors.join("") + (sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()) + "\n"

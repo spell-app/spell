@@ -148,6 +148,11 @@ export class PeopleStore {
     return thing instanceof People.Org ? thing : undefined
   }
 
+  /** Is there an org `id`, with a file of its own?  Reads nothing else, so a name made up logs nothing. */
+  async hasOrg(id: string): Promise<boolean> {
+    return (await this.storage.read(orgFile(id))) !== undefined
+  }
+
   /**
    * Give `person` the role `role` in `org`:  a membership added, or the one they have changed (epic `atmosphere` P4, T6).
    * - Writes the org's file, its comments kept;  returns the text written.
@@ -157,6 +162,19 @@ export class PeopleStore {
     if (membership) membership.role = role
     else org.members.items = [...org.members.items, new People.Membership({ person, role })]
     return this.save(org)
+  }
+
+  /**
+   * Who `account` (`owen@rs`, a person's spaces in org `org`) is, as the org's file names them.
+   * - An org's first Admins are Spell accounts in it (`OrgSetup`, J163):  `owen@spell`, whose spaces there are `owen@rs`.
+   * - `account` itself for anyone else, on the org's file or not.
+   */
+  async memberCalled(org: string, account: string): Promise<string> {
+    const [id] = account.split("@")
+    const members = (await this.org(org))?.members.items ?? []
+    const addresses = members.flatMap((each) => (each.person ? [this.addressOf(each.person)] : []))
+    const spellAccount = `${id}@${HOME_ORG}`
+    return !addresses.includes(account) && addresses.includes(spellAccount) ? spellAccount : account
   }
 
   /**

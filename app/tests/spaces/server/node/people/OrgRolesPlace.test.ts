@@ -91,9 +91,9 @@ describe("an org's roles as a place", () => {
 
     const log = await rowsOf("role_changes")
     expect(log.slice(-3).map((row) => [row.did, row.who])).toEqual([
-      ["join", "ada@rs"],
-      ["team", "ada@rs"],
-      ["give", "ada@rs"]
+      ["join", "ada"],
+      ["team", "ada"],
+      ["give", "ada"]
     ])
   })
 
@@ -124,8 +124,8 @@ describe("an org's roles as a place", () => {
     expect((await rowsOf("terms")).some((row) => row.holder === "dee@rs")).toBe(false)
     expect((await rowsOf("role_changes")).at(-1)).toMatchObject({
       did: "end",
-      who: "bo@rs",
-      what: "dee@rs project-manager of 2026_q4"
+      who: "bo",
+      what: "dee Project Manager of 2026 Q4"
     })
   })
 

@@ -289,7 +289,7 @@ export const coreMethods = defineCoreModule({
    * The class to make for `Class`:  the running program's newest class by its name, if it IS `Class` or extends it,
    * else `Class` itself (epic `language` P26).
    * - So a library's `a new card` makes the importing program's card:  Solitaire's `Card`, which extends the library's.
-   * - Compiled from a library's own `new` of a type it exports:  `new (core.classToMake(Card))()`.
+   * - Compiled from a library's own `new` of a type others may extend:  `new (core.classToMake(Card))()`.
    * - No running program (the model's core, a library run by itself), or one with no such class:  `Class`.
    * - A class of the same name that doesn't extend `Class` (another project's own `Card`):  `Class`.
    */

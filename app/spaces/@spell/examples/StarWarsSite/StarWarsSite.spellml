@@ -304,12 +304,9 @@
 		- [x] add or remove a review right in the table
 		- [x] paste a block of reviews copied from a spreadsheet
 	</>
-	<property "reviews" description="Every review written on this device">
-		return every review
-	</property>
 	<draw>
 		draw (a new page top with title = "Reviews")
-		<table editable celled rows={its reviews}/>
+		<table editable celled rows={every review}/>
 	</draw>
 </>
 

@@ -76,6 +76,8 @@
   /* an amber, further from red than Spell UI's orange:  the epic pages' own (`--epic-state-replied`, I207) */
   --spell-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
   --spell-state-replied-on: var(--ui-orange-on, #1b1c1d);
+  --spell-state-requested: light-dark(oklch(0.86 0.1 66), oklch(0.89 0.08 68));
+  --spell-state-requested-on: var(--ui-yellow-on, #1b1c1d);
   --spell-state-progress: var(--ui-blue, #2185d0);
   --spell-state-progress-on: var(--ui-blue-on, #fff);
   --spell-state-open: var(--ui-yellow, #fbbd08);
@@ -937,6 +939,8 @@ pre > .spell-code-copy {
   --epic-state-attention-on: var(--spell-state-attention-on);
   --epic-state-replied: var(--spell-state-replied);
   --epic-state-replied-on: var(--spell-state-replied-on);
+  --epic-state-requested: var(--spell-state-requested);
+  --epic-state-requested-on: var(--spell-state-requested-on);
   --epic-state-progress: var(--spell-state-progress);
   --epic-state-progress-on: var(--spell-state-progress-on);
   --epic-state-open: var(--spell-state-open);
@@ -970,7 +974,7 @@ pre > .spell-code-copy {
  * ## Page notes (epic `airplane`, P3):  `<spell-notes>` groups of `<spell-note>` cards, written into the page
  * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`):  each note's head line is an
  * `<epic-page-note-head>` (the epics pack, epic `epic-engine` P3), its look its own sheet's.
- * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, in an agent's voice
+ * - a note is a person's:  a faint violet card (`--spell-voice-person-fill`);  Claude's replies under it, in an agent's voice
  *   (`--spell-voice-agent`, terracotta;  epic `epic-friend` P10, Q16:  violet before, which now means a person)
  * - FOLDED until opened (`spell-note[open]`):  only the head line shows, with the note's first line
  * - its status, by the colour scheme:  new yellow (open), answered in the agent's voice, done grey
@@ -989,7 +993,7 @@ pre > .spell-code-copy {
   border: 1px solid var(--spell-rule);
   border-left: 3px solid var(--spell-state-open);
   border-radius: 6px;
-  background: var(--spell-warm);
+  background: var(--spell-voice-person-fill);
   font-size: 0.95rem;
 }
 .spell-doc-main spell-note[status="answered"] {

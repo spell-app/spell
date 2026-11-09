@@ -44,7 +44,7 @@ def test_counting() -> None:
     """Tests"""
     with core.test("test counting"):
         core.echo_test_action("get a new counter")
-        it = Counter()
+        it = core.class_to_make(Counter)()
         core.expect(it.count, "its count", 0, "0")
         core.echo_test_action("increment it")
         it.increment()

@@ -3028,6 +3028,21 @@
     },
     {
       "kind": "method",
+      "name": "waitedValueKeyFor",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "...parts"
+        }
+      ],
+      "description": "ONE object for `thing` and each of `parts`, the `thing` of a `waitedValue()` with a loop's item in it: `rows={every review where its film is film}` is another read for each film, in the same words."
+    },
+    {
+      "kind": "method",
       "name": "whileWaiting",
       "of": "core",
       "module": "waiting",
@@ -3244,6 +3259,13 @@
       "of": "core",
       "module": "saved",
       "description": "The person using the program:  what `them` compiles to.  With no sign-in, the name its server knows them by, else a guest."
+    },
+    {
+      "kind": "method",
+      "name": "signInMenu",
+      "of": "core",
+      "module": "saved",
+      "description": "The person menu, for a program's own toolbar:  what `the sign in menu` compiles to."
     },
     {
       "kind": "method",

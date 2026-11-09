@@ -319,15 +319,28 @@ describe("<ui-docs-nav> lists", () => {
     expect(row(nav, "ui-buttons").hasAttribute("aria-current")).toBe(false)
   })
 
-  it("marks a hand-written page, and shows a load error", async () => {
+  it("marks a hand-written page, and shows a load error inside the Components band", async () => {
     const nav = await render(`current="getting-started"`)
     expect(row(nav, "getting-started").getAttribute("aria-current")).toBe("page")
 
     SiteData.url = "/no-such-folder/__data/components.json5"
     const broken = await render()
-    expect(find(broken, "ui-message").getAttribute("heading")).toBe("The component list didn't load")
+    const message = find(broken, "ui-message")
+    expect(message.getAttribute("heading")).toBe("The component list didn't load")
     expect(broken.matches(":state(listed)")).toBe(true)
     expect(links(broken)).toContain("theming")
+    const band = row(broken, "group:components")
+    expect(band.hasAttribute("open")).toBe(true)
+    expect(band.querySelector("slot")!.assignedElements()).toEqual([message.parentElement])
+  })
+
+  it("marks the current page's copy in Favourites as current too, and reveals its row in Components", async () => {
+    localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(["ui-input"]))
+    const nav = await render(`current="ui-input"`)
+    expect(row(nav, "favorite:ui-input").getAttribute("aria-current")).toBe("page")
+    expect(row(nav, "favorite:ui-input").hasAttribute("data-current")).toBe(false)
+    expect(row(nav, "ui-input").getAttribute("aria-current")).toBe("page")
+    expect(row(nav, "ui-input").hasAttribute("data-current")).toBe(true)
   })
 })
 
