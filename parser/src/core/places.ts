@@ -220,6 +220,9 @@ const PLACE_WRITES: PlaceWriteListener = {
   }
 }
 
+/** The time that's stamped once. */
+const CREATED_FIELD = "created"
+
 /** Lists made by following a field of addresses:  a change to one writes the addresses back (`rememberLinkedList()`). */
 const LINKED_LISTS = new WeakMap<object, LinkedListHome>()
 
@@ -520,18 +523,29 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const group = this.groupNumberFor(pending)
     const times = this.placesOrDie("saveNew").timesStampedOn(type, this.places!.placeForOrDie(placeName))
     const now = this.nextStampTime()
-    const stamps = Object.fromEntries(times.map((field) => [field, now.toISOString()]))
+    const allTimes = (thing.constructor as { savedIn?: { times?: readonly string[] } }).savedIn?.times ?? []
+    const names = storedAsNamesOf(schemaOf(thing.constructor))
+    const propertyOf = (field: string) => names.get(field) ?? field
+    // a thing saved again, by undo:  it keeps when it was first saved
+    const createdBefore = allTimes.includes(CREATED_FIELD) ? getProp(thing, propertyOf(CREATED_FIELD)) : undefined
+    const stampOf = (field: string) =>
+      (field === CREATED_FIELD && createdBefore instanceof Date ? createdBefore : now).toISOString()
+    const stamps = Object.fromEntries(times.map((field) => [field, stampOf(field)]))
+    const timeProperties = allTimes.map(propertyOf)
+    const row = Object.fromEntries(
+      Object.entries(this.rowAsWritten(thing)).filter(([field]) => !timeProperties.includes(field))
+    )
     this.writing(() =>
       pending.insert({
         collection,
         type,
         id,
-        fields: { ...this.rowAsWritten(thing), ...stamps },
+        fields: { ...row, ...stamps },
         ...(group !== undefined && { group })
       })
     )
     // shown even where the place can't keep them:  what's added here stays on top until it's read again
-    this.showStamps(thing, (thing.constructor as { savedIn?: { times?: string[] } }).savedIn?.times ?? [], now)
+    this.showStamps(thing, allTimes.filter((field) => field !== CREATED_FIELD || !createdBefore), now)
   }
 
   /** Now, later than any stamp this page made before:  things saved in one moment still have an order. */

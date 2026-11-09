@@ -638,7 +638,7 @@ class ProgramPlaces {
     if (!select || this.askedWhole.has(Class)) return undefined
     const { select: canSelect, idOf = ID_FIELD } = behind.describe()
     if (!this.folder!.canDoAll(canSelect, select)) return undefined
-    this.heedFieldsLeftOut(Class, select)
+    this.heedFieldsLeftOut(Class, select, behind)
     // its id too:  it's what makes it one thing
     return select.includes(idOf) ? select : [...select, idOf]
   }
@@ -653,11 +653,18 @@ class ProgramPlaces {
    * - Costs only a read that finds nothing set.
    * - Not what's being read in, or what only shows it (`whileOnlyShowing()`).
    */
-  private heedFieldsLeftOut(Class: SavedClass, select: readonly string[]): void {
+  private heedFieldsLeftOut(Class: SavedClass, select: readonly string[], behind: PlaceBehind): void {
     if (this.heeded.has(Class)) return
     this.heeded.add(Class)
-    const selected = new Set([...select, ID_FIELD])
     const schema = schemaOf(Class)
+    // a saved time this place can't hold:  asking again can't bring it, and it would ask for a field it hasn't got
+    const { timesHeld } = behind.describe()
+    const { times = [] } = savedInOf(Class)
+    const noneToBring = (name: string) => {
+      const field = schema.info(name)?.storedAs ?? name
+      return times.includes(field) && timesHeld !== "every field" && !timesHeld?.includes(field)
+    }
+    const selected = new Set([...select, ID_FIELD, ...[...schema.declared.keys()].filter(noneToBring)])
     const seen = new Set<string>()
     for (let each: typeof schema | undefined = schema; each; each = each.parent) {
       for (const [name, info] of each.declared) {
