@@ -822,11 +822,24 @@ describe("PlaceThings, refused", () => {
 })
 
 describe("core.notify's actions", () => {
+  test("a page with no toast element yet loads it before the toast shows", async () => {
+    const order: string[] = []
+    const key = Symbol.for("spell-ui:runtime")
+    const page = globalThis as unknown as Record<symbol, unknown>
+    const toast = () => (order.push("shown"), { closed: Promise.resolve() })
+    const ready = async () => void order.push("loaded")
+    const runtime = { load: async () => runtime, toast, toasts: { ready } }
+    page[key] = runtime
+    await core.notify("Oops", { actions: [{ text: "Retry", click: () => {} }] })
+    delete page[key]
+    expect(order).toEqual(["loaded", "shown"])
+  })
+
   test("each reaches the page's toast with its handler, and the toast stays until it's closed", async () => {
     const toast = vi.fn(() => ({ closed: Promise.resolve() }))
     const key = Symbol.for("spell-ui:runtime")
     const page = globalThis as unknown as Record<symbol, unknown>
-    const runtime = { load: async () => runtime, toast }
+    const runtime = { load: async () => runtime, toast, toasts: { ready: async () => {} } }
     page[key] = runtime
     const click = vi.fn()
     await core.notify("Oops", { actions: [{ text: "Retry", click }] })

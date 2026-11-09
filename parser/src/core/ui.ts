@@ -152,7 +152,10 @@ export const uiMethods = defineCoreModule({
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
     try {
-      const toast = (await ui.load()).toast(toastOptionsFor(String(message), options))
+      const page = await ui.load()
+      // the first toast of a page with none drawn yet:  its element is loaded now, not by every page up front
+      await page.toasts.ready()
+      const toast = page.toast(toastOptionsFor(String(message), options))
       if (!toastStays(options)) await toast.closed
     } catch (error) {
       core.console.error("notify:  can't show a toast", error)
@@ -569,6 +572,8 @@ type PageUI = {
   load(): Promise<PageUI>
   /** a toast:  `UI.toast()`, its options the ones `notify` uses (Spell UI's `ToastOptions`) */
   toast(options: PageToastOptions): { closed: Promise<void> }
+  /** toasts:  `UI.toasts`;  `ready()` resolves once one can show, importing the family the first time */
+  toasts: { ready(): Promise<void> }
   /** dialogs that answer with a promise:  `UI.modals` */
   modals: {
     alert(options: { message: string; okText?: string }): Promise<void>
