@@ -229,7 +229,8 @@ start the box`
 })
 
 describe("what's listened to counts as read (epic `data` P13)", () => {
-  const SELECT = /static savedIn = \{ place: "family_cookbook", collection: "recipes", times: \[[^\]]*\], select: \[([^\]]*)\]/
+  const SELECT =
+    /static savedIn = \{ place: "family_cookbook", collection: "recipes", times: \[[^\]]*\], select: \[([^\]]*)\]/
 
   test("`when its notes changes` reads notes, with nothing else that does, or it would be left out", () => {
     const read = compile(

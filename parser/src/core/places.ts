@@ -445,7 +445,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!rows) throw new TypeError("new PlaceThings():  it needs `places`, or a `cache` of rows to find references in")
     super({ entryFor: (ref) => entryOfCachedRow(rows, ref), ...(classNamed && { classNamed }) })
     this.places = places
-    places?.stampTimesBy((type) => (this.classNamed(type) as { savedIn?: { times?: string[] } } | undefined)?.savedIn?.times ?? [])
+    places?.stampTimesBy(
+      (type) => (this.classNamed(type) as { savedIn?: { times?: string[] } } | undefined)?.savedIn?.times ?? []
+    )
     this.showMe = showMe ?? ((thing) => void (core as Partial<Pick<typeof core, "send">>).send?.(thing, SHOW_ME_EVENT))
     if (places) {
       onPlaceWrite(PLACE_WRITES)

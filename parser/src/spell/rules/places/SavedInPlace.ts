@@ -58,12 +58,7 @@ export class SavedInPlace extends SpellStatement<"type|place"> {
         property("place", text(saved?.place)),
         property("collection", text(saved?.collection)),
         ...(times.length
-          ? [
-              property(
-                "times",
-                new P.ASTArrayLiteral(match, { items: times.map(({ field }) => text(field)) })
-              )
-            ]
+          ? [property("times", new P.ASTArrayLiteral(match, { items: times.map(({ field }) => text(field)) }))]
           : [])
       ]
     })

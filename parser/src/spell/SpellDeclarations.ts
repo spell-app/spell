@@ -420,7 +420,8 @@ export class SpellDeclarations {
     type.saved = { place, placeType, collection }
     if (keepsNoTimes) return
     for (const word of Object.values(SP.Language.of(scope).words.savedTimeWords)) {
-      if (!type.variables.get(word, "LOCAL_ONLY")) type.variables.add({ name: word, datatype: "date", isSavedTime: true })
+      if (!type.variables.get(word, "LOCAL_ONLY"))
+        type.variables.add({ name: word, datatype: "date", isSavedTime: true })
     }
   }
 

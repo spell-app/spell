@@ -399,7 +399,16 @@ export class TypeScope extends BlockScope {
   declareProperty(
     name: string,
     declaredBy: P.Match,
-    { asWritten, datatype, autoDeclared, readAs, measure, output, valueOutputs, isSavedTime }: DeclarePropertyOptions = {}
+    {
+      asWritten,
+      datatype,
+      autoDeclared,
+      readAs,
+      measure,
+      output,
+      valueOutputs,
+      isSavedTime
+    }: DeclarePropertyOptions = {}
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
     if (existing?.isSavedTime && !isSavedTime && existing.declaredBy !== declaredBy) {
