@@ -1295,7 +1295,10 @@ export class EditorStore extends Observable {
   async duplicateFile(newPath?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
-      newPath ||= await editor.prompt({ message: appTexts.text("askNewFileName"), defaultValue: editor.file!.file })
+      newPath ||= await editor.prompt({
+        message: appTexts.text("askNewFileName"),
+        defaultValue: SP.SpellProject.sourceNameOf(editor.file!.path)
+      })
       if (!newPath) return
       const newFile = await new SPACES.ProjectFiles(editor.project!).duplicate(editor.file!.filePath!, newPath)
       editor.showEditor(newFile.path)
@@ -1310,7 +1313,10 @@ export class EditorStore extends Observable {
     try {
       const { project, file } = editor
       if (!newPath) {
-        const name = await editor.prompt({ message: appTexts.text("askRenameFile"), defaultValue: file!.file })
+        const name = await editor.prompt({
+          message: appTexts.text("askRenameFile"),
+          defaultValue: SP.SpellProject.sourceNameOf(file!.path)
+        })
         if (!name) return
         newPath = SP.SpellLocation.getFileLocation(project!.projectId, name).filePath!
         if (newPath === file!.filePath) return
@@ -1333,7 +1339,12 @@ export class EditorStore extends Observable {
       const fileIndex = files.indexOf(file)
       const nextFile = files[fileIndex + (fileIndex === files.length - 1 ? -1 : 1)]
       // actually remove the file
-      if (!(await editor.confirm({ message: appTexts.text("confirmRemoveFile", { name: file.file! }) }))) return
+      if (
+        !(await editor.confirm({
+          message: appTexts.text("confirmRemoveFile", { name: SP.SpellProject.sourceNameOf(file.path) })
+        }))
+      )
+        return
       const removed = await new SPACES.ProjectFiles(project).delete(file.filePath!)
       if (removed) {
         // select the nextFile, or the project (which will select another file)
