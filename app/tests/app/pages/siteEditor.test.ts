@@ -319,7 +319,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
 
     test("a group with no sites says so, and how to make one", async () => {
       const other = await page.context().newPage()
-      await other.goto(`${EDITOR}site/@spell/guides`)
+      await other.goto(`${EDITOR}site/@spell/library`)
       await other.getByText("No sites here yet").waitFor({ timeout: 30_000 })
       expect(await other.locator("#sites .TileCard:not(.empty)").count()).toBe(0)
       await other.close()
