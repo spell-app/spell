@@ -150,6 +150,31 @@ describe("<FileDropdown>", () => {
     expect(dropdown.value).toBe("test-project/one.js")
   })
 
+  test("a project's folders:  each a header over its files;  the trigger and the tabs say the whole name", async () => {
+    const file = fakeFile("test-project/Button/Usage.spellml", "")
+    const row = (path: string, location: object) => ({ path, location, file: reactiveObject({ isDirty: false }) })
+    ;(file.project as unknown as { imports: unknown[] }).imports = [
+      row("test-project/Button/Usage.spellml", { file: "Usage.spellml", folder: "/Button/" }),
+      row("test-project/Card.spell", { file: "Card.spell", folder: "/" }),
+      row("test-project/Divider/Usage.spellml", { file: "Usage.spellml", folder: "/Divider/" }),
+      row("test-project/Button/styles.css", { file: "styles.css", folder: "/Button/" })
+    ]
+    setEditor("project", file.project as unknown as EditorStore["project"])
+    setEditor("file", file)
+    const host = await mount(() => <FileDropdown />)
+    const dropdown = host.querySelector<HTMLElement>("ui-dropdown#FileDropdown")!
+    const items = [...dropdown.querySelectorAll(":scope > ui-item")]
+    expect(items.map((item) => [item.getAttribute("kind") ?? "item", text(item)])).toEqual([
+      ["item", "Card.spell"],
+      ["header", "Button"],
+      ["item", "Usage"],
+      ["item", "styles.css"],
+      ["header", "Divider"],
+      ["item", "Usage"]
+    ])
+    expect(text(host.querySelector(".FileDropdownTrigger")!)).toBe("Button/Usage")
+  })
+
   test("loading, with no items, until the project's loaded", async () => {
     const file = fakeFile("test-project/one.js", "")
     file.project.isLoaded = false

@@ -999,21 +999,44 @@ export const request_restore = respondWithJSON(async (request) => {
 /**
  * Rename a project file, keeping its position in `imports` (rewriting its `path` entry in place)
  * rather than letting `getIndex()`'s resync drop-and-re-append it at end.
+ * - The new path may be in another folder:  it's made if need be, and a folder left empty goes (`removeIfEmpty()`).
  */
 export const renameFile = async (projectId: string, filePath: string, newFilePath: string) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   const newLocation = SP.SpellLocation.getFileLocation(projectId, newFilePath)
   await fileUtils.movePath(location.serverPath, newLocation.serverPath)
+  await removeIfEmpty(location)
 
   // update `imports` so file order stays the same
   const importsFile = await loadProjectFile(projectId)
   importsFile.imports = importsFile.imports.map((item) => {
-    if (item.path === filePath) return { ...item, path: newFilePath }
+    if (isImportOf(projectId, item.path, location)) return { ...item, path: newLocation.filePath! }
     return item
   })
   await saveProjectFile(projectId, importsFile)
 
   return true
+}
+
+/** Is `importPath`, from project `projectId`'s file, an import of its file at `location`?  Another project's never is. */
+function isImportOf(projectId: string, importPath: string, location: SP.SpellLocation): boolean {
+  if (SP.SpellLocation.isAddress(importPath)) return false
+  return SP.SpellLocation.getFileLocation(projectId, importPath).path === location.path
+}
+
+/**
+ * SIDE EFFECT:  the file at `location` just left its folder:  remove that folder if it's now empty, then its parent ...
+ * - Stops at the first folder with anything in it, hidden files included, and at the project's own folder.
+ */
+async function removeIfEmpty(location: SP.SpellLocation): Promise<void> {
+  const projectFolder = SP.SpellLocation.getProjectLocation(location.projectId).serverPath
+  let folder = dirname(location.serverPath)
+  while (SRV.pathInside(projectFolder, folder)) {
+    const inside = await fileUtils.getFolderContents(folder, { includeFolders: true, namesOnly: true })
+    if (inside.length) return
+    await fileUtils.deletePath(folder)
+    folder = dirname(folder)
+  }
 }
 
 /**
@@ -1029,16 +1052,17 @@ export const request_renameFile = respondWithJSON(async (request) => {
   return await getIndex(projectId, { person: personOf(request) })
 })
 
-/** Delete a project file, and its import from the project's file, the other imports in their order. */
+/**
+ * Delete a project file, and its import from the project's file, the other imports in their order.
+ * - A folder left empty goes too (`removeIfEmpty()`).
+ */
 export const deleteFile = async (projectId: string, filePath: string) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   const deleted = await fileUtils.deletePath(location.serverPath)
+  await removeIfEmpty(location)
   // its import goes too:  `getIndex()` never takes one out of the project file
   const importsFile = await loadProjectFile(projectId)
-  const imports = importsFile.imports.filter(
-    ({ path }) =>
-      SP.SpellLocation.isAddress(path) || SP.SpellLocation.getFileLocation(projectId, path).path !== location.path
-  )
+  const imports = importsFile.imports.filter(({ path }) => !isImportOf(projectId, path, location))
   if (imports.length !== importsFile.imports.length) await saveProjectFile(projectId, { ...importsFile, imports })
   return deleted
 }

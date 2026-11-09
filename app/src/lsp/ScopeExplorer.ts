@@ -587,9 +587,12 @@ export class ScopeExplorer {
     return LSP.scopePath("", "project", project.projectName ?? project.projectId)
   }
 
-  /** Path of `file`'s entry, in `project`. */
+  /**
+   * Path of `file`'s entry, in `project`:  by its path in the project, `Button/Usage.spellml`,
+   * as files in different folders can share a name.
+   */
   private static filePath(project: SP.SpellProject, file: SP.SpellFile): string {
-    return LSP.scopePath(ScopeExplorer.projectPath(project), "file", file.file ?? file.path)
+    return LSP.scopePath(ScopeExplorer.projectPath(project), "file", SP.SpellProject.sourceNameOf(file.path))
   }
 
   /** URI of the file entry `path` is below, if any. */

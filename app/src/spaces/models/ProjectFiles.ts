@@ -35,7 +35,7 @@ export class ProjectFiles {
    * Create a new file within the project, and return it.
    * - `filePath` is relative to the project, and may or may not start with `/`.
    * - No `filePath`:  asks for one (`prompt()`), suggesting `newFileName`.
-   * - NOTE: in theory this handles nested files.
+   * - It may be in a folder, `Button/Usage.spellml`:  the server makes the folder.
    * - throws if the file is already there, or the server says no;  `undefined` if the prompt is cancelled
    */
   async create(
@@ -95,12 +95,14 @@ export class ProjectFiles {
     } catch (e) {
       die("Server error loading file", e)
     }
-    return this.create(newFilePath, contents, file.file, die)
+    return this.create(newFilePath, contents, SP.SpellProject.sourceNameOf(file.path), die)
   }
 
   /**
    * Rename an existing file, keeping its place in the project's file order, and return the renamed file.
-   * - No `newFilePath`:  asks for a new name (`prompt()`);  cancelled or unchanged:  `undefined`.
+   * - It may go to another folder:  the new path says so, `Button/Usage.spellml`.
+   * - No `newFilePath`:  asks for a new name (`prompt()`), starting from its path in the project;
+   *   cancelled or unchanged:  `undefined`.
    * - throws if the file isn't there, the new one is, or the server says no
    */
   async rename(filePath: string, newFilePath?: string): Promise<SP.AnySpellFile | undefined> {
@@ -110,7 +112,7 @@ export class ProjectFiles {
     const file = project.getFile(filePath) || die("File not found.")
 
     if (!newFilePath) {
-      const filename = prompt("New name for the file?", file.file)
+      const filename = prompt("New name for the file?", SP.SpellProject.sourceNameOf(file.path))
       if (!filename) return undefined
       newFilePath = SP.SpellLocation.getFileLocation(project.projectId, filename).filePath!
       if (newFilePath === filePath) return undefined
@@ -150,7 +152,7 @@ export class ProjectFiles {
     const file = project.getFile(filePath) || die("File not found.")
 
     if (shouldConfirm === CONFIRM) {
-      if (!confirm(`Really remove file '${file.file}'?`)) return undefined
+      if (!confirm(`Really remove file '${SP.SpellProject.sourceNameOf(file.path)}'?`)) return undefined
     }
 
     // Tell the server to delete the file, which returns the updated index.

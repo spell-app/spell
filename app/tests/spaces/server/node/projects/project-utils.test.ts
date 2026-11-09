@@ -277,6 +277,74 @@ describe("project-utils", () => {
       expect(index.imports.map((it) => it.path)).toEqual(["/Generated.spell", "/Button/socket.io.js"])
     })
 
+    test("two files of one name:  each opens, saves and renames by its own path", async () => {
+      const projectId = project("TwoUsages")
+      const folder = resolve(workspace, "TwoUsages")
+      write(folder, "Button/Usage.spellml", "button\n")
+      write(folder, "Divider/Usage.spellml", "divider\n")
+      await projectUtils.getIndex(projectId)
+
+      // opens:  the file's URL finds the right one
+      const url = `/spaces/${projectId}/Divider/Usage.spellml`
+      expect(projectUtils.locationForUrl(url).filePath).toBe("/Divider/Usage.spellml")
+      expect(readFileSync(projectUtils.locationForUrl(url).serverPath, "utf8")).toBe("divider\n")
+
+      // saves
+      await projectUtils.saveFile(projectId, "/Button/Usage.spellml", "button 2\n")
+      expect(readFileSync(resolve(folder, "Button/Usage.spellml"), "utf8")).toBe("button 2\n")
+      expect(readFileSync(resolve(folder, "Divider/Usage.spellml"), "utf8")).toBe("divider\n")
+
+      // renames:  only that one, in its place in the file order
+      await projectUtils.renameFile(projectId, "/Button/Usage.spellml", "/Button/Examples.spellml")
+      expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toEqual([
+        "/TwoUsages.spell",
+        "/Button/Examples.spellml",
+        "/Divider/Usage.spellml"
+      ])
+    })
+
+    test("renaming moves a file between folders, making the new one, and removes a folder left empty", async () => {
+      const projectId = project("Moved")
+      const folder = resolve(workspace, "Moved")
+      write(folder, "Old/deep/Usage.spellml")
+      write(folder, "Keep/One.spellml")
+      write(folder, "Keep/Two.spellml")
+      await projectUtils.getIndex(projectId)
+
+      // no leading slash:  the project file still says it the one way
+      await projectUtils.renameFile(projectId, "Old/deep/Usage.spellml", "New/Usage.spellml")
+      expect(existsSync(resolve(folder, "Old"))).toBe(false)
+      expect(readFileSync(resolve(folder, "New/Usage.spellml"), "utf8")).toBe(TAG)
+      expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toEqual([
+        "/Moved.spell",
+        "/Keep/One.spellml",
+        "/Keep/Two.spellml",
+        "/New/Usage.spellml"
+      ])
+
+      // a folder with something left in it stays
+      await projectUtils.renameFile(projectId, "/Keep/One.spellml", "/One.spellml")
+      expect(existsSync(resolve(folder, "Keep/Two.spellml"))).toBe(true)
+    })
+
+    test("deleting a folder's last file removes the folder, and its parents left empty;  never the project's", async () => {
+      const projectId = project("Emptied")
+      const folder = resolve(workspace, "Emptied")
+      write(folder, "A/B/Only.spellml")
+      write(folder, "C/One.spellml")
+      write(folder, "C/Two.spellml")
+      await projectUtils.getIndex(projectId)
+
+      await projectUtils.deleteFile(projectId, "/A/B/Only.spellml")
+      expect(existsSync(resolve(folder, "A"))).toBe(false)
+      await projectUtils.deleteFile(projectId, "/C/One.spellml")
+      expect(existsSync(resolve(folder, "C/Two.spellml"))).toBe(true)
+      await projectUtils.deleteFile(projectId, "/C/Two.spellml")
+      expect(existsSync(resolve(folder, "C"))).toBe(false)
+      expect(existsSync(folder)).toBe(true)
+      expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toEqual(["/Emptied.spell"])
+    })
+
     test("a link to a folder is NOT followed:  it could point back up", async () => {
       const projectId = project("Linked")
       const folder = resolve(workspace, "Linked")
