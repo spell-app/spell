@@ -60,6 +60,21 @@ export class Sequence<
   declare leadingWord: P.Literal | P.Literals | undefined
 
   /**
+   * The words a line MUST start with to be ours;  `undefined` ~== it can start with anything.
+   * - `Choice`'s first-word table files us under these (`Choice.parse()`).
+   * - `undefined` when our first rule isn't a required word, or is one matched in any case (rulex `/i`).
+   * - NOTE: a rule that starts with a word MUST read it:  its `parse()` and `test()` ask its syntax first
+   *   (`firstWords.test.ts`, spell's).
+   */
+  get firstWords(): readonly string[] | undefined {
+    const word = this.leadingWord
+    if (!word) return undefined
+    if (word instanceof P.Literal) return word.caseInsensitive ? undefined : literalWords(word.literal)
+    const [first] = word.literals
+    return first && !first.optional ? literalWords(first.literal) : undefined
+  }
+
+  /**
    * The words our syntax can't do without, anywhere on the line, each a set of alternatives:  `of` and `is` in
    * `the {property} of {type} is ...`, not a word in an optional or alternative group (epic `language` T32).
    * - Read off our syntax, so a rule that overrides `parse()` and parses its syntax first (nearly all do) has them too;
@@ -281,6 +296,11 @@ function startsWithWord(word: P.Literal | P.Literals, scope: P.Scope, tokens: P.
   if (word instanceof P.Literal) return word.test(scope, tokens, start) !== false
   const [first] = word.literals
   return !first || first.optional || !!tokens[start]?.matchesLiteral(first.literal)
+}
+
+/** A literal's word or words, as a list. */
+function literalWords(literal: string | string[]): readonly string[] {
+  return Array.isArray(literal) ? literal : [literal]
 }
 
 /**

@@ -1,15 +1,16 @@
-import { For, Show, createSignal, getOwner, onCleanup, onSettled, runWithOwner } from "solid-js"
+import { Show, createSignal, getOwner, onSettled, runWithOwner } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
+import type { monaco } from "spell/app/app/ui/monaco"
 
 import { setDebugGlobal } from "spell/util"
 import { after } from "spell/element"
+import { SourceMarks, type SourcePlace } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
-// Import directly:  the barrel brings the site header and the section editor too
-import { PagePatch } from "spell/server/site/PagePatch"
+import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { NotebookController, type KeyedCell } from "./NotebookController"
-import { ExampleCode, ExampleDescription, NotebookCell } from "./NotebookCell"
-import { CellTools } from "./NotebookCellTools"
+import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
+import { ExampleCode } from "./ExampleCode"
+import { NotebookController } from "./NotebookController"
 import { NotebookDocs } from "./NotebookDocs"
 import { showNotebook } from "./NotebookHeader"
 import { SpellExample } from "./SpellExample"
@@ -21,37 +22,37 @@ import "./NotebookPage.css"
 
 /****************
  * ### `<NotebookPage>`
- * A `.spellml` NOTEBOOK's page (epic `elemental-spell` P16):  the page its `<spell-notebook>` template draws, in the
- * editor app, editable in place.
- * - Drawn as Spell UI's docs site draws a component page, on the pane's own glass (no background of its own):
- *   a masthead, the page's title and the line under it;  each section a `<ui-section sticky collapsible>`, listed in
- *   "On this page" at the right, the site's own `<ui-toc>`.
- *   - written either way (`NotebookPageCells`):  markdown (`# Counter`, `## Several counters`), or tags
- *     (`<header level="1">`, `<section label="Several counters">`)
- * - Its tools (the notebooks' menu, the lock, what happened to the last edit) are in the pane's header
- *   (`<NotebookHeader>`):  no toolbar of its own.
- * - Each cell (`<NotebookCell>`) in order:  prose drawn as markdown, templates as code, and what the notebook
- *   draws -- examples, sections, text -- live, each in its own place, drawn by the running program's runtime.
- * - An example's code is always editable:  an edit changes only that cell's span of the file, draws only that cell
- *   again, and saves it, unless the notebook's locked (`NotebookController`).
- * - Each example's tools, left of its `</>` while the pointer's over it, and a section's on its title bar
- *   (`<CellTools>`):  Add below, Move up, Move down, Delete;  the pane header's ⋯ menu acts on the cell last
- *   clicked (`<NotebookMenu>`).
- * - ⌘Z, outside an editor:  undoes the last add, move, delete, lock or unlock.
- * - A change to the file from outside the page (read every couple of seconds):  only the cells it changed draw again,
- *   planned by epic-engine's shared page patch;  the cell being typed in keeps its text, with a note
- *   (`NotebookController.outsideChange()`).
- * - "On this page" shows at the right where there's room, unless its Hide hid it;  where it doesn't show, an icon at
- *   the end of the title's row opens it as a flyout, just under that icon, over the page but never over the pane's
- *   header.
- * - A link to another notebook of the project (its tab bar's) shows it through the app's router:  no reload.
- * - The program still runs as ever, drawn out of sight:  its classes and its notebook are what the cells draw with.
- * - SIDE EFFECT:  defines `<spell-example>`, the example frame the notebook's examples draw as;  and loads
- *   `<ui-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
+ * The docs frame round a NOTEBOOK page the running program draws, in the app area (epic `notebook` P3, Q4):
+ * a `.spellml` page with the `notebook` flag, `<spell-page "x" notebook>` or its short spelling `<spell-notebook "x">`.
+ * - The PROGRAM draws the page, in the app's mount point (`program`), as any app draws:
+ *   its title, its sections, sticky and foldable, and its examples, `<spell-example>`.
+ *   - So drag and drop, the Inspector and the palette work on it as on any app,
+ *     and an edit draws again only what changed (`LiveEdit`).
+ *   - The page drawn is the open file's, not the one the project starts by itself (`editor.showOpenPage()`, J3).
+ * - This adds what's the editor's, round the drawing:
+ *   - the docs site's look, its text size and the page's gutter (`NotebookPage.css`)
+ *   - "On this page" at the right where there's room, unless its Hide hid it, the site's own `<ui-toc>`;
+ *     where it doesn't show, an icon at the pane's top right opens it as a flyout
+ *   - each example's code editor, in its `source` slot (`<ExampleCode>`):
+ *     - found by the place its `<spell-example>` is marked with (`SourceMarks.placeOfDrawn()`)
+ *     - made ONCE per example, and MOVED into the example the program draws again, its code pane kept open:
+ *       its text, cursor and focus stay as they were
+ *   - a click selects the cell it's on, through the Inspector:
+ *     `<AppPane>` hands `Inspector.pagePartAt` the controller's `cellAt()`,
+ *     so the editor's drag and drop, palette and Edit menu work on it (epic `notebook` P5)
+ *   - a link to another notebook of the project (its tab bar's) shows it through the app's router:  no reload
+ *   - a link to a section (`#types`) scrolls to it within the page
+ * - Its tools (the notebooks' menu, the lock) are in the pane's header (`<NotebookHeader>`).
+ * - SIDE EFFECT:  defines `<spell-example>`, the example frame the notebook's examples draw as.
+ * - SIDE EFFECT:  loads `<ui-toc>`, and `<ui-docs-api>`, which an `<html>` block may draw (`NotebookDocs`).
  ****************/
 export function NotebookPage(props: {
   file: SP.SpellFile
   project: SP.SpellProject
+  /** the app area:  the element holding the program's mount point (`#spell-app-root`) and its scroller */
+  program: HTMLElement
+  /** the id of the element that scrolls the program's drawing (`<AppRoot containerId>`) */
+  scroller: string
   /** hears the page's controller once it's made, and `undefined` as the page goes:  the pane's header's tools */
   onController?: (controller: NotebookController | undefined) => void
 }) {
@@ -64,157 +65,82 @@ export function NotebookPage(props: {
   // the pane's header's tools:  once drawn (a write, never in the body)
   onSettled(() => {
     props.onController?.(controller)
-    return () => {
-      controller.leave()
-      props.onController?.(undefined)
-    }
+    return () => props.onController?.(undefined)
   })
-  const owner = getOwner()
-  const panelDisposers: Array<() => void> = []
-  /** A panel for an example's `slot`, drawing `view` (its description, its code). */
-  const panelFor = (slot: string, view: (panel: HTMLElement) => JSX.Element) => {
-    const panel = document.createElement("div")
-    panel.slot = slot
-    const dispose = runWithOwner(owner, () => render(() => view(panel), panel))
-    panelDisposers.push(dispose)
-    return panel
-  }
-  controller.panelMaker = (key, index) => [
-    panelFor("description", (panel) => (
-      <ExampleDescription controller={controller} key={key} index={index} panel={panel} />
-    )),
-    panelFor("source", () => <ExampleCode controller={controller} key={key} index={index} />),
-    // its cell's tools, left of its `</>`:  on its first example only, as they act on the whole cell
-    ...(index === 0 ? [panelFor("tools", () => <CellTools controller={controller} key={key} />)] : [])
-  ]
-  onCleanup(() => panelDisposers.forEach((dispose) => dispose()))
+  // the open file's page, drawn by the program:  outside Solid's settling, as it mounts a root of its own
+  onSettled(() => queueMicrotask(() => editor.showOpenPage()))
 
-  // a change from outside the page:  the file on the server, read every couple of seconds
-  onSettled(() => controller.watchFile())
-  // the cell being typed in:  the one holding the focused editor (`PagePatch.SHARED`'s fixed ones)
-  controller.typingIn = () => {
-    let active = document.activeElement
-    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
-    const editor = active?.closest(PagePatch.SHARED.fixed!)
-    return editor?.closest<HTMLElement>("[data-cell-key]")?.dataset.cellKey
-  }
+  const editors = new ExampleEditors(controller, getOwner())
+  onSettled(() => editors.follow(props.program))
 
-  let page!: HTMLDivElement
-
-  // "On this page"'s column showing:  not hidden, and room for it (as the page's CSS lays it out)
+  // "On this page"'s column showing:  not hidden, and room for it
   const [isNarrow, setNarrow] = createSignal(false)
-  const followWidth = (div: HTMLDivElement) => {
-    page = div
-    const observer = new ResizeObserver(() => setNarrow(div.clientWidth <= NARROW_PANE))
-    observer.observe(div)
-    onCleanup(() => observer.disconnect())
-  }
-  const isColumnShown = () => controller.contentsShown() && !isNarrow()
-  const ids = { scroller: `notebook-scroller-${++pages}`, main: `notebook-main-${pages}` }
-
-  // the flyout, where the column doesn't show:  just under the title row's icon, and closed by a click elsewhere
-  const [flyoutTop, setFlyoutTop] = createSignal(FLYOUT_GAP)
-  const isFlyoutOpen = () => !isColumnShown() && controller.contentsOpen()
-  const contents: ContentsFlyout = {
-    isShown: () => !isColumnShown(),
-    toggle: (button) => {
-      if (isFlyoutOpen()) return controller.setContentsOpen(false)
-      const top = button.getBoundingClientRect().bottom - page.getBoundingClientRect().top + FLYOUT_GAP
-      setFlyoutTop(Math.max(FLYOUT_GAP, Math.round(top)))
-      controller.setContentsOpen(true)
-    }
-  }
-  const closeOnOutside = (event: Event) => {
-    const path = event.composedPath()
-    const inside = path.some(
-      (node) => node instanceof Element && node.matches(".NotebookTocFlyout, .NotebookTocButton")
-    )
-    if (!inside) controller.setContentsOpen(false)
-  }
-  const closeOnEscape = (event: KeyboardEvent) => {
-    if (event.key === "Escape") controller.setContentsOpen(false)
-  }
   onSettled(() => {
+    const observer = new ResizeObserver(() => setNarrow(props.program.clientWidth <= NARROW_PANE))
+    observer.observe(props.program)
+    return () => observer.disconnect()
+  })
+  const isColumnShown = () => controller.contentsShown() && !isNarrow()
+  const isFlyoutOpen = () => !isColumnShown() && controller.contentsOpen()
+
+  // a click:  a link followed within the editor;  a click elsewhere closes the flyout
+  onSettled(() => {
+    const onClick = (event: MouseEvent) => followLinks(event, controller)
+    const closeOnOutside = (event: Event) => {
+      const inside = event
+        .composedPath()
+        .some((node) => node instanceof Element && node.matches(".NotebookTocFlyout, .NotebookTocButton"))
+      if (!inside) controller.setContentsOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") controller.setContentsOpen(false)
+    }
+    props.program.addEventListener("click", onClick)
     document.addEventListener("pointerdown", closeOnOutside, true)
     document.addEventListener("keydown", closeOnEscape)
     return () => {
+      props.program.removeEventListener("click", onClick)
       document.removeEventListener("pointerdown", closeOnOutside, true)
       document.removeEventListener("keydown", closeOnEscape)
     }
   })
 
-  // a link to another of the project's notebooks (the tab bar's):  through the router, never a reload;
-  // a link to a section of the page (the section tabs'):  scrolled to within the page
-  const followNotebookLinks = (event: MouseEvent) => {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
-    if (scrollTo(event)) return
-    const link = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
-    const notebook = link && notebookAt(link, controller)
-    if (!notebook) return
-    event.preventDefault()
-    if (notebook.path !== controller.file.path) showNotebook(notebook.path)
-  }
-
-  const sections = () => sectionsOf(controller.cells())
-  const pageTitle = () => controller.cells().find((each) => each.cell.title)?.cell.title
+  const pageTitle = () => controller.model()?.cells.find((cell) => cell.title)?.title
   return (
-    <div class="NotebookPage ui-selectable" ref={followWidth} onClick={followNotebookLinks}>
-      <div class="NotebookScroller ui-docs-sections" id={ids.scroller}>
-        <div class="NotebookColumns">
-          <main class="NotebookMain" id={ids.main}>
-            <For each={sections()} keyed={(section) => section.key}>
-              {(section) => (
-                <Show
-                  when={section().heading !== undefined}
-                  fallback={<Cells controller={controller} cells={section().cells} masthead={contents} />}
-                >
-                  <ui-section
-                    id={slugOf(section().heading!)}
-                    label={section().heading}
-                    sticky="stack"
-                    level="2"
-                    collapsible=""
-                    dividing=""
-                    class="NotebookSection"
-                    onPointerOver={followTitleHover}
-                    onPointerLeave={(event: PointerEvent) =>
-                      (event.currentTarget as HTMLElement).classList.remove(TITLE_HOVER)
-                    }
-                  >
-                    <div slot="actions" class="NotebookSectionTools">
-                      <CellTools controller={controller} key={section().key} />
-                    </div>
-                    <Cells controller={controller} cells={section().cells} />
-                  </ui-section>
-                </Show>
-              )}
-            </For>
-          </main>
-          {/* drawn while hidden too:  it follows the scroll for the section tabs (`selectSectionTab()`) */}
-          <aside class={["NotebookAside", { hidden: !isColumnShown() }]}>
-            <Contents ids={ids} title={pageTitle()} onScrolledTo={(id) => selectSectionTab(page, id)}>
-              <ui-icon
-                slot="tools"
-                name="eye slash outline"
-                link=""
-                class="IconAction NotebookTocHide"
-                label={appTexts.text("notebookPageHideContents")}
-                title={appTexts.text("notebookPageHideContents")}
-                onClick={() => controller.toggleContents()}
-              />
-            </Contents>
-          </aside>
-        </div>
-      </div>
-      {/* where the column doesn't show:  the same contents, under the title row's icon */}
-      <Show when={isFlyoutOpen()}>
-        <div
-          class="NotebookTocFlyout"
-          role="dialog"
-          aria-label={appTexts.text("notebookPageContents")}
-          style={{ top: `${flyoutTop()}px` }}
+    <>
+      {/* drawn while hidden too:  it follows the scroll for the section tabs (`selectSectionTab()`) */}
+      <aside class={["NotebookAside", { hidden: !isColumnShown() }]} {...EDITORS}>
+        <Contents
+          scroller={props.scroller}
+          title={pageTitle()}
+          onScrolledTo={(id) => selectSectionTab(props.program, id)}
         >
-          <Contents ids={ids} title={pageTitle()} onPick={() => controller.setContentsOpen(false)}>
+          <ui-icon
+            slot="tools"
+            name="eye slash outline"
+            link=""
+            class="IconAction NotebookTocHide"
+            label={appTexts.text("notebookPageHideContents")}
+            title={appTexts.text("notebookPageHideContents")}
+            onClick={() => controller.toggleContents()}
+          />
+        </Contents>
+      </aside>
+      {/* where the column doesn't show:  an icon at the pane's top right, opening the same contents under it */}
+      <Show when={!isColumnShown()}>
+        <ui-icon
+          name="list"
+          link=""
+          class="IconAction NotebookTocButton"
+          {...EDITORS}
+          label={appTexts.text("notebookPageContents")}
+          title={appTexts.text("notebookPageContents")}
+          onClick={() => controller.setContentsOpen(!controller.contentsOpen())}
+        />
+      </Show>
+      <Show when={isFlyoutOpen()}>
+        <div class="NotebookTocFlyout" role="dialog" aria-label={appTexts.text("notebookPageContents")} {...EDITORS}>
+          <Contents scroller={props.scroller} title={pageTitle()} onPick={() => controller.setContentsOpen(false)}>
             <Show when={!isNarrow()}>
               <ui-icon
                 slot="tools"
@@ -232,17 +158,19 @@ export function NotebookPage(props: {
           </Contents>
         </div>
       </Show>
-    </div>
+    </>
   )
 }
 
 /**
- * "On this page":  Spell UI's `<ui-toc>`, as the docs site's, headed by the page's title, following the page's
- * scroll inside its pane (`scroller`);  `children`, its own buttons in its header's row.
- * - A link scrolls its section into view within the page, never changing the editor's address;  `onPick` then.
+ * "On this page":  Spell UI's `<ui-toc>`, as the docs site's, headed by the page's title.
+ * - It lists the sections the program draws in its mount point (`#spell-app-root`),
+ *   and follows its scroller (`scroller`).
+ * - `children`:  its own buttons, in its header's row.
+ * - A link scrolls its section into view within the page, never changing the editor's address;  then `onPick`.
  */
 function Contents(props: {
-  ids: { scroller: string; main: string }
+  scroller: string
   title?: string
   onPick?: () => void
   /** hears the entry in view change:  its target's id */
@@ -252,12 +180,12 @@ function Contents(props: {
   return (
     <ui-toc
       class="NotebookToc"
-      for={props.ids.main}
-      scroller={props.ids.scroller}
+      for={PROGRAM_MOUNT}
+      scroller={props.scroller}
       heading={props.title}
       aria-label={appTexts.text("notebookPageContents")}
       onClick={(event: MouseEvent) => {
-        if (scrollTo(event)) props.onPick?.()
+        if (scrollTo(event, document)) props.onPick?.()
       }}
       ref={(toc: HTMLElement) =>
         toc.addEventListener("ui-scrolled-to", (event) =>
@@ -270,125 +198,203 @@ function Contents(props: {
   )
 }
 
-/** The flyout "On this page" opens as, where its column doesn't show. */
-type ContentsFlyout = {
-  /** is its column not showing, so the title row's icon is? */
-  isShown: () => boolean
-  /** open it under `button` (the title row's icon), or close it */
-  toggle: (button: HTMLElement) => void
+/****************
+ * ### `ExampleEditors`
+ * Each example's code editor on a notebook page the program draws:  made once, and kept in its example.
+ * - Watches the program's mount point.
+ *   As the program draws (at first, after an edit), each `<spell-example>` it marked as written in the page's file
+ *   gets its example's editor, in its `source` slot (`<ExampleCode>`).
+ * - An example drawn again is a NEW element:  its editor is moved into it, its code pane open as it was,
+ *   and the focus put back if it was typed in.
+ *   So typing never loses the text, the cursor or the place.
+ * - An editor whose example is gone for good (deleted, or moved, so its mark changed) is let go, unless it's typed in.
+ * - Kept by the example's place in the file, `line:column` from its mark:  typing inside an example never moves it.
+ *   - A line typed above it moves it:  its element, drawn again or not, gets its new place (`LiveEdit`'s `places`),
+ *     and its editor follows it there (epic `notebook` P4).
+ ****************/
+class ExampleEditors {
+  /** Each example's editor, by its place, `line:column`. */
+  private panels = new Map<string, ExamplePanel>()
+  /** The panel being typed in, if any:  the one the focus last went into. */
+  private typingIn: ExamplePanel | undefined
+
+  constructor(
+    private readonly controller: NotebookController,
+    private readonly owner: ReturnType<typeof getOwner>
+  ) {}
+
+  /** Follow `program`'s drawing until the page goes:  returns what stops it. */
+  follow(program: HTMLElement): () => void {
+    const mount = program.querySelector<HTMLElement>(`#${PROGRAM_MOUNT}`) ?? program
+    const observer = new MutationObserver(() => this.place(mount))
+    observer.observe(mount, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [SourceMarks.PLACE_ATTRIBUTE]
+    })
+    // what's drawn already:  after the page has settled, as an editor is drawn in a root of its own (`render()`)
+    queueMicrotask(() => this.place(mount))
+    const onFocusIn = (event: FocusEvent) => {
+      const path = event.composedPath()
+      this.typingIn = [...this.panels.values()].find((each) => path.includes(each.panel))
+    }
+    document.addEventListener("focusin", onFocusIn, true)
+    return () => {
+      observer.disconnect()
+      document.removeEventListener("focusin", onFocusIn, true)
+      for (const each of this.panels.values()) this.letGo(each)
+      this.panels.clear()
+    }
+  }
+
+  /** Put each example's editor in the example drawn in `mount`, making the ones it hasn't got. */
+  private place(mount: HTMLElement) {
+    const source = SP.SpellProject.sourceNameOf(this.controller.file.path)
+    this.followMoves(source)
+    const seen = new Set<ExamplePanel>()
+    for (const example of mount.querySelectorAll<HTMLElement>(EXAMPLE_TAG)) {
+      const place = SourceMarks.placeOfDrawn(example)
+      if (!place || place.path !== source) continue
+      const key = `${place.line}:${place.column}`
+      const panel = this.panels.get(key) ?? this.made(key, place)
+      seen.add(panel)
+      if (panel.panel.parentElement === example) continue
+      // its code pane stays open as it was:  the example it was in is the old drawing's
+      if (panel.panel.parentElement?.hasAttribute("code")) example.setAttribute("code", "")
+      const wasTyping = this.typingIn === panel && !panel.panel.contains(deepActiveElement())
+      example.append(panel.panel)
+      // moving it let go of the focus:  back where it was, the cursor its model kept,
+      // once the example has drawn its code pane round it
+      if (wasTyping) void after(0, () => panel.editor?.focus()).catch(() => undefined)
+    }
+    for (const [key, panel] of this.panels) {
+      if (seen.has(panel) || panel === this.typingIn) continue
+      this.letGo(panel)
+      this.panels.delete(key)
+    }
+  }
+
+  /**
+   * Each editor still in its example, keyed by where the example is written NOW:
+   * a line typed above it moved it (`LiveEdit`'s `places`), and its editor follows it there.
+   * - Its element stays when it moves (epic `notebook` I6):  each kept example only gets its new place.
+   * - First, so an editor's old place, now another example's, is never taken for that one's.
+   */
+  private followMoves(source: string) {
+    const panels = new Map<string, ExamplePanel>()
+    const moved = new Set<ExamplePanel>()
+    for (const panel of this.panels.values()) {
+      const example = panel.panel.parentElement
+      const place = example ? SourceMarks.placeOfDrawn(example) : undefined
+      if (!place || place.path !== source) continue
+      panels.set(`${place.line}:${place.column}`, panel)
+      moved.add(panel)
+      panel.moveTo({ line: place.line, column: place.column })
+    }
+    for (const [key, panel] of this.panels) if (!moved.has(panel) && !panels.has(key)) panels.set(key, panel)
+    this.panels = panels
+  }
+
+  /** The editor for the example written at `place`, made now. */
+  private made(key: string, place: SourcePlace): ExamplePanel {
+    const panel = document.createElement("div")
+    panel.slot = "source"
+    const [placeNow, moveTo] = createSignal({ line: place.line, column: place.column })
+    const made: ExamplePanel = { panel, moveTo, dispose: () => undefined }
+    made.dispose = runWithOwner(this.owner, () =>
+      render(
+        () => (
+          <ExampleCode
+            controller={this.controller}
+            place={placeNow()}
+            onEditor={(instance) => (made.editor = instance)}
+          />
+        ),
+        panel
+      )
+    )
+    this.panels.set(key, made)
+    return made
+  }
+
+  /** Take `panel` off the page, and let go of its editor. */
+  private letGo(panel: ExamplePanel) {
+    panel.dispose()
+    panel.panel.remove()
+    if (this.typingIn === panel) this.typingIn = undefined
+  }
 }
 
-/** How many notebook pages there have been:  each page's ids its own. */
-let pages = 0
-
-/** The flyout's gap under the icon that opened it, and from the page's top edge at least, px. */
-const FLYOUT_GAP = 6
-
-/** A section's cells;  the first section's first cell with a title (`#`, or `<header level="1">`) is the masthead. */
-function Cells(props: { controller: NotebookController; cells: KeyedCell[]; masthead?: ContentsFlyout }) {
-  return (
-    <For each={props.cells} keyed={(each) => each.key}>
-      {(each, index) => (
-        <Show
-          when={props.masthead && index() === 0 && each().cell.title}
-          fallback={
-            <NotebookCell
-              controller={props.controller}
-              key={each().key}
-              cell={each().cell}
-              heading={!props.masthead && index() === 0}
-            />
-          }
-        >
-          <header class="NotebookMasthead">
-            <ui-header level="1" class="NotebookTitle">
-              {/* "On this page", where its column doesn't show:  an icon opening it, as the pane header's icons */}
-              <Show when={props.masthead!.isShown()}>
-                <span class="NotebookTocSlot">
-                  <ui-icon
-                    name="list"
-                    link=""
-                    class="IconAction NotebookTocButton"
-                    label={appTexts.text("notebookPageContents")}
-                    title={appTexts.text("notebookPageContents")}
-                    onClick={(event: MouseEvent) => props.masthead!.toggle(event.currentTarget as HTMLElement)}
-                  />
-                </span>
-              </Show>
-              {each().cell.title}
-              <Show when={each().cell.lead}>{(rest) => <ui-header class="NotebookLead">{rest()}</ui-header>}</Show>
-            </ui-header>
-          </header>
-        </Show>
-      )}
-    </For>
-  )
+/**
+ * One example's editor:  its panel, what moves it to its example's new place, what takes it down,
+ * and its Monaco editor once made.
+ */
+type ExamplePanel = {
+  panel: HTMLElement
+  moveTo: (place: { line: number; column: number }) => void
+  dispose: () => void
+  editor?: monaco.editor.IStandaloneCodeEditor
 }
 
-/** The page's width, px, at and under which "On this page" has no room for its column:  the CSS's `@container`. */
+/** What has the focus, through shadow roots. */
+function deepActiveElement(): Element | null {
+  let active = document.activeElement
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+  return active
+}
+
+/**
+ * A click on a link in the page:
+ * - another notebook of the project (the tab bar's):  shown through the app's router, never a reload
+ * - a section of the page (the section tabs'):  scrolled to within the page
+ */
+function followLinks(event: MouseEvent, controller: NotebookController) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+  if (scrollTo(event, event.currentTarget as HTMLElement)) return
+  const link = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
+  const notebook = link && notebookAt(link, controller)
+  if (!notebook) return
+  event.preventDefault()
+  if (notebook.path !== controller.file.path) showNotebook(notebook.path)
+}
+
+/** Marks the frame's own elements as the editor's, never the app's parts (`EDITOR_OWN`). */
+const EDITORS = { [EDITOR_OWN]: "" }
+
+/** How wide the app area is, px, at and under which "On this page" has no room for its column. */
 const NARROW_PANE = 760
 
-/** A section of the page:  its heading (none for what comes before the first), its key, and its cells. */
-type Section = { key: string; heading: string | undefined; cells: KeyedCell[] }
+/** The program's mount point's id:  `<AppContainer>`'s, written out as it is there. */
+const PROGRAM_MOUNT = "spell-app-root"
 
-/** `cells` as the page's sections:  a new one at each cell with a heading (`##`, `<section label>`), keyed by it. */
-function sectionsOf(cells: KeyedCell[]): Section[] {
-  const sections: Section[] = [{ key: "intro", heading: undefined, cells: [] }]
-  for (const each of cells) {
-    if (each.cell.heading !== undefined) sections.push({ key: each.key, heading: each.cell.heading, cells: [] })
-    sections.at(-1)!.cells.push(each)
-  }
-  return sections[0]!.cells.length ? sections : sections.slice(1)
-}
+/** The tag a notebook's example draws as:  `example_block`'s. */
+const EXAMPLE_TAG = "spell-example"
 
 /**
- * Mark a page section `titleHover` while the pointer's over its OWN title bar (not a nested section's):
- * its tools show then (`NotebookCellTools.css`).
- */
-function followTitleHover(event: PointerEvent) {
-  const section = event.currentTarget as HTMLElement
-  const onTitle = event
-    .composedPath()
-    .some((node) => node instanceof Element && node.getRootNode() === section.shadowRoot && node.part.contains("title"))
-  section.classList.toggle(TITLE_HOVER, onTitle)
-}
-
-/** The class a page section has while the pointer's over its title bar. */
-const TITLE_HOVER = "titleHover"
-
-/** A section's id, from its heading:  `Two of them` => `two-of-them`. */
-function slugOf(heading: string): string {
-  return heading
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-|-$/g, "")
-}
-
-/**
- * Scroll the section an "On this page" link names into view, within the page:  the page scrolls, not the window,
+ * Scroll the section a `#...` link names into view, within `within`:  the page scrolls, not the window,
  * and the editor's address keeps no hash.
  * - Returns whether it was such a link.
  */
-function scrollTo(event: MouseEvent): boolean {
+function scrollTo(event: MouseEvent, within: ParentNode): boolean {
   const link = event.composedPath().find((node): node is HTMLAnchorElement => node instanceof HTMLAnchorElement)
   const href = link?.getAttribute("href") ?? ""
   if (!href.startsWith("#")) return false
-  const target = (event.currentTarget as HTMLElement)
-    .closest(".NotebookPage")
-    ?.querySelector(`[id="${CSS.escape(href.slice(1))}"]`)
+  const target = within.querySelector(`[id="${CSS.escape(href.slice(1))}"]`)
   event.preventDefault()
   target?.scrollIntoView({ behavior: "smooth", block: "start" })
   return true
 }
 
 /**
- * Select the section tab (`<ui-menu class="ui-docs-section-tabs">`, under the page's tabs) of the top-level section
- * holding `id`, the entry in view, as the docs site's section toolbar follows the scroll.
- * - SIDE EFFECT:  sets `selected` on the notebook's own drawn items;  drawn again, they're set again on the next scroll
+ * Select the section tab of the top-level section holding `id`, the entry in view,
+ * as the docs site's section toolbar follows the scroll.
+ * - The section tabs:  `<ui-toolbar class="ui-docs-section-tabs">`, under the page's tabs.
+ * - SIDE EFFECT:  sets `selected` on what the program drew;  drawn again, they're set again on the next scroll
  */
 function selectSectionTab(page: HTMLElement, id: string, tries = SECTION_TAB_TRIES) {
   const tabs = page.querySelector(SECTION_TABS)
-  // the first entry in view is known before the notebook's drawings are in:  look again shortly
+  // the first entry in view is known before the program has drawn its tabs:  look again shortly
   if (!tabs) {
     if (tries > 0) after(0.1, () => selectSectionTab(page, id, tries - 1)).catch(() => undefined)
     return
@@ -409,14 +415,16 @@ function selectSectionTab(page: HTMLElement, id: string, tries = SECTION_TAB_TRI
 const SECTION_TAB_TRIES = 30
 
 /** The section tabs a notebook draws under its tabs (`docs-page.css`). */
-const SECTION_TABS = "ui-menu.ui-docs-section-tabs"
+const SECTION_TABS = "ui-toolbar.ui-docs-section-tabs"
 
 /** The project's notebook `link` points at (`/edit/...`, `/run/...`), if it's one of `controller`'s project's. */
 function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP.SpellFile | undefined {
   const url = new URL(link.href, location.href)
   if (url.origin !== location.origin) return undefined
-  return NotebookController.notebooksIn(controller.project).find((file) => {
+  const named = NotebookController.notebooksIn(controller.project).find((file) => {
     const location = new SP.SpellLocation(file.path)
     return url.pathname === location.editorUrl || url.pathname === location.runnerUrl
   })
+  // a site's address, `/button/api`:  the page's file, shown here
+  return named ?? editor.pageFileAt(controller.project, url.pathname)
 }

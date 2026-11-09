@@ -4,23 +4,17 @@
  *   Its copy in `--against`'s temp checkout finds that checkout's spell through its own imports.
  * - Writes, per project:  `<project>/compiled.js`, and `<project>/<file>.messages.txt` for a file with errors or warnings.
  *   - The test projects:  `compiledFixture()`, as their snapshots are made
- *   - The notebooks:  each file's own compile, as the snapshots have none, and only in javascript:  it's all they run in
+ *   - The Spell UI site's pages:  each file's own compile, as the snapshots have none, and only in javascript:  it's all they run in
  * - A second argument names the target, e.g. `py`:  the test projects are compiled for it.
  * - Never `spell/app/cli`.
  * - `.mts`, so it loads as an ES module wherever it's copied -- see `PAPERCUTS.md`.
  */
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs"
+import { mkdirSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
 import { parseSpellProject } from "spell/parser/spell/test"
-import environment from "spell/app/spaces/server/node/environment"
-import {
-  compiledFixture,
-  fixtureImportScope,
-  fixtureProjectNames,
-  importScopeIn,
-  loadFixtureProject
-} from "spell/app/spaces/test"
+import { SPACES } from "spell/app/spaces"
+import { compiledFixture, fixtureImportScope, fixtureProjectNames, loadFixtureProject } from "spell/app/spaces/test"
 
 type ParsedFile = ReturnType<typeof parseSpellProject>["files"][number]
 
@@ -51,21 +45,13 @@ for (const name of fixtureProjectNames()) {
   }
 }
 
-const NOTEBOOKS_DIR = resolve(environment.systemFilesRoot, "notebooks")
-for (const { name } of readdirSync(NOTEBOOKS_DIR, { withFileTypes: true }).filter((it) => it.isDirectory())) {
-  const project = `@spell/notebooks/${name}`
-  try {
-    const folder = resolve(NOTEBOOKS_DIR, name)
-    const paths = readdirSync(folder).filter((file) => file.endsWith(".spellml"))
-    const files = paths.map((file) => ({ path: `/${file}`, contents: readFileSync(resolve(folder, file), "utf8") }))
-    const parentScope = importScopeIn(
-      folder,
-      files.map(({ path }) => path)
-    )
-    const parsed = parseSpellProject(files, { parentScope }).files
-    for (const { path, compiled } of parsed) write(project, `${path.slice(1)}.js`, compiled)
-    writeMessages(project, parsed)
-  } catch (error) {
-    write(project, "threw.txt", `${String(error)}\n`)
-  }
+// The Spell UI site, its pages' own compiles together:  it has no snapshots of its own, and runs only in javascript
+const SPELL_UI = SPACES.SPELL_UI_SITE_PROJECT
+try {
+  const files = loadFixtureProject(SPELL_UI)
+  const parsed = parseSpellProject(files, { parentScope: fixtureImportScope(SPELL_UI), projectPath: SPELL_UI }).files
+  for (const { path, compiled } of parsed) write(SPELL_UI, `${path.slice(1)}.js`, compiled)
+  writeMessages(SPELL_UI, parsed)
+} catch (error) {
+  write(SPELL_UI, "threw.txt", `${String(error)}\n`)
 }

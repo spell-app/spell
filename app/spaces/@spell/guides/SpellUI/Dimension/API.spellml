@@ -1,0 +1,31 @@
+<spell-page "dimension api" notebook>
+	<header level="1">
+		Dimension
+		<header>A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#parts">Parts</>
+			<item link="#texts">Texts</>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-dimension" only="attributes"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-dimension" only="parts"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-dimension" only="texts"></>
+		</>
+	</>
+</spell-page>

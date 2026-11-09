@@ -99,7 +99,7 @@ const PLACES: Readonly<
   },
   notebook: {
     at: "editor",
-    path: "/edit/@spell/notebooks/Avatar",
+    path: "/edit/@spell/guides/SpellUI/Avatar/Usage.spellml",
     width: 1440,
     icon: "book open"
   }

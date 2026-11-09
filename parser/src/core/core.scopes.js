@@ -283,6 +283,11 @@
       ]
     },
     {
+      path: "type:Page/property:lock",
+      detail: "text",
+      description: "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.\n- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.\n- Say it on its tag, `<spell-page \"guide\" locked>`, or in its body, `- its lock is \"locked\"`."
+    },
+    {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
       uri: "templates/TwoSidedView.spell"
@@ -412,19 +417,6 @@
     {
       path: "type:Place",
       super: "type:Thing"
-    },
-    {
-      path: "type:Notebook", line: [5, 11],
-      super: "type:Page",
-      uri: "templates/Notebook.spell"
-    },
-    {
-      path: "type:Notebook/property:lock", line: 8,
-      uri: "templates/Notebook.spell"
-    },
-    {
-      path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "templates/Notebook.spell"
     },
     {
       path: "type:Site", line: [6, 8],

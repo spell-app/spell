@@ -10,6 +10,7 @@
  */
 
 import { core, SPELL_CORE_MODULE, SPELL_ELEMENTS_MODULE } from "spell/parser/core"
+import type { PartEdit } from "spell/parser/core/core.types"
 // Import directly:  the parser's barrel would bring the whole parser into the runner;  this file imports no other
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { LiveEdit, type ProgramText } from "./LiveEdit"
@@ -158,7 +159,9 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
  * - The running things become those classes (`core.takeNewClasses()`).
  * - Each project it imports is weighed the same way, deepest first (epic `editor`, Live Edit Everywhere):
  *   one that changed loads over its running self, its things kept;  one that didn't stays the module it was.
- * - Only the views of what changed draw again, keeping their elements (`core.drawAgain()`).
+ * - Only the views of what changed draw again, keeping their elements (`core.drawAgain()`):
+ *   only the parts that changed of a drawing made of parts, e.g. a notebook's examples (epic `notebook` P4).
+ * - What only moved in its file (a line typed above it) keeps its elements, given their new places.
  * - Answers `undefined` when this edit isn't for it, and the run goes on as usual:
  *   - no app mounted, nor a last run to go from
  *   - a project whose imports changed which projects they are:  a project added or dropped
@@ -199,10 +202,14 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
   const imports: RunningImports = new Map(last.imports)
   try {
     const drawAgain: string[] = []
+    const parts: PartEdit[] = []
+    const places = new Map<string, string>()
     let isEverything = false
     const followDrawing = (taken: LiveEdit) => {
       if (taken.drawAgain === "everything") isEverything = true
       else drawAgain.push(...taken.drawAgain)
+      parts.push(...taken.parts)
+      for (const [was, now] of taken.places) places.set(was, now)
     }
     // each changed project loads over its running self, its own imports the running ones
     for (const { projectId, text, edit: taken } of importEdits) {
@@ -240,7 +247,9 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
     lastCompiled = compiled
     // the old modules' URLs:  their modules are retired, so nothing imports them again
     urls.forEach((url) => URL.revokeObjectURL(url))
-    core.drawAgain(isEverything ? "everything" : [...new Set(drawAgain)])
+    // what only moved keeps its elements, at their new places:  what draws again is stamped anew
+    SourceMarks.movePlaces(core.appElement(), places)
+    core.drawAgain(isEverything ? "everything" : [...new Set(drawAgain)], parts)
     return {}
   } catch (error) {
     console.error(error)

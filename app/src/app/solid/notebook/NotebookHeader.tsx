@@ -1,5 +1,4 @@
 import { For, Show } from "solid-js"
-import type { JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -14,15 +13,17 @@ import "./NotebookHeader.css"
  * A notebook's tools in the program pane's header, the row its title is in (epic `elemental-spell` P18;
  * Owen, 2026-10-26:  the page has no toolbar of its own).
  * - It's a `<ui-panel appearance="pane">` with no body, as the file tabs are:  ONE bar, the same as every header's.
- *   The notebook's page is outside it:  the pane's body is drawn once, whatever its header does (`<AppPane>`).
- * - Its `<ui-toolbar>`'s slots:  the title, then the lock and the note, then `children` at the right.
+ * - The notebook's page is outside it:  the pane's body is drawn once, whatever its header does (`<AppPane>`).
+ * - Its `<ui-toolbar>`'s slots:  the title, then the lock and the note.
  *   - Narrow, the note gives way first, then the name shortens;  the lock stays (`NotebookHeader.css`).
  * - Its title, the project's icon and name, is a menu of the project's notebooks (Examples, Usage, API):
  *   picking one shows it, through the app's router, so the page never reloads.
- * - The lock, an icon about 40px after the title, as the header's other icons are:  whoever can write the file locks
- *   it, or unlocks it.  Locked, nothing is ever saved, for anyone.
- * - What happened to the last edit, small and grey:  "Saved", or "Locked:  changes aren't saved";
- *   shown for a while after the edit, then faded out (`NotebookController.status()`).
+ * - The lock, an icon about 40px after the title, as the header's other icons are.
+ *   - Whoever may save the page, by their role in its space, locks it or unlocks it (`NotebookController.mayLock()`).
+ *   - Locked, nothing is ever saved, for anyone.
+ * - A locked page with an edit not put back says so, small and grey (`NotebookController.status()`):
+ *   "Locked:  changes aren't saved".
+ * - An unlocked page's edits are saved as any edit is, AutoSave or ⌘S (Q5).
  ****************/
 export function NotebookHeader(props: {
   /** The notebook showing. */
@@ -31,12 +32,11 @@ export function NotebookHeader(props: {
   icon: string
   /** The project's title. */
   title: string
-  /** What goes at the bar's right end, e.g. `<NotebookMenu>`. */
-  children?: JSX.Element
 }) {
   const { controller } = props
   const locked = () => !!controller.model()?.locked
-  const notebooks = () => NotebookController.notebooksIn(controller.project)
+  // a site's component:  only its own pages (`pagesBeside()`), not all 351
+  const notebooks = () => NotebookController.pagesBeside(controller.file, controller.project)
   // what the status said last:  kept while it fades out
   let lastStatus = ""
   return (
@@ -68,7 +68,7 @@ export function NotebookHeader(props: {
           </For>
         </ui-dropdown>
         <span slot="center" class="NotebookNotes">
-          <Show when={controller.isAdmin()}>
+          <Show when={controller.mayLock()}>
             <span class="NotebookLock">
               <ui-icon
                 name={locked() ? "lock" : "lock open"}
@@ -84,9 +84,6 @@ export function NotebookHeader(props: {
           <span class={["NotebookStatus", controller.status() ?? "", { shown: !!controller.status() }]} role="status">
             {statusText(controller.status())}
           </span>
-        </span>
-        <span slot="right" class="NotebookActions">
-          {props.children}
         </span>
       </ui-toolbar>
     </ui-panel>
@@ -115,8 +112,6 @@ function nameOf(file: SP.SpellFile): string {
 
 /** The words of each status. */
 const STATUS_TEXTS = {
-  saving: "notebookPageSaving",
-  saved: "notebookPageSaved",
   locked: "notebookPageLocked"
 } as const
 

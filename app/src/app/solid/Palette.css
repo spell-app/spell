@@ -58,7 +58,7 @@
 }
 
 /* an empty app, in Edit:  what to do */
-/* - only an app's element draws in its children:  a page's whole drawing is in its shadow root, so has none (T77) */
+/* - an app's element draws in its children, and a page's (epic `notebook` P3):  a view's drawing is in its shadow root (T77) */
 .EmptyAppPrompt {
   display: none;
 }

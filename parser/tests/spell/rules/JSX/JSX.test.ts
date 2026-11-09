@@ -148,6 +148,21 @@ describe("a JSX text keeps its spaces, as JSX reads them", () => {
     expect(drawOf(lines)).toContain(`"First line\\n\\nSecond line"`)
     expect(compiled(lines, SP.TARGETS["ts/solid"]!.writer)).toContain(`{"First line\\n\\nSecond line"}`)
   })
+
+  test("an attribute written across lines is one line of text in the javascript, which parses (I12)", () => {
+    const lines = [...GAME, '\treturn <p style="color: red;', '\t\tmargin: 0">Hi</p>']
+    const draw = drawOf(lines)
+    expect(draw).toContain('style: "color: red;\\n\t\tmargin: 0"')
+    // oxlint-disable-next-line typescript/no-implied-eval -- never called:  it only asks whether the text parses
+    expect(() => new Function(`return { ${draw} }`)).not.toThrow()
+    expect(compiled(lines, SP.TARGETS["ts/solid"]!.writer)).toContain('style={"color: red;\\n\t\tmargin: 0"}')
+    expect(compiled(lines, SP.TARGETS.py!.writer)).toContain('"color: red;\\n\\t\\tmargin: 0"')
+  })
+
+  test("a line break after a backslash stays a javascript line continuation (I12)", () => {
+    expect(P.jsText.lineBreaksEscaped('"a\\\nb\nc"')).toBe('"a\\\nb\\nc"')
+    expect(P.jsText.lineBreaksEscaped("`a\nb`")).toBe("`a\nb`")
+  })
 })
 
 /** `lines` as one file, compiled by `writer` (javascript by default). */

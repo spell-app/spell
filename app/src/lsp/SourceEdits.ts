@@ -2,7 +2,7 @@ import type { Position, TextEdit } from "vscode-languageserver"
 
 /**
  * The ONE place a program's text is changed by what a person did, rather than typed (epic `editor`):
- * the side bar's fields, the notebook's add, move and delete, and the app's parts added, moved and deleted.
+ * the side bar's fields, an example's code on a notebook's page, and the app's parts added, moved and deleted.
  * - Every edit is a list of `TextEdit`s, the shape the language server already speaks:
  *   each changes only its own characters, and the rest of the file stays byte for byte.
  * - Plain text in, edits out:  it loads no parser, no language service and no code editor,
@@ -59,6 +59,8 @@ export class SourceEdits {
   /**
    * The tag opening at `opening` in `text`, read as written:  its name, attributes and where each one is.
    * - Reads `.spell` and `.spellml` alike, and any language:  it only looks at the shape of a tag.
+   * - A template tag's quoted name, `<spell-page "counter notebook">`, is its name's, never its attributes:
+   *   a new attribute goes after it (`namedEnd`).
    * - `undefined` when no tag opens there.
    */
   static tagAt(text: string, opening: number): WrittenTag | undefined {
@@ -66,12 +68,16 @@ export class SourceEdits {
     const end = endOfTag(text, opening + 1)
     if (end < 0) return undefined
     const nameEnd = opening + 1 + /^[^\s/>]*/.exec(text.slice(opening + 1, end))![0].length
+    const quotedName = /^\s+"[^"]*"/.exec(text.slice(nameEnd, end))
+    const namedEnd = nameEnd + (quotedName?.[0].length ?? 0)
     const attributes: WrittenAttribute[] = []
-    const inside = /([a-zA-Z][\w-]*)(?:=("[^"]*"|'[^']*'|\{))?/g
-    inside.lastIndex = nameEnd
+    // a quoted text on its own is skipped:  no attribute's
+    const inside = /"[^"]*"|'[^']*'|([a-zA-Z][\w-]*)(?:=("[^"]*"|'[^']*'|\{))?/g
+    inside.lastIndex = namedEnd
     let match: RegExpExecArray | null
     while ((match = inside.exec(text)) && match.index < end) {
       const [whole, name, value] = match
+      if (!name) continue
       const start = match.index
       if (value === "{") {
         const valueStart = inside.lastIndex
@@ -93,7 +99,7 @@ export class SourceEdits {
         })
       }
     }
-    return { start: opening, nameEnd, end: end + 1, attributes, selfClosing: text[end - 1] === "/" }
+    return { start: opening, nameEnd, namedEnd, end: end + 1, attributes, selfClosing: text[end - 1] === "/" }
   }
 
   /**
@@ -117,47 +123,7 @@ export class SourceEdits {
     if (isGone) return []
     const written = value === true ? word : `${word}=${quoted(String(value), attribute?.quote ?? '"')}`
     if (attribute) return [SourceEdits.replacing(text, attribute.span, written)]
-    return [SourceEdits.replacing(text, { start: tag.nameEnd, end: tag.nameEnd }, ` ${written}`)]
-  }
-
-  ////////////////
-  // ## Blocks of text
-  ////////////////
-
-  /** The edits that trade `first` and `second`, in that order in `text`:  the lines between them stay. */
-  static swapped(text: string, first: TextSpan, second: TextSpan): TextEdit[] {
-    return [
-      SourceEdits.replacing(text, first, text.slice(second.start, second.end)),
-      SourceEdits.replacing(text, second, text.slice(first.start, first.end))
-    ]
-  }
-
-  /**
-   * The edit that takes `span`'s lines out of `text`, and a blank line after it when one's before it too.
-   * - Nor a blank line left before its block's closing tag, when it was the last in its block.
-   */
-  static deletedLines(text: string, span: TextSpan): TextEdit {
-    const start = text.lastIndexOf("\n", span.start - 1) + 1
-    let end = text.indexOf("\n", span.end)
-    end = end < 0 ? text.length : end + 1
-    const before = text.slice(0, start)
-    if (before.endsWith("\n\n") && /^[ \t]*\n/.test(text.slice(end))) end = text.indexOf("\n", end) + 1
-    else if (before.endsWith("\n\n") && /^[ \t]*<\//.test(text.slice(end))) {
-      return SourceEdits.replacing(text, { start: start - 1, end }, "")
-    }
-    return SourceEdits.replacing(text, { start, end }, "")
-  }
-
-  /**
-   * The edit that adds `code` as a block of its own, on the line after the one holding `after`, a blank line before it.
-   * - `code` has no indent:  it takes `indent`, on every line.
-   * - `start`:  where its code starts in the new text, to find it by.
-   */
-  static insertedAfterLine(text: string, after: number, code: string, indent: string) {
-    const lineEnd = text.indexOf("\n", after)
-    const at = lineEnd < 0 ? text.length : lineEnd
-    const edit = SourceEdits.replacing(text, { start: at, end: at }, `\n\n${indent}${indented(code, indent)}`)
-    return { edit, start: at + 2 + indent.length }
+    return [SourceEdits.replacing(text, { start: tag.namedEnd, end: tag.namedEnd }, ` ${written}`)]
   }
 
   ////////////////
@@ -200,15 +166,22 @@ export class SourceEdits {
   /**
    * `text` with `code` written at `place`, indented as what's around it is, and each thing kept on its own line.
    * - Inside a tag closed with `/>`:  it opens to hold it.
+   * - Beside a run of prose (`place.whole`), or a run of prose written:  a blank line between them,
+   *   so two runs never join into one (epic `notebook` P5).
    * - `start`:  where `code` starts in the new text, to find it by.
-   * - throws `TypeError` when no element opens at `place.opening`.
+   * - throws `TypeError` when no element opens at `place.opening`, or `place` is inside a run of prose.
    */
   static written(text: string, place: ElementPlace, code: string): { text: string; start: number } {
-    const element = SourceEdits.elementAt(text, place.opening)
-    if (!element)
+    const element = place.whole ? undefined : SourceEdits.elementAt(text, place.opening)
+    // what it's written beside:  the element, or the run of prose
+    const beside = place.whole ?? element
+    if (!beside)
       throw new TypeError(`SourceEdits.written():  no element opens at ${place.opening};  find it again first`)
     const indent = indentAt(text, place.opening)
+    const gap = place.whole || isProse(code) ? "\n" : ""
     if (place.where === "inside") {
+      if (!element)
+        throw new TypeError("SourceEdits.written():  nothing goes inside a run of prose;  write it before or after it")
       const inner = indent + indentStep(text)
       const block = `${inner}${indented(code, inner)}\n`
       if (element.bodyStart === undefined) {
@@ -222,20 +195,22 @@ export class SourceEdits {
       }
       const body = text.slice(element.bodyStart, element.bodyEnd)
       const start = element.bodyStart + body.trimEnd().length
-      const closed = `\n${block}${indent}`
+      // after a run of prose, a blank line:  as beside one
+      const after = isProse(body.trimEnd().split("\n").at(-1)!) ? "\n" : ""
+      const closed = `\n${after}${block}${indent}`
       return {
         text: replaceSpan(text, { start, end: element.bodyEnd! }, closed),
-        start: start + 1 + inner.length
+        start: start + 1 + after.length + inner.length
       }
     }
     if (place.where === "before") {
-      const block = `${indented(code, indent)}\n${indent}`
-      return { text: replaceSpan(text, { start: element.start, end: element.start }, block), start: element.start }
+      const block = `${indented(code, indent)}\n${gap}${indent}`
+      return { text: replaceSpan(text, { start: beside.start, end: beside.start }, block), start: beside.start }
     }
-    const block = `\n${indent}${indented(code, indent)}`
+    const block = `\n${gap}${indent}${indented(code, indent)}`
     return {
-      text: replaceSpan(text, { start: element.end, end: element.end }, block),
-      start: element.end + 1 + indent.length
+      text: replaceSpan(text, { start: beside.end, end: beside.end }, block),
+      start: beside.end + 1 + gap.length + indent.length
     }
   }
 
@@ -244,11 +219,14 @@ export class SourceEdits {
     return dedented(text.slice(span.start, span.end), indentAt(text, span.start))
   }
 
-  /** `text` without the elements at `spans`, each taking its own line with it when it's alone there. */
+  /**
+   * `text` without the elements at `spans`, each taking its own lines with it when it's alone there.
+   * - And a blank line after it, when one's before it too:  no gap left twice as wide.
+   */
   static without(text: string, spans: readonly TextSpan[]): string {
     let result = text
     for (const span of [...spans].sort((one, other) => other.start - one.start)) {
-      result = replaceSpan(result, wholeLinesOf(result, span), "")
+      result = replaceSpan(result, removedOf(result, span), "")
     }
     return result
   }
@@ -268,12 +246,13 @@ export class SourceEdits {
     // the place's offset, once what's moving has gone from before it
     const gone = ordered.filter((span) => span.end <= place.opening)
     const lost = gone.reduce((sum, span) => {
-      const lines = wholeLinesOf(text, span)
-      return sum + lines.end - lines.start
+      const removed = removedOf(text, span)
+      return sum + removed.end - removed.start
     }, 0)
+    const whole = place.whole && { start: place.whole.start - lost, end: place.whole.end - lost }
     return SourceEdits.writtenAll(
       SourceEdits.without(text, ordered),
-      { ...place, opening: place.opening - lost },
+      { ...place, opening: place.opening - lost, ...(whole && { whole }) },
       codes
     )
   }
@@ -283,7 +262,8 @@ export class SourceEdits {
    * - `starts`:  where each one starts in the new text.
    */
   static writtenAll(text: string, place: ElementPlace, codes: readonly string[]): { text: string; starts: number[] } {
-    const joiner = `\n`
+    // runs of prose written together keep a blank line between them, as `written()` does
+    const joiner = codes.some(isProse) ? `\n\n` : `\n`
     const indent =
       place.where === "inside" ? indentAt(text, place.opening) + indentStep(text) : indentAt(text, place.opening)
     const { text: result, start } = SourceEdits.written(text, place, codes.join(joiner))
@@ -343,10 +323,16 @@ export type WrittenElement = TextSpan & {
 
 /** Where to write something, beside or inside the element opening at `opening`. */
 export type ElementPlace = {
-  /** offset of that element's `<` */
+  /** offset of that element's `<`;  of a run of prose's first character */
   opening: number
   /** beside it, or last inside it */
   where: "before" | "after" | "inside"
+  /**
+   * what's at `opening`, when it's a run of prose rather than a tag (`NotebookPageCells.proseAt()`):
+   * its whole span, which no tag says
+   * - only beside it:  nothing goes inside prose
+   */
+  whole?: TextSpan
 }
 
 /** What an attribute can be set to:  see `SourceEdits.settingAttribute()`. */
@@ -358,6 +344,8 @@ export type WrittenTag = {
   start: number
   /** offset just past its name */
   nameEnd: number
+  /** offset just past its name and its quoted name, if it has one (`<spell-page "x"`):  where a new attribute goes */
+  namedEnd: number
   /** offset just past its `>` */
   end: number
   /** its attributes, in order */
@@ -425,6 +413,30 @@ function wholeLinesOf(text: string, span: TextSpan): TextSpan {
   if (isAlone) return { start: lineStart, end: foundEnd < 0 ? lineEnd : lineEnd + 1 }
   const spaces = /[ \t]*$/.exec(text.slice(lineStart, span.start))![0].length
   return { start: span.start - spaces, end: span.end }
+}
+
+/**
+ * What goes with the element at `span` when it's taken out:
+ * - its whole lines (`wholeLinesOf()`)
+ * - and a blank line round them, when one's before them and another after, or its block's closing tag:
+ *   no gap left twice as wide, nor one left before a closer
+ */
+function removedOf(text: string, span: TextSpan): TextSpan {
+  const lines = wholeLinesOf(text, span)
+  // alone on its lines:  they go from a line's start to just past its end
+  const isAlone = (lines.start === 0 || text[lines.start - 1] === "\n") && text[lines.end - 1] === "\n"
+  const blankBefore = isAlone ? /(?:^|\n)([ \t]*\n)$/.exec(text.slice(0, lines.start)) : null
+  if (!blankBefore) return lines
+  const after = text.slice(lines.end)
+  const blankAfter = /^[ \t]*\n/.exec(after)
+  if (blankAfter) return { start: lines.start, end: lines.end + blankAfter[0].length }
+  return /^[ \t]*<\//.test(after) ? { start: lines.start - blankBefore[1]!.length, end: lines.end } : lines
+}
+
+/** Is `code` a run of prose, not a tag:  it starts with words, not `<` or `{`;  nothing's none. */
+function isProse(code: string): boolean {
+  const start = code.trimStart()
+  return !!start && !start.startsWith("<") && !start.startsWith("{")
 }
 
 /** `value` in `quote`, a `"` in it written `&quot;`, a `'` as `&#39;`. */

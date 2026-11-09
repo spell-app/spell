@@ -5,7 +5,7 @@ import { SpellExpression } from "./SpellExpression"
 
 /**
  * `measure_literal` rule:  a number with its unit, written as people write measures (epic `language` P23, Owen's C3):
- * `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2"`, `100 °C`, `1/2 cup`.
+ * `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2"`, `100 °C`, `1/2 cup`, `18%`.
  * - Each part a number (a whole one, a fraction, or both:  `3 1/2`), then a unit of a dimension the scope knows.
  * - Several parts are ONE measure, all of one dimension, largest first:  `5 ft 8 in`.
  * - Its value is a plain number in its LAST part's unit, worked out as it compiles:  `5 ft 8 in` is `68` (inches),

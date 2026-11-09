@@ -61,8 +61,10 @@
    * - none of a menu's margin beside its siblings:  the keys and slots before it aren't other blocks,
    *   and its 1em above and below made a 40px bar 68px tall (epic `data` I87)
    */
-  .ui.toolbar > .ui.menu {
+  .ui.toolbar > .ui.menu:not(.equal) {
     --_ui-menu-item-flex: 0 0 auto;
+  }
+  .ui.toolbar > .ui.menu {
     --_menu-margin-top: 0;
     --_menu-margin-bottom: 0;
     flex: 1 1 auto;

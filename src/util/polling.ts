@@ -1,4 +1,4 @@
-import { every } from "./timing"
+import { every, letNodeEnd } from "./timing"
 
 /**
  * Run `fn` every `seconds`, on `every()`, while the page shows, and once when the page shows again:  the ONE way to poll.
@@ -6,6 +6,8 @@ import { every } from "./timing"
  * - A look still waiting (`fn` answered a promise) skips the next, so a slow server never piles up looks.
  * - A look that fails is logged, and the next one still comes:  a poll is best-effort.
  * - With no page (`document`), as on a server:  every look runs.
+ * - NEVER keeps node running by itself:  with nothing else to do, a program ends, whatever it was to check next.
+ *   - `check it once a day at 5am` left a headless run waiting for 16 hours (epic `data` I37).
  * - Returns a function that stops it.
  * - In a file of its own, not `timing.ts`:  Spell UI's `E` holds everything of that file, and every page would pay for this.
  * - `at`:  instead, once a day at that time (`check it once a day at 5am`), see `lookDailyAt()`.
@@ -22,7 +24,7 @@ export function pollWhileVisible(seconds: number, fn: () => unknown, { at }: { a
       .finally(() => (isLooking = false))
   }
   if (at) return lookDailyAt(at, look, page)
-  const stopLooking = every(seconds, look)
+  const stopLooking = every(seconds, look, { inBackground: true })
   page?.addEventListener("visibilitychange", look)
   return () => {
     stopLooking()
@@ -72,6 +74,7 @@ function lookDailyAt(at: ClockTime, look: () => void, page: Document | undefined
       else look()
       wait()
     }, msUntil(at))
+    letNodeEnd(timer)
   }
   const shown = () => {
     if (!isMissed || page?.visibilityState === "hidden") return

@@ -24,7 +24,7 @@ describe("spell's project groups", () => {
       ["owen@spell", "owen@spell"],
       ["@spell/examples", "@spell"],
       ["@spell/guides", "@spell"],
-      ["@spell/notebooks", "@spell"],
+      ["@spell/sites", "@spell"],
       ["@spell/library", "@spell"],
       ["@spell/editor", "@spell"],
       ["@spell/test", "@spell"]

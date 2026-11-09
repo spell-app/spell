@@ -2514,6 +2514,19 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-site-tabs" label="Site tabs" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  Site tabs show the page&#39;s family as a row of tabs:  the parent page first, the page shown selected, each a link.
+                  <a href="ui-site-tabs.html">Site tabs page</a>
+                </p>
+                <ui-site-tabs
+                  current="#api"
+                  pages='[{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "Examples", "href": "#examples" }, { "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }]'
+                ></ui-site-tabs>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-space" label="Space" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">

@@ -50,6 +50,9 @@ export type SourceMapV3 = {
  *   - ONE map:  they're places in the statements' files, kept in the statements' source map
  ****************/
 export class SourceMarks {
+  /** The attribute saying where a drawn element is written, in the code the editor runs:  `placeOfDrawn()` reads it. */
+  static readonly PLACE_ATTRIBUTE = "data-spell-at"
+
   /** the marks being made now, if any */
   private static current: SourceMarks | undefined
 
@@ -154,6 +157,35 @@ export class SourceMarks {
       else lines[line] = `${before}, Symbol.for(${JSON.stringify(MADE_AT)}), { value: ${at} })${after}`
     }
     return lines.join("\n")
+  }
+
+  /**
+   * `code`, stamped (`stamped()`), with every place it says left blank (epic `notebook` P4):
+   * so two codes differing only in where they're written (a line typed above them) read the same.
+   */
+  static withoutPlaces(code: string): string {
+    return code.replace(STAMPED_DRAWN, `$1""`).replace(STAMPED_MADE, `$1""`)
+  }
+
+  /** Each place stamped code says a drawn tag is written, in order:  `Card.spellml:12:4`. */
+  static placesIn(code: string): string[] {
+    return [...code.matchAll(STAMPED_DRAWN)].map(([, , at]) => JSON.parse(at!) as string)
+  }
+
+  /**
+   * Give each element drawn in `root` (through shadow roots) its new place, `places`' by its old (epic `notebook` P4):
+   * so what's drawn keeps its elements when a line typed above it moves where it's written.
+   * - SIDE EFFECT:  sets the elements' place attribute (`placeOfDrawn()` reads it).
+   */
+  static movePlaces(root: Element | ShadowRoot | null | undefined, places: ReadonlyMap<string, string>): void {
+    if (!root || !places.size) return
+    for (const element of root.children) {
+      const at = element.getAttribute(DRAWN_AT)
+      const moved = at === null ? undefined : places.get(at)
+      if (moved !== undefined) element.setAttribute(DRAWN_AT, moved)
+      SourceMarks.movePlaces(element, places)
+      SourceMarks.movePlaces(element.shadowRoot, places)
+    }
   }
 
   /** Where a drawn `element` is written, as `stamped()` said:  `undefined` in code not stamped. */
@@ -297,10 +329,19 @@ function placeFrom(at: unknown): SourcePlace | undefined {
 }
 
 /** The attribute that says where a drawn element is written, in the code the editor runs. */
-const DRAWN_AT = "data-spell-at"
+const DRAWN_AT = SourceMarks.PLACE_ATTRIBUTE
 
 /** The key of the symbol that says where a thing was made, in the code the editor runs. */
 const MADE_AT = "spell.madeAt"
+
+/** A drawn tag's place in stamped code, `"data-spell-at": "Card.spellml:12:4"`:  what's before its value, and it. */
+const STAMPED_DRAWN = new RegExp(`(${JSON.stringify(DRAWN_AT)}: )("(?:[^"\\\\]|\\\\.)*")`, "g")
+
+/** A made thing's place in stamped code, `Symbol.for("spell.madeAt"), { value: "..." }`:  what's before its value, and it. */
+const STAMPED_MADE = new RegExp(
+  `(Symbol\\.for\\(${JSON.stringify(MADE_AT)}\\), \\{ value: )("(?:[^"\\\\]|\\\\.)*")`,
+  "g"
+)
 
 /** A stamped place's text. */
 const STAMPED_PLACE = /^(.+):(\d+):(\d+)$/

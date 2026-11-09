@@ -20,8 +20,8 @@ export const spellExampleVocabulary = {
   noun: "example",
   description:
     "A notebook's example:  its name over its live result, and its code a `</>` button shows and hides, as a " +
-    "component page's examples are.  A notebook's `<example \"...\">` compiles to it;  the notebook's page puts each " +
-    "one's code in its `source` slot, and the text before it in its `description` slot.",
+    'component page\'s examples are.  A notebook\'s `<example "...">` compiles to it, its `description="..."` the ' +
+    "example's description;  the notebook's page puts each one's code in its `source` slot.",
   attributes: [{ name: "name", kind: "string", description: "Its name, shown as its heading:  `one counter`." }],
   events: [],
   slots: [],

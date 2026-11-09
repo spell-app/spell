@@ -1,3 +1,4 @@
+import { waitUntil } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { SiteHost } from "spell/parser/core/core.types"
 import { editor } from "spell/app/app/editor"
@@ -35,6 +36,30 @@ export class RunSite implements SiteHost {
     const { project } = editor
     if (!project) return
     navigate(RunSite.runUrlFor(project.path, address))
+  }
+
+  /**
+   * Page class `className` is about to show:  compile it in, the first time (epic `notebook` P10, Q11).
+   * - `false` in Edit with a page open:  the open page shows, not the site's.
+   */
+  pageNeeded(className: string): Promise<boolean> | boolean | undefined {
+    return editor.pageNeeded(className)
+  }
+
+  /**
+   * Scroll to section `id` of the page being shown, once it's drawn:  the docs site's way of landing on a link's target
+   * (`HashLanding`).
+   * - Waits for the section:  a page compiled in as it's shown takes a moment.
+   * - NEVER throws:  a section that never comes is left alone.
+   */
+  landOn = (id: string): void => {
+    const shown = () => document.querySelector(`.spell-site-page [id="${CSS.escape(id)}"]`)
+    void waitUntil(shown, { timeout: SECTION_WAIT })
+      .then(async () => {
+        const { HashLanding } = await import("spell/ui/components/ui-toc/HashLanding")
+        await HashLanding.forDocument(document).landOnHash(`#${id}`)
+      })
+      .catch(() => undefined)
   }
 
   /** Call `showAddress` whenever the URL changes by itself:  each run hands over its site's. */
@@ -135,6 +160,9 @@ export class RunSite implements SiteHost {
     }
   }
 }
+
+/** How long a link's `#section` waits for its section, in seconds. */
+const SECTION_WAIT = 5
 
 /** The selector a site's theme is scoped to, for `UI.themes.scopedTokens()`:  the rules come back on `:root` it. */
 const SITE_SCOPE = ".spell-site-frame"

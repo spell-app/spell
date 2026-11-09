@@ -239,7 +239,7 @@ and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setti
    - It refuses on a branch behind `main`:  every window runs the ONE installed extension,
      so an older build would downgrade them all.
      It says to merge `main` in first (`epic worktree merge-main`);  `--force` builds anyway.
-   - The build fails unless the extension's version matches spell-parser's (0.8.0, both):  they're released together.
+   - The build fails unless the extension's version matches spell-parser's:  they're released together.
 3. Spell Epic, for the epic pages and the docs beside your code:
 
    ```sh
@@ -250,7 +250,12 @@ and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setti
    ```
 
    - Or `yarn vscode:package` at spell-epic's root, then the same `code --install-extension`.
-   - No script installs it for you:  install it again after a change you want in every window.
+   - Or, once it's built, `epic plugin install` (and so `epic init`) runs that last line.
+     With no `.vsix`, and a fresh clone has none, it skips the step and says nothing.
+     It installs only a version VS Code doesn't have, and a build alone doesn't change the version:
+     so after a rebuild, use the `code` line.
+   - Install it again after a change you want in every window.
+   - Then reload each window ("Developer:  Reload Window"):  a window keeps running the copy it started with.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
 5. Open the kit, `code ~/www/spell`, and any `.spell` or `.spellml` file in it:
    `app/spaces/@spell/examples/Solitaire/Solitaire.spellml`, say.
@@ -366,7 +371,7 @@ The settings it sets for you:
 | `editor.semanticTokenColorCustomizations` | the Markdown in comments:  headings 1 to 4 and bold in bold, italic, links underlined, strikethrough |
 | `editor.tokenColorCustomizations` | a `#` heading comment in bold from the grammar too |
 
-- Its id is `spell-language` (publisher `spell-app`), shown as "Spell", version 0.8.0.
+- Its id is `spell-language` (publisher `spell-app`), shown as "Spell".
 - It starts on a window's first `.spell`, `.spellml`, `.tsx` or `.jsx` file (`activationEvents`);
   the language server waits for the first `.spell` file.
 - It hands VS Code the HTML and CSS data (`contributes.html.customData`, `contributes.css.customData`),
@@ -464,7 +469,8 @@ Three tabs, and the page decides which one it opens in, whatever command showed 
   (`epic pages open <page> --vs`, `/spell-docs`).
   Its one setting, `spellEpic.docPreview.location`, can move it to VS Code's Simple Browser
   (`beside`;  the default is `sidebar`);  an epic page never opens there.
-- A page that stopped answering:  Reload, Restart Page Server, or Home Page, a fresh view at the docs' home page.
+- A page that stopped answering:  Reload, Restart Page Server, or Home Page, a fresh view at the docs' home page
+  (in Details, its list button).
 
 It also runs the WINDOW BRIDGE, which the windows below lean on.
 It starts with VS Code, in every window (`onStartupFinished`), and writes one registry file per window,

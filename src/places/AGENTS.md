@@ -58,6 +58,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
       unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
       With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
+    - What a web server can do is what its lines say (`restAbilitiesIn()`, in the parser's core;  epic `data` I35):
+      paging by a count and a position, filtering, sorting, naming the fields it gives, being read only.
     - `RestPlace`:  named operations (`operations`, `call()`), each a `POST`;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
@@ -88,6 +90,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Place.signIn` (`PlaceSignIn`):  how a person signs in, for what shows:  core's `showSignIn()`.
     - A session is two weeks at most, a day on a local address:  it ends as `"ended"`, and what's pending stays.
     - `atProtoClientMetadata()`:  the file a program on a real address has to serve;  a local address needs none, and must be `127.0.0.1`.
+      - Spell's cloud answers one for each program, beside its page;  the page says where (`SPELL_ATMOSPHERE.clientFile`).
+      - Anywhere else, it goes at the top of the address, by hand;  missing, a sign-in says which address it couldn't read.
   - [AtProtoPasswordSignIn](AtProtoPasswordSignIn.ts):  a PROGRAM signing in by itself,
     with an app password, no browser (epic `atmosphere` P9).
     - The handle becomes a DID, the DID's document names its host, and the host gives a session (`createSession`).
@@ -141,6 +145,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A step of the one sign-in shape, with the code step's names:
       - `"waiting for a code"`, `enterCode()`
       - `account`:  `"Spell account"`, named apart from an atmosphere one on the bar
+    - Or a password (epic `atmosphere` T64):  `signInWithPassword()`;  signed in, `setPassword()`, and what the bar needs to
+      offer it (`hasPassword`, `currentPasswordNeeded`, `passwordProblem`, `passwordSaved`)
     - The page waits on its one-time request, asking after it every 2 seconds:
       the link confirmed on any device signs it in, or the code typed here.
     - ONE per server on a page (`SpellSignIn.for()`):  a project data folder's `RemotePlace` takes it as its `signIn`.
@@ -205,6 +211,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](SheetTable.ts) makes its rows, shared with
       `GoogleSheetPlace`, in `spell/server/places`.
     - An author's `idColumn`, or rows share no identity.  A row with no id or a repeated one is left out, and said.
+    - Each column is a field by the program's name for it (`FieldNames.ofColumns()`, epic `data` I36):
+      a line's (`a recipe's title is its "Dish Name"`), else by its words, so `Hair Color` is `hairColor`;  the id column keeps its name.
+      Every kind of sheet does the same, writing too, so a change goes back under the column it was read from.
     - What a place wants known about an answer is `ListAnswer.notes`, shown by `PlaceResult.notes`;
       `PlaceQuery` adds the one for rows with no id, for every place.
     - Its ceiling holds while it reads:  the engine only counts rows it's handed.
@@ -226,6 +235,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Plain text in and out;  the place that writes a file is `CsvPlace`, in `spell/server/places`.
   - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
     - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
+    - Each tab keeps its own list:  [TabCopies](TabCopies.ts), a key and a held browser lock per tab;
+      what a closed tab left is gathered on opening (epic `data` I4).
     - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
       (`Places.onWriteFailed()`).
     - It sits on top of what's read (`replayOn()`), so you read your own writes.

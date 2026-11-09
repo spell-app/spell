@@ -3,6 +3,8 @@
   A program on Spell's server, the cloud (epic `atmosphere` P8, `SpellCloud`):  served at `/apps/<project>`.
   - Its `<spell-viewer>` names the project from the page's own address,
     so this file is the same for every program.
+  - It says where the program's client file is, for signing in to an atmosphere account:
+    one per program, as many share this address (`SpellCloud`).
 -->
 <html lang="en">
   <head>
@@ -14,20 +16,22 @@
       :root {
         color-scheme: light dark;
       }
+      /* Edge to edge:  a program with a toolbar across the top, or that fills the window as a chat app does */
       body {
         margin: 0;
-        padding: 16px;
       }
       spell-viewer {
         display: block;
-        min-height: 90vh;
+        min-height: 100dvh;
       }
     </style>
   </head>
   <body>
     <spell-viewer></spell-viewer>
     <script type="module">
-      const project = decodeURIComponent(location.pathname.replace(/^\/apps\//, "").replace(/\/+$/, ""))
+      const address = location.pathname.replace(/\/+$/, "")
+      const project = decodeURIComponent(address.replace(/^\/apps\//, ""))
+      window.SPELL_ATMOSPHERE = { clientFile: `${address}/oauth-client-metadata.json` }
       document.title = project.slice(project.lastIndexOf("/") + 1)
       document.querySelector("spell-viewer").setAttribute("project", project)
     </script>

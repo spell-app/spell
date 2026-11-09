@@ -1404,7 +1404,7 @@ export class TSWriter extends JSWriter {
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
-    const text = this.bare(expression)
+    const text = this.listChildDrawn(expression, this.bare(expression))
     if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
     return text.startsWith("<") ? text : `{${text}}`
   }
@@ -1430,7 +1430,8 @@ export class TSWriter extends JSWriter {
       return `${key}={${PRESS_ATTRIBUTES.test(key) ? `core.pressed(this, ${written})` : written}}`
     }
     const inner = unwrapped(value)
-    if (inner instanceof P.ASTStringLiteral && inner.quote && !/["\\]/.test(inner.value))
+    // over several lines it's a `{"..."}`:  a JSX attribute's own text would be indented again with the element
+    if (inner instanceof P.ASTStringLiteral && inner.quote && !/["\\\n]/.test(inner.value))
       return `${key}="${inner.value}"`
     return `${key}={${this.bare(value)}}`
   }

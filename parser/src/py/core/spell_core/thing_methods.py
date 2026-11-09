@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from spell_core.console import SpellConsole
 
 # The types every spell project starts with, as the parser names them:  spell's classes, and `Object`.
-BASE_TYPES = ["Object", "Thing", "List", "App", "View", "Page", "TwoSidedView", "Notebook", "ViewableList"]
+BASE_TYPES = ["Object", "Thing", "List", "App", "View", "Page", "TwoSidedView", "ViewableList"]
 
 
 class ThingMethods:
@@ -65,7 +65,8 @@ class ThingMethods:
 
         - Else `cls` itself (epic `language` P26).
         - So a library's `a new card` makes the importing program's card:  Solitaire's `Card`, which extends the
-          library's.  Compiled from a library's own new thing of a type others may extend:  `core.class_to_make(Card)()`.
+          library's.
+        - Compiled from a library's own new thing of a type others may extend:  `core.class_to_make(Card)()`.
         - A class of the same name that doesn't extend `cls` (another project's own `Card`):  `cls`.
         - The twin of the JavaScript core's `classToMake()`.
         """

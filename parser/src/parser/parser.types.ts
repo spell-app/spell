@@ -46,9 +46,10 @@ export type Datatype = string
  *   The parser only knows their names.
  * - NOTE: `list`, `thing`, `app`, `view`, `viewable list` and `page` are runtime classes too
  *   (`List`, `Thing` ...), which compiled code names by `BUILT_IN_CLASS_NAMES`.  The rest are plain javascript values.
- * - NOT here:  a built-in TEMPLATE written in spell, e.g. `two sided view`.  Its type comes into the root scope
- *   from its compiled declarations, with its members (spell's `loadBuiltInTemplates()`;  epic `elemental-spell` Q71).
- *   Its class name is still `BUILT_IN_CLASS_NAMES`', so compiled code imports it from the core.
+ * - NOT here:  a built-in TEMPLATE written in spell, e.g. `two sided view`.
+ *   - Its type comes into the root scope from its compiled declarations, with its members
+ *     (spell's `loadBuiltInTemplates()`;  epic `elemental-spell` Q71).
+ *   - Its class name is still `BUILT_IN_CLASS_NAMES`', so compiled code imports it from the core.
  */
 export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   text: undefined,
@@ -91,7 +92,6 @@ export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   place: "Place",
   // a built-in template written in spell, compiled into the core (not in `BUILT_IN_TYPES`)
   "two sided view": "TwoSidedView",
-  notebook: "Notebook",
   site: "Site"
 }
 
@@ -167,19 +167,19 @@ export function isValueType(datatype: Datatype | undefined): boolean {
   return isBuiltInType(datatype) && !BUILT_IN_CLASSES.includes(datatype!)
 }
 
-/** Datatype of a list holding `itemType`s, e.g. `Card` => `list of cards`, `number` => `list of numbers`. */
-export function listOf(itemType: Datatype): Datatype {
-  return `list of ${pluralize(itemType.toLowerCase())}`
-}
-
 /**
- * Datatype of a list holding the type named `typeName`, its words kept apart:
- * `CardSuit` => `list of card-suits`, so `itemTypeOf()` gives `CardSuit` back.
- * - `listOf()` would run them together, `list of cardsuits`, a type nobody declared.
- * - A one-word name is the same either way:  `Card` => `list of cards`.
+ * Datatype of a list holding `itemType`s, e.g. `Card` => `list of cards`, `number` => `list of numbers`.
+ * - The words of a name of several words stay apart:
+ *   `CardSuit` => `list of card-suits`, so `itemTypeOf()` gives `CardSuit` back.
+ *   - Run together, `list of cardsuits` gives back `Cardsuit`, a type nobody declared.
  */
-export function listOfType(typeName: string): Datatype {
-  return listOf(`${typeName}`.split(/(?<=\p{Ll})(?=\p{Lu})/u).join("-"))
+export function listOf(itemType: Datatype): Datatype {
+  return `list of ${pluralize(
+    itemType
+      .split(/(?<=\p{Ll})(?=\p{Lu})/u)
+      .join("-")
+      .toLowerCase()
+  )}`
 }
 
 /**

@@ -43,7 +43,7 @@ Open Library has no list of every book, only a search:  so the page always searc
 
 
 # A book
-Its cover, its title and who wrote it:  on its card, the first name the search gave;  on its own page, its first author, read from their own record.
+Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.
 
 <spell-more-of "book">
 	<property "writer" description="Who wrote it first:  read from Open Library's record of them, by their id">the first item of its authors</property>
@@ -53,7 +53,7 @@ Its cover, its title and who wrote it:  on its card, the first name the search g
 			<image src={its cover i} alt="" aspect-ratio="2:3" crop />
 			<content>
 				<header>{its title}</header>
-				<meta>{the first item of its author name} · {its first publish year}</meta>
+				<meta>{its author name} · {its first publish year}</meta>
 			</content>
 		</ui-card>
 	</draw>

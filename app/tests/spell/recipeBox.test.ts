@@ -139,6 +139,7 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
     return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
 <script type="module" src="/element/spell-viewer.js"></script>
+<style>body { margin: 0 }</style>
 </head><body><spell-viewer src="/programs/${name}.js"></spell-viewer></body></html>`
   }
 
@@ -398,7 +399,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
         // signing out says so, with a way back
         await bar.locator("ui-button").click()
         await expect.poll(() => bar.textContent(), WAITING).toContain("You aren't signed in")
-        await bar.locator("input").waitFor(WAITING)
+        await bar.locator("input").first().waitFor(WAITING)
         // a refused change raises a notice, and a bare <spell-viewer> page has no toasts to show one (epic `data`'s I item)
         expect(problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
         await page.close()
@@ -554,7 +555,7 @@ start the box
         await expect.poll(() => titlesOn(page), WAITING).toContain("Bob's stew")
         const bar = page.locator("ui-message.spell-sign-in")
         await expect.poll(() => bar.textContent(), WAITING).toContain("You aren't signed in")
-        await bar.locator("input").waitFor(WAITING)
+        await bar.locator("input").first().waitFor(WAITING)
         // what's only in the sign-in library, and it's a chunk of its own, so a page that only reads never asks for it
         expect(
           (await Promise.all(scripts)).filter((text) => text.includes("require_pushed_authorization_requests"))
@@ -630,8 +631,8 @@ start the box
     async function askOn(page: Page): Promise<void> {
       const bar = page.locator("ui-message.spell-sign-in")
       await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
-      await bar.locator("input").fill(EMAIL)
-      await bar.locator("ui-button").first().click()
+      await bar.locator("input").first().fill(EMAIL)
+      await bar.locator("ui-button", { hasText: "Email me" }).click()
       await expect.poll(() => bar.textContent(), WAITING).toContain(`Check your email:  ${EMAIL}`)
     }
 
@@ -722,7 +723,7 @@ start the box
         await other.goto(serve("sign-in-bluesky-2", withPlace(english(), LINES)))
         const otherBar = other.locator("ui-message.spell-sign-in")
         await expect.poll(() => otherBar.textContent(), WAITING).toContain("with a Spell account")
-        await otherBar.locator("input").fill("@ana.bsky.social")
+        await otherBar.locator("input").first().fill("@ana.bsky.social")
         await otherBar.locator("ui-button", { hasText: "Sign in with Bluesky" }).click()
         await expect.poll(() => otherBar.textContent(), WAITING).toContain("with your Spell account, ana@spell.")
 
@@ -746,7 +747,9 @@ start the box
     const problems: string[] = []
     page.on("pageerror", (error) => problems.push(`${error.message}`))
     await page.goto(serve(name, program, { token: "none" }))
-    return { page, problems, bar: page.locator("ui-message.spell-sign-in"), close: () => context.close() }
+    // the sign-in, where this program shows it:  a bar above the app, or its own toolbar's person menu
+    const bar = page.locator("ui-message.spell-sign-in, span.spell-sign-in-menu")
+    return { page, problems, bar, close: () => context.close() }
   }
 
   /** Sign in on `bar` by the code mailed to `email`. */
@@ -756,8 +759,15 @@ start the box
     signedIn = "with your Spell account"
   ): Promise<void> {
     const before = (await mailer.newestTo(email))?.sentAt ?? 0
-    await bar.locator("input").fill(email)
-    await bar.locator("ui-button").first().click()
+    await bar.waitFor({ state: "attached" })
+    // a person menu opens first, and says who's signed in its own way
+    if (await bar.locator("ui-popup").count()) {
+      await bar.locator("> ui-button").click()
+      bar = bar.locator("ui-popup")
+      signedIn = "Signed in as"
+    }
+    await bar.locator("input").first().fill(email)
+    await bar.locator("ui-button", { hasText: "Email me" }).click()
     await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
     await bar.locator("input").fill(/^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0])
     await bar.locator("ui-button").first().click()
@@ -897,8 +907,8 @@ start the box
       const bar = page.locator("ui-message.spell-sign-in")
       await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
       const before = (await mailer.newestTo(email))?.sentAt ?? 0
-      await bar.locator("input").fill(email)
-      await bar.locator("ui-button").first().click()
+      await bar.locator("input").first().fill(email)
+      await bar.locator("ui-button", { hasText: "Email me" }).click()
       await expect.poll(async () => (await mailer.newestTo(email))?.sentAt ?? 0, WAITING).toBeGreaterThan(before)
       const code = /^\d{6}$/m.exec((await mailer.newestTo(email))!.text)![0]
       await bar.locator("input").fill(code)
@@ -1262,11 +1272,17 @@ start the box
    */
   const shipped = (path: string): Program => {
     const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spellml")
+    const styles = path.replace(/\.api(\.\w\w)?\.spell$/, ".css")
     return {
       path: `/${path.split("/")[1]}`,
       source: readFileSync(join(EXAMPLES, path), "utf8"),
       field: "",
-      more: [{ path: `/${drawing.split("/")[1]}`, contents: readFileSync(join(EXAMPLES, drawing), "utf8") }]
+      more: [
+        { path: `/${drawing.split("/")[1]}`, contents: readFileSync(join(EXAMPLES, drawing), "utf8") },
+        ...(existsSync(join(EXAMPLES, styles))
+          ? [{ path: `/${styles.split("/")[1]}`, contents: readFileSync(join(EXAMPLES, styles), "utf8") }]
+          : [])
+      ]
     }
   }
 
@@ -1846,11 +1862,7 @@ iniciar la caja que publica`
     const pick = (page: Page, name: string, label: string) =>
       page.locator(`ui-select[name="${name}"] select`).selectOption({ label })
     /** Sign in from the page's person menu. */
-    const signInByMenu = async (page: Page, email: string) => {
-      const menu = page.locator("span.spell-sign-in-menu")
-      await menu.locator("> ui-button").click()
-      await signIn(menu.locator("ui-popup"), email, "Signed in as")
-    }
+    const signInByMenu = (page: Page, email: string) => signIn(page.locator("span.spell-sign-in-menu"), email)
 
     beforeAll(async () => {
       for (const [who, email] of Object.entries({ ...EMAILS, ...MORE })) address[who] = await accounts.invite(email)
@@ -1879,7 +1891,7 @@ iniciar la caja que publica`
       async () => {
         // 1. Ada, an Admin:  Eve joins, the Finance Team, Eve its Manager until June
         const ada = await deviceOn("admin-ada", admin())
-        expect(await ada.bar.count()).toBe(0)
+        expect(await ada.page.locator("ui-message.spell-sign-in").count()).toBe(0)
         await signInByMenu(ada.page, EMAILS.ada)
         await expect.poll(() => showing(ada.page), WAITING).toContain(address.bo!)
         await ada.page.locator("ui-stack.people ui-form.add input").fill(address.eve!)
@@ -2443,6 +2455,11 @@ the published sheet is a projection of the sign up sheet:
         await ed.page.reload()
         await ed.page.locator("ui-segment.sign-up ui-button.serving").click()
         await ed.page.waitForTimeout(3_000)
+        // the master itself:  the published sheet catches up only at its next check, too late to show a write got through
+        const master = await spaceFolders.placeFor(`${EVENT}/__private/signups`, address.cy)
+        const { rows } = await master!.list("volunteers", {}, { identity: address.cy! })
+        expect(rows.map((row) => row.shift)).toHaveLength(2)
+        expect(rows.map((row) => row.shift)).not.toContain("serving")
         expect(await cySheet.page.locator("ui-segment.published .signed-up").count()).toBe(2)
 
         for (const one of [cy, bo, cySheet, ann, ed, annsLetter]) {
@@ -2718,7 +2735,7 @@ the published sheet is a projection of the sign up sheet:
     const EMAILS = { bo: "bo.chat@example.com", cy: "cy.chat@example.com" }
     /** Each person's address, as their invite made it. */
     const address: Record<string, string> = {}
-    /** The example as it ships, in Spell's own org:  its one thread, the org's own (P37:  `@spell/messages`). */
+    /** The example as it ships, in Spell's own org:  every thread it may read (P37). */
     const chat = (): Program =>
       withPlace(
         shipped("OrgChat/OrgChat.api.spell"),
@@ -2726,9 +2743,7 @@ the published sheet is a projection of the sign up sheet:
       )
     /** The texts of the messages `page` shows. */
     const messagesOn = (page: Page) =>
-      page
-        .locator("ui-segment.message ui-text.text")
-        .evaluateAll((texts) => texts.map((text) => text.textContent ?? ""))
+      page.locator("ui-stack.message ui-text.text").evaluateAll((texts) => texts.map((text) => text.textContent ?? ""))
 
     beforeAll(async () => {
       for (const [who, email] of Object.entries(EMAILS)) address[who] = await accounts.invite(email)
@@ -2749,6 +2764,12 @@ the published sheet is a projection of the sign up sheet:
         orgFile("spell"),
         JSON.stringify({ $type: "Org", id: "spell", name: "Spell", members })
       )
+      // a list down the side worth seeing:  the teams set up here, unless an earlier test made the org's already
+      if (!(await people.roster("spell"))) {
+        await spaceFolders.orgRoles.setUp("spell", { board: address.cy! })
+        await spaceFolders.orgRoles.addTeam("spell", { id: "events_team", name: "Events Team" }, { by: address.cy })
+        await spaceFolders.orgRoles.addTeam("spell", { id: "programs_team", name: "Programs Team" }, { by: address.cy })
+      }
     })
 
     test(
@@ -2766,26 +2787,126 @@ the published sheet is a projection of the sign up sheet:
           await device.page.reload()
         }
         await expect.poll(() => cy.page.locator("ui-text.none").count(), { timeout: 20_000 }).toBeGreaterThan(0)
-        // P37:  the thread list down the side, its one thread the one shown
-        await expect.poll(() => cy.page.locator("ui-list.threads ui-item").count(), WAITING).toBe(1)
-        await expect.poll(() => cy.page.locator("ui-header").first().textContent(), WAITING).toBe("SPELL")
-        await cy.page.locator("ui-form ui-input input").fill("Who's bringing chairs?")
-        await cy.page.locator("ui-button.send").click()
+        // P37:  the thread list down the side, the org's own showing, its name as its people write it
+        // (an earlier test may have added more threads to this org:  I21)
+        await expect.poll(() => cy.page.locator("ui-menu.threads ui-item").count(), WAITING).toBeGreaterThan(1)
+        await expect.poll(() => cy.page.locator("ui-stack.thread-name ui-header").textContent(), WAITING).toBe("Spell")
+        expect(await cy.page.locator("ui-toolbar.top-bar").getAttribute("aria-label")).toBe("Chat")
+        const cyBox = cy.page.locator("ui-form.composer textarea")
+        await cyBox.fill("Who's bringing chairs?")
+        await cyBox.press("Enter")
         await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toEqual(["Who's bringing chairs?"])
-        await expect
-          .poll(() => bo.page.locator("ui-segment.message ui-text.by").textContent(), WAITING)
-          .toBe(address.cy)
+        await expect.poll(() => cyBox.inputValue(), WAITING).toBe("")
+        await expect.poll(() => bo.page.locator("ui-stack.message ui-text.by").textContent(), WAITING).toBe(address.cy)
 
-        await bo.page.locator("ui-form ui-input input").fill("I am")
+        await bo.page.locator("ui-form.composer textarea").fill("I am")
         await bo.page.locator("ui-button.send").click()
         await expect.poll(() => messagesOn(cy.page), { timeout: 20_000 }).toEqual(["Who's bringing chairs?", "I am"])
-        await cy.page.screenshot({ path: join(shots, "org-chat.png"), fullPage: true })
+        // a new line, not a send
+        await cyBox.fill("Two")
+        await cyBox.press("Shift+Enter")
+        await cyBox.pressSequentially("lines")
+        expect(await cyBox.inputValue()).toBe("Two\nlines")
+        await cyBox.press("Enter")
+        await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toContain("Two\nlines")
 
+        await cy.page.locator("ui-stack.message", { hasText: "Who's bringing chairs?" }).hover()
         await cy.page
-          .locator("ui-segment.message", { hasText: "Who's bringing chairs?" })
+          .locator("ui-stack.message", { hasText: "Who's bringing chairs?" })
           .locator("ui-button.remove")
           .click()
-        await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toEqual(["I am"])
+        await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toEqual(["I am", "Two\nlines"])
+        expect(bo.problems).toEqual([])
+        expect(cy.problems).toEqual([])
+
+        // what it looks like:  a dozen messages, on a window and on a phone, light and dark (T61)
+        for (const [each, device] of [
+          ["Morning all", bo],
+          ["Morning!", cy],
+          ["Is the back room free on Saturday?", bo],
+          ["I think so, let me check the calendar.", cy],
+          ["Yes, from noon.", cy],
+          ["Perfect.", bo],
+          ["Could someone bring the long table?", bo],
+          ["I can.  Do we need the folding chairs as well, or are there enough in the room already?", cy],
+          ["Yes please, eight or so.", bo],
+          ["On it.", cy],
+          ["Thanks both.", bo],
+          ["See you then.", cy]
+        ] as const) {
+          const box = device.page.locator("ui-form.composer textarea")
+          await box.fill(each)
+          await box.press("Enter")
+          await expect.poll(() => messagesOn(bo.page), { timeout: 20_000 }).toContain(each)
+        }
+        await expect.poll(() => messagesOn(cy.page), WAITING).toHaveLength(14)
+        await cy.page.setViewportSize({ width: 1280, height: 800 })
+        await cy.page.screenshot({ path: join(shots, "org-chat.png") })
+        await cy.page.emulateMedia({ colorScheme: "dark" })
+        await cy.page.waitForTimeout(500)
+        await cy.page.screenshot({ path: join(shots, "org-chat-dark.png") })
+        await cy.page.emulateMedia({ colorScheme: "light" })
+        // only the messages scroll;  they start at the newest;  the box is the full width of the thread
+        const measures = await cy.page.evaluate(() => {
+          const within = (selector: string) => {
+            const finder = (root: ParentNode): Element | undefined => {
+              for (const each of root.querySelectorAll("*")) {
+                if (each.matches(selector)) return each
+                const found = each.shadowRoot && finder(each.shadowRoot)
+                if (found) return found
+              }
+              return undefined
+            }
+            return finder(document)!
+          }
+          const main = within("ui-stack.main").getBoundingClientRect()
+          const composer = within("ui-form.composer").getBoundingClientRect()
+          const list = within("ui-stack.messages")
+          const sidebar = within("ui-stack.sidebar").getBoundingClientRect()
+          const bar = within("ui-toolbar.top-bar").getBoundingClientRect()
+          return {
+            pageScrolls: document.documentElement.scrollHeight > window.innerHeight,
+            mainWidth: main.width,
+            composerWidth: composer.width,
+            sidebarWidth: sidebar.width,
+            sidebarFills: sidebar.bottom,
+            barTop: bar.top,
+            windowHeight: window.innerHeight,
+            listAtBottom: list.scrollHeight - list.clientHeight + list.scrollTop,
+            listScrolls: list.scrollHeight > list.clientHeight
+          }
+        })
+        expect(measures.pageScrolls).toBe(false)
+        expect(measures.barTop).toBe(0)
+        expect(measures.sidebarFills).toBe(measures.windowHeight)
+        expect(measures.sidebarWidth).toBe(260)
+        expect(measures.composerWidth).toBe(measures.mainWidth)
+        // column-reverse:  at the bottom, its scrollTop is 0, or as near as a fraction of a pixel
+        expect(measures.listAtBottom).toBeGreaterThanOrEqual(measures.listScrolls ? -1 : 0)
+
+        // a phone:  no side bar, the bars open the threads, nothing wider than the window
+        await cy.page.setViewportSize({ width: 390, height: 844 })
+        await expect.poll(() => cy.page.locator("ui-button.show-threads").isVisible(), WAITING).toBe(true)
+        expect(await cy.page.locator("ui-stack.sidebar").isVisible()).toBe(false)
+        expect(await cy.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+        await cy.page.screenshot({ path: join(shots, "org-chat-phone.png") })
+        await cy.page.locator("ui-button.show-threads").click()
+        await expect
+          .poll(() => cy.page.locator("ui-flyout.threads-drawer ui-item").first().isVisible(), WAITING)
+          .toBe(true)
+        await cy.page.screenshot({ path: join(shots, "org-chat-phone-threads.png") })
+
+        // a thread with nothing in it:  the quiet words, and the box named for it
+        await bo.page.setViewportSize({ width: 1280, height: 800 })
+        await bo.page.locator("ui-menu.threads ui-item", { hasText: "Events Team" }).first().click()
+        await expect
+          .poll(() => bo.page.locator("ui-stack.thread-name ui-header").textContent(), WAITING)
+          .toBe("Events Team")
+        await expect.poll(() => bo.page.locator("ui-text.none").textContent(), WAITING).toContain("say hello")
+        expect(await bo.page.locator("ui-form.composer textarea").getAttribute("placeholder")).toBe(
+          "Message Events Team"
+        )
+        await bo.page.screenshot({ path: join(shots, "org-chat-empty.png") })
         expect(bo.problems).toEqual([])
         expect(cy.problems).toEqual([])
         await bo.close()
@@ -2797,10 +2918,18 @@ the published sheet is a projection of the sign up sheet:
 
 /** `source`, one file, as a runner is handed it:  with its imports. */
 function compiledProgram(path: string, source: string, more: { path: string; contents: string }[] = []): string {
-  const { scope, files } = parseSpellProject([{ path, contents: source }, ...more])
+  const styles = more.filter((file) => file.path.endsWith(".css"))
+  const { scope, files } = parseSpellProject([
+    { path, contents: source },
+    ...more.filter((file) => !styles.includes(file))
+  ])
   const errors = files.flatMap((file) => file.errors)
   if (errors.length) throw new Error(`parse errors:\n${errors.join("\n")}`)
-  const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
+  const parts = [
+    ...files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled)),
+    // a project's stylesheet, as `SpellCSSFile` compiles it
+    ...styles.map((file) => `core.installStyles(${JSON.stringify(file.path)}, ${JSON.stringify(file.contents)})`)
+  ]
   const header = SP.SpellProject.importHeaderFor(scope, P.JSWriter.instance)
   return SP.SpellDeclarations.stripComments(SP.SpellProject.combineCompiled(parts, P.JSWriter.instance, header, scope))
 }

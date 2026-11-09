@@ -16,8 +16,7 @@ import {
   whoWritesFolderAt,
   type Place,
   type PlaceEvent,
-  type SpaceFilesWrite,
-  type ThingChange
+  type SpaceFilesWrite
 } from "spell/places/places.types"
 import type { AtProtoNetwork } from "spell/places/AtProtoPlace"
 import { AtProtoPasswordSignIn } from "spell/places/AtProtoPasswordSignIn"
@@ -518,7 +517,7 @@ export class SpaceFolders {
     const paired = whoWrites === "its members" && this.mail ? await this.orgRoles.spaceAt(address) : undefined
     const updates = paired?.side === "shared" ? this.mail!.writtenFor(address, paired) : undefined
     const onWritten = writtenTo([real?.written, projections?.written, inbox?.written, updates, sheets?.written])
-    const changeOrDie = this.quietOrDie(address, inbox?.changeOrDie ?? members.changeOrDie)
+    const changeOrDie = inbox?.changeOrDie ?? members.changeOrDie
     const place = new FolderPlace({
       storage,
       format: new JsonChunks({ summaries: EVERY_FIELD }),
@@ -529,6 +528,7 @@ export class SpaceFolders {
               id: members.spaceId,
               memberOf: members.memberOf,
               settings: members.settings,
+              writableOrDie: () => this.quietOrDie(address),
               changeOrDie: updates ? this.mail!.checkFor(address, changeOrDie) : changeOrDie,
               signUpOrDie: sheets!.signUpOrDie
             },
@@ -884,24 +884,28 @@ export class SpaceFolders {
     return !(await this.takedowns.takenDownIn(address, person)).isWhole
   }
 
+  /** Does anyone at all read the space at `address`, signed in or not?  `false` for an address that's no space's. */
+  async isPublicSpace(address: string): Promise<boolean> {
+    const folder = this.spaceFolderAt(address)
+    return !!folder && (await folder.members.settings()).publicRead
+  }
+
   private spaceFolderAt(address: string): SpaceFolder | undefined {
     if (!SP.SpellLocation.isAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
     return this.folderAt(address)
   }
 
   /**
-   * `changeOrDie`, refusing every change first while the folder at `address` is in a QUIET event's spaces
+   * Refuse every write while the folder at `address` is in a QUIET event's spaces
    * (`OrgEvents.isQuietAt()`, epic `atmosphere` P32):  read only, its record kept.
+   * - Whoever's asking:  a member, someone signing up, or someone writing a public space (I22).
    * - throws `PlaceError` `"refused"`, `"place"`
    */
-  private quietOrDie(address: string, changeOrDie: (change: ThingChange) => Promise<void>) {
-    return async (change: ThingChange): Promise<void> => {
-      if (await this.events.isQuietAt(address)) {
-        throw new PlaceError(`${address} is quiet:  its event is over, and it's read only`, {
-          cause: { kind: "refused", whyNot: "place" }
-        })
-      }
-      await changeOrDie(change)
+  private async quietOrDie(address: string): Promise<void> {
+    if (await this.events.isQuietAt(address)) {
+      throw new PlaceError(`${address} is quiet:  its event is over, and it's read only`, {
+        cause: { kind: "refused", whyNot: "place" }
+      })
     }
   }
 
@@ -939,7 +943,8 @@ export class SpaceFolders {
       spacesOf: (org) => roles.pairedSpacesOf(org),
       isInOrg: (org, who) => roles.isInOrg(org, who),
       managersOf: (space) => roles.managersOfSpace(space),
-      placeAt: (address) => this.placeFor(address, undefined)
+      placeAt: (address) => this.placeFor(address, undefined),
+      orgNameOf: (org) => roles.orgName(org)
     })
     this.threadLists.set(key, threads)
     return threads

@@ -46,7 +46,8 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print errors as JSON")
     .option(
       "--fix",
-      "put right what it can:  retired words (parts => slots), " +
+      "put right what it can:  retired words (parts => slots), old spellings in a page " +
+        "(<spell-notebook> => <spell-page notebook>, a description before an example => its description=), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)
@@ -146,8 +147,9 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print what was found as JSON")
     .action((word: string, _options, command: Command) => language("explain", [word], command))
 
-  // translating, under `spell translate`:  a project (the command itself), and the language packs' tools -- their
-  // work is here, not behind the hook, but `translate`'s and `speedtest`'s project finding (epic `repo-split` P18)
+  // translating, under `spell translate`:  a project (the command itself), and the language packs' tools
+  // - their work is here, not behind the hook, but `translate`'s and `speedtest`'s project finding
+  //   (epic `repo-split` P18)
   // - `--to` is checked by each action, not `requiredOption()`:  commander checks a parent's required options for
   //   its subcommands too, and the parent takes `--to` / `--effort` wherever they are, so `speedtest` reads them
   //   through `optsWithGlobals()`

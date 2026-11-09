@@ -7,7 +7,6 @@ import {
   Page,
   Place,
   TwoSidedView,
-  Notebook,
   ViewableList,
   h,
   css,
@@ -68,7 +67,7 @@ export function runSpellFiles(
     // and a view type's classes, drawing and `<css>`:  `View`, `h()`, `css`
     const imported = {
       ...{ on, off, once, trigger, send, positionOf, position, spellPosition, endPosition, withSpellPositions },
-      ...{ View, Page, Place, TwoSidedView, Notebook, ViewableList, h, css }
+      ...{ View, Page, Place, TwoSidedView, ViewableList, h, css }
     }
     // oxlint-disable-next-line no-implied-eval -- running compiled spell, as a runner does, is the test
     const fn = new Function("core", "Thing", "List", "App", ...Object.keys(imported), body)

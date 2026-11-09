@@ -1,7 +1,9 @@
 <!doctype html>
 <!--
   What someone gets at a program or an org's home that they can't read yet (epic `atmosphere` I14, T59, `SpellCloud`):
-  - nobody signed in:  sign in by email, then this address loads what they asked for
+  - nobody signed in:  sign in by email and password, or "Email me a link instead", then this address loads what they
+    asked for
+  - at `/sign-in?password`:  setting or changing a password, once signed in (epic `atmosphere` T64)
   - signed in, arriving by another site's link (epic `atmosphere` I20):  loads this address once more
     - The session cookie is `SameSite=Strict`, so a link from another site brings no cookie, and the server sent this.
     - This page's own request does bring it, and going to its own address from here brings it too.
@@ -10,73 +12,221 @@
   - At `/sign-in`, the spaces home's way in:  signed in, on to the home.
   - A program can't load to draw its own sign-in bar:  its files are only for the org's people.
   - The same for every name in the space, so a stranger can't tell what an org has.
+  - The same top bar as the home pages (`cloudHome.html`), with nothing on its right.
+    - Only its look comes from Spell UI:  with `/element/` out of reach the form still shows, and works.
 -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sign in to Spell</title>
+    <link rel="icon" href="/element/favicon/favicon.svg" />
+    <script type="module" src="/element/spell-ui.js"></script>
     <style>
       :root {
         color-scheme: light dark;
-        font-family: system-ui, sans-serif;
       }
       body {
-        margin: 0 auto;
-        max-width: 26rem;
-        padding: 4rem 1rem;
+        margin: 0;
         line-height: 1.5;
-      }
-      form {
-        display: flex;
-        gap: 0.5rem;
-      }
-      input {
-        flex: 1;
-        min-width: 0;
-        font: inherit;
-        padding: 0.4rem 0.6rem;
-      }
-      button {
-        font: inherit;
-        padding: 0.4rem 0.8rem;
+        color: var(--ui-text-color, CanvasText);
+        background: var(--ui-background, Canvas);
+        font-family: var(--ui-font-family, system-ui, sans-serif);
       }
       [hidden] {
         display: none;
       }
+
+      /* The top bar, as on the home pages. */
+      .top-bar {
+        padding: 5px 16px;
+        border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color, GrayText);
+      }
+      .top-bar::part(toolbar) {
+        min-height: 40px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: inherit;
+        text-decoration: none;
+        img {
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      /* The one column, in a card. */
+      main {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: calc(26em + 32px);
+        margin-inline: auto;
+        padding: 48px 16px 64px;
+      }
+      .panel {
+        padding: 24px;
+        border-radius: var(--ui-radius, 6px);
+        background: var(--ui-surface, Canvas);
+        box-shadow: 0 0 0 var(--ui-border-width, 1px) var(--ui-border-color, GrayText);
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 1.375em;
+        line-height: 1.25;
+      }
+      p {
+        margin: 0 0 16px;
+      }
+      section p {
+        color: var(--ui-text-muted, inherit);
+      }
+      /* Side by side where both fit;  on a phone the button takes the next row, so the address isn't cut off. */
+      form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      input {
+        flex: 999 1 12em;
+        min-width: 0;
+        box-sizing: border-box;
+        font: inherit;
+        padding: 0.5em 0.75em;
+        color: inherit;
+        background: transparent;
+        border: var(--ui-border-width, 1px) solid var(--ui-border-color-strong, GrayText);
+        border-radius: var(--ui-radius, 6px);
+      }
+      button {
+        flex: 1 0 auto;
+        font: inherit;
+        font-weight: var(--ui-font-weight-semibold, 600);
+        padding: 0.5em 1em;
+        color: var(--ui-text-inverted-color, ButtonText);
+        background: var(--ui-primary, ButtonFace);
+        border: none;
+        border-radius: var(--ui-radius, 6px);
+        cursor: pointer;
+        &:hover {
+          background: var(--ui-primary-hover, ButtonFace);
+        }
+      }
+      /* Fields one above another, the main button under them, the second way under that. */
+      form.stacked {
+        display: grid;
+        input,
+        button {
+          width: 100%;
+          box-sizing: border-box;
+        }
+      }
+      /* The second way:  there, but not what the eye goes to first. */
+      button.second {
+        font-weight: inherit;
+        color: var(--ui-text-color, CanvasText);
+        background: transparent;
+        box-shadow: inset 0 0 0 var(--ui-border-width, 1px) var(--ui-border-color-strong, GrayText);
+        &:hover {
+          background: color-mix(in oklch, currentColor 8%, transparent);
+        }
+      }
+      a.back {
+        color: var(--ui-primary-text, LinkText);
+      }
       #problem {
-        color: #c33;
+        margin: 16px 0 0;
+        color: var(--ui-red-text, #c33);
+      }
+      #problem:empty {
+        display: none;
       }
     </style>
   </head>
   <body>
-    <h1 id="title" hidden>Sign in to see this page</h1>
-    <section id="signing-in" hidden>
-      <p>This page belongs to an organization on Spell. Sign in with the email it knows you by.</p>
-      <form id="email-form">
-        <input
-          id="email"
-          type="email"
-          required
-          autocomplete="email"
-          placeholder="you@example.com"
-          aria-label="Your email"
-        />
-        <button>Email me a link</button>
-      </form>
-    </section>
-    <section id="waiting" hidden>
-      <p>Check your email: open its link, or type its code here.</p>
-      <form id="code-form">
-        <input id="code" required autocomplete="one-time-code" aria-label="The code from your email" />
-        <button>Sign in</button>
-      </form>
-    </section>
-    <section id="not-yours" hidden>
-      <p>You're signed in as <b id="who"></b>, and you don't have access to this page.</p>
-      <button id="sign-out">Sign out</button>
-    </section>
-    <p id="problem" role="alert"></p>
+    <ui-root display="immediately">
+      <ui-toolbar class="top-bar" aria-label="Spell">
+        <a slot="title" class="brand" href="/" title="Spell's home page">
+          <img src="/element/favicon/favicon.svg" alt="" />
+          <ui-text size="large">Spell</ui-text>
+        </a>
+      </ui-toolbar>
+      <main>
+        <div class="panel">
+          <h1 id="title" hidden>Sign in to see this page</h1>
+          <section id="signing-in" hidden>
+            <p id="lead">Sign in with your email and password.</p>
+            <!-- post, to a route that ignores it:  a form sent before the script runs can't put a password in an address -->
+            <form id="email-form" class="stacked" method="post" action="/api/sign-in/password">
+              <input
+                id="email"
+                name="username"
+                type="email"
+                required
+                autocomplete="username"
+                placeholder="you@example.com"
+                aria-label="Your email"
+              />
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autocomplete="current-password"
+                placeholder="Your password"
+                aria-label="Your password"
+              />
+              <button id="sign-in">Sign in</button>
+              <button id="email-link" class="second" type="button">Email me a link instead</button>
+            </form>
+          </section>
+          <section id="waiting" hidden>
+            <p>Check your email: open its link, or type its code here.</p>
+            <form id="code-form">
+              <input id="code" required autocomplete="one-time-code" aria-label="The code from your email" />
+              <button>Sign in</button>
+            </form>
+          </section>
+          <section id="set-password" hidden>
+            <p id="password-lead"></p>
+            <form id="password-form" class="stacked" method="post" action="/api/sign-in/password/change">
+              <input id="password-account" name="username" type="text" autocomplete="username" hidden />
+              <input
+                id="current-password"
+                name="current"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Your current password"
+                aria-label="Your current password"
+                hidden
+              />
+              <input
+                id="new-password"
+                name="password"
+                type="password"
+                required
+                minlength="8"
+                maxlength="256"
+                autocomplete="new-password"
+                placeholder="A new password, at least 8 characters"
+                aria-label="A new password, at least 8 characters"
+              />
+              <button id="save-password">Save password</button>
+            </form>
+          </section>
+          <section id="password-saved" hidden>
+            <p>Your password is saved. Next time, sign in with your email and it.</p>
+            <a class="back" href="/">Back to your spaces</a>
+          </section>
+          <section id="not-yours" hidden>
+            <p>You're signed in as <b id="who"></b>, and you don't have access to this page.</p>
+            <button id="sign-out">Sign out</button>
+          </section>
+          <p id="problem" role="alert"></p>
+        </div>
+      </main>
+    </ui-root>
     <script type="module">
       const WAIT_MS = 3000
       /** Under this key:  when this page last went to its own address, so it goes once. */
@@ -85,18 +235,29 @@
       const RETRY_FRESH_MS = 10_000
       /** At `/sign-in`, signing in leads to the spaces home;  anywhere else, to this address. */
       const SIGN_IN_ONLY = location.pathname === "/sign-in"
+      /** At `/sign-in?password`:  setting a password, once signed in;  signing in first comes back here. */
+      const SETTING_PASSWORD = SIGN_IN_ONLY && new URLSearchParams(location.search).has("password")
+      /** Only an address that holds someone's page can say so:  `/sign-in` guards nothing. */
+      const GATED_LEAD = "This page belongs to an organization on Spell. Sign in with the email it knows you by."
 
       const element = (id) => document.getElementById(id)
       const show = (id) => {
-        for (const each of ["signing-in", "waiting", "not-yours"]) element(each).hidden = each !== id
+        const sections = ["signing-in", "waiting", "set-password", "password-saved", "not-yours"]
+        for (const each of sections) element(each).hidden = each !== id
         element("title").hidden = false
-        element("title").textContent = id === "not-yours" ? "You don't have access" : TITLE
+        element("title").textContent = TITLES[id] ?? TITLE
         element("problem").textContent = ""
       }
       const TITLE = SIGN_IN_ONLY ? "Sign in to Spell" : element("title").textContent
+      /** Each section's title, where it isn't `TITLE`. */
+      const TITLES = {
+        "not-yours": "You don't have access",
+        "set-password": "Your password",
+        "password-saved": "Password saved"
+      }
 
       /** Go where signing in leads.  `replace`, not `reload`:  a navigation of this page's own brings the cookie. */
-      const goOn = () => location.replace(SIGN_IN_ONLY ? "/" : location.href)
+      const goOn = () => location.replace(SIGN_IN_ONLY && !SETTING_PASSWORD ? "/" : location.href)
 
       /**
        * Did this page just go to its own address, and get answered this page again?  Clears the mark.
@@ -141,6 +302,18 @@
       element("email-form").addEventListener(
         "submit",
         saying(async () => {
+          const typed = element("email").value.trim()
+          const password = element("password").value
+          // the field empties, right or wrong:  a password stays on screen no longer than it has to
+          element("password").value = ""
+          await ask("password", { email: typed, password })
+          goOn()
+        })
+      )
+      element("email-link").addEventListener(
+        "click",
+        saying(async () => {
+          if (!element("email").reportValidity()) return
           email = element("email").value.trim()
           const { request } = await ask("ask", { email })
           show("waiting")
@@ -166,8 +339,36 @@
           location.replace(location.href)
         })
       )
-      const { person } = await ask("me").catch(() => ({}))
-      if (person && SIGN_IN_ONLY) {
+      element("password-form").addEventListener(
+        "submit",
+        saying(async () => {
+          const password = element("new-password").value
+          const current = element("current-password").value
+          await ask("password/change", { password, ...(current && { current }) })
+          element("new-password").value = ""
+          element("current-password").value = ""
+          show("password-saved")
+        })
+      )
+
+      /** SIDE EFFECT:  the page sets `person`'s password:  the current one's field only if it's needed. */
+      const showSetPassword = (person, { set = false, currentNeeded = false } = {}) => {
+        element("password-account").value = person
+        element("current-password").hidden = !currentNeeded
+        element("current-password").required = currentNeeded
+        element("password-lead").textContent = !set
+          ? "Choose a password. Then you can sign in with your email and it."
+          : currentNeeded
+            ? "Type your current password and a new one. Forgot it? Sign out, use Email me a link instead, then come back."
+            : "You just signed in with your email, so a new password is all this needs."
+        show("set-password")
+      }
+
+      if (!SIGN_IN_ONLY) element("lead").textContent = GATED_LEAD
+      const { person, password: passwordState } = await ask("me").catch(() => ({}))
+      if (person && SETTING_PASSWORD) {
+        showSetPassword(person, passwordState)
+      } else if (person && SIGN_IN_ONLY) {
         location.replace("/")
       } else if (person && !justRetried() && retry()) {
         // on its way to its own address

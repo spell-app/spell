@@ -1,0 +1,116 @@
+<spell-page "tree examples" notebook>
+	<header level="1">
+		Tree
+		<header>A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="Rows in rows" sticky="stack" collapsible dividing>
+			<example "Rows in rows" description="Each row's rows are its children.  The triangle opens and closes a row, with `open`, `ui-opening` and `ui-closing`.">
+				<tree label="Files" style="width: 18em">
+					<tree-item label="src" icon="folder" open>
+						<tree-item label="Card.spellml" icon="file code" selected/>
+						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="styles" icon="folder">
+							<tree-item label="card.css" icon="file code"/>
+						</tree-item>
+					</tree-item>
+					<tree-item label="README.md" which="notes" icon="file alternate outline"/>
+				</tree>
+			</example>
+		</>
+
+		<section label="Many selected" sticky="stack" collapsible dividing>
+			<example "Many selected" description="With `choose=\"many\"`, Shift takes a range of the rows on screen, and Command or Control adds a row or takes it away.">
+				<tree choose="many" label="Files" style="width: 18em">
+					<tree-item label="src" icon="folder" open>
+						<tree-item label="Card.spellml" icon="file code" selected/>
+						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="styles" icon="folder">
+							<tree-item label="card.css" icon="file code"/>
+						</tree-item>
+					</tree-item>
+					<tree-item label="README.md" which="notes" icon="file alternate outline"/>
+				</tree>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Which one" sticky="stack" collapsible dividing>
+			<example "Which one" description="`which` says which one it is, quieter, and shortens first when there's no room.  A button in the `actions` slot keeps its own click.">
+				<tree label="Things" style="width: 18em">
+					<tree-item label="Card" which="ace of spades" icon="cube">
+						<button slot="actions" size="mini">Show</button>
+					</tree-item>
+					<tree-item label="Pile" which="discards" icon="cube"/>
+				</tree>
+			</example>
+		</>
+
+		<section label="Groups" sticky="stack" collapsible dividing>
+			<example "Groups" description="A `group` row only holds rows:  a click opens or closes it, and it's never selected.">
+				<tree label="Kinds" style="width: 18em">
+					<tree-item group label="Cards" which="2" open>
+						<tree-item label="ace of spades"/>
+						<tree-item label="king of hearts"/>
+					</tree-item>
+				</tree>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Filtered" sticky="stack" collapsible dividing>
+			<example "Filtered" description="`filter` shows only the rows whose words hold it, with the rows they're inside kept open.  It changes no row's `open`.">
+				<tree filter="card" label="Files" style="width: 18em">
+					<tree-item label="src" icon="folder" open>
+						<tree-item label="Card.spellml" icon="file code" selected/>
+						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="styles" icon="folder">
+							<tree-item label="card.css" icon="file code"/>
+						</tree-item>
+					</tree-item>
+					<tree-item label="README.md" which="notes" icon="file alternate outline"/>
+				</tree>
+			</example>
+		</>
+
+		<section label="Sticky path" sticky="stack" collapsible dividing>
+			<example "Sticky path" description="With `sticky-path`, scroll down:  one line pinned at the top names the open rows the first row in view is inside.  A click on one scrolls back to it, selecting nothing.">
+				<stack style="height: 12em; overflow-y: auto; width: 18em">
+					<tree sticky-path label="Views">
+						<tree-item label="Solitaire" icon="cube" open>
+							<tree-item label="Container" icon="cube" open>
+								<tree-item label="Grid" icon="cube" open>
+									<tree-item label="StockPile" which="stock" icon="cube" open>
+										<tree-item label="Card" which="3 of spades" icon="cube"/>
+										<tree-item label="Card" which="queen of clubs" icon="cube"/>
+										<tree-item label="Card" which="king of diamonds" icon="cube"/>
+										<tree-item label="Card" which="king of spades" icon="cube"/>
+										<tree-item label="Card" which="king of clubs" icon="cube"/>
+										<tree-item label="Card" which="10 of clubs" icon="cube"/>
+										<tree-item label="Card" which="5 of diamonds" icon="cube"/>
+										<tree-item label="Card" which="8 of diamonds" icon="cube"/>
+										<tree-item label="Card" which="ace of hearts" icon="cube"/>
+										<tree-item label="Card" which="2 of hearts" icon="cube"/>
+										<tree-item label="Card" which="7 of spades" icon="cube"/>
+										<tree-item label="Card" which="jack of hearts" icon="cube"/>
+									</tree-item>
+									<tree-item label="DiscardPile" which="discards" icon="cube"/>
+								</tree-item>
+							</tree-item>
+						</tree-item>
+					</tree>
+				</stack>
+			</example>
+		</>
+	</>
+</spell-page>

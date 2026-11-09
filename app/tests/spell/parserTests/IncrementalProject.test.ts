@@ -246,7 +246,9 @@ function outcome(summarizeIt: () => SpellProjectSummary): SpellProjectSummary | 
  *   the ones parsed later out of JSX `{...}` included.
  */
 function expectPositions(project: P.IncrementalProject, where: string) {
-  for (const { path, parse } of project.files) {
+  for (const { path, parse: its } of project.files) {
+    // every file in these tests isn't alone, so it has parsed
+    const parse = its!
     const tokens = parse.match?.tokens ?? []
     const fresh = parse.parser.tokenizeRoot(parse.text)
     expect(positions(tokens), `${where}: ${path} token positions`).toEqual(positions(fresh ? [fresh] : []))

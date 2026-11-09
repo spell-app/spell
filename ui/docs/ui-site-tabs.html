@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Site tabs | Spell UI</title>
+    <meta
+      name="description"
+      content="Site tabs show the page&#39;s family as a row of tabs:  the parent page first, the page shown selected, each a link."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Site tabs">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-site-tabs%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Site tabs
+            <ui-header>Site tabs show the page&#39;s family as a row of tabs:  the parent page first, the page shown selected, each a link.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-a-page-s-family" label="A page's family" sticky="stack" collapsible dividing>
+                <ui-example description="`pages` is the side navigation's own list.  Site tabs find the page shown, its parent and the pages under the parent, and draw them as tabs:  the parent first, the page shown selected, each a link.">
+                  <ui-site-tabs
+                    current="#api"
+                    pages='[{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "Examples", "href": "#examples" }, { "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }]'
+                  ></ui-site-tabs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-the-parent-s-word" label="The parent's word" sticky="stack" collapsible dividing>
+                <ui-example description="A tab says its page's `tab`, or its `title` when it has none.  So the side navigation can say Button while its first tab says Usage;  here the parent has no `tab`, and its tab says its title.">
+                  <ui-site-tabs
+                    current="#overview"
+                    pages='[{ "title": "Overview", "href": "#overview", "pages": [{ "title": "Examples", "href": "#examples" }, { "title": "API", "href": "#api" }] }]'
+                  ></ui-site-tabs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-narrow" label="Narrow" sticky="stack" collapsible dividing>
+                <ui-example description="Where the tabs don't fit, they stay on one row and scroll sideways, the selected tab scrolled into sight.">
+                  <ui-site-tabs
+                    style="max-width: 12em"
+                    current="#theming"
+                    pages='[{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "Examples", "href": "#examples" }, { "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }]'
+                  ></ui-site-tabs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-no-family" label="No family" sticky="stack" collapsible dividing>
+                <ui-example description="A page with no pages under it, and that isn't under another, has no family:  nothing is drawn and it takes no room, `:state(empty)`.  So does a page whose address has a parameter.  Below, the shown page is alone.">
+                  <ui-site-tabs
+                    current="#alone"
+                    pages='[{ "title": "Alone", "href": "#alone" }]'
+                  ></ui-site-tabs>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Hand it the same `pages` you hand `<ui-site-nav>`, and put it above the page's content.
+                  - `pages`:  each page's `title` and `href`, its `pages` under it.  A parent page's `tab` is what its tab says, when not its `title`.
+                  - `current` says which page is shown, by its `href` or its `id`;  without it, the page at the browser's address.
+                  - A parent with no `href` only holds pages, so it has no tab, and a page whose address has a parameter (`/films/:film`) isn't one either.  A family of fewer than two tabs draws nothing.
+                  - Picking a tab goes there.  A site that shows its pages itself cancels `ui-navigating` and shows `event.detail.page`.  A middle click or Command-click opens a new tab, as any link does.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  document.querySelector("ui-site-tabs").addEventListener("ui-navigating", (event) => {
+                    event.preventDefault()
+                    showPage(event.detail.page)
+                  })
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Each tab is a link:  Tab moves between them, Enter goes there.  In a row that scrolls, focusing a tab scrolls it into sight.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The row is a `nav` landmark named `label`, else the family's parent page's title.  The selected tab is `aria-current="page"`.  Without a family nothing is drawn, so nothing is announced.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-tabs" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-tabs" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-tabs" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-tabs" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-site-tabs" only="states"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-site-tabs" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-site-tabs
+                  current="#api"
+                  pages='[{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "Examples", "href": "#examples" }, { "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }]'
+                ></ui-site-tabs>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

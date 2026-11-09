@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-84 families, 135 tags;  3 families in progress.
+85 families, 136 tags;  3 families in progress.
 
 ### Elements
 
@@ -350,6 +350,7 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Sides](docs/ui-sides.html) | `<ui-sides>` | Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side. | margin, padding, box model, spacing |
 |  | [Site nav](docs/ui-site-nav.html) | `<ui-site-nav>` | A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page. | site navigation, side navigation, sidebar menu, nav menu |
+|  | [Site tabs](docs/ui-site-tabs.html) | `<ui-site-tabs>` | Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link. | page tabs, section tabs, sub navigation, secondary navigation |
 |  | [Space](docs/ui-space.html) | `<ui-space>` | A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, it takes the room left in its row or column.  It has no look of its own. | spacer, gap, line break, br |
 |  | [Split Panel](docs/ui-split-panel.html) | `<ui-split-panel>` | A split panel lays its children out side by side or one above the other, with bars to resize them. | split view, split pane, resizable panes, panes |
 |  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |

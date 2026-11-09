@@ -53,7 +53,7 @@ export function FileTabs() {
         const file = known.get(each.path) ?? new File()
         file.path = each.path
         file.name = each.name
-        file.icon = fileIconFor(each.name)
+        file.icon = fileIconFor(each.path)
         // not saved beats a draft:  the dot, else the ring (epic `editor` I44)
         file.status = each.isDirty ? "changed" : drafts.includes(each.path) ? "drafted" : "saved"
         file.place = each.path === path ? "chosen" : "other"

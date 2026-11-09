@@ -132,6 +132,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
           ? language.parserMessage("spellx-tag-in-markup", { tag: element.tagName })
           : language.parserMessage("spellx-unknown-component", { tag: element.tagName, packs })
         match.data.error = SP.spellParser.createParseError(scope, [element], message)
+        // still drawn, by the name it has:  a pack that isn't loaded here may have it
+        match.data.error.data.drawnAnyway = true
       }
     }
     match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
@@ -140,7 +142,19 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       const message = SP.Language.of(scope).parserMessage("not-an-element", { tag: element.tagName })
       match.data.error = SP.spellParser.createParseError(scope, [element], message)
     }
+    SpellJSX.noteUnreadable(scope, match, element)
     return match
+  }
+
+  /** SIDE EFFECT:  an element whose tag holds something it couldn't read says so -- see `parseErrorsIn()`. */
+  static noteUnreadable(scope: P.Scope, match: P.Match, element: P.JSXElementToken): void {
+    if (!element.unreadable) return
+    const message = SP.Language.of(scope).parserMessage("unreadable-attribute", {
+      text: element.unreadable,
+      tag: element.tagName
+    })
+    const { data } = match as P.Match<P.MatchGroups, { error?: P.Match }>
+    data.error = SP.spellParser.createParseError(scope, [element], message)
   }
 
   /**
@@ -258,16 +272,13 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - `undefined`:  nobody has it;  a name with a dash (`ui-text`, `solitaire-card`) is then left as written, as a tag
    */
   static componentTagFor(scope: P.Scope, word: string): string | undefined {
-    if (!isBareComponentName(word)) {
-      return word.includes("-")
-        ? SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
-        : undefined
-    }
-    const type = scope.getType(SP.typeName(word))
+    // a view of several words is named with dashes:  `<task-list/>`, a page's own (epic `notebook` P10)
+    const type = word.includes("-") || isBareComponentName(word) ? scope.getType(SP.typeName(word)) : undefined
     if (type?.isA("View")) {
       const project = projectScopeOf(scope)
       if (project?.name) return elementTagFor(project.name, type.name)
     }
+    if (!isBareComponentName(word) && !word.includes("-")) return undefined
     return SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
   }
 
@@ -517,6 +528,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         // a `<for>` inside an element:  its lines' errors (I19)
         if (match.is(SpellJSX) && match.data.loop) errors.push(...(SP.Block.getParseErrors(match.data.loop) ?? []))
         below.push(...(match.data.attributes ?? []), ...(match.data.children ?? []))
+        // a child nothing could read:  half a tag, say (epic `notebook` I5)
+        errors.push(...(match.data.children ?? []).filter((child): child is P.Match => !!child?.is(ParseError)))
       }
       if (match.is(SpellJSXContent)) {
         if (match.data.error) errors.push(match.data.error)

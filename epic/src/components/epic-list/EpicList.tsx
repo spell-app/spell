@@ -35,7 +35,7 @@ import listCSS from "./EpicList.css?inline"
  * - within each, by title (A to Z, numbers as numbers) or newest first by when each was last worked on, as the page's
  *   `<epic-sort>` says (`epic-sort`);  remembered in this browser
  * - SAGA CHIPS above them (epic `epic-workflow` P15):  one per saga its cards name, in `sagas`' order, then No saga,
- *   each with its count;  a click shows only that saga's epics, by the state chips' rule (`StateFilter.nextShown()`);
+ *   each with its count;  a click shows only that saga's epics (`StateFilter.nextShown()`, its `narrow` rule);
  *   remembered in this browser, for every Epics page
  * - a card the docs runtime's state chips hide (`data-spell-hidden`) doesn't count either
  * - it NEVER moves or changes its cards (but their star, below):  one grid in its shadow root holds the headings and
@@ -236,11 +236,11 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
   // ## Behaviour
   ////////////////
 
-  /** A saga chip, clicked:  what shows next, by the state chips' rule;  remembered for every Epics page. */
+  /** A saga chip, clicked:  what shows next, by the `narrow` rule;  remembered for every Epics page. */
   @E.untracked
   private pickSaga(id: string) {
     const ids = this.chips.map((chip) => chip.id)
-    const next = StateFilter.nextShown(ids, [...this.shownSagas], id)
+    const next = StateFilter.nextShown(ids, [...this.shownSagas], id, "narrow")
     this.chosenSagas = next
     save(SAGAS_SHOWN_KEY, next)
   }

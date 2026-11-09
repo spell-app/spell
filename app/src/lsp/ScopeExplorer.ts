@@ -87,7 +87,7 @@ export class ScopeExplorer {
    * - What `yarn lsp:scopes --builtins` writes to spell-parser's `src/core/core.scopes.js`, for pages with no parser.
    * - That file is GENERATED, so its docs live in the table.
    * - `coreUri`:  core's `src/` folder, as a `file:` URI.
-   *   Given, each built-in template's file under it is written relative to it (`templates/Notebook.spell`),
+   *   Given, each built-in template's file under it is written relative to it (`templates/TwoSidedView.spell`),
    *   as the pack sits there:  so the committed file holds no checkout's own path.
    */
   exportBuiltIns(coreUri?: string): LSP.ScopePack {
@@ -587,9 +587,12 @@ export class ScopeExplorer {
     return LSP.scopePath("", "project", project.projectName ?? project.projectId)
   }
 
-  /** Path of `file`'s entry, in `project`. */
+  /**
+   * Path of `file`'s entry, in `project`:  by its path in the project, `Button/Usage.spellml`,
+   * as files in different folders can share a name.
+   */
   private static filePath(project: SP.SpellProject, file: SP.SpellFile): string {
-    return LSP.scopePath(ScopeExplorer.projectPath(project), "file", file.file ?? file.path)
+    return LSP.scopePath(ScopeExplorer.projectPath(project), "file", SP.SpellProject.sourceNameOf(file.path))
   }
 
   /** URI of the file entry `path` is below, if any. */
@@ -665,8 +668,8 @@ export class ScopeExplorer {
 
   /**
    * PascalCase name of the type statement `declaredBy` declares something on, e.g. `Card`, if any.
-   * - Else the type whose outline body it's in:  `- "suits" as one of clubs ...` under `a "card" is ... where:`
-   *   declares the suits on the card (epic `spanish` P11).
+   * - Else the type whose outline body it's in (epic `spanish` P11):
+   *   `- "suits" as one of clubs ...` under `a "card" is ... where:` declares the suits on the card.
    */
   private ownerOf(declaredBy: P.Match | undefined): string | undefined {
     const of =

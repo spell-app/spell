@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto"
 
 import { LoadOnce } from "spell/util/LoadOnce"
 import { ApiError, type ApiRequest } from "spell/util/fetching"
+import { FieldNames } from "spell/places/FieldNames"
 import { DEFAULT_CEILING } from "spell/places/PlaceQuery"
 import {
   PlaceError,
@@ -164,6 +165,10 @@ export class AirtablePlace extends WebPlace implements Place {
   private readonly writesTo = new Map<string, number>()
   /** Each table's records, by id and by `rec...`, as last seen. */
   private readonly records = new Map<string, RecordNames>()
+  /** Each collection's column names, by the program's. */
+  private readonly columnNames = new Map<string, FieldNames>()
+  /** The collections whose names have read the base's schema. */
+  private readonly namedFromSchema = new Set<string>()
   /** Each collection's rows as last read whole, as JSON by id:  what the next one's compared with. */
   private readonly lastRead = new Map<string, Map<string, { row: PlaceRow; json: string }>>()
   /** Each table's columns found to be read only, from a refusal. */
@@ -741,13 +746,24 @@ export class AirtablePlace extends WebPlace implements Place {
   /** The column `field` of `collection` is in:  the id column for a row's id, which has none without one. */
   private columnOf(collection: string, field: string): string | undefined {
     if (field === ID_FIELD) return this.idColumn
-    return this.collections[collection]?.fields?.[field] ?? field
+    return this.namesFor(collection).serverName(field)
   }
 
-  /** What the program calls `column` of `collection`. */
+  /** What the program calls `column` of `collection`:  what a line says, else by its words (`Cuisine` is `cuisine`). */
   private fieldNamed(collection: string, column: string): string {
-    const fields = this.collections[collection]?.fields ?? {}
-    return Object.keys(fields).find((field) => fields[field] === column) ?? column
+    return this.namesFor(collection).ourName(column)
+  }
+
+  /** `collection`'s column names:  what its lines say, then what it's read, and the base's schema as soon as it's known. */
+  private namesFor(collection: string): FieldNames {
+    let names = this.columnNames.get(collection)
+    if (!names) this.columnNames.set(collection, (names = new FieldNames(this.collections[collection]?.fields)))
+    const columns = this.knownSchema?.get(this.tableOf(collection))?.fields.keys()
+    if (columns && !this.namedFromSchema.has(collection)) {
+      this.namedFromSchema.add(collection)
+      names.note(columns)
+    }
+    return names
   }
 
   /** The columns the program's lines name. */
@@ -823,7 +839,7 @@ export type AirtablePlaceProps = {
   keys: PlaceKeys
   /** Airtable's address:  a test's stub's, in a test. */
   url?: string
-  /** Each collection's table and fields there, where they aren't called the same:  a program's lines say these (`withLines()`). */
+  /** Each collection's table, and the fields a program's lines name (`withLines()`):  any other column is matched by its words (`FieldNames`). */
   collections?: PlaceLines["collections"]
   /** The column holding each row's id.  Left out:  Airtable makes the ids, and a new row sent again can double. */
   idColumn?: string

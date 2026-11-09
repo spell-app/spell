@@ -26,6 +26,17 @@ describe("pollWhileVisible()", () => {
     expect(look).toHaveBeenCalledTimes(2)
   })
 
+  test("never keeps node running:  its timer is let go, on a schedule or once a day (epic `data` I37)", () => {
+    const interval = { unref: vi.fn() }
+    const timeout = { unref: vi.fn() }
+    vi.spyOn(globalThis, "setInterval").mockReturnValue(interval as unknown as ReturnType<typeof setInterval>)
+    vi.spyOn(globalThis, "setTimeout").mockReturnValue(timeout as unknown as ReturnType<typeof setTimeout>)
+    pollWhileVisible(30, () => {})
+    expect(interval.unref).toHaveBeenCalledTimes(1)
+    pollWhileVisible(0, () => {}, { at: { hour: 5, minute: 0 } })
+    expect(timeout.unref).toHaveBeenCalledTimes(1)
+  })
+
   test("asks nothing while the page is hidden, and looks as soon as it's back", async () => {
     pageIs("visible")
     const look = vi.fn()

@@ -163,6 +163,7 @@ export type NewOptions = GlobalOptions & {
  *   Left out:  English.
  * - `reports`:  `test` also sends how each test went (`TestsReport`) over IPC, for the lines its failures are on
  *   (epic `spanish` P25:  `spell translate`'s fix-ups)
+ * - `offline`:  no server is ever asked, each answer a failed connection -- see `noNetwork()` in `runProject.ts`
  */
 export type RunSpec = {
   mode: "run" | "test"
@@ -176,6 +177,7 @@ export type RunSpec = {
   seed?: number
   messages?: Record<string, string>
   reports?: boolean
+  offline?: boolean
 }
 
 /**
@@ -219,6 +221,8 @@ export type DeclaredAt = {
  * - `path`:  absolute path of the file it's in -- none if the whole parse crashed
  * - `line`, `column`:  where, from 1
  * - `severity`:  `"warning"` for a warning;  none for an error
+ * - `rule`:  the name of the lint rule that found it, e.g. `description-before-example`, printed after its message;
+ *   none for spell's own errors and warnings
  */
 export type Problem = {
   project: string
@@ -227,6 +231,7 @@ export type Problem = {
   column?: number
   message: string
   severity?: "warning"
+  rule?: string
 }
 
 ////////////////

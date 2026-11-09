@@ -9,6 +9,33 @@ export const SIGN_IN_MINUTES = 20
 /** How many wrong codes a request takes before it's refused for good:  a new one must be asked for. */
 export const CODE_TRIES = 5
 
+/**
+ * How many wrong passwords an account (or an email nobody has:  they read the same) takes before it has to wait.
+ * - Then `PASSWORD_WAIT_MINUTES`, every try refused, the right one too.
+ */
+export const PASSWORD_TRIES = 5
+
+/** How many wrong passwords one internet address takes, whoever it names:  more than an account's, for a household or an office. */
+export const PASSWORD_ADDRESS_TRIES = 20
+
+/** How long too many wrong passwords have to wait, in minutes. */
+export const PASSWORD_WAIT_MINUTES = 15
+
+/** A password's fewest characters:  the only rule about what's in one. */
+export const PASSWORD_LEAST = 8
+
+/** A password's most characters:  hashing is deliberately slow, so what it's handed stays small. */
+export const PASSWORD_MOST = 256
+
+/**
+ * How long a sign-in by emailed link or code counts as proof, in minutes:
+ * changing a password without the current one, which is how "forgot my password" works.
+ */
+export const PASSWORD_PROOF_MINUTES = 20
+
+/** How a device signed in, for what it's trusted to do afterwards. */
+export type SignInWay = "email" | "password" | "linked account"
+
 /** How long a device stays signed in, in days. */
 export const SESSION_DAYS = 30
 
@@ -37,7 +64,10 @@ export const SignInRefusals = [
   "used",
   "taken down",
   "not linked",
-  "linked elsewhere"
+  "linked elsewhere",
+  "wrong password",
+  "bad password",
+  "needs proof"
 ] as const
 /**
  * Why a sign-in was refused:
@@ -51,6 +81,10 @@ export const SignInRefusals = [
  * - `"not linked"`:  an atmosphere (Bluesky) account no Spell account here is linked to (epic `atmosphere` P19):
  *   the server is invite only, so they ask for an invite, sign in by email, and link it
  * - `"linked elsewhere"`:  linking an atmosphere account another Spell account here is linked to already
+ * - `"wrong password"`:  that email and password don't go together, or nobody has that email:  the same answer
+ * - `"bad password"`:  a new password too short or too long
+ * - `"needs proof"`:  changing a password takes the current one, or a sign-in by emailed link or code just now
+ * - `"too many tries"` also answers too many wrong passwords:  wait, or sign in by emailed link
  */
 export type SignInRefusal = (typeof SignInRefusals)[number]
 
@@ -108,6 +142,12 @@ export type Mailer = {
 export type SignInAccounts = {
   /** The account with this email;  `undefined` for none:  the server is invite only. */
   accountFor(email: string): Promise<string | undefined>
+  /**
+   * The account a typed name is, `ana@spell`, or an org's name for it, `ana@rs`;  `undefined` for none.
+   * - Only a password's sign-in takes one (epic `atmosphere` T64):  a link has to go to an email.
+   * - Left out:  only emails.
+   */
+  accountNamed?(name: string): Promise<string | undefined>
   /** Make an account for `email`, or find the one it has:  its address.  - throws if it can't */
   invite(email: string): Promise<string>
   /** Is the account `person` (`ana@spell`) taken down, so it can't sign in (epic `atmosphere` P6)?  Left out:  none is. */
@@ -167,10 +207,14 @@ export type AtProtoIdentities = {
 export type Session = {
   /** Their account's address, `ana@spell`. */
   person: string
-  /** The email it came by;  `""` for a sign-in by a linked atmosphere account (epic `atmosphere` P19). */
+  /** The email it came by;  `""` for a sign-in by a linked atmosphere account (epic `atmosphere` P19), or a typed name. */
   email: string
   /** When it ends, ms. */
   ends: number
+  /** How it signed in.  Left out:  a device signed in before passwords. */
+  way?: SignInWay
+  /** When it signed in, ms.  Left out as `way` is. */
+  at?: number
 }
 
 /** A device signed in now:  the cookie it's to keep, and who. */

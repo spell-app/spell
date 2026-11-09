@@ -1,0 +1,258 @@
+<spell-page "home" notebook>
+	<segment inverted padding="lg" align="center" appearance="vertical">
+		<header level="1" inverted>
+			Spell UI
+			<header>Beautiful, themeable, accessible components that load themselves on demand</>
+		</>
+		<divider spacer/>
+		<button size="huge" inverted link="/getting-started">Get Started</>
+		<button size="huge" inverted link="/components" appearance="basic">Browse Components</>
+	</>
+	<segment padding="lg" align="center" appearance="vertical basic">
+		<image src="/components/ui/images/devices.png" alt="" size="large" align="center"/>
+		<header level="2" id="design" align="center">Design Beautiful Pages Quickly</>
+		<markdown>
+			Fomantic UI has the best vocabulary of any widget set: `ui small primary basic icon button` reads
+			like a sentence. Spell UI keeps that vocabulary and rebuilds everything under it: shadow DOM,
+			cascade layers, OKLCH tokens, container and style queries, anchor positioning, `<dialog>` and
+			popover, with accessibility built in.
+		</>
+	</>
+
+	<!--
+		Stackable grids stack by the SCREEN here (the root's `stack-with="page"`), as Fomantic's stripes do.
+		Fomantic's `very relaxed` gutters are left out:  they overflow the page's 1em phone margin (Fomantic's
+		grids are `container`s).
+	-->
+	<segment padding="lg" appearance="vertical basic">
+		<grid stackable vertical-align="middle">
+			<column width="7">
+				<header level="2" id="concise-html">Concise HTML</>
+				<markdown>
+					Fomantic UI treats words and classes as exchangeable concepts. Spell UI makes the words
+					attributes: `<ui-button size="small" color="primary" appearance="basic">` renders `ui small basic primary button`
+					on a real `<button>` inside its shadow root.
+
+					Noun-first grammar, and the Types / Content / States / Variations taxonomy on every page. If
+					you know Fomantic, you know this. [How attributes become classes](/grammar).
+				</>
+			</>
+			<column width="9">
+				<example code>
+					<buttons width="3">
+						<button selected>One</button>
+						<button>Two</button>
+						<button>Three</button>
+					</buttons>
+				</example>
+			</>
+		</>
+		<divider/>
+		<grid stackable vertical-align="middle">
+			<column width="7">
+				<header level="2" id="any-framework">Any Framework, or None</>
+				<markdown>
+					One package of custom elements: rich data as JS properties, primitives as attributes, and
+					composed `ui-*` events. React, Vue, Svelte, Solid, Angular and plain HTML all use the same
+					tags. [The contract](/getting-started).
+				</>
+			</>
+			<column width="9">
+				<example code>
+					<dropdown multiple selection fluid placeholder="Skills" value="meteor ember" aria-label="Skills">
+						<item value="angular">Angular</item>
+						<item value="css">CSS</item>
+						<item value="ember">Ember</item>
+						<item value="html">HTML</item>
+						<item value="javascript">Javascript</item>
+						<item value="meteor">Meteor</item>
+						<item value="node">NodeJS</item>
+					</dropdown>
+				</example>
+			</>
+		</>
+		<divider/>
+		<grid stackable vertical-align="middle">
+			<column width="7">
+				<header level="2" id="accessible">Accessible by Default</>
+				<markdown>
+					Semantic shadow markup: a `<button>`, an `<input>`, a `<dialog>`, never a `<div>` where an
+					element exists. Keyboard patterns from the WAI-ARIA practices, focus management, reduced
+					motion, and form controls that join a native `<form>`.
+				</>
+			</>
+			<column width="9">
+				<example>
+					<checkbox label="I enjoy having fun"/>
+					<divider spacer/>
+					<checkbox appearance="slider" label="Receive weekly poodle newsletter"/>
+					<divider spacer/>
+					<checkbox appearance="toggle" label="Make my dog's profile public"/>
+				</example>
+			</>
+		</>
+	</>
+	<segment padding="lg" appearance="vertical basic">
+		<grid stackable columns="2" vertical-align="middle">
+			<column align="center">
+				<header level="2" icon id="theming"><image alt="" src="/components/ui/images/icons/theming.png"/> Unbelievable Theming</>
+				<markdown>
+					Every look is a token: `--ui-primary`, `--ui-radius`, `--ui-button-padding-inline`. Set one
+					on `:root`, an ancestor or the element itself. Spell's four themes are token sheets on top.
+
+					Pick a theme: the whole site restyles, these buttons too.
+				</>
+			</>
+			<column>
+				<theme-menu size="large"/>
+				<divider/>
+				<button>View</>
+				<button icon="shop" color="primary">Add to Cart</>
+				<button icon="save" color="secondary">Save for Later</>
+				<button labeled icon="star">Rate</>
+				<buttons>
+					<button selected>1</>
+					<button>2</>
+					<button>3</>
+				</>
+			</>
+		</>
+	</>
+	<segment padding="lg" appearance="vertical secondary">
+		<grid stackable columns="3" divided align="center">
+			<column>
+				<header level="2" icon id="tokens"><image alt="" src="/components/ui/images/icons/paint.png"/> Tokens, Not Variables <header>Light and dark in OKLCH</></>
+				<text paragraph>The one dogma: <text italic>everything arbitrary is a token</>, read live, no build step.</>
+				<button size="large" link="/theming">Theming Guide</>
+			</>
+			<column>
+				<header level="2" icon id="components"><image alt="" src="/components/ui/images/icons/book.png"/> 55+ Components <header>90+ tags</></>
+				<text paragraph>Build a whole site with one UI stack, including the functional side: calendar, slider, toast, flyout, form validation.</>
+				<button size="large" link="/components" color="primary">Browse UI</>
+			</>
+			<column>
+				<header level="2" icon id="tested"><image alt="" src="/components/ui/images/icons/lab.png"/> Tested <header>In a real browser</></>
+				<text paragraph>Every component has unit, accessibility and visual tests, and each form control a fallback test too, all run in Chromium, Firefox and WebKit.</>
+				<button size="large" link="https://github.com/spell-app/spell-ui">Visit GitHub</>
+			</>
+		</>
+	</>
+	<segment padding="lg" appearance="vertical basic">
+		<header level="2" icon align="center" id="breadth"><image alt="" src="/components/ui/images/icons/toolbox.png"/> Unbelievable Breadth</>
+		<markdown>
+			Not just buttons on a page: elements, collections, views, modules and behaviours, Fomantic's five
+			kinds, cover the gamut of interface design. A few of them, live:
+		</>
+		<grid stackable columns="3">
+			<column>
+				<header size="small" link="/menu">Menu</>
+				<menu direction="vertical">
+					<item selected>Inbox <label color="green">1</></>
+					<item>Trash <label>1</></>
+					<item>
+						<input appearance="transparent" icon="search" placeholder="Search mail..." aria-label="Search mail"/>
+					</>
+				</>
+				<menu appearance="secondary pointing" direction="vertical">
+					<item selected>Inbox</>
+					<item>Starred</>
+					<item>Trash</>
+				</>
+				<header size="small" link="/divider">Divider</>
+				<segment>
+					<grid columns="2" align="center">
+						<column>
+							<button>A</>
+						</>
+						<column>
+							<button color="teal">B</>
+						</>
+					</>
+					<divider direction="vertical">or</>
+				</>
+			</>
+			<column>
+				<header size="small" link="/card">Card</>
+				<card image="images/avatar2/large/rachel.png" heading="Rachel Maddow" meta="Pundit">
+					<extra>22 Friends · Joined in 2014</>
+				</>
+				<header size="small" link="/step">Step</>
+				<steps direction="vertical">
+					<step completed icon="truck" heading="Shipping" description="Choose your shipping options"/>
+					<step selected icon="credit card" heading="Billing" description="Enter billing information"/>
+					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
+				</>
+				<header size="small" link="/label">Label</>
+				<list>
+					<item><label color="red" empty appearance="circular"/> Bug</>
+					<item><label color="blue" empty appearance="circular"/> Enhancement</>
+					<item><label empty appearance="circular"/> Change Declined</>
+					<item><label color="yellow" empty appearance="circular"/> Off Topic</>
+					<item><label color="pink" empty appearance="circular"/> Interesting</>
+					<item><label color="green" empty appearance="circular"/> Discussion</>
+				</>
+				<header size="small" link="/segment">Segment</>
+				<segment appearance="stacked"/>
+				<segment appearance="raised"/>
+				<segment appearance="secondary"/>
+				<segment appearance="tertiary"/>
+				<segment attach="top"/>
+				<segment attach="both"/>
+				<segment attach="bottom"/>
+			</>
+			<column>
+				<header size="small" link="/input">Input</>
+				<input icon="search" icon-position="left" placeholder="Search..." aria-label="Search">
+					<button slot="action" color="teal">Search</>
+				</>
+				<divider spacer/>
+				<input labeled label="https://" icon="linkify" placeholder="mysite.com" aria-label="Site"/>
+				<divider spacer/>
+				<input labeled="right" placeholder="Enter categories" aria-label="Categories">
+					<label slot="label" tag>Add Tags</>
+				</>
+				<header size="small" link="/message">Message</>
+				<message dismissible>This site uses cookies</>
+				<message state="warning" heading="Looking for help?">
+					<list bulleted>
+						<item>Use our help center</>
+						<item>Check our FAQ</>
+					</>
+				</>
+				<header size="small" link="/checkbox">Checkbox</>
+				<checkbox label="I enjoy having fun"/>
+				<divider spacer/>
+				<checkbox appearance="slider" label="Receive weekly poodle newsletter"/>
+				<divider spacer/>
+				<checkbox appearance="toggle" label="Make my dog's profile public"/>
+			</>
+		</>
+	</>
+	<segment padding="lg" appearance="vertical basic">
+		<grid stackable columns="2" divided align="center">
+			<column>
+				<header level="2" icon id="responsive"><image alt="" src="/components/ui/images/icons/mobile.png"/> Responsively Designed</>
+				<text paragraph>Every size is an <text code>em</> of one token, <text code>--ui-font-size</>. Grids, cards and tables answer to their container's width, not only the viewport's.</>
+				<button size="large" link="/grid">Responsive Grids</>
+			</>
+			<column>
+				<header level="2" icon id="integrations"><image alt="" src="/components/ui/images/icons/heart.png"/> Partners with Libraries You Love</>
+				<text paragraph>Tested in <text bold>React 19, Vue 3.5, Svelte 5, Solid, Angular 20 and Preact 10</>: the same tags, properties and events in each.</>
+				<button size="large" link="/getting-started">See Integrations</>
+			</>
+		</>
+	</>
+	<segment padding="lg" align="center" appearance="vertical basic">
+		<header level="2" icon id="get-started"><image alt="" src="/components/ui/images/icons/rocket.png"/> Liberate Your Development</>
+		<text paragraph>Install it and learn the framework contract, see how attributes become classes, set tokens and themes, find an icon by name, or go straight to the components.</>
+		<list direction="horizontal" spacing="lg" appearance="link">
+			<item link="/getting-started" icon="flag">Getting started</>
+			<item link="/grammar" icon="language">Grammar</>
+			<item link="/theming" icon="palette">Theming</>
+			<item link="/icons" icon="icons">Icons</>
+			<item link="/components" icon="cubes">Components</>
+		</>
+		<divider spacer/>
+		<button size="large" labeled="right" icon="chevron right" link="/getting-started" color="primary">Get Started Now</>
+	</>
+</spell-page>

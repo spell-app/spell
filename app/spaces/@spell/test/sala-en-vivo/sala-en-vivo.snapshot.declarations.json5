@@ -14,6 +14,11 @@
       "type": "Receta",
       "superType": "View",
       "gender": "feminine",
+      "savedIn": {
+        "place": "recetario_familiar",
+        "placeType": "RecetarioFamiliar",
+        "collection": "recetas"
+      },
       "defined": "/SalaEnVivo.es.spell:830-1148"
     },
     {
@@ -25,6 +30,10 @@
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
+      "place": {
+        "name": "recetario_familiar",
+        "kind": "room"
+      },
       "defined": "/SalaEnVivo.es.spell:102-156"
     },
     {

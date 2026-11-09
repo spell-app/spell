@@ -118,7 +118,7 @@ export class SpellLanguageService {
   diagnostics(file: SP.SpellFile): Diagnostic[] {
     const top: Range = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }
     if (!file.isActive) {
-      const message = `Not parsed:  '${file.file}' isn't active in this project's .imports.json`
+      const message = `Not parsed:  '${SP.SpellProject.sourceNameOf(file.path)}' isn't active in this project's .imports.json`
       return [{ range: top, severity: DiagnosticSeverity.Information, source: "spell", message }]
     }
     const problem = file.project.parseError
@@ -1135,7 +1135,7 @@ export class SpellLanguageService {
   /** Markdown link to `match` in `file`, as `File.spell:12`. */
   private linkTo({ file, match }: LSP.FileMatch): string {
     const line = match.start === undefined ? 1 : this.positionAt(file, match.start).line + 1
-    return `[${file.file}:${line}](${this.addresses.uriFor(file)}#L${line})`
+    return `[${SP.SpellProject.sourceNameOf(file.path)}:${line}](${this.addresses.uriFor(file)}#L${line})`
   }
 
   /** Markdown link to `location`, as `linkTo()` writes one:  its file's name and line. */
@@ -1505,11 +1505,11 @@ export class SpellLanguageService {
     const { name, comment } = SpellLanguageService.COMPILED_TARGETS[target]
     if (target === "spell") return this.codeSpellOf(file)
     if (target === "spellx") return SpellLanguageService.spellxOf(file)
-    if (!file.match) return `${comment} ${file.file} hasn't been parsed`
+    if (!file.match) return `${comment} ${SP.SpellProject.sourceNameOf(file.path)} hasn't been parsed`
     const { writer } = SP.targetFor(name)
     return (
       SpellLanguageService.compileQuietly(file.match, writer) ??
-      `${comment} ${file.file} couldn't be compiled to ${name}`
+      `${comment} ${SP.SpellProject.sourceNameOf(file.path)} couldn't be compiled to ${name}`
     )
   }
 
@@ -1535,7 +1535,7 @@ export class SpellLanguageService {
     try {
       return SX.SpellxWriter.textOf(file)
     } catch (error) {
-      return `// ${file.file} couldn't be written as spellx:  ${(error as Error).message}`
+      return `// ${SP.SpellProject.sourceNameOf(file.path)} couldn't be written as spellx:  ${(error as Error).message}`
     }
   }
 
@@ -1543,29 +1543,20 @@ export class SpellLanguageService {
    * The code spell `file` means:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`, Q70);
    * a `.spell` file's own text.
    * - A drawing's bare component names as the parse took them (`<card>` => `<solitaire-card>`):
-   *   each element's match, by where it starts.
+   *   `SP.ComponentTags`, which the editor's code-spell tab and a notebook's Spell view read too (epic `notebook` P6).
    * - NEVER throws:  a file that can't be written says so, as a comment.
    */
   codeSpellOf(file: SP.SpellFile): string {
     const text = file.contents ?? ""
     if (file.form !== "spellx") return text
-    const tags = new Map<number, string>()
-    if (file.match) {
-      SpellLanguageService.walk(file.match, (match) => {
-        const [element] = match.matched
-        if (match.rule.name === "jsxElement" && element instanceof P.JSXElementToken && match.data.tagName) {
-          tags.set(element.start, match.data.tagName as string)
-        }
-      })
-    }
     try {
       return SX.CodeSpellWriter.write(text, {
         path: file.path,
         language: file.language,
-        componentTag: (word, start) => tags.get(start) ?? SP.ComponentPacks.tagFor(word, file.language.lang)
+        componentTag: SP.ComponentTags.of(file).componentTag
       })
     } catch (error) {
-      return `// ${file.file} couldn't be written as code spell:  ${(error as Error).message}`
+      return `// ${SP.SpellProject.sourceNameOf(file.path)} couldn't be written as code spell:  ${(error as Error).message}`
     }
   }
 
@@ -1588,7 +1579,7 @@ export class SpellLanguageService {
       project: project.projectId,
       files: project.spellFiles.map((it) => ({
         uri: this.addresses.uriFor(it),
-        file: it.file ?? it.path,
+        file: SP.SpellProject.sourceNameOf(it.path),
         errors: (it.match && SP.Block.getParseErrors(it.match)?.length) ?? 0
       })),
       problem: project.parseError,
@@ -1645,8 +1636,8 @@ export class SpellLanguageService {
   /**
    * Completions for keywords `words`, each with `detail`, e.g. `if` or `si`:
    * - A word with a written accent is offered WITH it, found by the word without it,
-   *   so `esta` and `está` are ONE suggestion, `está`, which typing `esta` finds first -- see
-   *   `LSP.SpellKeywords.completionSpelling()`.
+   *   so `esta` and `está` are ONE suggestion, `está`, which typing `esta` finds first.
+   *   SEE:  `LSP.SpellKeywords.completionSpelling()`.
    * - Why:  the editor accepts the suggestion on Enter, so `esta` must find `está` above a longer name like `estado`
    *   (epic `spanish` I7).
    */

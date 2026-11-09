@@ -338,8 +338,12 @@
     height: 0;
     padding-block: 0;
   }
+  /*
+   * the code button while its pane is open:  pressed IN, a deeper fill than at rest, on any frame's glass
+   * (a 6% tint didn't show on a dark theme's glass;  epic `notebook` P9)
+   */
   :host(:state(open)) .frame > [part~="toggle"]::part(button) {
-    background: color-mix(in oklab, var(--ui-text-color) 6%, var(--_ui-example-toggle-background));
+    background: color-mix(in oklab, var(--ui-text-color) 18%, var(--_ui-example-toggle-background));
     box-shadow:
       inset 0 1px 2px oklch(0 0 0 / 0.18),
       0 0 0 1px var(--ui-border-color);

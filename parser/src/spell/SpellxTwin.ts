@@ -1,3 +1,4 @@
+import { withoutAccents } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
@@ -65,9 +66,11 @@ export class SpellxTwin {
     const tokenizer = parser.tokenizer
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     const language = parser.language ?? SP.Language.default
-    // its description is comments ending its line:  left out, as a line's comment can't be parsed with it (epic `language` T59)
+    // its description is comments ending its line:  left out, as a line's comment can't be parsed with it
+    // (epic `language` T59)
     // with the block under it, so a tag that opens one ends in its `:`, as its line does when it's parsed:
-    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none (epic `language` T83)
+    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none
+    // (epic `language` T83)
     const twinText = (line: P.LineToken, next?: P.Token) =>
       SpellxTwin.for(language, parser, line, next)
         ?.line.tokens.filter((token) => !(token instanceof P.CommentToken))
@@ -159,11 +162,6 @@ export class SpellxTwin {
         const twin = this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"), riders)
         return riders.length ? { ...twin, riders: riders.length } : twin
       }
-      case "start":
-        return {
-          line: new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.start) }),
-          takesNextItem: false
-        }
       default:
         return this.skipped()
     }
@@ -177,6 +175,7 @@ export class SpellxTwin {
    * A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body.
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
+   * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
    */
   private template(): SpellxTwinLine {
     const regrouped =
@@ -184,7 +183,7 @@ export class SpellxTwin {
     if (regrouped)
       return new SpellxTwin(this.language, this.spell, this.words, this.line, this.head, regrouped).template()
     const { kind } = this.tag
-    if (kind === "notebook") return this.notebook()
+    if (this.tag.drawsBody) return this.drawnPage()
     const singleton = kind === "page" || kind === "app" || kind === "site"
     const shape =
       kind === "site" && this.attribute("at")
@@ -202,19 +201,30 @@ export class SpellxTwin {
     const flags = Object.entries(this.words.viewFlags)
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
       .map(([, line]) => [this.bullet(), ...this.expand(line)])
-    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags])
+    const locked = kind === "page" && this.isLocked ? [[this.bullet(), ...this.expand(this.words.pageLocked)]] : []
+    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked])
+  }
+
+  /** Is the tag `locked`, `<spell-page "x" locked>`? */
+  private get isLocked(): boolean {
+    return this.tag.attributes.some((attribute) => attribute.name === "locked")
   }
 
   /**
-   * A notebook (epic `elemental-spell` P16):  a page, `counter notebook is a notebook :`, its body a drawing.
+   * A page that draws its body, as it has no `<draw>` of its own
+   * (`SP.SpellxTag.drawsBody`;  epic `elemental-spell` P16, `notebook` P1, P2).
+   * - Its line is `counter notebook is a page :`, and its body is its drawing.
    * - Its members stay its members (`<property>`, `<action>` ...).
-   * - Everything else is its content's drawing, `- to draw its content :`, in order:
+   * - Everything else is its drawing, `- to draw it :`, in order:
    *   - markup, `<section>`, `<example "one counter">`, as written
-   *   - each run of prose as a `<markdown>` block, a new block at each `##` heading:  a section of the page
-   * - `locked`:  a line, `- its lock is locked`.
-   * - Its own templates aren't in its block:  the tokenizer lifted them out, to after it (`liftNotebooks()`).
+   *   - each run of prose as a `<markdown>` block
+   * - Its sections draw as the docs pages' do, sticky and foldable (epic `notebook` P3, J1):
+   *   - each `##` heading and what follows it, a `<section>` the twin makes:  see `markdownLines()`, `gatherSections()`
+   *   - each `<section label="...">` written at its top level, with the same look:  see `withSectionLook()`
+   * - `locked`:  a line, `- its lock is "locked"`.
+   * - Its own templates aren't in its block:  the tokenizer lifted them out, to before it (`liftPageTemplates()`).
    */
-  private notebook(): SpellxTwinLine {
+  private drawnPage(): SpellxTwinLine {
     const members: Array<P.LineToken | P.BlockToken> = []
     const drawing: Array<P.LineToken | P.BlockToken> = []
     let prose: Array<SP.SpellxProseToken | null> = []
@@ -243,7 +253,9 @@ export class SpellxTwin {
       const isCloser = first instanceof SP.SpellxCloserToken && item.tokens.length === 1
       const isMember =
         (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
-        (first instanceof SP.SpellxProseToken && !!first.note)
+        (first instanceof SP.SpellxProseToken && !!first.note) ||
+        // its stories, `<spell-stories>`, as `withStoriesAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
+        (first instanceof P.JSXElementToken && first.tagName === STORIES && item.tokens.length === 1)
       // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
       if (isCloser) {
         if (last === members) members.push(item)
@@ -253,14 +265,15 @@ export class SpellxTwin {
       last.push(item)
     }
     endProse()
+    this.withSectionLook(drawing)
+    this.gatherSections(drawing)
     const indent = this.block?.indent ?? (this.line.indent ?? 0) + 1
     const lineOf = (tokens: P.Token[]) =>
       new P.LineToken({ start: this.head.start, line: this.head.line, ch: this.head.ch, indent, tokens })
     const items: Array<P.LineToken | P.BlockToken> = [...members]
-    if (this.tag.attributes.some((attribute) => attribute.name === "locked"))
-      items.push(lineOf([this.bullet(), ...this.expand(this.words.notebookLocked)]))
+    if (this.isLocked) items.push(lineOf([this.bullet(), ...this.expand(this.words.pageLocked)]))
     if (drawing.length) {
-      items.push(lineOf([this.bullet(), ...this.expand(this.words.notebookContent)]))
+      items.push(lineOf([this.bullet(), ...this.expand(this.words.draw)]))
       SpellxTwin.joinMarkup(drawing)
       const [first] = drawing
       items.push(
@@ -287,13 +300,9 @@ export class SpellxTwin {
    * - SIDE EFFECT:  changes `lines` in place.
    */
   private static joinMarkup(lines: Array<P.LineToken | P.BlockToken>) {
-    const isMarkup = (item: P.Token | undefined): item is P.LineToken =>
-      item instanceof P.LineToken &&
-      item.tokens.length > 0 &&
-      item.tokens.every((token) => token instanceof P.JSXElementToken || token instanceof P.JSXFragmentToken)
+    const isMarkup = isMarkupLine
     // a comment line between two lines of markup (`<!-- ... -->`, `//`) is part of the run, and draws nothing
-    const isComment = (item: P.Token | undefined): boolean =>
-      item instanceof P.LineToken && item.tokens.length === 1 && item.tokens[0] instanceof P.CommentToken
+    const isComment = isCommentLine
     for (let index = 0; index < lines.length; index++) {
       let end = index
       while (isMarkup(lines[end])) {
@@ -304,11 +313,7 @@ export class SpellxTwin {
       }
       if (end - index < 2) continue
       const run = (lines.slice(index, end) as P.LineToken[]).filter((line) => !isComment(line))
-      const children = run.flatMap((line) =>
-        line.tokens.flatMap((token) =>
-          token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
-        )
-      )
+      const children = run.flatMap((line) => line.tokens.flatMap(childrenOf))
       const [first] = run
       const fragment = new P.JSXFragmentToken({ start: first!.start, raw: "", children, isImplicit: true })
       lines.splice(index, end - index, new P.LineToken({ ...first!.record, tokens: [fragment] }))
@@ -316,38 +321,178 @@ export class SpellxTwin {
   }
 
   /**
-   * A run of a notebook's `prose` as `<markdown>` blocks, a line each:  a new one at each `##` heading, so each
-   * section of the page starts with its own (`markdown_block` draws them).
+   * A run of a drawn page's `prose` as `<markdown>` blocks, a line each:  a new one at each `##` heading.
    * - Each block stands where its first line is, its text the lines as written, less their indent.
+   * - A `##` heading's run is a SECTION of the page (epic `notebook` P3, J1):
+   *   a `<section>` labelled with the heading, holding the rest of the run's block (`sectionFor()`).
+   *   - Its heading isn't in the block too:  the section's title shows it.
+   *   - `gatherSections()` then moves the markup after it into it.
    */
   private markdownLines(prose: Array<SP.SpellxProseToken | null>): P.LineToken[] {
     const runs: Array<Array<SP.SpellxProseToken | null>> = []
     for (const token of prose) {
-      if (!runs.length || (token && /^##\s/.test(`${token.value}`))) runs.push([])
+      if (!runs.length || (token && HEADING.test(`${token.value}`))) runs.push([])
       runs.at(-1)!.push(token)
     }
+    const indent = (this.block?.indent ?? 1) + 1
     return runs.flatMap((run) => {
       while (run.length && !run.at(-1)) run.pop()
       const [first] = run
       if (!first) return []
-      // each line as written, less the indent its run's first line has:  a nested list stays nested
-      const indentOf = (token: SP.SpellxProseToken) => "  ".repeat(Math.max(0, (token.ch ?? 0) - (first.ch ?? 0)))
-      const text = run.map((token) => (token ? indentOf(token) + `${token.value}` : "")).join("\n")
-      const end = run.at(-1)!.end
-      const element = new P.JSXElementToken({
-        tagName: MARKDOWN,
-        start: first.start,
-        raw: text,
-        children: [
-          new P.JSXTextToken({ value: text, raw: text, start: first.start }) as unknown as P.JSXElementToken,
-          new P.JSXEndTagToken({ raw: `</${MARKDOWN}>`, tagName: MARKDOWN, start: end }) as unknown as P.JSXElementToken
-        ]
-      })
-      const indent = this.block?.indent ?? 1
-      return [
-        new P.LineToken({ start: first.start, line: first.line, ch: first.ch, indent: indent + 1, tokens: [element] })
+      const lineOf = (token: P.Token) =>
+        new P.LineToken({ start: first.start, line: first.line, ch: first.ch, indent, tokens: [token] })
+      const heading = HEADING.exec(`${first.value}`)
+      if (!heading) return [lineOf(SpellxTwin.markdownOf(run))]
+      // the rest of its run:  from its first line after the heading with text
+      const rest = run.slice(1)
+      while (rest.length && !rest[0]) rest.shift()
+      const block = rest.length ? [SpellxTwin.markdownOf(rest)] : []
+      return [lineOf(this.sectionFor(heading[1]!.trim(), first, block))]
+    })
+  }
+
+  /**
+   * `run`, lines of prose, as ONE `<markdown>` block standing where its first line is.
+   * - Its line and column are its first line's:  so what it draws is marked as written there, as a tag is
+   *   (`P.SourceMarks`), and the editor can pick it, move it and delete it (epic `notebook` P5).
+   */
+  private static markdownOf(run: Array<SP.SpellxProseToken | null>): P.JSXElementToken {
+    const first = run[0]!
+    // each line as written, less the indent its run's first line has:  a nested list stays nested
+    const indentOf = (token: SP.SpellxProseToken) => "  ".repeat(Math.max(0, (token.ch ?? 0) - (first.ch ?? 0)))
+    const text = run.map((token) => (token ? indentOf(token) + `${token.value}` : "")).join("\n")
+    const end = run.at(-1)!.end
+    return new P.JSXElementToken({
+      tagName: MARKDOWN,
+      start: first.start,
+      line: first.line,
+      ch: first.ch,
+      raw: text,
+      children: [
+        new P.JSXTextToken({ value: text, raw: text, start: first.start }) as unknown as P.JSXElementToken,
+        new P.JSXEndTagToken({ raw: `</${MARKDOWN}>`, tagName: MARKDOWN, start: end }) as unknown as P.JSXElementToken
       ]
     })
+  }
+
+  ////////////////
+  // ## A drawn page's sections
+  ////////////////
+
+  /**
+   * The section a `##` heading starts, `heading` its text, holding `children`:
+   * `<section label="Try it" sticky="stack" collapsible dividing level="2">`,
+   * in the language's words (`SP.SpellxTwinWords.pageSection`).
+   * - Its own tokens stand at the heading (`at`), with no text of their own in the file:  `isSynthetic()`.
+   *   So its source mark is the heading's line;  each child keeps its own.
+   * - Its label is the heading as written, but:
+   *   - its `[`s and `]`s doubled:  an attribute's `[name]` is a fill-in
+   *   - its `"`s curly, `“...”`:  markup's attribute text has no escape for its own quote
+   */
+  private sectionFor(heading: string, at: P.Token, children: P.Token[]): P.JSXElementToken {
+    const { tag, label } = this.words.pageSection
+    const text = heading
+      .replace(/[[\]]/g, "$&$&")
+      .replace(/"([^"]*)"/g, "“$1”")
+      .replace(/"/g, "”")
+    const quoted = `"${text}"`
+    const closer = new P.JSXEndTagToken({ raw: `</${tag}>`, tagName: tag, start: at.end })
+    const section = new P.JSXElementToken({
+      tagName: tag,
+      start: at.start,
+      line: at.line,
+      ch: at.ch,
+      raw: "",
+      attributes: [SpellxTwin.attributeAt(at.start, label, quoted), ...this.sectionLook(at.start)],
+      children: [...children, closer] as P.JSXElementToken[],
+      synthetic: true
+    } as P.JSXElementTokenProps)
+    SECTIONS_MADE.add(section)
+    return section
+  }
+
+  /** The section look's attributes, each standing at `start`, but those `said` already. */
+  private sectionLook(start: number, said: ReadonlySet<string> = new Set()): P.JSXAttributeToken[] {
+    return Object.entries(this.words.pageSection.defaults)
+      .filter(([name]) => !said.has(name))
+      .map(([name, value]) => SpellxTwin.attributeAt(start, name, value === true ? undefined : `"${value}"`))
+  }
+
+  /**
+   * `drawing` with each section a `##` heading started (`sectionFor()`) holding the markup after it:
+   * its elements, `<example>`s and comments, up to the next heading, or the drawing's end.
+   * - It ends early, before anything that can't be an element's child:  a line of code, a block.
+   * - And before the next section, a `##` heading's or a `<section label="...">` written at the top level:
+   *   markup on lines one after another is one line, so a line may be split there.
+   * - Comments in it are left out, as they draw nothing;  its closer moves to the end of the last element it takes.
+   * - SIDE EFFECT:  changes `drawing` in place.
+   */
+  private gatherSections(drawing: Array<P.LineToken | P.BlockToken>) {
+    const startsSection = (token: P.Token) => SECTIONS_MADE.has(token) || this.isTopSection(token)
+    for (let index = 0; index < drawing.length; index++) {
+      const section = onlyTokenOf(drawing[index])
+      if (!(section instanceof P.JSXElementToken) || !SECTIONS_MADE.has(section)) continue
+      const children = section.record.children as P.Token[]
+      const closer = children.pop()!
+      let end = index + 1
+      for (; end < drawing.length; end++) {
+        const item = drawing[end]
+        if (isCommentLine(item)) continue
+        if (!isMarkupLine(item)) break
+        const elements = item.tokens.flatMap(childrenOf)
+        const next = elements.findIndex(startsSection)
+        children.push(...elements.slice(0, next < 0 ? undefined : next))
+        if (next < 0) continue
+        // the next section starts on this line:  what's before it is this one's, the rest a line of its own
+        if (next > 0) drawing[end] = lineOfElements(item, elements.slice(next))
+        break
+      }
+      // comments at its end are left after it
+      while (end > index + 1 && isCommentLine(drawing[end - 1])) end--
+      const last = children.at(-1)
+      if (last) closer.record.start = last.end
+      children.push(closer)
+      drawing.splice(index + 1, end - index - 1)
+    }
+  }
+
+  /**
+   * `drawing` with each `<section label="...">` written at its top level given the docs pages' look,
+   * as a `##` heading's section has (`sectionFor()`):
+   * each of `sticky="stack" collapsible dividing level="2"` it doesn't say.
+   * - Only a labelled section, and only at the top:  a section inside an example, or with no title, is as written.
+   * - Each a copy of the file's element, its added attributes standing at its start (`isSynthetic()`).
+   * - SIDE EFFECT:  changes `drawing` in place.
+   */
+  private withSectionLook(drawing: Array<P.LineToken | P.BlockToken>) {
+    const withLook = (token: P.Token): P.Token => {
+      if (token instanceof P.JSXFragmentToken && token.isImplicit)
+        return new P.JSXFragmentToken({ ...token.record, children: token.children?.map(withLook) })
+      if (!this.isTopSection(token)) return token
+      const added = this.sectionLook(token.start, new Set(token.attributes?.map((attribute) => attribute.name)))
+      if (!added.length) return token
+      return new P.JSXElementToken({ ...token.record, attributes: [...(token.attributes ?? []), ...added] })
+    }
+    for (const [index, item] of drawing.entries()) {
+      if (isMarkupLine(item)) drawing[index] = new P.LineToken({ ...item.record, tokens: item.tokens.map(withLook) })
+    }
+  }
+
+  /** Is `token` a `<section label="...">` written in the file, in the language's word for it? */
+  private isTopSection(token: P.Token | undefined): token is P.JSXElementToken {
+    const { tag, label } = this.words.pageSection
+    return (
+      token instanceof P.JSXElementToken &&
+      !SECTIONS_MADE.has(token) &&
+      withoutAccents(token.tagName) === tag &&
+      !!token.attributes?.some((attribute) => attribute.name === label)
+    )
+  }
+
+  /** An attribute the twin adds, `name="value"` or bare `name`, standing at `start` with no text of its own. */
+  private static attributeAt(start: number, name: string, quoted?: string): P.JSXAttributeToken {
+    const value = quoted === undefined ? undefined : new P.TextToken({ value: quoted, raw: quoted, start })
+    return new P.JSXAttributeToken({ name, start, value, raw: "", synthetic: true } as P.JSXAttributeTokenProps)
   }
 
   /**
@@ -516,6 +661,8 @@ export class SpellxTwin {
           this.expand(
             [
               this.attribute("title") ? words.sitePageTitled : words.sitePage,
+              this.attribute("tab") ? words.sitePageTab : "",
+              this.attribute("tags") ? words.sitePageTags : "",
               // the state is a word of the line, not a text:  `state="old"` is `, old`
               this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
               this.attribute("picture") ? words.sitePagePicture : "",
@@ -549,7 +696,8 @@ export class SpellxTwin {
    * A menu, ONE line naming its actions (Q34, Q41).
    * - `<menu "game menu">` holding `<action "deal" />`, `<action "-" />` and `<action "undo" />`
    *   is `its "game menu" is a menu of "deal" , "-" and "undo"`.
-   * - A `<menu "file menu" />` inside it is a sub-menu;  `title="File"` its title, `titled "File"` (epic `language` P19).
+   * - A `<menu "file menu" />` inside it is a sub-menu (epic `language` P19):
+   *   `title="File"` its title, `titled "File"`.
    * - `<menu "more examples" for-each={its examples} action="open example" />`:  filled from a list (Q21).
    * - Its block is the line's:  nothing left to parse under it.
    * - Its `description=` is its docstring, as every member's is.
@@ -758,8 +906,8 @@ export class SpellxTwin {
   ////////////////
 
   /**
-   * The tokens of twin `shape`:  its words the language's own (synthetic), its slots the tag's -- see
-   * `SP.SpellxTwinWords`.
+   * The tokens of twin `shape`:  its words the language's own (synthetic), its slots the tag's.
+   * - SEE:  `SP.SpellxTwinWords`.
    * - `slots`:  more slots, e.g. an alias's `{alias}`, a parameter's `{param}`.
    * - A slot with nothing for it gives nothing:  the line then fails to parse, saying so.
    */
@@ -961,8 +1109,48 @@ function spaceAfter(tokens: P.Token[]) {
   if (last && !last.whitespace) last.record.whitespace = " "
 }
 
-/** The tag of a run of a notebook's prose, drawn as markdown:  `markdown_block`'s. */
+/** The tag of a run of a drawn page's prose, drawn as markdown:  `markdown_block`'s. */
 const MARKDOWN = "markdown"
+
+/** A `##` heading, starting a drawn page's section:  its text. */
+const HEADING = /^##\s+(.*)$/
+
+/** The sections the twin made for `##` headings (`sectionFor()`), apart from those written as tags. */
+const SECTIONS_MADE = new WeakSet<P.Token>()
+
+/** Is `item` a line holding only markup:  elements, fragments? */
+function isMarkupLine(item: P.Token | undefined): item is P.LineToken {
+  return (
+    item instanceof P.LineToken &&
+    item.tokens.length > 0 &&
+    item.tokens.every((token) => token instanceof P.JSXElementToken || token instanceof P.JSXFragmentToken)
+  )
+}
+
+/** Is `item` a line holding only a comment (`<!-- ... -->`, `//`):  it draws nothing. */
+function isCommentLine(item: P.Token | undefined): boolean {
+  return item instanceof P.LineToken && item.tokens.length === 1 && item.tokens[0] instanceof P.CommentToken
+}
+
+/** The one token of `item`, a line of one token. */
+function onlyTokenOf(item: P.Token | undefined): P.Token | undefined {
+  return item instanceof P.LineToken && item.tokens.length === 1 ? item.tokens[0] : undefined
+}
+
+/** A line in `line`'s place holding `elements`, the end of its markup:  one element, or an implicit fragment. */
+function lineOfElements(line: P.LineToken, elements: P.Token[]): P.LineToken {
+  const [first] = elements
+  const token =
+    elements.length === 1
+      ? first!
+      : new P.JSXFragmentToken({ start: first!.start, raw: "", children: elements, isImplicit: true })
+  return new P.LineToken({ ...line.record, start: first!.start, tokens: [token] })
+}
+
+/** `token` as children of what holds it:  an implicit fragment's children, else itself. */
+function childrenOf(token: P.Token): P.Token[] {
+  return token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
+}
 
 /** A page's stories' tag in code spell, `<stories>`:  `STORIES_TAG` (the rules' own;  spellx doesn't import them). */
 const STORIES = "stories"

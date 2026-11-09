@@ -11,6 +11,11 @@
     {
       "type": "Listing",
       "superType": "Thing",
+      "savedIn": {
+        "place": "published_sheet",
+        "placeType": "PublishedSheet",
+        "collection": "listings"
+      },
       "defined": "/PicnicLetter.api.spell:569-674"
     },
     {
@@ -41,6 +46,11 @@
     {
       "type": "Message",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_inbox",
+        "placeType": "MyInbox",
+        "collection": "messages"
+      },
       "defined": "/PicnicLetter.api.spell:839-932"
     },
     {
@@ -71,11 +81,32 @@
     {
       "type": "PublishedSheet",
       "superType": "Place",
+      "place": {
+        "name": "published_sheet",
+        "kind": "data folder",
+        "at": "/api/places/spaces/picnic@rs/sheet",
+        "details": {
+          "checkedEvery": 30,
+          "collections": {
+            "listings": {
+              "at": "volunteers"
+            }
+          }
+        }
+      },
       "defined": "/PicnicLetter.api.spell:451-567"
     },
     {
       "type": "MyInbox",
       "superType": "Place",
+      "place": {
+        "name": "my_inbox",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@rs/__inbox",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/PicnicLetter.api.spell:765-837"
     },
     {

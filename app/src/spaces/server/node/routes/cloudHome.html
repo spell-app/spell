@@ -1,8 +1,10 @@
 <!doctype html>
 <!--
-  The cloud's home pages (epic `atmosphere` T59, `SpellCloud`):  one file, for two addresses.
+  The cloud's home pages (epic `atmosphere` T59, T62, `SpellCloud`):  one file, for two addresses.
   - `/`:  the spaces home, the spaces the person asking may read
   - `/@willzalone`:  an org's home, its programs and its other spaces
+  - The top bar is the org programs' (`OrgAdmin`'s, `{the sign in menu}`):  who's signed in on the right, as a drop-down.
+    - `cloudSignIn.html` draws the same bar, with nothing on its right.
   - What it lists comes from `/api/cloud/...`, which answers only what the person asking may read (`CloudHomes`).
     - Asked from the page, so a person arriving by another site's link is still signed in here:
       the browser leaves the cookie off the page itself, but not off the page's own requests.
@@ -13,6 +15,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Spell</title>
+    <link rel="icon" href="/element/favicon/favicon.svg" />
     <script type="module" src="/element/spell-ui.js"></script>
     <style>
       :root {
@@ -20,27 +23,153 @@
       }
       body {
         margin: 0;
-        color: CanvasText;
+        color: var(--ui-text-color, CanvasText);
         background: var(--ui-background, Canvas);
         font-family: var(--ui-font-family, system-ui, sans-serif);
       }
-      /* Its right slot has an inset of its own:  the two sides end up the same 15px in. */
+
+      /* The top bar:  a rule below it, the page's 16px gutter at each end (its right slot adds 4px of its own). */
       .top-bar {
-        padding-inline: 15px 11px;
         padding-block: 5px;
+        padding-inline: 16px 12px;
         border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color, GrayText);
       }
+      .top-bar::part(toolbar) {
+        min-height: 40px;
+      }
+      .top-bar::part(title) {
+        flex: 0 1 auto;
+        gap: 6px;
+      }
+      .top-bar::part(right) {
+        flex: none;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: none;
+        color: inherit;
+        text-decoration: none;
+        img {
+          width: 24px;
+          height: 24px;
+        }
+      }
+      .crumb {
+        flex: none;
+        color: var(--ui-text-muted, GrayText);
+      }
+      /* An org's name gives way first on a narrow page:  `<ui-text>` has no box of its own to do it. */
+      .place {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Who's signed in:  a long address gives way before anything else in the bar does. */
+      .person::part(button) {
+        max-width: 40vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .person-panel {
+        min-width: 16em;
+      }
+
+      /* The page's one column. */
       main {
-        max-width: 40em;
-        padding: 1em 15px 3em;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: calc(52em + 32px);
+        margin-inline: auto;
+        padding: 40px 16px 64px;
+        &.org {
+          max-width: calc(68em + 32px);
+        }
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.75em;
+        line-height: 1.2;
+        font-weight: var(--ui-font-weight-bold, 700);
+      }
+      .lead {
+        margin: 0;
+        color: var(--ui-text-muted, GrayText);
+      }
+      section {
+        margin-block-start: 32px;
       }
       h2 {
-        font-size: 1em;
-        margin-block: 1.5em 0.5em;
+        margin: 0 0 12px;
+        font-size: 0.875em;
+        font-weight: var(--ui-font-weight-semibold, 600);
+        color: var(--ui-text-muted, GrayText);
       }
-      .note {
-        opacity: 0.7;
+
+      /* The cards:  the same 1em between them both ways, the gaps at the ends taken back by the group. */
+      ui-cards {
+        --ui-cards-wide-spacing: 0.5em;
+        --ui-cards-narrow-spacing: 0.5em;
+        --ui-cards-stackable-spacing: 0.5em;
+        --ui-cards-row-spacing: 1em;
       }
+      .tile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        min-height: 44px;
+        min-width: 0;
+        .words {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+      }
+      .program {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding-block: 18px;
+      }
+      .badge {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--ui-radius, 6px);
+        color: var(--ui-primary-text, LinkText);
+        background: color-mix(in oklch, var(--ui-primary, LinkText) 14%, transparent);
+        font-weight: var(--ui-font-weight-bold, 700);
+        font-size: 1.125em;
+      }
+      .badge ui-icon {
+        --ui-icon-width: auto;
+        --ui-icon-distance: 0;
+      }
+
+      /* Nothing to list yet. */
+      .empty {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        margin-block-start: 32px;
+        padding: 40px 24px;
+        border: var(--ui-border-width, 1px) dashed var(--ui-border-color, GrayText);
+        border-radius: var(--ui-radius, 6px);
+        color: var(--ui-text-muted, GrayText);
+        text-align: center;
+        p {
+          margin: 0;
+          max-width: 28em;
+        }
+      }
+
+      /* Last, so it beats the display of anything above that can be hidden. */
       [hidden] {
         display: none;
       }
@@ -49,56 +178,145 @@
   <body>
     <ui-root>
       <ui-toolbar class="top-bar" aria-label="Spell">
-        <ui-text id="title" slot="title" size="large">Spell</ui-text>
+        <a slot="title" class="brand" href="/" title="Every space you can read">
+          <img src="/element/favicon/favicon.svg" alt="" />
+          <ui-text size="large">Spell</ui-text>
+        </a>
+        <ui-icon id="crumb" class="crumb" slot="title" name="chevron right" hidden></ui-icon>
+        <span id="place" class="place" slot="title" hidden><ui-text id="title" size="large"></ui-text></span>
         <ui-stack id="who" slot="right" direction="horizontal" align="center"></ui-stack>
       </ui-toolbar>
-      <main>
+      <main id="page">
+        <h1 id="heading"></h1>
+        <p id="lead" class="lead"></p>
         <section id="programs-section" hidden>
           <h2>Programs</h2>
-          <ui-list id="programs" divided spacing="lg"></ui-list>
+          <ui-cards id="programs" columns="4" doubling stack-with="page"></ui-cards>
         </section>
         <section id="spaces-section" hidden>
           <h2 id="spaces-title">Spaces</h2>
-          <ui-list id="spaces" divided spacing="lg"></ui-list>
+          <ui-cards id="spaces" columns="2" stackable stack-with="page"></ui-cards>
         </section>
-        <p id="empty" class="note" hidden></p>
-        <p id="problem" role="alert" hidden></p>
+        <div id="empty" class="empty" hidden>
+          <ui-icon name="folder open outline" size="big"></ui-icon>
+          <p id="empty-words"></p>
+          <ui-button id="empty-sign-in" link="/sign-in" hidden>Sign in</ui-button>
+        </div>
+        <ui-message id="problem" color="red" role="alert" hidden></ui-message>
       </main>
     </ui-root>
     <script type="module">
       /** What a person's told when there's nothing to list:  signed in, or not. */
-      const NOTHING_SIGNED_IN = "There's nothing here for you to read yet."
+      const NOTHING_SIGNED_IN = "There's nothing here for you yet. When an org adds you, its spaces will show here."
       const NOTHING_SIGNED_OUT = "Nothing here is public yet. Sign in to see your spaces."
+      const NOTHING_IN_ORG = "This org has no programs or other spaces you can read yet."
+
+      /** What each kind of space is called, and the icon it has;  an org shows its initial instead. */
+      const SPACE_KINDS = {
+        org: { words: "Organization" },
+        "your space": { words: "Personal", icon: "user" },
+        public: { words: "Public", icon: "globe" },
+        members: { words: "Members only", icon: "users" }
+      }
+
+      /** The icon of each of the programs every org has, by its folder;  any other program has `PROGRAM_ICON`. */
+      const PROGRAM_ICONS = { OrgAdmin: "user shield", Inbox: "inbox", OrgFeed: "rss", OrgChat: "comments" }
+      const PROGRAM_ICON = "cube"
 
       const element = (id) => document.getElementById(id)
 
       /** A `tag` element saying `text`, with `attributes`. */
       const made = (tag, text, attributes = {}) => {
         const each = document.createElement(tag)
-        each.textContent = text
+        if (text) each.textContent = text
         for (const [name, value] of Object.entries(attributes)) each.setAttribute(name, value)
         return each
       }
 
-      /** SIDE EFFECT:  the list `id` shows `rows`, each a link if it has one. */
-      const fill = (id, rows) => {
-        element(id).replaceChildren(...rows.map(({ name, link }) => made("ui-item", name, link ? { link } : {})))
-        element(`${id}-section`).hidden = rows.length === 0
+      /** A coloured square holding `children`:  an icon, or an initial. */
+      const badge = (...children) => {
+        const each = made("span", "", { class: "badge" })
+        each.append(...children)
+        return each
       }
 
-      /** SIDE EFFECT:  the top bar says who's signed in, with Sign out;  or offers Sign in. */
+      /** A card with `badge` and `words` in it:  a link, if it has one;  a card that goes nowhere doesn't look like one. */
+      const card = ({ link, tooltip, look = "tile" }, theBadge, ...words) => {
+        const each = made("ui-card", "", { ...(link && { link }), ...(tooltip && { title: tooltip }) })
+        const tile = made("div", "", { class: look })
+        const text = made("div", "", { class: "words" })
+        text.append(...words)
+        tile.append(theBadge, text)
+        each.append(tile)
+        return each
+      }
+
+      /** A space's card:  its initial or icon, its name, and what it is. */
+      const spaceCard = ({ name, kind, link, address }) => {
+        const { words, icon } = SPACE_KINDS[kind]
+        const initial = name.trim()[0]?.toUpperCase() ?? "?"
+        return card(
+          { link, tooltip: address },
+          icon ? badge(made("ui-icon", "", { name: icon })) : badge(initial),
+          made("ui-header", name),
+          made("ui-meta", link ? words : `${words} · No page yet`)
+        )
+      }
+
+      /** A program's card:  its icon, and its name. */
+      const programCard = ({ name, link }) => {
+        const folder = link.slice(link.lastIndexOf("/") + 1)
+        return card(
+          { link, look: "tile program" },
+          badge(made("ui-icon", "", { name: PROGRAM_ICONS[folder] ?? PROGRAM_ICON })),
+          made("ui-header", name)
+        )
+      }
+
+      /** SIDE EFFECT:  the group `id` shows `cards`, and its section shows only if there are some. */
+      const fill = (id, cards) => {
+        element(id).replaceChildren(...cards)
+        element(`${id}-section`).hidden = cards.length === 0
+      }
+
+      /** SIDE EFFECT:  says why there's nothing to list;  `offerSignIn` adds a way to sign in. */
+      const showEmpty = (words, offerSignIn) => {
+        element("empty").hidden = false
+        element("empty-words").textContent = words
+        element("empty-sign-in").hidden = !offerSignIn
+      }
+
+      /** SIDE EFFECT:  the top bar says who's signed in, as a drop-down with Sign out;  or offers Sign in. */
       const showWho = (person) => {
         if (!person) {
-          element("who").replaceChildren(made("ui-button", "Sign in", { link: "/sign-in" }))
+          element("who").replaceChildren(
+            made("ui-button", "Sign in", { icon: "user circle", appearance: "basic", link: "/sign-in" })
+          )
           return
         }
+        const button = made("ui-button", person, {
+          class: "person",
+          icon: "user circle",
+          appearance: "basic",
+          title: `Signed in as ${person}`
+        })
+        const popup = made("ui-popup", "", { "open-on": "click", position: "bottom right" })
+        const panel = made("ui-stack", "", { class: "person-panel", spacing: "sm" })
         const signOut = made("ui-button", "Sign out")
         signOut.addEventListener("click", () => {
           fetch("/api/sign-in/out", { method: "POST" })
             .then(() => location.replace(location.href))
             .catch(showProblem)
         })
-        element("who").replaceChildren(made("ui-text", person), signOut)
+        const password = made("ui-button", "Set a password", { link: "/sign-in?password" })
+        ask("/api/sign-in/me")
+          .then((me) => {
+            if (me.password?.set) password.textContent = "Change password"
+          })
+          .catch(() => undefined)
+        panel.append(made("span", `Signed in as ${person}`), password, signOut)
+        popup.append(panel)
+        element("who").replaceChildren(button, popup)
       }
 
       const showProblem = (error) => {
@@ -113,25 +331,38 @@
         return response.json()
       }
 
+      /** SIDE EFFECT:  the page is an org's home:  its name in the bar and as the heading, its cards below. */
+      const showOrg = ({ person, org }) => {
+        document.title = org.name
+        element("page").classList.add("org")
+        element("crumb").hidden = false
+        element("place").hidden = false
+        element("title").textContent = org.name
+        element("heading").textContent = org.name
+        element("lead").hidden = true
+        element("spaces-title").textContent = "Other spaces"
+        showWho(person)
+        fill("programs", org.programs.map(programCard))
+        fill("spaces", org.spaces.map(spaceCard))
+        if (org.programs.length + org.spaces.length === 0) showEmpty(NOTHING_IN_ORG)
+      }
+
+      /** SIDE EFFECT:  the page is the spaces home. */
+      const showSpaces = ({ person, spaces }) => {
+        element("heading").textContent = person ? "Your spaces" : "Spaces"
+        element("lead").textContent = person
+          ? "Your organizations, your own space, and anything shared with you."
+          : "Public spaces on Spell. Sign in to see your own."
+        element("spaces-title").hidden = true
+        showWho(person)
+        fill("spaces", spaces.map(spaceCard))
+        if (spaces.length === 0) showEmpty(person ? NOTHING_SIGNED_IN : NOTHING_SIGNED_OUT, !person)
+      }
+
       const orgId = /^\/@([^/]+)/.exec(location.pathname)?.[1]
       try {
-        if (orgId) {
-          const { person, org } = await ask(`/api/cloud/home/orgs/${encodeURIComponent(orgId)}`)
-          document.title = org.name
-          element("title").textContent = org.name
-          element("spaces-title").textContent = "Its other spaces"
-          showWho(person)
-          fill("programs", org.programs)
-          fill("spaces", org.spaces)
-          element("empty").hidden = org.programs.length + org.spaces.length > 0
-          element("empty").textContent = NOTHING_SIGNED_IN
-        } else {
-          const { person, spaces } = await ask("/api/cloud/home")
-          showWho(person)
-          fill("spaces", spaces)
-          element("empty").hidden = spaces.length > 0
-          element("empty").textContent = person ? NOTHING_SIGNED_IN : NOTHING_SIGNED_OUT
-        }
+        if (orgId) showOrg(await ask(`/api/cloud/home/orgs/${encodeURIComponent(orgId)}`))
+        else showSpaces(await ask("/api/cloud/home"))
       } catch (error) {
         showProblem(error)
       }

@@ -108,24 +108,42 @@ export function abilitiesOf(saved: P.SavedPlace | undefined) {
 }
 
 /**
- * Is what's saved in `saved` read only:  a kind that is, at a plain address?
+ * Is what's saved in `saved` read only:  a line under its place says so, or a kind that is, at a plain address?
+ * - e.g. `- it is read only` (epic `data` I35)
  * - A sheet at a place server isn't:  `family cookbook is a sheet at "/api/places/recipes"` (epic `data` P14).
  *   No new word:  the address says it, as a data folder's and a file's do.
  * - Nor is the program's own CSV file, `a sheet at "tasks.csv"`:  the page server writes it (epic `language` T65).
  */
 export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
-  if (!abilitiesOf(saved)?.isReadOnly) return false
-  const declaredBy = saved?.placeType.declaredBy
-  if ((declaredBy?.data as { folderAt?: string } | undefined)?.folderAt) return false
-  const address = declaredBy?.groups.address as P.Match | undefined
+  if (placeLinesOf(saved)?.readOnly) return true
+  return !!saved && isPlaceTypeReadOnly(saved.placeType)
+}
+
+/** `isReadOnlyPlace()` of the place `type` is:  a place another project declared says so itself. */
+export function isPlaceTypeReadOnly(type: P.TypeScope): boolean {
+  if (!PLACE_KIND_ABILITIES[type.placeKind ?? ""]?.isReadOnly) return false
+  const { declaredBy, importedPlaceDetails } = type
+  if (!declaredBy) return !!importedPlaceDetails?.readOnly
+  if ((declaredBy.data as { folderAt?: string }).folderAt) return false
+  const address = declaredBy.groups.address as P.Match | undefined
   return !address || !isPlaceServerAddress(textIn(address))
+}
+
+/**
+ * What the lines under the place `saved` names say, for the compiler to ask:
+ * from the lines themselves, or for a place another project declared, from its declarations (epic `data` I19).
+ * - `undefined` when there's nothing to read:  a place that has no lines the compiler can see.
+ */
+function placeLinesOf(saved: P.SavedPlace | undefined): P.ImportedPlaceDetails | undefined {
+  const { declaredBy, importedPlaceDetails } = saved?.placeType ?? {}
+  if (!declaredBy) return importedPlaceDetails
+  const rule = declaredBy.rule.constructor as unknown as { detailsOf?(match: P.Match): P.ImportedPlaceDetails }
+  return rule.detailsOf?.(declaredBy)
 }
 
 /** Does a line under the place `saved` names say how often to ask it what changed? */
 export function isCheckedOften(saved: P.SavedPlace): boolean {
-  const { declaredBy } = saved.placeType
-  const rule = declaredBy?.rule.constructor as unknown as { detailsOf?(match: P.Match): { checkedEvery?: number } }
-  return !!declaredBy && rule.detailsOf?.(declaredBy)?.checkedEvery !== undefined
+  return placeLinesOf(saved)?.checkedEvery !== undefined
 }
 
 /**
@@ -135,14 +153,7 @@ export function isCheckedOften(saved: P.SavedPlace): boolean {
  * - `undefined` when no line under its place says so.
  */
 export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fields: string[] } | undefined {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): {
-      searches?: { param: string; fields: string[] }
-      collections?: Record<string, { searches?: { param: string; fields: string[] } }>
-    }
-  }
-  const details = declaredBy ? rule.detailsOf?.(declaredBy) : undefined
+  const details = placeLinesOf(saved)
   return details?.collections?.[saved!.collection]?.searches ?? details?.searches
 }
 
@@ -151,11 +162,7 @@ export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fi
  * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */
 export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { collections?: Record<string, { at?: string }> }
-  }
-  const at = declaredBy && rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.at
+  const at = placeLinesOf(saved)?.collections?.[saved!.collection]?.at
   return !!at && /\{[^{}/]*\}/.test(at)
 }
 
@@ -164,11 +171,7 @@ export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
  * - e.g. `books are searched at "/search.json"` (epic `data` P29)
  */
 export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { collections?: Record<string, { searchedOnly?: boolean }> }
-  }
-  return !!declaredBy && !!rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.searchedOnly
+  return !!placeLinesOf(saved)?.collections?.[saved!.collection]?.searchedOnly
 }
 
 /**
@@ -177,11 +180,7 @@ export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
  * - Empty when no line says so.
  */
 export function askedByOf(saved: P.SavedPlace | undefined): string[] {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { collections?: Record<string, { askedBy?: string[] }> }
-  }
-  return (declaredBy && rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.askedBy) || []
+  return placeLinesOf(saved)?.collections?.[saved!.collection]?.askedBy ?? []
 }
 
 /**

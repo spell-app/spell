@@ -5,6 +5,7 @@ import { EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The Inspector's outline round what's selected (epic `editor`):  its marching ants, measured on screen.
+ * - The ants' 2px line is 4 to 6px outside the part (`Inspector.css`, epic `notebook` P9):  its middle, 5px out, is what's read.
  * - EVEN:  the same 2px line on all four sides, at a fractional place and size, at 1, 1.5 and 2 device pixels a
  *   pixel, in Chromium and WebKit (Owen, 2026-11-06:  "right and bottom read 1px")
  *   - WebKit's showed it:  at 1.5, the old SVG line was 1.68px on the right, 1.99px at the bottom
@@ -124,9 +125,9 @@ async function measure(
       const turnedPoints: [number, number][] = []
       const uprightPoints: [number, number][] = []
       for (let x = 12; x < g.width - 12; x++) {
-        const [dx, dy] = [x - g.width / 2, -g.height / 2 - 2]
+        const [dx, dy] = [x - g.width / 2, -g.height / 2 - 5]
         turnedPoints.push([centreX + cos * dx - sin * dy, centreY + sin * dx + cos * dy])
-        uprightPoints.push([g.left + (x / g.width) * (g.right - g.left), g.top - 2])
+        uprightPoints.push([g.left + (x / g.width) * (g.right - g.left), g.top - 5])
       }
       const darkShare = (points: [number, number][]) =>
         points.filter(([x, y]) => light(x * dpr, y * dpr) < 0.3).length / points.length
@@ -137,7 +138,7 @@ async function measure(
 }
 
 /**
- * The brightness of the outline's middle, 2px above the probe's top side, at each CSS px along it:
+ * The brightness of the outline's middle, 5px above the probe's top side, at each CSS px along it:
  * left of the backdrop's split, and right of it.
  */
 async function topLine(page: Page, dpr: number): Promise<{ overWhite: number[]; overDark: number[] }> {
@@ -156,7 +157,7 @@ async function topLine(page: Page, dpr: number): Promise<{ overWhite: number[]; 
       canvas.height = image.height
       const context = canvas.getContext("2d", { willReadFrequently: true })!
       context.drawImage(image, 0, 0)
-      const y = Math.floor((box.top - 2) * dpr)
+      const y = Math.floor((box.top - 5) * dpr)
       const overWhite: number[] = []
       const overDark: number[] = []
       for (let x = Math.ceil(box.left + 12); x < box.right - 12; x++) {

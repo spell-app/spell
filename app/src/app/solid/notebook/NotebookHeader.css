@@ -69,8 +69,4 @@
       color: var(--ui-orange-text, var(--ui-orange, #f2711c));
     }
   }
-
-  & .NotebookActions {
-    display: contents;
-  }
 }

@@ -9,7 +9,8 @@
  *   spell-epic's `spell-toolbar.css`, "Under a page's tabs").  Another page's tabs here are plain and don't stick:
  *   - the tabs:  a segmented `<ui-menu>` whose box is exported as `docs-tabs`
  *     (`exportparts="menu: docs-tabs"`, so it's reached from outside the element that draws it)
- *   - the section tabs under them:  a segmented `<ui-menu class="ui-docs-section-tabs">`
+ *   - the section tabs under them:  a segmented `<ui-toolbar class="ui-docs-section-tabs">`, whose row scrolls with
+ *     `‹` / `›` when it doesn't fit (epic `notebook` P9)
  * - In `@layer ui.app`, the page's own layer, as `site.css` is.
  */
 
@@ -54,14 +55,29 @@
     font-size: calc(var(--ui-font-size) * var(--ui-docs-tabs-scale));
     box-shadow: 0 0 0 var(--ui-docs-tabs-band) var(--ui-docs-tabs-glass);
   }
+  /*
+   * phones:  the tabs keep their padding, and the row scrolls sideways once they don't fit, rather than squeezing each
+   * tab's words against its neighbours' (epic `notebook` P9)
+   */
+  @media (--ui-mobile) {
+    .ui-docs-sections *::part(docs-tabs) {
+      /* each tab at least its words and padding:  the equal tabs still share any room left */
+      --ui-menu-item-min-width: max-content;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+  }
 
   /*
    * ## The section tabs under them:  the panel's lower half, ONE panel with the tabs' (a T)
    * - only as wide as its buttons, centred, its bottom corners round;  two concave curves where it meets the top band
    * - it starts where the tabs' band ends:  glass laid twice would show a darker seam
+   * - the panel is the toolbar's box (`::part(toolbar)`);  the row inside it (`::part(menu)`) scrolls, with `‹` / `›`,
+   *   when the buttons don't fit:  the curves hang outside the panel, which a scrolling box would cut off
+   * - the row's selected tab:  the menu's sliding thumb, filled as the tabs' above (Owen's segmented look)
    */
-  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu) {
-    --ui-menu-segmented-background: transparent;
+  .ui-docs-sections ui-toolbar.ui-docs-section-tabs::part(toolbar) {
     position: relative;
     box-sizing: border-box;
     width: fit-content;
@@ -71,16 +87,21 @@
      * margin collapses with:  the site's toolbar keeps both
      */
     margin: calc(-1 * var(--ui-docs-tabs-gap)) auto calc(var(--ui-docs-tabs-gap) + 1.5em);
-    /* the band round the track, and the segmented track's own 2px inside it */
+    /* the band round the row, and the segmented track's own 2px inside it */
     padding: 2px calc(var(--ui-docs-tabs-band) + 2px) calc(var(--ui-docs-tabs-band) + 2px);
     /* a size smaller than the tabs' row above it, as the site's section toolbar is */
     font-size: calc(var(--ui-font-size) * 0.9333);
     border-radius: 0 0 calc(12px + var(--ui-docs-tabs-band)) calc(12px + var(--ui-docs-tabs-band));
     background: var(--ui-docs-tabs-glass);
+  }
+  .ui-docs-sections ui-toolbar.ui-docs-section-tabs::part(menu) {
+    --ui-menu-segmented-background: transparent;
+    /* the panel's padding is the room round it:  none of a menu's own */
+    margin: 0;
     box-shadow: none;
   }
-  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::before,
-  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::after {
+  .ui-docs-sections ui-toolbar.ui-docs-section-tabs::part(toolbar)::before,
+  .ui-docs-sections ui-toolbar.ui-docs-section-tabs::part(toolbar)::after {
     content: "";
     position: absolute;
     top: 0;
@@ -88,7 +109,7 @@
     height: var(--ui-docs-tabs-band);
     pointer-events: none;
   }
-  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::before {
+  .ui-docs-sections ui-toolbar.ui-docs-section-tabs::part(toolbar)::before {
     right: 100%;
     background: radial-gradient(
       circle at 0 100%,
@@ -96,7 +117,7 @@
       var(--ui-docs-tabs-glass) var(--ui-docs-tabs-band)
     );
   }
-  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::after {
+  .ui-docs-sections ui-toolbar.ui-docs-section-tabs::part(toolbar)::after {
     left: 100%;
     background: radial-gradient(
       circle at 100% 100%,

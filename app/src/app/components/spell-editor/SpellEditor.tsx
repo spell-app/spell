@@ -322,12 +322,21 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
     this.compiled = undefined
   }
 
-  /** The file our `file` attribute names in `project`, else its first spell file. */
+  /**
+   * The file our `file` attribute names in `project`, else its first spell file.
+   * - By its path in the project, `Button/Usage.spellml` (a leading `/` is fine), or its whole address
+   * - Else by its bare name, `Usage.spellml`:  the first of that name
+   */
   @E.untracked
   private namedFile(project: SP.SpellProject): SP.SpellFile | undefined {
     const files = project.spellFiles
     const name = this.file
-    return files.find((file) => file.file === name || file.path === name) ?? files[0]
+    const inProject = name?.replace(/^\/+/, "")
+    return (
+      files.find((file) => file.path === name || SP.SpellProject.sourceNameOf(file.path) === inProject) ??
+      files.find((file) => file.file === name) ??
+      files[0]
+    )
   }
 
   /** Where to put the cursor when the editor next shows `path`, e.g. "go to definition" from another file. */

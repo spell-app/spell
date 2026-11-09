@@ -210,6 +210,12 @@ export class JSXToken<
  *  - `element.attributes` is an array of `jsxAttribute` children
  *  - `element.children` is an array of child `jsxElement` instances.
  */
+/**
+ * What couldn't be read as a child of an element:  `</butto` half typed, a stray `>`.
+ * - Matches no rule, so it's a parse error where it is;  the element around it carries on.
+ */
+export class JSXUnreadableToken extends JSXToken<string> {}
+
 export class JSXElementToken extends JSXToken<never, JSXElementTokenProps> {
   /** Tag name. */
   get tagName() {
@@ -226,6 +232,10 @@ export class JSXElementToken extends JSXToken<never, JSXElementTokenProps> {
   /** Does this represent a unary tag? */
   get isUnaryTag() {
     return this.record.isUnaryTag
+  }
+  /** What it couldn't read among its attributes, `Ždge="1,048"` -- `undefined` when it read them all. */
+  get unreadable() {
+    return this.record.unreadable
   }
   /** A chain branch's kind, `<if ...>`, `<otherwise>` ...:  see `Tokenizer.chainTags`.  `undefined` for an element. */
   get chain() {
@@ -245,6 +255,8 @@ export type JSXElementTokenProps = Prettify<P.TokenProps<never>> & {
   tagName: string
   /** Does this represent a unary tag? */
   isUnaryTag?: boolean
+  /** What it couldn't read among its attributes -- see `JSXElementToken.unreadable`. */
+  unreadable?: string
   /** A chain branch's kind -- see `JSXElementToken.chain`. */
   chain?: JSXChainKind
   /** A chain branch's phrase -- see `JSXElementToken.phrase`. */

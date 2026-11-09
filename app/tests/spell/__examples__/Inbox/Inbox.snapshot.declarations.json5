@@ -11,6 +11,11 @@
     {
       "type": "Message",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_inbox",
+        "placeType": "MyInbox",
+        "collection": "messages"
+      },
       "defined": "/Inbox.api.spell:553-785"
     },
     {
@@ -77,6 +82,11 @@
     {
       "type": "MailChoice",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_inbox",
+        "placeType": "MyInbox",
+        "collection": "mail_choices"
+      },
       "defined": "/Inbox.api.spell:965-1037"
     },
     {
@@ -101,6 +111,11 @@
     {
       "type": "Subscription",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_inbox",
+        "placeType": "MyInbox",
+        "collection": "subscriptions"
+      },
       "defined": "/Inbox.api.spell:1152-1227"
     },
     {
@@ -125,12 +140,20 @@
     {
       "type": "MyInbox",
       "superType": "Place",
+      "place": {
+        "name": "my_inbox",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@rs/__inbox",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/Inbox.api.spell:383-455"
     },
     {
       "type": "InboxPage",
       "superType": "App",
-      "defined": "/Inbox.spellml:2013-5414"
+      "defined": "/Inbox.spellml:2013-5793"
     },
     {
       "property": "new_message",
@@ -223,7 +246,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:2635-5405"
+      "defined": "/Inbox.spellml:2635-5784"
     }
   ],
   "codeLines": [

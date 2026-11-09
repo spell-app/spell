@@ -1,0 +1,35 @@
+<spell-page "split-panel theming" notebook>
+	<header level="1">
+		Split Panel
+		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tokens">Tokens</>
+			<item link="#themes">Themes</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-split-panel" playground>
+				<ui-split-panel columns="25%,*" resizable style="height: 8em">
+					<ui-panel appearance="pane">Tree</>
+					<ui-panel appearance="pane">Code</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-page>

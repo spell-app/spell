@@ -1925,7 +1925,7 @@ export class Book extends Thing {
   set subtitle(value) { this.setProp("subtitle", value) }
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1927, end: 2063 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1923, end: 2059 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -1939,7 +1939,7 @@ export class Book extends Thing {
       h("ui-image", { src: () => this.coverI, alt: "", "aspect-ratio": "2:3", crop: true }),
       h("ui-content",
         h("ui-header", () => this.title),
-        h("ui-meta", () => core.getItemAt(this.authorName, 0), " · ", () => this.firstPublishYear)
+        h("ui-meta", () => core.listShown(this.authorName), " · ", () => this.firstPublishYear)
       )
     )
   }
@@ -2446,7 +2446,7 @@ core.heading("A book")
 ////////////
 // ## A book
 ////////////
-// Its cover, its title and who wrote it:  on its card, the first name the search gave;  on its own page, its first author, read from their own record.
+// Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.
 
 core.heading("Who wrote it")
 //# Who wrote it

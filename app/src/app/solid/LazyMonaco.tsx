@@ -12,8 +12,8 @@ import { CodeSettings } from "./CodeSettings"
  *   e.g. `<Loading fallback={<LazyMonaco.Loading />}>`.
  * - SIDE EFFECT, once loaded:  listens to the editor, so edits compile soon,
  *   and "go to definition" in another file shows that file.
- * - SIDE EFFECT, once loaded:  hands the editor a scope explorer on its language service, for the Types tab
- *   (`editor.setScopeExplorer()`).
+ * - SIDE EFFECT, once loaded:  hands the editor a scope explorer on its language service,
+ *   for the Types tab (`editor.setScopeExplorer()`).
  * - SIDE EFFECT, once loaded:  every Monaco editor on the page takes the code pane's settings (`CodeSettings`).
  * - SIDE EFFECT, once loaded:  puts `SpellMonaco` / `monaco` on `globalThis` for console debugging,
  *   as `debug.ts` does for everything else.
@@ -52,7 +52,7 @@ function loadMonaco(): Promise<typeof import("spell/app/app/solid/monaco")> {
   loading ??= import("spell/app/app/solid/monaco").then(async (module) => {
     CodeSettings.follow(module.monaco)
     module.SpellMonaco.onEdit((file) => editor.onFileEdited(file))
-    editor.codeEditorEdits = (file, edits) => module.SpellMonaco.models.applyEdits(file, edits)
+    editor.codeEditorEdits = (file, edits, way) => module.SpellMonaco.models.applyEdits(file, edits, way)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in Monaco's chunk
     const { LSP } = await import("spell/app/lsp")
     editor.setScopeExplorer(new LSP.ScopeExplorer(module.SpellMonaco.register().service))

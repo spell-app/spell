@@ -100,11 +100,21 @@ export function after<T = undefined>(seconds: number, fn?: () => T): CancelableP
 /**
  * Run `fn` every `seconds` (`every(5, ...)`), over `setInterval()`, until stopped.
  * - The first run is `seconds` from now, not at once.
+ * - `inBackground`:  it doesn't keep node running by itself -- see `letNodeEnd()`.
  * - Returns a function that stops it.
  */
-export function every(seconds: number, fn: () => void): () => void {
+export function every(seconds: number, fn: () => void, { inBackground }: { inBackground?: boolean } = {}): () => void {
   const timer = setInterval(fn, seconds * 1000)
+  if (inBackground) letNodeEnd(timer)
   return () => clearInterval(timer)
+}
+
+/**
+ * SIDE EFFECT:  node may end with `timer` still waiting:  for work only worth doing while something else runs.
+ * - Node waits for every timer before it ends;  a browser has no such thing, so there this does nothing.
+ */
+export function letNodeEnd(timer: ReturnType<typeof setTimeout>): void {
+  ;(timer as { unref?: () => void }).unref?.()
 }
 
 /**

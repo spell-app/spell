@@ -21,6 +21,60 @@ function folderAt(at: string) {
   })
 }
 
+/** What's behind a web server whose lines say `details`. */
+function webServerWith(details: object) {
+  return placeBehind({
+    details: { name: "cookbook", kind: "web server", at: "https://cookbook.test", ...details },
+    folder: PlacesFolder,
+    collection: "recipes",
+    Class: Object,
+    person: { id: "guest-1", name: "Guest 1" }
+  })
+}
+
+describe("placeBehind(), a web server (epic `data` I35)", () => {
+  test("says what its lines say it can do", () => {
+    expect(
+      webServerWith({
+        pagesByOffset: { limit: "per", offset: "from" },
+        filters: ["cuisine"],
+        sorts: "every field",
+        fieldsNamedIn: "response_fields",
+        readOnly: true
+      }).describe()
+    ).toMatchObject({
+      page: "offset",
+      filter: ["cuisine"],
+      sort: "every field",
+      select: "every field",
+      write: "none"
+    })
+  })
+
+  test("with no lines it promises nothing, and takes writes", () => {
+    expect(webServerWith({}).describe()).toMatchObject({
+      page: "none",
+      filter: "none",
+      sort: "none",
+      select: "none",
+      write: ["insert", "update", "delete"]
+    })
+  })
+
+  test("pages counted by number are paged by offset, asked for by what they're called", () => {
+    expect(webServerWith({ pagesByNumber: { limit: "per_page", page: "page" } }).describe().page).toBe("offset")
+    expect(webServerWith({ pagesByNumber: { page: "p", first: 0 } }).describe().page).toBe("offset")
+  })
+
+  test("the last row's id is a kind of cursor", () => {
+    expect(webServerWith({ pagesByLastId: { param: "after", moreIn: "has_more" } }).describe().page).toBe("cursor")
+  })
+
+  test("its next page in its `Link` header still pages by cursor", () => {
+    expect(webServerWith({ nextPageInLink: true }).describe()).toMatchObject({ page: "cursor" })
+  })
+})
+
 describe("placeBehind(), a data folder", () => {
   test("a project data folder's address is the page server's, and says what its server does", () => {
     const behind = folderAt("/api/places/spaces/owen@spell/recipes")
@@ -103,5 +157,31 @@ describe("placeBehind(), a sheet that's the program's own CSV file (epic `langua
     const keyed = sheetAt("/api/places/spaces/@spell/examples/TaskList/__data/tasks.csv", "key")
     expect(keyed.describe()).toMatchObject({ idOf: "key" })
     expect((keyed as unknown as { lines: object }).lines).toEqual({ idColumn: "key" })
+  })
+})
+
+describe("placeBehind(), a line naming a sheet's column (epic `data` I36)", () => {
+  const collections = { recipes: { at: "Recipes", fields: { title: "Dish Name" } } }
+  const fieldLines = { recipes: { fields: { title: "Dish Name" } } }
+
+  /** What's behind a place of `kind` at `at`. */
+  const behind = (kind: string, at: string) =>
+    placeBehind({
+      details: { name: "family_cookbook", kind, at, collections },
+      folder: PlacesFolder,
+      collection: "recipes",
+      Class: Object,
+      person: { id: "guest-1", name: "Guest 1" }
+    }) as unknown as { collections?: object; lines?: object }
+
+  test("a sheet read from the browser is told", () => {
+    expect(behind("sheet", "https://x.test/recipes.csv").collections).toEqual(fieldLines)
+    expect(behind("excel file", "https://x.test/recipes.xlsx").collections).toEqual(fieldLines)
+  })
+
+  test("a sheet on a server sends it with each request", () => {
+    expect(behind("sheet", "/api/places/recipes").lines).toEqual({ collections: fieldLines })
+    expect(behind("sheet", "/api/places/spaces/@x/n/__data/recipes.csv").lines).toEqual({ collections: fieldLines })
+    expect(behind("google sheet", "/api/places/recipes").lines).toEqual({ collections: fieldLines })
   })
 })

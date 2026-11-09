@@ -49,6 +49,12 @@ const NEXT_LINK = /<([^>]+)>\s*;[^,]*\brel="?next"?/
 /** A cursor that's a whole address, as a `Link` header gives. */
 const IS_ADDRESS = /^(https?:)?\/\//
 
+/**
+ * A next page written as a path on the same server:  `/items?page=2`, `?page=2`.
+ * - Needs its `?`, as a cursor starting with `/` is no address:  base64's can.
+ */
+const IS_PATH_WITH_QUERY = /^\/[^?]*\?|^\?/
+
 /****************
  * ### `RestPlace`
  * A plain web server as a place:  a mapping of its paths and field names, and nothing else (epic `data` P4).
@@ -95,6 +101,12 @@ export class RestPlace extends WebPlace implements Place {
   private readonly pageSize: number
   /** It was told how many to ask for, so a server that pages by its own next link is asked for that many too. */
   private readonly asksForPageSize: boolean
+  /** A place that pages by offset counts pages, not rows, from this number:  `pageNumbers`. */
+  private readonly firstPageNumber: number | undefined
+  /** It's never told how many to give:  `sendsNoCount`. */
+  private readonly sendsNoCount: boolean
+  /** Its next page is asked for by the last row's id:  `pagesByLastId`. */
+  private readonly pagesByLastId: { moreAt?: string } | undefined
   /** Each thing's version, as last read or written, by collection and id. */
   private readonly seenVersions = new Map<string, string>()
   /** Each named operation's address. */
@@ -116,12 +128,18 @@ export class RestPlace extends WebPlace implements Place {
     update = "PATCH",
     params,
     pageSize,
+    pageNumbers,
+    sendsNoCount = false,
+    pagesByLastId,
     operations,
     namesLike,
     searches,
     ...rest
   }: RestPlaceProps) {
     super(rest)
+    this.firstPageNumber = pageNumbers?.first
+    this.sendsNoCount = sendsNoCount
+    this.pagesByLastId = pagesByLastId
     this.namesLike = namesLike
     this.searches = searches
     this.operations = operations ?? {}
@@ -184,20 +202,22 @@ export class RestPlace extends WebPlace implements Place {
     const handled: ListHandled = {}
     // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
     const asked = this.paramsFor(collection, query, handled)
-    const data = page === "cursor" && at && IS_ADDRESS.test(at) ? {} : asked
-    if (page === "offset") Object.assign(data, { [this.params.limit]: size, [this.params.offset]: Number(at ?? 0) })
+    // a last row's id may look like an address, and still isn't where the next page is
+    const nextAddress = page === "cursor" && !this.pagesByLastId && at && IS_ADDRESS.test(at) ? at : undefined
+    const data = nextAddress ? {} : asked
+    if (page === "offset") {
+      if (!this.sendsNoCount) data[this.params.limit] = size
+      data[this.params.offset] = Number(at ?? this.firstPageNumber ?? 0)
+    }
     if (page === "cursor") {
       // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
-      if (query.page?.size !== undefined) data[this.params.limit] = query.page.size
+      if (this.pagesByLastId) {
+        if (!this.sendsNoCount) data[this.params.limit] = size
+      } else if (query.page?.size !== undefined) data[this.params.limit] = query.page.size
       else if (this.asksForPageSize && !at) data[this.params.limit] = this.pageSize
-      if (at && !IS_ADDRESS.test(at)) data[this.params.cursor] = at
+      if (at && !nextAddress) data[this.params.cursor] = at
     }
-    const url =
-      at && IS_ADDRESS.test(at)
-        ? at
-        : query.under
-          ? this.addressUnder(query.under)
-          : this.listAddress(collection, handled)
+    const url = nextAddress ?? (query.under ? this.addressUnder(query.under) : this.listAddress(collection, handled))
     const response = await this.answerTo({ url, urlData: {}, data }, context)
     const body = await jsonIn(response)
     const { rowsAt, nextAt, askedBy } = this.mappingOf(collection)
@@ -215,9 +235,23 @@ export class RestPlace extends WebPlace implements Place {
         `RestPlace.list():  "${collection}" didn't answer with a list${rowsAt ? ` at "${rowsAt}"` : ""};  say where it is with \`rowsAt\``
       )
     }
-    const nextPage = this.nextPageOf({ page, at, size, count: rows.length, body, nextAt, response })
+    // told no count, it gives what it gives:  a read asking for fewer takes the first of them
+    const kept = this.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
+    const sizeIsKnown = this.asksForPageSize || query.page?.size !== undefined
+    const nextPage = this.nextPageOf({
+      page,
+      at,
+      size,
+      sizeIsKnown,
+      count: kept.length,
+      body,
+      nextAt,
+      response,
+      collection,
+      lastRow: kept.at(-1)
+    })
     return {
-      rows: (rows as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
+      rows: (kept as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
       ...(nextPage !== undefined && { nextPage }),
       handled
     }
@@ -423,15 +457,60 @@ export class RestPlace extends WebPlace implements Place {
   /**
    * What to ask for next.
    * - By offset:  a full page means there may be more.
+   *   - Counting pages:  the next number.
+   *   - Told no count and not told its size:  only an empty page says that was the last, and it goes on by what it got.
+   * - By the last row's id:  `nextByLastId()`.
    * - By cursor:  what the answer says at `nextAt`, else its `Link` header.
+   * - throws `TypeError` for a page that goes on from a last row with no id
    */
-  private nextPageOf({ page, at, size, count, body, nextAt, response }: NextPageAsk): string | undefined {
-    if (page === "offset") return count === size ? String(Number(at ?? 0) + size) : undefined
+  private nextPageOf(ask: NextPageAsk): string | undefined {
+    const { page, at, size, sizeIsKnown, count, body, nextAt, response } = ask
+    if (this.pagesByLastId) return this.nextByLastId(ask, this.pagesByLastId.moreAt)
+    if (page === "offset") {
+      const isFull = this.sendsNoCount ? (sizeIsKnown ? count >= size : count > 0) : count === size
+      if (!isFull) return undefined
+      if (this.firstPageNumber !== undefined) return String(Number(at ?? this.firstPageNumber) + 1)
+      return String(Number(at ?? 0) + (this.sendsNoCount ? count : size))
+    }
     if (page !== "cursor") return undefined
     const named = valueAt(body, nextAt)
     if (nextAt !== undefined)
-      return named === null || named === undefined || named === "" ? undefined : `${named as string}`
-    return NEXT_LINK.exec(response.headers.get("Link") ?? "")?.[1]
+      return named === null || named === undefined || named === ""
+        ? undefined
+        : this.wholeAddressOf(`${named as string}`, response)
+    const link = NEXT_LINK.exec(response.headers.get("Link") ?? "")?.[1]
+    return link === undefined ? undefined : this.wholeAddressOf(link, response)
+  }
+
+  /**
+   * The id of this page's last row, when there's more after it.
+   * - An empty page was the last, whatever it says.
+   * - What the answer says at `moreAt` decides;  nothing there, or nothing told to look at:
+   *   with its size known, a short page was the last;  not known, only an empty one.
+   * - throws `TypeError` for a last row with no id, which would silently end the read
+   */
+  private nextByLastId(
+    { size, sizeIsKnown, count, body, collection, lastRow }: NextPageAsk,
+    moreAt: string | undefined
+  ): string | undefined {
+    if (count === 0) return undefined
+    const more = moreAt === undefined ? undefined : valueAt(body, moreAt)
+    const hasMore = more === undefined || more === null ? !sizeIsKnown || count >= size : !!more
+    if (!hasMore) return undefined
+    const idField = this.wireName(collection, this.capabilities.idOf ?? REST_CAPABILITIES.idOf!)
+    const id = isOneRow(lastRow) ? lastRow[idField] : lastRow
+    if (id === undefined || id === null || id === "") {
+      throw new TypeError(
+        `RestPlace.list():  the last row of "${collection}" has no "${idField}", so its next page can't be asked for;  say which field is its id`
+      )
+    }
+    return `${id as string | number}`
+  }
+
+  /** A next page written as a path on this server, as a whole address;  anything else as it is. */
+  private wholeAddressOf(next: string, response: Response): string {
+    const base = response.url || this.url
+    return IS_PATH_WITH_QUERY.test(next) && URL.canParse(next, base) ? new URL(next, base).href : next
   }
 
   /** `collection`'s mapping:  what it says, over what's said of every collection;  all defaults if neither says. */
@@ -522,6 +601,23 @@ export type RestPlaceProps = WebPlaceProps & {
    *   (`it gives up to 2000 at a time`).
    */
   pageSize?: number
+  /**
+   * On a place that pages by offset, it counts pages, not rows, from `first`:  `?page=3` (epic `data` I35).
+   * - `params.offset` names the page's question.
+   */
+  pageNumbers?: { first: number }
+  /**
+   * It's never told how many to give, paging by offset or by the last row's id:  `?start=40` alone, its page size its own.
+   * - Without `pageSize`, a read goes on until a page comes back empty, one request more.
+   */
+  sendsNoCount?: boolean
+  /**
+   * With `can: { page: "cursor" }`, its next page is asked for by the last row's id, sent as `params.cursor`:
+   * Stripe's `?starting_after=cus_123` (epic `data` I35).
+   * - `moreAt`:  a dotted path in the answer that says whether there's more, Stripe's `has_more`.
+   * - Left out, or nothing there:  a short page was the last when its size is known, else an empty one.
+   */
+  pagesByLastId?: { moreAt?: string }
   /** How the server spells a field's name it hasn't sent yet, for a write or a query:  `snake` for `hair_color`.  Left out:  ours. */
   namesLike?: NameStyle
   /**
@@ -653,6 +749,12 @@ type NextPageAsk = {
   at: string | undefined
   /** How many rows it asked for. */
   size: number
+  /** Was it told that size, rather than taking the default? */
+  sizeIsKnown: boolean
+  /** The collection it's reading. */
+  collection: string
+  /** This page's last row, as the server sent it. */
+  lastRow: unknown
   /** How many it got. */
   count: number
   /** The answer's JSON. */

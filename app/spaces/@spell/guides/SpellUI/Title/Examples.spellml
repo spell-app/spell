@@ -1,0 +1,52 @@
+<spell-page "title examples" notebook>
+	<header level="1">
+		Title
+		<header>A title heads a step, an accordion panel or a search result.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-title>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Step" sticky="stack" collapsible dividing>
+			<example "Step" description="A step's title:  its main line.">
+				<steps>
+					<step icon="truck">
+						<content>
+							<title>Shipping</title>
+							<description>Choose your shipping options</description>
+						</content>
+					</step>
+					<step selected icon="payment">
+						<content>
+							<title>Billing</title>
+							<description>Enter billing information</description>
+						</content>
+					</step>
+				</steps>
+			</example>
+		</>
+
+		<section label="Accordion" sticky="stack" collapsible dividing>
+			<example "Accordion" description="An accordion's titles:  each toggles the panel after it.">
+				<accordion appearance="styled">
+					<title>What is a dog?</title>
+					<content>
+						<text paragraph>A dog is a type of domesticated animal.</text>
+					</content>
+					<title>How do you acquire a dog?</title>
+					<content>
+						<text paragraph>Three common ways for a prospective owner to acquire a dog.</text>
+					</content>
+				</accordion>
+			</example>
+		</>
+	</>
+</spell-page>

@@ -10,6 +10,7 @@ import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
 import { DrawnState, buttonsForItem } from "spell/epic/components/epic-item/EpicItem.types"
 import { PhaseState } from "spell/epic/components/epic-section/PhaseState"
+import { MARKED_SHOWS_AS } from "spell/epic/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 
 import { epicFocusVocabulary } from "./EpicFocus.en"
@@ -304,8 +305,8 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
     if (!tab) return
     const present = new Set(
       this.entries()
-        .filter((entry) => entry.kind === tab && !entry.marked)
-        .map((it) => it.state)
+        .filter((entry) => entry.kind === tab)
+        .map((it) => (it.marked ? MARKED_SHOWS_AS : it.state))
     )
     const everything = [...present].every((state) => event.detail.shown.includes(state))
     const shown = { ...this.shown }

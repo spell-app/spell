@@ -155,7 +155,9 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
 
   /** What the item's called -- see the class.  The list's last word is its noun:  `its films`, `las películas`. */
   private static itemName(match: P.Match, datatype: unknown): string {
-    if (typeof datatype === "string" && match.scope.getType(datatype)) return P.instanceCase(datatype)
+    // a type of several words:  the list's noun, `type` for `its types`, reads better than `pokemontype`
+    const isOneWord = typeof datatype === "string" && !/\p{Ll}\p{Lu}/u.test(datatype)
+    if (isOneWord && match.scope.getType(datatype)) return P.instanceCase(datatype)
     const { list } = (match as P.MatchFor<ListIterationNamedForList>).groups
     const noun = list.inputText.trim().split(/\s+/).at(-1) ?? ""
     return /^[\p{L}_-]+$/u.test(noun) && noun !== P.singularize(noun) ? P.singularize(noun) : ITEM_WITH_NO_NAME

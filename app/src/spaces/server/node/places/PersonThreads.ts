@@ -67,8 +67,11 @@ export class PersonThreads implements Place {
   private readonly managersOf: PersonThreadsProps["managersOf"]
   /** The place of the space at `address`. */
   private readonly placeAt: PersonThreadsProps["placeAt"]
+  /** What people call org `org`:  its own thread's name, where it has no Admin space. */
+  private readonly orgNameOf: PersonThreadsProps["orgNameOf"]
 
-  constructor({ person, org, spacesOf, isInOrg, managersOf, placeAt }: PersonThreadsProps) {
+  constructor({ person, org, spacesOf, isInOrg, managersOf, placeAt, orgNameOf }: PersonThreadsProps) {
+    this.orgNameOf = orgNameOf
     this.person = person
     this.org = org
     this.spacesOf = spacesOf
@@ -101,7 +104,8 @@ export class PersonThreads implements Place {
     const rows: PlaceRow[] = []
     const spaces = await this.spacesOf(this.org)
     // an org with no Admin space has no paired spaces:  its own open thread alone
-    if (!spaces.length) rows.push(threadRowOf(this.org.toUpperCase(), "shared", `@${this.org}/${THREAD_MESSAGES}`))
+    if (!spaces.length)
+      rows.push(threadRowOf(await this.orgNameOf(this.org), "shared", `@${this.org}/${THREAD_MESSAGES}`))
     for (const space of spaces) {
       if (space.side === "private" && !(await this.managersOf(space)).includes(this.person)) continue
       rows.push(threadRowOf(space.name, space.side, `${space.address}/${THREAD_MESSAGES}`))
@@ -142,6 +146,8 @@ export type PersonThreadsProps = {
   managersOf: (space: NamedSpace) => Promise<string[]>
   /** The place of the space at `address`:  `undefined` for none. */
   placeAt: (address: string) => Promise<Place | undefined>
+  /** What people call org `org`, as its file says it:  `OrgRoles.orgName()`. */
+  orgNameOf: (org: string) => Promise<string>
 }
 
 ////////////////

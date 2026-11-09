@@ -11,12 +11,13 @@ import type { E } from "spell/ui/core"
 
 /****************
  * ### `exampleVocabulary`
- * The names of `<ui-example>`, Fomantic's docs example block:  a heading and description,
- * its own children LIVE, and their source in a code pane the code button shows and hides.
+ * The names of `<ui-example>`, Fomantic's docs example block:
+ * a heading and description, its own children LIVE, and their source in a code pane the code button shows and hides.
  ****************/
 export const exampleVocabulary = {
   tag: "ui-example",
   icon: "lightbulb outline",
+  snippet: '<ui-example heading="An example">\n\t<ui-button>Try me</ui-button>\n</ui-example>',
   topics: ["documentation", "data display"],
   aka: ["example", "demo", "live example", "code sample", "playground", "show code"],
   skeleton: "header, 2 line paragraph",

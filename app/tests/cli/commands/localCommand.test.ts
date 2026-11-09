@@ -8,10 +8,21 @@ import { join } from "path"
 
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { LocalSite, hostsWith, lanAddressOf, partnerScript, type LocalTools } from "spell/app/cli/commands/localCommand"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
+import {
+  LocalSite,
+  hostsWith,
+  lanAddressOf,
+  partnerScript,
+  stopLocalSiteWithAll,
+  type LocalTools
+} from "spell/app/cli/commands/localCommand"
 import {
   LocalSiteServer,
   caddyFileFor,
+  cloudCode,
+  editorNameAmong,
+  localSiteTools,
   type LocalSiteChild,
   type LocalSiteServerProps
 } from "spell/app/spaces/server/node/routes/LocalSiteServer"
@@ -27,10 +38,11 @@ const PASSWORD = "abcd efgh ijkl mnop"
 const SQUEEZED_PASSWORD = "abcdefghijklmnop"
 
 /** A program a test started:  `end()` makes it stop by itself. */
-function childProgram() {
+function childProgram(pid: number) {
   let end = (_code: number) => {}
   const exited = new Promise<number>((resolve) => (end = resolve))
   const child: LocalSiteChild & { end: (code: number) => void } = {
+    pid,
     exited,
     end: (code) => end(code),
     stop: vi.fn(() => end(0))
@@ -57,10 +69,14 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
     args: string[]
     env?: Record<string, string>
     logFile?: string
+    detached: boolean
     child: ReturnType<typeof childProgram>
   }[] = []
   const listeners: Record<string, string[]> = {}
+  const processes: Record<string, string> = { ...COMMANDS }
+  const versions = { code: "first code" }
   const mails: (string | undefined)[] = []
+  let nextPid = 2000
 
   const tools: LocalTools = {
     has: (command) => installed.includes(command),
@@ -68,7 +84,7 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
       if (command === "mkcert") return `${caRoot}\n`
       if (command === "postconf") return `${relay}\n`
       if (command === "lsof") return (listeners[args[0]!] ?? []).join("\n")
-      if (command === "ps") return COMMANDS[args.at(-1)!] ?? "something else\n"
+      if (command === "ps") return processes[args.at(-1)!] ?? ""
       return ""
     },
     succeeds: (command, args) => {
@@ -85,21 +101,33 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
       if (command === "sudo" && args[0] === "tee" && args[1] === hostsFile) writeFileSync(hostsFile, input!)
     },
     start: (command, args, options) => {
-      const child = childProgram()
+      const pid = nextPid++
+      const child = childProgram(pid)
       children.push({
         command,
         args,
         ...(options.env && { env: options.env }),
         ...(options.logFile && { logFile: options.logFile }),
+        detached: options.detached ?? false,
         child
       })
+      if (args.includes("serve")) {
+        processes[pid] = COMMANDS["111"]!
+        listeners["-tiTCP:4949"] = [`${pid}`]
+      }
+      if (command === "caddy") {
+        processes[pid] = COMMANDS["443"]!
+        listeners["-tiTCP:443"] = [`${pid}`]
+      }
       return child
     },
     stop: (pid) => {
       stopped.push(pid)
+      delete processes[pid]
       for (const port of Object.keys(listeners)) listeners[port] = listeners[port]!.filter((each) => each !== `${pid}`)
     },
     sleep: () => Promise.resolve(),
+    cloudVersion: () => versions.code,
     open: (url) => void opened.push(url),
     lanAddress: () => "192.168.4.30",
     askSecret: () => Promise.resolve(PASSWORD),
@@ -145,6 +173,8 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
     posts,
     children,
     listeners,
+    processes,
+    versions,
     mails
   }
 }
@@ -253,7 +283,7 @@ describe("spell space local", () => {
       await expect(world.site.start({})).rejects.toThrow("spell space local setup")
     })
 
-    test("runs the cloud at both addresses, and Caddy with the file it wrote", async () => {
+    test("runs the cloud at both addresses, the editor's last, and Caddy with the file it wrote", async () => {
       world = setUp({ trusted: true })
       await world.site.setup({})
       expect(await startAndStop(world)).toBe(0)
@@ -262,9 +292,9 @@ describe("spell space local", () => {
         "cloud",
         "serve",
         "--address",
-        "https://test.spell.app",
+        "https://test.spell.space",
         "--address",
-        "https://test.spell.space"
+        "https://test.spell.app"
       ])
       expect(world.children[1]!.command).toBe("caddy")
       expect(world.children[1]!.args).toEqual(["run", "--config", join(world.root, "local-site", "Caddyfile")])
@@ -329,7 +359,15 @@ describe("spell space local", () => {
       const settings = join(world.root, "local-site", "settings.json5")
       writeFileSync(settings, readFileSync(settings, "utf8").replace("{", `{ home: "/apps/@rs/OrgAdmin",`))
       await startAndStop(world)
-      expect(readFileSync(join(world.root, "local-site", "Caddyfile"), "utf8")).not.toContain("redir")
+      expect(readFileSync(join(world.root, "local-site", "Caddyfile"), "utf8")).not.toContain("/apps/@rs/OrgAdmin")
+    })
+
+    test("says the editor's address is for the house network alone", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      await startAndStop(world)
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("https://test.spell.app is Spell's editor"))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("anyone who reaches it edits as you"))
     })
 
     test("while the page server runs the site:  says so, and leaves it alone", async () => {
@@ -340,6 +378,14 @@ describe("spell space local", () => {
       expect(world.children).toHaveLength(2)
       expect(world.children[0]!.child.stop).not.toHaveBeenCalled()
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining("page server is already running the site"))
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("spell space local stop"))
+    })
+
+    test("runs its programs attached to the terminal, as children of it", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      await startAndStop(world)
+      expect(world.children.map((each) => each.detached)).toEqual([false, false])
     })
 
     test("its cloud's output shows in the terminal;  Caddy's goes to the log", async () => {
@@ -402,7 +448,8 @@ describe("spell space local", () => {
       await server.startWithPageServer()
       const logFile = join(world.root, "local-site", "site.log")
       expect(world.children.map((each) => each.logFile)).toEqual([logFile, logFile])
-      expect(await server.report()).toMatchObject({ url: "https://test.spell.app", state: "running" })
+      expect(world.children.map((each) => each.detached)).toEqual([true, true])
+      expect(await server.report()).toMatchObject({ url: "https://test.spell.app", state: "started" })
     })
 
     test("starts once:  asked again, or by a second page server", async () => {
@@ -413,7 +460,7 @@ describe("spell space local", () => {
       await second.startWithPageServer()
       expect(world.children).toHaveLength(2)
       expect(world.children[0]!.child.stop).not.toHaveBeenCalled()
-      expect(await second.report()).toMatchObject({ state: "already running, from the page server" })
+      expect(await second.report()).toMatchObject({ url: "https://test.spell.app", state: "running" })
     })
 
     test("replaces a cloud and a Caddy left running, as a terminal's start does", async () => {
@@ -437,26 +484,210 @@ describe("spell space local", () => {
       expect(await started).toBe(0)
     })
 
-    test("stops with the page server, and then may start again", async () => {
+    /** The site as an earlier page server left it running;  what it started, with the list emptied for what comes next. */
+    const leftRunning = async () => {
       await setUpMac()
-      const server = world.pageServerSite()
-      await server.startWithPageServer()
-      server.stop()
-      for (const { child } of world.children) expect(child.stop).toHaveBeenCalled()
-      expect(world.pageServerSite().runner).toBeUndefined()
+      const earlier = world.pageServerSite()
+      await earlier.startWithPageServer()
+      earlier.stop()
+      const [cloud, caddy] = world.children.splice(0).map((each) => each.child)
+      return { cloud: cloud!, caddy: caddy! }
+    }
+    /** What each program started since `leftRunning()` is, in order. */
+    const startedSince = () =>
+      world.children.map((each) =>
+        each.command === "caddy" ? "caddy" : each.args.includes("build") ? "build" : "cloud"
+      )
 
-      world.children.length = 0
-      await world.pageServerSite().startWithPageServer()
-      expect(world.children).toHaveLength(2)
+    test("a page server stopping leaves the site running, and the next one finds it", async () => {
+      const left = await leftRunning()
+      expect(left.cloud.stop).not.toHaveBeenCalled()
+      expect(left.caddy.stop).not.toHaveBeenCalled()
+      expect(world.stopped).toEqual([])
+      expect(world.pageServerSite().runner?.detached).toMatchObject({ cloud: left.cloud.pid, caddy: left.caddy.pid })
+
+      const next = world.pageServerSite()
+      await next.startWithPageServer()
+      expect(world.children).toEqual([])
+      expect(await next.report()).toMatchObject({ url: "https://test.spell.app", state: "running" })
     })
 
-    test("a page server stopped while it starts leaves nothing running", async () => {
+    test("a page server stopped while it starts leaves what it started running", async () => {
       await setUpMac()
       const server = world.pageServerSite()
       const starting = server.startWithPageServer()
       server.stop()
       await starting
-      for (const { child } of world.children) expect(child.stop).toHaveBeenCalled()
+      for (const { child } of world.children) expect(child.stop).not.toHaveBeenCalled()
+    })
+
+    test("unchanged code:  no build and no swap", async () => {
+      await leftRunning()
+      await world.pageServerSite().startWithPageServer()
+      expect(world.children).toEqual([])
+      expect(world.stopped).toEqual([])
+    })
+
+    test("changed code:  builds first, the old cloud serving, then swaps it, Caddy left alone", async () => {
+      const left = await leftRunning()
+      world.versions.code = "newer code"
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+
+      expect(startedSince()).toEqual(["build"])
+      expect(world.children[0]!.logFile).toBe(join(world.root, "local-site", "site.log"))
+      expect(world.stopped).toEqual([])
+      expect(await server.report()).toMatchObject({ url: "https://test.spell.app", state: "updating" })
+
+      world.children[0]!.child.end(0)
+      await vi.waitFor(() => expect(startedSince()).toEqual(["build", "cloud"]))
+      expect(world.stopped).toEqual([left.cloud.pid])
+      expect(world.processes[left.caddy.pid]).toBeDefined()
+      expect(world.pageServerSite().runner?.detached).toMatchObject({
+        cloud: world.children[1]!.child.pid,
+        caddy: left.caddy.pid,
+        code: "newer code"
+      })
+      await vi.waitFor(async () => expect(await server.report()).toMatchObject({ state: "started" }))
+
+      world.children.length = 0
+      await world.pageServerSite().startWithPageServer()
+      expect(world.children).toEqual([])
+    })
+
+    test("a build that fails leaves the old cloud serving, and says so in the log", async () => {
+      const left = await leftRunning()
+      world.versions.code = "newer code"
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+
+      world.children[0]!.child.end(1)
+      await vi.waitFor(async () =>
+        expect(await server.report()).toMatchObject({ state: expect.stringContaining("the old code") })
+      )
+      expect(world.stopped).toEqual([])
+      expect(startedSince()).toEqual(["build"])
+      expect(world.pageServerSite().runner?.detached?.cloud).toBe(left.cloud.pid)
+      expect(siteLog()).toContain("the old cloud keeps serving")
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("the old cloud keeps serving"))
+    })
+
+    test("two starts make one swap:  the second says it's updating, and does nothing", async () => {
+      const left = await leftRunning()
+      world.versions.code = "newer code"
+      const first = world.pageServerSite()
+      const second = world.pageServerSite()
+      await Promise.all([first.startWithPageServer(), second.startWithPageServer()])
+      expect(startedSince()).toEqual(["build"])
+      expect(await second.report()).toMatchObject({ state: "updating" })
+
+      world.children[0]!.child.end(0)
+      await vi.waitFor(() => expect(startedSince()).toEqual(["build", "cloud"]))
+      expect(world.stopped).toEqual([left.cloud.pid])
+    })
+
+    test("a page server stopping during the build ends the build, and swaps nothing", async () => {
+      await leftRunning()
+      world.versions.code = "newer code"
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      server.stop()
+      expect(world.children[0]!.child.stop).toHaveBeenCalled()
+      await vi.waitFor(() => expect(existsSync(join(world.root, "local-site", "site.lock"))).toBe(false))
+      expect(world.stopped).toEqual([])
+      expect(startedSince()).toEqual(["build"])
+    })
+
+    test("a Caddy file that changed restarts Caddy alone, with no build", async () => {
+      const left = await leftRunning()
+      writeFileSync(join(world.root, "local-site", "Caddyfile"), "an older file")
+      await world.pageServerSite().startWithPageServer()
+      await vi.waitFor(() => expect(startedSince()).toEqual(["caddy"]))
+      expect(world.stopped).toEqual([left.caddy.pid])
+      expect(readFileSync(join(world.root, "local-site", "Caddyfile"), "utf8")).toContain("lb_try_duration")
+    })
+
+    test("real mail set up since it started swaps the cloud", async () => {
+      await leftRunning()
+      world.tools.output = (
+        (original) => (command: string, args: string[]) =>
+          command === "postconf" ? "[smtp.gmail.com]:587\n" : original(command, args)
+      )(world.tools.output)
+      await world.pageServerSite().startWithPageServer()
+      world.children[0]!.child.end(0)
+      await vi.waitFor(() => expect(startedSince()).toEqual(["build", "cloud"]))
+      expect(world.children[1]!.env).toEqual({ SPELL_MAIL: "sendmail", SPELL_MAIL_FROM: "owen@example.com" })
+    })
+
+    test("a program gone while nobody watched:  started afresh", async () => {
+      const left = await leftRunning()
+      delete world.processes[left.caddy.pid]
+      world.listeners["-tiTCP:443"] = []
+      await world.pageServerSite().startWithPageServer()
+      expect(startedSince()).toEqual(["cloud", "caddy"])
+      expect(world.stopped).toEqual([left.cloud.pid])
+    })
+
+    test("a record from before detaching (a live page server, no programs) is left alone", async () => {
+      await setUpMac()
+      writeFileSync(join(world.root, "local-site", "run.json5"), `{ pid: ${process.pid}, by: "the page server" }`)
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      expect(world.children).toEqual([])
+      expect(await server.report()).toMatchObject({ state: "already running, from the page server" })
+    })
+
+    test("spell space local stop stops both programs, and the record", async () => {
+      const left = await leftRunning()
+      expect(await world.site.stop()).toBe(0)
+      expect(world.stopped).toEqual([left.cloud.pid, left.caddy.pid])
+      expect(world.pageServerSite().runner).toBeUndefined()
+      expect(console.log).toHaveBeenCalledWith("The site:  stopped.")
+
+      vi.mocked(console.log).mockClear()
+      expect(await world.site.stop()).toBe(0)
+      expect(console.log).toHaveBeenCalledWith("The site:  not running.")
+    })
+
+    test("spell space local stop asks a terminal's run to stop", async () => {
+      await setUpMac()
+      const started = world.site.start({})
+      await vi.waitFor(() => expect(world.children).toHaveLength(2))
+      await world.site.stop()
+      expect(world.stopped).toContain(process.pid)
+      process.emit("SIGINT")
+      expect(await started).toBe(0)
+    })
+
+    test("spell space local stop waits its turn while an update runs", async () => {
+      await leftRunning()
+      world.versions.code = "newer code"
+      await world.pageServerSite().startWithPageServer()
+      await expect(world.site.stop()).rejects.toThrow("being updated")
+      world.children[0]!.child.end(0)
+      await vi.waitFor(() => expect(startedSince()).toEqual(["build", "cloud"]))
+    })
+
+    describe("spell server stop all's part", () => {
+      test("from the main checkout:  stops both programs", async () => {
+        const left = await leftRunning()
+        const main = fakeMainCheckout(world.root)
+        expect(await stopLocalSiteWithAll(main, world.site)).toBe("local site:  stopped")
+        expect(world.stopped).toEqual([left.cloud.pid, left.caddy.pid])
+      })
+
+      test("from a worktree:  leaves it alone", async () => {
+        await leftRunning()
+        const main = fakeMainCheckout(world.root)
+        const worktree = fakeWorktree(main, join(world.root, "elsewhere"))
+        expect(await stopLocalSiteWithAll(worktree, world.site)).toContain("left alone")
+        expect(world.stopped).toEqual([])
+      })
+
+      test("on a Mac that isn't set up:  says nothing", async () => {
+        world = setUp()
+        expect(await stopLocalSiteWithAll(world.root, world.site)).toBeUndefined()
+      })
     })
 
     test("a record whose process has gone counts for nothing", async () => {
@@ -615,8 +846,108 @@ describe("spell space local", () => {
     world = setUp()
     const file = caddyFileFor({ names: NAMES, certificate: "/c.pem", key: "/k.pem" })
     expect(file).toContain(
-      `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\treverse_proxy 127.0.0.1:4949\n}`
+      `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\treverse_proxy 127.0.0.1:4949 {\n` +
+        `\t\tlb_try_duration 30s\n\t\tlb_try_interval 250ms\n\t}\n}`
     )
+  })
+
+  describe("the editor's address (epic `atmosphere` P39)", () => {
+    const file = () =>
+      caddyFileFor({ names: NAMES, certificate: "/c.pem", key: "/k.pem", editor: { name: NAMES[0]!, port: 3456 } })
+
+    test("the editor's name goes to its dev server, the other to the cloud", () => {
+      world = setUp()
+      expect(file()).toContain(`test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\treverse_proxy 127.0.0.1:4949 {`)
+      expect(file()).toMatch(/\ntest\.spell\.app \{\n\ttls "\/c\.pem" "\/k\.pem"\n/)
+      expect(file()).toContain("reverse_proxy 127.0.0.1:3456 {")
+      expect(file()).not.toMatch(/test\.spell\.app, /)
+    })
+
+    test("a page of an org's opened there goes on to the cloud, never the dev server's own files", () => {
+      world = setUp()
+      const pattern = new RegExp(/@cloudPages path_regexp (\S+)/.exec(file())![1]!)
+      for (const path of ["/apps/@rs/OrgAdmin", "/@willzalone", "/@rs/"]) expect(path).toMatch(pattern)
+      for (const path of ["/@vite/client", "/@fs/Users/x.ts", "/@id/x", "/edit/@spell/x", "/apps", "/"]) {
+        expect(path).not.toMatch(pattern)
+      }
+      expect(file()).toContain("redir @cloudPages https://test.spell.space{uri}")
+    })
+
+    test("to the dev server it's this machine's editor:  its Host, and that one Origin alone", () => {
+      world = setUp()
+      expect(file()).toContain("header_up Host localhost:3456")
+      expect(file()).toContain(`header_up Origin "^https://test\\.spell\\.app$" "http://localhost:3456"`)
+      expect(file().match(/header_up Origin/g)).toHaveLength(1)
+      expect(file().split("\ntest.spell.app {")[0]).not.toContain("header_up")
+    })
+
+    test("requests into a Claude session, test routes and themes saved into Spell UI are refused there", () => {
+      world = setUp()
+      expect(file()).toContain(
+        "@refused path /api/changes /api/changes/* /api/test /api/missing /api/not-authorized /api/error"
+      )
+      expect(file()).toContain("path /api/themes/*\n\t\tnot method GET HEAD")
+      expect(file()).toContain(`respond @refused "`)
+      expect(file()).toContain(`respond @themeSaves "`)
+      // and never at the cloud's address
+      expect(file().split("\ntest.spell.app {")[0]).not.toContain("@refused")
+    })
+
+    test("no editor running:  it says so plainly, after the hold", () => {
+      world = setUp()
+      expect(file()).toMatch(/handle_errors \{\n\t\trespond "Spell's editor isn't running[^"]*" 502/)
+      expect(file().split("\ntest.spell.app {")[1]).toContain("lb_try_duration 30s")
+    })
+
+    test("the only name:  no redirects, as there's no cloud address to go to", () => {
+      world = setUp()
+      const alone = caddyFileFor({
+        names: ["editor.example"],
+        certificate: "/c.pem",
+        key: "/k.pem",
+        editor: { name: "editor.example", port: 3456 }
+      })
+      expect(alone).not.toContain("redir")
+      expect(alone).not.toContain("127.0.0.1:4949")
+    })
+
+    test("editorNameAmong():  the first of two or more, or what the settings say, or none", () => {
+      world = setUp()
+      expect(editorNameAmong(NAMES, undefined)).toBe("test.spell.app")
+      expect(editorNameAmong(["only.example"], undefined)).toBeUndefined()
+      expect(editorNameAmong(NAMES, "https://test.spell.space")).toBe("test.spell.space")
+      expect(editorNameAmong(NAMES, false)).toBeUndefined()
+      expect(editorNameAmong(NAMES, "https://other.example")).toBeUndefined()
+    })
+
+    test("the Caddy file follows the editor's port, and the settings' choice of address", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      const caddyFile = join(world.root, "local-site", "Caddyfile")
+      let port = 3000
+      const site = world.pageServerSite({ editorPort: () => port })
+      await site.startWithPageServer()
+      expect(readFileSync(caddyFile, "utf8")).toContain("reverse_proxy 127.0.0.1:3000 {")
+      site.stop()
+      port = 3456
+      await world.pageServerSite({ editorPort: () => port }).startWithPageServer()
+      await vi.waitFor(() => expect(readFileSync(caddyFile, "utf8")).toContain("reverse_proxy 127.0.0.1:3456 {"))
+    })
+
+    test("editorAddress:  the main checkout's, on a Mac set up for it, and only then", async () => {
+      world = setUp({ trusted: true })
+      expect(world.pageServerSite().editorAddress).toBeUndefined()
+      await world.site.setup({})
+      expect(world.pageServerSite().editorAddress).toBe("https://test.spell.app")
+      expect(world.pageServerSite({ isMainCheckout: false }).editorAddress).toBeUndefined()
+      expect(world.pageServerSite({ platform: "linux" }).editorAddress).toBeUndefined()
+    })
+  })
+
+  test("the real tools:  the cloud's code is there to hash", () => {
+    world = setUp()
+    for (const path of cloudCode()) expect(existsSync(path)).toBe(true)
+    expect(localSiteTools().cloudVersion()).toMatch(/^[0-9a-f]{32}-[0-9a-f]{16}$/)
   })
 
   test("lanAddressOf():  Wi-Fi or wired before a VPN, and never loopback", () => {

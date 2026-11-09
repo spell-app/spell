@@ -445,7 +445,7 @@ export class Tokenizer {
   }
   /** Regex matching a JSX attribute name plus optional trailing `=`. */
   get JSX_ATTRIBUTE_START() {
-    return /^\s*([\w-]+\b)\s*(=?)\s*/
+    return /^\s*([\p{L}\p{N}_-]+)\s*(=?)\s*/u
   }
   /** Characters which terminate a run of `JSXTextToken`. */
   get JSX_TEXT_END_CHARS() {
@@ -589,24 +589,54 @@ export class Tokenizer {
     if (endBit !== ">" && endBit !== "/>") {
       const named = this.matchJSXQuotedName(tagName, text, nextStart, end)
       if (named) nextStart = named.next
-      const attrs = this.consume(this.matchJSXAttribute, text, nextStart, end)
-      if (named || (attrs && attrs.length)) {
-        jsxElement.record.attributes = [...(named ? [named] : []), ...(attrs ?? [])]
-        if (attrs?.length) nextStart = attrs[attrs.length - 1].next
+      const attributes: P.JSXAttributeToken[] = named ? [named] : []
+      // read what attributes it can;  what it can't is skipped, so the tag still ends at its own `>` (epic `notebook` I5)
+      let endBitMatch: RegExpMatchArray | null | undefined
+      while (true) {
+        const attrs = this.consume(this.matchJSXAttribute, text, nextStart, end) ?? []
+        attributes.push(...attrs)
+        if (attrs.length) nextStart = attrs[attrs.length - 1]!.next
+        endBitMatch = this.matchExpressionAtHead(this.JSX_TAG_START_END, text, nextStart, end)
+        if (endBitMatch) break
+        const skipped = this.endOfUnreadableAttribute(text, nextStart, end)
+        if (skipped === undefined) break
+        jsxElement.record.unreadable ??= text.slice(nextStart, skipped).trim()
+        nextStart = this.eatWhitespace(text, skipped, end)
       }
+      if (attributes.length) jsxElement.record.attributes = attributes
 
       // see if we got an end marker after attributes
-      const endBitMatch = this.matchExpressionAtHead(this.JSX_TAG_START_END, text, nextStart, end)
       if (endBitMatch) {
         if (endBitMatch[1] === "/>") jsxElement.record.isUnaryTag = true
         nextStart += endBitMatch[0].length
       } else {
         this.logger.warn("Missing expected end `>` for jsxElement", jsxElement, `\`${text.slice(start, nextStart)}\``)
         jsxElement.record.error = "No end >"
+        jsxElement.record.unreadable ??= text.slice(start, nextStart).trim()
       }
     }
     jsxElement.record.raw = text.slice(start, nextStart)
     return jsxElement
+  }
+
+  /**
+   * Where the unreadable word at `start` of a tag's attributes ends, its quotes included:
+   * `Ždge="1,048"` in `<button baŽdge="1,048" appearance="basic">` -- `undefined` if there's no word to skip.
+   * - It stays on its line, and stops at the tag's end or the next tag, so a broken tag stays one tag.
+   */
+  private endOfUnreadableAttribute(text: string, start: number, end: number): number | undefined {
+    let at = start
+    while (at < end && /[ \t]/.test(text[at]!)) at++
+    const from = at
+    for (let quote = ""; at < end; at++) {
+      const char = text[at]!
+      if (char === "\n") break
+      if (quote) {
+        if (char === quote) quote = ""
+      } else if (char === '"') quote = char
+      else if (/[\s<>]/.test(char) || (char === "/" && text[at + 1] === ">")) break
+    }
+    return at > from ? at : undefined
   }
 
   /**
@@ -706,9 +736,16 @@ export class Tokenizer {
     let nesting = 1
 
     let nextStart = start
+    this.openJSXTags.push(endTagName)
     while (true) {
-      const child = this.matchJSXChild(endTagName, text, nextStart, end)
-      if (!child) break
+      const child =
+        this.matchJSXChild(endTagName, text, nextStart, end) ?? this.matchUnreadableJSX(text, nextStart, end)
+      if (!child) {
+        // white space before an end tag that isn't ours:  left for that tag, so it still starts its line
+        const last = children.at(-1)
+        if (last instanceof P.JSXTextToken && !`${last.raw}`.trim()) children.pop()
+        break
+      }
       children.push(child)
       nextStart = child.next
 
@@ -719,12 +756,36 @@ export class Tokenizer {
         continue
       }
     }
+    this.openJSXTags.pop()
     // TODO: how to surface this error???
     if (nesting !== 0) {
       this.logger.warn(`matchJSXChildren(${text.slice(start, nextStart + 10)}: didn't match end child!`)
     }
 
     return children
+  }
+
+  /** The tags `matchJSXChildren()` is inside, outermost first:  so a stray end tag can be told from a real one. */
+  private openJSXTags: string[] = []
+
+  /**
+   * What's left of the line at `start`, when nothing there reads as a child:  `</butto` half typed, a stray `>`.
+   * - So what's written after it stays inside its element, and one mistake is one error (epic `notebook` I5).
+   * - `undefined` at the end of the text, and at an end tag that closes something:
+   *   - one some open element is waiting for, `</example>`, or `</>`
+   *   - one on a line of its own, which may be a spellx tag's, `</draw>`, outside the markup this reads
+   */
+  private matchUnreadableJSX(text: string, start: number, end: number): P.JSXUnreadableToken | undefined {
+    const offset = text.slice(start, end).search(/\S/)
+    if (offset === -1) return undefined
+    const at = start + offset
+    const endTag = /^<\/([\w.-]*)>/.exec(text.slice(at, end))
+    const startsItsLine = /^[ \t]*$/.test(text.slice(text.lastIndexOf("\n", at - 1) + 1, at))
+    if (endTag && (endTag[1] === "" || startsItsLine || this.openJSXTags.includes(endTag[1]!))) return undefined
+    const newline = text.indexOf("\n", at)
+    const lineEnd = newline === -1 || newline > end ? end : newline
+    const raw = text.slice(at, lineEnd).trimEnd()
+    return new P.JSXUnreadableToken({ value: raw, raw, start: at })
   }
 
   /**
@@ -829,6 +890,8 @@ export class Tokenizer {
     // if there was an equals char, parse the value
     if (equals) {
       const value = this.matchJSXAttributeValue(text, nextStart, end)
+      // a quote left open, `color="bl`:  not an attribute, or it'd run on to the next tag's quote (epic `notebook` I5)
+      if (value instanceof P.TextToken && UNCLOSED_QUOTE.test(`${value.raw}`)) return undefined
       if (value) {
         attribute.record.value = value
         nextStart = value.next
@@ -1328,6 +1391,12 @@ export const HTML_COMMENT_START = "<!--"
 
 /** What ends one. */
 export const HTML_COMMENT_END = "-->"
+
+/**
+ * A quoted attribute value that ran past its line into the next tag's:  a quote left open, `color="bl`.
+ * - A value can run over several lines, but not with a line that starts a tag.
+ */
+const UNCLOSED_QUOTE = /\n\s*</
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */
 const SPACES_BEFORE_TAB = / {1,3}\t/g

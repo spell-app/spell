@@ -107,7 +107,7 @@ Rulex walks the tokens a language's tokenizer made:  words, numbers, symbols, qu
 - Parentheses only group.
   What lands in `match.groups` is each `{subrule}`, under its rule's name or the one you give it, and any part you
   name:  `{thing:expression}` is a regex's `(?<thing>...)`, and lands in `match.groups.thing`.
-- A choice parses EVERY alternative, then keeps the best one
+- A choice parses every alternative that can start where it is, then keeps the best one
   ([how it picks](README-parser.md#how-a-choice-is-settled)).
   A regex's `a|b` takes the first one that works.
 

@@ -65,7 +65,7 @@ describe("thing references in spell", () => {
       parentScope: rootScope
     })
     const project = new P.IncrementalProject({ scope, files: [{ path: "/Main.spell", text }] })
-    const shown = () => describeWarnings(project.files[0]!.parse.match)
+    const shown = () => describeWarnings(project.files[0]!.parse!.match)
     expect(shown()).toHaveLength(1)
     project.update(
       "/Main.spell",

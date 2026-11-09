@@ -31,6 +31,19 @@ test("invite only:  nobody's account until an invite makes one, through the peop
   expect(await accounts.invite("ana@example.com")).toBe("ana@spell")
 })
 
+test("a typed name:  the account itself, or an org's name for one of Spell's;  nobody else's (epic `atmosphere` T64)", async () => {
+  await accounts.invite("cam@example.com")
+  expect(await accounts.accountNamed("cam@spell")).toBe("cam@spell")
+  expect(await accounts.accountNamed("nobody@spell")).toBeUndefined()
+  expect(await accounts.accountNamed("cam@no-such-org")).toBeUndefined()
+  expect(await accounts.accountNamed("no at sign")).toBeUndefined()
+  const { person } = await people.person("cam")
+  await people.save(
+    new People.Org({ id: "camden", name: "Camden", members: [new People.Membership({ person, role: "manager" })] })
+  )
+  expect(await accounts.accountNamed("cam@camden")).toBe("cam@spell")
+})
+
 test("a name taken gets a number", async () => {
   expect(await accounts.invite("ana@elsewhere.org")).toBe("ana-2@spell")
 })

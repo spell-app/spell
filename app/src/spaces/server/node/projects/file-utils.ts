@@ -15,7 +15,7 @@ import filterAsync from "node-filter-async"
 import { SRV } from "spell/server"
 
 import { isFileOrFolderNotFoundError } from "./response-utils"
-import type { GetFolderContentsOptions } from "./server.types"
+import type { GetFilesInsideOptions, GetFolderContentsOptions } from "./server.types"
 
 ////////////////
 // ## File encoding formats for `readFile()`, `writeFile()`, etc.
@@ -198,7 +198,7 @@ export async function makeFolder(path: string) {
 /**
  * Return array (single level of) files in folder at server `path`, as paths or filenames.
  * - See `GetFolderContentsOptions` (`server.types.ts`) for `options`.
- * - TODO: `includeNested` to recurse down directories??
+ * - Every level, every file:  `getFilesInside()`.
  */
 export async function getFolderContents(path: string, options: GetFolderContentsOptions = {}) {
   const {
@@ -240,6 +240,34 @@ export async function getFolderContents(path: string, options: GetFolderContents
   // Sort case-insensitive
   if (sort) paths.sort(caseInsensitiveSort)
   return paths
+}
+
+/**
+ * Every file inside the folder at server `path`, sub-folders too, each as its path from `path`:
+ * `Usage.spellml`, `Button/Usage.spellml`.
+ * - `/`-separated on every platform:  these become parts of a project's addresses.
+ * - A folder's own files come first, then each of its sub-folders' in turn, each level sorted as `getFolderContents()` does.
+ * - Leaves out hidden files and folders, at every level, and any folder `ignoreFolder` turns down.
+ * - NEVER follows a link to a folder:  it could point back up.
+ *   A link to a file lists as a file;  a broken link isn't listed.
+ */
+export async function getFilesInside(path: string, { ignoreFolder }: GetFilesInsideOptions = {}): Promise<string[]> {
+  const walk = async (folder: string, inside: string): Promise<string[]> => {
+    const names = await getFolderContents(folder, { includeFolders: true, namesOnly: true, ignoreHidden: true })
+    const files: string[] = []
+    const folders: string[] = []
+    for (const name of names) {
+      const itemPath = joinPath(folder, name)
+      const relativePath = inside + name
+      const isLink = (await fse.lstat(itemPath)).isSymbolicLink()
+      if (isLink && !(await pathExists(itemPath))) continue
+      if (!(await pathIsAFolder(itemPath))) files.push(relativePath)
+      else if (!isLink && !ignoreFolder?.(relativePath)) folders.push(name)
+    }
+    for (const name of folders) files.push(...(await walk(joinPath(folder, name), `${inside}${name}/`)))
+    return files
+  }
+  return await walk(path, "")
 }
 
 /**

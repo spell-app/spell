@@ -1,0 +1,141 @@
+<spell-page "tree-diagram usage" notebook>
+	<header level="1">
+		Tree diagram
+		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#from-script">From script</>
+			<item link="#clicks-and-folding">Clicks and folding</>
+			<item link="#size">Size</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  the data contract, the two ways to give it, sizing, framework snippets, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A tree diagram draws any tree:  it knows nothing about where the tree came from.
+			Write it as nested tags:  a `<ui-tree-node>` inside the diagram, the nodes under it inside that.
+			In Spell it's `<tree-node "If">`, its label a bare quoted name.
+
+			| Attribute | What it is |
+			|---|---|
+			| `label` | The box's text, e.g. `If`, `Variable number`, `Number 15`.  None:  the node's own text. |
+			| `detail` | A second, smaller, muted line under the label, e.g. a datatype `number`. |
+			| `edge-label` | Text on the line from its parent, e.g. `condition`, `body`, `otherwise`. |
+			| `hover-text` | What shows when the pointer rests on its box, e.g. the source it came from. |
+			| `color` | The box's colour, a hue of the theme's:  `green`, `blue` ... |
+			| `kind` | A word for what sort of node it is:  its box is also part `kind-<word>`, for your own style. |
+			| `folded` | It starts folded:  the nodes under it don't show. |
+
+			Anything else inside a node shows in its box:  an icon, a button, an image.
+			It's a real element on the page, measured so the box fits it, and it keeps its state and events.
+
+			Or give the tree as data, the same fields in a `TreeDiagramNode` (exported by `spell-ui`):
+			`edgeLabel` for `edge-label`, `title` for `hover-text`, and `children`, left to right.
+
+			- The `tree` property, from script or a framework.  It redraws whenever `tree` is set again:  set a NEW
+			  tree, since a tree changed in place isn't seen.
+			- A `<ui-json>` child, holding it as JSON in its text or in a `source` file.
+			- A `<script type="application/json">` child, the older way, for a static page with no script of its own
+			  (it works from `file://` too).
+
+			The property wins;  then nested tags;  then JSON.  The diagram follows its children as the page changes them.
+			Setting the property back to `undefined` shows the children's tree again.
+
+			With no tree, or JSON that doesn't parse, it draws nothing and takes no room;  bad JSON also logs one console
+			warning.  Data is checked, not trusted:  a node without a `label` gets an empty box, and anything that
+			isn't a node is left out.
+		</>
+		<markdown>
+			```html
+			<ui-tree-diagram>
+			  <ui-tree-node label="Add">
+			    <ui-tree-node label="Number 1"></ui-tree-node>
+			    <ui-tree-node label="Number 2"></ui-tree-node>
+			  </ui-tree-node>
+			</ui-tree-diagram>
+			```
+		</>
+	</>
+
+	<section label="From script">
+		<markdown>
+			Set `tree` on the element. In Solid, pass it as a plain prop, `tree={...}`:  the element takes the
+			object whole, as its property.
+		</>
+		<markdown>
+			```js
+			import "spell/ui/ui-tree-diagram"
+
+			const diagram = document.querySelector("ui-tree-diagram")
+			diagram.tree = {
+			  label: "If",
+			  children: [
+			    { label: "IsA · integer", edgeLabel: "condition", detail: "boolean" },
+			    { label: "Print", edgeLabel: "body" }
+			  ]
+			}
+			```
+		</>
+		<markdown>
+			```tsx
+			import type { TreeDiagramNode } from "spell/ui"
+
+			function ParseTree(props: { tree: TreeDiagramNode }) {
+			  return <ui-tree-diagram tree={props.tree} />
+			}
+			```
+		</>
+	</>
+
+	<section label="Clicks and folding">
+		<markdown>
+			A click on a node sends `ui-node-clicked`, with its `node` and its `path`, its child index at each depth (`0.2.1`).
+			`clickable` makes that clear to the reader:  a pointer cursor, a hover look, and keys.
+
+			`foldable` gives each node with children a button;  `ui-node-toggled` says which, and `folded`.
+			A folded node stays folded when the tree changes around it.
+		</>
+	</>
+
+	<section label="Size">
+		<markdown>
+			A tree is laid out tidy:  each depth a row (a column, `left-right`), each parent centred over its children,
+			small subtrees spread evenly between big ones, and no two boxes or edge labels overlapping.
+
+			Boxes fit their text, measured in its real font, so any font works.
+			It's the page's by default;  `--ui-tree-diagram-font-family` sets another.
+			A static server render has nothing to measure with, and estimates from the number of characters.
+
+			It draws at its natural size, `--ui-tree-diagram-font-size` (13px in 16px text) for labels, and never
+			larger.  In a narrower column it shrinks to fit, down to `--ui-tree-diagram-min-scale` (three quarters);
+			a tree wider than that scrolls sideways inside the element instead of shrinking past readable.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			A plain tree diagram is a picture, and nothing in it takes focus.
+			A tree wide enough to scroll scrolls with the scrollbar or a trackpad;  browsers that make scrolling boxes
+			focusable also let the arrow keys scroll it.
+
+			- `foldable`:  Tab reaches each fold button;  Enter or Space folds or opens it.
+			- `clickable`:  Tab reaches each node too;  Enter or Space sends `ui-node-clicked`, as a click does.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The drawing is one `<svg role="img">`, named by a summary of its root:  "Tree:  If, with 3 children"
+			  (translatable).
+			- `foldable` or `clickable` make it `role="group"`, as it holds buttons then:  each named by its node.
+			- A node's `hover-text` is its box's `<title>`:  hover text for a pointer.
+			- The summary doesn't read out the whole tree.  Where its shape matters to a reader, say it in the
+			  text around the diagram too.
+		</>
+	</>
+</spell-page>

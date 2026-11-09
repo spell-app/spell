@@ -1,6 +1,6 @@
 import { For, Show, createComponent, omit } from "solid-js"
 
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import type { monaco } from "spell/app/app/ui/monaco"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 
@@ -28,7 +28,7 @@ export function SpellEditorPane(props: SpellEditorPaneProps) {
                 class={{ active: it === props.file }}
                 onClick={() => props.onSelect(it)}
               >
-                {it.file ?? it.path}
+                {SP.SpellProject.sourceNameOf(it.path)}
                 <Show when={props.isDirty(it)}>
                   <span class="dirty" title={appTexts.text("editedSinceSaved")}></span>
                 </Show>

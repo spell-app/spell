@@ -22,6 +22,11 @@
       "type": "Perfil",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "perfiles"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:1027-1172"
     },
     {
@@ -40,6 +45,11 @@
       "type": "Función",
       "superType": "Thing",
       "gender": "feminine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "funciones"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:1210-1309"
     },
     {
@@ -52,6 +62,11 @@
       "type": "Miembro",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "miembros"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:1311-1550"
     },
     {
@@ -82,6 +97,11 @@
       "type": "Equipo",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "equipos"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:1552-1697"
     },
     {
@@ -100,6 +120,11 @@
       "type": "Proyecto",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "proyectos"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:1699-1892"
     },
     {
@@ -124,6 +149,11 @@
       "type": "Mandato",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "mandatos"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:1894-2347"
     },
     {
@@ -180,6 +210,11 @@
       "type": "Aprobación",
       "superType": "Thing",
       "gender": "feminine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "aprobaciones"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:2349-2501"
     },
     {
@@ -198,6 +233,11 @@
       "type": "Diseñador",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "diseñadores"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:2616-2827"
     },
     {
@@ -223,6 +263,11 @@
       "type": "Etapa",
       "superType": "Thing",
       "gender": "feminine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "etapas"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:2919-3122"
     },
     {
@@ -248,6 +293,11 @@
       "type": "Cambio",
       "superType": "Thing",
       "gender": "masculine",
+      "savedIn": {
+        "place": "roles_de_la_org",
+        "placeType": "RolDeLaOrg",
+        "collection": "cambios"
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:3124-3396"
     },
     {
@@ -284,12 +334,52 @@
     {
       "type": "RolDeLaOrg",
       "superType": "Place",
+      "place": {
+        "name": "roles_de_la_org",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@rs/__admin/roles",
+        "details": {
+          "checkedEvery": 30,
+          "collections": {
+            "perfiles": {
+              "at": "org_profiles"
+            },
+            "funciones": {
+              "at": "org_roles"
+            },
+            "miembros": {
+              "at": "members"
+            },
+            "equipos": {
+              "at": "teams"
+            },
+            "proyectos": {
+              "at": "projects"
+            },
+            "mandatos": {
+              "at": "terms"
+            },
+            "aprobaciones": {
+              "at": "approved_apps"
+            },
+            "diseñadores": {
+              "at": "designers"
+            },
+            "etapas": {
+              "at": "event_stages"
+            },
+            "cambios": {
+              "at": "role_changes"
+            }
+          }
+        }
+      },
       "defined": "/AdministracionDeLaOrg.api.es.spell:482-952"
     },
     {
       "type": "AdministraciónDeLaOrg",
       "superType": "App",
-      "defined": "/AdministracionDeLaOrg.es.spellml:659-14690"
+      "defined": "/AdministracionDeLaOrg.es.spellml:659-14843"
     },
     {
       "property": "miembro_nuevo",

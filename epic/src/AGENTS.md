@@ -1026,7 +1026,7 @@ The shared folders:
       - Above the groups, a row of SAGA CHIPS, one per saga with epics, in the person's order (`<epic-list sagas>`),
         then "No saga", each with its count.
         - A saga no epic names gets no chip (epic `epic-engine` P3:  its chip could only show nothing).
-      - A click shows only that saga's epics, by the state chips' rule (`StateFilter.nextShown()`).
+      - A click shows only that saga's epics (`StateFilter.nextShown()`, its `narrow` rule).
         - remembered in this browser (`spell-epics:sagas`), for every Epics page
       - The groups count only the cards that show.
       - each card carries its saga in attributes (`saga`, `saga-title`, `saga-purpose`), for the list and the page
@@ -1451,10 +1451,12 @@ In `tools/`:
     - Each chip shows how many, left of its count.
     - solid while that state shows, outlined while hidden
     - no filter icon (2026-10-10)
-    - A click (`StateFilter.nextShown()`, in the element:  an epic page's rule too):
-      - everything showing:  only that state
-      - else a hidden one shows too, and a shown one hides
-      - the only one showing:  everything again
+    - A click (`StateFilter.nextShown()`, in the element:  an epic page's rule too;  epic `epic-engine` I242):
+      - toggles that chip, and every state of its colour:  the blues together (the blue badge is their chip, the items
+        marked in this pass with them), the oranges together
+      - the blues sit together, first
+      - a click that would leave nothing showing shows the next colour instead, wrapping to the first;
+        the only colour there is stays on (Owen, 2026-11-09:  "Turning off the last badge -- select the next one")
     - The PHASES section's chips (`<epic-state-filter phases>`, epic `epic-engine` I157;
       recoloured in I170, 2026-10-29:  "this doesn't match our other colors"):  ONE state per phase, the first that holds (`PhaseState`,
       `epic-section/PhaseState.ts`, the one rule its chips, counts, toolbar badges and each phase's status circle use)
@@ -1468,7 +1470,7 @@ In `tools/`:
       - green (`recent`):  done in the last 3 days (`done-at`, which the tool stamps, and takes from the log for an
         older done phase);  grey (`old`):  done before, or no `done-at`
       - each phase's status circle wears its chip's colour and fill (`data-state`), its shape still its status
-    - An ⌥-click (Alt-click) on ANY chip, every list's and an epic page's alike:  only that state, whatever showed
+    - An ⌥-click (Alt-click) on ANY chip, every list's and an epic page's alike:  only that colour, whatever showed
       (epic `epic-engine` I166;  2026-10-29:  "if I option-click on one of those badges, turn just that one on").
       - the element sends it as `how: "only"` (`StateFilter.nextShown(..., "only")`);  each chip's tooltip says so
     - A filtered list says "N hidden · show all" under it.

@@ -26,17 +26,33 @@ const vocabulary = {
  * - It IS a `<ui-example>`:  its heading, its description, its live result in a frame,
  *   and the `</>` button that rolls its code open under it, closed at first.
  * - Its heading is its `name`:  a notebook's `<example "one counter">` compiles to
- *   `h("spell-example", { name: "one counter" }, ...)`.
- * - Knows nothing of the notebook:  `<NotebookPage>` puts each example's code in its `source` slot (an editor), and
- *   the text before it in its `description` slot, and finds it by its place.
+ *   `h("spell-example", { name: "one counter" }, ...)`;  without one, its `heading`.
+ * - Its description is its own `description`, as `<ui-example>`'s is (epic `notebook` P6):
+ *   `<example "one counter" description="...">`.
+ *   The text before it is just text.
+ * - Knows nothing of the notebook:  `<NotebookPage>` finds each example by its place,
+ *   and puts its code in its `source` slot (an editor).
  * - The editor app's own:  a page that doesn't define it (a `<spell-viewer>` elsewhere) shows the result alone.
  ****************/
 export class SpellExample extends UIExample {
   @E.proto static vocabulary: E.ComponentVocabulary = vocabulary
 
-  /** Its heading:  its `name`. */
+  /**
+   * Its heading:  its `name`;  none, its own `heading`, as the palette's example writes it
+   * (`<example heading="An example">`, from `<ui-example>`'s snippet;  epic `notebook` P5).
+   */
   get heading(): string | undefined {
-    return this.name
+    const heading = this.name || (E.Reactive.attributeValue(this, "heading") as string | undefined)
+    // under a section of the same words, the section's title already says it (Button's Examples:  "Button", "Button")
+    return heading && heading === this.sectionLabel ? undefined : heading
+  }
+
+  /**
+   * The `label` of the section it's in, if any:  what its heading would only repeat (epic `notebook` P9).
+   * - Read as it's drawn:  an example is drawn inside its section.
+   */
+  get sectionLabel(): string | undefined {
+    return this.domElement.parentElement?.closest("ui-section")?.getAttribute("label") ?? undefined
   }
 }
 

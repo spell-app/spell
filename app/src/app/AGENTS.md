@@ -189,6 +189,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - A program that imports other projects takes it too, each import weighed the same way, deepest first
         (epic `editor`, Live Edit Everywhere);  one whose imports become other projects runs again.
       - A program with no app runs again instead:  nothing is drawn to keep.
+      - A notebook's examples are each a part of the page's drawing (core's `drawPart()`):  an edit to one draws that
+        one again, not the page;  a line typed above one only moves it (epic `notebook` P4).
+        A move keeps every example and section it can, so only what moved goes elsewhere on the page (I6).
       - A property an edit adds shows as its element's attribute at once, both ways (epic `editor` I47):
         the tag's definition grows in place (`E.DOMElement.addAttributes()`), and the page hears of the new classes
         only once the running things are theirs (core's `takeNewClasses()`).

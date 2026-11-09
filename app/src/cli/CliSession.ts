@@ -255,10 +255,11 @@ export class CliSession {
   /**
    * `problem` on one line:  `path:line:col  message`, which terminals and editors can click.
    * - A warning says so:  `path:line:col  warning:  message`.
+   * - A lint rule's problem names it last:  `...  message  (description-before-example)`.
    * - Its path is relative to the current folder.
    */
-  problemLine({ project, path, line, column, message: _message, severity }: CLI.Problem): string {
-    const message = severity === "warning" ? `warning:  ${_message}` : _message
+  problemLine({ project, path, line, column, message: _message, severity, rule }: CLI.Problem): string {
+    const message = (severity === "warning" ? `warning:  ${_message}` : _message) + (rule ? `  (${rule})` : "")
     return path ? `${this.relative(path)}:${line}:${column}  ${message}` : `${project}:  ${message}`
   }
 

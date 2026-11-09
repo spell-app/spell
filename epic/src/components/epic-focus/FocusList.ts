@@ -1,6 +1,6 @@
 import { PageStages } from "spell/epic/phases"
 import { inTestOrder } from "spell/epic/review"
-import { StateFilter } from "spell/epic/components/epic-section/StateFilter"
+import { MARKED_SHOWS_AS, StateFilter } from "spell/epic/components/epic-section/StateFilter"
 
 import { FOCUS_KINDS, OPEN_STATES, type FocusEntry, type FocusKind, type FocusKindLook } from "./EpicFocus.types"
 
@@ -45,8 +45,8 @@ export class FocusList {
 
   /**
    * The entries that show, of `entries`, with each tab's chips `shown` (the states showing;  a tab without, every one).
-   * - never hidden:  the pinned item, one marked in this pass, one Claude is on (`progress`:  the blue badge, no chip;
-   *   `StateFilter.hides()`, the chips' own rule)
+   * - never hidden:  the pinned item
+   * - one marked in this pass goes with the blues (`MARKED_SHOWS_AS`), as the chips' own rule (`StateFilter.hides()`)
    */
   static visible(
     entries: readonly FocusEntry[],
@@ -55,8 +55,8 @@ export class FocusList {
   ): FocusEntry[] {
     return entries.filter((entry) => {
       const states = shown[entry.kind]
-      if (!states || entry.id === pinned || entry.marked) return true
-      return !StateFilter.hides(entry.state, states)
+      if (!states || entry.id === pinned) return true
+      return !StateFilter.hides(entry.marked ? MARKED_SHOWS_AS : entry.state, states)
     })
   }
 

@@ -23,6 +23,7 @@ behind.apply([{"kind": "insert", "collection": "device_notes", "id": "device-not
 import asyncio
 import json
 import os
+import re
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Mapping
@@ -47,6 +48,8 @@ TOKEN_HEADER = "x-server-token"
 PLACES_PREFIX = "/api/places/"
 # How long a request to the page server may take, in seconds.
 REQUEST_SECONDS = 30
+# Where two words of a Python name meet:  `device_count`.
+SNAKE_WORD = re.compile(r"_([a-z0-9])")
 # The end of a compiled program's file name, before which its name is:  `Notes.spell.py`.
 PROGRAM_SUFFIX = ".spell.py"
 # The end of its device file's name, beside it:  `Notes.device.json`.
@@ -152,7 +155,7 @@ class ServerPlace(PlaceBehind):
 
     - `POST <address>/list` `{collection, query}`, `POST <address>/apply` `{changes}`, `POST <address>/call`.
     - With the page server's write token (`x-server-token`), on reads too:  its guard asks it of every request.
-    - A program's lines go with each request (`lines`):  a CSV file's id column.
+    - A program's lines go with each request (`lines`):  a CSV file's id column, the columns a line names.
     - Who's asking:  this machine's person, as the page server takes anyone with its token.
     - `post`:  sends a request, for a test to stand in for the server;  `urllib`'s by default.
     """
@@ -246,9 +249,29 @@ def place_behind(details: Mapping[str, Any], program: Path | None) -> PlaceBehin
                 "a project's own (a name alone), or a place server's address",
                 "not found",
             )
-        lines = {"idColumn": details["id_column"]} if "id_column" in details else {}
-        return ServerPlace(kind, server_address(at), os.environ.get(SERVER_TOKEN_VARIABLE) or None, lines)
+        return ServerPlace(kind, server_address(at), os.environ.get(SERVER_TOKEN_VARIABLE) or None, lines_of(details))
     raise PlaceError(f'"{name}" is a {kind or "place of its own kind"}:  not in Python yet', "not found")
+
+
+def lines_of(details: Mapping[str, Any]) -> dict[str, object]:
+    """What a program's lines say that its server needs to hear:  the id column, and each column a line names.
+
+    - A column's field is sent by its JavaScript name, as a row is:  `hairColor`.
+    """
+    columns = {
+        collection: {"fields": {javascript_name(field): column for field, column in held["fields"].items()}}
+        for collection, held in details.get("collections", {}).items()
+        if held.get("fields")
+    }
+    return {
+        **({"idColumn": details["id_column"]} if "id_column" in details else {}),
+        **({"collections": columns} if columns else {}),
+    }
+
+
+def javascript_name(name: str) -> str:
+    """Python's `name` as javascript names it:  `device_count` is `deviceCount`, `class_` is `class`."""
+    return SNAKE_WORD.sub(lambda match: match.group(1).upper(), name.rstrip("_"))
 
 
 def device_file_for(program: Path | None) -> Path:

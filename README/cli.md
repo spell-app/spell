@@ -248,7 +248,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server start` | starts it in the background if it isn't running, and prints where it is (JSON) |
 | `spell server start all` | every web server of the kit:  the page server, the app's editor, Spell UI's site;  a row for each, and exit 1 if one didn't come up |
 | `spell server stop` | stops the page server, waiting for its process to end;  its editor stops with it |
-| `spell server stop all` | the page server, then the app's editor too, even one left running |
+| `spell server stop all` | the page server, then the app's editor too, even one left running, and the local site, which a plain stop leaves up |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
 | `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
@@ -439,7 +439,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | Command | What it does |
 | --- | --- |
 | `spell compile [projects...]` | compiles each project to JavaScript, `<Project>.spell.js` in its build folder, plus its other targets, its declarations and its words;  a lone `.spell` file prints its JavaScript |
-| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
 | `spell spellx convert [projects...]` | writes each `.spell` file as spellx, the same program in tags, `Card.spell` => `Card.spellml` beside it;  never in the frozen test projects |
@@ -454,7 +454,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`), and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's old spellings (`<spell-notebook>` => `<spell-page notebook>`, `<spell-view>` inside a page => `<view>`, a `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`);  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
@@ -1046,9 +1046,11 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell space takedown hide \| delete \| restore <target> --reason <words>` | for Spell's admins:  takes down a space's folder (`@family/cookbook`), one thing of it (`--record recipes/r-1`) or an account (`ana@spell`), or puts it back, the reason logged beside it;  `list <target>` prints that log |
 | `spell space backup now \| list \| status \| restore <space>` | every space's nightly backups, on this machine, a week kept:  makes one now, lists them, says if a night was missed (exits 1), or brings one space back (`--from <backup>`, default the newest) |
 | `spell space cloud serve [--address <url>]... [--port <n>]` | runs Spell's server for people outside this machine, the cloud a program's `... is saved in the cloud` keeps its things in, invite only, until `Ctrl-C`:  on this machine alone (port 4949), for a tunnel or a proxy to give it its `https` address;  its pages carry no write token, and nobody outside is this machine's person;  given several addresses, the first is its main one, a sign-in begun at one finishes there, and someone signs in once at each |
+| `spell space cloud build` | builds the browser bundle programs run on, if it's stale, and starts nothing;  exits 1 when the build fails |
 | `spell space cloud status \| invite <email> \| mail [email]` | is it up, where, and its backups (exits 1 when it isn't, or a night was missed);  an account for an email, and its mail;  the newest mail it caught, with its link and code, until a mail service is picked |
-| `spell space local setup [--address <url>]... [--undo]` | on a Mac, gets Spell's cloud ready at real-looking addresses for one house network (`https://test.spell.app` and `.space` by default), with nothing public changed:  makes the certificate, trusts it, adds the names to this Mac's hosts file, and writes a folder that sets up another Mac;  needs `brew install mkcert caddy`.  From then on the main checkout's page server runs the site by itself, starting and stopping with it, its output in `~/.spell/local-site/site.log` |
+| `spell space local setup [--address <url>]... [--undo]` | on a Mac, gets Spell's cloud ready at real-looking addresses for one house network (`https://test.spell.app` and `.space` by default), with nothing public changed:  makes the certificate, trusts it, adds the names to this Mac's hosts file, and writes a folder that sets up another Mac;  needs `brew install mkcert caddy`.  From then on the main checkout's page server runs the site by itself, its output in `~/.spell/local-site/site.log`;  the site outlives the page server, so a restart leaves it up, and only a change to the cloud makes it build the new code first and then swap it in, a few seconds Caddy hides |
 | `spell space local start [--address <url>]...` | runs the cloud and HTTPS in front of it in this terminal, to watch it, until `Ctrl-C`;  says so and leaves it alone while the page server is running the site;  real mail by itself once `spell space local mail` has run |
+| `spell space local stop` | stops the site, whoever's running it, the page server's or a terminal's;  the page server starts it again the next time it starts |
 | `spell space local mail [--gmail <address>] [--new-password]` | sends real mail from this Mac:  its postfix relays through Gmail, with a Gmail app password, asked for once and kept where only root reads it;  sends a test mail |
 | `spell space local sign-in [email] [page]` | signs in on the running site:  asks for the link, opens it, then opens the page |
 | `spell space org host start [--port <n>] \| stop` | runs Spell's own Spaces host on this machine (ports 4960 and 4961), with two throwaway accounts, and prints the Spaces trial's command line against it;  everything is kept in memory, so stopping it deletes the accounts and all they wrote |
@@ -1076,12 +1078,13 @@ spell projects
 <summary>Output</summary>
 
 ```text
-owen@spell        Projects       ...
-@spell/examples   Examples       ... projects
-@spell/guides     Guides         ... projects
-@spell/notebooks  Notebooks      ... projects
-@spell/library    Libraries      1 project
-@spell/test       Test fixtures  ... projects
+owen@spell       Projects       ...
+@spell/examples  Examples       ... projects
+@spell/guides    Guides         ... projects
+@spell/sites     Sites          1 project
+@spell/library   Libraries      1 project
+@spell/editor    The editor     ... projects
+@spell/test      Test fixtures  ... projects
 ```
 
 </details>
@@ -1185,7 +1188,7 @@ epic worktree merge-main
   `epic close seo#J3`.
 - Every verb runs on the caller's checkout:  a worktree's, when run in one.
   `epic --version` says which code that is:  its commit, branch and checkout.
-- `epic --help` lists all 63 verbs, in twelve groups;
+- `epic --help` lists all 77 verbs, under thirteen headings;
   `epic help <verb>`, or `epic <verb> --help`, shows one's usage, what it does and an example,
   and a group's verbs too (`epic ask create --help`).
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.

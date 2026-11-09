@@ -70,6 +70,11 @@
     {
       "type": "Issue",
       "superType": "Thing",
+      "savedIn": {
+        "place": "github",
+        "placeType": "Github",
+        "collection": "issues"
+      },
       "defined": "/GitHub.api.spell:1648-2761"
     },
     {
@@ -265,6 +270,11 @@
     {
       "type": "Contributor",
       "superType": "Thing",
+      "savedIn": {
+        "place": "github",
+        "placeType": "Github",
+        "collection": "contributors"
+      },
       "defined": "/GitHub.api.spell:2763-3564"
     },
     {
@@ -399,6 +409,11 @@
     {
       "type": "User",
       "superType": "Thing",
+      "savedIn": {
+        "place": "github",
+        "placeType": "Github",
+        "collection": "users"
+      },
       "defined": "/GitHub.api.spell:3566-4747"
     },
     {
@@ -1301,6 +1316,11 @@
     {
       "type": "Repository",
       "superType": "Thing",
+      "savedIn": {
+        "place": "github",
+        "placeType": "Github",
+        "collection": "repositories"
+      },
       "defined": "/GitHub.api.spell:8200-11511"
     },
     {
@@ -2032,6 +2052,38 @@
     {
       "type": "Github",
       "superType": "Place",
+      "place": {
+        "name": "github",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 2400,
+          "collections": {
+            "issues": {
+              "at": "/repos/solidjs/solid/issues"
+            },
+            "contributors": {
+              "at": "/repos/solidjs/solid/contributors"
+            },
+            "users": {
+              "at": "/users/{id}",
+              "searches": {
+                "param": "q",
+                "fields": [],
+                "at": "/search/users"
+              }
+            },
+            "repositories": {
+              "at": "/search/repositories",
+              "searches": {
+                "param": "q",
+                "fields": [],
+                "at": "/search/repositories"
+              },
+              "searchedOnly": true
+            }
+          }
+        }
+      },
       "defined": "/GitHub.api.spell:1141-1646"
     },
     {
@@ -2102,6 +2154,11 @@
     {
       "type": "Book",
       "superType": "Thing",
+      "savedIn": {
+        "place": "open_library",
+        "placeType": "OpenLibrary",
+        "collection": "books"
+      },
       "defined": "/OpenLibrary.api.spell:1437-2317"
     },
     {
@@ -2249,7 +2306,7 @@
       "property": "writer",
       "of": "Book",
       "datatype": "Author",
-      "defined": "/OpenLibrary.spellml:1927-2063"
+      "defined": "/OpenLibrary.spellml:1923-2059"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2262,7 +2319,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OpenLibrary.spellml:2077-2341"
+      "defined": "/OpenLibrary.spellml:2073-2319"
     },
     {
       "syntax": "open {thisArg:expression}",
@@ -2299,6 +2356,11 @@
     {
       "type": "Author",
       "superType": "Thing",
+      "savedIn": {
+        "place": "open_library",
+        "placeType": "OpenLibrary",
+        "collection": "authors"
+      },
       "defined": "/OpenLibrary.api.spell:2319-2916"
     },
     {
@@ -2414,6 +2476,11 @@
     {
       "type": "Edition",
       "superType": "Thing",
+      "savedIn": {
+        "place": "open_library",
+        "placeType": "OpenLibrary",
+        "collection": "editions"
+      },
       "defined": "/OpenLibrary.api.spell:2918-3581"
     },
     {
@@ -2431,7 +2498,7 @@
     {
       "property": "authors",
       "of": "Edition",
-      "datatype": "list of editionauthors",
+      "datatype": "list of edition-authors",
       "defined": "/OpenLibrary.api.spell:3039-3081"
     },
     {
@@ -2746,6 +2813,31 @@
     {
       "type": "OpenLibrary",
       "superType": "Place",
+      "place": {
+        "name": "open_library",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "searches": {
+            "param": "q",
+            "fields": [
+              "titles"
+            ]
+          },
+          "collections": {
+            "books": {
+              "at": "/search.json",
+              "searchedOnly": true
+            },
+            "authors": {
+              "at": "/authors/{id}.json"
+            },
+            "editions": {
+              "at": "/books/{id}.json"
+            }
+          }
+        }
+      },
       "defined": "/OpenLibrary.api.spell:1010-1435"
     },
     {
@@ -2801,6 +2893,11 @@
     {
       "type": "Post",
       "superType": "Thing",
+      "savedIn": {
+        "place": "jsonplaceholder",
+        "placeType": "Jsonplaceholder",
+        "collection": "posts"
+      },
       "defined": "/JSONPlaceholder.api.spell:1240-1405"
     },
     {
@@ -2844,6 +2941,11 @@
     {
       "type": "Comment",
       "superType": "Thing",
+      "savedIn": {
+        "place": "jsonplaceholder",
+        "placeType": "Jsonplaceholder",
+        "collection": "comments"
+      },
       "defined": "/JSONPlaceholder.api.spell:1407-1557"
     },
     {
@@ -2887,6 +2989,11 @@
     {
       "type": "JsonplaceholderUser",
       "superType": "Thing",
+      "savedIn": {
+        "place": "jsonplaceholder",
+        "placeType": "Jsonplaceholder",
+        "collection": "jsonplaceholder_users"
+      },
       "defined": "/JSONPlaceholder.api.spell:1559-1874"
     },
     {
@@ -2946,6 +3053,11 @@
     {
       "type": "Todo",
       "superType": "Thing",
+      "savedIn": {
+        "place": "jsonplaceholder",
+        "placeType": "Jsonplaceholder",
+        "collection": "todos"
+      },
       "defined": "/JSONPlaceholder.api.spell:1876-2011"
     },
     {
@@ -3059,6 +3171,34 @@
     {
       "type": "Jsonplaceholder",
       "superType": "Place",
+      "place": {
+        "name": "jsonplaceholder",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "searches": {
+            "param": "q",
+            "fields": [
+              "names",
+              "titles"
+            ]
+          },
+          "collections": {
+            "posts": {
+              "at": "/posts"
+            },
+            "comments": {
+              "at": "/comments"
+            },
+            "jsonplaceholder_users": {
+              "at": "/users"
+            },
+            "todos": {
+              "at": "/todos"
+            }
+          }
+        }
+      },
       "defined": "/JSONPlaceholder.api.spell:792-1238"
     },
     {
@@ -3116,6 +3256,11 @@
     {
       "type": "Forecast",
       "superType": "Thing",
+      "savedIn": {
+        "place": "open_meteo",
+        "placeType": "OpenMeteo",
+        "collection": "forecasts"
+      },
       "defined": "/OpenMeteo.api.spell:1282-1622"
     },
     {
@@ -3214,6 +3359,22 @@
     {
       "type": "OpenMeteo",
       "superType": "Place",
+      "place": {
+        "name": "open_meteo",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "collections": {
+            "forecasts": {
+              "at": "/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2",
+              "askedBy": [
+                "latitude",
+                "longitude"
+              ]
+            }
+          }
+        }
+      },
       "defined": "/OpenMeteo.api.spell:972-1280"
     },
     {
@@ -3326,6 +3487,11 @@
     {
       "type": "Artwork",
       "superType": "Thing",
+      "savedIn": {
+        "place": "met_museum",
+        "placeType": "MetMuseum",
+        "collection": "artworks"
+      },
       "defined": "/MetMuseum.api.spell:1281-3283"
     },
     {
@@ -3835,6 +4001,23 @@
     {
       "type": "MetMuseum",
       "superType": "Place",
+      "place": {
+        "name": "met_museum",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "searches": {
+            "param": "q",
+            "fields": [],
+            "at": "/v1.1/search"
+          },
+          "collections": {
+            "artworks": {
+              "at": "/v1/objects"
+            }
+          }
+        }
+      },
       "defined": "/MetMuseum.api.spell:933-1279"
     },
     {
@@ -3905,6 +4088,11 @@
     {
       "type": "Country",
       "superType": "Thing",
+      "savedIn": {
+        "place": "rest_countries",
+        "placeType": "RestCountry",
+        "collection": "countries"
+      },
       "defined": "/RestCountries.api.spell:1085-1874"
     },
     {
@@ -4260,6 +4448,18 @@
     {
       "type": "RestCountry",
       "superType": "Place",
+      "place": {
+        "name": "rest_countries",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 30,
+          "collections": {
+            "countries": {
+              "at": "/countries.json"
+            }
+          }
+        }
+      },
       "defined": "/RestCountries.api.spell:927-1083"
     },
     {

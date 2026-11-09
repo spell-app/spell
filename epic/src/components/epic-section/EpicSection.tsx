@@ -24,7 +24,7 @@ import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
 import { PhaseDrag } from "./PhaseDrag"
 import { phaseFields } from "./PhaseFields"
 import { PhaseState } from "./PhaseState"
-import { StateFilter, type ChipPick } from "./StateFilter"
+import { MARKED_SHOWS_AS, StateFilter, type ChipPick } from "./StateFilter"
 import { TestQueue } from "./TestQueue"
 import {
   CLOSED_STATUSES,
@@ -142,10 +142,9 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  * - An item section's STATE FILTER (P10;  chips with counts, epic `airplane` P8), at the title's end:
  *   - one chip per state its items are in, in the state's colour, with how many:
  *     solid while that state's items show, outlined while hidden
- *   - a click (Owen, 2026-10-10;  `StateFilter.nextShown()`):
- *     everything showing, only that state;  else a hidden state shows too and a shown one hides;
- *     the only one showing, everything again
- *   - an ⌥-click (epic `epic-engine` I166):  only that state, whatever showed
+ *   - a click (epic `epic-engine` I242;  `StateFilter.nextShown()`):  toggles that chip and every state of its colour;
+ *     the last one off, the next colour shows instead
+ *   - an ⌥-click (epic `epic-engine` I166):  only that colour, whatever showed
  *   - a filtered list says `3 hidden · show all` under it
  *   - a link landing on an item it hides shows that item anyway, until the reader picks a chip again
  *     (`showLinked()`, epic `epic-engine` I191);  so does a section the page's stage hides
@@ -318,10 +317,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * Its items Owen has MARKED in this pass, not applied yet (epic `epic-engine` P43;  `ReviewState.isMarked()`).
    * - counted apart, in the blue badge left of the state chips, and left out of theirs:  the chips tick down
    *   as he marks
-   * - never hidden by the filter:  a marked item stays in sight mid-pass
+   * - hidden only with the blues (`MARKED_SHOWS_AS`):  it counts in the blue badge
    * - outside a review (no inbox):  none
    * - the Phases section's:  its phases Owen marked in this pass, not done (epic `epic-engine` I147, I157);  the same
-   *   blue badge, left out of the phase chips and never hidden by them
+   *   blue badge, left out of the phase chips, and hidden only with the blues
    *   - a phase under way or being worked on is `progress` (I170), which the filter counts in that badge too, as an
    *     item's:  unless it's red or orange first (Owen's order)
    */
@@ -336,6 +335,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** The states its unmarked items (or phases) are in, in the filter's order:  its state chips. */
   readonly present = createMemo((): ChipState[] => {
     const states = new Set<string>(this.unmarked().map((it) => it.state))
+    if (this.marked().size) states.add(MARKED_SHOWS_AS)
     const order: readonly ChipState[] = this.kind === "phases" ? PHASE_FILTER_STATES : FILTER_STATES
     return order.filter((it) => states.has(it.state))
   })
@@ -360,13 +360,16 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   })
 
   /**
-   * The items the filter hides (`StateFilter.hides()`):  never a marked one, nor one Claude is on (blue), nor the one a
-   * link just landed on, or in (`linkedHere`).
+   * The items the filter hides (`StateFilter.hides()`):  a marked one goes with the blues (`MARKED_SHOWS_AS`);
+   * never the one a link just landed on, or in (`linkedHere`).
    */
   readonly hidden = createMemo(() => {
     const linked = this.linkedHere
-    return this.unmarked().filter(
-      (it) => StateFilter.hides(it.state, this.showing()) && !(linked && it.item.contains(linked))
+    const marked = this.marked()
+    return this.itemStates().filter(
+      (it) =>
+        StateFilter.hides(marked.has(it.item) ? MARKED_SHOWS_AS : it.state, this.showing()) &&
+        !(linked && it.item.contains(linked))
     )
   })
 
@@ -863,7 +866,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * The filter's chips:  one per state its items are in, with how many, solid while they show
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3);  a click comes back as `epic-state-changed`.
-   * - the items marked in this pass in its blue badge, left of the chips, whatever the filter (P43)
+   * - the items marked in this pass in its blue badge, left of the chips:  the blues' chip (P43, I242)
    */
   private filter(): JSX.Element {
     return (

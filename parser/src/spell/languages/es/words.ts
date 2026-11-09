@@ -123,7 +123,7 @@ export const spanishWords: SP.LanguageWords = {
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)
   appActions: { deshacer: "undo", rehacer: "redo" },
-  // el ejemplo de un cuaderno, en un dibujo (`example_block`, épica `elemental-spell` P16)
+  // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
   defaultsTag: "ui-defaults",
@@ -166,7 +166,8 @@ export const spanishWords: SP.LanguageWords = {
       "plantilla-de-pagina": "page template",
       "plantilla-de-aplicación": "app template",
       "plantilla-de-aplicacion": "app template",
-      cuaderno: "notebook",
+      // una página que dibuja su cuerpo:  `<encanto-página cuaderno>` (épica `notebook` P1)
+      cuaderno: { kind: "page", flag: "notebook" },
       // páginas entre las que la gente se mueve por su dirección (épica `mockup` P1)
       sitio: "site"
     },
@@ -269,7 +270,8 @@ export const spanishWords: SP.LanguageWords = {
       soltable: "droppable",
       seleccionable: "selectable",
       pulsable: "clickable",
-      // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
+      // una página que dibuja su cuerpo, y el editor muestra en su sitio, editable (épica `notebook` P1)
+      cuaderno: "notebook",
       grupo: "group",
       // de un sitio y sus páginas (épica `mockup` P1)
       en: "at",
@@ -277,6 +279,9 @@ export const spanishWords: SP.LanguageWords = {
       dirección: "address",
       direccion: "address",
       estado: "state",
+      pestaña: "tab",
+      pestana: "tab",
+      etiquetas: "tags",
       ilustración: "picture",
       ilustracion: "picture",
       fila: "row",
@@ -296,7 +301,6 @@ export const spanishWords: SP.LanguageWords = {
         app: "aplicación",
         "page template": "página",
         "app template": "aplicación",
-        notebook: "cuaderno",
         site: "sitio"
       },
       property: {
@@ -335,12 +339,19 @@ export const spanishWords: SP.LanguageWords = {
       menuEach: "su {name} es un menú de {for-each} , cada uno ejecutando {quoted action}",
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
-      notebookContent: "para dibujar su contenido :",
-      notebookLocked: "su candado es bloqueado",
+      pageLocked: 'su candado es "bloqueado"',
+      // Spell UI's Spanish words for `<ui-section label sticky="stack" collapsible dividing level>`
+      pageSection: {
+        tag: "seccion",
+        label: "etiqueta",
+        defaults: { pegado: "apilado", plegable: true, divisorio: true, nivel: "2" }
+      },
       siteAt: "{words} es {a super} {super} en {quoted at} :",
       siteCloud: "{words} es {a super} {super} en la nube :",
       sitePage: "tiene {a words} {words} en {quoted address}",
       sitePageTitled: "tiene {a words} {words} en {quoted address} , llamada {quoted title}",
+      sitePageTab: ", pestaña {quoted tab}",
+      sitePageTags: ", etiquetada {quoted tags}",
       sitePageState: ", {state}",
       sitePagePicture: ", ilustrada en {quoted picture}",
       siteCardPlace: ", en la fila {row} columna {column}",
@@ -352,7 +363,6 @@ export const spanishWords: SP.LanguageWords = {
         selectable: "es seleccionable",
         clickable: "es pulsable"
       },
-      start: "iniciar {words}",
       handlers: {
         on: "al {phrase} :",
         when: "cuando {phrase} :",
@@ -435,7 +445,14 @@ export const spanishWords: SP.LanguageWords = {
     "short time": ["hora corta"],
     "long time": ["hora larga"],
     timestamp: ["marca de tiempo"],
-    selection: ["selección", "seleccion"]
+    selection: ["selección", "seleccion"],
+    // una página bloqueada:  `su candado es bloqueado` (épica `notebook` P1)
+    lock: ["candado"]
+  },
+
+  builtInMemberValues: {
+    // lo que vale el candado de una página (épica `notebook` I1)
+    lock: { bloqueado: "locked", desbloqueado: "unlocked" }
   },
 
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
@@ -521,8 +538,6 @@ export const spanishTypeWords: P.TypeWords = {
   // a view with a front and a back:  `de` and `a` are grammar words, so not `vista de dos caras`
   "vista reversible": "two sided view",
   "vista-reversible": "two sided view",
-  // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-  cuaderno: "notebook",
   // pages people move between by address (epic `mockup` P1)
   sitio: "site",
   // un tipo de medida:  `la longitud es una dimensión:` (épica `language` P23)

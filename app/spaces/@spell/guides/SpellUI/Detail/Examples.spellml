@@ -1,0 +1,35 @@
+<spell-page "detail examples" notebook>
+	<header level="1">
+		Detail
+		<header>A detail is a label's dimmer second value, such as a count.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+			<item link="#variations">Variations</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-detail>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Label" sticky="stack" collapsible dividing>
+			<example "Label" description="A label's detail:  a dimmer second value after its text.">
+				<label icon="mail">Mail<detail>23</detail></label>
+				<label>Dogs<detail>214</detail></label>
+				<label color="blue">Veronika<detail>Friend</detail></label>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Link" sticky="stack" collapsible dividing>
+			<example "Link" description="With `link`, the detail is a link of its own.">
+				<label color="teal">Tag<detail link="#tags">See all</detail></label>
+			</example>
+		</>
+	</>
+</spell-page>

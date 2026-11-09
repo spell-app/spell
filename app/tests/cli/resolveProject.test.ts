@@ -114,7 +114,7 @@ describe("rootsNamed()", () => {
     expect(paths("@spell")).toEqual([
       "@spell/examples",
       "@spell/guides",
-      "@spell/notebooks",
+      "@spell/sites",
       "@spell/library",
       "@spell/editor",
       "@spell/test"

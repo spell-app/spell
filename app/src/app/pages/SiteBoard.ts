@@ -50,21 +50,22 @@ export class SiteBoard {
    *   - First in a section:  the section's first part.
    *   - After a card with pages of its own:  that card's first page, so nothing comes between them.
    * - Going into another section it takes that section's colour, by being under it.
-   * - throws `TypeError` for a card or section the site doesn't have, or a section's own card:  that moves as a section
+   * - A section's own card can go into another section:  it joins it, its pages with it, keeping their layout from there.
+   * - throws `TypeError` for a card or section the site doesn't have, or a section's own card dropped in its section
    */
   static withCardDropped(text: string, name: string, drop: CardDrop): string {
     const sections = SiteBoard.sectionsOf(SiteEdits.partsIn(text) ?? [])
     const target = sections.find((section) => section.key === drop.section)
     const from = sections.find((section) => section.cards.some((card) => card.part.name === name))
     const card = from?.cards.find((each) => each.part.name === name)
-    if (!target || !card) {
+    if (!target || !from || !card) {
       throw new TypeError(
         `SiteBoard.withCardDropped():  no card "${name}" or section "${drop.section}";  pick one on the board`
       )
     }
-    if (card.isSectionCard) {
+    if (card.isSectionCard && from === target) {
       throw new TypeError(
-        `SiteBoard.withCardDropped():  "${name}" is a section's card;  move it with SiteEdits.withPartMoved()`
+        `SiteBoard.withCardDropped():  "${name}" heads this section;  drop it on another section, or move the section`
       )
     }
     if (from === target && card.row === drop.row && card.column === drop.column) return text
@@ -78,6 +79,15 @@ export class SiteBoard {
     }
     const place = SiteBoard.lineFor(target, others, name, drop)
     if (place) after = SiteEdits.withPartMoved(after, name, place)
+    if (card.isSectionCard) {
+      for (const moved of from.cards) {
+        if (moved === card || moved.part.row === undefined) continue
+        after = SiteEdits.withPartPlaced(after, moved.part.name, {
+          row: moved.row + drop.row - 1,
+          column: moved.column + drop.column - 1
+        })
+      }
+    }
     return SiteEdits.withPartPlaced(after, name, { row: drop.row, column: drop.column })
   }
 

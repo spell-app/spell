@@ -27,6 +27,7 @@ export function AppRoot(props: AppRootProps) {
       <AppContainer
         scrolling={props.scrolling ?? true}
         padded={props.padded ?? false}
+        id={props.containerId}
         appRef={(element) => {
           appElement = element
           editor.setAppRoot(element)
@@ -47,6 +48,8 @@ export type AppRootProps = {
    * fill a window of its own (Owen, 2026-11-06:  "Shouldn't be a border on an app by default")
    */
   padded?: boolean
+  /** Its container's `id`, the element that scrolls the program's drawing:  e.g. for "On this page" to follow it. */
+  containerId?: string
 }
 
 /****************

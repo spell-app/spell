@@ -9,9 +9,9 @@ done.](docs/images/epic-page.png)
 _A real epic page, mid-build:  this repo's epic-engine epic at P57, its Issues section open and showing only what
 isn't settled._
 
-Count the chips at the toolbar's right:  565 items, 5 blue, 252 yellow, 1 green, 307 grey, and no red.
-Red means a person is needed, so nothing here is waiting on you:
-blue is what Claude is working on right now, yellow is open, and you get to it when you have time.
+Count the chips at the toolbar's right:  565 items, 5 blue, 252 yellow, 1 green, 307 grey, and no red or orange.
+Red and orange mean a person is needed, so nothing here is waiting on you:
+blue is with Claude, yellow is open, and you get to it when you have time.
 
 If you've run a project from an issue tracker and a pull-request thread, you know where the time goes:
 grooming the list, and scrolling the conversation for whatever is still open.
@@ -33,16 +33,22 @@ You review on the page, item by item, when you have time;  the answers come back
 
 1. In Claude Code, type `/epic review <name>`.
    The epic page opens in the Review tab, and that session starts listening for your marks.
-2. Open a section, open an item, and press Approve, Revisit (then type a note) or Make Todo.
+2. Open a section, open an item, and press Make Todo, Revisit (then type a note) or Approve.
+   On an issue or a judgement call, Do this takes Make Todo's place.
    The button goes DASHED:  saved on the page server, not sent.
-3. Press Send, the paper plane at the top right.
+3. Press Send, the paper plane in the header's middle.
+   Or leave the page alone:  Auto Send sends by itself after 2 minutes.
    Dashed turns OUTLINED:  the agent has it.
 4. Watch the item.
    Approvals and new todos are applied as soon as the session wakes, and the buttons clear.
-   A revisit comes back as an answer IN the item, under a card that goes from blue (on it) to green (done).
+   A revisit comes back as an answer on the page, under a card that goes from blue (on it) to green (done).
 
-You can mark for an hour and send once:  nothing needs a session listening until you press Send.
-Press it with nobody listening, and the page server types `/epic review <name>` into the epic's session for you;
+You can mark for an hour and send once:
+every key, click or scroll restarts Auto Send's wait, and a note box you're typing in holds it.
+Want only your own press to send?  The gear's Auto Send has Off.
+
+An epic's own session listens by itself whenever it's open.
+Send with nobody listening, and the page server types `/epic review <name>` into the epic's session for you;
 you press Enter ("How Send wakes a session", below).
 
 One catch:  your marks wait in a file on THIS machine until they're applied.
@@ -55,19 +61,26 @@ where the build stands and where you're needed are one glance up.
 
 1. **The header says where the build is.**
    The step pill names the phase under way (`P13`), else the next one to do, DONE, FUTURE or STANDING;
-   it turns red when every phase is done but items still need you, and grey when the epic is paused,
+   while the plan is still being agreed, its stage (`OVERVIEW`, `PHASES`).
+   It turns red when every phase is done but items still need you, and grey when the epic is paused,
    untouched for 3 days.
-   - Beside it:  the gear, which picks Auto Send and the page's theme.
+   - Beside it:  the gear, with Focus mode (while the page is being reviewed), Auto Send and the page's theme.
    - In the header's middle:  Send (the paper plane), while the page is being reviewed.
-     A press sends at once;  left alone, a ring round it drains, and it sends by itself (2 minutes by default).
-     Beside it, a spinner while Claude is at work.
+     A press sends at once;  left alone, a ring round it drains, and it sends by itself.
+     The gear picks the wait:  Immediately, 2 minutes (the default), 5 minutes or Off, remembered in this browser.
+   - Beside Send, while Claude is at other work:  a spinner and its word or two (`Building P35`).
+     While it answers what you sent, a blue arc turns round the plane instead.
    - The epic's name, at the left, copies `/epic resume <name>` when you click it.
    - While agents the epic started are running, the step pill counts them (`4` and a robot):
      click it for their rows, each with a box that redirects it.
 2. **The toolbar says where you're needed.**
    An icon per section jumps there;  a red badge on it counts what needs you,
-   an orange one the answers waiting on your pick.
-   - At its right, a chip per item state with its count:  click one to show only those.
+   an orange one what's your turn to pick, review or see.
+   - At its right, a chip per colour of item with its count, the whole page's;  each section has its own over its list.
+     - A click toggles that chip:  its items hide or show, and the others stay as they are.
+     - Option-click (Alt-click) shows only that group.
+     - The blues toggle together, and so do the oranges and the greys.
+     - Turn off the last chip showing, and the next one in the row turns on, so a list is never empty by accident.
    - Then one button that unfolds every section, or folds them all again.
    - No new item button here:  each item section has its own (New todo, New issue ...).
 3. **The meta lines say how to start, and where the work lives:**
@@ -89,13 +102,22 @@ a link to `#todos` lands on the todos of any epic page, a year from now.
 | Section | Id | What goes in it |
 | --- | --- | --- |
 | 1. Overview | `#overview` | a two-sentence summary;  the kickoff prompt, folded;  the estimate, which the tool adds up from the phases (`34h-43h in all, 4h-5h left`);  then the plan's substance, in numbered sub-sections `1.1` ... (`#o1` ...) |
-| 2. Phases | `#phases` | a block per phase (`P1 · Short Name`):  Symptom (what's wrong today), Changes, the Goal;  Done and Commits once it's built;  Files and Verify behind the folder and flask toggles |
+| 2. Phases | `#phases` | a block per phase (`P1 · Short Name`):  Symptom (what's wrong today), Changes, the Goal;  Claude's build plan, once it's written;  Done and Commits once it's built;  Files and Verify shown from the section's gear, or a phase's own |
 | 3. Questions (`Q1` ...) | `#decisions` | what only you can decide:  open ones first, then the answered ones, which are the decisions |
 | 4. Judgement calls (`J1` ...) | `#judgements` | choices the agent made without you, "chose X over Y because Z", open until you review them |
-| 5. Todo (`T1` ...) | `#todos` | loose ends:  work still to do, and limits the plan accepts (marked `limit`, drawn calmer) |
+| 5. Todo (`T1` ...) | `#todos` | loose ends:  work still to do, and limits the plan accepts (marked `limit`, drawn grey) |
 | 6. Issues (`I1` ...) | `#issues` | problems found, open until fixed |
 | 7. Manual tests (`M1` ...) | `#tests` | what you check by hand before merging:  each a Step, and what it Should do |
-| 8. Log | `#log` | one line per change to the plan, with its date and time |
+| 8. Log | `#log` | one entry per commit, newest first:  its time, its sentence and a chip per phase and item it names |
+
+Three more appear only when they have something to say, and the eight never move for them:
+- **0. While you were out** (`#away`), first, above the Overview.
+  What Claude did since you last pressed Done reading, and what needs you now, in the order to look at it.
+  The tool writes it on every edit, never by hand;  each line has its own Read.
+  What you've already addressed leaves it, and a finished phase ages out after 3 days (`epic settings`).
+  With nothing new, there's no section.
+- **Choices** (`#choices`), between the Overview and the Phases:  an open-ended list you pick from, round after round.
+- **A report**, after the Overview:  what a run wrote for you to read, like an overnight `/bedtime`.
 
 ![The Phases section opened, under the sticky header and toolbar:  its title with a 3/15 count of open phases, a
 folder and a flask toggle;  then P1 to P15, each with an estimate (1-2h, 3-4h, 1-2d) and its review buttons.  P1 to P12
@@ -129,6 +151,24 @@ And two markers keep a second look short:
 
 </details>
 
+## Agreeing the plan:  three stages, each ended by your Accept
+
+No plan mode, and no plan in a chat:  a new epic is agreed on its page, from its first minute.
+Its sections appear as the plan gets that far.
+
+| Stage | What shows | How it ends |
+| --- | --- | --- |
+| `overview` | the Overview, Questions and Todo | Accept Overview, on the Overview's title row |
+| `phases` | the Phases and Issues too;  each phase has Looks good and Defer, or Accept and Defer once its build plan is up | Accept Phases, on the Phases section's title row:  one press takes the phases and every plan waiting |
+| `building` | everything | every phase built, one after another, with no stop between them |
+
+- Each answer to a question rewrites the Overview, its changed words orange for 3 days:  nothing to approve.
+- An Accept counts down 5 minutes, a green ring round its thumbs up.
+  A second press calls it off;  only when the ring ends does the agent hear it.
+- The button's tooltip counts the open questions:  a reminder, never a lock.
+- A hidden section is still in the file:  a stage is only a view.
+  Judgement calls and Issues show at any stage, once they hold an item.
+
 ## A review round:  your marks wait until you send them
 
 A pull-request review is a batch:  you comment, then you submit.
@@ -161,11 +201,13 @@ it explains every card and colour change you'll see on an item.
    It waits in the background, its turn over, costing nothing.
 2. Your Send wakes it, with a list of your marks.
 3. It applies the mechanical ones at once:
-   approvals, picks, new todos, a todo's plane or x, skips, new items, test results.
-   A pick or a queued todo gets a calm "Noted" card saying what happens next.
-4. Each revisit asked now gets a blue "Underway" card:  what the agent took the task to be.
-   A background agent writes the answer into the item, and the card turns green, "Done".
+   approvals, picks, new todos, Do this, a todo's plane or x, skips, new items, Accepts, Seen and Read.
+   A queued or new todo gets a calm "Noted" card saying what happens next.
+4. Each revisit asked now (Auto Send asks every revisit now) gets a blue "Underway" card:
+   what the agent took the task to be.
+   A background agent writes the answer into the item, and the card turns green.
    An answer that offers options turns the item ORANGE:  your pick.
+   A plain note left for later becomes a comment thread on the item, answered there.
 5. The page updates in place:  the buttons clear, and the chips show the result.
 6. The session waits again.
    When it leaves, or is killed mid-wait, the page soon says nobody is reviewing.
@@ -173,7 +215,8 @@ it explains every card and colour change you'll see on an item.
 The command behind each step, and why a finished `wait` is what wakes a session:
 [README-cli.md](README-cli.md#a-session-wakes-when-its-wait-exits).
 
-- Nothing goes until you press the paper plane:  it's filled blue while something waits.
+- Nothing goes until you press the paper plane or Auto Send's wait runs out:
+  the plane is filled blue while something waits.
 - Typing in an item's note box turns its Revisit on at the first key;  the box stays open while you type.
 - A request Claude is on spins its button:  click it again to call it off ("nevermind");  an answer that arrives
   after that is refused.
@@ -184,7 +227,8 @@ The command behind each step, and why a finished `wait` is what wakes a session:
 buttons, and apart from them Do Now (the wand);  its text below;  then the note box, "Your note:  a question,
 instructions, why", with Revisit Later and Skip This beside it.](docs/images/epic-item.png)
 
-_An item:  its id chip, the three review buttons and Do Now, its text, and the note box._
+_An item, from an older build:  its id chip, review buttons, text and note box.
+Today its one group reads Make Todo, Revisit, Approve, and the wand (Do Now) is gone._
 
 Every mark, and what applying it does:
 
@@ -192,24 +236,27 @@ Every mark, and what applying it does:
 | --- | --- | --- |
 | Approve | the check, green | an open question:  answered with its recommended option (none recommended:  left to talk over);  an open judgement call:  closed, accepted;  an open test:  closed, passed;  anything else:  marked reviewed |
 | a pick | Choose, on an option card | a question:  answered with that option;  any other item:  approved with that option |
-| Make Todo | the list, green | a new todo, "Follow up:  ...", linking back;  on any item, phase, the summary or an Overview sub-section |
-| Revisit | the history arrow, blue, then a note | answered INTO the item as a reply, then cleared;  with a pick, talked over first, and recorded once you agree |
+| Make Todo | the list, green | a new todo, "Follow up:  ...", linking back;  on an item, the summary or an Overview sub-section |
+| Do this | the thumbs up, green, first on an issue, a judgement call or a phase still to do | an issue or call:  fixed in the item itself, no todo;  blue outlined until handled, orange once fixed, and your Approve closes it;  a phase:  "yes, build this" |
+| Revisit | the history arrow, blue, then a note | asked now:  answered INTO the item as a reply;  a plain note left for later:  a comment thread on the item;  with a pick or a picture:  talked over first, and recorded once you agree |
 | a todo's plane | "Do it in the next phase", green | queued into the first phase still to do |
 | a todo's x | "Drop it", grey | canceled, "dropped in review" |
-| Skip This | the note box's x, grey | reviewed, nothing else;  your note kept as your reply |
-| new | `+`, or New todo / New question at the end of those sections | made, with your note as its details |
+| Skip This | the note box's x, grey | reviewed, nothing else;  your note kept as your reply;  on a test:  canceled |
+| new | `+`, or New todo / New question / New issue at the end of those sections | made, with your note as its details |
 
 - Each applied mark logs one line:  `J9 approved:  closed (accepted)`.
 - A mark you changed meanwhile stays, for the next Send.
-- The summary, each phase and each Overview sub-section take Make Todo and Revisit too, but no Approve.
+- The summary and each Overview sub-section take Make Todo and Revisit, but no Approve;
+  a phase still to do takes Do this and Revisit.
 
 <details>
 <summary>How Send wakes a session</summary>
 
-Send, while NO session listens, makes the page server wake the epic.
+Send, a press or Auto Send's, while NO session listens, makes the page server wake the epic.
 
 - Who, first match wins:
-  1. the ONE running session titled for the epic, `🚧 <epic>`:  `/epic review <epic>` typed into it
+  1. the ONE running session titled for the epic, `🚧 <epic>`:  `/epic review <epic>` typed into it,
+     or nothing typed when its background listener is running or its turn is still going, since that hears the Send
   2. else the epic's worktree window:  a new session tab, the command typed in (the window opened if it's closed)
   3. else, for an epic with no worktree:  a new session in a main window
 - Never a new worktree, and never sent for you:  you press Enter.
@@ -244,7 +291,8 @@ Only the tool writes it, under a lock.
   listening: { session: "...", since: "...", seen: "..." }, // the review session's heartbeat
   handedOver: "2026-10-21T12:50:32", // the last Send a session took
   comments: {},
-  woken: null // the last time Send woke a session
+  woken: null, // the last time Send woke a session
+  doing: null // what the session says it's on:  "Building P35", beside Send
 }
 ```
 
@@ -263,7 +311,7 @@ Only the tool writes it, under a lock.
   ```
 
 - A new todo or question from the page waits under its own key, `new1`, `new2` ...
-- A test answer is `{ action: "test", result, note?, shot? }`, with its screenshot saved beside the page.
+- A note can carry `shot`, a picture you pasted or dropped in, saved beside the page in `tests/`.
 - The inbox's code and every method on it:  [`ReviewInbox`](src/tool/ReviewInbox.ts);
   the verbs that read and write it:  [README-cli.md](README-cli.md#epic-page--the-review-inbox).
 
@@ -302,48 +350,56 @@ Comments ride the page's own Send, and where they land depends on the page:
 Send's line says who'll hear it:  "python-target is listening", or "nobody is listening:  Send wakes feedback".
 Details and choice pages take no comments, since each sends its answers its own way;  nor do templates.
 
-## Test runs:  one card per test
+## Manual tests and Focus mode:  one item at a time
 
 The Manual tests section is the list of things only a person can check:  open this page, click that, it should do this.
-A test run turns it into a checklist you click through, one big card at a time, in the Review tab.
+You answer each test where it is, with the same buttons as any item.
 
-![A test run on the airplane epic page:  "TESTING 1 of 15" and a Done testing button;  a card for V1, "Merge the
-branch into main with /isolate done", its STEP text, then four buttons, Passed, Failed, Skip and Not now, a comment box,
-and Back and Next.](docs/images/test-run.png)
-
-_The first of fifteen tests:  answer it, or press P, F, S or N._
-
-- Start it with "Start testing" on the Manual tests section, or `epic test <name>`.
-  `epic test --all` runs every epic's in turn, in the sagas' order:  each run's last card leads to the next epic.
-- A card shows the test's Step (with a button for any page it says to open) and what it Should do;
-  sometimes an Example (a screenshot the agent took) and If not (what to tell the agent).
-- "4 of 9" and a thin bar say how far you are;  Back and Next, the arrows and Esc move you.
-- Leaving the run sends your unsent answers, and the page says so.
-
-| Your answer | What `inbox apply` does |
+| Your answer | What happens |
 | --- | --- |
-| Passed | closes the test |
-| Failed, with a note and a pasted screenshot | makes a NEW issue, "M3 failed:  ...", with your note and screenshot;  the test stays open |
-| Skip | cancels the test:  it no longer applies |
-| Not now | leaves it open, and puts it last in the next run |
+| Approve | closes the test, passed |
+| a Revisit note, with a screenshot pasted or dropped in if you like | what you saw, for the agent.  Passed:  it closes the test.  Failed:  a NEW issue, "M3 failed:  ...", with your note and screenshot, and a red "failed → I12" on the test, which stays open |
+| the note box's x | cancels the test:  it no longer applies |
+| nothing | it stays open |
+
+"Start testing", on the section, has the agent get them ready first.
+- It checks what it can by itself, writes out the rest step by step, with an Example screenshot where it can take one,
+  and puts them in order.
+- Then the first test opens in Focus mode;  the button now reads "Focus on the tests · 3 left".
+- The same from a terminal:  `epic test <name>`, or `epic test <name>#M3` to land on one.
+  `epic test --all` opens the first epic with open tests, in the sagas' order;
+  its Manual tests section links the next once all are answered.
+
+FOCUS MODE, the first row of the header's gear, is the way through a long page without scrolling:
+a full-screen overlay that walks the open items and phases, whatever the page draws red, orange, blue or yellow.
+- A tab per kind (Phases, Questions, Todos, Calls, Issues, Tests), each with its count and its own state chips.
+- One item at a time:  its id, title and whole text, its own buttons and note box, then Back and Next (← and →).
+- Your marks are the page's, and Send rides in the overlay's top bar.
+- Esc or × closes it.
+- The catch:  its place (tab, item, chips) is kept in this browser only.
 
 ## Colours:  each one means one thing, everywhere
 
 Each colour means ONE thing on every page:  epic pages, details pages, saga pages, the Epics list.
-Only two ever ask for you, red and orange;  the other six say where things stand, or who's talking.
+Only red and the two oranges ever ask for you;  the others say where things stand, or who's talking.
 So you can read a page by its colours before you read a word.
 A new element takes its colour from this table, never one that means something else.
 
 | Colour | Means | For example |
 | --- | --- | --- |
-| red | needs you | an open question's chip;  an unreviewed judgement call or issue;  the toolbar's count |
-| yellow | open, still undecided | an open todo or test;  a reviewed call or issue |
-| blue | do it now, or the agent is on it | Revisit, Send;  the Underway card;  an epic in progress |
-| green | decided or done, however long ago | Approve, Make Todo, a pick;  a phase done;  the Done and Noted cards |
-| orange | changed since you looked;  or the agent's options, waiting for your pick | UPDATE labels;  "nobody is listening";  a replied item's chip |
-| violet | the agent's voice | its reply cards;  "recommended" (a thumbs-up) |
-| ivory | your voice | your note box, your replies, the answer card;  the toolbar |
-| grey | no longer relevant, or not chosen | a canceled item;  buttons at rest;  a phase to do;  a future epic |
+| red | needs you | an open question's chip;  an unreviewed judgement call or issue, unless calm;  a phase with a choice open;  the toolbar's count |
+| orange | your turn to read:  changed since you looked, or something waiting on your pick or review | UPDATE labels;  a plan waiting for your Accept;  the agent's options;  a fix to review;  a manual test whose phase isn't done;  "nobody is listening" |
+| light orange | what you asked for is finished:  your turn to see it | an issue filed from your own words, closed by the agent, until you review it |
+| yellow | open, still undecided | an open todo;  a test whose phase is done;  a calm issue;  a reviewed call or issue |
+| blue | do it now, or it's with the agent | Revisit, Send;  the Underway card;  a phase under way;  a Do this not started (outlined);  a todo queued, or a phase still to do (dotted) |
+| green | decided or done just now:  an item for a day after its last change, a phase for 3 days, then grey | Approve, Make Todo, a pick;  a phase just done;  the Done and Noted cards |
+| violet | a person's voice:  yours, and every person's | your reply cards, your note box, a marked note;  the forms for a new item or option |
+| terracotta | an agent's voice:  Claude's, Codex's | its reply cards' mark and name;  its comment messages;  "recommended" (a thumbs-up) |
+| ivory | the page's own warm ground, nobody's voice | the toolbar;  a comment thread's ground |
+| grey | no longer relevant, or nothing to think about | a canceled item;  a calm judgement call;  a limit;  buttons at rest;  a future or paused epic |
+
+- Approving a green item greys it at once:  green says "new since you looked".
+- A person or an agent can have a colour of their own:  `colors` in the repo's epic settings.
 
 The FILL says how far a button, pill or chip has got:
 
@@ -356,7 +412,8 @@ The FILL says how far a button, pill or chip has got:
 | solid | only on chips, the step pill's DONE, and a Choose pill once applied |
 
 - So a dashed or outlined chip is ANSWERED:  don't answer it again.
-  Only a solid red (needs you) or orange (your pick) chip waits on you, and the toolbar counts only those.
+  Only a solid red (needs you), orange (your pick or review) or light orange (yours to see) chip waits on you,
+  and the toolbar counts only those.
 - Colour-blind readers tell red and green apart least:  the chip's id, the icons and the words keep them readable.
 
 <details>
@@ -369,19 +426,34 @@ The FIRST row that applies wins, top to bottom.
 | --- | --- | --- |
 | `progress` | blue | the agent is working on it:  an Underway card, or the spinner |
 | `old` | grey | canceled:  made moot, struck through |
-| `recent` | green | decided or done, however long ago |
-| `open` | yellow | work a review queued (a todo's plane), not started |
+| `handled` | grey | its answer is a phase's text now;  or an issue the agent found and fixed itself, calm, never one you asked for |
+| `requested` | light orange | an issue filed from your own words, closed done, not reviewed yet |
+| `recent` | green | decided or done |
+| `replied` | orange | an issue or call the agent has fixed:  your turn to review it, and Approve closes it |
+| `scheduled` | blue, dotted | work a review queued, agreed, not started |
 | `replied` | orange | open, and the agent's last reply holds options nothing is picked in yet:  your turn |
-| `attention` | red | an open question;  an open judgement call or issue not reviewed, unless marked calm |
+| `attention` | red | an open question |
+| `handed` | blue, outlined | a judgement call or issue you pressed Do this on, not handled yet |
+| `attention` | red | an open judgement call, issue or urgent todo not reviewed, unless marked calm |
+| `quiet`, `open` | grey, yellow | the same, marked calm:  a call grey, anything else yellow |
 | `recent` | green | open, but settled by a review:  approved as it stands, or made a todo |
-| `open` | yellow | anything else open:  todos, tests, reviewed calls and issues |
+| `quiet` | grey | a limit |
+| `replied` | orange | a manual test whose phase isn't done |
+| `open` | yellow | anything else open:  todos, tests whose phase is done, reviewed calls and issues |
 
+- As the page draws it, `recent` turns grey a day after the item last changed, and at once when you've approved it.
+  The file keeps `recent`;  only the drawing ages.
+- Blue `progress` and `handed` have no chip of their own:
+  the blue badge is theirs, and counts what you marked this pass.
 - An item's status is `open`, `decided` (an answered question), `done` (closed, never removed) or `canceled`
   (struck through;  `reopen` undoes it).
-- A judgement call or issue is CALM (yellow) by default, and red only when it would surprise you:
+- A judgement call or issue is CALM by default, and red only when it would surprise you:
   it goes against something you said, narrows what you asked for, is a fork you'd plausibly have picked differently
   and that matters, or needs your answer before work can go on.
   Clicking its chip switches it.
+- A phase takes ONE colour, the first that holds:  red, a choice open in it;
+  orange, its plan waits for your Accept, or it changed since you looked;  blue, under way;  dotted blue, still to do;
+  green, done in the last 3 days;  grey, done longer ago.
 - Saga pages colour their items by the same states.
 
 </details>
@@ -415,8 +487,9 @@ _A saga's page:  its overview, then its epics as cards, grouped as on the Epics 
 ### Details pages
 
 When a question needs a picture, or more than Claude Code's question modal holds (four options, four questions),
-the agent writes a DETAILS PAGE (`/details`) and shows it in the Review tab.
+the agent writes a DETAILS PAGE (`/details`) and shows it in the side bar's Details tab.
 You answer ON the page:  a radio per option card, a comment box on each, "Other" for your own answer, then Send.
+A page still waiting for your answer is never replaced there:  the next one waits its turn, and the tab says so.
 
 ![A details page, "Shared editing (CRDT):  analysis":  its header says "Sent 10/11/26 20:11 · 4 of 4 decided" and
 "nobody is waiting yet";  a tab per question, Q1 to Q4;  Q1, "What do people edit together?", with three option cards,
@@ -505,20 +578,20 @@ This one line, from the repo-split page, is a whole judgement call:
 _Trimmed of its change time.  Its body waits in a part file;  the element draws its chip, buttons and fold._
 
 Epic UI is `spell-epic`'s set of these:  one component pack, `epics`, every tag starting `epic-`,
-48 tags in 36 families.
+56 tags in 43 families.
 The frame around them (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s `<ui-*>` elements.
-44 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`;
-the other four (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-message`)
-are drawn only inside other elements.
+50 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`;
+the other six (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-message`, `epic-option-form`,
+`epic-stage-button`) are drawn only inside other elements.
 
 | Group | Elements |
 | --- | --- |
-| Page structure | `epic-page` (the header, meta, step pill, Send, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-event` (a log line), `epic-commit` |
+| Page structure | `epic-page` (the header, meta, step pill, Send, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-away-line` (a line of While you were out), `epic-actions` (a block's actions row), `epic-mark` (an id as a chip), `epic-change` (words a decision changed), `epic-event` (a log line), `epic-commit` |
 | Prose blocks | `epic-question`, `epic-choices` and `epic-option`, `epic-answer`, `epic-net-effect`, `epic-reply`, `epic-more` (More Details), `epic-original` and `epic-version` (Original Discussion), `epic-update`, `epic-note`, `epic-aside`, `epic-code`, `epic-link` |
-| Review | `epic-review` (an item's buttons), `epic-status` (Underway, Done, Noted), `epic-new-item`, `epic-state-filter`, `epic-hidden-note`, `epic-agents` (the running agents), `epic-test-run` |
+| Review | `epic-review` (an item's buttons), `epic-stage-button` (Accept Overview, Accept Phases), `epic-status` (Underway, Done, Noted), `epic-new-item`, `epic-option-form`, `epic-state-filter`, `epic-hidden-note`, `epic-agents` (the running agents), `epic-focus` (Focus mode) |
 | Comments | `epic-comment-pane`, `epic-thread`, `epic-thread-message`, `epic-threads`, `epic-page-note-head` (older page notes) |
 | Lists | `epic-list`, `epic-card` and `epic-sort` (the Epics list), `epic-cards` (a saga's epics) |
-| Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-send-buttons` (Send, every page's), `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar` |
+| Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-send-buttons` (Send, every page's), `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar`, `epic-run` and `epic-run-row` (run pages) |
 
 - `<epic-link epic="seo" item="J3">` links an item on another page by what it is, never by a path:
   it draws "seo J3", with J3's title as its tooltip.

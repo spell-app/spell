@@ -51,6 +51,13 @@ import {
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
+import { NextPageByOffset } from "./NextPageByOffset"
+import { NextPageByNumber } from "./NextPageByNumber"
+import { NextPageByLastId } from "./NextPageByLastId"
+import { FiltersBy } from "./FiltersBy"
+import { SortsBy } from "./SortsBy"
+import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
+import { IsReadOnly } from "./IsReadOnly"
 import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
@@ -397,9 +404,246 @@ places.addRule(RowsIn, {
   syntax: "{type:subject_its} rows are (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
 places.addRule(NextPageIn, {
-  syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+  syntax:
+    "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text} (, sent back as {param:text})?"
 })
 places.addRule(NextPageInLink, { syntax: "{type:subject_its} next page is in its {header:text} header" })
+places.addRule(NextPageByOffset, {
+  syntax: "{type:subject_its} next page is asked for with ({limit:text} and)? {offset:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'met museum is a web server at "https://collectionapi.metmuseum.org"\n\t- its next page is asked for with "limit" and "offset"',
+          [
+            "export class MetMuseum extends Place {}",
+            "export const metMuseum = core.place(new MetMuseum(), {",
+            '  name: "met_museum",',
+            '  kind: "web server",',
+            '  at: "https://collectionapi.metmuseum.org",',
+            '  pagesByOffset: { limit: "limit", offset: "offset" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(NextPageByLastId, {
+  syntax:
+    "{type:subject_its} next page is asked for with ({limit:text} and)? the last id as {param:text} (, until (the {inner:text} of)? its {field:text} is no)?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'stripe is a web server at "https://stripe.test"\n\t- its next page is asked for with "limit" and the last id as "starting_after", until its "has_more" is no',
+          [
+            "export class Stripe extends Place {}",
+            "export const stripe = core.place(new Stripe(), {",
+            '  name: "stripe",',
+            '  kind: "web server",',
+            '  at: "https://stripe.test",',
+            "  pagesByLastId: {",
+            '    limit: "limit",',
+            '    param: "starting_after",',
+            '    moreIn: "has_more"',
+            "  }",
+            "})"
+          ]
+        ],
+        [
+          'shop is a web server at "https://shop.test"\n\t- its next page is asked for with the last id as "after", until the "more" of its "paging" is no',
+          [
+            "export class Shop extends Place {}",
+            "export const shop = core.place(new Shop(), {",
+            '  name: "shop",',
+            '  kind: "web server",',
+            '  at: "https://shop.test",',
+            '  pagesByLastId: { param: "after", moreIn: "paging.more" }',
+            "})"
+          ]
+        ],
+        [
+          'shop is a web server at "https://shop.test"\n\t- its next page is asked for with the last id as "after"',
+          [
+            "export class Shop extends Place {}",
+            "export const shop = core.place(new Shop(), {",
+            '  name: "shop",',
+            '  kind: "web server",',
+            '  at: "https://shop.test",',
+            '  pagesByLastId: { param: "after" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(NextPageByNumber, {
+  syntax:
+    "{type:subject_its} next page is asked for by number with ({limit:text} and)? {page:text} (, counting from {first:number})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'github is a web server at "https://github.test"\n\t- its next page is asked for by number with "per_page" and "page"',
+          [
+            "export class Github extends Place {}",
+            "export const github = core.place(new Github(), {",
+            '  name: "github",',
+            '  kind: "web server",',
+            '  at: "https://github.test",',
+            '  pagesByNumber: { limit: "per_page", page: "page" }',
+            "})"
+          ]
+        ],
+        [
+          'spring is a web server at "https://spring.test"\n\t- its next page is asked for by number with "size" and "page", counting from 0',
+          [
+            "export class Spring extends Place {}",
+            "export const spring = core.place(new Spring(), {",
+            '  name: "spring",',
+            '  kind: "web server",',
+            '  at: "https://spring.test",',
+            "  pagesByNumber: {",
+            '    limit: "size",',
+            '    page: "page",',
+            "    first: 0",
+            "  }",
+            "})"
+          ]
+        ],
+        [
+          'blog is a web server at "https://blog.test"\n\t- its next page is asked for by number with "p"',
+          [
+            "export class Blog extends Place {}",
+            "export const blog = core.place(new Blog(), {",
+            '  name: "blog",',
+            '  kind: "web server",',
+            '  at: "https://blog.test",',
+            '  pagesByNumber: { page: "p" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(FiltersBy, {
+  syntax: "{type:subject_it} filters by every field",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it filters by every field',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  filters: "every field"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(FiltersBy, {
+  syntax: "{type:subject_it} filters by {fields:searched_fields}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it filters by cuisine and cook-time',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  filters: ["cuisine", "cookTime"]',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(SortsBy, { syntax: "{type:subject_it} sorts by every field (with {param:text})?" })
+places.addRule(SortsBy, {
+  syntax: "{type:subject_it} sorts by {fields:searched_fields} (with {param:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it sorts by title and date with "order"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  sorts: ["title", "date"],',
+            '  sortedWith: "order"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(GivesFieldsNamedIn, {
+  syntax: "{type:subject_it} gives only the fields named in {param:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'countries is a web server at "https://countries.test"\n\t- it gives only the fields named in "response_fields"',
+          [
+            "export class Country extends Place {}",
+            "export const countries = core.place(new Country(), {",
+            '  name: "countries",',
+            '  kind: "web server",',
+            '  at: "https://countries.test",',
+            '  fieldsNamedIn: "response_fields"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(IsReadOnly, {
+  syntax: "{type:subject_it} is (read only|read-only)",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'countries is a web server at "https://countries.test"\n\t- it is read only',
+          [
+            "export class Country extends Place {}",
+            "export const countries = core.place(new Country(), {",
+            '  name: "countries",',
+            '  kind: "web server",',
+            '  at: "https://countries.test",',
+            "  readOnly: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(ListsUnder, {
   syntax: "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
   tests: [

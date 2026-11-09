@@ -47,6 +47,16 @@ export function inQuotes(text: string, quote: '"' | "'" | "`"): string {
   return `\`${text.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${")}\``
 }
 
+/**
+ * `written`, a text as its source spelled it, quotes included, on one line:  each line break is a `\n`.
+ * - An attribute may run over several lines, and a line break inside `"..."` isn't javascript.
+ * - An escape it already has stays whole, and a backtick-quoted text as is:  line breaks are legal there.
+ */
+export function lineBreaksEscaped(written: string): string {
+  if (written.startsWith("`")) return written
+  return written.replace(/\\[^]|\r?\n/g, (found) => (found.startsWith("\\") ? found : "\\n"))
+}
+
 ////////////////
 // ## Whitespace & Delimiters
 ////////////////

@@ -1148,6 +1148,36 @@ describe("looking again", () => {
     expect(result.couldntChange.join("\n")).toMatch(/"planets" is gone from the source/)
   })
 
+  test("a collection kept as /people/, listed as /people:  one look at it, under its own name (epic `data` I66)", async () => {
+    const swapi = `${API}/`
+    const routes = {
+      [API]: { people: `${swapi}people/`, planets: `${swapi}planets/` },
+      [`${API}/people/`]: { count: 2, next: null, results: [LUKE, LEIA] },
+      [`${API}/planets/`]: { count: 1, next: null, results: [TATOOINE] }
+    }
+    const askedBare: string[] = []
+    const plain = fakeFetch(routes)
+    // `/people` answers from `/people/`, as swapi's redirect does
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`.replace(/[?#].*$/, "")
+      askedBare.push(url)
+      const moved = /\/(people|planets)$/.test(url) ? `${url}/` : undefined
+      const answer = await plain.fetch(moved ?? input, init)
+      if (moved) Object.defineProperty(answer, "url", { value: moved })
+      return answer
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    await ingest.add({ address: API, into: "/S.spell", name: "stars" })
+    expect(descriptions.get("/S.json5")!.collections.people!.at).toBe("/people/")
+    askedBare.length = 0
+
+    const { description } = await ingest.update("/S.spell")
+    expect(Object.keys(description.collections).sort()).toEqual(["people", "planets"])
+    expect(description.collections.people!.at).toBe("/people/")
+    expect(description.collections.people!.fields.homeworld!.linksTo).toBe("planets")
+    expect(askedBare).not.toContain(`${API}/people`)
+  })
+
   test("a person's own key in the description stays, and the words chosen", async () => {
     const added = ingestOf(STARS)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })

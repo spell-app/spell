@@ -57,14 +57,8 @@ export const EXAMPLES_GROUP = "@spell/examples"
 /** The Spell guides' group, `@spell/guides`:  where `GUIDE_PROJECTS` are read from. */
 export const GUIDES_GROUP = "@spell/guides"
 
-/**
- * Spell UI's component notebooks' group, `@spell/notebooks`:  read only as an example imports one, never tested on
- * their own here (epic `mockup` P1:  the Spell UI site imports four).
- */
-export const NOTEBOOKS_GROUP = "@spell/notebooks"
-
-/** Every group a test project is in, or one imports:  the fixtures', the examples', the Spell guides', the notebooks'. */
-const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP, NOTEBOOKS_GROUP]
+/** Every group a test project is in, or one imports:  the fixtures', the examples', the Spell guides'. */
+const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
 
 /**
  * Every built-in example, by its name with its group:  `@spell/examples/Solitaire` (epic `spanish` P21).
@@ -90,8 +84,11 @@ export const EXAMPLE_SNAPSHOTS_DIR = resolve(environment.repoDir, "tests", "spel
  * - NOT frozen, and not listed by hand:  a new one is tested as soon as it's there.
  *   - Its snapshots are written by `spell content check --bless`;  read the diff.
  * - Their snapshots are tests', never beside the guide:  `GUIDE_SNAPSHOTS_DIR`.
+ * - Skips any guide whose project file says `"onHome": false`:  the Spell UI site, compile-only and javascript only,
+ *   checked by `notebooks.test.ts` (epic `notebook` P10):  its 2.7 MB doesn't snapshot, and its drawings don't build
+ *   for the other targets.
  */
-export const GUIDE_PROJECTS = new Set(projectsIn(GUIDES_GROUP))
+export const GUIDE_PROJECTS = new Set(projectsIn(GUIDES_GROUP).filter(isOnTheHomePage))
 
 /** Folder of the snapshots of `GUIDE_PROJECTS`:  `tests/spell/__guides__/<name>/`, at spell-app's root. */
 export const GUIDE_SNAPSHOTS_DIR = resolve(environment.repoDir, "tests", "spell", "__guides__")
@@ -143,6 +140,11 @@ function groupOf(projectName: TestProjectName): string {
 /** Each project of `group`, by its test project name:  `@spell/examples/Solitaire` -- see `projectFoldersIn()`. */
 function projectsIn(group: string): TestProjectName[] {
   return projectFoldersIn(groupFolderOf(group)).map((name) => `${group}/${name}`)
+}
+
+/** Does test project `name` stay on the home page:  its project file doesn't say `"onHome": false`? */
+function isOnTheHomePage(name: TestProjectName): boolean {
+  return readProjectFile(fixtureFolder(name)).onHome !== false
 }
 
 /** Folder of test group `group`:  `FIXTURES_DIR`, or `spaces/@spell/<group>/`. */
@@ -228,20 +230,6 @@ export function fixtureDraws(projectName: TestProjectName): boolean {
 /** Fixture `projectName`'s declarations, as its `<Project>.declarations.json5` would hold them -- see `compileFixture()`. */
 export function fixtureDeclarations(projectName: TestProjectName): string {
   return JSON.stringify(compileFixture(projectName).declarations, null, 2) + "\n"
-}
-
-/**
- * Does test project `projectName` read servers other people run:  its project file's `"readsOtherPeoplesServers": true`.
- * - Nothing that runs it as a test may:  a test isn't to ask them, and what it prints would follow what they say.
- *   So the core contract leaves it out;  its compiled snapshots are still checked.
- */
-export function readsOtherPeoplesServers(projectName: TestProjectName): boolean {
-  const { readsOtherPeoplesServers: says } = JSON5.parse(
-    readFileSync(projectFileFor(fixtureFolder(projectName)), "utf8")
-  ) as {
-    readsOtherPeoplesServers?: boolean
-  }
-  return !!says
 }
 
 /**
@@ -336,10 +324,10 @@ export function fixtureImports(projectName: TestProjectName): Record<string, Tes
 
 /**
  * The projects the project in `folder` imports, by the module its compiled code imports each from:
- * `fixtureImports()`, for any project's folder, e.g. the Counter notebook's (`@spell/notebooks/Counter`).
+ * `fixtureImports()`, for any project's folder.
  * - Each by its test project name, as the fixture helpers take it:
  *   a fixture's bare (`@spell/test/counter` => `counter`), an example's or a Spell guide's with its group
- *   (the notebook's `@spell/examples/Counter`).
+ *   (`@spell/examples/Counter`).
  * - throws if it imports any other project:  tests read ONLY the test groups (`TEST_GROUPS`).
  */
 function projectImportsIn(folder: string): Record<string, TestProjectName> {
@@ -387,7 +375,7 @@ export function fixtureImportScope(projectName: TestProjectName): P.Scope {
 
 /**
  * The import layer the project in `folder` parses under:  `fixtureImportScope()`, for any project's folder,
- * e.g. the Counter notebook's, under the Counter example's declarations.
+ * e.g. a notebook page's, under what its project imports.
  * - `paths`:  its files', e.g. `/Counter.spellml`:  their languages, by their names, pick its root scope.
  */
 export function importScopeIn(folder: string, paths: string[]): P.Scope {
@@ -497,6 +485,7 @@ function readProjectFile(projectDir: string): {
   exports?: string[]
   imports: Array<{ path: string; active?: boolean; import?: string[] }>
   listsStartAt?: 0 | 1
+  onHome?: boolean
 } {
   return JSON5.parse(readFileSync(projectFileFor(projectDir), "utf8"))
 }

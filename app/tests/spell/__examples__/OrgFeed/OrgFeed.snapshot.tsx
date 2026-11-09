@@ -103,27 +103,36 @@ export class FeedPage extends App {
 
   @drawn draw() {
     return (
-      <ui-container class="feed">
-        <ui-stack>
-          <ui-header size="large">What's new</ui-header>
-          <ui-segment class="favourites">
-            <ui-header size="medium">More of what you like</ui-header>
-            <ui-stack class="favourite-list" spacing="sm">
-              {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isAFavourite), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your feed"}</ui-loader>, none: () => <ui-text color="grey">Nothing yet.</ui-text> })}
-            </ui-stack>
-          </ui-segment>
-          <ui-segment class="everything">
-            <ui-header size="medium">Everything else</ui-header>
-            <ui-stack class="post-list" spacing="sm">
-              {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isOrdinary), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your feed"}</ui-loader>,
-                none: () => <ui-text class="none" color="grey">Nothing new.</ui-text>,
-                failed: () => <ui-text color="red">We can't read your feed right now.</ui-text>
-              })}
-            </ui-stack>
-          </ui-segment>
-        </ui-stack>
-      </ui-container>
+      <ui-stack class="org-page" spacing="none">
+        <ui-toolbar class="top-bar" appearance="text" aria-label="Feed">
+          <ui-text slot="title" size="large">Feed</ui-text>
+          <ui-item link="OrgChat">Chat</ui-item>
+          <ui-item link="Inbox">Inbox</ui-item>
+          <ui-item link="OrgAdmin">Admin</ui-item>
+          <ui-stack slot="right" direction="horizontal">{core.signInMenu()}</ui-stack>
+        </ui-toolbar>
+        <ui-container class="feed">
+          <ui-stack>
+            <ui-header size="large">What's new</ui-header>
+            <ui-segment class="favourites">
+              <ui-header size="medium">More of what you like</ui-header>
+              <ui-stack class="favourite-list" spacing="sm">
+                {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isAFavourite), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your feed"}</ui-loader>, none: () => <ui-text color="grey">Nothing yet.</ui-text> })}
+              </ui-stack>
+            </ui-segment>
+            <ui-segment class="everything">
+              <ui-header size="medium">Everything else</ui-header>
+              <ui-stack class="post-list" spacing="sm">
+                {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isOrdinary), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), {
+                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your feed"}</ui-loader>,
+                  none: () => <ui-text class="none" color="grey">Nothing new.</ui-text>,
+                  failed: () => <ui-text color="red">We can't read your feed right now.</ui-text>
+                })}
+              </ui-stack>
+            </ui-segment>
+          </ui-stack>
+        </ui-container>
+      </ui-stack>
     )
   }
 }
@@ -139,6 +148,8 @@ export class FeedPageElement extends SpellElement<FeedPage> {
 }
 core.useElement(FeedPage, FeedPageElement)
 export const feedPage = new FeedPage()
+// -----------
+core.installStyles(undefined, `/* The toolbar across the top, who's signed in on its right;  the page the theme's colours, light or dark. */¬.org-page {¬  min-height: 100dvh;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬.org-page .top-bar {¬  padding: 6px 12px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬¬.org-page .top-bar::part(menu) {¬  margin-block: 0;¬}¬¬.org-page .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬.org-page ui-container > ui-stack {¬  padding-block: 16px;¬}¬¬/* A phone:  the links go, leaving the name and who's signed in. */¬@media (max-width: 640px) {¬  .org-page .top-bar ui-item {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) feedPage.start()
 

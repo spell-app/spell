@@ -80,6 +80,9 @@ describe("inspecting", () => {
     const ants = document.querySelector<HTMLElement>("body > .InspectorSelected")!
     expect(ants.hidden).toBe(false)
     expect(getComputedStyle(ants).mixBlendMode).toBe("difference")
+    // clear of what the part draws:  8px out all round, its corners the part's, that much further out
+    expect(parseFloat(ants.style.width)).toBeCloseTo(button.getBoundingClientRect().width + 16, 0)
+    expect(parseFloat(ants.style.borderRadius)).toBeGreaterThanOrEqual(9)
   })
 
   test("Inspect app's help shows while inspecting, until the first select;  never again after", async () => {
