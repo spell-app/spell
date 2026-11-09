@@ -1611,7 +1611,7 @@ add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (a call grey, an issue yellow);  --loud:  red again
-requested <name>#I3 [<id>...]                       issues filed from the person's own words:  light orange once closed
+update <name>#I3 --requested                        an issue filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)
 commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase or an item
