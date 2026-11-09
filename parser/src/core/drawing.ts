@@ -142,6 +142,22 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * A list written in braces in a drawing, as Solid can draw it:  `{its author name}`, `{the cards}` (epic `data` I57).
+   * - Solid can't draw a spell `List`:  handed one, the element fails to draw.
+   * - Things that draw draw:  `drawItems()`, each kept by identity.
+   * - Anything else in it shows as words, with commas:  "Ann Author, Bob Writer", as a `List` prints.
+   * - Reads its items, in the live value:  so it follows them.
+   * - Not a list after all (nothing yet, say):  as it is.
+   */
+  listShown(value: unknown): Drawing {
+    const items = value instanceof List ? value.items : value
+    if (!Array.isArray(items)) return value as Drawing
+    const drawsItself = items.length > 0 && items.every((item) => typeof item?.draw === "function")
+    if (drawsItself) return value instanceof List ? core.drawItems(value) : items.map((item) => core.drawThing(item))
+    return items.join(", ")
+  },
+
+  /**
    * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
    * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
    *   And what a viewable list's element holds as its children -- see `drawThing()`.

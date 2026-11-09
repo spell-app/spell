@@ -1404,7 +1404,7 @@ export class TSWriter extends JSWriter {
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
-    const text = this.bare(expression)
+    const text = this.listChildDrawn(expression, this.bare(expression))
     if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
     return text.startsWith("<") ? text : `{${text}}`
   }
