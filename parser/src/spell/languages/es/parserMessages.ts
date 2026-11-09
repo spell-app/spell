@@ -187,6 +187,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
   "spellx-tag-in-markup":
     "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",
+  /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
+  "unreadable-attribute": 'No se puede leer "{text}" en <{tag}>:  revisa su nombre y sus comillas',
   "markdown-hole":
     'No entiendo "{{hole}}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave',
 

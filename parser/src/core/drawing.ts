@@ -107,6 +107,7 @@ export const drawingMethods = defineCoreModule({
    *     then it hands back what it drew, for the drawing around it to put in its new place.
    * - Found again by its code, `make`'s text (`Function.toString()`), which is what an edit names.
    * - Held by its drawing's boundary, not by the drawing around it, so drawing that again needn't tear this down.
+   * - In an error boundary of its own, the drawing's stand-in when it throws:  the rest of the drawing keeps working.
    * - No `thing` (a drawing outside a type):  never drawn alone.
    */
   drawPart(thing: unknown, make: () => Drawing): Drawing {
@@ -124,11 +125,17 @@ export const drawingMethods = defineCoreModule({
     }
     const type = (thing as object | undefined)?.constructor?.name
     const part: DrawnPart = { thing: thing as object, type, make, again: new Cell(), drawing: null, owner: partsOwner }
+    // in a boundary of its own:  a part that throws while drawing is that part's problem (epic `notebook` I5)
     const draw = () =>
-      createMemo(() => {
-        part.again.read()
-        // its boundary holds what it draws, even drawn again alone:  the parts inside it stay keepable
-        return withPartsOwner(part.owner, () => madeOnce(part.make()))
+      createComponent(Errored, {
+        fallback: (error: () => unknown) => drawingFailed((thing as object | undefined) ?? part, error()),
+        get children() {
+          return createMemo(() => {
+            part.again.read()
+            // its boundary holds what it draws, even drawn again alone:  the parts inside it stay keepable
+            return withPartsOwner(part.owner, () => madeOnce(part.make()))
+          }) as unknown as Drawing
+        }
       }) as unknown as Drawing
     if (partsOwner) {
       runWithOwner(partsOwner, () =>

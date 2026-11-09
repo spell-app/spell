@@ -166,6 +166,25 @@ describe("@drawn", () => {
     expect(drawCalls.get(card)).toBe(1)
   })
 
+  test("a part that throws shows its stand-in, in its own place;  the parts beside it stay (epic `notebook` I5)", () => {
+    const card = new Card({ rank: 2 })
+    const parts = () => [
+      core.drawPart(card, () => h("p", { class: "one" }, "One")),
+      core.drawPart(card, () => {
+        throw new Error("no such part")
+      }),
+      core.drawPart(card, () => h("p", { class: "three" }, "Three"))
+    ]
+    draw(() => h("section", parts()))
+
+    expect(element.innerHTML).toBe(
+      `<section><p class="one">One</p>` +
+        `<span class="spell-draw-error" role="alert" title="no such part">⚠ Card can't draw</span>` +
+        `<p class="three">Three</p></section>`
+    )
+    expect(core.console.error).toHaveBeenCalledTimes(1)
+  })
+
   test("a draw() that throws shows its stand-in, says so once and sends `ui-error`;  its pile keeps drawing", () => {
     const sentErrors: unknown[] = []
     element.addEventListener("ui-error", (event) => sentErrors.push((event as CustomEvent).detail.thing))

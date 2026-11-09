@@ -8437,7 +8437,7 @@
           "ruleNames": ["example_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ExampleBlock.ts",
-          "line": 30,
+          "line": 34,
           "purpose": "An EXAMPLE on a page, in a drawing (epic `elemental-spell` P16): a title, then its live result, drawn by the editor app's `<spell-example>`.",
           "syntaxes": [
             {

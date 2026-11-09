@@ -113,6 +113,30 @@ describe("<NotebookPage>", () => {
     for (const section of sections) expect(section.getAttribute("sticky")).toBe("stack")
   })
 
+  test("an example typed half-way draws its error in its own place;  the page around it stays, and heals (epic `notebook` I5)", async () => {
+    const { mount, controller } = await mounted()
+    await until(() => editorsIn(mount).length === 2)
+    const [first] = mount.querySelectorAll<HTMLElement>("spell-example")
+    controller.editExample(placeOf(first!), '<counter ba§dge="1"/>')
+    await until(
+      () => !!mount.querySelector("spell-example .spell-draw-error"),
+      () => resultsOf(mount).join(" | ")
+    )
+    const examples = [...mount.querySelectorAll<HTMLElement>("spell-example")]
+    expect(examples).toHaveLength(2)
+    expect(examples[0]!.querySelector(".spell-draw-error")!.textContent).toContain("§dge")
+    // the other example, still drawn
+    expect(resultsOf(mount)[1]).toBe("Clicked 0 times Clicked 0 times")
+    expect(mount.querySelectorAll("ui-section[label]")).toHaveLength(2)
+
+    controller.editExample(placeOf(examples[0]!), "<counter/>")
+    await until(
+      () => !mount.querySelector(".spell-draw-error") && resultsOf(mount)[0] === "Clicked 0 times",
+      () => resultsOf(mount).join(" | ")
+    )
+    expect(resultsOf(mount)[1]).toBe("Clicked 0 times Clicked 0 times")
+  })
+
   test("typing in an example goes into the file, and the example drawn again keeps the same code editor, open", async () => {
     const { mount, file, controller } = await mounted()
     await until(() => editorsIn(mount).length === 2)
@@ -163,7 +187,9 @@ describe("<NotebookPage>", () => {
     Object.assign(file, { match: parsed!.match, scope: parsed!.scope })
     await until(() => editorsIn(mount).length === 2)
     const place = placeOf(mount.querySelector("spell-example")!)
-    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe("<test-project-counter-notebook-counter/>")
+    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe(
+      "<test-project-counter-notebook-counter/>"
+    )
     controller.setCodeView("spell")
     // a signal's write is staged until the flush, as the switch's click is long before the typing
     flush()

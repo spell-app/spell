@@ -385,6 +385,77 @@ describe("a spellx page that draws its body", () => {
     })
   })
 
+  // epic `notebook` I5:  typed half-way, one example's problem;  the rest of the page drawn as it was
+  describe("a broken example", () => {
+    const page = (broken: string) =>
+      [
+        '<spell-page "p" notebook>',
+        '\t<example "first">',
+        "\t\t<button>First</button>",
+        "\t</example>",
+        '\t<section label="Labeled">',
+        '\t\t<example "broken">',
+        `\t\t\t${broken}`,
+        "\t\t</example>",
+        "\t</section>",
+        '\t<section label="Later" sticky="stack">',
+        '\t\t<example "last">',
+        "\t\t\t<button>Last</button>",
+        "\t\t</example>",
+        "\t</section>",
+        "</spell-page>",
+        ""
+      ].join("\n")
+    const syntaxErrors = (errors: string[]) => errors.filter((error) => !/isn't a component/.test(error))
+
+    test.each([
+      ["a character no name has", '<button color="blue" ba§dge="1,048" appearance="basic">Forks</button>', "§dge"],
+      ["a quote left open", '<button color="bl', 'color="bl'],
+      ["a tag with no end", '<button color="blue" ba', "<button"],
+      ["half an end tag", "<button>x</button>\n\t\t\t</butto", "</butto"],
+      ["a stray >", '<button color="blue" >>Forks</button>', ">Forks"]
+    ])("%s:  one error, in the example;  the rest as it was", (_case, broken, said) => {
+      const { code, errors } = compiled(page(broken))
+      expect(syntaxErrors(errors)).toHaveLength(1)
+      expect(syntaxErrors(errors)[0]).toContain(said)
+      expect(code.match(/\n\s*return /g)).toHaveLength(1)
+      expect(code).toContain('h("spell-example", { name: "first" }, h("ui-button", "First"))')
+      expect(code).toContain('h("spell-example", { name: "last" }, h("ui-button", "Last"))')
+      expect(code).toContain('label: "Later"')
+      expect(code).toMatch(
+        /h\("spell-example", \{ name: "broken" \},\s+h\("span", \{ class: "spell-draw-error", role: "alert" \}/
+      )
+      expect(code).toContain("⚠")
+    })
+
+    test("a tag no pack here has:  reported, and still drawn by its name", () => {
+      const { code } = compiled(page("<nosuchthing>x</nosuchthing>"))
+      expect(code).toContain('h("nosuchthing", "x")')
+      expect(code).not.toContain("spell-draw-error")
+    })
+
+    test("a value over several lines stays one value", () => {
+      const { code, errors } = compiled(page('<button title="two\n\t\t\tlines">Go</button>'))
+      expect(syntaxErrors(errors)).toEqual([])
+      expect(code).not.toContain("spell-draw-error")
+    })
+
+    test("accented attribute names read whole, in Spanish", () => {
+      const text = [
+        '<encanto-página "p">',
+        '\t<ejemplo "a">',
+        '\t\t<botón título="hola" acción="y">x</botón>',
+        "\t</ejemplo>",
+        "</encanto-página>",
+        ""
+      ].join("\n")
+      const { code, errors } = compiled(text, "/P.es.spellml")
+      expect(syntaxErrors(errors)).toEqual([])
+      expect(code).not.toContain("spell-draw-error")
+      expect(code).toContain("hola")
+    })
+  })
+
   // epic `notebook` P2:  a page's own views, `<view counter>` (Q6), in any page (Q1);  named for the page (P10, Q11, reversing Q7's A)
   describe("a page's own views", () => {
     const HOME = [
