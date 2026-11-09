@@ -1,7 +1,6 @@
 {
   "title": "Star Wars",
   "description": "A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  each server's API in a file of its own, Star Wars' as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl",
-  "readsOtherPeoplesServers": true,
   "imports": [{
     "path": "/StarWars.api.spell",
     "active": true

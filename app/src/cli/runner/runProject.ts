@@ -23,6 +23,7 @@ import type { CLI } from "spell/app/cli"
 const spec = JSON.parse(process.env.SPELL_RUN!) as CLI.RunSpec
 /** What the project tried to do which needs a browser, e.g. `start the game`. */
 const skipped = new Set<string>()
+if (spec.offline) noNetwork()
 if (spec.dom) await fakeDom()
 else headless()
 // a fresh state bag + event hub for the project, e.g. for `on card-click` -- as the app's runners do
@@ -137,6 +138,18 @@ function headless() {
     skipped.add(`start the ${this.constructor.name.toLowerCase()}`)
   }
   core.installStyles = () => {}
+}
+
+/**
+ * SIDE EFFECT:  every request fails at once, as if the connection were down, and never leaves this machine.
+ * - So a program on someone else's server runs the same way every time, drawing what it shows when it can't reach them.
+ * - No `WebSocket` at all:  a place's live connection (`ReconnectingSocket`) then doesn't try one.
+ * - For the core contract, `contract.test.ts`:  a test isn't to ask other people's servers,
+ *   and what it prints shouldn't follow what they say.
+ */
+function noNetwork() {
+  globalThis.fetch = (input) => Promise.reject(new TypeError(`fetch failed:  this run is offline (${String(input)})`))
+  Reflect.deleteProperty(globalThis, "WebSocket")
 }
 
 /**

@@ -21,7 +21,6 @@ export {
   FIXTURES_GROUP,
   NOTEBOOKS_GROUP,
   fixtureProjectNames,
-  readsOtherPeoplesServers,
   compiledFixture,
   compiledFixtureWithMap,
   fixtureDeclarations,

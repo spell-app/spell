@@ -18,8 +18,7 @@ import {
   fixtureImports,
   fixtureLanguages,
   fixtureProjectId,
-  fixtureProjectNames,
-  readsOtherPeoplesServers
+  fixtureProjectNames
 } from "spell/app/spaces/test"
 import { CLI } from "spell/app/cli"
 
@@ -40,6 +39,7 @@ import { CLI } from "spell/app/cli"
  *   each view as its own element, e.g. `<test-project-card>`, its drawing in its place.
  * - Its random numbers start from seed 1 (`core.seedRandom()`),
  *   so Solitaire deals the same cards every run, on every target.
+ * - Its requests all fail (`RunSpec.offline`):  a program on someone else's server draws what it shows without them.
  * - Only STDOUT is compared:  the program's own output, as data.
  *   A dump of a thing (`print the card`) goes to stderr, as do warnings (epic `python-target`, Q17):
  *   how a thing looks dumped is each target's own business.
@@ -68,7 +68,9 @@ async function printed(name: string, target: string, code = compiledFixture(name
       // a test's lines in the fixture's language, as `spell run` prints them:  `Solitario`'s in Spanish
       messages: SP.SpellWords.messagesFor(fixtureLanguages(name)[0]!),
       // only what's printed matters:  Python needn't wait at a pause (javascript's run as they are)
-      pauses: false
+      pauses: false,
+      // what a program on someone's server prints must not follow what they say
+      offline: true
     })
     expect(exitCode, `${name} on ${target} exited ${exitCode}:\n${output}`).toBe(CLI.EXIT.OK)
     return stdout
@@ -136,7 +138,7 @@ describe("the core contract:  every target prints the same", () => {
     expect([...RUNNING_TARGETS].sort()).toEqual(Object.keys(TARGET_FILES).sort())
   })
 
-  for (const name of fixtureProjectNames().filter((project) => !readsOtherPeoplesServers(project))) {
+  for (const name of fixtureProjectNames()) {
     test(
       name,
       async () => {
