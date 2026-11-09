@@ -375,6 +375,8 @@ export function listenForTableEdits(element: HTMLElement): () => void {
  * - Each declared property, in the order declared (a parent class's first), headed by its words
  *   (`filmTitle` => `film title`), of its kind:  `number`, `date`, `choice` (true or false:
  *   a tick box), one of its values (`its "size" is small or large`);  a list, or a thing, isn't a column.
+ * - NOT Spell's own `created` and `modified` (`savedIn.times`, epic `data` T57):  it stamps them, nobody types them.
+ *   A type that declares its own `created` has it as a column, like any property.
  * - SIDE EFFECT:  a getter on `list`, not enumerable, so its JSON and its items don't change.
  */
 export function nameTableColumns(list: object, Class: Function): void {
@@ -397,6 +399,7 @@ function columnsFor(Class: Function): TableColumn[] {
   const schemas: Schema[] = []
   for (let schema = schemaOf(Class as never) as Schema | undefined; schema; schema = schema.parent)
     schemas.unshift(schema)
+  const times = (Class as { savedIn?: { times?: readonly string[] } }).savedIn?.times ?? []
   const columns: TableColumn[] = []
   for (const schema of schemas) {
     for (const [key, info] of schema.declared) {
@@ -404,7 +407,7 @@ function columnsFor(Class: Function): TableColumn[] {
       const type = info.type
       const values = typeof info.oneOf === "function" ? info.oneOf() : info.oneOf
       const header = key.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
-      if (key === "id") continue
+      if (key === "id" || times.includes(key)) continue
       if (values?.length) columns.push({ key, header, type: "choice", choices: values.map((value) => ({ value })) })
       else if (type === "number" || type === "date") columns.push({ key, header, type })
       else if (type === "choice") columns.push({ key, header, type: "yes-no" })
