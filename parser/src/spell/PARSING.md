@@ -1067,7 +1067,7 @@ A kind that says so is saved in a file of its own.
     - Its type's name, `CardSuit`, `PaloDeCarta`:  `SP.Language.propertyKindType()`.
     - Its plural is any name's of several words:  `card suits`;  `palos de carta`, up to the `de`.
   - A `P.TypeScope` whose `valueKind` names its `property`:  `{ values, listOn: "Card", listName: "Suits", property: "suit" }`.
-  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOfType()`):
+  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOf()`):
     so a loop over `card suits` knows each is a card suit.
 - What it gives another type, and the program:
   - `its "suit" is a card suit`:  `{ oneOf: () => Card.Suits }`, as for a value kind.

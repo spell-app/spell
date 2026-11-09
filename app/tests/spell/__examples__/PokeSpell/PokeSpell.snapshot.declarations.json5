@@ -100,27 +100,27 @@
     {
       "property": "abilities",
       "of": "Pokemon",
-      "datatype": "list of pokemonabilities",
+      "datatype": "list of pokemon-abilities",
       "defined": "/PokeSpell.api.spell:1526-1572"
     },
     {
       "property": "past_abilities",
       "asWritten": "past abilities",
       "of": "Pokemon",
-      "datatype": "list of pastabilities",
+      "datatype": "list of past-abilities",
       "defined": "/PokeSpell.api.spell:1576-1624"
     },
     {
       "property": "forms",
       "of": "Pokemon",
-      "datatype": "list of pokeapinames",
+      "datatype": "list of poke-api-names",
       "defined": "/PokeSpell.api.spell:1628-1667"
     },
     {
       "property": "game_indices",
       "asWritten": "game indices",
       "of": "Pokemon",
-      "datatype": "list of gameindices",
+      "datatype": "list of game-indices",
       "defined": "/PokeSpell.api.spell:1671-1715"
     },
     {
@@ -140,7 +140,7 @@
     {
       "property": "moves",
       "of": "Pokemon",
-      "datatype": "list of pokemonmoves",
+      "datatype": "list of pokemon-moves",
       "defined": "/PokeSpell.api.spell:1814-1852"
     },
     {
@@ -171,13 +171,13 @@
       "property": "past_stats",
       "asWritten": "past stats",
       "of": "Pokemon",
-      "datatype": "list of paststats",
+      "datatype": "list of past-stats",
       "defined": "/PokeSpell.api.spell:1981-2021"
     },
     {
       "property": "types",
       "of": "Pokemon",
-      "datatype": "list of pokemontypes",
+      "datatype": "list of pokemon-types",
       "defined": "/PokeSpell.api.spell:2025-2063"
     },
     {
@@ -369,14 +369,14 @@
       "property": "pokedex_numbers",
       "asWritten": "pokedex numbers",
       "of": "PokemonSpecies",
-      "datatype": "list of pokedexnumbers",
+      "datatype": "list of pokedex-numbers",
       "defined": "/PokeSpell.api.spell:2711-2761"
     },
     {
       "property": "egg_groups",
       "asWritten": "egg groups",
       "of": "PokemonSpecies",
-      "datatype": "list of pokeapinames",
+      "datatype": "list of poke-api-names",
       "defined": "/PokeSpell.api.spell:2765-2809"
     },
     {
@@ -427,7 +427,7 @@
       "property": "pal_park_encounters",
       "asWritten": "pal park encounters",
       "of": "PokemonSpecies",
-      "datatype": "list of palparkencounters",
+      "datatype": "list of pal-park-encounters",
       "defined": "/PokeSpell.api.spell:3085-3143"
     },
     {
@@ -441,7 +441,7 @@
       "property": "flavor_text_entries",
       "asWritten": "flavor text entries",
       "of": "PokemonSpecies",
-      "datatype": "list of flavortextentries",
+      "datatype": "list of flavor-text-entries",
       "defined": "/PokeSpell.api.spell:3192-3250"
     },
     {
@@ -510,7 +510,7 @@
       "property": "game_indices",
       "asWritten": "game indices",
       "of": "Type",
-      "datatype": "list of gameindices",
+      "datatype": "list of game-indices",
       "defined": "/PokeSpell.api.spell:3540-3584"
     },
     {
@@ -535,7 +535,7 @@
     {
       "property": "pokemon",
       "of": "Type",
-      "datatype": "list of typepokemon",
+      "datatype": "list of type-pokemon",
       "defined": "/PokeSpell.api.spell:3704-3743"
     },
     {
@@ -628,27 +628,27 @@
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "Ability",
-      "datatype": "list of effectentries",
+      "datatype": "list of effect-entries",
       "defined": "/PokeSpell.api.spell:4029-4077"
     },
     {
       "property": "effect_changes",
       "asWritten": "effect changes",
       "of": "Ability",
-      "datatype": "list of effectchanges",
+      "datatype": "list of effect-changes",
       "defined": "/PokeSpell.api.spell:4081-4129"
     },
     {
       "property": "flavor_text_entries",
       "asWritten": "flavor text entries",
       "of": "Ability",
-      "datatype": "list of flavortextentries",
+      "datatype": "list of flavor-text-entries",
       "defined": "/PokeSpell.api.spell:4133-4191"
     },
     {
       "property": "pokemon",
       "of": "Ability",
-      "datatype": "list of abilitypokemon",
+      "datatype": "list of ability-pokemon",
       "defined": "/PokeSpell.api.spell:4195-4237"
     },
     {
@@ -724,7 +724,7 @@
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "Move",
-      "datatype": "list of effectentries",
+      "datatype": "list of effect-entries",
       "defined": "/PokeSpell.api.spell:4632-4680"
     },
     {
@@ -756,7 +756,7 @@
       "property": "past_values",
       "asWritten": "past values",
       "of": "Move",
-      "datatype": "list of pastvalues",
+      "datatype": "list of past-values",
       "defined": "/PokeSpell.api.spell:4820-4862"
     },
     {
@@ -795,7 +795,7 @@
       "property": "flavor_text_entries",
       "asWritten": "flavor text entries",
       "of": "Move",
-      "datatype": "list of flavortextentries",
+      "datatype": "list of flavor-text-entries",
       "defined": "/PokeSpell.api.spell:5068-5126"
     },
     {
@@ -868,7 +868,7 @@
       "property": "pokemon_species",
       "asWritten": "pokemon species",
       "of": "Generation",
-      "datatype": "list of pokemonspecies",
+      "datatype": "list of pokemon-species",
       "defined": "/PokeSpell.api.spell:5570-5620"
     },
     {
@@ -881,7 +881,7 @@
       "property": "version_groups",
       "asWritten": "version groups",
       "of": "Generation",
-      "datatype": "list of pokeapinames",
+      "datatype": "list of poke-api-names",
       "defined": "/PokeSpell.api.spell:5658-5706"
     },
     {
@@ -921,7 +921,7 @@
     {
       "property": "abilities",
       "of": "PastAbility",
-      "datatype": "list of pastabilityabilities",
+      "datatype": "list of past-ability-abilities",
       "defined": "/PokeSpell.api.spell:5918-5969"
     },
     {
@@ -974,7 +974,7 @@
       "property": "version_group_details",
       "asWritten": "version group details",
       "of": "PokemonMove",
-      "datatype": "list of versiongroupdetails",
+      "datatype": "list of version-group-details",
       "defined": "/PokeSpell.api.spell:6239-6301"
     },
     {
@@ -1484,7 +1484,7 @@
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "EffectChange",
-      "datatype": "list of effectentries",
+      "datatype": "list of effect-entries",
       "defined": "/PokeSpell.api.spell:9034-9082"
     },
     {

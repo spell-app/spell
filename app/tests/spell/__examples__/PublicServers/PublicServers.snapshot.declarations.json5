@@ -2431,7 +2431,7 @@
     {
       "property": "authors",
       "of": "Edition",
-      "datatype": "list of editionauthors",
+      "datatype": "list of edition-authors",
       "defined": "/OpenLibrary.api.spell:3039-3081"
     },
     {
