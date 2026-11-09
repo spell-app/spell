@@ -974,7 +974,7 @@ pre > .spell-code-copy {
  * ## Page notes (epic `airplane`, P3):  `<spell-notes>` groups of `<spell-note>` cards, written into the page
  * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`):  each note's head line is an
  * `<epic-page-note-head>` (the epics pack, epic `epic-engine` P3), its look its own sheet's.
- * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, in an agent's voice
+ * - a note is a person's:  a faint violet card (`--spell-voice-person-fill`);  Claude's replies under it, in an agent's voice
  *   (`--spell-voice-agent`, terracotta;  epic `epic-friend` P10, Q16:  violet before, which now means a person)
  * - FOLDED until opened (`spell-note[open]`):  only the head line shows, with the note's first line
  * - its status, by the colour scheme:  new yellow (open), answered in the agent's voice, done grey
@@ -993,7 +993,7 @@ pre > .spell-code-copy {
   border: 1px solid var(--spell-rule);
   border-left: 3px solid var(--spell-state-open);
   border-radius: 6px;
-  background: var(--spell-warm);
+  background: var(--spell-voice-person-fill);
   font-size: 0.95rem;
 }
 .spell-doc-main spell-note[status="answered"] {

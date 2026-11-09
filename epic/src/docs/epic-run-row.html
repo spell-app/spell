@@ -7,7 +7,7 @@
     <title>epic-run-row</title>
     <meta
       name="description"
-      content="The &lt;epic-run-row&gt; element: one row of a run page: the command&#39;s columns, then Owen&#39;s answer."
+      content="The &lt;epic-run-row&gt; element: one row of a run page: the command&#39;s columns, then your answer."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -32,16 +32,16 @@
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-run-row&gt;
-            <ui-header>The &lt;epic-run-row&gt; element: one row of a run page: the command&#39;s columns, then Owen&#39;s answer.</ui-header>
+            <ui-header>The &lt;epic-run-row&gt; element: one row of a run page: the command&#39;s columns, then your answer.</ui-header>
           </ui-header>
         </ui-container>
       </ui-segment>
 
       <ui-container class="site-body">
         <article class="site-article">
-          <p class="lede">One row of a run page: a thing a command asks about, and Owen's answer to it.</p>
+          <p class="lede">One row of a run page: a thing a command asks about, and your answer to it.</p>
           <p class="meta">
-            For anyone writing a command that asks Owen on a page, or changing this element.<br />
+            For anyone writing a command that asks you on a page, or changing this element.<br />
             <ui-label size="mini" color="green">built</ui-label> in
             <a href="/epic/src/components/epic-run-row/" target="src-spell-epic-src-components-epic-run-row"
               ><code title="epic/src/components/epic-run-row/">epic-run-row/</code></a
@@ -90,7 +90,7 @@
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               Never written in a page: <code>&lt;epic-run&gt;</code> draws one per row in its shadow root, giving it
-              the row, the columns and Owen's answer as properties. In markup, they're JSON.
+              the row, the columns and your answer as properties. In markup, they're JSON.
             </p>
           </ui-section>
 
@@ -137,7 +137,7 @@
                   <tr>
                     <td><code>answer</code></td>
                     <td>a <code>RunAnswer</code></td>
-                    <td>Owen's answer so far; none: the proposal.</td>
+                    <td>Your answer so far; none: the proposal.</td>
                     <td>no</td>
                   </tr>
                   <tr>
@@ -171,7 +171,7 @@
                     <tr>
                       <td><code>epic-run-answered</code></td>
                       <td>
-                        Owen typed (<code>now: false</code>), picked or ticked (<code>now: true</code>);
+                        You typed (<code>now: false</code>), picked or ticked (<code>now: true</code>);
                         <code>outcome</code>: <code>accepted</code>, <code>picked</code> or <code>typed</code>.
                       </td>
                     </tr>
