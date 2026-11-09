@@ -722,7 +722,7 @@ describe("a spellx page that draws its body", () => {
 /** What a page's section draws as, besides its label:  sticky, foldable, as the docs pages' are (J1). */
 const LOOK = 'sticky: "stack", collapsible: true, dividing: true, level: "2"'
 
-/** The Counter notebook, as P16's plan writes it (its `<section>` left out:  the tests' pack has none). */
+/** A counter notebook, as P16's plan writes it (its `<section>` left out:  the tests' pack has none). */
 const COUNTER = [
   '<spell-notebook "counter notebook">',
   "\t# A counter",

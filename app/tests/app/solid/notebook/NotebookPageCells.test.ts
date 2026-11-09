@@ -7,8 +7,8 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 
 /**
- * The Counter notebook, written in markdown:  its `#` title, its `##` sections and their text.
- * - Its counter is the Counter example's, which its project imports:  so it has no template cell of its own.
+ * A counter notebook, written in markdown:  its `#` title, its `##` sections and their text.
+ * - Its counter is some other project's:  so it has no template cell of its own.
  */
 const COUNTER = [
   '<spell-notebook "counter notebook">',
@@ -34,9 +34,40 @@ const COUNTER = [
   ""
 ].join("\n")
 
-/** The Counter notebook, `@spell/notebooks/Counter`, as committed:  its title and sections written as tags. */
-const TAGGED = readFileSync(
-  new URL("../../../../spaces/@spell/notebooks/Counter/Counter.spellml", import.meta.url),
+/** A notebook with a view of its own:  its title and sections written as tags, a view, and text after a drawing. */
+const TAGGED = [
+  '<spell-page "counter notebook" notebook>',
+  '\t<header level="1">',
+  "\t\tCounter",
+  "\t\t<header>A button that counts its clicks.</header>",
+  "\t</header>",
+  "",
+  '\t<view "counter">',
+  '\t\t<property "count" type="number">0</property>',
+  '\t\t<action "count up">set its count to its count + 1</>',
+  "\t\t<draw><button onClick={count up}>Clicked {its count} times</button></draw>",
+  "\t</view>",
+  "",
+  '\t<section label="Counter">',
+  '\t\t<example "One counter" description="A counter starts at 0, and adds one each time it\'s clicked.">',
+  "\t\t\t<counter/>",
+  "\t\t</example>",
+  "\t</section>",
+  "",
+  '\t<section label="Several counters">',
+  '\t\t<example "Two counters" description="Each counter keeps its own count:  clicking one leaves the others alone.">',
+  "\t\t\t<counter/>",
+  "\t\t\t<counter/>",
+  "\t\t</example>",
+  '\t\t<text color="grey">Click either one.</text>',
+  "\t</section>",
+  "</spell-page>",
+  ""
+].join("\n")
+
+/** Detail's Examples page, as committed in the Spell UI site:  a real page, written as tags. */
+const SITE_PAGE = readFileSync(
+  new URL("../../../../spaces/@spell/guides/SpellUI/Detail/Examples.spellml", import.meta.url),
   "utf8"
 )
 
@@ -137,6 +168,19 @@ describe("NotebookPageCells", () => {
     const several = tagged.cells[4]!
     expect(several.code).toBe('<section label="Several counters">')
     expect(TAGGED.slice(several.block!.start, several.block!.end)).toMatch(/^<section[^]*<\/section>$/)
+  })
+
+  test("a site page:  its title and lead, its section headings, a section's cell its opening tag and the section whole", () => {
+    const page = NotebookPageCells.of(SITE_PAGE, "/Detail/Examples.spellml")!
+    expect(page.cells[0]).toMatchObject({
+      kind: "heading",
+      title: "Detail",
+      lead: "A detail is a label's dimmer second value, such as a count."
+    })
+    const sections = page.cells.filter((cell) => cell.kind === "heading" && cell.heading)
+    expect(sections.map((cell) => cell.heading)).toEqual(["Owners", "Variations"])
+    expect(sections[0]!.code).toBe('<section label="Owners">')
+    expect(SITE_PAGE.slice(sections[1]!.block!.start, sections[1]!.block!.end)).toMatch(/^<section[^]*<\/>$/)
   })
 
   test("a template's groups:  each one's members together, under its name and description", () => {

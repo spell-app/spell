@@ -61,7 +61,7 @@ const testEditor = vi.hoisted(() => ({
   compileApp: async () => runProgram(testEditor.file!.contents)
 }))
 
-/** The Counter notebook:  a title, a view of its own, two sections each holding an example. */
+/** A counter notebook:  a title, a view of its own, two sections each holding an example. */
 const COUNTER = [
   '<spell-notebook "counter notebook">',
   "\t# A counter",
