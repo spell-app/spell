@@ -52,6 +52,7 @@ export const stringMethods = defineCoreModule({
    *   - `plain`:  `November 7, 2026`, what a program shows unless it says otherwise
    *   - `short`:  `11/7/26`;  `long`:  `Saturday, November 7, 2026`;  `abbreviated`:  `Sat, Nov 7, 2026`
    *   - `short time`:  `9:14 AM`;  `long time`:  `9:14:42 AM`
+   *   - `date and time`:  `Nov 7, 2026, 9:14 AM`
    *   - `timestamp`:  `2026-11-07T17:14:42.000Z`, ISO 8601, in UTC:  what a program sends and saves
    *   - `reader`:  as the reader's own browser says a date, `Nov 7, 2026` in the US, `7 nov 2026` in Spain
    * - Nothing, or anything that isn't a date, stays as it is;  a style it doesn't know is `plain`.
@@ -156,6 +157,7 @@ const DATE_STYLES = {
     date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }),
   "short time": (date: Date) => clockTime(date, "minutes"),
   "long time": (date: Date) => clockTime(date, "seconds"),
+  "date and time": (date: Date) => `${date.toLocaleDateString("en-US", { dateStyle: "medium" })}, ${clockTime(date, "minutes")}`,
   timestamp: (date: Date) => date.toISOString(),
   reader: (date: Date) => date.toLocaleDateString(undefined, { dateStyle: "medium" })
 } satisfies Record<string, (date: Date) => string>

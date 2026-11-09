@@ -563,11 +563,11 @@ expressionsEs.addRule(TheDate, {
 expressionsEs.addRule(
   Wording.specialize({
     ruleName: "date_style",
-    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "timestamp"]
+    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "date_and_time", "timestamp"]
   }),
   {
     syntax:
-      "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
+      "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(date_and_time:fecha y hora)|(timestamp:marca de tiempo))"
   }
 )
 expressionsEs.addRule(AsADate, {
@@ -578,7 +578,10 @@ expressionsEs.addRule(AsADate, {
       beforeEach(scope: P.Scope) {
         scope.variables?.add({ name: "due", datatype: "date" })
       },
-      tests: [["due como fecha corta", 'core.dateAs(due, "short")']]
+      tests: [
+        ["due como fecha corta", 'core.dateAs(due, "short")'],
+        ["due como fecha y hora", 'core.dateAs(due, "date and time")']
+      ]
     }
   ]
 })
