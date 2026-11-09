@@ -14,6 +14,7 @@ import { PlaceHeal } from "./PlaceHeal"
 import { PlaceReads } from "./PlaceReads"
 import { PlaceResult, type PlaceResultProps } from "./PlaceResult"
 import { PlaceError, writeAnswerFor, type Place, type PlaceRow, type WhyNotWritable } from "./places.types"
+import type { TabLocks } from "./TabCopies"
 
 /****************
  * ### `Places`
@@ -224,7 +225,7 @@ export class Places {
     let pending = this.pending.get(placeName)
     if (pending) return pending
     this.placeForOrDie(placeName)
-    const { storage, wait, retry } = this.props
+    const { storage, locks, wait, retry } = this.props
     // what's written to a place in for another for now isn't kept:  it's that place's to keep
     const keepPendingAs = this.setAside.has(placeName) ? undefined : this.props.keepPendingAs
     pending = new PendingChanges({
@@ -232,6 +233,7 @@ export class Places {
       places: this,
       ...(keepPendingAs !== undefined && { keepAs: keepPendingAs }),
       ...(storage && { storage }),
+      ...(locks && { locks }),
       ...(wait !== undefined && { wait }),
       ...(retry !== undefined && { retry })
     })
@@ -495,6 +497,8 @@ export type PlacesProps = {
   keepPendingAs?: string
   /** Finds where they're kept:  `BrowserCopyProps.storage`. */
   storage?: () => StorageLike | undefined
+  /** The browser's locks, which say which tabs have gone:  `TabCopiesProps.locks`.  Left out:  `navigator.locks`, in a page. */
+  locks?: TabLocks
   /** How long after the last change one in no group is sent, ms. */
   wait?: number
   /** How long after no answer it tries again, ms. */

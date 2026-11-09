@@ -226,6 +226,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Plain text in and out;  the place that writes a file is `CsvPlace`, in `spell/server/places`.
   - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
     - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
+    - Each tab keeps its own list:  [TabCopies](TabCopies.ts), a key and a held browser lock per tab;
+      what a closed tab left is gathered on opening (epic `data` I4).
     - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
       (`Places.onWriteFailed()`).
     - It sits on top of what's read (`replayOn()`), so you read your own writes.

@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { MemoryPlace, Places, type PlaceCapabilities, type PlaceWriteFailure } from "spell/places"
+import { MemoryPlace, Places, type PlaceCapabilities, type PlaceWriteFailure, type TabLocks } from "spell/places"
 import { MemoryStorage } from "spell/util/persist/MemoryStorage"
 
 import { TroubledPlace } from "./fakePlaces"
@@ -344,6 +344,170 @@ describe("PendingChanges, closing the tab", () => {
     places.onWriteFailed((failure) => failures.push(failure))
     expect(failures).toHaveLength(1)
   })
+})
+
+/** One browser's locks:  which are held, and a queue per name, so a lock is held by one at a time. */
+class FakeBrowser {
+  readonly held = new Set<string>()
+  readonly queues = new Map<string, Promise<unknown>>()
+
+  /** A new tab of this browser. */
+  newTab(): FakeTab {
+    return new FakeTab(this)
+  }
+}
+
+/** One tab's `navigator.locks`:  what it holds is let go by `close()`, as the browser does for a tab that's gone. */
+class FakeTab {
+  private readonly mine = new Set<string>()
+
+  constructor(private readonly browser: FakeBrowser) {}
+
+  /** The browser's `request()`, for the two ways `TabCopies` calls it. */
+  readonly request = ((name: string, callback: () => Promise<unknown>) => {
+    const { browser } = this
+    const run = async () => {
+      browser.held.add(name)
+      this.mine.add(name)
+      try {
+        return await callback()
+      } finally {
+        browser.held.delete(name)
+        this.mine.delete(name)
+      }
+    }
+    const answer = (browser.queues.get(name) ?? Promise.resolve()).then(run, run)
+    browser.queues.set(name, answer)
+    return answer
+  }) as unknown as TabLocks["request"]
+
+  /** The browser's `query()`. */
+  readonly query = (async () => ({
+    held: [...this.browser.held].map((name) => ({ name })),
+    pending: []
+  })) as TabLocks["query"]
+
+  /** The tab's gone. */
+  close(): void {
+    for (const name of this.mine) this.browser.held.delete(name)
+  }
+}
+
+describe("PendingChanges, two tabs of one program", () => {
+  const keepAs = "@owen/cookbook"
+
+  /** A tab of `browser` holding the change `value` it couldn't send.  `id`:  the recipe. */
+  async function tabHolding(browser: FakeBrowser, storage: MemoryStorage, value: string, id = "r-1") {
+    const tab = browser.newTab()
+    const made = cookbook({}, { keepPendingAs: keepAs, storage: () => storage, retry: 10_000, locks: tab as TabLocks })
+    made.place.nextWrites = ["fails"]
+    made.pending.setField(titleWrite(value, "Soup", id))
+    await vi.waitFor(() => expect(made.pending.queue.state.kind).toBe("failed"))
+    made.pending.queue.stop()
+    return { tab, ...made }
+  }
+
+  /** Opening the program in a new tab of `browser`. */
+  function openingTab(browser: FakeBrowser, storage: MemoryStorage) {
+    const place = new TroubledPlace({
+      collections: {
+        recipes: [
+          { id: "r-1", title: "Soup" },
+          { id: "r-2", title: "Stew" }
+        ]
+      }
+    })
+    const places = new Places({
+      wait: 0,
+      retry: 1,
+      keepPendingAs: keepAs,
+      storage: () => storage,
+      locks: browser.newTab() as TabLocks
+    }).add("cookbook", place)
+    return { place, places, pending: places.pendingFor("cookbook") }
+  }
+
+  /** The text kept for every tab. */
+  function keptTexts(storage: MemoryStorage): string[] {
+    return Array.from({ length: storage.length }, (_, at) => storage.getItem(storage.key(at)!)!)
+  }
+
+  test("each open tab keeps its own list, so neither writes over the other's", async () => {
+    const [browser, storage] = [new FakeBrowser(), new MemoryStorage()]
+    await tabHolding(browser, storage, "Broth")
+    await tabHolding(browser, storage, "Chowder", "r-2")
+    const texts = keptTexts(storage)
+    expect(texts).toHaveLength(2)
+    expect(texts.filter((text) => text.includes("Broth"))).toHaveLength(1)
+    expect(texts.filter((text) => text.includes("Chowder"))).toHaveLength(1)
+  })
+
+  test("what a closed tab left is taken over on opening, sent with its id, and its copy removed", async () => {
+    const [browser, storage] = [new FakeBrowser(), new MemoryStorage()]
+    const closed = await tabHolding(browser, storage, "Broth")
+    const { changeId } = closed.pending.changes[0]!
+    closed.tab.close()
+
+    const { place, pending } = openingTab(browser, storage)
+    await vi.waitFor(() => expect(place.sent.flat().map((change) => change.changeId)).toEqual([changeId]))
+    await allSent(pending)
+    expect((await kept(place))!.title).toBe("Broth")
+    expect(keptTexts(storage)).toEqual([])
+  })
+
+  test("two closed tabs are both taken over, the older one's first", async () => {
+    const [browser, storage] = [new FakeBrowser(), new MemoryStorage()]
+    const older = await tabHolding(browser, storage, "Broth")
+    await new Promise((resolve) => setTimeout(resolve, 2))
+    const newer = await tabHolding(browser, storage, "Chowder", "r-2")
+    older.tab.close()
+    newer.tab.close()
+
+    const { place, pending } = openingTab(browser, storage)
+    await allSentOnceTaken(pending, place, 2)
+    expect(place.sent.flat().map(({ fields }) => fields)).toEqual([{ title: "Broth" }, { title: "Chowder" }])
+  })
+
+  test("a tab still open keeps what it holds", async () => {
+    const [browser, storage] = [new FakeBrowser(), new MemoryStorage()]
+    const open = await tabHolding(browser, storage, "Broth")
+    const { place, places } = openingTab(browser, storage)
+    await places.pendingFor("cookbook").open()
+    expect(places.pendingFor("cookbook").changes).toEqual([])
+    expect(place.sent).toEqual([])
+    expect(open.pending.changes).toHaveLength(1)
+  })
+
+  test("a list kept before tabs had keys is taken over too", async () => {
+    const [browser, storage] = [new FakeBrowser(), new MemoryStorage()]
+    // moved to the one key every tab used to share
+    const original = await tabHolding(browser, storage, "Broth")
+    const key = storage.key(0)!
+    storage.setItem(key.slice(0, key.indexOf("#tab-")), storage.getItem(key)!)
+    storage.removeItem(key)
+    original.tab.close()
+
+    const { place, pending } = openingTab(browser, storage)
+    await allSentOnceTaken(pending, place, 1)
+    expect((await kept(place))!.title).toBe("Broth")
+  })
+
+  test("two tabs opening at once:  only one takes over what a closed tab left", async () => {
+    const [browser, storage] = [new FakeBrowser(), new MemoryStorage()]
+    const closed = await tabHolding(browser, storage, "Broth")
+    closed.tab.close()
+
+    const [one, other] = [openingTab(browser, storage), openingTab(browser, storage)]
+    await vi.waitFor(() => expect(one.place.sent.length + other.place.sent.length).toBe(1))
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(one.place.sent.length + other.place.sent.length).toBe(1)
+  })
+
+  /** Once `count` changes have reached `place`, and nothing's pending. */
+  async function allSentOnceTaken(pending: { hasPending: boolean }, place: TroubledPlace, count: number) {
+    await vi.waitFor(() => expect(place.sent.flat()).toHaveLength(count))
+    await allSent(pending)
+  }
 })
 
 describe("PendingChanges, reading your own write", () => {
