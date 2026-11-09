@@ -3769,7 +3769,7 @@
         },
         {
           "name": "recommended",
-          "description": "The recommended one's violet thumbs-up, after its title, labelled `Recommended`."
+          "description": "The recommended one's terracotta thumbs-up, after its title, labelled `Recommended`."
         },
         {
           "name": "actions",
@@ -7854,7 +7854,7 @@
       "folder": "epic-ask",
       "mainTag": "epic-ask",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
+      "summary": "A question you answer on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7974,7 +7974,7 @@
       "folder": "epic-comment-pane",
       "mainTag": "epic-comment-pane",
       "title": "<epic-comment-pane>",
-      "summary": "The <epic-comment-pane> element: the floating pane Owen writes a new comment in.",
+      "summary": "The <epic-comment-pane> element: the floating pane you write a new comment in.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8226,7 +8226,7 @@
       "folder": "epic-reply",
       "mainTag": "epic-reply",
       "title": "<epic-reply>",
-      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's violet, Owen's ivory.",
+      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's terracotta, yours violet.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8238,7 +8238,7 @@
       "folder": "epic-run",
       "mainTag": "epic-run",
       "title": "<epic-run>",
-      "summary": "The <epic-run> element: a run page's body: a command asks, Owen answers each row, Send.",
+      "summary": "The <epic-run> element: a run page's body: a command asks, you answer each row, Send.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8250,7 +8250,7 @@
       "folder": "epic-run-row",
       "mainTag": "epic-run-row",
       "title": "<epic-run-row>",
-      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then Owen's answer.",
+      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then your answer.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8322,7 +8322,7 @@
       "folder": "epic-status",
       "mainTag": "epic-status",
       "title": "<epic-status>",
-      "summary": "Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done.",
+      "summary": "Claude's status card on an item: what Claude took your mark to mean, then that it's done.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8346,7 +8346,7 @@
       "folder": "epic-text-box",
       "mainTag": "epic-text-box",
       "title": "<epic-text-box>",
-      "summary": "A box Owen types in on a page he answers on: notes, a comment, Other, feedback.",
+      "summary": "A box you type in on a page you answer on: notes, a comment, Other, feedback.",
       "status": "done",
       "docs": false,
       "tags": [

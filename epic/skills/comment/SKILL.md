@@ -41,7 +41,7 @@ Review any file through PLAN MODE's comment tab.
    ```
    - `.md`:  the text as is, so it renders.
      Anything else:  in one fenced block with its language (` ```ts `).
-   - Over ~600 lines:  say so in the header;  still one round (Owen picked one per file).
+   - Over ~600 lines:  say so in the header;  still one round (the person picked one per file).
 4. `ExitPlanMode`.  Then, by what comes back:
    - **Feedback / comments** (plan rejected, still in plan mode):
      apply each comment to the COPY in the plan file, the only file plan mode lets you edit.

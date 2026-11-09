@@ -72,7 +72,7 @@ The person has lots going at once:  show it all in one screen, sort it, and clea
 ## 2. What's next?
 
 More than 4 items in all (the modals below would take several calls):  skip steps 2 and 3's modals.
-ONE details page asks about every item instead (Owen, 2026-10-03):
+ONE details page asks about every item instead (2026-10-03):
 - The spec:
   - `where`:  epic "none:  repo housekeeping"
   - just now:  "what `/worktrees` found" (counts per group)

@@ -10,7 +10,7 @@ In Codex:  each step that needs a Claude Code tool says what Codex does instead,
 (the long form:  `epic guide claude-only-tools`).
 
 The person says what they want where they are;  it goes to the epic that owns it,
-and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-10-11).
+and this session carries on with its own work (epic `epic-workflow`, 2026-10-11).
 - The request is written FIRST, into the epic's shared folder:  nothing is lost if that epic's session is closed.
 - The epic's session turns it into a phase:  [the epic skill](../epic/SKILL.md), "12. Request".
 - The command:  `epic send` ([Requests.ts](https://github.com/spell-app/spell/blob/main/epic/src/command/Requests.ts)).

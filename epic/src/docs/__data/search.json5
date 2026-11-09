@@ -158,7 +158,7 @@
     {
       "path": "epic-ask.html",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
+      "summary": "A question you answer on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "tag": "epic-ask",
       "sections": [
         {
@@ -576,7 +576,7 @@
     {
       "path": "epic-comment-pane.html",
       "title": "<epic-comment-pane>",
-      "summary": "The <epic-comment-pane> element: the floating pane Owen writes a new comment in.",
+      "summary": "The <epic-comment-pane> element: the floating pane you write a new comment in.",
       "tag": "epic-comment-pane",
       "sections": [
         {
@@ -1570,7 +1570,7 @@
     {
       "path": "epic-reply.html",
       "title": "<epic-reply>",
-      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's violet, Owen's ivory.",
+      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's terracotta, yours violet.",
       "tag": "epic-reply",
       "sections": [
         {
@@ -1617,7 +1617,7 @@
     {
       "path": "epic-run-row.html",
       "title": "<epic-run-row>",
-      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then Owen's answer.",
+      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then your answer.",
       "tag": "epic-run-row",
       "sections": [
         {
@@ -1654,7 +1654,7 @@
     {
       "path": "epic-run.html",
       "title": "<epic-run>",
-      "summary": "The <epic-run> element: a run page's body: a command asks, Owen answers each row, Send.",
+      "summary": "The <epic-run> element: a run page's body: a command asks, you answer each row, Send.",
       "tag": "epic-run",
       "sections": [
         {
@@ -1926,7 +1926,7 @@
     {
       "path": "epic-status.html",
       "title": "<epic-status>",
-      "summary": "Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done.",
+      "summary": "Claude's status card on an item: what Claude took your mark to mean, then that it's done.",
       "tag": "epic-status",
       "sections": [
         {
@@ -2029,7 +2029,7 @@
     {
       "path": "epic-text-box.html",
       "title": "<epic-text-box>",
-      "summary": "A box Owen types in on a page he answers on: notes, a comment, Other, feedback.",
+      "summary": "A box you type in on a page you answer on: notes, a comment, Other, feedback.",
       "tag": "epic-text-box",
       "sections": [
         {

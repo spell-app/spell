@@ -14,11 +14,11 @@
  *     (epic `epic-engine` P9).
  * - Plain `node`:  `PromptGate.ts` loads with its types stripped.
  * - Then `PromptAck` (epic `epic-engine` P18):  a prompt the gate let through, sent while the session is busy, gets
- *   an "On it:  <what Owen asked>" line for him (`systemMessage`);  every prompt is logged to `epic-prompts.log` in
+ *   an "On it:  <what the person asked>" line for them (`systemMessage`);  every prompt is logged to `epic-prompts.log` in
  *   the checkout's git folder.
  * - And the session's moves (`SessionMoves`, epic `epic-engine` P26), first:
  *   - marks the session, so `epic window handoff` / `launch --move` know its hooks run (`sawHooks()`)
- *   - a move promised last turn and never started (the end-of-turn hook didn't run):  said, to Owen and Claude,
+ *   - a move promised last turn and never started (the end-of-turn hook didn't run):  said, to the person and Claude,
  *     and its record cleared (`missedMove()`)
  *   - "last turn":  the session wasn't busy when the prompt came;  a busy one's record may be this turn's own
  * - Never fails a prompt:  any error exits 0, the prompt untouched.

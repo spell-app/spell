@@ -10,7 +10,7 @@
  *   - green:  decided or done (Approve, Make Todo, a pick, a todo's plane)
  *   - blue:  an ask of Claude (Revisit)
  *   - grey:  no longer relevant (a todo's x, the note box's x:  Owen, 2026-10-09)
- *   - Owen's own words (the note box, a marked note, the note bubble):  on the brand's ivory (`--ui-brown-*`)
+ *   - a person's own words (the note box, a marked note, the note bubble):  their violet (`--epic-voice-person-*`)
  * - THE FILL (`data-fill`, Q20), never solid:
  *   - a grey outline:  available
  *   - dashed in its colour:  pressed, not sent
@@ -37,8 +37,8 @@
     /* a todo's x (drop it):  no longer relevant, as a canceled item's chip;  darker than a button at rest */
     --_epic-act-grey: var(--ui-grey, light-dark(#767676, #a0a0a0));
     /* Owen's voice:  the ivory of his answer card (`EpicAnswer.css`), its accent the brown ink */
-    --_epic-act-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
-    --_epic-act-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
     /* the ring of a group WAITING on Owen (Owen, 2026-10-25:  "try 2px border, #666") */
     --_epic-asks-ring: #666;
@@ -205,7 +205,7 @@
     font-size: 13px;
   }
   .review-noted[data-sent] {
-    color: var(--_epic-act-ivory-ink);
+    color: var(--_epic-act-person-ink);
   }
   .review-noted ui-icon::part(icon),
   .note-box ui-icon::part(icon),
@@ -408,9 +408,9 @@
     gap: 2px 8px;
     margin: 4px 0 2px;
     padding: 3px 4px 3px 10px;
-    border: 1px solid color-mix(in oklab, var(--_epic-act-ivory-ink) 25%, transparent);
+    border: 1px solid color-mix(in oklab, var(--_epic-act-person-ink) 25%, transparent);
     border-radius: 8px;
-    background: var(--_epic-act-ivory);
+    background: var(--_epic-act-person);
     font-size: 15px;
   }
   /* in its item's thread (`<epic-item>` gives the host `in-thread`):  a member of the thread's one frame, no box */
@@ -428,7 +428,7 @@
     padding: 0 4px;
     border: none;
     background: none;
-    color: var(--_epic-act-ivory-ink);
+    color: var(--_epic-act-person-ink);
     font-size: 13px;
   }
   .said-who {
@@ -438,7 +438,7 @@
   .said > ui-icon {
     flex: none;
     align-self: center;
-    color: var(--_epic-act-ivory-ink);
+    color: var(--_epic-act-person-ink);
   }
   .said-note {
     flex: 1 1 12em;
@@ -451,7 +451,7 @@
   .said-what {
     flex: none;
     margin-inline-start: auto;
-    color: var(--_epic-act-ivory-ink);
+    color: var(--_epic-act-person-ink);
     font-size: 12px;
   }
   .said-edit {
@@ -470,7 +470,7 @@
     cursor: pointer;
   }
   .said-edit:hover {
-    background: color-mix(in oklab, var(--_epic-act-ivory-ink) 14%, transparent);
+    background: color-mix(in oklab, var(--_epic-act-person-ink) 14%, transparent);
   }
   .said-edit:focus-visible {
     outline: 2px solid var(--_epic-act-focus);

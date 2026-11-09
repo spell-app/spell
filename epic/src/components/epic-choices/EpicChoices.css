@@ -121,11 +121,14 @@
     min-width: 0;
     overflow-wrap: anywhere;
   }
-  /* the recommended one:  a violet thumbs-up after its title, no word (Owen, 2026-10-08:  Claude's suggestion) */
+  /*
+   * the recommended one:  a thumbs-up in the agent's terracotta after its title, no word:  it's Claude's suggestion
+   * (violet until epic `epic-engine` I238:  violet is a person)
+   */
   .recommended {
     display: inline-flex;
     vertical-align: -0.1em;
-    color: var(--ui-violet-text, var(--ui-violet, #6550ca));
+    color: var(--epic-voice-agent-text, light-dark(#a8502f, #e59a7c));
   }
   .recommended svg {
     display: block;

@@ -1,6 +1,6 @@
 /*
  * `<epic-new-item>` (`EpicNewItem.tsx`, epic `airplane` P2):  the `+` button and the form for a new todo or question.
- * - Owen's own words:  his ivory, as the review controls' note box
+ * - a person's own words:  their violet, as the review controls' note box
  *   (`EpicReview.css`, whose private tokens it shares by value)
  * - the page header's is the form alone (`open`):  the page's sheet gives it a row of its own
  * - Public tokens (`--epic-new-item-*`) are never declared here:  read through private aliases.
@@ -17,9 +17,9 @@
     --_epic-act-green: var(--ui-green, #00853a);
     /* ink on the green Add:  never declared before P10, so Add took the text colour (black on green:  axe's 4.3:1) */
     --_epic-act-green-on: var(--ui-green-on, #fff);
-    /* Owen's voice:  the ivory of his answer card (`EpicAnswer.css`), its accent the brown ink */
-    --_epic-act-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
-    --_epic-act-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    /* a person's voice:  the faint violet of their reply card (`EpicAnswer.css`), its accent the violet ink */
+    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
     display: block;
   }
@@ -80,9 +80,9 @@
     width: 100%;
     margin: 8px 0 2px;
     padding: 8px;
-    border: 1px solid color-mix(in oklab, var(--_epic-act-ivory-ink) 30%, transparent);
+    border: 1px solid color-mix(in oklab, var(--_epic-act-person-ink) 30%, transparent);
     border-radius: 12px;
-    background: var(--_epic-act-ivory);
+    background: var(--_epic-act-person);
     font-size: 15px;
   }
   .new-kinds {
