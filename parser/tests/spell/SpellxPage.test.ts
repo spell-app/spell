@@ -34,7 +34,7 @@ describe("a spellx page that draws its body", () => {
   test("compiles:  its templates first, its drawing, then it starts", () => {
     const { code, errors } = compiled(COUNTER)
     expect(errors).toEqual([])
-    expect(code).toContain("export class Counter extends View {")
+    expect(code).toContain("export class CounterNotebookCounter extends View {")
     expect(code).toContain("export class CounterNotebook extends Page {")
     expect(code).toContain(
       [
@@ -42,7 +42,7 @@ describe("a spellx page that draws its body", () => {
         "    return [",
         '      h("ui-markdown", "# A counter\\nA button that counts its clicks."),',
         `      core.drawPart(this, () => h("ui-section", { label: "Try it", ${LOOK} },`,
-        '        core.drawPart(this, () => h("spell-example", { name: "one counter" }, h("test-project-counter")))',
+        '        core.drawPart(this, () => h("spell-example", { name: "one counter" }, h("test-project-counter-notebook-counter")))',
         "      )),",
         `      h("ui-section", { label: "Two of them", ${LOOK} },`,
         '        h("ui-markdown", "Each counts on its own:"),',
@@ -57,20 +57,20 @@ describe("a spellx page that draws its body", () => {
     expect(projectCode(COUNTER)).toContain("if (!core.isCarryingOver) counterNotebook.start()")
     // a JSX text's spaces on its own line stay:  `Clicked {its count} times`, not `Clicked0times`
     expect(code).toContain('"Clicked ", () => this.count, " times"')
-    expect(code.indexOf("class Counter ")).toBeLessThan(code.indexOf("class CounterNotebook "))
+    expect(code.indexOf("class CounterNotebookCounter ")).toBeLessThan(code.indexOf("class CounterNotebook "))
   })
 
   test("written as code spell, in memory, it compiles to the same program", () => {
     const written = SX.CodeSpellWriter.write(COUNTER, {
       path: "/Counter.spellml",
       // the project's own views, as the editor reads them off the parse
-      componentTag: (word) => (word === "counter" ? "test-project-counter" : SP.ComponentPacks.tagFor(word, "en"))
+      componentTag: (word) => (word === "counter" ? "test-project-counter-notebook-counter" : SP.ComponentPacks.tagFor(word, "en"))
     })
     expect(written).toContain("counter notebook is a page:\n\t- to draw it:\n\t\t<markdown>\n")
     // each `##` heading's section, written out, what follows it inside
     expect(written).toContain(
       '\t\t<ui-section label="Try it" sticky="stack" collapsible dividing level="2">\n' +
-        '\t\t\t<example "one counter">\n\t\t\t\t<test-project-counter/>\n\t\t\t</example>\n\t\t</ui-section>\n'
+        '\t\t\t<example "one counter">\n\t\t\t\t<test-project-counter-notebook-counter/>\n\t\t\t</example>\n\t\t</ui-section>\n'
     )
     expect(written).not.toContain("start counter notebook")
     const twin = compiled(written, "/Counter.spell")
@@ -113,7 +113,7 @@ describe("a spellx page that draws its body", () => {
     expect(errors).toEqual([])
     expect(code).toContain("export class CuadernoDelContador extends Page {")
     expect(code).toContain('return "bloqueado"')
-    expect(code).toContain('h("spell-example", { name: "un contador" }, h("test-project-contador"))')
+    expect(code).toContain('h("spell-example", { name: "un contador" }, h("test-project-cuaderno-del-contador-contador"))')
     expect(projectCode(text, "/Contador.es.spellml")).toContain("if (!core.isCarryingOver) cuadernoDelContador.start()")
   })
 
@@ -160,17 +160,17 @@ describe("a spellx page that draws its body", () => {
       const [file] = parseSpellProject([{ path: "/Counter.spell", contents: written }]).files
       const back = SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
       expect(back).toContain('<spell-page "counter notebook" notebook>')
-      expect(back).toContain('<spell-view "counter">')
+      expect(back).toContain('<spell-view "counter-notebook-counter"')
     })
   })
 
   // epic `notebook` P6, T2:  the way back writes a page's drawing as its own body
   describe("written as code spell and back, its drawing is its own body again", () => {
     /** `text` as code spell, its own views' tags as the editor reads them, then back as spellx. */
-    const thereAndBack = (text: string) => {
+    const thereAndBack = (text: string, counterTag = "test-project-counter-notebook-counter") => {
       const written = SX.CodeSpellWriter.write(text, {
         path: "/Counter.spellml",
-        componentTag: (word) => (word === "counter" ? "test-project-counter" : SP.ComponentPacks.tagFor(word, "en"))
+        componentTag: (word) => (word === "counter" ? counterTag : SP.ComponentPacks.tagFor(word, "en"))
       })
       const [file] = parseSpellProject([{ path: "/Counter.spell", contents: written }]).files
       return SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
@@ -187,7 +187,7 @@ describe("a spellx page that draws its body", () => {
           "",
           "\t## Try it",
           '\t<example "one counter">',
-          "\t\t<test-project-counter/>",
+          "\t\t<test-project-counter-notebook-counter/>",
           "\t</example>",
           "",
           "\t## Two of them",
@@ -220,7 +220,7 @@ describe("a spellx page that draws its body", () => {
         "</spell-page>",
         ""
       ].join("\n")
-      const back = thereAndBack(`${COUNTER.split("\n").slice(4, 10).join("\n")}\n${text}`)
+      const back = thereAndBack(`${COUNTER.split("\n").slice(4, 10).join("\n")}\n${text}`, "test-project-counter")
       expect(back).toContain("\t<markdown>\n\t\t<b>Bold</b>, then text\n\t</markdown>\n\tA second block\n\t<markdown>")
       expect(compiled(back).code).toBe(compiled(`${COUNTER.split("\n").slice(4, 10).join("\n")}\n${text}`).code)
     })
@@ -332,7 +332,7 @@ describe("a spellx page that draws its body", () => {
     })
   })
 
-  // epic `notebook` P2:  a page's own views, `<view counter>` (Q6), in any page (Q1), usable anywhere (Q7's A)
+  // epic `notebook` P2:  a page's own views, `<view counter>` (Q6), in any page (Q1);  named for the page (P10, Q11, reversing Q7's A)
   describe("a page's own views", () => {
     const HOME = [
       '<spell-page "home">',
@@ -352,10 +352,10 @@ describe("a spellx page that draws its body", () => {
     test('`<view counter>` and `<view "one counter">`:  lifted to just before the page, drawn later in it', () => {
       const { code, errors } = compiled(HOME, "/Home.spellml")
       expect(errors).toEqual([])
-      expect(code.indexOf("export class Counter extends View {")).toBeGreaterThanOrEqual(0)
-      expect(code.indexOf("export class OneCounter extends View {")).toBeGreaterThan(code.indexOf("class Counter "))
-      expect(code.indexOf("export class Home extends Page {")).toBeGreaterThan(code.indexOf("class OneCounter "))
-      expect(code).toContain('h("ui-markdown", "# Home"),\n      h("test-project-counter")')
+      expect(code.indexOf("export class HomeCounter extends View {")).toBeGreaterThanOrEqual(0)
+      expect(code.indexOf("export class HomeOneCounter extends View {")).toBeGreaterThan(code.indexOf("class HomeCounter "))
+      expect(code.indexOf("export class Home extends Page {")).toBeGreaterThan(code.indexOf("class HomeOneCounter "))
+      expect(code).toContain('h("ui-markdown", "# Home"),\n      h("test-project-home-counter")')
       // where it's written, in the chunk tree:  `<view>` is the templates table's word, read without its prefix
       const [page] = SX.SpellxView.read(HOME, { path: "/Home.spellml" }).templates
       expect(page!.children.slice(0, 2)).toMatchObject([
@@ -376,18 +376,18 @@ describe("a spellx page that draws its body", () => {
       text.push("\t<draw><counter/></draw>", "</spell-page>", "")
       const { code, errors } = compiled(text.join("\n"), "/Home.spellml")
       expect(errors).toEqual([])
-      expect(code).toContain("export class Counter extends View {")
-      expect(code).toContain('return h("test-project-counter")')
+      expect(code).toContain("export class HomeCounter extends View {")
+      expect(code).toContain('return h("test-project-home-counter")')
     })
 
-    test("an ordinary view of the project:  drawn from another file too (Q7, A)", () => {
+    test("a page's own view, in a file with others:  its short name still reads from another file", () => {
       const other = '<spell-page "other">\n\t<counter/>\n</spell-page>\n'
       const [, second] = parseSpellProject([
         { path: "/Home.spellml", contents: HOME },
         { path: "/Other.spellml", contents: other }
       ]).files
       expect(second!.errors).toEqual([])
-      expect(second!.compiled).toContain('h("test-project-counter")')
+      expect(second!.compiled).toContain('h("test-project-home-counter")')
     })
 
     test("in Spanish:  `<vista contador>`, the same short word, read off Spanish's templates table", () => {
@@ -403,8 +403,8 @@ describe("a spellx page that draws its body", () => {
       ].join("\n")
       const { code, errors } = compiled(text, "/Inicio.es.spellml")
       expect(errors).toEqual([])
-      expect(code).toContain("export class Contador extends View {")
-      expect(code).toContain('h("ui-markdown", "# Hola"),\n      h("test-project-contador")')
+      expect(code).toContain("export class InicioContador extends View {")
+      expect(code).toContain('h("ui-markdown", "# Hola"),\n      h("test-project-inicio-contador")')
     })
 
     test("a bare name names any template:  `<spell-view counter>`;  an attribute word wins, `<view locked>`", () => {

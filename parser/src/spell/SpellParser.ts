@@ -320,6 +320,34 @@ export class SpellParser extends P.Parser {
     return layer === base ? layers : [this]
   }
 
+  /** Our copy for a page alone in its file:  our form too, so its tags still read. */
+  cloneForAloneFile(): this {
+    const clone = this.clone({ module: this.module })
+    clone.form = this.form
+    return clone
+  }
+
+  /**
+   * A parser to read `aloneHead()` with, before a project has a scope:  its head is words, and needs nothing of one.
+   */
+  static spellxReaderFor(language: SP.Language, form: SP.SpellForm = "spell"): SpellParser {
+    return SP.Language.rootScopeFor([language]).parser!.clone({ module: "head", form } as P.ParserProps) as SpellParser
+  }
+
+  /**
+   * What the project knows of page file `text` at `path`, when the page is alone in it;  `undefined` when it isn't.
+   * - Alone:  a spellx file whose only top-level thing is one page tag, comments aside (epic `notebook` P10, Q11).
+   *   A view or a thing written inside the page belongs to it.
+   * - Read from the file's lines, before anything parses:  351 pages in about 4 ms.
+   * - Any other file is simply not alone:  no error, and it compiles as it always has.
+   */
+  aloneHead(text: string, path: string): P.FileHead | undefined {
+    if (this.form !== "spellx") return undefined
+    const name = SP.alonePageName(text, this.language ?? SP.Language.default)
+    if (!name) return undefined
+    return new SP.AlonePage(this, name, SP.alonePageProperties(text, this.language ?? SP.Language.default), path)
+  }
+
   /** A clone of us, as `P.Parser.clone()`, but none of our twins:  a family is one project's (`twinFor()`). */
   clone(properties?: P.ParserProps): this {
     const clone = super.clone(properties)

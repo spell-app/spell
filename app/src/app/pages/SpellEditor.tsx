@@ -50,6 +50,7 @@ import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
 import { CodeOutputPane, CodeOutputShown, FollowAlong } from "spell/app/app/solid/CodeOutput"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
+import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
 import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
 import { editorHotkeys } from "./editorHotkeys"
@@ -273,7 +274,10 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
   const title = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
-  const notebook = tracked(() => notebookOf(editor.project, editor.file))
+  const isRun = tracked(() => editor.projectPage === "runner")
+  const notebook = tracked(() => notebookOf(editor.project, editor.file, isRun()))
+  // a site of notebook pages wears the docs site's look in Run (epic `notebook` P10)
+  const isNotebookSite = tracked(() => !!editor.project && editor.isNotebookSite(editor.project))
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
   // one of the editor's own pieces, outside the draft editor:  its app is the editor itself, from your drafts
   const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
@@ -292,7 +296,7 @@ export function AppPane() {
         <div
           class={[
             "AppPaneProgram",
-            { hidden: isEditorPiece(), NotebookPage: !!notebook(), "ui-docs-sections": !!notebook() }
+            { hidden: isEditorPiece(), NotebookPage: !!notebook(), "ui-docs-sections": !!notebook() || isNotebookSite() }
           ]}
           ref={(element: HTMLDivElement) => (program = element)}
         >
@@ -459,12 +463,19 @@ export function ProgramPanel(props: { onClose: () => void }) {
  * `project`'s notebook, if it's one (`NotebookController.notebooksIn()`).
  * - The one open in the editor (`open`), when it's a notebook:  a project of several shows each at its own address,
  *   `/edit/@spell/guides/SpellUI/Avatar/Usage.spellml` (epic `notebook` P10).
+ * - A project with a site:  Run always shows the site (`isRun`), and Edit only the open file, so opening the site
+ *   file shows the site file.
  * - Else its first.
  */
 function notebookOf(
   project: SP.SpellProject | undefined,
-  open: { path?: string } | undefined
+  open: { path?: string } | undefined,
+  isRun: boolean
 ): SP.SpellFile | undefined {
+  if (project?.isLoaded && editor.projectHasSite(project)) {
+    if (isRun || !(open instanceof SP.SpellFile) || !NotebookPageCells.holdsNotebook(open)) return undefined
+    return open
+  }
   const notebooks = NotebookController.notebooksIn(project)
   return notebooks.find((file) => file.path === open?.path) ?? notebooks[0]
 }

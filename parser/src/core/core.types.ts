@@ -393,6 +393,14 @@ export type SiteHost = {
   address(): string
   /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
   go(address: string): void
+  /**
+   * Page class `className` is about to show:  a host that compiles pages one at a time brings it in now.
+   * - Answers whether the site should show it:  `false` where another page is shown instead (a page open in Edit).
+   * - None, or `undefined`:  the program has it already.
+   */
+  pageNeeded?(className: string): Promise<boolean> | boolean | undefined
+  /** Scroll to the section `id` of the page being shown, once it's drawn:  a link's `#section`. */
+  landOn?(id: string): void
   /** Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in. */
   listen(showAddress: (address: string) => void): void
   /**

@@ -198,6 +198,10 @@ export class SiteBase extends App {
       this.setState("showing", { kind: "missing", address } satisfies Showing)
       return
     }
+    // a page not compiled yet (`SiteHost.pageNeeded()`):  the host brings it in;  false:  this isn't the place to show it
+    const needed = core.siteHost?.pageNeeded?.(found.entry.page)
+    if (needed !== undefined && !(await needed)) return
+    if (this.currentAddressHere !== address) return
     const page = this.pageInstance(found.entry)
     if (!page) {
       this.setState("showing", {
@@ -378,6 +382,7 @@ export class SiteBase extends App {
       },
       h("ui-site-nav", {
         class: "spell-site-nav",
+        appearance: "nav",
         remember: this.constructor.name,
         // functions:  `h()` reads a function on a dashed tag as a live value
         // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
@@ -389,7 +394,21 @@ export class SiteBase extends App {
           this.navigate(event.detail.href)
         }
       }),
-      h("div", { class: "spell-site-page", style: PAGE_LAYOUT }, () => made(this.drawShowing())),
+      h(
+        "div",
+        { class: "spell-site-page", style: PAGE_LAYOUT },
+        // the shown page's family as tabs (`<ui-site-tabs>`), when it has one:  pages write nothing
+        h("ui-site-tabs", {
+          class: "spell-site-tabs",
+          pages: () => JSON.stringify(this.navPages()),
+          current: () => this.tabsCurrent(),
+          "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
+            event.preventDefault()
+            this.navigate(event.detail.href)
+          }
+        }),
+        () => made(this.drawShowing())
+      ),
       () => made(this.drawOverlay())
     ) as unknown as Drawing
   }
@@ -404,7 +423,12 @@ export class SiteBase extends App {
         .filter((entry) => !entry.params?.length)
         .map((entry) => {
           const pages = listed(entry.pages)
-          const page: SiteNavPage = { title: entry.title ?? entry.name, href: entry.address, id: entry.name }
+          const page: SiteNavPage = {
+            title: entry.title ?? entry.name,
+            href: entry.address,
+            id: entry.name,
+            ...(entry.tab && { tab: entry.tab })
+          }
           return pages.length ? { ...page, pages } : page
         })
     return listed(this.siteClass.pages)
@@ -429,16 +453,32 @@ export class SiteBase extends App {
     return listed.at(-1)?.address ?? ""
   }
 
-  /** A click on a link to one of its own addresses:  shown here, not loaded as a new page. */
+  /**
+   * The page `<ui-site-tabs>` marks as shown:  the page shown;  `""`, no tabs, for one with a parameter
+   * or for the not found and error pages.
+   */
+  tabsCurrent(): string {
+    const showing = this.getState<Showing>("showing")
+    return showing?.kind === "page" && !showing.entry.params?.length ? showing.entry.address : ""
+  }
+
+  /**
+   * A click on a link to one of its own addresses:  shown here, not loaded as a new page.
+   * - A link to download a file, or one with its own `target`, is left to the browser.
+   * - An address may end in a `#section`:  the part before it picks the page,
+   *   and Spell UI's `HashLanding` lands on the section, as the docs site's links do.
+   */
   followLink(event: MouseEvent): void {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
     const link = (event.composedPath() as Element[]).find((element) => element.localName === "a") as
       | HTMLAnchorElement
       | undefined
     const href = link?.getAttribute("href")
-    if (!href?.startsWith("/") || href.startsWith("//") || link?.target) return
+    if (!href?.startsWith("/") || href.startsWith("//") || link?.target || link?.hasAttribute("download")) return
     event.preventDefault()
-    this.navigate(href)
+    const [address = "", section] = href.split("#")
+    this.navigate(address)
+    if (section) core.siteHost?.landOn?.(section)
   }
 
   /** What it shows now:  its page, the not found page or the error page. */
@@ -565,7 +605,7 @@ export class SiteBase extends App {
 ////////////////
 
 /** One page as `<ui-site-nav pages>` takes it (Spell UI's `SiteNavPage`:  the core never imports Spell UI). */
-type SiteNavPage = { title: string; href: string; id: string; pages?: SiteNavPage[] }
+type SiteNavPage = { title: string; href: string; id: string; tab?: string; pages?: SiteNavPage[] }
 
 /** A site's two columns:  its navigation, then the page. */
 const SITE_LAYOUT =

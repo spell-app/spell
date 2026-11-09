@@ -125,6 +125,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
   "site-param-not-on-page":
     'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
+  "page-part-names-a-page": '"{name}" es el nombre de {page}, una página de este proyecto:  ponle otro nombre',
   "site-address-taken": 'La {page} ya está en "{address}":  cada página necesita su propia dirección',
   "site-card-place-not-whole":
     "La fila y la columna de una tarjeta se cuentan desde 1, en números enteros:  {row} y {column} no lo son",

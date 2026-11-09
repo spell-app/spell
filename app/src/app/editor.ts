@@ -13,7 +13,7 @@ import type { monaco, EditWay } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
-import { runSite } from "spell/app/app/pages/RunSite"
+import { RunSite, runSite } from "spell/app/app/pages/RunSite"
 import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -27,6 +27,7 @@ import { StartingPoints } from "spell/app/app/StartingPoints"
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 // By file:  plain TypeScript, no Solid, as this file must be
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
+import { declaresSite } from "spell/app/spaces/models/siteFiles"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 
@@ -106,6 +107,8 @@ export class EditorStore extends Observable {
    * - Updates the URL, whose route calls `selectPath()`.
    */
   showEditor(path?: string, selection?: UIT.EditorSelection): void {
+    // pressing Edit on a page of the running site opens that page's file
+    if (!path && editor.projectPage === "runner") path = editor.pageShownInSite()?.path
     if (!path) path = editor.file?.path
     // TODO: selection!!!!
     try {
@@ -123,7 +126,7 @@ export class EditorStore extends Observable {
   async showRunner(path?: string): Promise<void> {
     if (!path) path = editor.file?.path
     try {
-      navigate(new SP.SpellLocation(path!).runnerUrl)
+      navigate(editor.siteRunUrlFor(path!) ?? new SP.SpellLocation(path!).runnerUrl)
       // what's running is this program as it is now:  a game in progress goes on
       if (!editor.isRunningLatest) void editor.compileApp()
     } catch {
@@ -257,11 +260,51 @@ export class EditorStore extends Observable {
     editor.project = project
     editor.file = file
     await file.load(undefined)
+    const pageCameIntoPlay = editor.bringIntoPlay(project, file)
     startingPoints.note(project.path, project.files)
     if (!sameProject) void editor.refreshDrafts()
     // If we switched projects, recompile
-    if (!sameProject) void editor.compileApp()
+    if (!sameProject || pageCameIntoPlay) void editor.compileApp()
   }
+
+  /**
+   * In Edit, the open file's page, when it's alone in its file, is what's compiled (`project.pagesInPlay`).
+   * - Answers whether it wasn't before.
+   * - A project with no page alone in a file compiles as it always has:  `pagesInPlay` costs it nothing.
+   * - In Run, what the site shows comes in as it's shown:  `pageNeeded()`.
+   */
+  bringIntoPlay(project: SP.SpellProject, file: EditorFile): boolean {
+    project.pagesInPlay ??= new Set()
+    if (editor.projectPage !== "editor" || !(file instanceof SP.SpellFile)) return false
+    if (project.pagesInPlay.has(file.path) || !project.headFor(file)) return false
+    project.pagesInPlay.add(file.path)
+    return true
+  }
+
+  /**
+   * A running site is about to show page class `className`:  compile it in, if it isn't yet
+   * (`SP.SpellProject.pagesInPlay`), then let the site show it.
+   * - A page open in Edit is what shows, so the site doesn't:  `false`.
+   * - Waits for the run in progress to finish:  the page is added to it (`LiveEdit`, a type added).
+   * - NEVER throws:  a page that won't compile shows its errors in the console, and the site's error page.
+   */
+  pageNeeded(className: string): Promise<boolean> | boolean | undefined {
+    const { project, file } = editor
+    if (!project?.pagesInPlay) return undefined
+    if (editor.projectPage === "editor" && file instanceof SP.SpellFile && project.headFor(file)) return false
+    const page = project.fileForPage(className)
+    if (!page || project.pagesInPlay.has(page.path)) return undefined
+    project.pagesInPlay.add(page.path)
+    const running = editor.appRun
+    return (async () => {
+      await running.catch(() => undefined)
+      await editor.compileApp().catch(editor.showError)
+      return true
+    })()
+  }
+
+  /** The program running now, starting:  a page compiled in waits for it (`pageNeeded()`).  NOTE: not reactive. */
+  appRun: Promise<unknown> = Promise.resolve()
 
   /**
    * Show `match` in its file, with the cursor on it.
@@ -465,6 +508,44 @@ export class EditorStore extends Observable {
   /** Path of the project run last:  a compile of the same project keeps its things. */
   lastExecutedPath: string | undefined = undefined
 
+  /** Does `project` hold a site?  Its Run shows the site, and Edit its own pages (epic `notebook` P10). */
+  projectHasSite(project: SP.SpellProject): boolean {
+    return project.spellFiles.some((file) => file.contents && declaresSite(file.contents))
+  }
+
+  /** Is `project` a site of pages alone in their files, e.g. the Spell UI site?  It wears the docs look in Run. */
+  isNotebookSite(project: SP.SpellProject): boolean {
+    return editor.projectPage === "runner" && project.isLoaded && editor.projectHasSite(project) && project.hasAlonePages
+  }
+
+  /** The running program's site, if any. */
+  private get runningSite(): RunningSite | undefined {
+    return (appRuntime as unknown as { core: { RUNTIME?: { site?: RunningSite } } } | undefined)?.core.RUNTIME?.site
+  }
+
+  /** The file of the page the running site is showing, when it's alone in its file. */
+  pageShownInSite(): SP.SpellFile | undefined {
+    return editor.project && editor.pageFileAt(editor.project, runSite.address())
+  }
+
+  /** The file of the page at site address `address` of `project`, when it's alone in its file. */
+  pageFileAt(project: SP.SpellProject, address: string): SP.SpellFile | undefined {
+    const entry = editor.runningSite?.pageFor(address)?.entry
+    return entry && project.fileForPage(entry.page)
+  }
+
+  /** Run's URL showing file `path` in the running site, when it holds one of the site's pages. */
+  siteRunUrlFor(path: string): string | undefined {
+    const { project, file } = editor
+    const page = project && (project.getFile(path) as SP.AnySpellFile | undefined)
+    if (!project || !(page instanceof SP.SpellFile)) return undefined
+    const head = project.headFor(page)
+    const site = editor.runningSite
+    if (!(head instanceof SP.AlonePage) || !site || file !== page) return undefined
+    const entry = site.allPages().find((each) => each.page === head.className && !each.params?.length)
+    return entry && RunSite.runUrlFor(project.path, entry.address)
+  }
+
   /** The compiled program run last:  `isRunningLatest` compares it. */
   lastExecutedProgram: string | undefined = undefined
 
@@ -517,7 +598,7 @@ export class EditorStore extends Observable {
       await RootLoader.useLanguage(lang)
     }
     const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
-    const error = await runtime.runApp(compiled, {
+    const run = runtime.runApp(compiled, {
       appRoot,
       coreUrl: runtimeUrl(),
       keepConsole: true,
@@ -530,6 +611,8 @@ export class EditorStore extends Observable {
       placesFrom: sourceMap,
       siteHost: runSite
     })
+    editor.appRun = run
+    const error = await run
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
     else output.info(appTexts.text("consoleExecuted", words))
@@ -546,6 +629,8 @@ export class EditorStore extends Observable {
    */
   showOpenPage(): void {
     const { file } = editor
+    // in Run, a site shows itself:  a page is reached through it, its first by its own address (epic `notebook` P10)
+    if (editor.projectPage === "runner" && editor.project && editor.projectHasSite(editor.project)) return
     if (!appRuntime || !(file instanceof SP.SpellFile) || !NotebookPageCells.holdsNotebook(file)) return
     try {
       const name = P.camelCaseOf(NotebookPageCells.notebookNameIn(file).trim().replace(/\s+/g, "_"))
@@ -1543,6 +1628,12 @@ export class EditorStore extends Observable {
 
 /** The runtime programs run on, once loaded -- NOT spell state:  nothing follows it.  See `loadRuntime()`. */
 let appRuntime: SpellRuntime | undefined
+
+/** What the editor asks the running site:  `SiteBase`, which it never imports. */
+type RunningSite = {
+  pageFor(address: string): { entry: { page: string } } | undefined
+  allPages(): { page: string; address: string; params?: string[] }[]
+}
 /** Loading `appRuntime`, once asked for. */
 let loadingRuntime: Promise<SpellRuntime> | undefined
 /** Where the running app draws -- NOT spell state either.  See `editor.setAppRoot()`. */

@@ -421,8 +421,10 @@ const SECTION_TABS = "ui-toolbar.ui-docs-section-tabs"
 function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP.SpellFile | undefined {
   const url = new URL(link.href, location.href)
   if (url.origin !== location.origin) return undefined
-  return NotebookController.notebooksIn(controller.project).find((file) => {
+  const named = NotebookController.notebooksIn(controller.project).find((file) => {
     const location = new SP.SpellLocation(file.path)
     return url.pathname === location.editorUrl || url.pathname === location.runnerUrl
   })
+  // a site's address, `/button/api`:  the page's file, shown here
+  return named ?? editor.pageFileAt(controller.project, url.pathname)
 }

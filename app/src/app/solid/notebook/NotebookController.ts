@@ -51,6 +51,15 @@ export class NotebookController {
    * - Read from the files' text (`NotebookPageCells.holdsNotebook()`), so the page shows as soon as the project's
    *   loaded;  `[]` until then.
    */
+  /**
+   * The notebooks `file` sits with:  the project's, or in a folder of a project, the folder's alone, as a folder holds
+   * one component's pages (epic `notebook` P10).
+   */
+  static pagesBeside(file: SP.SpellFile, project: SP.SpellProject | undefined): SP.SpellFile[] {
+    const all = NotebookController.notebooksIn(project)
+    return all.filter((it) => it.folder === file.folder)
+  }
+
   static notebooksIn(project: SP.SpellProject | undefined): SP.SpellFile[] {
     if (!project?.isLoaded) return []
     return project.spellFiles.filter((file) => file.form === "spellx" && NotebookPageCells.holdsNotebook(file))

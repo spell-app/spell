@@ -80,7 +80,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     this.breakIntoIndentedBlocks = (tokens: P.Token[]) =>
       groupLines(tokens)
         .map((block) => unwrapCode(block, this.unwrapsHtml))
-        .map((block) => (this.liftsPageTemplates ? liftPageTemplates(block) : block))
+        .map((block) => (this.liftsPageTemplates ? liftPageTemplates(block, this.nameForPage) : block))
   }
 
   /**
@@ -190,6 +190,31 @@ export class SpellxTokenizer extends P.Tokenizer {
    * - Every line to its closing fence is prose, as written:  `<property ...>` at a line's start is shown, never read.
    */
   private openFence: { fence: string; note?: SP.SpellxNoteKind } | undefined
+
+  /**
+   * SIDE EFFECT:  template line `item`, written in page `page`, is named for it (epic `notebook` P10, Q11):
+   * `<view "counter">` in the film page reads `a film page counter aka counter is a view`.
+   * - So two pages can each have a `counter`, and `<counter/>` in a page finds its own.
+   * - Only for a parse:  a view of the file's chunks keeps `liftsPageTemplates` off, and its names as written.
+   * - A template that says its own `aka` keeps it;  a short name of several words is dashed, as a tag says it.
+   */
+  private nameForPage = (item: P.Token, page: SP.SpellxText): void => {
+    const head = item instanceof P.LineToken ? item.tokens[0] : undefined
+    if (!SP.isSpellxTag(head, "template") || !head.tag.name) return
+    const { tag } = head
+    const short = tag.name!
+    // dashed:  a name of several words stops at four (`type_words`), and this one is often longer
+    const whole = `${page.text} ${short.text}`.trim().split(/\s+/).join("-")
+    tag.name = { ...this.textAt(whole, 0, whole.length, false), start: short.start }
+    if (tag.attributes.some((it) => it.name === "aka")) return
+    const dashed = short.text.trim().split(/\s+/).join("-")
+    tag.attributes.push({
+      name: "aka",
+      word: "aka",
+      value: this.textAt(dashed, 0, dashed.length, false),
+      start: short.start
+    })
+  }
 
   /** Match a single top-level token at `start`:  a spellx tag, closer or line of prose, else spell's. */
   matchTopTokens(text: string, start = 0, end = text.length) {
@@ -1356,7 +1381,7 @@ function isSelfClosingHead(line: string): boolean {
  * - The page starts by itself, as any app or page does (`SpellProject.startedByItself()`):  no line is added for it.
  * - SIDE EFFECT:  changes `block`'s items in place;  returns it.
  */
-function liftPageTemplates(block: P.BlockToken): P.BlockToken {
+function liftPageTemplates(block: P.BlockToken, nameForPage: (item: P.Token, page: SP.SpellxText) => void): P.BlockToken {
   const items = block.tokens
   for (let index = 0; index < items.length; index++) {
     const line = items[index]
@@ -1364,6 +1389,7 @@ function liftPageTemplates(block: P.BlockToken): P.BlockToken {
     if (!SP.isSpellxTag(head, "template") || head.tag.kind !== "page") continue
     const body = items[index + 1] instanceof P.BlockToken ? (items[index + 1] as P.BlockToken) : undefined
     const lifted = body ? liftTemplates(body) : []
+    if (head.tag.name) for (const it of lifted) nameForPage(it, head.tag.name)
     // its templates before it:  parsed first, so its drawing knows them (`<counter/>` is the counter's element)
     items.splice(index, 0, ...lifted)
     index += lifted.length + (body ? 1 : 0)

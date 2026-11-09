@@ -35,7 +35,8 @@ export function NotebookHeader(props: {
 }) {
   const { controller } = props
   const locked = () => !!controller.model()?.locked
-  const notebooks = () => NotebookController.notebooksIn(controller.project)
+  // a site's component:  only its own pages (`pagesBeside()`), not all 351
+  const notebooks = () => NotebookController.pagesBeside(controller.file, controller.project)
   // what the status said last:  kept while it fades out
   let lastStatus = ""
   return (

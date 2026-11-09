@@ -258,16 +258,13 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - `undefined`:  nobody has it;  a name with a dash (`ui-text`, `solitaire-card`) is then left as written, as a tag
    */
   static componentTagFor(scope: P.Scope, word: string): string | undefined {
-    if (!isBareComponentName(word)) {
-      return word.includes("-")
-        ? SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
-        : undefined
-    }
-    const type = scope.getType(SP.typeName(word))
+    // a view of several words is named with dashes:  `<task-list/>`, a page's own (epic `notebook` P10)
+    const type = word.includes("-") || isBareComponentName(word) ? scope.getType(SP.typeName(word)) : undefined
     if (type?.isA("View")) {
       const project = projectScopeOf(scope)
       if (project?.name) return elementTagFor(project.name, type.name)
     }
+    if (!isBareComponentName(word) && !word.includes("-")) return undefined
     return SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
   }
 

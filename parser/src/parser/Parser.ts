@@ -40,6 +40,11 @@ export class Parser extends Derivative {
   }
 
   /** Return a clone of this parser with additional `properties` passed in. */
+  /** Our copy for a file that parses alone:  see `P.IncrementalProject`. */
+  cloneForAloneFile(): this {
+    return this.clone({ module: this.module })
+  }
+
   clone(properties?: ParserProps): this {
     // oxlint-disable-next-line typescript/no-misused-spread
     const allProps = { ...this, ...properties } as Record<string, unknown>
