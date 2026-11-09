@@ -507,7 +507,9 @@ than just being able to move on").
      - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
    - A choice made WITHOUT the person (they're away, or an agent decided):  `add <name>#J`.
      - Ids `J1` ...;  see `/bedtime`.
-     - CALM by default:  `--calm` (last), yellow (open) rather than red.  The same for an issue.
+     - CALM by default:  `--calm` (last):  a call grey, an issue yellow, rather than red.
+     - An issue filed from the person's own words (their request, their screenshot):  add `--requested` too.
+       Closed, it turns light orange until they've looked;  without it, a calm issue Claude closes goes grey (epic `epic-engine` P63).
        - Owen:  "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
          (2026-10-10, "the principle of least surprise").
        - RED (no `--calm`) only when it would surprise them:
@@ -1603,12 +1605,13 @@ phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / p
 phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck through, finished as done;  why in place of Done
 phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
-add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm]   prints the id (T3)
+add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
 add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
-calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
+calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (a call grey, an issue yellow);  --loud:  red again
+requested <name>#I3 [<id>...]                       issues filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)
 commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase or an item

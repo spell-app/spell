@@ -58,6 +58,7 @@ epic pages link <page> --show     # the page's links, to give the person
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
 3. Do the work.  Record as you go:
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
+     (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked)
    - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`

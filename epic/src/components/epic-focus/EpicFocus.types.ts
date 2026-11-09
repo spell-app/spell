@@ -36,16 +36,19 @@ export type FocusKind = FocusKindLook["kind"]
 
 /**
  * The states Focus mode walks, by the page's own colours (`DrawnState` for items, `PhaseState` for phases):  red,
- * orange, blue and yellow (a phase's dotted blue, scheduled, too).
+ * orange, light orange, blue and yellow (a phase's or item's dotted blue, scheduled, too).
  * - left out:  green, grey (done, decided, no longer relevant;  a phase paused, held by Owen:  epic `epic-engine` I221)
  */
 export const OPEN_STATES: ReadonlySet<string> = new Set([
-  // an item's:  red, orange, blue, yellow
+  // an item's:  red, orange and light orange, blue, yellow
   "attention",
   "replied",
+  "requested",
   "progress",
+  "handed",
   "open",
-  // a phase's own:  orange (its plan changed), dotted blue (scheduled)
+  // a phase's own:  orange (a plan to accept, or its plan changed);  dotted blue, an item's too (scheduled)
+  "waiting",
   "updated",
   "scheduled"
 ])

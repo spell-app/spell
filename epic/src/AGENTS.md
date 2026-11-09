@@ -1447,7 +1447,8 @@ In `tools/`:
     - The PHASES section's chips (`<epic-state-filter phases>`, epic `epic-engine` I157;  recoloured in I170, Owen,
       2026-10-29:  "this doesn't match our other colors"):  ONE state per phase, the first that holds (`PhaseState`,
       `epic-section/PhaseState.ts`, the one rule its chips, counts, toolbar badges and each phase's status circle use)
-      - red (`attention`):  its plan waits for his Accept (not the doc pass), or a choice set in it is open
+      - red (`attention`):  a choice set in it is open
+      - orange (`waiting`):  its plan waits for his Accept (not the doc pass;  epic `epic-engine` P63)
         (`choices-open`, P50)
       - orange (`updated`):  changed since he looked:  `to-see` updates neither Seen nor quiet (3 days, I168)
       - blue (`progress`):  under way, or Claude at work on it;  counted in the blue badge, as an item's
