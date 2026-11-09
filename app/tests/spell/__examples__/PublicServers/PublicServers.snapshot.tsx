@@ -416,6 +416,16 @@ export class User extends Thing {
   @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4785, end: 4802 } })
   accessor bio!: string
 
+  /** Their own page, in the GitHub tab */
+  async lookAtUser() {
+    publicServers.github.showing = this
+  }
+
+  /** Put their page away again, with its Back button */
+  async lookAwayFromUser() {
+    publicServers.github.showing = undefined
+  }
+
   @drawn draw() {
     return (
       <ui-card onClick={core.pressed(this, async () => await this.lookAtUser())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
@@ -473,19 +483,6 @@ export class User extends Thing {
         </ui-stack>
       </ui-stack>
     )
-  }
-
-  //////////////////////////////////////////////////
-  // ## What someone on GitHub can do, from anywhere
-  //////////////////////////////////////////////////
-  // Shown on their own page, and put away again by its Back button, in the GitHub tab of the public servers.
-
-  async lookAtUser() {
-    publicServers.github.showing = this
-  }
-
-  async lookAwayFromUser() {
-    publicServers.github.showing = undefined
   }
 
   static savedIn = {
@@ -1604,7 +1601,6 @@ core.heading("A repository")
 //////////////////
 // Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
 
-core.heading("What someone on GitHub can do, from anywhere")
 // -----------
 core.heading("Open Library:  books by what they're called, who wrote them, and their covers")
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1720,6 +1716,16 @@ export class Book extends Thing {
     return core.getItemAt(this.authors, 0)
   }
 
+  /** Its own page, on the library's tab */
+  async open() {
+    publicServers.library.showing = this
+  }
+
+  /** Back to what the search found */
+  async close() {
+    publicServers.library.showing = undefined
+  }
+
   @drawn draw() {
     return (
       <ui-card class="book" onClick={core.pressed(this, async () => await this.open())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
@@ -1766,19 +1772,6 @@ export class Book extends Thing {
 
     core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="writing">Asking Open Library who wrote it</ui-loader>)
     core.readRider("failed", () => <ui-text part="writing">Open Library can't say who wrote it just now.</ui-text>)
-  }
-
-  //////////////////////////////////////////////////
-  // ## What a book and a city can do, from anywhere
-  //////////////////////////////////////////////////
-  // Only this file can name the public servers:  so its other files ask this.
-
-  async open() {
-    publicServers.library.showing = this
-  }
-
-  async close() {
-    publicServers.library.showing = undefined
   }
 
   static savedIn = {
@@ -2779,16 +2772,17 @@ export class City extends Thing {
   @prop({ type: "number" })
   accessor longitude!: number
 
+  /** The city the weather's for */
+  pick() {
+    publicServers.weather.city = this
+  }
+
   @drawn draw() {
     return (
       <ui-item active={this === publicServers.weather.city} onClick={core.pressed(this, () => this.pick())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {this.name}
       </ui-item>
     )
-  }
-
-  pick() {
-    publicServers.weather.city = this
   }
 }
 
@@ -3755,8 +3749,6 @@ export class PublicServerElement extends SpellElement<PublicServer> {
 }
 core.useElement(PublicServer, PublicServerElement)
 export const publicServers = new PublicServer()
-
-core.heading("What a book and a city can do, from anywhere")
 // -----------
 if (!core.isCarryingOver) publicServers.start()
 

@@ -196,32 +196,32 @@
       "property": "picture",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:434-585"
+      "defined": "/Pokemon.spellml:210-361"
     },
     {
       "property": "sound",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:600-702"
+      "defined": "/Pokemon.spellml:376-478"
     },
     {
       "property": "number_tag",
       "asWritten": "number tag",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:717-984"
+      "defined": "/Pokemon.spellml:493-760"
     },
     {
       "property": "evolutions",
       "of": "Pokemon",
       "datatype": "Chain",
-      "defined": "/Pokemon.spellml:999-1151"
+      "defined": "/Pokemon.spellml:775-927"
     },
     {
       "property": "loved",
       "of": "Pokemon",
       "datatype": "choice",
-      "defined": "/Pokemon.spellml:1166-1311"
+      "defined": "/Pokemon.spellml:942-1087"
     },
     {
       "syntax": "open {thisArg:expression}",
@@ -236,7 +236,7 @@
       "name": "open it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spellml:1327-1749"
+      "defined": "/Pokemon.spellml:1103-1525"
     },
     {
       "syntax": "hear {thisArg:expression}",
@@ -250,7 +250,7 @@
       "kind": "method",
       "name": "hear it",
       "returns": "nothing",
-      "defined": "/Pokemon.spellml:1763-1891"
+      "defined": "/Pokemon.spellml:1539-1667"
     },
     {
       "syntax": "love {thisArg:expression}",
@@ -265,7 +265,7 @@
       "name": "love it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spellml:1905-2209"
+      "defined": "/Pokemon.spellml:1681-1985"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -278,7 +278,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:2223-2578"
+      "defined": "/Pokemon.spellml:1999-2354"
     },
     {
       "type": "PokemonSpecies",
@@ -470,7 +470,7 @@
       "property": "pokemon",
       "of": "PokemonSpecies",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spellml:7887-8023"
+      "defined": "/Pokemon.spellml:8110-8246"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -483,7 +483,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:8038-8080"
+      "defined": "/Pokemon.spellml:8261-8303"
     },
     {
       "type": "Type",
@@ -567,13 +567,13 @@
       "kind": "method",
       "name": "\"is real\"",
       "returns": "choice",
-      "defined": "/Pokemon.spellml:5319-5494"
+      "defined": "/Pokemon.spellml:5542-5717"
     },
     {
       "property": "colour",
       "of": "Type",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:5507-6213"
+      "defined": "/Pokemon.spellml:5730-6436"
     },
     {
       "syntax": "pick {thisArg:expression}",
@@ -588,7 +588,7 @@
       "name": "pick it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spellml:6229-6369"
+      "defined": "/Pokemon.spellml:6452-6592"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -601,7 +601,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:6383-6572"
+      "defined": "/Pokemon.spellml:6606-6795"
     },
     {
       "type": "Ability",
@@ -1239,6 +1239,12 @@
       "defined": "/PokeSpell.api.spell:7588-7617"
     },
     {
+      "property": "word",
+      "of": "Stat",
+      "datatype": "text",
+      "defined": "/Pokemon.spellml:5059-5439"
+    },
+    {
       "type": "PastStat",
       "superType": "Thing",
       "defined": "/PokeSpell.api.spell:7619-7714"
@@ -1283,7 +1289,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:6695-6805"
+      "defined": "/Pokemon.spellml:6918-7028"
     },
     {
       "type": "PokedexNumber",
@@ -1477,7 +1483,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:6901-6926"
+      "defined": "/Pokemon.spellml:7124-7149"
     },
     {
       "type": "EffectEntry",
@@ -1710,7 +1716,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:7324-7679"
+      "defined": "/Pokemon.spellml:7547-7902"
     },
     {
       "type": "PokeApiName",
@@ -1790,7 +1796,7 @@
       "property": "pokemon",
       "of": "Favourite",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spellml:8205-8260"
+      "defined": "/Pokemon.spellml:8428-8483"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1803,7 +1809,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:8273-8298"
+      "defined": "/Pokemon.spellml:8496-8521"
     },
     {
       "type": "MyFavourite",
@@ -2203,113 +2209,114 @@
     1119,
     1124,
     1130,
-    1131,
-    1136,
+    1141,
     1142,
-    1143,
-    1148,
+    1147,
     1153,
-    1161,
-    1162,
-    1167,
+    1154,
+    1159,
+    1164,
+    1172,
     1173,
-    1174,
-    1179,
+    1178,
+    1184,
     1185,
-    1186,
-    1191,
+    1190,
     1196,
+    1197,
     1202,
-    1203,
-    1208,
+    1207,
     1213,
+    1214,
     1219,
-    1220,
-    1225,
+    1224,
+    1230,
     1231,
-    1232,
-    1237,
+    1236,
+    1242,
     1243,
-    1244,
-    1249,
+    1248,
     1254,
-    1259,
-    1264,
-    1269,
+    1255,
+    1260,
+    1265,
+    1270,
     1275,
-    1276,
-    1281,
+    1280,
     1286,
+    1287,
     1292,
-    1293,
-    1298,
+    1297,
     1303,
+    1304,
     1309,
-    1310,
-    1315,
+    1314,
+    1320,
     1321,
-    1322,
-    1327,
+    1326,
     1332,
+    1333,
     1338,
-    1339,
-    1344,
+    1343,
+    1349,
     1350,
-    1351,
-    1356,
+    1355,
+    1361,
     1362,
-    1364,
-    1365,
-    1370,
+    1367,
+    1373,
     1375,
-    1380,
-    1385,
-    1390,
-    1395,
-    1400,
+    1376,
+    1381,
+    1386,
+    1391,
+    1396,
+    1401,
     1406,
-    1407,
-    1412,
+    1411,
     1417,
+    1418,
     1423,
-    1424,
-    1429,
+    1428,
     1434,
-    1439,
-    1444,
-    1470,
-    1471,
-    1477,
-    1483,
-    1512,
-    1513,
-    1519,
+    1435,
+    1440,
+    1445,
+    1450,
+    1455,
+    1481,
+    1482,
+    1488,
+    1494,
+    1523,
     1524,
-    1529,
-    1555,
-    1594,
-    1595,
-    1600,
+    1530,
+    1535,
+    1540,
+    1566,
     1605,
-    1610,
-    1614,
-    1619,
+    1606,
+    1611,
+    1616,
+    1621,
     1625,
-    1632,
-    1707,
-    1711,
-    1714,
-    1719,
-    1724,
-    1729,
-    1734,
-    1739,
-    1744,
-    1749,
-    1757,
+    1630,
+    1636,
+    1643,
+    1718,
+    1722,
+    1725,
+    1730,
+    1735,
+    1740,
+    1745,
+    1750,
+    1755,
+    1760,
     1768,
-    1772,
-    1778,
-    1784
+    1779,
+    1783,
+    1789,
+    1795
   ]
 }

@@ -49,18 +49,3 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 		</>
 	</draw>
 </spell-app>
-
-
-# What a book and a city can do, from anywhere
-Only this file can name the public servers:  so its other files ask this.
-
-<spell>
-	to open (a book):
-		set the public servers' library's showing to it
-
-	to close (a book):
-		set the public servers' library's showing to nothing
-
-	to pick (a city):
-		set the public servers' weather's city to it
-</spell>

@@ -48,6 +48,14 @@ Its cover, its title and who wrote it:  on its card, every name the search gave;
 <spell-more-of "book">
 	<property "writer" description="Who wrote it first:  read from Open Library's record of them, by their id">the first item of its authors</property>
 
+	<action "open it" description="Its own page, on the library's tab">
+		set the showing of the library of the public servers to it
+	</action>
+
+	<action "close it" description="Back to what the search found">
+		set the showing of the library of the public servers to nothing
+	</action>
+
 	<draw>
 		<ui-card class="book" onClick={open it}>
 			<image src={its cover i} alt="" aspect-ratio="2:3" crop />
