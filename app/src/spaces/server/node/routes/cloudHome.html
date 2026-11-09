@@ -308,7 +308,13 @@
             .then(() => location.replace(location.href))
             .catch(showProblem)
         })
-        panel.append(made("span", `Signed in as ${person}`), signOut)
+        const password = made("ui-button", "Set a password", { link: "/sign-in?password" })
+        ask("/api/sign-in/me")
+          .then((me) => {
+            if (me.password?.set) password.textContent = "Change password"
+          })
+          .catch(() => undefined)
+        panel.append(made("span", `Signed in as ${person}`), password, signOut)
         popup.append(panel)
         element("who").replaceChildren(button, popup)
       }

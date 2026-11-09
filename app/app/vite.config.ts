@@ -31,7 +31,12 @@ export default defineConfig({
   server: {
     ...APP_CONFIG.server,
     port: environment.vitePort,
-    host: "0.0.0.0",
+    // on the house network (epic `atmosphere` P39):  this machine's own side only, so its one way in is Caddy's address,
+    // which refuses what shouldn't reach this machine's person from elsewhere (`caddyFileFor()`)
+    // Live reload needs nothing more:  vite's page script opens its socket at the address the page came from
+    // (`wss://test.spell.app`).
+    // REJECTED:  a fixed `hmr` host and port 443, which would break the same editor at http://localhost:3000.
+    host: environment.editorThisMachineOnly ? "127.0.0.1" : "0.0.0.0",
     // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's
     // pages;  its write token added for the project data folders (`pageServerProxy()`)
     proxy: pageServerProxy({

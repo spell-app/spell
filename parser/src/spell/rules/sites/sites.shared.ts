@@ -18,6 +18,8 @@ export type SitePageEntry = {
   title?: string
   /** what its tab says in the site's `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
   tab?: string
+  /** what the line files it under, to group and search a site's pages by:  `["Forms", "Inputs"]` */
+  tags?: string[]
   /** how far along it is, if the line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14) */
   state?: string
   /** a picture of it, if the line names one:  a file of the project, `snapshots/films.png` */
@@ -116,6 +118,18 @@ export function pageNamed(scope: P.Scope, words: string): P.TypeScope | undefine
   else if (SP.typeName(all[0]!) === "page") shorter = all.slice(Wording.reads(scope, "receiver_of", all[1]!) ? 2 : 1)
   const page = shorter?.length ? typeNamed(scope, shorter.join(" ")) : undefined
   return page?.isA("Page") ? page : undefined
+}
+
+/** The tags a line wrote, split at their commas:  `"Forms, Inputs"` => `["Forms", "Inputs"]`;  blanks and repeats left out. */
+export function tagsIn(text: string): string[] {
+  return [
+    ...new Set(
+      text
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    )
+  ]
 }
 
 /** Each parameter in `address`, by the property it fills:  `/films/:film/people/:person_id` => `film`, `person id`. */

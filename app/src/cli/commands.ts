@@ -8,9 +8,9 @@
  *   Spell taking down a record, a space or an account, for Spell's admins,
  *   with a reason in a log beside it (epic `atmosphere` P6)
  * - `spell space backup now | list | status | restore <space>`:  every space's nightly backups (epic `atmosphere` P7)
- * - `spell space cloud serve | status | invite | mail | service`:  Spell's server for people outside this machine,
+ * - `spell space cloud serve | build | status | invite | mail | service`:  Spell's server for people outside this machine,
  *   the cloud a program's `... is saved in the cloud` keeps its things in (epic `atmosphere` P8)
- * - `spell space local setup | start | mail | sign-in`:  the cloud at real-looking addresses, for one house network
+ * - `spell space local setup | start | stop | mail | sign-in`:  the cloud at real-looking addresses, for one house network
  *   (epic `atmosphere` T57)
  * - `spell space org host start | stop`:  Spell's own Spaces host on this machine, with two throwaway accounts,
  *   for the Spaces trial to run against (epic `atmosphere` P13)
@@ -248,6 +248,11 @@ export default function appCommands(spell: Command): void {
     .action((_options, command: Command) => runCloud("serve", undefined, command))
 
   cloud
+    .command("build")
+    .description("build the browser bundle programs run on, if it's stale, and start nothing")
+    .action((_options, command: Command) => runCloud("build", undefined, command))
+
+  cloud
     .command("status")
     .description("is it running, where, and its backups;  exits 1 when it isn't, or a night was missed")
     .action((_options, command: Command) => runCloud("status", undefined, command))
@@ -257,6 +262,12 @@ export default function appCommands(spell: Command): void {
     .description("make an account for an email, and send its mail:  the running cloud's own invite")
     .argument("<email>", "whose, e.g. ana@example.com")
     .action((email: string, _options, command: Command) => runCloud("invite", email, command))
+
+  cloud
+    .command("password")
+    .description("set someone's password on the running cloud:  asked for twice, hidden, or read from standard input")
+    .argument("<email>", "whose:  an email, or an account's name, e.g. ana@example.com")
+    .action((email: string, _options, command: Command) => runCloud("password", email, command))
 
   cloud
     .command("mail")
@@ -294,6 +305,13 @@ export default function appCommands(spell: Command): void {
     )
     .option("--address <url>", "where it's reached;  each needs `setup` -- default what `setup` made", collect, [])
     .action((_options, command: Command) => runLocal("start", [], command))
+
+  local
+    .command("stop")
+    .description(
+      "stop the site, the cloud and HTTPS:  a page server restart leaves it running, and the next one starts it again"
+    )
+    .action((_options, command: Command) => runLocal("stop", [], command))
 
   local
     .command("mail")

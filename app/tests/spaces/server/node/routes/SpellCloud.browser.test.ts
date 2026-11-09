@@ -107,7 +107,7 @@ describe("staying signed in, in a browser", () => {
   /** SIDE EFFECT:  `page`, at the sign-in page, signs in as `email` by the code mailed to them. */
   const signIn = async (page: Page, email: string) => {
     await page.fill("#email", email)
-    await page.click("#email-form button")
+    await page.click("#email-link")
     await page.locator("#code").waitFor({ timeout: SETTLE_MS })
     const mail = await new MailCatcher({ folder: join(dir, "mail") }).newestTo(email)
     await page.fill("#code", /^\d{6}$/m.exec(mail!.text)![0])
@@ -309,6 +309,170 @@ describe("staying signed in, in a browser", () => {
         )
       }
     }
+  })
+
+  describe("signing in with a password", () => {
+    const PASSWORD = "a long enough one"
+    const NEWER = "another long enough one"
+
+    beforeAll(async () => {
+      await cloud.signIn.signIns.setPasswordFor((await new SpellAccounts(people).accountFor(ANA))!, PASSWORD)
+    })
+
+    /** The sign-in form, as a browser's password manager reads it. */
+    const formAsFound = (page: Page) =>
+      page.evaluate(() => {
+        const password = document.querySelector<HTMLInputElement>('form input[type="password"]')!
+        const form = password.form!
+        const username = form.querySelector<HTMLInputElement>('input[autocomplete="username"]')!
+        return { method: form.method, username: username.name, password: password.autocomplete }
+      })
+
+    test(
+      "a page that's gated says so, and a password manager finds the form;  filled, it signs in and goes on",
+      async () => {
+        const { context, page } = await newPage()
+        await page.goto(here(PROGRAM))
+        await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+        expect(await page.locator("#lead").textContent()).toContain("belongs to an organization")
+        expect(await formAsFound(page)).toEqual({ method: "post", username: "username", password: "current-password" })
+        await page.fill("#email", ANA)
+        await page.fill("#password", PASSWORD)
+        await page.click("#sign-in")
+        await expectProgram(page)
+        await context.close()
+      },
+      TEST_MS
+    )
+
+    test(
+      "at /sign-in it guards nothing, so it says nothing of an org;  a wrong password says so, and stays;  no password in the address",
+      async () => {
+        const { context, page } = await newPage()
+        await page.goto(here("/sign-in"))
+        await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+        expect(await page.locator("#lead").textContent()).not.toContain("organization")
+        await page.fill("#email", BO)
+        await page.fill("#password", "not the password")
+        await page.click("#sign-in")
+        await expect.poll(() => page.locator("#problem").textContent()).toContain("don't go together")
+        expect(page.url()).not.toContain("password=")
+        expect(await page.inputValue("#password")).toBe("")
+        await context.close()
+      },
+      TEST_MS
+    )
+
+    test.skipIf(!hasElements)(
+      "set from the home page's menu:  a link's sign-in needs no current password;  it works next time",
+      async () => {
+        const { context, page } = await newPage("elements")
+        await page.goto(here("/sign-in"))
+        await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+        await signIn(page, ANA)
+        await page.waitForURL(here("/"), { timeout: SETTLE_MS })
+        await page.locator("#who > ui-button button").click()
+        await page.getByRole("link", { name: "Change password" }).click()
+        await page.locator("#new-password").waitFor({ state: "visible", timeout: SETTLE_MS })
+        expect(await page.locator("#current-password").isVisible()).toBe(false)
+        await page.fill("#new-password", NEWER)
+        await page.click("#save-password")
+        await page.locator("#password-saved").waitFor({ state: "visible", timeout: SETTLE_MS })
+        await context.close()
+
+        const later = await newPage()
+        await later.page.goto(here(PROGRAM))
+        await later.page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+        await later.page.fill("#email", ANA)
+        await later.page.fill("#password", NEWER)
+        await later.page.click("#sign-in")
+        await expectProgram(later.page)
+        await cloud.signIn.signIns.setPasswordFor((await new SpellAccounts(people).accountFor(ANA))!, PASSWORD)
+        await later.context.close()
+      },
+      TEST_MS
+    )
+
+    test.skipIf(!hasElements)(
+      "a program's sign-in bar:  email and password in a real form;  signed in, it changes the password",
+      async () => {
+        const { context, page } = await newPage("elements")
+        await page.goto(here("/apps/@spell/examples/FamilyCookbook"))
+        const bar = page.locator("ui-message.spell-sign-in")
+        await bar.locator("form").waitFor({ state: "attached", timeout: 30_000 })
+        const native = bar.locator('input[type="password"]')
+        await native.waitFor({ timeout: SETTLE_MS })
+        expect(await native.getAttribute("autocomplete")).toBe("current-password")
+        expect(await bar.locator("input").first().getAttribute("autocomplete")).toBe("username")
+        if (PICTURES) await page.screenshot({ path: join(PICTURES, "password-bar-desktop-light.png") })
+
+        await bar.locator("input").first().fill(ANA)
+        await native.fill(PASSWORD)
+        await native.press("Enter")
+        await expect.poll(() => bar.textContent(), { timeout: SETTLE_MS }).toContain("with your Spell account")
+
+        await bar.locator("ui-button", { hasText: "Change password" }).click()
+        await bar.locator('input[autocomplete="new-password"]').waitFor({ timeout: SETTLE_MS })
+        if (PICTURES) await page.screenshot({ path: join(PICTURES, "password-bar-changing-desktop-light.png") })
+        await bar.locator('input[autocomplete="current-password"]').fill(PASSWORD)
+        await bar.locator('input[autocomplete="new-password"]').fill(NEWER)
+        await bar.locator("ui-button", { hasText: "Save password" }).click()
+        await expect.poll(() => bar.textContent(), { timeout: SETTLE_MS }).toContain("Your password is saved.")
+        await bar.locator("ui-button", { hasText: "Change password" }).waitFor({ timeout: SETTLE_MS })
+        await cloud.signIn.signIns.setPasswordFor((await new SpellAccounts(people).accountFor(ANA))!, PASSWORD)
+        await context.close()
+      },
+      TEST_MS
+    )
+
+    test.skipIf(!hasElements || !PICTURES)(
+      "pictures:  the sign-in page and setting a password, each width and scheme",
+      async () => {
+        const accountId = (await new SpellAccounts(people).accountFor(ANA))!
+        for (const [widthName, viewport] of Object.entries(WIDTHS)) {
+          for (const colorScheme of SCHEMES) {
+            const context = await browser.newContext({ viewport, colorScheme })
+            const page = await context.newPage()
+            const picture = (name: string) =>
+              page.screenshot({ path: join(PICTURES!, `${name}-${widthName}-${colorScheme}.png`) })
+            await page.goto(here("/sign-in"))
+            await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+            await page.waitForTimeout(400)
+            await picture("password-sign-in")
+            await page.goto(here(PROGRAM))
+            await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+            await page.waitForTimeout(200)
+            await picture("password-gated")
+            await page.goto(here("/sign-in"))
+            await page.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+            await page.fill("#email", ANA)
+            await page.fill("#password", "not the password")
+            await page.click("#sign-in")
+            await expect.poll(() => page.locator("#problem").textContent()).toContain("don't go together")
+            await picture("password-wrong")
+            await page.fill("#email", ANA)
+            await page.fill("#password", PASSWORD)
+            await page.click("#sign-in")
+            await page.waitForURL(here("/"), { timeout: SETTLE_MS })
+            await page.goto(here("/sign-in?password"))
+            await page.locator("#new-password").waitFor({ state: "visible", timeout: SETTLE_MS })
+            await page.waitForTimeout(200)
+            await picture("password-change")
+            await context.close()
+            const measuring = await browser.newContext({ viewport, colorScheme })
+            const measured = await measuring.newPage()
+            await measured.goto(here("/sign-in"))
+            await measured.locator("#email").waitFor({ state: "visible", timeout: SETTLE_MS })
+            expect(
+              await measured.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+            ).toBe(0)
+            await measuring.close()
+          }
+        }
+        await cloud.signIn.signIns.setPasswordFor(accountId, PASSWORD)
+      },
+      TEST_MS * 4
+    )
   })
 
   test(

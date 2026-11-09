@@ -41,7 +41,7 @@ const MAIL_LOOKS = 20
 const MAIL_LOOK_MS = 250
 
 /**
- * `spell space local setup | start | mail | sign-in`:  see `LocalSite`.
+ * `spell space local setup | start | stop | mail | sign-in`:  see `LocalSite`.
  * - Node only;  loads spaces' node side alone (no `loadApp()`).
  * - A `LocalSiteError` is a mistake to say plainly, as `CLI.CliError` is.
  */
@@ -50,11 +50,29 @@ export async function localCommand(verb: string, targets: string[], options: Loc
     const site = new LocalSite()
     if (verb === "setup") return await site.setup(options)
     if (verb === "start") return await site.start(options)
+    if (verb === "stop") return await site.stop()
     if (verb === "mail") return await site.mail(options)
     return await site.signIn(targets[0], targets[1])
   } catch (error) {
     if (error instanceof LocalSiteError) throw new CLI.CliError(error.message)
     throw error
+  }
+}
+
+/**
+ * The app's part of `spell server stop all`, the `stopAllServers` hook:  the local site stops, as a plain `stop` doesn't.
+ * - Only from the main checkout (`root`):  a worktree's `stop all` is no reason to take the site down.
+ * - Its line for the table;  `undefined` off a Mac, or on a Mac it's never been set up on.
+ * - NEVER throws:  a failure is its line.
+ */
+export async function stopLocalSiteWithAll(root: string, site = new LocalSite()): Promise<string | undefined> {
+  if (!site.needsStopping) return undefined
+  const checkout = SRV.checkoutOf(root)
+  if (!checkout || checkout.root !== checkout.main) return "local site:  left alone:  the main checkout's runs it"
+  try {
+    return `local site:  ${await site.stopSite()}`
+  } catch (error) {
+    return `local site:  ${(error as Error).message}`
   }
 }
 
@@ -80,6 +98,7 @@ export type LocalOptions = {
  *   - Caddy turns `https://test.spell.app` into the cloud's local port
  *   - real mail by itself, once `mail` has run
  *   - while the page server runs the site, it says so and leaves it alone
+ * - `stop`:  the site stops, the page server's or a terminal's;  the next page server to start starts it again (T63)
  * - `mail [--gmail <address>] [--new-password]`:  the Mac's own postfix relays through Gmail
  * - `sign-in [email] [page]`:  asks for the link, finds it in the cloud's caught mail, opens it
  * - Its files are in `~/.spell/local-site`.
@@ -97,6 +116,8 @@ export class LocalSite {
   private readonly hostsFile: string
   /** This machine's person's email. */
   private readonly machineEmail: () => Promise<string>
+  /** What this machine runs on. */
+  private readonly platform: string
 
   constructor({
     tools = macTools(),
@@ -110,6 +131,7 @@ export class LocalSite {
     this.server = new LocalSiteServer({ tools, folder, oldFolder, machineEmail, platform })
     this.hostsFile = hostsFile
     this.machineEmail = machineEmail
+    this.platform = platform
   }
 
   ////////////////
@@ -162,6 +184,7 @@ export class LocalSite {
 
     const partner = this.writePartnerFolder(names, rootFile)
     console.log(`Done:  this Mac reaches ${names.join(" and ")}.`)
+    this.tellAboutEditor(addresses)
     console.log(`The page server runs the site from now on.  To start it now:  ${RESTART_THE_SITE}`)
     if (partner) console.log(`For another Mac on this network, copy this folder over and run its script:  ${partner}`)
     return 0
@@ -229,8 +252,32 @@ export class LocalSite {
   private tellAboutPageServer(): number {
     console.log(`The page server is already running the site, so this leaves it alone.`)
     console.log(`To watch it:  tail -f ${this.server.logFile}`)
-    console.log(`To run it here instead:  spell server stop, then spell space local start`)
+    console.log(`To run it here instead:  spell space local stop, then spell space local start`)
     return 0
+  }
+
+  ////////////////
+  // ## stop
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  the site stops, whoever's running it, and says so.
+   * - throws `LocalSiteError` off a Mac, or while the page server is updating it
+   */
+  async stop(): Promise<number> {
+    this.server.macOrDie()
+    console.log(`The site:  ${await this.server.stopSite()}.`)
+    return 0
+  }
+
+  /** Whether `spell server stop all` has anything to do here:  a Mac that's been set up. */
+  get needsStopping(): boolean {
+    return this.platform === "darwin" && this.server.isSetUp
+  }
+
+  /** SIDE EFFECT:  the site stops;  what became of it.  - throws `LocalSiteError` while the page server is updating it */
+  stopSite(): Promise<string> {
+    return this.server.stopSite()
   }
 
   /** What `start` waits for:  a `Ctrl-C` is a clean stop;  a program ending on its own is not. */
@@ -248,10 +295,19 @@ export class LocalSite {
     }
   }
 
+  /** SIDE EFFECT:  says which address is the editor's, and that it's for this house network alone (epic `atmosphere` P39). */
+  private tellAboutEditor(addresses: string[]): void {
+    const editorName = this.server.editorNameFor(addresses)
+    if (!editorName) return
+    console.log(`https://${editorName} is Spell's editor, for this house network ONLY:`)
+    console.log(`  it runs as this Mac's person with no sign-in, so anyone who reaches it edits as you.`)
+  }
+
   /** SIDE EFFECT:  says where the site is, and how mail goes. */
   private tellAboutStart({ addresses, mail }: LocalSiteRun): void {
     console.log(`Spell's local site, until Ctrl-C:`)
     for (const address of addresses) console.log(`  ${address}`)
+    this.tellAboutEditor(addresses)
     const lanAddress = this.tools.lanAddress()
     if (lanAddress) console.log(`Another Mac on this network reaches it through this one:  ${lanAddress}`)
     console.log(

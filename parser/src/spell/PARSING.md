@@ -63,11 +63,26 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 - A rule is two methods:
   - `test()`:  a cheap "could this match at `start`?"
   - `parse()`:  builds a `Match`, or returns `undefined`
-- [`Choice.parse()`](../parser/rules/Choice.ts) parses EVERY alternative,
-  then picks one with `getBestMatch()`:
+- [`Choice.parse()`](../parser/rules/Choice.ts) parses every alternative that can start with the line's first word
+  (see "Which alternatives a line tries", below), then picks one with `getBestMatch()`:
   - highest `priority`, then longest match, then EARLIEST rule
   - `priority` answers ONLY "several rules match the SAME words:  which wins?" (`Rule.priority`, default 0)
   - how tightly an operator binds is spell's `precedence` (see "Expressions")
+- Which alternatives a line tries (epic `language` P37):
+  - A `Choice` of 4 or more keeps a table from a line's first word to the alternatives worth trying
+    ([`FirstWordIndex`](../parser/rules/Choice.ts)):  the rules that must start with that word, plus every rule that
+    can start with anything, in the list's order, so ties still go to the earliest rule.
+  - A `Sequence` is filed under a word only when its syntax demands it:  its required first word (`leadingWord`, read
+    by `firstWords`), unless that word is matched in any case (`/i`).
+  - A rule whose `parse()` reads the line by hand, not starting with its syntax, says
+    `@proto static startsWithItsSyntax = false`, so it's never filed under a word.
+    - So far:  `CompoundExpression`, `MeasureLiteral`, `WithoutWaiting`.
+    - [firstWords.test.ts](../../tests/spell/rules/firstWords.test.ts) fails for a new `parse()` that skips
+      `super.parse()` and doesn't say so, and for a `test()` skipping `super.test()` on a filed rule.
+  - Expecting mode (editor completion) tries every alternative:  a line being typed may not have its first word yet.
+  - One table per list of rules, shared by every `clone()` of the `Choice` (so scopes share it), and built the first
+    time it's asked for;  `addChoice()`, how a rule added while parsing arrives, makes a new one.
+  - `Choice.USE_FIRST_WORD_INDEX = false` tries every alternative, as tests do to compare the two.
 - [`Sequence.parse()`](../parser/rules/Sequence.ts) first runs `Sequence.test()`:
   - fixed words, symbols and patterns are checked where they must fall;  subrules are skipped
     - except a ZERO-WIDTH rule's (`Rule.zeroWidth`), which takes no tokens:
@@ -115,6 +130,12 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `parser.rules` rebuilds after mid-parse `addRule()`s:
     - 35 per project parse (38 before P6:  no rule per enumeration)
     - ~1ms in all:  not worth optimizing
+  - The whole Solitaire project (5 files, 530 lines), processor time, warm, a busy machine (2026-11-09, epic `language` P37):
+    - 310ms before P37, 236ms with the first-word table and no per-match type checks (-24%)
+    - PublicServers (1,334 lines):  680ms before, 497ms after (-27%)
+    - A compiled engine (WebAssembly, ...) is rejected for now:  why, and when to look again, in `Choice`'s docstring.
+    - Next places to look, if more is wanted:  the scope name lookups (9%), and the declaration scan's tokenizing (4.3%).
+  - `Match.DEBUG_MATCH_INITIALIZATION` (type checks on every match) is off outside tests;  each parse paid about 4%.
 - "What can come NEXT?", for editor completion:  `parser.expectedAfter(input, ruleName, scope)`.
   - It parses a half-typed line in EXPECTING mode (`P.Expectations`).
   - Where rules ran out of tokens, they record what they were waiting for:
@@ -2185,7 +2206,7 @@ sidebars any of them opens.
     - So a plain `set x to 1` stays cheap.
 - If an `update()` throws (a rule crashed committing a line), `IncrementalProject.isBroken`:
   the next update re-parses every file from scratch.
-- Cost, Solitaire, against a full parse of ~110ms:
+- Cost, Solitaire, against a full parse of ~110ms (a smaller grammar, a quieter machine:  a warm parse today, "Rules and matching"):
   - body edit:  ~10ms
   - comment, blank line or top-level statement, anywhere:  ~1-2ms
   - declaration edit near the END:  ~1ms

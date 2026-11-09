@@ -17,6 +17,8 @@ import { SpellExpression } from "./SpellExpression"
  *   so `3 in the list` stays `3`, in the list.
  */
 export class MeasureLiteral extends SpellExpression {
+  // reads its amounts and units by hand
+  @proto static startsWithItsSyntax = false
   @proto static datatype = "number"
   @proto static highlightAs: P.HighlightKind = "number"
 

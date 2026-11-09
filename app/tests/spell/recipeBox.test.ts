@@ -2455,6 +2455,11 @@ the published sheet is a projection of the sign up sheet:
         await ed.page.reload()
         await ed.page.locator("ui-segment.sign-up ui-button.serving").click()
         await ed.page.waitForTimeout(3_000)
+        // the master itself:  the published sheet catches up only at its next check, too late to show a write got through
+        const master = await spaceFolders.placeFor(`${EVENT}/__private/signups`, address.cy)
+        const { rows } = await master!.list("volunteers", {}, { identity: address.cy! })
+        expect(rows.map((row) => row.shift)).toHaveLength(2)
+        expect(rows.map((row) => row.shift)).not.toContain("serving")
         expect(await cySheet.page.locator("ui-segment.published .signed-up").count()).toBe(2)
 
         for (const one of [cy, bo, cySheet, ann, ed, annsLetter]) {

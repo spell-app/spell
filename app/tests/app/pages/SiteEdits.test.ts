@@ -7,6 +7,17 @@ import { SiteEdits } from "spell/app/app/pages/SiteEdits"
  * in it, in either of Spell's forms.
  */
 describe("SiteEdits", () => {
+  test("a part's tags and tab are read, and kept when its line is rewritten (P15)", () => {
+    const spellx = '<spell-site "s">\n\t<page "a page" address="/a" tab="Usage" tags="Forms, Inputs"/>\n</>\n'
+    expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs" })
+    expect(SiteEdits.withPartPlaced(spellx, "a page", { row: 1, column: 2 })).toContain('tags="Forms, Inputs"')
+    const code = 's is a site:\n\t- it has a page at "/a", tab "Usage", tagged "Forms, Inputs", old\n'
+    expect(SiteEdits.partsIn(code)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs", state: "old" })
+    expect(SiteEdits.withPartPlaced(code, "page", { row: 1, column: 2 })).toContain(
+      '- it has a page at "/a", tab "Usage", tagged "Forms, Inputs", old, in row 1 column 2'
+    )
+  })
+
   test("names a new page from its address's last part", () => {
     expect(SiteEdits.pageNameFor("/planets/tatooine")).toBe("tatooine page")
     expect(SiteEdits.pageNameFor("/about-us")).toBe("about us page")

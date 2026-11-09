@@ -6,7 +6,15 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 import { textIn } from "spell/parser/spell/rules/places"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
-import { cardDetailsOf, cardPlaceMessage, pageNamed, paramsIn, siteOf, type SitePageEntry } from "./sites.shared"
+import {
+  cardDetailsOf,
+  cardPlaceMessage,
+  pageNamed,
+  paramsIn,
+  siteOf,
+  tagsIn,
+  type SitePageEntry
+} from "./sites.shared"
 
 /**
  * `site_page` rule:  one of a site's pages, and its address (epic `mockup` P1).
@@ -18,6 +26,8 @@ import { cardDetailsOf, cardPlaceMessage, pageNamed, paramsIn, siteOf, type Site
  *   any part's line may end so
  * - e.g. `- it has a button usage page at "/button", named "Button", tab "Usage"`:  what its tab says, when it has pages
  *   under it and shouldn't read as the navigation does (epic `notebook` P10, Q10)
+ * - e.g. `- it has a button usage page at "/button", tagged "Forms, Inputs"`:  what it's filed under, to group and search
+ *   the site's pages by, the tags split at their commas (epic `mockup` P15)
  * - e.g. `- it has a button usage page at "/button"`:  a page named for a notebook, `button usage`, its last word
  *   "page" read as a word, not the type's
  * - The SITE holds each page's address and name, never the page:  so a page moves, or is named in another language,
@@ -33,7 +43,7 @@ import { cardDetailsOf, cardPlaceMessage, pageNamed, paramsIn, siteOf, type Site
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.
  */
 export class SitePage extends SpellStatement<
-  "type|part|address|title?|tab?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
+  "type|part|address|title?|tab?|tags?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
   { entry?: SitePageEntry }
 > {
   @proto static priority = Priority.declaration + 1
@@ -71,6 +81,7 @@ export class SitePage extends SpellStatement<
     }
     const title = match.groups.title ? textIn(match.groups.title) : undefined
     const tab = match.groups.tab ? textIn(match.groups.tab) : undefined
+    const tags = match.groups.tags ? tagsIn(textIn(match.groups.tags)) : undefined
     const state = Wording.meaningOf(match.groups.state)
     const picture = match.groups.picture ? textIn(match.groups.picture) : undefined
     const card = cardDetailsOf(match.groups)
@@ -81,6 +92,7 @@ export class SitePage extends SpellStatement<
       address,
       ...(title && { title }),
       ...(tab && { tab }),
+      ...(tags?.length && { tags }),
       ...(state && { state }),
       ...(picture && { picture }),
       ...card,

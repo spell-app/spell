@@ -29,6 +29,29 @@ export class SitePages {
     })
   }
 
+  /** Every page of `pages`, the ones under each too, in order. */
+  static allOf<Page extends SitePage>(pages: readonly Page[]): Page[] {
+    return pages.flatMap((page) => [page, ...SitePages.allOf((page.pages ?? []) as readonly Page[])])
+  }
+
+  /**
+   * The pages of `pages`, at any depth, filed under each of their `tags`:  a page with two tags is in both groups.
+   * - Groups come in `order`'s order, then the others as the pages first name them.
+   * - A top-level page with pages under it and no tags goes under `untagged`, last:  a new family shows up even before
+   *   it's filed.  Any other page with no tags isn't listed.
+   */
+  static groupedByTag<Page extends SitePage>(
+    pages: readonly Page[],
+    { order = [], untagged }: { order?: readonly string[]; untagged: string }
+  ): SitePageGroup<Page>[] {
+    const groups = new Map<string, Page[]>(order.map((tag) => [tag, []]))
+    for (const page of SitePages.allOf(pages))
+      for (const tag of page.tags ?? []) groups.set(tag, [...(groups.get(tag) ?? []), page])
+    const loose = pages.filter((page) => page.pages?.length && !page.tags?.length)
+    const filed = [...groups].filter(([, listed]) => listed.length).map(([tag, listed]) => ({ tag, pages: listed }))
+    return loose.length ? [...filed, { tag: untagged, pages: loose }] : filed
+  }
+
   /** `event` is a click the browser opens elsewhere:  a middle click, or one with Command, Control, Shift or Alt. */
   static isOpenElsewhere(event: Event | undefined): boolean {
     if (!(event instanceof MouseEvent)) return false
@@ -57,6 +80,16 @@ export type SitePage = {
   href?: string
   /** what `current` may call it, when its `href` isn't enough:  `film-page` */
   id?: string
+  /** what it's filed under, to group and search a site's pages by:  `["Forms", "Inputs"]` */
+  tags?: readonly string[]
   /** the pages under it */
   pages?: readonly SitePage[]
+}
+
+/** One group of `SitePages.groupedByTag()`. */
+export type SitePageGroup<Page extends SitePage = SitePage> = {
+  /** what its pages are filed under */
+  tag: string
+  /** its pages, in the site's order */
+  pages: readonly Page[]
 }

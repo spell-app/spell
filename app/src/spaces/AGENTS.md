@@ -287,7 +287,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - APPROVING it (a stage that `approves`) makes it a project under its team (`addProject()`), its organizers its
       Project Managers (`give()`), and copies the program's template project into its shared space
       (`events_team@rs/picnic/SignUpSheet/`).
-    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`);
+    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`),
+      whoever's asking:  a member, someone signing up, or someone writing a public space;
       P33's feed leaves it off too.
     - Kept in the Admin space beside the roles, `@rs/__admin/events.json5`:  `{ program?, events }`;  the program the
       Board's and the Admins' to change (`setProgram()`), every move in the org's log (`"event"`, its stage the name).
@@ -395,6 +396,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   the people of Spell's own org, as a sign-in by email finds them (an email in `Person.emails`).
   - Invite only:  an invite makes one through `PeopleStore.me()`.
     - E.g. `ana@example.com` => `ana@spell`.
+  - Or a PASSWORD (epic `atmosphere` T64;  the kit's `SignIns` and `Passwords`):  only its hash, in `passwords.json` beside
+    the sessions in `environment.signInDir` (`environment.cloudDir` for the cloud), so no export or backup of spaces has it.
+    - Set while signed in:  the sign-in bar and menu, or `/sign-in?password` from the cloud's home;
+      or for anyone, on this machine:  `spell space cloud password <email>`.
+    - Typed beside an email, an account's name works too (`accountNamed()`):  `ana@spell`, or `ana@rs` for someone an
+      org calls by its own name (`PeopleStore.memberCalled()`).
   - Or a linked BLUESKY account (epic `atmosphere` P19):  its DID and handle in the person's file
     (`Person.signInDid`, `signInHandle`), found by the DID alone;  one Spell account each (`link()` refuses
     `"linked elsewhere"`).
@@ -475,6 +482,32 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The house-network test site the same way:  [LocalSiteServer.ts](server/node/routes/LocalSiteServer.ts),
     the cloud and Caddy, from the main checkout's page server alone, on a Mac `spell space local setup` has set up
     (epic `atmosphere` T58).
+    - It OUTLIVES the page server (T63), so the restart every merge to `main` brings doesn't take it down:
+      its programs run detached, recorded in `run.json5` with the code and settings they started from.
+      - A plain `spell server stop` leaves them;  `spell server stop all` and `spell space local stop` end them.
+    - A page server starting finds it running, and compares a version over the cloud's own code (`cloudCode()`), and its settings:
+      - the same:  it does nothing, so a merge that doesn't touch the cloud causes no swap
+      - different:  it builds the bundle first (`spell space cloud build`, a child), the old cloud serving meanwhile,
+        then stops the old cloud and starts the new one;  a build that fails leaves the old cloud serving, a line in `site.log`
+      - ONE at a time:  `site.lock` in its folder (`SRV.FileLock`), kept fresh while it builds
+      - Caddy holds each request up to 30s through the gap (`lb_try_duration`), and runs throughout unless its own file changed
+      - a page's rooms come back by themselves:  `ReconnectingSocket`
+    - REJECTED (Owen's suggestion, T63):  the new cloud on another port, switched to once ready.
+      Two at once would both run the daily round and the retry queue (mail and backups twice),
+      and split live rooms and sign-ins kept in memory.
+    - WHICH ADDRESS SHOWS WHAT (epic `atmosphere` P39), by Caddy:  the first address, `test.spell.app`, is the editor, the rest the cloud.
+      - Which one's the editor's:  the site's `settings.json5`, `editorAddress`;  unset, the first of two or more;  `false`, none;
+        with one address it's all the cloud, as before.
+      - The editor's is `EditorServer`'s running dev server, its port followed by the Caddy file (its name from the page server, a terminal's from the record).
+        - That port stays the same across restarts (`steadyPort()`), since a changed Caddy file restarts Caddy.
+      - It runs as this machine's person, with no sign-in:  HOUSE NETWORK ONLY, as `setup` and `start` say.
+        The production build and sign-in come first for any public address (a todo on the epic).
+      - Caddy tells the dev server that a request came from this machine's editor (`Host`, and that one address's `Origin`):
+        so vite's settings and the page server's guard change nothing.  NEVER every `Origin`:  any site's page could post as this machine.
+      - Vite listens on this machine alone then (`SPELL_EDITOR_THIS_MACHINE_ONLY`), so Caddy is the one way in.
+      - Refused there:  `/api/changes` (requests into a Claude session), themes saved into Spell UI (`POST /api/themes/...`), the API's test routes.
+      - `/apps/@...` and an org's home (`/@rs`) go on to the cloud's address;  the cloud's own first address is its, for mail links.
+      - No editor running:  Caddy holds the request 30s, then says so plainly.
     - Quiet anywhere else;  a failure is one line in the log, and never stops the page server.
     - Its row in `spell server start all`:  the route module's `addServerReport`, so the kit names none of it.
     - A test's page server never starts it (`VITEST`);  `SPELL_NO_LOCAL_SITE=1` turns it off.
@@ -632,6 +665,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       showing it, `?thread=events_team@rs/messages`.
     - The page's room is at `"@rs/__thread"`:  whichever thread its address names, else the one this browser showed
       last, else the org's own (the kit's `roomForPage()`);  picking another is following its link.
+    - A chat app (epic `atmosphere` T61):  fills the window (`cloudApp.html` has no padding of its own), a toolbar with
+      who's signed in, the threads in a 260px side bar, the box pinned below only the messages scrolling.
+      - The box is `<ui-textarea grow send-on-enter>`:  Enter sends, Shift-Enter types a new line.
+      - At phone width the side bar's list opens in a `<ui-flyout>` from the toolbar's bars button.
+      - Every org program has the same toolbar (`{the sign in menu}`, its programs linked in it), written out in each:
+        each org gets its own copy of the programs, so a shared file wouldn't reach them.
   - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):
     Spell taking down a record, a space or an account, and putting it back.
     - Each with a reason, by a Spell admin (`spell space takedown`).
@@ -703,7 +742,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         each.
     - Who's asking is whoever's signed in, nobody else (`signedInPerson()`):  its pages carry no write token.
     - What it serves, and nothing else:
-      - the sign-in, the project data folders, `/terms`, `/element/`
+      - the sign-in (`cloudSignIn.html`:  email and password, or a link;  at `/sign-in` it speaks of no org, as it guards
+        nothing;  at `/sign-in?password`, setting one), the project data folders, `/terms`, `/element/`
       - the built-in programs' pages (`/apps/<project>`, `cloudApp.html`) and files
       - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
         - someone who can't yet gets `cloudSignIn.html` at its address, whatever the name:
@@ -726,6 +766,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
     - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
       it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
+      - `spell space cloud build` builds it and starts nothing:  the house-network site's update, while the old cloud serves.
     - Its own files are in `environment.cloudDir`:
       - default `~/.spell/cloud`;  `SPELL_CLOUD_DIR` sets it
       - sessions, caught mail, its read key

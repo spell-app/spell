@@ -386,7 +386,7 @@ core.console.log(2)
 
 ### How a choice is settled
 
-A `Choice` tries EVERY alternative, then keeps:
+A `Choice` tries every alternative that can start with the line's first word, then keeps:
 1. the highest `priority`:  only for rules that match the same words
 2. then the longest match
 3. then the one registered first
@@ -791,8 +791,9 @@ Spell's recipe for that, step by step, with a whole rule to copy from:  [README-
 Parsing is nearly the whole bill.
 Measured warm on a laptop, Solitaire's four files (510 lines) parse in about 70 ms,
 and compile to JavaScript in under 10 ms;  its card file alone, 154 lines, parses in about 17 ms.
-- Why:  every `Choice` parses every alternative before it picks one.
-- What keeps that affordable:  a `Sequence` checks its fixed words where they must fall,
+- Why:  a `Choice` parses each alternative that could match before it picks one.
+- What keeps that affordable:  a line tries only the rules that can start with its first word,
+  and a `Sequence` checks its fixed words where they must fall,
   before any of its parts parse (`Sequence.test()`), so most rules fail on the first token they look at.
 - Against a parser written by hand for one language, a general one is slower:
   markdown on this parser against marked, in [README-markdown](README-markdown.md).

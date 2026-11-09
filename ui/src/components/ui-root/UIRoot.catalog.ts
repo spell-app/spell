@@ -315,6 +315,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["tag", "family", "only", "level"]
   },
+  "ui-docs-index": { folder: "ui-docs-index", attributes: ["pages"] },
   "ui-docs-inspector": {
     folder: "ui-docs-inspector",
     skeleton: {
@@ -339,7 +340,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-docs-search": {
     folder: "ui-docs-search",
     skeleton: { width: "16em", height: "2.25em" },
-    attributes: ["base", "page", "shortcuts", "placeholder", "size"]
+    attributes: ["pages", "base", "page", "shortcuts", "placeholder", "size"]
   },
   "ui-docs-theme-bench": { folder: "ui-docs-theme-bench", skeleton: { height: "40em" }, attributes: [] },
   "ui-docs-tokens": {

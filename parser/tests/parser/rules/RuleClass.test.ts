@@ -158,6 +158,148 @@ describe("rules defined as classes", () => {
     })
   })
 
+  describe("first-word index", () => {
+    let tried: string[] = []
+
+    /** A statement which notes every `parse()` tried on it. */
+    class CountingStatement extends TestStatement {
+      parse(scope: P.Scope, tokens: P.Token[]) {
+        tried.push(this.name!)
+        return super.parse(scope, tokens)
+      }
+    }
+    class apple_statement extends CountingStatement {
+      @proto static syntax = "apple {thing:word}"
+    }
+    class pear_statement extends CountingStatement {
+      @proto static syntax = "pear {thing:word}"
+    }
+    class plum_statement extends CountingStatement {
+      @proto static syntax = "(plum|prune) {thing:word}"
+    }
+    class fig_statement extends CountingStatement {
+      @proto static syntax = "fig {thing:word}"
+    }
+    /** Can start with anything:  always tried. */
+    class any_statement extends CountingStatement {
+      @proto static syntax = "{thing:word} ok"
+    }
+    /** Reads the line by hand, whatever its syntax says:  never filed under a word. */
+    class handwritten_statement extends TestStatement {
+      @proto static syntax = "ignored {thing:word}"
+      @proto static startsWithItsSyntax = false
+      parse(scope: P.Scope, tokens: P.Token[]) {
+        tried.push(this.name!)
+        if (tokens[0]?.value !== "hand") return undefined
+        return new P.Match({ rule: this, matched: tokens, tokens: [...tokens], scope })
+      }
+    }
+
+    const makeFruitParser = () => {
+      tried = []
+      return new Parser({
+        rules: [
+          word,
+          apple_statement,
+          any_statement,
+          pear_statement,
+          plum_statement,
+          fig_statement,
+          handwritten_statement
+        ]
+      })
+    }
+    const statements = (parser: Parser) => parser.rules.statement as P.Group
+
+    test("a sequence is filed under the word its syntax must start with", () => {
+      const parser = makeFruitParser()
+      const firstWords = (name: string) => (parser.rules[name] as P.Sequence).firstWords
+      expect(firstWords("apple_statement")).toEqual(["apple"])
+      expect(firstWords("plum_statement")).toEqual(["plum", "prune"])
+      expect(firstWords("any_statement")).toBeUndefined()
+      expect(firstWords("handwritten_statement")).toBeUndefined()
+      const anyCase = new Parser({ rules: [word] })
+      class cased_statement extends P.Sequence {
+        @proto static syntax = "note/i {thing:word}"
+      }
+      expect((anyCase.addRule(cased_statement) as P.Sequence).firstWords).toBeUndefined()
+    })
+
+    test("a line tries only the rules that can start with its first word, in their order", () => {
+      const parser = makeFruitParser()
+      const match = parser.parse("apple x", "statement")
+      expect(match?.rule.name).toBe("apple_statement")
+      expect(tried).toEqual(["apple_statement", "any_statement", "handwritten_statement"])
+      tried = []
+      expect(parser.parse("zebra ok", "statement")?.rule.name).toBe("any_statement")
+      expect(tried).toEqual(["any_statement", "handwritten_statement"])
+      tried = []
+      expect(parser.parse("hand x", "statement")?.rule.name).toBe("handwritten_statement")
+    })
+
+    test("off, every alternative is tried", () => {
+      const parser = makeFruitParser()
+      P.Choice.USE_FIRST_WORD_INDEX = false
+      try {
+        parser.parse("apple x", "statement")
+      } finally {
+        P.Choice.USE_FIRST_WORD_INDEX = true
+      }
+      expect(tried).toEqual([
+        "apple_statement",
+        "any_statement",
+        "pear_statement",
+        "plum_statement",
+        "fig_statement",
+        "handwritten_statement"
+      ])
+    })
+
+    test("expecting mode tries every alternative:  the line may not have its first word yet", () => {
+      const parser = makeFruitParser()
+      parser.expectedAfter("apple", "statement")
+      expect(tried).toEqual([
+        "apple_statement",
+        "any_statement",
+        "pear_statement",
+        "plum_statement",
+        "fig_statement",
+        "handwritten_statement"
+      ])
+    })
+
+    test("a rule added later is found, and only by its own list", () => {
+      const parser = makeFruitParser()
+      parser.parse("apple x", "statement")
+      const table = statements(parser).firstWordIndex
+      class kiwi_statement extends CountingStatement {
+        @proto static syntax = "kiwi {thing:word}"
+      }
+      parser.addRule(kiwi_statement)
+      expect(statements(parser).firstWordIndex).not.toBe(table)
+      tried = []
+      expect(parser.parse("kiwi x", "statement")?.rule.name).toBe("kiwi_statement")
+      expect(tried).toEqual(["any_statement", "handwritten_statement", "kiwi_statement"])
+    })
+
+    test("a clone shares the table until it adds a rule of its own", () => {
+      const parser = makeFruitParser()
+      const group = statements(parser)
+      const clone = group.clone()
+      expect(clone.firstWordIndex).toBe(group.firstWordIndex)
+      clone.addChoice(parser, new P.Keyword("kiwi"))
+      expect(clone.firstWordIndex).not.toBe(group.firstWordIndex)
+      expect(group.rules.length).toBe(clone.rules.length - 1)
+    })
+
+    test("a short list skips the table", () => {
+      const parser = new Parser({ rules: [word, apple_statement, pear_statement] })
+      tried = []
+      parser.parse("pear x", "statement")
+      expect(tried).toEqual(["apple_statement", "pear_statement"])
+    })
+  })
+
   describe("descriptive props", () => {
     test("come from class prototype, leaving instances small", () => {
       const rule = makeParser().rules.give_statement!
