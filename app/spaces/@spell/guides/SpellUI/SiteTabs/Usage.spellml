@@ -1,0 +1,48 @@
+<spell-page "site-tabs usage" notebook>
+	<header level="1">
+		Site tabs
+		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			Hand it the same `pages` you hand `<ui-site-nav>`, and put it above the page's content.
+
+			- `pages`: each page's `title` and `href`, its `pages` under it.
+			  A parent page's `tab` is what its tab says, when not its `title`.
+			- `current` says which page is shown, by its `href` or its `id`; without it, the page at the browser's address.
+			- A parent with no `href` only holds pages, so it has no tab, and a page whose address has a parameter
+			  (`/films/:film`) isn't one either. A family of fewer than two tabs draws nothing.
+			- Picking a tab goes there. A site that shows its pages itself cancels `ui-navigating` and shows
+			  `event.detail.page`. A middle click or Command-click opens a new tab, as any link does.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-site-tabs").addEventListener("ui-navigating", (event) => {
+			  event.preventDefault()
+			  showPage(event.detail.page)
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Each tab is a link: Tab moves between them, Enter goes there. In a row that scrolls, focusing a tab scrolls it into sight.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The row is a `nav` landmark named `label`, else the family's parent page's title. The selected tab is
+			`aria-current="page"`. Without a family nothing is drawn, so nothing is announced.
+		</>
+	</>
+</spell-page>

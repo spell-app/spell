@@ -1,0 +1,45 @@
+<spell-page "icon api" notebook>
+	<header level="1">
+		Icon
+		<header>An icon is a glyph used to represent something else.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tags">Tags</>
+			<item link="#attributes">Attributes</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Tags">
+		<html>
+			<ui-docs-api family="ui-icon" only="tags"></>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-icon" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-icon" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-icon" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-icon" only="states"></>
+		</>
+	</>
+</spell-page>

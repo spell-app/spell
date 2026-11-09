@@ -1,0 +1,46 @@
+<spell-page "site-tabs examples" notebook>
+	<header level="1">
+		Site tabs
+		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#variations">Variations</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="A page's family" sticky="stack" collapsible dividing>
+			<example "A page's family" description="`pages` is the side navigation's own list.  Site tabs find the page shown, its parent and the pages under the parent, and draw them as tabs:  the parent first, the page shown selected, each a link.">
+				<ui-site-tabs current="#api" pages="\[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"pages\": \[{ \"title\": \"Examples\", \"href\": \"#examples\" }, { \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }\] }\]"/>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="The parent's word" sticky="stack" collapsible dividing>
+			<example "The parent's word" description="A tab says its page's `tab`, or its `title` when it has none.  So the side navigation can say Button while its first tab says Usage;  here the parent has no `tab`, and its tab says its title.">
+				<ui-site-tabs current="#overview" pages="\[{ \"title\": \"Overview\", \"href\": \"#overview\", \"pages\": \[{ \"title\": \"Examples\", \"href\": \"#examples\" }, { \"title\": \"API\", \"href\": \"#api\" }\] }\]"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Narrow" sticky="stack" collapsible dividing>
+			<example "Narrow" description="Where the tabs don't fit, they stay on one row and scroll sideways, the selected tab scrolled into sight.">
+				<ui-site-tabs style="max-width: 12em" current="#theming" pages="\[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"pages\": \[{ \"title\": \"Examples\", \"href\": \"#examples\" }, { \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }\] }\]"/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="No family" sticky="stack" collapsible dividing>
+			<example "No family" description="A page with no pages under it, and that isn't under another, has no family:  nothing is drawn and it takes no room, `:state(empty)`.  So does a page whose address has a parameter.  Below, the shown page is alone.">
+				<ui-site-tabs current="#alone" pages="\[{ \"title\": \"Alone\", \"href\": \"#alone\" }\]"/>
+			</example>
+		</>
+	</>
+</spell-page>

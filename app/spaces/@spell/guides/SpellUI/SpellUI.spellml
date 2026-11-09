@@ -1,0 +1,460 @@
+<!--
+  Spell UI's component pages as one site (epic `notebook` P10).
+  Each component has a folder of notebooks, and each notebook is one page here:  this file says where each one is,
+  and what the side navigation calls it.  A component's Usage page is its address, and its other pages are under it.
+-->
+<spell-site "spell ui">
+	<page "accordion usage page" address="/accordion" title="Accordion" tab="Usage">
+		<page "accordion examples page" address="/accordion/examples" title="Examples"/>
+		<page "accordion api page" address="/accordion/api" title="API"/>
+		<page "accordion theming page" address="/accordion/theming" title="Theming"/>
+	</>
+	<page "action usage page" address="/action" title="Action" tab="Usage">
+		<page "action examples page" address="/action/examples" title="Examples"/>
+		<page "action api page" address="/action/api" title="API"/>
+		<page "action theming page" address="/action/theming" title="Theming"/>
+	</>
+	<page "actions usage page" address="/actions" title="Actions" tab="Usage">
+		<page "actions examples page" address="/actions/examples" title="Examples"/>
+		<page "actions api page" address="/actions/api" title="API"/>
+	</>
+	<page "advertisement usage page" address="/advertisement" title="Advertisement" tab="Usage">
+		<page "advertisement examples page" address="/advertisement/examples" title="Examples"/>
+		<page "advertisement api page" address="/advertisement/api" title="API"/>
+		<page "advertisement theming page" address="/advertisement/theming" title="Theming"/>
+	</>
+	<page "audio usage page" address="/audio" title="Audio" tab="Usage">
+		<page "audio examples page" address="/audio/examples" title="Examples"/>
+		<page "audio api page" address="/audio/api" title="API"/>
+	</>
+	<page "author usage page" address="/author" title="Author" tab="Usage">
+		<page "author examples page" address="/author/examples" title="Examples"/>
+		<page "author api page" address="/author/api" title="API"/>
+	</>
+	<page "avatar usage page" address="/avatar" title="Avatar" tab="Usage">
+		<page "avatar examples page" address="/avatar/examples" title="Examples"/>
+		<page "avatar api page" address="/avatar/api" title="API"/>
+	</>
+	<page "breadcrumb usage page" address="/breadcrumb" title="Breadcrumb" tab="Usage">
+		<page "breadcrumb examples page" address="/breadcrumb/examples" title="Examples"/>
+		<page "breadcrumb api page" address="/breadcrumb/api" title="API"/>
+		<page "breadcrumb theming page" address="/breadcrumb/theming" title="Theming"/>
+	</>
+	<page "button usage page" address="/button" title="Button" tab="Usage">
+		<page "button examples page" address="/button/examples" title="Examples"/>
+		<page "button api page" address="/button/api" title="API"/>
+		<page "button theming page" address="/button/theming" title="Theming"/>
+	</>
+	<page "calendar usage page" address="/calendar" title="Calendar" tab="Usage">
+		<page "calendar examples page" address="/calendar/examples" title="Examples"/>
+		<page "calendar api page" address="/calendar/api" title="API"/>
+		<page "calendar theming page" address="/calendar/theming" title="Theming"/>
+	</>
+	<page "card usage page" address="/card" title="Card" tab="Usage">
+		<page "card examples page" address="/card/examples" title="Examples"/>
+		<page "card api page" address="/card/api" title="API"/>
+		<page "card theming page" address="/card/theming" title="Theming"/>
+	</>
+	<page "checkbox usage page" address="/checkbox" title="Checkbox" tab="Usage">
+		<page "checkbox examples page" address="/checkbox/examples" title="Examples"/>
+		<page "checkbox api page" address="/checkbox/api" title="API"/>
+		<page "checkbox theming page" address="/checkbox/theming" title="Theming"/>
+	</>
+	<page "code usage page" address="/code" title="Code" tab="Usage">
+		<page "code examples page" address="/code/examples" title="Examples"/>
+		<page "code api page" address="/code/api" title="API"/>
+		<page "code theming page" address="/code/theming" title="Theming"/>
+	</>
+	<page "comment usage page" address="/comment" title="Comment" tab="Usage">
+		<page "comment examples page" address="/comment/examples" title="Examples"/>
+		<page "comment api page" address="/comment/api" title="API"/>
+		<page "comment theming page" address="/comment/theming" title="Theming"/>
+	</>
+	<page "components usage page" address="/components" title="Components" tab="Usage">
+		<page "components examples page" address="/components/examples" title="Examples"/>
+		<page "components api page" address="/components/api" title="API"/>
+		<page "components theming page" address="/components/theming" title="Theming"/>
+	</>
+	<page "container usage page" address="/container" title="Container" tab="Usage">
+		<page "container examples page" address="/container/examples" title="Examples"/>
+		<page "container api page" address="/container/api" title="API"/>
+		<page "container theming page" address="/container/theming" title="Theming"/>
+	</>
+	<page "content usage page" address="/content" title="Content" tab="Usage">
+		<page "content examples page" address="/content/examples" title="Examples"/>
+		<page "content api page" address="/content/api" title="API"/>
+	</>
+	<page "content-parts usage page" address="/content-parts" title="Content parts" tab="Usage">
+		<page "content-parts examples page" address="/content-parts/examples" title="Examples"/>
+		<page "content-parts api page" address="/content-parts/api" title="API"/>
+		<page "content-parts theming page" address="/content-parts/theming" title="Theming"/>
+	</>
+	<page "date usage page" address="/date" title="Date" tab="Usage">
+		<page "date examples page" address="/date/examples" title="Examples"/>
+		<page "date api page" address="/date/api" title="API"/>
+	</>
+	<page "description usage page" address="/description" title="Description" tab="Usage">
+		<page "description examples page" address="/description/examples" title="Examples"/>
+		<page "description api page" address="/description/api" title="API"/>
+	</>
+	<page "detail usage page" address="/detail" title="Detail" tab="Usage">
+		<page "detail examples page" address="/detail/examples" title="Examples"/>
+		<page "detail api page" address="/detail/api" title="API"/>
+	</>
+	<page "dimmer usage page" address="/dimmer" title="Dimmer" tab="Usage">
+		<page "dimmer examples page" address="/dimmer/examples" title="Examples"/>
+		<page "dimmer api page" address="/dimmer/api" title="API"/>
+		<page "dimmer theming page" address="/dimmer/theming" title="Theming"/>
+	</>
+	<page "divider usage page" address="/divider" title="Divider" tab="Usage">
+		<page "divider examples page" address="/divider/examples" title="Examples"/>
+		<page "divider api page" address="/divider/api" title="API"/>
+		<page "divider theming page" address="/divider/theming" title="Theming"/>
+	</>
+	<page "dropdown usage page" address="/dropdown" title="Dropdown" tab="Usage">
+		<page "dropdown examples page" address="/dropdown/examples" title="Examples"/>
+		<page "dropdown api page" address="/dropdown/api" title="API"/>
+		<page "dropdown theming page" address="/dropdown/theming" title="Theming"/>
+	</>
+	<page "embed usage page" address="/embed" title="Embed" tab="Usage">
+		<page "embed examples page" address="/embed/examples" title="Examples"/>
+		<page "embed api page" address="/embed/api" title="API"/>
+		<page "embed theming page" address="/embed/theming" title="Theming"/>
+	</>
+	<page "emoji usage page" address="/emoji" title="Emoji" tab="Usage">
+		<page "emoji examples page" address="/emoji/examples" title="Examples"/>
+		<page "emoji api page" address="/emoji/api" title="API"/>
+		<page "emoji theming page" address="/emoji/theming" title="Theming"/>
+	</>
+	<page "example usage page" address="/example" title="Example" tab="Usage">
+		<page "example examples page" address="/example/examples" title="Examples"/>
+		<page "example api page" address="/example/api" title="API"/>
+		<page "example theming page" address="/example/theming" title="Theming"/>
+	</>
+	<page "extra usage page" address="/extra" title="Extra" tab="Usage">
+		<page "extra examples page" address="/extra/examples" title="Examples"/>
+		<page "extra api page" address="/extra/api" title="API"/>
+	</>
+	<page "feed usage page" address="/feed" title="Feed" tab="Usage">
+		<page "feed examples page" address="/feed/examples" title="Examples"/>
+		<page "feed api page" address="/feed/api" title="API"/>
+		<page "feed theming page" address="/feed/theming" title="Theming"/>
+	</>
+	<page "flag usage page" address="/flag" title="Flag" tab="Usage">
+		<page "flag examples page" address="/flag/examples" title="Examples"/>
+		<page "flag api page" address="/flag/api" title="API"/>
+		<page "flag theming page" address="/flag/theming" title="Theming"/>
+	</>
+	<page "flyout usage page" address="/flyout" title="Flyout" tab="Usage">
+		<page "flyout examples page" address="/flyout/examples" title="Examples"/>
+		<page "flyout api page" address="/flyout/api" title="API"/>
+		<page "flyout theming page" address="/flyout/theming" title="Theming"/>
+	</>
+	<page "form usage page" address="/form" title="Form" tab="Usage">
+		<page "form examples page" address="/form/examples" title="Examples"/>
+		<page "form api page" address="/form/api" title="API"/>
+		<page "form theming page" address="/form/theming" title="Theming"/>
+	</>
+	<page "grid usage page" address="/grid" title="Grid" tab="Usage">
+		<page "grid examples page" address="/grid/examples" title="Examples"/>
+		<page "grid api page" address="/grid/api" title="API"/>
+		<page "grid theming page" address="/grid/theming" title="Theming"/>
+	</>
+	<page "icon usage page" address="/icon" title="Icon" tab="Usage">
+		<page "icon examples page" address="/icon/examples" title="Examples"/>
+		<page "icon api page" address="/icon/api" title="API"/>
+		<page "icon theming page" address="/icon/theming" title="Theming"/>
+	</>
+	<page "icon-picker usage page" address="/icon-picker" title="Icon Picker" tab="Usage">
+		<page "icon-picker examples page" address="/icon-picker/examples" title="Examples"/>
+		<page "icon-picker api page" address="/icon-picker/api" title="API"/>
+		<page "icon-picker theming page" address="/icon-picker/theming" title="Theming"/>
+	</>
+	<page "image usage page" address="/image" title="Image" tab="Usage">
+		<page "image examples page" address="/image/examples" title="Examples"/>
+		<page "image api page" address="/image/api" title="API"/>
+		<page "image theming page" address="/image/theming" title="Theming"/>
+	</>
+	<page "include usage page" address="/include" title="Include" tab="Usage">
+		<page "include examples page" address="/include/examples" title="Examples"/>
+		<page "include api page" address="/include/api" title="API"/>
+		<page "include theming page" address="/include/theming" title="Theming"/>
+	</>
+	<page "input usage page" address="/input" title="Input" tab="Usage">
+		<page "input examples page" address="/input/examples" title="Examples"/>
+		<page "input api page" address="/input/api" title="API"/>
+		<page "input theming page" address="/input/theming" title="Theming"/>
+	</>
+	<page "item usage page" address="/item" title="Item" tab="Usage">
+		<page "item examples page" address="/item/examples" title="Examples"/>
+		<page "item api page" address="/item/api" title="API"/>
+		<page "item theming page" address="/item/theming" title="Theming"/>
+	</>
+	<page "items usage page" address="/items" title="Items" tab="Usage">
+		<page "items examples page" address="/items/examples" title="Examples"/>
+		<page "items api page" address="/items/api" title="API"/>
+		<page "items theming page" address="/items/theming" title="Theming"/>
+	</>
+	<page "json usage page" address="/json" title="JSON data" tab="Usage">
+		<page "json examples page" address="/json/examples" title="Examples"/>
+		<page "json api page" address="/json/api" title="API"/>
+	</>
+	<page "keys usage page" address="/keys" title="Keys" tab="Usage">
+		<page "keys examples page" address="/keys/examples" title="Examples"/>
+		<page "keys api page" address="/keys/api" title="API"/>
+	</>
+	<page "label usage page" address="/label" title="Label" tab="Usage">
+		<page "label examples page" address="/label/examples" title="Examples"/>
+		<page "label api page" address="/label/api" title="API"/>
+		<page "label theming page" address="/label/theming" title="Theming"/>
+	</>
+	<page "list usage page" address="/list" title="List" tab="Usage">
+		<page "list examples page" address="/list/examples" title="Examples"/>
+		<page "list api page" address="/list/api" title="API"/>
+		<page "list theming page" address="/list/theming" title="Theming"/>
+	</>
+	<page "loader usage page" address="/loader" title="Loader" tab="Usage">
+		<page "loader examples page" address="/loader/examples" title="Examples"/>
+		<page "loader api page" address="/loader/api" title="API"/>
+		<page "loader theming page" address="/loader/theming" title="Theming"/>
+	</>
+	<page "markdown usage page" address="/markdown" title="Markdown" tab="Usage">
+		<page "markdown examples page" address="/markdown/examples" title="Examples"/>
+		<page "markdown api page" address="/markdown/api" title="API"/>
+		<page "markdown theming page" address="/markdown/theming" title="Theming"/>
+	</>
+	<page "menu usage page" address="/menu" title="Menu" tab="Usage">
+		<page "menu examples page" address="/menu/examples" title="Examples"/>
+		<page "menu api page" address="/menu/api" title="API"/>
+		<page "menu theming page" address="/menu/theming" title="Theming"/>
+	</>
+	<page "message usage page" address="/message" title="Message" tab="Usage">
+		<page "message examples page" address="/message/examples" title="Examples"/>
+		<page "message api page" address="/message/api" title="API"/>
+		<page "message theming page" address="/message/theming" title="Theming"/>
+	</>
+	<page "meta usage page" address="/meta" title="Meta" tab="Usage">
+		<page "meta examples page" address="/meta/examples" title="Examples"/>
+		<page "meta api page" address="/meta/api" title="API"/>
+	</>
+	<page "modal usage page" address="/modal" title="Modal" tab="Usage">
+		<page "modal examples page" address="/modal/examples" title="Examples"/>
+		<page "modal api page" address="/modal/api" title="API"/>
+		<page "modal theming page" address="/modal/theming" title="Theming"/>
+	</>
+	<page "nag usage page" address="/nag" title="Nag" tab="Usage">
+		<page "nag examples page" address="/nag/examples" title="Examples"/>
+		<page "nag api page" address="/nag/api" title="API"/>
+		<page "nag theming page" address="/nag/theming" title="Theming"/>
+	</>
+	<page "page usage page" address="/page" title="Page" tab="Usage">
+		<page "page examples page" address="/page/examples" title="Examples"/>
+		<page "page api page" address="/page/api" title="API"/>
+		<page "page theming page" address="/page/theming" title="Theming"/>
+	</>
+	<page "panel usage page" address="/panel" title="Panel" tab="Usage">
+		<page "panel examples page" address="/panel/examples" title="Examples"/>
+		<page "panel api page" address="/panel/api" title="API"/>
+		<page "panel theming page" address="/panel/theming" title="Theming"/>
+	</>
+	<page "placeholder usage page" address="/placeholder" title="Placeholder" tab="Usage">
+		<page "placeholder examples page" address="/placeholder/examples" title="Examples"/>
+		<page "placeholder api page" address="/placeholder/api" title="API"/>
+		<page "placeholder theming page" address="/placeholder/theming" title="Theming"/>
+	</>
+	<page "popup usage page" address="/popup" title="Popup" tab="Usage">
+		<page "popup examples page" address="/popup/examples" title="Examples"/>
+		<page "popup api page" address="/popup/api" title="API"/>
+		<page "popup theming page" address="/popup/theming" title="Theming"/>
+	</>
+	<page "progress usage page" address="/progress" title="Progress" tab="Usage">
+		<page "progress examples page" address="/progress/examples" title="Examples"/>
+		<page "progress api page" address="/progress/api" title="API"/>
+		<page "progress theming page" address="/progress/theming" title="Theming"/>
+	</>
+	<page "property-editor usage page" address="/property-editor" title="Property Editor" tab="Usage">
+		<page "property-editor examples page" address="/property-editor/examples" title="Examples"/>
+		<page "property-editor api page" address="/property-editor/api" title="API"/>
+	</>
+	<page "quote usage page" address="/quote" title="Quote" tab="Usage">
+		<page "quote examples page" address="/quote/examples" title="Examples"/>
+		<page "quote api page" address="/quote/api" title="API"/>
+	</>
+	<page "radio usage page" address="/radio" title="Radio" tab="Usage">
+		<page "radio examples page" address="/radio/examples" title="Examples"/>
+		<page "radio api page" address="/radio/api" title="API"/>
+		<page "radio theming page" address="/radio/theming" title="Theming"/>
+	</>
+	<page "rail usage page" address="/rail" title="Rail" tab="Usage">
+		<page "rail examples page" address="/rail/examples" title="Examples"/>
+		<page "rail api page" address="/rail/api" title="API"/>
+		<page "rail theming page" address="/rail/theming" title="Theming"/>
+	</>
+	<page "rating usage page" address="/rating" title="Rating" tab="Usage">
+		<page "rating examples page" address="/rating/examples" title="Examples"/>
+		<page "rating api page" address="/rating/api" title="API"/>
+		<page "rating theming page" address="/rating/theming" title="Theming"/>
+	</>
+	<page "reveal usage page" address="/reveal" title="Reveal" tab="Usage">
+		<page "reveal examples page" address="/reveal/examples" title="Examples"/>
+		<page "reveal api page" address="/reveal/api" title="API"/>
+		<page "reveal theming page" address="/reveal/theming" title="Theming"/>
+	</>
+	<page "root usage page" address="/root" title="Root" tab="Usage">
+		<page "root examples page" address="/root/examples" title="Examples"/>
+		<page "root api page" address="/root/api" title="API"/>
+		<page "root theming page" address="/root/theming" title="Theming"/>
+	</>
+	<page "search usage page" address="/search" title="Search" tab="Usage">
+		<page "search examples page" address="/search/examples" title="Examples"/>
+		<page "search api page" address="/search/api" title="API"/>
+		<page "search theming page" address="/search/theming" title="Theming"/>
+	</>
+	<page "section usage page" address="/section" title="Section" tab="Usage">
+		<page "section examples page" address="/section/examples" title="Examples"/>
+		<page "section api page" address="/section/api" title="API"/>
+		<page "section theming page" address="/section/theming" title="Theming"/>
+	</>
+	<page "segment usage page" address="/segment" title="Segment" tab="Usage">
+		<page "segment examples page" address="/segment/examples" title="Examples"/>
+		<page "segment api page" address="/segment/api" title="API"/>
+		<page "segment theming page" address="/segment/theming" title="Theming"/>
+	</>
+	<page "select usage page" address="/select" title="Select" tab="Usage">
+		<page "select examples page" address="/select/examples" title="Examples"/>
+		<page "select api page" address="/select/api" title="API"/>
+		<page "select theming page" address="/select/theming" title="Theming"/>
+	</>
+	<page "shape usage page" address="/shape" title="Shape" tab="Usage">
+		<page "shape examples page" address="/shape/examples" title="Examples"/>
+		<page "shape api page" address="/shape/api" title="API"/>
+		<page "shape theming page" address="/shape/theming" title="Theming"/>
+	</>
+	<page "sidebar usage page" address="/sidebar" title="Sidebar" tab="Usage">
+		<page "sidebar examples page" address="/sidebar/examples" title="Examples"/>
+		<page "sidebar api page" address="/sidebar/api" title="API"/>
+		<page "sidebar theming page" address="/sidebar/theming" title="Theming"/>
+	</>
+	<page "site-tabs usage page" address="/site-tabs" title="Site tabs" tab="Usage">
+		<page "site-tabs examples page" address="/site-tabs/examples" title="Examples"/>
+		<page "site-tabs api page" address="/site-tabs/api" title="API"/>
+	</>
+	<page "slider usage page" address="/slider" title="Slider" tab="Usage">
+		<page "slider examples page" address="/slider/examples" title="Examples"/>
+		<page "slider api page" address="/slider/api" title="API"/>
+		<page "slider theming page" address="/slider/theming" title="Theming"/>
+	</>
+	<page "space usage page" address="/space" title="Space" tab="Usage">
+		<page "space examples page" address="/space/examples" title="Examples"/>
+		<page "space api page" address="/space/api" title="API"/>
+	</>
+	<page "stack usage page" address="/stack" title="Stack" tab="Usage">
+		<page "stack examples page" address="/stack/examples" title="Examples"/>
+		<page "stack api page" address="/stack/api" title="API"/>
+	</>
+	<page "statistic usage page" address="/statistic" title="Statistic" tab="Usage">
+		<page "statistic examples page" address="/statistic/examples" title="Examples"/>
+		<page "statistic api page" address="/statistic/api" title="API"/>
+		<page "statistic theming page" address="/statistic/theming" title="Theming"/>
+	</>
+	<page "step usage page" address="/step" title="Step" tab="Usage">
+		<page "step examples page" address="/step/examples" title="Examples"/>
+		<page "step api page" address="/step/api" title="API"/>
+		<page "step theming page" address="/step/theming" title="Theming"/>
+	</>
+	<page "sticky usage page" address="/sticky" title="Sticky" tab="Usage">
+		<page "sticky examples page" address="/sticky/examples" title="Examples"/>
+		<page "sticky api page" address="/sticky/api" title="API"/>
+		<page "sticky theming page" address="/sticky/theming" title="Theming"/>
+	</>
+	<page "summary usage page" address="/summary" title="Summary" tab="Usage">
+		<page "summary examples page" address="/summary/examples" title="Examples"/>
+		<page "summary api page" address="/summary/api" title="API"/>
+	</>
+	<page "tab usage page" address="/tab" title="Tab" tab="Usage">
+		<page "tab examples page" address="/tab/examples" title="Examples"/>
+		<page "tab api page" address="/tab/api" title="API"/>
+		<page "tab theming page" address="/tab/theming" title="Theming"/>
+	</>
+	<page "table usage page" address="/table" title="Table" tab="Usage">
+		<page "table examples page" address="/table/examples" title="Examples"/>
+		<page "table api page" address="/table/api" title="API"/>
+		<page "table theming page" address="/table/theming" title="Theming"/>
+	</>
+	<page "table-of-contents usage page" address="/table-of-contents" title="Table of contents" tab="Usage">
+		<page "table-of-contents examples page" address="/table-of-contents/examples" title="Examples"/>
+		<page "table-of-contents api page" address="/table-of-contents/api" title="API"/>
+		<page "table-of-contents theming page" address="/table-of-contents/theming" title="Theming"/>
+	</>
+	<page "terms usage page" address="/terms" title="Terms" tab="Usage">
+		<page "terms examples page" address="/terms/examples" title="Examples"/>
+		<page "terms api page" address="/terms/api" title="API"/>
+	</>
+	<page "text usage page" address="/text" title="Text" tab="Usage">
+		<page "text examples page" address="/text/examples" title="Examples"/>
+		<page "text api page" address="/text/api" title="API"/>
+		<page "text theming page" address="/text/theming" title="Theming"/>
+	</>
+	<page "textarea usage page" address="/textarea" title="Textarea" tab="Usage">
+		<page "textarea examples page" address="/textarea/examples" title="Examples"/>
+		<page "textarea api page" address="/textarea/api" title="API"/>
+		<page "textarea theming page" address="/textarea/theming" title="Theming"/>
+	</>
+	<page "theme-editor usage page" address="/theme-editor" title="Theme Editor" tab="Usage">
+		<page "theme-editor examples page" address="/theme-editor/examples" title="Examples"/>
+		<page "theme-editor api page" address="/theme-editor/api" title="API"/>
+		<page "theme-editor theming page" address="/theme-editor/theming" title="Theming"/>
+	</>
+	<page "theme-menu usage page" address="/theme-menu" title="Theme Menu" tab="Usage">
+		<page "theme-menu examples page" address="/theme-menu/examples" title="Examples"/>
+		<page "theme-menu api page" address="/theme-menu/api" title="API"/>
+		<page "theme-menu theming page" address="/theme-menu/theming" title="Theming"/>
+	</>
+	<page "title usage page" address="/title" title="Title" tab="Usage">
+		<page "title examples page" address="/title/examples" title="Examples"/>
+		<page "title api page" address="/title/api" title="API"/>
+	</>
+	<page "toast usage page" address="/toast" title="Toast" tab="Usage">
+		<page "toast examples page" address="/toast/examples" title="Examples"/>
+		<page "toast api page" address="/toast/api" title="API"/>
+		<page "toast theming page" address="/toast/theming" title="Theming"/>
+	</>
+	<page "toolbar usage page" address="/toolbar" title="Toolbar" tab="Usage">
+		<page "toolbar examples page" address="/toolbar/examples" title="Examples"/>
+		<page "toolbar api page" address="/toolbar/api" title="API"/>
+		<page "toolbar theming page" address="/toolbar/theming" title="Theming"/>
+	</>
+	<page "transition usage page" address="/transition" title="Transition" tab="Usage">
+		<page "transition examples page" address="/transition/examples" title="Examples"/>
+		<page "transition api page" address="/transition/api" title="API"/>
+		<page "transition theming page" address="/transition/theming" title="Theming"/>
+	</>
+	<page "tree-diagram usage page" address="/tree-diagram" title="Tree diagram" tab="Usage">
+		<page "tree-diagram examples page" address="/tree-diagram/examples" title="Examples"/>
+		<page "tree-diagram api page" address="/tree-diagram/api" title="API"/>
+		<page "tree-diagram theming page" address="/tree-diagram/theming" title="Theming"/>
+	</>
+	<page "value usage page" address="/value" title="Value" tab="Usage">
+		<page "value examples page" address="/value/examples" title="Examples"/>
+		<page "value api page" address="/value/api" title="API"/>
+	</>
+	<page "video usage page" address="/video" title="Video" tab="Usage">
+		<page "video examples page" address="/video/examples" title="Examples"/>
+		<page "video api page" address="/video/api" title="API"/>
+	</>
+	<page "visibility usage page" address="/visibility" title="Visibility" tab="Usage">
+		<page "visibility examples page" address="/visibility/examples" title="Examples"/>
+		<page "visibility api page" address="/visibility/api" title="API"/>
+		<page "visibility theming page" address="/visibility/theming" title="Theming"/>
+	</>
+	<page "zoom usage page" address="/zoom" title="Zoom" tab="Usage">
+		<page "zoom examples page" address="/zoom/examples" title="Examples"/>
+		<page "zoom api page" address="/zoom/api" title="API"/>
+		<page "zoom theming page" address="/zoom/theming" title="Theming"/>
+	</>
+	<!-- the docs site's own:  its settings, and the syntax of the language a component page shows -->
+	<dialog "settings dialog"/>
+	<sidebar "syntax sidebar"/>
+	<page "not found page"/>
+	<page "error page"/>
+</>

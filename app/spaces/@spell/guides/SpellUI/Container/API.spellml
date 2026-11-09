@@ -1,0 +1,38 @@
+<spell-page "container api" notebook>
+	<header level="1">
+		Container
+		<header>A container limits content to a maximum width.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-container" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-container" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-container" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-container" only="states"></>
+		</>
+	</>
+</spell-page>

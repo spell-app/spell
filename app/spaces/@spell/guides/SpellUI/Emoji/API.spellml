@@ -1,0 +1,31 @@
+<spell-page "emoji api" notebook>
+	<header level="1">
+		Emoji
+		<header>An emoji is a glyph used to represent something else.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-emoji" only="attributes"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-emoji" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-emoji" only="states"></>
+		</>
+	</>
+</spell-page>
