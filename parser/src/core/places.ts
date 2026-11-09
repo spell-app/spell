@@ -527,7 +527,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const names = storedAsNamesOf(schemaOf(thing.constructor))
     const propertyOf = (field: string) => names.get(field) ?? field
     // a thing saved again, by undo:  it keeps when it was first saved
-    const createdBefore = allTimes.includes(CREATED_FIELD) ? getProp(thing, propertyOf(CREATED_FIELD)) : undefined
+    const createdBefore = allTimes.includes(CREATED_FIELD)
+      ? whileReading(() => getProp(thing, propertyOf(CREATED_FIELD)))
+      : undefined
     const stampOf = (field: string) =>
       (field === CREATED_FIELD && createdBefore instanceof Date ? createdBefore : now).toISOString()
     const stamps = Object.fromEntries(times.map((field) => [field, stampOf(field)]))
