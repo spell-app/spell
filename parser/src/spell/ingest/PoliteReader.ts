@@ -1,6 +1,7 @@
 import { backoffFor, rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { clockTime } from "spell/util/time"
 import { after } from "spell/util/timing"
+import { addressWithoutKey, keyHidden, putKeyOn, type KeyGoes } from "spell/places/keyGoes"
 
 import { IngestStopped, type ReaderSession } from "./ingest.types"
 
@@ -73,7 +74,8 @@ export type ReadAnswer = {
  * - NEVER sends a write, but through `tryWrite()`, when the person said it may (`--try-writes`):
  *   - `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks
  *   - so a read through the Spell can't write either
- * - The key goes on each request, and its value is taken out of whatever comes back, should a server say it again.
+ * - The key goes on each request, where its server wants it (`keyGoes`, epic `data` T73),
+ *   and its value is taken out of whatever comes back, should a server say it again:  its text, its headers, where it landed.
  * - A signed-in session goes the same way (epic `mockup` P12):  its cookies only to their own host, and its values
  *   taken out of what comes back.
  *   - It asks as itself, not as another page, which a signed-in server may refuse.
@@ -88,6 +90,8 @@ export class PoliteReader {
   private readonly sleep: (msec: number) => Promise<void>
   /** The key's value. */
   private readonly key: string | undefined
+  /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
+  private readonly keyGoes: KeyGoes | undefined
   /** The signed-in session. */
   private readonly session: ReaderSession | undefined
   /** How many requests so far. */
@@ -104,16 +108,19 @@ export class PoliteReader {
   constructor({
     fetch,
     key,
+    keyGoes,
     session,
     sleep = (msec) => after(msec / 1000)
   }: {
     fetch: typeof globalThis.fetch
     key?: string
+    keyGoes?: KeyGoes
     session?: ReaderSession
     sleep?: (msec: number) => Promise<void>
   }) {
     this.send = fetch
     this.key = key
+    this.keyGoes = keyGoes
     this.session = session
     this.sleep = sleep
   }
@@ -186,14 +193,14 @@ export class PoliteReader {
     headers.set("user-agent", READER_NAME)
     // a browser sets its own, and won't let a page:  so only where it can
     if (!headers.has("origin") && !this.session) headers.set("origin", READER_ORIGIN)
-    if (this.key !== undefined) headers.set("authorization", `Bearer ${this.key}`)
+    const asked = this.key === undefined ? url : putKeyOn(url, headers, this.key, this.keyGoes)
     for (let attempt = 1; ; attempt++) {
       if (!this.hasRoom)
         throw new IngestStopped(`stopped reading at its limit, ${MOST_REQUESTS} requests or ${MOST_BYTES} bytes`)
       await this.waitForLimit(url)
       await this.waitForGap()
       this.requests++
-      const { response, landedAt } = await this.sent(url, init, headers)
+      const { response, landedAt } = await this.sent(asked, init, headers)
       this.noteLimit(response.headers)
       const isTooMany = response.status === 429 || response.status === 503
       if (isTooMany && response.headers.has("retry-after") && attempt <= MOST_RETRIES) {
@@ -207,12 +214,12 @@ export class PoliteReader {
         continue
       }
       const { bytes, isCut } = await this.bytesOf(response)
-      const landed = landedAt ?? (response.url || url)
+      const landed = addressWithoutKey(landedAt ?? (response.url || url), this.keyGoes)
       const text = this.withoutKey(new TextDecoder().decode(bytes))
       return {
         status: response.status,
         text,
-        headers: response.headers,
+        headers: this.headersWithoutKey(response.headers),
         isCut,
         url: landed,
         ...(body === "bytes too" && { bytes })
@@ -315,9 +322,15 @@ export class PoliteReader {
     return { bytes: isCut ? bytes.slice(0, MOST_BYTES_AN_ANSWER) : bytes, isCut }
   }
 
+  /** `headers`, with the key's value taken out:  a next page's `Link` can say a key that went in the address. */
+  private headersWithoutKey(headers: Headers): Headers {
+    if (this.key === undefined) return headers
+    return new Headers([...headers.entries()].map(([name, value]) => [name, keyHidden(value, this.key)]))
+  }
+
   /** `text`, with the key's value and the session's taken out. */
   private withoutKey(text: string): string {
-    let clean = this.key ? text.replaceAll(this.key, "[its key]") : text
+    let clean = keyHidden(text, this.key)
     for (const secret of this.session?.secrets ?? []) {
       const inJson = JSON.stringify(secret).slice(1, -1)
       clean = clean.replaceAll(secret, "[its session]").replaceAll(inJson, "[its session]")

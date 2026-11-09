@@ -804,6 +804,11 @@ export class AirtablePlace extends WebPlace implements Place {
   }
 
   /** What Airtable said, in its own words:  its `type` first, which says which mistake it is. */
+  /** Its `RateQueue` waits out a limit by itself. */
+  protected get waitsOutLimits(): boolean {
+    return false
+  }
+
   protected async messageOf(error: ApiError): Promise<string> {
     const { type, message } = await airtableErrorIn(error)
     if (error.status === 401)

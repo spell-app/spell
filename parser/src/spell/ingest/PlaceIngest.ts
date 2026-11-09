@@ -1,3 +1,4 @@
+import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD } from "spell/places/places.types"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
@@ -95,7 +96,7 @@ export class PlaceIngest {
     const existing = (await files.read(file)) ?? ""
     const already = placeLineAt(existing, address)
     if (already) return this.alreadyThere(file, already, existing)
-    const reader = this.readerFor(ask.keySecret, ask.signedIn)
+    const reader = this.readerFor(ask.keySecret, ask.signedIn, ask.keyGoes)
     const kind = await this.kindFor(address, ask.kind, reader, ask)
     this.say(`A ${kind}.  Looking at what it holds ...`)
     const look = await lookAtPlace(kind, {
@@ -112,6 +113,7 @@ export class PlaceIngest {
     refuseSecondServer(file, existing)
     const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
+    if (ask.keyGoes) description.about.keyGoes = ask.keyGoes
     if (ask.keySecret) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
@@ -151,8 +153,8 @@ export class PlaceIngest {
   /** Look again at one place. */
   private async updateOne(file: string, descriptionPath: string, old: PlaceDescription): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, address, keySecret, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
-    const reader = this.readerFor(keySecret, signedIn)
+    const { name, kind, address, keySecret, keyGoes, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
+    const reader = this.readerFor(keySecret, signedIn, keyGoes)
     this.say(`Looking again at ${address} ...`)
     // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
     const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
@@ -170,6 +172,7 @@ export class PlaceIngest {
     })
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
+    if (keyGoes) description.about.keyGoes = keyGoes
     if (keySecret) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
@@ -253,7 +256,7 @@ export class PlaceIngest {
   }
 
   /** A reader for this place, with its key and session.  - throws `IngestStopped` for one that isn't there, or has ended */
-  private readerFor(keySecret: string | undefined, signedIn?: string): PoliteReader {
+  private readerFor(keySecret: string | undefined, signedIn?: string, keyGoes?: KeyGoes): PoliteReader {
     const { fetch, sleep, keyNamed, sessionNamed } = this.settings
     const key = keySecret ? keyNamed?.(keySecret) : undefined
     if (keySecret && key === undefined) {
@@ -266,7 +269,7 @@ export class PlaceIngest {
       throw new IngestStopped(`${signedIn} hasn't been signed in to:  spell place sign-in ${signedIn} <address>`)
     }
     if (session?.hasEnded) throw sessionEnded(session)
-    return new PoliteReader({ fetch, ...withDefined({ key, session, sleep }) })
+    return new PoliteReader({ fetch, ...withDefined({ key, keyGoes, session, sleep }) })
   }
 
   /**

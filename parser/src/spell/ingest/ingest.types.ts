@@ -3,6 +3,7 @@
  * - See `PlaceIngest`, which runs the steps.
  * - No values but the error:  every step's other half is handed in, so the editor can run the same steps.
  */
+import type { KeyGoes } from "spell/places/keyGoes"
 import type { ClaudeRunner } from "spell/parser/spell/translate/translate.types"
 
 /** Thrown when it can't go on, and only a person can say what to do:  its message says what's wrong, and how to go on. */
@@ -125,6 +126,8 @@ export type IngestAsk = {
   name?: string
   /** The NAME of the key it needs. */
   keySecret?: string
+  /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
+  keyGoes?: KeyGoes
   /** The name of the place whose kept session it reads as:  `spell place sign-in`'s (epic `mockup` P12). */
   signedIn?: string
   /** An address to read its docs at, over those it finds by itself. */
@@ -465,6 +468,8 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
+    /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
+    keyGoes?: KeyGoes
     /** The name of the session it's read as, never the session. */
     signedIn?: string
     /** It answered without the key too, so it takes it only when it's set:  GitHub's, 60 requests an hour without. */

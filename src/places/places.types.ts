@@ -550,6 +550,11 @@ export type ListAnswer = {
    */
   notes?: string[]
   /**
+   * How a number its text can't settle, `1,200`, reads, when the place knows (epic `data` T83):
+   * a Google Sheet's own locale.  Left out:  the program's language's way.
+   */
+  unclearNumbers?: DecimalMark
+  /**
    * The fields that read, and take no write, as far as the place knows:  Airtable's formulas, lookups and rollups.
    * - For a place behind a server side, whose `canWrite()` a browser can't call:  `RemotePlace` keeps them, and answers from them.
    */
@@ -1362,6 +1367,20 @@ export class PlaceError extends Error {
   }
 }
 PlaceError.prototype.name = "PlaceError"
+
+/**
+ * Thrown, with nothing sent, while a server has said not to ask yet (epic `data` T110):  `WebPlace`.
+ * - No answer, as far as a change is concerned:  it's sent again later.
+ * - `retryAt`:  when it may be asked, which a drawing says, and tries again at (`waitAfter()`, in core).
+ */
+export class TooSoonError extends Error {
+  declare cause: { retryAt: number } | undefined
+  /** When it may be asked again, in ms since 1970. */
+  get retryAt() {
+    return this.cause?.retryAt
+  }
+}
+TooSoonError.prototype.name = "TooSoonError"
 
 /**
  * The store a sample's records are kept in on this device (`SamplePlace`):  `spell-samples:<program>/<place>`.

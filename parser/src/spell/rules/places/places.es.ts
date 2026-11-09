@@ -21,6 +21,8 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
+import { KeyGoesInAddress } from "./KeyGoesInAddress"
+import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
@@ -345,6 +347,52 @@ placesEs.addRule(FieldCalled, {
 placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
+placesEs.addRule(KeyGoesInHeader, {
+  syntax: "{type:subject_its} clave va en su cabecera {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://example.com"\n\t- su clave va en su cabecera "X-Api-Key"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://example.com",',
+            '  keyGoes: { header: "X-Api-Key" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(KeyGoesInAddress, {
+  syntax: "{type:subject_its} clave va en la dirección como {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://example.com"\n\t- su clave va en la dirección como "api_key"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://example.com",',
+            '  keyGoes: { inAddress: "api_key" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
   syntax: "((second:segundo|segundos)|(minute:minuto|minutos)|(hour:hora|horas)|(day:día|días|dia|dias))"
 })
@@ -689,7 +737,9 @@ placesEs.addRule(ListsUnder, {
 placesEs.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"
 })
-placesEs.addRule(PageSizeIs, { syntax: "{type:subject_implied} da hasta {size:number} a la vez" })
+placesEs.addRule(PageSizeIs, {
+  syntax: "{type:subject_implied} da hasta {size:number} a la vez (, pedidos con {param:text})?"
+})
 placesEs.addRule(RequestsASecond, {
   syntax: "{type:subject_implied} acepta hasta {most:number} peticiones por segundo",
   tests: [

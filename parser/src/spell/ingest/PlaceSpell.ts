@@ -3,6 +3,7 @@ import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/places/FieldNames"
+import type { KeyGoes } from "spell/places/keyGoes"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { PROPORTION } from "spell/util/measures/Dimension"
 
@@ -24,6 +25,13 @@ const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> =
 
 /** A row's id, in a place that isn't told otherwise. */
 const USUAL_ID = "id"
+
+/** The line saying where a key goes. */
+function keyGoesLine(goes: KeyGoes): string {
+  return "header" in goes
+    ? `- its key goes in its "${goes.header}" header`
+    : `- its key goes in the address as "${goes.inAddress}"`
+}
 
 /** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */
 const MOST_AT_A_TIME = 5000
@@ -81,12 +89,13 @@ export function spellPartsFor(
   { about, collections, checkEverySeconds, mostPerSecond }: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
 ): SpellParts {
-  const { name, kind, address, keySecret, keyIfSet } = about
+  const { name, kind, address, keySecret, keyIfSet, keyGoes } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
   const every = shown.map(([, collection]) => collection)
   const placeLines: SpellLine[] = []
   if (withKey && keySecret) {
     placeLines.push({ key: "key", text: `- its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
+    if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"

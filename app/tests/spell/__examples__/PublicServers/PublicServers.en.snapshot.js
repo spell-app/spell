@@ -31,7 +31,8 @@ export const words = {
       stateReason: "state reason",
       draft: "draft",
       pullRequest: "pull request",
-      assignee: "assignee"
+      assignee: "assignee",
+      draw: "draw it"
     },
     Contributor: {
       login: "login",
@@ -336,6 +337,7 @@ export const words = {
       lendingEditionS: "lending edition s",
       lendingIdentifierS: "lending identifier s",
       publicScanB: "public scan b",
+      editions: "editions",
       seriesKey: "series key",
       seriesName: "series name",
       seriesPosition: "series position",
@@ -383,7 +385,8 @@ export const words = {
       latestRevision: "latest revision",
       revision: "revision",
       created: "created",
-      lastModified: "last modified"
+      lastModified: "last modified",
+      draw: "draw it"
     },
     Link: {
       title: "title",

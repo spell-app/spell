@@ -14,6 +14,7 @@
 github is a web server at "https://api.github.com":
 	- its optional key is the secret "GITHUB_TOKEN"
 	- its next page is in its "Link" header
+	- it gives up to 100 at a time, asked for with "per_page"
 	- check it every 40 minutes
 	- it writes names like "repository_url"
 	- issues live at "/repos/solidjs/solid/issues"

@@ -56,6 +56,8 @@ export type PlaceDetails = {
   keyIfSet?: boolean
   /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
   forEachTab?: boolean
+  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its key goes in its "X-Api-Key" header`. */
+  keyGoes?: PlacesFolder.KeyGoes
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
   /** Once a day at this time, instead:  `check it once a day at 5am` (`pollWhileVisible()`'s `at`). */
@@ -109,6 +111,8 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
+  /** What a web server calls that, when it isn't `limit`:  `it gives up to 100 at a time, asked for with "per_page"`. */
+  pageSizeAskedWith?: string
   /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
   filters?: "every field" | readonly string[]
   /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
@@ -233,21 +237,14 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(deviceCopy && { deviceCopy }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
-      ...(details.keyNamed !== undefined && {
-        keyNamed: details.keyNamed,
-        ...(keyFrom && { keyFrom }),
-        ...(details.keyIfSet && { keyIfSet: true })
-      })
+      ...keyLinesOf(details, keyFrom)
     }),
   "graphql server": (making, { GraphPlace }) =>
     new GraphPlace({
       url: making.details.at!,
       collections: graphCollections(making),
-      ...(making.details.keyNamed !== undefined && {
-        keyNamed: making.details.keyNamed,
-        ...(making.keyFrom && { keyFrom: making.keyFrom }),
-        ...(making.details.keyIfSet && { keyIfSet: true })
-      })
+      ...(making.details.versionsIn !== undefined && { versions: { field: making.details.versionsIn } }),
+      ...keyLinesOf(making.details, making.keyFrom)
     }),
   "data folder": ({ details, deviceCopy }, places) => {
     const {
@@ -390,6 +387,12 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
 }
 
+/** What a place's lines say of its key, for a place on a server:  nothing without one named. */
+function keyLinesOf({ keyNamed, keyIfSet, keyGoes }: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]) {
+  if (keyNamed === undefined) return {}
+  return { keyNamed, ...(keyFrom && { keyFrom }), ...(keyIfSet && { keyIfSet }), ...(keyGoes && { keyGoes }) }
+}
+
 /**
  * A sheet's file:  read from a browser at its address, or, at a place server's address, through the server that writes it.
  * - `format` left out:  by the address's ending (`SheetPlace`).
@@ -529,6 +532,7 @@ function restAbilitiesIn({
   pagesByOffset,
   pagesByNumber,
   pagesByLastId,
+  pageSizeAskedWith,
   filters,
   sorts,
   sortedWith,
@@ -547,6 +551,7 @@ function restAbilitiesIn({
   }
   const params = {
     ...(count?.limit !== undefined && { limit: count.limit }),
+    ...(pageSizeAskedWith !== undefined && { limit: pageSizeAskedWith }),
     ...(position && { offset: position.offset }),
     ...(nextPageSentAs !== undefined && { cursor: nextPageSentAs }),
     ...(pagesByLastId && { cursor: pagesByLastId.param }),
@@ -581,7 +586,8 @@ function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
   const list = at ?? collection
   const one = list.replace(/s$/, "")
   const typeName = one.charAt(0).toUpperCase() + one.slice(1)
-  const selected = [ID_FIELD, ...declaredFields(Class).filter((field) => field !== ID_FIELD)]
+  const versionField = details.versionsIn === undefined ? [] : [details.versionsIn]
+  const selected = [...new Set([ID_FIELD, ...versionField, ...declaredFields(Class)])]
   return {
     [collection]: {
       list,
