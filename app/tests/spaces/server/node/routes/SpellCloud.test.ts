@@ -219,8 +219,8 @@ describe("Spell's cloud", () => {
       test("someone in the org:  the org, linking to its home, and their own space", async () => {
         const answer = await json("/api/cloud/home", anasCookie)
         expect(answer.person).toBe("ana@spell")
-        expect(answer.spaces).toContainEqual({ address: "@rs", name: expect.any(String), link: "/@rs" })
-        expect(answer.spaces).toContainEqual({ address: "ana@spell", name: "Your space" })
+        expect(answer.spaces).toContainEqual({ address: "@rs", name: expect.any(String), kind: "org", link: "/@rs" })
+        expect(answer.spaces).toContainEqual({ address: "ana@spell", name: "Your space", kind: "your space" })
       })
 
       test("a stranger:  only what's public and their own, never the org", async () => {
@@ -234,7 +234,7 @@ describe("Spell's cloud", () => {
       test("nobody signed in:  only what's public", async () => {
         const answer = await json("/api/cloud/home")
         expect(answer.person).toBeUndefined()
-        expect(answer.spaces.map((each: { address: string }) => each.address)).toEqual(["@rs/noticeboard"])
+        expect(answer.spaces).toEqual([expect.objectContaining({ address: "@rs/noticeboard", kind: "public" })])
       })
 
       test("an org's home, for someone who reads it:  its programs, and its other spaces they may read", async () => {
@@ -251,6 +251,8 @@ describe("Spell's cloud", () => {
           "/apps/@rs/OrgFeed"
         ])
         const spaces = org.spaces.map((each: { address: string }) => each.address)
+        expect(org.spaces).toContainEqual(expect.objectContaining({ address: "@rs/noticeboard", kind: "public" }))
+        expect(org.spaces).toContainEqual(expect.objectContaining({ address: "@rs/__admin", kind: "members" }))
         expect(spaces).toContain("@rs/noticeboard")
         expect(spaces).toContain("@rs/__admin")
         expect(spaces).not.toContain("@rs")
