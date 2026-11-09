@@ -6792,7 +6792,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 94,
+          "line": 96,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7250,6 +7250,32 @@
                 },
                 "py": {
                   "code": "class MuseoMet(Place):\n    pass\n\nmuseo_met = core.place(\n    MuseoMet(),\n    {\n        \"name\": \"museo_met\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"pages_by_offset\": {\"limit\": \"limit\", \"offset\": \"offset\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageByLastId",
+          "ruleNames": ["next_page_by_last_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageByLastId.ts",
+          "line": 16,
+          "purpose": "A web server is asked what comes after a row, by that row's id (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente se pide con ({limit:text} y)? el último id como {param:text} (, hasta que (el {inner:text} de)? su {field:text} sea no)?",
+              "example": "stripe es un servidor web en \"https://stripe.test\"\n\t- su página siguiente se pide con \"limit\" y el último id como \"starting_after\", hasta que su \"has_more\" sea no",
+              "outputs": {
+                "js": {
+                  "code": "export class Stripe extends Place {}\nexport const stripe = core.place(new Stripe(), {\n  name: \"stripe\",\n  kind: \"web server\",\n  at: \"https://stripe.test\",\n  pagesByLastId: {\n    limit: \"limit\",\n    param: \"starting_after\",\n    moreIn: \"has_more\"\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Stripe extends Place {}\nexport const stripe = core.place(new Stripe(), {\n  name: \"stripe\",\n  kind: \"web server\",\n  at: \"https://stripe.test\",\n  pagesByLastId: {\n    limit: \"limit\",\n    param: \"starting_after\",\n    moreIn: \"has_more\"\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Stripe(Place):\n    pass\n\nstripe = core.place(\n    Stripe(),\n    {\n        \"name\": \"stripe\",\n        \"kind\": \"web server\",\n        \"at\": \"https://stripe.test\",\n        \"pages_by_last_id\": {\"limit\": \"limit\", \"param\": \"starting_after\", \"more_in\": \"has_more\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }

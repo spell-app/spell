@@ -66,6 +66,10 @@ describe("placeBehind(), a web server (epic `data` I35)", () => {
     expect(webServerWith({ pagesByNumber: { page: "p", first: 0 } }).describe().page).toBe("offset")
   })
 
+  test("the last row's id is a kind of cursor", () => {
+    expect(webServerWith({ pagesByLastId: { param: "after", moreIn: "has_more" } }).describe().page).toBe("cursor")
+  })
+
   test("its next page in its `Link` header still pages by cursor", () => {
     expect(webServerWith({ nextPageInLink: true }).describe()).toMatchObject({ page: "cursor" })
   })
