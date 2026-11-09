@@ -908,6 +908,31 @@ class SavedRead {
     nameTableColumns(this.list, Class)
   }
 
+  /**
+   * This read, in another order, by the field a table's column is named for:  asked of the place, which sorts every
+   * page, not only those drawn (epic `data` T80).
+   * - `undefined` when no field of its type goes by that name:  a worked-out column has nothing to ask for.
+   * - Resolves once it has its first page.
+   * - throws what the read threw
+   */
+  sortedAtPlace(column: string | undefined, descending: boolean): Promise<List> | undefined {
+    const field = column === undefined ? undefined : this.fieldNamed(column)
+    if (field === undefined) return undefined
+    const read = this.program.readOf(this.Class, { ...this.query, sort: [{ field, descending }] })
+    const answering = read.firstPage()
+    read.hold(answering)
+    return answering
+  }
+
+  /** The declared field a column is named for, however its words are spelled:  `Release Date` => `releaseDate`. */
+  private fieldNamed(column: string): string | undefined {
+    const words = wordsOfName(column)
+    for (let schema = schemaOf(this.Class) as ReturnType<typeof schemaOf> | undefined; schema; schema = schema.parent) {
+      for (const name of schema.declared.keys()) if (wordsOfName(name) === words) return name
+    }
+    return undefined
+  }
+
   /** Is there another page it hasn't read? */
   get hasMorePages(): boolean {
     return this.nextPage !== undefined
@@ -1567,8 +1592,17 @@ export const savedMethods = defineCoreModule({
   ): Drawing {
     // a read written straight in the drawing is a function that waits:  what it read shows until a new answer lands
     const current = read.constructor.name === ASYNC_FUNCTION ? (createDeferred(read as never) as typeof read) : read
+    ////// A table's header asking its place for another order:  shown until the read itself changes
+    let sorted: { base: unknown; list: object } | undefined
+    const sortChanged = new Cell()
+    const listShown = () => {
+      sortChanged.read()
+      const base = current()
+      const now = sorted
+      return now?.base === base ? now.list : base
+    }
     const items = () => {
-      const list = current() as { items?: readonly Item[] } | readonly Item[] | undefined
+      const list = listShown() as { items?: readonly Item[] } | readonly Item[] | undefined
       return (
         Array.isArray(list) ? list : ((list as { items?: readonly Item[] } | undefined)?.items ?? [])
       ) as readonly Item[]
@@ -1576,7 +1610,7 @@ export const savedMethods = defineCoreModule({
     const drawn = () => {
       if (!drawEach) return current() as Drawing
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
-      const more = () => MORE_PAGES.get(current() as object)
+      const more = () => MORE_PAGES.get(listShown() as object)
       const paging = riders.paging?.()
       const around = elementOf(riders.items?.())
       const row = around?.firstElementChild ?? undefined
@@ -1602,7 +1636,7 @@ export const savedMethods = defineCoreModule({
               drawItem,
               // the same read draws the same list, so coming back finds it as it was
               key: () => {
-                const list = current()
+                const list = listShown()
                 return list instanceof List ? list : undefined
               },
               more
@@ -1610,6 +1644,17 @@ export const savedMethods = defineCoreModule({
       if (row) {
         row.remove()
         keepHeaderRow(row, around!, items)
+        around!.addEventListener(TABLE_SORTING, (event) => {
+          const { key, direction } = (event as CustomEvent<TableSorting>).detail
+          const base = current() as object
+          MORE_PAGES.get(base)
+            ?.sortedAtPlace(key, direction === "descending")
+            ?.then((list) => {
+              sorted = { base, list }
+              sortChanged.changed()
+            })
+            .catch((error: unknown) => void core.notify(core.message("read-failed", { why: whyOf(error) })))
+        })
       }
       const inside = around ? drawnIn(around, list) : list
       // the pager comes AFTER what's around the items:  never one more card, or a row of the table
@@ -1727,6 +1772,7 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
       for (const cell of named) {
         const title = document.createElement(cell.localName)
         title.textContent = cell.getAttribute(COLUMN_NAME)
+        title.setAttribute(COLUMN_KEY, cell.getAttribute(COLUMN_NAME)!)
         const align = cell.getAttribute("align")
         if (align) title.setAttribute("align", align)
         header.append(title)
@@ -1789,6 +1835,20 @@ function drawnInPages<Item>({
 
 /** What a cell's column is called, on the cell:  `<cell "Name">`. */
 const COLUMN_NAME = "data-column"
+
+/** What a table's header cell says it sorts by, in Spell UI's `ui-sorting`:  its column's name. */
+const COLUMN_KEY = "data-key"
+
+/** The event a table sends as a header asks to sort:  Spell UI's. */
+const TABLE_SORTING = "ui-sorting"
+
+/** What `ui-sorting` says, as far as a read cares:  a copy of Spell UI's `TableSortDetail`, as core never imports `ui`. */
+type TableSorting = {
+  /** The header's key:  here, its column's name. */
+  key?: string
+  /** Which way. */
+  direction: "ascending" | "descending"
+}
 
 /** The mark on the header row a table of items makes. */
 const HEADER_ROW = "data-header-row"
