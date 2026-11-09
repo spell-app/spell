@@ -24,9 +24,9 @@ export const epicStateFilterVocabulary = {
     "per state the items are in, in the state's colour, with how many;  solid while that state's items show, " +
     "outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item " +
     "section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the " +
-    "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip;  an " +
-    "⌥-click (Alt-click) shows only its state, whatever showed (epic `epic-engine` I166).  The items " +
-    "marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
+    "Epics page).  A click toggles a chip and every state of its colour (`StateFilter.nextShown()`), as its tooltip says;  an " +
+    "⌥-click (Alt-click) shows only that colour, whatever showed (epic `epic-engine` I166).  The items " +
+    "marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, the blues' chip.",
   attributes: [
     {
       name: "counts",
@@ -41,9 +41,9 @@ export const epicStateFilterVocabulary = {
       name: "marked",
       kind: "number",
       description:
-        "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
-        "badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a " +
-        "click does nothing.  None, or 0:  no badge."
+        "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in the blue " +
+        "badge, left of the chips, and left out of `counts`.  A click toggles every blue, these items too.  None, or " +
+        "0, and nothing with Claude:  no badge."
     },
     {
       name: "phases",

@@ -963,8 +963,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
    * - solid while EVERY section showing that state shows it
    * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule
-   *   (`StateFilter.nextShown()`);  an ⌥-click, only its state (I166)
-   * - the items marked in this pass in its blue badge, left of the chips, whatever the filter (P43)
+   *   (`StateFilter.nextShown()`);  an ⌥-click, only its colour (I166)
+   * - the items marked in this pass in its blue badge, left of the chips:  the blues' chip (P43, I242)
    */
   private pageFilter(): JSX.Element {
     const chips = () => this.filterChips()

@@ -188,6 +188,7 @@ Both title bars carry the same row, and Review adds a list button right of Home:
 | Back, Forward | the page's own history.  The view can't read a frame from another origin, so the page reports where it is;  a page from no page server never does, and both stay off |
 | Reload | the page again, in the same frame |
 | Home Page | a NEW frame, at the docs' home page:  the epic server's, else the window's own repo's |
+| This Window's Epic Page | the Epic Docs tab's checklist button:  the epic page of this window's epic, in the Review tab |
 | Review:  Open Epic... | lists every epic page of every registered repo, and of the window's first folder, newest first, by title;  the one you pick opens in Review, in any window.  No terminal, no Claude:  it's how you review on a plane |
 | Restart Page Server | stops and starts the server behind the page, then shows the page again, on its new port if it moved |
 | Open in Browser | the page, in your default browser |

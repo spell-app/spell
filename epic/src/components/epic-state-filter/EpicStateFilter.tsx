@@ -4,7 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 // the filter's rule, states and words:  their files, not `epic-section`'s barrel (which would define it here)
-import { StateFilter, WITH_CLAUDE, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
+import { MARKED_SHOWS_AS, StateFilter, WITH_CLAUDE, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,
@@ -29,14 +29,13 @@ import filterCSS from "./EpicStateFilter.css?inline"
  *   `progress`), grey paused (held, I221), a DOTTED blue outline scheduled, green done lately, grey done before
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
  * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
- *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
- *   one hides;  the only one showing, everything again);  the owner filters, and sets `shown`
- * - an ⌥-click (Alt-click;  epic `epic-engine` I166, Owen, 2026-10-29:  "if I option-click on one of those badges,
- *   turn just that one on"):  only that state, whatever showed;  `how: "only"` in the event, its `shown` that state alone
+ *   rule (`StateFilter.nextShown()`:  it toggles the chip, and every state of its colour);  the owner filters, and sets
+ *   `shown` (epic `epic-engine` I242)
+ * - an ⌥-click (Alt-click;  epic `epic-engine` I166):  only that colour, whatever showed;  `how: "only"` in the event
  * - each chip's tooltip and name:  how many, which state, what its click does, and its ⌥-click
  * - the items MARKED in this pass (`marked`, epic `epic-engine` P43):  a solid badge in Send's blue (a dotted outline at first;  Owen chose solid), first,
  *   left of the chips (Owen, 2026-10-25:  "remove from the red/green/etc and put in a blue badge with dotted outline
- *   to the left");  drawn whatever `shown` says, and not a filter:  a click does nothing
+ *   to the left");  the blues' chip:  solid while they show, outlined while hidden, a click toggles them (I242)
  * - drawn by:  `<epic-section>` (an item section's title), `<epic-page>` (its toolbar:  every section at once), the
  *   docs runtime's lists (the Epics page's cards:  `wireItemFilters()`), so a guide and an epic page look alike
  * - NEVER filters anything itself:  it only says what was picked
@@ -74,7 +73,8 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   get present(): ChipState[] {
     const counts = this.stateCounts
     const order: readonly ChipState[] = this.phases ? PHASE_FILTER_STATES : FILTER_STATES
-    return order.filter((it) => counts.has(it.state))
+    const hasMarked = Number(this.marked ?? 0) > 0
+    return order.filter((it) => counts.has(it.state) || (hasMarked && it.state === MARKED_SHOWS_AS))
   }
 
   /**
@@ -118,18 +118,20 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
         >
           <Show when={this.markedCount}>
             {(count) => {
-              const words = () =>
-                this.translationForKey(this.phases ? "markedPhaseWords" : "markedWords", { count: count() })
+              const words = () => this.badgeWords(count())
               return (
-                <span
+                <button
+                  type="button"
                   class={[CHIP, MARKED]}
                   part={this.partForName("marked")}
-                  role="img"
+                  data-state={MARKED_SHOWS_AS}
+                  aria-pressed={this.showing.has(MARKED_SHOWS_AS) ? "true" : "false"}
                   aria-label={words()}
                   title={words()}
+                  onClick={(event: MouseEvent) => this.pick(MARKED_SHOWS_AS, event.altKey ? "only" : "click")}
                 >
                   {count()}
-                </span>
+                </button>
               )
             }}
           </Show>
@@ -161,10 +163,19 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /** A chip's name and tooltip:  how many, which state, and what its click does (`StateFilter.clickDoes()`). */
   private chipWords(state: ChipState): string {
-    const words = this.translationForKey(state.words)
-    const count = this.stateCounts.get(state.state) ?? 0
+    return this.wordsFor(state.state, this.stateCounts.get(state.state) ?? 0, this.translationForKey(state.words))
+  }
+
+  /** The blue badge's name and tooltip, as a chip's:  `count` with Claude. */
+  private badgeWords(count: number): string {
+    const words = this.translationForKey(this.phases ? "markedPhaseWords" : "markedWords")
+    return this.wordsFor(MARKED_SHOWS_AS, count, words)
+  }
+
+  /** How many are in `state` (`words`), and what a click and an ⌥-click on its chip do. */
+  private wordsFor(state: string, count: number, words: string): string {
     const present = this.present.map((it) => it.state as string)
-    const does = this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state.state)])
+    const does = this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state)])
     return this.translationForKey("chipWords", { count, words, does, only: this.translationForKey("chipAltOnly") })
   }
 
@@ -172,7 +183,6 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   @E.untracked
   private pick(state: string, how: ChipPick) {
     const present = this.present.map((it) => it.state as string)
-    // what Claude is on has no chip of its own:  `nextShown()` keeps it showing
     const next = StateFilter.nextShown(present, [...this.showing], state, how)
     // the grey chip is `old`, `handled` and `quiet`:  shown or hidden together
     const shown = next.includes(SETTLED) ? [...next, ...SETTLED_TOO] : next
@@ -184,7 +194,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 const SETTLED = "old"
 const SETTLED_TOO: readonly string[] = ["handled", "quiet"]
 
-/** Class of the blue badge, the items marked in this pass (P43). */
+/** Class of the blue badge:  what's with Claude, and the items marked in this pass (P43). */
 const MARKED = "marked"
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
