@@ -58,6 +58,10 @@ Where it is on Earth:  what its forecast is asked for by.
 		- its "longitude" is a number
 	</spell>
 
+	<action "pick it" description="The city the weather's for">
+		set the city of the weather of the public servers to it
+	</action>
+
 	<draw>
 		<item active={it is the public servers' weather's city} onClick={pick it}>{its name}</item>
 	</draw>

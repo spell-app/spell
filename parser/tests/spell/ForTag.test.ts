@@ -104,6 +104,17 @@ describe("<for>", () => {
     expect(code).toContain("failed: () =>")
   })
 
+  test("<loading> and <empty> in a body are slots too, each drawing what it holds (epic `data` T127)", () => {
+    const { code, errors } = compiled(
+      `\t\t<for film in its films>\n\t\t\t<text>x</text>\n\t\t\t<loading><text>Waiting</text></loading>\n\t\t\t<empty><text>None yet</text></empty>\n\t\t</for>`
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("none: () =>")
+    expect(code).toContain("waiting")
+    expect(code).toContain("Waiting")
+    expect(code).toContain("None yet")
+  })
+
   test("for each stays an accepted spelling", () => {
     const { code, errors } = compiled(`\t\t<for each film in its films>\n\t\t\t<text>x</text>\n\t\t</for>`)
     expect(errors).toEqual([])

@@ -196,7 +196,8 @@ export const words = {
     Stat: {
       baseStat: "base stat",
       effort: "effort",
-      stat: "stat"
+      stat: "stat",
+      word: "word"
     },
     PastStat: {
       generation: "generation",

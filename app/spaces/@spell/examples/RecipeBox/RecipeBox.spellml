@@ -1,5 +1,5 @@
 # Recipe Box
-Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
+Your recipes, on cards:  find one, add one, change one as you type or on its Edit screen, remove one and undo it.
 Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 
 // Every notes box grows as you type
@@ -10,11 +10,16 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 ## A recipe:  a card you can read and change
 
 <spell-more-of "recipe">
+	<action "edit it" description="Its Edit screen:  nothing changes until Save">
+		set the editing of the recipe box to it
+	</action>
+
 	<draw>
 		<card>
 			<content>
 				<form value={it} class="recipe">
 					<field label="Recipe name">
+						<button slot="actions" class="edit" icon="pencil" size="mini" appearance="transparent" aria-label="Edit" title="Edit" onClick={edit it}/>
 						<button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the recipes}/>
 						<input name="title" class="title" size="large"/>
 					</field>
@@ -31,11 +36,53 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 </spell-more-of>
 
 
+## Its Edit screen:  a form over a draft, so nothing changes until Save
+
+<spell-view "recipe editor">
+	<property "recipe" type="recipe" description="The recipe being changed"/>
+	<property "draft" description="A copy to change:  the recipe stays as it was until Save">a draft of its recipe</property>
+
+	<action "save it" description="Every changed field, sent together">
+		save its draft
+		set the editing of the recipe box to nothing
+	</action>
+
+	<action "cancel it" description="Forget the copy:  the recipe never changed">
+		discard its draft
+		set the editing of the recipe box to nothing
+	</action>
+
+	<draw>
+		<card class="editor">
+			<content>
+				<form value={its draft}>
+					<header size="small">Edit {its recipe's title}</header>
+					<field label="Recipe name">
+						<input name="title" class="edit-title" size="large"/>
+					</field>
+					<field label="Serves" inline>
+						<input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
+					</field>
+					<field label="Notes">
+						<textarea name="notes" rows="2"/>
+					</field>
+				</form>
+			</content>
+			<extra>
+				<button class="save" size="small" color="primary" disabled={the title of its draft is ""} onClick={save it}>Save</button>
+				<button class="cancel" size="small" onClick={cancel it}>Cancel</button>
+			</extra>
+		</card>
+	</draw>
+</spell-view>
+
+
 ## The box:  the card for a new recipe, then a card for each one you have
 
 <spell-app "recipe box">
 	<property "search">text</>
 	<property "new recipe">a new recipe with servings = 4</>
+	<property "editing" type="recipe" description="The recipe on its Edit screen, while one is"/>
 	<property "box menu">a menu of "undo"</>
 
 	<action "create it" description="With nothing kept yet, a few to start from">
@@ -68,6 +115,14 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 					</field>
 				</form>
 			</stack>
+			{draw the screen of it}
+		</container>
+	</draw>
+
+	<draw "screen" description="Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one">
+		<if its editing>
+			draw (a new recipe editor with recipe = its editing)
+		<otherwise>
 			<cards columns="3" doubling>
 				<card class="new">
 					<content>
@@ -100,6 +155,6 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 					</failed>
 				</for>
 			</cards>
-		</container>
+		</>
 	</draw>
 </spell-app>
