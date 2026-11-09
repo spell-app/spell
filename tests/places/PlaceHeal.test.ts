@@ -43,6 +43,33 @@ describe("PlaceHeal", () => {
     expect(told.mock.calls[0]![0].rows).toEqual([{ id: "r-1", title: "Soup" }])
   })
 
+  test("a heal with no ids reads every page of a paged place", async () => {
+    const pages: Record<string, { rows: { id: string }[]; nextPage?: string }> = {
+      first: { rows: [{ id: "r-1" }], nextPage: "two" },
+      two: { rows: [{ id: "r-2" }], nextPage: "three" },
+      three: { rows: [{ id: "r-3" }] }
+    }
+    const { places, told } = cookbook({
+      describe: () => new MemoryPlace().describe(),
+      list: (_collection, query) => Promise.resolve(pages[query.page?.at ?? "first"]!)
+    })
+    await places.heal.heal(ask)
+    expect(told.mock.calls[0]![0].rows.map((row: { id: string }) => row.id)).toEqual(["r-1", "r-2", "r-3"])
+  })
+
+  test("a heal of a few ids stops reading pages once it has them", async () => {
+    const pages: Record<string, { rows: { id: string }[]; nextPage?: string }> = {
+      first: { rows: [{ id: "r-1" }], nextPage: "two" },
+      two: { rows: [{ id: "r-2" }] }
+    }
+    const list = vi.fn((_collection: string, query: { page?: { at: string } }) =>
+      Promise.resolve(pages[query.page?.at ?? "first"]!)
+    )
+    const { places } = cookbook({ describe: () => new MemoryPlace().describe(), list })
+    await places.heal.heal({ ...ask, ids: ["r-1"] })
+    expect(list).toHaveBeenCalledTimes(1)
+  })
+
   test("can't reach the place:  what's showing stays, and it answers false", async () => {
     const logged = vi.spyOn(console, "error").mockImplementation(() => {})
     const { places, told } = cookbook({

@@ -1,5 +1,6 @@
 import type { PendingChange, PendingChanges } from "./PendingChanges"
 import type { Places } from "./Places"
+import { DEFAULT_CEILING } from "./PlaceQuery"
 import { idOfRow, isLongText, type Place, type PlaceEvent, type PlaceRow, type ReplacedValue } from "./places.types"
 
 /****************
@@ -160,14 +161,34 @@ export class PlaceHeal {
   }
 
   /**
-   * What `place` holds now of `collection`:  every row, or only those of `ids`.
+   * What `place` holds now of `collection`:  every row of every page, or only those of `ids`.
    * - throws what the place threw
    */
   async latestRows(place: Place, collection: string, ids?: readonly string[]): Promise<PlaceRow[]> {
     if (ids && place.getMany) return place.getMany(collection, ids, {})
     const { idOf } = place.describe()
-    const { rows } = await place.list(collection, {}, {})
+    const rows = await this.rowsOfEveryPage(place, collection, ids)
     return rows.filter((row) => !ids || ids.includes(idOfRow(row, idOf) ?? ""))
+  }
+
+  /**
+   * Every page of `collection`, in order, the place's own cursors walked here.
+   * - Stops once every one of `ids` is found, or at the place's ceiling in rows:  a heal tells what it read, so what's
+   *   past the ceiling only stays as it was.
+   * - throws what the place threw
+   */
+  private async rowsOfEveryPage(place: Place, collection: string, ids?: readonly string[]): Promise<PlaceRow[]> {
+    const { idOf, ceiling } = place.describe()
+    const mostRows = ceiling?.rows ?? DEFAULT_CEILING.rows
+    const missing = new Set(ids)
+    const rows: PlaceRow[] = []
+    for (let page: string | undefined; ; ) {
+      const answer = await place.list(collection, page === undefined ? {} : { page: { at: page } }, {})
+      rows.push(...answer.rows)
+      for (const row of answer.rows) missing.delete(idOfRow(row, idOf) ?? "")
+      page = answer.nextPage
+      if (!page || rows.length >= mostRows || (ids && !missing.size)) return rows
+    }
   }
 
   /** Heal the things `changes` were to, collection by collection.  NEVER throws. */
