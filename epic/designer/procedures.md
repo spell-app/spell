@@ -131,7 +131,7 @@ What each skill at https://jakub.kr/skills does, and how a `/designer` review co
   4. Status every finding:  `Introduced`, `Regression` or `Pre-existing` (at most 3 of those, as a courtesy).
   5. Hold the change to its stated intent:  a new variant missing hover / focus / disabled / loading;  a new component with no empty, error or narrow state.
   6. Never check out or stash:  fetch refs and read them in place;  render in a separate worktree.
-  - Fits Owen's flow:  "bold what drifted from my last stated intent" is step 5.
+  - Fits the person's flow:  "bold what drifted from my last stated intent" is step 5.
 
 ## explain-interface
 

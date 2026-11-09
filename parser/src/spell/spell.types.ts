@@ -664,6 +664,28 @@ export type SpellDeclarationsData = {
   codeLines?: number[]
 }
 
+/** A place, as a project's declarations say it -- see `SpellDeclaration.place`. */
+export type DeclaredPlace = {
+  /** Its name, as `core.place()` knows it:  `family_cookbook`. */
+  name: string
+  /** Its kind, in `core.place()`'s words:  `web server`.  None for a kind a library added. */
+  kind?: string
+  /** Where a project data folder's things are:  see `P.TypeScope.placeAt`. */
+  at?: string
+  /** What the compiler asks about its lines, when they say anything:  see `P.ImportedPlaceDetails`. */
+  details?: P.ImportedPlaceDetails
+}
+
+/** Where a type is saved, as a project's declarations say it -- see `SpellDeclaration.savedIn`. */
+export type DeclaredSaved = {
+  /** The place's name, as `core.place()` knows it:  `family_cookbook`. */
+  place: string
+  /** The place's type, by class name:  `FamilyCookbook`. */
+  placeType: string
+  /** The collection its things are in:  `recipes`. */
+  collection: string
+}
+
 /**
  * Where one of a project's declarations is written:  a type, or one of its properties, methods, events or abilities
  * (epic `editor` P23) -- see `SP.SpellDeclarationPlaces`.
@@ -808,6 +830,17 @@ export type SpellDeclaration = {
    * see `P.TypeScope.units`:  so an importer reads `3 KB in B` too.
    */
   units?: P.DimensionUnit[]
+  /**
+   * What `type` is as a place, if it's one, e.g. `family cookbook is a web server at "..."` (epic `data` I19).
+   * - So a project importing it knows its name and kind:  see `P.TypeScope.placeName`.
+   */
+  place?: DeclaredPlace
+  /**
+   * Where `type` is saved, e.g. for `a recipe is saved in the family cookbook` (epic `data` I19).
+   * - On the type's own declaration:  a line of its own would leave a blank one behind in the compiled code.
+   * - So in a project importing it, `every recipe` reads the place:  see `P.TypeScope.saved`.
+   */
+  savedIn?: DeclaredSaved
   /** What a `property` measures, e.g. a length in cm -- see `P.ScopeVariable.measure`. */
   measure?: P.Measure
   /**

@@ -39,7 +39,7 @@ describe("<epic-prompt>", () => {
     expect(fold.open).toBe(false)
   })
 
-  test("on the ivory (Owen's voice), readable in the LIGHT and DARK schemes, open (axe)", async () => {
+  test("in faint violet (a person's voice), readable in the LIGHT and DARK schemes, open (axe)", async () => {
     const light = await ElementFixture.render(
       `<div style="color-scheme: light; color: CanvasText; padding: 4px">${PROMPT}</div>`
     )

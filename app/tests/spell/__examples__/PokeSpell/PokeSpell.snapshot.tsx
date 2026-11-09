@@ -225,7 +225,7 @@ export class Pokemon extends Thing {
 
   // Its kinds, small:  a group of labels sizes them all
   drawPills() {
-    return core.drawRead(() => this.types, (type: Pokemontype) => core.drawThing(type), { items: () => <ui-labels size="small" part="pills" /> })
+    return core.drawRead(() => this.types, (type: PokemonType) => core.drawThing(type), { items: () => <ui-labels size="small" part="pills" /> })
   }
 
   // Full and red when it's a favourite;  press it to change
@@ -236,7 +236,7 @@ export class Pokemon extends Thing {
 
   // Its kinds, big:  a group of labels sizes them all
   drawKinds() {
-    return core.drawRead(() => this.types, (type: Pokemontype) => core.drawThing(type), { items: () => <ui-labels size="huge" part="kinds" /> })
+    return core.drawRead(() => this.types, (type: PokemonType) => core.drawThing(type), { items: () => <ui-labels size="huge" part="kinds" /> })
   }
 
   // A bar for each of its six numbers:  255 is as strong as any Pokémon gets
@@ -636,8 +636,9 @@ export class Generation extends Thing {
   accessor names!: List<Name>
 
   // - its "pokemon species" is a list of pokemon species
-  @prop({ itemType: "PokemonSpecies", init: () => new List<PokemonSpecies>({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5570, end: 5620 } })
-  accessor pokemonSpecies!: List<PokemonSpecies>
+  static { this.declareProp("pokemonSpecies", { itemType: "PokemonSpecies", init: () => new List<PokemonSpecies>({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5570, end: 5620 } }) }
+  get pokemonSpecies(): List<PokemonSpecies> { return core.linked(this, "pokemonSpecies", PokemonSpecies) as List<PokemonSpecies> }
+  set pokemonSpecies(value: List<PokemonSpecies>) { this.setProp("pokemonSpecies", value) }
 
   // - its "types" is a list of types
   static { this.declareProp("types", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5624, end: 5654 } }) }
@@ -1505,7 +1506,7 @@ export class Pokedex extends App {
           {core.whileWaiting(() => this.pickedKind?.name)}
           {" Pokémon"}
         </ui-header>,
-        core.drawRead(() => this.pickedKind?.pokemon, (item: Typepokemon) => core.drawThing(item), {
+        core.drawRead(() => this.pickedKind?.pokemon, (item: TypePokemon) => core.drawThing(item), {
           waiting: () => <ui-loader visible={true} inline={true} text={true} part="kinds">{"Finding them…"}</ui-loader>,
           paging: () => "pages",
           items: () => <ui-cards columns="4" doubling={true} part="kinds" />

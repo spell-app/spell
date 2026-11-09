@@ -71,6 +71,28 @@ export type PlaceDetails = {
    * `its next page is in its "Link" header`.
    */
   nextPageInLink?: boolean
+  /**
+   * What a web server calls how many and where from, when it pages by a position, for every collection:
+   * `its next page is asked for with "limit" and "offset"`.
+   * - No `limit`:  it's asked only where from, and gives its own page size.
+   */
+  pagesByOffset?: { limit?: string; offset: string }
+  /**
+   * What a web server calls how many and which page, when it counts pages, for every collection:
+   * `its next page is asked for by number with "per_page" and "page"`.
+   * - No `limit`:  it's asked only which page.
+   * - `first`:  the first page's number;  left out, 1.
+   */
+  pagesByNumber?: { limit?: string; page: string; first?: number }
+  /**
+   * What a web server calls how many and the last row's id, when it's asked for what comes after a row, for every collection:
+   * `its next page is asked for with "limit" and the last id as "starting_after", until its "has_more" is no`.
+   * - No `limit`:  it's asked only what comes after, and gives its own page size.
+   * - `moreIn`:  a dotted path in its answer that says whether there's more.
+   */
+  pagesByLastId?: { limit?: string; param: string; moreIn?: string }
+  /** What a web server calls the cursor it's sent back, when that isn't `cursor`:  `its next page is its "nextPageToken", sent back as "pageToken"`. */
+  nextPageSentAs?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
   /** How it spells a field's name, by an example:  `hair_color` (`it writes names like "hair_color"`). */
@@ -85,6 +107,16 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
+  /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
+  filters?: "every field" | readonly string[]
+  /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
+  sorts?: "every field" | readonly string[]
+  /** What a web server calls a sort, when that isn't `sort`:  `it sorts by date with "order"`. */
+  sortedWith?: string
+  /** What a web server calls the fields it's asked for:  `it gives only the fields named in "fields"`. */
+  fieldsNamedIn?: string
+  /** It takes no writes:  `it is read only`. */
+  readOnly?: boolean
   /**
    * Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`).
    * - No fields, all of each thing, and the search's own address:
@@ -193,6 +225,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
       ...restLinesForEveryCollection(details),
+      ...restAbilitiesIn(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.mostPerSecond !== undefined && { mostPerSecond: details.mostPerSecond }),
       ...(deviceCopy && { deviceCopy }),
@@ -464,18 +497,61 @@ function storedAsIn(Class: Function): Record<string, string> {
 
 /**
  * What a web server's lines say of every collection:  its id's field, where its rows are, where its next page is.
- * - Its next page in its `Link` header:  it pages by cursor, with no field for it, as `RestPlace` reads that header then.
  */
-function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn, nextPageInLink }: PlaceDetails) {
-  const pages = nextPageIn !== undefined || !!nextPageInLink
-  if (idColumn === undefined && rowsIn === undefined && !pages) return {}
+function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDetails) {
+  if (idColumn === undefined && rowsIn === undefined && nextPageIn === undefined) return {}
   return {
     allCollections: {
       ...(idColumn !== undefined && idColumn !== ID_FIELD && { fields: { [ID_FIELD]: idColumn } }),
       ...(rowsIn !== undefined && { rowsAt: rowsIn }),
       ...(nextPageIn !== undefined && { nextAt: nextPageIn })
-    },
-    ...(pages && { can: { page: "cursor" as const } })
+    }
+  }
+}
+
+/**
+ * What a web server's lines say it can do, and what it calls each question it's asked (epic `data` I35).
+ * - Its next page in a field or its `Link` header:  it pages by cursor, as `RestPlace` reads that field or header then.
+ */
+function restAbilitiesIn({
+  nextPageIn,
+  nextPageInLink,
+  nextPageSentAs,
+  pagesByOffset,
+  pagesByNumber,
+  pagesByLastId,
+  filters,
+  sorts,
+  sortedWith,
+  fieldsNamedIn,
+  readOnly
+}: PlaceDetails) {
+  const position = pagesByOffset ?? (pagesByNumber && { limit: pagesByNumber.limit, offset: pagesByNumber.page })
+  const page = position ? "offset" : nextPageIn !== undefined || nextPageInLink || pagesByLastId ? "cursor" : undefined
+  const count = position ?? pagesByLastId
+  const can = {
+    ...(page && { page: page as "offset" | "cursor" }),
+    ...(filters && { filter: filters }),
+    ...(sorts && { sort: sorts }),
+    ...(fieldsNamedIn !== undefined && { select: "every field" as const }),
+    ...(readOnly && { write: "none" as const })
+  }
+  const params = {
+    ...(count?.limit !== undefined && { limit: count.limit }),
+    ...(position && { offset: position.offset }),
+    ...(nextPageSentAs !== undefined && { cursor: nextPageSentAs }),
+    ...(pagesByLastId && { cursor: pagesByLastId.param }),
+    ...(sortedWith !== undefined && { sort: sortedWith }),
+    ...(fieldsNamedIn !== undefined && { select: fieldsNamedIn })
+  }
+  return {
+    ...(Object.keys(can).length > 0 && { can }),
+    ...(Object.keys(params).length > 0 && { params }),
+    ...(pagesByNumber && { pageNumbers: { first: pagesByNumber.first ?? 1 } }),
+    ...(count && count.limit === undefined && { sendsNoCount: true }),
+    ...(pagesByLastId && {
+      pagesByLastId: { ...(pagesByLastId.moreIn !== undefined && { moreAt: pagesByLastId.moreIn }) }
+    })
   }
 }
 

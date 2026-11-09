@@ -986,7 +986,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       parts.findIndex((part) => typeof part === "object")
     )
     const subclassed = SP.subclassImportedTypes(statements, scope, firstFile)
-    const hoisted = SP.hoistClassMembers(subclassed.files)
+    // what the program makes as it loads, its classes before it, whichever file each is in
+    const hoisted = SP.hoistClassesMadeAsItLoads(SP.hoistClassMembers(subclassed.files))
     const projectWriter = writer.forProject(hoisted, scope, { ...options, noteForAuthor: SP.SpellWarnings.noteRead })
     // an imported type we subclass is imported by another name, its class's:  `Card as CardsCard`
     if (header && subclassed.names.length) {

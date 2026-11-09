@@ -25,31 +25,66 @@
     {
       "type": "DeviceNote",
       "superType": "Note",
+      "savedIn": {
+        "place": "this_device",
+        "placeType": "ThisDevice",
+        "collection": "device_notes"
+      },
       "defined": "/KeptInPlaces.spell:722-775"
     },
     {
       "type": "FolderNote",
       "superType": "Note",
+      "savedIn": {
+        "place": "note_folder",
+        "placeType": "NoteFolder",
+        "collection": "folder_notes"
+      },
       "defined": "/KeptInPlaces.spell:777-830"
     },
     {
       "type": "SheetNote",
       "superType": "Note",
+      "savedIn": {
+        "place": "note_sheet",
+        "placeType": "NoteSheet",
+        "collection": "sheet_notes"
+      },
       "defined": "/KeptInPlaces.spell:832-883"
     },
     {
       "type": "ThisDevice",
       "superType": "Place",
+      "place": {
+        "name": "this_device",
+        "kind": "database on this device"
+      },
       "defined": "/KeptInPlaces.spell:475-515"
     },
     {
       "type": "NoteFolder",
       "superType": "Place",
+      "place": {
+        "name": "note_folder",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@spell/test/kept-in-places/__data/notes",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/KeptInPlaces.spell:517-586"
     },
     {
       "type": "NoteSheet",
       "superType": "Place",
+      "place": {
+        "name": "note_sheet",
+        "kind": "sheet",
+        "at": "/api/places/spaces/@spell/test/kept-in-places/__data/notes.csv",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/KeptInPlaces.spell:588-676"
     },
     {

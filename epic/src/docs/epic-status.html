@@ -7,7 +7,7 @@
     <title>epic-status</title>
     <meta
       name="description"
-      content="Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done."
+      content="Claude's status card on an item: what Claude took your mark to mean, then that it's done."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -41,7 +41,7 @@
           <ui-header level="1" class="site-title">
             &lt;epic-status&gt;
             <ui-header
-              >Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done.</ui-header
+              >Claude's status card on an item: what Claude took your mark to mean, then that it's done.</ui-header
             >
           </ui-header>
         </ui-container>
@@ -50,7 +50,7 @@
       <ui-container class="site-body">
         <article class="site-article">
           <p class="lede">
-            Claude's status card on an item: what Claude took Owen's review mark to mean, then that it's done. It reads
+            Claude's status card on an item: what Claude took your review mark to mean, then that it's done. It reads
             <code>Claude • Underway</code> (blue) while Claude works, then <code>Claude • Done</code> (green), the
             reading kept and a summary added when there's something worth saying.
           </p>
@@ -114,7 +114,7 @@
                   Find which comments on this test went missing, when and how, put them back if they're recoverable, and
                   say what happened.
                 </p>
-                <p slot="summary">Owen: it was transient, nothing to restore.</p></epic-status
+                <p slot="summary">It was transient, nothing to restore.</p></epic-status
               >
             </epic-item>
           </ui-section>
@@ -122,8 +122,8 @@
           <ui-section id="1b-answered" label="1b. On an answered item" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="comments"></ui-icon>
             <p>
-              Live: an answered question. A drive-by first (taken before Owen's reply), the Choices with no Answer strip,
-              then the thread:  Owen's reply, Claude's (NEW until seen), and the Noted / Done line last.
+              Live: an answered question. A drive-by first (taken before your reply), the Choices with no Answer strip,
+              then the thread:  your reply, Claude's (NEW until seen), and the Noted / Done line last.
             </p>
             <epic-item id="q16" title="What are the tags called?" status="decided" state="recent" answered open>
               <epic-status slot="status" state="done" at="2026-10-24 14:02" done-at="2026-10-24 14:05"
@@ -138,12 +138,12 @@
               >
               <epic-question><p>One tag per kind of template:  what are they called?</p></epic-question>
               <epic-choices chosen="A"
-                ><epic-option letter="A" title="template=, as Owen wrote it" recommended
-                  ><p>Matches his card.</p></epic-option
+                ><epic-option letter="A" title="template=, as you wrote it" recommended
+                  ><p>Matches your card.</p></epic-option
                 ><epic-option letter="B" title="is="><p>Reads like code spell.</p></epic-option></epic-choices
               >
-              <epic-answer title="template=, as Owen wrote it"></epic-answer>
-              <epic-reply from="Owen" at="2026-10-24 14:46" re="revisit soon"
+              <epic-answer title="template=, as you wrote it"></epic-answer>
+              <epic-reply from="Ana" at="2026-10-24 14:46" re="revisit soon"
                 ><p>&lt;spell-thing&gt; creates a "class" ...</p></epic-reply
               >
               <epic-reply from="Claude" at="2026-10-24 15:34"><p>Recorded:  here is the model in one table.</p></epic-reply>
@@ -170,7 +170,7 @@
                         Find which comments on this test went missing, when and how, put them back if they're recoverable,
                         and say what happened.
                       </p>
-                      <p slot="summary">Owen: it was transient, nothing to restore.</p></epic-status
+                      <p slot="summary">It was transient, nothing to restore.</p></epic-status
                     >
                   </script></ui-code
                 >
@@ -185,7 +185,7 @@
               <li>
                 <a href="epic-item.html" target="src-packages-epics-docs-epic-item-html"
                   ><code>&lt;epic-item&gt;</code></a
-                >, as <code>slot="status"</code>: written last in the item, drawn last in its details, under Owen's
+                >, as <code>slot="status"</code>: written last in the item, drawn last in its details, under your
                 marked note and above the note box
               </li>
               <li>
@@ -304,7 +304,7 @@
                     </tr>
                     <tr>
                       <td><code>summary</code></td>
-                      <td>Once done, and only when worth saying: what Owen should know about it.</td>
+                      <td>Once done, and only when worth saying: what you should know about it.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -416,7 +416,7 @@
                     </tr>
                     <tr>
                       <td><code>drive-by</code></td>
-                      <td>Taken before Owen's first reply on the item: its line above the Choices.</td>
+                      <td>Taken before your first reply on the item: its line above the Choices.</td>
                     </tr>
                     <tr>
                       <td><code>in-thread</code></td>
@@ -463,7 +463,7 @@
               <li>Its border is stronger than a reply's, so it stands out from the reply cards around it.</li>
               <li>The reading first; the summary under it, across a rule, only when there is one.</li>
             </ul>
-            <p><b>In an item</b> (epic <code>epic-engine</code> P27, Owen's layout A), a LINE, not a card:</p>
+            <p><b>In an item</b> (epic <code>epic-engine</code> P27, your layout A), a LINE, not a card:</p>
             <ul>
               <li>
                 <code>✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did</code>: a run of cards about one task is
@@ -473,7 +473,7 @@
               <li>What Claude did: the last card's summary, else its reading.</li>
               <li>
                 Last in the item's thread, after Claude's reply, inside the thread's one frame, hidden while the thread's first reply is folded. A DRIVE-BY's line (a card taken
-                before Owen's first reply, about a comment he made before answering) goes first in the item's details,
+                before your first reply, about a comment you made before answering) goes first in the item's details,
                 above the Choices, with <i>your earlier comment</i> after its steps.
               </li>
               <li>Outside an item (an Overview sub-section), the card above.</li>

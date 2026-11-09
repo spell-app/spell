@@ -3214,6 +3214,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "OrdinalOfExpression",
+          "ruleNames": ["ordinal_of_expression"],
+          "internal": false,
+          "file": "src/spell/rules/lists/OrdinalOfExpression.ts",
+          "line": 14,
+          "purpose": "One item of a list by its place, with no word for what the items are, e.g. `the first of its authors`, `the last of the cards`.",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? {ordinal} (en|de|del) {expression:operand}",
+              "example": "el primero de autores",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(autores, 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(autores, 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(autores, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "OrdinalWhereExpression",
           "ruleNames": ["ordinal_where_expression"],
           "internal": false,
@@ -6766,7 +6792,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 78,
+          "line": 96,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7198,6 +7224,206 @@
                 },
                 "py": {
                   "code": "class GuerraDeLasGalaxias(Place):\n    pass\n\nguerra_de_las_galaxias = core.place(\n    GuerraDeLasGalaxias(),\n    {\n        \"name\": \"guerra_de_las_galaxias\",\n        \"kind\": \"web server\",\n        \"at\": \"https://swapi.py4e.com/api\",\n        \"kept_on_device\": 20000000,\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageByOffset",
+          "ruleNames": ["next_page_by_offset"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageByOffset.ts",
+          "line": 32,
+          "purpose": "A web server pages by a row's position, with no next link to follow (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente se pide con ({limit:text} y)? {offset:text}",
+              "example": "museo met es un servidor web en \"https://collectionapi.metmuseum.org\"\n\t- su página siguiente se pide con \"limit\" y \"offset\"",
+              "outputs": {
+                "js": {
+                  "code": "export class MuseoMet extends Place {}\nexport const museoMet = core.place(new MuseoMet(), {\n  name: \"museo_met\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  pagesByOffset: { limit: \"limit\", offset: \"offset\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class MuseoMet extends Place {}\nexport const museoMet = core.place(new MuseoMet(), {\n  name: \"museo_met\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  pagesByOffset: { limit: \"limit\", offset: \"offset\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class MuseoMet(Place):\n    pass\n\nmuseo_met = core.place(\n    MuseoMet(),\n    {\n        \"name\": \"museo_met\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"pages_by_offset\": {\"limit\": \"limit\", \"offset\": \"offset\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageByLastId",
+          "ruleNames": ["next_page_by_last_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageByLastId.ts",
+          "line": 16,
+          "purpose": "A web server is asked what comes after a row, by that row's id (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente se pide con ({limit:text} y)? el último id como {param:text} (, hasta que (el {inner:text} de)? su {field:text} sea no)?",
+              "example": "stripe es un servidor web en \"https://stripe.test\"\n\t- su página siguiente se pide con \"limit\" y el último id como \"starting_after\", hasta que su \"has_more\" sea no",
+              "outputs": {
+                "js": {
+                  "code": "export class Stripe extends Place {}\nexport const stripe = core.place(new Stripe(), {\n  name: \"stripe\",\n  kind: \"web server\",\n  at: \"https://stripe.test\",\n  pagesByLastId: {\n    limit: \"limit\",\n    param: \"starting_after\",\n    moreIn: \"has_more\"\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Stripe extends Place {}\nexport const stripe = core.place(new Stripe(), {\n  name: \"stripe\",\n  kind: \"web server\",\n  at: \"https://stripe.test\",\n  pagesByLastId: {\n    limit: \"limit\",\n    param: \"starting_after\",\n    moreIn: \"has_more\"\n  },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Stripe(Place):\n    pass\n\nstripe = core.place(\n    Stripe(),\n    {\n        \"name\": \"stripe\",\n        \"kind\": \"web server\",\n        \"at\": \"https://stripe.test\",\n        \"pages_by_last_id\": {\"limit\": \"limit\", \"param\": \"starting_after\", \"more_in\": \"has_more\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageByNumber",
+          "ruleNames": ["next_page_by_number"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageByNumber.ts",
+          "line": 17,
+          "purpose": "A web server pages by a page's number, not by a row's position (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente se pide por número con ({limit:text} y)? {page:text} (, contando desde {first:number})?",
+              "example": "github es un servidor web en \"https://github.test\"\n\t- su página siguiente se pide por número con \"per_page\" y \"page\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://github.test\",\n  pagesByNumber: { limit: \"per_page\", page: \"page\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Github extends Place {}\nexport const github = core.place(new Github(), {\n  name: \"github\",\n  kind: \"web server\",\n  at: \"https://github.test\",\n  pagesByNumber: { limit: \"per_page\", page: \"page\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Github(Place):\n    pass\n\ngithub = core.place(\n    Github(),\n    {\n        \"name\": \"github\",\n        \"kind\": \"web server\",\n        \"at\": \"https://github.test\",\n        \"pages_by_number\": {\"limit\": \"per_page\", \"page\": \"page\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FiltersBy",
+          "ruleNames": ["filters_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/FiltersBy.ts",
+          "line": 13,
+          "purpose": "Which fields a web server filters by itself (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} filtra por todos los campos",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- filtra por todos los campos",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: \"every field\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: \"every field\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"filters\": \"every field\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} filtra por {fields:searched_fields}",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- filtra por cocina y tiempo",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: [\"cocina\", \"tiempo\"],\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: [\"cocina\", \"tiempo\"],\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"filters\": [\"cocina\", \"tiempo\"],\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortsBy",
+          "ruleNames": ["sorts_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsBy.ts",
+          "line": 12,
+          "purpose": "Which fields a web server sorts by itself, and what it calls that (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} ordena por {fields:searched_fields} (con {param:text})?",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- ordena por titulo y fecha con \"order\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  sorts: [\"titulo\", \"fecha\"],\n  sortedWith: \"order\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  sorts: [\"titulo\", \"fecha\"],\n  sortedWith: \"order\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"sorts\": [\"titulo\", \"fecha\"],\n        \"sorted_with\": \"order\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} ordena por todos los campos (con {param:text})?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "GivesFieldsNamedIn",
+          "ruleNames": ["gives_fields_named_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/GivesFieldsNamedIn.ts",
+          "line": 11,
+          "purpose": "A web server answers with only the fields it's asked for (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} da solo los campos nombrados en {param:text}",
+              "example": "paises es un servidor web en \"https://paises.test\"\n\t- da solo los campos nombrados en \"response_fields\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  fieldsNamedIn: \"response_fields\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  fieldsNamedIn: \"response_fields\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Paise(Place):\n    pass\n\npaises = core.place(\n    Paise(),\n    {\n        \"name\": \"paises\",\n        \"kind\": \"web server\",\n        \"at\": \"https://paises.test\",\n        \"fields_named_in\": \"response_fields\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IsReadOnly",
+          "ruleNames": ["is_read_only"],
+          "internal": false,
+          "file": "src/spell/rules/places/IsReadOnly.ts",
+          "line": 10,
+          "purpose": "A place takes no writes, whatever its kind can do (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} es de solo lectura",
+              "example": "paises es un servidor web en \"https://paises.test\"\n\t- es de solo lectura",
+              "outputs": {
+                "js": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  readOnly: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  readOnly: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Paise(Place):\n    pass\n\npaises = core.place(\n    Paise(),\n    {\n        \"name\": \"paises\",\n        \"kind\": \"web server\",\n        \"at\": \"https://paises.test\",\n        \"read_only\": True,\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }
@@ -7649,11 +7875,11 @@
           "ruleNames": ["next_page_in"],
           "internal": false,
           "file": "src/spell/rules/places/NextPageIn.ts",
-          "line": 11,
+          "line": 13,
           "purpose": "Which field of a web server's answer says where its next page is.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+              "syntax": "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text} (, devuelta como {param:text})?"
             }
           ],
           "aliases": ["statement"]

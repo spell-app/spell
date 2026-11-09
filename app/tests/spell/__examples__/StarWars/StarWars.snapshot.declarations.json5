@@ -32,6 +32,11 @@
     {
       "type": "Character",
       "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "characters"
+      },
       "defined": "/StarWars.api.spell:1294-1831"
     },
     {
@@ -176,6 +181,11 @@
     {
       "type": "Planet",
       "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "planets"
+      },
       "defined": "/StarWars.api.spell:1833-2335"
     },
     {
@@ -297,6 +307,11 @@
     {
       "type": "Film",
       "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "films"
+      },
       "defined": "/StarWars.api.spell:2337-2807"
     },
     {
@@ -438,6 +453,11 @@
     {
       "type": "Species",
       "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "species"
+      },
       "defined": "/StarWars.api.spell:2809-3302"
     },
     {
@@ -563,6 +583,11 @@
     {
       "type": "Vehicle",
       "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "vehicles"
+      },
       "defined": "/StarWars.api.spell:3304-3853"
     },
     {
@@ -681,6 +706,11 @@
     {
       "type": "Starship",
       "superType": "Thing",
+      "savedIn": {
+        "place": "star_wars",
+        "placeType": "StarWar",
+        "collection": "starships"
+      },
       "defined": "/StarWars.api.spell:3855-4501"
     },
     {
@@ -812,11 +842,50 @@
     {
       "type": "StarWar",
       "superType": "Place",
+      "place": {
+        "name": "star_wars",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 86400,
+          "searches": {
+            "param": "search",
+            "fields": [
+              "names",
+              "titles"
+            ]
+          },
+          "collections": {
+            "characters": {
+              "at": "/people/"
+            },
+            "planets": {
+              "at": "/planets/"
+            },
+            "films": {
+              "at": "/films/"
+            },
+            "species": {
+              "at": "/species/"
+            },
+            "vehicles": {
+              "at": "/vehicles/"
+            },
+            "starships": {
+              "at": "/starships/"
+            }
+          }
+        }
+      },
       "defined": "/StarWars.api.spell:817-1292"
     },
     {
       "type": "WikiPage",
       "superType": "Thing",
+      "savedIn": {
+        "place": "wikipedia",
+        "placeType": "Wikipedia",
+        "collection": "wiki_pages"
+      },
       "defined": "/Wikipedia.api.spell:1064-1726"
     },
     {
@@ -1107,6 +1176,18 @@
     {
       "type": "Wikipedia",
       "superType": "Place",
+      "place": {
+        "name": "wikipedia",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 86400,
+          "collections": {
+            "wiki_pages": {
+              "at": "/page/summary/{id}"
+            }
+          }
+        }
+      },
       "defined": "/Wikipedia.api.spell:856-1062"
     },
     {

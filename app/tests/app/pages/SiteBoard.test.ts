@@ -140,10 +140,18 @@ describe("SiteBoard:  moving a card", () => {
     expect(SiteBoard.withCardDropped(FILMS, "film page", { section: "films page", row: 1, column: 2 })).toBe(FILMS)
   })
 
-  test("not a section's own card, nor a card or section the site doesn't have", () => {
-    expect(() =>
-      SiteBoard.withCardDropped(FILMS, "films page", { section: "planets page", row: 1, column: 2 })
-    ).toThrow(TypeError)
+  test("a section's card joins another section, its pages with it", () => {
+    const after = SiteBoard.withCardDropped(FILMS, "planets page", { section: "films page", row: 3, column: 2 })
+    expect(boardOf(after).map((section) => section.key)).toEqual(["films page", "not found page"])
+    expect(placesIn(after, 0)).toContain("planets page 3:2")
+    expect(placesIn(after, 0)).toContain("planet page 3:3")
+    expect(order(after).indexOf("planet page")).toBe(order(after).indexOf("planets page") + 1)
+  })
+
+  test("not a section's own card in its own section, nor a card or section the site doesn't have", () => {
+    expect(() => SiteBoard.withCardDropped(FILMS, "films page", { section: "films page", row: 1, column: 2 })).toThrow(
+      TypeError
+    )
     expect(() => SiteBoard.withCardDropped(FILMS, "no page", { section: "planets page", row: 1, column: 2 })).toThrow(
       TypeError
     )

@@ -19,7 +19,7 @@ import { savedPlaceOfMatch, searchesOf } from "./places.shared"
 export class EveryThingMatching extends SpellExpression<"type|words"> {
   /** A list of the type, e.g. `list of artworks`:  as `every_thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    return P.listOfType(SP.typeName(`${match.groups.type.value}`))
+    return P.listOf(SP.typeName(`${match.groups.type.value}`))
   }
 
   /** A known type;  refused, when the errors are gathered, unless its place searches all of each thing. */

@@ -9,6 +9,11 @@
     {
       "type": "Status",
       "superType": "Thing",
+      "savedIn": {
+        "place": "status_board",
+        "placeType": "StatusBoard",
+        "collection": "statuses"
+      },
       "defined": "/Status.spell:189-353"
     },
     {
@@ -66,6 +71,17 @@
     {
       "type": "StatusBoard",
       "superType": "Place",
+      "place": {
+        "name": "status_board",
+        "kind": "personal atmosphere account",
+        "details": {
+          "collections": {
+            "statuses": {
+              "at": "xyz.statusphere.status"
+            }
+          }
+        }
+      },
       "defined": "/Statusphere.api.spell:322-413"
     },
     {

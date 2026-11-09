@@ -11,6 +11,11 @@
     {
       "type": "Message",
       "superType": "Thing",
+      "savedIn": {
+        "place": "chat",
+        "placeType": "Chat",
+        "collection": "messages"
+      },
       "defined": "/OrgChat.api.spell:959-1090"
     },
     {
@@ -53,6 +58,11 @@
     {
       "type": "Thread",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_threads",
+        "placeType": "MyThread",
+        "collection": "threads"
+      },
       "defined": "/OrgChat.api.spell:1203-1370"
     },
     {
@@ -88,11 +98,24 @@
     {
       "type": "Chat",
       "superType": "Place",
+      "place": {
+        "name": "chat",
+        "kind": "room",
+        "at": "/api/rooms/spaces/@rs/__thread"
+      },
       "defined": "/OrgChat.api.spell:738-770"
     },
     {
       "type": "MyThread",
       "superType": "Place",
+      "place": {
+        "name": "my_threads",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@rs/__threads",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/OrgChat.api.spell:771-847"
     },
     {

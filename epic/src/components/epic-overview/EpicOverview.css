@@ -52,11 +52,12 @@
     text-wrap: pretty;
   }
 
-  /* ## An older doc's Kickoff prompt (`<epic-prompt>` draws its own):  folded on the brand's ivory;  a card on it */
+  /* ## An older doc's Kickoff prompt (`<epic-prompt>` draws its own):  folded on a person's faint violet;  a card on it */
   .prompt {
     margin: 0 0 14px;
     border-radius: 10px;
-    background: var(--epic-warm, var(--ui-accent-background));
+    border: 1px solid var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
+    background: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
   }
   .prompt > summary {
     display: flex;

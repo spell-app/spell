@@ -16,7 +16,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The form for ONE option of a set (epic `epic-engine` P50):  Add choice's new card, or an option edited in place.
  * - Who draws it:  `<epic-choices>` (Add choice, an added option changed before it's sent) and `<epic-option>` (its
  *   pencil), in their shadow roots, while the page is reviewed.
- * - In Owen's ivory (his voice), in its order:
+ * - In a person's violet (their voice), in its order:
  *   - its heading (`New choice`, `Edit B`)
  *   - the title, which takes the focus as it's drawn
  *   - a note that grows as it's typed (`<epic-text-box type="note">`)
