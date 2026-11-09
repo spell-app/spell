@@ -1,5 +1,5 @@
 /*
- * `<epic-prompt>` (`EpicPrompt.tsx`):  the Kickoff prompt, folded on the brand's ivory (Owen's voice, Q20);
+ * `<epic-prompt>` (`EpicPrompt.tsx`):  the Kickoff prompt, folded on a person's faint violet (their voice);
  * unfolded, the prompt a card on it -- as `<epic-overview>` drew `<blockquote slot="prompt">` (`EpicOverview.css`).
  */
 
@@ -18,7 +18,8 @@
 @layer ui.components.epic-prompt.content {
   details {
     border-radius: 10px;
-    background: var(--epic-warm, light-dark(#faf5ea, #2c2152));
+    border: 1px solid var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
+    background: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
   }
   .title {
     display: flex;
