@@ -136,6 +136,7 @@ describe("priority and precedence", () => {
         "min:  Priority.specific",
         "minus:  Precedence.sum",
         "most_rows_each:  Priority.declaration",
+        "next_page_by_last_id:  Priority.declaration",
         "next_page_by_number:  Priority.declaration",
         "next_page_by_offset:  Priority.declaration",
         "next_page_in:  Priority.declaration",

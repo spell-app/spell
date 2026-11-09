@@ -84,6 +84,13 @@ export type PlaceDetails = {
    * - `first`:  the first page's number;  left out, 1.
    */
   pagesByNumber?: { limit?: string; page: string; first?: number }
+  /**
+   * What a web server calls how many and the last row's id, when it's asked for what comes after a row, for every collection:
+   * `its next page is asked for with "limit" and the last id as "starting_after", until its "has_more" is no`.
+   * - No `limit`:  it's asked only what comes after, and gives its own page size.
+   * - `moreIn`:  a dotted path in its answer that says whether there's more.
+   */
+  pagesByLastId?: { limit?: string; param: string; moreIn?: string }
   /** What a web server calls the cursor it's sent back, when that isn't `cursor`:  `its next page is its "nextPageToken", sent back as "pageToken"`. */
   nextPageSentAs?: string
   /** Each named operation's address, by its name. */
@@ -488,6 +495,7 @@ function restAbilitiesIn({
   nextPageSentAs,
   pagesByOffset,
   pagesByNumber,
+  pagesByLastId,
   filters,
   sorts,
   sortedWith,
@@ -495,7 +503,8 @@ function restAbilitiesIn({
   readOnly
 }: PlaceDetails) {
   const position = pagesByOffset ?? (pagesByNumber && { limit: pagesByNumber.limit, offset: pagesByNumber.page })
-  const page = position ? "offset" : nextPageIn !== undefined || nextPageInLink ? "cursor" : undefined
+  const page = position ? "offset" : nextPageIn !== undefined || nextPageInLink || pagesByLastId ? "cursor" : undefined
+  const count = position ?? pagesByLastId
   const can = {
     ...(page && { page: page as "offset" | "cursor" }),
     ...(filters && { filter: filters }),
@@ -504,9 +513,10 @@ function restAbilitiesIn({
     ...(readOnly && { write: "none" as const })
   }
   const params = {
-    ...(position?.limit !== undefined && { limit: position.limit }),
+    ...(count?.limit !== undefined && { limit: count.limit }),
     ...(position && { offset: position.offset }),
     ...(nextPageSentAs !== undefined && { cursor: nextPageSentAs }),
+    ...(pagesByLastId && { cursor: pagesByLastId.param }),
     ...(sortedWith !== undefined && { sort: sortedWith }),
     ...(fieldsNamedIn !== undefined && { select: fieldsNamedIn })
   }
@@ -514,7 +524,10 @@ function restAbilitiesIn({
     ...(Object.keys(can).length > 0 && { can }),
     ...(Object.keys(params).length > 0 && { params }),
     ...(pagesByNumber && { pageNumbers: { first: pagesByNumber.first ?? 1 } }),
-    ...(position && position.limit === undefined && { sendsNoCount: true })
+    ...(count && count.limit === undefined && { sendsNoCount: true }),
+    ...(pagesByLastId && {
+      pagesByLastId: { ...(pagesByLastId.moreIn !== undefined && { moreAt: pagesByLastId.moreIn }) }
+    })
   }
 }
 

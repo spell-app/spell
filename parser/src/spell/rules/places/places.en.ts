@@ -53,6 +53,7 @@ import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
 import { NextPageByOffset } from "./NextPageByOffset"
 import { NextPageByNumber } from "./NextPageByNumber"
+import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
@@ -422,6 +423,57 @@ places.addRule(NextPageByOffset, {
             '  kind: "web server",',
             '  at: "https://collectionapi.metmuseum.org",',
             '  pagesByOffset: { limit: "limit", offset: "offset" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(NextPageByLastId, {
+  syntax:
+    "{type:subject_its} next page is asked for with ({limit:text} and)? the last id as {param:text} (, until (the {inner:text} of)? its {field:text} is no)?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'stripe is a web server at "https://stripe.test"\n\t- its next page is asked for with "limit" and the last id as "starting_after", until its "has_more" is no',
+          [
+            "export class Stripe extends Place {}",
+            "export const stripe = core.place(new Stripe(), {",
+            '  name: "stripe",',
+            '  kind: "web server",',
+            '  at: "https://stripe.test",',
+            "  pagesByLastId: {",
+            '    limit: "limit",',
+            '    param: "starting_after",',
+            '    moreIn: "has_more"',
+            "  }",
+            "})"
+          ]
+        ],
+        [
+          'shop is a web server at "https://shop.test"\n\t- its next page is asked for with the last id as "after", until the "more" of its "paging" is no',
+          [
+            "export class Shop extends Place {}",
+            "export const shop = core.place(new Shop(), {",
+            '  name: "shop",',
+            '  kind: "web server",',
+            '  at: "https://shop.test",',
+            '  pagesByLastId: { param: "after", moreIn: "paging.more" }',
+            "})"
+          ]
+        ],
+        [
+          'shop is a web server at "https://shop.test"\n\t- its next page is asked for with the last id as "after"',
+          [
+            "export class Shop extends Place {}",
+            "export const shop = core.place(new Shop(), {",
+            '  name: "shop",',
+            '  kind: "web server",',
+            '  at: "https://shop.test",',
+            '  pagesByLastId: { param: "after" }',
             "})"
           ]
         ]

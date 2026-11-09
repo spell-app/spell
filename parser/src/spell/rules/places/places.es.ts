@@ -71,6 +71,7 @@ import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
 import { NextPageByOffset } from "./NextPageByOffset"
 import { NextPageByNumber } from "./NextPageByNumber"
+import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
@@ -378,6 +379,60 @@ placesEs.addRule(NextPageByOffset, {
             '  kind: "web server",',
             '  at: "https://collectionapi.metmuseum.org",',
             '  pagesByOffset: { limit: "limit", offset: "offset" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(NextPageByLastId, {
+  syntax:
+    "{type:subject_its} página siguiente se pide con ({limit:text} y)? el último id como {param:text} (, hasta que (el {inner:text} de)? su {field:text} sea no)?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'stripe es un servidor web en "https://stripe.test"\n\t- su página siguiente se pide con "limit" y el último id como "starting_after", hasta que su "has_more" sea no',
+          [
+            "export class Stripe extends Place {}",
+            "export const stripe = core.place(new Stripe(), {",
+            '  name: "stripe",',
+            '  kind: "web server",',
+            '  at: "https://stripe.test",',
+            "  pagesByLastId: {",
+            '    limit: "limit",',
+            '    param: "starting_after",',
+            '    moreIn: "has_more"',
+            "  },",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'tienda es un servidor web en "https://tienda.test"\n\t- su página siguiente se pide con el último id como "after", hasta que el "more" de su "paging" sea no',
+          [
+            "export class Tienda extends Place {}",
+            "export const tienda = core.place(new Tienda(), {",
+            '  name: "tienda",',
+            '  kind: "web server",',
+            '  at: "https://tienda.test",',
+            '  pagesByLastId: { param: "after", moreIn: "paging.more" },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'tienda es un servidor web en "https://tienda.test"\n\t- su página siguiente se pide con el último id como "after"',
+          [
+            "export class Tienda extends Place {}",
+            "export const tienda = core.place(new Tienda(), {",
+            '  name: "tienda",',
+            '  kind: "web server",',
+            '  at: "https://tienda.test",',
+            '  pagesByLastId: { param: "after" },',
             '  unclearNumbers: ","',
             "})"
           ]
