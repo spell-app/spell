@@ -43,6 +43,10 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   static get guides(): SpellProjectRoot {
     return new SpellProjectRoot("@spell/guides")
   }
+  /** Singleton `@spell/sites` root. */
+  static get sites(): SpellProjectRoot {
+    return new SpellProjectRoot("@spell/sites")
+  }
   /** Singleton `@spell/test` root -- frozen projects tests run against;  listed in the UI in dev only. */
   static get fixtures(): SpellProjectRoot {
     return new SpellProjectRoot("@spell/test")
@@ -67,6 +71,7 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     if (name.startsWith("project")) return SpellProjectRoot.projects
     if (name.startsWith("examples")) return SpellProjectRoot.examples
     if (name.startsWith("guides")) return SpellProjectRoot.guides
+    if (name.startsWith("sites")) return SpellProjectRoot.sites
     if (name.startsWith("library")) return SpellProjectRoot.library
     if (name.startsWith("fixtures")) return SpellProjectRoot.fixtures
     if (name.startsWith("editor")) return SpellProjectRoot.editorPieces
