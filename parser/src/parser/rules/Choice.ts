@@ -220,6 +220,12 @@ export class Choice<
  * - A rule is filed under a word only when its syntax demands it (`Sequence.firstWords`).
  * - Built the first time it's asked, and never changed:  `Choice.addChoice()` makes a new one for its new list.
  * - NOTE: never used for the expecting mode's full-list walk, see `Choice.parse()`.
+ *
+ * REJECTED, for now:  also asking each always-tried rule `canStartWith(token)`, once per first word.
+ * - Worked out from each rule's syntax, on Solitaire and PublicServers:  a third fewer rules tried, and no faster.
+ *   The rules it drops are the ones their own `test()` already turns away cheaply.
+ * - Even a perfect answer, taken from having parsed the project already, is only 27 to 32% faster,
+ *   and no check made before parsing can know that much.
  */
 class FirstWordIndex {
   /** Shorter lists just try them all:  the table wouldn't pay for itself. */

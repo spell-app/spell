@@ -60,24 +60,15 @@ export class Sequence<
   declare leadingWord: P.Literal | P.Literals | undefined
 
   /**
-   * Does our `parse()` start by matching our syntax, so a line that doesn't start with our first word can't be ours?
-   * - `true` for nearly every rule:  its `parse()` calls `super.parse()`, checks what it needs, and goes on.
-   * - A rule that reads the line by hand (`WithoutWaiting`, `CompoundExpression`, `MeasureLiteral`) says `false`:
-   *   its syntax says nothing about which words it can start with, so `firstWords` must not file it under one.
-   * - A test (`firstWords.test.ts`, spell's) fails for a new `parse()` that skips `super.parse()` and doesn't say.
-   */
-  declare startsWithItsSyntax: boolean
-  /** Class-level default for `startsWithItsSyntax`. */
-  @proto static startsWithItsSyntax = true
-
-  /**
    * The words a line MUST start with to be ours;  `undefined` ~== it can start with anything.
-   * - `Choice`'s first-word table files us under these (`Choice.parse()`, `startsWithItsSyntax`).
+   * - `Choice`'s first-word table files us under these (`Choice.parse()`).
    * - `undefined` when our first rule isn't a required word, or is one matched in any case (rulex `/i`).
+   * - NOTE: a rule that starts with a word MUST read it:  its `parse()` and `test()` ask its syntax first
+   *   (`firstWords.test.ts`, spell's).
    */
   get firstWords(): readonly string[] | undefined {
     const word = this.leadingWord
-    if (!word || !this.startsWithItsSyntax) return undefined
+    if (!word) return undefined
     if (word instanceof P.Literal) return word.caseInsensitive ? undefined : literalWords(word.literal)
     const [first] = word.literals
     return first && !first.optional ? literalWords(first.literal) : undefined

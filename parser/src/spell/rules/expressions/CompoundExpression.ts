@@ -17,8 +17,6 @@ import { Precedence, SuffixLeft } from "./expressions.shared"
 export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
   static ruleName = "expression"
   @proto static alias: string | string[] = []
-  // reads its operand and its suffixes by hand
-  @proto static startsWithItsSyntax = false
   /** Suffixes must bind tighter than this to be ours:  0 takes them all, see `ArithmeticExpression`. */
   declare bound: number
   @proto static bound = 0

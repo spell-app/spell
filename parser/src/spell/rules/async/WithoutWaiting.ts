@@ -23,8 +23,6 @@ import { Meanwhile } from "./Meanwhile"
 export class WithoutWaiting extends Meanwhile {
   @proto static alias = ["statement", "async"]
   @proto static priority = Priority.specific
-  // reads its statement by hand:  its words come last
-  @proto static startsWithItsSyntax = false
 
   /** How many words the rule's own end has:  `without waiting`, `sin esperar`. */
   private static readonly WORDS = 2

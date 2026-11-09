@@ -833,7 +833,7 @@
           "internal": false,
           "file": "src/spell/rules/expressions/MeasureLiteral.ts",
           "line": 19,
-          "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`.",
+          "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`, `18%`.",
           "syntaxes": [
             {
               "syntax": "{number} {unit:unit_words}"

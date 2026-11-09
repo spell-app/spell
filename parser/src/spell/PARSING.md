@@ -74,11 +74,10 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     can start with anything, in the list's order, so ties still go to the earliest rule.
   - A `Sequence` is filed under a word only when its syntax demands it:  its required first word (`leadingWord`, read
     by `firstWords`), unless that word is matched in any case (`/i`).
-  - A rule whose `parse()` reads the line by hand, not starting with its syntax, says
-    `@proto static startsWithItsSyntax = false`, so it's never filed under a word.
-    - So far:  `CompoundExpression`, `MeasureLiteral`, `WithoutWaiting`.
-    - [firstWords.test.ts](../../tests/spell/rules/firstWords.test.ts) fails for a new `parse()` that skips
-      `super.parse()` and doesn't say so, and for a `test()` skipping `super.test()` on a filed rule.
+  - A rule filed under a word MUST read that word:  its `parse()` and `test()` start with its syntax.
+    - [firstWords.test.ts](../../tests/spell/rules/firstWords.test.ts) fails for a filed rule whose `parse()` skips
+      `super.parse()`, or whose `test()` skips `super.test()`.
+    - A rule that reads the line by hand starts with a slot, as `CompoundExpression` does, so it's never filed.
   - Expecting mode (editor completion) tries every alternative:  a line being typed may not have its first word yet.
   - One table per list of rules, shared by every `clone()` of the `Choice` (so scopes share it), and built the first
     time it's asked for;  `addChoice()`, how a rule added while parsing arrives, makes a new one.
@@ -566,7 +565,7 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   - Shown by `MeasureSystem.shown()` in Intl's percent style, whatever the reader's system.
 - `unit_words` reads the longest unit name at a place, of any dimension in scope (`SP.unitAt()`):  a name, an `aka`, a
   plural;  tokens touching read as one name (`°C`), tokens apart as words (`fl oz`).
-- `measure_literal`, an operand:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, its value worked out in its last part's unit.
+- `measure_literal`, an operand:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`, `18%`, its value worked out in its last part's unit.
   - The tokenizer reads a `"` straight after a digit as a mark (`marksAfterDigits`), not text.
   - `in`, an inch, only after another part:  `3 in the list` stays a number.
 - `measure_in`, a suffix binding tightest (`Precedence.measure`):  only after a measure (`SP.measureOf()`, off the

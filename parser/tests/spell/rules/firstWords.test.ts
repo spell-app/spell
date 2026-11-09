@@ -6,8 +6,8 @@ import { SP, spellParser } from "spell/parser/spell"
 /**
  * A `Choice` tries only the rules that can start with a line's first word, so a rule is filed under a word
  * only if its `parse()` really starts with its syntax:  these tests guard that.
- * - A new rule with a `parse()` that reads the line by hand MUST say `@proto static startsWithItsSyntax = false`.
- * - Reads each method's text:  a test may;  the parser itself reads only `Sequence.startsWithItsSyntax`.
+ * - A rule that reads the line by hand MUST start its syntax with a slot, so it's never filed.
+ * - Reads each method's text:  a test may;  the parser itself reads only `Sequence.firstWords`.
  */
 describe("first-word filing", () => {
   /** Every `P.Sequence` rule instance of both languages, and every rule class spell exports. */
@@ -41,23 +41,14 @@ describe("first-word filing", () => {
   const callsUp = (text: string, method: string) =>
     text.includes(`super.${method}(`) || text.includes(`.prototype.${method}.call(this`)
 
-  test("a Sequence rule's parse() starts with its syntax, or says it doesn't", () => {
-    const offenders: string[] = []
-    for (const rule of census().classes) {
-      if (rule.prototype.startsWithItsSyntax === false) continue
-      for (const { owner, text } of ownOverrides(rule, "parse")) {
-        if (!callsUp(text, "parse")) offenders.push(`${rule.name} (${owner}.parse)`)
-      }
-    }
-    expect(offenders).toEqual([])
-  })
-
-  test("a rule filed under a first word has a test() that still asks its syntax", () => {
+  test("a rule filed under a first word has a parse() and test() that still ask its syntax", () => {
     const offenders: string[] = []
     for (const rule of census().rules) {
       if (!(rule instanceof P.Sequence) || !rule.firstWords) continue
-      for (const { owner, text } of ownOverrides(rule.constructor as typeof P.Sequence, "test")) {
-        if (!callsUp(text, "test")) offenders.push(`${rule.name} (${owner}.test)`)
+      for (const method of ["parse", "test"] as const) {
+        for (const { owner, text } of ownOverrides(rule.constructor as typeof P.Sequence, method)) {
+          if (!callsUp(text, method)) offenders.push(`${rule.name} (${owner}.${method})`)
+        }
       }
     }
     expect(offenders).toEqual([])
