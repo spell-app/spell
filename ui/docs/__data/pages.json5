@@ -110,6 +110,11 @@
       "summary": "An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data.",
       "status": "done"
     },
+    "ui-docs-index": {
+      "title": "Docs index",
+      "summary": "A site index draws a card for each of a site's pages, grouped by the pages' tags, with a search field above them.",
+      "status": "done"
+    },
     "ui-docs-inspector": {
       "title": "Docs inspector",
       "summary": "An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change.",

@@ -27,6 +27,14 @@ export const docsSearchVocabulary = {
     "sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere.",
   attributes: [
     {
+      name: "pages",
+      kind: "json",
+      reflect: false,
+      description:
+        "A site's own pages to search instead of the docs site's data:  the same `pages` `<ui-site-nav>` takes, each " +
+        "found by its `title` and its `tags`.  With it, links are each page's `href` as written, and nothing is fetched."
+    },
+    {
       name: "base",
       kind: "string",
       description:

@@ -5,6 +5,7 @@ import { DocsFamilies } from "spell/ui/docs-components/DocsFamilies"
  * - `<ui-docs-api tag="ui-avatar" only="attributes">`, in a notebook's `<html>` blocks:  a component's API tables,
  *   as its page draws them
  * - `<ui-toc>`:  the page's "On this page", the docs site's own
+ * - `<ui-docs-index>`:  a site's index page, in the Spell UI site's Components page
  * - Loaded once, when a notebook's page first draws:  a lazy chunk, never in the editor's own bundle.
  *   - The page's `<ui-root>` may load any `<ui-docs-*>` family on sight too (`DocsFamilies.add()`):
  *     without it, it warned of a tag it had no family for.
@@ -21,7 +22,7 @@ export class NotebookDocs {
   private static loading: Promise<void> | undefined
 
   /**
-   * Define `<ui-toc>` and `<ui-docs-api>`, the latter's data pointed at Spell UI's docs site, once.
+   * Define `<ui-toc>`, `<ui-docs-index>` and `<ui-docs-api>`, the latter two's data pointed at Spell UI's docs site, once.
    * - NEVER throws:  a failed load is logged, and a notebook drawing one shows the bare tag.
    */
   static load(): Promise<void> {
@@ -30,6 +31,7 @@ export class NotebookDocs {
       const [{ SiteData }] = await Promise.all([
         import("spell/ui/docs-components/SiteData"),
         import("spell/ui/docs-components/ui-docs-api"),
+        import("spell/ui/docs-components/ui-docs-index"),
         import("spell/ui/components/ui-toc")
       ])
       SiteData.url ??= NotebookDocs.dataUrl
