@@ -1,5 +1,6 @@
 import { proto, snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { getKnownType } from "spell/parser/spell/rules/types"
@@ -13,8 +14,9 @@ import { collectionNameFor } from "./places.shared"
  * - After this, the words people know reach the place:  `every recipe`, `add`, `remove`, `set`.
  * - A read above this line means the place too:  each reads the type's record as the project compiles.
  * - Compiles to `Recipe.savedIn = { place: "family_cookbook", collection: "recipes" }`.
+ * - Noted for the project's declarations too (`declaresSaved`), so a project importing the type knows (epic `data` I19).
  */
-export class SavedInPlace extends SpellStatement<"type|place"> {
+export class SavedInPlace extends SpellStatement<"type|place", { declaresSaved?: SP.DeclaresSaved }> {
   @proto static alias = "statement"
   @proto static priority = Priority.declaration + 1
 
@@ -33,6 +35,10 @@ export class SavedInPlace extends SpellStatement<"type|place"> {
     const known = getKnownType(type)
     const collection = collectionNameFor(snakeCase(known.name).replace(/_/g, " "))
     known.declareSaved({ place: placeType.placeName!, placeType, collection }, match)
+    match.data.declaresSaved = {
+      of: known.name,
+      savedIn: { place: placeType.placeName!, placeType: placeType.name, collection }
+    }
   }
 
   getAST(match: P.MatchFor<this>): P.ASTPatchedMember {
