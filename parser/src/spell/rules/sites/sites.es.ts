@@ -16,7 +16,7 @@ export const sitesEs = new SpellParser({ module: "sites" })
 
 /** Lo que la línea de una página dice tras su dirección. */
 const PAGE_DETAILS =
-  "(, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})?"
+  "(, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, miniatura {thumbnail:text})? (, en vivo {live:text})?"
 
 /** An indefinite article, either gender:  `un sitio`, `una página`. */
 const A = "(un|una)"

@@ -930,7 +930,8 @@ spell site screenshots owen@spell/my-site --size 1440x900 --signed-in work
 ```
 
 - A small bar on top of each page takes the picture's name and the site's page it's of, picked or new.
-- Save writes `snapshots/<name>.jpg` into the site's project and sets that page's `thumbnail`.
+- Save writes `snapshots/<name>.jpg` into the site's project, sets that page's `thumbnail`,
+  and records the address it was taken at as its `live` link, what its card's new-tab icon opens.
 - A new page is added at the address the browser is on.
 
 ## spell-ui

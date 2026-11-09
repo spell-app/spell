@@ -98,9 +98,9 @@ describe("a site", () => {
         [
           '<spell-page "terms page" thumbnail="snapshots/t.jpg"/>',
           '<spell-page "home page" thumbnail="snapshots/h.jpg">',
-          "\t<spell-stories>",
-          "\t\t- [x] open it",
-          "\t</>",
+          "\t<stories>",
+          '\t\t<story "S1" done>open it</story>',
+          "\t</stories>",
           "</>",
           '<spell-view "settings dialog" thumbnail="snapshots/s.jpg"/>'
         ],
@@ -264,7 +264,6 @@ describe("a site", () => {
         ...CODE.slice(0, 5),
         "galaxy guide is a site:",
         '\t- it has a films page at "/films"',
-        '\t- it has a flim page at "/x"',
         '\t- it has a film page at "films"',
         '\t- it has a film page at "/f/:person"',
         '\t- it has a film page at "/films"'
@@ -272,11 +271,83 @@ describe("a site", () => {
       "/Galaxy.spell"
     )
     expect(errors).toEqual([
-      `8:3 "flim page" isn't one of this program's pages:  name a page it declares, e.g. a "film page" is a page`,
-      `9:3 A page's address starts with "/", from the site's root:  "/films", not "films"`,
-      `10:3 The film page has nothing called person for ":person" to fill:  say what it is on the page, e.g. - it has a person`,
-      `11:3 The films page is already at "/films":  each page needs an address of its own`
+      `8:3 A page's address starts with "/", from the site's root:  "/films", not "films"`,
+      `9:3 The film page has nothing called person for ":person" to fill:  say what it is on the page, e.g. - it has a person`,
+      `10:3 The films page is already at "/films":  each page needs an address of its own`
     ])
+  })
+
+  describe("a page's name is its title (P17)", () => {
+    test("a name with `&` or `?` is read without them, and goes by what's written", () => {
+      const { code, errors } = compiled(
+        [
+          '<spell-page "Boxes & Blades"/>',
+          '<spell-site "galaxy guide">',
+          '\t<page "Boxes & Blades" address="/boxes"/>',
+          "</>"
+        ],
+        "/G.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain("export class BoxesBlade extends Page")
+      expect(code).toContain('page: "BoxesBlade"')
+      expect(code).toContain('title: "Boxes & Blades"')
+    })
+
+    test("a page no file declares yet waits:  no error, listed under the class it will have", () => {
+      const { code, errors } = compiled(
+        ['<spell-site "galaxy guide">', '\t<page "My Inbox" address="/inbox/:box"/>', "</>"],
+        "/G.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain('name: "My Inbox"')
+      expect(code).toContain('page: "MyInbox"')
+    })
+
+    test("`live=` is the real page it stands for, in spellx and code spell", () => {
+      const spellx = compiled(
+        ['<spell-site "galaxy guide">', '\t<page "Films" address="/films" live="https://example.com/f"/>', "</>"],
+        "/G.spellml"
+      )
+      expect(spellx.errors).toEqual([])
+      expect(spellx.code).toContain('live: "https://example.com/f"')
+      const code = compiled(
+        ["galaxy guide is a site:", '\t- it has a films page at "/films", live "https://example.com/f"'],
+        "/G.spell"
+      )
+      expect(code.errors).toEqual([])
+      expect(code.code).toContain('live: "https://example.com/f"')
+    })
+
+    test("`<group>` is flat:  the lines after it are under it", () => {
+      const { code, errors } = compiled(
+        [
+          '<spell-site "galaxy guide">',
+          '\t<group "Home"/>',
+          '\t<page "Home" address="/"/>',
+          '\t<group "My Stuff"/>',
+          '\t<page "My Inbox" address="/inbox"/>',
+          "</>"
+        ],
+        "/G.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(code).toMatch(/name: "Home",[^}]*group: "Home"/)
+      expect(code).toMatch(/name: "My Inbox",[^}]*group: "My Stuff"/)
+    })
+
+    test("a sidebar or dialog whose name doesn't say which it is, its view in a later file", () => {
+      const project = parseSpellProject([
+        {
+          path: "/Site.site.spellml",
+          contents: ['<spell-site "galaxy guide">', '\t<sidebar "System Notices" address="/n"/>', "</>"].join("\n")
+        },
+        { path: "/notices.spellml", contents: ['<spell-view "System Notices">', "\t<draw>x</draw>", "</>"].join("\n") }
+      ])
+      const [site] = project.files
+      expect(site!.errors).toEqual([])
+      expect(site!.compiled).toContain('static sidebars = [{ name: "System Notices sidebar", view: "SystemNotice" }]')
+    })
   })
 
   test("`it has a ...` outside a site is a property, as before", () => {

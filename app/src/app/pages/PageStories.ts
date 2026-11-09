@@ -2,14 +2,14 @@ import { SiteEdits } from "./SiteEdits"
 
 /****************
  * ### `PageStories`
- * A page's STORIES, read from its file and written back (epic `mockup` P6, Q12):  what the page must let people do,
+ * A page's STORIES, read from its file and written back (epic `mockup` P6, P17):  what the page must let people do,
  * kept with it for good, through the mockup and into the real site.
- * - Written in the page's own declaration, first in its body, as markdown:
- *   - spellx:  `<spell-stories>` ... `</>`
+ * - Written in the page's own declaration, first in its body, one `<story>` tag each:
+ *   - spellx:  `<stories>` ... `</stories>`, in Spanish `<encanto-historias>` ... `</>`
  *   - code spell:  `<stories>` ... `</stories>`
- *   - both compile to the page's `static stories` (`markdown_description`);  the running page draws nothing for them.
- * - A story is a markdown list item:  a plain line, or an Agile story ("As a fan, I want ..., so that ...");
- *   a task list's box ticks it off, `- [x]`.  Lines under it are its details:  `- done when:  ...`.
+ *   - both compile to the page's `static stories`;  the running page draws nothing for them.
+ * - A story is one piece of text:  its words, then two blank lines and its description, if it has one.
+ * - `<story "S1" done>`:  each numbered when it's first written, the number staying with it as stories move.
  * - Plain text in, text out, as `SiteEdits` is:  it loads no parser, so it's tested in node;
  *   the site editor applies the result as one step of the editor's history (`SiteWrites.changeStories()`).
  * - Static and instance-free on purpose:  it holds nothing, and every caller has its own text.
@@ -24,15 +24,16 @@ export class PageStories {
     const declared = SiteEdits.declarationOf(text, name)
     if (!declared) return undefined
     const block = PageStories.blockIn(text, declared)
-    return block ? PageStories.parsed(block.markdown) : []
+    return block ? PageStories.parsed(block.inside) : []
   }
 
   /**
    * `text` with page `name`'s stories `stories`:  its block written, replaced, or taken out when `stories` is empty.
    * - A page written `<spell-page "x"/>` opens up to hold them;  `a "x" is a page` gains its `:`.
+   * - `language`:  whose words a new block is written in;  a block already there keeps its own.
    * - throws `TypeError` when `text` doesn't declare the page
    */
-  static withStories(text: string, name: string, stories: readonly PageStory[]): string {
+  static withStories(text: string, name: string, stories: readonly PageStory[], language: "en" | "es" = "en"): string {
     const declared = SiteEdits.declarationOf(text, name)
     if (!declared) {
       throw new TypeError(
@@ -42,7 +43,8 @@ export class PageStories {
     const head = text.slice(declared.start, text.indexOf("\n", declared.start) + 1 || declared.end)
     const form = head.startsWith("<") ? "spellx" : "code"
     const block = PageStories.blockIn(text, declared)
-    const written = stories.length ? PageStories.blockText(form, stories) : ""
+    const words = PageStories.wordsFor(form, language, block?.tag)
+    const written = stories.length ? PageStories.blockText(words, stories) : ""
     if (block) return text.slice(0, block.span.start) + written + text.slice(block.span.end)
     if (!written) return text
     const headEnd = declared.start + head.length
@@ -57,11 +59,9 @@ export class PageStories {
     return text.slice(0, declared.start) + `${withColon}\n${written}${apart}` + text.slice(headEnd)
   }
 
-  /**
-   * A new story:  its words, empty when just added, for the person to fill in (`As a …, I want …, so that …`).
-   */
-  static newStory(text: string, details: string[] = []): PageStory {
-    return { text, done: false, details }
+  /** A new story:  its words, empty when just added, for the person to fill in;  its number comes when it's written. */
+  static newStory(text: string): PageStory {
+    return { text, done: false }
   }
 
   /** How many of `stories` are ticked off. */
@@ -73,7 +73,7 @@ export class PageStories {
   // ## Reading and writing the block
   ////////////////
 
-  /** The stories block in declaration `declared` of `text`:  its lines, and its markdown less their shared indent. */
+  /** The stories block in declaration `declared` of `text`:  its lines, its tag, and what's between its tags. */
   private static blockIn(text: string, declared: { start: number; end: number }): StoriesBlock | undefined {
     const body = text.slice(declared.start, declared.end)
     const open = OPENER.exec(body)
@@ -85,69 +85,103 @@ export class PageStories {
     const rest = text.slice(after, declared.end)
     const closed = close.exec(rest)
     if (!closed) return undefined
-    const lines = rest
-      .slice(0, closed.index)
-      .replace(/\r?\n$/, "")
-      .split("\n")
-    return { span: { start, end: after + closed.index + closed[0].length }, markdown: dedent(lines).join("\n") }
-  }
-
-  /** The stories in `markdown`:  each list item at its left edge a story, the lines under it its details. */
-  private static parsed(markdown: string): PageStory[] {
-    const stories: PageStory[] = []
-    for (const line of markdown.split("\n")) {
-      if (!line.trim()) continue
-      const item = ITEM.exec(line)
-      if (item) {
-        const [, box, words] = item
-        stories.push({ text: words!.trim(), done: box === undefined ? undefined : /x/i.test(box), details: [] })
-      } else if (/^\s/.test(line) && stories.length) stories.at(-1)!.details.push(line.replace(/^(?:\t| {2})/, ""))
-      else stories.push({ text: line.trim(), done: undefined, details: [] })
+    return {
+      span: { start, end: after + closed.index + closed[0].length },
+      tag: open[2]!,
+      inside: rest.slice(0, closed.index)
     }
-    return stories
   }
 
-  /** The block for `stories`, in `form`, one tab in, its lines two:  ready to put first in a page's body. */
-  private static blockText(form: "spellx" | "code", stories: readonly PageStory[]): string {
-    const items = stories.flatMap((story) => {
-      const box = story.done === undefined ? "" : story.done ? "[x] " : "[ ] "
-      return [
-        // one line in the file, however many it was typed on:  a story is one list item
-        `\t\t- ${box}${story.text.replace(/\s*\n\s*/g, " ")}`,
-        ...story.details.filter((line) => line.trim()).map((line) => `\t\t\t${line}`)
-      ]
+  /** The stories between a block's tags. */
+  private static parsed(inside: string): PageStory[] {
+    return [...inside.matchAll(STORY)].map(([, , id, attributes, body]) => ({
+      ...(id && { id }),
+      text: unescaped(textOf(body!)),
+      done: DONE.test(attributes!)
+    }))
+  }
+
+  /** How a block is written, for `form`:  its tag, its closer, a story's tag and what says it's done. */
+  private static wordsFor(form: "spellx" | "code", language: "en" | "es", tag: string | undefined): BlockWords {
+    const isSpanish = tag ? /historias/.test(tag) : language === "es"
+    const opener = tag ?? (form === "spellx" && isSpanish ? "encanto-historias" : "stories")
+    return {
+      opener,
+      closer: isSpanish && form === "spellx" ? "</>" : `</${opener}>`,
+      story: isSpanish ? "historia" : "story",
+      done: isSpanish ? "hecha" : "done",
+      idLetter: isSpanish ? "H" : "S"
+    }
+  }
+
+  /** The block for `stories`, one tab in, each story two:  ready to put first in a page's body. */
+  private static blockText(words: BlockWords, stories: readonly PageStory[]): string {
+    const number = (id: string | undefined) => Number(/\d+$/.exec(id ?? "")?.[0] ?? 0)
+    let last = Math.max(0, ...stories.map((story) => number(story.id)))
+    const items = stories.map((story) => {
+      const id = story.id ?? `${words.idLetter}${++last}`
+      return PageStories.storyText(words, id, story)
     })
-    const [opener, closer] = form === "spellx" ? ["<spell-stories>", "</>"] : ["<stories>", "</stories>"]
-    return `\t${opener}\n${items.join("\n")}\n\t${closer}\n`
+    return `\t<${words.opener}>\n${items.join("\n")}\n\t${words.closer}\n`
+  }
+
+  /** One story's tag:  on one line for words on one line, else its lines one tab further in, blank ones left blank. */
+  private static storyText(words: BlockWords, id: string, { text, done }: PageStory): string {
+    const opened = `\t\t<${words.story} "${id}"${done ? ` ${words.done}` : ""}>`
+    const closed = `</${words.story}>`
+    const written = escaped(text.trim())
+    if (!written.includes("\n")) return `${opened}${written}${closed}`
+    const lines = written.split("\n").map((line) => (line.trim() ? `\t\t\t${line}` : ""))
+    return `${opened}\n${lines.join("\n")}\n\t\t${closed}`
   }
 }
 
 /** One story of a page:  what it must let people do. */
 export type PageStory = {
-  /** Its words:  `see a film's opening crawl`, or a story, `As a fan, I want ..., so that ...`. */
+  /** Its number, `S1`:  none until it's first written. */
+  id?: string
+  /** Its words:  `see a film's opening crawl`;  two blank lines, then its description, if it has one. */
   text: string
-  /** Ticked off (`- [x]`), not yet (`- [ ]`), or a plain item with no box (`undefined`). */
-  done: boolean | undefined
-  /** The lines under it, less one indent:  its checks, `- done when:  its people are listed`. */
-  details: string[]
+  /** Ticked off? */
+  done: boolean
 }
 
-/** A stories block in a page's declaration:  where it's written, and its markdown. */
-type StoriesBlock = { span: { start: number; end: number }; markdown: string }
+/** A stories block in a page's declaration. */
+type StoriesBlock = {
+  /** Where it's written. */
+  span: { start: number; end: number }
+  /** Its tag:  `stories`, `spell-stories`, `encanto-historias`. */
+  tag: string
+  /** What's between its tags. */
+  inside: string
+}
 
-/** A stories block's first line, in either form:  `\t<spell-stories>`, `\t<stories>`;  its indent, and its tag. */
-const OPENER = /^([ \t]*)<(spell-stories|encanto-historias|stories)>[ \t]*\r?\n/m
+/** How a stories block is written. */
+type BlockWords = { opener: string; closer: string; story: string; done: string; idLetter: string }
 
-/** A list item at the left edge:  `- [x] see a film`, `- see a film`;  its box, then its words. */
-const ITEM = /^[-*+]\s+(\[[ xX]\](?:\s+|$))?(.*)$/
+/** A stories block's first line, in either form:  `\t<stories>`;  its indent, and its tag. */
+const OPENER = /^([ \t]*)<(spell-stories|encanto-historias|historias|stories)>[ \t]*\r?\n/m
 
-/** `lines` less the indent every line that isn't blank shares. */
-function dedent(lines: string[]): string[] {
-  const indents = lines.filter((line) => line.trim()).map((line) => /^[ \t]*/.exec(line)![0])
-  const shared = indents.reduce((a, b) => {
-    let at = 0
-    while (at < a.length && a[at] === b[at]) at++
-    return a.slice(0, at)
-  }, indents[0] ?? "")
-  return lines.map((line) => (line.startsWith(shared) ? line.slice(shared.length) : line.trimStart()))
+/** One `<story "S1" done>...</story>`:  its tag's word, its number, the rest of its tag, what's inside. */
+const STORY = /<(story|historia)\b\s*(?:"([^"]*)")?([^>]*)>([^]*?)<\/\1>/g
+
+/** What says a story is done. */
+const DONE = /(?:^|\s)(?:done|hecha)(?:\s|$)/
+
+/** A story's text from what's inside its tag:  the shared indent off its lines, no blank lines round it. */
+function textOf(body: string): string {
+  const lines = body.split("\n")
+  const indents = lines.slice(1).flatMap((line) => (line.trim() ? [/^[ \t]*/.exec(line)![0].length] : []))
+  const shared = indents.length ? Math.min(...indents) : 0
+  return [lines[0]!, ...lines.slice(1).map((line) => line.slice(shared))].join("\n").trim()
+}
+
+/** `text` safe inside a tag:  a `</` of its own would close it. */
+function escaped(text: string): string {
+  return text.replaceAll("</", "&lt;/")
+}
+
+/** `text` as it was typed. */
+function unescaped(text: string): string {
+  return text.replaceAll("&lt;/", "</")
 }

@@ -91,6 +91,7 @@ export const words = {
     "sign-in-taken-down": "La cuenta de Encanto vinculada a esa cuenta de Bluesky fue retirada por Encanto.",
     "sign-in-linked-elsewhere": "Esa cuenta de Bluesky ya está vinculada a otra cuenta de Encanto.",
     "site-no-such-page": "No existe esa página",
+    "site-page-waiting": "Esta página aún no se ha hecho.",
     "site-create-page": "¿Quieres crearla?",
     "site-create-it": "Crearla",
     "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",

@@ -313,6 +313,7 @@ export const CORE_MESSAGES = {
   "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
   "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
   "site-no-such-page": "No such page",
+  "site-page-waiting": "This page hasn't been made yet.",
   "site-create-page": "Would you like to create one?",
   "site-create-it": "Create it",
   "site-page-failed": "Sorry, this page couldn't be shown.",
@@ -383,6 +384,10 @@ export type SitePageEntry = {
   tags?: string[]
   /** its address's parameters, each one of the page's own properties:  `["film"]` */
   params?: string[]
+  /** the real page it stands for, on the live site, if the line says */
+  live?: string
+  /** the `<group>` it's under, at the site's top level:  its navigation's heading */
+  group?: string
   /** the pages under it, as the lines under its line list them */
   pages?: SitePageEntry[]
 }
