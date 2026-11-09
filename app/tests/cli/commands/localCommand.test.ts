@@ -8,16 +8,19 @@ import { join } from "path"
 
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { CLI } from "spell/cli"
+import { LocalSite, hostsWith, lanAddressOf, partnerScript, type LocalTools } from "spell/app/cli/commands/localCommand"
 import {
-  LocalSite,
+  LocalSiteServer,
   caddyFileFor,
-  hostsWith,
-  lanAddressOf,
-  partnerScript,
-  type LocalChild,
-  type LocalTools
-} from "spell/app/cli/commands/localCommand"
+  type LocalSiteChild,
+  type LocalSiteServerProps
+} from "spell/app/spaces/server/node/routes/LocalSiteServer"
+
+/** What `ps` says of each pid a test has listening. */
+const COMMANDS: Record<string, string> = {
+  "111": "node /Users/x/bin/spell space cloud serve --address https://test.spell.app\n",
+  "443": "/opt/homebrew/bin/caddy run --config Caddyfile\n"
+}
 
 const NAMES = ["test.spell.app", "test.spell.space"]
 const PASSWORD = "abcd efgh ijkl mnop"
@@ -27,7 +30,7 @@ const SQUEEZED_PASSWORD = "abcdefghijklmnop"
 function childProgram() {
   let end = (_code: number) => {}
   const exited = new Promise<number>((resolve) => (end = resolve))
-  const child: LocalChild & { end: (code: number) => void } = {
+  const child: LocalSiteChild & { end: (code: number) => void } = {
     exited,
     end: (code) => end(code),
     stop: vi.fn(() => end(0))
@@ -44,9 +47,6 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
   writeFileSync(join(caRoot, "rootCA-key.pem"), "SECRET KEY")
   const hostsFile = join(root, "hosts")
   writeFileSync(hostsFile, "127.0.0.1 localhost\n")
-  const spacesDir = join(root, "spaces")
-  mkdirSync(join(spacesDir, "@spell", "OrgAdmin"), { recursive: true })
-  writeFileSync(join(spacesDir, "@spell", "OrgAdmin", "__project.json5"), "{}")
 
   const runs: { command: string; args: string[]; input?: string }[] = []
   const opened: string[] = []
@@ -56,6 +56,7 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
     command: string
     args: string[]
     env?: Record<string, string>
+    logFile?: string
     child: ReturnType<typeof childProgram>
   }[] = []
   const listeners: Record<string, string[]> = {}
@@ -67,7 +68,7 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
       if (command === "mkcert") return `${caRoot}\n`
       if (command === "postconf") return `${relay}\n`
       if (command === "lsof") return (listeners[args[0]!] ?? []).join("\n")
-      if (command === "ps") return args.at(-1) === "443" ? "/opt/homebrew/bin/caddy\n" : "other\n"
+      if (command === "ps") return COMMANDS[args.at(-1)!] ?? "something else\n"
       return ""
     },
     succeeds: (command, args) => {
@@ -85,10 +86,19 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
     },
     start: (command, args, options) => {
       const child = childProgram()
-      children.push({ command, args, ...(options.env && { env: options.env }), child })
+      children.push({
+        command,
+        args,
+        ...(options.env && { env: options.env }),
+        ...(options.logFile && { logFile: options.logFile }),
+        child
+      })
       return child
     },
-    stop: (pid) => void stopped.push(pid),
+    stop: (pid) => {
+      stopped.push(pid)
+      for (const port of Object.keys(listeners)) listeners[port] = listeners[port]!.filter((each) => each !== `${pid}`)
+    },
     sleep: () => Promise.resolve(),
     open: (url) => void opened.push(url),
     lanAddress: () => "192.168.4.30",
@@ -106,17 +116,27 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
     folder: join(root, "local-site"),
     oldFolder: join(root, "house-site"),
     hostsFile,
-    spacesDir,
     machineEmail: () => Promise.resolve("owen@example.com"),
     platform: "darwin"
   })
   const sudoRuns = () => runs.filter((each) => each.command === "sudo")
+  /** The site as the page server holds it, in the same folders. */
+  const pageServerSite = (props: LocalSiteServerProps = {}) =>
+    new LocalSiteServer({
+      tools,
+      folder: join(root, "local-site"),
+      oldFolder: join(root, "house-site"),
+      machineEmail: () => Promise.resolve("owen@example.com"),
+      platform: "darwin",
+      isMainCheckout: true,
+      ...props
+    })
   return {
     root,
     caRoot,
     hostsFile,
-    spacesDir,
     site,
+    pageServerSite,
     tools,
     runs,
     sudoRuns,
@@ -223,7 +243,7 @@ describe("spell space local", () => {
     test("is for a Mac", async () => {
       world = setUp()
       const elsewhere = new LocalSite({ tools: world.tools, folder: join(world.root, "x"), platform: "linux" })
-      await expect(elsewhere.setup({})).rejects.toThrow(CLI.CliError)
+      await expect(elsewhere.setup({})).rejects.toThrow("is for a Mac")
     })
   })
 
@@ -250,7 +270,7 @@ describe("spell space local", () => {
       expect(world.children[1]!.args).toEqual(["run", "--config", join(world.root, "local-site", "Caddyfile")])
     })
 
-    test("stops a cloud already running, and only a Caddy on the HTTPS port", async () => {
+    test("replaces a cloud and a Caddy already on its ports", async () => {
       world = setUp({ trusted: true })
       await world.site.setup({})
       world.listeners["-tiTCP:4949"] = ["111"]
@@ -259,12 +279,16 @@ describe("spell space local", () => {
       expect(world.stopped).toEqual([111, 443])
     })
 
-    test("leaves something else on the HTTPS port alone", async () => {
+    test.each([
+      ["-tiTCP:443", "port 443"],
+      ["-tiTCP:4949", "port 4949"]
+    ])("leaves anything else on %s alone, and says so", async (listener, message) => {
       world = setUp({ trusted: true })
       await world.site.setup({})
-      world.listeners["-tiTCP:443"] = ["999"]
-      await startAndStop(world)
+      world.listeners[listener] = ["999"]
+      await expect(world.site.start({})).rejects.toThrow(message)
       expect(world.stopped).toEqual([])
+      expect(world.children).toEqual([])
     })
 
     test("mail stays caught until postfix relays", async () => {
@@ -299,42 +323,181 @@ describe("spell space local", () => {
       )
     })
 
-    describe("the bare address", () => {
-      const caddyFile = () => readFileSync(join(world.root, "local-site", "Caddyfile"), "utf8")
+    test("an old home left in its settings is ignored", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      const settings = join(world.root, "local-site", "settings.json5")
+      writeFileSync(settings, readFileSync(settings, "utf8").replace("{", `{ home: "/apps/@rs/OrgAdmin",`))
+      await startAndStop(world)
+      expect(readFileSync(join(world.root, "local-site", "Caddyfile"), "utf8")).not.toContain("redir")
+    })
 
-      test("--home sets it, and it's remembered", async () => {
-        world = setUp({ trusted: true })
-        await world.site.setup({})
-        await startAndStop(world, { home: "/apps/@rs/Home" })
-        expect(caddyFile()).toContain("redir / /apps/@rs/Home\n")
-        world.children.length = 0
-        await startAndStop(world)
-        expect(caddyFile()).toContain("redir / /apps/@rs/Home\n")
-      })
+    test("while the page server runs the site:  says so, and leaves it alone", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      await world.pageServerSite().startWithPageServer()
+      expect(await world.site.start({})).toBe(0)
+      expect(world.children).toHaveLength(2)
+      expect(world.children[0]!.child.stop).not.toHaveBeenCalled()
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("page server is already running the site"))
+    })
 
-      test("none set:  the Admin page of the first org here but Spell's", async () => {
-        world = setUp({ trusted: true })
-        for (const org of ["@zed", "@willzalone"]) {
-          mkdirSync(join(world.spacesDir, org, "OrgAdmin"), { recursive: true })
-          writeFileSync(join(world.spacesDir, org, "OrgAdmin", "__project.json5"), "{}")
-        }
-        await world.site.setup({})
-        await startAndStop(world)
-        expect(caddyFile()).toContain("redir / /apps/@willzalone/OrgAdmin\n")
-      })
+    test("its cloud's output shows in the terminal;  Caddy's goes to the log", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      await startAndStop(world)
+      expect(world.children[0]!.logFile).toBeUndefined()
+      expect(world.children[1]!.logFile).toBe(join(world.root, "local-site", "site.log"))
+    })
+  })
 
-      test("none set, no org:  no redirect", async () => {
-        world = setUp({ trusted: true })
-        await world.site.setup({})
-        await startAndStop(world)
-        expect(caddyFile()).not.toContain("redir")
-      })
+  describe("with the page server", () => {
+    /** A Mac `setup` has been run on. */
+    const setUpMac = async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      vi.mocked(console.log).mockClear()
+    }
+    const siteLog = () => readFileSync(join(world.root, "local-site", "site.log"), "utf8")
 
-      test("a home that isn't a path is refused", async () => {
-        world = setUp({ trusted: true })
-        await world.site.setup({})
-        await expect(world.site.start({ home: 'x" { evil' })).rejects.toThrow("--home takes a page's path")
-      })
+    test("a Mac that isn't set up:  nothing starts, and nothing is said", async () => {
+      world = setUp()
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      expect(world.children).toEqual([])
+      expect(console.error).not.toHaveBeenCalled()
+      expect(existsSync(join(world.root, "local-site"))).toBe(false)
+      expect(await server.report()).toMatchObject({ url: "-", state: "not set up:  spell space local setup" })
+    })
+
+    test("off a Mac:  nothing starts, and it has no row", async () => {
+      await setUpMac()
+      const server = world.pageServerSite({ platform: "linux" })
+      await server.startWithPageServer()
+      expect(world.children).toEqual([])
+      expect(await server.report()).toBeUndefined()
+    })
+
+    test("a worktree's page server never starts it", async () => {
+      await setUpMac()
+      const server = world.pageServerSite({ isMainCheckout: false })
+      await server.startWithPageServer()
+      expect(world.children).toEqual([])
+      expect(await server.report()).toMatchObject({ state: "the main checkout's page server runs it" })
+    })
+
+    test("the old scripts' certificate counts as set up", async () => {
+      world = setUp()
+      const old = join(world.root, "house-site")
+      mkdirSync(old)
+      writeFileSync(join(old, "test.spell.app+1.pem"), "old certificate")
+      writeFileSync(join(old, "test.spell.app+1-key.pem"), "old key")
+      await world.pageServerSite().startWithPageServer()
+      expect(world.children).toHaveLength(2)
+    })
+
+    test("starts the cloud and Caddy, every word of their output in the log", async () => {
+      await setUpMac()
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      const logFile = join(world.root, "local-site", "site.log")
+      expect(world.children.map((each) => each.logFile)).toEqual([logFile, logFile])
+      expect(await server.report()).toMatchObject({ url: "https://test.spell.app", state: "running" })
+    })
+
+    test("starts once:  asked again, or by a second page server", async () => {
+      await setUpMac()
+      const first = world.pageServerSite()
+      await Promise.all([first.startWithPageServer(), first.startWithPageServer()])
+      const second = world.pageServerSite()
+      await second.startWithPageServer()
+      expect(world.children).toHaveLength(2)
+      expect(world.children[0]!.child.stop).not.toHaveBeenCalled()
+      expect(await second.report()).toMatchObject({ state: "already running, from the page server" })
+    })
+
+    test("replaces a cloud and a Caddy left running, as a terminal's start does", async () => {
+      await setUpMac()
+      world.listeners["-tiTCP:4949"] = ["111"]
+      world.listeners["-tiTCP:443"] = ["443"]
+      await world.pageServerSite().startWithPageServer()
+      expect(world.stopped).toEqual([111, 443])
+      expect(world.children).toHaveLength(2)
+    })
+
+    test("leaves a site running from a terminal alone", async () => {
+      await setUpMac()
+      const started = world.site.start({})
+      await vi.waitFor(() => expect(world.children).toHaveLength(2))
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      expect(world.children).toHaveLength(2)
+      expect(await server.report()).toMatchObject({ state: "already running, from a terminal" })
+      process.emit("SIGINT")
+      expect(await started).toBe(0)
+    })
+
+    test("stops with the page server, and then may start again", async () => {
+      await setUpMac()
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      server.stop()
+      for (const { child } of world.children) expect(child.stop).toHaveBeenCalled()
+      expect(world.pageServerSite().runner).toBeUndefined()
+
+      world.children.length = 0
+      await world.pageServerSite().startWithPageServer()
+      expect(world.children).toHaveLength(2)
+    })
+
+    test("a page server stopped while it starts leaves nothing running", async () => {
+      await setUpMac()
+      const server = world.pageServerSite()
+      const starting = server.startWithPageServer()
+      server.stop()
+      await starting
+      for (const { child } of world.children) expect(child.stop).toHaveBeenCalled()
+    })
+
+    test("a record whose process has gone counts for nothing", async () => {
+      await setUpMac()
+      const server = world.pageServerSite()
+      writeFileSync(join(world.root, "local-site", "run.json5"), `{ pid: 999999, by: "a terminal" }`)
+      await server.startWithPageServer()
+      expect(world.children).toHaveLength(2)
+    })
+
+    test.each([
+      ["Caddy missing", () => (world.tools.has = () => false), "brew install caddy"],
+      ["its port held", () => (world.listeners["-tiTCP:443"] = ["999"]), "port 443 is held by something else"],
+      [
+        "a program that throws",
+        () =>
+          (world.tools.start = () => {
+            throw new Error("spawn failed")
+          }),
+        "spawn failed"
+      ]
+    ])("%s:  doesn't throw, and says why", async (_name, breakIt, why) => {
+      await setUpMac()
+      breakIt()
+      const server = world.pageServerSite()
+      await expect(server.startWithPageServer()).resolves.toBeUndefined()
+      expect(await server.report()).toMatchObject({ url: "-", state: expect.stringContaining(why) })
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining(why))
+      expect(siteLog()).toContain(why)
+    })
+
+    test("one program stopping by itself stops the other, and the table says so", async () => {
+      await setUpMac()
+      const server = world.pageServerSite()
+      await server.startWithPageServer()
+      world.children[1]!.child.end(1)
+      await vi.waitFor(async () =>
+        expect(await server.report()).toMatchObject({ state: expect.stringContaining("stopped by itself") })
+      )
+      expect(world.children[0]!.child.stop).toHaveBeenCalled()
+      expect(siteLog()).toContain("stopped by itself")
     })
   })
 
@@ -448,9 +611,9 @@ describe("spell space local", () => {
     })
   })
 
-  test("caddyFileFor():  no redirect without a home page", () => {
+  test("caddyFileFor():  HTTPS for its names, everything to the cloud", () => {
     world = setUp()
-    const file = caddyFileFor({ names: NAMES, certificate: "/c.pem", key: "/k.pem", homePage: undefined })
+    const file = caddyFileFor({ names: NAMES, certificate: "/c.pem", key: "/k.pem" })
     expect(file).toContain(
       `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\treverse_proxy 127.0.0.1:4949\n}`
     )

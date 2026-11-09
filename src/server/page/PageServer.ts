@@ -22,7 +22,8 @@ import {
   type PageScript,
   type PageServerSettings,
   type RouteContext,
-  type RouteModule
+  type RouteModule,
+  type ServerReport
 } from "spell/server/page"
 
 /** The mark on every script tag the page server adds to a page (`withPageScripts()`). */
@@ -108,6 +109,9 @@ export class PageServer {
 
   /** run on `stop()`, from route modules */
   private stops: (() => unknown)[] = []
+
+  /** What route modules said to ask for `spell server start all`'s table. */
+  private reports: ServerReport[] = []
 
   /** more fields for every page's `window.SPELL_SERVER`, from route modules (`addPageConfig()`) */
   private pageConfigs: PageConfig[] = []
@@ -216,6 +220,7 @@ export class PageServer {
       )
     router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
+    router.get(SERVER_REPORTS_API, this.onReportsAsked)
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -560,8 +565,22 @@ export class PageServer {
       serveContent: (dir) => void this.serveContent(dir),
       addPageConfig: (add) => void this.addPageConfig(add),
       onListening: (start) => this.listenings.push(start),
-      onStop: (stop) => this.stops.push(stop)
+      onStop: (stop) => this.stops.push(stop),
+      addServerReport: (report) => this.reports.push(report)
     }
+  }
+
+  /**
+   * The router handler for `GET SERVER_REPORTS_API`:  the servers route modules run, for `spell server start all`.
+   * - A report that fails is left out:  a table row is never worth an error.
+   */
+  private onReportsAsked = async (_request: SRV.Request, reply: SRV.Reply): Promise<void> => {
+    const asked = this.reports.map((report) =>
+      Promise.resolve()
+        .then(report)
+        .catch(() => undefined)
+    )
+    reply.set("Cache-Control", "no-store").json((await Promise.all(asked)).filter(Boolean))
   }
 }
 
@@ -606,6 +625,9 @@ const SERVER_API = SRV.SERVER_API
 
 /** Where a page tells of a stale generated file (`SPELL_SERVER.reportStale()`, `onStaleReport()`). */
 const STALE_API = `${SERVER_API}/stale`
+
+/** The servers route modules run, for `spell server start all`'s table (`ReportedServer`). */
+export const SERVER_REPORTS_API = `${SERVER_API}/reports`
 
 /**
  * `PageServer.start()` options.
