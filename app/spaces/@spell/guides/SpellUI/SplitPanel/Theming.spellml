@@ -19,8 +19,8 @@
 		<html>
 			<ui-docs-tokens family="ui-split-panel" playground>
 				<ui-split-panel columns="25%,*" resizable style="height: 8em">
-					<ui-segment>Tree</>
-					<ui-segment>Code</>
+					<ui-panel appearance="pane">Tree</>
+					<ui-panel appearance="pane">Code</>
 				</>
 			</>
 		</>

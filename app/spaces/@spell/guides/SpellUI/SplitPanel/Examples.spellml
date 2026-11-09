@@ -15,8 +15,8 @@
 		<section label="Columns" sticky="stack" collapsible dividing>
 			<example "Columns" description="Panes side by side, sized by `columns`.  `resizable` puts a bar between them:  drag it, or give it the focus and use the arrow keys.">
 				<split-panel columns="30%,*" resizable style="height: 8em">
-					<segment>Tree</segment>
-					<segment>Code</segment>
+					<panel appearance="pane">Tree</panel>
+					<panel appearance="pane">Code</panel>
 				</split-panel>
 			</example>
 		</>
@@ -24,8 +24,8 @@
 		<section label="Rows" sticky="stack" collapsible dividing>
 			<example "Rows" description="Panes one above the other, sized by `rows`:  here a fixed height, with the rest above it.">
 				<split-panel rows="*,3em" resizable style="height: 10em">
-					<segment>Code</segment>
-					<segment>Output</segment>
+					<panel appearance="pane">Code</panel>
+					<panel appearance="pane">Output</panel>
 				</split-panel>
 			</example>
 		</>
@@ -34,10 +34,10 @@
 			<example "Nested" description="A split panel is a pane too.">
 				<split-panel columns="*,*" resizable style="height: 10em">
 					<split-panel rows="*,*" resizable>
-						<segment>Code</segment>
-						<segment>Output</segment>
+						<panel appearance="pane">Code</panel>
+						<panel appearance="pane">Output</panel>
 					</split-panel>
-					<segment>App</segment>
+					<panel appearance="pane">App</panel>
 				</split-panel>
 			</example>
 		</>
@@ -57,9 +57,9 @@
 		<section label="Hidden panes" sticky="stack" collapsible dividing>
 			<example "Hidden panes" description="A child with `hidden` isn't a pane:  the others share its room.  Showing it again moves nothing, so a running program in a pane keeps running.">
 				<split-panel columns="*,*,*" resizable style="height: 6em">
-					<segment>One</segment>
-					<segment hidden>Not shown</segment>
-					<segment>Three</segment>
+					<panel appearance="pane">One</panel>
+					<panel appearance="pane" hidden>Not shown</panel>
+					<panel appearance="pane">Three</panel>
 				</split-panel>
 			</example>
 		</>
