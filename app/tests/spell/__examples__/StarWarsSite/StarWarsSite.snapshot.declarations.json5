@@ -89,13 +89,13 @@
     {
       "type": "PersonFact",
       "superType": "View",
-      "defined": "/StarWarsSite.spellml:6162-6751"
+      "defined": "/StarWarsSite.spellml:6199-6788"
     },
     {
       "property": "person",
       "of": "PersonFact",
       "datatype": "Character",
-      "defined": "/StarWarsSite.spellml:6271-6305"
+      "defined": "/StarWarsSite.spellml:6308-6342"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -108,18 +108,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:6310-6742"
+      "defined": "/StarWarsSite.spellml:6347-6779"
     },
     {
       "type": "PersonSidebar",
       "superType": "View",
-      "defined": "/StarWarsSite.spellml:6767-7097"
+      "defined": "/StarWarsSite.spellml:6804-7134"
     },
     {
       "property": "person",
       "of": "PersonSidebar",
       "datatype": "Character",
-      "defined": "/StarWarsSite.spellml:6798-6832"
+      "defined": "/StarWarsSite.spellml:6835-6869"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -132,12 +132,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:6872-7088"
+      "defined": "/StarWarsSite.spellml:6909-7125"
     },
     {
       "type": "SettingsDialog",
       "superType": "View",
-      "defined": "/StarWarsSite.spellml:13891-14558"
+      "defined": "/StarWarsSite.spellml:13928-14595"
     },
     {
       "property": "units",
@@ -147,7 +147,7 @@
         "metric",
         "imperial"
       ],
-      "defined": "/StarWarsSite.spellml:13935-13968"
+      "defined": "/StarWarsSite.spellml:13972-14005"
     },
     {
       "property": "crawl",
@@ -157,7 +157,7 @@
         "shown",
         "hidden"
       ],
-      "defined": "/StarWarsSite.spellml:13973-14003"
+      "defined": "/StarWarsSite.spellml:14010-14040"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -170,24 +170,24 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:14015-14549"
+      "defined": "/StarWarsSite.spellml:14052-14586"
     },
     {
       "type": "ReviewDialog",
       "superType": "View",
-      "defined": "/StarWarsSite.spellml:14574-15441"
+      "defined": "/StarWarsSite.spellml:14611-15478"
     },
     {
       "property": "film",
       "of": "ReviewDialog",
       "datatype": "Film",
-      "defined": "/StarWarsSite.spellml:14604-14631"
+      "defined": "/StarWarsSite.spellml:14641-14668"
     },
     {
       "property": "draft",
       "of": "ReviewDialog",
       "datatype": "Review",
-      "defined": "/StarWarsSite.spellml:14676-14783"
+      "defined": "/StarWarsSite.spellml:14713-14820"
     },
     {
       "syntax": "save the review (of {thisArg:expression})?",
@@ -202,7 +202,7 @@
       "name": "save the review",
       "returns": "nothing",
       "waits": true,
-      "defined": "/StarWarsSite.spellml:14796-14975"
+      "defined": "/StarWarsSite.spellml:14833-15012"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -215,7 +215,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:14988-15432"
+      "defined": "/StarWarsSite.spellml:15025-15469"
     },
     {
       "type": "FilmsPage",
@@ -238,7 +238,7 @@
     {
       "type": "FilmPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:1980-4585"
+      "defined": "/StarWarsSite.spellml:1980-4622"
     },
     {
       "property": "film",
@@ -250,7 +250,7 @@
       "property": "reviews",
       "of": "FilmPage",
       "datatype": "list of reviews",
-      "defined": "/StarWarsSite.spellml:2621-2778"
+      "defined": "/StarWarsSite.spellml:2621-2815"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -263,12 +263,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:2793-4576"
+      "defined": "/StarWarsSite.spellml:2830-4613"
     },
     {
       "type": "PeoplePage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:4619-5369"
+      "defined": "/StarWarsSite.spellml:4656-5406"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -281,18 +281,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:4876-5360"
+      "defined": "/StarWarsSite.spellml:4913-5397"
     },
     {
       "type": "PersonPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:5388-6156"
+      "defined": "/StarWarsSite.spellml:5425-6193"
     },
     {
       "property": "person",
       "of": "PersonPage",
       "datatype": "Character",
-      "defined": "/StarWarsSite.spellml:5693-5727"
+      "defined": "/StarWarsSite.spellml:5730-5764"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -305,12 +305,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:5793-6147"
+      "defined": "/StarWarsSite.spellml:5830-6184"
     },
     {
       "type": "PlanetsPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:7142-7741"
+      "defined": "/StarWarsSite.spellml:7179-7778"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -323,18 +323,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:7324-7732"
+      "defined": "/StarWarsSite.spellml:7361-7769"
     },
     {
       "type": "PlanetPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:7760-8728"
+      "defined": "/StarWarsSite.spellml:7797-8765"
     },
     {
       "property": "planet",
       "of": "PlanetPage",
       "datatype": "Planet",
-      "defined": "/StarWarsSite.spellml:7914-7945"
+      "defined": "/StarWarsSite.spellml:7951-7982"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -347,12 +347,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:8012-8719"
+      "defined": "/StarWarsSite.spellml:8049-8756"
     },
     {
       "type": "SpeciesListPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:8763-9371"
+      "defined": "/StarWarsSite.spellml:8800-9408"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -365,18 +365,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:8953-9362"
+      "defined": "/StarWarsSite.spellml:8990-9399"
     },
     {
       "type": "SpeciesPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:9390-10084"
+      "defined": "/StarWarsSite.spellml:9427-10121"
     },
     {
       "property": "species",
       "of": "SpeciesPage",
       "datatype": "Species",
-      "defined": "/StarWarsSite.spellml:9532-9565"
+      "defined": "/StarWarsSite.spellml:9569-9602"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -389,12 +389,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:9634-10075"
+      "defined": "/StarWarsSite.spellml:9671-10112"
     },
     {
       "type": "VehiclesPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:10134-10666"
+      "defined": "/StarWarsSite.spellml:10171-10703"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -407,18 +407,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:10293-10657"
+      "defined": "/StarWarsSite.spellml:10330-10694"
     },
     {
       "type": "VehiclePage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:10685-11647"
+      "defined": "/StarWarsSite.spellml:10722-11684"
     },
     {
       "property": "vehicle",
       "of": "VehiclePage",
       "datatype": "Vehicle",
-      "defined": "/StarWarsSite.spellml:10836-10869"
+      "defined": "/StarWarsSite.spellml:10873-10906"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -431,12 +431,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:10939-11638"
+      "defined": "/StarWarsSite.spellml:10976-11675"
     },
     {
       "type": "StarshipsPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:11666-12390"
+      "defined": "/StarWarsSite.spellml:11703-12427"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -449,18 +449,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:11988-12381"
+      "defined": "/StarWarsSite.spellml:12025-12418"
     },
     {
       "type": "StarshipPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:12409-13182"
+      "defined": "/StarWarsSite.spellml:12446-13219"
     },
     {
       "property": "starship",
       "of": "StarshipPage",
       "datatype": "Starship",
-      "defined": "/StarWarsSite.spellml:12557-12592"
+      "defined": "/StarWarsSite.spellml:12594-12629"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -473,12 +473,12 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:12665-13173"
+      "defined": "/StarWarsSite.spellml:12702-13210"
     },
     {
       "type": "ReviewsPage",
       "superType": "Page",
-      "defined": "/StarWarsSite.spellml:13245-13830"
+      "defined": "/StarWarsSite.spellml:13282-13867"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -491,18 +491,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWarsSite.spellml:13721-13821"
+      "defined": "/StarWarsSite.spellml:13758-13858"
     },
     {
       "type": "GalaxyGuide",
       "superType": "Site",
-      "defined": "/StarWarsSite.spellml:15554-16666"
+      "defined": "/StarWarsSite.spellml:15591-16703"
     },
     {
       "property": "theme",
       "of": "GalaxyGuide",
       "datatype": "text",
-      "defined": "/StarWarsSite.spellml:15570-15678"
+      "defined": "/StarWarsSite.spellml:15607-15715"
     }
   ],
   "codeLines": [
