@@ -149,6 +149,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   aria-pressed={this.showing.has(state.state) ? "true" : "false"}
                   aria-label={words()}
                   title={words()}
+                  disabled={this.static}
                   onClick={(event: MouseEvent) => this.pick(state.state, event.altKey ? "only" : "click")}
                 >
                   {this.stateCounts.get(state.state) ?? 0}

@@ -43,6 +43,7 @@ import {
   PHASE_FILTER_STATES,
   REPORT,
   AWAY,
+  FOLD_KEY,
   SECTION_LOOKS,
   STAYS_FOLDED_KINDS,
   ALL_QUERY,
@@ -538,7 +539,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           : kind === "overview-part"
             ? () => this.reviewButtons()
             : kind === AWAY
-              ? () => this.doneReading()
+              ? () => (
+                  <>
+                    {this.awayBadges()}
+                    {this.doneReading()}
+                  </>
+                )
               : this.holdsItems()
                 ? () => (
                     <>
@@ -922,6 +928,17 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Review (an Overview sub-section)
   ////////////////
 
+  /** "0. While you were out"'s badges, at the title's end:  how much is new, by colour, which only say (`news`). */
+  private awayBadges(): JSX.Element {
+    return (
+      <Show when={this.news}>
+        <span class={FILTER} part={this.partForName("filter")}>
+          <epic-state-filter counts={this.news} static />
+        </span>
+      </Show>
+    )
+  }
+
   /** "0. While you were out"'s Done reading, at the title's end, while the page is reviewed (P62). */
   private doneReading(): JSX.Element {
     return (
@@ -932,13 +949,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * "0. While you were out" opens by itself as the page loads (P62):  it's what Owen came back to read, whatever fold he
-   * left it in;  once, after it first draws.
+   * "0. While you were out" opens by itself the first time a page shows it (P62):  it's what you came back to read;
+   * once, after it first draws.
+   * - folded or opened by hand since:  stays as you left it (`FOLD_KEY`, the docs runtime's memory of a page's folds)
    */
   @E.onChange("isReady")
   protected onAwayReady(isReady: boolean) {
     if (!isReady || this.kind !== AWAY || this.hasOpenedAway) return
     this.hasOpenedAway = true
+    if (this.id && this.id in EpicSection.saved(FOLD_KEY)) return
     E.afterSolidUpdate(() => void this.expand())
   }
 

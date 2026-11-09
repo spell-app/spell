@@ -29,6 +29,11 @@ export const epicStateFilterVocabulary = {
     "marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, the blues' chip.",
   attributes: [
     {
+      name: "static",
+      kind: "boolean",
+      description: "Its chips only say their counts:  no click filters anything."
+    },
+    {
       name: "counts",
       kind: "string",
       description:

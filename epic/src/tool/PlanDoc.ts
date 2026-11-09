@@ -2739,7 +2739,8 @@ export class PlanDoc extends PlanReader {
       id: AWAY_ID,
       kind: AWAY,
       title: AWAY_TITLE,
-      waiting: summary.waiting || undefined
+      waiting: summary.waiting || undefined,
+      news: awayCounts(summary) || undefined
     })
     section.append(...this.awayBody(summary))
     // its lines' keys on the section itself:  the review inbox reads the skeleton, and the body is a part (I206)
@@ -3601,3 +3602,18 @@ function changeTitle(change: Element): string {
 
 /** "While you were out"'s title, its own:  numbered 0, before the Overview's 1 (epic `epic-engine` P62). */
 const AWAY_TITLE = "0. While you were out"
+
+/** What's new in "0. While you were out", for its title's badges:  `recent:2 progress:1 attention:3 open:2`. */
+function awayCounts(summary: NightSummary): string {
+  const running = summary.done.filter((done) => done.status === "under way").length
+  const counts = {
+    recent: summary.done.length - running,
+    progress: running,
+    attention: summary.waiting,
+    open: summary.needs.length - summary.waiting
+  }
+  return Object.entries(counts)
+    .filter(([, count]) => count > 0)
+    .map(([state, count]) => `${state}:${count}`)
+    .join(" ")
+}

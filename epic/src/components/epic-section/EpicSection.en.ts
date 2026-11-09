@@ -96,6 +96,13 @@ export const epicSectionVocabulary = {
         "toolbar's red badge."
     },
     {
+      name: "news",
+      kind: "string",
+      description:
+        '`kind="away"`:  how much is new, as `<state>:<count>` (`recent:2 progress:1 attention:3 open:2`), written by the tool:  ' +
+        "its title's badges, there while it's folded."
+    },
+    {
       name: "lines",
       kind: "string",
       description:

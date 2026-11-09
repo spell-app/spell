@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  15fa4ec9e4e8189d
+// sources:  47b62a31bee700ec
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -46,12 +46,12 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
-  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","waiting","lines","to-accept","to-see","open"]},
+  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","waiting","news","lines","to-accept","to-see","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","asks","working","working-on","countdown"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
   "epic-stage-button": {"folder":"epic-review","skeleton":{"display":"inline","width":"8em","height":"1.6em"},"attributes":["stage","open"]},
-  "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","shown"]},
+  "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["static","counts","marked","phases","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from","agent"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
