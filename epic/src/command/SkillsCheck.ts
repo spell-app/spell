@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { join } from "node:path"
 
 import { CLI } from "spell/cli"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 
@@ -236,4 +237,4 @@ const ROOT_COMMAND = "epic guide --root"
 const FRONT_MATTER = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
 
 /** The plugin's skills:  `epic/skills/`. */
-const SKILLS_FOLDER = join(dirname(dirname(import.meta.dirname)), "skills")
+const SKILLS_FOLDER = EngineFiles.path("skills")

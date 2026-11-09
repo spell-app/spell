@@ -254,7 +254,7 @@ export const englishWords: SP.LanguageWords = {
       state: "state",
       tab: "tab",
       tags: "tags",
-      picture: "picture",
+      thumbnail: "thumbnail",
       row: "row",
       column: "column",
       color: "color"
@@ -310,6 +310,7 @@ export const englishWords: SP.LanguageWords = {
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
       pageLocked: 'its lock is "locked"',
+      templateThumbnail: "its thumbnail is {quoted thumbnail}",
       pageSection: {
         tag: "section",
         label: "label",
@@ -322,7 +323,7 @@ export const englishWords: SP.LanguageWords = {
       sitePageTab: ", tab {quoted tab}",
       sitePageTags: ", tagged {quoted tags}",
       sitePageState: ", {state}",
-      sitePagePicture: ", pictured in {quoted picture}",
+      sitePageThumbnail: ", thumbnail {quoted thumbnail}",
       siteCardPlace: ", in row {row} column {column}",
       siteCardColor: ", colored {color}",
       siteOverlay: "it has {a words} {words}",

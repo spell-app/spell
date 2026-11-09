@@ -374,6 +374,71 @@ describe("generatorsFor()", () => {
   })
 })
 
+describe("a repo that doesn't use Spell's tools", () => {
+  test("snapshotUpdateOf():  the repo's own runner, or none at all", () => {
+    const repo = join(TEMP, "runners")
+    mkdirSync(repo)
+    const packageJson = (name: string) =>
+      put(repo, { "package.json": JSON.stringify({ devDependencies: { [name]: "1" } }) })
+    expect(MainMerge.snapshotUpdateOf(repo)).toBeNull()
+    packageJson("left-pad")
+    expect(MainMerge.snapshotUpdateOf(repo)).toBeNull()
+    packageJson("vitest")
+    expect(MainMerge.snapshotUpdateOf(repo)?.(["a.test.ts"])).toEqual(["npx", "vitest", "run", "a.test.ts", "--update"])
+    put(repo, { "pnpm-lock.yaml": "" })
+    expect(MainMerge.snapshotUpdateOf(repo)?.(["a.test.ts"]).slice(0, 3)).toEqual(["pnpm", "exec", "vitest"])
+    rmSync(join(repo, "pnpm-lock.yaml"))
+    put(repo, { "yarn.lock": "" })
+    packageJson("vite-plus")
+    expect(MainMerge.snapshotUpdateOf(repo)?.(["a.test.ts"])).toEqual([
+      "yarn",
+      "vp",
+      "test",
+      "run",
+      "a.test.ts",
+      "--update"
+    ])
+  })
+
+  test("generatorsFor():  a root lockfile gets its own tool first;  a listed generator wins;  no runner, no snapshot step", () => {
+    const steps = MainMerge.generatorsFor(["package-lock.json", "tests/unit/__snapshots__/x.snap"], [], null)
+    expect(steps.map(({ generator }) => generator.run)).toEqual([
+      ["npm", "install", "--package-lock-only", "--ignore-scripts"]
+    ])
+    const listed = { name: "mine", outputs: ["package-lock.json"], cwd: ".", run: ["true"] }
+    expect(MainMerge.generatorsFor(["package-lock.json"], [listed], null)).toEqual([
+      { generator: listed, files: ["package-lock.json"] }
+    ])
+    expect(MainMerge.generatorsFor(["sub/package-lock.json"], [], null)).toEqual([])
+  })
+
+  test("package-lock.json in conflict:  no snapshot runner run, its tool regenerates it, and the merge commits", () => {
+    const repo = join(TEMP, "npm-repo")
+    mkdirSync(repo)
+    git(repo, "init", "-q", "-b", "main")
+    // stands in for npm:  fails on a file with no markers, then writes a settled lockfile
+    const settle = `
+      const fs = require("fs")
+      if (!fs.readFileSync("package-lock.json", "utf8").includes("<<<<<<<")) process.exit(3)
+      fs.writeFileSync("package-lock.json", "settled\\n")`
+    put(repo, { "package.json": "{}\n", "package-lock.json": "base\n" })
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "first")
+    git(repo, "switch", "-q", "-c", "wip")
+    put(repo, { "package-lock.json": "wip\n" })
+    git(repo, "commit", "-q", "-am", "wip")
+    git(repo, "switch", "-q", "main")
+    put(repo, { "package-lock.json": "main\n" })
+    git(repo, "commit", "-q", "-am", "main")
+    git(repo, "switch", "-q", "wip")
+    const generators = [{ name: "lock", outputs: ["package-lock.json"], cwd: ".", run: ["node", "-e", settle] }]
+    const report = new MainMerge({ root: repo, generators, install: [], rename: [] }).run()
+    expect(report.result).toBe("merged")
+    expect(read(repo, "package-lock.json")).toBe("settled\n")
+    expect(git(repo, "status", "--porcelain")).toBe("")
+  })
+})
+
 describe("snapshotEntries()", () => {
   test("each `exports[...]` entry by key, values across lines, escaped backticks kept", () => {
     const text = '// Vitest Snapshot v1\n\nexports[`one 1`] = `\n"x"\n`;\n\nexports[`two \\` 1`] = `"y"`;\n'

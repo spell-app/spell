@@ -482,7 +482,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       selfClosing: head.selfClosing
     }
     const hasDraw = tag.kind === "page" ? this.hasDrawOfItsOwn(text, head.end, end, indent) : undefined
-    if (!tag.selfClosing && SP.isPageDrawingItsBody(tag, hasDraw)) {
+    const hasThumbnail = tag.attributes.some((attribute) => attribute.name === "thumbnail")
+    if ((!tag.selfClosing || hasThumbnail) && SP.isPageDrawingItsBody(tag, hasDraw)) {
       tag.drawsBody = true
       word = { ...word, drawsBody: true }
     }

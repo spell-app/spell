@@ -1,4 +1,14 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  rmdirSync,
+  writeFileSync
+} from "node:fs"
+import { tmpdir } from "node:os"
 import { basename, dirname, join, relative } from "node:path"
 
 import chalk from "chalk"
@@ -21,7 +31,7 @@ import { Shared } from "./Shared"
 /****************
  * ### `RepoInit`
  * `epic init [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public]
- * [--no-plugin] [--no-server] [--dry-run] [--json]`:
+ * [--protected-base] [--no-plugin] [--no-server] [--dry-run] [--json]`:
  * set a repo up for epics (epic `epic-eject` P9), from any folder of its main checkout or a worktree of it;  the ONE
  * command a new repo, and each teammate joining it, runs (epic `epic-friend` P13:  `npx spell@next epic init`).
  *
@@ -72,6 +82,10 @@ import { Shared } from "./Shared"
  * - it commits the files it wrote in the repo (the config and `.gitignore`) on the base branch, asking first in a
  *   terminal (`commitStep()`;  `--no-commit`):  every new worktree branches from there, and needs the `.gitignore` to
  *   leave the links alone;  on another branch it says so, and commits nothing
+ * - a base branch that takes only pull requests (`baseBranchProtected`):  it NEVER commits there
+ *   (`commitViaPullRequest()`):  the two files go on a new branch, `epic-setup`, pushed, with a pull request opened
+ *   (`gh`), else what to run printed;  the base branch's checkout is left as it was, and epics start once it's merged
+ *   - on when `--protected-base` says so, or GitHub does (`protectionStep()`), in one line
  * - it starts with "Initializing Epic for repo <main>" and ends with "Epics initialized!", in colour;  the settings it
  *   wrote are in the file, not printed (Owen, 2026-10-29)
  ****************/
@@ -95,7 +109,16 @@ export class RepoInit {
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
-    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote", "public", "noPlugin", "noServer", "noCommit"])
+    const { flags } = parseVerbArgs(args, [
+      "dryRun",
+      "json",
+      "noRemote",
+      "public",
+      "noPlugin",
+      "noServer",
+      "noCommit",
+      "protectedBase"
+    ])
     const dryRun = flags.dryRun === true
     const remote = stringFlag(flags.remote)
     const contentRepo = stringFlag(flags.contentRepo)
@@ -144,16 +167,25 @@ export class RepoInit {
       noRemote,
       color: answers.color,
       cloned: answers.cloned,
+      protectedBase: flags.protectedBase === true,
       say
     })
     if (plugin) report.plugin = plugin
     print([...RepoInit.fileLines(report, { head: false }), ...RepoInit.noteLines(report)])
     if (flags.noCommit !== true && report.content.action !== "missing") {
-      if (RepoInit.changedFiles(report).length) print(["", chalk.bold(COMMIT_HEADER)])
+      if (RepoInit.changedFiles(report).length) print(["", chalk.bold(RepoInit.commitHeader(report))])
       report.commit = await RepoInit.commitStep({ report, ask, say })
       print(RepoInit.commitResultLines(report.commit))
+    } else if (flags.noCommit === true && report.config.settings.baseBranchProtected) {
+      const files = RepoInit.changedFiles(report)
+      if (files.length)
+        print([
+          `> Not committed (--no-commit):  ${report.config.settings.baseBranch} takes only pull requests, so put ` +
+            `${files.join(" and ")} on a branch and open one`
+        ])
     }
-    if (flags.noServer !== true && report.content.action !== "missing") {
+    // waiting on its pull request, the repo has no config yet, and the server has nothing to serve
+    if (flags.noServer !== true && report.content.action !== "missing" && report.commit?.action !== "on branch") {
       if (!dryRun) say("starting the epic server…")
       report.server = await this.serverStep({ dryRun })
     }
@@ -264,6 +296,7 @@ export class RepoInit {
     server = false,
     commit = false,
     cloned = false,
+    protectedBase = false,
     say = () => {}
   }: InitOptions = {}): Promise<InitReport> {
     const { main } = this
@@ -271,11 +304,15 @@ export class RepoInit {
     const pluginReport = plugin ? this.pluginStep({ dryRun }) : undefined
     const configFile = join(main, EpicConfig.FILE)
     const hadConfig = existsSync(configFile)
-    const settings = hadConfig ? new EpicConfig(main).settings : EpicConfig.defaultsFor(main)
+    const found = hadConfig ? new EpicConfig(main).settings : EpicConfig.defaultsFor(main)
+    const protection = RepoInit.protectionStep({ main, configFile, hadConfig, settings: found, protectedBase })
+    const settings = { ...found, baseBranchProtected: protection.on }
     if (!hadConfig && !dryRun) {
       mkdirSync(dirname(configFile), { recursive: true })
       writeFileSync(configFile, RepoInit.configText(settings))
     }
+    if (hadConfig && !dryRun && (protection.action === "flag" || protection.action === "detected"))
+      RepoInit.keepProtected(configFile)
     const content = join(main, settings.contentFolder)
     const folders = settings.sharedFolders
     const report: InitReport = {
@@ -286,6 +323,7 @@ export class RepoInit {
       links: [],
       remote: { action: "skipped" },
       gitignore: { file: join(main, ".gitignore"), action: "ok" },
+      protection,
       person: RepoInit.personStep({ dryRun, name }),
       ...(pluginReport && { plugin: pluginReport })
     }
@@ -384,6 +422,7 @@ export class RepoInit {
    * - only those files, whatever else is staged (`git commit -- <files>`);  none changed:  `none`
    * - on another branch:  `other branch`, nothing committed (a worktree branches from the base branch)
    * - pushed (`pushBranch()`):  to the branch's upstream, else `origin`;  neither:  committed, nothing to push to
+   * - a base branch that takes only pull requests:  `commitViaPullRequest()` instead, NEVER a commit on it
    * - NEVER throws:  a failed commit is `failed`, a failed push `push:  "failed"`, with git's words
    * - SIDE EFFECT (not `dryRun`):  a commit in the repo, a push
    */
@@ -396,6 +435,7 @@ export class RepoInit {
     ask: boolean
     say?: (text: string) => void
   }): Promise<CommitReport> {
+    if (report.config.settings.baseBranchProtected) return RepoInit.commitViaPullRequest({ report, ask, say })
     const { main, dryRun } = report
     const base = report.config.settings.baseBranch
     const files = RepoInit.changedFiles(report)
@@ -413,9 +453,223 @@ export class RepoInit {
     return { action: "committed", files, branch, ...RepoInit.pushBranch(main, branch, say) }
   }
 
-  /** The files `epic init` changed in the repo, still to commit:  the config, `.gitignore`. */
-  static changedFiles({ main }: Pick<InitReport, "main">): string[] {
-    return [EpicConfig.FILE, ".gitignore"].filter((file) => Git.out(["status", "--porcelain", "--", file], main))
+  /**
+   * The files `epic init` wrote, for a base branch that takes only pull requests:  committed on a new branch
+   * (`SETUP_BRANCH`) WITHOUT touching the base branch, pushed, a pull request opened;  what it did.
+   * - asks first in a terminal, `y` suggested;  with no terminal, yes
+   * - on another branch:  `other branch`, nothing done
+   * - a commit of `epic init`'s own on the base branch, not pushed (a run before this setting was on, its push refused):
+   *   taken back first, keeping its files (`undoOwnCommit()`)
+   * - the branch is made without checking it out (`commitOnSetupBranch()`), then the base branch's checkout put back as
+   *   it was (`restoreBase()`):  so "safe to run again", whatever else is staged or changed
+   * - the pull request:  `gh pr create` when `gh` is logged in;  else `pullRequestError` says why, and the lines say what
+   *   to run
+   * - NEVER throws
+   * - SIDE EFFECT (not `dryRun`):  a branch, a push, a pull request, the two files out of the checkout
+   */
+  static async commitViaPullRequest({
+    report,
+    ask,
+    say = () => {}
+  }: {
+    report: InitReport
+    ask: boolean
+    say?: (text: string) => void
+  }): Promise<CommitReport> {
+    const { main, dryRun } = report
+    const base = report.config.settings.baseBranch
+    const via = { viaPullRequest: true, base }
+    const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], main) ?? ""
+    if (!dryRun && branch === base) RepoInit.undoOwnCommit(main, base)
+    const files = RepoInit.changedFiles(report)
+    if (!files.length) return { action: "none", files, branch: base, ...via }
+    if (branch !== base) return { action: "other branch", files, branch, ...via }
+    if (dryRun) return { action: "would branch", files, branch: SETUP_BRANCH, ...via }
+    const question = `Put ${files.join(" and ")} on a new branch ${SETUP_BRANCH}, push it, and open a pull request?`
+    const answer = ask ? await CLI.ask(question, { suggestion: "y" }) : "y"
+    if (/^n/i.test(answer.trim())) return { action: "declined", files, branch, ...via }
+    try {
+      RepoInit.commitOnSetupBranch(main, base, files)
+      RepoInit.restoreBase(main, files, report.config.settings.sharedFolders)
+    } catch (error) {
+      return { action: "failed", files, branch: SETUP_BRANCH, error: (error as Error).message, ...via }
+    }
+    const pushed = RepoInit.pushBranch(main, SETUP_BRANCH, say)
+    const done: CommitReport = { action: "on branch", files, branch: SETUP_BRANCH, ...via, ...pushed }
+    return pushed.push === "pushed" ? { ...done, ...RepoInit.pullRequestStep(main, base, say) } : done
+  }
+
+  /**
+   * Take back `epic init`'s own commit from base branch `base`, when it's its last commit and the only one `origin`'s
+   * lacks:  an earlier run's, its push refused.  Its files stay, uncommitted.
+   * - anything else on the branch that `origin`'s lacks:  left alone
+   * - SIDE EFFECT:  `git reset --mixed HEAD~1`
+   */
+  private static undoOwnCommit(main: string, base: string): void {
+    if (Git.out(["rev-list", "--count", `refs/remotes/origin/${base}..${base}`], main) !== "1") return
+    if (Git.out(["log", "-1", "--format=%s", base], main) !== COMMIT_MESSAGE) return
+    Git.run(["reset", "-q", "--mixed", "HEAD~1"], main)
+  }
+
+  /**
+   * `files`, as they are on disk, committed on `SETUP_BRANCH`:  with a temporary index, so HEAD, the checkout's own
+   * index and any other change there are never touched.
+   * - from `base`, or on top of the branch when it holds work `base` doesn't (a run before, its pull request open)
+   * - nothing new to commit:  the branch stays
+   * - throws a `GitError` when git can't
+   * - SIDE EFFECT:  a commit, and the branch made or moved
+   */
+  private static commitOnSetupBranch(main: string, base: string, files: string[]): void {
+    const tip = Git.out(["rev-parse", "--verify", "--quiet", `refs/heads/${SETUP_BRANCH}`], main)
+    const parent =
+      tip && !Git.run(["merge-base", "--is-ancestor", tip, base], main).ok
+        ? tip
+        : Git.mustRun(["rev-parse", base], main)
+    const folder = mkdtempSync(join(tmpdir(), "epic-setup-"))
+    const env = { ...process.env, GIT_INDEX_FILE: join(folder, "index") }
+    try {
+      Git.mustRun(["read-tree", parent], main, { env })
+      for (const file of files) {
+        const blob = Git.mustRun(["hash-object", "-w", "--", file], main)
+        Git.mustRun(["update-index", "--add", "--cacheinfo", `100644,${blob},${file}`], main, { env })
+      }
+      const tree = Git.mustRun(["write-tree"], main, { env })
+      if (tree === Git.out(["rev-parse", `${parent}^{tree}`], main)) return
+      const commit = Git.mustRun(["commit-tree", tree, "-p", parent, "-m", COMMIT_MESSAGE], main)
+      Git.mustRun(["update-ref", `refs/heads/${SETUP_BRANCH}`, commit], main)
+    } finally {
+      rmSync(folder, { recursive: true, force: true })
+    }
+  }
+
+  /**
+   * Put the base branch's checkout back:  `files` as HEAD has them, or gone when it hasn't any, so `git status` is clean.
+   * - the links `init()` made (`links`) are listed in `.git/info/exclude`:  the `.gitignore` that names them is on the
+   *   setup branch until it's merged
+   * - throws a `GitError` when git can't
+   * - SIDE EFFECT:  the two files, the exclude file
+   */
+  private static restoreBase(main: string, files: string[], links: string[]): void {
+    for (const file of files) {
+      if (Git.run(["cat-file", "-e", `HEAD:${file}`], main).ok) Git.mustRun(["checkout", "HEAD", "--", file], main)
+      else {
+        Git.run(["rm", "-q", "--cached", "--ignore-unmatch", "--", file], main)
+        rmSync(join(main, file), { force: true })
+      }
+    }
+    try {
+      rmdirSync(join(main, dirname(EpicConfig.FILE)))
+    } catch {
+      // holds other files, or is gone:  it stays as it is
+    }
+    const exclude = join(main, ".git", "info", "exclude")
+    const listed = existsSync(exclude) ? readFileSync(exclude, "utf8").split("\n") : []
+    const missing = links.map((link) => `/${link}`).filter((line) => !listed.includes(line))
+    if (!missing.length) return
+    mkdirSync(dirname(exclude), { recursive: true })
+    appendFileSync(exclude, `${EXCLUDE_NOTE}\n${missing.join("\n")}\n`)
+  }
+
+  /**
+   * The pull request for `SETUP_BRANCH`, opened with `gh`:  its address, or why not.
+   * - NEVER throws
+   * - SIDE EFFECT:  a pull request on GitHub
+   */
+  private static pullRequestStep(
+    main: string,
+    base: string,
+    say: (text: string) => void
+  ): Pick<CommitReport, "pullRequest" | "pullRequestError"> {
+    const status = GitHub.status()
+    if (status === "missing") return { pullRequestError: "GitHub's command, gh, isn't installed" }
+    if (status === "logged-out") return { pullRequestError: "gh isn't logged in to GitHub" }
+    say("opening the pull request…")
+    try {
+      return {
+        pullRequest: GitHub.openPullRequest({ branch: SETUP_BRANCH, base, title: PR_TITLE, body: PR_BODY, cwd: main })
+      }
+    } catch (error) {
+      return { pullRequestError: (error as Error).message }
+    }
+  }
+
+  /**
+   * Whether the base branch takes only pull requests, and how that's known;  what `init()` puts in the config.
+   * - already on in the config, or in the setup branch's (run again, its pull request not merged yet):  `config`
+   * - `protectedBase` (`--protected-base`):  `flag`
+   * - else GitHub's word (`githubRequiresPullRequest()`):  `detected`;  no such rule:  `off`
+   * - a config that says `false` in so many words stays so (a file already there is kept):  `says off`, and a note
+   * - NEVER throws:  failing to find out is `off`, never a failed init
+   */
+  static protectionStep({
+    main,
+    configFile,
+    hadConfig,
+    settings,
+    protectedBase
+  }: {
+    main: string
+    configFile: string
+    hadConfig: boolean
+    settings: EpicSettings
+    protectedBase: boolean
+  }): ProtectionReport {
+    if (settings.baseBranchProtected || RepoInit.setupBranchSaysProtected(main)) return { action: "config", on: true }
+    if (protectedBase) return { action: "flag", on: true }
+    try {
+      if (!RepoInit.githubRequiresPullRequest(main, settings.baseBranch)) return { action: "off", on: false }
+      const written = hadConfig ? (EpicConfig.parse(readFileSync(configFile, "utf8"), configFile) as object) : {}
+      return "baseBranchProtected" in written ? { action: "says off", on: false } : { action: "detected", on: true }
+    } catch {
+      return { action: "off", on: false }
+    }
+  }
+
+  /** Whether `SETUP_BRANCH`, when there is one, holds a config with `baseBranchProtected` on. */
+  private static setupBranchSaysProtected(main: string): boolean {
+    const text = Git.out(["show", `refs/heads/${SETUP_BRANCH}:${EpicConfig.FILE}`], main)
+    if (!text) return false
+    try {
+      return EpicConfig.settingsFrom(text, EpicConfig.FILE, main).baseBranchProtected
+    } catch {
+      return false
+    }
+  }
+
+  /** Whether GitHub, as `gh` can see it, requires a pull request into `base` of checkout `main`'s `origin`. */
+  private static githubRequiresPullRequest(main: string, base: string): boolean {
+    const origin = Git.out(["remote", "get-url", "origin"], main)
+    const repo = origin ? GitHub.repoIn(origin) : undefined
+    return repo !== undefined && GitHub.status() === "ready" && GitHub.requiresPullRequest(repo, base)
+  }
+
+  /**
+   * Turn `baseBranchProtected` on in config file `file`, keeping the rest as written.
+   * - the line `epic init` writes is changed in place;  a file without one gets the key through `DataFile`
+   * - SIDE EFFECT:  writes the file
+   */
+  static keepProtected(file: string): void {
+    const text = readFileSync(file, "utf8")
+    const line = /^(\s*"baseBranchProtected":\s*)false/m
+    if (line.test(text)) writeFileSync(file, text.replace(line, "$1true"))
+    else DataFile.edit<Record<string, unknown>>(file, (settings) => ({ ...settings, baseBranchProtected: true }))
+  }
+
+  /** What the commit section says first:  why `epic init` asks to commit, or to open a pull request. */
+  static commitHeader({ config }: Pick<InitReport, "config">): string {
+    return config.settings.baseBranchProtected ? PULL_REQUEST_HEADER : COMMIT_HEADER
+  }
+
+  /**
+   * The files `epic init` changed in the repo, still to commit:  the config, `.gitignore`.
+   * - a dry run wrote nothing:  the ones it would have count too
+   */
+  static changedFiles({ main, dryRun, config, gitignore }: ChangedFilesInput): string[] {
+    const wouldWrite = (file: string) =>
+      dryRun && (file === EpicConfig.FILE ? config?.action === "written" : gitignore?.action !== "ok")
+    return [EpicConfig.FILE, ".gitignore"].filter(
+      (file) => wouldWrite(file) || Git.out(["status", "--porcelain", "--", file], main)
+    )
   }
 
   /** Where `branch` of checkout `main` pushes:  its upstream (`git push`), else `origin`;  none:  `undefined`. */
@@ -723,6 +977,9 @@ export class RepoInit {
   "contentRemote": ${value("contentRemote")},
   // the branch worktrees start from and merge into
   "baseBranch": ${value("baseBranch")},
+  // whether that branch can't be pushed to, and work reaches it only through a pull request:
+  // epic init opens one, epic merge refuses, and the skills finish with a pull request
+  "baseBranchProtected": ${value("baseBranchProtected")},
   // where new worktrees go, one folder each:  <worktreesFolder>/<name>
   "worktreesFolder": ${value("worktreesFolder")},
   // what makes a new worktree ready to run, from its root ("":  nothing to install)
@@ -731,7 +988,7 @@ export class RepoInit {
   "installOnCreate": ${value("installOnCreate")},
   // the seconds that install may take
   "installTimeout": ${value("installTimeout")},
-  // folders that are yarn projects of their own, outside that install (a \`vscode/\` extension), from a worktree's
+  // folders that are projects of their own, outside that install (a \`vscode/\` extension), from a worktree's
   // root:  installCommand runs in each too
   "extraInstalls": ${value("extraInstalls")},
   // the VS Code windows:  the window file a worktree's window is opened from, the folder names a window shows,
@@ -809,7 +1066,7 @@ export class RepoInit {
       ...RepoInit.fileLines(report),
       ...RepoInit.noteLines(report),
       ...(report.commit?.action && report.commit.action !== "none"
-        ? ["", chalk.bold(COMMIT_HEADER), ...RepoInit.commitResultLines(report.commit)]
+        ? ["", chalk.bold(RepoInit.commitHeader(report)), ...RepoInit.commitResultLines(report.commit)]
         : []),
       ...RepoInit.doneLines(report)
     ]
@@ -919,20 +1176,31 @@ export class RepoInit {
 
   /** What needs a word of its own, under the files:  the epic repo's problems, the colour's, no name. */
   static noteLines(report: InitReport): string[] {
-    const notes = [...remoteNotesFor(report), ...colorNotesFor(report.color)]
+    const notes = [...protectionNotesFor(report), ...remoteNotesFor(report), ...colorNotesFor(report.color)]
     if (report.person.action === "none") notes.push("no name yet (git has no user.name):  epic whoami <name> keeps one")
     if (!notes.length) return []
     return ["", chalk.bold("Note:"), ...notes]
   }
 
   /** What the commit came to (`commitStep()`), under its question. */
-  static commitResultLines({ action, files, branch, error, push, pushError }: CommitReport): string[] {
+  static commitResultLines(commit: CommitReport): string[] {
+    const { action, files, branch, error, push, pushError } = commit
     const named = files.join(" and ")
+    if (commit.viaPullRequest) return viaPullRequestLines(commit)
     switch (action) {
       case "committed":
         if (push === "pushed") return ["> Committed and pushed"]
         if (push === "failed")
-          return [`> Committed;  the push failed:  ${pushError}`, `  push it by hand:  git push origin ${branch}`]
+          return [
+            `> Committed;  the push failed:  ${pushError}`,
+            `  push it by hand:  git push origin ${branch}`,
+            ...(PUSH_REFUSED.test(pushError ?? "")
+              ? [
+                  `  or, if ${branch} takes only pull requests:  epic init --protected-base ` +
+                    "(it moves this commit onto a branch, and opens one)"
+                ]
+              : [])
+          ]
         return ["> Committed;  no remote to push to"]
       case "would commit":
         return [`> would commit ${named} on ${branch}, and push it`]
@@ -954,6 +1222,7 @@ export class RepoInit {
   static doneLines(report: InitReport): string[] {
     if (report.dryRun) return ["", "dry run:  nothing changed"]
     if (report.content.action === "missing") return []
+    if (report.commit?.action === "on branch") return ["", chalk.green.bold(DONE_ONCE_MERGED)]
     const editor = Editor.of({ setting: report.config.settings.editor })
     const { server, main } = report
     const browser =
@@ -997,6 +1266,63 @@ function remoteRowsFor({ action, address, repo, visibility, error }: RemoteRepor
       return [["shared with", address ?? ""]]
     default:
       return []
+  }
+}
+
+/** What `epic init` says about a base branch that takes only pull requests:  how it knows, or a config against it. */
+function protectionNotesFor({ protection, config }: InitReport): string[] {
+  const base = config.settings.baseBranch
+  if (protection.action === "detected")
+    return [`GitHub requires a pull request into ${base}:  baseBranchProtected is on (${EpicConfig.FILE})`]
+  if (protection.action === "says off")
+    return [
+      `GitHub requires a pull request into ${base}, but ${EpicConfig.FILE} says baseBranchProtected false:  ` +
+        "epic init --protected-base turns it on"
+    ]
+  return []
+}
+
+/** What the commit came to, for a base branch that takes only pull requests:  what happened, and what's left to do. */
+function viaPullRequestLines(commit: CommitReport): string[] {
+  const { action, files, branch, error, push, pushError, pullRequest, pullRequestError, base } = commit
+  const named = files.join(" and ")
+  const openIt = [`  gh pr create --base ${base} --head ${SETUP_BRANCH} --fill`]
+  const merged = [
+    `> Once it's merged:  git pull on ${base}, and epics work here;  teammates can join then (epic init in their clone)`
+  ]
+  switch (action) {
+    case "on branch": {
+      const said = [`> ${named} are on branch ${SETUP_BRANCH};  your ${base} is as it was`]
+      if (push === "failed")
+        return [
+          ...said,
+          `> The push failed:  ${pushError}`,
+          "  to finish:",
+          `  git push -u origin ${SETUP_BRANCH}`,
+          ...openIt,
+          ...merged
+        ]
+      if (push === "nowhere")
+        return [
+          ...said,
+          `> No remote to push to:  push ${SETUP_BRANCH} once there is, and open a pull request`,
+          ...merged
+        ]
+      if (pullRequest) return [...said, `> Pull request:  ${pullRequest}`, ...merged]
+      return [...said, `> Pushed;  no pull request yet (${pullRequestError}).  To open one:`, ...openIt, ...merged]
+    }
+    case "would branch":
+      return [
+        `> would put ${named} on a new branch ${SETUP_BRANCH}, push it and open a pull request;  ${base} stays as it is`
+      ]
+    case "declined":
+      return [`> Not done:  ${base} takes only pull requests, so ${named} need one before epics work here`]
+    case "other branch":
+      return [`> Not done:  you're on ${branch};  run epic init on ${base}, which puts ${named} on a new branch`]
+    case "failed":
+      return [`> Couldn't put ${named} on branch ${SETUP_BRANCH}:  ${error}`]
+    default:
+      /* case "none" */ return []
   }
 }
 
@@ -1083,6 +1409,8 @@ export type InitReport = {
   remote: RemoteReport
   links: { path: string; action: string }[]
   gitignore: { file: string; action: "ok" | "updated" | "written" }
+  /** whether the base branch takes only pull requests, and how that's known (`protectionStep()`) */
+  protection: ProtectionReport
   /** the name this machine's person goes by:  `kept` now, kept `already`, `would keep` (a dry run), or `none` */
   person: { name: string | undefined; action: "kept" | "already" | "would keep" | "none" }
   /** the epic plugin (`pluginStep()`);  none with `--no-plugin` */
@@ -1098,14 +1426,23 @@ export type InitReport = {
 /**
  * What `epic init` did about committing the files it wrote in the repo (`RepoInit.commitStep()`):
  * `committed`, `would commit`, `declined` (asked, and no), `other branch` (not the base branch), `failed`,
- * `none` (nothing to commit)
+ * `none` (nothing to commit);  for a base branch that takes only pull requests, `on branch` (`SETUP_BRANCH`) and
+ * `would branch` in place of the commits
  */
 export type CommitReport = {
-  action: "committed" | "would commit" | "declined" | "other branch" | "failed" | "none"
+  action: "committed" | "would commit" | "on branch" | "would branch" | "declined" | "other branch" | "failed" | "none"
   /** the files, from the repo's root:  the config, `.gitignore` */
   files: string[]
-  /** the branch the repo is on (the base branch, unless `other branch`) */
+  /** the branch the repo is on (the base branch, unless `other branch`), or the setup branch */
   branch: string
+  /** the base branch takes only pull requests:  `commitViaPullRequest()` did this */
+  viaPullRequest?: boolean
+  /** the base branch, with `viaPullRequest` */
+  base?: string
+  /** the pull request's address */
+  pullRequest?: string
+  /** why there's none yet:  no `gh`, logged out, or gh's words */
+  pullRequestError?: string
   /** why it failed */
   error?: string
   /** after the commit:  `pushed`, `nowhere` (no upstream, no `origin`), or `failed` (`pushError`, git's words) */
@@ -1113,6 +1450,16 @@ export type CommitReport = {
   /** why the push failed */
   pushError?: string
 }
+
+/**
+ * Whether the base branch takes only pull requests (`RepoInit.protectionStep()`):  `on`, and how that's known:
+ * `config` (it says so), `flag` (`--protected-base`), `detected` (GitHub says so), `off`, or `says off` (GitHub requires
+ * one, but the config says `false`, and stays so)
+ */
+export type ProtectionReport = { action: "config" | "flag" | "detected" | "off" | "says off"; on: boolean }
+
+/** What `RepoInit.changedFiles()` reads off the report. */
+export type ChangedFilesInput = Pick<InitReport, "main"> & Partial<Pick<InitReport, "dryRun" | "config" | "gitignore">>
 
 /** What `epic init`'s questions came to (`RepoInit.questions()`):  `init()`'s answers, and the summary. */
 export type Answers = Pick<InitOptions, "name" | "color" | "contentRepo" | "visibility" | "cloned"> & {
@@ -1275,6 +1622,8 @@ export type InitOptions = {
   commit?: boolean
   /** the team's plans cloned already (`questions()`, for the colours they hold):  reported as `cloned` */
   cloned?: boolean
+  /** the base branch takes only pull requests (`--protected-base`);  default `false`:  GitHub's word, else off */
+  protectedBase?: boolean
   /** a progress line, before each slow step (a clone, GitHub, a push, the server);  default:  nothing said */
   say?: (text: string) => void
 }
@@ -1331,11 +1680,36 @@ const README_EPICS = "https://github.com/spell-app/spell/blob/main/README-epics.
 /** `epic init`'s line, in colour, once the repo is set up. */
 const DONE = "Epics initialized!"
 
+/** `epic init`'s line, in colour, when what's left is a pull request to merge. */
+const DONE_ONCE_MERGED = "Epics are set up, and start here once that pull request is merged."
+
 /** The files section's head. */
 const FILES_HEAD = "Setting up epic files:"
 
 /** The commit section's head:  why `epic init` asks to commit in the code repo. */
 const COMMIT_HEADER = "We need to make a commit in the main repo to enable epics."
+
+/** What the commit section says first when the base branch takes only pull requests. */
+const PULL_REQUEST_HEADER = "This repo takes only pull requests into its base branch, so epics are enabled through one."
+
+/** The branch `epic init` puts its two files on, for a base branch that takes only pull requests. */
+const SETUP_BRANCH = "epic-setup"
+
+/** The pull request `epic init` opens:  its title. */
+const PR_TITLE = "Set up epics"
+
+/** The pull request `epic init` opens:  its body. */
+const PR_BODY =
+  "Adds `.epic/config.json5` and the `.gitignore` lines that the `epic` tooling needs, nothing else.\n\n" +
+  "Once this is merged:  `git pull` on the base branch, and teammates can run `epic init`.\n\n" +
+  "The epic pages live in a repo of their own beside this one, which needs direct pushes:  " +
+  "if an org-wide rule requires pull requests, it must leave that repo out."
+
+/** The comment above the links `epic init` excludes until its pull request is merged (`restoreBase()`). */
+const EXCLUDE_NOTE = "# epic init:  its links, until the pull request that lists them in .gitignore is merged"
+
+/** A push git's server refused, rather than one that never got there. */
+const PUSH_REFUSED = /rejected|declined|protected|pull request|GH0\d\d/i
 
 /** How long a push of the base branch may take:  a network call, longer than git's local default. */
 const PUSH_TIMEOUT = 120_000

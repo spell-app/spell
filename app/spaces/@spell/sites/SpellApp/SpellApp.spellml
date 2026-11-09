@@ -1,17 +1,10 @@
 <!--
-  Spell's own app as a site:  a page per screen, each showing a picture of how it looks today.
-  What opens over a page is a dialog or a sidebar, opened from the buttons above its picture.
+  Spell's own app as a site:  a page per screen, each with a thumbnail of how it looks today.
+  What opens over a page is a dialog or a sidebar, opened from the buttons above its thumbnail.
   Most addresses name a project, so they aren't in the navigation:  Home links to one of each.
 -->
 
-<spell-view "picture">
-	<property "file" description="The picture's file, in snapshots/, without its .jpg">text</property>
-	<draw>
-		<image src={"/spaces/@spell/sites/SpellApp/snapshots/" + its file + ".jpg"}/>
-	</draw>
-</>
-
-<spell-page "home page">
+<spell-page "home page" thumbnail="snapshots/home.jpg">
 	<spell-stories>
 		- [x] open an example, a guide, a notebook or one of my projects from its card
 		- [x] start from a blank app, a small starter or Solitaire
@@ -28,31 +21,25 @@
 			<link link={"/site/@spell/examples/StarWarsSite"}>The site editor</link>
 			<link link={"/apps/@spell/examples/TaskList"}>A hosted app</link>
 		</stack>
-		draw (a new picture with file = "home")
+		draw its thumbnail
 	</draw>
 </>
 
-<spell-page "notebook page">
+<spell-page "notebook page" thumbnail="snapshots/notebook.jpg">
 	<spell-stories>
 		- [x] read a notebook, its words and its code in cells
 	</>
 	<property "notebook" description="What the address names">text</property>
-	<draw>
-		draw (a new picture with file = "notebook")
-	</draw>
 </>
 
-<spell-page "guide page">
+<spell-page "guide page" thumbnail="snapshots/guide.jpg">
 	<spell-stories>
 		- [x] read a guide in the editor, its words as the comments of its spell file
 	</>
 	<property "guide" description="What the address names">text</property>
-	<draw>
-		draw (a new picture with file = "guide")
-	</draw>
 </>
 
-<spell-page "code editor page">
+<spell-page "code editor page" thumbnail="snapshots/edit.jpg">
 	<spell-stories>
 		- [x] change the code in its file tabs, with the running app beside it
 		- [x] see the program's output, its compiled code and what I can use, in the Program panel under the code
@@ -75,22 +62,19 @@
 			<button appearance="basic" onClick={show the publish clash dialog}>Publish Clash</button>
 			<button appearance="basic" onClick={show the person dialog}>You</button>
 		</stack>
-		draw (a new picture with file = "edit")
+		draw its thumbnail
 	</draw>
 </>
 
-<spell-page "running app page">
+<spell-page "running app page" thumbnail="snapshots/run.jpg">
 	<spell-stories>
 		- [x] use the program by itself, with no code showing
 		- [x] restart it
 	</>
 	<property "project" description="What the address names">text</property>
-	<draw>
-		draw (a new picture with file = "run")
-	</draw>
 </>
 
-<spell-page "site editor page">
+<spell-page "site editor page" thumbnail="snapshots/site-pages.jpg">
 	<spell-stories>
 		- [x] see a site's pages as a tree and a board of cards
 		- [x] drag a row to move a page, with its pages
@@ -103,21 +87,18 @@
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the site data sidebar}>Data</button>
 		</stack>
-		draw (a new picture with file = "site-pages")
+		draw its thumbnail
 	</draw>
 </>
 
-<spell-page "theme editor page">
+<spell-page "theme editor page" thumbnail="snapshots/theme.jpg">
 	<spell-stories>
 		- [x] change a theme and see it on real pages
 		- [x] save it by name, to pick from every theme menu
 	</>
-	<draw>
-		draw (a new picture with file = "theme")
-	</draw>
 </>
 
-<spell-page "hosted app page">
+<spell-page "hosted app page" thumbnail="snapshots/hosted-program.jpg">
 	<spell-stories>
 		- [x] use a program at its own address on Spell's cloud
 	</>
@@ -126,122 +107,67 @@
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the sign-in dialog}>Sign In</button>
 		</stack>
-		draw (a new picture with file = "hosted-program")
+		draw its thumbnail
 	</draw>
 </>
 
-<spell-page "terms page">
+<spell-page "terms page" thumbnail="snapshots/terms.jpg">
 	<spell-stories>
 		- [x] read Spell's terms
 	</>
-	<draw>
-		draw (a new picture with file = "terms")
-	</draw>
 </>
 
-<spell-view "inspector sidebar">
-	<draw>
-		draw (a new picture with file = "inspector")
-	</draw>
-</>
+<spell-view "inspector sidebar" thumbnail="snapshots/inspector.jpg"/>
 
-<spell-view "palette sidebar">
-	<draw>
-		draw (a new picture with file = "palette")
-	</draw>
-</>
+<spell-view "palette sidebar" thumbnail="snapshots/palette.jpg"/>
 
-<spell-view "site data sidebar">
-	<draw>
-		draw (a new picture with file = "site-data")
-	</draw>
-</>
+<spell-view "site data sidebar" thumbnail="snapshots/site-data.jpg"/>
 
-<spell-view "project settings dialog">
-	<draw>
-		draw (a new picture with file = "project-settings")
-	</draw>
-</>
+<spell-view "project settings dialog" thumbnail="snapshots/project-settings.jpg"/>
 
-<spell-view "code settings dialog">
-	<draw>
-		draw (a new picture with file = "code-settings")
-	</draw>
-</>
+<spell-view "code settings dialog" thumbnail="snapshots/code-settings.jpg"/>
 
-<spell-view "project versions dialog">
-	<draw>
-		draw (a new picture with file = "versions")
-	</draw>
-</>
+<spell-view "project versions dialog" thumbnail="snapshots/versions.jpg"/>
 
-<spell-view "new file dialog">
-	<draw>
-		draw (a new picture with file = "new-file")
-	</draw>
-</>
+<spell-view "new file dialog" thumbnail="snapshots/new-file.jpg"/>
 
-<spell-view "new project dialog">
-	<draw>
-		draw (a new picture with file = "new-project")
-	</draw>
-</>
+<spell-view "new project dialog" thumbnail="snapshots/new-project.jpg"/>
 
-<spell-view "duplicate project dialog">
-	<draw>
-		draw (a new picture with file = "duplicate-project")
-	</draw>
-</>
+<spell-view "duplicate project dialog" thumbnail="snapshots/duplicate-project.jpg"/>
 
-<spell-view "change this dialog">
-	<draw>
-		draw (a new picture with file = "change-this")
-	</draw>
-</>
+<spell-view "change this dialog" thumbnail="snapshots/change-this.jpg"/>
 
-<spell-view "publish clash dialog">
-	<draw>
-		draw (a new picture with file = "publish-clash")
-	</draw>
-</>
+<spell-view "publish clash dialog" thumbnail="snapshots/publish-clash.jpg"/>
 
-<spell-view "person dialog">
-	<draw>
-		draw (a new picture with file = "you")
-	</draw>
-</>
+<spell-view "person dialog" thumbnail="snapshots/you.jpg"/>
 
-<spell-view "sign-in dialog">
-	<draw>
-		draw (a new picture with file = "sign-in")
-	</draw>
-</>
+<spell-view "sign-in dialog" thumbnail="snapshots/sign-in.jpg"/>
 
 <spell-site "spell app">
-	<page "home page" address="/" title="Home" state="old" picture="snapshots/home.jpg" color="red"/>
-	<page "notebook page" address="/edit/@spell/guides/SpellUI/:notebook*" title="Notebook" state="old" picture="snapshots/notebook.jpg" color="orange"/>
-	<page "guide page" address="/edit/@spell/guides/:guide" title="Guide" state="old" picture="snapshots/guide.jpg" color="yellow"/>
-	<page "code editor page" address="/edit/:project*" title="Edit" state="old" picture="snapshots/edit.jpg" color="olive">
-		<page "running app page" address="/run/:project*" title="Run" state="old" picture="snapshots/run.jpg"/>
+	<page "home page" address="/" title="Home" state="old" color="red"/>
+	<page "notebook page" address="/edit/@spell/guides/SpellUI/:notebook*" title="Notebook" state="old" color="orange"/>
+	<page "guide page" address="/edit/@spell/guides/:guide" title="Guide" state="old" color="yellow"/>
+	<page "code editor page" address="/edit/:project*" title="Edit" state="old" color="olive">
+		<page "running app page" address="/run/:project*" title="Run" state="old"/>
 	</>
-	<page "site editor page" address="/site/:project*" title="Site Editor" state="old" picture="snapshots/site-pages.jpg" color="green"/>
-	<page "theme editor page" address="/theme" title="Theme Editor" state="old" picture="snapshots/theme.jpg" color="teal"/>
-	<page "hosted app page" address="/apps/:project*" title="Hosted App" state="old" picture="snapshots/hosted-program.jpg" color="blue">
-		<page "terms page" address="/terms" title="Terms" state="old" picture="snapshots/terms.jpg"/>
+	<page "site editor page" address="/site/:project*" title="Site Editor" state="old" color="green"/>
+	<page "theme editor page" address="/theme" title="Theme Editor" state="old" color="teal"/>
+	<page "hosted app page" address="/apps/:project*" title="Hosted App" state="old" color="blue">
+		<page "terms page" address="/terms" title="Terms" state="old"/>
 	</>
-	<sidebar "inspector sidebar" picture="snapshots/inspector.jpg"/>
-	<sidebar "palette sidebar" picture="snapshots/palette.jpg"/>
-	<sidebar "site data sidebar" picture="snapshots/site-data.jpg"/>
-	<dialog "project settings dialog" picture="snapshots/project-settings.jpg"/>
-	<dialog "code settings dialog" picture="snapshots/code-settings.jpg"/>
-	<dialog "project versions dialog" picture="snapshots/versions.jpg"/>
-	<dialog "new file dialog" picture="snapshots/new-file.jpg"/>
-	<dialog "new project dialog" picture="snapshots/new-project.jpg"/>
-	<dialog "duplicate project dialog" picture="snapshots/duplicate-project.jpg"/>
-	<dialog "change this dialog" picture="snapshots/change-this.jpg"/>
-	<dialog "publish clash dialog" picture="snapshots/publish-clash.jpg"/>
-	<dialog "person dialog" picture="snapshots/you.jpg"/>
-	<dialog "sign-in dialog" picture="snapshots/sign-in.jpg"/>
+	<sidebar "inspector sidebar"/>
+	<sidebar "palette sidebar"/>
+	<sidebar "site data sidebar"/>
+	<dialog "project settings dialog"/>
+	<dialog "code settings dialog"/>
+	<dialog "project versions dialog"/>
+	<dialog "new file dialog"/>
+	<dialog "new project dialog"/>
+	<dialog "duplicate project dialog"/>
+	<dialog "change this dialog"/>
+	<dialog "publish clash dialog"/>
+	<dialog "person dialog"/>
+	<dialog "sign-in dialog"/>
 	<page "not found page"/>
 	<page "error page"/>
 </>

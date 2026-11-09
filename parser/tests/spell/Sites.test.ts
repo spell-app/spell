@@ -27,7 +27,7 @@ describe("a site", () => {
     expect(code).toContain(SITE_CLASS)
   })
 
-  test("a page says how far along it is, and where its picture is (T14)", () => {
+  test("a page says how far along it is, and where its thumbnail is (T14)", () => {
     const { code, errors } = compiled(
       [
         'a "films page" is a page where:',
@@ -39,7 +39,7 @@ describe("a site", () => {
         "\t- to draw it:",
         "\t\t<header>Add</header>",
         "galaxy guide is a site:",
-        '\t- it has a "films page" at "/films", named "Films", old, pictured in "snapshots/a.png"',
+        '\t- it has a "films page" at "/films", named "Films", old, thumbnail "snapshots/a.png"',
         '\t\t- it has a "film page" at "/films/one", new',
         '\t- it has a "add film dialog"'
       ],
@@ -47,7 +47,7 @@ describe("a site", () => {
     )
     expect(errors).toEqual([])
     expect(code).toContain('state: "old",')
-    expect(code).toContain('picture: "snapshots/a.png"')
+    expect(code).toContain('thumbnail: "snapshots/a.png"')
     expect(code).toContain('state: "new"')
   })
 
@@ -77,19 +77,88 @@ describe("a site", () => {
     expect(spellx.code).toContain('tags: ["Forms", "Inputs"]')
   })
 
-  test("in spellx, `state=` and `picture=` say the same (T14)", () => {
+  test("in spellx, `state=` and `thumbnail=` say the same (T14)", () => {
     const { code, errors } = compiled(
       [
         '<spell-page "films page"/>',
         '<spell-site "galaxy guide">',
-        '\t<page "films page" address="/films" title="Films" state="old" picture="snapshots/a.png"/>',
+        '\t<page "films page" address="/films" title="Films" state="old" thumbnail="snapshots/a.png"/>',
         "</spell-site>"
       ],
       "/Galaxy.spellml"
     )
     expect(errors).toEqual([])
     expect(code).toContain('state: "old",')
-    expect(code).toContain('picture: "snapshots/a.png"')
+    expect(code).toContain('thumbnail: "snapshots/a.png"')
+  })
+
+  describe("a page's or view's own thumbnail (P16)", () => {
+    test("on its tag, self-closed or with stories:  it has no drawing, so its thumbnail draws", () => {
+      const { code, errors } = compiled(
+        [
+          '<spell-page "terms page" thumbnail="snapshots/t.jpg"/>',
+          '<spell-page "home page" thumbnail="snapshots/h.jpg">',
+          "\t<spell-stories>",
+          "\t\t- [x] open it",
+          "\t</>",
+          "</>",
+          '<spell-view "settings dialog" thumbnail="snapshots/s.jpg"/>'
+        ],
+        "/Pages.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/t\.jpg"/)
+      expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/h\.jpg"/)
+      expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/s\.jpg"/)
+      expect(code).not.toMatch(/\bdraw\(\)/)
+    })
+
+    test("content of its own replaces it:  its body draws, with the thumbnail still known", () => {
+      const { code, errors } = compiled(
+        ['<spell-page "terms page" thumbnail="t.jpg">', "\t<text>Terms</text>", "</>"],
+        "/P.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(code).toMatch(/\bdraw\(\)/)
+    })
+
+    test("in code spell, a line of its body", () => {
+      const { code, errors } = compiled(['a "terms page" is a page where:', '\t- its thumbnail is "t.jpg"'], "/P.spell")
+      expect(errors).toEqual([])
+      expect(code).toMatch(/get thumbnail\(\) \{\s+return "t\.jpg"/)
+    })
+
+    test("a drawing places it:  `draw its thumbnail`, under what else it draws", () => {
+      const { code, errors } = compiled(
+        [
+          '<spell-page "home page" thumbnail="h.jpg">',
+          "\t<draw>",
+          "\t\t<button>Go</button>",
+          "\t\tdraw its thumbnail",
+          "\t</draw>",
+          "</>"
+        ],
+        "/P.spellml"
+      )
+      expect(errors).toEqual([])
+      expect(code).toContain("this.drawThumbnail()")
+    })
+
+    test("a view's own data called thumbnail is still its data, drawn as that thing", () => {
+      const { code, errors } = compiled(
+        [
+          'a "photo" is a view where:',
+          '\t- to "draw it": <div/>',
+          'a "film card" is a view where:',
+          '\t- its "thumbnail" is a photo',
+          "\t- to draw it:",
+          "\t\treturn draw its thumbnail"
+        ],
+        "/P.spell"
+      )
+      expect(errors).toEqual([])
+      expect(code).not.toContain("drawThumbnail")
+    })
   })
 
   test("a card says its place in its section, and its colour;  a dialog under a page too (T31)", () => {

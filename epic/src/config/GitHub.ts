@@ -15,6 +15,8 @@ import { spawnSync } from "node:child_process"
  *
  * - Who runs it:  `EpicHome.refreshGithub()` (the person's login), `epic init` (the epic repo).
  *   Serving a page or running a hook never does:  `gh` may take seconds, or be offline.
+ *   And a repo whose base branch takes only pull requests:  `epic init` opens one, `epic worktree remove --branches`
+ *   asks whether a branch's was merged.
  * - `$SPELL_EPIC_GH` names another `gh` (`command()`):  the tests' stand-ins, or a path to none.
  * - Git itself is the kit's `Git`, never this.
  * - STATIC:  `gh` is the machine's.
@@ -32,9 +34,9 @@ export class GitHub {
    * - `command`:  the `gh` to run, default `command()`
    * - a missing `gh`, a timeout or a failing command is `ok: false`;  NEVER throws
    */
-  static run(args: string[], { command = GitHub.command(), timeout = TIMEOUT_MS }: GhRunOptions = {}): GhResult {
+  static run(args: string[], { command = GitHub.command(), timeout = TIMEOUT_MS, cwd }: GhRunOptions = {}): GhResult {
     try {
-      const run = spawnSync(command, args, { encoding: "utf8", timeout })
+      const run = spawnSync(command, args, { encoding: "utf8", timeout, cwd })
       return {
         ok: run.status === 0,
         out: (run.stdout ?? "").trim(),
@@ -78,6 +80,81 @@ export class GitHub {
     return GITHUB_ADDRESS.exec(address)?.[1]
   }
 
+  /** The GitHub repo in git address `address`, `owner/name`;  `undefined` for an address that isn't GitHub's. */
+  static repoIn(address: string): string | undefined {
+    const match = GITHUB_ADDRESS.exec(address)
+    return match ? `${match[1]}/${match[2]}` : undefined
+  }
+
+  /**
+   * Whether GitHub requires a pull request into `branch` of repo `fullName` (`owner/name`):
+   * a ruleset's `pull_request` rule, or, where this person may read it, classic branch protection's required reviews.
+   * - `false` for anything else:  no rule, no right to read it, offline, `gh` missing.  NEVER throws.
+   */
+  static requiresPullRequest(fullName: string, branch: string): boolean {
+    const path = `repos/${fullName}`
+    const name = encodeURIComponent(branch)
+    const rules = GitHub.json<{ type?: string }[]>(["api", `${path}/rules/branches/${name}`])
+    if (Array.isArray(rules) && rules.some((rule) => rule.type === PULL_REQUEST_RULE)) return true
+    const classic = GitHub.json<{ required_pull_request_reviews?: unknown }>([
+      "api",
+      `${path}/branches/${name}/protection`
+    ])
+    return Boolean(classic?.required_pull_request_reviews)
+  }
+
+  /**
+   * The pull request of branch `branch` into `base` that GitHub merged, as `gh` run in `cwd` reports it:
+   * `{ number, url, head }` (`head`:  its last commit), the newest first;  `[]` when `gh` can't say.  NEVER throws.
+   */
+  static mergedPullRequests(branch: string, base: string, cwd: string): MergedPullRequest[] {
+    const args = [
+      "pr",
+      "list",
+      "--head",
+      branch,
+      "--base",
+      base,
+      "--state",
+      "merged",
+      "--json",
+      "number,url,headRefOid"
+    ]
+    const found = GitHub.json<{ number: number; url: string; headRefOid: string }[]>(args, { cwd, timeout: NETWORK_MS })
+    return Array.isArray(found) ? found.map(({ number, url, headRefOid }) => ({ number, url, head: headRefOid })) : []
+  }
+
+  /**
+   * Open a pull request of `branch` into `base`, from checkout `cwd`:  its address.
+   * - one open already:  that one's address
+   * - throws an `Error` with gh's own words when it can't
+   * - SIDE EFFECT:  a pull request on GitHub
+   */
+  static openPullRequest({ branch, base, title, body, cwd }: OpenPullRequest): string {
+    const open = GitHub.json<{ url: string }[]>(
+      ["pr", "list", "--head", branch, "--base", base, "--state", "open", "--json", "url"],
+      { cwd, timeout: NETWORK_MS }
+    )
+    if (Array.isArray(open) && open[0]?.url) return open[0].url
+    const run = GitHub.run(["pr", "create", "--base", base, "--head", branch, "--title", title, "--body", body], {
+      cwd,
+      timeout: CREATE_TIMEOUT_MS
+    })
+    if (!run.ok) throw new Error(`gh pr create failed:  ${run.err || run.out || "no reason given"}`, { cause: run })
+    return run.out.split("\n").at(-1) ?? ""
+  }
+
+  /** `gh <args>`'s output as JSON;  `undefined` when it failed or wasn't JSON.  NEVER throws. */
+  private static json<T>(args: string[], options?: GhRunOptions): T | undefined {
+    const run = GitHub.run(args, options)
+    if (!run.ok) return undefined
+    try {
+      return JSON.parse(run.out) as T
+    } catch {
+      return undefined
+    }
+  }
+
   /**
    * Make GitHub repo `fullName` (`owner/name`), empty:  private, unless `visibility` says `public`.
    * - throws an `Error` with gh's own words when it can't (a name taken, no right to make one there)
@@ -117,7 +194,15 @@ export type GhRunOptions = {
   command?: string
   /** how long it may take, ms;  default a few seconds:  it may be offline */
   timeout?: number
+  /** where it runs, for what asks about "this repo" (`gh pr ...`);  default the current folder */
+  cwd?: string
 }
+
+/** A pull request GitHub merged:  `GitHub.mergedPullRequests()`;  `head`:  its last commit. */
+export type MergedPullRequest = { number: number; url: string; head: string }
+
+/** What `GitHub.openPullRequest()` takes. */
+export type OpenPullRequest = { branch: string; base: string; title: string; body: string; cwd: string }
 
 /** Whether `gh` can make a repo:  `GitHub.status()`. */
 export type GhStatus = "ready" | "missing" | "logged-out"
@@ -134,11 +219,17 @@ const TIMEOUT_MS = 5000
 /** Who can see a GitHub repo `GitHub.createRepo()` makes:  `gh repo create`'s `--private` / `--public`. */
 export type RepoVisibility = "private" | "public"
 
-/** How long `gh repo create` waits, ms. */
+/** How long `gh repo create` and `gh pr create` wait, ms. */
 const CREATE_TIMEOUT_MS = 30_000
+
+/** How long a question about pull requests waits, ms:  longer than a login's, it pages through them. */
+const NETWORK_MS = 15_000
+
+/** A ruleset rule's `type` that requires a pull request. */
+const PULL_REQUEST_RULE = "pull_request"
 
 /** A GitHub login:  letters, digits and single hyphens, at most 39. */
 const LOGIN = /^[A-Za-z\d](?:[A-Za-z\d]|-(?=[A-Za-z\d])){0,38}$/
 
-/** A GitHub git address, SSH or HTTPS, its owner caught. */
-const GITHUB_ADDRESS = /github\.com[:/]([^/]+)\/[^/]+?(?:\.git)?\/?$/
+/** A GitHub git address, SSH or HTTPS, its owner and name caught. */
+const GITHUB_ADDRESS = /github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?\/?$/

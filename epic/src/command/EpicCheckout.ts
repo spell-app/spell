@@ -1,10 +1,10 @@
 import { existsSync } from "node:fs"
-import { join, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { join } from "node:path"
 
 import { findUp } from "spell/util/node/findUp"
 import { Git } from "spell/server/Git"
 import type { SRV } from "spell/server"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 import { EpicCommandError } from "./command.types"
 
@@ -61,8 +61,8 @@ export class EpicCheckout {
   }
 
   /**
-   * The checkout this code is in:  `src/command/` is two folders down.
+   * The checkout this code is in (`EngineFiles.root`;  the `epic/` of the `spell` package, in an npm install).
    * - static:  where the running `epic`'s own copy of every tool is (`EpicTools`)
    */
-  static readonly CODE_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+  static readonly CODE_ROOT = EngineFiles.root
 }

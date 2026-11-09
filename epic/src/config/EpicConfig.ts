@@ -10,6 +10,7 @@ import JSON5 from "json5"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { peerRepos } from "spell/server/page/settings"
 import { PeopleColors } from "./PeopleColors.ts"
 import { Editor, EDITOR_IDS } from "./Editor.ts"
@@ -79,6 +80,7 @@ export class EpicConfig {
    */
   static readonly DEFAULTS: EpicDefaults = {
     contentRemote: "",
+    baseBranchProtected: false,
     installTimeout: 600,
     extraInstalls: [],
     windows: { worktreeOnly: true, settings: {} },
@@ -107,7 +109,7 @@ export class EpicConfig {
    *   computed as the class loads stopped it starting (epic `epic-engine` I76)
    */
   static get ENGINE_VOICES(): string {
-    return resolve(import.meta.dirname ?? ".", "../../voices")
+    return EngineFiles.path("voices")
   }
 
   /**
@@ -259,6 +261,11 @@ export class EpicConfig {
   /** the branch worktrees start from and merge into */
   get baseBranch(): string {
     return this.settings.baseBranch
+  }
+
+  /** whether the base branch can't be pushed to:  work reaches it only through a pull request */
+  get baseBranchProtected(): boolean {
+    return this.settings.baseBranchProtected
   }
 
   /**
@@ -925,6 +932,7 @@ export class EpicConfig {
       contentFolder: this.contentFolder,
       contentRemote: this.contentRemote,
       baseBranch: this.baseBranch,
+      baseBranchProtected: this.baseBranchProtected,
       worktreesFolder: this.worktreesFolder,
       installCommand: this.installCommand,
       installOnCreate: this.installOnCreate,
@@ -1101,6 +1109,7 @@ export class EpicConfig {
       contentFolder: valueOf(given, "contentFolder", defaults.contentFolder, file),
       contentRemote: valueOf(given, "contentRemote", defaults.contentRemote, file, "", { empty: true }),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
+      baseBranchProtected: valueOf(given, "baseBranchProtected", defaults.baseBranchProtected, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
       installOnCreate: valueOf(given, "installOnCreate", defaults.installOnCreate, file),
@@ -1208,17 +1217,24 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *     epic folder is missing
  * - `baseBranch`:  the branch worktrees start from and merge into (the remote's default branch, from git):
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
+ * - `baseBranchProtected`:  the base branch can't be pushed to, and work reaches it only through a pull request
+ *   (`false`, the default;  `epic init` turns it on with `--protected-base`, or when GitHub says so)
+ *   - `epic init` opens a pull request instead of committing on it;  `epic merge` refuses
+ *   - the worktree hook and `epic worktree merge-main` fast-forward the local base branch from `origin` first
+ *     (`BaseBranch`);  `epic worktree remove --branches` counts a merged pull request as merged (a squash too)
+ *   - the skills' finish reads it:  a pull request in place of a merge
+ *   - NOT the epic repo, whose own branch every turn pushes to:  an org-wide rule must leave it out
  * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`../my-app.worktrees`), one folder each:
  *   the worktree hook, the window script, the epics list, the page server's `/worktrees/<w>/`
  *   - outside the repo since epic `epic-eject` P8:  the old place, `.claude/worktrees`, is still read for the
  *     worktrees left there (`worktreesFolders`)
- * - `installCommand`:  what makes a new worktree ready to run (what the repo's lock file names, `yarn install`):
+ * - `installCommand`:  what makes a new worktree ready to run (what the repo's lock file names, `npm install`):
  *   `/isolate`, `/epic`, the hook;  `""` for none (a repo with no packages to install)
  * - `installOnCreate`:  whether the worktree hook runs `installCommand` itself, before it hands a NEW worktree over
  *   (off:  the skills run it, after entering).  On (the default when there's an install command), nothing opens the
  *   worktree without its packages (I2)
  * - `installTimeout`:  the seconds the hook's install may take (600)
- * - `extraInstalls`:  folders of a new worktree that are yarn projects of their own, NOT workspaces of the one install
+ * - `extraInstalls`:  folders of a new worktree that are projects of their own, NOT workspaces of the one install
  *   (`["epic/vscode", "app/vscode"]`, the extensions;  epic `epic-engine` I65), each a path from the
  *   worktree's root (the top's, in a multi-repo top);  `[]` (the default):  none
  *   - the worktree hook runs `installCommand` in each, after the one at the root, `installTimeout` seconds each
@@ -1294,6 +1310,7 @@ export type EpicSettings = {
   contentFolder: string
   contentRemote: string
   baseBranch: string
+  baseBranchProtected: boolean
   worktreesFolder: string
   installCommand: string
   installOnCreate: boolean

@@ -6,9 +6,11 @@ import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
+import { GitHub } from "spell/epic/config/GitHub"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { URGENT_STATES } from "spell/epic/list/EpicState"
 import { PhaseStatuses } from "spell/epic/phases"
@@ -61,7 +63,8 @@ import { tsxImports } from "spell/epic/tools/packageDir"
  *     - for a person or a tool:  the skills enter a worktree by its NAME, never this path (Claude Code asks before
  *       entering a path outside `.claude/worktrees/`;  epic `epic-engine` P16)
  *   - `remove <name | path> [--force] [--branches]`:  remove a worktree, its servers stopped FIRST (`remove()`, epic
- *     `epic-engine` I53);  `--branches`:  and its branch in each repo, when merged (`git branch -d`)
+ *     `epic-engine` I53);  `--branches`:  and its branch in each repo, when merged (`git branch -d`;  a merged pull
+ *     request counts, where the base branch takes only those)
  *   - `repos [<name>] [--json]`:  each repo's checkout in epic `<name>`'s worktree (default:  the one this runs in),
  *     with its branch, what's uncommitted, and how far it is ahead of and behind its base branch (`repoStates()`)
  *   - `merge-main [--continue] [--json]`:  merge `main` into this checkout's branch (`MainMerge`)
@@ -263,7 +266,8 @@ export class Worktrees {
    *   1. its servers stopped (`CheckoutServers.stop()`)
    *   2. `git worktree remove [--force]`:  git refuses a worktree with changes, unless `force`
    *   3. its saved-session link taken away, if it's one to main's (`SessionFolders.unlink()`), as the worktree hook does
-   * - NOT its branch:  the caller deletes it (`git branch -d`), as it would after `git worktree remove`
+   * - NOT its branch, unless `branches`:  the caller deletes it (`git branch -d`), as it would after
+   *   `git worktree remove`
    * - refuses (`EpicCommandError`) the main checkout, a folder that isn't one of the repo's worktrees, and git's refusal
    * - what `/isolate done` (`/epic done`) and `/worktrees`' clean-up (`Stock`) run;  the `WorktreeRemove` hook stops
    *   the servers itself
@@ -346,10 +350,37 @@ export class Worktrees {
     return lines
   }
 
-  /** `git branch -d <branch>` in `main`:  a line saying what happened;  an unmerged branch stays, never `-D`. */
+  /**
+   * Delete `branch` in `main`, when merged:  a line saying what happened;  unmerged work always stays.
+   * - `git branch -d`, never a blind `-D`
+   * - a base branch that takes only pull requests:  `mergedThroughPullRequest()` decides, then `-D`
+   *   - why:  `-d` refuses a squash-merged branch, and passes one that's merely pushed (it checks the upstream)
+   */
   static deleteBranch(main: string, branch: string): string {
+    const config = new EpicConfig(main)
+    if (config.baseBranchProtected) {
+      const why = Worktrees.mergedThroughPullRequest(main, branch, config.baseBranch)
+      if (!why)
+        return `kept branch ${branch}:  not in ${config.baseBranch}, and no merged pull request has its last commit`
+      const forced = Git.run(["branch", "-D", branch], main)
+      return forced.ok ? `deleted branch ${branch} (${why})` : `kept branch ${branch}:  ${forced.err.split("\n")[0]}`
+    }
     const deleted = Git.run(["branch", "-d", branch], main)
     return deleted.ok ? `deleted branch ${branch}` : `kept branch ${branch}:  ${deleted.err.split("\n")[0]}`
+  }
+
+  /**
+   * Why `branch` counts as merged into `base`, in a repo whose base takes only pull requests;  `undefined` if it doesn't:
+   * - all its commits in `base`, local or `origin`'s
+   * - or a pull request GitHub reports merged whose last commit holds the branch's tip:
+   *   so a commit made since the merge keeps the branch
+   * - runs `gh` only when git alone can't say;  `gh` missing or offline:  `undefined`, and the branch stays
+   */
+  static mergedThroughPullRequest(main: string, branch: string, base: string): string | undefined {
+    const within = (into: string) => Git.run(["merge-base", "--is-ancestor", branch, into], main).ok
+    if (within(base) || within(`refs/remotes/origin/${base}`)) return `in ${base}`
+    const merged = GitHub.mergedPullRequests(branch, base, main).find((pull) => within(pull.head))
+    return merged && `pull request #${merged.number} merged`
   }
 
   /** `move --idle`:  move every worktree in the old place that no session works in;  a report each. */
@@ -741,12 +772,16 @@ function repoLines(states: RepoState[]): string[] {
 /** `merge-main`'s report, for a person. */
 function mergeMainLines(report: MergeMainReport): string[] {
   const lines = mergeResultLines(report)
-  const { ditched, ditchedTo } = report
-  if (!ditched?.length) return lines
+  const { ditched = [], ditchedTo, baseCatchUp } = report
   return [
+    ...(baseCatchUp ? [baseCatchUp] : []),
     lines[0]!,
-    `  moved ${ditched.length} generated file(s) aside, into ${ditchedTo}:`,
-    ...ditched.map((file) => `    ${file}`),
+    ...(ditched.length
+      ? [
+          `  moved ${ditched.length} generated file(s) aside, into ${ditchedTo}:`,
+          ...ditched.map((file) => `    ${file}`)
+        ]
+      : []),
     ...lines.slice(1)
   ]
 }
@@ -799,4 +834,4 @@ function mergeResultLines(report: MergeMainReport): string[] {
 }
 
 /** The plugin's worktree hook, which `create()` runs:  `epic/hooks/worktree.mjs`. */
-const WORKTREE_HOOK = join(dirname(dirname(import.meta.dirname)), "hooks", "worktree.mjs")
+const WORKTREE_HOOK = EngineFiles.path("hooks/worktree.mjs")

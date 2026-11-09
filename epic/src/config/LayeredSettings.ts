@@ -1,7 +1,8 @@
 import { homedir } from "node:os"
-import { join, resolve } from "node:path"
+import { join } from "node:path"
 
 import { DataFile } from "spell/server/DataFile"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 /****************
  * ### `LayeredSettings`
@@ -37,7 +38,7 @@ export class LayeredSettings {
 
   /** The kit's own file:  worked out when read, as `EpicConfig.ENGINE_VOICES` is. */
   static get DEFAULT_FILE(): string {
-    return resolve(import.meta.dirname ?? ".", "../..", LayeredSettings.FILE)
+    return EngineFiles.path(LayeredSettings.FILE)
   }
 
   /** The layers, lowest first. */

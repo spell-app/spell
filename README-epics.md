@@ -2,7 +2,7 @@
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-node ~/www/spell/bin/spell.mjs epic init   # from a clone of Spell, below
+npx spell@next epic init
 ```
 
 <details>
@@ -139,21 +139,7 @@ beside the main checkout rather than inside it.
 You need Claude Code, VS Code, git, Node 24.11 or later, and GitHub's command, `gh`.
 These steps are for the FIRST person on a team;  everyone after them:  "A teammate joins", below.
 
-### 1. A clone of Spell
-
-The epic tools run from a clone, once per machine, and the VS Code extension is built in it:
-
-```sh
-git clone https://github.com/spell-app/spell.git ~/www/spell
-cd ~/www/spell
-corepack enable
-yarn install
-```
-
-- `~/www/spell` is only the convention these pages use:  anywhere will do, and the commands below follow it.
-- `corepack: command not found`, and the rest of a first setup:  [Setup from zero](README.md#setup-from-zero).
-
-### 2. GitHub's command, logged in
+### 1. GitHub's command, logged in
 
 `epic init` uses it to make the team's epic repo, so install it first.
 On macOS, with Homebrew:
@@ -169,13 +155,13 @@ gh auth login
 - Without it, `epic init` still sets everything else up, and says how to get it.
   Run `epic init` again once you're logged in:  it makes the epic repo then.
 
-### 3. `epic init`, in your repo
+### 2. `epic init`, in your repo
 
 From any folder of your repo, a git repo with at least one commit:
 
 ```sh
 cd ~/www/my-app
-node ~/www/spell/bin/spell.mjs epic init
+npx spell@next epic init
 ```
 
 <details>
@@ -242,11 +228,11 @@ _Ana's first `epic init`, against the same stand-in for GitHub as the top of thi
 then a summary, then each step;  a gray line before each slow one (GitHub, the push, the server).
 The settings it wrote are in the file, not printed._
 
-- That runs the clone's `spell epic`, which runs the epic tool beside it.
+- That fetches Spell's package and runs its `spell epic`, which runs the epic tool installed beside it.
   Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
-- **Not yet:  `npx spell@next epic init` instead of a clone.**
-  It sets up your repo, the plugin and the extension, but the epic server can't start from an npm install,
-  so no page shows.
+- `epic` and the plugin then run from npm's cache (`~/.npm/_npx`):
+  after `npm cache clean`, run this line again.
+- Your project doesn't need yarn:  an npm repo works, and yarn, pnpm and bun repos are found by their lock files.
 
 In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow, then sums up the
 answers (`> Your name  :  Ana`, the values bold) before it does anything.
@@ -345,6 +331,25 @@ Gemfile.lock            bundle install
 
 </details>
 
+<details>
+<summary>npm or yarn:  what your repo needs</summary>
+
+Your repo doesn't need yarn.
+A plain npm repo, with a `package-lock.json`, works:
+- `epic init` writes `npm install` as the install command, and every new worktree runs it.
+- `epic worktree merge-main` rewrites a `package-lock.json` that both sides changed with
+  `npm install --package-lock-only`, then installs.
+  `pnpm-lock.yaml`, `yarn.lock` and `bun.lock` get their own tools the same way.
+- Vitest snapshots are updated with your repo's own runner:  `npx vitest run ... --update` for npm.
+  With no Vitest in your `package.json` (Jest, say), nothing runs, and a snapshot both sides changed is an ordinary
+  conflict, for you to resolve or to list in `.epic/generators.json5`.
+
+Yarn is on your machine for one reason:  the clone of Spell that `epic` runs from uses it,
+in its own folder, for its own install and to format pages.
+No command runs yarn in your repo.
+
+</details>
+
 Then check that `epic` answers:
 
 ```sh
@@ -363,18 +368,14 @@ epic ... (...) .../epic
 - `--version` names the code that answers:  its commit, its branch and the folder it's in.
 - `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  put the link wherever yours looks.
 
-🌱 Planned:  the plugin from Claude Code's marketplace, with no clone.
-The marketplace entry exists, but the plugin's `epic` command needs a clone's install to run.
+🌱 Planned:  the plugin from Claude Code's marketplace, without `npx`.
 
 ### And the extension
 
 The Review tab, where you mark up a page, and the moves between windows need Spell's VS Code extension:
 the same one in VS Code or Cursor, which runs VS Code's extensions.
-No script installs it:
-three commands and a reload, in [the extension's README](epic/README-vscode.md#install-it--three-commands-and-a-reload).
-- build it in the clone's `epic/vscode/` folder
-- install the `.vsix`
-- reload your windows
+`epic init` installs it, from the package:  reload your windows when it says so (**Developer:  Reload Window**).
+From a clone of Spell instead:  [the extension's README](epic/README-vscode.md#install-it--three-commands-and-a-reload).
 
 In Cursor, the epic tools use `cursor` where VS Code's take `code`:  they tell from the window they run in.
 - Say it outright with `editor` in `.epic/config.json5` (below), or for one machine `SPELL_EPIC_EDITOR=cursor`.
@@ -404,11 +405,11 @@ and CLONES it, beside the code repo:
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-node ~/www/spell/bin/spell.mjs epic init
+npx spell@next epic init
 ```
 
 - What it printed:  the top of this page.
-- They need the clone of Spell first (step 1 above).
+- The plugin and the extension are set up on their machine by the same line.
 - It asks your name and your colour, as it asked the first person, from any folder of the code repo:
   it finds the repo's main checkout from wherever it runs.
 - The epic repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
@@ -520,6 +521,67 @@ A comment you leave on a page is shared with the plans, the moment the turn's sy
 **Still on your machine:**  your marks (the pills you press on items), your Send, and who's listening,
 in the page's review inbox, a file never committed.
 What your agent makes of a mark lands in the epic page, under your name, which everyone shares.
+
+## <a id="when-main-takes-only-pull-requests"></a>When main takes only pull requests
+
+Plenty of GitHub orgs refuse direct pushes to `main`.
+Tell the repo so with one setting, and nothing `epic` does tries to land there:
+
+```sh
+epic init --protected-base
+```
+
+`baseBranchProtected` in `.epic/config.json5` says the base branch can't be pushed to,
+and work reaches it only through a pull request.
+
+**You usually don't have to say so.**
+With `gh` logged in and a GitHub remote, `epic init` asks GitHub whether a rule requires a pull request into the branch
+(a ruleset's `pull_request` rule and, if you're allowed to read it, classic branch protection),
+turns the setting on, and says so in one line.
+If it can't find out, it carries on without it.
+A config that already says `false` stays `false`, and `epic init` tells you how to change it.
+
+**Setting up the repo goes through a pull request too.**
+`epic init` never commits on `main`:
+- `.epic/config.json5` and `.gitignore` go on a new branch, `epic-setup`, which it pushes.
+- It opens the pull request with `gh pr create`, or prints exactly what to run without `gh`.
+- Your local `main` is left clean:  the two files aren't in it until the merge.
+- Epics start working in the repo once it's merged and you've run `git pull`.
+  Teammates can join then.
+
+Ran `epic init` before the rule existed, and its push was refused?
+It left a commit on your local `main`, and it says what to do:
+`epic init --protected-base` takes that commit back and moves it onto `epic-setup`.
+
+**The epic repo is the exception, and it has to stay one.**
+Your plans live in `<repo>.epics`, and every turn pushes straight to its main branch.
+An org-wide rule requiring pull requests must leave that repo out, or the plans stop syncing.
+The setting changes nothing about it.
+
+**What changes with the setting on:**
+
+| Where | What it does instead |
+| --- | --- |
+| `epic merge <name>` | refuses, in one line saying to open a pull request |
+| `/epic done`, `/isolate done` | no "Merge now":  "Push and open a pull request", or "Leave it" |
+| a standing epic's phase | pushed and put in a pull request, rather than merged at once |
+| a new worktree, `epic worktree merge-main` | fast-forward your local `main` from `origin` first |
+| `epic worktree remove --branches` | a branch whose pull request GitHub merged counts as merged, a squash included |
+
+Local `main` only moves when you pull, so those fast-forwards keep it from going stale.
+They happen only when it's safe:  fast-forward only, nothing uncommitted.
+Offline, or with `main` diverged, they carry on from what you have, and say so.
+
+A branch is deleted only if all its commits are in `main`,
+or a merged pull request holds its last commit:  a commit made after the merge keeps the branch.
+Asking GitHub takes `gh`;  without it, the branch stays, and the line says why.
+
+**After a pull request merges,** in the main checkout:
+
+```sh
+git pull
+epic worktree remove <name> --branches
+```
 
 ## <a id="with-codex"></a>With Codex (or another agent)
 
@@ -693,6 +755,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `contentFolder` | `"../<repo>.epics"` | the epic repo:  epics, sagas, guides, pages |
 | `contentRemote` | the epic repo's address, once it's made (or `--remote`);  `""` until then | where every turn pulls the epic repo from and pushes it to, and what a teammate's `epic init` clones;  `""`:  the plans stay on this machine |
 | `baseBranch` | from git:  the remote's default branch, else `main` or `master`, else the branch the main checkout is on | the branch worktrees start from and merge into |
+| `baseBranchProtected` | `false`, unless `--protected-base` or GitHub says otherwise | the base branch can't be pushed to, and work reaches it only through a pull request ([below](#when-main-takes-only-pull-requests)) |
 | `worktreesFolder` | `"../<repo>.worktrees"` | where new worktrees go, one folder each, `<worktreesFolder>/<name>` |
 | `installCommand` | from the lock file;  `""` with none | what makes a new worktree ready to run, from its root;  `""`:  nothing to install |
 | `installOnCreate` | `true` with an install | whether the worktree hook runs the install before it hands the worktree over |
@@ -843,9 +906,8 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 
 What you'd trip on today, roughly in the order you'd meet it.
 
-1. **It all runs from a clone of Spell.**
-   `epic init` and the epic tools run from one, and the VS Code extension is built and installed by hand in its
-   `epic/vscode/`.
+1. **Everything runs from npm's cache.**
+   `npx spell@next epic init` installs nothing permanent:  after `npm cache clean`, run it again.
 2. **Sharing needs GitHub.**
    `epic init` makes the epic repo only through GitHub's `gh`;
    anywhere else, make it by hand and pass `--remote <address>`.
@@ -857,7 +919,6 @@ What you'd trip on today, roughly in the order you'd meet it.
 5. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
    - Saved prompts go to `~/.spell/prompts/`.
-   - `epic worktree merge-main` updates Vitest snapshots with Spell's own command, `yarn vp test run --update`.
 6. **Claude Code first.**
    The skills run in Codex too, but five stay Claude Code's, and so do waking a session from the page, session
    titles and window moves ([With Codex](#with-codex));  any other agent follows `epic guide`.
@@ -897,7 +958,6 @@ What you'd trip on today, roughly in the order you'd meet it.
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
-- setting up without a clone:  `npx spell@next epic init` sets up everything but a working epic server
 - Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
 - a host other than GitHub, without making the epic repo by hand

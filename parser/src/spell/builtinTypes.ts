@@ -403,7 +403,24 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       "```"
     ),
     rules: ["create_type", "draw_it"],
-    members: []
+    slots: ["thumbnail"],
+    members: [
+      {
+        words: "thumbnail",
+        kind: "property",
+        datatype: "text",
+        stored: true,
+        declarable: true,
+        anyDatatype: true,
+        docstring: md(
+          "A picture of it, a file of its project:  `snapshots/terms.jpg`.",
+          "- Drawn while it has no drawing of its own:  writing one replaces it.",
+          "- A drawing can place it too:  `draw its thumbnail`.",
+          "- A site's card shows it, unless the site's line names its own.",
+          '- Say it on its tag, `<spell-page "terms" thumbnail="snapshots/terms.jpg"/>`, or in its body, `- its thumbnail is "..."`.'
+        )
+      }
+    ]
   },
   {
     name: "page",
@@ -791,6 +808,13 @@ export function loadBuiltInTypes(
       if (!keepExisting || !type.variables.get(props.name, "LOCAL_ONLY")) type.variables.add(props)
     }
     if (entry.itemType) type.itemType = entry.itemType
+    // a slot it places, in each of the language's words for it:  Spanish's `dibujar su miniatura` draws its `thumbnail`
+    for (const slot of entry.slots ?? []) {
+      const said = (words.builtInMembers?.[slot] ?? []).map(builtInMemberName)
+      type.slots = [...new Set([...(type.slots ?? []), slot, ...said])]
+      if (said.length)
+        type.slotOutputs = { ...type.slotOutputs, ...Object.fromEntries(said.map((name) => [name, slot])) }
+    }
     for (const member of entry.members) {
       // the language's own words for it, e.g. Spanish's `largo` for `length`:  each reads the same
       const local = words.builtInMembers?.[member.words]

@@ -74,7 +74,13 @@ describe("a page's stories", () => {
 
   test("Spanish spellx:  `<encanto-historias>`", () => {
     const { code, errors } = compiled(
-      ['<encanto-página "página de películas">', "\t<encanto-historias>", "\t\t- [ ] ver las películas", "\t</>", "</>"],
+      [
+        '<encanto-página "página de películas">',
+        "\t<encanto-historias>",
+        "\t\t- [ ] ver las películas",
+        "\t</>",
+        "</>"
+      ],
       "/Galaxia.es.spellml"
     )
     expect(errors).toEqual([])

@@ -522,6 +522,8 @@ export type PatchReport = {
  * - `regenerated`:  each generator that ran, and the files it staged
  * - `review`:  snapshot entries to show Owen (`SnapshotReview`)
  * - `unstaged`:  files a generator changed outside its `outputs`, left for a person to look at
+ * - `baseCatchUp`:  what happened bringing the local base branch up to date first (`BaseBranch`), for a repo whose base
+ *   branch takes only pull requests;  left out with nothing to say
  */
 /**
  * What `epic merge` did in one repo (`Requests.merge()`, `mergeEach()`).
@@ -547,6 +549,7 @@ export type MergeMainReport = {
   regenerated: { name: string; files: string[] }[]
   review: SnapshotReview[]
   unstaged: string[]
+  baseCatchUp?: string
   /** a multi-repo top's epic worktree (`MainMerge.runAll()`):  the repo's folder name;  left out for a single repo */
   repo?: string
   /** a multi-repo top's:  why this repo's merge couldn't start or go on (the others went on) */

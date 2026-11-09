@@ -1,3 +1,4 @@
+import { escapeRegExp } from "spell/util/string"
 import { CODE_SITE, SPELLX_SITE, declaresSite } from "spell/app/spaces/models/siteFiles"
 
 /****************
@@ -172,6 +173,23 @@ export class SiteEdits {
   }
 
   /**
+   * The thumbnail written on part `name`'s own page or view in `text`, if it's declared there.
+   * - `<spell-page "x" thumbnail="...">`, `<spell-view "x" thumbnail="...">`, or a line of its body,
+   *   `- its thumbnail is "..."`.
+   * - A site's `button usage page` may be declared as `button usage`:  either name finds it.
+   */
+  static thumbnailOf(text: string, name: string): string | undefined {
+    if (!text.includes("thumbnail")) return undefined
+    for (const quoted of [name, name.replace(/ page$/, "")].map((each) => escapeRegExp(JSON.stringify(each)))) {
+      const tag = new RegExp(`^<spell-(?:page|view) ${quoted}[^\\n]*`, "m").exec(text)?.[0]
+      if (tag) return ATTRIBUTE("thumbnail").exec(tag)?.[1]
+      const body = new RegExp(`^an? ${quoted} is an? (?:page|view)[^\\n]*\\n((?:[ \\t]+[^\\n]*\\n)*)`, "m").exec(text)
+      if (body) return /^[ \t]*- its thumbnail is "([^"]*)"/m.exec(body[1]!)?.[1]
+    }
+    return undefined
+  }
+
+  /**
    * Can `part` have pages under it?
    * - Only a page with an address:  the not found and error pages are shown when no address matches,
    *   and nothing goes under a dialog or sidebar, so the language reads nothing there.
@@ -303,8 +321,8 @@ export type SitePart = {
   title?: string
   /** A page's state, if its line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14). */
   state?: string
-  /** A picture of a page, a file of the project:  `snapshots/films.png`. */
-  picture?: string
+  /** A thumbnail of a page, a file of the project:  `snapshots/films.png`. */
+  thumbnail?: string
   /** What its tab says, if its line says. */
   tab?: string
   /** What it's filed under, as its line writes it:  `Forms, Inputs`. */
@@ -396,7 +414,7 @@ function spellxPartsIn(text: string, start: number): SitePart[] {
       tab: ATTRIBUTE("tab").exec(attributes!)?.[1],
       tags: ATTRIBUTE("tags").exec(attributes!)?.[1],
       state: ATTRIBUTE("state").exec(attributes!)?.[1],
-      picture: ATTRIBUTE("picture").exec(attributes!)?.[1],
+      thumbnail: ATTRIBUTE("thumbnail").exec(attributes!)?.[1],
       row: numberIn(ATTRIBUTE("row").exec(attributes!)?.[1]),
       column: numberIn(ATTRIBUTE("column").exec(attributes!)?.[1]),
       color: ATTRIBUTE("color").exec(attributes!)?.[1],
@@ -422,7 +440,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
     if (line.text.trim() && !/^[ \t]/.test(line.text)) break
     const written = CODE_PART.exec(line.text)
     if (!written) continue
-    const [, indent, written_name, address, title, tab, tags, state, picture, row, column, color] = written
+    const [, indent, written_name, address, title, tab, tags, state, thumbnail, row, column, color] = written
     const isQuoted = /^".*"$/.test(written_name!)
     const name = isQuoted ? written_name!.slice(1, -1) : written_name!
     while (open.length && open.at(-1)!.indent.length >= indent!.length) open.pop()
@@ -434,7 +452,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
       tab,
       tags,
       state,
-      picture,
+      thumbnail,
       row: numberIn(row),
       column: numberIn(column),
       color,
@@ -535,7 +553,7 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
 /** A spellx part's `line` with its address and title as given:  an attribute added, changed or taken out. */
 function spellxLineWith(
   line: string,
-  { address, title, tab, tags, state, picture, row, column, color }: PartWords
+  { address, title, tab, tags, state, thumbnail, row, column, color }: PartWords
 ): string {
   let changed = line
   for (const [word, value] of [
@@ -544,7 +562,7 @@ function spellxLineWith(
     ["tab", tab],
     ["tags", tags],
     ["state", state],
-    ["picture", picture],
+    ["thumbnail", thumbnail],
     ["row", row === undefined ? undefined : `${row}`],
     ["column", column === undefined ? undefined : `${column}`],
     ["color", color]
@@ -564,15 +582,15 @@ type PartWords = {
   tab?: string
   tags?: string
   state?: string
-  picture?: string
+  thumbnail?: string
   row?: number
   column?: number
   color?: string
 }
 
 /** What `part`'s line says now, besides its name. */
-function wordsOf({ address, title, tab, tags, state, picture, row, column, color }: SitePart): PartWords {
-  return { address, title, tab, tags, state, picture, row, column, color }
+function wordsOf({ address, title, tab, tags, state, thumbnail, row, column, color }: SitePart): PartWords {
+  return { address, title, tab, tags, state, thumbnail, row, column, color }
 }
 
 /** `text` as a number;  none for none. */
@@ -584,7 +602,7 @@ function numberIn(text: string | undefined): number | undefined {
 function codeLineWith(
   line: string,
   part: SitePart,
-  { address, title, tab, tags, state, picture, row, column, color }: PartWords
+  { address, title, tab, tags, state, thumbnail, row, column, color }: PartWords
 ): string {
   const ending = line.endsWith("\n") ? "\n" : ""
   const at = address === undefined ? "" : ` at ${JSON.stringify(address)}`
@@ -592,7 +610,7 @@ function codeLineWith(
   const tabbed = tab === undefined || !address ? "" : `, tab ${JSON.stringify(tab)}`
   const tagged = tags === undefined || !address ? "" : `, tagged ${JSON.stringify(tags)}`
   const stated = state === undefined || !address ? "" : `, ${state}`
-  const pictured = picture === undefined || !address ? "" : `, pictured in ${JSON.stringify(picture)}`
+  const pictured = thumbnail === undefined || !address ? "" : `, thumbnail ${JSON.stringify(thumbnail)}`
   const placed = row === undefined || column === undefined ? "" : `, in row ${row} column ${column}`
   const colored = color === undefined ? "" : `, colored ${color}`
   const name = part.isQuoted ? JSON.stringify(part.name) : part.name
@@ -609,7 +627,7 @@ const SPELLX_PART = /^<(page|dialog|sidebar)\s+"([^"]+)"([^>]*?)\s*(\/>|>)$/
 
 /** A code-spell part's line:  `- it has a films page at "/films", named "Films"`, `- it has a settings dialog`. */
 const CODE_PART =
-  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, pictured in "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
+  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, thumbnail "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
 
 /** The end of a spellx tag that closes itself, `<page "x"/>`, what follows it in group 1. */
 const SPELLX_CLOSES_ITSELF = /\s*\/>(\s*)$/
