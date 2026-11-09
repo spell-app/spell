@@ -560,6 +560,14 @@ export abstract class Rule<
     return undefined
   }
 
+  /**
+   * Every token value we could start with, when we can only start with one of those:  `Choice` looks us up by it.
+   * - `undefined`, as here:  we could start some other way, so we're always tried.
+   */
+  get firstWords(): readonly unknown[] | undefined {
+    return undefined
+  }
+
   ////////////////
   // ## Match groups & scopes
   ////////////////

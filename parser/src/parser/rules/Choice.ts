@@ -6,6 +6,16 @@ import { Rule } from "./Rule"
 /** Turn on debugging of choice / priority semantics. */
 const DEBUG_CHOICES = false
 
+/** How many rules a `Choice` has before looking them up by first word beats trying each:  `Choice.rulesFor()`. */
+const MIN_RULES_TO_LOOK_UP = 16
+
+/**
+ * A long `Choice`'s rules, by the token each can start with.
+ * - `byWord`:  for each first word, the rules starting with it and the rules that can start with anything, in order
+ * - `withoutWord`:  the rules that can start with anything:  all that can match a token no rule names
+ */
+type RuleLookup = { byWord: Map<unknown, P.Rule[]>; withoutWord: P.Rule[] }
+
 /**
  * Alternative syntax, matching one of a number of different rules.
  * The result of a parse is the longest rule that actually matched.
@@ -21,6 +31,9 @@ export class Choice<
 > extends Rule<ChoiceProps, Groups, MatchData> {
   /** List of rules, any of which will match. */
   declare rules: P.Rule[]
+
+  /** Our `rules` by their first word, made the first time a long list is parsed -- see `rulesFor()`. */
+  private lookup: RuleLookup | undefined
 
   /** Copy `props.rules` into a new array (defaulting to `[]`) so callers can't mutate our list from outside. */
   constructor(props: ChoiceProps) {
@@ -59,6 +72,7 @@ export class Choice<
    */
   addChoice(_parser: P.Parser, ...rules: P.Rule[]) {
     this.rules = [...this.rules, ...rules]
+    this.lookup = undefined
   }
 
   /**
@@ -101,7 +115,8 @@ export class Choice<
     // For efficiency, complicated rules (e.g. sequences or recursive rules)
     //  should exit quickly via their own `test()`, see `Sequence.parse()`.
     const matches: P.Match[] = []
-    for (let i = 0, rule; (rule = this.rules[i++]);) {
+    const rules = expecting || !tokens.length ? this.rules : this.rulesFor(tokens[0]!)
+    for (let i = 0, rule; (rule = rules[i++]);) {
       if (DEBUG_CHOICES) console.group("parsing rule", rule.name)
       const from = expecting ? expecting.records.length : 0
       const match = rule.parse(scope, tokens)
@@ -135,6 +150,38 @@ export class Choice<
     match.choiceRule = this.matchGroup || this.name
     if (this.matchGroup) match.matchGroup = this.matchGroup
     return match
+  }
+
+  /**
+   * Those of our `rules` that could match starting at `token`, in order:  all of them, unless we're long.
+   * - Why:  a long list is `statement` (299 rules) or `operand` (129), tried at every line and in every expression,
+   *   and nearly all of them are turned away by their first word (epic `data` I42).
+   * - Only skips a rule whose own `test()` would say no, so what parses doesn't change;  order is kept for `getBestMatch()`.
+   */
+  private rulesFor(token: P.Token): P.Rule[] {
+    if (this.rules.length < MIN_RULES_TO_LOOK_UP) return this.rules
+    const { byWord, withoutWord } = (this.lookup ??= Choice.lookupFor(this.rules))
+    return byWord.get(token.value) ?? withoutWord
+  }
+
+  /** `rules` by the first word of each -- see `RuleLookup`. */
+  private static lookupFor(rules: P.Rule[]): RuleLookup {
+    const byWord = new Map<unknown, P.Rule[]>()
+    const withoutWord: P.Rule[] = []
+    // new words start with the rules that take any word so far, so each list stays in the rules' order
+    for (const rule of rules) {
+      const words = rule.firstWords
+      if (words) {
+        for (const word of words) {
+          if (!byWord.has(word)) byWord.set(word, [...withoutWord])
+          byWord.get(word)!.push(rule)
+        }
+      } else {
+        withoutWord.push(rule)
+        for (const list of byWord.values()) list.push(rule)
+      }
+    }
+    return { byWord, withoutWord }
   }
 
   /**

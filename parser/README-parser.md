@@ -794,6 +794,8 @@ and compile to JavaScript in under 10 ms;  its card file alone, 154 lines, parse
 - Why:  every `Choice` parses every alternative before it picks one.
 - What keeps that affordable:  a `Sequence` checks its fixed words where they must fall,
   before any of its parts parse (`Sequence.test()`), so most rules fail on the first token they look at.
+- A long `Choice`, with `statement`'s hundreds of rules, goes further:
+  it looks them up by the line's first word, so a rule that needs another word isn't tried at all.
 - Against a parser written by hand for one language, a general one is slower:
   markdown on this parser against marked, in [README-markdown](README-markdown.md).
 

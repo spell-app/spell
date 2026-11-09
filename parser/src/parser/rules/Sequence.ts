@@ -69,6 +69,21 @@ export class Sequence<
   declare requiredWords: ReadonlyArray<readonly string[]> | undefined
 
   /**
+   * The words we can start with, from `leadingWord`, which `test()` turns everything else away by.
+   * - `undefined` for a word compared ignoring case, or a first word that may be left out.
+   * - And for a rule with its own `test()`, which may allow what `leadingWord` doesn't.
+   */
+  get firstWords(): readonly unknown[] | undefined {
+    const word = this.leadingWord
+    if (!word || this.test !== Sequence.prototype.test) return undefined
+    if (word instanceof P.Literals) {
+      const [first] = word.literals
+      return !first || first.optional ? undefined : [first.literal].flat()
+    }
+    return word.caseInsensitive ? undefined : [word.literal].flat()
+  }
+
+  /**
    * Match each rule in `this.rules` in order against `tokens`, bailing unless every non-optional rule matches.
    * - In expecting mode (see `P.Expectations`):
    *   - out of tokens before a child, records it
