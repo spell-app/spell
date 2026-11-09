@@ -465,7 +465,7 @@ The root (`~/www/spell`)
 - Vite+ (`vite-plus`, the `vp` command) pins Vite, Vitest, oxlint, oxfmt and tsgolint together, at the versions in
   the root's `catalog:`;  how they're bumped:
   [README/toolchain.md](toolchain.md#one-dependency-pins-every-tool), "One dependency pins every tool".
-- TypeScript 7;  Solid 2.0.0-rc.17 for every folder;  Playwright 1.63.0 for the browser tests.
+- TypeScript 7;  Solid 2.0.0-rc.21 for every folder;  Playwright 1.63.0 for the browser tests.
 
 </details>
 

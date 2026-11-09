@@ -50,7 +50,9 @@ export class PlaceCache {
 function defineField(row: PlaceRow, field: string): void {
   Object.defineProperty(row, field, {
     get: () => getProp(row, field),
-    set: (value) => setProp(row, field, value),
+    set: (value) => {
+      setProp(row, field, value)
+    },
     enumerable: true,
     configurable: true
   })

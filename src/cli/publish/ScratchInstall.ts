@@ -5,6 +5,8 @@ import { join } from "node:path"
 
 import { SRV } from "spell/server"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
+import { CLI } from "spell/cli"
+import { DependencyCheck, npmFindings, type DependencyFinding } from "spell/cli/commands/deps"
 import type { PackedPackage, PublishCheck } from "spell/cli/publish"
 
 /****************
@@ -25,6 +27,8 @@ import type { PackedPackage, PublishCheck } from "spell/cli/publish"
  *      `class DOMElement`
  *   3. `npx spell help` runs, and the command the lean install couldn't;  and `npx epic --help`, and the epic checks
  *      above, when `spell-epic` is among them
+ * - Both are held to `DependencyCheck`'s rules (epic `epic-engine` P67):  what someone outside gets, deprecated or
+ *   audited, which the lockfile can't show.  The publish fails on what isn't on the known-open list.
  * - Third-party packages come from the npm registry:  it needs the network.
  * - Each package's name is pinned to its `.tgz` (`overrides`), so the packages' dependencies on each other
  *   (`spell` on `spell-ui` ...) find the packed ones, never the registry's.
@@ -38,6 +42,9 @@ export class ScratchInstall {
   /** The project the steps are working in now. */
   private project: string
 
+  /** What the audits of the installs so far found. */
+  private readonly findings: DependencyFinding[] = []
+
   constructor(readonly packed: PackedPackage[]) {
     this.dir = mkdtempSync(join(tmpdir(), "spell-publish-"))
     this.project = this.dir
@@ -46,6 +53,10 @@ export class ScratchInstall {
   /** Install, then run the checks;  every result, passed or failed.  NEVER throws. */
   async run(): Promise<PublishCheck[]> {
     const checks = [...(await this.lean()), ...(await this.whole())]
+    if (checks.every((check) => check.ok))
+      checks.push(
+        this.step("the dependencies:  nothing deprecated, no unlisted critical or high", () => this.dependencies())
+      )
     if (checks.every((check) => check.ok)) rmSync(this.dir, { recursive: true, force: true })
     else checks.push({ check: "scratch project kept, to look into", ok: true, detail: this.dir })
     return checks
@@ -63,6 +74,7 @@ export class ScratchInstall {
     const spellEpic = (...args: string[]) => ["--no-install", SPELL, "epic", ...args]
     return [
       install,
+      this.step("lean:  audited", () => this.audit()),
       this.step("lean:  small enough", () => this.leanSize()),
       this.step("lean:  npx spell help runs", () => this.spellHelp()),
       await this.asyncStep("lean:  the epic server starts, and an epic page saves", () => this.epicServer(spellEpic)),
@@ -79,6 +91,7 @@ export class ScratchInstall {
     if (!install.ok) return [install]
     const checks = [
       install,
+      this.step("whole:  audited", () => this.audit()),
       this.step("whole:  node imports spell/util and spell/parser/parser", () => this.nodeImports()),
       await this.asyncStep("whole:  a Vite page draws <ui-button>, with one DOMElement", () => this.page()),
       this.step("whole:  npx spell help runs", () => this.spellHelp()),
@@ -116,6 +129,21 @@ export class ScratchInstall {
     })
     this.exec("npm", ["install", "--no-audit", "--no-fund", "--loglevel=error"], { timeout: 600_000 })
     return `${packages.length} packed, ${Object.keys(addOns).length} add-ons, in ${this.project}`
+  }
+
+  /** What npm says of the install just made, kept for `dependencies()`. */
+  private audit(): string {
+    const findings = npmFindings(this.project)
+    this.findings.push(...findings)
+    return `${findings.length} findings`
+  }
+
+  /** Every audit's findings against the rules, together:  an entry is stale only when no install shows it. */
+  private dependencies(): string {
+    const report = DependencyCheck.forKit(CLI.findCheckout(CLI.KIT_MARKER)).report("npm", this.findings)
+    const lines = [...report.problems, ...report.stale.map((entry) => `stale on the known-open list:  ${entry}`)]
+    if (lines.length) throw new Error(lines.join(";  "))
+    return `${report.knownOpen} known-open;  ${report.advisories} advisories, ${report.deprecated} deprecated in all`
   }
 
   /** The lean install's packages and megabytes, against `LEAN_LIMITS`;  throws when it's over either. */
@@ -345,10 +373,8 @@ const SPELL = "spell"
 
 /**
  * The most the lean install may hold, as `du` and npm's own lockfile count it.
- * - TODO:  40 packages and 120 MB once epic `epic-engine`'s Dependency Safety phase replaces json5-writer, which is
- *   about 300 of today's 334 packages.
  */
-const LEAN_LIMITS = { packages: 340, megabytes: 150 }
+const LEAN_LIMITS = { packages: 40, megabytes: 120 }
 
 /**
  * A definition of the element base class in built JavaScript, as esbuild or Rolldown write it, minified or not:

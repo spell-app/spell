@@ -224,7 +224,9 @@ describe("EpicProgram.checkFlags()", () => {
 
   test("--requested is a flag of `add` and `update`:  what the skills tell agents to file with (epic `epic-engine` I240)", () => {
     for (const verb of ["add", "update"]) {
-      expect(EpicProgram.checkFlags(`epic ${verb}`, VERB_FLAGS[verb]!, ["seo#I3", "--requested"])).toContain("--requested")
+      expect(EpicProgram.checkFlags(`epic ${verb}`, VERB_FLAGS[verb]!, ["seo#I3", "--requested"])).toContain(
+        "--requested"
+      )
     }
   })
 

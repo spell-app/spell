@@ -171,14 +171,14 @@ const page = globalThis.SpellUI?.packModules
 const specifiers = ${JSON.stringify(SHARED_SPECIFIERS)}
 // modules with only a default export, and the name it goes by here
 const defaults = ${JSON.stringify(SHARED_DEFAULTS)}
-const from = specifiers.every((specifier) => page?.[specifier])
+const sharedModules = specifiers.every((specifier) => page?.[specifier])
   ? Object.assign(
       {},
       ...specifiers.map((specifier) => page[specifier]),
       ...Object.entries(defaults).map(([specifier, name]) => ({ [name]: page[specifier].default }))
     )
   : await import("./${SHARED_SOLID.solid}")
-export const { ${[...names].sort().join(", ")} } = from
+export const { ${[...names].sort().join(", ")} } = sharedModules
 `
 }
 

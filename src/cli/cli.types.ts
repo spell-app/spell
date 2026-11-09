@@ -74,6 +74,11 @@ export type WwodOptions = GlobalOptions & {
   json?: boolean
 }
 
+/** `spell deps`'s flags. */
+export type DepsOptions = GlobalOptions & {
+  json?: boolean
+}
+
 /**
  * `spell publish` flags.
  * - `dryRun`:  build, pack and check every package, then install them in a scratch project;  publish nothing

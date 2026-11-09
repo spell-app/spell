@@ -2457,8 +2457,9 @@ sidebars any of them opens.
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
   - a page's STORIES, `<stories>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static stories`
-    - what the page must let people do, a markdown list, `- [x]` for one done;  nothing draws them
-    - spellx writes it `<spell-stories>` (Spanish `<encanto-historias>`), a note whose twin is the `<stories>` block
+    - what the page must let people do, one `<story "S1" done>` tag each (epic `mockup` P17):  anything else in the
+      block is refused;  nothing draws them
+    - spellx writes it `<stories>` or `<spell-stories>` (Spanish `<encanto-historias>`), a note whose twin is the `<stories>` block
       (`SpellxTwin.withStoriesAsBlocks()`)
     - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between
       a `<stories>` and a `<markdown>` keeps them apart

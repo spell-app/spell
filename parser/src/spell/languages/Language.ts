@@ -712,12 +712,18 @@ export type SpellxTwinWords = {
   sitePageState: string
   /** What a page's `thumbnail=` adds to its line. */
   sitePageThumbnail: string
+  /** What a page's `live=` adds to its line:  the real page it stands for. */
+  sitePageLive: string
   /** What a part's `row=` and `column=` add to its line:  its place in its section of the site editor's board. */
   siteCardPlace: string
   /** What a part's `color=` adds to its line. */
   siteCardColor: string
   /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
   siteOverlay: string
+  /** A dialog or sidebar whose name doesn't say which it is, `<sidebar "System Notices"/>`:  the line that does. */
+  siteOverlayOf: { dialog: string; sidebar: string }
+  /** The words that say a part is a dialog or sidebar, as a regular expression's alternatives. */
+  siteOverlayWords: string
   /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
@@ -793,10 +799,22 @@ export type SpellxDeclarationKind =
  * A spellx block of prose:  a member's long description, a comment among its lines,
  * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
  * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
- * - Or a page's STORIES, `<spell-stories>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
+ * - Or a page's STORIES, `<stories>` (epic `mockup` P6):  what it must let people do, as `<story>` tags, its twin a
  *   `<stories>` block, compiled to its `static stories`.
  */
 export type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"
+
+/**
+ * The words a page or view's name is read by:  `Pinned Screens & Hardware` => `Pinned Screens Hardware`.
+ * - A name is its title (epic `mockup` P17), so it can hold what no type's name can:  `&`, `?`, `'` are left out here.
+ * - What it's called, with them, stays as written.
+ */
+export function plainPartName(name: string): string {
+  return name
+    .replace(/[^\p{L}\p{N}\s-]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
 
 /**
  * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);

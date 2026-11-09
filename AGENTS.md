@@ -155,6 +155,13 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - Every big folder adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
     `spell help` lists them, grouped by folder.
   - A word two folders both want goes under each one's short name (`spell parser check`, `spell app check`).
+- Before any push to GitHub or publish to npm, the dependencies are checked and fixed (Owen, 2026-11-09;  epic `epic-engine` P67):
+  - `spell deps check`:  the lockfile;  a git hook runs it before a push to `main` (`tools/pre-push.ts`, written by `yarn install`)
+  - `spell publish`, on its scratch installs:  what someone outside gets, which the lockfile can't show
+  - both fail on a deprecated package, a critical or high advisory not on [the known-open list](deps-known-open.json5),
+    or an entry on it that no longer matches anything
+  - NEVER `npm audit fix --force`:  it proposed downgrading `spell` to 0.8.1;  `resolutions` don't reach people
+    installing from npm, so the real dependency has to change
 - `spell publish` publishes three packages:
   - `spell`:  the one package, the kit and every folder, built into `dist/<folder>/`;  it holds the epic command too,
     so `npx spell@next epic init` needs nothing else

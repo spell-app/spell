@@ -214,10 +214,10 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await stories.locator("li").count()).toBe(3)
     await stories.locator("ui-button", { hasText: "Add a story" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [x] open a film's page from its row\n\t\t- [ ] \n\t</>")
+    expect(await text()).toContain('open a film\'s page from its row</story>\n\t\t<story "S4"></story>\n')
     await stories.locator("li").last().locator('input[type="checkbox"]').check()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain("\t\t- [x] \n")
+    expect(await text()).toContain('<story "S4" done></story>')
     expect(await cardWith("/films · 3 of 4 stories").count()).toBe(1)
   })
 

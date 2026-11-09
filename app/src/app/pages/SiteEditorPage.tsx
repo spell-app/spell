@@ -10,7 +10,7 @@ import { SpellPage, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
-import { RunSite } from "./RunSite"
+
 import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
@@ -250,11 +250,9 @@ SiteEditorPage.thumbnailOf = (part: SitePart): string | undefined => {
   return thumbnail && SP.SpellUrls.fileUrl(`${editor.project?.path}/${thumbnail}`)
 }
 
-/** The address of a page in the running site, for a new tab;  none for a part with no address. */
+/** The real page a card stands for, on the live site, for a new tab;  none when the site doesn't say. */
 SiteEditorPage.newTabUrlOf = (part: SitePart): string | undefined =>
-  part.kind === "page" && part.address && editor.project
-    ? RunSite.runUrlFor(editor.project.path, part.address)
-    : undefined
+  part.live && SiteEdits.isLiveLink(part.live) ? part.live : undefined
 
 /** An address no page has yet, for a new page:  `/new-page`, then `/new-page-2` ... */
 SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {
@@ -270,18 +268,7 @@ SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {
  * - NEVER throws:  a failure shows in the error banner.
  */
 SiteEditorPage.openInEdit = (name: string): void => {
-  const file = SiteWrites.siteFile()
-  const project = editor.project
-  if (!file || !project) return
-  const text = file.contents ?? ""
-  const quoted = JSON.stringify(name)
-  const declared = [`<spell-page ${quoted}`, `a ${quoted} is a page`, `<spell-view ${quoted}`]
-    .map((start) => text.search(new RegExp(`^${escapeForRegExp(start)}`, "m")))
-    .find((at) => at >= 0)
-  const at = declared ?? safely(() => SiteEdits.partNamed(text, name).line.start) ?? 0
-  const line = text.slice(0, at).split("\n").length - 1
-  editor.cameFromSite = project.path
-  editor.showFileAt(file.path, { anchor: { line, ch: 0 }, head: { line, ch: 0 } }).catch(editor.showError)
+  SiteWrites.openPart(name).catch(editor.showError)
 }
 
 /** The board's tabs:  the site's pages, or the data it reads. */
@@ -289,20 +276,6 @@ type SiteEditorTab = "pages" | "data"
 
 /** Where a new page goes, before a number makes it free. */
 const NEW_PAGE_ADDRESS = "/new-page"
-
-/** `text` as a regular expression that matches only itself. */
-function escapeForRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
-
-/** What `read()` answers, or `undefined` when it throws. */
-function safely<T>(read: () => T): T | undefined {
-  try {
-    return read()
-  } catch {
-    return undefined
-  }
-}
 
 /****************
  * ### `<SitePartTree>`
@@ -350,7 +323,12 @@ function SitePartRows(props: { parts: readonly SitePart[]; picked?: string }) {
 }
 
 /** Each kind of part's icon, in the tree. */
-const PART_ICONS = { page: "file outline", dialog: "window maximize outline", sidebar: "columns" } as const
+const PART_ICONS = {
+  page: "file outline",
+  dialog: "window maximize outline",
+  sidebar: "columns",
+  group: "folder outline"
+} as const
 
 /** The attribute saying where a dragged part would go, on the row it would go by:  its value is `SitePartPlace`'s `where`. */
 const DROP_MARK = "data-drop"
@@ -444,9 +422,13 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     title: appTexts.text("siteFieldTitle"),
     address: appTexts.text("siteFieldAddress"),
     state: appTexts.text("siteFieldState"),
+    live: appTexts.text("siteFieldLive"),
     parameters: appTexts.text("siteFieldParameters")
   })
   const isPage = () => props.part.kind === "page"
+  const isGroup = () => props.part.kind === "group"
+  /** What the name field shows:  a group's own words, not what it's known by. */
+  const shownName = () => (isGroup() ? (props.part.title ?? "") : props.part.name)
   const schema = () => ({
     name: props.part.kind,
     attributes: [
@@ -456,17 +438,19 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
             { name: fields().title, kind: "string", description: "" },
             { name: fields().address, kind: "string", description: "" },
             { name: fields().state, kind: "enum", values: PAGE_STATES, description: "" },
+            { name: fields().live, kind: "string", description: "" },
             { name: fields().parameters, kind: "string", description: "" }
           ]
         : [])
     ]
   })
   const value = () => ({
-    [fields().name]: props.part.name,
+    [fields().name]: shownName(),
     ...(isPage() && {
       [fields().title]: props.part.title ?? "",
       [fields().address]: props.part.address ?? "",
       [fields().state]: props.part.state ?? "",
+      [fields().live]: props.part.live ?? "",
       [fields().parameters]: parametersOf(props.part.address) || appTexts.text("siteNoParameters")
     })
   })
@@ -481,16 +465,21 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     const title = said("title")
     const address = said("address")
     const state = said("state")
+    const live = said("live")
     const name = said("name")?.trim()
+    const wasGroup = part.kind === "group"
     typed.clear()
     if (
       (title !== undefined && title !== (part.title ?? "")) ||
       (address !== undefined && address !== part.address) ||
-      (state !== undefined && state !== (part.state ?? ""))
+      (state !== undefined && state !== (part.state ?? "")) ||
+      (live !== undefined && live !== (part.live ?? ""))
     ) {
-      SiteWrites.changePart(part.name, { title, address, state })
+      SiteWrites.changePart(part.name, { title, address, state, live })
     }
-    if (name && name !== part.name && SiteWrites.renamePart(part.name, name)) props.onRenamed(name)
+    if (name && name !== shownName() && SiteWrites.renamePart(part.name, name)) {
+      props.onRenamed(wasGroup ? SiteEdits.groupKey(name) : name)
+    }
   }
   return (
     <ui-property-editor
@@ -526,8 +515,8 @@ function parametersOf(address: string | undefined): string {
 /****************
  * ### `<SitePageStories>`
  * A page's STORIES, under its form (epic `mockup` P6, Q12):  what it must let people do, kept with the page for good.
- * - Each a row:  a thumb to drag it by (or move it with the arrow keys), its box to tick it off, its words,
- *   its details under them (`- done when:  ...`), each a field of at least two rows that grows with its text;
+ * - Each a row:  a thumb to drag it by (or move it with the arrow keys), its box to tick it off, one field of at least
+ *   two rows that grows with its text (its words, then two blank lines and its description, if it has one);
  *   and a button to delete it, which asks first unless Option is held.
  * - "Add a story" adds an empty one, its field showing the shape to fill in:  `As a …, I want …, so that …`.
  * - Every change is ONE step of the editor's history, written into the page's own file (`SiteWrites.changeStories()`);
@@ -595,20 +584,12 @@ function SitePageStories(props: { name: string }) {
                         aria-label={appTexts.text("siteStoryDone")}
                         onChange={(event) => changed(story(), { done: event.currentTarget.checked })}
                       />
-                      <div class="words">
-                        <textarea
-                          class="text"
-                          value={story().text}
-                          placeholder={appTexts.text("siteNewStory")}
-                          onChange={(event) => changed(story(), { text: event.currentTarget.value.trim() })}
-                        />
-                        <textarea
-                          class="details"
-                          value={story().details.join("\n")}
-                          placeholder={appTexts.text("siteStoryDetails")}
-                          onChange={(event) => changed(story(), { details: event.currentTarget.value.split("\n") })}
-                        />
-                      </div>
+                      <textarea
+                        class="text"
+                        value={story().text}
+                        placeholder={appTexts.text("siteNewStory")}
+                        onChange={(event) => changed(story(), { text: event.currentTarget.value.trim() })}
+                      />
                       <span class="actions">
                         <ui-button
                           size="mini"

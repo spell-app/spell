@@ -341,7 +341,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /** The states its unmarked items (or phases) are in, in the filter's order:  its state chips. */
   readonly present = createMemo((): ChipState[] => {
-    const states = new Set<string>(this.kind === AWAY ? this.newsCounts().keys() : this.unmarked().map((it) => it.state))
+    const states = new Set<string>(
+      this.kind === AWAY ? this.newsCounts().keys() : this.unmarked().map((it) => it.state)
+    )
     if (this.marked().size) states.add(MARKED_SHOWS_AS)
     const order: readonly ChipState[] = this.kind === "phases" ? PHASE_FILTER_STATES : FILTER_STATES
     return order.filter((it) => states.has(it.state))

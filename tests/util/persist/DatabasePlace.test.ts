@@ -82,7 +82,7 @@ describe("DatabasePlace.update()", () => {
       // as another tab would:  past this page's store, straight to the database
       place.update("db-test", "visits", (visits) => ((visits as number | undefined) ?? 0) + 1)
     ])
-    expect(results.sort()).toEqual([1, 2, 3])
+    expect((results as number[]).sort((a, b) => a - b)).toEqual([1, 2, 3])
     expect(await prefs.load("visits")).toBe(3)
   })
 

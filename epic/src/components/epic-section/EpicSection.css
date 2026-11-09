@@ -137,7 +137,10 @@
   .new-list {
     --_epic-act-ink: var(--ui-text-color, CanvasText);
     --_epic-act-green: var(--ui-green, #00853a);
-    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
     --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
   }

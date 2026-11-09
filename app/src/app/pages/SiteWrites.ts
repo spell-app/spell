@@ -36,15 +36,51 @@ export class SiteWrites {
    */
   static addPage(address: string, title?: string, then?: () => void): string | undefined {
     let name: string | undefined
+    const listOnly = SiteEdits.isRoutingOnly(SiteWrites.siteFile()?.path ?? "")
     const changed = SiteWrites.change(appTexts.text("siteCreatePage", { address }), then, (text) => {
-      name = SiteEdits.pageNameFor(
-        address,
-        SiteEdits.allParts(SiteEdits.partsIn(text) ?? []).map((part) => part.name)
-      )
-      const added = SiteEdits.withPageAdded(text, name, address)
-      return title ? SiteEdits.withPartChanged(added, name, { title }) : added
+      const taken = SiteEdits.allParts(SiteEdits.partsIn(text) ?? []).map((part) => part.name)
+      // its name is its title, in a site of routing alone;  its page comes when it's first opened
+      name = listOnly
+        ? SiteEdits.freeName(title ?? SiteEdits.pageNameFor(address), taken)
+        : SiteEdits.pageNameFor(address, taken)
+      const added = SiteEdits.withPageAdded(text, name, address, { listOnly })
+      return title && !listOnly ? SiteEdits.withPartChanged(added, name, { title }) : added
     })
     return changed ? name : undefined
+  }
+
+  /**
+   * Open part `name`'s own page in the editor (epic `mockup` P17):  its declaration, in whichever file has it.
+   * - No page for it yet:  made first, a file of its own beside the site's.
+   * - A group, or a part another project declares (a notebook a site imports):  its line in the site.
+   * - Rejects when a file can't be read or made;  the caller shows it.
+   */
+  static async openPart(name: string): Promise<void> {
+    const site = SiteWrites.siteFile()
+    const project = editor.project
+    if (!site || !project) return
+    const part = SiteEdits.partNamed(site.contents ?? "", name)
+    const file = part.kind === "group" ? undefined : SiteWrites.declaringFile(name)
+    if (part.kind !== "group" && !file && project.scope && !project.hasPageOrView(name)) {
+      return SiteWrites.createPartFile(part, site)
+    }
+    const shown = file ?? site
+    const text = shown.contents ?? ""
+    const at = (file && SiteWrites.declarationOf(text, name)?.start) ?? (file ? 0 : part.line.start)
+    const line = text.slice(0, at).split("\n").length - 1
+    editor.cameFromSite = project.path
+    await editor.showFileAt(shown.path, { anchor: { line, ch: 0 }, head: { line, ch: 0 } })
+  }
+
+  /** SIDE EFFECT:  a new file for `part`, its own, beside the site's `site`, and shown. */
+  private static async createPartFile(part: SitePart, site: SiteFile): Promise<void> {
+    const project = editor.project!
+    const language = /\.es\.spell(?:ml|x)$/.test(site.path) ? "es" : "en"
+    const folder = (site.filePath ?? "").replace(/[^/]*$/, "")
+    const taken = project.files.map((file) => file.filePath?.replace(/^.*\//, "") ?? "")
+    const fileName = SiteEdits.fileNameFor(part.title ?? part.name, taken, language)
+    editor.cameFromSite = project.path
+    await editor.createFile(`${folder}${fileName}`, SiteEdits.stubFor(part, language))
   }
 
   /**
@@ -108,6 +144,13 @@ export class SiteWrites {
         if (at !== file)
           SiteWrites.changeText(at, title, undefined, (text) => SiteWrites.withNamesReplaced(text, spans, wanted))
       }
+      // the page's own file, in a site of routing alone
+      const declaring = SiteWrites.declaringFile(name)
+      if (declaring && declaring !== file) {
+        SiteWrites.changeText(declaring, title, undefined, (text) =>
+          SiteEdits.withDeclarationRenamed(text, name, wanted)
+        )
+      }
     })
     return true
   }
@@ -128,8 +171,9 @@ export class SiteWrites {
       editor.showNotice(appTexts.text("siteStoriesElsewhere", { name }))
       return false
     }
+    const language = /\.es\.spell(?:ml|x)$/.test(file.path) ? "es" : "en"
     return SiteWrites.changeText(file, appTexts.text("siteChangeStories", { name }), undefined, (text) =>
-      PageStories.withStories(text, name, stories)
+      PageStories.withStories(text, name, stories, language)
     )
   }
 
@@ -150,12 +194,20 @@ export class SiteWrites {
     const files = editor.project?.files ?? []
     const site = SiteWrites.siteFile()
     return [...(site ? [site] : []), ...files.filter((file) => file !== site)].find(
-      (file) => !!SiteEdits.declarationOf(file.contents ?? "", name)
+      (file) => !!SiteWrites.declarationOf(file.contents ?? "", name)
     )
   }
 
+  /** Where part `name` is declared in `text`:  by its whole name, else as `button usage` for `button usage page`. */
+  private static declarationOf(text: string, name: string): ReturnType<typeof SiteEdits.declarationOf> {
+    return SiteEdits.declarationOf(text, name) ?? SiteEdits.declarationOf(text, name.replace(/ page$/, ""))
+  }
+
   /** Change page `name`'s address or title. */
-  static changePart(name: string, change: { address?: string; title?: string; state?: string }): boolean {
+  static changePart(
+    name: string,
+    change: { address?: string; title?: string; state?: string; live?: string }
+  ): boolean {
     return SiteWrites.change(appTexts.text("siteChangePart", { name }), undefined, (text) =>
       SiteEdits.withPartChanged(text, name, change)
     )

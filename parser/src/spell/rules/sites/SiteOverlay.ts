@@ -9,9 +9,9 @@ import {
   cardDetailsOf,
   cardPlaceMessage,
   overlayKindOf,
+  overlayViewNamed,
   siteOf,
   specialPageOf,
-  typeNamed,
   type SiteOverlayEntry
 } from "./sites.shared"
 
@@ -19,7 +19,8 @@ import {
  * `site_overlay` rule:  one of a site's dialogs or sidebars (epic `mockup` P1).
  * - e.g. `- it has a settings dialog`, `- it has a syntax sidebar`, in a site's body
  * - Named once, opened from any of its pages, with no address of its own:  drawn as a modal and a slide-out panel.
- * - What it shows:  the view of its name, when the program declares one (`a "settings dialog" is a view`);
+ * - What it shows:  the view of its name, when the program declares one (`a "settings dialog" is a view`),
+ *   its kind's word left out or not (`System Notices sidebar`, the view `System Notices`);
  *   else it's a name, waiting for one.
  * - Its last word says which, in the language's own words:  `site_dialog`, `site_sidebar`.
  * - Its NOT FOUND and ERROR pages too (epic `mockup` P2):
@@ -51,11 +52,11 @@ export class SiteOverlay extends SpellStatement<
     const words = name.split(/\s+/)
     const kind = specialPageOf(scope, name) ?? overlayKindOf(scope, words.at(-1)) ?? overlayKindOf(scope, words[0])
     if (!kind) return undefined
-    const view = typeNamed(scope, name)
+    const view = overlayViewNamed(scope, name)
     const card = cardDetailsOf(match.groups)
     if (!card) return SpellStatement.refuse(match, cardPlaceMessage(SP.Language.of(scope), match.groups))
     match.data.kind = kind
-    match.data.entry = { name, ...(view?.isA("View") && { view: view.name }), ...card }
+    match.data.entry = { name, ...(view && { view: view.name }), ...card }
     return match
   }
 

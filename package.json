@@ -1288,10 +1288,10 @@
     "@atproto/oauth-client-browser": "0.5.11",
     "@atproto/oauth-client-node": "0.5.13",
     "@inkjs/ui": "^2",
-    "@solidjs/h": "2.0.0-rc.17",
-    "@solidjs/router": "2.0.0-next.41",
-    "@solidjs/vite-plugin": "3.0.0-next.51",
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/h": "2.0.0-rc.21",
+    "@solidjs/router": "2.0.0-next.44",
+    "@solidjs/vite-plugin": "3.0.0-next.57",
+    "@solidjs/web": "2.0.0-rc.21",
     "browser-or-node": "^3.0.0",
     "chalk": "^5.6.0",
     "commander": "^14",
@@ -1299,11 +1299,9 @@
     "entities": "^6.0.1",
     "esbuild": "^0.28.2",
     "fs-extra": "^11.3.0",
-    "global": "^4.3.2",
     "highlight.js": "^11.12.0",
     "ink": "^5.2.1",
     "json5": "^2.2.3",
-    "json5-writer": "^0.2.0",
     "lightningcss": "^1.33.0",
     "linkedom": "^0.18.13",
     "lodash": "^4.17.21",
@@ -1314,10 +1312,10 @@
     "parse5": "^7.3.0",
     "pluralize": "^8.0.0",
     "postcss": "^8.5.28",
-    "query-string": "^6.12.1",
+    "query-string": "^10.0.0",
     "react": "^18.2.0",
     "semver": "^7.8.5",
-    "solid-js": "2.0.0-rc.17",
+    "solid-js": "2.0.0-rc.21",
     "temporal-polyfill": "^1.0.5",
     "tsx": "4.20.3",
     "vite-plus": "catalog:",
@@ -1330,7 +1328,7 @@
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@playwright/test": "1.63.0",
-    "@solidjs/compiler": "2.0.0-rc.17",
+    "@solidjs/compiler": "2.0.0-rc.21",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.17",
     "@types/lodash-es": "^4.17.12",
@@ -1354,9 +1352,9 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/web": "2.0.0-rc.21",
     "axe-core": "^4.13.0",
-    "solid-js": "2.0.0-rc.17"
+    "solid-js": "2.0.0-rc.21"
   },
   "peerDependenciesMeta": {
     "@solidjs/web": {
@@ -1370,15 +1368,16 @@
     }
   },
   "resolutions": {
-    "@solidjs/babel-plugin": "2.0.0-rc.17",
-    "@solidjs/compiler": "2.0.0-rc.17",
-    "@solidjs/h": "2.0.0-rc.17",
-    "@solidjs/signals": "2.0.0-rc.17",
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/babel-plugin": "2.0.0-rc.21",
+    "@solidjs/compiler": "2.0.0-rc.21",
+    "@solidjs/h": "2.0.0-rc.21",
+    "@solidjs/signals": "2.0.0-rc.21",
+    "@solidjs/web": "2.0.0-rc.21",
     "axe-core": "4.13.0",
-    "solid-js": "2.0.0-rc.17",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
-    "vitest": "5.0.1"
+    "dompurify": "3.4.17",
+    "solid-js": "2.0.0-rc.21",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+    "vitest": "5.1.0"
   },
   "engines": {
     "node": ">=24.11"
@@ -1408,7 +1407,6 @@
       "entities",
       "esbuild",
       "fs-extra",
-      "global",
       "highlight.js",
       "ink",
       "lightningcss",

@@ -53,7 +53,7 @@ with live elements to click.
   - shadow DOM, `@layer`s, OKLCH tokens
   - accessibility built in
   - usable from any framework or plain HTML
-- Built on **Solid 2**:  `solid-js` / `@solidjs/web` `2.0.0-rc.17`, pinned exactly.
+- Built on **Solid 2**:  `solid-js` / `@solidjs/web` `2.0.0-rc.21`, pinned exactly.
 - The custom-element layer is the kit's [`element/`](../src/element/AGENTS.md):
   `spell/element`, by the same name on a page.
   - EVERY set's elements are written on it

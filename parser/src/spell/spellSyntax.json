@@ -4901,7 +4901,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 47,
+          "line": 50,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -8495,20 +8495,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 45,
+          "line": 49,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -8518,7 +8518,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 37,
+          "line": 38,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {

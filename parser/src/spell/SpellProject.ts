@@ -5,6 +5,8 @@ import { PY } from "spell/parser/py"
 // each runner runs its own copy.  See `spellRuntime.ts`.
 import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
 import { SP } from "spell/parser/spell"
+// Import directly:  these two helpers, not the rules' barrel
+import { overlayViewNamed, pageNamed } from "spell/parser/spell/rules/sites/sites.shared"
 
 /**
  * One spell project, e.g. `owen@spell/myProject`:  its files, and reading, compiling and saving them.
@@ -326,6 +328,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const parser = this.scope?.parser as SP.SpellParser | undefined
     const reader = parser?.twinFor(file.language, file.form) ?? SP.SpellParser.spellxReaderFor(file.language, file.form)
     return reader.aloneHead(file.parseText, file.path)
+  }
+
+  /** Does anything we can see, our files or our imports, declare `words` as a page or a dialog's view? */
+  hasPageOrView(words: string): boolean {
+    const { scope } = this
+    return !!scope && !!(pageNamed(scope, words) ?? overlayViewNamed(scope, words))
   }
 
   /** Our spell file that holds the page of class `className`, alone:  what a site asks for by. */
