@@ -53,6 +53,11 @@ describe("PageStories", () => {
     expect(PageStories.of(text, "films page")).toEqual([{ text: "", done: false, details: [] }])
   })
 
+  test("a story typed on two lines is written as one list item", () => {
+    const written = PageStories.withStories(SPELLX, "film page", [PageStories.newStory("see a film\n  and its crawl")])
+    expect(PageStories.of(written, "film page")?.map((story) => story.text)).toEqual(["see a film and its crawl"])
+  })
+
   test("opens up a self-closing page to hold its first story", () => {
     const text = PageStories.withStories(SPELLX, "films page", [PageStories.newStory("see every film")])
     expect(text).toContain('<spell-page "films page">\n\t<spell-stories>\n\t\t- [ ] see every film\n\t</>\n</>\n')

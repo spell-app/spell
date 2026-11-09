@@ -221,9 +221,9 @@ export const APP_TEXTS = {
   siteNewStory: "As a …, I want …, so that …",
   siteStoryDetails: "Details, e.g. - done when:  …",
   siteStoryDone: "Done",
-  siteStoryUp: "Move up",
-  siteStoryDown: "Move down",
-  siteStoryRemove: "Delete this story",
+  siteStoryMove: "Drag to move this story, or use the arrow keys",
+  siteStoryRemove: "Delete this story:  hold Option to skip asking",
+  siteStoryConfirmRemove: "Delete this story?",
   siteChangeStories: "Change {name}'s stories",
   // the site's data, in the site editor's Data tab (epic `mockup` P11):  a NERD, its boxes turning over to their ERD
   siteTabPages: "Pages",

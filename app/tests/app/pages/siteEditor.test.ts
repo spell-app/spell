@@ -221,6 +221,31 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await cardWith("/films · 3 of 4 stories").count()).toBe(1)
   })
 
+  test("a story moves by its thumb;  deleting one asks first, unless Option is held", async () => {
+    const stories = page.locator(".SitePageStories")
+    const rows = stories.locator("li")
+    const before = await rows.first().locator("textarea.text").inputValue()
+    const thumb = (await rows.first().locator(".thumb").boundingBox())!
+    const second = (await rows.nth(1).boundingBox())!
+    await page.mouse.move(thumb.x + thumb.width / 2, thumb.y + thumb.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(thumb.x + thumb.width / 2, second.y + second.height / 2, { steps: 4 })
+    await page.mouse.move(thumb.x + thumb.width / 2, second.y + second.height - 1, { steps: 2 })
+    await page.mouse.up()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await rows.nth(1).locator("textarea.text").inputValue()).toBe(before)
+
+    const count = await rows.count()
+    const deleteLast = rows.last().locator("ui-button")
+    await deleteLast.click()
+    await page.locator("ui-button", { hasText: "Cancel" }).click()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await rows.count()).toBe(count)
+    await deleteLast.click({ modifiers: ["Alt"] })
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await rows.count()).toBe(count - 1)
+  })
+
   describe("moving on the board", () => {
     // every section in sight at once, whatever the tests before scrolled to
     beforeEach(async () => {

@@ -112,7 +112,8 @@ export class PageStories {
     const items = stories.flatMap((story) => {
       const box = story.done === undefined ? "" : story.done ? "[x] " : "[ ] "
       return [
-        `\t\t- ${box}${story.text}`,
+        // one line in the file, however many it was typed on:  a story is one list item
+        `\t\t- ${box}${story.text.replace(/\s*\n\s*/g, " ")}`,
         ...story.details.filter((line) => line.trim()).map((line) => `\t\t\t${line}`)
       ]
     })
