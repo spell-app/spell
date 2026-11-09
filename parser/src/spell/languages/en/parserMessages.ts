@@ -398,6 +398,15 @@ export const PARSER_MESSAGES = {
   "value-line-outside-getter": 'A line of a getter\'s body:  put it under one, e.g. "the color of a card is:"',
   /** `set the length of the name to 3`:  `{what}` is `the-property` or `the-property-of-a-type`. */
   "cant-set-worked-out": "Can't set {what}:  spell works it out",
+  /** A quoted value that isn't one of a property's values, `- its lock is "banana"`;  or `- it is banana` (epic `language` P39). */
+  "not-one-of-its-values": "{what} can't be {value}:  it's one of {values}",
+  /** What a `not-one-of-its-values` message says for `- it is banana`, where no one property's meant. */
+  "it-itself": "It",
+  /** `- it is banana`, in a type with no property that has a list of values (epic `language` P39). */
+  "no-listed-values": "It can't be {value}:  it has no property with a list of values",
+  /** `- it is red`, when two of its properties list `red`:  which one it means (epic `language` P39). */
+  "listed-on-two-properties":
+    '{value} is a value of both its {first} and its {second}:  say which, "its {first} is {value}"',
   /** `set the pile of the card to x`, when a card belongs to one pile. */
   "cant-set-belongs-to": "Can't set {what}:  it's the {holder} holding it -- move it to a {holder} instead",
   "the-property": "the {property}",

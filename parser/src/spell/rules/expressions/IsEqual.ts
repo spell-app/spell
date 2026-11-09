@@ -1,5 +1,6 @@
-import { lowerFirst, proto } from "spell/util"
+import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
 
 import { Negatable } from "./Negatable"
@@ -21,10 +22,18 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return match
-    const property = IsEqual.listedPropertyFor(scope, SuffixLeft.current, match.groups.expression)
-    if (property) (match.data as IsEqualMatchData).property = property
+    const listed = IsEqual.listedPropertyFor(scope, SuffixLeft.current, match.groups.expression)
+    if (listed) {
+      const { property, value } = listed
+      ;(match.data as IsEqualMatchData).property = property.output ?? property.name
+      // the value as its list says it, and what that compiles to:  `it is a club` is `clubs`, `bloqueada` is `locked`
+      SpellConstant.compileAs(match.groups.expression, property.valueOutputs?.[value] ?? value)
+    }
     // a value said for a built-in template's property, in its own language:  `arriba` is `up` (epic `language` T74)
     SpellConstant.sayFor(SuffixLeft.current, match.groups.expression)
+    // a quoted value that isn't one of its values:  `if its lock is "banana"` (epic `language` P39)
+    const wrongValue = SpellConstant.wrongValueOf(scope, SuffixLeft.current, match.groups.expression)
+    if (wrongValue) SP.SpellWarnings.note(match, wrongValue)
     return match
   }
 
@@ -49,33 +58,21 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
    * The ONE property of `left`'s type whose own list of values holds the word `right` is, e.g. `suit` for
    * `it is clubs` in a card, which says `its "suit" is one of clubs, diamonds, hearts or spades`.
    * - So a thing compared to one of its values compares the property that has it:  a card is never `clubs` itself.
-   * - The word as listed, or its singular or plural:  `it is a club` is the `is a (suit)` phrase's, not ours.
    * - `undefined`:  `left`'s type is unknown or lists no such value, `right` is more than a word or a variable,
    *   or two of its properties list it.
+   * - SEE:  `P.TypeScope.propertiesListing()`.
    * - A lookup:  call it WHILE PARSING.
    */
-  private static listedPropertyFor(
+  static listedPropertyFor(
     scope: P.Scope,
     left: P.Match | undefined,
     right: P.Match | undefined
-  ): string | undefined {
+  ): { property: P.ScopeVariable; value: string } | undefined {
     const type = scope.getType(left?.datatype)
     const word = right?.inputText.trim()
     if (!type || !word || /\s/.test(word) || scope.variables?.get(word)) return undefined
-    const singular = P.singularize(word)
-    const found = new Set<string>()
-    for (const owner of type.chain()) {
-      for (const variable of owner.variables.get()) {
-        const values = variable.enumeration
-        // its own list is kept on its plural class variable, e.g. `Suits` for `suit`:  `define_property_has`
-        if (!values) continue
-        const listed = values.some(
-          (value) => typeof value === "string" && P.singularize(value.replace(/^'(.*)'$/, "$1")) === singular
-        )
-        if (listed) found.add(P.singularize(lowerFirst(variable.name)))
-      }
-    }
-    return found.size === 1 ? [...found][0] : undefined
+    const found = type.propertiesListing(word)
+    return found.length === 1 ? found[0] : undefined
   }
 
   getOperator(operator: P.Match): P.ASTOperator {

@@ -27,6 +27,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "every_thing_with": "type|filters|body?",
   "field_value_filter": "field|value",
   "has_slots": "type|slots",
+  "it_is_value": "value",
   "items_reordered": "type|seconds?|now?",
   "its_quoted_property": "type|property",
   "kind_values": "type",

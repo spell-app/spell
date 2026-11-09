@@ -307,6 +307,32 @@ export class TypeScope extends BlockScope {
     return undefined
   }
 
+  /**
+   * Each property of ours, own or inherited, whose list of values holds `word`, with the value as it's listed.
+   * - The word as listed, or its singular or plural:  `club` is `clubs`.
+   * - Text values only:  `2` never names a rank.
+   * - The nearest record of each name:  a subtype's line about a property keeps its list.
+   * - A lookup:  call it WHILE PARSING.
+   */
+  propertiesListing(word: string): Array<{ property: P.ScopeVariable; value: string }> {
+    const singular = P.singularize(word)
+    const found = new Map<string, { property: P.ScopeVariable; value: string }>()
+    for (const owner of this.chain()) {
+      for (const property of owner.variables.get()) {
+        if (!property.listedValues || found.has(property.name)) continue
+        for (const listed of property.listedValues) {
+          if (typeof listed !== "string") continue
+          const value = P.spellValueOf(listed)
+          if (P.singularize(value) === singular) {
+            found.set(property.name, { property, value })
+            break
+          }
+        }
+      }
+    }
+    return [...found.values()]
+  }
+
   /** Is `words` a property a scan found on us, or on a type we're built on?  See `propertiesAhead`. */
   knowsPropertyAhead(words: string): boolean {
     const key = snakeCase(words)
@@ -391,7 +417,16 @@ export class TypeScope extends BlockScope {
   declareProperty(
     name: string,
     declaredBy: P.Match,
-    { asWritten, datatype, autoDeclared, readAs, measure, output, valueOutputs }: DeclarePropertyOptions = {}
+    {
+      asWritten,
+      datatype,
+      autoDeclared,
+      readAs,
+      measure,
+      output,
+      valueOutputs,
+      listedValues
+    }: DeclarePropertyOptions = {}
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
     if (!existing) {
@@ -403,6 +438,7 @@ export class TypeScope extends BlockScope {
       if (measure) props.measure = measure
       if (output) props.output = output
       if (valueOutputs) props.valueOutputs = valueOutputs
+      if (listedValues) props.listedValues = listedValues
       this.variables.add(props)
     }
     // an earlier parse of THIS statement left it:  it's ours again -- see `sameStatement()`
@@ -668,6 +704,8 @@ export type DeclarePropertyOptions = {
   output?: string
   /** What each of its values compiles to, when that isn't itself -- see `P.ScopeVariable.valueOutputs`. */
   valueOutputs?: Record<string, string>
+  /** The words its value can be -- see `P.ScopeVariable.listedValues`. */
+  listedValues?: ReadonlyArray<string | number>
 }
 
 /** Constructor props for `TypeScope`. */

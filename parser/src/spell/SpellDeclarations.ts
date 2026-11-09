@@ -561,6 +561,8 @@ export class SpellDeclarations {
           output,
           // and its values too:  `arriba` sets `.direction` to `up`
           valueOutputs: enumerationOutputs,
+          // what it can be:  a quoted value is checked against it
+          listedValues: classVariable ? spellValues(enumeration) : undefined,
           asWritten,
           datatype,
           readAs,

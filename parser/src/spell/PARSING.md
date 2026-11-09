@@ -859,6 +859,26 @@ A kind that says so is saved in a file of its own.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 
+## A property's list of values:  `- it is locked` (epic `language` P39)
+
+A property with a list of values keeps it on its record, `P.ScopeVariable.listedValues`, however it got one:
+a line of the built-in types table, a built-in template, or a project's own `one of`.
+
+- The list is in its language:  Spanish's `candado` lists `bloqueado`, and `valueOutputs` says what each compiles to.
+- Each word is a constant the language knows, so `its lock is locked` needs no quotes.
+- `P.TypeScope.propertiesListing(word)` finds the properties that list a word, own or inherited, singular or plural.
+- Three things read the list:
+  - `it_is_value`, a line in a type's body:  `- it is locked`, `- it is a queen`, Spanish's `- está bloqueada`
+    - starts with its literal words, so it's filed under them and no other line tries it
+    - the same getter as naming the property;  it outranks setting a variable named `it`
+    - a word on no list, or on two properties' lists, is a parse error;  a variable or property of that name isn't ours
+  - `is_equal` and `is_listed_value`, comparing:  `if it is clubs`, `if it is a queen`
+    - `is_listed_value` only when the word names no type:  a known type's `is_a` wins
+  - the check on a plain quoted value, `SpellConstant.wrongValueMessage()`:
+    - a line giving it a value, or a `set`, is refused:  `- its lock is "banana"`
+    - a comparison, a new thing or a drawing's tag warns:  `<card suit="banana"/>`
+    - a value from a variable or with a `[fill-in]` isn't checked:  that's for the run-time check
+
 ## Outline bodies:  `a card is a thing where:`
 
 - The OUTLINE style (epic `outline-spell`):  a type's heading, then indented lines all about that type.
@@ -1336,7 +1356,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose).
     - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
       its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
-      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is "locked"`.
+      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is locked`.
       - Its SECTIONS draw as the docs pages' do, sticky and foldable, so the program draws the docs look
         (epic `notebook` P3, J1;  the words, `SpellxTwinWords.pageSection`):
         - each `##` heading's run is a `<section label="..." sticky="stack" collapsible dividing level="2">`

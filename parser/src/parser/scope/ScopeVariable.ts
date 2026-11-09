@@ -88,6 +88,14 @@ export class ScopeVariable {
    */
   declare valueOutputs: Record<string, string> | undefined
   /**
+   * The words a property's value can be, however it got a list of them (epic `language` P39):
+   * a built-in table's, a built-in template's, or a project's own `one of`.
+   * - As said in its language:  Spanish's `candado` lists `bloqueado`;  what each compiles to is `valueOutputs`.
+   * - A subtype's own line about it (`- its lock is locked`) keeps the list on its record too.
+   * - SEE:  `P.TypeScope.propertiesListing()`.
+   */
+  declare listedValues: ReadonlyArray<string | number> | undefined
+  /**
    * What a number property MEASURES, and in which unit:
    * `{ dimension: "Length", unit: "centimeter" }` for `its "height" is a length in cm` (epic `language` P23).
    * - Its value stays a plain number in that unit;  `its height in feet` converts it (spell's `measure_in`).
@@ -155,6 +163,8 @@ export type ScopeVariableProps = {
   readAs?: string
   /** See `ScopeVariable.valueOutputs`. */
   valueOutputs?: Record<string, string>
+  /** See `ScopeVariable.listedValues`. */
+  listedValues?: ReadonlyArray<string | number>
   /** See `ScopeVariable.measure`. */
   measure?: P.Measure
   /** See `ScopeVariable.rules`. */
