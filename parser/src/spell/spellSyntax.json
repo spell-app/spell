@@ -3188,6 +3188,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "OrdinalOfExpression",
+          "ruleNames": ["ordinal_of_expression"],
+          "internal": false,
+          "file": "src/spell/rules/lists/OrdinalOfExpression.ts",
+          "line": 14,
+          "purpose": "One item of a list by its place, with no word for what the items are, e.g. `the first of its authors`, `the last of the cards`.",
+          "syntaxes": [
+            {
+              "syntax": "the {ordinal} (in|of) {expression:operand}",
+              "example": "the first of authors",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(authors, 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(authors, 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(authors, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PossessiveOrdinal",
           "ruleNames": ["possessive_ordinal"],
           "internal": false,

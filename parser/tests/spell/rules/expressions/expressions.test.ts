@@ -140,6 +140,7 @@ describe("priority and precedence", () => {
         "on:  Priority.preferred",
         "operation_at:  Priority.declaration",
         "or:  Precedence.or",
+        "ordinal_of_expression:  Priority.mostSpecific",
         "ordinal_where_expression:  Priority.specific",
         "outline_specifier_text_kind:  Priority.specific",
         "page_size_is:  Priority.declaration",

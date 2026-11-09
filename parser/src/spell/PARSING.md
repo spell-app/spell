@@ -402,6 +402,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - An enumeration's instance twin compiles to its class variable:  `the suits of the card` => `Card.Suits`.
   - LOOSE:  ONE word, which nothing need declare, blacklisted words out:  `the is-set-up of it`.
     - Several undeclared words are NOT a property read, so `the first card of the deck` stays the ordinal rule's.
+    - `the first of its authors` is an item too, not a property named `first`:
+      [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
+      (never a property the owner declares, nor `the top of its card`).
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
     - its syntax:  `the {property:member_words} of {expression:operand}`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`

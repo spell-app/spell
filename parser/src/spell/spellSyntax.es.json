@@ -3214,6 +3214,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "OrdinalOfExpression",
+          "ruleNames": ["ordinal_of_expression"],
+          "internal": false,
+          "file": "src/spell/rules/lists/OrdinalOfExpression.ts",
+          "line": 14,
+          "purpose": "One item of a list by its place, with no word for what the items are, e.g. `the first of its authors`, `the last of the cards`.",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? {ordinal} (en|de|del) {expression:operand}",
+              "example": "el primero de autores",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(autores, 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(autores, 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(autores, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "OrdinalWhereExpression",
           "ruleNames": ["ordinal_where_expression"],
           "internal": false,
