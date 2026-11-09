@@ -187,7 +187,8 @@ placesEs.addRule(StoredOnThisDevice, {
             "export class Ajuste extends Place {}",
             "export const ajustes = core.place(new Ajuste(), {",
             '  name: "ajustes",',
-            '  kind: "database on this device"',
+            '  kind: "database on this device",',
+            '  unclearNumbers: ","',
             "})"
           ]
         ],
@@ -198,6 +199,7 @@ placesEs.addRule(StoredOnThisDevice, {
             "export const borrador = core.place(new Borrador(), {",
             '  name: "borrador",',
             '  kind: "database on this device",',
+            '  unclearNumbers: ",",',
             "  forEachTab: true",
             "})"
           ]
@@ -891,10 +893,7 @@ placesEs.addRule(EveryThingMatching, {
         scope.variables?.add("búsqueda")
       },
       tests: [
-        [
-          "todas las obras que coinciden con búsqueda",
-          'await core.savedThings(Obra, { search: { "*": búsqueda } })'
-        ],
+        ["todas las obras que coinciden con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })'],
         ["las obras que coinciden con búsqueda", 'await core.savedThings(Obra, { search: { "*": búsqueda } })']
       ]
     }

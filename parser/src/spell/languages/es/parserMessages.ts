@@ -90,6 +90,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
+  "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",
   "rider-only-in-a-drawing":
     "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
   "in-one-go-not-atomic":
@@ -111,6 +112,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "atmosphere-reads-here":
     'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda un número decimal como texto, "12.50", que otras aplicaciones leen como texto',
   "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
+  "operation-named-create":
+    'Una acción de {thing} no puede llamarse "create":  es lo que se ejecuta al crear cada {thing}.  Llámala de otro modo, p. ej. "para añadir una {thing} está en ..."',
   "page-size-a-whole-number": "Una página tiene un número entero de cosas, 1 o más",
   "atmosphere-not-a-space": '"{address}" no es un espacio:  se escribe "at://did:plc:.../space/familia"',
   "atmosphere-not-a-corner":

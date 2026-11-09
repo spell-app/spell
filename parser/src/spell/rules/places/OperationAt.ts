@@ -2,11 +2,15 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 // Import directly to avoid circular import
 import { MethodDefinition } from "spell/parser/spell/rules/methods/MethodDefinition"
 import type { MethodSignatureData } from "spell/parser/spell/rules/methods/methods.shared"
 import { PLACE_KIND_ABILITIES } from "./places.shared"
 import { textIn } from "./PlaceDetail"
+
+/** The method core runs as a thing is made:  no operation can have that name on a type (epic `data` T56). */
+const CREATE_HOOK = "create"
 
 /**
  * `operation_at` rule:  an action that happens at a place, by its own address (epic `data` Q14, Q17's C).
@@ -26,7 +30,8 @@ import { textIn } from "./PlaceDetail"
  *   - It's only a type's name that sends:  a word that isn't one stays part of the action's name, as in any action.
  * - Only says something under a place, which no action anywhere else could have read:  this line was an error everywhere.
  *   - Copied anywhere else it warns, and its action does nothing, as there's no place to reach.
- * - Known below its line:  a place's lines come first in a program, as a saved type needs them to.
+ * - Known ahead of its line too, as an action in a type's outline is:  `refresh` above the place's line (epic `data` T67).
+ * - `to create a recipe is at "..."` won't compile:  it would be the recipe's `create()`, run as each one is made.
  * - Compiles to `core.callPlace()`;  `create_place` gathers the addresses into its `core.place()`.
  * - `Priority.declaration`:  `to_do_something` reads as far as the text, and this reads the whole line.
  */
@@ -41,6 +46,10 @@ export class OperationAt extends MethodDefinition<"signature|path", OperationDat
     if (!match) return undefined
     const place = P.SubjectScope.of(scope)?.subjectType
     const language = SP.Language.of(scope)
+    const { methodName, instanceType } = this.getSignature(match)!
+    if (methodName === CREATE_HOOK && instanceType) {
+      return SpellStatement.refuse(match, language.parserMessage("operation-named-create", { thing: instanceType }))
+    }
     if (!place?.placeName) {
       SP.SpellWarnings.note(match as P.Match, language.parserMessage("operation-outside-place"))
       return match

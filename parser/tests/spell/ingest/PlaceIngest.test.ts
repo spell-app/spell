@@ -846,7 +846,7 @@ describe("a key", () => {
     const { ingest, asked, texts, descriptions } = ingestOf(echoing, { keyNamed: () => KEY, claude })
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "stuff", keySecret: "STUFF_KEY" })
     expect(asked[0]!.headers.get("authorization")).toBe(`Bearer ${KEY}`)
-    expect(texts.get("/K.spell")).toContain(`- its key is the secret "STUFF_KEY"`)
+    expect(texts.get("/K.spell")).toContain(`- its optional key is the secret "STUFF_KEY"`)
     const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")

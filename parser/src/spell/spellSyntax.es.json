@@ -3731,7 +3731,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 20,
+          "line": 27,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -6802,7 +6802,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 31,
+          "line": 34,
           "purpose": "What a read in a drawing shows while it has no list to show (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7609,7 +7609,7 @@
           "ruleNames": ["show_them_at_a_time"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 118,
+          "line": 126,
           "purpose": "`show them 12 at a time`: how many a long list draws at once: a page of `show them in pages`, or each lot of more as you scroll -- see `core.drawRead()` (epic `data` Q35).",
           "syntaxes": [
             {
@@ -8040,7 +8040,7 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 33,
+          "line": 38,
           "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
@@ -8074,7 +8074,7 @@
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 180,
+          "line": 188,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8088,7 +8088,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 188,
+          "line": 196,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8102,7 +8102,7 @@
           "ruleNames": ["if_that_fails_say"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 69,
+          "line": 77,
           "purpose": "`if that fails say \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).",
           "syntaxes": [
             {
@@ -8116,7 +8116,7 @@
           "ruleNames": ["show_them_paged"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 90,
+          "line": 98,
           "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
           "syntaxes": [
             {
@@ -8130,7 +8130,7 @@
           "ruleNames": ["show_them_all"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 106,
+          "line": 114,
           "purpose": "`show them all` -- see `ShowThemPaged`.",
           "syntaxes": [
             {
@@ -8144,7 +8144,7 @@
           "ruleNames": ["show_them_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 170,
+          "line": 178,
           "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
           "syntaxes": [
             {
@@ -8158,7 +8158,7 @@
           "ruleNames": ["show_it_all_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 175,
+          "line": 183,
           "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
           "syntaxes": [
             {
@@ -8172,7 +8172,7 @@
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 203,
+          "line": 224,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -8529,7 +8529,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 56,
+          "line": 64,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

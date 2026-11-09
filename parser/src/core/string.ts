@@ -157,7 +157,8 @@ const DATE_STYLES = {
     date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }),
   "short time": (date: Date) => clockTime(date, "minutes"),
   "long time": (date: Date) => clockTime(date, "seconds"),
-  "date and time": (date: Date) => `${date.toLocaleDateString("en-US", { dateStyle: "medium" })}, ${clockTime(date, "minutes")}`,
+  "date and time": (date: Date) =>
+    `${date.toLocaleDateString("en-US", { dateStyle: "medium" })}, ${clockTime(date, "minutes")}`,
   timestamp: (date: Date) => date.toISOString(),
   reader: (date: Date) => date.toLocaleDateString(undefined, { dateStyle: "medium" })
 } satisfies Record<string, (date: Date) => string>

@@ -228,7 +228,10 @@ places.addRule(StoredOnThisDevice, {
       tests: [
         [
           "settings is stored on this device",
-          ["export class Setting extends Place {}", "export const settings = core.place(new Setting(), { name: \"settings\", kind: \"database on this device\" })"]
+          [
+            "export class Setting extends Place {}",
+            'export const settings = core.place(new Setting(), { name: "settings", kind: "database on this device" })'
+          ]
         ],
         [
           "scratch is stored on this device, for each tab",

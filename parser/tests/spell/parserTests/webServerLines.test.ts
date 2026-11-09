@@ -531,18 +531,15 @@ describe("GitHub's way (epic `data` P28)", () => {
 })
 
 describe("the place kinds' other words", () => {
-  const errorsOf = (contents: string) =>
-    parseSpellProject([{ path: "/Lines.spell", contents }]).files[0]!.errors
+  const errorsOf = (contents: string) => parseSpellProject([{ path: "/Lines.spell", contents }]).files[0]!.errors
 
   test("an atmosphere space's address has to be a space's", () => {
     expect(errorsOf('family cookbook is an atmosphere space at "at://did:plc:abc/space/family"')).toEqual([])
-    expect(errorsOf('family cookbook is an atmosphere space at "https://example.com"').join()).toMatch(
-      /isn't a space/
-    )
+    expect(errorsOf('family cookbook is an atmosphere space at "https://example.com"').join()).toMatch(/isn't a space/)
   })
 
   test("reading an atmosphere space says it can't be reached yet", async () => {
-    const { Note } = await runSpell([
+    const { Note } = runSpell([
       'family cookbook is an atmosphere space at "at://did:plc:abc/space/family"',
       "a note is a thing",
       "\t- it is saved in family cookbook"
@@ -585,5 +582,122 @@ describe("the place kinds' other words", () => {
     expect(errorsOf("scratch is stored on this device, for each tab")).toEqual([])
     expect(errorsOf("settings is stored on this device")).toEqual([])
     expect(errorsOf("settings is a database on this device")).toEqual([])
+  })
+})
+
+describe("the checks that moved to compile (epic `data` P42)", () => {
+  const compiled = (contents: string) => parseSpellProject([{ path: "/Lines.spell", contents }]).files[0]!
+
+  test("a quoted name with a number in it", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        "a book is a thing:",
+        '\t- its "isbn 10" is text',
+        '\t- its "top 3 movies" is text',
+        "\t- to f:  return its isbn 10",
+        "\t- to g:  return the top 3 movies of it"
+      ].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("return this.isbn10")
+    expect(code).toContain("return this.top3Movies")
+  })
+
+  test("an operation named create is refused, on a type:  it would run as each one is made", () => {
+    const lines = (operation: string) =>
+      compiled(
+        [
+          `films is a web server at "${HOST}":`,
+          `\t- ${operation}`,
+          "a recipe is a thing:",
+          "\t- it lives in films"
+        ].join("\n")
+      ).errors
+    expect(lines('to create a recipe is at "/recipes"').join()).toMatch(/can't be called "create"/)
+    expect(lines('to create is at "/recipes"')).toEqual([])
+  })
+
+  test("a place's operation is known above its line", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        "to go with a film:",
+        "\trefresh",
+        "\tpublish the film",
+        "a film is a thing",
+        `archive is a web server at "${HOST}":`,
+        '\t- to refresh is at "/refresh:all"',
+        '\t- to publish a film is at "/publish"'
+      ].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.callPlace("archive", "refresh")')
+    const es = parseSpellProject([
+      {
+        path: "/Lines.es.spell",
+        contents: [
+          "para ir:",
+          "\trefrescar",
+          `archivo es un servidor web en "${HOST}":`,
+          '\t- para refrescar está en "/r"'
+        ].join("\n")
+      }
+    ]).files[0]!
+    expect(es.errors).toEqual([])
+  })
+
+  const FILMS = [`films is a web server at "${HOST}":`, "\t- it is read only", '\t- reviews live at "/r"'].join("\n")
+  const REVIEW = (drawing: string) =>
+    `${FILMS}\na review is a thing:\n\t- it lives in films\n\t- its "title" is text\n\tto draw it:\n\t\t${drawing}`
+
+  test("a form bound to a read-only saved thing is refused", () => {
+    expect(compiled(REVIEW('<ui-form value={it}><ui-input name="title"/></ui-form>')).errors.join()).toMatch(
+      /read only here/
+    )
+    expect(compiled(REVIEW('<ui-form value={a draft of it}><ui-input name="title"/></ui-form>')).errors).toEqual([])
+    expect(compiled(REVIEW('<ui-form value={it} disabled><ui-input name="title"/></ui-form>')).errors).toEqual([])
+  })
+
+  test("a sort key reading a getter that waits, through another's name", () => {
+    const shelf = (key: string) =>
+      compiled(
+        [
+          `films is a web server at "${HOST}":`,
+          '\t- reviews live at "/r"',
+          "a review is a thing:",
+          "\t- it lives in films",
+          '\t- its "title" is text',
+          '\t- its "score" is the number of reviews where its title is "x"',
+          '\t- its "other" is its score',
+          '\t- its "plain" is its title',
+          "a shelf is a thing:",
+          `\t- to f:  return every review, sorted by ${key}`
+        ].join("\n")
+      ).errors
+    expect(shelf("its score").join()).toMatch(/can't wait/)
+    expect(shelf("its other").join()).toMatch(/can't wait/)
+    expect(shelf("other").join()).toMatch(/can't wait/)
+    expect(shelf("its plain")).toEqual([])
+    expect(shelf("its title")).toEqual([])
+  })
+
+  test("if that fails, on a read in an action", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        `films is a web server at "${HOST}":`,
+        '\t- reviews live at "/r"',
+        "a review is a thing:",
+        "\t- it lives in films",
+        "to go:",
+        "\tset found to every review",
+        "\tif that fails:",
+        '\t\tprint "Oops"',
+        "\tprint found"
+      ].join("\n")
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("let found = undefined")
+    expect(code).toContain("found = await core.savedThings(Review)")
+    expect(code).toMatch(/catch \(error\) \{\n\s*core\.console\.log\("Oops"\)/)
+    expect(compiled('to go:\n\tif that fails:\n\t\tprint "x"').errors.join()).toMatch(/under the line/)
   })
 })

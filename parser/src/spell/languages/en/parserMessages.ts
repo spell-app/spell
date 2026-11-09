@@ -127,6 +127,8 @@ export const PARSER_MESSAGES = {
   /** A sort key that waits:  won't compile. */
   "sort-key-waits":
     "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",
+  /** `if that fails:` in an action with nothing above it. */
+  "rider-needs-a-line-above": "This goes under the line it's about, as a read of a place",
   /** A rider outside a drawing:  won't compile. */
   "rider-only-in-a-drawing":
     "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
@@ -159,6 +161,9 @@ export const PARSER_MESSAGES = {
     'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** `to create a recipe is at "..."` (epic `data` T56). */
+  "operation-named-create":
+    'A {thing}\'s action can\'t be called "create":  that\'s what runs as each {thing} is made.  Call it something else, e.g. "to add a {thing} is at ..."',
   /** `show them 0 at a time`. */
   "page-size-a-whole-number": "A page holds a whole number of things, 1 or more",
   /** An atmosphere space's address that isn't one. */

@@ -15,7 +15,10 @@ export class ShowDatesAs extends SpellStatement<"style"> {
   @proto static alias = "statement"
 
   getAST(match: P.MatchFor<this>) {
-    const style = new P.ASTStringLiteral(match, { value: Wording.meaningOf(match.groups.style)!.replace(/_/g, " "), quote: '"' })
+    const style = new P.ASTStringLiteral(match, {
+      value: Wording.meaningOf(match.groups.style)!.replace(/_/g, " "),
+      quote: '"'
+    })
     return new P.ASTCoreMethodInvocation(match, { methodName: "showDatesAs", args: [style] })
   }
 }
