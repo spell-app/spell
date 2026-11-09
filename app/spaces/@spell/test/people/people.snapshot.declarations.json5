@@ -34,7 +34,7 @@
     {
       "property": "dates",
       "of": "Person",
-      "datatype": "list of datedevents",
+      "datatype": "list of dated-events",
       "defined": "/People.spell:414-451"
     },
     {

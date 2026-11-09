@@ -256,7 +256,7 @@ export class DefinePropertyHas extends SpellStatement<
     const kind = DefinePropertyHas.declareKind(match, typeScope, values, groupName, property)
     const varProps: P.ScopeVariableProps & { enumeration: Array<string | number> } = {
       name: groupName,
-      datatype: kind && P.listOfType(kind),
+      datatype: kind && P.listOf(kind),
       enumeration: values,
       initializer: P.enumerationInitializer(values),
       declaredBy: match

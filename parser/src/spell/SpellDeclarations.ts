@@ -577,7 +577,7 @@ export class SpellDeclarations {
       const kind = property && SpellDeclarations.loadPropertyKind(scope, typeScope, declaration, declaredAt)
       const variable = definedOnly({
         name: classVariable,
-        datatype: kind && P.listOfType(kind),
+        datatype: kind && P.listOf(kind),
         enumeration: spellValues(enumeration),
         initializer: enumerationInitializer(enumeration),
         declaredAt
