@@ -312,7 +312,7 @@ Where that stands, plainly:
 
 One clone, one install, and every part of Spell is a folder in it.
 
-![One repo, its folders stacked by what they use:  on top, app uses parser and ui, and epic, beside it, uses ui;  parser, the language in English and Spanish, and ui use the shared code under src/, whose folders are util, toolchain, server, element and cli](docs/images/repos.svg)
+![One repo, its folders stacked by what they use:  on top, app uses parser and ui, and epic, beside it, uses ui;  parser, the language in English and Spanish, and ui use the shared code under src/, whose folders are util, places, toolchain, server, element and cli](docs/images/repos.svg)
 
 _The shared code is under everything.  epic sits beside app, not under it:
 app names it nowhere, and the page server runs each folder's part of its settings, epic's too._

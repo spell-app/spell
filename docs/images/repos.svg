@@ -1,7 +1,7 @@
-<!-- The src/ box shows five folders on purpose: element-tools and test-helpers are left out (Owen, 2026-10-23). -->
+<!-- The src/ box shows six folders on purpose: element-tools and test-helpers are left out (Owen, 2026-10-23). -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="800" height="440" role="img" aria-labelledby="title desc">
   <title id="title">One repo, five parts</title>
-  <desc id="desc">The repo spell, its folders stacked by what they use.  At the top, app uses parser and ui, and epic, beside it, uses ui.  parser, the language in English and Spanish, and ui use the shared code under src/, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
+  <desc id="desc">The repo spell, its folders stacked by what they use.  At the top, app uses parser and ui, and epic, beside it, uses ui.  parser, the language in English and Spanish, and ui use the shared code under src/, at the bottom, whose folders are util, places, toolchain, server, element and cli.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
@@ -51,14 +51,16 @@
   <rect class="kit" x="40" y="320" width="720" height="92" rx="14"/>
   <text class="name" x="400" y="344">src/</text>
   <text class="what" x="400" y="361" style="font-size:11.5px">the shared code:  under every folder</text>
-  <rect class="chipbox" x="120" y="374" width="96" height="24" rx="12"/>
-  <text class="chip" x="168" y="390">util</text>
-  <rect class="chipbox" x="236" y="374" width="96" height="24" rx="12"/>
-  <text class="chip" x="284" y="390">toolchain</text>
-  <rect class="chipbox" x="352" y="374" width="96" height="24" rx="12"/>
-  <text class="chip" x="400" y="390">server</text>
-  <rect class="chipbox" x="468" y="374" width="96" height="24" rx="12"/>
-  <text class="chip" x="516" y="390">element</text>
-  <rect class="chipbox" x="584" y="374" width="96" height="24" rx="12"/>
-  <text class="chip" x="632" y="390">cli</text>
+  <rect class="chipbox" x="62" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="110" y="390">util</text>
+  <rect class="chipbox" x="178" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="226" y="390">places</text>
+  <rect class="chipbox" x="294" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="342" y="390">toolchain</text>
+  <rect class="chipbox" x="410" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="458" y="390">server</text>
+  <rect class="chipbox" x="526" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="574" y="390">element</text>
+  <rect class="chipbox" x="642" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="690" y="390">cli</text>
 </svg>
