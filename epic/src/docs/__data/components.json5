@@ -6014,6 +6014,11 @@
           "description": "`kind=\"away\"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the toolbar's red badge."
         },
         {
+          "name": "news",
+          "kind": "string",
+          "description": "`kind=\"away\"`:  how much is new, as `<state>:<count>` (`recent:2 progress:1 attention:3 open:2`), written by the tool:  its title's badges, there while it's folded."
+        },
+        {
           "name": "lines",
           "kind": "string",
           "description": "`kind=\"away\"`:  its lines' keys, space-separated (`done p-x todo i205`;  epic `epic-engine` I206), written by the tool:  each `<epic-away-line>` in it takes its own Read, which the review inbox knows by these."
@@ -6679,6 +6684,11 @@
       "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  A click toggles a chip and every state of its colour (`StateFilter.nextShown()`), as its tooltip says;  an ⌥-click (Alt-click) shows only that colour, whatever showed (epic `epic-engine` I166).  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, the blues' chip.",
       "noun": "state-filter",
       "attributes": [
+        {
+          "name": "static",
+          "kind": "boolean",
+          "description": "Its chips only say their counts:  no click filters anything."
+        },
         {
           "name": "counts",
           "kind": "string",
