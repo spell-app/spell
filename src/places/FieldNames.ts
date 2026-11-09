@@ -13,6 +13,9 @@ const WORD_BREAK = /[\s_-]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/
 /** Our name for a row's id. */
 const ID = "id"
 
+/** Spell's two times, as a program names a server's field to be one (epic `data` T57). */
+const TIMES = ["created", "modified"]
+
 /****************
  * ### `FieldNames`
  * One collection's field names:  ours (`hairColor`, what compiled Spell calls them) and the server's (`hair_color`).
@@ -98,6 +101,11 @@ export class FieldNames {
     // a field that's its id is still itself too:  GitHub's user `login`, Wikipedia's `title`, which a page shows
     const theirId = this.theirs.get(ID)
     if (theirId !== undefined && theirId in row) read[ourNameFor(theirId)] ??= row[theirId]
+    // so is one that's named as one of Spell's two times:  `a post's created is its "created_at"`, and `its created at` still reads
+    for (const time of TIMES) {
+      const theirTime = this.theirs.get(time)
+      if (theirTime !== undefined && theirTime in row) read[ourNameFor(theirTime)] ??= row[theirTime]
+    }
     return read
   }
 

@@ -119,6 +119,12 @@ function pageSettings(): AtProtoPageSettings {
   return (globalThis as { SPELL_ATMOSPHERE?: AtProtoPageSettings }).SPELL_ATMOSPHERE ?? {}
 }
 
+/** What a read reaches here, a page's own network over the real one:  what `spell place ingest` looks at too. */
+export function atmosphereNetwork(): AtProtoNetwork {
+  const { signIn: _signIn, clientFile: _clientFile, ...settings } = pageSettings()
+  return { ...REAL_NETWORK, ...settings }
+}
+
 /** The one real sign-in of this page:  every place on it shares one person. */
 let pageSignIn: AtProtoSignIn | undefined
 
