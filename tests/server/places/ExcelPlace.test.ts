@@ -133,3 +133,22 @@ describe("ExcelPlace (epic `data` P38)", () => {
     await server.close()
   })
 })
+
+describe("ExcelPlace, a column under another name (epic `data` I36, T84)", () => {
+  const NAMED = {
+    Recipes: [
+      ["id", "Dish Name", "Hair Color"],
+      ["r-1", "Soup", "red"]
+    ]
+  }
+  const lines = { collections: { [RECIPES]: { fields: { title: "Dish Name" } } } }
+
+  test("reads and writes by the program's names, and the workbook keeps its own", async () => {
+    const { file, place } = aFile(NAMED)
+    const described = place.withLines(lines)
+    expect((await described.list(RECIPES, {}, {})).rows).toEqual([{ id: "r-1", title: "Soup", hairColor: "red" }])
+    const { rows } = await described.apply([update("r-1", { title: "Broth", hairColor: "blue" })], {})
+    expect(rows).toEqual([{ id: "r-1", title: "Broth", hairColor: "blue" }])
+    expect(await rowsIn(file)).toEqual([{ id: "r-1", "Dish Name": "Broth", "Hair Color": "blue" }])
+  })
+})

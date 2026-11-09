@@ -3,6 +3,7 @@ import type { StorageLike } from "spell/util/persist/persist.types"
 import { listEditsTo, POSITIONS_KEY, withListEdits } from "./positions"
 import { rowsInOrder, rowsMatching } from "./PlaceQuery"
 import { SaveQueue } from "./SaveQueue"
+import { TabCopies, type TabLocks } from "./TabCopies"
 import type { Places } from "./Places"
 import {
   PlaceError,
@@ -163,6 +164,7 @@ export type PendingGroup = {
  * ### `PendingChanges`
  * Every change made to one place and not yet confirmed, in the order made, each with its own id (epic `data` P3).
  * - A change is one field of one thing, shown at once and kept on this device, so it outlives the tab.
+ *   - Each tab keeps its own list, and what a closed tab left is gathered on opening (`open()`, `TabCopies`).
  * - Sending is `SaveQueue`'s:  in order, one at a time, again every 3s until it goes through, and as the page goes away.
  * - Each write has one of three ends:
  *   - it's confirmed:  it's gone, and what the place answered is told to whoever shows it
@@ -204,16 +206,21 @@ export class PendingChanges {
   private readonly places: Places
   /** The place it had when it was set aside:  `setAside()`. */
   private placeAside: Place | undefined
+  /** Which key this tab keeps them under, and what closed tabs left.  Left out:  nothing's kept. */
+  private readonly copies: TabCopies | undefined
 
-  constructor({ placeName, places, keepAs, storage, wait = PENDING_WAIT_MS, retry }: PendingChangesProps) {
+  constructor({ placeName, places, keepAs, storage, locks, wait = PENDING_WAIT_MS, retry }: PendingChangesProps) {
     this.placeName = placeName
     this.places = places
+    if (keepAs !== undefined) {
+      this.copies = new TabCopies({ key: `${PENDING_STORE}:${keepAs}/${placeName}`, storage, locks })
+    }
     this.queue = new SaveQueue({
       save: (options) => this.send(options),
       onChange: () => this.stateListeners.forEach((listener) => listener()),
       wait,
       ...(retry !== undefined && { retry }),
-      ...(keepAs !== undefined && { key: `${PENDING_STORE}:${keepAs}/${placeName}` }),
+      ...(this.copies && { key: this.copies.key }),
       ...(storage && { storage })
     })
     this.pending = this.queue.kept<PendingChange[]>() ?? []
@@ -262,13 +269,32 @@ export class PendingChanges {
 
   /**
    * SIDE EFFECT:  send what was left from the last visit:  first what the place holds now, with it replayed on top.
+   * - Takes over what any closed tab left of this place (`TabCopies`).
    * - Nothing kept:  nothing happens.
    * - NEVER throws:  a heal that fails is logged, and it's sent anyway.
    */
   async open(): Promise<void> {
+    let takenSoFar = 0
+    await this.copies?.gather<PendingChange[]>((changes) => (takenSoFar += this.takeOver(changes, takenSoFar)))
     if (!this.pending.length) return
     await this.places.heal.healPending(this.placeName)
     this.queue.changed({ now: true })
+  }
+
+  /**
+   * Take on `changes`, left by a closed tab, at position `at`:  before anything of this tab's, as they were made first.
+   * - A change it already holds isn't taken twice.
+   * - Their groups are renumbered:  each tab numbers its own.
+   * - Returns how many it took.
+   */
+  private takeOver(changes: readonly PendingChange[], at: number): number {
+    const taken = changes
+      .filter(({ changeId }) => !this.pending.some((change) => change.changeId === changeId))
+      .map((change) => (change.group === undefined ? change : { ...change, group: change.group + this.lastGroup }))
+    this.pending.splice(at, 0, ...taken)
+    this.lastGroup = Math.max(this.lastGroup, ...taken.map(({ group }) => group ?? 0))
+    if (taken.length) this.keepCopy()
+    return taken.length
   }
 
   /** Once everything sendable now has gone, or failed:  whether nothing is left unsaved.  NEVER rejects. */
@@ -914,6 +940,8 @@ export type PendingChangesProps = {
   keepAs?: string
   /** Finds where they're kept:  `BrowserCopyProps.storage`. */
   storage?: () => StorageLike | undefined
+  /** The browser's locks, which say which tabs are gone:  `TabCopiesProps.locks`. */
+  locks?: TabLocks | undefined
   /** How long after the last change it sends one in no group, ms. */
   wait?: number
   /** How long after no answer it tries again, ms. */

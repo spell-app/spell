@@ -159,3 +159,29 @@ describe("placeBehind(), a sheet that's the program's own CSV file (epic `langua
     expect((keyed as unknown as { lines: object }).lines).toEqual({ idColumn: "key" })
   })
 })
+
+describe("placeBehind(), a line naming a sheet's column (epic `data` I36)", () => {
+  const collections = { recipes: { at: "Recipes", fields: { title: "Dish Name" } } }
+  const fieldLines = { recipes: { fields: { title: "Dish Name" } } }
+
+  /** What's behind a place of `kind` at `at`. */
+  const behind = (kind: string, at: string) =>
+    placeBehind({
+      details: { name: "family_cookbook", kind, at, collections },
+      folder: PlacesFolder,
+      collection: "recipes",
+      Class: Object,
+      person: { id: "guest-1", name: "Guest 1" }
+    }) as unknown as { collections?: object; lines?: object }
+
+  test("a sheet read from the browser is told", () => {
+    expect(behind("sheet", "https://x.test/recipes.csv").collections).toEqual(fieldLines)
+    expect(behind("excel file", "https://x.test/recipes.xlsx").collections).toEqual(fieldLines)
+  })
+
+  test("a sheet on a server sends it with each request", () => {
+    expect(behind("sheet", "/api/places/recipes").lines).toEqual({ collections: fieldLines })
+    expect(behind("sheet", "/api/places/spaces/@x/n/__data/recipes.csv").lines).toEqual({ collections: fieldLines })
+    expect(behind("google sheet", "/api/places/recipes").lines).toEqual({ collections: fieldLines })
+  })
+})

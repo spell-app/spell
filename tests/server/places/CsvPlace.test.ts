@@ -360,3 +360,34 @@ r-1,Soup,4,"Roast first, then blend.",top
     })
   })
 })
+
+describe("CsvPlace, a column under another name (epic `data` I36, T84)", () => {
+  const NAMED = `Recipe ID,Dish Name,Hair Color
+r-1,Soup,red
+`
+
+  test("reads a line's column as its field, and the rest by their words", async () => {
+    const { place } = aFile(NAMED, { idColumn: "Recipe ID" })
+    const described = place.withLines({ collections: { [RECIPES]: { fields: { title: "Dish Name" } } } })
+    expect((await described.list(RECIPES, {}, {})).rows[0]).toMatchObject({
+      "Recipe ID": "r-1",
+      title: "Soup",
+      hairColor: "red"
+    })
+  })
+
+  test("a write goes back under the column it was read from, and only that line changes", async () => {
+    const { place, read } = aFile(NAMED, { idColumn: "Recipe ID" })
+    const described = place.withLines({ collections: { [RECIPES]: { fields: { title: "Dish Name" } } } })
+    const { rows } = await described.apply([update("r-1", { title: "Broth", hairColor: "blue" })], {})
+    expect(read()).toBe("Recipe ID,Dish Name,Hair Color\nr-1,Broth,blue\n")
+    expect(rows[0]).toMatchObject({ title: "Broth", hairColor: "blue" })
+  })
+
+  test("the same lines give the same place;  no lines, this one", () => {
+    const { place } = aFile(NAMED, { idColumn: "Recipe ID" })
+    const lines = { collections: { [RECIPES]: { fields: { title: "Dish Name" } } } }
+    expect(place.withLines(lines)).toBe(place.withLines(lines))
+    expect(place.withLines({})).toBe(place)
+  })
+})

@@ -21,7 +21,7 @@ import pytest
 
 from spell_core import Core, Place, PlaceError, Thing, h, prop
 from spell_core.core import using_core
-from spell_core.place_kinds import device_file_for, place_behind
+from spell_core.place_kinds import ServerPlace, device_file_for, place_behind
 from spell_core.places import javascript_name, python_name
 
 # The page server's write token, here.
@@ -301,6 +301,18 @@ def test_a_sheet_sends_its_id_column_and_reads_its_numbers_back(page_server: str
     notes = asyncio.run(program.saved_things(SheetNote))
     # the file holds text:  a number comes back a number, as the type declares it
     assert [(it.text, it.stars) for it in notes] == [("milk", 2)]
+
+
+def test_a_sheet_sends_the_columns_its_lines_name_by_their_javascript_names() -> None:
+    details = {
+        "name": "s",
+        "kind": "sheet",
+        "at": "http://x.test/api/places/recipes",
+        "collections": {"recipes": {"at": "Recipes", "fields": {"hair_color": "Hair Color"}}, "shelves": {"at": "Tab"}},
+    }
+    behind = place_behind(details, None)
+    assert isinstance(behind, ServerPlace)
+    assert behind.lines == {"collections": {"recipes": {"fields": {"hairColor": "Hair Color"}}}}
 
 
 def test_a_named_operation(page_server: str, program: Core) -> None:

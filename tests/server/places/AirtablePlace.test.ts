@@ -685,3 +685,23 @@ describe("behind a room", () => {
     expect(referee.sequence).toBeGreaterThan(sequence)
   })
 })
+
+describe("a column named differently (epic `data` T65, T84)", () => {
+  const LINES_NAMING_NO_FIELD = {
+    idColumn: "Spell id",
+    collections: { recipes: { at: "Recipes" } }
+  } as unknown as Partial<typeof LINES>
+
+  test("found by its words, capitals and spaces too, with no line naming it", async () => {
+    const { place } = await base({ lines: LINES_NAMING_NO_FIELD })
+    const { rows } = await place.list("recipes", {}, {})
+    expect(rows[0]).toMatchObject({ id: "r-1", title: "Soup", servings: 4, notes: "Roast" })
+  })
+
+  test("a write goes back under the column it was read from", async () => {
+    const { place, stub } = await base({ lines: LINES_NAMING_NO_FIELD })
+    await place.list("recipes", {}, {})
+    await place.apply([change("update", "r-1", { title: "Broth" })], {})
+    expect(stub.rowsOf("Recipes")[0]).toMatchObject({ Title: "Broth" })
+  })
+})

@@ -8,9 +8,11 @@ import {
   type PlaceCapabilities,
   type PlaceChange,
   type PlaceContext,
+  type PlaceLines,
   type PlaceRow,
   type RateLimit
 } from "spell/places/places.types"
+import { FieldNames } from "spell/places/FieldNames"
 import { SheetTable } from "spell/places/SheetTable"
 import { jsonIn, WebPlace } from "spell/places/WebPlace"
 
@@ -51,6 +53,8 @@ const NOT_SHARED_STATUS = 403
  *   - A field with no column is refused:  it doesn't add columns to someone's sheet.
  *   - No `idColumn`:  no write, since nothing says which row is which.
  *   - An insert with an id it holds changes that row, so sending it again doesn't double it.
+ * - Each column is a field by the program's name for it, reading and writing (`FieldNames`):
+ *   a line's (`withLines()`), else by its words.
  * - Limits:  through a `RateQueue` per kind of request and per key, as Google counts them.
  * - NO VERSIONS:  Sheets has none, so `versionCheck` is off:  the last save wins that cell.
  * - KNOWN RACE:  a row is found by reading, then written by its position, a moment later:  a person adding or removing a row
@@ -69,14 +73,34 @@ export class GoogleSheetPlace extends WebPlace implements Place {
   private readonly token: GoogleToken
   /** Each tab's number, by its title, once known:  what a write names it by. */
   private readonly sheetIds = new Map<string, number>()
+  /** What it was made with:  each program's lines make another from it. */
+  private readonly props: GoogleSheetPlaceProps
+  /** This place as each program's lines say. */
+  private readonly withThoseLines = new Map<string, GoogleSheetPlace>()
 
-  constructor({ spreadsheet, keyNamed, keys, idColumn, tabs = {}, url = SHEETS_URL }: GoogleSheetPlaceProps) {
+  constructor(props: GoogleSheetPlaceProps) {
+    const { spreadsheet, keyNamed, keys, idColumn, tabs = {}, url = SHEETS_URL } = props
     const token = new GoogleToken({ keyNamed, keys })
     super({ url, keyNamed, keyFrom: token.current, changeIdHeader: false })
     this.spreadsheet = spreadsheet
     this.idColumn = idColumn
     this.tabs = tabs
     this.token = token
+    this.props = props
+  }
+
+  /** This place with the columns a program's lines name, made once for each description. */
+  withLines({ collections }: PlaceLines): GoogleSheetPlace {
+    if (!collections || !Object.values(collections).some(({ fields }) => fields)) return this
+    const name = JSON.stringify(collections)
+    let place = this.withThoseLines.get(name)
+    if (!place) this.withThoseLines.set(name, (place = new GoogleSheetPlace({ ...this.props, collections })))
+    return place
+  }
+
+  /** The names of `table`'s columns, for `collection`. */
+  private namesOf(table: SheetTable, collection: string): FieldNames {
+    return FieldNames.ofColumns(table.columns, this.props.collections?.[collection]?.fields, [this.idColumn])
   }
 
   /** What it can do:  be read whole, and written all or none if rows have ids. */
@@ -107,8 +131,13 @@ export class GoogleSheetPlace extends WebPlace implements Place {
    *   anything else for no answer
    */
   async list(collection: string, _query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
-    const { rows, notes } = await this.tableOf(collection, context)
-    return { rows, ...(notes.length && { notes }), handled: {} }
+    const table = await this.tableOf(collection, context)
+    const names = this.namesOf(table, collection)
+    return {
+      rows: table.rows.map((row) => names.fromServer(row)),
+      ...(table.notes.length && { notes: table.notes }),
+      handled: {}
+    }
   }
 
   /** `collection`'s tab, now. */
@@ -169,7 +198,8 @@ export class GoogleSheetPlace extends WebPlace implements Place {
   private async editOf(edits: Map<string, TabEdit>, collection: string, context: PlaceContext): Promise<TabEdit> {
     let edit = edits.get(collection)
     if (!edit) {
-      edit = new TabEdit({ collection, table: await this.tableOf(collection, context), idColumn: this.idColumn! })
+      const table = await this.tableOf(collection, context)
+      edit = new TabEdit({ collection, table, idColumn: this.idColumn!, names: this.namesOf(table, collection) })
       edits.set(collection, edit)
     }
     return edit
@@ -245,6 +275,8 @@ export type GoogleSheetPlaceProps = {
   idColumn?: string
   /** The tab each collection is on, where it isn't called the same:  `{ recipes: "Family recipes" }`. */
   tabs?: Readonly<Record<string, string>>
+  /** Each collection's columns a program's lines name:  `{ recipes: { fields: { title: "Dish Name" } } }`. */
+  collections?: PlaceLines["collections"]
   /** Google's address:  a test's stub's, in a test. */
   url?: string
 }
@@ -283,15 +315,24 @@ class TabEdit {
   private readonly written = new Map<number, PlaceRow>()
   /** Each row it read that's going, by position. */
   private readonly deleted = new Set<number>()
+  /** The names of its columns. */
+  private readonly names: FieldNames
 
-  constructor({ collection, table, idColumn }: { collection: string; table: SheetTable; idColumn: string }) {
+  constructor({ collection, table, idColumn, names }: TabEditProps) {
     this.collection = collection
     this.table = table
     this.idColumn = idColumn
+    this.names = names
   }
 
-  /** Make `change`:  its row, as it'll now be kept, unless it deleted one.  - throws `PlaceError`, as `apply()` */
-  make({ kind, id, fields = {} }: PlaceChange): PlaceRow[] {
+  /** Make `change`:  its row, as it'll now be kept, by the program's names, unless it deleted one.  - throws `PlaceError`, as `apply()` */
+  make(change: PlaceChange): PlaceRow[] {
+    const fields = this.names.toServer(change.fields ?? {})
+    return this.madeBy({ ...change, fields }).map((row) => this.names.fromServer(row))
+  }
+
+  /** `make()`, its fields by column. */
+  private madeBy({ kind, id, fields = {} }: PlaceChange): PlaceRow[] {
     if (id === undefined) {
       throw new TypeError(
         `GoogleSheetPlace.apply():  a change in "${this.collection}" needs an id;  this place makes none`
@@ -368,6 +409,18 @@ class TabEdit {
       }
     )
   }
+}
+
+/** What a `TabEdit` is made with. */
+type TabEditProps = {
+  /** The collection it's for. */
+  collection: string
+  /** The tab, as read. */
+  table: SheetTable
+  /** The column holding each row's id. */
+  idColumn: string
+  /** The names of its columns. */
+  names: FieldNames
 }
 
 /** `value` as a cell Google is sent:  always a value, never a formula. */

@@ -51,6 +51,13 @@ export class BrowserCopy {
     if (this.props.key) PrefStore.setAt(this.props.key, undefined, this.place)
   }
 
+  /** Every key kept that starts with this one, each whole, `<store>:<key>`:  this one's too, if it's kept. */
+  keysStartingHere(): string[] {
+    if (!this.props.key) return []
+    const [store, key] = PrefStore.splitKey(this.props.key)
+    return new PrefStore(store, { place: this.place }).keysUnder(key).map((each) => `${store}:${each}`)
+  }
+
   /** Where it's kept:  `props.storage`, or the browser's `localStorage`. */
   private place = new StoragePlace({
     storage: () => (this.props.storage ? this.props.storage() : globalThis.localStorage),
