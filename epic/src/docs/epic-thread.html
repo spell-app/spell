@@ -48,8 +48,8 @@
       <ui-container class="site-body">
         <article class="site-article">
           <p class="lede">
-            One comment's whole thread: its header (the bullhorn, its id, the first words it's on), Owen's answer while
-            it's his turn, the messages in order, then his reply box. The docs runtime's comments draw one under the
+            One comment's whole thread: its header (the bullhorn, its id, the first words it's on), your answer while
+            it's your turn, the messages in order, then your reply box. The docs runtime's comments draw one under the
             paragraph, list item or cell holding a comment's quote, else under its block, on every page that takes
             comments: a guide, an epic page, an Epic UI page.
           </p>
@@ -73,14 +73,14 @@
               <epic-thread open comment="{&quot;id&quot;: &quot;c5&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;This needs a section of its own.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;taken&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;quote&quot;: &quot;every target awaits&quot;, &quot;taken&quot;: {&quot;epic&quot;: &quot;feedback&quot;, &quot;phase&quot;: 4, &quot;phaseId&quot;: &quot;p-memory&quot;, &quot;title&quot;: &quot;Memory&quot;, &quot;at&quot;: &quot;2026-10-18T16:00:00.000Z&quot;}}"></epic-thread>
             </epic-threads>
             <ul>
-              <li>C1:  new, Claude's turn, folded:  the pen (his words wait, Claude hasn't had them) and the trash.</li>
-              <li>C2:  Claude thinking about it:  the stub his answer replaces.</li>
-              <li>C3:  Owen's turn, orange:  the review pills, That's good, Reply, Skip it.</li>
+              <li>C1:  new, Claude's turn, folded:  the pen (your words wait, Claude hasn't had them) and the trash.</li>
+              <li>C2:  Claude thinking about it:  the stub your answer replaces.</li>
+              <li>C3:  your turn, orange:  the review pills, That's good, Reply, Skip it.</li>
               <li>C4:  done:  a check circle, Reopen, and the green Done line inside.</li>
               <li>C5:  taken into an epic's phase, linked by the phase's stable id.</li>
             </ul>
             <p class="meta">
-              Live: the real elements, drawn by the epics pack this page loads. Their buttons say what Owen did (their
+              Live: the real elements, drawn by the epics pack this page loads. Their buttons say what you did (their
               events);  only the comments' code saves, so here they fold and nothing more.
             </p>
           </ui-section>
@@ -106,8 +106,8 @@
             <ui-icon slot="icon" name="map"></ui-icon>
             <ul>
               <li>Its parent:  <a href="epic-threads.html"><code>&lt;epic-threads&gt;</code></a>, the box of threads under one block.</li>
-              <li>Its child:  Owen's box, a <code>&lt;textarea&gt;</code> the comments' code makes and keeps:  the reply box, or the pen's box over his first words.</li>
-              <li>In its shadow root:  each message, an <code>&lt;epic-thread-message&gt;</code>, and Owen's answer, an <code>&lt;epic-review buttons="thread"&gt;</code> (the item's review pills).</li>
+              <li>Its child:  your box, a <code>&lt;textarea&gt;</code> the comments' code makes and keeps:  the reply box, or the pen's box over your first words.</li>
+              <li>In its shadow root:  each message, an <code>&lt;epic-thread-message&gt;</code>, and your answer, an <code>&lt;epic-review buttons="thread"&gt;</code> (the item's review pills).</li>
             </ul>
           </ui-section>
 
@@ -121,9 +121,9 @@
                 <tbody>
                   <tr><td><code>comment</code></td><td>JSON (a property)</td><td>The comment, as <code>GET /api/docs/comments</code> answers it:  <code>id</code>, <code>text</code>, <code>at</code>, <code>status</code>, <code>turn</code>, <code>replies</code>, <code>working</code>, <code>done</code>, <code>taken</code>, and where it is.</td></tr>
                   <tr><td><code>open</code></td><td>boolean</td><td>Unfolded. A click on its header flips it, and says so (<code>epic-thread-opened</code> / <code>epic-thread-closed</code>).</td></tr>
-                  <tr><td><code>unseen</code></td><td>boolean</td><td>Orange:  Claude spoke last and Owen hasn't answered yet.</td></tr>
+                  <tr><td><code>unseen</code></td><td>boolean</td><td>Orange:  Claude spoke last and you haven't answered yet.</td></tr>
                   <tr><td><code>moved</code></td><td>boolean</td><td>Its block changed since:  it says what it was on.</td></tr>
-                  <tr><td><code>boxed</code></td><td><code>first</code> or <code>pending</code></td><td>Owen's words now in the box under it (his first words, or his pending reply), left out of the messages.</td></tr>
+                  <tr><td><code>boxed</code></td><td><code>first</code> or <code>pending</code></td><td>Your words now in the box under it (your first words, or your pending reply), left out of the messages.</td></tr>
                   <tr><td><code>saved</code></td><td>text</td><td>The box's floppy, and its tooltip:  <code>Saved 14:02 · waiting for Claude</code>.</td></tr>
                   <tr><td><code>failed</code></td><td>boolean</td><td>The last save failed:  the floppy red.</td></tr>
                 </tbody>
@@ -136,7 +136,7 @@
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic-thread-opened</code> / <code>epic-thread-closed</code></td><td><code>{ open }</code></td><td>Owen clicked its header:  it unfolded / folded.</td></tr>
+                  <tr><td><code>epic-thread-opened</code> / <code>epic-thread-closed</code></td><td><code>{ open }</code></td><td>You clicked its header:  it unfolded / folded.</td></tr>
                   <tr><td><code>epic-thread-editing</code></td><td><code>{}</code></td><td>The pen.</td></tr>
                   <tr><td><code>epic-thread-removing</code></td><td><code>{}</code></td><td>The trash.</td></tr>
                   <tr><td><code>epic-thread-answered</code></td><td><code>{ act }</code></td><td>Its review pills:  <code>good</code>, <code>reply</code>, <code>skip</code>;  <code>reopen</code> once done.</td></tr>
@@ -149,9 +149,9 @@
           <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
-              <li>All ivory, whoever spoke last (Owen, 2026-10-10:  "Make the entire thing ivory");  orange while it's his turn.</li>
+              <li>All ivory, whoever spoke last (2026-10-10:  "Make the entire thing ivory");  orange while it's your turn.</li>
               <li>Its id small and muted, an outline and no fill;  the first words in italics, cut short.</li>
-              <li>His messages plain on the ivory, Claude's in a light violet box, the Done line green, the thinking stub blue (Claude at work on it, as a phase's spinner and the Underway card);  a bold "You:" / "Ana:" / "Claude:" / "Claude (Ana):" first (whose words, or whose session's Claude, by the comment's <code>by</code> and each reply's <code>by</code> and <code>agent</code>;  epic <code>epic-friend</code> P2);  each one's time in its top right corner.</li>
+              <li>Your messages plain on the ivory, Claude's in a light terracotta box, the Done line green, the thinking stub blue (Claude at work on it, as a phase's spinner and the Underway card);  a bold "You:" / "Ana:" / "Claude:" / "Claude (Ana):" first (whose words, or whose session's Claude, by the comment's <code>by</code> and each reply's <code>by</code> and <code>agent</code>;  epic <code>epic-friend</code> P2);  each one's time in its top right corner.</li>
               <li>Every message but the last a step smaller and quieter.</li>
               <li>The same on every page:  a guide, an epic page, here.</li>
             </ul>

@@ -125,7 +125,7 @@ export const epicOptionVocabulary = {
     { name: "title", description: "`A · A named palette`." },
     {
       name: "recommended",
-      description: "The recommended one's violet thumbs-up, after its title, labelled `Recommended`."
+      description: "The recommended one's terracotta thumbs-up, after its title, labelled `Recommended`."
     },
     { name: "actions", description: "While the page is reviewed:  the box at the header's end holding the pill." },
     {

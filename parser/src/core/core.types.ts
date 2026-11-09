@@ -51,18 +51,7 @@ export const SPELL_ELEMENTS_MODULE = "@spell/elements"
  * Spell's own classes, from `core/classes`:  what a project's types are made from, e.g. `a card is a thing`.
  * - What a Type Explorer lists as built in -- see `LSP.ScopeExplorer`.
  */
-export const SPELL_CLASSES = [
-  "Thing",
-  "List",
-  "App",
-  "View",
-  "Page",
-  "TwoSidedView",
-  "Notebook",
-  "Site",
-  "ViewableList",
-  "Place"
-]
+export const SPELL_CLASSES = ["Thing", "List", "App", "View", "Page", "TwoSidedView", "Site", "ViewableList", "Place"]
 
 /** Names every compiled project imports from `SPELL_CORE_MODULE`:  `core`, and spell's classes. */
 export const SPELL_CORE_NAMES = ["core", ...SPELL_CLASSES]
@@ -114,6 +103,32 @@ export type Core = typeof coreMethods &
   typeof dimensionMethods &
   typeof siteMethods &
   typeof deprecatedMethods
+
+// ## Drawing again
+
+/**
+ * An edit to one PART of a drawing (`core.drawPart()`), e.g. one example on a page:
+ * what `core.drawAgain()` takes, to draw only that part again (epic `notebook` P4).
+ * - The app's `LiveEdit` reads it from the compiled code, before and after:
+ *   each part is found by its code.
+ */
+export type PartEdit = {
+  /** the type whose drawing holds it, e.g. `ButtonExamples` */
+  type: string
+  /** the drawing that draws it, e.g. `draw` */
+  member: string
+  /** its code before:  `() => h("spell-example", ...)` */
+  was: string
+  /** its code now */
+  now: string
+  /** does it draw again?  `false`:  only where it's written changed, so it keeps what it drew */
+  drawsAgain: boolean
+  /**
+   * It's KEPT as what's around it draws again (a part moved, epic `notebook` I6):
+   * that drawing asks for it with its new code, and gets what it drew, the same elements, to put in its new place.
+   */
+  kept?: boolean
+}
 
 // ## Tests
 
@@ -362,6 +377,8 @@ export type SitePageEntry = {
   address: string
   /** what the site calls it, in its navigation, if the line names it:  `Film` */
   title?: string
+  /** what its tab says in `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
+  tab?: string
   /** its address's parameters, each one of the page's own properties:  `["film"]` */
   params?: string[]
   /** the pages under it, as the lines under its line list them */
@@ -389,6 +406,14 @@ export type SiteHost = {
   address(): string
   /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
   go(address: string): void
+  /**
+   * Page class `className` is about to show:  a host that compiles pages one at a time brings it in now.
+   * - Answers whether the site should show it:  `false` where another page is shown instead (a page open in Edit).
+   * - None, or `undefined`:  the program has it already.
+   */
+  pageNeeded?(className: string): Promise<boolean> | boolean | undefined
+  /** Scroll to the section `id` of the page being shown, once it's drawn:  a link's `#section`. */
+  landOn?(id: string): void
   /** Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in. */
   listen(showAddress: (address: string) => void): void
   /**

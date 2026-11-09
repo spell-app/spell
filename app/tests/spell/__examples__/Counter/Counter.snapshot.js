@@ -5,7 +5,6 @@ core.heading("Counter")
 // ## Counter
 /////////////
 // A button that counts its clicks:  the smallest app there is.
-// The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
 
 core.heading("A counter")
 ///////////////

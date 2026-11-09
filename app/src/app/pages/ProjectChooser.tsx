@@ -25,7 +25,7 @@ import "./ProjectChooser.css"
 
 /****************
  * ### `<ProjectChooser>`
- * The landing page:  a hero line over cards for the examples, the guides, the notebooks and your own projects.
+ * The landing page:  a hero line over cards for the examples, the guides and your own projects.
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
  *   then a grid of cards per group, each card a project's title and the first phrase of its description.
  * - No empty columns:  a group with nothing in it says so in one quiet card;  "create" buttons sit in their
@@ -37,7 +37,7 @@ import "./ProjectChooser.css"
  * - Its look follows the editor's theme:  the hero and cards are tokens (`ProjectChooser.css`).
  ****************/
 export function ProjectChooser() {
-  const { projects, examples, guides, notebooks, fixtures, editorPieces } = SPACES.SpellProjectRoot
+  const { projects, examples, guides, fixtures, editorPieces } = SPACES.SpellProjectRoot
   // a dev-only root is there in every build -- just not listed outside dev
   const showFixtures = !!import.meta.env?.DEV || !fixtures.devOnly
   const exampleList = trackProjectRoot(() => examples)
@@ -66,7 +66,6 @@ export function ProjectChooser() {
           empty={appTexts.text("homeNoGuides")}
           create={<Actions.createGuide button appearance="basic" size="small" />}
         />
-        <ProjectCards id="notebooks" projectRoot={notebooks} line={appTexts.text("homeNotebooksLine")} />
         <ProjectCards
           id="projects"
           projectRoot={projects}
@@ -91,7 +90,8 @@ export function ProjectChooser() {
  ****************/
 function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
   const firstExample = () => props.examples.projects[0]?.path
-  const firstGuide = () => props.guides.projects[0]?.path
+  // the first guide the home page shows a card for:  a project may stay off it (`"onHome": false`)
+  const firstGuide = () => props.guides.projects.find((project) => project.onHome !== false)?.path
   return (
     <section class="Hero">
       <div class="pitch">
@@ -212,7 +212,9 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  ****************/
 export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
-  const listed = () => root().projects.filter((project) => !props.sitesOnly || project.isSite)
+  // the page of a group's sites lists every site;  the home page's rows skip a project that says `"onHome": false`
+  const listed = () =>
+    root().projects.filter((project) => (props.sitesOnly ? project.isSite : project.onHome !== false))
   return (
     <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
       <header>

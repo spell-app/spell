@@ -259,9 +259,10 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   return Promise.all(
     projectNames.map(async (projectName) => {
       const path = `${domain.projectRoot}/${projectName}`
-      const { title, description, imports } = await loadProjectFile(path).catch(() => ({
+      const { title, description, onHome, imports } = await loadProjectFile(path).catch(() => ({
         title: undefined,
         description: undefined,
+        onHome: undefined,
         imports: []
       }))
       const files = imports.map((each) => each.path)
@@ -272,7 +273,8 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
         ...(title && { title }),
         ...(description && { description }),
         ...(language && { language }),
-        ...(isSite && { isSite })
+        ...(isSite && { isSite }),
+        ...(onHome === false && { onHome })
       }
     })
   )
@@ -326,7 +328,34 @@ const GENERATED_SUFFIXES = [
 ]
 
 /**
+ * Folders inside a project that `getIndex()` never walks into, by name, at any depth:  what tools put there isn't its source.
+ * - `build`, `dist`:  what's built, a compiled `.js` would become one of its imports.
+ * - `node_modules`:  someone else's code, and a project in an ordinary web app's folder has one.
+ */
+const FOLDERS_NOT_SOURCE = new Set(["build", "dist", "node_modules"])
+
+/**
+ * Should `getIndex()` stay out of folder `relativePath`, inside the project in folder `projectFolder`?
+ * - `__draft/`, `versions/`:  a person's drafts and saved versions (`ProjectDrafts.isPrivatePath()`)
+ * - spaces' own names, e.g. `__data/` (`SPACES.isSpaceName()`);  `__snapshots__/` is NOT one of them, and is walked
+ * - `FOLDERS_NOT_SOURCE`
+ * - a folder with a project file of its own:  a project inside this one, whose files are its own
+ * - a name an address can't say (`SP.SpellLocation.isValidPathSegment()`), which would stop the whole project listing
+ */
+function isFolderOutsideProject(projectFolder: string, relativePath: string): boolean {
+  const name = basename(relativePath)
+  return (
+    ProjectDrafts.isPrivatePath(relativePath) ||
+    SPACES.isSpaceName(name) ||
+    FOLDERS_NOT_SOURCE.has(name) ||
+    !SP.SpellLocation.isValidPathSegment(name) ||
+    hasProjectFile(resolve(projectFolder, relativePath))
+  )
+}
+
+/**
  * Given a file `name`, return `true` if we should add it to the manifest.
+ * - `name` is its bare name, `Usage.spellml`, with no folder.
  * - RENAME: shares its extension list with `isPreloadFile()` below, kept a separate function so they CAN diverge.
  *   They have:  this one also leaves out compiled output, snapshots, scope packs, page files and words files.
  * - Leaves out spaces' own names, by the list spaces keeps (`SPACES.isSpaceName()`, decision J52):
@@ -347,7 +376,7 @@ function isPreloadFile(name: string) {
 }
 
 /**
- * Is file `name`, in folder `folder`, ANY project's words file -- e.g. `calculator.en.js`, left in a copy named `calc2`?
+ * Is file `filePath`, from folder `folder`, ANY project's words file -- e.g. `calculator.en.js`, left in a copy named `calc2`?
  * - `isManifestFile()` knows the project's own by its name;  an old name's needs its text read.
  * - Named as one (`SP.SpellWords.isWordsFile()`), and written as one (`SP.SpellWords.isWordsScript()`):
  *   a helper with a name like one, `socket.io.js`, still lists.
@@ -355,9 +384,9 @@ function isPreloadFile(name: string) {
  *   Compiling writes the new name's.
  * - NEVER throws:  a file it can't read lists.
  */
-async function isWordsFileOnDisk(folder: string, name: string): Promise<boolean> {
-  if (!SP.SpellWords.isWordsFile(name)) return false
-  const text = await fileUtils.loadTextFile(resolve(folder, name), "OPTIONAL").catch(() => null)
+async function isWordsFileOnDisk(folder: string, filePath: string): Promise<boolean> {
+  if (!SP.SpellWords.isWordsFile(basename(filePath))) return false
+  const text = await fileUtils.loadTextFile(resolve(folder, filePath), "OPTIONAL").catch(() => null)
   return text !== null && SP.SpellWords.isWordsScript(text)
 }
 
@@ -410,6 +439,7 @@ export type GetIndexOptions = {
 /**
  * Return `index` for a project as a JSON blob -- see `ProjectIndexJSON`.
  * - `manifest` portion always reflects current state of file system.
+ *   - Every file of the project, sub-folders too, e.g. `Button/Usage.spellml`:  see `isFolderOutsideProject()`.
  * - `imports` portion is synced with `manifest`:  missing files left out, new files appended as `active`.
  *   - SIDE EFFECT:  a new file's import is saved to disk, in the project's file (`saveProjectFile()`).
  *   - A missing file's import is left out of the index, but NEVER out of the project file:
@@ -428,16 +458,16 @@ export const getIndex = async (
   const location = SP.SpellLocation.getProjectLocation(projectId)
 
   // Get non-hidden files in project which the front-end knows how to deal with
-  const options = { includeFolders: false, ignoreHidden: true, namesOnly: true }
-  const listed = (await fileUtils.getFolderContents(location.serverPath, options)) //
-    .filter((name) => isManifestFile(name, location.projectName))
+  const ignoreFolder = (relativePath: string) => isFolderOutsideProject(location.serverPath, relativePath)
+  const listed = (await fileUtils.getFilesInside(location.serverPath, { ignoreFolder })) //
+    .filter((filePath) => isManifestFile(basename(filePath), location.projectName))
   const isWords = await Promise.all(listed.map((name) => isWordsFileOnDisk(location.serverPath, name)))
   let fileNames = listed.filter((_name, index) => !isWords[index])
   // a file only drafted so far, e.g. a new document before its first Publish (Q23), is the project's too
   const drafts = reading === "your drafts" ? await draftsOf(projectId, person) : undefined
   for (const filePath of (await drafts?.draftedFiles()) ?? []) {
     const name = filePath.replace(/^\/+/, "")
-    if (!fileNames.includes(name) && isManifestFile(name, location.projectName)) fileNames.push(name)
+    if (!fileNames.includes(name) && isManifestFile(basename(name), location.projectName)) fileNames.push(name)
   }
 
   // HACKY: make sure we have at least one valid file by creating a default file
@@ -971,21 +1001,44 @@ export const request_restore = respondWithJSON(async (request) => {
 /**
  * Rename a project file, keeping its position in `imports` (rewriting its `path` entry in place)
  * rather than letting `getIndex()`'s resync drop-and-re-append it at end.
+ * - The new path may be in another folder:  it's made if need be, and a folder left empty goes (`removeIfEmpty()`).
  */
 export const renameFile = async (projectId: string, filePath: string, newFilePath: string) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   const newLocation = SP.SpellLocation.getFileLocation(projectId, newFilePath)
   await fileUtils.movePath(location.serverPath, newLocation.serverPath)
+  await removeIfEmpty(location)
 
   // update `imports` so file order stays the same
   const importsFile = await loadProjectFile(projectId)
   importsFile.imports = importsFile.imports.map((item) => {
-    if (item.path === filePath) return { ...item, path: newFilePath }
+    if (isImportOf(projectId, item.path, location)) return { ...item, path: newLocation.filePath! }
     return item
   })
   await saveProjectFile(projectId, importsFile)
 
   return true
+}
+
+/** Is `importPath`, from project `projectId`'s file, an import of its file at `location`?  Another project's never is. */
+function isImportOf(projectId: string, importPath: string, location: SP.SpellLocation): boolean {
+  if (SP.SpellLocation.isAddress(importPath)) return false
+  return SP.SpellLocation.getFileLocation(projectId, importPath).path === location.path
+}
+
+/**
+ * SIDE EFFECT:  the file at `location` just left its folder:  remove that folder if it's now empty, then its parent ...
+ * - Stops at the first folder with anything in it, hidden files included, and at the project's own folder.
+ */
+async function removeIfEmpty(location: SP.SpellLocation): Promise<void> {
+  const projectFolder = SP.SpellLocation.getProjectLocation(location.projectId).serverPath
+  let folder = dirname(location.serverPath)
+  while (SRV.pathInside(projectFolder, folder)) {
+    const inside = await fileUtils.getFolderContents(folder, { includeFolders: true, namesOnly: true })
+    if (inside.length) return
+    await fileUtils.deletePath(folder)
+    folder = dirname(folder)
+  }
 }
 
 /**
@@ -1001,16 +1054,17 @@ export const request_renameFile = respondWithJSON(async (request) => {
   return await getIndex(projectId, { person: personOf(request) })
 })
 
-/** Delete a project file, and its import from the project's file, the other imports in their order. */
+/**
+ * Delete a project file, and its import from the project's file, the other imports in their order.
+ * - A folder left empty goes too (`removeIfEmpty()`).
+ */
 export const deleteFile = async (projectId: string, filePath: string) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   const deleted = await fileUtils.deletePath(location.serverPath)
+  await removeIfEmpty(location)
   // its import goes too:  `getIndex()` never takes one out of the project file
   const importsFile = await loadProjectFile(projectId)
-  const imports = importsFile.imports.filter(
-    ({ path }) =>
-      SP.SpellLocation.isAddress(path) || SP.SpellLocation.getFileLocation(projectId, path).path !== location.path
-  )
+  const imports = importsFile.imports.filter(({ path }) => !isImportOf(projectId, path, location))
   if (imports.length !== importsFile.imports.length) await saveProjectFile(projectId, { ...importsFile, imports })
   return deleted
 }

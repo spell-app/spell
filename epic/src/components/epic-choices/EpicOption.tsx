@@ -29,7 +29,7 @@ import picturesCSS from "./EpicOption.pictures.css?inline"
  * ### `EpicOption`
  * The component behind `<epic-option>`:  one option of a question.
  * - its header:  `A · A named palette`
- *   - a violet thumbs-up after the recommended one's title, no word (Owen, 2026-10-08)
+ *   - a terracotta thumbs-up after the recommended one's title, no word (Owen, 2026-10-08)
  * - then its pros and cons:  its light children, through the default slot
  *
  * - Open question:  a CARD, its header a band at the top, open to start with.
@@ -251,7 +251,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     return this.canFold && this.fold.isOpen()
   }
 
-  /** The recommended one's mark:  a violet thumbs-up, no word (Owen, 2026-10-08, decision Q20's Q6). */
+  /** The recommended one's mark:  a terracotta thumbs-up, no word (Owen, 2026-10-08, decision Q20's Q6). */
   readonly thumbsUp = new E.IconGlyph({ owner: this, name: () => (this.recommended ? RECOMMENDED_ICON : undefined) })
 
   ////////////////
@@ -556,7 +556,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     )
   }
 
-  /** The recommended one's thumbs-up, after its title:  violet, no word. */
+  /** The recommended one's thumbs-up, after its title:  terracotta, no word. */
   private recommendedMark(): JSX.Element {
     return (
       <Show when={this.recommended}>

@@ -1308,6 +1308,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
     attributes: ["pages", "current", "label", "appearance", "remember"]
   },
+  "ui-site-tabs": { folder: "ui-site-tabs", attributes: ["pages", "current", "label"] },
   "ui-slider": {
     folder: "ui-slider",
     skeleton: { width: "16em", height: "1.25em" },

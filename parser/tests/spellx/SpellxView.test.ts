@@ -350,7 +350,7 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
       /"<xyz>" isn't a spellx word:  here, use one of <property>, <alias>, .*<on>, <when>, <while>, <draggable>, <clickable>, <selectable>, <droppable>$/
     )
     expect(attribute).toMatch(
-      /<property> has no "zzz":  it takes "name", "aka", .*"group", "at", "cloud", "address", "state", "picture", "row", "column", "color"$/
+      /<property> has no "zzz":  it takes "name", "aka", .*"group", "at", "cloud", "address", "state", "tab", "picture", "row", "column", "color"$/
     )
   })
 

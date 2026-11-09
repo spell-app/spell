@@ -402,6 +402,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - An enumeration's instance twin compiles to its class variable:  `the suits of the card` => `Card.Suits`.
   - LOOSE:  ONE word, which nothing need declare, blacklisted words out:  `the is-set-up of it`.
     - Several undeclared words are NOT a property read, so `the first card of the deck` stays the ordinal rule's.
+    - `the first of its authors` is an item too, not a property named `first`:
+      [`ordinal_of_expression`](rules/lists/OrdinalOfExpression.ts), for a list or something of unknown type
+      (never a property the owner declares, nor `the top of its card`).
   - `the X of Y` is ONE rule doing both, `property_expression`:  two would parse every operand twice.
     - its syntax:  `the {property:member_words} of {expression:operand}`
     - `Priority.preferred`:  a declared `last card` beats the ordinal `the last card of`
@@ -1067,7 +1070,7 @@ A kind that says so is saved in a file of its own.
     - Its type's name, `CardSuit`, `PaloDeCarta`:  `SP.Language.propertyKindType()`.
     - Its plural is any name's of several words:  `card suits`;  `palos de carta`, up to the `de`.
   - A `P.TypeScope` whose `valueKind` names its `property`:  `{ values, listOn: "Card", listName: "Suits", property: "suit" }`.
-  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOfType()`):
+  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOf()`):
     so a loop over `card suits` knows each is a card suit.
 - What it gives another type, and the program:
   - `its "suit" is a card suit`:  `{ oneOf: () => Card.Suits }`, as for a value kind.
@@ -1299,14 +1302,52 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     Its closer stays, and compiles to nothing.
     - An `<html>` block (epic `elemental-spell` P16) is unwrapped the same way:  its markup the drawing's own lines,
       as written.  A view of the file's chunks keeps it whole (`unwrapsHtml`).
-  - A NOTEBOOK, `<spell-notebook>` (P16):  its body is a drawing, so a line there that isn't spellx's is markup or
-    markdown (prose), and a template may sit inside it.
-    - `breakIntoIndentedBlocks()` then lifts its own templates to just before it, and adds a `start` tag after it
-      (`liftNotebooks()`):  code spell declares a type only at a file's top level.
-      A view of the file's chunks keeps them where they're written (`liftsNotebooks`).
-    - Its twin (`SpellxTwin.notebook()`) keeps its members, and makes the rest its content's drawing,
-      `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
-      each run of markup lines joined into one implicit fragment.
+  - A PAGE THAT DRAWS ITS BODY (P16;  epic `notebook` P1, P2):  any `<spell-page>` with no `<draw>` of its own in its
+    block, flag or not (Q2 B).
+    - The tokenizer works it out ONCE, as it reads the head (`SP.isPageDrawingItsBody()`), and keeps it on the tag,
+      `SP.SpellxTag.drawsBody`:  everything after reads it there.
+      - It looks ahead in the page's block once (`hasDrawOfItsOwn()`):  a `<draw>` at its body's indent, not a slot
+        placed (`<draw "front" />`), not in fenced code or a comment.
+      - Read a line at a time (`tokenizeLine()`, the editor's colouring), it can't see the block:
+        then the `notebook` flag says.
+    - A page WITH a `<draw>` is read as before:  loose text a comment, the lines just above a member its docstring.
+    - `<spell-notebook "x">` is the short spelling of `<spell-page "x" notebook>`:  its word brings the flag (the words
+      table's `{ kind: "page", flag: "notebook" }`).  The flag only turns on the editor's in-place page.
+    - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose).
+    - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
+      its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
+      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is "locked"`.
+      - Its SECTIONS draw as the docs pages' do, sticky and foldable, so the program draws the docs look
+        (epic `notebook` P3, J1;  the words, `SpellxTwinWords.pageSection`):
+        - each `##` heading's run is a `<section label="..." sticky="stack" collapsible dividing level="2">`
+          the twin makes (`sectionFor()`), the rest of the run its `<markdown>` child, its heading only its label
+        - `gatherSections()` moves the markup after it inside, up to the next section, a line of code or a block;
+          markup lines run together are one line, split there
+        - each `<section label="...">` written at the top gets each of those attributes it doesn't say
+          (`withSectionLook()`)
+        - the twin's own tokens stand at the heading (`isSynthetic()`);  each child keeps its own, its source mark
+        - `SX.CodeSpellWriter` writes them out:  a heading's section as tags, a written one's added attributes after
+          its own
+      - So the page's element draws in its children, as an app's does (`Page.drawsInItsChildren`):
+        the editor's docs frame and its "On this page" list reach the sections.
+      - A drawing that's only prose is one `<markdown>` block, alone:  in a method, `markdown_description` leaves it to
+        the drawing's `markdown_block`.
+    - It starts by itself, as any app or page does (`SpellProject.startedByItself()`):  nothing is added to start it.
+  - A PAGE'S OWN VIEWS (epic `notebook` P2, Q1, Q6):  any page, drawing its body or not, may hold templates.
+    - `<view counter>`:  `view` is the templates table read WITHOUT its prefix, as a note's short word is
+      (`tagWordAt()`, `isShortTemplate`), so Spanish's `<vista>` comes free.
+      Only `view` may be short (`SHORT_TEMPLATE_KINDS`), and only inside a page:  `<page>` is Spell UI's `<ui-page>`;
+      at a file's top, `<view>` is `spellx-unknown-word`, naming `<spell-view>`;  in a drawing it's markup.
+    - The long word reads there too, `<spell-view "counter">`;  `</view>` and `</spell-view>` close either.
+    - `breakIntoIndentedBlocks()` lifts them to just before the page (`liftPageTemplates()`):
+      code spell declares a type only at a file's top level.
+      It's the page's own, named for it (epic `notebook` P10, Q11, reversing Q7's A):
+      `<view "counter">` in the film page is `a film-page-counter aka counter`, so two pages can each have a `counter`
+      and `<counter/>` finds the page's own (`SpellxTokenizer.nameForPage()`).
+      A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
+  - A TEMPLATE'S NAME, three ways (`readNamedHead()`):  quoted, `<spell-view "one counter">`;  `name="..."`;  or bare,
+    one word first, `<spell-view counter>`, `<view counter>` (epic `notebook` P2).
+    An attribute word the tag takes wins:  `<view locked>` is unnamed and locked.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
     the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
@@ -1535,6 +1576,16 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
+  - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a `.spellml` file whose only top-level thing is one page tag,
+    comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
+    - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.
+      That's what a site's page lines and `go to the film page` read.
+    - It parses in a small `P.ProjectScope` of its own under the project's, with its own copy of the parser and its own
+      journal (`P.IncrementalProject`, "a file ALONE"):  what it declares is its own, so nothing later can be affected.
+    - Typing in it re-parses it alone;  changing its name or a property re-reads the rest of the project.
+    - The editor compiles the rest plus the pages it's showing (`SpellProject.pagesInPlay`).
+      Every other compile combines every file, its output byte for byte what it was.
+    - Any other file is simply not alone:  no error, and it compiles as ever.
   - `is a <type>` (`is_a`) names a KNOWN type:  built in, imported, declared or stubbed earlier.
     - Else it's a parse error, e.g. `is a crad`.
     - A type first mentioned in an `is a` above its own declaration is one too.
@@ -1713,6 +1764,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
 - `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
   - Compiled:  `static savedIn = { place, collection }`.
+  - The project's declarations say it too (epic `data` I19):  `savedIn` on the type, `place` on the place's type,
+    so in a project importing the type the words below read the place as well (`SP.SpellDeclarations.load()`).
+    - A project can't yet name an imported place on its own type's line:  the place's one instance isn't imported.
 - The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
   while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
   - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
@@ -2200,6 +2254,11 @@ sidebars any of them opens.
   - Banners, headings' calls and the code under them stay where they are.
   - A patch onto another file's class doesn't count as running code.
   - A one-of-a-kind app IS running code (P21, `create_one_of_a_kind`), e.g. `solitaire is an app where:`.
+- What a project makes as it loads has its classes before it, whichever file each is in (epic `data` I59):
+  `SP.hoistClassesMadeAsItLoads()`, from `SP.SpellProject.combineCompiled()`.
+  - So an app can make a thing of a type in a file listed after it:  `- its "library" is a new open library page`.
+  - Only a class that's made then, by a top-level `new` or by what making one makes, and declared later, moves:
+    every other program compiles as it did.
     Its line compiles to its class, then `export const solitaire = new Solitaire()`.
     - So every class declared below it moves above it, and its properties' starting values can make them.
     - Its variable is of kind `only` (`P.ScopeVariable.kind`), in the project's scope (epic `data` I44).

@@ -6,6 +6,8 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SP } from "spell/parser/spell"
 import { SPELL_COMPILED_EVENT } from "spell/app/app/runner/runner.types"
 import { SpellEditorPane, type SpellEditorStatus } from "spell/app/app/spellEditor/SpellEditorPane"
+import { SpellEditor } from "spell/app/app/components/spell-editor/SpellEditor"
+import "spell/app/spaces/models/projectGroups"
 import type { DOMSpellEditorElement } from "spell/app/app/components/spell-editor"
 
 /**
@@ -44,6 +46,13 @@ describe("<SpellEditorPane>", () => {
     expect(tabs[0]!.classList.contains("active")).toBe(false)
   })
 
+  test("a file in a folder is named by its path in the project", () => {
+    const files = [file("Button/Usage.spellml"), file("Divider/Usage.spellml")]
+    const { host } = mountPane({ files, file: files[0], onSelect: vi.fn() })
+    const tabs = host.querySelectorAll<HTMLButtonElement>(".SpellEditorTabs button")
+    expect([...tabs].map((tab) => tab.textContent)).toEqual(["Button/Usage.spellml", "Divider/Usage.spellml"])
+  })
+
   test("one file:  no tabs;  no Monaco yet:  a placeholder", () => {
     const files = [file("Only.spell")]
     const { host } = mountPane({ files, file: files[0] })
@@ -80,6 +89,29 @@ describe("<SpellEditorPane>", () => {
     setStatus({ state: "failed", message: "nope" })
     flush()
     expect(status.querySelector(".message")!.textContent).toBe("nope")
+  })
+})
+
+describe("SpellEditor namedFile()", () => {
+  const files = [file("Card.spellml"), file("Button/Usage.spellml"), file("Divider/Usage.spellml")]
+  /** The file `<spell-editor file="...">` opens, with `files` as its project's. */
+  const named = (name: string | undefined) =>
+    (SpellEditor.prototype as unknown as { namedFile: (project: object) => unknown }).namedFile.call(
+      { file: name },
+      { spellFiles: files }
+    )
+
+  test("by its path in the project, with or without the leading slash", () => {
+    expect(named("Divider/Usage.spellml")).toBe(files[2])
+    expect(named("/Divider/Usage.spellml")).toBe(files[2])
+  })
+
+  test("by its address, or bare name:  the first of that name;  else the first file", () => {
+    expect(named("@spell/examples/Proj/Divider/Usage.spellml")).toBe(files[2])
+    expect(named("Usage.spellml")).toBe(files[1])
+    expect(named("Card.spellml")).toBe(files[0])
+    expect(named("Nope.spellml")).toBe(files[0])
+    expect(named(undefined)).toBe(files[0])
   })
 })
 
@@ -122,7 +154,11 @@ describe("<spell-editor>", () => {
 
 /** A stand-in spell file:  just what the pane reads. */
 function file(name: string): SP.SpellFile {
-  return { file: name, path: `/${name}`, isDirty: false } as unknown as SP.SpellFile
+  return {
+    file: name.split("/").pop(),
+    path: `@spell/examples/Proj/${name}`,
+    isDirty: false
+  } as unknown as SP.SpellFile
 }
 
 /** Render a `<SpellEditorPane>`, its `file` and `status` settable;  unmounted after the test. */

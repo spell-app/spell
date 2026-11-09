@@ -72,6 +72,61 @@ core.console.log("printed at the top")
 if (!core.isCarryingOver) counter.start()
 `
 
+/** A page of two parts, as a notebook's examples compile (epic `notebook` P4). */
+const PARTS = `
+import { core, App, h } from "@spell/core"
+export class Notes extends App {
+  draw() {
+    return h("section", { class: "notes" },
+      core.drawPart(this, () => h("p", { class: "one" }, "One")),
+      core.drawPart(this, () => h("p", { class: "two" }, "Two"))
+    )
+  }
+}
+export let notes = new Notes()
+if (!core.isCarryingOver) notes.start()
+`
+
+/** Two sections of examples, each section a part too, as a notebook's page compiles (epic `notebook` I6). */
+const SECTIONS = `
+import { core, App, h } from "@spell/core"
+export class Notes extends App {
+  draw() {
+    return [
+      core.drawPart(this, () => h("section", { class: "first" },
+        core.drawPart(this, () => h("p", { class: "one" }, "One")),
+        core.drawPart(this, () => h("p", { class: "two" }, "Two"))
+      )),
+      core.drawPart(this, () => h("section", { class: "second" },
+        core.drawPart(this, () => h("p", { class: "three" }, "Three"))
+      ))
+    ]
+  }
+}
+export let notes = new Notes()
+if (!core.isCarryingOver) notes.start()
+`
+
+/** `SECTIONS`, its second example moved to the end of the second section. */
+const SECTIONS_MOVED = `
+import { core, App, h } from "@spell/core"
+export class Notes extends App {
+  draw() {
+    return [
+      core.drawPart(this, () => h("section", { class: "first" },
+        core.drawPart(this, () => h("p", { class: "one" }, "One"))
+      )),
+      core.drawPart(this, () => h("section", { class: "second" },
+        core.drawPart(this, () => h("p", { class: "three" }, "Three")),
+        core.drawPart(this, () => h("p", { class: "two" }, "Two"))
+      ))
+    ]
+  }
+}
+export let notes = new Notes()
+if (!core.isCarryingOver) notes.start()
+`
+
 /** A program with no app:  it only prints. */
 const PRINTER = `
 import { core } from "@spell/core"
@@ -89,10 +144,11 @@ setTimeout(() => late.start(), 50)
 `
 
 /**
- * A card table, as spell compiles it:  a viewable list whose frame has a named place, filled by a child that says
- * it goes there.
- * - From its spell:  `to draw a pile:` returns `<div className="pile"><div className="header"><children
- *   name="header"/></div><children/></div>`;  the table draws a pile, and one written by hand,
+ * A card table, as spell compiles it:
+ * a viewable list whose frame has a named place, filled by a child that says it goes there.
+ * - What its spell's `to draw a pile:` returns:
+ *   `<div className="pile"><div className="header"><children name="header"/></div><children/></div>`.
+ * - The table draws a pile, and one written by hand:
  *   `<test-project-pile><h3 in="header">Discards</h3></test-project-pile>`.
  */
 const CARD_TABLE = `
@@ -132,9 +188,11 @@ if (!core.isCarryingOver) table.start()
 `
 
 /**
- * A view with a SLOT, as spell compiles it (epic `elemental-spell` P27):  `- it has slots "lid"`, `- to draw its lid:`,
- * and its drawing placing it, `draw its lid`, as the web's `<slot name="lid">` around the lid's own drawing.
- * - A fancy box draws its lid again;  the table draws one of each, and a box written by hand whose lid it fills,
+ * A view with a SLOT, as spell compiles it (epic `elemental-spell` P27):
+ * `- it has slots "lid"`, `- to draw its lid:`, and its drawing placing it, `draw its lid`,
+ * as the web's `<slot name="lid">` around the lid's own drawing.
+ * - A fancy box draws its lid again.
+ * - The table draws one of each, and a box written by hand whose lid it fills:
  *   `<test-project-box><i slot="lid">filled lid</i></test-project-box>`.
  */
 const BOXES = `
@@ -703,7 +761,7 @@ describe("compiled spell draws with Solid", () => {
 
     // the counter library's drawing, edited:  a new label
     // (Solitaire imported a card library until epic `spanish` P21, and showed the game kept, drawn the new way;
-    //  an edit to the counter app's own file would start afresh:  it starts the app -- P17, below)
+    //  an edit to the counter app's own file would start afresh (P17, below), as that file starts the app)
     // what the console held:  an edit taken as it runs (epic `editor`, Live Edit Everywhere) leaves it as it was
     const printedBefore = consoleText()
     let asked = false
@@ -781,6 +839,57 @@ describe("compiled spell draws with Solid", () => {
     controls!.restart()
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 1")
     expect(consoleText()).toContain("testing the counter")
+  })
+
+  test("an edit to one part of a drawing draws that part alone;  the rest keeps its elements (epic `notebook` P4)", async () => {
+    const { host, setSource } = await mountSettable(source(PARTS, "Notes"))
+    const two = await waitFor(() => host.querySelector<HTMLElement>("p.two"))
+    const [section, one] = [host.querySelector("section.notes")!, host.querySelector("p.one")!]
+    expect(two.textContent).toBe("Two")
+
+    setSource(source(PARTS.replace('"Two"', '"Deux"'), "Notes"))
+    await waitFor(() => host.querySelector("p.two")?.textContent === "Deux")
+    expect(host.querySelector("section.notes")).toBe(section)
+    expect(host.querySelector("p.one")).toBe(one)
+    expect(host.querySelector("p.two")).not.toBe(two)
+    expect([...section.children].map((each) => each.className)).toEqual(["one", "two"])
+
+    // and again:  the part is found by its new code
+    setSource(source(PARTS.replace('"Two"', '"Zwei"'), "Notes"))
+    await waitFor(() => host.querySelector("p.two")?.textContent === "Zwei")
+    expect(host.querySelector("p.one")).toBe(one)
+  })
+
+  test("a part moved:  it's kept, the same element, and what's around it draws again (epic `notebook` I6)", async () => {
+    const { host, setSource } = await mountSettable(source(SECTIONS, "Notes"))
+    const two = await waitFor(() => host.querySelector<HTMLElement>("p.two"))
+    const [one, three] = [host.querySelector("p.one")!, host.querySelector("p.three")!]
+    const [first, second] = [host.querySelector("section.first")!, host.querySelector("section.second")!]
+
+    // `two` goes to the second section:  they draw again, the examples kept
+    setSource(source(SECTIONS_MOVED, "Notes"))
+    await waitFor(() => host.querySelector("section.second")?.contains(host.querySelector("p.two")))
+    expect(host.querySelector("p.two")).toBe(two)
+    expect(host.querySelector("p.one")).toBe(one)
+    expect(host.querySelector("p.three")).toBe(three)
+    expect([...host.querySelector("section.second")!.children].map((each) => each.className)).toEqual(["three", "two"])
+    expect(host.querySelector("section.first")).not.toBe(first)
+    expect(host.querySelector("section.second")).not.toBe(second)
+
+    // a kept part still draws again alone:  it's found by its new code
+    setSource(source(SECTIONS_MOVED.replace('"Three"', '"Trois"'), "Notes"))
+    await waitFor(() => host.querySelector("p.three")?.textContent === "Trois")
+    expect(host.querySelector("p.two")).toBe(two)
+    expect(host.querySelector("p.one")).toBe(one)
+  })
+
+  test("a part kept stays live:  what it reads still draws it (epic `notebook` I6)", async () => {
+    const { host, setSource } = await mountSettable(source(SECTIONS, "Notes"))
+    const two = await waitFor(() => host.querySelector<HTMLElement>("p.two"))
+    setSource(source(SECTIONS_MOVED, "Notes"))
+    await waitFor(() => host.querySelector("section.second")?.contains(host.querySelector("p.two")))
+    expect(host.querySelector("p.two")).toBe(two)
+    expect(two.isConnected).toBe(true)
   })
 
   test("a thing that can't come over:  the program starts afresh as a whole, and the console says why (P17)", async () => {
@@ -1043,8 +1152,8 @@ function topLevelNames(): string[] {
 let testCore: (typeof import("spell/app/app/runner/spellRuntime"))["core"] | undefined
 
 /**
- * The Solitaire example, as a runner runs it:  its compiled javascript, its blessed snapshot as text
- * (`tests/spell/__examples__/Solitaire/Solitaire.snapshot.js`).
+ * The Solitaire example, as a runner runs it:
+ * its compiled javascript, its blessed snapshot as text (`tests/spell/__examples__/Solitaire/Solitaire.snapshot.js`).
  * - Vite serves a file by its path.
  * - A snapshot, never the example's build:  an example's compiled output is built when needed, in `build/`
  *   (epic `people-and-orgs` P11), so a fresh checkout has none.

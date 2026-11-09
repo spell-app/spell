@@ -1,16 +1,18 @@
 /**
- * The files spell's built-in templates written in spell compile to (epic `elemental-spell` Q71) -- see
- * `SP.BUILT_IN_TEMPLATES` for what they are.
+ * The files spell's built-in templates written in spell compile to (epic `elemental-spell` Q71).
+ * - What the templates are:  `SP.BUILT_IN_TEMPLATES`.
  * - Each template's source is in the core's `src/core/templates/`:  `TwoSidedView.spell`, and each other language's
  *   twin, `TwoSidedView.es.spell`, line for line the same template in that language's words.
  * - Compiled ONCE, here, in a root without them (`SP.Language.bareRootScope()`):
- *   - its CLASS, from the English, into the core:  `src/core/classes/TwoSidedView.ts`;  and its twin into Python's,
- *     `src/py/core/spell_core/two_sided_view.py`
+ *   - its CLASS, from the English, into the core:  `src/core/classes/TwoSidedView.ts`;
+ *     and its twin into Python's, `src/py/core/spell_core/two_sided_view.py`
  *   - its DECLARATIONS, in every language it's written in, into `src/spell/builtInTemplates.generated.ts`:
  *     what each language's root loads (`SP.loadBuiltInTemplates()`)
- * - Another language's declarations name the ENGLISH class's members:  a template has one class, whatever language
- *   says it.  Its twin's statements are paired with the English ones in order, and each takes the English
- *   one's compiled names -- its property's, its values', its slots', its rules' -- see `speakingEnglish()`.
+ * - Another language's declarations name the ENGLISH class's members:
+ *   a template has one class, whatever language says it.
+ *   - Its twin's statements are paired with the English ones in order.
+ *   - Each takes the English one's compiled names (`speakingEnglish()`):
+ *     its property's, its values', its slots', its rules'.
  * - Pure but for reading the sources:  `writeBuiltInTemplates.ts` writes the files, a test checks they're current.
  * - NODE ONLY, and NOT in the barrel.
  */
@@ -106,15 +108,16 @@ function compileTemplate(className: string, lang: string) {
  * - NOT its element:  a template is a base, as `View` is;  a view made from it defines its own.
  * - Each of its slots drawn by default as nothing (`drawFront()`), for a view made from it to draw.
  * - Its drawing without `@drawn`, as compiled javascript has it:  `drawThing()` puts the error boundary round it.
- *   A slot it places as compiled javascript writes it too, `h("slot", { name: "front" }, () => this.drawFront())`:
- *   the core's files aren't `.tsx`.  A thunk, which the boundary makes (`drawThing()`), typed as the drawing.
+ *   - A slot it places as compiled javascript writes it too, `h("slot", { name: "front" }, () => this.drawFront())`:
+ *     the core's files aren't `.tsx`.
+ *   - A thunk, which the boundary makes (`drawThing()`), typed as the drawing.
  */
 function classFile(className: string, typescript: string): string {
   const code = SP.SpellDeclarations.stripComments(typescript)
   const lines = code.split("\n")
   const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled TypeScript`)
-  // what it extends:  `View` for a two sided view, `Page` for a notebook;  in the core, a hand-written base of that,
+  // what it extends, e.g. `View` for a two sided view;  in the core, a hand-written base of that,
   // when it has one (`HAND_WRITTEN_BASES`)
   const spellSuperClass = /\bextends (\w+)/.exec(lines[start]!)?.[1] ?? "View"
   const superClass = HAND_WRITTEN_BASES[className] ?? spellSuperClass
@@ -181,7 +184,7 @@ function pythonClassFile(className: string, python: string): string {
   const lines = SP.SpellDeclarations.stripComments(python).split("\n")
   const start = lines.findIndex((line) => line.startsWith(`class ${className}(`))
   if (start < 0) throw new Error(`Built-in template ${className}:  no class ${className} in its compiled Python`)
-  // what it extends:  `View` for a two sided view, `Page` for a notebook
+  // what it extends, e.g. `View` for a two sided view
   const superClass = /^class \w+\((\w+)\)/.exec(lines[start]!)?.[1] ?? "View"
   const end = lines.findIndex((line, index) => index > start && /^\S/.test(line))
   const body = lines
@@ -243,7 +246,6 @@ function slotMethod(slot: string): string {
 
 /** A line making something from template `className`, for its class's docstring:  `a card is a two sided view`. */
 function exampleOf(className: string): string {
-  if (className === "Notebook") return "counter notebook is a notebook"
   if (className === "Site") return "spell ui is a site"
   return `a card is a ${templateWords(className)}`
 }

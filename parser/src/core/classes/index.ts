@@ -1,11 +1,11 @@
 /**
  * Master import file for the classes `core` exposes to compiled spell code.
  * - Re-exported from `spell/parser/core`'s own barrel (`export * from "./classes"`) so `Thing`, `List`, `App`, `View`,
- *   `Page`, `TwoSidedView`, `Notebook`, `Site` and `ViewableList` are available alongside the rest of `core`.
+ *   `Page`, `TwoSidedView`, `Site` and `ViewableList` are available alongside the rest of `core`.
  *
- * NOTE: imports reach into `spell/parser/core/core` and `spell/parser/core/Core` directly rather than
- * the `spell/parser/core` barrel -- this file helps BUILD that barrel, so going through it would
- * re-enter it circularly.
+ * NOTE: imports reach into `spell/parser/core/core` and `spell/parser/core/Core` directly
+ * rather than the `spell/parser/core` barrel:
+ * this file helps BUILD that barrel, so going through it would re-enter it circularly.
  */
 import { core } from "spell/parser/core/core"
 import { defineCoreModule, SPELL_BASE_TYPES } from "spell/parser/core/core.types"
@@ -16,7 +16,6 @@ import { List } from "./List"
 import { View } from "./View"
 import { Page } from "./Page"
 import { TwoSidedView } from "./TwoSidedView"
-import { Notebook } from "./Notebook"
 import { SiteBase } from "./SiteBase"
 import { Site } from "./Site"
 import { ViewableList } from "./ViewableList"
@@ -61,5 +60,5 @@ export const classesMethods = defineCoreModule({
 Object.assign(core, classesMethods)
 
 // Compiled spell imports these -- `import { core, Thing, List, App, ... } from "@spell/core"`.  No globals.
-export { Thing, List, App, View, Page, TwoSidedView, Notebook, SiteBase, Site, ViewableList, Place }
+export { Thing, List, App, View, Page, TwoSidedView, SiteBase, Site, ViewableList, Place }
 export type { ListCallback } from "./List"

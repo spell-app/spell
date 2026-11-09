@@ -295,7 +295,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### the @spell space
 
 - **Say:**  the `@spell` space, for Spell's own built-in projects (`spaces/@spell/` in the app folder):
-  its groups `@spell/examples`, `@spell/notebooks`, `@spell/guides`, `@spell/library`, `@spell/test`.
+  its groups `@spell/examples`, `@spell/guides`, `@spell/library`, `@spell/test`.
 - **Not:**  the `@spell` package, `@spell/` packages.
   - "Package" is the npm package (`spell`, `spell-ui`, `spell-epic`).
 - **Decided:**  epic `content` P2 (T3).
@@ -420,7 +420,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 - **Not:**  `for each` in what we write (still read, as people will type it);  `<each>`, a widget of its own.
 - **Decided:**  Owen, 2026-10-31, epic `data` P22:  "`<for film in films` should do all of the above", "maybe we don't
   need the `each` at all?", "`loading={no}` should turn off loading indicator".
-- **Score:**  `^\s*<?for each\b` · in `app/spaces/@spell/examples`, `app/spaces/@spell/guides`, `app/spaces/@spell/notebooks`
+- **Score:**  `^\s*<?for each\b` · in `app/spaces/@spell/examples`, `app/spaces/@spell/guides`
 
 ### the person using the program
 

@@ -1,0 +1,45 @@
+<spell-page "site-nav usage" notebook>
+	<header level="1">
+		Site nav
+		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Hand it the site's pages, and put it where the site's side navigation goes:  `<ui-page>`'s `nav` slot.
+			- `pages`:  each page's `title` and `href`, its `pages` under it;  a page with no `href` only holds pages.
+			- `current` says which page is shown, by its `href` or its `id`;  without it, the page at the browser's address.
+			- `remember` keeps which pages each person left open, under that name.
+			- Picking a page goes there.  A site that shows its pages itself cancels `ui-navigating` and shows `event.detail.page`.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-site-nav").addEventListener("ui-navigating", (event) => {
+			  event.preventDefault()
+			  showPage(event.detail.page)
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			It's one tab stop, as a tree is.
+			- Up and down move between the pages on screen;  Home and End go to the ends.
+			- Right opens a page, then goes into it;  left closes it, then goes out to the page it's under.
+			- Enter and Space go to the page.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>A `nav` landmark named by `label` ("Site" without one), holding a `tree` of `treeitem`s;  the page shown says `aria-current="page"`, and each page its level and whether it's open.</>
+	</>
+</spell-page>

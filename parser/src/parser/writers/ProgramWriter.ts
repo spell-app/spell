@@ -5,6 +5,7 @@ import {
   alike,
   eventKey,
   isCoreCall,
+  isLoopCall,
   isKnownType,
   kindFromDatatype,
   kindOfType,
@@ -367,9 +368,17 @@ export abstract class ProgramWriter extends Writer {
 
   /** `written`, a live value's words:  a loop's, in `core.listDrawn()`, as its answer may be a `List`. */
   loopDrawn(node: P.ASTExpression, written: string): string {
-    const inner = unwrapped(node)
-    const isLoop = inner instanceof P.ASTScopedMethodInvocation && isCoreCall(inner) && inner.methodName === "map"
-    return isLoop ? `core.listDrawn(${written})` : written
+    return isLoopCall(node) ? `core.listDrawn(${written})` : written
+  }
+
+  /**
+   * `written`, an element's child in braces:  a list's, in `core.listShown()`, as Solid can't draw a `List`.
+   * - e.g. `{its author name}` (epic `data` I57).
+   * - A loop's answer is `loopDrawn()`'s.
+   */
+  listChildDrawn(node: P.ASTExpression, written: string): string {
+    const isList = !isLoopCall(node) && P.itemTypeOf(unwrapped(node).match?.datatype)
+    return isList ? `core.listShown(${written})` : written
   }
 
   /**

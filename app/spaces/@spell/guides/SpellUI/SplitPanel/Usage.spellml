@@ -1,0 +1,36 @@
+<spell-page "split-panel usage" notebook>
+	<header level="1">
+		Split Panel
+		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Write your panes as children, and say how big each is in `columns` or `rows`.
+			- Sizes:  a comma list, `20%,*,380px`.  A number, `px` or `em` is fixed;  `%` is a share of what the fixed panes leave;  `*` shares what's left;  `auto` is as big as its content.
+			- `resizable` puts a bar between each two.  The panel doesn't remember what's dragged:  `ui-changed` hands you `sizes`, in the same form, to keep and give back.
+			- `hidden` on a child takes it out of the panes.  Nothing is moved or redrawn as panes come and go, so what's running in one keeps running.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-split-panel").addEventListener("ui-changed", (event) => localStorage.setItem("panes", event.detail.sizes))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>A bar takes the focus with Tab, after every pane.  The arrow keys along it move it 16px, or 160px with Shift.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>Each bar of a `resizable` panel is a named `separator`, saying its place as a percent of the two panes beside it.  Tab reaches the bars after every pane, not between them:  each pane is placed by CSS `order`, so nothing has to move.</>
+	</>
+</spell-page>

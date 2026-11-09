@@ -11,7 +11,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * ### `EpicPrompt`
  * The component behind `<epic-prompt>`:  the prompt that started the plan, folded under `Kickoff prompt`.
  * - A native `<details>`, folded to start with:
- *   - folded:  a chevron and `Kickoff prompt` on the brand's ivory (Owen's voice, Q20)
+ *   - folded:  a chevron and `Kickoff prompt` in a person's faint violet (their voice)
  *   - unfolded:  the prompt a quoted card on it
  *   - whether it's open is page state, never in the file
  * - The prompt is its light children, through the default slot inside the `<details>`:

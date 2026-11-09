@@ -7,7 +7,8 @@
  *   A separate runner applies them to the live page (`run()`).
  * - The planner (`PagePatch.plan()`) works over ANY keyed tree, through a small adapter (`PatchTree`):
  *   each node's key, kind, attributes, text and children.
- *   - the DOM is one adapter (`PagePatch.domTree()`);  a Spell notebook's chunk tree is another (elemental-spell P16)
+ *   - the DOM is one adapter (`PagePatch.domTree()`);  a Spell notebook's chunk tree was another (elemental-spell P16),
+ *     until epic `notebook` P3 had the running program draw the notebook's page
  *   - so the server could work the same list out later, for multiplayer Spell, with no change to the page
  * - Each runtime hands it its rules (`PatchRules`), laid over ONE shared set (`PagePatch.SHARED`):
  *   - what's never replaced:  an open editor (Monaco in a cell), the field being typed in
@@ -18,7 +19,7 @@
  * - Plain DOM, NO imports:  any page's bundle can take it.
  *
  * How a node is matched (Owen, comment M1 on P40):
- * - a node with a KEY (an element's `id`;  a notebook's chunk path) matches the node with that key, wherever it moved
+ * - a node with a KEY (an element's `id`) matches the node with that key, wherever it moved
  * - a node with none is matched by its PLACE:  its kind and its index among its same-kind siblings
  *   - same-kind siblings that didn't change are lined up first (the longest run in common), then the rest by place:
  *     so a paragraph added at the top of a section is one insert, not every paragraph's text moving down
@@ -472,13 +473,13 @@ export type PlanRules<N> = {
  * A page runtime's rules for the DOM patcher (`new PagePatch(rules)`), laid over `PagePatch.SHARED`.
  * - `skip`:  live elements the page's source doesn't have, which the runtime added:  stepped around, never touched
  * - `keptAttributes`:  attributes the reader's state lives in:  never set or removed by a patch
- * - `replacedWhole`:  elements that manage their children (tabs, accordions, selects ...):  replaced whole when they
- *   change, their reader state carried over by `prepare()`
+ * - `replacedWhole`:  elements that manage their children (tabs, accordions, selects ...):
+ *   replaced whole when they change, their reader state carried over by `prepare()`
  * - `fixed`:  live elements never replaced, moved or removed, and never patched inside:  an open editor
  * - `slotsOnly()`:  an element whose only children from the page are its slotted ones (a body loaded from a file)
  * - `mustReplace()`:  a source element to replace though its tag stayed (another body file)
- * - `prepare()`:  give `copy` (in this document, not yet in the page) the reader's state:  from `live`, the element
- *   it replaces, or null for a new one
+ * - `prepare()`:  give `copy` (in this document, not yet in the page) the reader's state:
+ *   from `live`, the element it replaces, or null for a new one
  */
 export type PatchRules = {
   skip?: string
@@ -606,9 +607,9 @@ class Planner<N extends object> {
   }
 
   /**
-   * Match `now`'s children to `was`'s, and morph each pair:  keyed ones by key, then the rest of each kind by place
-   * (`alignByPlace()`).  What's left over is placed later (`placeSteps()`), maybe moved in from elsewhere first
-   * (`joinMoves()`).
+   * Match `now`'s children to `was`'s, and morph each pair:
+   * keyed ones by key, then the rest of each kind by place (`alignByPlace()`).
+   * - What's left over is placed later (`placeSteps()`), maybe moved in from elsewhere first (`joinMoves()`).
    */
   private lineUp(was: N, now: N, address: string): void {
     const { tree } = this
@@ -992,8 +993,8 @@ function headKey(doc: Document): string {
 }
 
 /**
- * Is `script` INERT:  a data block the browser never runs (`type="text/plain"`, JSON ...), not JavaScript or a
- * module?
+ * Is `script` INERT:  a data block the browser never runs (`type="text/plain"`, JSON ...),
+ * not JavaScript or a module?
  */
 function isInert(script: Element): boolean {
   const type = (script.getAttribute("type") ?? "").trim().toLowerCase()

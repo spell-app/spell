@@ -14,6 +14,10 @@ import { SitePartWords } from "./SitePartWords"
 /** The `sites` rule module, in Spanish. */
 export const sitesEs = new SpellParser({ module: "sites" })
 
+/** Lo que la línea de una página dice tras su dirección. */
+const PAGE_DETAILS =
+  "(, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})?"
+
 /** An indefinite article, either gender:  `un sitio`, `una página`. */
 const A = "(un|una)"
 
@@ -130,12 +134,12 @@ const CARD_DETAILS = "(, en la fila {row:number} columna {column:number})? (, de
 
 // una página del sitio, en su dirección:  `- tiene una página de película en "/peliculas/:pelicula", llamada "Película"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_it} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_it} tiene ${A} {part:site_part_words} en {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... sin el sujeto, como se dice en español:  `- tiene una página de película en "/peliculas/:pelicula"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_implied} tiene ${A} {part:site_part_words} en {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // un diálogo o un panel del sitio:  `- tiene un diálogo de ajustes`, `- tiene un panel de sintaxis`
@@ -147,10 +151,10 @@ sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:
 // ... con el nombre entre comillas, como se nombra en español lo que lleva `de`:
 // `- tiene una "página de película" en "/peliculas/:película"`
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_it} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_it} tiene ${A} {part:quoted_member} en {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 sitesEs.addRule(SitePage, {
-  syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? ${CARD_DETAILS} {with_nested_statements}?`
+  syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} en {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 
 // ... y un diálogo o un panel:  `- tiene un "diálogo de ajustes"`, `- tiene un "panel de películas"`

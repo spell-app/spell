@@ -16,6 +16,8 @@ export type SitePageEntry = {
   address: string
   /** what the site calls it, in its navigation, if the line names it:  `Film` */
   title?: string
+  /** what its tab says in the site's `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
+  tab?: string
   /** how far along it is, if the line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14) */
   state?: string
   /** a picture of it, if the line names one:  a file of the project, `snapshots/films.png` */

@@ -16,6 +16,7 @@ import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPr
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
+import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { DRAG_START_PX } from "spell/util/Dragging"
@@ -68,11 +69,11 @@ import "./Inspector.css"
  *   - It starts as the Inspector opens, and stops once something's selected:  the app works as ever again.
  *   - Its crosshairs button starts it again;  Esc stops it.
  *   - The click goes to the Inspector, never to the app:  selecting a button doesn't press it.
- *   - Shift, Command or Control adds to what's selected, and keeps inspecting;  so does dragging across the app's
- *     background, a rubber band (`PartSelector`).
+ *   - Shift, Command or Control adds to what's selected, and keeps inspecting;
+ *     so does dragging across the app's background, a rubber band (`PartSelector`).
  * - What a part is (`SelectedPart`):
- *   - a drawn spell thing (a drawable type's element, `<solitaire-card>`):  its thing, with its class's properties
- *     (`ClassSchemas`)
+ *   - a drawn spell thing (a drawable type's element, `<solitaire-card>`):
+ *     its thing, with its class's properties (`ClassSchemas`)
  *   - a Spell UI element (`<ui-input>`):  the element, with its tag's attributes (its vocabulary)
  * - Edits change the running app at once, and go into the program's text as a step of `editor.history`
  *   (`InspectorWrites`;  epic `editor`);  what can't go there says so in the card (`<NotSavedNote>`).
@@ -235,8 +236,8 @@ export class Inspector {
   /**
    * Select `element` (`undefined`:  nothing), outlined while it stays selected.
    * - A new selection starts the trail afresh (`inspected`);  `trail`, inspecting it again after a redraw, follows that one.
-   * - NOTE:  the new selection and trail are passed along, never read back:  a signal reads its old value until the next
-   *   flush.
+   * - NOTE:  the new selection and trail are passed along, never read back:
+   *   a signal reads its old value until the next flush.
    */
   static select(element: Element | undefined, { trail: steps = [] as readonly string[] } = {}): void {
     const part = element && Inspector.partFor(element)
@@ -489,7 +490,8 @@ export class Inspector {
    */
   static restoreSelection(rows: readonly PartRow[]): void {
     const parts = selectedParts()
-    if (placesToSelect) {
+    // only once the edit is drawn:  until then a place in the new text still names what's there now
+    if (placesToSelect && !Inspector.isCatchingUp) {
       const wanted = placesToSelect
       const found = rows.filter((row) => wanted.has(writtenKeyOf(row.element) ?? "")).map((row) => row.element)
       if (found.length) {
@@ -551,6 +553,9 @@ export class Inspector {
     placesToSelect = new Set(places)
   }
 
+  /** A gesture's compile is running:  what's drawn is behind the text (`PartEdits`). */
+  static isCatchingUp = false
+
   /** What's selected next is new from the palette:  its words, ready to type over in the properties card. */
   static readyWordsNext(): void {
     wordsReadyNext = true
@@ -586,12 +591,17 @@ export class Inspector {
     if (addresses.length) editorPrefs.set(Inspector.selectionPref, addresses)
   }
 
-  /** The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through. */
+  /**
+   * The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through.
+   * - Never the editor's own, round the program (`EDITOR_OWN`):  a notebook's contents, its examples' code editors.
+   */
   static partsIn(element: Element, depth = 0): PartRow[] {
     return [...element.children].flatMap((child) =>
-      Inspector.isPart(child)
-        ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
-        : Inspector.partsIn(child, depth)
+      child.hasAttribute(EDITOR_OWN)
+        ? []
+        : Inspector.isPart(child)
+          ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
+          : Inspector.partsIn(child, depth)
     )
   }
 
@@ -621,20 +631,33 @@ export class Inspector {
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
    * - Inspecting listens there;  a new area while inspecting moves the listening to it.
-   * - Not inspecting, a click anywhere in the app lets go of what's selected (Owen, 2026-11-07:  "clicking on the
-   *   blue in the pokemon page" should deselect everything);  a click inspecting takes is never the app's, so it stays
+   * - Not inspecting, a click anywhere in the app lets go of what's selected
+   *   (Owen, 2026-11-07:  "clicking on the blue in the pokemon page" should deselect everything).
+   *   - A click inspecting takes is never the app's, so what's selected stays.
+   *   - On a page that draws its body, a notebook among them, a click picks the cell it's on instead (`pagePartAt`):
+   *     its controls still work as ever, as the click goes on to them (epic `notebook` P5).
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
-    const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
-    const letGo = (event: MouseEvent) => {
-      if (!event.defaultPrevented && !isInspecting() && Inspector.allSelected.length) Inspector.letGo()
+    const stopEditing = PartEdits.watch(area, (event) => {
+      const part = PartSelector.partAt(event, area)
+      const cell = Inspector.pagePartAt?.(event)
+      // a control inside a page's cell is a part of its own;  else the cell, never the page round it
+      return cell && !(part && part !== cell && cell.contains(part)) ? cell : part
+    })
+    const clicked = (event: MouseEvent) => {
+      if (event.defaultPrevented || isInspecting()) return
+      const cell = Inspector.pagePartAt?.(event)
+      if (cell) {
+        if (!Inspector.isSelected(cell) || event.shiftKey || event.metaKey || event.ctrlKey)
+          Inspector.clicked(cell, undefined, event)
+      } else if (Inspector.allSelected.length) Inspector.letGo()
     }
-    area.addEventListener("click", letGo)
+    area.addEventListener("click", clicked)
     return () => {
-      area.removeEventListener("click", letGo)
+      area.removeEventListener("click", clicked)
       stopEditing()
       if (appArea !== area) return
       setArea(undefined)
@@ -648,17 +671,31 @@ export class Inspector {
     return appArea
   }
 
-  /** Is `element` a part the Inspector shows:  a drawn thing, or a Spell UI element? */
-  static isPart(element: Element): boolean {
-    return !!SpellElement.thingOf(element) || element.localName.startsWith(UI_PREFIX)
+  /**
+   * The part a click on the app picks when it's a page that draws its body, a notebook among them:
+   * the cell it's on (`NotebookController.cellAt()`).
+   * - Set by `<AppPane>` while one shows;  `undefined` for any other app.
+   * - Not inspecting, a click there selects it;  a press on it once selected drags it (`PartEdits.watch()`).
+   */
+  static pagePartAt: ((event: Event) => Element | undefined) | undefined
+
+  /**
+   * Is `element` a part the Inspector shows:  a drawn thing, or a Spell UI element?
+   * - Or an element of a component built on Spell UI's, its vocabulary its own:  a notebook's `<spell-example>`.
+   * - An arrow:  handed on as it is (`NotebookController.cellAt()`).
+   */
+  static isPart = (element: Element): boolean => {
+    return !!SpellElement.thingOf(element) || isUIElement(element)
   }
 
   /**
    * A part's title:  `Card · the queen of spades`, `<ui-button "20%" />`.
-   * - A Spell UI element reads as its tag, then which it is:  its `name`, else its `label` (or `aria-label`:  an
-   *   icon-only menu item's, `<ui-item "Cheat" />`), else its own words,
-   *   shortened (Owen:  "show name or label to make it clearer which is which";  `<ui-button "20%" />`);
-   *   none:  its tag alone, `<ui-form />`.
+   * - A Spell UI element reads as its tag, then which it is:
+   *   - its `name`
+   *   - else its `label` (or `aria-label`:  an icon-only menu item's, `<ui-item "Cheat" />`)
+   *   - else its own words, shortened
+   *     (Owen:  "show name or label to make it clearer which is which";  `<ui-button "20%" />`)
+   *   - none:  its tag alone, `<ui-form />`
    */
   static labelFor(element: Element): string {
     const thing = SpellElement.thingOf(element)
@@ -1136,7 +1173,7 @@ export class Inspector {
         label: Inspector.labelFor(element)
       }
     }
-    if (element.localName.startsWith(UI_PREFIX)) {
+    if (isUIElement(element)) {
       // its attributes as its vocabulary lists them:  those it sets first, the rest under "More"
       const component = (element as Element & { component?: { vocabulary?: { attributes?: FieldSpec[] } } }).component
       const fields = component?.vocabulary?.attributes ?? []
@@ -1217,6 +1254,14 @@ function sharedLayout(parts: readonly SelectedPart[]): SelectedPart["layout"] {
   const [first] = parts as readonly [SelectedPart, ...SelectedPart[]]
   if (!first.layout || !parts.every((part) => isSameKind(part, first))) return undefined
   return { hasText: false, set: [], more: [...first.layout.set, ...first.layout.more] }
+}
+
+/**
+ * Is `element` a Spell UI element (`<ui-*>`), or of a component built on Spell UI's with a vocabulary of its own
+ * (a notebook's `<spell-example>`, once its family has loaded)?
+ */
+function isUIElement(element: Element): boolean {
+  return element.localName.startsWith(UI_PREFIX) || !!(element as E.DOMElement).component?.vocabulary
 }
 
 /** Where a part is written, as a key:  `undefined` when it has no place. */
@@ -1572,8 +1617,8 @@ const [areaMoved, setAreaMoved] = createSignal(0)
 
 /** Watch `area` from now on (`undefined`:  none), and tell its reactive readers. */
 /**
- * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:  `""` when it's all inside, or
- * there's no area.
+ * The `clip-path` that cuts a box at `left`, `top` (page pixels) to the app's area:
+ * `""` when it's all inside, or there's no area.
  * - An upright box only:  a turned one is left whole.
  */
 function clipToArea(box: { left: number; top: number; width: number; height: number }): string {
@@ -1803,6 +1848,20 @@ function boxDrawerOf(element: Element): Element | undefined {
   return drawers.length === 1 ? drawers[0] : undefined
 }
 
+/**
+ * The corner radius `element` is drawn with, in CSS px:  its top left corner's.
+ * - at most half its shorter side:  a pill's `999px` is half its height
+ * - at least `MIN_ANTS_RADIUS - ANTS_OUT`:  so the ants' box, `ANTS_OUT` further out, rounds a square part too
+ */
+function ringRadiusOf(element: Element): number {
+  const radius = parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0
+  const { width, height } = element.getBoundingClientRect()
+  return Math.max(MIN_ANTS_RADIUS - ANTS_OUT, Math.min(radius, Math.min(width, height) / 2))
+}
+
+/** The ants' box's smallest corner radius, in CSS px:  square parts get a soft corner (`Inspector.css`). */
+const MIN_ANTS_RADIUS = 9
+
 /** Does `element` itself listen for an event through Solid (`onClick` ...)? */
 function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
@@ -1814,9 +1873,10 @@ const HOVER_MARK = "data-inspect-hover"
 const RING_OUT = 3
 /**
  * How far the marching ants' box is outside what's selected, in CSS px:
- * its line is 1px to 3px out (`Inspector.css`).
+ * its line is 4px to 6px out (`Inspector.css`), clear of what's drawn at the part's edge
+ * (its text, a pill's rim;  epic `notebook` P9).
  */
-const ANTS_OUT = 5
+const ANTS_OUT = 8
 /** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
 const INSPECTING_MARK = "data-inspecting"
 
@@ -2030,8 +2090,9 @@ class PartSelector {
   /**
    * Move ring `mark` to `element` (`undefined`:  off whatever has it):  true if `element` draws it itself,
    * false if it can't (`canRing()`, `isRingDrawn()`), so a box stands in.
-   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a tilted card) can't
-   *   anchor to itself, so its ring falls back to 3px outside its own box (`Inspector.css`).
+   * - Pinned by its anchor.
+   * - A part that is its own `::after`'s containing block (a transform:  a tilted card) can't anchor to itself,
+   *   so its ring falls back to 3px outside its own box (`Inspector.css`).
    * - Fixed, its ring is drawn inside the nearest transformed ancestor, so it turns with the part.
    */
   private static ring(mark: string, element: Element | undefined): boolean {
@@ -2094,6 +2155,7 @@ class PartSelector {
     for (const target of event.composedPath()) {
       if (target === area) return undefined
       if (!(target instanceof Element)) continue
+      if (target.hasAttribute(EDITOR_OWN)) return undefined
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
       const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)
@@ -2146,6 +2208,11 @@ class PartSelector {
     // cut to the app's area:  never over the top bar or a pane beside it, as the app scrolls under them (Owen)
     const clip = turned ? "" : clipToArea({ left, top, width, height })
     if (box.style.clipPath !== clip) box.style.clipPath = clip
+    // the ants' corners follow the part's, `out` further out:  a pill's ring is a pill (epic `notebook` P9)
+    if (out) {
+      const radius = `${ringRadiusOf(drawer ?? element) + out}px`
+      if (box.style.borderRadius !== radius) box.style.borderRadius = radius
+    }
     if (box.hidden) box.hidden = false
   }
 
@@ -2170,8 +2237,8 @@ class PartSelector {
  *   - what's selected (`<PropertiesCard>`), its events and actions as bands at its end
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
- * - Each card folds to its header (`<InspectorCard>`):  a folded card keeps its header's height, the others share
- *   the rest.
+ * - Each card folds to its header (`<InspectorCard>`):
+ *   a folded card keeps its header's height, the others share the rest.
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
  * - The cards' insides are the brand's Theme Creator inspector, in the Spell Brand theme whatever the editor
@@ -2365,8 +2432,8 @@ function cardsLayout(shown: readonly InspectorCardId[]): { id: string; sizes: st
 }
 
 /**
- * Fold each card dragged too small to show anything (Owen, of the old Events card:  "should auto-collapse when it
- * gets small"),
+ * Fold each card dragged too small to show anything
+ * (Owen, of the old Events card:  "should auto-collapse when it gets small"),
  * and forget the drag (`forgetSizes`), so unfolding it brings back its usual size.
  */
 function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
@@ -2818,8 +2885,8 @@ type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: Fie
  * in folding bands named by its file's groups and headings (`rank`, `suit`, `drawing`), in the file's order
  * (`ThingMembers.bandsOf()`);  then, for a list, its items, a link each.
  * - A stored property:  a field to change it, or a link to the thing it holds (`<ThingLink>`).
- * - A computed one (Value, Color, Picture, is a face card):  its value, read only, live as the program changes it
- *   (`<ComputedField>`).
+ * - A computed one (Value, Color, Picture, is a face card):
+ *   its value, read only, live as the program changes it (`<ComputedField>`).
  * - Each by its words in the program (`is a face card`), when the words file has them.
  * - The built-in `id` last, in a band that starts folded.
  ****************/
@@ -3241,9 +3308,9 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
 
 /****************
  * ### `<InspectHelp>`
- * Inspect app's help:  a small popup under its button, while inspecting, until the first selection ever or until it's
- * closed (`Inspector.isHelpShown`):  "Click a part of the app to inspect it.  Alt-click for a part inside it.
- * Esc stops."
+ * Inspect app's help:  a small popup under its button, while inspecting.
+ * - Shown until the first selection ever, or until it's closed (`Inspector.isHelpShown`).
+ * - It says:  "Click a part of the app to inspect it.  Alt-click for a part inside it.  Esc stops."
  * - `for`:  the button's id (`<InspectAppButton id>`).
  ****************/
 export function InspectHelp(props: { for: string }): JSX.Element {

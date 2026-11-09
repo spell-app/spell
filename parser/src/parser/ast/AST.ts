@@ -175,8 +175,8 @@ export class ASTOrdinalLiteral extends ASTNumericLiteral {}
 /**
  * A number written in hex, e.g. spell's `hex 1F0A0` => `0x1F0A0`.
  * - `raw` is its hex digits as written, `1F0A0`;  `value` the number, `127136`.
- * - Javascript, TypeScript and Python all write it `0x<digits>`;  a writer with nothing to say of it writes it as
- *   `ASTNumericLiteral`.
+ * - Javascript, TypeScript and Python all write it `0x<digits>`;
+ *   a writer with nothing to say of it writes it as `ASTNumericLiteral`.
  */
 export class ASTHexLiteral extends ASTNumericLiteral {
   declare raw: string
@@ -2043,12 +2043,18 @@ export type ASTJSXElementProps = Prettify<{
   tagName: string
   attrs?: ASTJSXAttribute[]
   children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
+  /**
+   * Drawn as a part of its own, which an edit can draw again alone, e.g. an example on a page:
+   * javascript's `core.drawPart(this, () => h(...))` (epic `notebook` P4).
+   */
+  drawnApart?: boolean
 }>
 
 export class ASTJSXElement extends ASTExpression {
   declare tagName: string
   declare attrs: ASTJSXAttribute[] | undefined
   declare children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
+  declare drawnApart: boolean | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")
@@ -2077,7 +2083,7 @@ export class ASTJSXElement extends ASTExpression {
     return this.derived("childValues", () => {
       return (this.children ?? [])
         .map((child) => {
-          if (child instanceof ASTJSXExpression) return liveValueOf(child.output)
+          if (child instanceof ASTJSXExpression) return liveValueOf(child.output, "a child")
           return child instanceof ASTJSXElement ? child : child?.output
         })
         .filter((child): child is ASTExpression => !!child)
@@ -2086,8 +2092,8 @@ export class ASTJSXElement extends ASTExpression {
 }
 
 /** JSXFragment -- several elements side by side, with no element around them:  `<><a/><b/></>`.
- * - Drawn in javascript as a list of them, `[h("a"), h("b")]`, as Solid's `h()` takes a fragment;  TypeScript writes
- *   `<>...</>` as is.
+ * - Drawn in javascript as a list of them, `[h("a"), h("b")]`, as Solid's `h()` takes a fragment;
+ *   TypeScript writes `<>...</>` as is.
  * - Also elements written one after another, `return <a/>` then `<b/>` on the next line:  an implicit fragment.
  * - An element with no tag and no attributes, so whatever takes an element takes it:  `tagName` is `""`.
  * - `children` is array of child nodes -- JSXElement/JSXEndTag/JSXText/JSXExpression.
@@ -2213,10 +2219,15 @@ export class ASTJSXExpression extends ASTExpression {
  * - A literal (`"suit"`, `1`) never changes, so it stays a plain value:  see `liveValueOf()`.
  * - `expression` is the value's expression.
  */
-export type ASTJSXLiveValueProps = Prettify<{ expression: ASTExpression }>
+export type ASTJSXLiveValueProps = Prettify<{
+  expression: ASTExpression
+  /** Is it what an element holds, `{its names}`, not an attribute's value?  A list in braces shows its items there. */
+  isChild?: boolean
+}>
 
 export class ASTJSXLiveValue extends ASTExpression {
   declare expression: ASTExpression
+  declare isChild: boolean | undefined
   constructor(match: P.AnyMatch, props: ASTJSXLiveValueProps) {
     super(match, props)
     this.assertType("expression", ASTExpression)
@@ -2227,10 +2238,11 @@ export class ASTJSXLiveValue extends ASTExpression {
  * `expression` as a JSX prop or child's value:
  * wrapped in an `ASTJSXLiveValue` when it can change, as is when it can't (a literal, an element, an inline function).
  * - `undefined` stays `undefined`:  a broken `{}` with no expression.
+ * - `place`:  `"a child"` for what an element holds.
  */
-function liveValueOf<T extends ASTExpression | undefined>(expression: T): T | ASTJSXLiveValue {
+function liveValueOf<T extends ASTExpression | undefined>(expression: T, place?: "a child"): T | ASTJSXLiveValue {
   if (!expression || isFixedJSXValue(expression)) return expression
-  return new ASTJSXLiveValue(expression.match, { expression })
+  return new ASTJSXLiveValue(expression.match, { expression, ...(place && { isChild: true }) })
 }
 
 /** Can't JSX value `expression` change?  A literal (not a list, which holds expressions), an element, a function. */

@@ -265,7 +265,7 @@ export class SignInCheck {
    * Which of this server's addresses `request` came to:  one of `alsoAt` when its `Host` is that one's, else `address`.
    * - So a `Host` naming anywhere else never picks where a mail's link goes.
    */
-  private addressFor(request: SRV.Request): string | undefined {
+  addressFor(request: SRV.Request): string | undefined {
     const host = request.get("host")?.toLowerCase()
     return this.alsoAt.find((each) => new URL(each).host === host) ?? this.address
   }

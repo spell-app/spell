@@ -379,7 +379,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell/server/site/...` -- browser code:
     - the PAGE PATCHER, `PagePatch` (epic `epic-engine` P40):  the ONE way an edited page shows in place, for every
       page runtime (spell-epic's docs runtime, Spell UI's site), each with its rules over one shared set
-      - a planner over ANY keyed tree (`PatchTree`:  the DOM is one;  a Spell notebook's chunks another), its steps a
+      - a planner over ANY keyed tree (`PatchTree`:  the DOM is one;  a Spell notebook's chunks were another, until
+        epic `notebook` P3 had the program draw the page), its steps a
         list (`PatchStep`:  text, attribute, replace, remove, insert, move), their nodes named by place
         (`#p-x/section[2]/p[3]/text()[1]`);  a runner that applies them to the live DOM
       - `redraw()`:  a page's patch as ONE short cross-fade (`crossFade()`, a same-document view transition) when it

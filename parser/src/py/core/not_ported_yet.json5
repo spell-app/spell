@@ -63,6 +63,7 @@
         "giveDefaults",
         "handDefaultsTo",
         "listDrawn",
+        "listShown",
         "useElement",
         "elementClassOf",
         "css"
@@ -92,6 +93,7 @@
         "isCarryingOver",
         "carryOver",
         "drawAgain",
+        "drawPart",
         "keptTopLevel",
         "loadOverRunning",
         "takeNewClasses",

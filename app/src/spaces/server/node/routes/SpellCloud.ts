@@ -5,6 +5,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync }
 import { join } from "path"
 import { fileURLToPath } from "url"
 
+import { atProtoClientMetadata, PROGRAM_CLIENT_FILE } from "spell/places"
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
 import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
@@ -109,6 +110,8 @@ const ELEMENT_DIR = join(APP_DIR, "dist-element")
  *     `/api/places/spaces/...`, `/api/reads/spaces/...`, `/api/exports/spaces/...`, and their live rooms,
  *     `/api/rooms/spaces/...` (epic `atmosphere` T38)
  *   - `/apps/<project>`:  a program's page (`cloudApp.html`), and its files under `/spaces/`:
+ *     - beside each page, on an `https` address, the file a host reads when someone signs in to an atmosphere account
+ *       (`PROGRAM_CLIENT_FILE`):  one per program, as a sign-in comes back to the page its file names
  *     - the built-in ones, `@spell/examples` and `@spell/guides`, for anyone
  *     - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
  *       - someone who can't yet gets `cloudSignIn.html` at its address:  a program can't load to draw its own sign-in bar
@@ -273,6 +276,7 @@ export class SpellCloud {
     router.get("/hello", (_request, reply) => reply.set("Cache-Control", "no-store").json({ message: "Spell's cloud" }))
     router.get(`${CLOUD_APPS_PREFIX}/:project*`, async (request, reply) => {
       reply.set("Cache-Control", "no-store")
+      if (request.path.endsWith(`/${PROGRAM_CLIENT_FILE}`)) return reply.json(await this.clientFileFor(request))
       const path = `/${request.params.project ?? ""}/`
       if (SERVED_GROUPS.test(path)) return reply.sendFile(APP_PAGE)
       const program = await this.sharedProgramAt(path)
@@ -303,6 +307,32 @@ export class SpellCloud {
     })
     router.use("/spaces", this.onlyServedPrograms, spaceFiles)
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
+  }
+
+  /**
+   * What a host reads at `/apps/<project>/oauth-client-metadata.json`, when someone signs in to a program there.
+   * - The host asks with no sign-in, so anyone gets it;  it says only what its address already does.
+   * - In an org's shared space every name answers, there or not, so a stranger can't find out what an org has.
+   * - It names the address it was asked at:  a program at each of the cloud's addresses is its own client to a host.
+   * - throws a 404 on a local address, which needs none, and for anything the cloud doesn't serve
+   */
+  private async clientFileFor(request: SRV.Request): Promise<object> {
+    const address = this.signIn.addressFor(request)
+    if (!address?.startsWith("https:")) {
+      throw new SRV.HttpError(404, "this server's address is local:  a host needs no client file")
+    }
+    const file = request.path
+    const page = file.slice(0, -`/${PROGRAM_CLIENT_FILE}`.length)
+    const path = `${page.slice(CLOUD_APPS_PREFIX.length)}/`
+    if (!SERVED_GROUPS.test(path) && !(await this.sharedProgramAt(path))) {
+      throw new SRV.HttpError(404, "no such program here")
+    }
+    return atProtoClientMetadata({
+      origin: address,
+      redirect: `${address}${page}`,
+      name: decodeURIComponent(page.slice(page.lastIndexOf("/") + 1)),
+      file
+    })
   }
 
   /**

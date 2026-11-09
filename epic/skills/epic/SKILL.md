@@ -18,7 +18,7 @@ An EPIC is a planning session and the work it plans;  its live record is the EPI
 Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole time.
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
-  - That's the checkbox icon;  never the "Epic Docs" tab, the book (Owen's rule, 2026-10-07).
+  - That's the checkbox icon;  never the "Epic Docs" tab, the book (rule, 2026-10-07).
   - The extension sends every epic page there by itself, whatever the command asked (epic `epic-engine` P59);
     details, review and choice pages go to the third tab, "Details" (the speech bubble), so a question never
     replaces the epic page, and one still waiting for an answer is never replaced either.
@@ -67,7 +67,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - full words, and a concrete example for anything tricky
   - ids explained
   - a **Net effect** list (`<epic-net-effect>`) closing every question, issue, judgement call and decision
-  - NOT caveman (Owen, 2026-10-04).
+  - NOT caveman (2026-10-04).
   - Replies:  short, the same plain words.
 - Naming a doc in a reply (the epic page, a guide, any docs page):
   paste what `epic pages link` prints, run in the checkout the doc is in.
@@ -107,8 +107,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session.
     Go to "12. Request" (epic `epic-workflow`).
   - `done`:  `/epic done` is `/isolate done`, word for word.
-    - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (Owen,
-      2026-10-24):  the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
+    - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (2026-10-24):
+      the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
       - In Codex:  the same words:  `$epic done` is `$isolate done`.
     Follow [the isolate skill](../isolate/SKILL.md)'s "Finish", and skip everything else here.
     - The same steps "6. Doc Review" ends with.
@@ -186,7 +186,7 @@ When the session already has work under way ("make this a plan doc"), carry it o
 ## From another worktree
 
 `/epic <name> ...`, typed in a session working in ANOTHER worktree (`<other>`),
-means "open a window for epic `<name>`" (Owen, 2026-10-07).
+means "open a window for epic `<name>`" (2026-10-07).
 - This session stays `<other>`'s:  no rename, no `EnterWorktree`, no plan here.
   - In Codex:  say so, and print `epic window launch <name>` for the person to run.
 
@@ -194,7 +194,7 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
    - A natural-language trigger:  save it yourself, as "1. Name" says.
 2. Collisions, as "1. Name".
    Not the future-epic case:  it goes on as usual in the new window.
-3. NO question:  typing it is the ask (Owen, 2026-10-21:  "I just create a new session in this window, type
+3. NO question:  typing it is the ask (2026-10-21:  "I just create a new session in this window, type
    `/epic name` and you do the right thing").  Straight on to step 4.
    - A multi-repo kit:  the worktree is the kit's, with every repo in it, from ANY repo's window (`EpicConfig.top`).
 4. `epic window launch <name> [--color <look>]`, a look after the name as in "1. Name".
@@ -207,7 +207,7 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
    - It fails (no window bridge, an old extension:  `unknown op` / `bad session id`):
      say so in one line;  the text stays saved.
 5. A FRESH session (the prompt hook's note says so:  a new tab, opened only to type `/epic <name>`) MOVES instead
-   (epic `epic-engine` I72;  Owen, 2026-10-22:  the tab stayed in epic-engine's window, beside the new window's
+   (epic `epic-engine` I72;  2026-10-22:  the tab stayed in epic-engine's window, beside the new window's
    session).
    - `epic window launch <name> --move`, LAST in its command line:  the worktree and window file made, then this
      session handed off.
@@ -235,7 +235,7 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
       name, and Claude Code lets the call through.
       - With a `path` outside `.claude/worktrees/` it asks the person every time, whatever the permission rules say;  a
         symlink doesn't help (it resolves links).
-      - Owen:  "this EnterWorktree thing is intolerable -- it's halting processes and wasting my time."
+      - "this EnterWorktree thing is intolerable -- it's halting processes and wasting my time."
         - In Codex:  none of this:
           `cd "$(epic worktree path <name>)"`, or `epic worktree create <name>` when it isn't there.
     - The session-start guard records a session that starts in the worktree, so a reopen from another window still
@@ -306,7 +306,7 @@ Staying in this window (step 0):  skip steps 4 and 6.
 
 ## 3. Plan:  the Overview, on the page
 
-NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
+NO plan mode, ever, for an epic (epic `epic-engine` P33;  2026-10-24).
 - In Codex:  nothing to avoid:  Codex has no plan mode.
 - The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
   only the Overview, Questions and Todo until the person presses Accept Overview.
@@ -320,7 +320,7 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
   2. `phases`:  Claude writes the phases AND each one's build plan, in one pass ("4b. Build plans");  the person Defers any,
      then ONE Accept Phases accepts the phases and their plans together ->
   3. `building`:  the phases built one after another with no stop between them ("5. Each phase").
-  - ONE accept, not two (epic `epic-engine` I125;  Owen, 2026-10-25:  "the mode where I 'accept the phase' twice
+  - ONE accept, not two (epic `epic-engine` I125;  2026-10-25:  "the mode where I 'accept the phase' twice
     (once for symptom/goals, once for plan) is slowing things down.  Collapse them into one").
 
 1. Explore (read-only):  the code, the docs, the kickoff prompt.
@@ -355,7 +355,7 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
    - `decide <name>#Q<n> "..."`, then rewrite the Overview's words it changes, wrapping the changed words in
      `<epic-change item="q<n>">...</epic-change>`, in the part file
    - then `epic change <name>`:  it stamps each mark;  the words show orange for 3 days, so the person sees what moved
-   - NO approval, and never a wait (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the
+   - NO approval, and never a wait (2026-10-25:  "i shouldn't have to approve those -- I already answered the
      question"):  go straight on, the next answer, the next question, the phases once the Overview is accepted.  They
      Reopen one if they disagree:  it comes back as a mark like any other
    - a new question the answer raises:  `add <name>#Q`, as step 3
@@ -365,7 +365,7 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 ## 4. Fill the doc:  the phases (after Accept Overview)
 
 The phases go to a background agent, `<name>-plan-doc`, as if the person had typed `/bg "plan-doc" ...`
-([the bg skill](../bg/SKILL.md);  Owen, 2026-10-07).
+([the bg skill](../bg/SKILL.md);  2026-10-07).
 - In Codex:  no background agents:  do it yourself now, or ask for a Codex sub-agent and wait for it.
   The same for every "background agent" below:  a sub-agent Codex waits for, or the work done here, one item at a time.
 - Its prompt has these steps, the Overview's sub-sections to read, and the decided questions.
@@ -374,7 +374,7 @@ The phases go to a background agent, `<name>-plan-doc`, as if the person had typ
   a phase's Done list and items at its end, a reorder, Doc Review's pruning.
 
 - Per phase, in order, `add-phase`
-  (Owen, 2026-10-06:  "Symptom, Changes, then the details";  the page draws Changes after the Goal, next to the plan,
+  (2026-10-06:  "Symptom, Changes, then the details";  the page draws Changes after the Goal, next to the plan,
   since epic `epic-engine` P45):
 
   ```sh
@@ -427,7 +427,7 @@ The phases go to a background agent, `<name>-plan-doc`, as if the person had typ
 ## 4b. Build plans:  ALL of them, up front, WITH the phases
 
 Claude's build plan for EVERY phase still to do, written in the same pass as the phases ("4. Fill the doc"), before
-the person sees them and before any code (Owen, 2026-10-25:  "write the plans
+the person sees them and before any code (2026-10-25:  "write the plans
 up front, then look into adjusting before starting.  Otherwise, you'll stop after each phase and make me approve rather
 than just being able to move on").
 - Before epic `epic-engine` I117 each plan was written right before its phase, and the session stopped after every
@@ -435,7 +435,7 @@ than just being able to move on").
 - Each one:  `epic update <name>#P<N> --plan "<ol><li>...</li></ol>"`:  the steps, the files, how it's checked, what's
   left out;  short, in the person's terms.
   - FIRST, before reading for it:  `epic phase <name>#P<N> planning`, so its page shows a blue spinner on the phase,
-    "Claude is writing this phase's plan" (epic `epic-engine` I147;  Owen, 2026-10-26:  "no indication in the phase
+    "Claude is writing this phase's plan" (epic `epic-engine` I147;  2026-10-26:  "no indication in the phase
     header").  The `--plan` write ends it;  given up, `epic phase <name>#P<N> planning off`.
     - `epic update <name>#P<N> --goal ...` on a phase whose plan isn't accepted turns it on by itself.
   - Agents (up to 5) may draft them in parallel, a few phases each;  the session reads them all before showing them.
@@ -443,7 +443,7 @@ than just being able to move on").
     (`<epic-phase plan="waiting">`).
 - ONE coherence review over ALL of them (epic `coherence` P4, its Q3):  a `coherence` agent, `<name>-coherence`,
   as in "3. Plan", step 1.
-  - Started AS the drafting starts, not after it (Owen, 2026-10-25:  so it overlaps the writing):  it reads the
+  - Started AS the drafting starts, not after it (2026-10-25:  so it overlaps the writing):  it reads the
     accepted phases (their goals and files) while the plans are written, then the plans as they land.
   - Before showing them, its findings are worked into the plans:  the wait is only what's left of it.
   - The build plan is where "write a new X" shows:  each finding changes its plan to use what exists, or becomes a
@@ -452,7 +452,7 @@ than just being able to move on").
   - Again whenever a plan is written later:  a phase added, a request filed, a plan rewritten ("5. Each phase", step 1).
 - Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "The phases and their
   build plans are up, P3-P9:  one Accept Phases takes both".
-- The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
+- The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (2026-10-25).
 - The person accepts them on the page:  Accept Phases on the Phases section's title row (in the `phases` stage:  the phases and every waiting plan,
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or they say "go"
   in chat:  every waiting plan accepted.
@@ -460,7 +460,7 @@ than just being able to move on").
   - Un-clicking an accepted phase's green thumbs up HOLDS it (epic `epic-engine` I218):  `inbox apply` writes
     `plan="held"` (paused, grey, I221).  Build no held phase;  go on to the next accepted one, and stop when none is left.
   - Accept Phase on one they have just COMMENTED in (its Revisit pressed by itself, I158):  the Accept keeps their comments
-    (epic `epic-engine` I163;  Owen, 2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
+    (epic `epic-engine` I163;  2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
     me again").  `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan as usual.
     - Fold them into the plan and KEEP it accepted:  `epic update <name>#P<N> --plan "<ol>...</ol>" --accepted`
       (no `waiting`, no spinner), then answer each comment on its thread
@@ -468,7 +468,7 @@ than just being able to move on").
     - Only a comment that goes against something they decided, or changes the scope a lot, becomes a Q item instead
       (`epic add <name>#Q`, its thread answered with the link);  the rest are still folded in.
   - A plan rewritten from an ANSWER (a question decided, a revisit's pick):  the changed words marked
-    (`<epic-change item="q<n>">`, then `epic change`), and NO `epic updated` block (epic `epic-engine` I159;  Owen,
+    (`<epic-change item="q<n>">`, then `epic change`), and NO `epic updated` block (epic `epic-engine` I159;
     2026-10-29, on P51's orange Update under its Q53 marks:  "Do we still need the orange update section like this?").
   - Defer Phase on one (beside Accept Phase):  `inbox apply` moves it after the other phases, still to do.
 - Then "5. Each phase", from the first, straight through.
@@ -510,7 +510,7 @@ than just being able to move on").
      - CALM by default:  `--calm` (last):  a call grey, an issue yellow, rather than red.
      - An issue filed from the person's own words (their request, their screenshot):  add `--requested` too.
        Closed, it turns light orange until they've looked;  without it, a calm issue Claude closes goes grey (epic `epic-engine` P63).
-       - Owen:  "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
+       - "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
          (2026-10-10, "the principle of least surprise").
        - RED (no `--calm`) only when it would surprise them:
          - it goes against something they said
@@ -521,7 +521,7 @@ than just being able to move on").
        - Following the repo's house style is one case of calm, not the only one.
        - Never ask:  decide, and record it.
        - A call that needs their YES / NO (it went ahead, but they may say "don't"):  give it an option set, so they pick on
-         the page (epic `epic-engine` P50, request r44;  Owen, 2026-10-29:  "In future, this could be a question
+         the page (epic `epic-engine` P50, request r44;  2026-10-29:  "In future, this could be a question
          block!"):  `add <name>#J "..." --options "*Do it | Don't" --calm`, `*` the one taken.
          - a question takes `--options` too (`add <name>#Q "..." --options "A:Red | B:Blue"`)
          - pros and cons on an option afterwards:  `epic option edit <name>#J5 A --note "..."`
@@ -541,10 +541,10 @@ than just being able to move on").
 
        - `--step`:  short, exact;  a page to open is an action link, drawn as a button:
          `<a class="epic-test-action" href="<an epic pages link URL>">Open the Epics page</a>`
-       - HOW a step is written (epic `epic-engine` r16;  Owen, 2026-10-22:  "You are making me think too much to do this
+       - HOW a step is written (epic `epic-engine` r16;  2026-10-22:  "You are making me think too much to do this
          stuff ... put them in code blocks with exactly what I need to type"):
          - it names the app, the window and the menu or keys:  "In VS Code's `⎇ repo-split` window, View > Output (⇧⌘U),
-           pick `Spell` in its list", never "the Output panel" (Owen's:  "What is the output panel?")
+           pick `Spell` in its list", never "the Output panel" (the person's:  "What is the output panel?")
          - everything to type in a code block, `cd` included:  `<pre><code>cd ui</code></pre>`, or in plain text a
            fenced block;  the page shows each with a Copy button
          - a new terminal in a worktree's window asks which folder:  the step says which to pick, or `cd`s first
@@ -572,13 +572,13 @@ than just being able to move on").
      - `updated <name>#P<N> "<p>what changed, and why</p>" --summary "..."`:
        an `<epic-update>` block at the end of the phase's description, after Goal:  **Update**: <summary>, dated.
        Never an "Updated" word in the text.
-     - NEVER for a change an answer caused:  its change marks say it (next bullet;  epic `epic-engine` I159, Owen,
-       2026-10-29:  an Update block "only when no mark says it").
+     - NEVER for a change an answer caused:  its change marks say it (next bullet;
+       epic `epic-engine` I159, 2026-10-29:  an Update block "only when no mark says it").
        - `updated` itself writes nothing then:  `--for q53` (or, without it, the item ids its text names, marked in
          the phase this pass) with marks in the phase prints "no Update block, the change marks say it".
        - Something the marks can't say (a file moved, why a step went):  its own block, `--for` left off.
-     - ALWAYS pass `--summary`:  5-10 words saying WHAT changed (Owen, 2026-10-11).
-       - Never who or when ("From Owen's comment CM2 ...", "Owen, 2026-10-11:"):
+     - ALWAYS pass `--summary`:  5-10 words saying WHAT changed (2026-10-11).
+       - Never who or when ("From the person's comment CM2 ...", "2026-10-11:"):
          the text says who, the block shows when.
        - E.g. `--summary "Tab labelled App/UI, right after App"`.
      - Then `update <name>#P<N> --changes ...` (or `--goal` ...), to make the fields say the new plan.
@@ -661,7 +661,7 @@ than just being able to move on").
             - In Codex:  nothing to leave:  stay in the worktree's folder.
           - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
-          - STRAY files in a main checkout (epic `epic-engine` I77;  Owen:  "ask if I want to ditch them before merging
+          - STRAY files in a main checkout (epic `epic-engine` I77;  "ask if I want to ditch them before merging
             rather than just bailing"):
             - a test's snapshot, a repo's generated output:  it moves them aside by itself, and says so
             - one to three others (a `settings.json5` ...):  it refuses, listing them.  Ask the person in a modal, "Ditch
@@ -676,7 +676,7 @@ than just being able to move on").
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).
 6. A short note (done, issues, todos, next), the "complete.  Next is" line (see the top), then GO STRAIGHT ON to
-   the next phase whose plan is accepted:  no question, no stop (Owen, 2026-10-25, I117:  "rather than just being able to
+   the next phase whose plan is accepted:  no question, no stop (2026-10-25, I117:  "rather than just being able to
    move on").
    - Stop, and ask (AskUserQuestion), only when:
      - In Codex:  ask in the chat.
@@ -706,7 +706,7 @@ than just being able to move on").
 - It FLOATS (epic `epic-engine` P33, M4):  docs never trail the code.
   - `add-phase` (no `--before` / `--after`) puts a new phase just before a last Doc Review:  P15 the new one, the
     Doc Review moving down to P16, what names it following.
-    - Phase numbers are always WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just
+    - Phase numbers are always WHOLE (epic `epic-engine` I126;  2026-10-25:  "ditch the 17.1 and just
       reorder");  P39's decimals (P14.1) are gone, made whole by the migration `whole-phase-numbers`.
     - The Doc Review keeps its name.
     - Under way or done, it is to do again (logged):  it takes in the new phase's docs when it runs again.
@@ -918,13 +918,13 @@ Read what it printed.
 Then, in this order.
 
 Every card you finish says what REALLY happened, one of three
-(Owen, 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything";
+(2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything";
 2026-10-26, epic `epic-engine` I148:  a fixed issue with two Done cards stayed red):
 - `status ... underway "<reading>"`:  you're on it.
 - `status ... noted "<what;  what happens next>"`:  a STEP done, the item NOT finished.
   - their choice recorded (a todo made;  "do it next phase"):  `"Queued for P9 · Build"`
   - a phase's Do this (its thumbs up, a `todo` mark;  Make Todo before epic `epic-engine` I181):  NOT a todo to make
-    (Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a todo"):  `apply` notes "Go ahead" on it;
+    (2026-10-29:  "it's already a phase, you wouldn't make it a todo"):  `apply` notes "Go ahead" on it;
     build it (its plan first, when it has none accepted), or say why not yet
     - NOT a pick:  `choose` / `apply` record it inside the item's Choices, no card (I153)
   - an answer or reply written, details added, the item condensed:  `"Answered their note:  options A and B"`
@@ -945,7 +945,7 @@ The item's id chip follows too (PLAN-DOC.md "Colours"):
 - Leave work you queued `queued` until it's built, so their chip stays outlined.
 
 A revisit note that says just `do it` (now or soon) means:  DO it, no question back -- the call as written, the todo
-as asked.  Revisit puts it in a judgement call's or todo's empty note box for them (Owen, 2026-10-19:  "I generally
+as asked.  Revisit puts it in a judgement call's or todo's empty note box for them (2026-10-19:  "I generally
 want you to just do it").
 
 0. The toolbar's line (epic `epic-engine` P35), FIRST:  `epic inbox status <name> "Responding" --items <the ids
@@ -1029,7 +1029,7 @@ want you to just do it").
           `epic details <name>#M3 --prepared 1` (alone it only stamps;  with `--step` ... it stamps too)
        6. `epic inbox done <name>#tests`:  the page opens Focus mode on its Tests tab, on the first test, in that order
           (epic `epic-engine` P57, Q65;  unless they're typing:  then "Tests ready:  Focus on the tests opens the first")
-     - His button then reads "Focus on the tests · 3 left";  with every test prepared it never asks you again.
+     - Their button then reads "Focus on the tests · 3 left";  with every test prepared it never asks you again.
      - Nevermind on it (their click while "Preparing tests") is 1b:  stop the agent, `epic inbox done <name>#tests`.
 3. SENT marks:  `epic inbox apply <name>`.
    - Approvals, picks and todos made or queued land in the doc;  it prints each.
@@ -1070,9 +1070,9 @@ want you to just do it").
      - "Made todo T23 ..."
      - "Queued for P10 · ..."
    - A plain revisit's NOTE (words, no pick, no picture, not their comments in its text) is no "to talk over" any
-     more (epic `epic-engine` I200;  Owen, 2026-11-02:  "make it a comment like the rest and clear the field"):
+     more (epic `epic-engine` I200;  2026-11-02:  "make it a comment like the rest and clear the field"):
      - `wait` makes it a COMMENT on its item, its mark gone, so their note box empties:  printed under "comments, to
-       answer on their threads", with "his revisit note on P3, made a comment"
+       answer on their threads", with "their revisit note on P3, made a comment"
      - answer it on its thread, as 3b says;  a note `wait` never took (`/airplane land`) becomes one, answered, at
        `inbox clear`
    - Then each "to talk over" left (a pick "B, but ...", a picture, their comments in its text), one at a time:
@@ -1116,7 +1116,7 @@ want you to just do it").
      - A REPLY of theirs on a thread is waiting work too, as a new comment is.
        - It's listed under its comment, "<their name> replied:  ...".
        - Answer their latest words, the thread above for context.
-   - The person's SEND hands them over, as it does marks (Owen, 2026-10-10:  Send stays the way comments reach you).
+   - The person's SEND hands them over, as it does marks (2026-10-10:  Send stays the way comments reach you).
      - A new comment, or their reply on a thread, turns Send blue on the page;  pressing it (or Review Now) wakes `wait`.
      - `wait` prints them under the send:  "comments, to answer on their threads", with their latest reply.
      - Each goes over once, until they speak on its thread again.
@@ -1205,7 +1205,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    a new window!"):  never resumed here.
    - "From another worktree", steps 4-5, with `--prompt "/epic resume <name>"`:  a launch, or a fresh session's move.
    - Then stop:  the epic's own window resumes it.
-0. Already home:  this window or this session is ALREADY the epic's own (Owen, 2026-10-10):
+0. Already home:  this window or this session is ALREADY the epic's own (2026-10-10):
    - the window:  `epic window which` says `ongoing/<name>.code-workspace` (in `epic config windowsFolder`)
    - or the session:  its folder is `epic worktree path <name>`'s
    - and `<name>` has an epic page (`epics/<name>/`), and is the `<name>` typed, if one was.
@@ -1336,7 +1336,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
 ## 10. Add a phase:  `/epic phase [ids] [name]`
 
 The person adds a phase to the epic under way, from items it already has, or from scratch.
-- Epic `skillz` P4, Owen 2026-10-07:
+- Epic `skillz` P4, 2026-10-07:
   "`/epic phase J1 J5, t3` => take judgement 1+2 and todo #3 and make a new phase".
   - A todo is `t3` again since epic `epic-engine` P44 (a caveat, `c3`, from P32 to P44).
 
@@ -1475,7 +1475,7 @@ A REQUEST is something the person asked for in another session, sent here instea
 ## 13. Summarize:  condense an item after a lot of back and forth
 
 When the person asks to summarize (condense, boil down) an item -- in chat, or a revisit note ("summarize this") --
-because its text and replies have grown too long to read (Owen, epic `repo-split` J141):
+because its text and replies have grown too long to read (epic `repo-split` J141):
 1. Read the WHOLE item:  `epic items <name> --json` for its id and state, then the item in the page, its part file
    too:  its text, every reply (theirs and Claude's), More Details, option cards, the comment thread on it.
 2. Write the condensed text to a scratchpad file, `condensed.html`:
@@ -1496,7 +1496,7 @@ because its text and replies have grown too long to read (Owen, epic `repo-split
 ## 14. Tidy:  `/epic tidy [<epic>]`
 
 Close the open judgement calls, issues and todos that other work has made obsolete, leaving a reason on each
-(epic `epic-engine` Q69;  Owen:  "mark as done any that have been obviated by other changes").
+(epic `epic-engine` Q69;  "mark as done any that have been obviated by other changes").
 No `<epic>`:  this session's epic.
 Only when the person (or that epic's session) asks:  it never starts by itself.
 
@@ -1575,7 +1575,7 @@ Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by 
   - run it on its OWN epic only, at its leisure:
     - now, if idle or between phases
     - else at the end of the phase under way, when running it now would disrupt that work
-  - it may commit what changed WITHOUT asking (Owen's standing OK, 2026-10-11), as `<epic> migrate <step>:  ...`
+  - it may commit what changed WITHOUT asking (the person's standing OK, 2026-10-11), as `<epic> migrate <step>:  ...`
     - epic pages are in the epic repo, committed by the turn-end hook:  usually nothing is left for the branch
     - "commit" means the branch's own changes, when a step touched tracked files
   - what the report leaves for a person ("left for you":  a link to a gone id, a comment whose words changed):
@@ -1611,7 +1611,7 @@ add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (a call grey, an issue yellow);  --loud:  red again
-requested <name>#I3 [<id>...]                       issues filed from the person's own words:  light orange once closed
+update <name>#I3 --requested                        an issue filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)
 commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase or an item

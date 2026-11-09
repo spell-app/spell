@@ -1,0 +1,46 @@
+<spell-page "site-nav examples" notebook>
+	<header level="1">
+		Site nav
+		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#variations">Variations</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="Pages in pages" sticky="stack" collapsible dividing>
+			<example "Pages in pages" description="`pages` lists the site's pages, each with its `title` and `href`, nested as the navigation nests them.  The page shown is marked, and every page it's under opens:  here, this page.">
+				<ui-site-nav current="#site-nav" style="max-width: 16em" pages="\[{ \"title\": \"Overview\", \"href\": \"#index\" }, { \"title\": \"Components\", \"href\": \"#components\", \"pages\": \[{ \"title\": \"Button\", \"href\": \"#button\" }, { \"title\": \"Site nav\", \"href\": \"#site-nav\" }, { \"title\": \"Tree\", \"href\": \"#tree\" }] }, { \"title\": \"Themes\", \"href\": \"#themes\" }]"/>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Groups" sticky="stack" collapsible dividing>
+			<example "Groups" description="A page with no `href` only holds pages:  a click opens or closes it.  `icon` puts an icon before a title.">
+				<ui-site-nav style="max-width: 16em" pages="\[{ \"title\": \"Forms\", \"icon\": \"edit outline\", \"pages\": \[{ \"title\": \"Input\", \"href\": \"#input\" }, { \"title\": \"Dropdown\", \"href\": \"#dropdown\" }] }, { \"title\": \"Lists\", \"icon\": \"list\", \"pages\": \[{ \"title\": \"Tree\", \"href\": \"#tree\" }, { \"title\": \"Table\", \"href\": \"#table\" }] }]"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Nav" sticky="stack" collapsible dividing>
+			<example "Nav" description="`appearance=\"nav\"` draws it as the docs site's side navigation does:  a page's `band` is a heading band over its pages (`heading`, or a lighter `subheading`), `count` and `badge` label its title, and `starred` gives it a star, which sends `ui-starred`.">
+				<ui-site-nav appearance="nav" style="max-width: 16em" pages="\[{ \"title\": \"Get started\", \"band\": \"heading\", \"open\": true, \"pages\": \[{ \"title\": \"Overview\", \"icon\": \"house\", \"href\": \"#index\" }] }, { \"title\": \"Components\", \"band\": \"heading\", \"count\": 3, \"open\": true, \"pages\": \[{ \"title\": \"Forms\", \"band\": \"subheading\", \"count\": 2, \"open\": true, \"pages\": \[{ \"title\": \"Input\", \"href\": \"#input\", \"starred\": true }, { \"title\": \"Calendar\", \"href\": \"#calendar\", \"badge\": \"in progress\", \"starred\": false }] }, { \"title\": \"Lists\", \"band\": \"subheading\", \"count\": 1, \"pages\": \[{ \"title\": \"Tree\", \"href\": \"#tree\", \"starred\": false }] }] }]"/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Remembered" sticky="stack" collapsible dividing>
+			<example "Remembered" description="With `remember`, the pages a person opens and closes stay so when they come back:  open one, then reload the page.">
+				<ui-site-nav style="max-width: 16em" remember="docs-example" current="#tree" pages="\[{ \"title\": \"Elements\", \"pages\": \[{ \"title\": \"Button\", \"href\": \"#button\" }, { \"title\": \"Icon\", \"href\": \"#icon\" }] }, { \"title\": \"Collections\", \"pages\": \[{ \"title\": \"Menu\", \"href\": \"#menu\" }, { \"title\": \"Tree\", \"href\": \"#tree\" }] }]"/>
+			</example>
+		</>
+	</>
+</spell-page>

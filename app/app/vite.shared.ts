@@ -106,7 +106,7 @@ export function pageServerProxy({ target, token }: { target: string; token?: str
     "/spaces": passed,
     "/element": passed,
     // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
-    // (`@spell/notebooks/Avatar`, epic `elemental-spell` P18)
+    // (`@spell/guides/SpellUI/Avatar/Usage.spellml`, epic `notebook` P10)
     "/components": passed,
     // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
     // epic `debut` P24)

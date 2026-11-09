@@ -7,7 +7,7 @@
     <title>epic-reply</title>
     <meta
       name="description"
-      content="A reply on an item: headed who and what about, the date at its right; Claude's violet, Owen's ivory."
+      content="A reply on an item: headed who and what about, the date at its right; Claude's terracotta, yours violet."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -41,7 +41,7 @@
           <ui-header level="1" class="site-title">
             &lt;epic-reply&gt;
             <ui-header
-              >A reply on an item: headed who and what about, the date at its right; Claude's violet, Owen's
+              >A reply on an item: headed who and what about, the date at its right; Claude's violet, your
               ivory.</ui-header
             >
           </ui-header>
@@ -52,7 +52,7 @@
         <article class="site-article">
           <p class="lede">
             A reply on an item: a card headed <code>&lt;who&gt; · re: &lt;what about&gt;</code>, the date at its right,
-            the reply itself its children. Claude's are violet, Owen's ivory.
+            the reply itself its children. Claude's are terracotta, yours violet.
           </p>
           <!-- no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
                <epic-item> can, and the live items draw unstyled (issue I9 of epic-components) -->
@@ -82,7 +82,7 @@
               <li>The review buttons don't show here: they show only on an epic page being reviewed.</li>
             </ul>
             <p>
-              Owen's note, kept as his reply once Claude took it, then Claude's answer: issue I6 of the
+              Your note, kept as your reply once Claude took it, then Claude's answer: issue I6 of the
               <code>epic-components</code> epic, cut down.
             </p>
             <epic-item
@@ -95,8 +95,8 @@
               <p>
                 A re-fetch counted as "on its way" again, so an open item hid its details until the new part arrived.
               </p>
-              <epic-reply from="Owen" at="2026-10-07 10:44" re="revisit soon"><p>fix it</p></epic-reply>
-              <epic-reply from="Owen" agent="claude" at="2026-10-07 10:56" re='"fix it"'
+              <epic-reply from="Ana" at="2026-10-07 10:44" re="revisit soon"><p>fix it</p></epic-reply>
+              <epic-reply from="Ana" agent="claude" at="2026-10-07 10:56" re='"fix it"'
                 ><p>
                   Fixed at the source, <code>SourceBody</code> in Spell UI, so every element that loads a part gets it.
                 </p></epic-reply
@@ -274,7 +274,7 @@
                   <tbody>
                     <tr>
                       <td><code>base</code></td>
-                      <td>The card: Claude's violet, Owen's ivory (<code>from</code>).</td>
+                      <td>The card: Claude's terracotta, yours violet (<code>from</code>).</td>
                     </tr>
                     <tr>
                       <td><code>header</code></td>
@@ -341,7 +341,7 @@
                     </tr>
                     <tr>
                       <td><code>new</code></td>
-                      <td>Claude's newest reply in its item (none of Owen's after it), not seen yet in this browser: an orange edge and <code>NEW</code>. Seen once on screen for 1.2s.</td>
+                      <td>Claude's newest reply in its item (none of yours after it), not seen yet in this browser: an orange edge and <code>NEW</code>. Seen once on screen for 1.2s.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -392,13 +392,13 @@
                 a thin rule between them, with Claude's status line last;  the first reply's fold folds the whole thread (epic <code>epic-engine</code> P27).
               </li>
               <li>
-                Claude's newest reply, with none of Owen's after it, has an orange edge and a small
-                <ui-label size="mini" color="orange">NEW</ui-label> in its band until Owen has seen it: on screen for
+                Claude's newest reply, with none of yours after it, has an orange edge and a small
+                <ui-label size="mini" color="orange">NEW</ui-label> in its band until you have seen it: on screen for
                 1.2 seconds, remembered in this browser (orange: changed since you looked).
               </li>
               <li>
-                Owen's note asking for More Details sits just ABOVE Claude's More Details card, which answers it, and
-                starts FOLDED to its band: it came first (Owen, 2026-10-24).
+                Your note asking for More Details sits just ABOVE Claude's More Details card, which answers it, and
+                starts FOLDED to its band: it came first (2026-10-24).
               </li>
             </ul>
             <p>
@@ -418,7 +418,7 @@
                 turned into one on the way in (<code>IncomingHtml</code>).
               </li>
               <li>
-                <code>epic inbox done &lt;name&gt;</code> or <code>clear</code>, on a mark with a note: Owen's note
+                <code>epic inbox done &lt;name&gt;</code> or <code>clear</code>, on a mark with a note: your note
                 is kept as the person's own reply (<code>from="Ana"</code>, <code>re="revisit soon"</code> ...), placed
                 before Claude's answer to it;  an agent's own replies handed in are marked its on the way
                 (<code>from="Ana" agent="codex"</code>, the agent running the command:  <code>IncomingHtml</code>)

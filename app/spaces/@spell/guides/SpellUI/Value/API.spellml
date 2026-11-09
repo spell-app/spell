@@ -1,0 +1,39 @@
+<spell-page "value api" notebook>
+	<header level="1">
+		Value
+		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-value" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api tag="ui-value" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-value" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-value" only="states"></>
+		</>
+	</>
+</spell-page>

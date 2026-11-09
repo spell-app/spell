@@ -122,6 +122,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       under the file lock, written all at once.
     - A group's list, and a project's file list, leave out our own `__` names (`SPACES.isSpaceName()`).
       - Known by that list of names:  so `__init__.py` and `__snapshots__/` still list (decision J52).
+    - A project's files may be in folders, listed by their path, `Button/Usage.spellml` (epic `notebook` P10):
+      `getIndex()` walks them, staying out of what isn't its source (`isFolderOutsideProject()`).
+      - Renaming moves a file between folders;  a folder left empty by a rename or delete goes.
   - [ProjectDrafts.ts](server/node/projects/ProjectDrafts.ts):  a person's DRAFTS, Publish and a project's versions
     (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
     - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
@@ -698,6 +701,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The page keeps it, and tries again.
   - LEAVING (epic `atmosphere` P7, T5;  [SpaceExport.ts](server/node/places/SpaceExport.ts)):
     a space as plain JSON files, laid out as its folder is.
+    - A chat app (epic `atmosphere` T61):  fills the window (`cloudApp.html` has no padding of its own), a toolbar with
+      who's signed in, the threads in a 260px side bar, the box pinned below only the messages scrolling.
+      - The box is `<ui-textarea grow send-on-enter>`:  Enter sends, Shift-Enter types a new line.
+      - At phone width the side bar's list opens in a `<ui-flyout>` from the toolbar's bars button.
+      - Every org program has the same toolbar (`{the sign in menu}`, its programs linked in it), written out in each:
+        each org gets its own copy of the programs, so a shared file wouldn't reach them.
     - With `members.json`, and a note on leaving with its id.
     - Read through its place, so what's taken down is left out.
     - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell space export` writes the folder.

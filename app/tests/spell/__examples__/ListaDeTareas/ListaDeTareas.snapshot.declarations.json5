@@ -146,6 +146,11 @@
       "type": "TareaDelNavegador",
       "superType": "Tarea",
       "gender": "feminine",
+      "savedIn": {
+        "place": "almacén_del_navegador",
+        "placeType": "AlmacénDelNavegador",
+        "collection": "tareas_del_navegador"
+      },
       "defined": "/ListaDeTareas.navegador.api.es.spell:328-458"
     },
     {
@@ -198,12 +203,21 @@
     {
       "type": "AlmacénDelNavegador",
       "superType": "Place",
+      "place": {
+        "name": "almacén_del_navegador",
+        "kind": "database on this device"
+      },
       "defined": "/ListaDeTareas.navegador.api.es.spell:264-326"
     },
     {
       "type": "TareaDelServidor",
       "superType": "Tarea",
       "gender": "feminine",
+      "savedIn": {
+        "place": "archivos_de_tareas",
+        "placeType": "ArchivoDeTareas",
+        "collection": "tareas_del_servidor"
+      },
       "defined": "/ListaDeTareas.servidor.api.es.spell:465-590"
     },
     {
@@ -256,12 +270,25 @@
     {
       "type": "ArchivoDeTareas",
       "superType": "Place",
+      "place": {
+        "name": "archivos_de_tareas",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@spell/examples/ListaDeTareas/__data/tareas",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/ListaDeTareas.servidor.api.es.spell:378-463"
     },
     {
       "type": "TareaDeLaHoja",
       "superType": "Tarea",
       "gender": "feminine",
+      "savedIn": {
+        "place": "hoja_de_tareas",
+        "placeType": "HojaDeTareas",
+        "collection": "tareas_de_la_hoja"
+      },
       "defined": "/ListaDeTareas.csv.api.es.spell:657-774"
     },
     {
@@ -314,12 +341,25 @@
     {
       "type": "HojaDeTareas",
       "superType": "Place",
+      "place": {
+        "name": "hoja_de_tareas",
+        "kind": "sheet",
+        "at": "/api/places/spaces/@spell/examples/ListaDeTareas/__data/tareas.csv",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/ListaDeTareas.csv.api.es.spell:549-655"
     },
     {
       "type": "TareaDelCielo",
       "superType": "Tarea",
       "gender": "feminine",
+      "savedIn": {
+        "place": "cielo_de_tareas",
+        "placeType": "CieloDeTareas",
+        "collection": "tareas_del_cielo"
+      },
       "defined": "/ListaDeTareas.atmosphere.api.es.spell:472-588"
     },
     {
@@ -379,6 +419,17 @@
     {
       "type": "CieloDeTareas",
       "superType": "Place",
+      "place": {
+        "name": "cielo_de_tareas",
+        "kind": "personal atmosphere account",
+        "details": {
+          "collections": {
+            "tareas_del_cielo": {
+              "at": "spaces.spell.examples.listadetareas.tarea"
+            }
+          }
+        }
+      },
       "defined": "/ListaDeTareas.atmosphere.api.es.spell:340-470"
     },
     {

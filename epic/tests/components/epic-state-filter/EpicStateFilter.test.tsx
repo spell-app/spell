@@ -8,7 +8,7 @@ import "spell/epic/components/epic-state-filter"
 /** Its chips, as they read:  `state:count`, `+` while pressed. */
 function chips(host: Element): string[] {
   return Array.from(
-    host.shadowRoot!.querySelectorAll<HTMLButtonElement>("button"),
+    host.shadowRoot!.querySelectorAll<HTMLButtonElement>("button:not(.marked)"),
     (chip) => `${chip.dataset.state}:${chip.textContent}${chip.getAttribute("aria-pressed") === "true" ? "+" : ""}`
   )
 }
@@ -39,7 +39,7 @@ describe("<epic-state-filter>", () => {
     const grey = await ElementFixture.render(`<epic-state-filter counts="old:3 handled:2 open:1"></epic-state-filter>`)
     expect(chips(grey)).toEqual(["open:1+", "old:5+"])
     expect(chip(host, "attention").dataset.color).toBe("red")
-    expect(chip(host, "attention").title).toBe("1 needs attention:  show only these\n⌥-click:  show only these")
+    expect(chip(host, "attention").title).toBe("1 needs attention:  hide these\n⌥-click:  show only these")
     expect(host.shadowRoot!.querySelector('[part~="base"]')!.getAttribute("role")).toBe("group")
     await expectAccessible(host)
   })
@@ -50,17 +50,17 @@ describe("<epic-state-filter>", () => {
       `<epic-state-filter phases counts="old:40 recent:2 scheduled:5 progress:1 updated:3 attention:1" ` +
         `shown="attention updated scheduled progress"></epic-state-filter>`
     )
-    expect(chips(host)).toEqual(["attention:1+", "updated:3+", "scheduled:5+", "recent:2", "old:40"])
-    const looks = ["attention", "updated", "scheduled", "recent", "old"].map(
+    expect(chips(host)).toEqual(["scheduled:5+", "attention:1+", "updated:3+", "recent:2", "old:40"])
+    const looks = ["scheduled", "attention", "updated", "recent", "old"].map(
       (state) =>
         `${chip(host, state).dataset.color}${chip(host, state).dataset.fill ? ` ${chip(host, state).dataset.fill}` : ""}`
     )
-    expect(looks).toEqual(["red", "orange", "blue dotted", "green", "grey"])
+    expect(looks).toEqual(["blue dotted", "red", "orange", "green", "grey"])
     // working counts in the one blue badge, as an item's `progress`
     const badge = host.shadowRoot!.querySelector<HTMLElement>(".marked")!
     expect([badge.textContent, badge.title]).toEqual([
       "1",
-      "1 with Claude:  under way, being worked on, or marked in this pass"
+      "1 with Claude (under way, being worked on, or marked in this pass):  hide these\n⌥-click:  show only these"
     ])
     expect(chip(host, "attention").title).toBe("1 need you:  a choice open:  hide these\n⌥-click:  show only these")
     expect(chip(host, "updated").title).toBe("3 changed since you looked:  hide these\n⌥-click:  show only these")
@@ -77,7 +77,7 @@ describe("<epic-state-filter>", () => {
     ])
     // without `phases`, the same names are an item's:  its own words, no dotted chip
     const items = await ElementFixture.render(`<epic-state-filter counts="attention:1 recent:2"></epic-state-filter>`)
-    expect(chip(items, "attention").title).toBe("1 needs attention:  show only these\n⌥-click:  show only these")
+    expect(chip(items, "attention").title).toBe("1 needs attention:  hide these\n⌥-click:  show only these")
     await expectAccessible(host)
   })
 
@@ -92,6 +92,9 @@ describe("<epic-state-filter>", () => {
     expect(chips(host)).toEqual(["open:2", "recent:1"])
     const empty = await ElementFixture.render(`<epic-state-filter></epic-state-filter>`)
     expect(empty.shadowRoot!.querySelector("button")).toBeNull()
+    // one colour is all there is:  the tooltip doesn't claim to hide it
+    const alone = await ElementFixture.render(`<epic-state-filter counts="open:2"></epic-state-filter>`)
+    expect(chip(alone, "open").title).toBe("2 open, still undecided:  nothing else to show\n⌥-click:  show only these")
   })
 
   test("a click says what was picked and what should show next, by the one rule;  it filters nothing itself", async () => {
@@ -101,7 +104,7 @@ describe("<epic-state-filter>", () => {
     const heard = vi.fn()
     host.addEventListener("epic-state-changed", (event) => heard((event as CustomEvent).detail))
     chip(host, "open").click()
-    expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["open"], how: "click" })
+    expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["attention", "recent"], how: "click" })
     // controlled:  still all pressed until its owner sets `shown`
     expect(chips(host)).toEqual(["attention:1+", "open:2+", "recent:3+"])
     host.setAttribute("shown", "open")
@@ -109,7 +112,9 @@ describe("<epic-state-filter>", () => {
     chip(host, "attention").click()
     expect(heard).toHaveBeenLastCalledWith({ state: "attention", shown: ["attention", "open"], how: "click" })
     chip(host, "open").click()
-    expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["attention", "open", "recent"], how: "click" })
+    // the last one showing:  the next one instead
+    expect(chip(host, "open").title).toBe("2 open, still undecided:  show the next ones instead\n⌥-click:  show only these")
+    expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["recent"], how: "click" })
   })
 
   // epic `epic-engine` I166 (Owen, 2026-10-29:  "if I option-click on one of those badges, turn just that one on")
@@ -133,16 +138,31 @@ describe("<epic-state-filter>", () => {
   })
 
   // epic `epic-engine` P43 (Owen, 2026-10-25:  "a blue badge with dotted outline to the left")
-  test("`marked`:  a solid blue badge first, left of the chips, not a button;  alone when no chip is left;  axe", async () => {
+  test("`marked`:  the blues' chip, first, a toggle:  solid on, outlined off;  alone when no chip is left;  axe", async () => {
     const host = await ElementFixture.render(
-      `<epic-state-filter counts="open:2 recent:1" shown="recent" marked="3"></epic-state-filter>`
+      `<epic-state-filter counts="open:2 recent:1" marked="3"></epic-state-filter>`
     )
-    const badge = host.shadowRoot!.querySelector<HTMLElement>('[part~="marked"]')!
-    expect(badge.localName).toBe("span")
+    const badge = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="marked"]')!
+    expect(badge.localName).toBe("button")
     expect(badge.parentElement!.firstElementChild).toBe(badge)
-    expect([badge.textContent, badge.title]).toEqual(["3", "3 with Claude:  marked in this pass, or being worked on"])
+    expect([badge.textContent, badge.title]).toEqual([
+      "3",
+      "3 with Claude (marked in this pass, or being worked on):  hide these\n⌥-click:  show only these"
+    ])
+    expect(badge.getAttribute("aria-pressed")).toBe("true")
     expect(getComputedStyle(badge).borderTopStyle).toBe("solid")
     expect(getComputedStyle(badge).color).toBe("rgb(255, 255, 255)")
+    const heard = vi.fn()
+    host.addEventListener("epic-state-changed", (event) => heard((event as CustomEvent).detail))
+    badge.click()
+    expect(heard).toHaveBeenLastCalledWith({ state: "progress", shown: ["open", "recent"], how: "click" })
+    altClick(badge)
+    expect(heard).toHaveBeenLastCalledWith({ state: "progress", shown: ["progress"], how: "only" })
+    // the blues off:  outlined, as every chip
+    host.setAttribute("shown", "recent")
+    await ElementFixture.settle()
+    expect(badge.getAttribute("aria-pressed")).toBe("false")
+    expect(getComputedStyle(badge).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     expect(chips(host)).toEqual(["open:2", "recent:1+"])
     await expectAccessible(host)
     // every item marked:  the badge alone;  none marked, no badge

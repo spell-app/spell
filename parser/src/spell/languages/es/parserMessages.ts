@@ -125,6 +125,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
   "site-param-not-on-page":
     'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
+  "page-part-names-a-page": '"{name}" es el nombre de {page}, una página de este proyecto:  ponle otro nombre',
   "site-address-taken": 'La {page} ya está en "{address}":  cada página necesita su propia dirección',
   "site-card-place-not-whole":
     "La fila y la columna de una tarjeta se cuentan desde 1, en números enteros:  {row} y {column} no lo son",
@@ -220,6 +221,14 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "on-line": "en la línea {line}",
   "on-line-of-file": "en la línea {line} de {file}",
   "check-time-not-a-time": '"{time}" no es una hora del día:  dila como 5, 5:30 o 17:00',
+  "next-page-count-first":
+    'Primero cuántos, luego desde dónde:  `su página siguiente se pide con "{second}" y "{first}"`',
+  "next-page-counts-pages":
+    'Eso cuenta páginas, no filas:  `su página siguiente se pide por número con "per_page" y "page"`, y `, contando desde 0` si su primera página es la 0',
+  "next-page-is-a-cursor":
+    'Un cursor viene de su respuesta, así que no se puede calcular:  `su página siguiente está en "next_cursor", devuelta como "cursor"`',
+  "next-page-number-count-first":
+    'Primero cuántos, luego qué página:  `su página siguiente se pide por número con "{second}" y "{first}"`',
   "next-page-header-not-link":
     'La página siguiente se dice en una cabecera "Link", no "{header}":  `su página siguiente está en su cabecera "Link"`, o nombra el campo de su respuesta que la dice',
   "searched-only":

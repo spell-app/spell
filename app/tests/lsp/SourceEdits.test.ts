@@ -34,6 +34,14 @@ describe("SourceEdits", () => {
     )
   })
 
+  test("a template tag's quoted name is its name's:  never read as attributes, a new one goes after it (notebook P6)", () => {
+    const text = `<spell-page "locked notebook" notebook>\n</spell-page>`
+    expect(SourceEdits.tagAt(text, 0)!.attributes.map((each) => each.name)).toEqual(["notebook"])
+    expect(SourceEdits.applied(text, SourceEdits.settingAttribute(text, 0, "locked", true))).toBe(
+      `<spell-page "locked notebook" locked notebook>\n</spell-page>`
+    )
+  })
+
   test("an expression is code:  it throws", () => {
     expect(() => SourceEdits.settingAttribute(TAG, opening, "onClick", "x")).toThrow(/expression/)
   })
@@ -46,12 +54,6 @@ describe("SourceEdits", () => {
       ["color", "{"]
     ])
     expect(text.slice(tag.end)).toBe("y</ui-text>")
-  })
-
-  test("swaps two spans, with what's between them left alone", () => {
-    const text = "one\nmiddle\ntwo"
-    const edits = SourceEdits.swapped(text, { start: 0, end: 3 }, { start: 11, end: 14 })
-    expect(SourceEdits.applied(text, edits)).toBe("two\nmiddle\none")
   })
 
   test("offsets and positions agree", () => {

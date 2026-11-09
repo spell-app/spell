@@ -1,0 +1,39 @@
+<spell-page "content api" notebook>
+	<header level="1">
+		Content
+		<header>Content is the main block of a card, item, feed event, comment, modal, message, list item or step.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-content" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api tag="ui-content" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-content" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-content" only="states"></>
+		</>
+	</>
+</spell-page>

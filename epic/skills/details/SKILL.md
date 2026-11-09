@@ -31,9 +31,9 @@ A DETAILS PAGE:  a small page that explains one decision.
 
 ## Writing for the person
 
-The person may run 5+ epics at once (Owen does), and reads a page cold, coming from another session.
+The person may run 5+ epics at once (the person does), and reads a page cold, coming from another session.
 
-Dense, terse pages make them ask "what do you mean?" (Owen, 2026-10-03), so:
+Dense, terse pages make them ask "what do you mean?" (2026-10-03), so:
 - The "Where we are" box first, every time:
   - which epic or session
   - what that work is for (one line)
@@ -123,7 +123,7 @@ the page is the same for both agents.
      - Written into the page (the template has them):
        - a comment box last in every other section with no section inside it:  `<epic-text-box for="<section id>">`
        - the page's notes, after the last question:  `<epic-text-box type="notes">`
-     - The page NEVER locks:  the person sends partial answers, and sends again whenever they like (Owen, 2026-10-08).
+     - The page NEVER locks:  the person sends partial answers, and sends again whenever they like (2026-10-08).
    - a picture page:  delete the question sections and `<epic-send>`;  nothing to send
 3. In an epic:  format the page once it's written, as the engine's tools do:
    `yarn vp fmt <its ABSOLUTE path>`, from the kit's root
@@ -133,7 +133,7 @@ the page is the same for both agents.
 
 - Asked again (their answer raised more, a round 2 of the same names):  `epic ask round <slug> [--from <spec.json>]`,
   or for a choice page `epic choices round <slug> --rows <rows.json5>` (epic `epic-engine` P37).
-  - Owen (2026-10-24):  "you updated the Event Names document several times, leaving multiple copies viable.
+  - 2026-10-24:  "you updated the Event Names document several times, leaving multiple copies viable.
     Better to replace the one file."
   - It rewrites the ONE page in place:  the new round on top, the round before folded at its bottom
     ("Round 1 · 10/24 · what you sent"), with what they sent.
@@ -180,7 +180,7 @@ Any page you name to the person (a details page, an epic page, any docs page):
 `epic pages link <page> --hash <id> --show`, and paste what it prints.
 - It shows the page in this session's side bar NOW (`--show`), and prints two links:
   - the title opens it in the side bar (again)
-  - `🌐`, after a `•`, opens it in Chrome:  `Title • 🌐` (Owen, 2026-10-11)
+  - `🌐`, after a `•`, opens it in Chrome:  `Title • 🌐` (2026-10-11)
   - Both go through the page server ([showRoutes.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/showRoutes.ts)):
     the Claude panel ignores `vscode://` links, and opens `localhost` ones in a VS Code tab.
 - `--hash`:  ALWAYS the id of what you mean.

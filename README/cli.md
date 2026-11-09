@@ -439,7 +439,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | Command | What it does |
 | --- | --- |
 | `spell compile [projects...]` | compiles each project to JavaScript, `<Project>.spell.js` in its build folder, plus its other targets, its declarations and its words;  a lone `.spell` file prints its JavaScript |
-| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
 | `spell spellx convert [projects...]` | writes each `.spell` file as spellx, the same program in tags, `Card.spell` => `Card.spellml` beside it;  never in the frozen test projects |
@@ -454,7 +454,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`), and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's old spellings (`<spell-notebook>` => `<spell-page notebook>`, `<spell-view>` inside a page => `<view>`, a `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`);  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
@@ -1077,12 +1077,12 @@ spell projects
 <summary>Output</summary>
 
 ```text
-owen@spell        Projects       ...
-@spell/examples   Examples       ... projects
-@spell/guides     Guides         ... projects
-@spell/notebooks  Notebooks      ... projects
-@spell/library    Libraries      1 project
-@spell/test       Test fixtures  ... projects
+owen@spell       Projects       ...
+@spell/examples  Examples       ... projects
+@spell/guides    Guides         ... projects
+@spell/library   Libraries      1 project
+@spell/editor    The editor     ... projects
+@spell/test      Test fixtures  ... projects
 ```
 
 </details>

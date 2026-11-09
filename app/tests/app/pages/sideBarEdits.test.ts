@@ -29,8 +29,7 @@ async function contextWithNoSaving(context: BrowserContext): Promise<void> {
       saved.set(decodeURI(pathname), request.postData() ?? "")
       return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
     }
-    // a reload reads what was "saved", wherever it reads its source:  by its group, project and name, as
-    // `@spell/notebooks/Counter` and `@spell/examples/Counter` both hold a `Counter.spellml`
+    // a reload reads what was "saved", wherever it reads its source:  by its group, project and name
     const tail = decodeURI(pathname).split("/").slice(-3).join("/")
     const key = [...saved.keys()].find((each) => each.endsWith(`/${tail}`))
     return key ? route.fulfill({ contentType: "text/plain", body: saved.get(key)! }) : route.continue()
@@ -318,11 +317,10 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
 
   test("a notebook's lock is a step of the same history", { timeout: 90_000 }, async () => {
     const page = await context.newPage()
-    await page.goto(`${EDITOR}edit/@spell/notebooks/Counter`, { timeout: 60_000 })
+    await page.goto(`${EDITOR}edit/@spell/guides/SpellUI/Divider/Usage.spellml`, { timeout: 60_000 })
     await page.waitForFunction(() => "notebook" in window, undefined, { timeout: 40_000 })
     await page.waitForTimeout(2000)
-    const text = () =>
-      page.evaluate(() => (window as unknown as { notebook: { now: { text: string } } }).notebook.now.text)
+    const text = () => page.evaluate(() => (window as unknown as { notebook: { text(): string } }).notebook.text())
     const before = await text()
     await page.evaluate(() =>
       (window as unknown as { notebook: { setLocked(locked: boolean): void } }).notebook.setLocked(true)

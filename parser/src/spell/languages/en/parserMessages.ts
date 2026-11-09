@@ -180,6 +180,8 @@ export const PARSER_MESSAGES = {
   "site-param-not-on-page":
     'The {page} has nothing called {param} for ":{param}" to fill:  say what it is on the page, e.g. - it has a {param}',
   /** Two pages of a site at one address. */
+  /** A page's own view or thing, whose name is another page of the project (epic `notebook` P10). */
+  "page-part-names-a-page": '"{name}" is the name of the {page}, a page of this project:  call it something else',
   "site-address-taken": 'The {page} is already at "{address}":  each page needs an address of its own',
   /** A place in a section that's no row and column:  `in row 0 column 2`. */
   "site-card-place-not-whole": "A card's row and column count from 1, in whole numbers:  {row} and {column} aren't",
@@ -336,6 +338,17 @@ export const PARSER_MESSAGES = {
   /** A dot in a field's name, under a place. */
   "check-time-not-a-time": '"{time}" isn\'t a time of day:  say one as 5am, 5:30pm or 17:00',
   /** `its next page is in its "{header}" header`, a header other than `Link`. */
+  /** `its next page is asked for with "offset" and "limit"`:  the wrong way round.  `{first}` and `{second}` as written. */
+  "next-page-count-first":
+    'How many comes first, then where from:  `its next page is asked for with "{second}" and "{first}"`',
+  /** A page's number or a cursor where a place in the list goes. */
+  "next-page-counts-pages":
+    'Those count pages, not rows:  `its next page is asked for by number with "per_page" and "page"`, and `, counting from 0` if its first page is 0',
+  "next-page-is-a-cursor":
+    'A cursor comes from its answer, so it can\'t be worked out:  `its next page is its "next_cursor", sent back as "cursor"`',
+  /** `its next page is asked for by number with "page" and "per_page"`:  the wrong way round. */
+  "next-page-number-count-first":
+    'How many comes first, then which page:  `its next page is asked for by number with "{second}" and "{first}"`',
   "next-page-header-not-link":
     'A next page is said in a "Link" header, not "{header}":  `its next page is in its "Link" header`, or name the field of its answer that says it',
   "searched-only":

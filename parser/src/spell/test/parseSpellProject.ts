@@ -176,9 +176,9 @@ function parserFor(projectScope: P.Scope, path: string): SP.SpellParser {
 export function summarizeIncremental(project: P.IncrementalProject): SpellProjectSummary {
   return project.files.map(({ path, parse }) => ({
     path,
-    compiled: (P.JSWriter.instance.writeMatch(parse.match) as string | undefined) ?? "",
-    errors: describeParseErrors(parse.match),
-    warnings: describeWarnings(parse.match)
+    compiled: (P.JSWriter.instance.writeMatch(parse!.match) as string | undefined) ?? "",
+    errors: describeParseErrors(parse!.match),
+    warnings: describeWarnings(parse!.match)
   }))
 }
 

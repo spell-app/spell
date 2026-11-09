@@ -1,0 +1,30 @@
+<spell-page "diagram theming" notebook>
+	<header level="1">
+		Diagram
+		<header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tokens">Tokens</>
+			<item link="#themes">Themes</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-diagram" playground></>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.  The spec's own colours (headers, groups) stay;  the page, box bodies, text and lines follow the theme and dark mode.
+		</>
+	</>
+</spell-page>

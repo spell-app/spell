@@ -133,12 +133,17 @@ JSX.addRule(ExampleBlock, {
       tests: [
         [
           ['<example "one counter">', "\t<ui-button>Count</ui-button>", "</example>"],
-          'h("spell-example", { name: "one counter" }, h("ui-button", "Count"))',
+          'core.drawPart(this, () => h("spell-example", { name: "one counter" }, h("ui-button", "Count")))',
           ['<spell-example name="one counter">', "  <ui-button>Count</ui-button>", "</spell-example>"]
         ],
         [
           ['<example name="two">', "\t<ui-text>A</ui-text>", "\t<ui-text>B</ui-text>", "</example>"],
-          ['h("spell-example", { name: "two" },', '  h("ui-text", "A"),', '  h("ui-text", "B")', ")"],
+          [
+            'core.drawPart(this, () => h("spell-example", { name: "two" },',
+            '  h("ui-text", "A"),',
+            '  h("ui-text", "B")',
+            "))"
+          ],
           ['<spell-example name="two">', "  <ui-text>A</ui-text>", "  <ui-text>B</ui-text>", "</spell-example>"]
         ]
       ]

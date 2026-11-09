@@ -211,6 +211,43 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(spell.errors).toEqual([])
     expect([back.errors, back.code]).toEqual([[], spell.code])
   })
+
+  // epic `notebook` P6:  the way back from the Spell view of an example on a page
+  describe("writeMarkup():  code spell markup as spellx, the way back from `CodeSpellWriter.writeMarkup()`", () => {
+    const words: Record<string, string> = { "ui-button": "button", "counter-counter": "counter", "ui-text": "text" }
+    const back = (markup: string) =>
+      SX.SpellxWriter.writeMarkup(markup, { path: "/Counter.spellml", componentWord: (tag) => words[tag] })
+
+    test("each tag a bare name gives, that name again;  holes, attributes and other tags as written", () => {
+      expect(back('<counter-counter/>\n<ui-button color="primary" onClick={count up}>Go {its count}</ui-button>')).toBe(
+        '<counter/>\n<button color="primary" onClick={count up}>Go {its count}</button>'
+      )
+      expect(back("<ui-label>a < b</ui-label>")).toBe("<ui-label>a < b</ui-label>")
+    })
+
+    test("nested, on several lines, at their own indent", () => {
+      expect(back("<ui-text>\n\t<ui-button>Go</ui-button>\n</ui-text>")).toBe("<text>\n\t<button>Go</button>\n</text>")
+    })
+
+    test("an <html> block's markup and a <markdown> block's text as written", () => {
+      expect(back("<ui-button>Go</ui-button>\n<html><ui-button>Raw</ui-button></html>")).toBe(
+        "<button>Go</button>\n<html><ui-button>Raw</ui-button></html>"
+      )
+      expect(back("<markdown>\n\t<ui-button> in a sentence\n</markdown>")).toBe(
+        "<markdown>\n\t<ui-button> in a sentence\n</markdown>"
+      )
+    })
+
+    test("there and back:  an example's spellx, its code spell, and its spellx again", () => {
+      const spellx = "<text>\n\t<button>Go</>\n</text>"
+      const spell = SX.CodeSpellWriter.writeMarkup(spellx, { path: "/Counter.spellml" })
+      expect(spell).toBe("<ui-text>\n\t<ui-button>Go</ui-button>\n</ui-text>")
+      // by default a pack's own, by the name after its prefix
+      expect(SX.SpellxWriter.writeMarkup(spell, { path: "/Counter.spellml" })).toBe(
+        "<text>\n\t<button>Go</button>\n</text>"
+      )
+    })
+  })
 })
 
 /** `text` (a `.spell` file at `path`) written as spellx. */

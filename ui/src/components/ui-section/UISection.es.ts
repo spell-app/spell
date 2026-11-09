@@ -10,6 +10,7 @@ export const sectionEs = {
   lang: "es",
   tag: "ui-section",
   name: "seccion",
+  snippet: '<es-seccion etiqueta="Una sección">\n\t<es-texto>Lo que tiene</es-texto>\n</es-seccion>',
   aka: ["sección", "panel", "plegable", "desplegable", "conjunto de campos"],
   texts: {
     loading: "Cargando…",

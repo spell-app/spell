@@ -5,6 +5,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { getKnownType } from "spell/parser/spell/rules/types"
 // Through the folder:  read only when called, once the folder has loaded
 import { DefinePropertyHas } from "spell/parser/spell/rules/classes"
+import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { PossessiveProperty } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
 import { BlockLine } from "spell/parser/spell/rules/BlockLine"
@@ -49,7 +50,7 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  */
 export class PropertyValueGetter extends SpellStatement<
   "property|type|specifier?|body?",
-  { valueKind?: boolean; inheritedType?: string; members?: P.Match }
+  { valueKind?: boolean; inheritedType?: string; inheritedOutput?: string; members?: P.Match }
 > {
   @proto static alias = "statement"
   @proto static declares: P.DeclaresSpec = { kind: "property", name: "property", of: "type" }
@@ -78,6 +79,7 @@ export class PropertyValueGetter extends SpellStatement<
     // `a draft` as a type named `Draft`, which there's none of (epic `data` T135)
     if (this.getBody(match)?.datatype === DRAFT_DATATYPE) match.priority = Priority.aboveDeclaration
     match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
+    PropertyValueGetter.noteInheritedMember(match, this.getBody(match))
     this.warnIfAlwaysTheSame(match)
     this.warnIfReadsAfterWait(match)
     // a possessive misspelled, `a card' value is ...` (epic `language` T24)
@@ -110,6 +112,16 @@ export class PropertyValueGetter extends SpellStatement<
       }
     })
     return found
+  }
+
+  /**
+   * SIDE EFFECT:  an inherited member given a value in the language's own words compiles by the member's name,
+   * in the member's values (epic `notebook` I1), e.g. `- su candado es "bloqueado"` => `get lock() { return "locked" }`.
+   */
+  private static noteInheritedMember(match: P.MatchFor<PropertyValueGetter>, body: P.Match | undefined): void {
+    const member = getKnownType(match.groups.type).inheritedMember(`${match.groups.property.value}`)
+    if (member?.output) match.data.inheritedOutput = member.output
+    SpellConstant.sayForMember(member, body)
   }
 
   /**
@@ -167,7 +179,13 @@ export class PropertyValueGetter extends SpellStatement<
     const typeScope = getKnownType(type)
     // a value kind's is its static method, which `readAs` reads;  anything else's, a getter
     const readAs = match.data.valueKind ? `${typeScope.name}.${property.value}({it})` : undefined
-    typeScope.declareProperty(`${property.value}`, match, { asWritten: property.raw, readAs })
+    const member = typeScope.inheritedMember(`${property.value}`)
+    typeScope.declareProperty(`${property.value}`, match, {
+      asWritten: property.raw,
+      readAs,
+      output: member?.output,
+      valueOutputs: member?.valueOutputs
+    })
     // its own list of values, `one of red, black`:  as a stored property's
     const values = specifier?.AST
     if (values instanceof P.ASTEnumeration) {
@@ -293,7 +311,9 @@ export class PropertyValueGetter extends SpellStatement<
     }
     return new P.ASTPropertyDefinition(match, {
       type: P.matchAST<P.ASTTypeExpression>(type),
-      property: P.matchAST<P.ASTPropertyLiteral>(property),
+      property: match.data.inheritedOutput
+        ? new P.ASTPropertyLiteral(property, match.data.inheritedOutput)
+        : P.matchAST<P.ASTPropertyLiteral>(property),
       get: new P.ASTMethodDefinition(match, {
         body: P.matchAST<MethodBody>(this.getBody(match)),
         datatype: match.data.inheritedType

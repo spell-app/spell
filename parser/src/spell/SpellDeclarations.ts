@@ -178,7 +178,8 @@ export class SpellDeclarations {
         // a property's kind, e.g. `CardSuit`:  loading makes it again from the property's own list
         if (!item.stub && !item.valueKind?.property) {
           const { name: type, superType, aka, gender, itemType, units } = item
-          merge({ type, superType, aka, gender, itemType, units })
+          const place = SpellDeclarations.placeDeclaration(item)
+          merge({ type, superType, aka, gender, itemType, units, place, savedIn: savedDeclaration(item) })
         }
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
@@ -326,7 +327,8 @@ export class SpellDeclarations {
   /**
    * Load one project's `declarations` into import layer `scope`:
    * just what `import` picks, replaying each statement's in order.
-   * - Each picked name brings its type dependencies (`superType`, property datatypes) and what it owns:
+   * - Each picked name brings its type dependencies (`superType`, property datatypes, the place it's saved in)
+   *   and what it owns:
    *   its properties, constants and rules, e.g. `Card` brings `card suits`.
    *   - A property of a kind, e.g. a foundation's `its "suit" is a card suit`, brings the type listing it, `Card`.
    * - A type picked as `Card:Playingcard` loads as `Playingcard`, everywhere a loaded record names it:
@@ -360,6 +362,7 @@ export class SpellDeclarations {
     SpellDeclarations.loadSubclasses(scope, from, declarations, originals, module)
     // names as the importer knows them
     const names = new Set([...originals].map((name) => renames.get(name) ?? name))
+    const saved: SP.SpellDeclaration[] = []
     for (const original of declarations.statements) {
       const declaration = SpellDeclarations.renamed(original, renames)
       const declaredAt = SpellDeclarations.declaredAt(projectId, declaration.defined)
@@ -371,12 +374,13 @@ export class SpellDeclarations {
         const valueKind = values && { values, listOn: of!, listName: classVariable! }
         const props = { name: type, superType, aka, gender, itemType, valueKind, runtimeName, declaredAt }
         SpellDeclarations.loadType(scope, from, names, props)
+        const loaded = names.has(type) ? scope.types.get(type, "LOCAL_ONLY") : undefined
         // a dimension's units, `data size is a dimension:` (epic `language` T34)
-        const loaded = declaration.units && names.has(type) ? scope.types.get(type, "LOCAL_ONLY") : undefined
-        if (loaded) {
+        if (loaded && declaration.units) {
           loaded.units = declaration.units
-          declaration.units!.forEach(SP.noteUnitNames)
+          declaration.units.forEach(SP.noteUnitNames)
         }
+        if (loaded && declaration.place) SpellDeclarations.loadPlace(loaded, declaration.place)
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
       SpellDeclarations.loadConstants(scope, from, names, declaration, declaredAt)
@@ -388,7 +392,30 @@ export class SpellDeclarations {
       SpellDeclarations.loadMethod(scope, names, declaration, declaredAt)
       SpellDeclarations.loadSlots(scope, names, declaration)
       if (declaration.uiDefaults) SpellDeclarations.loadUIDefaults(scope, projectId, declaration)
+      if (declaration.savedIn) saved.push(declaration)
     }
+    // after every statement:  a type's line may come before the line declaring its place
+    for (const declaration of saved) SpellDeclarations.loadSaved(scope, names, declaration)
+  }
+
+  /** SIDE EFFECT:  `type` is the place `place` says, for what the compiler asks of it (epic `data` I19). */
+  private static loadPlace(type: P.TypeScope, { name, kind, at, details }: SP.DeclaredPlace) {
+    Object.assign(type, definedOnly({ placeName: name, placeKind: kind, placeAt: at, importedPlaceDetails: details }))
+  }
+
+  /**
+   * SIDE EFFECT:  `declaration`'s type, if picked, is saved where it says (epic `data` I19).
+   * - Its place's type, when it's loaded;  it's picked along with the type.
+   * - A place the project itself imported from a third one isn't in its declarations:
+   *   the type still counts as saved, with nothing known of the place, as with a library's kind.
+   */
+  private static loadSaved(scope: P.RootScope, names: Set<string>, { type: name, savedIn }: SP.SpellDeclaration) {
+    const type = name && names.has(name) ? scope.types.get(name, "LOCAL_ONLY") : undefined
+    if (!type || !savedIn) return
+    const { place, placeType: placeTypeName, collection } = savedIn
+    const placeType = scope.types.get(placeTypeName, "LOCAL_ONLY") ?? new P.TypeScope(placeTypeName)
+    placeType.placeName ??= place
+    type.saved = { place, placeType, collection }
   }
 
   /**
@@ -550,7 +577,7 @@ export class SpellDeclarations {
       const kind = property && SpellDeclarations.loadPropertyKind(scope, typeScope, declaration, declaredAt)
       const variable = definedOnly({
         name: classVariable,
-        datatype: kind && P.listOfType(kind),
+        datatype: kind && P.listOf(kind),
         enumeration: spellValues(enumeration),
         initializer: enumerationInitializer(enumeration),
         declaredAt
@@ -746,8 +773,9 @@ export class SpellDeclarations {
     // the kind of a property's values, e.g. `CardSuit`, by the type listing them, `Card`:  a type, as far as needs go
     const kindsListedBy = new Map<string, string>()
     for (const declaration of statements) {
-      const { type, superType, property, of, datatype, classVariable, asWritten, defined } = declaration
+      const { type, superType, property, of, datatype, classVariable, asWritten, defined, savedIn } = declaration
       if (type) needs.set(type, [...(needs.get(type) ?? []), superType ?? ""])
+      if (type && savedIn) needs.set(type, [...(needs.get(type) ?? []), savedIn.placeType])
       if (property && of && datatype) needs.set(of, [...(needs.get(of) ?? []), datatype])
       if (property && of && classVariable) {
         kindsListedBy.set(SP.Language.forFile(defined).propertyKindType(of, asWritten ?? property), of)
@@ -779,6 +807,10 @@ export class SpellDeclarations {
       const name = declaration[key]
       const to = name === undefined ? undefined : renames.get(P.typeCase(name))
       if (to) renamed[key] = to
+    }
+    if (declaration.savedIn) {
+      const to = renames.get(P.typeCase(declaration.savedIn.placeType))
+      if (to) renamed.savedIn = { ...declaration.savedIn, placeType: to }
     }
     if (declaration.params) {
       renamed.params = declaration.params.map((param) => {
@@ -835,6 +867,19 @@ export class SpellDeclarations {
       measure,
       initializer: ownInitializer
     }
+  }
+
+  /**
+   * What `type` is as a place, for a project importing it (epic `data` I19):  `undefined` for any other type.
+   * - What its lines say comes from its rule:  see `CreatePlace.importedDetailsOf()`.
+   */
+  private static placeDeclaration(type: P.TypeScope): SP.DeclaredPlace | undefined {
+    const { placeName, placeKind, placeAt, declaredBy } = type
+    if (!placeName) return undefined
+    const rule = declaredBy?.rule.constructor as
+      | { importedDetailsOf?(place: P.TypeScope): P.ImportedPlaceDetails | undefined }
+      | undefined
+    return definedOnly({ name: placeName, kind: placeKind, at: placeAt, details: rule?.importedDetailsOf?.(type) })
   }
 
   /**
@@ -988,6 +1033,8 @@ const PROP_ORDER = [
   "getter",
   "itemType",
   "units",
+  "place",
+  "savedIn",
   "measure",
   "exclusive",
   "rules",
@@ -1000,6 +1047,11 @@ const PROP_ORDER = [
   "constantOutputs",
   "enumeration"
 ]
+
+/** Where `type` itself is saved, for its declaration:  `undefined` for a type kept in memory, or one inheriting it. */
+function savedDeclaration({ saved }: P.TypeScope): SP.DeclaredSaved | undefined {
+  return saved && { place: saved.place, placeType: saved.placeType.name, collection: saved.collection }
+}
 
 /** Is `item` a `P.ScopeRule`, the record `scope.addRule()` notes? */
 function isScopeRule(item: unknown): item is P.ScopeRule {

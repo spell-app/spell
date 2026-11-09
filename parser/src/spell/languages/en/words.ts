@@ -121,7 +121,7 @@ export const englishWords: SP.LanguageWords = {
   ongoingEventName: /ing$/,
   // the app's own actions, as a menu names them (`define_menu`, epic `elemental-spell` P10)
   appActions: { undo: "undo", redo: "redo" },
-  // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
+  // an example on a page, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
   defaultsTag: "ui-defaults",
@@ -158,8 +158,9 @@ export const englishWords: SP.LanguageWords = {
       app: "app",
       "page-template": "page template",
       "app-template": "app template",
-      // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-      notebook: "notebook",
+      // `<spell-page notebook>` (epic `notebook` P1):
+      // a page that draws its body, its prose, examples and its own templates
+      notebook: { kind: "page", flag: "notebook" },
       // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
       site: "site",
       // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
@@ -237,6 +238,8 @@ export const englishWords: SP.LanguageWords = {
       action: "action",
       "menu-bar": "menu-bar",
       locked: "locked",
+      // a page that draws its body, and the editor shows in place, editable (epic `notebook` P1)
+      notebook: "notebook",
       // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
       animated: "animated",
       draggable: "draggable",
@@ -249,6 +252,7 @@ export const englishWords: SP.LanguageWords = {
       cloud: "cloud",
       address: "address",
       state: "state",
+      tab: "tab",
       picture: "picture",
       row: "row",
       column: "column",
@@ -267,7 +271,6 @@ export const englishWords: SP.LanguageWords = {
         app: "app",
         "page template": "page",
         "app template": "app",
-        notebook: "notebook",
         site: "site"
       },
       property: {
@@ -305,12 +308,17 @@ export const englishWords: SP.LanguageWords = {
       menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
-      notebookContent: "to draw its content :",
-      notebookLocked: "its lock is locked",
+      pageLocked: 'its lock is "locked"',
+      pageSection: {
+        tag: "section",
+        label: "label",
+        defaults: { sticky: "stack", collapsible: true, dividing: true, level: "2" }
+      },
       siteAt: "{words} is {a super} {super} at {quoted at} :",
       siteCloud: "{words} is {a super} {super} in the cloud :",
       sitePage: "it has {a words} {words} at {quoted address}",
       sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
+      sitePageTab: ", tab {quoted tab}",
       sitePageState: ", {state}",
       sitePagePicture: ", pictured in {quoted picture}",
       siteCardPlace: ", in row {row} column {column}",
@@ -322,7 +330,6 @@ export const englishWords: SP.LanguageWords = {
         selectable: "it is selectable",
         clickable: "it is clickable"
       },
-      start: "start {words}",
       handlers: {
         on: "on {phrase} :",
         when: "when {phrase} :",

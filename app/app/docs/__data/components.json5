@@ -291,7 +291,7 @@
         {
           "name": "file",
           "kind": "string",
-          "description": "Which file to show first, e.g. `Card.spell`;  default, its first spell file.  Tabs show the others."
+          "description": "Which file to show first, by its path in the project (`Button/Usage.spellml`) or its bare name (`Card.spell`);  default, its first spell file.  Tabs show the others."
         },
         {
           "name": "app",
@@ -1255,6 +1255,11 @@
           "description": "Padding around the program's drawing."
         },
         {
+          "name": "id",
+          "type": "string",
+          "description": "Its own `id`:  the element that scrolls the program's drawing, when `scrolling`."
+        },
+        {
           "name": "appRef",
           "type": "(element: HTMLDivElement) => void",
           "description": "Hand over where the program draws, once drawn."
@@ -1340,6 +1345,11 @@
           "name": "padded",
           "type": "boolean",
           "description": "Padding around the program's drawing.  Default:  `false`:  an app runs to its pane's edges, as it would fill a window of its own (Owen, 2026-11-06:  \"Shouldn't be a border on an app by default\")"
+        },
+        {
+          "name": "containerId",
+          "type": "string",
+          "description": "Its container's `id`, the element that scrolls the program's drawing:  e.g. for \"On this page\" to follow it."
         }
       ],
       "usedIn": [
@@ -2256,7 +2266,7 @@
       "usedIn": [
         {
           "name": "CellEditor",
-          "file": "src/app/solid/notebook/NotebookCell.tsx"
+          "file": "src/app/solid/notebook/ExampleCode.tsx"
         },
         {
           "name": "CodeOutputPane",
@@ -2369,7 +2379,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`; or, with `target`, the whole project's code for that target, written after each compile (`project.codeFor()`); or, with `target=\"spell\"`, the code spell `editor.file` means:  a `.spellml` file's, written from its tags' twins; or, with `target=\"spellx\"`, `editor.file` as spellx:  a `.spell` file's, written by `SX.SpellxWriter`.",
+      "description": "Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.",
       "noun": "OutputEditor",
       "attributes": [],
       "slots": [],

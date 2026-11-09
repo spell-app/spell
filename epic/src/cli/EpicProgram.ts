@@ -332,7 +332,7 @@ export class EpicProgram {
 
     this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, T todo, M manual test, D decision)")
       .usage(
-        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
+        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm] [--requested]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
       )
       .addHelpText("after", ADD_HELP)
     this.page(
@@ -1223,7 +1223,7 @@ A phase (seo#P3):
   --title "New name" [--html]                             rename it:  links that say the old name follow
 An item (seo#J3):
   --title "New title" [--html]                            retitle it
-  --calm  /  --loud                                       not urgent (yellow)  /  urgent (red)
+  --calm  /  --loud                                       not urgent  /  urgent (red)
   --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
                                                           on its line, a Noted card linking it, left open)  /  not;
                                                           closing it takes the mark off too
@@ -1273,7 +1273,7 @@ Prints the new item's id.  The letter after # is its kind:
   J judgement   Q question   I issue   T todo   M manual test (checked by hand)   D decision (a question born answered)
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
---calm (last):  a judgement or issue that wouldn't surprise you, yellow rather than red.
+--calm (last):  a judgement call (grey) or issue (yellow) that wouldn't surprise you, rather than red.
 A manual test (M), answered by you on the epic page, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> a page to open;

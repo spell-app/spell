@@ -1,0 +1,39 @@
+<spell-page "detail api" notebook>
+	<header level="1">
+		Detail
+		<header>A detail is a label's dimmer second value, such as a count.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-detail" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api tag="ui-detail" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-detail" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-detail" only="states"></>
+		</>
+	</>
+</spell-page>

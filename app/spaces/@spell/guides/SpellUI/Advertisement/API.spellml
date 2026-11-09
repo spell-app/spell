@@ -1,0 +1,46 @@
+<spell-page "advertisement api" notebook>
+	<header level="1">
+		Advertisement
+		<header>An ad displays third-party promotional content.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+			<item link="#texts">Texts</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-ad" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-ad" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-ad" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-ad" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-ad" only="texts"></>
+		</>
+	</>
+</spell-page>

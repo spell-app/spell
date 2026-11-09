@@ -1,7 +1,7 @@
 /*
  * `<epic-option-form>` (`EpicOptionForm.tsx`, epic `epic-engine` P50):  the form for one option, a new one or one
  * edited in place.
- * - Owen's own words:  his ivory, as `<epic-new-item>`'s form (`EpicNewItem.css`, whose private tokens it shares by
+ * - a person's own words:  their violet, as `<epic-new-item>`'s form (`EpicNewItem.css`, whose private tokens it shares by
  *   value)
  * - Public tokens (`--epic-option-form-*`) are never declared here:  read through private aliases.
  */
@@ -16,8 +16,8 @@
     --_epic-form-rule: var(--epic-rule, var(--ui-border-color, GrayText));
     --_epic-form-green: var(--ui-green, #00853a);
     --_epic-form-green-on: var(--ui-green-on, #fff);
-    --_epic-form-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
-    --_epic-form-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    --_epic-form-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-form-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-form-focus: var(--ui-focus-color, Highlight);
     display: block;
   }
@@ -33,13 +33,13 @@
     box-sizing: border-box;
     width: 100%;
     padding: 8px;
-    border: 1px solid color-mix(in oklab, var(--_epic-form-ivory-ink) 30%, transparent);
+    border: 1px solid color-mix(in oklab, var(--_epic-form-person-ink) 30%, transparent);
     border-radius: 10px;
-    background: var(--_epic-form-ivory);
+    background: var(--_epic-form-person);
     font-size: 14px;
   }
   .heading {
-    color: var(--_epic-form-ivory-ink);
+    color: var(--_epic-form-person-ink);
     font-weight: 600;
     font-size: 0.9em;
   }

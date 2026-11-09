@@ -199,7 +199,7 @@ export function AppMark(): JSX.Element {
  * - The hat alone, in the theme's primary colour:  the favicon's hat without its dark square
  *   (`/static/favicon/hat.svg`, drawn as a mask, `EditorTheme.css`).
  * - On a phone, the hat alone (`.AppName` read, not shown:  `chrome.css`).
- * - A notebook's:  "Spell Notebooks" (Owen, 2026-10-27).
+ * - The Spell UI site's:  "Spell Notebooks" (Owen, 2026-10-27).
  * - SIDE EFFECT:  names the browser's tab for the project shown:  `Button • Spell Notebook`, `Solitaire • Spell`.
  ****************/
 export function AppMarkLabel(): JSX.Element {
@@ -215,13 +215,13 @@ export function AppMarkLabel(): JSX.Element {
 /**
  * Name the browser's tab for the project shown, while the calling component is up:
  * `Button • Spell Notebook`, `Solitaire • Spell`;  plain "Spell" with none.
- * - Returns what it read:  the project's title, and whether it's a notebook.
+ * - Returns what it read:  the project's title, and whether it's the Spell UI site, Spell's notebooks.
  * - Call in a component body:  `<AppMarkLabel>`'s, the editor's project menu's (`<ProjectBarMenu>`).
  */
 export function followTabTitle(): () => { title: string | undefined; isNotebook: boolean } {
   const shown = tracked(() => ({
     title: editor.project?.title,
-    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
+    isNotebook: editor.project?.path === SPACES.SPELL_UI_SITE_PROJECT
   }))
   createEffect(shown, ({ title, isNotebook }) => {
     const key = isNotebook ? "notebookTabTitle" : "tabTitle"

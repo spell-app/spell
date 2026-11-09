@@ -11,6 +11,7 @@ import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/edi
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Action } from "./Actions"
+import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
@@ -20,12 +21,19 @@ import { chooseRow, treeChoosesRows } from "./treeRows"
 import "./Palette.css"
 
 /**
- * What can be added to the app, and whether it's kept open:  the top bar's popup, a menu in columns by topic,
- * or kept open, a strip of icons across the top of the panes.
+ * What can be added to the app, and whether it's kept open.
+ * - Closed, it's the top bar's popup:  a menu in columns by topic.
+ * - Kept open, it's a strip of icons across the top of the panes.
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
  *   every vocabulary, which the page never needs otherwise.
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
  * - First, This app:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
+ *   - On a page that draws its body, a notebook among them, it's This page, with a row of its own first:
+ *     a new view, kept in the page (`addNewView()`, epic `notebook` P5).
+ *   - What else a page adds (an example, a section, text) are the components' own rows.
+ * - In a page that draws its body, Spell UI's tags are written by their bare names, as a notebook writes them:
+ *   `<example>`, `<section>`.
+ *   `<example>` is then the page's own example, its code editable in place.
  */
 export class Palette {
   /** Is it kept open as a strip (reactive)? */
@@ -89,11 +97,34 @@ export class Palette {
     PartEdits.add([snippet], appTexts.text("partStepAdd", { part: view.name }), place)
   }
 
-  /** Add `definition` beside what's selected, else at the end of the drawing. */
+  /** Is the open file a page that draws its body, a notebook (reactive)?  Its palette is This page's. */
+  static get isPageShown(): boolean {
+    void editor.edits
+    const file = editor.file
+    return !!file && NotebookPageCells.holdsDrawnPage(file)
+  }
+
+  /** Add a new view of the open page's own, last in its body:  `<spell-view "new view">`, drawn later by its name. */
+  static addNewView(): void {
+    const file = editor.file
+    const opening = file && NotebookPageCells.drawnPageIn(file.contents ?? "", file.path)
+    if (!file || opening === undefined) return
+    const title = appTexts.text("partStepAdd", { part: appTexts.text("paletteNewView") })
+    PartEdits.add([NEW_VIEWS[languageOf(file)] ?? NEW_VIEWS.en!], title, { file, opening, where: "inside" })
+  }
+
+  /**
+   * Add `definition` beside what's selected, else at the end of the drawing.
+   * - Never one example inside another:  an example selected, a new one goes after it (epic `notebook` P5).
+   */
   static add(definition: ComponentDefinition): void {
     const place = PartEdits.placeForNew()
     Inspector.readyWordsNext()
-    PartEdits.add([snippetFor(definition, place?.file)], stepTitle(definition), place)
+    const snippet = snippetFor(definition, place?.file)
+    const isExampleIn = (code: string) => EXAMPLE_START.test(code)
+    const into = place?.where === "inside" && place.file.contents?.slice(place.opening)
+    const at = into && isExampleIn(into) && isExampleIn(snippet) ? { ...place, where: "after" as const } : place
+    PartEdits.add([snippet], stepTitle(definition), at)
   }
 }
 
@@ -106,13 +137,43 @@ let loading: Promise<void> | undefined
 /** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
 
-/** What `definition` adds to `file`, in its language. */
+/**
+ * What `definition` adds to `file`, in its language.
+ * - In a page that draws its body:  Spell UI's tags by their bare names, as a notebook writes them (`bareNames()`).
+ */
 function snippetFor(definition: ComponentDefinition, file: SP.AnySpellFile | undefined): string {
-  return (
+  const snippet =
     definitions?.snippetIn(definition, languageOf(file)) ??
     definition.snippet ??
     `<${definition.tag}></${definition.tag}>`
+  return file && NotebookPageCells.holdsDrawnPage(file) ? bareNames(snippet, languageOf(file)) : snippet
+}
+
+/**
+ * `code` with each Spell UI tag written by its bare name in `language`, as a notebook writes them:
+ * `<ui-button>` => `<button>`, `<es-boton>` => `<boton>`.
+ * - `<ui-example>` is then `<example>`:  the page's own example, drawn with its code editable in place.
+ * - A tag whose bare name the language doesn't know is left as it is.
+ */
+function bareNames(code: string, language: string): string {
+  return code.replace(TAG_WITH_PREFIX, (tag, slash: string, word: string) =>
+    SP.ComponentPacks.tagFor(word, language) ? `<${slash}${word}` : tag
   )
+}
+
+/** What a page is built of, its examples and sections:  offered under This page, as well as under their topics. */
+const PAGE_PART_TAGS = ["ui-example", "ui-section"]
+
+/** An example's tag, as a page writes it:  `<example`, `<ejemplo` (`bareNames()`). */
+const EXAMPLE_START = /^<(example|ejemplo)\b/
+
+/** A tag's start, with its prefix:  `<ui-button`, `</es-boton`. */
+const TAG_WITH_PREFIX = /<(\/?)[a-z]+-([a-z][\w-]*)/g
+
+/** A new view of a page's own, in each language a page is written in:  `Palette.addNewView()`. */
+const NEW_VIEWS: Record<string, string> = {
+  en: '<spell-view "new view">\n\t<draw><text>A new view</text></draw>\n</spell-view>',
+  es: '<encanto-vista "nueva vista">\n\t<dibujar><texto>Una vista nueva</texto></dibujar>\n</encanto-vista>'
 }
 
 /** The preference that remembers whether it's kept open. */
@@ -263,6 +324,15 @@ export function PaletteStrip(): JSX.Element {
   return (
     <div class="PaletteStrip">
       <ui-toolbar class="PaletteStripItems" aria-label={appTexts.text("addPart")}>
+        <Show when={Palette.isPageShown}>
+          <ui-item
+            title={appTexts.text("paletteNewViewTip")}
+            aria-label={appTexts.text("paletteNewView")}
+            onClick={() => Palette.addNewView()}
+          >
+            <ui-icon name={NEW_VIEW_ICON} />
+          </ui-item>
+        </Show>
         <For each={ownViewsFor(editor.file)}>
           {(view) => (
             <ui-item
@@ -316,8 +386,8 @@ function PinIcon(): JSX.Element {
 }
 
 /**
- * The palette as a menu:  what to do and its search, then This app, the app's own views, then every part, by topic,
- * in columns.
+ * The palette as a menu, in columns:
+ * what to do and its search, then This app, the app's own views, then every part, by topic.
  * - Each topic shows its few ready-made parts;  its "N more" opens every other component filed under it.
  * - A search looks through all of them, by name, other names and description.
  */
@@ -341,6 +411,19 @@ function PaletteMenu(): JSX.Element {
     const words = filter().trim().toLowerCase()
     return ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words))
   }
+  /**
+   * On a page, its examples and sections (`PAGE_PART_TAGS`) that match the search, to show under This page
+   * - they still show under their own topics too (epic `notebook` P9)
+   */
+  const pageParts = () => {
+    const words = filter().trim().toLowerCase()
+    const parts = offered().flatMap((group) => [...group.parts, ...group.more])
+    return PAGE_PART_TAGS.flatMap((tag) => parts.filter((part) => part.tag === tag)).filter((part) =>
+      `${part.name} ${part.aka.join(" ")}`.toLowerCase().includes(words)
+    )
+  }
+  /** Its first group's name:  This page on a page that draws its body, else This app. */
+  const thisGroup = () => (Palette.isPageShown ? "thisPage" : "thisApp")
   return (
     <div class="PaletteBody">
       <div class="PaletteHead">
@@ -355,10 +438,19 @@ function PaletteMenu(): JSX.Element {
         <PinIcon />
       </div>
       <div class="PaletteGroups">
-        <Show when={own().length}>
+        <Show when={own().length || Palette.isPageShown}>
           <section class="PaletteGroup ThisApp">
-            <h4>{appTexts.text("thisApp")}</h4>
-            <ui-tree class="PaletteTree" label={appTexts.text("thisApp")} ref={treeChoosesRows}>
+            <h4>{appTexts.text(thisGroup())}</h4>
+            <ui-tree class="PaletteTree" label={appTexts.text(thisGroup())} ref={treeChoosesRows}>
+              <Show when={Palette.isPageShown}>
+                <ui-tree-item
+                  icon={NEW_VIEW_ICON}
+                  label={appTexts.text("paletteNewView")}
+                  title={appTexts.text("paletteNewViewTip")}
+                  ref={(row: Element) => chooseRow(() => Palette.addNewView())(row)}
+                />
+                <For each={pageParts()}>{(definition) => <PaletteRow definition={definition} />}</For>
+              </Show>
               <For each={own()}>
                 {(view) => (
                   <ui-tree-item
@@ -437,6 +529,9 @@ function startsOwnDrag(element: Element, view: OwnView): void {
 
 /** The icon of the app's own views, in the palette. */
 const OWN_VIEW_ICON = "cube"
+
+/** The icon of a page's new view of its own, in the palette. */
+const NEW_VIEW_ICON = "plus square outline"
 
 /** One thing that can be added:  a click adds it, a drag places it. */
 function PaletteRow(props: { definition: ComponentDefinition }): JSX.Element {

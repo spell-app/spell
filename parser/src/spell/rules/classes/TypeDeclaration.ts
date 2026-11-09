@@ -70,6 +70,14 @@ export class TypeDeclaration<
       return refused
     }
     const named = scope.types?.get(name)
+    if (named?.alonePage) {
+      // its own head, which the project knows it by:  the page declares itself, in its own scope
+      if (named.alonePage === match.getScopeOfType(P.FileScope)?.path) return match
+      return SpellStatement.refuse(
+        match,
+        language.parserMessage("page-part-names-a-page", { name: `${groups.type.raw}`, page: wordsOf(named.name) })
+      )
+    }
     if (named && SpellType.isShortName(named, name)) {
       const message = language.parserMessage("already-a-short-name", {
         name: `${groups.type.raw}`,
@@ -109,7 +117,7 @@ export class TypeDeclaration<
     const options = { itemType, aka: groups.aka && `${groups.aka.value}`, gender: TypeDeclaration.genderOf(match) }
     // TODO: complain if existing type is set up differently!
     const existing = scope.types?.get(name)
-    if (existing && !(existing.parentScope instanceof P.ImportScope)) {
+    if (existing && !existing.alonePage && !(existing.parentScope instanceof P.ImportScope)) {
       // a stub, or left by an earlier parse of this statement -- see `P.TypeScope.sameStatement()`
       const isPropertyKind = !!existing.valueKind?.property
       if (existing.stub || isPropertyKind || P.TypeScope.sameStatement(existing.declaredBy, match)) {

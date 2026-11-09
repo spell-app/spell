@@ -61,20 +61,20 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - A piece several families draw is a family of its own.
     - It's drawn in their shadow roots, and never written in a doc.
     - Those pieces:  `<epic-review>`, `<epic-new-item>`, `<epic-agents>`, `<epic-thread-message>`.
-  - The pieces INSIDE an epic page's blocks are elements too (epic `epic-engine` P45;  Owen, 2026-10-25:  "You should
+  - The pieces INSIDE an epic page's blocks are elements too (epic `epic-engine` P45;  2026-10-25:  "You should
     be creating web elements for the things inside an `<epic-phase>` for a) consistent styling, b) themeability,
     c) less stuff to manage"):
     - `<epic-mark item link>`:  an item's id as a chip in its state colour (a phase's To review), not a link a script
       colours
     - `<epic-actions>`:  a block's actions row, made by the docs runtime (`addBlockAction()`)
     - a field's label and icon come from its `name` alone (`<epic-field>`)
-      - a named field folds by its label row, open to start with (epic `epic-engine` I167;  Owen, 2026-10-29:  "These
+      - a named field folds by its label row, open to start with (epic `epic-engine` I167;  2026-10-29:  "These
         should be collapsable"):  `Fold`'s chevron before its icon;  folded, its label and a one-line taste of its text
         (a list's count);  remembered per page in its own key (`FieldFolds`, `spell-field-folds:<path>`);  collapse-all,
         expand-all (`opensWithAll`) and ⌥-click reach it;  the runtime's `reveal()` opens one a link or comment lands in
       - a labelled block (`Where:`, a test's Step) doesn't fold
     - a list's RUNS (rounded ends) and its filter's hidden items:  one page sheet, by position
-      (`EpicSection.runs.css`;  Owen:  "generic CSS, using sibling selectors ... rather than with explicit ids"),
+      (`EpicSection.runs.css`;  "generic CSS, using sibling selectors ... rather than with explicit ids"),
       the filter marking what it hides `data-epic-filtered`
   - A screenshot opens full size over the page (epic `epic-engine` I129) in Spell UI's `<ui-zoom>`
     (the epics pack's `<epic-zoom>` until epic `ui-gaps` P14):  ONE per page, made at the end of `<body>` by
@@ -92,7 +92,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - Every element with a TITLE ROW has an `actions` slot in it (epic `epic-workflow` P25):
     `<epic-section>`, `<epic-overview>`, `<epic-phase>`, `<epic-item>`, `<epic-aside>`, `<epic-code>`, `<epic-update>`.
     - What a page puts there (`<ui-button slot="actions">`) sits after the title, before the element's own buttons.
-    - The title, as Owen asked (2026-10-19:  "I don't like the ellipsis in a collapsed issue/etc header --
+    - The title, as the person asked (2026-10-19:  "I don't like the ellipsis in a collapsed issue/etc header --
       make it always show the full title, wrapped"):
       - ALWAYS in full, as many lines as it needs, folded or open:  no "…", no tooltip
       - Before:  J183 (2026-10-18), "ellipsis when collapsed, wrap when expanded".
@@ -102,7 +102,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - a section's badge and tools stay beside its title while the title fits on one line beside them;  only when it
         doesn't (the side bar, a phone) do they wrap, together, onto a row of their own at its end (epic `epic-engine`
         I149:  under 480px they always did before)
-      - no expand-all or collapse-all button in a title row (epic `epic-engine` I161;  Owen, 2026-10-29:  "combine the
+      - no expand-all or collapse-all button in a title row (epic `epic-engine` I161;  2026-10-29:  "combine the
         'expand/collapse all' with the normal disclosure triangle -- holding down option is 'expand all'"):
         - ⌥-click (Alt-click) on any fold's chevron or title, or ⌥+Enter / ⌥+Space on its focused chevron, opens it and
           everything in it, cards too, parts loading as they open (`expandAll()`);  on an open one, folds everything
@@ -110,7 +110,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - every chevron's tooltip ends with what ⌥-click does (`DEEP_TIPS`;  `<ui-section>`'s `toggleTipMore`)
         - the Log stays folded under it, as under the page's expand-all (`staysFolded`, I155)
         - the page toolbar keeps its one toggle-all (`Fold.toggleAllButton()`):  it has no chevron to hold
-      - a GEAR in its place, last in the row, on the Phases section and each phase (epic `epic-engine` I166;  Owen,
+      - a GEAR in its place, last in the row, on the Phases section and each phase (epic `epic-engine` I166;
         2026-10-29:  "'Show each phase's files' etc is something I'd rarely choose ... we can change the 'expand
         all' to a gear icon which shows menu"):
         - Spell UI's menu (`EpicFold.renderGear()`):  a `<ui-dropdown>` whose trigger is a round `<ui-button
@@ -122,16 +122,16 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - one `PhaseFields` per page holds both, remembered per page in this browser;  a pick for every phase forgets
           each phase's own choice of that field
         - its entries are a LIST the element builds (`GearEntry`):  a new setting is one more entry
-        - the state chips stay in the row, before it:  frequent changes keep their place (Owen:  "do NOT move filter
+        - the state chips stay in the row, before it:  frequent changes keep their place ("do NOT move filter
           badges into that menu")
-      - its cursors (I161;  Owen:  "pointer when over content in these headers, drag cursor when over whitespace"):
+      - its cursors (I161;  "pointer when over content in these headers, drag cursor when over whitespace"):
         the fold button is only as wide as its chevron, icon and title;  the pointer over those, the badge and the
         buttons;  over the row's empty space, the pointer too (a click there folds it, `onTitleRowClick()`), but the grab
         cursor on a to-do phase while the page is reviewed (`PhaseDrag`), grabbing while one is dragged
       - CSS and the elements' own drawing only:  the page's markup is unchanged, so no migration step
       - NOT `<ui-section>` on guides:  at phone width a title there still runs on under its buttons,
-        fading out (`spell-doc.css`;  Owen, 2026-10-10:  "stay in place and overlap")
-      - a DETAILS page's `<ui-section>` titles wrap in full too (epic `epic-engine` I21):  Owen answers there;
+        fading out (`spell-doc.css`;  2026-10-10:  "stay in place and overlap")
+      - a DETAILS page's `<ui-section>` titles wrap in full too (epic `epic-engine` I21):  the person answers there;
         its count and actions go below the title when they don't fit beside it
     - A click on it never folds:  `CONTROLS` in `Fold.tsx` takes the slot and its box (`Fold.actions()`).
     - The slot, its child spec and its part:
@@ -155,7 +155,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `phases/` -- `PhaseIds`:  a phase's STABLE id and the number people see (epic `epic-workflow` P15).
     - The id is made once from the phase's name, `p-epic-migrate`, and kept through renames and inserts.
     - "P7" is its place, worked out as it's drawn or printed:  never written, never its id.
-    - Every number WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
+    - Every number WHOLE (epic `epic-engine` I126;  2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
       moving a phase renumbers the to-do phases after it, and the tool's `PhaseNumbers` rewrites what names them.
       - bare numbers too (I137):  `P18`, `P17-P20`, `P20's`, `epic-engine P46`, in phases, items and Update blocks,
         mapped all at once, so P18 => P19 never chains on to P20
@@ -166,7 +166,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - Finding a phase as people name it (`7`, `P7`, its id, name or slug), and an old `#p7` landing on P7.
   - `comments/` (`spell/epic/comments`) -- `ThreadFacts`:  what a comment's THREAD shows, worked out ONE way for the
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
-    - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`C3`), the few words it's on, its times,
+    - whose turn, the person's words Claude hasn't had, its id as the person sees it (`C3`), the few words it's on,
+      its times,
       where a taken comment went (`takenInto()`)
     - WHO WROTE IT, the ONE check (epic `epic-friend` P2, Q9):  `isAgents()` / `agentOf()`, `lastPersonReply()`,
       `speakerOf()` (You, a name, Claude, Claude (Ana)), for a page's `<epic-reply>` and a comment's reply alike
@@ -203,7 +204,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         (`attachShot()`);  `Pictures`, beside the client, reads a paste or a drop and turns any image into a PNG,
         for `<epic-option-form>` too
       - The controls show while `<epic-page reviewing>` is set.
-    - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
+    - `AgentsClient`, one per page:  the epic's running agents, and the person's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
       - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
         - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
@@ -222,7 +223,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         server's word that a file changed (a name, or a test of the path)
       - `ServerLink.forPage()`:  the page's own link, for reads and writes with no client of their own (`<epic-page>`'s
         See Also, `<epic-cards>`, `<epic-link>`, the docs pages' comments, the syntax page)
-  - `answers/` (`spell/epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
+  - `answers/` (`spell/epic/answers`) -- the pages Claude makes for the person to answer ON (epic `epic-workflow` P12),
     as their elements keep them.
     - No Solid, no Spell UI:  node-safe at import.
     - `AnswerForm`, one per details page:
@@ -230,13 +231,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - it gathers the answer, sends it (`POST /api/docs/details/answer`, through a `ServerLink`),
         reads it back on load, and says where it stands for `<epic-send>`
       - and its DRAFT (P18):  what's typed and not sent
-        - kept by id at once (`typed`), in `localStorage` at once, and on the page server as he types, half a second
+        - kept by id at once (`typed`), in `localStorage` at once, and on the page server as they type, half a second
           later (`POST /api/docs/details/draft`);  a failed save tries again every 3s (epic `epic-engine` P15)
         - put back on load over the answer, and into a part that joins later (an agent's rewrite, patched in place)
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
-    - `DraftSaver` (epic `coherence` C10;  on the kit's `SaveQueue` since epic `data` P3):  a draft that saves itself, the ONE way every page Owen types into keeps
+    - `DraftSaver` (epic `coherence` C10;  on the kit's `SaveQueue` since epic `data` P3):
+      a draft that saves itself, the ONE way every page the person types into keeps
       what's typed and not sent:  the three forms, `<epic-review>`'s note, the docs pages' comments
       and the syntax page
       - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,
@@ -246,13 +248,13 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - plain timers, not the kit's `after()`:  `spell/element`'s leaves are neither a pack's shared module nor allowed
         in the docs bundles
     - `RunForm`, one per run page (epic `epic-engine` P23):  a command's review page, `<epic-run>`'s
-      - reads the run (`GET /api/runs/<id>`);  each row's answer saved as Owen gives it (`POST .../answer`, half a
+      - reads the run (`GET /api/runs/<id>`);  each row's answer saved as the person gives it (`POST .../answer`, half a
         second after typing, a pick or a tick at once;  a failed save tried again every 3s);  Send (`POST .../send`)
       - kept fresh by the run's files changing (`spell-server:changed`) and every 30s, for the waiting state
       - see "Run pages"
     - `ChoicesForm`, one per choice page:
       - the rows (`<epic-choice-row>`) register
-      - the draft:  in `localStorage` at once, on the page server as he types and as the page goes away, a failed save
+      - the draft:  in `localStorage` at once, on the page server as they type and as the page goes away, a failed save
         tried again every 3s (epic `epic-engine` P15);  "Do it" (`/api/docs/choices/*`);  bringing both back;
         Copy my answers (`copyText()`);  for `<epic-choices-bar>`
     - the answers' shapes are copies of the docs tools' routes':
@@ -392,7 +394,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         The short name is the identity:  no id beside it.
         - the GitHub login:  `refreshGithub()` (`gh api user`, a few seconds, never throws) keeps it in
           `person.json5` as `github`;  only `epic whoami` and `epic init` run it, so a page served never runs `gh`
-          (Owen, 2026-10-29);  `$SPELL_EPIC_GH` names another `gh` (the tests' stand-ins)
+          (2026-10-29);  `$SPELL_EPIC_GH` names another `gh` (the tests' stand-ins)
       - `personName()`:  the name put on what they write, "someone" when nobody said (epic `epic-friend` P2):
         the page server stamps a comment's and a reply's `by` with it (never the page's word), the tool passes it to
         `PlanDoc` (`PlanDocOptions.person`) for kept notes, picks, test runs, log lines and Claude's status cards
@@ -429,7 +431,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - its entry is [epicMain.ts](cli/epicMain.ts), run by [bin/epic](../bin/epic)
       - its base is the kit's `spell/cli` (`runCommand()`, `rawArgsAfter()`, `EXIT`, `CliError`;  epic `coherence` P20),
         NEVER the kit's program (`spell/cli/main`), and it loads no spell
-    - Owen's names (repo-split P13):
+    - The person's names (repo-split P13):
       - `create`, `lint`
       - `inbox watch | ignore | wait ... <epic>` (the inbox's verb first)
       - `window should-stay`, `window reload`
@@ -480,7 +482,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           at once, `shareNow()`), last the epic server, serving the repo, its address the last line (`serverStep()`,
           `Hub.addressOf()`;  `--no-server`);  each a failure of one line, init carrying on;  `init()` takes them as
           `plugin`, `server` (off unless asked:  only `run()` asks) and `color`, a test hands in stand-ins
-        - its words (Owen, 2026-10-29:  "Use color to distinguish fields and values"):  `run()` asks EVERY question
+        - its words (2026-10-29:  "Use color to distinguish fields and values"):  `run()` asks EVERY question
           first (`questions()`:  name, colour, and the epic repo's name and private or public only when
           `willMakeRepo()`;  a teammate joining has the plans cloned before the colour question, so the taken ones are
           known), sums up the answers (`summaryLines()`, `> Your name  :  <bold>`, the colour in its colour), then
@@ -525,8 +527,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         the transcripts are 1.6GB, and reading them all took 1.7s of a 2s command, more with every session
       - keyed by each file's size and modified time;  best effort, never throws
     - `ActiveTime`, `WorkTime`:  how long Claude WORKED, from the transcripts (epic `epic-engine` P41)
-      - `ActiveTime`:  one transcript's working stretches, never the waits for Owen (his next prompt, an answer, a
-        permission, a background wait for his notes);  side by side counted once
+      - `ActiveTime`:  one transcript's working stretches, never the waits for the person (their next prompt,
+        an answer, a
+        permission, a background wait for their notes);  side by side counted once
       - `WorkTime`:  a phase's (its own agents, else the epic's sessions while it was active) and an agent's, found in
         Claude's folder (`<session>/subagents/`, each agent named by its meta file's `description`)
       - used by `epic phase … done | took` (`<epic-phase took>`) and `epic agents done`
@@ -562,7 +565,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - the plugin's names:  `epic` from its manifest, `spell` from the repo's root marketplace (`pluginNames()`);
         the fix it names is `epic plugin install`
       - `missedMove()`:  a move's record still waiting when the session's next prompt comes
-        (the hook renames it the moment it runs) is said to Owen and Claude, and set aside as `<session id>.missed.json`
+        (the hook renames it the moment it runs) is said to the person and Claude,
+        and set aside as `<session id>.missed.json`
         - the window script's worktree commands say it too when the hook can't run, since then the prompt hook can't
           either
       - plain `node` loads it by path
@@ -616,7 +620,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `data/` -- `DataFile`:  the tooling's DATA FILES in the shared folders, as JSON5 (epic `epic-workflow` P21).
     - review inboxes, details pages' answers and drafts, choice pages' rows, running agents, the docs home's lists
       (`home.json5`, `favorites.json5`), the sagas' list, the commands page's data
-    - written keeping a comment Owen adds by hand:  spaces' `json5Edited()` (json5-writer)
+    - written keeping a comment the person adds by hand:  spaces' `json5Edited()` (json5-writer)
       - laid out as `JSON.stringify()` would, in JSON5's JSON-compatible part (keys and text in double quotes)
     - read by the `.json5` name first, then the old `.json`;  written as `.json5` only (the old `.json` removed)
       - a checkout on older code keeps reading its files until it merges
@@ -675,13 +679,13 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - NEVER import TypeScript into it:  node's TypeScript support alone adds about 28MB
       - looks at start, a few seconds after a watched file changes, and when the last look said to
       - prints NOTHING while idle (no tokens)
-        - Owen's Send:  the look's `📬` line, once per batch,
+        - The person's Send:  the look's `📬` line, once per batch,
           which wakes the session, which takes the work with its own `epic inbox wait`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)
     - SAGAS (P15):  `Sagas`
-      - the shared list in Owen's order, `sagas/sagas.json5`:  node only, loaded by path by the docs index too
+      - the shared list in the person's order, `sagas/sagas.json5`:  node only, loaded by path by the docs index too
       - each guide's saga meta:  `guides()`, `sagaOf()`, `withSaga()`
       - `SagaCommands`:  `epic saga list | set | create | move | title | rename | page`
       - `epicRoutes`' `GET /api/epics/pages` answers the epic's saga too (`<epic-page>`'s meta line)
@@ -770,14 +774,15 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
   - [The barrel's test](../tests/components/index.test.tsx) checks every class the barrel exports.
 - The tooling's data files are JSON5, read and written through `DataFile` (`spell/epic/data/DataFile`, see "Overview"):
-  never `JSON.parse()` / `JSON.stringify()` on one, which would refuse or drop Owen's comments.
+  never `JSON.parse()` / `JSON.stringify()` on one, which would refuse or drop the person's comments.
   - A new one:  `<name>.json5`, its path given to `DataFile`.
   - A browser reader reads it with the kit's `parseJSON5()` (`commands.entry.js`, bundled since epic `coherence` C12).
 - A change to epic page markup adds its MIGRATION STEP in the SAME commit (epic `epic-workflow` P8).
   - epic page markup:  what the tool writes, or what an element reads
   - the step:  a class in [migrations/](tool/migrations/), last in `Migrations.all`, with its test
   - another page kind's markup:  its step in the docs tools' `STEPS` ([migrate.js](tools/migrate.js))
-    - a page's CONTENTS too, where a component replaces markup written by hand (epic `epic-engine` P3, Owen on I26:
+    - a page's CONTENTS too, where a component replaces markup written by hand (epic `epic-engine` P3,
+      the person on I26:
       "page controls AND contents"):  `components-not-markup`
   - Then `epic migrate --all --dry-run`, to see what it would change.
   - Once it's on `main`, `epic migrate --all --notify`:  idle epics are migrated, running ones are told.
@@ -863,8 +868,8 @@ Laid out as every set is since P18 of `people-and-orgs`
     checkout the page server serves).
 - Check a page:  `node src/tools/check-spell.js src/docs/<tag>.html`, from `epic/`.
   It loads the page from the page server, at its address.
-- Comments (epic `epic-engine` P2, T3):  Owen comments on these pages as on a guide.
-  - So he does on App UI's and Brand's, spell-app's sets, which load the same script (see "Comments" below).
+- Comments (epic `epic-engine` P2, T3):  the person comments on these pages as on a guide.
+  - So they do on App UI's and Brand's, spell-app's sets, which load the same script (see "Comments" below).
   - The bullhorns, the pane, the threads and Send, all of "Comments" below.
   - Each page loads the comments by themselves, after the site's bundle, in its `<head>`:
     `<script defer src="/_epic/assets/spell-comments.js">` (the template has it too).
@@ -877,11 +882,11 @@ Laid out as every set is since P18 of `people-and-orgs`
     - The site's router swaps `main` for the next page:
       the toolbar and the comments are taken down and wired again for it.
   - The masthead is the page header:  the page's bullhorn over its corner, Send under the title.
-  - A TOOLBAR (epic `epic-engine` T11;  Owen, 2026-10-20:  "Epic UI pages should have a toolbar"):
+  - A TOOLBAR (epic `epic-engine` T11;  2026-10-20:  "Epic UI pages should have a toolbar"):
     a guide's, built by the same code (`titledItems()`, `toolbarMenu()`),
     first in the page's article, under the masthead
     - a button per top-level section (its icon and title, `1. Example` shows `Example`), the section being read marked
-    - the comments' bullhorn at its right, its orange count, each click the next thread waiting on Owen
+    - the comments' bullhorn at its right, its orange count, each click the next thread waiting on the person
     - in the site's page bar, `<ui-sticky class="site-sticky-bar">` (`SiteSections`' `PAGE_BAR`):
       it sticks at the site's top (under the narrow screens' top bar), the section titles stick below it,
       links land below both
@@ -948,7 +953,7 @@ The shared folders:
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
   - One card per area, in the top bar's order, each with its count:
     Guides · Sagas · Epics · Epic/UI · Spell/UI · App · App/UI · Brand · Templates
-    - Owen's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
+    - The person's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
     - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
@@ -972,7 +977,7 @@ The shared folders:
   - A card per page (epics open first).
   - `epic pages index` writes them, between the `index:start` / `index:end` markers.
   - A missing one is made from [`skeleton()`](tools/index.js).
-  - The Epics page (epic `airplane` P8, Owen 2026-10-10) sorts its cards into five GROUPS.
+  - The Epics page (epic `airplane` P8, 2026-10-10) sorts its cards into five GROUPS.
     - ELEMENTS since epic `epic-engine` P3 (the `epic-list` family, Epic UI's "The Epics page"):
       - `<epic-list>`:  the groups, their headings and counts, the saga chips, the sort and filters
       - `<epic-card>`:  one epic, drawn from its attributes;  its star
@@ -982,7 +987,7 @@ The shared folders:
       - before P3 the page held hand-made groups (`div.spell-epic-group`) and the docs runtime moved cards between
         them;  `docs index` writes the list anew, so no migration step
     - Each group is a small heading with its count;  cards are alphabetical by title within each.
-    - Or newest first:  the page header's sort buttons, A–Z and Date (`<epic-sort>`;  Owen, 2026-10-13).
+    - Or newest first:  the page header's sort buttons, A–Z and Date (`<epic-sort>`;  2026-10-13).
       - They sort the cards inside each group by title, or by when each was last worked on.
       - Remembered in this browser (`spell-epics:sort`;  `spell-epics-sort` before epic `prefs-and-undo` P4, moved once).
     - A group with no card showing isn't drawn (hidden by a saga chip, or by the runtime's state chips).
@@ -993,13 +998,13 @@ The shared folders:
       - Favorites:  starred, whatever their state.  A starred epic shows only here.
       - Active:  phases left.  In progress, and paused (its mark grey).
       - Planning:  future, or no phases yet
-      - Urgent:  every phase done, items waiting on Owen (the `errors` state)
+      - Urgent:  every phase done, items waiting on the person (the `errors` state)
       - Done
     - Each card's state mark:  `<epic-card>` draws it from its facts (`phases`, `updated`, `urgent` ...) as of now,
       by `EpicState`;  a session running for it (`running`) is never paused.
     - Each card's STAR, top right:
       - Yellow when starred (the page's yellow, `--spell-favorite`), else its outline, grey.
-        - Owen, 2026-10-10 (`airplane` J22):  "make it yellow".  The brand's gold-brown before.
+        - 2026-10-10 (`airplane` J22):  "make it yellow".  The brand's gold-brown before.
         - The one yellow that doesn't mean "open".
       - A click stars or unstars it at once:  the card sets its own `favorite`, and its list regroups.
       - Then the card posts it to [epicRoutes.ts](tool/epicRoutes.ts) (`POST /api/epics/favorite`).
@@ -1018,10 +1023,10 @@ The shared folders:
       - A running epic's card keeps the date `epic pages index` wrote when it's later than its doc's.
     - SAGAS (epic `epic-workflow` P15):  each card names its saga, a small label
       (the saga's title, its purpose the tooltip).
-      - Above the groups, a row of SAGA CHIPS, one per saga with epics, in Owen's order (`<epic-list sagas>`),
+      - Above the groups, a row of SAGA CHIPS, one per saga with epics, in the person's order (`<epic-list sagas>`),
         then "No saga", each with its count.
         - A saga no epic names gets no chip (epic `epic-engine` P3:  its chip could only show nothing).
-      - A click shows only that saga's epics, by the state chips' rule (`StateFilter.nextShown()`).
+      - A click shows only that saga's epics (`StateFilter.nextShown()`, its `narrow` rule).
         - remembered in this browser (`spell-epics:sagas`), for every Epics page
       - The groups count only the cards that show.
       - each card carries its saga in attributes (`saga`, `saga-title`, `saga-purpose`), for the list and the page
@@ -1030,13 +1035,13 @@ The shared folders:
       `data-status`), as on a saga page's lists.
     - The docs' home page's Epics count is by the same groups:
       `2 favorites · 5 active · 2 planning · 17 urgent · 7 done`.
-  - The GUIDES page (epic `epic-workflow` P15):  a section per saga, in Owen's order, then "Misc", last.
+  - The GUIDES page (epic `epic-workflow` P15):  a section per saga, in the person's order, then "Misc", last.
     - Each is headed by the saga's title linking its saga page (made or not yet), its purpose under it.
     - A guide names its saga in its head, right after its description meta:
       `<meta name="spell-saga" content="<id>">` (`Sagas.withSaga()` writes it, `sagaOf()` reads it).
     - None, or a saga not in the list:  Misc.  `docs index` prints both kinds.
     - `epic saga rename` rewrites the metas.
-  - The SAGAS page:  a card per saga, in Owen's order (`sagas/sagas.json5`).
+  - The SAGAS page:  a card per saga, in the person's order (`sagas/sagas.json5`).
     - its title linking its saga page, its purpose, how many epics and guides name it
     - a note on the parked first sagas (`goals/`)
   - The Templates page also holds the "Writing docs" notes;  the Brand page, its folder's files.
@@ -1062,7 +1067,7 @@ The shared folders:
     - Every page walker skips `parts/` folders, so a part is never taken for a page.
       - `findPages()`, `spell ssr`
 - `pages/details/`:  DETAILS PAGES, each `<slug>.html`.
-  - A question Claude explains, and Owen answers on the page (`/details`, see "Details pages").
+  - A question Claude explains, and the person answers on the page (`/details`, see "Details pages").
   - Scratch:  ignored by the epic repo's git, swept after 14 days.
   - An epic's go in its folder's `details/`, kept (auto-committed with the epic repo).
   - CHOICE pages live there too (see "Choice pages").
@@ -1091,7 +1096,7 @@ In `tools/`:
       so is the toolbar, `spell-doc-toolbar.js` (its menu, items, fitting their titles, the jump key:  T11);
       `spell-doc-helpers.js`, what they share
     - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine` I26):
-      - Owen, 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"
+      - 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"
       - an icon button (the comments' `iconButton()`), its `title` on the inner button too (`titleInside()`):
         `<ui-button appearance="circular basic" size="mini" icon="..." title aria-label>`
       - its icon centred BY THE COMPONENT:  no hand-set icon size, offset or `place-items` on it
@@ -1117,7 +1122,7 @@ In `tools/`:
         - the comment pane an `<epic-comment-pane>`
         - an old page note's head line an `<epic-page-note-head>`
         - a thread's and a note's fold are their own shadow markup now (J16's two raw buttons)
-        - Owen's field in the pane or a thread stays a native `<textarea>` the comments' code makes and slots in:
+        - The person's field in the pane or a thread stays a native `<textarea>` the comments' code makes and slots in:
           it lives through every redraw, the cursor with it
     - a block's own controls share its ONE ACTIONS ROW (`addBlockAction()`, `<epic-actions>`):
       the bullhorn first, then a table's expand button;  never a row or corner of their own
@@ -1125,7 +1130,7 @@ In `tools/`:
       - an element on every page (epic `epic-engine` P45;  every page's since epic `coherence` P22):  it places and
         styles its buttons itself;  the runtime still measures where its block's top edge lies (`alignBlockActions()`)
   - `spell-comments.css`:  the comments' look on the page, `@import`ed first by `spell-doc.css`
-    - the bullhorns, Send, Owen's field, where a box of threads sits
+    - the bullhorns, Send, the person's field, where a box of threads sits
     - the threads and the pane draw themselves (their own sheets)
   - `spell-toolbar.css`:  the toolbar's look and the jump dialog's (epic `epic-engine` T11)
     - `@import`ed by `spell-doc.css`, which keeps where a docs page puts the toolbar;  linked by `spell-comments.js`
@@ -1212,7 +1217,7 @@ In `tools/`:
   - Its tabs:  the epic repo's `page-server.json5` `"siteTabs"` (epic `repo-split` P16);  the docs bundle gives none
     of its own since P46 (`DOCS_TABS`, for a page opened from disk, went).
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
-- Pages are SERVED, never opened from disk (epic `epic-engine` P46;  Owen, 2026-10-25:  "Opening files is a no-go for
+- Pages are SERVED, never opened from disk (epic `epic-engine` P46;  2026-10-25:  "Opening files is a no-go for
   many reasons"):  their links are ROOT PATHS, which mean something only on the page server.
   - The openers (`docs open`, `epic open`) and `check-spell.js` show them from this checkout's PAGE SERVER
     (`spell server`, see [server's AGENTS.md](../../src/server/AGENTS.md)).
@@ -1222,28 +1227,29 @@ In `tools/`:
     a `commands` page, the core reference page and the spell syntax guide.
     - From `file://` each says so, where they'd go.
     - Its `<body data-spell-needs-server>` makes `check-spell.js` load it from the server.
-    - Why:  Owen chose a plain JSON file over a JS data file, or tables rendered into the HTML (epic `commands`, D4).
+    - Why:  the person chose a plain JSON file over a JS data file,
+      or tables rendered into the HTML (epic `commands`, D4).
 - The MEASURE:  every page is in the WIDE LAYOUT (`spell-doc.css`, "Layout").
-  - The default on every page since epic `epic-engine` P2 (Owen, 2026-10-19).
+  - The default on every page since epic `epic-engine` P2 (2026-10-19).
     - Tried first as an opt-in, `<body class="... spell-wide">`, on the spell syntax guide and an epic page
-      (epic `epic-workflow`, Owen 2026-10-12).
+      (epic `epic-workflow`, 2026-10-12).
     - Before it, one centred column held EVERYTHING in `<main>`:  nice for prose, "horrible for tables".
     - Nothing reads `spell-wide` now:  a page on another branch that still says it is drawn the same.
   - The READING COLUMN:  `--spell-measure` wide, centred;  880px, its 16px gutters included.
   - `<main>` runs the window's full width, and each kind of block places itself:
     - BARS (the sticky page header and its toolbar, section titles, the footer, a bottom bar):
       background and rule edge to edge, their contents in the column
-    - TABLES (`ui-table`, a bare `table`):  in the column, as prose (Owen, 2026-10-13)
+    - TABLES (`ui-table`, a bare `table`):  in the column, as prose (2026-10-13)
       - an EXPAND button over each one's top right corner runs it the full width, less a 16px gutter
-        - in the table's actions row, right of its bullhorn (Owen, 2026-10-19:  "The expand button should be to the
+        - in the table's actions row, right of its bullhorn (2026-10-19:  "The expand button should be to the
           right of the bullhorn rather than in its own line");  pressed (`active`) while wide, the row moving with
           the table's right edge
         - a `<ui-button appearance="circular basic" size="mini">`, its icon arrows left right / to line, its tooltip on itself
       - a TWO-COLUMN table (every row two cells:  `VERB | DOES`):  its first column doesn't wrap, the second takes the
-        rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap")
+        rest (2026-10-19:  "Two column table -- left column shouldn't wrap")
         - UNTIL the first would take more than 40% of the table AND leave the second less than a readable measure
           (its words whole, or 24em):  then the first wraps, to the wider of 40% and what leaves the second that
-          measure, the second never under 12em (epic `epic-engine` I145;  Owen, 2026-10-26:  "table layout sucks",
+          measure, the second never under 12em (epic `epic-engine` I145;  2026-10-26:  "table layout sucks",
           the second column a word a line at the side bar's width)
           - only when that takes 2em or more off the first:  never a word wrapped for a few px
           - measured by the runtime (`wireTwoColumnTables()`:  `data-spell-wrap-first`, `--spell-first-column`),
@@ -1261,7 +1267,7 @@ In `tools/`:
         so one inside a list item or an epic item's details goes out to the gutter too
       - no button at phone width:  the column is the page already
       - its HEADER ROW sticks under the stuck titles while its rows scroll past
-        (Owen, 2026-10-19:  "make the table headers sticky";  epic `epic-engine` r4)
+        (2026-10-19:  "make the table headers sticky";  epic `epic-engine` r4)
         - every page's tables:  guides, details pages, an epic page's items
         - a `<thead>`, else a first row of `<th>`s alone
         - a COPY of it sticks, the runtime's `wireTableHeads()`:
@@ -1309,8 +1315,8 @@ In `tools/`:
 
     - EVERY one is `sticky collapsible dividing open="false"`:  a rule under every title, and every section folds.
   - They MUST start folded:  every section and sub-section `open="false"`, every code block and aside without `open`.
-    - The reader opens what they want (Owen, 2026-10-03:  "default to closed, open on demand").
-    - The ONE exception:  the spell syntax guide starts with everything open (Owen, 2026-10-12), a comment in it says so.
+    - The reader opens what they want (2026-10-03:  "default to closed, open on demand").
+    - The ONE exception:  the spell syntax guide starts with everything open (2026-10-12), a comment in it says so.
     - The runtime remembers the reader's folds per page, and a link to an id unfolds what hides it.
   - its icon:  a `<ui-icon slot="icon" name="...">`, first inside it
   - a title with markup:  a `<span slot="label">`, instead of `label`
@@ -1318,36 +1324,37 @@ In `tools/`:
     `label`, `hint`, `description`, `ui-opening` / `ui-closing`, `ui-loaded`
   - A sticky page header above them, on EVERY page (the templates have it), so the title stays on screen:
     `<ui-sticky class="spell-h1"><header class="spell-page-head">` around the h1.
-    - The runtime draws it on ONE line, as an epic page's (`oneLineHead()`;  Owen, 2026-10-13):
+    - The runtime draws it on ONE line, as an epic page's (`oneLineHead()`;  2026-10-13):
       - a copy of the breadcrumb goes into the h1:  `DOCS / SPELL SYNTAX`
       - the title in the crumbs' type (mono capitals), twice their size and bold
       - the breadcrumb above it hides
       - a lighter ivory than the toolbar under it
       - a "48 min read" chip after the title, its tooltip the word count (`wireReadingTime()`, epic `epic-engine` P14):
         prose at 230 words a minute, code words counted twice, folded sections included;
-        none at phone width;  an epic page has none (Owen, 2026-10-24:  "We can ditch the '14 minute read' thing")
+        none at phone width;  an epic page has none (2026-10-24:  "We can ditch the '14 minute read' thing")
     - While a sub-section's title is stuck under its parent's, the two are one row (`wireStuckTrail()`):
       `2. Files on disk › 2.1 The repo`.
   - The OLD markup is for the saga pages only;  the runtime still drives it.
     - It's `section.s2|s3` > `<ui-sticky class="spell-h2|spell-h3">` > `<h2|h3 id>`.
 - The runtime builds the page from that markup:
-  - NO contents list (Owen, 2026-10-08:  "remove the Contents thing entirely ... it is useless").
+  - NO contents list (2026-10-08:  "remove the Contents thing entirely ... it is useless").
     - NEVER hand-write one, or a "Contents" button.
   - The TOOLBAR, the page's one navigation (`buildPageToolbar()`).
-    - Epic `airplane` P8, Owen 2026-10-10:
+    - Epic `airplane` P8, 2026-10-10:
       "Make the floating sidebar in guides a sticky top toolbar like the epic page".
       Before it, a floating right-edge rail.
     - A row of the top-level sections' buttons:  the last row of the sticky page header (`.spell-page-head`).
       So it sticks with it, and the titles stick below it.
     - An ivory band, edge to edge across the window, its buttons in the reading column ("The MEASURE"), square.
-      - A rule under it, and none above (Owen, 2026-10-10).
+      - A rule under it, and none above (2026-10-10).
       - The same band as an epic page's.
     - Spell UI's menu (epic `epic-engine` P3):  `<ui-menu class="spell-toolbar" appearance="secondary">`, a `<ui-item>` link per
       section, its look through the menu's tokens (`spell-toolbar.css`);  an epic page's is the same element, and
       Epic UI's pages' (`spell-doc-toolbar.js`, epic `epic-engine` T11).
     - Each button:  the section's icon and its title.
       - the current one a deeper ivory (scroll-follow:  the item's `selected`)
-      - a red badge counting what needs Owen (a `<ui-label slot="badge">`:  it stays while the title is cut or gone)
+      - a red badge counting what needs the person (a `<ui-label slot="badge">`:
+        it stays while the title is cut or gone)
       - its icon centred by the menu:  measured 0px off (the old `<ui-icon>` cells sat 1.8px left of centre)
       - icons only:  every button the same width
     - Give every top-level section an icon:  without one, the button shows its number.
@@ -1361,26 +1368,29 @@ In `tools/`:
       - Guides, details pages and Epic UI's band all fit their titles so (I132, I133);
         only the segmented toolbar under Spell UI's page tabs keeps its titles whole and scrolls (epic `debut`).
       - The menu watches its own row:  nothing refits it by hand (the bullhorn showing, the fonts loading).
-    - Expand all and Collapse all at the band's right (`addFoldAll()`, Owen 2026-11-01):
+    - Expand all and Collapse all at the band's right (`addFoldAll()`, 2026-11-01):
       appended to the menu, after its items;  kept when the toolbar is built anew.
     - A comment in a folded section shows as a row under the outermost fold hiding it (`drawPromoted()`);
       a click opens only the sections it needs, the thread where the row was, with no visible scroll.
-    - Last, the bullhorn:  jumps to the next thread waiting on Owen, else the next open one, unfolding what hides it.
+    - Last, the bullhorn:  jumps to the next thread waiting on the person, else the next open one,
+      unfolding what hides it.
     - A page without a sticky page header:  the last row of its filter bar.
       Else a sticky bar of its own, before its first section (`.spell-toolbar-alone`:  the saga pages).
   - An EPIC PAGE (`body.plan-doc`) has its own toolbar (`buildToolbar()`).
     - It's the last row of `<epic-page>`'s sticky toolbar bar (its `toolbar` slot).
     - It sticks right under the h1's row, once the epic's title between them has scrolled away.
-    - One button per top-level block:  its icon ONLY, the title its tooltip (Owen, 2026-10-10:  "lose the titles").
+    - One button per top-level block:  its icon ONLY, the title its tooltip (2026-10-10:  "lose the titles").
       - the current one a deeper ivory
       - every button the same width, badges or not
-    - Badges count the block's items waiting on Owen, by each item's state AS DRAWN (`DrawnState`, `EpicItem.types.ts`:
+    - Badges count the block's items waiting on the person, by each item's state AS DRAWN (`DrawnState`,
+      `EpicItem.types.ts`:
       the one rule its id chip, its section's chips and blue badge and the toolbar share;  an item being worked on is
-      blue, never red;  Owen, 2026-10-26:  "badges don't match up")
-      - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for his
+      blue, never red;  2026-10-26:  "badges don't match up")
+      - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for their
         Accept, a choice open:  `PhaseState`, epic `epic-engine` I170)
-      - orange:  Claude replied with options for him to pick (`state="replied"`)
-      - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:  one changed since he looked
+      - orange:  Claude replied with options for them to pick (`state="replied"`)
+      - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:
+        one changed since they looked
         is orange first, and not counted (I170)
       - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
       - both kinds, both badges;  none, none
@@ -1391,14 +1401,15 @@ In `tools/`:
       and lands there as a link would.
       - An id that isn't there:  the dialog says so, and stays open (`wireJumpKey()`).
       - A comment's id too, `C3`:  see "Jumping to comments" below.
-  - JUMPING TO COMMENTS (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids", "Is there a way to
+  - JUMPING TO COMMENTS (epic `epic-workflow` P23;  2026-10-10:  "⌘K taking comment ids", "Is there a way to
     jump to comments in replies?"), on every page that takes comments (an epic page's and a guide's alike):
-    - a BULLHORN at the right of the toolbar, an orange badge counting the threads waiting on Owen (Claude spoke last)
+    - a BULLHORN at the right of the toolbar, an orange badge counting the threads waiting on the person (Claude spoke
+      last)
       - each click lands on the next, in page order, round again after the last:  opened, below the stuck titles
       - hidden while none waits;  `PageComments.drawWaiting()`, its place in `waitingHome()`
     - Cmd / Ctrl + K takes a comment's id (`C3`, `c3` or the old `cm3`) and lands on its thread, opened
       - `M3` is a manual test's since epic `epic-engine` P44 (a comment's before):  it lands on the test
-      - under its box, the threads waiting on Owen, a line each, "C3 · his first words", that lands there
+      - under its box, the threads waiting on the person, a line each, "C3 · their first words", that lands there
       - a guide's dialog asks "Jump to which comment?", and takes any other id on the page too
     - [check-comment-jump.mjs](demo/check-comment-jump.mjs) checks both, on stubbed comments
   - Sticky titles:  each top-level section's title sticks below the page header.
@@ -1408,21 +1419,21 @@ In `tools/`:
     - A live reload for new code puts back EVERY fold as it was, items and a link's unfolds too
       (`keepFoldsForReload()`, `sessionStorage`;  epic `epic-engine` I23).
     - An epic page (`body.plan-doc`) starts EVERY section folded that the reader hasn't opened or closed:
-      Owen opens what he wants (2026-10-03).
+      the person opens what they want (2026-10-03).
     - Its `<epic-*>` blocks start folded by themselves.
       - The runtime reopens the ones the reader left open, before they first draw (`restoreEpicFolds()`).
       - It saves their toggles as a section's.
       - EXCEPT the Log, which starts folded on EVERY load, a live reload's too, and which the page's expand-all
-        leaves folded (`STAYS_FOLDED`, `EpicSection.staysFolded`;  Owen, 2026-10-29, epic `epic-engine` I155):
+        leaves folded (`STAYS_FOLDED`, `EpicSection.staysFolded`;  2026-10-29, epic `epic-engine` I155):
         a link into it, a click and its own expand-all still open it.
     - Below the last line, a window's worth of empty ground (`--spell-doc-pad-end`, on `.spell-doc-main`):
       so folding near the page's end never leaves the page shorter than where it's scrolled to,
-      and what was clicked stays put (Owen, 2026-10-10, `airplane` J10).
+      and what was clicked stays put (2026-10-10, `airplane` J10).
   - Counts, on a top-level section holding `[data-status]` items
     (the Epics list page's epic cards, the saga pages' items):
     - `open/all` on its title, its `badge`
       - open:  any status but `done`, `decided` or `canceled`
-    - on the toolbar, a RED badge counting only the items that need Owen (state `attention`):
+    - on the toolbar, a RED badge counting only the items that need the person (state `attention`):
       none when none do (`countItems()`)
     - Nested sections get no count of their own.
     - An epic page's blocks count their own items:  the runtime only reads the count, and its `attention`
@@ -1431,7 +1442,7 @@ In `tools/`:
     the Epics list page's epic cards, and the saga pages' items (`.plan-items`), get their colour from `data-state`.
     - The colour scheme:  [the plan-doc guide](../templates/epics/plan-doc.md), "Colours";
       in CSS, `spell-doc.css`'s `--spell-state-*`.
-    - red needs Owen, blue Claude is working on it, yellow open (dark ink), green recent, grey older
+    - red needs the person, blue Claude is working on it, yellow open (dark ink), green recent, grey older
     - without one:  an open goals question red, anything else open yellow, done / decided grey
     - The saga pages colour their id chips by it, NOT by kind:  the kind is only the id's letter.
   - Item filter (`wireItemFilters()`):  a top-level section with such items gets a chip per state it has.
@@ -1439,26 +1450,28 @@ In `tools/`:
       the line under a filtered list its `<epic-hidden-note>`.
     - Each chip shows how many, left of its count.
     - solid while that state shows, outlined while hidden
-    - no filter icon (Owen, 2026-10-10)
-    - A click (`StateFilter.nextShown()`, in the element:  an epic page's rule too):
-      - everything showing:  only that state
-      - else a hidden one shows too, and a shown one hides
-      - the only one showing:  everything again
-    - The PHASES section's chips (`<epic-state-filter phases>`, epic `epic-engine` I157;  recoloured in I170, Owen,
-      2026-10-29:  "this doesn't match our other colors"):  ONE state per phase, the first that holds (`PhaseState`,
+    - no filter icon (2026-10-10)
+    - A click (`StateFilter.nextShown()`, in the element:  an epic page's rule too;  epic `epic-engine` I242):
+      - toggles that chip, and every state of its colour:  the blues together (the blue badge is their chip, the items
+        marked in this pass with them), the oranges together
+      - the blues sit together, first
+      - a click that would leave nothing showing shows the next colour instead, wrapping to the first;
+        the only colour there is stays on (Owen, 2026-11-09:  "Turning off the last badge -- select the next one")
+    - The PHASES section's chips (`<epic-state-filter phases>`, epic `epic-engine` I157;
+      recoloured in I170, 2026-10-29:  "this doesn't match our other colors"):  ONE state per phase, the first that holds (`PhaseState`,
       `epic-section/PhaseState.ts`, the one rule its chips, counts, toolbar badges and each phase's status circle use)
       - red (`attention`):  a choice set in it is open
-      - orange (`waiting`):  its plan waits for his Accept (not the doc pass;  epic `epic-engine` P63)
+      - orange (`waiting`):  its plan waits for their Accept (not the doc pass;  epic `epic-engine` P63)
         (`choices-open`, P50)
-      - orange (`updated`):  changed since he looked:  `to-see` updates neither Seen nor quiet (3 days, I168)
+      - orange (`updated`):  changed since they looked:  `to-see` updates neither Seen nor quiet (3 days, I168)
       - blue (`progress`):  under way, or Claude at work on it;  counted in the blue badge, as an item's
       - DOTTED blue (`scheduled`):  still to do, nothing above;  the chip a dotted outline, never filled, faded while
         hidden;  the circle dotted too
       - green (`recent`):  done in the last 3 days (`done-at`, which the tool stamps, and takes from the log for an
         older done phase);  grey (`old`):  done before, or no `done-at`
       - each phase's status circle wears its chip's colour and fill (`data-state`), its shape still its status
-    - An ⌥-click (Alt-click) on ANY chip, every list's and an epic page's alike:  only that state, whatever showed
-      (epic `epic-engine` I166;  Owen, 2026-10-29:  "if I option-click on one of those badges, turn just that one on").
+    - An ⌥-click (Alt-click) on ANY chip, every list's and an epic page's alike:  only that colour, whatever showed
+      (epic `epic-engine` I166;  2026-10-29:  "if I option-click on one of those badges, turn just that one on").
       - the element sends it as `how: "only"` (`StateFilter.nextShown(..., "only")`);  each chip's tooltip says so
     - A filtered list says "N hidden · show all" under it.
       Remembered per page.
@@ -1466,10 +1479,11 @@ In `tools/`:
     - Its elements draw themselves, in their shadow roots:
       - the page header, three columns (epic `epic-engine` P53):
         - the h1, one line, cut short when narrow (its full name first in its tooltip)
-        - in the exact middle (Owen's comment C7):  Send while reviewed (`<epic-send-buttons countdown>`), and beside it
+        - in the exact middle (the person's comment C7):
+          Send while reviewed (`<epic-send-buttons countdown>`), and beside it
           what the session is doing, a bare spinner;  narrow, they follow the title, never over it
           - while the session answers what was sent, a blue arc TURNS round the plane, the countdown ring's frame
-            (`working`, `CountdownRing.turning()`;  epic `epic-engine` P55, Owen's r46:  "put the spinning wheel
+            (`working`, `CountdownRing.turning()`;  epic `epic-engine` P55, the person's r46:  "put the spinning wheel
             cursor around this button (same size as countdown) while you are digesting remarks");  the countdown's
             ring wins once something new is marked;  the plane's tooltip names what it's answering
         - at the right:  the step label, then the GEAR, where the git toggle was
@@ -1477,7 +1491,7 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
-          - while reviewed, FOCUS MODE first (epic `epic-engine` P57;  Owen, 2026-10-30:  "a mode where I can quickly
+          - while reviewed, FOCUS MODE first (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
             walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
             never written in a page;  [its Epic UI page](docs/epic-focus.html)
             - Spell UI's `<ui-modal fullscreen overlay>`, Escape and its × close it
@@ -1493,10 +1507,11 @@ In `tools/`:
             - Start testing opens it on the Tests tab (decision Q65, A):  "Review inbox", START TESTING
         - no page-wide git toggle since P53:  the Log lists every commit (P52), an item its own (a git icon), a phase
           its own in its gear ("Show this phase's commits", I183)
-          - a commit's sentence longer than two lines is clamped to two, ending in "…" (`<epic-commit>`, J184, Owen's
+          - a commit's sentence longer than two lines is clamped to two, ending in "…" (`<epic-commit>`, J184,
+            the person's
             pick B):  a click on its text, or Enter on it, unfolds it;  unfolded ones remembered per page, by sha
             (`spell-commit-folds:<path>`);  its phase and item chips come before the sentence, so a folded one still
-            shows them all (Owen's "chips first")
+            shows them all (the person's "chips first")
       - the toolbar's tools
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
@@ -1511,9 +1526,9 @@ In `tools/`:
       - lands links inside them (a link to an `<epic-item>` opens it)
     - Running agents (epic `skillz` P3):  `<epic-page>`'s header pill has `2 🤖` ("2 agents running"),
       a button opening their rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
-      - It shows while any agent of the epic runs, after the step label, the pill grey (Owen, 2026-10-25).
+      - It shows while any agent of the epic runs, after the step label, the pill grey (2026-10-25).
       - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
-        (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (Owen, 2026-10-29:
+        (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (2026-10-29:
         "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
         (I210:  bare, it read as "the server is listening").  Answering a
         Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
@@ -1562,12 +1577,12 @@ In `tools/`:
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
-  - EDITING IN PLACE (epic `epic-engine` P60, request r53;  Owen:  "click in e.g. a table cell and edit the text there
+  - EDITING IN PLACE (epic `epic-engine` P60, request r53;  "click in e.g. a table cell and edit the text there
     directly, auto-save immediately"):  on a page the page server may save (`SPELL_SERVER.writable`, its file in the
     writable folders), every `<ui-markdown>` is `editable` (`editMarkdownInPlace()`, at start and on every rewire)
     - ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell:  it becomes a box holding its markdown;
       Enter or a click away keeps it, Tab moves on, Escape puts it back, 5 seconds without typing keeps it too;  a plain
-      click reads as before (Owen picked ⌥-click over a pencil, Q66);  holding ⌥ outlines what can be edited
+      click reads as before (the person picked ⌥-click over a pencil, Q66);  holding ⌥ outlines what can be edited
     - each keep is saved into the page's file at once, by the inline saver (`spell-ui-sources.js`):  the nearest element
       with an id read fresh (`SPELL_SERVER.readElement()`), the block found by its text, only its text swapped, indented as
       it was, its one-line tags kept (r52), then written back (`editPage()`, `shown`), so the page never reloads or moves
@@ -1576,7 +1591,7 @@ In `tools/`:
       markdown with its marks faint and formatted only, remembered per browser (Spell UI's `MarkdownBox`)
     - the toolbar bullhorn's tooltip says "⌥-click text to edit it";  `editable="tabs"` (Write / Preview) is left alone
     - [check-edit-in-place.mjs](demo/check-edit-in-place.mjs) checks it, on a copy of a guide in `pages/`
-- Copy buttons (epic `epic-engine` I182;  Owen, 2026-10-29:  "this should have a copy icon on the left"):
+- Copy buttons (epic `epic-engine` I182;  2026-10-29:  "this should have a copy icon on the left"):
     every `<pre><code>` gets a `<ui-button appearance="circular basic" size="mini" icon="copy">` first in it, centred
     on its first line, "Copied" in the page's notices (`addCodeCopies()`, at start and after every body or patch);
     the code scrolls, the button stays.  Not `<epic-code>` / `<ui-code copy>`:  they draw their own, at the right.
@@ -1596,7 +1611,7 @@ In `tools/`:
   - recommendations / warnings:  `<ui-message state="positive|negative|warning|info" heading="...">`
   - comparisons:  `<ui-table celled padding="compact" appearance="striped" unstackable>` around a native `<table>`
     - ALWAYS `unstackable`:  never stacked, at any width (epic `epic-engine` I36)
-      - Owen, 2026-10-19, on a table drawn at the side bar's width as its header cells,
+      - 2026-10-19, on a table drawn at the side bar's width as its header cells,
         then each row's cells one under another:  "I hate it"
       - too wide for its column, it scrolls sideways in its own box, never the page
       - `spell-doc.css` holds every `<ui-table>` unstacked whatever its markup ("NO table ever STACKS")
@@ -1633,13 +1648,13 @@ In `tools/`:
     `<ui-button appearance="circular" icon="paper plane">Send</ui-button>`
     - Icon-only buttons are circles (`circular`, no text).
       They MUST have an `aria-label`, and a tooltip.
-    - ALWAYS a component (Owen, 2026-10-19):  `<ui-*>`, or `<epic-*>` on an epic page;  NEVER a raw `<button>`, in a
+    - ALWAYS a component (2026-10-19):  `<ui-*>`, or `<epic-*>` on an epic page;  NEVER a raw `<button>`, in a
       page or in a control the runtime or a tool draws (see "Layout" › `spell-doc-runtime.js`).
       - Its icon centred by the component:  no CSS of ours sizing or moving the icon.
       - A block's own controls share its one actions row, the bullhorn first (`addBlockAction()`).
   - TOOLTIPS are the browser's own:  a `title` attribute.
     - Never a `<ui-tooltip>`, nor a `<ui-popup>` used as one.
-    - Owen's standing rule, 2026-10-10:  a styled one only when he asks for "a ui-tooltip with ...".
+    - The person's standing rule, 2026-10-10:  a styled one only when they ask for "a ui-tooltip with ...".
     - One still has a `<ui-popup inverted size="mini">` tooltip:  the runtime's heading fold button on the goal sets'
       pages ("Fold / unfold", epic `epic-engine` I32).  Turn it into a `title` when touching that code.
       - `goals-live.js`' own buttons have `title`s since epic `epic-engine` P3.
@@ -1662,8 +1677,8 @@ In `tools/`:
     Assign them to a `const`.
   - Prefer excerpts pasted from a real, runnable file over hand-typed examples.
 - Colours:  WWOD §18 › "Colours and themes through `ui`'s tokens", plus `spell-doc.css`'s own.
-  - ONE meaning per colour on every doc page (Q20 of epic `epic-components`, Owen 2026-10-08):
-    - red:  needs Owen
+  - ONE meaning per colour on every doc page (Q20 of epic `epic-components`, 2026-10-08):
+    - red:  needs the person
     - yellow:  open (dark ink)
     - blue:  do it now / Claude is working on it (every Send)
     - green:  decided or done
@@ -1673,15 +1688,16 @@ In `tools/`:
       `epic-friend` T11);  the docs pages' copies `spell-doc.css`'s `--spell-voice-*`
       - comment threads, page notes' replies and "answered" chip, and a waiting comment's quote read them too (epic
         `epic-friend` P10, Q16):  an agent's in terracotta, violet before
-      - a colour per person and per agent (P10;  Owen:  "color per person and/or agent working on the project, set in
+      - a colour per person and per agent (P10;  "color per person and/or agent working on the project, set in
         epic project settings"):  `colors` in `.epic/config.json5` (`EpicConfig.colors`), told every page as
         `SPELL_SERVER.colors` (`personRoutes`);  a reply or a thread message sets its speaker's own token,
         `var(--epic-voice-agent-codex, <colour>)` (`ThreadFacts.voiceOf()`), falling back to the shared one
-      - a colour is a Spell UI colour name, drawn from the theme (`var(--ui-green)`), or any CSS colour (P14, Owen's C7:
+      - a colour is a Spell UI colour name, drawn from the theme (`var(--ui-green)`),
+        or any CSS colour (P14, the person's C7:
         "would be cool if color names worked here from our 'standard' color set"):  `VoiceColor`
         (`spell/epic/config/VoiceColor`), the ONE check and drawing, which `EpicConfig` and `ThreadFacts` share;  it
         imports nothing, so plain `node` and the pages' bundle both load it
-    - ivory:  the page's warm ground (the answer card, a marked note, the toolbar, a comment thread)
+    - ivory:  the page's warm ground (the toolbar, the rail, a comment thread)
     - grey:  older
   - And the fill:  grey outline available, dashed pressed but not sent, outline sent, solid done.
   - The table, with examples:  [the plan-doc guide](../templates/epics/plan-doc.md), "Colours".
@@ -1690,9 +1706,9 @@ In `tools/`:
 ## Page kinds
 
 Each kind of page has ONE name, written everywhere a person reads it.
-- Owen, 2026-10-14, epic `epic-workflow` P14:
-  [the page kinds he settled](../../spell.epics/epics/epic-workflow/details/page-kinds.html)
-- The older words he may still say:  [spell-app's AGENTS.md](../../app/AGENTS.md), "Words".
+- 2026-10-14, epic `epic-workflow` P14:
+  [the page kinds they settled](../../spell.epics/epics/epic-workflow/details/page-kinds.html)
+- The older words they may still say:  [spell-app's AGENTS.md](../../app/AGENTS.md), "Words".
 
 | Name | What it's for | Where | Template |
 | --- | --- | --- | --- |
@@ -1701,7 +1717,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | details page | one question explained with a picture, answered on the page | `pages/details/`, `epics/<epic-id>/details/` | [details.html](../templates/details.html) |
 | review page | several calls to go through at once:  keep, change, talk over | same as details pages | [review.html](../templates/review.html) |
 | choice page | a table of names Claude recommends, typed over, then "Do it" | same, with `<slug>.rows.json5` | [syntax-choices.html](../templates/syntax-choices.html) |
-| run page | a command's review page:  a COMMAND (not Claude) asks, Owen answers each row, Send, and the command carries on (epic `epic-engine` P23) | `pages/runs/<run-id>/`, served at `/runs/<run-id>/` | [the tool's](tools/templates/run.html), served by [runRoutes.ts](tools/runRoutes.ts), never copied |
+| run page | a command's review page:  a COMMAND (not Claude) asks, the person answers each row, Send, and the command carries on (epic `epic-engine` P23) | `pages/runs/<run-id>/`, served at `/runs/<run-id>/` | [the tool's](tools/templates/run.html), served by [runRoutes.ts](tools/runRoutes.ts), never copied |
 | guide | explains a topic;  an epic's own write-up is "the epic's guide" | `guides/` | [durable.html](../templates/durable.html) |
 | cheatsheet | an API at a glance, as cards you filter | `guides/` | [cheatsheet.html](../templates/cheatsheet.html) |
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
@@ -1720,7 +1736,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
 ## Which side bar tab
 
 VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never the command that shows it
-(epic `epic-engine` P59, request r50:  a choice page Owen was answering vanished, the epic page shown in both tabs).
+(epic `epic-engine` P59, request r50:  a choice page the person was answering vanished,
+the epic page shown in both tabs).
 - The ONE rule:  `docViewFor()`, in the extension's [docUrls.ts](../vscode/src/docUrls.ts), from the page's path:
   - an epic page, a saga page:  "Review" (`review`), whatever was asked
   - a details, review or choice page (a page in a `details/` folder):  "Details" (`details`)
@@ -1728,7 +1745,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 - So the callers pass no tab:  `epic open`, `epic ask show`, `epic choices show`, `epic pages link --show`, the show
   route (`GET /api/docs/show`), `epic window show`;  `--review` stays, asking for a page of no kind of its own
   - the bridge's `show-doc` answers which tab it took, `{ file, view }`:  the show route's closing page names it
-- The "Details" tab never replaces a page still WAITING for Owen's answer (`DetailsPages.isWaiting()`,
+- The "Details" tab never replaces a page still WAITING for the person's answer (`DetailsPages.isWaiting()`,
   [DetailsPages.ts](tools/DetailsPages.ts):  no answer for its round now, or a session waiting on it):
   - the new page waits its turn (`DocView.offer()`), the tab's title bar and badge say "2 pages waiting"
   - it shows by itself once the page in view no longer waits (looked at every 5 seconds while any wait)
@@ -1812,7 +1829,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - On the kit's chunked files (epic `data` P6;  the disk byte for byte as it was, the page's markup and addresses too):
     - `EpicPageFormat` says what an epic page is to a `ChunkedPlace`:  its list the skeleton, a thing's body a part file.
     - `PlanParts.placeOf(file)`:  the page as a place, read only (`ReviewInbox.itemIdsOf()`:  what takes a mark, no body read).
-    - Writes:  still a whole page per edit, under its lock (Owen, J13);  `PlanDocFiles.writeDoc()`'s last step is
+    - Writes:  still a whole page per edit, under its lock (the person, J13);  `PlanDocFiles.writeDoc()`'s last step is
       `ChunkFiles.writeListAndBodies()`.  One place change per edit is later, epic `data`'s T16.
     - In the browser:  `<epic-*>` folds hand their `LoadableBody` `EpicBodies.loadText()`, the same place on `WebChunks`:
       a fold opening and a live re-fetch;  `<epic-focus>` too.  Every other section keeps `UI.sources`.
@@ -1839,7 +1856,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
 ### Review inbox
 
-- Owen marks an epic page's items ON the page:  approve, Make Todo (`todo` in the inbox), Add Details, revisit, pick an option card.
+- The person marks an epic page's items ON the page:
+  approve, Make Todo (`todo` in the inbox), Add Details, revisit, pick an option card.
   - The marks wait in its INBOX FILE until a Claude session takes them.
     It's `<name>.inbox.json5`, beside the doc in `epics/<name>/`.
   - Absent until the first mark;  deleted once empty.
@@ -1864,13 +1882,14 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
   - EVERY write goes through `ReviewInbox.update()` / `updateAsync()`:
     under the file's lock (`SRV.FileLock`), atomic (`updateAsync()` through `SRV.FileOperations.writeAtomic()`).
-  - `drafts`:  a note box's text as Owen types it, kept until the mark that uses it.
+  - `drafts`:  a note box's text as the person types it, kept until the mark that uses it.
     - Never sent, counted, or work for a waiting session.
   - `taken`:  the mark Claude TOOK on an item, whole (`takeMark()`, epic `epic-engine` I190):  its agent started, or a
     status card was written.
-    - The page shows its note read-only above the status card, and empties the note box:  what Owen types there next
+    - The page shows its note read-only above the status card, and empties the note box:
+      what the person types there next
       is a NEW mark, for the next send;  `inbox done` keeps both notes in the doc.
-  - `canceled`:  requests Owen called off ("nevermind", `cancelNow()`).
+  - `canceled`:  requests the person called off ("nevermind", `cancelNow()`).
     - `wait` hands them over once:  stop that item's agent.
     - `epic details` refuses a write for one.
     - `inbox done | clear`, or a new request, ends it.
@@ -1881,18 +1900,18 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - An OPTION SET's whole change is ONE mark (epic `epic-engine` P50), under what holds the set:  an item's id, a
     phase's (its Choices field), or a standing set's own (`s-upgrades`, the Choices section)
     - `{ action: "pick", pick: "A C +1", choices, multiple?, added?, edited?, removed? }`:  the picks (a pick-any set's
-      whole list, `+1` an option Owen added), the pick-one / pick-any flip, his new options, edits and removals
+      whole list, `+1` an option the person added), the pick-one / pick-any flip, their new options, edits and removals
     - the page works it out in ONE place, `SetChange` (`epic-choices/`), saved by `ReviewClient.changeSet()`;
-      `<epic-choices>` draws the heading's switch, Add choice (`<epic-option-form>`) and his added cards,
+      `<epic-choices>` draws the heading's switch, Add choice (`<epic-option-form>`) and their added cards,
       `<epic-option>` its pill, pencil and ✕
     - `epic inbox apply` writes it (`OptionSets`):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Option sets"
   - A CHANGE MARK's button (`<epic-change id="ch3">`, epic `epic-engine` P30):  Reopen, under its id;  no Accept
-    since changes need no approval (Owen, 2026-10-25)
+    since changes need no approval (2026-10-25)
     - `{ action: "reopen" }`;  an old `{ action: "accept" }` (no `stage`) still applies;  only a change takes
       them, and a change takes nothing else
     - markable while its host's `to-accept` lists it (the skeleton's), or it's in the page not `accepted`
     - `epic inbox apply` reopens the question for Reopen (an old Accept:  `accepted`, quiet):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
-  - An UPDATE block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear
+  - An UPDATE block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168;  2026-10-29:  "How do I clear
     these 'update' marks?"):  `{ action: "seen" }` under its id;  a ✓ before a new block's date, and one after its
     phase's pen for all of them
     - the block folds to one grey line at once, out of the pen;  Send carries it;  `epic inbox apply` stamps
@@ -1901,11 +1920,12 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       in the page not `seen`
     - unseen, a block goes quiet by itself 3 days after its `at`, the change marks' rule (`PlanDates.isQuiet()`):
       [PLAN-DOC.md](tool/PLAN-DOC.md), "Updates"
-    - a block carrying out Owen's OWN answer (every item it names answered by him, or his comment;  or `updated --for`
-      such items) is written seen by the tool, never in `to-see`:  no Seen to press (epic `epic-engine` I179;  Owen,
+    - a block carrying out the person's OWN answer (every item it names answered by them, or their comment;
+      or `updated --for`
+      such items) is written seen by the tool, never in `to-see`:  no Seen to press (epic `epic-engine` I179;
       2026-10-29:  "I shouldn't have to do that if you are doing what I said");  a change Claude made on its own stays new
   - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`);  every button meaning "accept this" is a
-    THUMBS UP (epic `epic-engine` I181;  Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make
+    THUMBS UP (epic `epic-engine` I181;  2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make
     this a todo'"):  Looks good, Accept plan, a plan accepted's state, Do this, the stage button
     - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
       moved after the others)
@@ -1913,13 +1933,13 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
     - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  a green thumbs up, drawn as
       a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing;  then Revisit, and no Do
-      this:  the accepted plan is the go-ahead (I184;  Owen, 2026-10-29:  "two thumbs up?")
+      this:  the accepted plan is the go-ahead (I184;  2026-10-29:  "two thumbs up?")
     - else Do this, Revisit (`buttons="phase"`):  no Approve
-      - Do this, the thumbs up, was Make Todo until I181 (Owen:  "it's already a phase, you wouldn't make it a todo"):
-        the same `todo` mark, which `inbox apply` takes on a phase as a GO-AHEAD (a Noted "Go ahead" card, his note
+      - Do this, the thumbs up, was Make Todo until I181 ("it's already a phase, you wouldn't make it a todo"):
+        the same `todo` mark, which `inbox apply` takes on a phase as a GO-AHEAD (a Noted "Go ahead" card, their note
         kept), never a new todo;  an Overview part's and the summary's stay Make Todo
   - The STAGE BUTTON (`<epic-stage-button>`, Accept Overview / Accept Phases, epic `epic-engine` I180) COUNTS DOWN FIVE
-    MINUTES once pressed (I181;  Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown"):
+    MINUTES once pressed (I181;  2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown"):
     - its mark goes in at once, `{ action: "accept", stage, countdown: true }`, HELD:  the route dates it
       `STAGE_COUNTDOWN_MS` ahead (`ReviewInbox.stamped()`), and a held mark (`isHeld()`) is neither unsent nor sent,
       so no Send (a press, Auto Send, Review Now) carries it early;  `epic inbox` prints it `held`
@@ -1927,8 +1947,9 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       carries on;  its tooltip says how long is left;  a second press removes the mark
     - nothing typed resets it:  a decision, not idleness;  run out, the button sends (`ReviewClient.send()`), waking
       the epic when nobody listens;  the page closed through the end, it goes when the page opens again
-  - REVISIT ON A PART WITH OWEN'S COMMENTS IN ITS TEXT (an item, a phase, an Overview part;  epic `epic-engine` I140;
-    Owen, 2026-10-26:  "The inline mark(s) are my comment"):  nothing typed, it opens no box
+  - REVISIT ON A PART WITH THE PERSON'S COMMENTS IN ITS TEXT (an item, a phase, an Overview part;
+    epic `epic-engine` I140;
+    2026-10-26:  "The inline mark(s) are my comment"):  nothing typed, it opens no box
     - it marks at once (`ReviewClient.press()`, `commentsIn()`):
       `{ action: "revisit", when: "soon", note: "see my comments in its text:  C1", comments: ["c1"] }`
     - which comments:  those waiting for Claude whose anchor is the part's (`<id>` or `<id>#<kind>-<n>`), from the
@@ -1936,7 +1957,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - `wait` prints them under the revisit, its content (`takeWork()`'s `inlineComments`);  `inbox` names them
       - never on their own too:  `takeWork()`'s `comments` leaves out the ones a sent revisit carries (I158)
     - NOT the phase's orange pen:  that counts its NEW update blocks (`to-see`, `<epic-update>`;  I168)
-  - A COMMENT SAVED IN A PART'S TEXT presses its Revisit by itself (epic `epic-engine` I158;  Owen, 2026-10-29:
+  - A COMMENT SAVED IN A PART'S TEXT presses its Revisit by itself (epic `epic-engine` I158;  2026-10-29:
     "When I add a comment to a phase, it should show as `revisit` automatically")
     - the comments route does it as it saves the comment, under the inbox's lock (`ReviewInbox.noteComment()`):
       the docs runtime writes comments, so the review client never sees one saved;  the page reads the new mark
@@ -1948,14 +1969,14 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - a pick:  that revisit, carrying the pick ("pick B, but ...")
       - an Approve / Accept plan:  still approved, the comment joining its `comments` (epic `epic-engine` I163)
       - any other mark (Make Todo, a revisit asked now):  left alone
-    - APPROVE on such a revisit (Approve, Accept Phase, Accept plan;  epic `epic-engine` I163;  Owen, 2026-10-29:  "just
+    - APPROVE on such a revisit (Approve, Accept Phase, Accept plan;  epic `epic-engine` I163;  2026-10-29:  "just
       incorporate the feedback and auto-approve rather than asking me again") keeps them (`ReviewClient.press()`):
       `{ action: "approve", note, comments }`;  clicked again, the revisit again
       - `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan, the comments
         left waiting;  Claude folds them in with `update <name>#P<n> --plan ... --accepted` (written accepted, no
         second Accept) and answers each
     - deleted or cleared (`dropComment()`):  out of every revisit naming it;  nothing left in one (no comment, no words
-      of Owen's):  a pick goes back to the plain pick, else the mark goes
+      of the person's):  a pick goes back to the plain pick, else the mark goes
     - Send counts one mark and the comment;  `wait` hands the comment over once, inside the revisit
     - the page header, the Overview as a whole, a guide:  nothing new
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
@@ -1977,11 +1998,11 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       `NOTE_SHOT` in `ReviewInbox.toMark()`;  a picture alone makes a revisit with an empty note
     - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's, next's
       or drop's picture in the person's kept reply (`keepNote()`)
-  - TESTS, answered on the page (epic `epic-engine` P51, Q53;  Owen, 2026-10-29:  "I don't think we need P/F/S/N if
+  - TESTS, answered on the page (epic `epic-engine` P51, Q53;  2026-10-29:  "I don't think we need P/F/S/N if
     testing feedback/etc are integrated in the epic doc"):  no test run, no test mode, no `<epic-test-run>`
     - Approve on a test:  `apply` closes it, passed
     - a Revisit note on it, or a comment in its Step or Should (which presses Revisit itself, I158):  left for the
-      session, which closes it (his note says it passed) or files "M3 failed:  <title>", linked both ways
+      session, which closes it (their note says it passed) or files "M3 failed:  <title>", linked both ways
     - the note box's ✕ (`skip`) on a test:  `apply` CANCELS it, "no longer applies"
       (`PlanDoc.applyAction()` hands it to `applyTest()`'s skip)
     - left alone:  still open
@@ -1992,10 +2013,10 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - nobody listening:  the page server wakes the epic, as for Add Details
     - "Preparing tests" while queued or worked;  a click calls it off (nevermind)
     - `epic inbox done <name>#tests` ends it:  FOCUS MODE opens on its Tests tab, in the person's order, on the first
-      test with no mark of his yet (epic `epic-engine` P57, decision Q65 A:  the section sends `epic-focus-asked`,
+      test with no mark of theirs yet (epic `epic-engine` P57, decision Q65 A:  the section sends `epic-focus-asked`,
       `<epic-page>` opens `<epic-focus>`), unless the person is typing in a field
       ("Tests ready:  Focus on the tests opens the first")
-    - every open test `prepared`:  "Focus on the tests · 3 left" (open tests with no mark of his yet), opening Focus
+    - every open test `prepared`:  "Focus on the tests · 3 left" (open tests with no mark of theirs yet), opening Focus
       mode there again;  none left:  "Focus on the tests · N";  it never asks Claude again
       - Focus mode's Back and Next step through them:  the section's own "Next test", landing on each in the page
         (`TestQueue.open()`, P51), went with Q65
@@ -2013,12 +2034,12 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
     - `PlanDoc.applyTest()`:  passed closes, failed files a new issue with the note and screenshot, skip cancels,
       not now defers;  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
-  - `comments`:  Owen's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `C1` ...
+  - `comments`:  the person's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `C1` ...
     - Written through the comments route.
-    - Sent with Send, as marks are (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude).
-      - Unsent (`unsentComments`):  waiting for Claude, and Owen's last words on the thread newer than `sent`.
-      - A new comment, or his reply on a thread, turns Send blue;  its tooltip counts both ("2 marks, 1 comment").
-      - `wait` hands each over once (`takeWork()`'s `sent.comments`), until Owen speaks on its thread again.
+    - Sent with Send, as marks are (2026-10-10:  they keep Send as the way comments reach Claude).
+      - Unsent (`unsentComments`):  waiting for Claude, and the person's last words on the thread newer than `sent`.
+      - A new comment, or their reply on a thread, turns Send blue;  its tooltip counts both ("2 marks, 1 comment").
+      - `wait` hands each over once (`takeWork()`'s `sent.comments`), until the person speaks on its thread again.
     - Waiting until answered (`epic inbox done <name>#C3`).
   - `listening.seen`:  the session's heartbeat (30s, from `wait`:  the kit's `Heartbeat`, epic `coherence` P28).
     - Older than 90s, the session is gone:  `liveListener()` returns `null` (`Heartbeat.isLive()`).
@@ -2074,7 +2095,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - Writes need the server's token and origin (`SRV.Guard`).
 - Unsent:  marks newer than `sent` (the last "send to Claude").
   - Never an immediate one (`details`, revisit `now`).
-  - And waiting comments whose last words from Owen are newer than `sent` (`unsentComments`).
+  - And waiting comments whose last words from the person are newer than `sent` (`unsentComments`).
 - `epic inbox <name> [--json]` prints it:
   - marks by action, with their items' titles, sent or not
   - the `now` queue, agents at work, the session listening
@@ -2083,17 +2104,17 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - `watch` / `ignore`:  a session waits on it, or stopped
   - `wait`:  run in the background;  it stamps the heartbeat while it waits
     - exits 0 with work, which wakes the session:  requests for now, taken;  a send not yet handed over (`handedOver`)
-      - a send with only comments too:  it prints them, each with Owen's latest reply
+      - a send with only comments too:  it prints them, each with the person's latest reply
       - a Send on a docs page the epic owns (epic `epic-workflow` P13, see "Comments"):  each comment under its page
-      - a plain revisit's note (words, no pick, no picture, not his comments in its text:
+      - a plain revisit's note (words, no pick, no picture, not their comments in its text:
         `ReviewInbox.isNoteToTalkOver()`) goes over as a COMMENT on its item (`PlanDoc.commentPlaceOf()`), its mark
         gone, so the page's note box lets go of the words (`ReviewClient.letGo()`);  answered on its thread like any
-        other (epic `epic-engine` I200;  Owen, 2026-11-02:  "make it a comment like the rest and clear the field")
+        other (epic `epic-engine` I200;  2026-11-02:  "make it a comment like the rest and clear the field")
         - one `wait` never took (`/airplane land`):  `inbox clear | done` makes it a comment, answered
     - exits 2 on timeout
   - `epic inbox <name>` lists the comments waiting on the pages the epic owns too (`guides` in its JSON)
   - `apply [ids]`:  the sent approve / pick / Make Todo marks and test answers, into the doc (`PlanDoc.applyMark()`),
-    then cleared;  each failed test's new issue listed, for the session to tell Owen with its link
+    then cleared;  each failed test's new issue listed, for the session to tell the person with its link
     - A revisit with a pick is left, "to talk over".
   - `<name>#<id> working on|off`:  an item, a comment, or a PHASE by number or id (`P20`, `p-one-repo`;  epic
     `epic-engine` I147), kept under its stable id
@@ -2101,8 +2122,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       writing this phase's plan" (to do, plan not accepted) or "Claude is working on it";  blue, and counted in the
       Phases section's blue badge and the toolbar's, unless it's red or orange first (`PhaseState`, I170)
     - Claude writing a phase's plan:  `epic phase <name>#P20 planning [off]`;  `update #P20 --goal ...` on a phase
-      whose plan isn't accepted sets it by itself, and `--plan` (now waiting for Owen) ends it
-  - `<name>#<id> done`:  keeps a mark Owen changed meanwhile
+      whose plan isn't accepted sets it by itself, and `--plan` (now waiting for the person) ends it
+  - `<name>#<id> done`:  keeps a mark the person changed meanwhile
   - `<name>#<id> clear`
   - These and `apply` stamp the heartbeat too.
   - An agent writes into ONE item with `epic details <name>#<id> --file <html> [--append]`.
@@ -2119,8 +2140,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
   - `show` opens a page in the side bar's "Details" tab (epic `epic-engine` P59;  "Review" from epic
     `windows-and-review` P6 until then):  see "Which side bar tab".
-  - `draft` prints what Owen typed and hasn't sent (below):  read it before rewriting a page he may have open.
-- ONE PAGE PER QUESTION (epic `epic-engine` P37;  Owen, 2026-10-24:  "you updated the Event Names document several
+  - `draft` prints what the person typed and hasn't sent (below):  read it before rewriting a page they may have open.
+- ONE PAGE PER QUESTION (epic `epic-engine` P37;  2026-10-24:  "you updated the Event Names document several
   times, leaving multiple copies viable.  Better to replace the one file."):
   - asked again:  `epic ask round <page> [--from <spec.json>]` (a choice page:  `epic choices round <page> --rows ...`)
     rewrites the ONE page in place;  without `--from`, a details page stays as it is, for Claude to edit
@@ -2146,7 +2167,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - a question:  a `<ui-section id>` holding an `<epic-ask>`
     - the `<epic-ask>` holds an `<epic-question>`, and an `<epic-choices>` of `<epic-option>`s
     - the section's id is its answer's key
-  - the boxes Owen types in:  `<epic-text-box>`es
+  - the boxes the person types in:  `<epic-text-box>`es
     - the notes, a section's comment
     - Other and each option's comment are drawn by the question
   - Send:  `<epic-send>`, in the sticky page header
@@ -2155,14 +2176,15 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - the template:  [the tool's own](tools/templates/details.html)
   - Before P12:  `ui-section.spell-question` > `.spell-option`, which a page script (`_assets/details.js`, gone) drew.
     - The migration step `answer-elements` converted every such page once (gone since epic `repo-split` Q45).
-- Owen's answer:  the page posts it to the page server's route module (`POST /api/docs/details/answer`).
+- The person's answer:  the page posts it to the page server's route module (`POST /api/docs/details/answer`).
   - The module:  [detailsRoutes.ts](tools/detailsRoutes.ts).
   - That writes `<slug>.answer.json5`, beside the page (`SRV.FileOperations.save()`).
   - `epic ask wait`, run in the background, exits with it, and so wakes the session.
   - Any of it is an answer:  a pick, Other, a section's comment, the notes.  A page with no questions, only comment
     boxes and notes, sends them all the same (`Sent 10/19/26 22:22`, no "0 of 0 decided").
 - WHO HEARS IT (epic `epic-engine` r6):  `<epic-send>` says, after the button.
-  - Why:  Owen typed comments on such a page while `epic ask show --wait` waited on it, and saw "nobody is listening"
+  - Why:  the person typed comments on such a page while `epic ask show --wait` waited on it,
+    and saw "nobody is listening"
     (the comments' Send, below, drawn over the page's own).
   - "repo-split is listening" (a green dot):  a session's `epic ask wait` (or `ask show --wait`) waits for the answer.
     - The wait keeps a heartbeat while it waits, gone as it ends ([AskListeners.ts](tools/AskListeners.ts)):
@@ -2176,10 +2198,10 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - It wakes no session (a docs page's Send does).
   - A details page takes no bullhorn comments, questions or not (`commentsRoutes.ts`, its `<epic-send>`):
     so no second Send in its header.
-- What he typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).
-  - Why:  agents rewrote a page under him twice, and everything he hadn't sent was lost (request r4).
+- What they typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).
+  - Why:  agents rewrote a page under them twice, and everything they hadn't sent was lost (request r4).
   - `<slug>.draft.json5` beside the page, through the same route module (`POST /api/docs/details/draft`)
-    - saved as he types (half a second after each change, one save at a time), and as the page goes away
+    - saved as they type (half a second after each change, one save at a time), and as the page goes away
     - a copy in the browser's `localStorage` too, written at once, for when the page server can't take it
     - a save that fails says so in red, on its own line under Send, and tries again every 3s until one goes through
       (epic `epic-engine` P15):  a page server back on its address takes it, its new token too, with no keystroke
@@ -2216,11 +2238,12 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - the columns:  File (opens VS Code at the line) | Purpose | Current | Recommended (a box, pre-filled)
     - The rows' `fileColumn: false` drops File, for rows whose place in the code doesn't matter to the reader
       (a list of commands;  epic `epic-workflow`, CM4).
-    - A section's `reorder: true` lets Owen put its rows in ORDER (epic `epic-workflow` P15, the sagas review page).
+    - A section's `reorder: true` lets the person put its rows in ORDER (epic `epic-workflow` P15,
+      the sagas review page).
       - an Order column first, each row's place with move up / move down
-      - The order he leaves goes with the draft and "Do it" (`order`, by section id).
+      - The order they leave goes with the draft and "Do it" (`order`, by section id).
       - `answer` prints it against Claude's.
-  - Owen types over the ones he'd write differently, then "Do it".
+  - The person types over the ones they'd write differently, then "Do it".
   - For a call made name by name, after a rule is picked (P13's boolean names).
   - How-to:  [the syntax-choices guide](../../spell.epics/guides/syntax-choices.html).
 - The commands ([choices.js](tools/choices.js);  the rows' shape is in its comment):
@@ -2249,12 +2272,12 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 - The page server's route module, [choicesRoutes.ts](tools/choicesRoutes.ts), at `/api/docs/choices/...`
   (each save through `SRV.FileOperations.save()`):
   - the draft:  `<slug>.draft.json5`, never wakes anyone
-    - saved as Owen types (half a second after each change), and as the page goes away
+    - saved as the person types (half a second after each change), and as the page goes away
     - a copy in the browser's `localStorage` too, written at once
       (through `PrefStore`, as everything this package keeps in the browser:  "Rules")
     - on load the newest of the two (or the answer) comes back
     - a save that fails says so in red on the bar, and tries again every 3s until one goes through
-      (epic `epic-engine` P15, r14:  a page server gone lost 76 boxes Owen typed)
+      (epic `epic-engine` P15, r14:  a page server gone lost 76 boxes the person typed)
     - Copy my answers, on the bar:  what's typed, as the draft's JSON, onto the clipboard,
       for a page whose server is gone for good (a reload there brings back nothing)
       - saved as the draft file, the page shows it again
@@ -2262,14 +2285,15 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
 ## Run pages
 
-- A COMMAND's review page (epic `epic-engine` P23):  a command, not Claude, stops to ask Owen, and carries on with his
+- A COMMAND's review page (epic `epic-engine` P23):
+  a command, not Claude, stops to ask the person, and carries on with their
   answers.  The first:  the Spanish translator (`spell translate`), with the names it drafted.
 - Who does what (every arrow down):
   - the kit's `SRV.CommandRun` (`spell/server/runs/`):  writes the run's folder, `pages/runs/<id>/` in the content
     folder, waits for Send with a heartbeat, reads the answers back;  its files' shapes, the contract with this side:
     `spell/server/runs/runs.types`
     - `run.json5`:  what the command asks (title, columns, rows, progress, status);  only the command writes it
-    - `answers.json5`:  what Owen answered, per row, and `sent`;  only the route module writes it
+    - `answers.json5`:  what the person answered, per row, and `sent`;  only the route module writes it
     - `waiting.json5`:  the command's heartbeat while it waits
   - here:  the page's template ([run.html](tools/templates/run.html)), its elements (`<epic-run>`, `<epic-run-row>`),
     and the route module that serves it and takes its answers ([runRoutes.ts](tools/runRoutes.ts))
@@ -2285,9 +2309,9 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - run id `[a-z0-9-]` only, a row of the run only, a known outcome:  else 400;  no such run:  404
 - `epic pages open <run folder> [--review]` opens its page (`pages.js` `runPagePath()`):
   the kit's `CommandRun.show()` runs it.
-- Steering (P25):  the command keeps going while Owen answers, and the page shows it live, from `run.json5`:
+- Steering (P25):  the command keeps going while the person answers, and the page shows it live, from `run.json5`:
   - `passes`:  the status card, a line per pass (name, bar and `212 of 380`, calls, time)
-  - `effort`:  the picker;  Owen's pick is saved at once, and the command reads it before its next pass
+  - `effort`:  the picker;  the person's pick is saved at once, and the command reads it before its next pass
   - `taken`:  a row the command acted on is marked `taken`;  changed after that, an orange note
     ("changed after the run took it"):  the command is handed it again, and may pick it up
   - `status`:  `done`, `stopped` or `timed-out` says how it ended, in the waiting line
@@ -2298,21 +2322,21 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
 ## Comments
 
-- Owen leaves a comment for Claude on any block of a docs page or epic page the page server serves
+- The person leaves a comment for Claude on any block of a docs page or epic page the page server serves
   (epic `airplane`, P11).
   - The BULLHORN beside each major block:
     - a section (in its title), table, aside, code block, message, cards, steps, top-level list
     - an epic page's Overview as a whole (epic `epic-engine` I55), items, phase fields, summary and Overview prose
     - an epic page's updates (`<epic-update>` blocks), even inside an item or a field:  each has its own bullhorn
-      (Owen, 2026-10-11:  "Those items are bullhorn-able")
+      (2026-10-11:  "Those items are bullhorn-able")
     - the page header:  the whole page
     - Quiet until hovered, ALWAYS:  it only starts a new comment ("Comment on this item").
     - No count, whatever the block has:  each comment is a thread on the page, right there.
-      Owen, 2026-10-10:  "Bullhorn to the far right is unnecessary".
+      2026-10-10:  "Bullhorn to the far right is unnecessary".
       - Before 2026-10-10 a block with comments showed "📢 N" always, sitting at the end of its thread's header row,
         with an orange dot for news;  its click listed them (`openPicker()`, gone).
       - The toolbar's signals stay as they were.
-    - WHERE it sits (epic `epic-workflow` P25;  Owen, 2026-10-17:  "an `actions` slot which puts additional buttons
+    - WHERE it sits (epic `epic-workflow` P25;  2026-10-17:  "an `actions` slot which puts additional buttons
       in the right spot, to the left of the 'default' buttons like collapse"):
       - a block with a TITLE ROW:  in that row, its `actions` slot, never over a button
         - a docs section:  `<ui-section>`'s own slot (`.at-section`)
@@ -2327,28 +2351,28 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - the page header:  in it (`.at-page`)
     - A corner bullhorn makes room rather than cover what's there (`makeRoom()`):
       a thread right under a short block, which it would cover, leaves room on its header's right.
-      - Owen, 2026-10-10:  "Overlap in bullhorn buttons"
+      - 2026-10-10:  "Overlap in bullhorn buttons"
       - Before P25 it also moved an item's corner bullhorn left of its review pills, and an update's left of its date
         (`MAKES_ROOM`, gone);  and a CSS rule shortened an aside's or code block's fold button by 34px (28e350907).
     - A click on a comment's highlighted quote opens its thread.
   - Or on SELECTED TEXT:  ⌘ / Ctrl I, or the bullhorn floating beside the selection.
     - The comment keeps the quote, highlighted softly on the page while the comment exists.
-  - The box is a small floating PANE (Owen, 2026-10-10), fixed on the screen, for writing a NEW comment:
+  - The box is a small floating PANE (2026-10-10), fixed on the screen, for writing a NEW comment:
     an `<epic-comment-pane>` (the epics pack;  epic `epic-engine` P3).
     - Once saved and closed, the comment is a THREAD (below).
     - just under the selection (or the bullhorn clicked);  above it when there's no room below
-    - the page never scrolls for it;  Owen drags it by its header
+    - the page never scrolls for it;  the person drags it by its header
     - ivory, 8px inside on every side, with no buttons below the text
     - Its header:  the first words of the selected text (else of the block;  its tooltip names the block),
       a floppy, a trash (once the comment is saved) and ×.
-    - Its field has no placeholder, only an `aria-label` (Owen, 2026-10-10).
-    - It saves itself as Owen types:  the floppy shows saved (its tooltip the time), or turns red.
+    - Its field has no placeholder, only an `aria-label` (2026-10-10).
+    - It saves itself as the person types:  the floppy shows saved (its tooltip the time), or turns red.
     - × or Escape (or ⌘ Enter) closes it.  Opening another saves this one first.
-    - So does the FOCUS LEAVING it (Owen, 2026-10-10:  "Tabbing out of a bullhorn modal saves it automatically.
+    - So does the FOCUS LEAVING it (2026-10-10:  "Tabbing out of a bullhorn modal saves it automatically.
       If it's empty, delete it"):  Tab, a click elsewhere on the page.
       - What's typed is saved;  nothing typed saves nothing;  emptied, the comment goes, with no Undo.
       - Another window or tab doesn't count:  the cursor is still in it there.
-  - NEVER an empty comment (Owen, 2026-10-10):
+  - NEVER an empty comment (2026-10-10):
     - nothing typed, or only spaces, saves nothing
     - emptied, it goes at once (`delete` while it waits for Claude, else `clear`)
     - the server refuses an `add` or `edit` with no text (white space or zero-width characters only):  400
@@ -2358,53 +2382,54 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - Before 2026-10-10 a saved comment's text stayed as a draft under its BLOCK:  after a reload, that block's
       bullhorn opened with it, and closing the pane saved it again, as a new comment.
       A new comment's draft that copies a comment already on its block is dropped.
-  - DELETE:  a trash on every comment's thread, and in the pane's header (Owen, 2026-10-10).
+  - DELETE:  a trash on every comment's thread, and in the pane's header (2026-10-10).
     - Icon only, its tooltip says what it does;  ONE click deletes at once, no dialog.
     - A toast says "Comment deleted", with Undo for 6s (`UNDO_MS`).
       - Undo puts it back as it was:  same block, quote and highlight, text, dates, state, Claude's answers.
       - Its id stays, unless a new comment took it meanwhile (`restore`, below).
       - Before 2026-10-10 the trash took two clicks, the first turning it red:
-        Owen clicked once, and thought it broken.
+        the person clicked once, and thought it broken.
     - `delete` while the comment waits for Claude;  `clear` once Claude has it (a taken one stays in its epic).
-  - THREADS (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane").
+  - THREADS (2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane").
     EVERY comment shows as one, an `<epic-thread>` (the epics pack;  epic `epic-engine` P3), in the `<epic-threads>`
     box under its block (the runtime's `thread()`, `boxFor()`):
     - ONE element per comment for the visit, given what the server holds at each redraw, moved only when its place
-      changes:  Owen's box in it, what's typed and the cursor stay
-    - it draws what it's given and says what Owen did (`epic-thread-opened` / `-closed`, `-editing`, `-removing`, `-answered`);
+      changes:  the person's box in it, what's typed and the cursor stay
+    - it draws what it's given and says what the person did (`epic-thread-opened` / `-closed`, `-editing`, `-removing`,
+      `-answered`);
       the comments' code saves, keeps the box (a `<textarea>`, slotted) and draws it again
     - what it shows is worked out by `ThreadFacts` (`spell/epic/comments`), the comments' code's too
-    - A thread is the comment, then its `replies` in order (Claude's answers, Owen's replies), then maybe `done`.
+    - A thread is the comment, then its `replies` in order (Claude's answers, the person's replies), then maybe `done`.
     - WHOSE TURN (`ThreadFacts.turnOf()`, sent by the GET as each comment's `turn`):
       - `person`:  an agent spoke last (`owen` before epic `epic-friend` P2;  `withTurns()` reads it so).  Also an epic page's comment answered in the doc, with no words on the thread.
       - `agent`:  a person spoke last, their comment or their reply.  An agent may have taken it, not answered yet.
         `claude` before epic `epic-friend` P10:  `ThreadFacts.asTurn()` reads it so, for a page or server from before
-      - `done`:  Owen closed it.
-    - Where (Owen, 2026-10-10:  "show them under the paragraph where they were defined"):
+      - `done`:  the person closed it.
+    - Where (2026-10-10:  "show them under the paragraph where they were defined"):
       - right after the smallest paragraph, list item, cell ... holding its quote (`holderOf()`)
       - inside a list item or cell:  at its end
       - else under its block;  a docs section's comes first in its body
     - Folded to its header, except while:
-      - it's Owen's turn, or Claude is thinking about it
-      - he opened it on this visit, or he's writing in it
-      - Before threads, a comment had a card only while it had news Owen hadn't read.
-    - Its EDGES (Owen, 2026-10-10:  "same indent as comment box"):
+      - it's the person's turn, or Claude is thinking about it
+      - they opened it on this visit, or they're writing in it
+      - Before threads, a comment had a card only while it had news the person hadn't read.
+    - Its EDGES (2026-10-10:  "same indent as comment box"):
       - under an epic page's item:  its note box's ("Your note:  a question ..."), the item's details' padding
         (`--epic-item-indent` left, 6px right);  so is a thread under a paragraph inside the item
       - else the block's it's under:  a guide's paragraph (its 72ch measure too), table, code ...;  a phase's field
       - Before 2026-10-10:  32px in from the text on each side.
-  - A thread's LOOK (the mockup, `comment-thread-mock.html`, a scratch details page, and Owen's notes on it):
+  - A thread's LOOK (the mockup, `comment-thread-mock.html`, a scratch details page, and the person's notes on it):
     - ALL ivory, whoever spoke last ("Make the entire thing ivory"):
       the pane's `--spell-rail-bg`, outline and corners;  no shadow.
-    - ORANGE while it's Owen's turn:  Claude spoke last, and he hasn't answered (✓, a reply, ×) (`unseen()`).
-      - Owen, 2026-10-10:  "make the background of the entire bullhorn thread + the last claude reply orange".
+    - ORANGE while it's the person's turn:  Claude spoke last, and they haven't answered (✓, a reply, ×) (`unseen()`).
+      - 2026-10-10:  "make the background of the entire bullhorn thread + the last claude reply orange".
         Then, on one that went ivory once looked at:  "I was expecting this to be orange, not ivory".
       - Looking at it no longer clears it:  the SEEN rule below only marks the reply read.
       - Orange is our colour for "changed since you looked".
       - The whole thread's ground:  `--ui-orange` mixed into the ivory, 13% (22% in the dark, where less reads brown).
       - Claude's latest reply (`data-latest`):  a stronger mix, 30% (40% dark), with a faint orange ring.
       - Its outline and header stay as on any thread (before 2026-10-10, only those turned orange).
-      - SEEN:  he unfolds it (or opens it from its quote),
+      - SEEN:  they unfold it (or opens it from its quote),
         or it's open with half of it (or half the screen) on screen for 1.2s (`SEEN_MS`) while the page is in view.
       - Remembered in this browser, per page, in the store the news-only cards kept before threads:
         `spell-comment-read:<path>`, `{ [comment id]: time of the latest Claude reply seen }`.
@@ -2414,16 +2439,17 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - the bullhorn (a green check circle once done)
       - its id, `C3`:  small and muted, an outline and no fill (epic `epic-workflow` P23;  `M3` until `epic-engine` P44)
       - the pane's summary (`ThreadFacts.headline()`):  the quote's first words, else the block's;  its tooltip the full place
-        - a saved thread's header:  the start of Owen's own words instead (I162):  the page highlights what was selected
+        - a saved thread's header:  the start of the person's own words instead (I162):
+          the page highlights what was selected
       - No date:  each message has its time.
-    - Then OWEN'S ANSWER, while it's his turn:  an epic page item's review pills
+    - Then THE PERSON'S ANSWER, while it's their turn:  an epic page item's review pills
       ("same semantics/look as pills in item header").
       - The real `<epic-review>`, `buttons="thread"` (`closed`:  Reopen), drawn by the thread in its shadow root:
         the item line's group, look and colours, but no inbox behind it (a press sends `epic-thread-answered`).
         - Before epic `epic-engine` P3 the docs runtime drew a copy of its markup:  a guide didn't load the pack.
       - ONE grouped pill of 24px square icon buttons, grey outlined, on the page's ground;
         each button its colour under the pointer.
-      - Tooltips (Owen, 2026-10-10:  "No tooltip on those same buttons"):
+      - Tooltips (2026-10-10:  "No tooltip on those same buttons"):
         "That's good:  done", "Reply", "Skip it:  done, nothing more to do".
         - The pointer lands on the titled `<ui-button>` itself (the pack's `Tooltip.css`),
           as the bullhorn's is.
@@ -2432,24 +2458,24 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - Revisit's history (blue):  reply.  The cursor goes into the reply box at the thread's end.
       - The note box's x (grey):  "skip it".  Done, nothing more to do.
       - A toast says it's done, with Undo (`reopen`).  A closed thread shows Reopen in their place.
-    - The pen, while his FIRST words wait and Claude hasn't had them:  they come back in a box to change.
-      His pending reply needs none:  it's in the reply box.
+    - The pen, while their FIRST words wait and Claude hasn't had them:  they come back in a box to change.
+      Their pending reply needs none:  it's in the reply box.
     - The trash, always.
     - The MESSAGES:  the colour says who, and a bold "You:" / "Claude:" starts each one's first line.
-      - Owen, 2026-10-10:  "Put You in bold, same line, before me and Claude: before yours".
-        Earlier he'd dropped a separate name line.
+      - 2026-10-10:  "Put You in bold, same line, before me and Claude: before yours".
+        Earlier they'd dropped a separate name line.
     - Tight:  2px / 6px inside a message, 2px between them.
-    - SMALLER than the page's text (Owen, 2026-10-10:  "Make text in comments smaller"):
+    - SMALLER than the page's text (2026-10-10:  "Make text in comments smaller"):
       the last message 0.9em, as are the reply box and the pane's field.
       - Every message but the LAST smaller still, 0.8em, and quieter.
-        - Owen, 2026-10-10:  "Make font smaller for "not current" things -- everything other than last message".
+        - 2026-10-10:  "Make font smaller for "not current" things -- everything other than last message".
         - The "thinking…" stub and the Done line count as the last.
         - The times keep their size.
-      - Owen's:  plain on the ivory, no box, but the same padding as a boxed one ("my text doesn't get bordered").
+      - The person's:  plain on the ivory, no box, but the same padding as a boxed one ("my text doesn't get bordered").
       - an agent's:  a light box in the agent's voice (`--epic-voice-agent`, terracotta;  violet before epic
         `epic-friend` P10), no side bar;  a speaker with a colour of their own, theirs (`--_epic-voice`).
         - Its outline only a faint ring in that colour, drawn as a shadow, its border clear, so nothing moves.
-          Owen, 2026-10-10:  "lighten border around your replies, make it just border-as-shadow".
+          2026-10-10:  "lighten border around your replies, make it just border-as-shadow".
         - Also "Taken into <epic> · <phase>", and "Answered in the epic page" for an answer with no words here.
           - linked by the phase's stable id, so an insert never moves it (epic `epic-engine` I16, `takenInto()`);
             one taken before:  "<epic> P<n>", at `#p<n>`
@@ -2457,39 +2483,39 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
         A faint green ring, the same way.
       - While Claude THINKS about it (the comment's `working`):  "Claude: thinking…" last, in a box of its own.
         - the page's BLUE, Claude at work on it (the Underway card's, a phase's spinner;  epic `epic-engine` I169;
-          Owen, 2026-10-29:  "Seems like this should be blue?"):  a light blue box, a faint blue ring, its words blue and
-          italic, "Claude:" in the ink;  violet before, his voice's colour
-        - a turning `circle notch`, its time when he started
-        - His answer takes its place.
-        - Owen, 2026-10-10:
+          2026-10-29:  "Seems like this should be blue?"):  a light blue box, a faint blue ring, its words blue and
+          italic, "Claude:" in the ink;  violet before, their voice's colour
+        - a turning `circle notch`, its time when they started
+        - Their answer takes its place.
+        - 2026-10-10:
           "What does it look like when you're thinking?  You could put in a stub and replace that when you've thought".
       - Each one's time in its top right corner, `position: absolute`:
         - The first's carries the day (`10/10 09:12`), the rest only the time, unless the day changed.
         - The full date and time is its tooltip.
         - A hidden copy floats there, so the first line's text stops short of it.
   - The REPLY BOX (`replyBoxFor()`):  last in EVERY open thread, no Revisit needed;  none once done, until Reopen.
-    - Owen, 2026-10-10:  "How do I reply?  Probably should have a comment box at the bottom for me".
+    - 2026-10-10:  "How do I reply?  Probably should have a comment box at the bottom for me".
     - The pane's field (no placeholder, an `aria-label`), its floppy in the corner:
       a line or two, growing with its words.
-    - It saves itself as he types (`reply`):  his PENDING reply (the last entry, his, not taken since) changes,
+    - It saves itself as they type (`reply`):  their PENDING reply (the last entry, theirs, not taken since) changes,
       rather than adding another.
-    - Claude's turn:  it still shows, holding his pending reply to change or add to.
-      - Once Claude is thinking about it (`working`), his words are read:  the box is empty again, and what he
-        types is a new reply after them.
-    - FOCUS LEAVING it (Tab, a click elsewhere) saves at once;  emptied, his pending reply goes.
+    - Claude's turn:  it still shows, holding their pending reply to change or add to.
+      - Once Claude is thinking about it (`working`), their words are read:  the box is empty again, and what they
+        type is a new reply after them.
+    - FOCUS LEAVING it (Tab, a click elsewhere) saves at once;  emptied, their pending reply goes.
     - Escape or ⌘ Enter saves, and the cursor leaves it.
-    - Kept across redraws while he's in it, or it holds words not saved yet, the cursor with it.
+    - Kept across redraws while they're in it, or it holds words not saved yet, the cursor with it.
       Else it's made again from what the server holds.
-    - The pen's box edits his first words while the comment is `new` (`edit`), standing in for the reply box.
+    - The pen's box edits their first words while the comment is `new` (`edit`), standing in for the reply box.
       - Focus leaving it, Escape or ⌘ Enter:  saved and closed.
       - Emptied, the comment goes only as the box closes, with Undo:  clearing it to type afresh never loses it.
     - A draft is kept in this browser while it differs from what's saved.
-  - Owen's icon buttons outside the pill (the pen, the trash, the pane's ×) are plain:
+  - The person's icon buttons outside the pill (the pen, the trash, the pane's ×) are plain:
     no ring, a tint under the pointer.
     - `<ui-button appearance="circular basic" size="mini">`s, plain through the component's tokens (`.tool` in
       `EpicThread.css` / `EpicCommentPane.css`;  epic `epic-engine` I26)
   - TOOLTIPS:  the browser's own (`title`), a few words each;  the longer wording is the `aria-label`.
-    - Owen, 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
+    - 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
     - Each button's:
       - ✓ "That's good:  done"
       - Revisit "Reply"
@@ -2513,7 +2539,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       Headless Playwright can't show a native tooltip, only check what's under the pointer.
   - Built for reading offline, with no Claude:  only the page server writes them.
 - SEND on a docs page (epic `epic-workflow` P13), as on an epic page:
-  Owen comments, presses Send, and the session working the epic the page BELONGS to gets them.
+  the person comments, presses Send, and the session working the epic the page BELONGS to gets them.
   - The page header's right:  a pill, the paper plane, "Send" and how many comments aren't sent yet.
     - blue by the fill rule (grey outline:  nothing waiting;  dashed:  some not sent;  outlined:  sent)
     - then who is listening:  "python-target is listening" (a green dot), "nobody is listening"
@@ -2526,7 +2552,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   - Which epic:  `SeeAlso.ownerOf()` ([SeeAlso.ts](tool/SeeAlso.ts)), from the epics' See Also:
     - a page in `epics/<name>/details/`:  epic `<name>`
     - else the epic whose See Also lists it:  its guide's epic first (J88), then an open one,
-      then the one updated last (Owen's Q12)
+      then the one updated last (the person's Q12)
     - none:  the STANDING epic `feedback` (epic `epic-engine` T9, J7;  `SeeAlso.epicFor()`), the inbox for every
       page no epic owns:  guides no epic claims, Epic UI's pages, the list pages, the changelog
       - its `epic inbox wait feedback` hears every such page's Send (`PageInboxes.unowned()`)
@@ -2544,7 +2570,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - [GuideInbox.ts](tool/GuideInbox.ts), in the `epic` tool since P13:  the tool's `wait` reads it
   - an epic page's:  the epic's review inbox, under `comments` (`ReviewInbox`, see "Review inbox")
   - One shape for both, and every change:  [`CommentList`](tool/CommentList.ts).
-  - IDS (epic `epic-engine` P44;  Owen, 2026-10-25:  "Can `Mark` be `Comment (C)`"):  shown `C1`, `C2` ...
+  - IDS (epic `epic-engine` P44;  2026-10-25:  "Can `Mark` be `Comment (C)`"):  shown `C1`, `C2` ...
     - small and muted in each thread's header, before its summary
     - every tool prints `C3`, and takes `C3`, `c3` or the old `cm3` (`CommentList.idOf()`, `label()`)
       - NOT `M3`:  that's a manual test now
@@ -2553,7 +2579,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
         `epic migrate` respells every inbox in the epic folder at once (`ContentRelink.respellComments()`)
       - a checkout on older code finds a comment by its key as it is:  until it merges `main`, it misses the
         comments written as `c3`, and its new ones are `m1` ... again (read as `c` by this code, a clash renumbered)
-    - before:  `M1` ... ("M" for mark, epic `epic-workflow` P23 to `epic-engine` P44;  Owen, 2026-10-10:  "use `M3`
+    - before:  `M1` ... ("M" for mark, epic `epic-workflow` P23 to `epic-engine` P44;  2026-10-10:  "use `M3`
       for mark 1"), keyed `m1` (J178, 2026-10-17), and `cm1` from comments' start (epic `airplane` P11)
     - comments in prose and commit messages from before keep the old letters:  history
 - Where a comment is:  its ANCHOR ([BlockAnchors.js](tools/BlockAnchors.js), shared by the runtime and the tools).
@@ -2571,7 +2597,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - add and edit need text:  blank is a 400
     - `restore { id, comment }`:  the trash's Undo, the comment as the GET gave it (`CommentList.restore()`)
     - the thread:
-      - `reply { id, text }`:  Owen's reply, as he types (blank empties his pending one;  none pending, a 400)
+      - `reply { id, text }`:  the person's reply, as they type (blank empties their pending one;  none pending, a 400)
       - `resolve { id, how: good | skip }`:  "that's good" / "skip it" close it
       - `reopen { id }`
   - The GET adds each comment's `turn`.
@@ -2611,15 +2637,15 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   ```
 
   - `wait`, run in the background, wakes the session with a comment that starts waiting (on those pages, else any):
-    a new one, or Owen's reply on one.  It exits 2 on timeout.
+    a new one, or the person's reply on one.  It exits 2 on timeout.
     - e.g. the spell syntax guide's wand, a comment on its row:  "Provide more details here:  `IsGtLt`."
   - `working ... on` as Claude starts on a comment:  its thread shows "Claude: thinking…".
     - It sets the comment's `working`, since when (`CommentList.setWorking()`).
     - `answer` turns it off.
-    - Not WAITING meanwhile, and Owen's words before it count as read.
-  - WAITING (`CommentList.waiting`):  Claude's turn, not taken since Owen last spoke.
-    So Owen's reply on a thread is new work, as a new comment is:  `list` shows it under the comment.
-  - `answer` puts Claude's answer on the thread:  Owen's turn.  `--commit`:  the Done line shows it.
+    - Not WAITING meanwhile, and the person's words before it count as read.
+  - WAITING (`CommentList.waiting`):  Claude's turn, not taken since the person last spoke.
+    So the person's reply on a thread is new work, as a new comment is:  `list` shows it under the comment.
+  - `answer` puts Claude's answer on the thread:  the person's turn.  `--commit`:  the Done line shows it.
   - `list <epic>`:  the comments on the pages that epic owns, and those taken into it.
   - every component set's pages too:  by their served path, `components/epics/epic-item.html#C1`,
     `components/app/Chooser.html#C1`;  their inboxes found in the sets' folders (`PageInboxes.inboxFiles()`, `pages.js`
@@ -2632,10 +2658,10 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - Only on pages NO epic owns (P13):  an owned page's go to its epic, unless the page is named.
     - `feedback`'s session runs it when a Send wakes it;  `/airplane land` sweeps what was never sent.
     - one phase per page;  an Updated block in the page's phase while it's open
-    - a reply rides along under its comment ("Owen replied on the thread")
+    - a reply rides along under its comment ("the person replied on the thread")
     - each comment then `taken`
     - `/airplane land` runs it.
-- Claude's side, for epic pages:  `epic inbox <name>` lists them, and Owen's replies under them.
+- Claude's side, for epic pages:  `epic inbox <name>` lists them, and the person's replies under them.
   - They reach Claude with the page's SEND, as marks do (see "Review inbox"):
     a send with only comments wakes `wait`, which prints them.
   - `epic inbox working <name>#C3 on | off`:  the thinking stub, as `comments working`.
@@ -2647,7 +2673,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
 ## Page notes
 
-- Before P11 (comments), Owen left notes on docs pages (epic `airplane`, P3).
+- Before P11 (comments), the person left notes on docs pages (epic `airplane`, P3).
   - A bubble on each section's title, and a Note pill in the page header:  both gone since.
   - The notes written still show, read only, and `epic notes` still answers them.
 - The note is written INTO the page's HTML, so the epic repo commits it with the next turn.
@@ -2699,7 +2725,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 
 ## Links
 
-- Every local link is a ROOT PATH, as the page server serves it (epic `epic-engine` P46;  Owen, 2026-10-25:  "links
+- Every local link is a ROOT PATH, as the page server serves it (epic `epic-engine` P46;  2026-10-25:  "links
   should NEVER be `../`", and "Root paths.  Opening files is a no-go for many reasons."):
 
   ```text
@@ -2707,7 +2733,7 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
   /guides/server.html                 a page of the epic folder
   /epics/seo/seo.plan.html#t3         an epic page and an id on it
   /epics/seo/details/q.html           a page BELOW the page's folder:  a root path too
-  q.html                              a file in the page's OWN folder:  stays as written (Owen's Q1)
+  q.html                              a file in the page's OWN folder:  stays as written (the person's Q1)
   _assets/site.js, parts/p1.html      what a page LOADS from below its folder:  stays, so a worktree's page loads its own
   ```
 
@@ -2828,7 +2854,7 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
   - Every write is under the file's lock (`SRV.FileLock`) and atomic, as the review inbox's.
   - REDIRECTS (P3):  an epic page's agents popover (`<epic-page>`'s header pill, spell-epic) shows an epic's list,
     with a note box per agent.
-    - Owen's note goes through [agentRoutes.ts](tools/agentRoutes.ts), guarded as the review routes are:
+    - The person's note goes through [agentRoutes.ts](tools/agentRoutes.ts), guarded as the review routes are:
       - `GET /api/epics/agents?page=`
       - `POST /api/epics/agents/redirect { page, name, note }`
     - It goes into the entry's `redirects`, untold.
@@ -2836,8 +2862,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
   - The verbs, and an example:  the header of [agents.ts](tools/agents.ts).
 - `epic pages link <page> [--hash <id>] [--text "..."] [--review] [--show]` ([link.ts](tools/link.ts)):
   the markdown links Claude gives for a page.
-  - side bar first (its tab the page's kind's;  `--review` asks for "Review"), then `• 🌐`, the browser link (Owen,
-    2026-10-11)
+  - side bar first (its tab the page's kind's;  `--review` asks for "Review"),
+    then `• 🌐`, the browser link (2026-10-11)
   - `<page>` may be a short address (`SAGA:/drawable-spell/python-target#T1`):  its `--hash`, and its text the short
     form and the item's title (`python-target T1 · ...`)
   - both through [showRoutes.ts](tools/showRoutes.ts) (`GET /api/docs/show`)

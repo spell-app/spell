@@ -396,7 +396,7 @@ Notes on reading them:
   - Fix:  let the next item peek 16-32px past the edge, or a disclosure control naming what's hidden:  "Show 12 more results".
   - Source:  [layout] G/better-layout/SKILL.md, G/better-layout/spacing-and-adaptivity.md
 - **C70  Room between controls, more when they have no border**
-  - Owen's toolbars are tighter than this:  T2 (related things close) and T1 (no padding out) WIN.
+  - House taste's toolbars are tighter than this:  T2 (related things close) and T1 (no padding out) WIN.
   - Look for:  borderless icon buttons packed 4px apart;  bordered buttons touching.
   - Fix:  12px between bordered or filled controls;  24px between the visible glyphs of borderless ones;  24px or more between groups of controls.
     A project's own dense spacing stays, as long as hit areas don't overlap.

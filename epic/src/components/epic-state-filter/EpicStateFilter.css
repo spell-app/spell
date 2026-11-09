@@ -72,17 +72,11 @@
    * the items marked in this pass (epic `epic-engine` P43):  SOLID blue, Send's plane's (`--ui-blue`), white ink, first (Owen,
    * 2026-10-25:  "go with dark blue solid, the light blue looks like filter turned off", then "Use same blue as plane";
    * a dotted outline over a light wash, before);
-   * not a filter, so no pointer and no hover ring
+   * the blues' chip:  outlined while they're hidden, as every chip (epic `epic-engine` I242)
    */
   .chip.marked {
     --_chip: var(--ui-blue, #2185d0);
-    border-color: var(--_chip);
-    background: var(--_chip);
-    color: white;
-    cursor: default;
-  }
-  .chip.marked:hover {
-    box-shadow: none;
+    --_chip-on: white;
   }
   .chip[aria-pressed="true"] {
     background: var(--_chip);

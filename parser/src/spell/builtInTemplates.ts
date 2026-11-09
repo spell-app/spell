@@ -22,7 +22,6 @@ import { BUILT_IN_TEMPLATE_DECLARATIONS } from "./builtInTemplates.generated"
  */
 export const BUILT_IN_TEMPLATES: Record<string, string> = {
   "two sided view": "TwoSidedView",
-  notebook: "Notebook",
   site: "Site"
 }
 
@@ -37,8 +36,8 @@ export function isBuiltInTemplate(datatype: string): boolean {
  *   (a Spanish file's `está boca arriba` reads `isFaceDirection("up")`), as a root of several languages has its
  *   built-in types' members in every one of their words.
  * - A language the template isn't written in reads English's.
- * - SIDE EFFECT:  adds types, members and rules to `scope`, and its parser -- `SP.Language.rootScope` calls it as it
- *   builds, once.
+ * - SIDE EFFECT:  adds types, members and rules to `scope`, and its parser:
+ *   `SP.Language.rootScope` calls it once, as it builds.
  * - Throws `P.ParserError` if a template's declarations won't load:  regenerate them (`yarn core:gen:templates`).
  */
 export function loadBuiltInTemplates(scope: P.RootScope, languages: readonly SP.Language[]): void {

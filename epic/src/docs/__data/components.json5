@@ -3769,7 +3769,7 @@
         },
         {
           "name": "recommended",
-          "description": "The recommended one's violet thumbs-up, after its title, labelled `Recommended`."
+          "description": "The recommended one's terracotta thumbs-up, after its title, labelled `Recommended`."
         },
         {
           "name": "actions",
@@ -5325,7 +5325,7 @@
         "request",
         "quote"
       ],
-      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the ivory of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
+      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the faint violet of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
       "noun": "prompt",
       "attributes": [],
       "slots": [
@@ -6676,7 +6676,7 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip;  an ⌥-click (Alt-click) shows only its state, whatever showed (epic `epic-engine` I166).  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  A click toggles a chip and every state of its colour (`StateFilter.nextShown()`), as its tooltip says;  an ⌥-click (Alt-click) shows only that colour, whatever showed (epic `epic-engine` I166).  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, the blues' chip.",
       "noun": "state-filter",
       "attributes": [
         {
@@ -6687,7 +6687,7 @@
         {
           "name": "marked",
           "kind": "number",
-          "description": "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a click does nothing.  None, or 0:  no badge."
+          "description": "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in the blue badge, left of the chips, and left out of `counts`.  A click toggles every blue, these items too.  None, or 0, and nothing with Claude:  no badge."
         },
         {
           "name": "phases",
@@ -6732,7 +6732,7 @@
         {
           "key": "chipWords",
           "text": "{count} {words}:  {does}\n{only}",
-          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...), then what an ⌥-click does (`chipAltOnly`)."
+          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipHide` ...), then what an ⌥-click does (`chipAltOnly`)."
         },
         {
           "key": "chipAltOnly",
@@ -6741,18 +6741,13 @@
         },
         {
           "key": "markedWords",
-          "text": "{count} with Claude:  marked in this pass, or being worked on",
+          "text": "with Claude (marked in this pass, or being worked on)",
           "description": "The ONE blue badge's name and tooltip:  how many items are with Claude, whatever their kind -- marked in this pass, or being worked on (epic `epic-engine` P43)."
         },
         {
           "key": "showAll",
           "text": "show everything",
           "description": "A state chip's click:  every state shows again."
-        },
-        {
-          "key": "chipOnly",
-          "text": "show only these",
-          "description": "A state chip's click:  only its state shows."
         },
         {
           "key": "chipAlso",
@@ -6763,6 +6758,16 @@
           "key": "chipHide",
           "text": "hide these",
           "description": "A state chip's click, showing:  its state hides."
+        },
+        {
+          "key": "chipNext",
+          "text": "show the next ones instead",
+          "description": "A state chip's click, the last one showing:  the next colour shows, and this one hides."
+        },
+        {
+          "key": "chipStays",
+          "text": "nothing else to show",
+          "description": "A state chip's click, the only colour there is."
         },
         {
           "key": "stateProgress",
@@ -6821,7 +6826,7 @@
         },
         {
           "key": "markedPhaseWords",
-          "text": "{count} with Claude:  under way, being worked on, or marked in this pass",
+          "text": "with Claude (under way, being worked on, or marked in this pass)",
           "description": "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked in this pass (epic `epic-engine` I170)."
         },
         {
@@ -7854,7 +7859,7 @@
       "folder": "epic-ask",
       "mainTag": "epic-ask",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
+      "summary": "A question you answer on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7974,7 +7979,7 @@
       "folder": "epic-comment-pane",
       "mainTag": "epic-comment-pane",
       "title": "<epic-comment-pane>",
-      "summary": "The <epic-comment-pane> element: the floating pane Owen writes a new comment in.",
+      "summary": "The <epic-comment-pane> element: the floating pane you write a new comment in.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8226,7 +8231,7 @@
       "folder": "epic-reply",
       "mainTag": "epic-reply",
       "title": "<epic-reply>",
-      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's violet, Owen's ivory.",
+      "summary": "A reply on an item: headed who and what about, the date at its right; Claude's terracotta, yours violet.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8238,7 +8243,7 @@
       "folder": "epic-run",
       "mainTag": "epic-run",
       "title": "<epic-run>",
-      "summary": "The <epic-run> element: a run page's body: a command asks, Owen answers each row, Send.",
+      "summary": "The <epic-run> element: a run page's body: a command asks, you answer each row, Send.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8250,7 +8255,7 @@
       "folder": "epic-run-row",
       "mainTag": "epic-run-row",
       "title": "<epic-run-row>",
-      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then Owen's answer.",
+      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then your answer.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8322,7 +8327,7 @@
       "folder": "epic-status",
       "mainTag": "epic-status",
       "title": "<epic-status>",
-      "summary": "Claude's status card on an item: what Claude took Owen's mark to mean, then that it's done.",
+      "summary": "Claude's status card on an item: what Claude took your mark to mean, then that it's done.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -8346,7 +8351,7 @@
       "folder": "epic-text-box",
       "mainTag": "epic-text-box",
       "title": "<epic-text-box>",
-      "summary": "A box Owen types in on a page he answers on: notes, a comment, Other, feedback.",
+      "summary": "A box you type in on a page you answer on: notes, a comment, Other, feedback.",
       "status": "done",
       "docs": false,
       "tags": [

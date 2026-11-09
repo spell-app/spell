@@ -115,7 +115,7 @@ export type HighlightSpan = {
 export type ProjectInfo = {
   /** Project id, e.g. `@spell/examples/Solitaire`. */
   project: string
-  /** Active spell files, in the order they parse. */
+  /** Active spell files, in the order they parse;  `file` its path in the project, `Button/Usage.spellml`. */
   files: Array<{ uri: string; file: string; errors: number }>
   /** Why the last full parse crashed, if it did. */
   problem?: string
