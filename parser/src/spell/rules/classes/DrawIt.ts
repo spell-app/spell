@@ -55,6 +55,8 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
 
   /** Only a `draw_method`'s words, in a type's outline body;  `draw each item` only in a list's. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    // a drawing under a declaration that was refused:  the refusal is the error, this line isn't
+    if (!P.SubjectScope.of(scope)) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     const type = P.SubjectScope.of(scope)?.subjectType
     if (!match || !type) return undefined

@@ -1381,7 +1381,10 @@ function isSelfClosingHead(line: string): boolean {
  * - The page starts by itself, as any app or page does (`SpellProject.startedByItself()`):  no line is added for it.
  * - SIDE EFFECT:  changes `block`'s items in place;  returns it.
  */
-function liftPageTemplates(block: P.BlockToken, nameForPage: (item: P.Token, page: SP.SpellxText) => void): P.BlockToken {
+function liftPageTemplates(
+  block: P.BlockToken,
+  nameForPage: (item: P.Token, page: SP.SpellxText) => void
+): P.BlockToken {
   const items = block.tokens
   for (let index = 0; index < items.length; index++) {
     const line = items[index]

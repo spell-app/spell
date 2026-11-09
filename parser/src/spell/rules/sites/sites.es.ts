@@ -15,7 +15,8 @@ import { SitePartWords } from "./SitePartWords"
 export const sitesEs = new SpellParser({ module: "sites" })
 
 /** Lo que la línea de una página dice tras su dirección. */
-const PAGE_DETAILS = "(, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})?"
+const PAGE_DETAILS =
+  "(, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})?"
 
 /** An indefinite article, either gender:  `un sitio`, `una página`. */
 const A = "(un|una)"

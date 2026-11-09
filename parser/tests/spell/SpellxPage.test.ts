@@ -64,7 +64,8 @@ describe("a spellx page that draws its body", () => {
     const written = SX.CodeSpellWriter.write(COUNTER, {
       path: "/Counter.spellml",
       // the project's own views, as the editor reads them off the parse
-      componentTag: (word) => (word === "counter" ? "test-project-counter-notebook-counter" : SP.ComponentPacks.tagFor(word, "en"))
+      componentTag: (word) =>
+        word === "counter" ? "test-project-counter-notebook-counter" : SP.ComponentPacks.tagFor(word, "en")
     })
     expect(written).toContain("counter notebook is a page:\n\t- to draw it:\n\t\t<markdown>\n")
     // each `##` heading's section, written out, what follows it inside
@@ -113,7 +114,9 @@ describe("a spellx page that draws its body", () => {
     expect(errors).toEqual([])
     expect(code).toContain("export class CuadernoDelContador extends Page {")
     expect(code).toContain('return "bloqueado"')
-    expect(code).toContain('h("spell-example", { name: "un contador" }, h("test-project-cuaderno-del-contador-contador"))')
+    expect(code).toContain(
+      'h("spell-example", { name: "un contador" }, h("test-project-cuaderno-del-contador-contador"))'
+    )
     expect(projectCode(text, "/Contador.es.spellml")).toContain("if (!core.isCarryingOver) cuadernoDelContador.start()")
   })
 
@@ -353,7 +356,9 @@ describe("a spellx page that draws its body", () => {
       const { code, errors } = compiled(HOME, "/Home.spellml")
       expect(errors).toEqual([])
       expect(code.indexOf("export class HomeCounter extends View {")).toBeGreaterThanOrEqual(0)
-      expect(code.indexOf("export class HomeOneCounter extends View {")).toBeGreaterThan(code.indexOf("class HomeCounter "))
+      expect(code.indexOf("export class HomeOneCounter extends View {")).toBeGreaterThan(
+        code.indexOf("class HomeCounter ")
+      )
       expect(code.indexOf("export class Home extends Page {")).toBeGreaterThan(code.indexOf("class HomeOneCounter "))
       expect(code).toContain('h("ui-markdown", "# Home"),\n      h("test-project-home-counter")')
       // where it's written, in the chunk tree:  `<view>` is the templates table's word, read without its prefix
