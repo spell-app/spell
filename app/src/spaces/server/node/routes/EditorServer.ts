@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process"
 import { createWriteStream, rmSync, writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join } from "node:path"
+import { setTimeout as sleep } from "node:timers/promises"
 import { stripVTControlCharacters } from "node:util"
 
 import { SRV } from "spell/server"
@@ -52,7 +53,7 @@ export class EditorServer {
    */
   async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
     if (process.env.SPELL_NO_EDITOR || this.child) return
-    const port = await editorPort()
+    const port = await editorPort({ thisMachineOnly })
     this.port = port
     const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
     guard.allowOriginPort(port)
@@ -132,9 +133,37 @@ const READY = /\bLocal:\s+http/
 /**
  * The editor's port:  the wanted one if free on IPv4 AND IPv6 (vite listens on 0.0.0.0), else any free one.
  * - NOTE: both:  on macOS `::` binds even while another process holds `0.0.0.0:<port>` -- another checkout's editor.
+ * - `thisMachineOnly`:  the house site's editor, whose port is in Caddy's file:  `steadyPort()`.
  */
-async function editorPort(): Promise<number> {
+async function editorPort({ thisMachineOnly }: { thisMachineOnly: boolean }): Promise<number> {
   const wanted = Number(process.env.SPELL_EDITOR_PORT) || environment.vitePort
-  const free = (await SRV.isFree(wanted, "0.0.0.0")) && (await SRV.isFree(wanted, "::"))
-  return free ? wanted : SRV.freePort()
+  const isFreeEverywhere = async (port: number) => (await SRV.isFree(port, "0.0.0.0")) && (await SRV.isFree(port, "::"))
+  if (thisMachineOnly) return (await steadyPort(wanted, isFreeEverywhere)) ?? SRV.freePort()
+  return (await isFreeEverywhere(wanted)) ? wanted : SRV.freePort()
 }
+
+/**
+ * A port that's the same from one page server to the next, so a restart doesn't change Caddy's file and restart Caddy
+ * (epic `atmosphere` P39):  `undefined` when none of them is free.
+ * - `wanted`, waiting a moment:  the last page server's editor is still letting go of it as a restart begins
+ * - else the first free one just above it:  the same one each time, while the same things hold the others
+ */
+export async function steadyPort(
+  wanted: number,
+  isFree: (port: number) => Promise<boolean>,
+  wait: (ms: number) => Promise<unknown> = sleep
+): Promise<number | undefined> {
+  for (let look = 0; look < WANTED_PORT_LOOKS; look++) {
+    if (await isFree(wanted)) return wanted
+    await wait(WANTED_PORT_LOOK_MS)
+  }
+  for (let port = wanted + 1; port <= wanted + SPARE_PORTS; port++) if (await isFree(port)) return port
+  return undefined
+}
+
+/** How many times `steadyPort()` looks for the wanted port, and how long between:  3 seconds in all. */
+const WANTED_PORT_LOOKS = 15
+const WANTED_PORT_LOOK_MS = 200
+
+/** How many ports above the wanted one `steadyPort()` tries. */
+const SPARE_PORTS = 20
