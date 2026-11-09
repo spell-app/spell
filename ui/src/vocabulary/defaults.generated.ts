@@ -1687,6 +1687,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "rows", kind: "number", group: "content" },
     { name: "grow", kind: "boolean", group: "layout" },
     { name: "max-rows", kind: "number", group: "layout" },
+    { name: "send-on-enter", kind: "boolean", group: "behaviour" },
     { name: "autocomplete", kind: "string", group: "form" },
     { name: "rules", kind: "json", group: "form" }
   ],

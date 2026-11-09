@@ -81,65 +81,73 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 	</action>
 
 	<draw>
-		<container class="inbox">
-			<stack>
-				<header size="large">Your inbox</header>
-				<text class="who-reads" color="grey">The org's Board and its Admins can read your inbox, as they can every space in the org.</text>
+		<stack class="org-page" spacing="none">
+			<toolbar class="top-bar" appearance="text" aria-label="Inbox">
+				<text slot="title" size="large">Inbox</text>
+				<item link="OrgChat">Chat</item>
+				<item link="OrgFeed">Feed</item>
+				<item link="OrgAdmin">Admin</item>
+				<stack slot="right" direction="horizontal">{the sign in menu}</stack>
+			</toolbar>
+			<container class="inbox">
+				<stack>
+					<text class="who-reads" color="grey">The org's Board and its Admins can read your inbox, as they can every space in the org.</text>
 
-				<segment class="write">
-					<header size="medium">Write to someone</header>
-					<form value={its new message}>
-						<stack spacing="sm">
-							<input name="recipients" placeholder="bo@rs, cy@rs" aria-label="Who it's to, by their address" fluid/>
-							<input name="text" placeholder="What you'd like to say" aria-label="Your message" fluid/>
-							<input name="thread" placeholder="A conversation to answer in, if any" aria-label="The conversation it answers" fluid/>
-							<button class="send" color="primary" disabled={the recipients of the new message is ""} onClick={send it}>Send</button>
-						</stack>
-					</form>
-				</segment>
-
-				<segment class="mail">
-					<header size="medium">Mail</header>
-					<stack class="mail-choices" spacing="sm">
-						<for choice in every mail choice loading="Reading how you hear of it">
-							<empty>
-								<stack direction="horizontal" spacing="md" align="center" wrap>
-									<text color="grey">A daily digest of what's new, each morning.</text>
-									<button class="choose" size="small" onClick={choose how}>Choose</button>
-								</stack>
-							</empty>
-						</for>
-					</stack>
-				</segment>
-
-				<segment class="subscriptions">
-					<header size="medium">Spaces you follow</header>
-					<form value={its new subscription}>
-						<input name="space" placeholder="events_team@rs" aria-label="A shared space of the org, by its address" fluid action>
-							<button slot="action" color="primary" disabled={the space of the new subscription is ""} onClick={subscribe}>Follow</button>
-						</input>
-					</form>
-					<stack class="subscription-list" spacing="sm">
-						<for subscription in every subscription>
-							<empty><text color="grey">None yet.</text></empty>
-						</for>
-					</stack>
-				</segment>
-
-				<segment class="messages">
-					<header size="medium">Conversations</header>
-					<stack class="message-list" spacing="sm">
-						<for message in every message sorted by its sent newest first loading="Reading your inbox">
-							<stack class="row" spacing="xs">
-								<message/>
-								<button class="reply" icon="reply" size="small" appearance="basic" title="Answer in this conversation:  fills in who it's to and the conversation" onClick={reply to the from of message in the thread of message}>Reply</button>
+					<segment class="write">
+						<header size="medium">Write to someone</header>
+						<form value={its new message}>
+							<stack spacing="sm">
+								<input name="recipients" placeholder="bo@rs, cy@rs" aria-label="Who it's to, by their address" fluid/>
+								<input name="text" placeholder="What you'd like to say" aria-label="Your message" fluid/>
+								<input name="thread" placeholder="A conversation to answer in, if any" aria-label="The conversation it answers" fluid/>
+								<button class="send" color="primary" disabled={the recipients of the new message is ""} onClick={send it}>Send</button>
 							</stack>
-							<empty><text class="none" color="grey">Nothing yet.</text></empty>
-							<failed><text color="red">We can't read your inbox right now.</text></failed>
-						</for>
-					</stack>
-				</segment>
-			</stack>
-		</container>
+						</form>
+					</segment>
+
+					<segment class="mail">
+						<header size="medium">Mail</header>
+						<stack class="mail-choices" spacing="sm">
+							<for choice in every mail choice loading="Reading how you hear of it">
+								<empty>
+									<stack direction="horizontal" spacing="md" align="center" wrap>
+										<text color="grey">A daily digest of what's new, each morning.</text>
+										<button class="choose" size="small" onClick={choose how}>Choose</button>
+									</stack>
+								</empty>
+							</for>
+						</stack>
+					</segment>
+
+					<segment class="subscriptions">
+						<header size="medium">Spaces you follow</header>
+						<form value={its new subscription}>
+							<input name="space" placeholder="events_team@rs" aria-label="A shared space of the org, by its address" fluid action>
+								<button slot="action" color="primary" disabled={the space of the new subscription is ""} onClick={subscribe}>Follow</button>
+							</input>
+						</form>
+						<stack class="subscription-list" spacing="sm">
+							<for subscription in every subscription>
+								<empty><text color="grey">None yet.</text></empty>
+							</for>
+						</stack>
+					</segment>
+
+					<segment class="messages">
+						<header size="medium">Conversations</header>
+						<stack class="message-list" spacing="sm">
+							<for message in every message sorted by its sent newest first loading="Reading your inbox">
+								<stack class="row" spacing="xs">
+									<message/>
+									<button class="reply" icon="reply" size="small" appearance="basic" title="Answer in this conversation:  fills in who it's to and the conversation" onClick={reply to the from of message in the thread of message}>Reply</button>
+								</stack>
+								<empty><text class="none" color="grey">Nothing yet.</text></empty>
+								<failed><text color="red">We can't read your inbox right now.</text></failed>
+							</for>
+						</stack>
+					</segment>
+				</stack>
+			</container>
+		</stack>
 	</draw>
 </spell-app>

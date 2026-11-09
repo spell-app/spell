@@ -1,14 +1,14 @@
 {
   "title": "Chat",
   "description": "A team's open thread in its org, live:  a message shows on everyone's open page at once.  Everyone in the org writes in it;  you delete your own messages, and the team's Managers anyone's.  Its organizers' thread is beside it, in the team's private space.",
-  "imports": [
-    {
-      "path": "/OrgChat.api.spell",
-      "active": true
-    },
-    {
-      "path": "/OrgChat.spellml",
-      "active": true
-    }
-  ]
+  "imports": [{
+    "path": "/OrgChat.api.spell",
+    "active": true
+  }, {
+    "path": "/OrgChat.spellml",
+    "active": true
+  }, {
+    "path": "/OrgChat.css",
+    "active": true
+  }]
 }

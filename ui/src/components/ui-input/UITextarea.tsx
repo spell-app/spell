@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell/ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { textareaVocabulary } from "./UITextarea.en"
 import { InputFallback } from "./UIInput.fallback"
 import { TextControl } from "./TextControl"
@@ -21,6 +21,9 @@ import inputCSS from "./UIInput.css?inline"
  *   - the browser's own `field-sizing: content` where it has it (`UI.browser.supports.fieldSizing`);
  *     elsewhere it MEASURES, on every change of its value (`fitHeight()`)
  *   - NOT on a width change alone, where it measures:  a field narrowed under its text keeps its height until typed in
+ * - `send-on-enter` (epic `atmosphere` T61), as a chat app's box:
+ *   Enter sends what's typed (`ui-send`, nothing with only spaces in it);  Shift-Enter types a new line.
+ *   Unlike a `<ui-input>`'s Enter, it submits no form:  the page decides what sending is.
  ****************/
 export class UITextarea extends TextControl<typeof textareaVocabulary> {
   @E.proto static vocabulary = textareaVocabulary
@@ -75,6 +78,14 @@ export class UITextarea extends TextControl<typeof textareaVocabulary> {
     control.style.blockSize = `${control.scrollHeight + borders}px`
   }
 
+  /** With `send-on-enter`:  Enter sends what's typed;  Shift-Enter, or Enter while composing an accent, types as usual. */
+  private readonly onKeyDown = (event: KeyboardEvent) => {
+    if (!this.sendOnEnter || event.key !== UIT.Key.enter || event.shiftKey || event.isComposing) return
+    event.preventDefault()
+    if (this.isDisabled || this.readonly || !this.value.trim()) return
+    this.send("ui-send", { value: this.value, originalEvent: event })
+  }
+
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("input")}>
@@ -95,6 +106,7 @@ export class UITextarea extends TextControl<typeof textareaVocabulary> {
           onChange={this.onChange}
           onFocus={this.onFocus}
           onBlur={this.onBlur}
+          onKeyDown={this.onKeyDown}
         />
       </div>
     )

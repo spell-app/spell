@@ -16189,6 +16189,14 @@
               "fieldName": "maxRows"
             },
             {
+              "name": "send-on-enter",
+              "description": "As a chat app's box (epic `atmosphere` T61):  Enter sends what's typed (`ui-send`), Shift-Enter types a new line.  Nothing is sent while it's empty or only spaces.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "sendOnEnter"
+            },
+            {
               "name": "autocomplete",
               "description": "Autofill hint, forwarded to the native textarea.",
               "type": {
@@ -16330,6 +16338,13 @@
             {
               "name": "ui-changed",
               "description": "Someone committed a change (blur).",
+              "type": {
+                "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-send",
+              "description": "With `send-on-enter`:  Enter was pressed, with text to send.",
               "type": {
                 "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
               }

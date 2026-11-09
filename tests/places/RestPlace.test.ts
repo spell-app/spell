@@ -359,6 +359,86 @@ describe("RestPlace paging, the shapes servers come in (epic `data` I35)", () =>
     expect(asked[1]).toBe("https://shapes.test/recipes?at=2")
   })
 
+  /** A server that gives what comes after `starting_after`, two at a time unless told, saying if there's more. */
+  const afterLastId = (rows: Array<Record<string, unknown>> = FIVE_ROWS, idField = "id") =>
+    fakeServer((query) => {
+      const after = query.get("starting_after")
+      const from = after === null ? 0 : rows.findIndex((row) => `${row[idField] as string}` === after) + 1
+      const end = from + Number(query.get("limit") ?? 2)
+      return { data: rows.slice(from, end), has_more: end < rows.length, meta: { has_more: end < rows.length } }
+    })
+
+  /** A place that asks for what comes after the last row's id. */
+  const byLastId = (props: Partial<RestPlaceProps> = {}) =>
+    shapedPlace({
+      can: { page: "cursor" },
+      allCollections: { rowsAt: "data" },
+      params: { cursor: "starting_after" },
+      pagesByLastId: { moreAt: "has_more" },
+      pageSize: 2,
+      ...props
+    })
+
+  test("the last row's id, until its answer says there's no more:  no request past the end", async () => {
+    const asked = afterLastId()
+    expect(await everyRow(byLastId())).toEqual(ALL_IDS)
+    expect(asked.map((address) => new URL(address).search)).toEqual([
+      "?limit=2",
+      "?limit=2&starting_after=r-2",
+      "?limit=2&starting_after=r-4"
+    ])
+  })
+
+  test("what says there's more can be inside its answer", async () => {
+    const asked = afterLastId()
+    expect(await everyRow(byLastId({ pagesByLastId: { moreAt: "meta.has_more" } }))).toEqual(ALL_IDS)
+    expect(asked).toHaveLength(3)
+  })
+
+  test("a full last page isn't read past when its answer says there's no more", async () => {
+    const asked = afterLastId(FIVE_ROWS.slice(0, 4))
+    expect(await everyRow(byLastId())).toEqual(ALL_IDS.slice(0, 4))
+    expect(asked).toHaveLength(2)
+  })
+
+  test("nothing said about more, its size known:  a short page was the last", async () => {
+    const asked = afterLastId()
+    expect(await everyRow(byLastId({ pagesByLastId: {} }))).toEqual(ALL_IDS)
+    expect(asked).toHaveLength(3)
+  })
+
+  test("nothing said about more, its size not known:  on until a page comes back empty", async () => {
+    const asked = afterLastId()
+    const place = byLastId({ pagesByLastId: {}, pageSize: undefined, params: { cursor: "starting_after", limit: "n" } })
+    expect(await everyRow(place)).toEqual(ALL_IDS)
+    expect(asked.map((address) => new URL(address).searchParams.get("n"))).toEqual(["100", "100", "100", "100"])
+  })
+
+  test("told no count, it asks only what comes after", async () => {
+    const asked = afterLastId()
+    expect(await everyRow(byLastId({ sendsNoCount: true }))).toEqual(ALL_IDS)
+    expect(new URL(asked[1]!).search).toBe("?starting_after=r-2")
+  })
+
+  test("an empty page was the last, even if it says there's more", async () => {
+    fakeServer(() => ({ data: [], has_more: true }))
+    expect(await everyRow(byLastId())).toEqual([])
+  })
+
+  test("the id goes by the server's name for it, an id that looks like an address staying an id", async () => {
+    const rows = ["https://shapes.test/a", "https://shapes.test/b", "https://shapes.test/c"].map((key) => ({ key }))
+    const asked = afterLastId(rows, "key")
+    const place = byLastId({ can: { page: "cursor", idOf: "key" } })
+    await everyRow(place)
+    expect(new URL(asked[1]!).pathname).toBe("/recipes")
+    expect(new URL(asked[1]!).searchParams.get("starting_after")).toBe("https://shapes.test/b")
+  })
+
+  test("a last row with no id throws, rather than quietly reading one page", async () => {
+    fakeServer(() => ({ data: [{ name: "a" }, { name: "b" }], has_more: true }))
+    await expect(byLastId().list("recipes", {}, {})).rejects.toThrow(/has no "id"/)
+  })
+
   test("a cursor that starts with a slash is still a cursor", async () => {
     const asked = fakeServer((query) =>
       query.get("cursor")

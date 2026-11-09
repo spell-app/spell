@@ -2083,7 +2083,7 @@ export class ASTJSXElement extends ASTExpression {
     return this.derived("childValues", () => {
       return (this.children ?? [])
         .map((child) => {
-          if (child instanceof ASTJSXExpression) return liveValueOf(child.output)
+          if (child instanceof ASTJSXExpression) return liveValueOf(child.output, "a child")
           return child instanceof ASTJSXElement ? child : child?.output
         })
         .filter((child): child is ASTExpression => !!child)
@@ -2219,10 +2219,15 @@ export class ASTJSXExpression extends ASTExpression {
  * - A literal (`"suit"`, `1`) never changes, so it stays a plain value:  see `liveValueOf()`.
  * - `expression` is the value's expression.
  */
-export type ASTJSXLiveValueProps = Prettify<{ expression: ASTExpression }>
+export type ASTJSXLiveValueProps = Prettify<{
+  expression: ASTExpression
+  /** Is it what an element holds, `{its names}`, not an attribute's value?  A list in braces shows its items there. */
+  isChild?: boolean
+}>
 
 export class ASTJSXLiveValue extends ASTExpression {
   declare expression: ASTExpression
+  declare isChild: boolean | undefined
   constructor(match: P.AnyMatch, props: ASTJSXLiveValueProps) {
     super(match, props)
     this.assertType("expression", ASTExpression)
@@ -2233,10 +2238,11 @@ export class ASTJSXLiveValue extends ASTExpression {
  * `expression` as a JSX prop or child's value:
  * wrapped in an `ASTJSXLiveValue` when it can change, as is when it can't (a literal, an element, an inline function).
  * - `undefined` stays `undefined`:  a broken `{}` with no expression.
+ * - `place`:  `"a child"` for what an element holds.
  */
-function liveValueOf<T extends ASTExpression | undefined>(expression: T): T | ASTJSXLiveValue {
+function liveValueOf<T extends ASTExpression | undefined>(expression: T, place?: "a child"): T | ASTJSXLiveValue {
   if (!expression || isFixedJSXValue(expression)) return expression
-  return new ASTJSXLiveValue(expression.match, { expression })
+  return new ASTJSXLiveValue(expression.match, { expression, ...(place && { isChild: true }) })
 }
 
 /** Can't JSX value `expression` change?  A literal (not a list, which holds expressions), an element, a function. */

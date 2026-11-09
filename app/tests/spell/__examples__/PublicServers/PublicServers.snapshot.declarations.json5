@@ -2306,7 +2306,7 @@
       "property": "writer",
       "of": "Book",
       "datatype": "Author",
-      "defined": "/OpenLibrary.spellml:1927-2063"
+      "defined": "/OpenLibrary.spellml:1923-2059"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2319,7 +2319,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OpenLibrary.spellml:2077-2341"
+      "defined": "/OpenLibrary.spellml:2073-2319"
     },
     {
       "syntax": "open {thisArg:expression}",

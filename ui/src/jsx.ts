@@ -46874,6 +46874,11 @@ export interface UITextareaEventMap {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
+  /**
+   * `ui-send`:  With `send-on-enter`:  Enter was pressed, with text to send.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   */
+  "ui-send": CustomEvent<{ value: string; originalEvent?: Event }>
 }
 
 /** `<ui-textarea>`'s own attributes, from its vocabulary. */
@@ -47048,6 +47053,16 @@ export interface UITextareaAttributes {
    * @deprecated write `max-rows` -- `prop:` stays only for compiled spell
    */
   "prop:maxRows"?: number | `${number}`
+  /**
+   * As a chat app's box (epic `atmosphere` T61):  Enter sends what's typed (`ui-send`), Shift-Enter types a new line.  Nothing is sent while it's empty or only spaces.
+   * - takes:  flag (present / absent)
+   */
+  "send-on-enter"?: boolean | ""
+  /**
+   * `send-on-enter`, as the DOM element's property.
+   * @deprecated write `send-on-enter` -- `prop:` stays only for compiled spell
+   */
+  "prop:sendOnEnter"?: boolean | ""
   /**
    * Autofill hint, forwarded to the native textarea.
    * - takes:  text
@@ -47325,6 +47340,11 @@ export interface UITextareaAttributes {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UITextareaEventMap["ui-changed"]) => void
+  /**
+   * `ui-send`:  With `send-on-enter`:  Enter was pressed, with text to send.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   */
+  "on-ui-send"?: (event: UITextareaEventMap["ui-send"]) => void
 }
 
 /** `<ui-textarea>` in JSX:  its own attributes, and HTML's global ones. */
@@ -54193,7 +54213,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-textarea>`:  A textarea is a multi-line field used to elicit a longer response.
        * - also known as:  multiline, text area, memo, comment box
-       * - events:  `ui-typed`, `ui-changed`
+       * - events:  `ui-typed`, `ui-changed`, `ui-send`
        */
       "ui-textarea": UITextareaJSXAttributes
       /**
@@ -54386,6 +54406,7 @@ export interface UIEventMap {
   "ui-unstuck": CustomEvent<unknown>
   "ui-editing": CustomEvent<unknown>
   "ui-sorting": CustomEvent<unknown>
+  "ui-send": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
   "ui-selecting": CustomEvent<unknown>

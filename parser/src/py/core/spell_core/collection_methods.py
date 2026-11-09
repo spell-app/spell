@@ -436,7 +436,11 @@ class CollectionMethods:
 
         - No `count`:  to the end.
         - A negative `start` counts from the end, the items still in order;  further back than the first:  nothing.
+        - Text:  its letters, as text -- `the first 2 letters in its name`.
         """
+        if isinstance(collection, str):
+            letters = _range_starting_at(start, count, len(collection))
+            return collection[letters[0] : letters[1]] if letters else ""
         if not self._is_array_like(collection, "range_starting_at"):
             return []
         found = _range_starting_at(start, count, self.item_count_of(collection))

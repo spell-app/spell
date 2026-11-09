@@ -194,95 +194,103 @@ export class InboxPage extends App {
   }
 
   draw() {
-    return h("ui-container", { class: "inbox" },
-      h("ui-stack",
-        h("ui-header", { size: "large" }, "Your inbox"),
-        h("ui-text", { class: "who-reads", color: "grey" },
-          "The org's Board and its Admins can read your inbox, as they can every space in the org."
-        ),
-        h("ui-segment", { class: "write" },
-          h("ui-header", { size: "medium" }, "Write to someone"),
-          h("ui-form", { "prop:value": () => this.newMessage },
-            h("ui-stack", { spacing: "sm" },
-              h("ui-input", {
-                name: "recipients",
-                placeholder: "bo@rs, cy@rs",
-                "aria-label": "Who it's to, by their address",
-                fluid: true
-              }),
-              h("ui-input", { name: "text", placeholder: "What you'd like to say", "aria-label": "Your message", fluid: true }),
-              h("ui-input", {
-                name: "thread",
-                placeholder: "A conversation to answer in, if any",
-                "aria-label": "The conversation it answers",
-                fluid: true
-              }),
-              h("ui-button", {
-                class: "send",
-                color: "primary",
-                disabled: () => this.newMessage.recipients === "",
-                onClick: core.pressed(this, () => this.send()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Send")
-            )
-          )
-        ),
-        h("ui-segment", { class: "mail" },
-          h("ui-header", { size: "medium" }, "Mail"),
-          h("ui-stack", { class: "mail-choices", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice) => core.drawThing(choice), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading how you hear of it"), none: () => h("ui-stack", { direction: "horizontal", spacing: "md", align: "center", wrap: true },
-              h("ui-text", { color: "grey" }, "A daily digest of what's new, each morning."),
-              h("ui-button", {
-                class: "choose",
-                size: "small",
-                onClick: core.pressed(this, () => this.chooseHow()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Choose")
-            ) })
-          )
-        ),
-        h("ui-segment", { class: "subscriptions" },
-          h("ui-header", { size: "medium" }, "Spaces you follow"),
-          h("ui-form", { "prop:value": () => this.newSubscription },
-            h("ui-input", {
-              name: "space",
-              placeholder: "events_team@rs",
-              "aria-label": "A shared space of the org, by its address",
-              fluid: true,
-              action: true
-            },
-              h("ui-button", {
-                slot: "action",
-                color: "primary",
-                disabled: () => this.newSubscription.space === "",
-                onClick: core.pressed(this, () => this.subscribe()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Follow")
+    return h("ui-stack", { class: "org-page", spacing: "none" },
+      h("ui-toolbar", { class: "top-bar", appearance: "text", "aria-label": "Inbox" },
+        h("ui-text", { slot: "title", size: "large" }, "Inbox"),
+        h("ui-item", { link: "OrgChat" }, "Chat"),
+        h("ui-item", { link: "OrgFeed" }, "Feed"),
+        h("ui-item", { link: "OrgAdmin" }, "Admin"),
+        h("ui-stack", { slot: "right", direction: "horizontal" }, () => core.signInMenu())
+      ),
+      h("ui-container", { class: "inbox" },
+        h("ui-stack",
+          h("ui-text", { class: "who-reads", color: "grey" },
+            "The org's Board and its Admins can read your inbox, as they can every space in the org."
+          ),
+          h("ui-segment", { class: "write" },
+            h("ui-header", { size: "medium" }, "Write to someone"),
+            h("ui-form", { "prop:value": () => this.newMessage },
+              h("ui-stack", { spacing: "sm" },
+                h("ui-input", {
+                  name: "recipients",
+                  placeholder: "bo@rs, cy@rs",
+                  "aria-label": "Who it's to, by their address",
+                  fluid: true
+                }),
+                h("ui-input", { name: "text", placeholder: "What you'd like to say", "aria-label": "Your message", fluid: true }),
+                h("ui-input", {
+                  name: "thread",
+                  placeholder: "A conversation to answer in, if any",
+                  "aria-label": "The conversation it answers",
+                  fluid: true
+                }),
+                h("ui-button", {
+                  class: "send",
+                  color: "primary",
+                  disabled: () => this.newMessage.recipients === "",
+                  onClick: core.pressed(this, () => this.send()),
+                  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+                }, "Send")
+              )
             )
           ),
-          h("ui-stack", { class: "subscription-list", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Subscription, {}, "as drawn"), (subscription) => core.drawThing(subscription), { none: () => h("ui-text", { color: "grey" }, "None yet.") })
-          )
-        ),
-        h("ui-segment", { class: "messages" },
-          h("ui-header", { size: "medium" }, "Conversations"),
-          h("ui-stack", { class: "message-list", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "sent", descending: true }] }, "as drawn"), (message) => h("ui-stack", { class: "row", spacing: "xs" },
-              () => core.drawThing(message),
-              h("ui-button", {
-                class: "reply",
-                icon: "reply",
-                size: "small",
-                appearance: "basic",
-                title: "Answer in this conversation:  fills in who it's to and the conversation",
-                onClick: core.pressed(this, () => this.replyToWhoInConversation(message.from, message.thread)),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Reply")
-            ), {
-              waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your inbox"),
-              none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet."),
-              failed: () => h("ui-text", { color: "red" }, "We can't read your inbox right now.")
-            })
+          h("ui-segment", { class: "mail" },
+            h("ui-header", { size: "medium" }, "Mail"),
+            h("ui-stack", { class: "mail-choices", spacing: "sm" },
+              () => core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice) => core.drawThing(choice), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading how you hear of it"), none: () => h("ui-stack", { direction: "horizontal", spacing: "md", align: "center", wrap: true },
+                h("ui-text", { color: "grey" }, "A daily digest of what's new, each morning."),
+                h("ui-button", {
+                  class: "choose",
+                  size: "small",
+                  onClick: core.pressed(this, () => this.chooseHow()),
+                  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+                }, "Choose")
+              ) })
+            )
+          ),
+          h("ui-segment", { class: "subscriptions" },
+            h("ui-header", { size: "medium" }, "Spaces you follow"),
+            h("ui-form", { "prop:value": () => this.newSubscription },
+              h("ui-input", {
+                name: "space",
+                placeholder: "events_team@rs",
+                "aria-label": "A shared space of the org, by its address",
+                fluid: true,
+                action: true
+              },
+                h("ui-button", {
+                  slot: "action",
+                  color: "primary",
+                  disabled: () => this.newSubscription.space === "",
+                  onClick: core.pressed(this, () => this.subscribe()),
+                  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+                }, "Follow")
+              )
+            ),
+            h("ui-stack", { class: "subscription-list", spacing: "sm" },
+              () => core.drawRead(async () => await core.savedThings(Subscription, {}, "as drawn"), (subscription) => core.drawThing(subscription), { none: () => h("ui-text", { color: "grey" }, "None yet.") })
+            )
+          ),
+          h("ui-segment", { class: "messages" },
+            h("ui-header", { size: "medium" }, "Conversations"),
+            h("ui-stack", { class: "message-list", spacing: "sm" },
+              () => core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "sent", descending: true }] }, "as drawn"), (message) => h("ui-stack", { class: "row", spacing: "xs" },
+                () => core.drawThing(message),
+                h("ui-button", {
+                  class: "reply",
+                  icon: "reply",
+                  size: "small",
+                  appearance: "basic",
+                  title: "Answer in this conversation:  fills in who it's to and the conversation",
+                  onClick: core.pressed(this, () => this.replyToWhoInConversation(message.from, message.thread)),
+                  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+                }, "Reply")
+              ), {
+                waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your inbox"),
+                none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet."),
+                failed: () => h("ui-text", { color: "red" }, "We can't read your inbox right now.")
+              })
+            )
           )
         )
       )
@@ -290,5 +298,7 @@ export class InboxPage extends App {
   }
 }
 export const inboxPage = new InboxPage()
+// -----------
+core.installStyles(undefined, `/* The toolbar across the top, who's signed in on its right;  the page the theme's colours, light or dark. */¬.org-page {¬  min-height: 100dvh;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬.org-page .top-bar {¬  padding: 6px 12px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬¬.org-page .top-bar::part(menu) {¬  margin-block: 0;¬}¬¬.org-page .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬.org-page ui-container > ui-stack {¬  padding-block: 16px;¬}¬¬/* A phone:  the links go, leaving the name and who's signed in. */¬@media (max-width: 640px) {¬  .org-page .top-bar ui-item {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) inboxPage.start()

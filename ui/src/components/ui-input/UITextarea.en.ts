@@ -113,6 +113,14 @@ export const textareaVocabulary = {
         "(`--ui-input-textarea-grow-max-height`)."
     },
     {
+      name: "send-on-enter",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "As a chat app's box (epic `atmosphere` T61):  Enter sends what's typed (`ui-send`), Shift-Enter types a new " +
+        "line.  Nothing is sent while it's empty or only spaces."
+    },
+    {
       name: "autocomplete",
       group: "form",
       kind: "string",
@@ -136,6 +144,11 @@ export const textareaVocabulary = {
       name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "Someone committed a change (blur)."
+    },
+    {
+      name: "ui-send",
+      detail: "{ value: string, originalEvent?: Event }",
+      description: "With `send-on-enter`:  Enter was pressed, with text to send."
     }
   ],
   slots: [],

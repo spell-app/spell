@@ -59,7 +59,7 @@ describe("a read of a place, right in a drawing", () => {
   test('as a child value:  a waited value with its own "…"', () => {
     const { code } = compiled("<text>{every review}</text>")
     expect(code).toContain(
-      '() => core.whileWaiting(() => core.waitedValue(this, "every review", async () => await core.savedThings(Review)))'
+      '() => core.whileWaiting(() => core.listShown(core.waitedValue(this, "every review", async () => await core.savedThings(Review))))'
     )
     expect(code).not.toContain("static drawsWaiting")
   })

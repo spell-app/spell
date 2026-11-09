@@ -16,26 +16,33 @@ export class Message extends Thing {
   @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1028, end: 1044 } })
   accessor by!: string
 
-  // - its "sent" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1048, end: 1066 } })
-  accessor sent!: string
+  // - its "sent" is a date
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1048, end: 1068 } })
+  accessor sent!: Date
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1070, end: 1090 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1072, end: 1092 } })
   accessor thread!: string
+
+  /** The first two letters of who sent it, for the circle beside their name */
+  static { this.declareProp("initials", { declaredAt: { path: "/OrgChat.spellml", start: 482, end: 629 }, readsFrom: ["chat"] }) }
+  get initials() {
+    return core.rangeStartingAt(this.by.toLocaleUpperCase(), 0, 2)
+  }
 
   @drawn draw() {
     return (
-      <ui-segment class="message">
-        <ui-stack spacing="xs">
-          <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
-            <ui-text class="by">{this.by}</ui-text>
-            <ui-text class="sent" color="grey">{this.sent}</ui-text>
+      <ui-stack class="message" direction="horizontal" spacing="md" align="start">
+        <ui-text class="avatar">{this.initials}</ui-text>
+        <ui-stack spacing="none">
+          <ui-stack direction="horizontal" spacing="sm" align="center">
+            <ui-text class="by" bold={true}>{this.by}</ui-text>
+            <ui-text class="sent" size="small" color="grey">{core.dateAs(this.sent, "short time")}</ui-text>
             <ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Delete this message" title="Delete this message:  yours, or anyone's if you manage the space" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-stack>
           <ui-text class="text">{this.text}</ui-text>
         </ui-stack>
-      </ui-segment>
+      </ui-stack>
     )
   }
 
@@ -45,24 +52,31 @@ export class Message extends Thing {
 /** A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it. */
 export class Thread extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1255, end: 1273 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1257, end: 1275 } })
   accessor name!: string
 
   // - its "side" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1277, end: 1295 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1279, end: 1297 } })
   accessor side!: string
 
   // - its "topic" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1299, end: 1318 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1301, end: 1320 } })
   accessor topic!: string
 
   // - its "link" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1322, end: 1340 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1324, end: 1342 } })
   accessor link!: string
 
   // - its "current" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1344, end: 1370 } })
+  @prop({ type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1346, end: 1372 } })
   accessor current!: boolean
+
+  /** Its icon:  a lock on the private ones */
+  static { this.declareProp("mark", { declaredAt: { path: "/OrgChat.spellml", start: 1389, end: 1514 }, readsFrom: ["my_threads"] }) }
+  get mark() {
+    if (this.side === "private") return "lock"
+    return "hashtag"
+  }
 
   static savedIn = { place: "my_threads", collection: "threads" }
 }
@@ -87,22 +101,26 @@ export const myThreads = core.place(new MyThread(), {
   name: "my_threads",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__threads",
-  checkedEvery: 30, firstReads: () => [[Thread, { sort: [{ field: "name" }] }], [Thread]] })
+  checkedEvery: 30, firstReads: () => [[Thread], [Thread, { sort: [{ field: "name" }] }]] })
 
 // -----------
 core.heading("Chat")
 //////////
 // ## Chat
 //////////
-// Every thread you can read, down the side, and the one you picked, live:  a message shows on everyone's open page at once.
+// A chat app for your org:  a toolbar with who's signed in, every thread you can read down the side, and the one you picked, live.
+// A message shows on everyone's open page at once.
 // Where they're kept is in OrgChat.api.spell, and only its first two lines know.
 // Everyone in the org reads and writes a team's open thread;  you delete your own messages, and the team's Managers anyone's.
 
-core.heading("A row for each:  who sent it, when, and what it says")
-//## A row for each:  who sent it, when, and what it says
+core.heading("A row for each message:  who sent it, when, and what it says")
+//## A row for each message:  who sent it, when, and what it says
 
-core.heading("The page:  the threads down the side, the one picked, oldest first, and a line to write in")
-//## The page:  the threads down the side, the one picked, oldest first, and a line to write in
+core.heading("A thread in the list:  a lock on the private ones")
+//## A thread in the list:  a lock on the private ones
+
+core.heading("The page:  the toolbar, the threads down the side, and the one picked, oldest first, with a box to write in")
+//## The page:  the toolbar, the threads down the side, and the one picked, oldest first, with a box to write in
 
 export class ChatPage extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -111,10 +129,36 @@ export class ChatPage extends App {
   @prop({ init: () => new Message(), early: true })
   accessor newMessage!: Message
 
-  static { this.declareProp("picked", { declaredAt: { path: "/OrgChat.spellml", start: 1131, end: 1200 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("picked", { declaredAt: { path: "/OrgChat.spellml", start: 1726, end: 1795 }, readsFrom: ["my_threads"] }) }
   get picked() { return core.waitedValue(this, "picked", async () => {
     return core.getItemAt(core.filter(await core.savedThings(Thread), (thread: Thread) => thread.current), 0)
   }) }
+
+  /** A phone only:  the threads, open in a drawer */
+  // - its "drawer open" is yes or no
+  @prop({ type: "choice" })
+  accessor drawerOpen!: boolean
+
+  /** The picked thread's name:  nothing until one is picked, as when signed out */
+  static { this.declareProp("threadName", { declaredAt: { path: "/OrgChat.spellml", start: 1897, end: 2064 }, readsFrom: ["my_threads"] }) }
+  get threadName() {
+    if (this.picked) return this.picked.name
+    return ""
+  }
+
+  /** What the box says, until something is typed */
+  static { this.declareProp("boxWords", { declaredAt: { path: "/OrgChat.spellml", start: 2079, end: 2187 }, readsFrom: ["my_threads"] }) }
+  get boxWords() {
+    return `Message ${this.threadName}`
+  }
+
+  openTheDrawer() {
+    this.drawerOpen = true
+  }
+
+  closeTheDrawer() {
+    this.drawerOpen = false
+  }
 
   async send() {
     this.newMessage.sent = new Date()
@@ -126,39 +170,58 @@ export class ChatPage extends App {
   static drawsWaiting = true
   @drawn draw() {
     return (
-      <ui-container class="chat">
-        <ui-stack direction="horizontal" spacing="lg" align="start">
-          <ui-list class="threads" appearance="link" aria-label="Threads">
-            {core.drawRead(async () => await core.savedThings(Thread, { sort: [{ field: "name" }] }, "as drawn"), (thread: Thread) => <ui-item link={thread.link} selected={thread.current}>
-              <ui-stack spacing="none">
-                <ui-text class="name">{thread.name}</ui-text>
-                <ui-text class="side" color="grey" size="small">{thread.side}</ui-text>
-              </ui-stack>
-            </ui-item>, {
-              waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding your threads"}</ui-loader>,
-              none: () => <ui-text class="none" color="grey">No threads you can read.</ui-text>,
-              failed: () => <ui-text color="red">We can't find your threads right now.</ui-text>
-            })}
-          </ui-list>
-          <ui-stack hidden={this.picked ? undefined : true}>
-            <ui-header size="large">{core.whileWaiting(() => this.picked.name)}</ui-header>
-            <ui-stack class="message-list" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Joining the thread"}</ui-loader>,
-                none: () => <ui-text class="none" color="grey">{"Nothing yet:  say hello."}</ui-text>,
-                failed: () => <ui-text color="red">We can't join this thread right now.</ui-text>
-              })}
+      <ui-stack class="org-chat" spacing="none">
+        <ui-toolbar class="top-bar" appearance="text" aria-label="Chat">
+          <ui-button class="show-threads" slot="icon" icon="bars" appearance="transparent" aria-label="Show the threads" title="Show the threads" onClick={core.pressed(this, () => this.openTheDrawer())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
+          <ui-text slot="title" size="large">Chat</ui-text>
+          <ui-item link="OrgFeed">Feed</ui-item>
+          <ui-item link="Inbox">Inbox</ui-item>
+          <ui-item link="OrgAdmin">Admin</ui-item>
+          <ui-stack slot="right" direction="horizontal">{core.signInMenu()}</ui-stack>
+        </ui-toolbar>
+        <ui-stack class="workspace" direction="horizontal" spacing="none">
+          <ui-stack class="sidebar" spacing="none">{this.drawThreadList()}</ui-stack>
+          <ui-stack class="main" spacing="none" hidden={this.picked ? undefined : true}>
+            <ui-stack class="thread-name">
+              <ui-header size="small">{core.whileWaiting(() => this.threadName)}</ui-header>
             </ui-stack>
-            <ui-form prop:value={this.newMessage}>
-              <ui-input name="text" placeholder="Write to the thread" aria-label="Your message" fluid={true} action={true}>
-                <ui-button class="send" slot="action" color="primary" disabled={this.newMessage.text === ""} onClick={core.pressed(this, async () => await this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            <ui-stack class="messages" spacing="none">
+              <ui-stack class="message-list" spacing="none">
+                {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {
+                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Joining the thread"}</ui-loader>,
+                  none: () => <ui-text class="none" color="grey">{"Nothing yet:  say hello."}</ui-text>,
+                  failed: () => <ui-text color="red">We can't join this thread right now.</ui-text>
+                })}
+              </ui-stack>
+            </ui-stack>
+            <ui-form class="composer" prop:value={this.newMessage}>
+              <ui-stack direction="horizontal" spacing="sm" align="end">
+                <ui-textarea name="text" fluid={true} grow={true} max-rows={8} send-on-enter={true} placeholder={this.boxWords} aria-label="Your message" on-ui-send={async () => await this.send()} />
+                <ui-button class="send" color="primary" disabled={this.newMessage.text === ""} onClick={core.pressed(this, async () => await this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                   Send
                 </ui-button>
-              </ui-input>
+              </ui-stack>
             </ui-form>
           </ui-stack>
         </ui-stack>
-      </ui-container>
+        <ui-flyout class="threads-drawer" visible={this.drawerOpen} position="left" width="thin" on-ui-closed={() => this.closeTheDrawer()}>
+          {this.drawThreadList()}
+        </ui-flyout>
+      </ui-stack>
+    )
+  }
+
+  drawThreadList() {
+    return (
+      <ui-menu class="threads" direction="vertical" appearance="secondary" fluid={true} aria-label="Threads" part="thread_list">
+        {core.drawRead(async () => await core.savedThings(Thread, { sort: [{ field: "name" }] }, "as drawn"), (thread: Thread) => <ui-item link={thread.link} selected={thread.current} icon={thread.mark} part="thread_list">
+          {thread.name}
+        </ui-item>, {
+          waiting: () => <ui-loader visible={true} inline={true} text={true} part="thread_list">{"Finding your threads"}</ui-loader>,
+          none: () => <ui-text class="none" color="grey" part="thread_list">No threads you can read.</ui-text>,
+          failed: () => <ui-text color="red" part="thread_list">We can't find your threads right now.</ui-text>
+        })}
+      </ui-menu>
     )
   }
 }
@@ -171,11 +234,26 @@ export class ChatPage extends App {
  */
 export class ChatPageElement extends SpellElement<ChatPage> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "chat page", [
-    { name: "new-message", kind: "json", description: "Its newMessage." }
+    { name: "new-message", kind: "json", description: "Its newMessage." },
+    { name: "drawer-open", kind: "boolean", description: "Its drawerOpen." }
   ])
+
+  openTheDrawer() {
+    return this.currentThing?.openTheDrawer()
+  }
+
+  closeTheDrawer() {
+    return this.currentThing?.closeTheDrawer()
+  }
+
+  drawThreadList() {
+    return this.currentThing?.drawThreadList()
+  }
 }
 core.useElement(ChatPage, ChatPageElement)
 export const chatPage = new ChatPage()
+// -----------
+core.installStyles(undefined, `/* Chat:  a chat app filling the window, with only its messages scrolling, light or dark. */¬.org-chat {¬  display: flex;¬  flex-direction: column;¬  height: 100dvh;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬/* The toolbar across the top:  a rule below it, the program's links close to its name, nothing making it tall. */¬.org-chat .top-bar {¬  flex: none;¬  padding: 6px 12px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬.org-chat .top-bar::part(menu) {¬  margin-block: 0;¬}¬.org-chat .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬/* The sign-in menu's button sits quietly in the bar. */¬.org-chat .top-bar [slot="right"] {¬  --ui-button-padding: 0.4em 0.7em;¬}¬¬/* The button that opens the threads:  only on a phone, where the side bar is gone. */¬.org-chat .show-threads {¬  display: none;¬}¬¬/* The side bar and the thread beside it, taking all the room below the toolbar. */¬.org-chat .workspace {¬  flex: 1;¬  min-height: 0;¬  align-items: stretch;¬}¬¬.org-chat .sidebar {¬  flex: none;¬  width: 260px;¬  padding: 10px 8px;¬  overflow-y: auto;¬  background: light-dark(oklch(96% 0 0), oklch(22% 0 0));¬  border-inline-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬}¬¬/* The thread:  its name, its messages (which take the room left and scroll), and the box to write in. */¬.org-chat .main {¬  flex: 1;¬  min-width: 0;¬  min-height: 0;¬}¬¬.org-chat .thread-name {¬  flex: none;¬  padding: 12px 16px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬}¬¬/* Column-reverse:  it starts at the bottom, and stays there as messages arrive. */¬.org-chat .messages {¬  flex: 1;¬  min-height: 0;¬  display: flex;¬  flex-direction: column-reverse;¬  overflow-y: auto;¬  padding: 16px;¬}¬¬/* With no messages, the words sit in the middle of the room. */¬.org-chat .messages:has(.none) {¬  justify-content: center;¬  text-align: center;¬}¬¬.org-chat .message {¬  padding-block: 4px;¬}¬¬/* Who sent it:  their initials on a circle. */¬.org-chat .avatar {¬  flex: none;¬  width: 36px;¬  height: 36px;¬  display: grid;¬  place-content: center;¬  border-radius: 50%;¬  color: white;¬  background: var(--ui-primary);¬  font-size: 13px;¬  font-weight: 600;¬}¬¬.org-chat .text {¬  white-space: pre-wrap;¬  overflow-wrap: anywhere;¬}¬¬/* Delete stays quiet until the message is pointed at, or the button has the keyboard. */¬.org-chat .remove {¬  opacity: 0;¬}¬.org-chat .message:hover .remove,¬.org-chat .remove:focus-within {¬  opacity: 1;¬}¬¬/* A phone has nothing to point with. */¬@media (hover: none) {¬  .org-chat .remove {¬    opacity: 1;¬  }¬}¬¬/* The box to write in, the full width of the thread:  its Send button at the bottom beside it. */¬.org-chat .composer {¬  flex: none;¬  padding: 0 16px 16px;¬}¬¬.org-chat .composer ui-textarea {¬  flex: 1;¬  min-width: 0;¬}¬¬/* A phone:  the side bar goes, and the bars button opens the threads in a drawer. */¬@media (max-width: 640px) {¬  .org-chat .sidebar {¬    display: none;¬  }¬  .org-chat .show-threads {¬    display: inline-block;¬  }¬  .org-chat .top-bar ui-item {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) chatPage.start()
 

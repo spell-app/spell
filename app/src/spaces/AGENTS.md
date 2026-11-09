@@ -663,6 +663,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The page keeps it, and tries again.
   - LEAVING (epic `atmosphere` P7, T5;  [SpaceExport.ts](server/node/places/SpaceExport.ts)):
     a space as plain JSON files, laid out as its folder is.
+    - A chat app (epic `atmosphere` T61):  fills the window (`cloudApp.html` has no padding of its own), a toolbar with
+      who's signed in, the threads in a 260px side bar, the box pinned below only the messages scrolling.
+      - The box is `<ui-textarea grow send-on-enter>`:  Enter sends, Shift-Enter types a new line.
+      - At phone width the side bar's list opens in a `<ui-flyout>` from the toolbar's bars button.
+      - Every org program has the same toolbar (`{the sign in menu}`, its programs linked in it), written out in each:
+        each org gets its own copy of the programs, so a shared file wouldn't reach them.
     - With `members.json`, and a note on leaving with its id.
     - Read through its place, so what's taken down is left out.
     - A member downloads it as a zip, at `/api/exports/spaces/<address>`;  `spell space export` writes the folder.
