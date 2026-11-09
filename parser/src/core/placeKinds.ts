@@ -54,6 +54,8 @@ export type PlaceDetails = {
   keyNamed?: string
   /** It goes without its key where nothing holds it, a browser:  `its key is the secret "GITHUB_TOKEN", if it's set`. */
   keyIfSet?: boolean
+  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its key goes in its "X-Api-Key" header`. */
+  keyGoes?: PlacesFolder.KeyGoes
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
   /** Once a day at this time, instead:  `check it once a day at 5am` (`pollWhileVisible()`'s `at`). */
@@ -231,21 +233,13 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(deviceCopy && { deviceCopy }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
-      ...(details.keyNamed !== undefined && {
-        keyNamed: details.keyNamed,
-        ...(keyFrom && { keyFrom }),
-        ...(details.keyIfSet && { keyIfSet: true })
-      })
+      ...keyLinesOf(details, keyFrom)
     }),
   "graphql server": (making, { GraphPlace }) =>
     new GraphPlace({
       url: making.details.at!,
       collections: graphCollections(making),
-      ...(making.details.keyNamed !== undefined && {
-        keyNamed: making.details.keyNamed,
-        ...(making.keyFrom && { keyFrom: making.keyFrom }),
-        ...(making.details.keyIfSet && { keyIfSet: true })
-      })
+      ...keyLinesOf(making.details, making.keyFrom)
     }),
   "data folder": ({ details, deviceCopy }, places) => {
     const {
@@ -379,6 +373,12 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   },
   "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
+}
+
+/** What a place's lines say of its key, for a place on a server:  nothing without one named. */
+function keyLinesOf({ keyNamed, keyIfSet, keyGoes }: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]) {
+  if (keyNamed === undefined) return {}
+  return { keyNamed, ...(keyFrom && { keyFrom }), ...(keyIfSet && { keyIfSet }), ...(keyGoes && { keyGoes }) }
 }
 
 /**

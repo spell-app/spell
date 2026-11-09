@@ -1773,6 +1773,11 @@ const HEADER_ROW = "data-header-row"
 function failedDrawing(error: unknown, said?: string): Drawing {
   const wait = waitAfter(error)
   const message = said ?? (wait === undefined ? core.message("read-failed", { why: whyOf(error) }) : tooSoon(wait))
+  // told when, it tries again then, itself:  waiting out a rate limit (epic `data` T110)
+  if (wait && getOwner()) {
+    const timer = setTimeout(() => void savedMethods.reloadSaved(), wait)
+    onCleanup(() => clearTimeout(timer))
+  }
   const button = h(
     "ui-button",
     {
@@ -1806,10 +1811,13 @@ const TOO_SOON_STATUSES = new Set([408, 425, 429, 503])
  * How long until a read that failed may be asked again, if it failed only for being too soon:
  * - a 429 (and a 408, 425, 503), or a 403 whose rate limit says no requests are left, GitHub's way
  * - its wait in ms:  the answer's `retry-after`, else when its rate limit resets;  `0` when it says neither
+ * - a read that wasn't sent, as a limit hasn't passed yet (`TooSoonError`):  its wait, by its `retryAt`
  * - `undefined` for any other failure, or one with no answer at all
  * - Reads the answer the error holds (`spell/util`'s `ApiError`), by its shape:  places are a chunk of their own.
  */
 export function waitAfter(error: unknown, now = Date.now()): number | undefined {
+  const { retryAt } = (error ?? {}) as { retryAt?: unknown }
+  if (typeof retryAt === "number") return Math.max(0, retryAt - now)
   const response = responseOf(error)
   if (!response) return undefined
   const { status, headers } = response

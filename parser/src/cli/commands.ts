@@ -271,6 +271,14 @@ export default function languageCommands(spell: Command): void {
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
     .option(
+      "--key-header <name>",
+      'the header its key goes in, as it is, e.g. X-Api-Key -- default "Authorization: Bearer <key>";  writes the line that says so'
+    )
+    .option(
+      "--key-in-address <name>",
+      "the question its key goes in the address as, e.g. api_key:  it's hidden from every message;  writes the line that says so"
+    )
+    .option(
       "--signed-in <place>",
       "read it as you, with the session spell place sign-in kept under that name:  its cookies go only to their own " +
         "host, and are never written down;  says so when the session has run out"

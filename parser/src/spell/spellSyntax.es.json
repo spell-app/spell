@@ -6792,7 +6792,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 96,
+          "line": 98,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7790,6 +7790,34 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} clave es {key:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInHeader",
+          "ruleNames": ["key_goes_in_header"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInHeader.ts",
+          "line": 16,
+          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} clave va en su cabecera {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInAddress",
+          "ruleNames": ["key_goes_in_address"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInAddress.ts",
+          "line": 16,
+          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} clave va en la dirección como {name:text}"
             }
           ],
           "aliases": ["statement"]

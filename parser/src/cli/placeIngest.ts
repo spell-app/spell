@@ -14,6 +14,7 @@ import JSON5 from "json5"
 import { json5Edited } from "spell/util/node/json5"
 import { peekProp, schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
+import type { KeyGoes } from "spell/places/keyGoes"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
   IngestStopped,
@@ -46,6 +47,10 @@ export type PlaceIngestOptions = {
   into?: string
   name?: string
   keySecret?: string
+  /** `--key-header <name>`:  the header its key goes in, when that isn't `Authorization: Bearer`. */
+  keyHeader?: string
+  /** `--key-in-address <name>`:  the question its key goes in the address as. */
+  keyInAddress?: string
   signedIn?: string
   docs?: string
   collections?: string
@@ -62,11 +67,13 @@ export type PlaceIngestOptions = {
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
   const { kind, into, name, keySecret, signedIn, docs, collections, samples, pictures, tryWrites, ai = true } = options
+  const keyGoes = keyGoesFrom(options)
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(ai, !!signedIn)
     const result = await ingest.add({
       address,
       ...withValues({ kind, into, name, keySecret, signedIn, docs }),
+      ...(keyGoes && { keyGoes }),
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
       ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
@@ -75,6 +82,21 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
     printAdded(result)
     return CLI.EXIT.OK
   })
+}
+
+/**
+ * Where the options say its key goes:  `undefined` for the usual way.
+ * - throws `CliError` for both at once, or either with no key named
+ */
+function keyGoesFrom({ keySecret, keyHeader, keyInAddress }: PlaceIngestOptions): KeyGoes | undefined {
+  if (keyHeader === undefined && keyInAddress === undefined) return undefined
+  if (keyHeader !== undefined && keyInAddress !== undefined) {
+    throw new CLI.CliError("spell place ingest:  a key goes in one place:  --key-header or --key-in-address, not both")
+  }
+  if (keySecret === undefined) {
+    throw new CLI.CliError("spell place ingest:  --key-header and --key-in-address say where a key goes:  name it too, --key-secret <NAME>")
+  }
+  return keyHeader !== undefined ? { header: keyHeader } : { inAddress: keyInAddress! }
 }
 
 /**

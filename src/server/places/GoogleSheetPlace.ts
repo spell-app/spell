@@ -250,6 +250,11 @@ export class GoogleSheetPlace extends WebPlace implements Place {
     return queue.run(() => super.answerTo(request, context, changeId), { signal: context.signal })
   }
 
+  /** Its `RateQueue` waits out a limit by itself. */
+  protected get waitsOutLimits(): boolean {
+    return false
+  }
+
   /** A 403 nearly always means one thing, and the fix is in Google's own screen. */
   protected messageOf(error: ApiError): Promise<string> | string {
     if (error.status !== NOT_SHARED_STATUS) return super.messageOf(error)

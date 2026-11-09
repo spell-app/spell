@@ -66,6 +66,12 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "su clave es el secreto "CLAVE_RECETARIO""',
   "key-needs-server-side":
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
+  "key-goes-bad-header":
+    '"{name}" no puede ser el nombre de una cabecera:  es una palabra de letras, dígitos y guiones, p. ej. "X-Api-Key"',
+  "key-goes-bad-question":
+    '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
+  "key-goes-with-no-key":
+    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "- su clave es el secreto "CLAVE_RECETARIO""',
   "place-cant-announce":
     'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
   "change-not-saved":

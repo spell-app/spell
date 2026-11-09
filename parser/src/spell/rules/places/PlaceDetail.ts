@@ -21,6 +21,8 @@ export type PlaceDetailValue = {
   >
   keyNamed?: string
   keyIfSet?: boolean
+  /** Where its key goes on a request:  see `KeyGoesInHeader`, `KeyGoesInAddress`. */
+  keyGoes?: { header: string } | { inAddress: string }
   checkedEvery?: number
   checkedAt?: { hour: number; minute: number; utc?: boolean }
   versionsIn?: string

@@ -911,6 +911,17 @@ describe("GitHub's way (epic `data` P28)", () => {
     expect(description.canDo.limits).toMatch(/It allows 60 requests/)
   })
 
+  test("a key that goes elsewhere (T73):  it's sent there, the line says so, and looking again keeps both", async () => {
+    const { ingest, asked, texts, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
+    const { spell } = await ingest.add({ ...ASK, keyGoes: { header: "X-Api-Key" } })
+    expect(spell).toContain(`- its key goes in its "X-Api-Key" header`)
+    expect(asked[0]!.headers.get("x-api-key")).toBe("k3y")
+    expect(asked[0]!.headers.get("authorization")).toBeNull()
+    expect(descriptions.get("/G.json5")!.about.keyGoes).toEqual({ header: "X-Api-Key" })
+    await ingest.update("/G.spell")
+    expect(texts.get("/G.spell")).toContain(`- its key goes in its "X-Api-Key" header`)
+  })
+
   test("looking again leaves out what it left out before", async () => {
     const { ingest, texts } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     await ingest.add(ASK)
@@ -935,6 +946,24 @@ describe("the manners", () => {
       reader.fetch(API, { method: "POST", body: JSON.stringify({ query: "{ recipes { id } }" }) })
     ).resolves.toBeInstanceOf(Response)
     expect(asked.filter(({ method }) => method !== "GET")).toHaveLength(1)
+  })
+
+  test("a key in the address (T73):  it's asked there, and never comes back in what's read", async () => {
+    const KEY = "k3y/wi th"
+    const secretLink = `<${API}?api_key=${encodeURIComponent(KEY)}&page=2>; rel="next"`
+    const sent: string[] = []
+    const fetch = (async (url: string) => {
+      sent.push(url)
+      const answer = Response.json({ echoed: KEY }, { headers: { link: secretLink } })
+      Object.defineProperty(answer, "url", { value: url })
+      return answer
+    }) as unknown as typeof globalThis.fetch
+    const reader = new PoliteReader({ fetch, key: KEY, keyGoes: { inAddress: "api_key" }, sleep: async () => {} })
+    const { text, url, headers } = await reader.read(`${API}?q=1`)
+    expect(new URL(sent[0]!).searchParams.get("api_key")).toBe(KEY)
+    expect(text).toBe('{"echoed":"[its key]"}')
+    expect(url).toBe(`${API}?q=1`)
+    expect(headers.get("link")).not.toContain("wi")
   })
 
   test("it waits when told to, then goes on", async () => {

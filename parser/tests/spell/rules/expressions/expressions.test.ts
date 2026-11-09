@@ -111,6 +111,8 @@ describe("priority and precedence", () => {
         "its_known_property:  Priority.preferred",
         "joined:  Precedence.join",
         "kept_on_device:  Priority.declaration",
+        "key_goes_in_address:  Priority.declaration",
+        "key_goes_in_header:  Priority.declaration",
         "key_if_set:  Priority.declaration",
         "key_is_secret:  Priority.declaration",
         "key_written:  Priority.declaration",

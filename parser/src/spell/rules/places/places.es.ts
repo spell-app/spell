@@ -20,6 +20,8 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
+import { KeyGoesInAddress } from "./KeyGoesInAddress"
+import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
@@ -309,6 +311,8 @@ placesEs.addRule(FieldCalled, {
 placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave es el secreto {name:text}, si la hay" })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
+placesEs.addRule(KeyGoesInHeader, { syntax: "{type:subject_its} clave va en su cabecera {name:text}" })
+placesEs.addRule(KeyGoesInAddress, { syntax: "{type:subject_its} clave va en la dirección como {name:text}" })
 placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
   syntax: "((second:segundo|segundos)|(minute:minuto|minutos)|(hour:hora|horas)|(day:día|días|dia|dias))"
 })

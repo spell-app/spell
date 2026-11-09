@@ -144,6 +144,7 @@ export class CreatePlace extends TypeDeclaration<
     const notAnAddress = this.refuseAtmosphereAddress(match) ?? this.refuseAirtableAddress(match)
     if (notAnAddress) return notAnAddress
     this.warnIfItCantSay(match)
+    this.warnIfKeyGoesNowhere(match)
     this.warnIfCheckedTooOften(match)
     this.warnOfNoReferee(match)
     this.warnOfAirtable(match)
@@ -234,6 +235,13 @@ export class CreatePlace extends TypeDeclaration<
       () => atmosphereLineProblem(match) ?? "",
       () => atmosphereLineProblem(match) !== undefined
     )
+  }
+
+  /** SIDE EFFECT:  a line says where a key goes, and no line names one:  it'd go nowhere, so it says. */
+  private warnIfKeyGoesNowhere(match: P.MatchFor<this>): void {
+    const details = () => CreatePlace.detailsOf(match)
+    const message = SP.Language.of(match.scope).parserMessage("key-goes-with-no-key")
+    SP.SpellWarnings.noteIf(match, message, () => details().keyGoes !== undefined && details().keyNamed === undefined)
   }
 
   /** SIDE EFFECT:  a plain web server can't announce what changed:  say so, unless a line under it says how often to ask. */

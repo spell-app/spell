@@ -6829,7 +6829,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 96,
+          "line": 98,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7235,6 +7235,58 @@
                 },
                 "py": {
                   "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"only_from\": \"attendees\",\n            \"most_each\": [{\"field\": \"shift\", \"most\": 2}, {\"field\": \"event\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"tickets\", \"field\": \"invitations\"},\n            \"joins\": {\"collection\": \"tickets\", \"address\": \"picnic@rs/__attendees\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInHeader",
+          "ruleNames": ["key_goes_in_header"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInHeader.ts",
+          "line": 16,
+          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key goes in its {name:text} header",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in its \"X-Api-Key\" header",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"header\": \"X-Api-Key\"},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyGoesInAddress",
+          "ruleNames": ["key_goes_in_address"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyGoesInAddress.ts",
+          "line": 16,
+          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key goes in the address as {name:text}",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in the address as \"api_key\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"in_address\": \"api_key\"},\n    },\n)"
                 }
               }
             }

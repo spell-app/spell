@@ -98,6 +98,13 @@ export const PARSER_MESSAGES = {
   /** A place named a key:  a browser program has no way to read one. */
   "key-needs-server-side":
     'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
+  /** `its key goes in its "..." header`, a name a header can't have:  won't compile. */
+  "key-goes-bad-header": '"{name}" can\'t be a header\'s name:  it\'s one word of letters, digits and dashes, e.g. "X-Api-Key"',
+  /** `its key goes in the address as "..."`, a name a question can't have:  won't compile. */
+  "key-goes-bad-question":
+    '"{name}" can\'t be asked in an address:  it\'s one word of letters, digits, dashes and underscores, e.g. "api_key"',
+  /** A line says where a key goes, and no line names one. */
+  "key-goes-with-no-key": 'This says where its key goes, and no line names one:  add "- its key is the secret "COOKBOOK_KEY""',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
     "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- check it every 30 seconds\" under it",

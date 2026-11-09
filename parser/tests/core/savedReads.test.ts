@@ -196,6 +196,10 @@ describe("waitAfter():  a read that was only too soon (epic `data` I92)", () => 
     expect(waitAfter(failed(403, { "x-ratelimit-remaining": "0", "x-ratelimit-reset": reset }), NOW)).toBe(90_000)
   })
 
+  test("a read that wasn't sent says its wait by itself (T110)", () => {
+    expect(waitAfter(Object.assign(new Error("later"), { retryAt: NOW + 90_000 }), NOW)).toBe(90_000)
+  })
+
   test("any other failure is no wait:  it shows red, as before", () => {
     expect(waitAfter(failed(403), NOW)).toBeUndefined()
     expect(waitAfter(failed(404), NOW)).toBeUndefined()

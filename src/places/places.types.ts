@@ -1364,6 +1364,20 @@ export class PlaceError extends Error {
 PlaceError.prototype.name = "PlaceError"
 
 /**
+ * Thrown, with nothing sent, while a server has said not to ask yet (epic `data` T110):  `WebPlace`.
+ * - No answer, as far as a change is concerned:  it's sent again later.
+ * - `retryAt`:  when it may be asked, which a drawing says, and tries again at (`waitAfter()`, in core).
+ */
+export class TooSoonError extends Error {
+  declare cause: { retryAt: number } | undefined
+  /** When it may be asked again, in ms since 1970. */
+  get retryAt() {
+    return this.cause?.retryAt
+  }
+}
+TooSoonError.prototype.name = "TooSoonError"
+
+/**
  * The store a sample's records are kept in on this device (`SamplePlace`):  `spell-samples:<program>/<place>`.
  * - The site editor's Data tab reads and writes the same (epic `mockup` P14, T22).
  */

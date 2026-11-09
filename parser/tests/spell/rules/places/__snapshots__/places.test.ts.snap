@@ -25,6 +25,8 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "in_one_go": "body?",
   "is_read_only": "type",
   "kept_on_device": "size?|unit?",
+  "key_goes_in_address": "type|name",
+  "key_goes_in_header": "type|name",
   "key_if_set": "type|name",
   "key_is_secret": "type|name",
   "key_written": "type|key",

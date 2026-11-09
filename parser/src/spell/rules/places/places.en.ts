@@ -19,6 +19,8 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
+import { KeyGoesInAddress } from "./KeyGoesInAddress"
+import { KeyGoesInHeader } from "./KeyGoesInHeader"
 import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
@@ -343,6 +345,50 @@ places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quo
 places.addRule(KeyIfSet, { syntax: "{type:subject_its} key is the secret {name:text}, if it's set" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
+places.addRule(KeyGoesInHeader, {
+  syntax: "{type:subject_its} key goes in its {name:text} header",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://example.com"\n\t- its key goes in its "X-Api-Key" header',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://example.com",',
+            '  keyGoes: { header: "X-Api-Key" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(KeyGoesInAddress, {
+  syntax: "{type:subject_its} key goes in the address as {name:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://example.com"\n\t- its key goes in the address as "api_key"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://example.com",',
+            '  keyGoes: { inAddress: "api_key" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
   syntax: "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
 })
