@@ -50,23 +50,20 @@
       <ui-container class="site-body">
         <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
-            <!--
-              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
-              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <ui-section id="examples-types-columns" label="Columns" sticky="stack" collapsible dividing>
                 <ui-example description="Panes side by side, sized by `columns`.  `resizable` puts a bar between them:  drag it, or give it the focus and use the arrow keys.">
                   <ui-split-panel columns="30%,*" resizable style="height: 8em">
-                    <ui-segment>Tree</ui-segment>
-                    <ui-segment>Code</ui-segment>
+                    <ui-panel appearance="pane">Tree</ui-panel>
+                    <ui-panel appearance="pane">Code</ui-panel>
                   </ui-split-panel>
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-rows" label="Rows" sticky="stack" collapsible dividing>
                 <ui-example description="Panes one above the other, sized by `rows`:  here a fixed height, with the rest above it.">
                   <ui-split-panel rows="*,3em" resizable style="height: 10em">
-                    <ui-segment>Code</ui-segment>
-                    <ui-segment>Output</ui-segment>
+                    <ui-panel appearance="pane">Code</ui-panel>
+                    <ui-panel appearance="pane">Output</ui-panel>
                   </ui-split-panel>
                 </ui-example>
               </ui-section>
@@ -74,10 +71,10 @@
                 <ui-example description="A split panel is a pane too.">
                   <ui-split-panel columns="*,*" resizable style="height: 10em">
                     <ui-split-panel rows="*,*" resizable>
-                      <ui-segment>Code</ui-segment>
-                      <ui-segment>Output</ui-segment>
+                      <ui-panel appearance="pane">Code</ui-panel>
+                      <ui-panel appearance="pane">Output</ui-panel>
                     </ui-split-panel>
-                    <ui-segment>App</ui-segment>
+                    <ui-panel appearance="pane">App</ui-panel>
                   </ui-split-panel>
                 </ui-example>
               </ui-section>
@@ -95,9 +92,9 @@
               <ui-section id="examples-states-hidden" label="Hidden panes" sticky="stack" collapsible dividing>
                 <ui-example description="A child with `hidden` isn't a pane:  the others share its room.  Showing it again moves nothing, so a running program in a pane keeps running.">
                   <ui-split-panel columns="*,*,*" resizable style="height: 6em">
-                    <ui-segment>One</ui-segment>
-                    <ui-segment hidden>Not shown</ui-segment>
-                    <ui-segment>Three</ui-segment>
+                    <ui-panel appearance="pane">One</ui-panel>
+                    <ui-panel appearance="pane" hidden>Not shown</ui-panel>
+                    <ui-panel appearance="pane">Three</ui-panel>
                   </ui-split-panel>
                 </ui-example>
               </ui-section>
@@ -176,8 +173,8 @@
               <ui-docs-tokens family="ui-split-panel" playground>
                 <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
                 <ui-split-panel columns="25%,*" resizable style="height: 8em">
-                  <ui-segment>Tree</ui-segment>
-                  <ui-segment>Code</ui-segment>
+                  <ui-panel appearance="pane">Tree</ui-panel>
+                  <ui-panel appearance="pane">Code</ui-panel>
                 </ui-split-panel>
                 <!-- playground:end -->
               </ui-docs-tokens>

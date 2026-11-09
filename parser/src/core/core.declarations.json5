@@ -7,7 +7,6 @@
     "View",
     "Page",
     "TwoSidedView",
-    "Notebook",
     "SiteBase",
     "Site",
     "ViewableList",
@@ -1689,12 +1688,31 @@
     },
     {
       "kind": "method",
+      "name": "drawPart",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "make"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A PART of `thing`'s drawing, `make`'s, which an edit can draw again alone (epic `notebook` P4)."
+    },
+    {
+      "kind": "method",
       "name": "drawAgain",
       "of": "core",
       "module": "drawing",
       "params": [
         {
           "name": "types"
+        },
+        {
+          "name": "parts"
         }
       ],
       "section": "Drawing things",
@@ -1779,7 +1797,7 @@
         }
       ],
       "section": "Mounting",
-      "description": "Mount `view`'s drawing into `core.appElement()`, as the program's page:  what `App.start()` and `Page.start()` do (`start the game`, `start the counter notebook`)."
+      "description": "Mount `view`'s drawing into `core.appElement()`, as the program's page: what `App.start()` and `Page.start()` do (`start the game`, `start the counter notebook`)."
     },
     {
       "kind": "method",
@@ -3591,12 +3609,6 @@
       "superType": "View",
       "module": "classes/TwoSidedView",
       "description": "`TwoSidedView`:  spell's built-in template `two sided view`, compiled from `templates/TwoSidedView.spell`."
-    },
-    {
-      "type": "Notebook",
-      "superType": "Page",
-      "module": "classes/Notebook",
-      "description": "`Notebook`:  spell's built-in template `notebook`, compiled from `templates/Notebook.spell`."
     },
     {
       "type": "SiteBase",

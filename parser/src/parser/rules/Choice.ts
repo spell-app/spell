@@ -6,16 +6,6 @@ import { Rule } from "./Rule"
 /** Turn on debugging of choice / priority semantics. */
 const DEBUG_CHOICES = false
 
-/** How many rules a `Choice` has before looking them up by first word beats trying each:  `Choice.rulesFor()`. */
-const MIN_RULES_TO_LOOK_UP = 16
-
-/**
- * A long `Choice`'s rules, by the token each can start with.
- * - `byWord`:  for each first word, the rules starting with it and the rules that can start with anything, in order
- * - `withoutWord`:  the rules that can start with anything:  all that can match a token no rule names
- */
-type RuleLookup = { byWord: Map<unknown, P.Rule[]>; withoutWord: P.Rule[] }
-
 /**
  * Alternative syntax, matching one of a number of different rules.
  * The result of a parse is the longest rule that actually matched.
@@ -24,6 +14,20 @@ type RuleLookup = { byWord: Map<unknown, P.Rule[]>; withoutWord: P.Rule[] }
  * - TODO: match all valid choices
  *
  * After parsing we'll return the rule which is the "best match" (rather than cloning this rule).
+ *
+ * Which alternatives get tried:  each line tries only the rules that can start with its first word
+ * (`FirstWordIndex`, below;  epic `language` P37).
+ *
+ * REJECTED, for now:  writing the tokenizer, base rules and Rulex matching in WebAssembly or a compiled TypeScript.
+ * - Measured on a warm Solitaire parse:  those parts are at most 54% of the time, so at BEST the whole job is 2.2 times
+ *   faster, and each rule's TypeScript would still be called 63,000 to 155,000 times a parse.
+ * - In a toy, nearly all the gain came from flat data (words as numbers, arrays of them), which plain JavaScript gets
+ *   too;  WebAssembly added 1.2 to 1.35 times on top.
+ * - The price:  every class of the engine rewritten, a build step in every program that loads the parser, and
+ *   scope records, Rulex, give-back and expecting mode moved across, all with hooks that can't move.
+ * - Look again if a large project still feels slow and matching is still over about 35% of the time:
+ *   first the flat data shape in plain JavaScript, then WebAssembly for the tokenizer and quick tests only.
+ * - The measurements:  epic `language`, P37 · Faster Parsing.
  */
 export class Choice<
   Groups extends string | P.AnyGroups = P.AnyGroups,
@@ -31,9 +35,11 @@ export class Choice<
 > extends Rule<ChoiceProps, Groups, MatchData> {
   /** List of rules, any of which will match. */
   declare rules: P.Rule[]
+  /** Which of `rules` can start with which word:  ONE per list, shared by every `clone()` of it. */
+  declare firstWordIndex: FirstWordIndex
 
-  /** Our `rules` by their first word, made the first time a long list is parsed -- see `rulesFor()`. */
-  private lookup: RuleLookup | undefined
+  /** Use the first-word table?  `false` tries every alternative:  tests compare the two (see `Sequence.firstWords`). */
+  static USE_FIRST_WORD_INDEX = true
 
   /** Copy `props.rules` into a new array (defaulting to `[]`) so callers can't mutate our list from outside. */
   constructor(props: ChoiceProps) {
@@ -42,6 +48,8 @@ export class Choice<
     // No `props.rules` => keep what `super()` built from `syntax`, e.g. `(is|is not|isn't|isnt)`.
     const rules = props.rules ?? this.rules
     this.rules = Array.isArray(rules) ? [...rules] : []
+    // a `clone()`'s, copied from the original by `super()`:  the same list, so the same table
+    this.firstWordIndex ??= new FirstWordIndex(this.rules)
   }
 
   /** Our alternatives. */
@@ -72,7 +80,7 @@ export class Choice<
    */
   addChoice(_parser: P.Parser, ...rules: P.Rule[]) {
     this.rules = [...this.rules, ...rules]
-    this.lookup = undefined
+    this.firstWordIndex = new FirstWordIndex(this.rules)
   }
 
   /**
@@ -111,12 +119,16 @@ export class Choice<
     // NOTE: only allocated when expecting:  `Choice.parse()` is too hot for an array per call
     const alternatives: Array<{ from: number; to: number; complete: boolean }> | undefined = expecting ? [] : undefined
 
-    // Try to match each rule in turn.
+    // Try to match each rule in turn:  only those that can start with this word (never when expecting:
+    // what's half typed may not have its first word yet).
     // For efficiency, complicated rules (e.g. sequences or recursive rules)
     //  should exit quickly via their own `test()`, see `Sequence.parse()`.
+    const rulesToTry =
+      expecting || !tokens.length || !Choice.USE_FIRST_WORD_INDEX
+        ? this.rules
+        : this.firstWordIndex.rulesFor(tokens[0]!)
     const matches: P.Match[] = []
-    const rules = expecting || !tokens.length ? this.rules : this.rulesFor(tokens[0]!)
-    for (let i = 0, rule; (rule = rules[i++]);) {
+    for (let i = 0, rule; (rule = rulesToTry[i++]);) {
       if (DEBUG_CHOICES) console.group("parsing rule", rule.name)
       const from = expecting ? expecting.records.length : 0
       const match = rule.parse(scope, tokens)
@@ -150,38 +162,6 @@ export class Choice<
     match.choiceRule = this.matchGroup || this.name
     if (this.matchGroup) match.matchGroup = this.matchGroup
     return match
-  }
-
-  /**
-   * Those of our `rules` that could match starting at `token`, in order:  all of them, unless we're long.
-   * - Why:  a long list is `statement` (299 rules) or `operand` (129), tried at every line and in every expression,
-   *   and nearly all of them are turned away by their first word (epic `data` I42).
-   * - Only skips a rule whose own `test()` would say no, so what parses doesn't change;  order is kept for `getBestMatch()`.
-   */
-  private rulesFor(token: P.Token): P.Rule[] {
-    if (this.rules.length < MIN_RULES_TO_LOOK_UP) return this.rules
-    const { byWord, withoutWord } = (this.lookup ??= Choice.lookupFor(this.rules))
-    return byWord.get(token.value) ?? withoutWord
-  }
-
-  /** `rules` by the first word of each -- see `RuleLookup`. */
-  private static lookupFor(rules: P.Rule[]): RuleLookup {
-    const byWord = new Map<unknown, P.Rule[]>()
-    const withoutWord: P.Rule[] = []
-    // new words start with the rules that take any word so far, so each list stays in the rules' order
-    for (const rule of rules) {
-      const words = rule.firstWords
-      if (words) {
-        for (const word of words) {
-          if (!byWord.has(word)) byWord.set(word, [...withoutWord])
-          byWord.get(word)!.push(rule)
-        }
-      } else {
-        withoutWord.push(rule)
-        for (const list of byWord.values()) list.push(rule)
-      }
-    }
-    return { byWord, withoutWord }
   }
 
   /**
@@ -230,6 +210,52 @@ export class Choice<
       !rule.optional &&
       !rule.caseInsensitive
     return flat ? (rule.literal as string[]).join("|") : rule.toRulexSyntax()
+  }
+}
+
+/**
+ * Which of a list of alternatives can start with which first word, so a line tries only those.
+ * - e.g. for a line starting `remove`:  the rules that must start with `remove`, plus every rule that can start with
+ *   anything, in their original order, so ties still go to the earliest rule (`Choice.getBestMatch()`).
+ * - A rule is filed under a word only when its syntax demands it (`Sequence.firstWords`).
+ * - Built the first time it's asked, and never changed:  `Choice.addChoice()` makes a new one for its new list.
+ * - NOTE: never used for the expecting mode's full-list walk, see `Choice.parse()`.
+ */
+class FirstWordIndex {
+  /** Shorter lists just try them all:  the table wouldn't pay for itself. */
+  private static readonly MIN_RULES = 4
+
+  /** For each first word, the rules to try, in list order.  Built on first use. */
+  private byWord: Map<unknown, P.Rule[]> | undefined
+  /** The rules that can start with anything:  what a word no rule demands tries. */
+  private anyWord: P.Rule[] = []
+
+  constructor(private readonly rules: P.Rule[]) {}
+
+  /** The alternatives that can match a line starting with `token`. */
+  rulesFor(token: P.Token): P.Rule[] {
+    if (this.rules.length < FirstWordIndex.MIN_RULES) return this.rules
+    this.byWord ??= this.buildTable()
+    return this.byWord.get(token.value) ?? this.anyWord
+  }
+
+  /** The table, walking `rules` once, in order:  a rule with no first word goes in every word's list. */
+  private buildTable(): Map<unknown, P.Rule[]> {
+    const byWord = new Map<unknown, P.Rule[]>()
+    for (const rule of this.rules) {
+      const words = rule instanceof P.Sequence ? rule.firstWords : undefined
+      if (!words) {
+        for (const list of byWord.values()) list.push(rule)
+        this.anyWord.push(rule)
+        continue
+      }
+      for (const word of words) {
+        const list = byWord.get(word) ?? [...this.anyWord]
+        if (list.at(-1) !== rule) list.push(rule)
+        byWord.set(word, list)
+      }
+    }
+    return byWord
   }
 }
 

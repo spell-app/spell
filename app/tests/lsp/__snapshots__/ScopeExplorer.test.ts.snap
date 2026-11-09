@@ -93,6 +93,7 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     method start (an app)
   type View (is a Thing)
   type Page (is a View)
+    property lock (text)
   type TwoSidedView (is a View)
     property direction
     enumeration Directions
@@ -110,10 +111,13 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     property year (number)
     property day (number)
     property hour (number)
+    property short date (text)
+    property long date (text)
+    property abbreviated date (text)
+    property short time (text)
+    property long time (text)
+    property timestamp (text)
   type Place (is a Thing)
-  type Notebook (is a Page)
-    property lock
-    enumeration Locks
   type Site (is a App)
     property current address (text)
   project Solitaire
@@ -175,6 +179,7 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     method start (an app)
   type View (is a Thing)
   type Page (is a View)
+    property lock (text)
   type TwoSidedView (is a View)
     property direction
     enumeration Directions
@@ -192,10 +197,13 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     property year (number)
     property day (number)
     property hour (number)
+    property short date (text)
+    property long date (text)
+    property abbreviated date (text)
+    property short time (text)
+    property long time (text)
+    property timestamp (text)
   type Place (is a Thing)
-  type Notebook (is a Page)
-    property lock
-    enumeration Locks
   type Site (is a App)
     property current address (text)
   project lib (imported)

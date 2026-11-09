@@ -1,0 +1,25 @@
+/*
+ * `<ui-site-tabs>` (`UISiteTabs.tsx`):  the shown page's family as a row of tabs, drawn with a segmented `<ui-toolbar>`.
+ * - The tabs' look is the menu's own (`--ui-menu-segmented-*`, `::part(tabs)` for its box).
+ * - The row never wraps:  when the tabs don't fit, the toolbar's row scrolls sideways, with its `‹` / `›` keys.
+ */
+@layer ui.components {
+  :host {
+    display: block;
+    min-width: 0;
+  }
+
+  :host(:state(empty)) {
+    display: none;
+  }
+
+  /* an equal share of the row, never squeezed below its words:  words that don't fit push the row to scroll */
+  ui-item {
+    min-width: max-content;
+  }
+
+  ui-item::part(item) {
+    min-width: max-content;
+    white-space: nowrap;
+  }
+}

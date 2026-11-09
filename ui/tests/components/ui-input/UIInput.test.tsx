@@ -557,6 +557,48 @@ describe("<ui-textarea grow>", () => {
   })
 })
 
+describe("<ui-textarea send-on-enter>", () => {
+  /** A textarea holding `value`, what it sent, and pressing a key in it. */
+  async function box(value: string, attributes = "send-on-enter") {
+    const host = await ElementFixture.render<Input>(`<ui-textarea ${attributes} aria-label="Message"></ui-textarea>`)
+    host.value = value
+    await ElementFixture.settle()
+    const sent: string[] = []
+    host.addEventListener("ui-send", (event) => sent.push((event as CustomEvent<{ value: string }>).detail.value))
+    const control = host.shadowRoot!.querySelector<HTMLTextAreaElement>("textarea")!
+    const press = (init: KeyboardEventInit) => {
+      const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, ...init })
+      control.dispatchEvent(event)
+      return event
+    }
+    return { sent, press }
+  }
+
+  it("Enter sends what's typed, and types no new line", async () => {
+    const { sent, press } = await box("Who's bringing chairs?")
+    expect(press({}).defaultPrevented).toBe(true)
+    expect(sent).toEqual(["Who's bringing chairs?"])
+  })
+
+  it("Shift-Enter types a new line, and sends nothing", async () => {
+    const { sent, press } = await box("line")
+    expect(press({ shiftKey: true }).defaultPrevented).toBe(false)
+    expect(sent).toEqual([])
+  })
+
+  it("nothing but spaces sends nothing, and types no new line either", async () => {
+    const { sent, press } = await box("   ")
+    expect(press({}).defaultPrevented).toBe(true)
+    expect(sent).toEqual([])
+  })
+
+  it("without it, Enter types a new line as ever", async () => {
+    const { sent, press } = await box("line", "")
+    expect(press({}).defaultPrevented).toBe(false)
+    expect(sent).toEqual([])
+  })
+})
+
 ////////////////
 // ## Tokens from outside
 ////////////////

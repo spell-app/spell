@@ -419,7 +419,20 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       "```"
     ),
     rules: ["create_type", "draw_it"],
-    members: []
+    members: [
+      {
+        words: "lock",
+        kind: "property",
+        datatype: "text",
+        stored: true,
+        declarable: true,
+        docstring: md(
+          "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.",
+          "- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.",
+          '- Say it on its tag, `<spell-page "guide" locked>`, or in its body, `- its lock is "locked"`.'
+        )
+      }
+    ]
   },
   {
     name: "two sided view",
@@ -673,8 +686,6 @@ export const TYPE_WORDS: P.TypeWords = {
   "two sided view": "two sided view",
   "two-sided view": "two sided view",
   "two-sided-view": "two sided view",
-  // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-  notebook: "notebook",
   // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
   site: "site",
   // a kind of measure:  `length is a dimension:` (epic `language` P23)
@@ -790,7 +801,10 @@ export function loadBuiltInTypes(
           const name = builtInMemberName(said)
           // compiled by its own name:  Spanish's `nombre` reads and sets `.name`
           const renamed = name !== output ? { output } : {}
-          addMember({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, datatype, docstring })
+          // and its values too:  Spanish's `bloqueado` sets a page's `lock` to `locked`
+          const valueOutputs = words.builtInMemberValues?.[member.words]
+          const values = valueOutputs ? { valueOutputs } : {}
+          addMember({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, ...values, datatype, docstring })
         }
         continue
       }
@@ -878,9 +892,9 @@ export function builtInMembersOfRule(ruleName: string): Array<{ type: SP.BuiltIn
  */
 export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
   if (!type) return false
-  // any root's own:  a Spanish project's built-ins are its own language's root's, a mixed project's its own
-  // root's, a built-in template's compile its bare root's (`SP.Language.bareRootScope()`):  a plain `P.RootScope`,
-  // NOT its sub-classes, a project's scope or its import layer
+  // any root's own:  a plain `P.RootScope`, NOT its sub-classes, a project's scope or its import layer
+  // - a Spanish project's built-ins are its own language's root's, a mixed project's its own root's
+  // - a built-in template's compile, its bare root's (`SP.Language.bareRootScope()`)
   return type.parentScope?.constructor === P.RootScope
 }
 
@@ -889,11 +903,11 @@ export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
  * - e.g. `id` on a person, `name` on a pile -- or Spanish's `nombre`, the language's own word for it;
  *   a card has no `name`, so it may declare any.
  * - Found through the built-in type `type` comes from, e.g. `list` for a pile.
- * - Its super-types not known yet (a stub):  only a member no type may declare, e.g. `id`, which every thing and
- *   list has.
+ * - Its super-types not known yet (a stub):  only a member no type may declare,
+ *   e.g. `id`, which every thing and list has.
  * - `name`:  how it compiles, e.g. `name` for `nombre`;  `on`:  the built-in type whose member it is, e.g. `list`.
- * - Why:  a declaration of one is refused, unless it's `declarable` with the same datatype -- see
- *   `SpellStatement.refuseBuiltInType()`.
+ * - Why:  a declaration of one is refused, unless it's `declarable` with the same datatype:
+ *   see `SpellStatement.refuseBuiltInType()`.
  * - A lookup:  call it WHILE PARSING.
  */
 export function builtInStoredMember(

@@ -1,0 +1,61 @@
+<spell-page "diagram usage" notebook>
+	<header level="1">
+		Diagram
+		<header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Give it a spec:  the `spec` property, or a `<script type="application/json">` child on a static page.
+			The spec is the NERD skill's JSON as it is, so a NERD written for that skill's script opens here:
+
+			- `columns`, left to right, each a stack of `groups`;  a group has a `label`, a `color`, and `nodes`
+			  (one stack) or `lanes` (stacks side by side);  `{ "legend": true }` places the legend
+			- a node has a `name`, a `note`, its linking `fields` (or example `bullets`), and its own `color`
+			- `edges`, each `{ "from": "Box.field", "to": "Other", "kind": "contains" }` (solid) or `"ref"` (dashed,
+			  the default);  a field `{ "name": "x", "derived": true }` is drawn italic, `x (derived)`
+			- `gap_before` on a group or node lines it up with what links to it
+
+			Or a flat `{ nodes, edges }`:  it's put in at most `columns` columns (3 by default).
+
+			Drag a box to move it;  `remember="name"` keeps where each person put them, and Put back forgets.
+			`fixed` stops moving boxes.  Each box takes focus, and the arrow keys move it (Shift for bigger steps);  Enter is a click.  A right click opens a menu:  Put back, Save as SVG, Save as JSON;  from script, `toSVG()`, `saveSVG()` and `saveJSON()`.
+		</>
+		<markdown>
+			```js
+			const diagram = document.querySelector("ui-diagram")
+			diagram.spec = { columns: [...], edges: [...] }
+			diagram.addEventListener("ui-node-clicked", (event) => console.log(event.detail.name))
+			diagram.addEventListener("ui-node-moved", (event) => console.log(event.detail))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			| Key | What it does |
+			| --- | --- |
+			| Tab | Moves to the next box |
+			| Arrow keys | Move the box a little;  with Shift, further |
+			| Enter or Space | A click on the box (a NERD box turns over) |
+			| Shift F10 or the menu key | Opens the menu:  Put back, Save as SVG, Save as JSON |
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The drawing is a group (`role="group"`), named by how many boxes and links it has:  "Diagram:  9 boxes,
+			11 links".  Each box is a button named by its name, its description saying the arrow keys move it;
+			its fields are real text in it.  A page that relies on the diagram should
+			say what it shows in words too.
+		</>
+	</>
+</spell-page>

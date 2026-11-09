@@ -12,15 +12,14 @@ game.start()   # drawn on the page:  `core.page.body_html()` writes it
 ```
 
 - The twins of the JavaScript core's `App`, `View`, `Page` and `ViewableList` (`classes/`).
-- `TwoSidedView` and `Notebook` are built-in templates written in spell:  generated, in `two_sided_view.py` and
-  `notebook.py`.
+- `TwoSidedView` is a built-in template written in spell:  generated, in `two_sided_view.py`.
 """
 
 from typing import Any
 
 from spell_core.drawing import h
 from spell_core.lists import List
-from spell_core.things import Thing, program_core
+from spell_core.things import Thing, program_core, prop
 
 
 class View(Thing):
@@ -66,7 +65,13 @@ class Page(View):
 
     - NOTE:  its address, and moving from page to page, aren't built yet:  for now it's drawn as any view is.
     - It hears what the program triggers by its own handler, as its app does:  see `core.trigger()`.
+    - Its `lock`:  whether what's changed on the page is saved (epic `notebook` P1, Q8).
     """
+
+    # what its `lock` may be:  `unlocked` (the default) or `locked`
+    LOCKS = ("unlocked", "locked")
+    # whether the page may be changed:  in a locked page every edit is a try-out, saved for nobody
+    lock = prop(one_of=LOCKS)
 
     def __init__(self, *args: Any, **props: Any) -> None:
         """SIDE EFFECT:  the running program's pages are listed as they're made, `core.RUNTIME.pages`."""
@@ -76,7 +81,7 @@ class Page(View):
     def start(self) -> None:
         """SIDE EFFECT:  draw this page as the program's page, as an app starts:  see `start_drawing()`.
 
-        - Compiles from `start the counter notebook`, which a `.spellml` notebook says by itself
+        - Compiles from `start the counter notebook`, which a `.spellml` page that draws its body says by itself
           (epic `elemental-spell` P16).
         """
         start_drawing(self)

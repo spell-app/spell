@@ -9,7 +9,7 @@ import { SP } from "spell/parser/spell"
  * - Its AST is a text value:  the text inside the quotes, with the source's spelling, quotes and all, as `raw`.
  * - Class named `TextLiteral`, not `Text`, which would hide the DOM's `Text`.
  */
-export class TextLiteral extends P.TokenType<never, { fillIns?: FillInParts }> {
+export class TextLiteral extends P.TokenType<never, { fillIns?: FillInParts; valueOutput?: string }> {
   static ruleName = "text"
   @proto static alias = "expression"
   @proto static highlightAs: P.HighlightKind = "string"
@@ -34,12 +34,21 @@ export class TextLiteral extends P.TokenType<never, { fillIns?: FillInParts }> {
 
   getAST(match: P.MatchFor<this>): P.ASTStringLiteral | P.ASTTemplateString {
     if (match.data.fillIns) return fillInsAST(match, match.data.fillIns)
+    if (match.data.valueOutput !== undefined) {
+      return new P.ASTStringLiteral(match, { value: match.data.valueOutput, quote: '"' })
+    }
     const raw = assert.string(match.value)
     return new P.ASTStringLiteral(match, {
       value: TextLiteral.plainText(raw, match.matched[0] as P.TextToken),
       quote: '"',
       raw
     })
+  }
+
+  /** SIDE EFFECT:  `match` compiles to what `outputs` says its text does, if it says -- see `SpellConstant.sayForMember()`. */
+  static sayAs(match: P.MatchFor<TextLiteral>, outputs: Record<string, string>): void {
+    const output = outputs[TextLiteral.plainText(assert.string(match.value), match.matched[0] as P.TextToken)]
+    if (output !== undefined) match.data.valueOutput = output
   }
 
   /** The text `raw` spells, escapes undone (`"say \"hi\""` => `say "hi"`) where JSON can read it, else as typed. */

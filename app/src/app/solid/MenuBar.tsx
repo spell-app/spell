@@ -231,10 +231,10 @@ const PUBLISH_ICON = "paper plane outline"
  * The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them
  * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
  * - Opens the project's group's projects, as File › More Examples does (`<ProjectsMenu>`):
- *   the Examples, or a notebook's Notebooks, the one shown ticked, in columns of 10 when there are more.
+ *   the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more.
  * - Home at its foot (`Actions.showProjectChooser`):  where the hat linked to before.
  * - `useRunner`:  the one chosen opens in Run.
- * - A notebook's:  "Spell Notebooks".
+ * - The Spell UI site's:  "Spell Notebooks".
  * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
  ****************/
 export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {

@@ -101,7 +101,7 @@
     {
       "type": "FeedPage",
       "superType": "App",
-      "defined": "/OrgFeed.spellml:1254-2227"
+      "defined": "/OrgFeed.spellml:1254-2617"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -114,7 +114,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgFeed.spellml:1267-2218"
+      "defined": "/OrgFeed.spellml:1267-2608"
     }
   ],
   "codeLines": [

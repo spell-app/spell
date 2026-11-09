@@ -13,6 +13,7 @@
  *   - `<ui-docs-search>` -- the site search (in the nav's header band):
  *     the page shown's sections, components, attributes and every page's sections
  *     (`__data/search.json5`, its own `SearchData`)
+ *   - `<ui-docs-index>` -- a site's index page:  a card per page, grouped by the pages' tags, from the site's own list
  *   - `<ui-docs-inspector for>` -- a live view of another element's attributes, properties and `:state()`s
  *     (the custom elements guide, `guides/custom-elements/`, loads it in its own script)
  * - NOT components:  `ComponentDefinitions.all`, the component list and the lib build's entries leave them out

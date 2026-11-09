@@ -20,6 +20,7 @@ const SOLID = [/^solid-js/, /^@solidjs\//]
 export default defineConfig({
   plugins: [standardDecorators(), packageVersion(import.meta.dirname)],
   test: {
+    setupFiles: ["tests/parserTestSetup.ts"],
     projects: [
       { extends: true, test: { name: "parser", dir: "tests/parser" } },
       { extends: true, test: { name: "markdown", dir: "tests/markdown" } },

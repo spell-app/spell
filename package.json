@@ -697,6 +697,11 @@
       "types": "./ui/dist-types/src/components/ui-site-nav/index.d.ts",
       "default": "./ui/src/components/ui-site-nav/index.ts"
     },
+    "./ui/components/ui-site-tabs": {
+      "spell-source": "./ui/src/components/ui-site-tabs/index.ts",
+      "types": "./ui/dist-types/src/components/ui-site-tabs/index.d.ts",
+      "default": "./ui/src/components/ui-site-tabs/index.ts"
+    },
     "./ui/components/ui-diagram": {
       "spell-source": "./ui/src/components/ui-diagram/index.ts",
       "types": "./ui/dist-types/src/components/ui-diagram/index.d.ts",
@@ -731,6 +736,11 @@
       "spell-source": "./ui/src/docs-components/ui-docs-api/index.ts",
       "types": "./ui/dist-types/src/docs-components/ui-docs-api/index.d.ts",
       "default": "./ui/src/docs-components/ui-docs-api/index.ts"
+    },
+    "./ui/docs-components/ui-docs-index": {
+      "spell-source": "./ui/src/docs-components/ui-docs-index/index.ts",
+      "types": "./ui/dist-types/src/docs-components/ui-docs-index/index.d.ts",
+      "default": "./ui/src/docs-components/ui-docs-index/index.ts"
     },
     "./ui/docs-components/ui-docs-inspector": {
       "spell-source": "./ui/src/docs-components/ui-docs-inspector/index.ts",

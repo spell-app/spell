@@ -1,0 +1,113 @@
+<spell-page "markdown examples" notebook>
+	<header level="1">
+		Markdown
+		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
+              own text or a file on this site.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples (Types, Variations), restyled, plus the
+		vocabulary's `breaks` and `sanitized`.  File shown:  `site/examples/readme.md`.
+	-->
+	<section label="Types">
+		<section label="Markdown" sticky="stack" collapsible dividing>
+			<example "Markdown" description="Markdown renders `source` as GitHub does: tables, task lists, strikethrough, autolinks, and code blocks as `<ui-code>`. `heading-offset` puts its headings under the page's:  here `#` becomes an h4, below this example's h3.">
+				<html>
+					<ui-markdown source="/components/ui/examples/readme.md" heading-offset="3"></ui-markdown>
+				</html>
+			</example>
+		</>
+
+		<section label="Inline text" sticky="stack" collapsible dividing>
+			<example "Inline text" description="Without `source`, markdown renders its own text:  a `<script type=\"text/markdown\">` child keeps it exact, then dedented.">
+				<html>
+					<ui-markdown>
+						<script type="text/markdown">
+							Write **markdown** in the page, indented with the markup around it.
+
+							- [x] `<tags>` in code stay text
+							- [ ] nothing to escape
+						</script>
+					</ui-markdown>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example "Size" description="Markdown can be smaller or larger, as text is.">
+				<html>
+					<ui-markdown size="small">Smaller text, the *same* look.</ui-markdown>
+					<ui-markdown size="large">Larger text, the *same* look.</ui-markdown>
+				</html>
+			</example>
+		</>
+
+		<section label="Line breaks" sticky="stack" collapsible dividing>
+			<example "Line breaks" description="`breaks` makes a single newline a line break, as in GitHub comments;  by default it isn't, as in GitHub files.">
+				<html>
+					<ui-markdown breaks>
+						<script type="text/markdown">
+							Roses are red,
+							violets are blue.
+						</script>
+					</ui-markdown>
+				</html>
+				<divider/>
+				<html>
+					<ui-markdown>
+						<script type="text/markdown">
+							Roses are red,
+							violets are blue.
+						</script>
+					</ui-markdown>
+				</html>
+			</example>
+		</>
+
+		<section label="Editable" sticky="stack" collapsible dividing>
+			<example "Editable" description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws.">
+				<html>
+					<ui-markdown editable>
+						<script type="text/markdown">
+							# Try it
+
+							Type **markdown** here, then look at the *Preview*.
+
+							- [x] tables, task lists, code
+							- [ ] your text
+
+							| Tab     | Shows            |
+							| ------- | ---------------- |
+							| Write   | the text box     |
+							| Preview | the markdown     |
+						</script>
+					</ui-markdown>
+				</html>
+			</example>
+		</>
+
+		<section label="Sanitized" sticky="stack" collapsible dividing>
+			<example "Sanitized" description="Raw HTML is kept as written, `<ui-*>` elements included.  `sanitized` runs it through DOMPurify, loaded only then:  set it for text you didn't write.">
+				<html>
+					<ui-markdown>
+						<script type="text/markdown">Version **2** adds <ui-label size="mini" color="teal">include</ui-label> and <ui-label size="mini">code</ui-label>.</script>
+					</ui-markdown>
+				</html>
+				<divider/>
+				<html>
+					<ui-markdown sanitized>
+						<script type="text/markdown">Version **2** adds <ui-label size="mini" color="teal">include</ui-label> and <ui-label size="mini">code</ui-label>.</script>
+					</ui-markdown>
+				</html>
+			</example>
+		</>
+	</>
+</spell-page>

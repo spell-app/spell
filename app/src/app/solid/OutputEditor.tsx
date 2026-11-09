@@ -46,12 +46,12 @@ export function OutputToolbar() {
 
 /****************
  * ### `<OutputEditor>`
- * Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`;
- * or, with `target`, the whole project's code for that target, written after each compile (`project.codeFor()`);
- * or, with `target="spell"`, the code spell `editor.file` means:  a `.spellml` file's, written from its tags' twins;
- * or, with `target="spellx"`, `editor.file` as spellx:  a `.spell` file's, written by `SX.SpellxWriter`.
- * - Those two are a file's OTHER FORM, a view:  a template lives in ONE file, `.spell` or `.spellml`
- *   (epic `elemental-spell` J95).
+ * Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.
+ * - With `target`:  the whole project's code for that target, written after each compile (`project.codeFor()`).
+ * - With `target="spell"`:  the code spell `editor.file` means, a `.spellml` file's, written from its tags' twins.
+ * - With `target="spellx"`:  `editor.file` as spellx, a `.spell` file's, written by `SX.SpellxWriter`.
+ * - Those two are a file's OTHER FORM, a view:
+ *   a template lives in ONE file, `.spell` or `.spellml` (epic `elemental-spell` J95).
  * - Coloured by Monaco's own highlighting for the language;  it doesn't follow the cursor in `<InputEditor>`.
  * - A target whose writer can't write the project shows why, as a comment, instead of its code.
  * - SEE:  its App UI components page, `app/docs/OutputEditor.html` (`/components/app/OutputEditor.html`).
@@ -121,8 +121,8 @@ const TARGET_LOOKS = {
 /**
  * The code spell `file` means, as text:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`);
  * any other spell file's own text;  nothing for a file that isn't spell.
- * - Its project's packs name its drawings' components;  its own views keep their bare names here
- *   (VS Code's view takes them from the parse).
+ * - Its drawings' bare component names as its last parse took them, its own views too (`<card>` =>
+ *   `<solitaire-card>`):  `SP.ComponentTags`, as VS Code's view and a notebook's Spell view read them (epic `notebook` P6).
  * - NEVER throws:  a file that can't be written says why, as a comment.
  */
 function codeSpellOf(file: typeof editor.file): string {
@@ -130,7 +130,11 @@ function codeSpellOf(file: typeof editor.file): string {
   const text = file.contents ?? ""
   if (file.form !== "spellx") return text
   try {
-    return SX.CodeSpellWriter.write(text, { path: file.path, language: file.language })
+    return SX.CodeSpellWriter.write(text, {
+      path: file.path,
+      language: file.language,
+      componentTag: SP.ComponentTags.of(file).componentTag
+    })
   } catch (error) {
     return `// ${file.file}:  ${error instanceof Error ? error.message : String(error)}\n`
   }

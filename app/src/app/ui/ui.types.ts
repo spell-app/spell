@@ -52,8 +52,8 @@ export type EditorPosition = {
 // ## Type Explorer
 
 /**
- * What a `<TypeExplorer>` remembers between runs -- plain JSON, for whoever stores it, e.g. the VS Code runner's
- * `settings.json5`.
+ * What a `<TypeExplorer>` remembers between runs -- plain JSON, for whoever stores it,
+ * e.g. the VS Code runner's `settings.json5`.
  */
 export type TypeExplorerState = {
   /** `id` of the selected node. */
@@ -95,3 +95,12 @@ export type ThingExplorerState = {
  * - `type`:  under each type they are, their own and each it extends -- e.g. a foundation under `Pile` too
  */
 export type ThingOrder = "document" | "type"
+
+// ## The editor's own, in the app's area
+
+/**
+ * The attribute on what the editor draws in the app's area, round the program:
+ * a notebook's frame, "On this page", each example's code editor.
+ * - Never one of the app's parts, for the Inspector, its Views tree, or a click or a drag.
+ */
+export const EDITOR_OWN = "data-editor-own"

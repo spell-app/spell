@@ -219,6 +219,8 @@ export type DeclaredAt = {
  * - `path`:  absolute path of the file it's in -- none if the whole parse crashed
  * - `line`, `column`:  where, from 1
  * - `severity`:  `"warning"` for a warning;  none for an error
+ * - `rule`:  the name of the lint rule that found it, e.g. `description-before-example`, printed after its message;
+ *   none for spell's own errors and warnings
  */
 export type Problem = {
   project: string
@@ -227,6 +229,7 @@ export type Problem = {
   column?: number
   message: string
   severity?: "warning"
+  rule?: string
 }
 
 ////////////////

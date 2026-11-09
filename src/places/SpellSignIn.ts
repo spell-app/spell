@@ -17,11 +17,21 @@ export type SignedInAnswer = {
   email?: string
 }
 
+/** Where a signed-in person's password stands (epic `atmosphere` T64). */
+export type PasswordState = {
+  /** Do they have one? */
+  set: boolean
+  /** Does changing it take the current one?  Not just after a sign-in by emailed link or code. */
+  currentNeeded: boolean
+}
+
 /**
  * What `GET /api/sign-in/me` answers in full:  who's signed in, and where to report abuse (epic `atmosphere` P6).
  * - `abuseContact`:  the host's abuse address, which the sign-in bar shows;  left out by a server that has none.
  */
 export type SignInMeAnswer = SignedInAnswer & {
+  /** Their password, while someone's signed in. */
+  password?: PasswordState
   /** The host's abuse contact:  `abuse@...`. */
   abuseContact?: string
   /**
@@ -108,6 +118,8 @@ export type SignInLinkAnswer = {
  *   (`"waiting for a code"`), asking after the request every `SIGN_IN_WAIT_SECONDS`.
  *   - Opening the link on ANY device, and confirming there, signs that device in;  this page's next ask signs it in too.
  *   - Or the code typed here:  `enterCode()`.
+ * - OR WITH A PASSWORD (epic `atmosphere` T64):  `signInWithPassword(email, password)`;  a wrong one is `problem`.
+ *   - Signed in, `setPassword()`:  `hasPassword`, `currentPasswordNeeded`, and how it went, `passwordProblem`, `passwordSaved`.
  * - Signed in, the server keeps it in a cookie:  every request to the same server carries it, so it needs no token.
  * - Who's signed in is this page's person too (`noteSignedIn()`):  a room on the page says so.
  * - OR WITH A BLUESKY (atmosphere) ACCOUNT linked to theirs, where the server offers it (epic `atmosphere` P19):
@@ -134,6 +146,12 @@ export class SpellSignIn implements PlaceSignIn {
   private _problem: string | undefined
   /** Who's signed in. */
   private signedIn: SignedInAnswer = {}
+  /** Their password, as the server last said. */
+  private password: PasswordState | undefined
+  /** Why setting a password last failed. */
+  private _passwordProblem: string | undefined
+  /** Was a password just saved? */
+  private _passwordSaved = false
   /** What the server said of signing in with an atmosphere account:  left out, it doesn't. */
   private atProto: SignInMeAnswer["atProto"]
   /** Why coming back from an atmosphere account's host didn't sign in. */
@@ -185,6 +203,26 @@ export class SpellSignIn implements PlaceSignIn {
     return this._refused
   }
 
+  /** Does the one signed in have a password? */
+  get hasPassword(): boolean {
+    return !!this.password?.set
+  }
+
+  /** Does changing it take the current one? */
+  get currentPasswordNeeded(): boolean {
+    return !!this.password?.currentNeeded
+  }
+
+  /** Why setting a password last failed, in words for people. */
+  get passwordProblem(): string | undefined {
+    return this._passwordProblem
+  }
+
+  /** Was a password just saved? */
+  get passwordSaved(): boolean {
+    return this._passwordSaved
+  }
+
   /** Where the code went, while waiting for one. */
   get sentTo(): string | undefined {
     return this.waitingOn?.email
@@ -209,6 +247,38 @@ export class SpellSignIn implements PlaceSignIn {
     } catch (error) {
       this.changeTo("signed out", (error as Error).message)
     }
+  }
+
+  /** Sign in with a password.  NEVER throws:  a refusal is `problem`. */
+  async signInWithPassword(email: string, password: string): Promise<void> {
+    this.stopAsking()
+    this._refused = undefined
+    this.changeTo("signing in")
+    try {
+      this.signedInAs(await this.ask<Required<SignedInAnswer>>("password", { email, password }))
+    } catch (error) {
+      this.changeTo("signed out", (error as Error).message)
+    }
+  }
+
+  /**
+   * Set or change the password of whoever's signed in.  `current`:  the password now, unless a sign-in just now will do.
+   * - NEVER throws:  a refusal is `passwordProblem`;  saved, `passwordSaved`.
+   */
+  async setPassword({ password, current }: { password: string; current?: string }): Promise<void> {
+    this._passwordProblem = undefined
+    this._passwordSaved = false
+    try {
+      const answer = await this.ask<{ password: PasswordState }>("password/change", {
+        password,
+        ...(current && { current })
+      })
+      this.password = answer.password
+      this._passwordSaved = true
+    } catch (error) {
+      this._passwordProblem = (error as Error).message
+    }
+    this.changeTo(this._status, this._problem)
   }
 
   /**
@@ -248,6 +318,9 @@ export class SpellSignIn implements PlaceSignIn {
       console.error("SpellSignIn.signOut():  the server didn't hear", ignored)
     )
     this.signedIn = {}
+    this.password = undefined
+    this._passwordProblem = undefined
+    this._passwordSaved = false
     noteSignedIn(undefined)
     this.changeTo("signed out")
   }
@@ -282,9 +355,10 @@ export class SpellSignIn implements PlaceSignIn {
   private async lookUp(): Promise<void> {
     const failed = this.cameBack()
     try {
-      const { abuseContact, atProto, ...answer } = await this.ask<SignInMeAnswer>("me")
+      const { abuseContact, atProto, password, ...answer } = await this.ask<SignInMeAnswer>("me")
       this._abuseContact = abuseContact
       this.atProto = atProto
+      this.password = password
       if (answer.person) return this.signedInAs(answer, failed)
     } catch (ignored) {
       // a server with no sign-in:  nobody is, and signing in says why
@@ -351,6 +425,19 @@ export class SpellSignIn implements PlaceSignIn {
     this.signedIn = answer
     noteSignedIn(this.person)
     this.changeTo("signed in", problem)
+    if (!this.password) void this.learnPassword()
+  }
+
+  /** Where the password of whoever just signed in stands:  so Set or Change shows right.  NEVER throws. */
+  private async learnPassword(): Promise<void> {
+    try {
+      const { password } = await this.ask<SignInMeAnswer>("me")
+      if (!password) return
+      this.password = password
+      this.changeTo(this._status, this._problem)
+    } catch (ignored) {
+      // offered as Set until the page asks again
+    }
   }
 
   /**

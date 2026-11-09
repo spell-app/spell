@@ -94,6 +94,12 @@ export class TypeScope extends BlockScope {
   /** If true, the type was created as a stub. */
   declare stub?: boolean
   /**
+   * Path of the file it's the head of:  a page alone in its file, known to the project by its name and properties
+   * before its file parses (`P.FileHead`).
+   * - The page's own declaration goes in the page's own scope, beside this:  see `IncrementalProject`.
+   */
+  declare alonePage?: string
+  /**
    * The language its declaration is written in, e.g. `en`, when a stub knows it before its declaration parses:
    * `P.Parser.stubDeclaredTypes()` sets it from the declaring file's parser (epic `spanish` J89).
    * - Spell asks it through `SP.SpellType.languageOf()`, which reads a declared type's from its `declaredBy`.
@@ -288,6 +294,19 @@ export class TypeScope extends BlockScope {
     })
   }
 
+  /**
+   * The member `name` we inherit:  the nearest one a type we're built on declares -- `undefined` if none does.
+   * - The member itself, NOT one of ours:  what a line giving an inherited member a value must compile to.
+   */
+  inheritedMember(name: string): P.ScopeVariable | undefined {
+    const superType = this.superType ? this.getType(this.superType) : undefined
+    for (const type of superType?.chain() ?? []) {
+      const member = type.variables.get(name, "LOCAL_ONLY")
+      if (member) return member
+    }
+    return undefined
+  }
+
   /** Is `words` a property a scan found on us, or on a type we're built on?  See `propertiesAhead`. */
   knowsPropertyAhead(words: string): boolean {
     const key = snakeCase(words)
@@ -372,7 +391,7 @@ export class TypeScope extends BlockScope {
   declareProperty(
     name: string,
     declaredBy: P.Match,
-    { asWritten, datatype, autoDeclared, readAs, measure }: DeclarePropertyOptions = {}
+    { asWritten, datatype, autoDeclared, readAs, measure, output, valueOutputs }: DeclarePropertyOptions = {}
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
     if (!existing) {
@@ -382,6 +401,8 @@ export class TypeScope extends BlockScope {
       if (autoDeclared) props.autoDeclared = true
       if (readAs) props.readAs = readAs
       if (measure) props.measure = measure
+      if (output) props.output = output
+      if (valueOutputs) props.valueOutputs = valueOutputs
       this.variables.add(props)
     }
     // an earlier parse of THIS statement left it:  it's ours again -- see `sameStatement()`
@@ -643,6 +664,10 @@ export type DeclarePropertyOptions = {
   readAs?: string
   /** What it measures, e.g. a length in cm -- see `P.ScopeVariable.measure`. */
   measure?: Measure
+  /** What it compiles to, when that isn't its name -- see `P.ScopeVariable.output`. */
+  output?: string
+  /** What each of its values compiles to, when that isn't itself -- see `P.ScopeVariable.valueOutputs`. */
+  valueOutputs?: Record<string, string>
 }
 
 /** Constructor props for `TypeScope`. */
@@ -657,6 +682,8 @@ export type TypeScopeProps = {
   gender?: string
   /** If true, the type was created as a stub. */
   stub?: boolean
+  /** See `TypeScope.alonePage`. */
+  alonePage?: string
   /** See `TypeScope.lang`. */
   lang?: string
   /** See `TypeScope.valueKind`. */

@@ -72,7 +72,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  * - The editor UI (`EditorServer`):  vite's dev server, started once the page server listens and stopped with it.
  *   The page server and the editor are ONE thing to start.
  * - The house-network test site (`LocalSiteServer`, epic `atmosphere` T58):  the cloud and Caddy, from the main
- *   checkout's page server alone, on a Mac set up for it;  stopped with the page server.
+ *   checkout's page server alone, on a Mac set up for it;  it outlives the page server, so a restart leaves it up (T63).
  *   - `SPELL_NO_LOCAL_SITE=1` or a test (`VITEST`):  not started, so a test's server leaves the real ports alone.
  * - Writes refuse a foreign `Origin` (another site posting into our projects).
  *   - The API has no token, since the editor calls it from vite's origin, through vite's proxy.
@@ -106,8 +106,16 @@ const appRoutes: RouteModule = {
     signIn.route(router, guard)
     // the person's prefs are answered here (`/api/prefs`, under `api`):  every page keeps its theme in their space
     addPageConfig(() => ({ prefs: true }))
+    const checkout = checkoutOf(environment.repoDir)
+    const isMainCheckout = !!checkout && checkout.root === checkout.main
     const editor = new EditorServer(root)
-    onListening(() => editor.start(info.port, guard))
+    const site =
+      !process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE
+        ? new LocalSiteServer({ isMainCheckout, editorPort: () => editor.port })
+        : undefined
+    // an editor the house network reaches through Caddy listens on this machine alone (epic `atmosphere` P39)
+    const thisMachineOnly = site?.editorAddress !== undefined
+    onListening(() => editor.start(info.port, guard, { thisMachineOnly }))
     onStop(() => editor.stop())
     projectBuild.start()
     onStop(() => projectBuild.stop())
@@ -120,11 +128,8 @@ const appRoutes: RouteModule = {
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
     // the daily round (a copy a night, real Spaces' lists), from the main checkout's server alone:
     // every worktree's reads the same spell.spaces
-    const checkout = checkoutOf(environment.repoDir)
-    const isMainCheckout = !!checkout && checkout.root === checkout.main
     if (isMainCheckout) onStop(spacesDailyRound(folders).start())
-    if (!process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE) {
-      const site = new LocalSiteServer({ isMainCheckout })
+    if (site) {
       // deliberately not waited for:  the page server's own start mustn't hang on Caddy's
       onListening(() => void site.startWithPageServer().catch((error: unknown) => console.error(error)))
       onStop(() => site.stop())

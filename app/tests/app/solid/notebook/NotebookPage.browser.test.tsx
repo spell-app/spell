@@ -1,40 +1,67 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
+import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import type { SP } from "spell/parser/spell"
 // Import directly:  the test barrel holds node-only helpers
-import { compiledSpellProject, incrementalSpellProject } from "spell/parser/spell/test/parseSpellProject"
+import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import type { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
+// By file:  the folder's barrel loads the language service
+import { SourceEdits } from "spell/app/lsp/SourceEdits"
 
 // Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
 import "spell/app/spaces"
+// Solid follows the program's things, as in the editor:  an edit draws again what changed
+import "spell/app/app/solid/cellsBridge"
 
 /**
- * `<NotebookPage>` in the browser (epic `elemental-spell` P16):  a notebook's page, its cells drawn live by the
- * program's runtime;  an edit draws only its own cell again, saves 600ms after, and a locked notebook never saves:
- * an edit there is a try-out.
- * - The runtime:  `spellRuntime.ts` as vite serves it, imported by its URL, as the runner's tests do;  the program
- *   (the notebook, compiled) runs on it first, as the editor runs it, out of sight.
- * - The project:  an incremental parse of the notebook (`incrementalSpellProject()`), standing in for the editor's;
- *   its file, a plain object that counts its saves.
+ * `<NotebookPage>` in the browser (epic `notebook` P3):  the docs frame round a notebook page the PROGRAM draws.
+ * - The runtime:  `spellRuntime.ts` as vite serves it, imported by its URL, as the runner's tests do.
+ * - The program (the notebook, compiled with its source marks) runs on it into the app's mount point,
+ *   as the editor runs it.
+ * - The editor is a stand-in, as the editor's `typeInto()` and `compileApp()` do:
+ *   - typing into the file
+ *   - running the program again as it takes an edit:
+ *     `runApp()` keeps its things, so `LiveEdit` draws again only what changed
+ *   - its history counts its steps
+ * - The file:  a plain object that counts its saves.
  */
-vi.mock("spell/app/app/editor", async () => {
-  const { UndoStack } = await import("spell/util")
-  return {
-    editor: {
-      history: new UndoStack(),
-      loadRuntime: testRuntime,
-      showError: (error: unknown) => console.error(error),
-      onFileEdited: () => {},
-      setScopeExplorer: () => {},
-      showFileAt: async () => {}
-    }
-  }
-})
+vi.mock("spell/app/app/editor", () => ({ editor: testEditor }))
 
-/** The Counter notebook, as the plan writes it, its section's text left out. */
+/** The editor, standing in:  see the file's docstring.  Made before the imports, as `vi.mock()` runs then. */
+const testEditor = vi.hoisted(() => ({
+  edits: 0,
+  steps: 0,
+  file: undefined as TestFile | undefined,
+  loadRuntime: () => testRuntime(),
+  showError: (error: unknown) => console.error(error),
+  onFileEdited: () => {},
+  setScopeExplorer: () => {},
+  showFileAt: async () => {},
+  showOpenPage: () => {},
+  refreshDrafts: async () => {},
+  mayDesign: true,
+  /** Type `edits` into the file, then run the program again:  `editor.typeInto()`. */
+  typeInto(file: TestFile, edits: Parameters<typeof SourceEdits.applied>[1]) {
+    file.contents = SourceEdits.applied(file.contents, edits)
+    testEditor.edits++
+    void runProgram(file.contents)
+  },
+  /** One step of the history:  the change made at once. */
+  history: {
+    change(change: { file: TestFile; at: number; before: string; after: string }) {
+      const { file, at, before, after } = change
+      file.contents = file.contents.slice(0, at) + after + file.contents.slice(at + before.length)
+      testEditor.edits++
+      testEditor.steps++
+    }
+  },
+  compileApp: async () => runProgram(testEditor.file!.contents)
+}))
+
+/** A counter notebook:  a title, a view of its own, two sections each holding an example. */
 const COUNTER = [
   '<spell-notebook "counter notebook">',
   "\t# A counter",
@@ -61,12 +88,6 @@ const COUNTER = [
   ""
 ].join("\n")
 
-/** The Counter notebook with its title as the docs pages write it:  a `<header level="1">`, its sub header inside. */
-const COUNTER_HEADER = COUNTER.replace(
-  "\t# A counter\n\tA button that counts its clicks.",
-  '\t<header level="1">\n\t\tA counter\n\t\t<header>A button that counts its clicks.</header>\n\t</header>'
-)
-
 /** Undo for each test:  unmount. */
 const cleanups: (() => void)[] = []
 
@@ -79,27 +100,113 @@ afterEach(() => {
 })
 
 describe("<NotebookPage>", () => {
-  test("draws each example live, and an edit to its template draws only the cells drawing it", async () => {
-    const { host, file, controller } = await mount()
+  test("the program draws the page:  its sections, sticky and foldable, each example with its code editor in place", async () => {
+    const { mount } = await mounted()
     await until(
-      () => resultsOf(host).length === 2,
-      () => resultsOf(host).join(" | ")
+      () => resultsOf(mount).length === 2 && editorsIn(mount).length === 2,
+      () => resultsOf(mount).join(" | ")
     )
-    expect(resultsOf(host)).toEqual(["Clicked 0 times", "Clicked 0 times Clicked 0 times"])
-    // what must stay:  the prose, the sections, the template's editor
-    const kept = [...host.querySelectorAll(".NotebookMasthead, .NotebookProse, .NotebookSection, .NotebookCode")]
-    const template = keyOf(controller, "template")
-    controller.editCell(template, controller.cellFor(template)!.code.replace("Clicked", "Pressed"))
-    await until(() => resultsOf(host).every((text) => /Pressed 0 times/.test(text)))
-    for (const node of kept) expect(node.isConnected, node.className).toBe(true)
-    expect(file.contents).toBe(COUNTER.replace("Clicked", "Pressed"))
+    expect(resultsOf(mount)).toEqual(["Clicked 0 times", "Clicked 0 times Clicked 0 times"])
+    // each `##` a section of the page, as the docs site draws one
+    const sections = [...mount.querySelectorAll("ui-section[label]")]
+    expect(sections.map((section) => section.getAttribute("label"))).toEqual(["Try it", "Two of them"])
+    for (const section of sections) expect(section.getAttribute("sticky")).toBe("stack")
   })
 
-  test("\"On this page\":  the docs site's contents in a column, hidden by its Hide;  else a flyout under the title row's icon", async () => {
-    const { host, controller } = await mount({ width: 1000 })
-    const column = () => host.querySelector<HTMLElement>(".NotebookAside:not(.hidden)")
-    const button = () => host.querySelector<HTMLElement>(".NotebookMasthead .NotebookTocButton")
-    const flyout = () => host.querySelector<HTMLElement>(".NotebookTocFlyout")
+  test("an example typed half-way draws its error in its own place;  the page around it stays, and heals (epic `notebook` I5)", async () => {
+    const { mount, controller } = await mounted()
+    await until(() => editorsIn(mount).length === 2)
+    const [first] = mount.querySelectorAll<HTMLElement>("spell-example")
+    controller.editExample(placeOf(first!), '<counter ba§dge="1"/>')
+    await until(
+      () => !!mount.querySelector("spell-example .spell-draw-error"),
+      () => resultsOf(mount).join(" | ")
+    )
+    const examples = [...mount.querySelectorAll<HTMLElement>("spell-example")]
+    expect(examples).toHaveLength(2)
+    expect(examples[0]!.querySelector(".spell-draw-error")!.textContent).toContain("§dge")
+    // the other example, still drawn
+    expect(resultsOf(mount)[1]).toBe("Clicked 0 times Clicked 0 times")
+    expect(mount.querySelectorAll("ui-section[label]")).toHaveLength(2)
+
+    controller.editExample(placeOf(examples[0]!), "<counter/>")
+    await until(
+      () => !mount.querySelector(".spell-draw-error") && resultsOf(mount)[0] === "Clicked 0 times",
+      () => resultsOf(mount).join(" | ")
+    )
+    expect(resultsOf(mount)[1]).toBe("Clicked 0 times Clicked 0 times")
+  })
+
+  test("typing in an example goes into the file, and the example drawn again keeps the same code editor, open", async () => {
+    const { mount, file, controller } = await mounted()
+    await until(() => editorsIn(mount).length === 2)
+    const [example] = mount.querySelectorAll<HTMLElement>("spell-example")
+    const [editor] = editorsIn(mount)
+    example!.setAttribute("code", "")
+    controller.editExample(placeOf(example!), "<counter/>\n<counter/>")
+    expect(file.contents).toContain('\t<example "one counter">\n\t\t<counter/>\n\t\t<counter/>\n\t</example>')
+    await until(
+      () => resultsOf(mount)[0] === "Clicked 0 times Clicked 0 times",
+      () => resultsOf(mount).join(" | ")
+    )
+    const [drawn] = mount.querySelectorAll<HTMLElement>("spell-example")
+    await until(() => editorsIn(mount)[0] === editor)
+    expect(drawn).not.toBe(example)
+    expect(drawn!.hasAttribute("code")).toBe(true)
+    expect(file.saves).toBe(0)
+  })
+
+  test("a lock is ONE step of the editor's history, and saves itself;  unlocked, back as it was", async () => {
+    const { file, controller } = await mounted()
+    const steps = testEditor.steps
+    controller.setLocked(true)
+    expect(file.contents.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
+    expect(testEditor.steps).toBe(steps + 1)
+    await until(() => file.saves === 1)
+    expect(controller.isLocked()).toBe(true)
+    controller.setLocked(false)
+    expect(file.contents).toBe(COUNTER)
+    expect(testEditor.steps).toBe(steps + 2)
+    await until(() => file.saves === 2)
+  })
+
+  test("who may lock it:  whoever may save its pages, by their role in its space (P6)", async () => {
+    const { controller } = await mounted()
+    expect(controller.mayLock()).toBe(true)
+    testEditor.mayDesign = false
+    try {
+      expect(controller.mayLock()).toBe(false)
+    } finally {
+      testEditor.mayDesign = true
+    }
+  })
+
+  test("the Spell view:  each bare name its tag, as the file's parse chose it;  an edit there saved as spellx (P6)", async () => {
+    const { mount, file, controller } = await mounted()
+    const [parsed] = parseSpellProject([{ path: file.path, contents: file.contents }]).files
+    Object.assign(file, { match: parsed!.match, scope: parsed!.scope })
+    await until(() => editorsIn(mount).length === 2)
+    const place = placeOf(mount.querySelector("spell-example")!)
+    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe(
+      "<test-project-counter-notebook-counter/>"
+    )
+    controller.setCodeView("spell")
+    // a signal's write is staged until the flush, as the switch's click is long before the typing
+    flush()
+    try {
+      controller.editExample(place, "<test-project-counter-notebook-counter/>\n<ui-button>Go</ui-button>")
+    } finally {
+      controller.setCodeView("spellx")
+      flush()
+    }
+    expect(file.contents).toContain('\t<example "one counter">\n\t\t<counter/>\n\t\t<button>Go</button>\n\t</example>')
+  })
+
+  test('"On this page":  the docs site\'s contents in a column, hidden by its Hide;  else a flyout from its icon', async () => {
+    const { program, controller } = await mounted({ width: 1100 })
+    const column = () => program.querySelector<HTMLElement>(".NotebookAside:not(.hidden)")
+    const button = () => program.querySelector<HTMLElement>(".NotebookTocButton")
+    const flyout = () => program.querySelector<HTMLElement>(".NotebookTocFlyout")
     const sectionLinks = (toc: Element | null | undefined) =>
       [...(toc?.shadowRoot?.querySelectorAll("[part~=section]") ?? [])].map((item) => item.textContent!.trim())
     await until(() => sectionLinks(column()?.querySelector("ui-toc")).length === 2)
@@ -111,170 +218,99 @@ describe("<NotebookPage>", () => {
     column()!.querySelector<HTMLElement>(".NotebookTocHide")!.click()
     await until(() => !column() && !!button())
     expect(controller.contentsShown()).toBe(false)
-    // opening and closing it never moves the page
-    const scroller = host.querySelector<HTMLElement>(".NotebookScroller")!
-    scroller.scrollTop = 40
-    const before = scroller.scrollTop
     button()!.click()
     await until(() => sectionLinks(flyout()?.querySelector("ui-toc")).length === 2)
-    expect(scroller.scrollTop).toBe(before)
-    // under the icon, never over the pane above the page
-    expect(flyout()!.getBoundingClientRect().top).toBeGreaterThanOrEqual(host.getBoundingClientRect().top)
-    button()!.click()
-    await until(() => !flyout())
-    expect(scroller.scrollTop).toBe(before)
     // its "Show contents" pins it back as the column
-    button()!.click()
     await until(() => !!flyout()?.querySelector(".NotebookTocShow"))
     flyout()!.querySelector<HTMLElement>(".NotebookTocShow")!.click()
     await until(() => !!column() && !flyout() && !button())
     // a narrow pane:  no column, the icon
-    host.style.width = "500px"
+    program.style.width = "500px"
     await until(() => !column() && !!button())
-  })
-
-  // the docs site's masthead:  the line under the title is the title's sub header, never title-sized
-  for (const [form, contents] of [
-    ["# A counter", COUNTER],
-    ['<header level="1">', COUNTER_HEADER]
-  ]) {
-    test(`the title's sub header is ~20px, normal weight and muted, under the title:  ${form}`, async () => {
-      const { host } = await mount({ contents })
-      const title = () => host.querySelector(".NotebookMasthead .NotebookTitle")?.shadowRoot?.querySelector("h1")
-      // the drawn box in its shadow root:  the host itself is `display: contents`, sized as the title
-      const lead = () => host.querySelector(".NotebookMasthead .NotebookLead")?.shadowRoot?.querySelector(".header")
-      await until(() => !!title() && !!lead() && lead()!.getBoundingClientRect().height > 0)
-      expect(host.querySelector(".NotebookLead")!.textContent!.trim()).toBe("A button that counts its clicks.")
-      const titleStyle = getComputedStyle(title()!)
-      const leadStyle = getComputedStyle(lead()!)
-      const textSize = parseFloat(
-        getComputedStyle(host.querySelector(".NotebookScroller")!).getPropertyValue("--ui-font-size")
-      )
-      // docs-page.css:  the page's text size x 1.34 (20.1px at 15px), muted, normal weight
-      expect(parseFloat(leadStyle.fontSize)).toBeCloseTo(textSize * 1.34, 0)
-      expect(parseFloat(leadStyle.fontSize)).toBeLessThan(parseFloat(titleStyle.fontSize) * 0.7)
-      expect(Number(leadStyle.fontWeight)).toBeLessThan(Number(titleStyle.fontWeight))
-      expect(leadStyle.color).not.toBe(titleStyle.color)
-      expect(lead()!.getBoundingClientRect().top).toBeGreaterThan(title()!.getBoundingClientRect().top)
-    })
-  }
-
-  test("saves 600ms after the last edit, once", async () => {
-    const { file, controller } = await mount()
-    const example = keyOf(controller, "drawing")
-    controller.editExample(example, 0, "<counter/>\n<counter/>")
-    controller.editExample(
-      controller.keys()[controller.keys().indexOf(example)]!,
-      0,
-      "<counter/>\n<counter/>\n<counter/>"
-    )
-    expect(file.saves).toBe(0)
-    await until(() => file.saves === 1)
-    expect(file.contents).toContain('\t<example "one counter">\n\t\t<counter/>\n\t\t<counter/>\n\t\t<counter/>\n')
-    expect(controller.status()).toBe("saved")
-  })
-
-  test("a lock is a step of the editor's history:  undone and redone", async () => {
-    const { editor } = await import("spell/app/app/editor")
-    const { file, controller } = await mount()
-    controller.setLocked(true)
-    await until(() => file.saves === 1)
-    const locked = controller.text()
-    expect(locked).toContain("locked")
-    editor.history.undo()
-    await until(() => !controller.text().includes(" locked"))
-    editor.history.redo()
-    await until(() => controller.text() === locked)
-    editor.history.clear()
-  })
-
-  test("locked, nothing is ever saved:  an edit is a try-out, drawn but not saved, and its Reset puts it back", async () => {
-    const { host, file, controller } = await mount()
-    controller.setLocked(true)
-    await until(() => file.saves === 1)
-    expect(file.contents.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
-    expect(controller.canSave()).toBe(false)
-    // a try-out:  the example draws again as it's typed, and the file stays as it was
-    const example = keyOf(controller, "drawing")
-    expect(controller.triedOutExample(example, 0)).toBeUndefined()
-    controller.editExample(example, 0, "<counter/>\n<counter/>")
-    await until(() => resultsOf(host)[0] === "Clicked 0 times Clicked 0 times")
-    await new Promise((resolve) => setTimeout(resolve, 900))
-    expect(file.saves).toBe(1)
-    expect(controller.status()).toBe("locked")
-    // its Reset:  the example's code as the file has it
-    expect(controller.triedOutExample(example, 0)).toBe("<counter/>")
-    controller.resetExample(example, 0)
-    await until(() => resultsOf(host)[0] === "Clicked 0 times")
-    expect(controller.triedOutExample(example, 0)).toBeUndefined()
-    expect(file.saves).toBe(1)
-    // unlocked:  saved again
-    controller.setLocked(false)
-    await until(() => file.saves === 2)
-    expect(file.contents).toBe(COUNTER)
   })
 })
 
 /** A notebook file, standing in for the editor's `SP.SpellFile`:  its text, and how many times it's saved. */
 type TestFile = { path: string; form: "spellx"; contents: string; match: unknown; saves: number; save(): Promise<void> }
 
-/** The Counter's page (`contents`, else `COUNTER`), its program running first;  its controller, at the page's debug global. */
-async function mount(options: { width?: number; contents?: string } = {}) {
-  const contents = options.contents ?? COUNTER
-  const runtime = await testRuntime()
-  const { code } = compiledSpellProject([{ path: "/Counter.spellml", contents }])
-  const appRoot = document.createElement("div")
-  document.body.append(appRoot)
-  // its imports, as a project's compile writes them above its code
-  const header = 'import { core, View, Notebook } from "@spell/core"\n'
-  const error = await runtime.runApp(header + code, { appRoot, coreUrl: RUNTIME_URL })
-  expect(error).toBeUndefined()
-
-  const incremental = incrementalSpellProject([{ path: "/Counter.spellml", contents }])
+/**
+ * The Counter's page:  the app area (`program`) with its scroller and mount point, the program drawn there, and the
+ * frame round it;  its controller, at the page's debug global.
+ */
+async function mounted(options: { width?: number } = {}) {
   const file: TestFile = {
     path: "/Counter.spellml",
     form: "spellx",
-    contents,
-    match: incremental.getFile("/Counter.spellml")!.match,
+    contents: COUNTER,
+    match: undefined,
     saves: 0,
     async save() {
       this.saves++
     }
   }
-  const project = {
-    incremental,
-    async updateText(each: TestFile, text: string) {
-      each.contents = text
-      incremental.update(each.path, text)
-      each.match = incremental.getFile(each.path)!.match
-      return []
-    },
-    async parse() {}
-  }
-  const host = document.createElement("div")
-  host.style.height = "800px"
-  if (options.width) host.style.width = `${options.width}px`
-  document.body.append(host)
+  testEditor.file = file
+  const program = document.createElement("div")
+  program.className = "AppPaneProgram NotebookPage ui-docs-sections"
+  program.style.cssText = `height: 800px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto;`
+  if (options.width) program.style.width = `${options.width}px`
+  program.innerHTML = `<div id="${SCROLLER}" style="overflow: auto"><div id="spell-app-root"></div></div>`
+  document.body.append(program)
+  const mount = program.querySelector<HTMLElement>("#spell-app-root")!
+  appRoot = mount
+  await runProgram(COUNTER, { afresh: true })
+  const project = { isLoaded: true, spellFiles: [file] }
   const dispose = render(
-    () => <NotebookPage file={file as unknown as SP.SpellFile} project={project as unknown as SP.SpellProject} />,
-    host
+    () => (
+      <NotebookPage
+        file={file as unknown as SP.SpellFile}
+        project={project as unknown as SP.SpellProject}
+        program={program}
+        scroller={SCROLLER}
+      />
+    ),
+    program
   )
   cleanups.push(() => {
     dispose()
-    host.remove()
-    appRoot.remove()
+    program.remove()
   })
   const controller = (globalThis as unknown as { notebook: NotebookController }).notebook
-  return { host, file, controller }
+  return { program, mount, file, controller }
 }
 
-/** Each example's result's text, its views' shadow roots and all, in order:  not its description and code panels. */
-function resultsOf(host: HTMLElement): string[] {
+/** Where the program draws, for this test. */
+let appRoot: HTMLElement | undefined
+
+/** Compile `contents` with its source marks and run it in `appRoot`, as the editor does:  an edit taken as it runs. */
+async function runProgram(contents: string, { afresh = false } = {}) {
+  const runtime = await testRuntime()
+  const { code, map } = compiledSpellProject([{ path: "/Counter.spellml", contents }], { sourceMap: true })
+  // the core's names it reads, as a project's compile imports them:  on its own first line, so its marks still fit
+  const linked = code.replace(
+    /^import \{ h \} from "@spell\/core"/,
+    'import { core, h, View, Page } from "@spell/core"'
+  )
+  const placesFrom = map && JSON.stringify(map)
+  const error = await runtime.runApp(linked, {
+    appRoot,
+    coreUrl: RUNTIME_URL,
+    keepThings: !afresh,
+    placesFrom,
+    onRestartNeeded: () => {}
+  })
+  expect(error).toBeUndefined()
+}
+
+/** The id of the element scrolling the program's drawing. */
+const SCROLLER = "notebook-test-scroller"
+
+/** Each example's result's text, its views' shadow roots and all, in order:  not its code panel. */
+function resultsOf(mount: HTMLElement): string[] {
   const deep = (node: Node): string =>
     node.nodeType === Node.TEXT_NODE
       ? (node.textContent ?? "")
       : [...((node as Element).shadowRoot?.childNodes ?? []), ...node.childNodes].map(deep).join("")
-  return [...host.querySelectorAll(".NotebookResult spell-example")].map((example) =>
+  return [...mount.querySelectorAll("spell-example")].map((example) =>
     [...example.childNodes]
       .filter((node) => !(node as Element).slot)
       .map(deep)
@@ -284,9 +320,15 @@ function resultsOf(host: HTMLElement): string[] {
   )
 }
 
-/** The key of the first cell of `kind`. */
-function keyOf(controller: NotebookController, kind: string): string {
-  return controller.cells().find((each) => each.cell.kind === kind)!.key
+/** Each example's code editor's panel, in order. */
+function editorsIn(mount: HTMLElement): Element[] {
+  return [...mount.querySelectorAll("spell-example > [slot=source]")]
+}
+
+/** Where `example` is written, from its mark:  its line and column, from 0. */
+function placeOf(example: Element): { line: number; column: number } {
+  const [, line, column] = /:(\d+):(\d+)$/.exec(example.getAttribute("data-spell-at") ?? "")!
+  return { line: Number(line), column: Number(column) }
 }
 
 /** Wait until `ready()`, up to 10 seconds;  `what()` says what it found, if it never was. */

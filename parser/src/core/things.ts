@@ -19,7 +19,6 @@ import { App } from "./classes/App"
 import { View } from "./classes/View"
 import { Page } from "./classes/Page"
 import { TwoSidedView } from "./classes/TwoSidedView"
-import { Notebook } from "./classes/Notebook"
 import { Site } from "./classes/Site"
 import { ViewableList } from "./classes/ViewableList"
 
@@ -457,7 +456,7 @@ export class ThingRegistry {
 }
 
 /** The built-in classes a program's classes extend -- see `classNamed()`. */
-const BUILT_IN_CLASSES: ThingClass[] = [Thing, List, App, View, Page, TwoSidedView, Notebook, Site, ViewableList]
+const BUILT_IN_CLASSES: ThingClass[] = [Thing, List, App, View, Page, TwoSidedView, Site, ViewableList]
 
 /** Prototypes of the built-in types a program's types extend -- where `propertiesOf()` stops. */
 const BASE_PROTOTYPES: object[] = BUILT_IN_CLASSES.map((Class) => Class.prototype)

@@ -4,6 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB (as `NavPreferences` says)
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { SitePages } from "./SitePages"
 import { siteNavVocabulary } from "./UISiteNav.en"
 
 import siteNavCSS from "./UISiteNav.css?inline"
@@ -73,7 +74,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   /** `pages`, the well-formed ones:  each with a `title`, and its pages checked the same way. */
   @E.derived
   get sitePages(): readonly SiteNavPage[] {
-    return UISiteNav.wellFormed(this.pages)
+    return SitePages.wellFormed(this.pages)
   }
 
   /** Which page is shown, as `current` says it, else the browser's address. */
@@ -83,10 +84,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
 
   /** Is `page` the one shown:  its `id`, its `href`, or its `href`'s path is `currentKey`? */
   isCurrent(page: SiteNavPage): boolean {
-    const key = this.currentKey
-    if (!key) return false
-    if (page.id === key || page.href === key) return true
-    return !!page.href && !isServer && UISiteNav.pathOf(page.href) === UISiteNav.pathOf(key)
+    return SitePages.isShown(page, this.currentKey)
   }
 
   /** Is `page` marked as the one shown:  it is, or it's a copy (`copyOf`) of the one that is? */
@@ -173,17 +171,11 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     if (!page?.href) return
     const { originalEvent } = event.detail
     // a middle or modified click on its link:  the browser opens it, as with any link
-    if (UISiteNav.isOpenElsewhere(originalEvent)) return
+    if (SitePages.isOpenElsewhere(originalEvent)) return
     originalEvent?.preventDefault()
     const href = page.href
     if (!this.send("ui-navigating", { href, page, originalEvent })) return
     location.assign(href)
-  }
-
-  /** `event` is a click the browser opens elsewhere:  a middle click, or one with Command, Control, Shift or Alt. */
-  private static isOpenElsewhere(event: Event | undefined): boolean {
-    if (!(event instanceof MouseEvent)) return false
-    return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
   }
 
   /** A page's star was clicked:  `ui-starred`, saying what the person asked for;  nothing is selected. */
@@ -308,32 +300,9 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   // ## Helpers
   ////////////////
 
-  /** What `page` is known by, to open, find and remember it:  its `id`, else its `href`, else its `title`. */
+  /** What `page` is known by, to open, find and remember it (`SitePages.keyOf()`). */
   static keyOf(page: SiteNavPage): string {
-    return page.id ?? page.href ?? page.title
-  }
-
-  /**
-   * `href`'s path and hash, against the page's address:  `films/1` on `/guide/` => `/guide/films/1`.
-   * - With its hash:  else every hash link (`#/films`) on one page would be the page shown.
-   */
-  private static pathOf(href: string): string {
-    try {
-      const url = new URL(href, location.href)
-      return url.pathname + url.hash
-    } catch {
-      return href
-    }
-  }
-
-  /** The pages in `value` that are pages:  objects with a text `title`;  anything else is left out. */
-  private static wellFormed(value: unknown): readonly SiteNavPage[] {
-    if (!Array.isArray(value)) return []
-    return value.flatMap((each): SiteNavPage[] => {
-      if (!each || typeof each !== "object" || typeof (each as SiteNavPage).title !== "string") return []
-      const page = each as SiteNavPage
-      return [page.pages ? { ...page, pages: UISiteNav.wellFormed(page.pages) } : page]
-    })
+    return SitePages.keyOf(page)
   }
 }
 

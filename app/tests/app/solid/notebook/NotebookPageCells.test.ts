@@ -1,11 +1,14 @@
 import { readFileSync } from "fs"
 import { describe, expect, test } from "vite-plus/test"
 
+import type { SP } from "spell/parser/spell"
+// By file:  the folder's barrel loads the language service
+import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 
 /**
- * The Counter notebook, written in markdown:  its `#` title, its `##` sections and their text.
- * - Its counter is the Counter example's, which its project imports:  so it has no template cell of its own.
+ * A counter notebook, written in markdown:  its `#` title, its `##` sections and their text.
+ * - Its counter is some other project's:  so it has no template cell of its own.
  */
 const COUNTER = [
   '<spell-notebook "counter notebook">',
@@ -31,9 +34,40 @@ const COUNTER = [
   ""
 ].join("\n")
 
-/** The Counter notebook, `@spell/notebooks/Counter`, as committed:  its title and sections written as tags. */
-const TAGGED = readFileSync(
-  new URL("../../../../spaces/@spell/notebooks/Counter/Counter.spellml", import.meta.url),
+/** A notebook with a view of its own:  its title and sections written as tags, a view, and text after a drawing. */
+const TAGGED = [
+  '<spell-page "counter notebook" notebook>',
+  '\t<header level="1">',
+  "\t\tCounter",
+  "\t\t<header>A button that counts its clicks.</header>",
+  "\t</header>",
+  "",
+  '\t<view "counter">',
+  '\t\t<property "count" type="number">0</property>',
+  '\t\t<action "count up">set its count to its count + 1</>',
+  "\t\t<draw><button onClick={count up}>Clicked {its count} times</button></draw>",
+  "\t</view>",
+  "",
+  '\t<section label="Counter">',
+  '\t\t<example "One counter" description="A counter starts at 0, and adds one each time it\'s clicked.">',
+  "\t\t\t<counter/>",
+  "\t\t</example>",
+  "\t</section>",
+  "",
+  '\t<section label="Several counters">',
+  '\t\t<example "Two counters" description="Each counter keeps its own count:  clicking one leaves the others alone.">',
+  "\t\t\t<counter/>",
+  "\t\t\t<counter/>",
+  "\t\t</example>",
+  '\t\t<text color="grey">Click either one.</text>',
+  "\t</section>",
+  "</spell-page>",
+  ""
+].join("\n")
+
+/** Detail's Examples page, as committed in the Spell UI site:  a real page, written as tags. */
+const SITE_PAGE = readFileSync(
+  new URL("../../../../spaces/@spell/guides/SpellUI/Detail/Examples.spellml", import.meta.url),
   "utf8"
 )
 
@@ -105,56 +139,48 @@ describe("NotebookPageCells", () => {
     expect(edited).toBe(text.replace('<ui-avatar src="elliot.jpg"></ui-avatar>', "<code>hi</code>"))
   })
 
-  test("move up, then down:  back as it was;  delete, add and lock", () => {
-    const moved = NotebookPageCells.moved(COUNTER, model.cells, 2, "up")
-    expect(moved.indexOf('<example "One counter">')).toBeLessThan(moved.indexOf("## Counter"))
-    const back = NotebookPageCells.of(moved, "/Counter.spellml")!
-    expect(NotebookPageCells.moved(moved, back.cells, 1, "down")).toBe(COUNTER)
-
-    const deleted = NotebookPageCells.deleted(COUNTER, model.cells[2]!)
-    expect(deleted).not.toContain("One counter")
-    expect(deleted).toContain(
-      "\t## Counter\n\tA counter starts at 0, and adds one each time it's clicked.\n\n\t## Several counters"
-    )
-
-    const { text, start } = NotebookPageCells.inserted(COUNTER, model, model.cells[1], "Some text.")
-    expect(text).toContain("it's clicked.\n\n\tSome text.\n")
-    expect(text.slice(start, start + 10)).toBe("Some text.")
-
-    const locked = NotebookPageCells.withLock(COUNTER, model, true)
+  test("lock, and unlock:  the Inspector's attribute edit, after the quoted name, and back as it was (P6)", () => {
+    const locked = SourceEdits.applied(COUNTER, NotebookPageCells.lockEdits(COUNTER, model, true))
     expect(locked.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
     const relocked = NotebookPageCells.of(locked, "/Counter.spellml")!
     expect(relocked.locked).toBe(true)
-    expect(NotebookPageCells.withLock(locked, relocked, false)).toBe(COUNTER)
+    expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, relocked, false))).toBe(COUNTER)
+    // locked twice is still once
+    expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, relocked, true))).toBe(locked)
   })
 
-  test('written as tags:  the title\'s `<header level="1">`, each `<section label>`, each `<text>` before an example', () => {
+  test('written as tags:  the title\'s `<header level="1">`, each `<section label>`;  a `<text>` is just a drawing (P6)', () => {
     const tagged = NotebookPageCells.of(TAGGED, "/Counter.spellml")!
-    const cells = tagged.cells.map(({ kind, heading, title, lead, name, description }) =>
-      Object.fromEntries(Object.entries({ kind, heading, title, lead, name, description }).filter(([, v]) => v))
+    const cells = tagged.cells.map(({ kind, heading, title, lead, name }) =>
+      Object.fromEntries(Object.entries({ kind, heading, title, lead, name }).filter(([, v]) => v))
     )
     expect(cells).toEqual([
       { kind: "heading", title: "Counter", lead: "A button that counts its clicks." },
       { kind: "template", name: "counter" },
       { kind: "heading", heading: "Counter" },
-      { kind: "drawing", description: "A counter starts at 0, and adds one each time it's clicked." },
       { kind: "drawing", name: "One counter" },
       { kind: "heading", heading: "Several counters" },
-      { kind: "drawing", description: "Each counter keeps its own count:  clicking one leaves the others alone." },
       { kind: "drawing", name: "Two counters" },
-      { kind: "drawing", description: "Click either one." }
+      // the grey `<text>` after it
+      { kind: "drawing" }
     ])
-    // a section's cell is its opening tag;  deleting it takes the section whole
-    const several = tagged.cells[5]!
+    // a section's cell is its opening tag;  `block`, the section whole
+    const several = tagged.cells[4]!
     expect(several.code).toBe('<section label="Several counters">')
-    const deleted = NotebookPageCells.deleted(TAGGED, several)
-    expect(deleted).not.toContain("Two counters")
-    expect(deleted).toContain("\t</section>\n</spell-notebook>")
-    // no move across a section's opening tag:  the tags would nest wrongly
-    expect(NotebookPageCells.moved(TAGGED, tagged.cells, 2, "up")).toBe(TAGGED)
-    // a cell added after a section's opening tag:  its first, one indent in
-    const { text } = NotebookPageCells.inserted(TAGGED, tagged, several, "<text>Hi</text>")
-    expect(text).toContain('<section label="Several counters">\n\n\t\t<text>Hi</text>\n')
+    expect(TAGGED.slice(several.block!.start, several.block!.end)).toMatch(/^<section[^]*<\/section>$/)
+  })
+
+  test("a site page:  its title and lead, its section headings, a section's cell its opening tag and the section whole", () => {
+    const page = NotebookPageCells.of(SITE_PAGE, "/Detail/Examples.spellml")!
+    expect(page.cells[0]).toMatchObject({
+      kind: "heading",
+      title: "Detail",
+      lead: "A detail is a label's dimmer second value, such as a count."
+    })
+    const sections = page.cells.filter((cell) => cell.kind === "heading" && cell.heading)
+    expect(sections.map((cell) => cell.heading)).toEqual(["Owners", "Variations"])
+    expect(sections[0]!.code).toBe('<section label="Owners">')
+    expect(SITE_PAGE.slice(sections[1]!.block!.start, sections[1]!.block!.end)).toMatch(/^<section[^]*<\/>$/)
   })
 
   test("a template's groups:  each one's members together, under its name and description", () => {
@@ -167,8 +193,103 @@ describe("NotebookPageCells", () => {
   test("in Spanish, locked is bloqueado", () => {
     const text = '<encanto-cuaderno "cuaderno">\n\t# Hola\n</encanto-cuaderno>\n'
     const spanish = NotebookPageCells.of(text, "/Cuaderno.es.spellml")!
-    expect(NotebookPageCells.withLock(text, spanish, true).split("\n")[0]).toBe(
+    expect(SourceEdits.applied(text, NotebookPageCells.lockEdits(text, spanish, true)).split("\n")[0]).toBe(
       '<encanto-cuaderno "cuaderno" bloqueado>'
     )
+  })
+
+  test("what a file's pages say:  its notebook's name, and whether a page is locked, read again as its text changes", () => {
+    const file = { path: "/Counter.spellml", contents: COUNTER } as unknown as SP.SpellFile
+    expect(NotebookPageCells.holdsNotebook(file)).toBe(true)
+    expect(NotebookPageCells.notebookNameIn(file)).toBe("counter notebook")
+    expect(NotebookPageCells.holdsLockedPage(file)).toBe(false)
+    file.contents = COUNTER.replace('"counter notebook">', '"counter notebook" locked>')
+    expect(NotebookPageCells.holdsLockedPage(file)).toBe(true)
+    // any page, notebook or not:  the lock is every page's (epic `notebook` P1)
+    file.contents = '<spell-page "home" locked>\n\t<draw><text>Hi</text></draw>\n</spell-page>\n'
+    expect(NotebookPageCells.holdsNotebook(file)).toBe(false)
+    expect(NotebookPageCells.notebookNameIn(file)).toBe("")
+    expect(NotebookPageCells.holdsLockedPage(file)).toBe(true)
+    // Spanish's word for it
+    const spanish = {
+      path: "/Cuaderno.es.spellml",
+      contents: '<encanto-cuaderno "cuaderno" bloqueado>\n\t# Hola\n</encanto-cuaderno>\n'
+    }
+    expect(NotebookPageCells.holdsLockedPage(spanish as unknown as SP.SpellFile)).toBe(true)
+  })
+})
+
+/**
+ * Moving a page's parts, as the editor's drag and drop does (`PartEdits`, epic `notebook` P5):
+ * a tag's span is `SourceEdits.elementAt()`'s, a run of prose's `NotebookPageCells.proseAt()`'s, and
+ * `SourceEdits.moved()` moves them;  only what moved changes, the rest byte for byte.
+ */
+describe("NotebookPageCells.proseAt(), moved by SourceEdits", () => {
+  const PATH = "/Counter.spellml"
+  const at = (text: string, words: string) => text.indexOf(words)
+  const prose = (text: string, words: string) => NotebookPageCells.proseAt(text, at(text, words), PATH)!
+  const element = (text: string, words: string) => SourceEdits.elementAt(text, at(text, words))!
+
+  test("a run of prose, a ## heading's section, and the section's own markdown", () => {
+    const span = (words: string) => {
+      const { start, end } = prose(COUNTER, words)
+      return COUNTER.slice(start, end)
+    }
+    expect(span("# Counter")).toBe("# Counter\n\tA button that counts its clicks.")
+    expect(span("## Counter")).toBe(
+      "## Counter\n\tA counter starts at 0, and adds one each time it's clicked.\n" +
+        '\t<example "One counter">\n\t\t<counter/>\n\t</example>'
+    )
+    expect(span("A counter starts")).toBe("A counter starts at 0, and adds one each time it's clicked.")
+    // none starts at a tag, nor inside a run
+    expect(NotebookPageCells.proseAt(COUNTER, at(COUNTER, '<example "One'), PATH)).toBeUndefined()
+    expect(NotebookPageCells.proseAt(COUNTER, at(COUNTER, "counts its clicks"), PATH)).toBeUndefined()
+  })
+
+  test("an example moved before a ## section:  a blank line between them, the rest as it was", () => {
+    const example = element(COUNTER, '<example "One counter">')
+    const section = prose(COUNTER, "## Counter")
+    const { text } = SourceEdits.moved(COUNTER, [example], { opening: section.start, where: "before", whole: section })
+    expect(text).toBe(
+      COUNTER.replace(
+        "\t## Counter\n\tA counter starts at 0, and adds one each time it's clicked.\n" +
+          '\t<example "One counter">\n\t\t<counter/>\n\t</example>\n',
+        '\t<example "One counter">\n\t\t<counter/>\n\t</example>\n\n' +
+          "\t## Counter\n\tA counter starts at 0, and adds one each time it's clicked.\n"
+      )
+    )
+  })
+
+  test("a ## section moved up, past another:  whole, with what it gathers;  no blank line left before the closer", () => {
+    const several = prose(COUNTER, "## Several counters")
+    const counter = prose(COUNTER, "## Counter")
+    const { text, starts } = SourceEdits.moved(COUNTER, [several], {
+      opening: counter.start,
+      where: "before",
+      whole: counter
+    })
+    const severalText = COUNTER.slice(several.start, several.end)
+    const counterText = COUNTER.slice(counter.start, counter.end)
+    expect(text).toBe(COUNTER.slice(0, counter.start) + severalText + "\n\n\t" + counterText + "\n</spell-notebook>\n")
+    expect(text.startsWith("## Several counters", starts[0]!)).toBe(true)
+  })
+
+  test("a run of prose moved after an example:  its own lines, a blank line before it", () => {
+    const run = prose(COUNTER, "A counter starts")
+    const example = element(COUNTER, '<example "One counter">')
+    const { text } = SourceEdits.moved(COUNTER, [run], { opening: example.start, where: "after" })
+    expect(text).toBe(
+      COUNTER.replace("\tA counter starts at 0, and adds one each time it's clicked.\n", "").replace(
+        "\t</example>\n\n\t## Several",
+        "\t</example>\n\n\tA counter starts at 0, and adds one each time it's clicked.\n\n\t## Several"
+      )
+    )
+    // it reads as a run of its own, in the same section
+    const cells = NotebookPageCells.of(text, PATH)!.cells.map((cell) => cell.code.split("\n")[0])
+    expect(cells.slice(1, 4)).toEqual([
+      "## Counter",
+      '<example "One counter">',
+      "A counter starts at 0, and adds one each time it's clicked."
+    ])
   })
 })

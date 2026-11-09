@@ -1,5 +1,6 @@
 import { For, Show } from "solid-js"
 
+import { SP } from "spell/parser/spell"
 import { editor } from "spell/app/app/editor"
 import { Actions, FILE_ICON, on, tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
@@ -16,6 +17,8 @@ import "./FileDropdown.css"
  * - Loading (spinning caret, no items) until the project's loaded and has a file.
  * - A file the project doesn't import (a `.spellml` beside its `.spell`) is listed after its imports, by its name,
  *   so the trigger still names it.
+ * - Files in a project's folders group under a header naming the folder, by `groupByFolder()`:
+ *   its files at the top come first, with no header.
  * - The dropdown's value is ALWAYS `editor.file`'s path (see `choose()`):
  *   choosing sets it back during the event, and shows the file chosen, which then becomes `editor.file`.
  * - `showActions`:  `Actions.FILE_DROPDOWN_ACTIONS` after a divider, as dropdown items;
@@ -27,6 +30,7 @@ export function FileDropdown(props: FileDropdownProps) {
   const state = trackProjectFiles()
 
   const selectedName = () => state().files.find((file) => file.path === state().path)?.name
+  const grouped = () => groupByFolder(state().files)
 
   return (
     <ui-item class="FileDropdown">
@@ -41,11 +45,17 @@ export function FileDropdown(props: FileDropdownProps) {
           <ui-icon name={FILE_ICON} />
           {selectedName()}
         </span>
-        <For each={state().files} keyed={(file) => file.path}>
-          {(file) => (
-            <ui-item value={file().path} icon={FILE_ICON} onClick={() => open(file().path)}>
-              {file().name}
-            </ui-item>
+        <For each={grouped().atTop} keyed={(file) => file.path}>
+          {(file) => <FileRow file={file()} />}
+        </For>
+        <For each={grouped().folders} keyed={(group) => group.folder}>
+          {(group) => (
+            <>
+              <ui-item kind="header">{group().folder}</ui-item>
+              <For each={group().files} keyed={(file) => file.path}>
+                {(file) => <FileRow file={file()} />}
+              </For>
+            </>
           )}
         </For>
         <Show when={props.showActions && state().ready && !isStaticBuild}>
@@ -55,6 +65,15 @@ export function FileDropdown(props: FileDropdownProps) {
       </ui-dropdown>
     </ui-item>
   )
+
+  /** One file's row, under its folder's header if it's in one. */
+  function FileRow(row: { file: ProjectFileRow }) {
+    return (
+      <ui-item value={row.file.path} icon={FILE_ICON} onClick={() => open(row.file.path)}>
+        {row.file.nameInFolder}
+      </ui-item>
+    )
+  }
 
   /** Show the file at `path`, in the editor or the runner. */
   function open(path: string) {
@@ -93,8 +112,22 @@ export type ProjectFilesState = {
   ready: boolean
   /** The path of the file shown;  `""` before there's one. */
   path: string
-  /** Every file, in the project's order:  its path, its name, and whether it has changes not saved. */
-  files: { path: string; name: string; isDirty: boolean }[]
+  /** Every file, in the project's order. */
+  files: ProjectFileRow[]
+}
+
+/** One file of `ProjectFilesState`. */
+export type ProjectFileRow = {
+  /** its address, as `editor.file.path` */
+  path: string
+  /** what a list of the whole project calls it:  `Card.spell`;  in a folder, `Button/Usage` */
+  name: string
+  /** the folder it's in, inside the project:  `Button`;  `""` for one at its top */
+  folder: string
+  /** what its folder's list calls it:  `Usage`;  at the project's top, its `name` */
+  nameInFolder: string
+  /** Has changes not saved. */
+  isDirty: boolean
 }
 
 /**
@@ -107,14 +140,52 @@ export function trackProjectFiles(): () => ProjectFilesState {
     const { project, file } = editor
     const ready = !!project?.isLoaded && !!file
     const files = ready
-      ? project.imports.map(({ path, location, file: each }) => ({
-          path,
-          name: location.file ?? path,
-          isDirty: each.isDirty
-        }))
+      ? project.imports.map(({ path, location, file: each }) => fileRowFor(path, location, each.isDirty))
       : []
     if (ready && !files.some((each) => each.path === file.path))
-      files.push({ path: file.path, name: file.path.split("/").at(-1) ?? file.path, isDirty: file.isDirty })
+      files.push(fileRowFor(file.path, file.location, file.isDirty))
     return { ready, path: file?.path ?? "", files }
   })
+}
+
+/**
+ * The row for the file at `path`, `location` its place.
+ * - A file in a folder drops its spell ending, so its folder can name it:  `Button/Usage`, for `Button/Usage.spellml`.
+ *   Any other ending stays:  `Button/styles.css`.
+ * - At the project's top it keeps its whole name, as `Card.spell`;  another project's import, its address.
+ */
+function fileRowFor(
+  path: string,
+  location: Pick<SP.SpellLocation, "file" | "folder">,
+  isDirty: boolean
+): ProjectFileRow {
+  const name = location.file ?? path
+  const folder = location.folder?.replace(/^\/|\/$/g, "") ?? ""
+  if (!folder) return { path, name, folder, nameInFolder: name, isDirty }
+  const spellEnding = [SP.SPELL_SUFFIX, ...SP.SPELLML_SUFFIXES].find((suffix) => name.endsWith(suffix))
+  const nameInFolder = spellEnding ? name.slice(0, -spellEnding.length) : name
+  return { path, name: `${folder}/${nameInFolder}`, folder, nameInFolder, isDirty }
+}
+
+/**
+ * `files` for the dropdown:  those at the project's top first, then each folder's, in the order each folder first
+ * appears in `files` (the project's own order).
+ */
+function groupByFolder(files: ProjectFileRow[]): { atTop: ProjectFileRow[]; folders: FolderOfFiles[] } {
+  const atTop = files.filter((file) => !file.folder)
+  const folders = new Map<string, FolderOfFiles>()
+  for (const file of files.filter((each) => each.folder)) {
+    const group = folders.get(file.folder) ?? { folder: file.folder, files: [] }
+    group.files.push(file)
+    folders.set(file.folder, group)
+  }
+  return { atTop, folders: [...folders.values()] }
+}
+
+/** A folder's files, for `groupByFolder()`. */
+type FolderOfFiles = {
+  /** its path inside the project, `Button` */
+  folder: string
+  /** its files, in the project's order */
+  files: ProjectFileRow[]
 }

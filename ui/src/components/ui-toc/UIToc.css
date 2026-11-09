@@ -50,6 +50,8 @@
     display: flex;
     align-items: center;
     gap: 0.5em;
+    /* the toggle's height, with or without it:  a page with no folds keeps the same row (epic `notebook` P9) */
+    min-height: 1.75em;
     /* the gap the header kept below itself, before it shared its row */
     margin-block-end: var(--ui-font-size);
   }
@@ -60,7 +62,18 @@
   slot[name="tools"] {
     display: contents;
   }
-  .head:not(:has(.toggle-all)) ::slotted([slot="tools"]:first-child) {
+  ::slotted([slot="tools"]) {
+    order: 2;
+  }
+  /*
+   * no toggle (nothing folds):  its room kept, so the page's buttons stay where they are on a page with one
+   * (epic `notebook` P9:  the Hide icon jumped left between a notebook's tabs)
+   */
+  .head:not(:has(.toggle-all))::after {
+    content: "";
+    order: 1;
+    flex: none;
+    width: 1.75em;
     margin-inline-start: auto;
   }
   [part~="header"] {
@@ -103,8 +116,7 @@
   /* The toggle:  a square, a soft background on hover. */
   .toggle-all {
     margin-inline-start: auto;
-    /* centred on the title's capitals, not its line box (which holds the descenders' room below) */
-    translate: 0 -0.125em;
+    /* centred on the row, as the title's capitals are:  its chevrons sit high in their box already (measured) */
     width: 1.75em;
     height: 1.75em;
     border-radius: 0.4286em;

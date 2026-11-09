@@ -175,8 +175,8 @@ export class ASTOrdinalLiteral extends ASTNumericLiteral {}
 /**
  * A number written in hex, e.g. spell's `hex 1F0A0` => `0x1F0A0`.
  * - `raw` is its hex digits as written, `1F0A0`;  `value` the number, `127136`.
- * - Javascript, TypeScript and Python all write it `0x<digits>`;  a writer with nothing to say of it writes it as
- *   `ASTNumericLiteral`.
+ * - Javascript, TypeScript and Python all write it `0x<digits>`;
+ *   a writer with nothing to say of it writes it as `ASTNumericLiteral`.
  */
 export class ASTHexLiteral extends ASTNumericLiteral {
   declare raw: string
@@ -2043,12 +2043,18 @@ export type ASTJSXElementProps = Prettify<{
   tagName: string
   attrs?: ASTJSXAttribute[]
   children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
+  /**
+   * Drawn as a part of its own, which an edit can draw again alone, e.g. an example on a page:
+   * javascript's `core.drawPart(this, () => h(...))` (epic `notebook` P4).
+   */
+  drawnApart?: boolean
 }>
 
 export class ASTJSXElement extends ASTExpression {
   declare tagName: string
   declare attrs: ASTJSXAttribute[] | undefined
   declare children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
+  declare drawnApart: boolean | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")
@@ -2086,8 +2092,8 @@ export class ASTJSXElement extends ASTExpression {
 }
 
 /** JSXFragment -- several elements side by side, with no element around them:  `<><a/><b/></>`.
- * - Drawn in javascript as a list of them, `[h("a"), h("b")]`, as Solid's `h()` takes a fragment;  TypeScript writes
- *   `<>...</>` as is.
+ * - Drawn in javascript as a list of them, `[h("a"), h("b")]`, as Solid's `h()` takes a fragment;
+ *   TypeScript writes `<>...</>` as is.
  * - Also elements written one after another, `return <a/>` then `<b/>` on the next line:  an implicit fragment.
  * - An element with no tag and no attributes, so whatever takes an element takes it:  `tagName` is `""`.
  * - `children` is array of child nodes -- JSXElement/JSXEndTag/JSXText/JSXExpression.

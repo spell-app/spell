@@ -46,7 +46,7 @@
           <ul>
             <li>It filters nothing itself: a click tells its owner what was picked, and what should show next.</li>
             <li>
-              ⌥-click (Alt-click) a chip to show ONLY its state, whatever showed (epic <code>epic-engine</code> I166).
+              A click toggles a chip and every state of its colour (turning off the last one shows the next colour instead); ⌥-click (Alt-click) a chip to show ONLY that colour, whatever showed (epic <code>epic-engine</code> I166).
             </li>
             <li>ONE element for every filter by state: an item section's title, an epic page's toolbar, the Epics page's lists.</li>
           </ul>
@@ -72,7 +72,7 @@
               </ui-content>
             </ui-accordion>
             <p>Red and yellow show, green is hidden. A click here only says so: nothing on this page listens.</p>
-            <p>Mid-pass, three items marked: they leave their chips for the blue badge, first, whatever the filter.</p>
+            <p>Mid-pass, three items marked: they leave their chips for the blue badge, first.</p>
 <epic-state-filter counts="open:2 recent:3" shown="open" marked="3"></epic-state-filter>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The marked example · 1 lines</ui-title>
@@ -153,7 +153,7 @@
                 <tbody>
                   <tr><td><code>base</code></td><td>The group of chips.</td></tr>
                   <tr><td><code>chip</code></td><td>Each chip, a <code>&lt;button&gt;</code>: <code>data-state</code>, <code>data-color</code>, <code>data-fill</code> (<code>dotted</code>: a phase scheduled), <code>aria-pressed</code>.</td></tr>
-                  <tr><td><code>marked</code></td><td>The blue badge of the items marked in this pass: not a button, a click does nothing.</td></tr>
+                  <tr><td><code>marked</code></td><td>The blue badge: everything with Claude and the items marked in this pass. The blues' chip: a click toggles them.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -179,7 +179,7 @@
               <li>Each state in its colour: blue Claude is on it, red needs you, orange your turn to pick, yellow open, green done lately, grey older.</li>
               <li>A phase scheduled, still to do: a DOTTED blue outline, its count in blue, never filled; faded while hidden (epic <code>epic-engine</code> I170).</li>
               <li>The colours come from the page: an epic page's <code>--epic-state-*</code>, a docs page's <code>--spell-state-*</code>.</li>
-              <li>Each chip's tooltip says how many, which state, and what a click does; its second line, that ⌥-click shows only these.</li>
+              <li>Each chip's tooltip says how many, which state, and what a click does; its second line, that ⌥-click shows only that colour.</li>
               <li>The marked badge: solid blue, the Send plane's, with white numbers, first in the row; its tooltip "3 marked in this pass, waiting for Claude".</li>
             </ul>
           </ui-section>

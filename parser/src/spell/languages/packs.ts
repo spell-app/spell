@@ -157,6 +157,9 @@ export function checkWords(english: SP.Language, other: SP.Language): WordProble
   for (const member of Object.keys(other.words.builtInMembers ?? {})) {
     if (!members.has(member)) problems.push({ table: "builtInMembers", key: member, problem: "unknown" })
   }
+  for (const member of Object.keys(other.words.builtInMemberValues ?? {})) {
+    if (!members.has(member)) problems.push({ table: "builtInMemberValues", key: member, problem: "unknown" })
+  }
   return problems
 }
 

@@ -36,31 +36,40 @@ What you see more of, and none of, is the ranking below:  it's yours to change, 
 
 <spell-app "feed page">
 	<draw>
-		<container class="feed">
-			<stack>
-				<header size="large">What's new</header>
+		<stack class="org-page" spacing="none">
+			<toolbar class="top-bar" appearance="text" aria-label="Feed">
+				<text slot="title" size="large">Feed</text>
+				<item link="OrgChat">Chat</item>
+				<item link="Inbox">Inbox</item>
+				<item link="OrgAdmin">Admin</item>
+				<stack slot="right" direction="horizontal">{the sign in menu}</stack>
+			</toolbar>
+			<container class="feed">
+				<stack>
+					<header size="large">What's new</header>
 
-				<segment class="favourites">
-					<header size="medium">More of what you like</header>
-					<stack class="favourite-list" spacing="sm">
-						<for post in every post where it is a favourite sorted by its posted newest first loading="Reading your feed">
-							<post/>
-							<empty><text color="grey">Nothing yet.</text></empty>
-						</for>
-					</stack>
-				</segment>
+					<segment class="favourites">
+						<header size="medium">More of what you like</header>
+						<stack class="favourite-list" spacing="sm">
+							<for post in every post where it is a favourite sorted by its posted newest first loading="Reading your feed">
+								<post/>
+								<empty><text color="grey">Nothing yet.</text></empty>
+							</for>
+						</stack>
+					</segment>
 
-				<segment class="everything">
-					<header size="medium">Everything else</header>
-					<stack class="post-list" spacing="sm">
-						<for post in every post where it is ordinary sorted by its posted newest first loading="Reading your feed">
-							<post/>
-							<empty><text class="none" color="grey">Nothing new.</text></empty>
-							<failed><text color="red">We can't read your feed right now.</text></failed>
-						</for>
-					</stack>
-				</segment>
-			</stack>
-		</container>
+					<segment class="everything">
+						<header size="medium">Everything else</header>
+						<stack class="post-list" spacing="sm">
+							<for post in every post where it is ordinary sorted by its posted newest first loading="Reading your feed">
+								<post/>
+								<empty><text class="none" color="grey">Nothing new.</text></empty>
+								<failed><text color="red">We can't read your feed right now.</text></failed>
+							</for>
+						</stack>
+					</segment>
+				</stack>
+			</container>
+		</stack>
 	</draw>
 </spell-app>

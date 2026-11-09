@@ -1,0 +1,32 @@
+/* The toolbar across the top, who's signed in on its right;  the page the theme's colours, light or dark. */
+.org-page {
+  min-height: 100dvh;
+  color: CanvasText;
+  background: var(--ui-background);
+  font-family: var(--ui-font-family);
+}
+
+.org-page .top-bar {
+  padding: 6px 12px;
+  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);
+  --ui-menu-item-padding: 0.5em 0.6em;
+}
+
+.org-page .top-bar::part(menu) {
+  margin-block: 0;
+}
+
+.org-page .top-bar::part(title) {
+  margin-inline-end: 12px;
+}
+
+.org-page ui-container > ui-stack {
+  padding-block: 16px;
+}
+
+/* A phone:  the links go, leaving the name and who's signed in. */
+@media (max-width: 640px) {
+  .org-page .top-bar ui-item {
+    display: none;
+  }
+}

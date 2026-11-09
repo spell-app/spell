@@ -1,0 +1,46 @@
+<spell-page "site-tabs api" notebook>
+	<header level="1">
+		Site tabs
+		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#properties">Properties</>
+			<item link="#events">Events</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-site-tabs" only="attributes"></>
+		</>
+	</>
+
+	<section label="Properties">
+		<html>
+			<ui-docs-api tag="ui-site-tabs" only="properties"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api tag="ui-site-tabs" only="events"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-site-tabs" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-site-tabs" only="states"></>
+		</>
+	</>
+</spell-page>

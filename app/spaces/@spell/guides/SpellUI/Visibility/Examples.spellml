@@ -1,0 +1,397 @@
+<spell-page "visibility examples" notebook>
+	<header level="1">
+		Visibility
+		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
+	</>
+
+	<!-- Examples › Infinite Scroll's list:  three more items each time its bottom comes into view, up to twelve -->
+	<view "endless list">
+		<property "shown" description="How many of its twelve items show">a number</>
+		<property "loading">yes or no</>
+		<action "create it">set its shown to 3</>
+		<action "load more" description="Three more items, after a moment's loading, until all twelve show">
+			if its shown >= 12 return
+			set its loading to yes
+			pause for 0.5 seconds
+			set its shown to its shown + 3
+			set its loading to no
+		</action>
+		<draw>
+			<visibility once="false" on-ui-bottom-in-view={load more}>
+				<segment>
+					<header level="3" align="center">Infinite Scroll Example</header>
+					<list divided spacing="lg">
+						<item>Item 1</item>
+						<item>Item 2</item>
+						<item>Item 3</item>
+						<item visible={its shown >= 4}>Item 4</item>
+						<item visible={its shown >= 5}>Item 5</item>
+						<item visible={its shown >= 6}>Item 6</item>
+						<item visible={its shown >= 7}>Item 7</item>
+						<item visible={its shown >= 8}>Item 8</item>
+						<item visible={its shown >= 9}>Item 9</item>
+						<item visible={its shown >= 10}>Item 10</item>
+						<item visible={its shown >= 11}>Item 11</item>
+						<item visible={its shown >= 12}>Item 12</item>
+					</list>
+					<loader inline align="center" size="small" visible={its loading}/>
+				</segment>
+			</visibility>
+		</draw>
+	</view>
+
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#usage">Usage</>
+			<item link="#callbacks">Callbacks</>
+			<item link="#examples">Examples</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
+		- An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
+		  IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
+	-->
+	<section label="Usage">
+		<section label="How To Use" sticky="stack" collapsible dividing>
+			<example "How To Use" description="Visibility reports an element's position on screen: wrap the content in `<ui-visibility>` and listen for its events, each with the calculations as `detail`. Scroll the page and watch the table: it updates at every check.">
+				<html>
+					<ui-grid columns="2" stackable>
+						<ui-column>
+							<ui-visibility id="visibility-demo" once="false" continuous>
+								<ui-segment>
+									<ui-image src="/components/ui/images/wireframe/centered-paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/media-paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/centered-paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/media-paragraph.png" alt=""></ui-image>
+									<ui-divider></ui-divider>
+									<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+								</ui-segment>
+							</ui-visibility>
+						</ui-column>
+						<ui-column>
+							<ui-sticky offset="64">
+								<ui-table appearance="basic" celled padding="compact" unstackable>
+									<table>
+										<thead>
+											<tr>
+												<th>Calculation</th>
+												<th>Value</th>
+											</tr>
+										</thead>
+										<tbody id="visibility-calculations">
+											<tr data-key="pixelsPassed">
+												<td>pixelsPassed</td>
+												<td></td>
+											</tr>
+											<tr data-key="percentagePassed">
+												<td>percentagePassed</td>
+												<td></td>
+											</tr>
+											<tr data-key="onScreen">
+												<td>onScreen</td>
+												<td></td>
+											</tr>
+											<tr data-key="offScreen">
+												<td>offScreen</td>
+												<td></td>
+											</tr>
+											<tr data-key="passing">
+												<td>passing</td>
+												<td></td>
+											</tr>
+											<tr data-key="topVisible">
+												<td>topVisible</td>
+												<td></td>
+											</tr>
+											<tr data-key="bottomVisible">
+												<td>bottomVisible</td>
+												<td></td>
+											</tr>
+											<tr data-key="topPassed">
+												<td>topPassed</td>
+												<td></td>
+											</tr>
+											<tr data-key="bottomPassed">
+												<td>bottomPassed</td>
+												<td></td>
+											</tr>
+											<tr data-key="direction">
+												<td>direction</td>
+												<td></td>
+											</tr>
+										</tbody>
+									</table>
+								</ui-table>
+							</ui-sticky>
+						</ui-column>
+					</ui-grid>
+				</html>
+				<message slot="description" state="info" size="small">Checks happen when something crosses (the element entering or leaving, an edge crossing the screen's top or bottom), not on every scrolled pixel: visibility runs on <text code>IntersectionObserver</text>, with no scroll listener. The table beside the demo is filled by this page's script from the events.</message>
+			</example>
+		</>
+
+		<section label="Changing Callback Frequency" sticky collapsible dividing>
+			<example "Changing Callback Frequency">
+				<text slot="description" paragraph>By default each event fires only <text bold>the first time</text> its conditions are met: <text code>once="false"</text> fires it each time its condition <text bold>becomes true</text>, and <text code>continuous</text> at every check while it holds. Each segment below counts its <text code>ui-top-in-view</text> events: scroll them out of view and back.</text>
+				<visibility class="visibility-counter">
+					<segment>Default (once): <label size="small">0</label></segment>
+				</visibility>
+				<visibility class="visibility-counter" once="false">
+					<segment><text code>once="false"</text>: <label size="small">0</label></segment>
+				</visibility>
+				<visibility class="visibility-counter" once="false" continuous>
+					<segment><text code>once="false" continuous</text>: <label size="small">0</label></segment>
+				</visibility>
+			</example>
+		</>
+	</>
+
+	<section label="Callbacks">
+		<section label="Standard Events" sticky="stack" collapsible dividing>
+			<example "Standard Events" description="Events occur at the first check where their conditions turn true, each Fomantic's callback as a `ui-*` event. The log below shows the demo's events as you scroll past it.">
+				<table slot="description" celled definition padding="compact">
+					<row header>
+						<cell>Event</cell>
+						<cell>Fomantic's callback</cell>
+						<cell>Occurs</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-in-view</text>
+						</cell>
+						<cell>
+							<text code>onOnScreen</text>
+						</cell>
+						<cell>Any part of the element is on screen</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-out-of-view</text>
+						</cell>
+						<cell>
+							<text code>onOffScreen</text>
+						</cell>
+						<cell>No part of the element is on screen</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-top-in-view</text>
+						</cell>
+						<cell>
+							<text code>onTopVisible</text>
+						</cell>
+						<cell>The element's top edge has passed the bottom of the screen</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-top-passed</text>
+						</cell>
+						<cell>
+							<text code>onTopPassed</text>
+						</cell>
+						<cell>The element's top edge has passed the top of the screen</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-bottom-in-view</text>
+						</cell>
+						<cell>
+							<text code>onBottomVisible</text>
+						</cell>
+						<cell>The element's bottom edge has passed the bottom of the screen</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-passing</text>
+						</cell>
+						<cell>
+							<text code>onPassing</text>
+						</cell>
+						<cell>The element spans the top of the screen</cell>
+					</row>
+					<row>
+						<cell>
+							<text code>ui-bottom-passed</text>
+						</cell>
+						<cell>
+							<text code>onBottomPassed</text>
+						</cell>
+						<cell>The element's bottom edge has passed the top of the screen</cell>
+					</row>
+				</table>
+				<visibility id="visibility-logged" once="false">
+					<segment>
+						<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						<divider/>
+						<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					</segment>
+				</visibility>
+				<segment appearance="secondary">
+					<list id="visibility-log" divided size="small">
+						<item>Scroll the page: events appear here, newest first.</item>
+					</list>
+				</segment>
+			</example>
+		</>
+
+		<!-- GAP I112:  no grouped `onPassed` thresholds (pixels / percentages);  shown as a note. -->
+		<message size="small" class="site-not-ported">Not yet: Grouped Events -- Fomantic's <text code>onPassed: &#123; 40: fn, "80%": fn &#125;</>, callbacks after a distance into the element. There is no event or <text code>UI.observeVisibility()</> option for them.</>
+
+		<section label="Reverse Events" sticky="stack" collapsible dividing>
+			<example "Reverse Events" description="Reverse events occur under the same conditions, but as the user scrolls back up the page: `UI.observeVisibility(element, options)` takes Fomantic's `...Reverse` callbacks (the element has no events for them). The log shows this demo's reverse callbacks.">
+				<segment id="visibility-reversed">
+					<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+				</segment>
+				<segment appearance="secondary">
+					<list id="visibility-reverse-log" divided size="small">
+						<item>Scroll past, then back up: reverse callbacks appear here.</item>
+					</list>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Examples">
+		<!-- C19:  items stack inside the docs column (under 768px), so these are unstackable (a 125px image). -->
+		<section label="Lazy Loading Images" sticky collapsible dividing>
+			<example "Lazy Loading Images" description="`type=\"image\"` lazy-loads every `<img data-src>` inside:  once its top is on screen, its data-src becomes its src;  keep a placeholder in src so the content doesn't jump when an image loads, or leave it out and have the image appear. Images fade in by default: `animation`, every element's, names another (or none), and `duration` its length.">
+				<visibility type="image" animation="fade" duration="1000">
+					<items divided unstackable>
+						<item>
+							<image alt="Elliot Fu" data-src="images/avatar/large/elliot.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Elliot Fu</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Helen Troy" data-src="images/avatar/large/helen.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Helen Troy</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Jenny Hess" data-src="images/avatar/large/jenny.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Jenny Hess</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Veronika Ossi" data-src="images/avatar/large/veronika.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Veronika Ossi</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Stevie" data-src="images/avatar/large/stevie.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Stevie</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Steve Jobes" data-src="images/avatar/large/steve.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Steve Jobes</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Ade" data-src="images/avatar/large/ade.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Ade</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Chris" data-src="images/avatar/large/chris.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Chris</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Joe Henderson" data-src="images/avatar/large/joe.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Joe Henderson</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+						<item>
+							<image alt="Laura" data-src="images/avatar/large/laura.jpg" src="/components/ui/images/wireframe/square-image.png"/>
+							<content>
+								<header>Laura</header>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<stack direction="horizontal" justify="between">
+									<button color="primary">Add Friend</button>
+									<button labeled="right" icon="chevron right">View</button>
+								</stack>
+							</content>
+						</item>
+					</items>
+				</visibility>
+			</example>
+		</>
+		<message size="small" class="site-not-ported">Not ported: Gradual Changes, per-pixel <text code>onPassing</> updates (checks happen at crossings only). For a style that follows the scroll, use CSS scroll-driven animations (<text code>animation-timeline: view()</>), which need no script at all.</>
+		<message size="small" class="site-not-ported">Not ported: Fixing Content To Viewport (<text code>type: 'fixed'</>) -- that's <link link="/sticky"><text code>&lt;ui-sticky&gt;</></>, on CSS <text code>position: sticky</> with no placeholder element.</>
+
+		<section label="Infinite Scroll" sticky="stack" collapsible dividing>
+			<example "Infinite Scroll" description="As an alternative to pagination, listen for `ui-bottom-in-view` with `once=\"false\"` and load more content when the bottom of a container is reached. Here its list adds three items each time, up to twelve.">
+				<endless-list/>
+			</example>
+		</>
+	</>
+</spell-page>

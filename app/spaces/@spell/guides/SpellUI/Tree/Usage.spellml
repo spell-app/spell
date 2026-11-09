@@ -1,0 +1,42 @@
+<spell-page "tree usage" notebook>
+	<header level="1">
+		Tree
+		<header>A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Write your rows as children, each row holding the rows inside it.
+			- A row says `label`, and `which` one, quieter, with an `icon`.
+			- `open` shows the rows inside it.  A row whose rows are drawn only once it opens says `expandable`.
+			- `ui-changed` hands over what's selected.  To decide that yourself, cancel `ui-selecting`, and set each row's `selected`.
+			- `filter` looks only at rows that are drawn.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-tree").addEventListener("ui-changed", (event) => show(event.detail.values))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The tree is one tab stop.
+			- Up and down move between the rows on screen;  Home and End go to the ends.
+			- Right opens a row, then goes into it;  left closes it, then goes out to its parent.
+			- Enter and Space select, with Shift, Command or Control as a click takes them.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>It's a `tree` of `treeitem`s, each saying its level, and whether it's open and selected.  Give it a `label`.</>
+	</>
+</spell-page>

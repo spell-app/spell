@@ -153,7 +153,7 @@
     {
       "type": "InboxPage",
       "superType": "App",
-      "defined": "/Inbox.spellml:2013-5414"
+      "defined": "/Inbox.spellml:2013-5793"
     },
     {
       "property": "new_message",
@@ -246,7 +246,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:2635-5405"
+      "defined": "/Inbox.spellml:2635-5784"
     }
   ],
   "codeLines": [

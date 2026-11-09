@@ -13,8 +13,12 @@ import { SP } from "spell/parser/spell"
  *   - closers:  nothing, as code spell's indentation already says where a body ends
  * - Not a step in the compile:  a `.spellml` file compiles from its own parse (Q70);
  *   this is what it MEANS, in the form people already read.
- * - A drawing's markup as code spell writes it:  a bare component name as its tag (`<text>` => `<ui-text>`, through
- *   `componentTag`), each `</>` naming what it closes.
+ * - A drawing's markup as code spell writes it:
+ *   a bare component name as its tag (`<text>` => `<ui-text>`, through `componentTag`),
+ *   each `</>` naming what it closes.
+ * - The sections of a page that draws its body, as its twin draws them (epic `notebook` P3, J1):
+ *   - a `##` heading's `<ui-section>`, written out round what it holds
+ *   - a written section's added look, after its own attributes
  * - Pure:  no scope, no rules;  only the language's spellx tokenizer and twin words.
  * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
@@ -42,23 +46,36 @@ export class CodeSpellWriter {
 
   /**
    * The code spell `markup` reads as, markup alone:  a drawing's, an example's body (epic `elemental-spell` P18).
-   * - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`, each `</>` naming what it closes,
-   *   prose as `<markdown>` blocks:  what the same markup in a notebook's drawing is written as.
-   * - Written as a notebook's drawing would be, then taken back out of it:  `markup`'s own lines, at its own indent.
+   * - It's written as the same markup would be in the drawing of a page that draws its body:
+   *   - `<card>`, `<avatar src="..."/>` => `<ui-card>`, `<ui-avatar src="..."/>`
+   *   - each `</>` naming what it closes
+   *   - prose as `<markdown>` blocks
+   * - How:  written inside such a page, then taken back out of it:  `markup`'s own lines, at its own indent.
+   * - A top-level `<html>` block keeps its tags (epic `notebook` T4):
+   *   in code spell `<div>` looks just like a component, so without them the way back can't tell which is which
+   *   (`SX.SpellxWriter.writeMarkup()`).
+   *   - How:  written inside an element, where a block keeps them already, and that element taken off.
    * - `options.componentTag`'s `start` is where the element starts in `markup`.
    * - NEVER throws:  markup spellx can't read is written as it is.
    */
   static writeMarkup(markup: string, options: CodeSpellWriteOptions = {}): string {
     const language = options.language ?? SP.Language.forFile(options.path)
-    const { prefix, templates } = language.words.spellx!
-    const notebook = Object.keys(templates).find((word) => templates[word] === "notebook")
-    const head = `<${prefix}-${notebook} "markup">\n`
+    const { prefix, templates, attributes } = language.words.spellx!
+    // a page that draws its body, in the language's own words:  `<spell-page "markup" notebook>`
+    const page = Object.keys(templates).find((word) => templates[word] === "page")
+    const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
+    const head = `<${prefix}-${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
-    // where each of `markup`'s lines starts, in it and in the notebook it's written in (one tab further in)
+    const isWrapped = TOP_LEVEL_HTML_BLOCK.test(markup)
+    const wrapperOpen = isWrapped ? `\t<${WRAPPER_TAG}>\n` : ""
+    const wrapperClose = isWrapped ? `\t</${WRAPPER_TAG}>\n` : ""
+    const indent = isWrapped ? "\t\t" : "\t"
+    // where each of `markup`'s lines starts, in it and in the page it's written in (`indent` further in)
     const starts: Array<{ markup: number; written: number }> = []
     let at = 0
     for (const line of lines) {
-      starts.push({ markup: at, written: head.length + at + starts.length + 1 })
+      const written = head.length + wrapperOpen.length + at + (starts.length + 1) * indent.length
+      starts.push({ markup: at, written })
       at += line.length + 1
     }
     const markupStart = (start: number) => {
@@ -67,19 +84,24 @@ export class CodeSpellWriter {
     }
     const componentTag = options.componentTag
     const written = CodeSpellWriter.write(
-      `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${notebook}>\n`,
+      `${head}${wrapperOpen}${lines.map((line) => indent + line).join("\n")}\n${wrapperClose}</${prefix}-${page}>\n`,
       {
         ...options,
         language,
-        componentTag: componentTag && ((word, start) => componentTag(word, markupStart(start)))
+        // never asked for the wrapper:  it's not in `markup`, and comes off below
+        componentTag:
+          componentTag &&
+          ((word, start) => (start < starts[0]!.written ? undefined : componentTag(word, markupStart(start))))
       }
     )
-    // its drawing's lines:  after the notebook's line and its `to draw its content:`, before its `start` line
+    // its drawing's lines:  after the page's line and its `to draw it:`, to its block's end
     const drawing = written.split("\n").slice(2)
     const end = drawing.findIndex((line) => line && !line.startsWith("\t"))
-    return drawing
-      .slice(0, end < 0 ? undefined : end)
-      .map((line) => line.replace(/^\t\t/, ""))
+    const body = drawing.slice(0, end < 0 ? undefined : end).filter((line, index, all) => {
+      return line || all.slice(index).some(Boolean)
+    })
+    return (isWrapped ? body.slice(1, -1) : body)
+      .map((line) => line.replace(isWrapped ? /^\t\t\t/ : /^\t\t/, ""))
       .join("\n")
       .trimEnd()
   }
@@ -145,10 +167,15 @@ export class CodeSpellWriter {
     }
     for (const comment of comments) this.lines.push(`${indent}// ${comment.value}`)
     const written = code.slice(0, end)
-    // a notebook's drawing (P16):  each element, or block of prose, on lines of its own
+    // a drawn page's drawing (P16):  each element, or block of prose, on lines of its own
     const [only] = written
     if (written.length === 1 && only instanceof P.JSXFragmentToken && only.record.isImplicit && !only.raw) {
       for (const child of only.children ?? []) this.writeMarkup(child, indent)
+      return
+    }
+    // a drawing that's one section the twin made, alone
+    if (written.length === 1 && only instanceof P.JSXElementToken && SP.SpellxTwin.isSynthetic(only)) {
+      this.writeMarkup(only, indent)
       return
     }
     // markup after the twin's words, an inline drawing:  `to draw it : <button ...>`
@@ -161,8 +188,9 @@ export class CodeSpellWriter {
   }
 
   /**
-   * One of a notebook drawing's items, `indent` in:  an element as code spell writes it, or a run of its prose as the
-   * `<markdown>` block it reads as, its lines one tab further in.
+   * One item of a drawn page's drawing, `indent` in:
+   * - an element, as code spell writes it
+   * - or a run of its prose, as the `<markdown>` block it reads as, its lines one tab further in
    */
   private writeMarkup(token: P.Token, indent: string) {
     if (
@@ -173,6 +201,16 @@ export class CodeSpellWriter {
       this.lines.push(`${indent}<markdown>`)
       for (const line of `${token.raw}`.split("\n")) this.lines.push(line ? `${indent}\t${line}` : "")
       this.lines.push(`${indent}</markdown>`)
+      return
+    }
+    // a section the twin made for a `##` heading (epic `notebook` P3, J1):  its tags, its children inside, a tab in
+    if (token instanceof P.JSXElementToken && SP.SpellxTwin.isSynthetic(token)) {
+      const tag = this.componentTag(token.tagName, token.start) ?? token.tagName
+      this.lines.push(`${indent}<${tag}${CodeSpellWriter.attributesOf(token.attributes ?? [])}>`)
+      for (const child of token.children ?? []) {
+        if (!(child instanceof P.JSXEndTagToken)) this.writeMarkup(child, `${indent}\t`)
+      }
+      this.lines.push(`${indent}</${tag}>`)
       return
     }
     const markup = this.markupOf([token], indent)
@@ -200,6 +238,15 @@ export class CodeSpellWriter {
       // its name just after its `<`:  a token's start can take in the white space before it (`a <text>`)
       const nameAt = this.text.indexOf("<", token.start) + 1
       if (tag) edits.push({ start: nameAt, end: nameAt + tagName.length, text: tag })
+      // the attributes the twin added (a page's `<section>`'s look):  after its own, in the same order
+      const added = token.attributes?.filter((attribute) => SP.SpellxTwin.isSynthetic(attribute)) ?? []
+      if (added.length) {
+        const ends = token
+          .attributes!.filter((attribute) => !SP.SpellxTwin.isSynthetic(attribute))
+          .map((attribute) => (attribute.value ? attribute.value.end : attribute.start + attribute.name.length))
+        const after = Math.max(nameAt + tagName.length, ...ends)
+        edits.push({ start: after, end: after, text: CodeSpellWriter.attributesOf(added) })
+      }
       const closer = token.isUnaryTag ? undefined : token.raw?.match(/<\/[^>]*>$/)?.[0]
       if (closer && closer !== `</${name}>`) {
         edits.push({ start: token.end - closer.length, end: token.end, text: `</${name}>` })
@@ -220,8 +267,9 @@ export class CodeSpellWriter {
   }
 
   /**
-   * Markup the twin wrote itself, not the file:  `<for square in it as="grid" columns="3">`'s
-   * `show them in: <grid columns="3"></grid>` => `<ui-grid columns="3"></ui-grid>`.
+   * Markup the twin wrote itself, not the file:
+   * `<for square in it as="grid" columns="3">`'s `show them in: <grid columns="3"></grid>`
+   * => `<ui-grid columns="3"></ui-grid>`.
    * - Its tokens stand at the tag, with no text of their own in the file:  written from their own text,
    *   each bare component name as its tag.
    */
@@ -270,6 +318,13 @@ export class CodeSpellWriter {
     return line.replace(/^([^"]*?) : /, "$1: ")
   }
 
+  /** `attributes` the twin made, as markup writes them:  ` name="value"` each, or ` name` for a bare one. */
+  private static attributesOf(attributes: P.JSXAttributeToken[]): string {
+    return attributes
+      .map((attribute) => ` ${attribute.name}${attribute.value ? `=${attribute.value.value}` : ""}`)
+      .join("")
+  }
+
   /** `tokens` as text:  each as written, with the space after it;  a line's end trimmed. */
   private static textOf(tokens: P.Token[]): string {
     return tokens
@@ -291,6 +346,12 @@ function lineComment(indent: string, text: string): string {
 
 /** A component's bare name in spellx markup (`<text>`, `<botón>`):  lowercase letters only, as `SpellJSX` reads it. */
 const BARE_NAME = /^\p{Ll}+$/u
+
+/** A line of an example's body that starts an `<html>` block, at the body's own indent:  top-level. */
+const TOP_LEVEL_HTML_BLOCK = /^<html[\s>]/m
+
+/** The element `writeMarkup()` writes a body holding one of those inside, and takes off again. */
+const WRAPPER_TAG = "section"
 
 /**
  * Spell's own blocks in a drawing, the same words in code spell:  never a pack's component (`<ui-markdown>`).

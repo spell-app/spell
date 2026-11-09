@@ -297,7 +297,7 @@ export class ProjectDrafts {
    * policy and the project's cap (see the file).  Returns its name.
    */
   private async keepVersion(): Promise<string> {
-    const files = await this.publicFiles(this.projectPath())
+    const files = await this.publicFiles()
     const entries = await Promise.all(
       files.map(async (filePath) => [filePath, await readFile(this.publicPath(filePath))] as const)
     )
@@ -332,22 +332,10 @@ export class ProjectDrafts {
     return caps.length ? Math.min(...caps) : undefined
   }
 
-  /** Every public file under `folder`, from the project's folder:  never the private folders, nor hidden files. */
-  private async publicFiles(folder: string, from = ""): Promise<string[]> {
-    const names = await fileUtils.getFolderContents(folder, {
-      includeFolders: true,
-      namesOnly: true,
-      ignoreHidden: true
-    })
-    const files: string[] = []
-    for (const name of names) {
-      const filePath = `${from}/${name}`
-      if (ProjectDrafts.isPrivatePath(filePath)) continue
-      const path = fileUtils.joinPath(folder, name)
-      if (await fileUtils.pathIsAFolder(path)) files.push(...(await this.publicFiles(path, filePath)))
-      else files.push(filePath)
-    }
-    return files
+  /** Every public file of the project, as `/Button/Usage.spellml`:  never the private folders, nor hidden files. */
+  private async publicFiles(): Promise<string[]> {
+    const files = await fileUtils.getFilesInside(this.projectPath(), { ignoreFolder: ProjectDrafts.isPrivatePath })
+    return files.map((file) => `/${file}`).filter((filePath) => !ProjectDrafts.isPrivatePath(filePath))
   }
 
   ////////////////

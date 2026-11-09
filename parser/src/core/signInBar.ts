@@ -8,6 +8,10 @@
  *   (`identifiesBy: "a sign-in"`, epic `atmosphere` P8).
  * - A Spell account's bar, with nobody signed in, also says where to report abuse:
  *   the host's abuse contact, as its server said it (`PlaceSignIn.abuseContact`, epic `atmosphere` P6).
+ * - A Spell account's bar and person menu, with passwords (epic `atmosphere` T64):
+ *   - nobody signed in:  email and password in a real form, a browser's password manager fills, "Sign in" its main
+ *     button;  "Email me a link instead" the second way
+ *   - signed in:  "Set a password" or "Change password", opening a form of its own
  * - A Spell account's bar, where its server signs people in with Bluesky too (epic `atmosphere` P19):
  *   - nobody signed in:  "Sign in with Bluesky" beside the email field;  a handle typed there is who
  *   - signed in:  "Link a Bluesky account", or which one is linked
@@ -67,6 +71,9 @@ const COLORS: Record<SignInStatus, string> = {
   "signed in": "green",
   ended: "yellow"
 }
+
+/** A field in a form on the bar:  wide enough for its words, one below the other where they don't fit. */
+const FORM_FIELD = { style: "flex: 1 1 16em" }
 
 /** Each sign-in a bar or a menu shows already. */
 const SHOWN = new WeakSet<object>()
@@ -205,7 +212,8 @@ function personName(place: Place): string {
 }
 
 /** What the sign-in says and offers, as things stand:  `words` in place of what the bar would say, if given. */
-function partsFor({ name: placeName, place }: ShownSignIn, words?: string): HTMLElement[] {
+function partsFor(shown: ShownSignIn, words?: string): HTMLElement[] {
+  const { name: placeName, place } = shown
   const signIn = place.signIn!
   const { status, problem, refused } = signIn
   const isCloud = place.describe().identifiesBy === "a sign-in"
@@ -221,9 +229,10 @@ function partsFor({ name: placeName, place }: ShownSignIn, words?: string): HTML
   const parts: HTMLElement[] = [text]
   if (status === "signed in") {
     parts.push(buttonFor("sign-out", () => void signIn.signOut()))
+    if (signIn.setPassword) parts.push(...passwordParts(shown))
     if (signIn.offersAtProto) parts.push(...linkedParts(signIn))
   } else if (status === "waiting for a code" && signIn.enterCode) parts.push(...codeParts(signIn))
-  else if (status !== "signing in") parts.push(...signInParts(signIn))
+  else if (status !== "signing in") parts.push(...signInParts(shown))
   if (status !== "signed in" && signIn.abuseContact) parts.push(abuseLine(signIn.abuseContact))
   return parts
 }
@@ -238,6 +247,10 @@ type ShownSignIn = {
   bar?: HTMLElement
   /** Draws it again, wherever it shows. */
   draw: () => void
+  /** Is the form that sets a password open? */
+  passwordOpen?: boolean
+  /** The email last typed into the sign-in form:  so a wrong password doesn't lose it. */
+  typedEmail?: string
 }
 
 /** A program's person menu (`signInMenu()`). */
@@ -267,9 +280,12 @@ type ProgramSignIns = {
 /**
  * Who they are, and Sign in:  a failure says so on the bar, as the sign-in keeps it.  A Spell account's is an email.
  * - and "Sign in with Bluesky", where it's offered:  a handle in the field is who;  an email or nothing, Bluesky asks
+ * - with passwords (a Spell account's):  `passwordSignIn()`
  */
-function signInParts(signIn: PlaceSignIn): HTMLElement[] {
+function signInParts(shown: ShownSignIn): HTMLElement[] {
+  const signIn = shown.place.signIn!
   const isSpell = signIn.account === "Spell account"
+  if (isSpell && signIn.signInWithPassword) return passwordSignIn(shown)
   const parts = fieldAndButton({
     label: isSpell ? "sign-in-email" : "sign-in-who",
     button: isSpell ? "sign-in-email-me" : "sign-in",
@@ -278,15 +294,150 @@ function signInParts(signIn: PlaceSignIn): HTMLElement[] {
     ...(isSpell && !signIn.offersAtProto && { type: "email" })
   })
   if (isSpell && signIn.offersAtProto && signIn.signInAtProto) {
-    const field = parts[0] as HTMLElement & { value?: string }
-    parts.push(
-      buttonFor("sign-in-bluesky", () => {
-        const typed = `${field.value ?? ""}`.trim()
-        void signIn.signInAtProto!(typed && !EMAIL.test(typed) ? typed : undefined)
-      })
-    )
+    parts.push(blueskyButton(signIn, parts[0] as TextField))
   }
   return parts
+}
+
+/** "Sign in with Bluesky":  a handle in `field` is who;  an email or nothing, Bluesky asks. */
+function blueskyButton(signIn: PlaceSignIn, field: TextField): HTMLElement {
+  return buttonFor("sign-in-bluesky", () => {
+    const typed = `${field.value ?? ""}`.trim()
+    void signIn.signInAtProto!(typed && !EMAIL.test(typed) ? typed : undefined)
+  })
+}
+
+/**
+ * Email and password, in a real `<form>`, so a browser's password manager finds and fills it:
+ * "Sign in", then "Email me a link instead", and "Sign in with Bluesky" where it's offered.
+ */
+function passwordSignIn(shown: ShownSignIn): HTMLElement[] {
+  const signIn = shown.place.signIn!
+  const form = formOf(() => {
+    const typed = `${email.value ?? ""}`.trim()
+    const password = `${secret.value ?? ""}`
+    if (!typed || !password) return
+    shown.typedEmail = typed
+    void signIn.signInWithPassword!(typed, password)
+  })
+  // a handle can go in it too, for Bluesky, and an account's name:  so plain text
+  const email = textField("sign-in-email", {
+    autocomplete: "username",
+    name: "username",
+    inputmode: "email",
+    ...FORM_FIELD
+  })
+  if (shown.typedEmail) email.setAttribute("value", shown.typedEmail)
+  const secret = textField("sign-in-password", {
+    type: "password",
+    autocomplete: "current-password",
+    name: "password",
+    ...FORM_FIELD
+  })
+  const instead = buttonFor("sign-in-email-me", () => {
+    const typed = `${email.value ?? ""}`.trim()
+    if (!typed) return email.focus()
+    shown.typedEmail = typed
+    signIn.signIn(typed).catch(() => undefined)
+  })
+  form.append(email, secret, submitButton("sign-in"), instead)
+  if (signIn.offersAtProto && signIn.signInAtProto) form.append(blueskyButton(signIn, email))
+  return [form]
+}
+
+/**
+ * "Set a password" or "Change password";  opened, a form of its own, with the current one's field only when it's needed.
+ * - How it went shows after it, on a line of its own.
+ */
+function passwordParts(shown: ShownSignIn): HTMLElement[] {
+  const signIn = shown.place.signIn!
+  const notes = passwordNotes(signIn)
+  if (!shown.passwordOpen) {
+    const open = buttonFor(signIn.hasPassword ? "sign-in-password-change" : "sign-in-password-set", () => {
+      shown.passwordOpen = true
+      shown.draw()
+    })
+    return [open, ...notes]
+  }
+  const asksCurrent = !!signIn.hasPassword && !!signIn.currentPasswordNeeded
+  const form = formOf(() => {
+    const password = `${fresh.value ?? ""}`
+    if (!password) return
+    void signIn.setPassword!({ password, ...(asksCurrent && { current: `${current?.value ?? ""}` }) }).then(() => {
+      if (!signIn.passwordProblem) shown.passwordOpen = false
+      shown.draw()
+    })
+  })
+  // a password manager saves a new password against the account it's named beside
+  const account = document.createElement("input")
+  account.setAttribute("autocomplete", "username")
+  account.setAttribute("name", "username")
+  account.style.display = "none"
+  account.setAttribute("value", signIn.person?.id ?? "")
+  const current = asksCurrent
+    ? textField("sign-in-password-current", {
+        type: "password",
+        autocomplete: "current-password",
+        name: "current",
+        ...FORM_FIELD
+      })
+    : undefined
+  const fresh = textField("sign-in-password-new", {
+    type: "password",
+    autocomplete: "new-password",
+    name: "password",
+    ...FORM_FIELD
+  })
+  const cancel = buttonFor("sign-in-password-cancel", () => {
+    shown.passwordOpen = false
+    shown.draw()
+  })
+  form.append(account, ...(current ? [current] : []), fresh, submitButton("sign-in-password-save"), cancel)
+  return [form, ...notes]
+}
+
+/** How setting a password last went:  a line of its own, or nothing. */
+function passwordNotes(signIn: PlaceSignIn): HTMLElement[] {
+  const said = signIn.passwordProblem ?? (signIn.passwordSaved ? core.message("sign-in-password-saved") : undefined)
+  if (!said) return []
+  const line = document.createElement("small")
+  line.classList.add("spell-sign-in-password-note")
+  line.style.display = "block"
+  line.textContent = said
+  return [line]
+}
+
+/** A real `<form>` on the page's Spell UI:  `submitted()` when it's sent, and the page stays where it is. */
+function formOf(submitted: () => void): HTMLFormElement {
+  const form = document.createElement("form")
+  form.setAttribute("method", "post")
+  form.style.display = "flex"
+  form.style.flexWrap = "wrap"
+  form.style.alignItems = "center"
+  form.style.gap = "0.5em"
+  form.addEventListener("submit", (event) => {
+    event.preventDefault()
+    submitted()
+  })
+  return form
+}
+
+/** A `<ui-input>` labelled by the message `label`. */
+function textField(label: CoreMessageKey, attributes: Record<string, string> = {}): TextField {
+  const field = document.createElement("ui-input") as TextField
+  field.setAttribute("placeholder", core.message(label))
+  field.setAttribute("aria-label", core.message(label))
+  for (const [name, value] of Object.entries(attributes)) field.setAttribute(name, value)
+  return field
+}
+
+/** A button saying the message `key`, which submits its form:  the main one. */
+function submitButton(key: CoreMessageKey): HTMLElement {
+  const button = document.createElement("ui-button")
+  button.textContent = core.message(key)
+  button.setAttribute("type", "submit")
+  button.setAttribute("color", "primary")
+  return button
 }
 
 /** A Spell account signed in:  the Bluesky account linked to it, or a button that links one. */
@@ -308,10 +459,7 @@ function codeParts(signIn: PlaceSignIn): HTMLElement[] {
 
 /** A field labelled `label`, and a button saying `button`:  Enter or the button hand `go()` what's typed. */
 function fieldAndButton({ label, button, go, type }: FieldAndButton): HTMLElement[] {
-  const field = document.createElement("ui-input") as HTMLElement & { value?: string }
-  field.setAttribute("placeholder", core.message(label))
-  field.setAttribute("aria-label", core.message(label))
-  if (type) field.setAttribute("type", type)
+  const field = textField(label, type ? { type } : {})
   const send = () => {
     const typed = `${field.value ?? ""}`.trim()
     if (typed) go(typed).catch(() => undefined)
@@ -321,6 +469,9 @@ function fieldAndButton({ label, button, go, type }: FieldAndButton): HTMLElemen
   })
   return [field, buttonFor(button, send)]
 }
+
+/** A field that's typed in. */
+type TextField = HTMLElement & { value?: string }
 
 /** What `fieldAndButton()` makes. */
 type FieldAndButton = {

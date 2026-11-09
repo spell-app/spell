@@ -289,7 +289,68 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     if (!this.incremental || this.incremental.isBroken) return true
     const { spellFiles } = this
     if (spellFiles.length !== this.incremental.files.length) return true
-    return spellFiles.some((file, index) => !file.match || this.incremental!.files[index]!.path !== file.path)
+    return spellFiles.some((file, index) => {
+      const known = this.incremental!.files[index]!
+      return known.path !== file.path || (!file.match && !known.head)
+    })
+  }
+
+  /**
+   * The alone pages our compiles are limited to (`P.IncrementalProject`, "a file ALONE";  epic `notebook` P10, Q11),
+   * by path;  `undefined`, the default:  every file compiles, as for `spell compile`, the tests and every other target.
+   * - The editor sets it, and adds what it's about to show:  the open page in Edit, each page the first time Run shows it.
+   * - A file that isn't a page alone in itself is always compiled.
+   * - A limited compile is neither cached nor saved:  the code it writes is only part of the program.
+   * - NOTE: plain field:  each `compile()` reads it.
+   */
+  pagesInPlay: Set<string> | undefined
+
+  /** Is `file` part of what's compiled now?  See `pagesInPlay`. */
+  isInPlay(file: SP.CompilableSpellFile): boolean {
+    if (!this.pagesInPlay || !(file instanceof SP.SpellFile) || !this.headFor(file)) return true
+    return this.pagesInPlay.has(file.path)
+  }
+
+  /** What's compiled now:  our imported source, and our active files in play. */
+  get filesInPlay(): SP.CompilableSpellFile[] {
+    return [...this.sourceImportFiles, ...this.activeImports].filter((file) => this.isInPlay(file))
+  }
+
+  /** Do any of our files hold a page alone?  Asks only the text:  every file MUST be loaded. */
+  get hasAlonePages(): boolean {
+    return this.spellFiles.some((file) => this.headFor(file))
+  }
+
+  /** What the project knows of `file`, if it's a page alone in itself:  by its text, before it parses. */
+  headFor(file: SP.SpellFile): P.FileHead | undefined {
+    const parser = this.scope?.parser as SP.SpellParser | undefined
+    const reader = parser?.twinFor(file.language, file.form) ?? SP.SpellParser.spellxReaderFor(file.language, file.form)
+    return reader.aloneHead(file.parseText, file.path)
+  }
+
+  /** Our spell file that holds the page of class `className`, alone:  what a site asks for by. */
+  fileForPage(className: string): SP.SpellFile | undefined {
+    return this.spellFiles.find((file) => {
+      const head = this.headFor(file)
+      return head instanceof SP.AlonePage && head.className === className
+    })
+  }
+
+  /**
+   * Bring the pages now in play into the parse we have:  what `pagesInPlay` gained since it was built.
+   * - SIDE EFFECT:  each one its `match`.
+   */
+  private parsePagesInPlay(): void {
+    const { incremental, pagesInPlay } = this
+    if (!incremental || !pagesInPlay) return
+    for (const file of this.spellFiles) {
+      if (!pagesInPlay.has(file.path)) continue
+      const parse = incremental.parseAlone(file.path)
+      if (parse) {
+        file.setParsed(parse)
+        file.logParseErrors()
+      }
+    }
   }
 
   /**
@@ -305,15 +366,23 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       scope: this.scope!,
       // one half-typed line shouldn't break every line after it
       keepLastGood: true,
-      files: spellFiles.map((file) => ({
-        path: file.path,
-        name: file.file,
-        text: file.parseText,
-        parser: parser.twinFor(file.language, file.form)
-      }))
+      headOf: (fileParser, text, path) => (fileParser as SP.SpellParser).aloneHead(text, path),
+      parsesAlone: (path) => !this.pagesInPlay || this.pagesInPlay.has(path),
+      files: spellFiles.map((file) => {
+        const twin = parser.twinFor(file.language, file.form)
+        return {
+          path: file.path,
+          name: SpellProject.sourceNameOf(file.path),
+          text: file.parseText,
+          parser: twin,
+          head: twin.aloneHead(file.parseText, file.path)
+        }
+      })
     })
     spellFiles.forEach((file) => {
-      file.setParsed(this.incremental!.getFile(file.path)!)
+      const parse = this.incremental!.getFile(file.path)
+      if (!parse) return file.resetCompiled()
+      file.setParsed(parse)
       file.logParseErrors()
     })
   }
@@ -346,6 +415,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   ): Promise<unknown> {
     this.parser.cancel()
     this.compiler.cancel()
+    // limited to some pages:  part of the program, so never saved or cached (`pagesInPlay`)
+    if (this.pagesInPlay) {
+      await this.load(undefined)
+      await Promise.all(this.spellFiles.map((file) => file.load(undefined)))
+      if (this.hasAlonePages) {
+        save = false
+        cached = false
+      }
+    }
     this.saveCompiled = save
     this.targetsThisRun = targets
     const run = ++this.compileRun
@@ -387,8 +465,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   static compileCache: SP.CompileCache | undefined
 
   /**
-   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"` (nothing parsed:  `scope` and each
-   * file's `match` are still to come, from a `parse()`).
+   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"`.
+   * - `"cache"`:  nothing parsed, so `scope` and each file's `match` are still to come, from a `parse()`.
    * - NOTE: plain field, as `saveCompiled`.
    */
   compiledFrom: "compile" | "cache" | undefined
@@ -652,7 +730,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           }),
           TaskList.forEach({
             name: `Loading imports`,
-            list: () => [...this.sourceImportFiles, ...this.activeImports],
+            // limited to some pages, `compile()` has loaded the rest at once:  a task each is 4ms of waiting, 350 times over
+            list: () => this.filesInPlay,
             getTask: (file: SP.CompilableSpellFile) =>
               new Task({
                 name: `Loading import: ${file.file}`,
@@ -664,6 +743,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             run: async () => {
               try {
                 if (!this.incremental) this.parseImports()
+                this.parsePagesInPlay()
                 for (const file of this.activeImports) {
                   if (!(file instanceof SP.SpellFile)) await file.parse(this.scope)
                 }
@@ -694,7 +774,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           this.parser,
           TaskList.forEach({
             name: `Compiling imports`,
-            list: () => [...this.sourceImportFiles, ...this.activeImports],
+            list: () => this.filesInPlay,
             getTask: (file: SP.CompilableSpellFile) =>
               new Task({
                 name: `Compiling import: ${file.file}`,
@@ -707,7 +787,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             run: async (allCompiled) =>
               this.scope!.parser!.inPlay(() => {
                 // each `.spell` file as its AST, so a class gets its members from every file
-                const files = [...this.sourceImportFiles, ...this.activeImports]
+                const files = this.filesInPlay
                 const parts = files.map((file, index) =>
                   file.AST instanceof P.ASTStatementGroup ? file.AST : (allCompiled as string[])[index]
                 )
@@ -1027,94 +1107,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     }
   }
 
-  ////////////////
-  // ## One chunk
-  ////////////////
-
   /**
-   * Compile ONE chunk of a file on its own (epic `elemental-spell` P16):  what a notebook re-draws when a cell changes.
-   * - `text`:  file `path`'s whole new text, of which the chunk is `span`.
-   * - `into`:  the project it's parsed into, `P.IncrementalProject`:  the file is updated there, which re-parses as
-   *   little as it can (one body, or from the first changed line), then just the chunk is written.
-   * - `kind`:
-   *   - `drawing`:  an element in a drawing (`<example "one counter">`, `<section>`):  a javascript expression,
-   *     `h("spell-example", ...)`, which reads `this` as the drawing's thing
-   *   - `template`:  a template the file declares (`<spell-view "counter">`):  its whole class, members and all,
-   *     `class Counter extends View { ... }`, and the class's name
-   * - `errors`:  the parse errors inside `span`, `"<line>:<ch> <message>"`, lines from 1.
-   * - Throws if `path` isn't one of `into`'s files;  a chunk it can't find compiles to `""`.
-   */
-  static compileChunk(options: CompileChunkOptions): CompiledChunk {
-    const { into, path, text, span, kind } = options
-    into.update(path, text)
-    const parse = into.getFile(path)!
-    const file = parse.match
-    const errors = SpellProject.errorsIn(file, span)
-    if (!file) return { code: "", errors }
-    const parser = (into.scope.parser ?? parse.parser) as SP.SpellParser
-    if (kind === "drawing") {
-      const element = SpellProject.elementAt(file, span.start)
-      const code = element
-        ? parser.inPlay(() => (P.JSWriter.instance.writeMatch(element) as string | undefined) ?? "")
-        : ""
-      return { code, errors }
-    }
-    // the file's classes, each with its members:  the template's is the one declared at `span`
-    const all = file.AST instanceof P.ASTStatementGroup ? file.AST : undefined
-    const code = parser.inPlay(() => SpellProject.combineCompiled([all], P.JSWriter.instance, "", into.scope))
-    const className = new RegExp(`type: "(\\w+)",[^}]*?defined: "[^"]*:${span.start}-`).exec(code)?.[1]
-    if (!className) return { code: "", errors }
-    const lines = SP.SpellDeclarations.stripComments(code).split("\n")
-    const start = lines.findIndex((line) => line.startsWith(`export class ${className} `))
-    const end = lines.findIndex((line, index) => index > start && line === "}")
-    if (start < 0 || end < 0) return { code: "", errors }
-    const classCode = lines
-      .slice(start, end + 1)
-      .join("\n")
-      .replace(/^export /, "")
-    return { code: classCode, errors, className }
-  }
-
-  /**
-   * The element match in drawing `match` starting at `offset`, its children's and attributes' too.
-   * - Not a fragment, but an `<html>` block, which is one (P18):  `<section label="Slots"><html>...</html>`.
-   */
-  private static elementAt(match: P.Match, offset: number): P.Match | undefined {
-    const data = match.data as { children?: unknown[]; attributes?: unknown[]; htmlBlock?: boolean }
-    const isElement = !(match.AST instanceof P.ASTJSXFragment) || data.htmlBlock
-    if (match.start === offset && match.AST instanceof P.ASTJSXElement && isElement) return match
-    for (const inner of [...match.matched, ...(data.children ?? []), ...(data.attributes ?? [])]) {
-      if (!(inner instanceof P.Match)) continue
-      const { start } = inner
-      const end = inner.end
-      if (start === undefined || end === undefined || start > offset || end < offset) continue
-      const found = SpellProject.elementAt(inner, offset)
-      if (found) return found
-    }
-    return undefined
-  }
-
-  /** The parse errors in file `match` inside `span`:  `"<line>:<ch> <message>"`, lines from 1. */
-  private static errorsIn(match: P.Match | undefined, span: { start: number; end: number }): string[] {
-    if (!match) return []
-    // each block's own, its indented bodies' too:  an incremental parse re-parses a body as a block of its own
-    const all = new Set<P.Match>()
-    const visit = (each: P.Match) => {
-      for (const error of SP.Block.getParseErrors(each) ?? []) all.add(error)
-      for (const inner of each.matched) if (inner instanceof P.Match) visit(inner)
-    }
-    visit(match)
-    return [...all]
-      .filter((error) => (error.start ?? -1) >= span.start && (error.start ?? -1) <= span.end)
-      .map((error) => {
-        const message = (error.AST as unknown as { value?: string } | undefined)?.value ?? error.inputText
-        return `${(error.line ?? 0) + 1}:${error.char ?? 0} ${message}`
-      })
-  }
-
-  /**
-   * The line that starts the project's app or page, when nothing in it says to:  `if (!core.isCarryingOver) game.start()`
-   * (epic `editor`, Edit Without Redraw).
+   * The line that starts the project's app or page, when nothing in it says to (epic `editor`, Edit Without Redraw):
+   * `if (!core.isCarryingOver) game.start()`.
    * - So a program needs no `start the game` line, in any language, and no edit can change how it starts.
    * - `undefined` when anything in the program calls `start`:  a written line wins, or a method that does more.
    * - Its site, if it has one (epic `mockup` P2);  else its top-level things whose type is an app or a page, by the
@@ -1275,7 +1270,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   updatedContentsFor(file: SP.AnySpellFile): void {
     const { incremental } = this
-    if (file instanceof SP.SpellFile && incremental?.getFile(file.path) && !incremental.isBroken) {
+    if (file instanceof SP.SpellFile && incremental?.has(file.path) && !incremental.isBroken) {
       try {
         const changed = incremental.update(file.path, file.parseText)
         changed.forEach((parse) => {
@@ -1283,7 +1278,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           const changedFile = this.spellFiles.find((it) => it.path === path)
           if (changedFile instanceof SP.SpellFile) changedFile.setParsed(parse)
         })
-        return
+        if (!incremental.isBroken) return
       } catch (error) {
         console.error("SpellProject.updatedContentsFor(): incremental parse failed", error)
       }
@@ -1689,30 +1684,6 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   toString(): string {
     return `${this.constructor.name}: ${this.path}`
   }
-}
-
-/** What `SpellProject.compileChunk()` takes. */
-export type CompileChunkOptions = {
-  /** the project the file is parsed into */
-  into: P.IncrementalProject
-  /** the file's path in it, e.g. `/Counter.spellml` */
-  path: string
-  /** the file's whole new text */
-  text: string
-  /** where the chunk is in `text` */
-  span: { start: number; end: number }
-  /** what the chunk is:  an element in a drawing, or a template */
-  kind: "drawing" | "template"
-}
-
-/** What `SpellProject.compileChunk()` gives. */
-export type CompiledChunk = {
-  /** its javascript:  an expression for a drawing, a class for a template;  `""` when it isn't found */
-  code: string
-  /** the parse errors inside it, `"<line>:<ch> <message>"` */
-  errors: string[]
-  /** a template's class name, e.g. `Counter` */
-  className?: string
 }
 
 /** Does AST `node` hold a JSX element, anywhere in its fields?  See `SpellProject.draws()`. */

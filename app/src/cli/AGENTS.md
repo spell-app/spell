@@ -22,9 +22,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `spell space backup now | list | status | restore`, `spell space export`, `spell space delete`;
       and what a space projects (P17):  `spell space projection list | rebuild`
     - Spell's server for people outside this machine (P8, [cloudCommand.ts](commands/cloudCommand.ts)):
-      `spell space cloud serve | status | invite | mail | service`
+      `spell space cloud serve | build | status | invite | password | mail | service`
     - the cloud at real-looking addresses, for one house network, on a Mac (T57,
-      [localCommand.ts](commands/localCommand.ts)):  `spell space local setup | start | mail | sign-in`
+      [localCommand.ts](commands/localCommand.ts)):  `spell space local setup | start | stop | mail | sign-in`
     - Spell's own Spaces host on this machine (P13, [orgCommand.ts](commands/orgCommand.ts)):
       `spell space org host start | stop`
     - an org set up on Spell's own server in one go (P35, Q29, [orgCreateCommand.ts](commands/orgCreateCommand.ts),

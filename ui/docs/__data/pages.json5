@@ -110,6 +110,11 @@
       "summary": "An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data.",
       "status": "done"
     },
+    "ui-docs-index": {
+      "title": "Docs index",
+      "summary": "A site index draws a card for each of a site's pages, grouped by the pages' tags, with a search field above them.",
+      "status": "done"
+    },
     "ui-docs-inspector": {
       "title": "Docs inspector",
       "summary": "An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change.",
@@ -498,6 +503,11 @@
     "ui-site-nav": {
       "title": "Site nav",
       "summary": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.",
+      "status": "done"
+    },
+    "ui-site-tabs": {
+      "title": "Site tabs",
+      "summary": "Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.",
       "status": "done"
     },
     "ui-slider": {

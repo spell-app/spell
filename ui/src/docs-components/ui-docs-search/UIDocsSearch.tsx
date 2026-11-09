@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
 import { SiteData } from "spell/ui/docs-components/SiteData"
+import { SitePages, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
 import { docsSearchVocabulary } from "./UIDocsSearch.en"
 import { SearchData } from "./SearchData"
 import { SearchIndex } from "./SearchIndex"
@@ -86,6 +87,8 @@ export class DOMDocsSearchElement extends E.DOMElement<UIDocsSearch> {
  *   the rest come from the site's data, fetched on the FIRST focus or keystroke
  *   (`SiteData` + `SearchData`, `SearchIndex`).
  *   - Until it's in, or if it fails, only the page shown is searched.
+ * - `pages`:  a site's own list of pages searched instead of the site's data, each by its title and tags;
+ *   nothing is fetched.
  * - Every keystroke fires `ui-input` (`{ value }`):  `<ui-docs-nav>` filters its list by it.
  * - Shortcuts (`shortcuts`, on by default):
  *   `/` (not while typing in a field) and Cmd / Ctrl+K summon the field (`summon()`).
@@ -170,8 +173,15 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
     this.currentPagePath = this.pagePath()
   }
 
+  /** `pages`, the well-formed ones;  none:  it searches the site's data instead. */
+  @E.derived
+  get sitePages(): readonly SitePage[] | undefined {
+    return this.pages === undefined ? undefined : SitePages.wellFormed<SitePage>(this.pages)
+  }
+
   /** Start fetching the site's data, once:  `searchIndex` gets what loads (both, one, or neither). */
   private loadSiteData() {
+    if (this.sitePages) return
     if (this.dataWasRequested) return
     this.dataWasRequested = true
     void Promise.allSettled([SiteData.load(), SearchData.load()]).then(([data, search]) => {
@@ -204,7 +214,8 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
   /** The groups found, best first.  `@derived`:  the search itself (scoring, sorting). */
   @E.derived
   get groups(): SearchGroup[] {
-    return (this.searchIndex ?? NO_INDEX).search(this.query, this.pageOutline, this.currentPagePath)
+    const index = this.sitePages ? new SearchIndex({ pages: this.sitePages }) : (this.searchIndex ?? NO_INDEX)
+    return index.search(this.query, this.pageOutline, this.currentPagePath)
   }
 
   /** Every result in order, with its group:  what ↑ / ↓ walk.  `@derived`:  read on every key and render. */
@@ -457,6 +468,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
   /** Prefix of every link:  `base`, else the site root from `SiteData`. */
   private get linkBase(): string {
     if (this.base !== undefined) return this.base
+    if (this.sitePages) return ""
     try {
       return SiteData.root()
     } catch {

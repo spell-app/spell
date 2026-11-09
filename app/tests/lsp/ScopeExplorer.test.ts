@@ -25,6 +25,45 @@ const STATE_DESCRIPTION = "Its short name:  Q♠↓ is the queen of spades, face
 /** The `##` heading in the game's file that the card's moves are under, e.g. `play a card`:  their section. */
 const PLAYING_HEADING = "Playing a card"
 
+/** A project whose folders each hold a `Usage.spellml`, as a language server sees it (epic `notebook` P10). */
+describe("ScopeExplorer of a project with sub-folders", () => {
+  const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-folders-"))
+  const folder = resolve(dir, "Folders")
+  const uriOf = (file: string) => pathToFileURL(resolve(folder, file)).href
+  const workspace = new SpellDiskWorkspace()
+  const service = new LSP.SpellLanguageService(workspace)
+  const explorer = new LSP.ScopeExplorer(service)
+  let project: SP.SpellProject
+
+  beforeAll(async () => {
+    for (const name of ["Button", "Divider"]) mkdirSync(resolve(folder, name), { recursive: true })
+    writeFileSync(resolve(folder, SP.PROJECT_FILE), JSON.stringify({ imports: [] }))
+    writeFileSync(resolve(folder, "Button/Usage.spellml"), '<spell-thing "button usage">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Divider/Usage.spellml"), '<spell-thing "divider usage">\n</spell-thing>\n')
+    await workspace.update(uriOf("Button/Usage.spellml"), readFileSync(resolve(folder, "Button/Usage.spellml"), "utf8"))
+    project = workspace.fileFor(uriOf("Button/Usage.spellml"))!.project as SP.SpellProject
+  })
+
+  test("two files of one name are two entries, each keyed by its path in the project;  each parses", () => {
+    expect(project.spellFiles.map((file) => file.filePath)).toEqual(["/Button/Usage.spellml", "/Divider/Usage.spellml"])
+    expect([...all(explorer.tree(project))].filter((node) => node.kind === "file").map((node) => node.path)).toEqual([
+      "project:Folders/file:Button%2FUsage.spellml",
+      "project:Folders/file:Divider%2FUsage.spellml"
+    ])
+    expect(find(explorer.tree(project), "DividerUsage").path).toBe(
+      "project:Folders/file:Divider%2FUsage.spellml/type:DividerUsage"
+    )
+  })
+
+  test("the views panel's file list names each by its path", () => {
+    const file = workspace.fileFor(uriOf("Divider/Usage.spellml"))!
+    expect(service.projectInfo(file).files.map((each) => `${each.file} ${each.errors}`)).toEqual([
+      "Button/Usage.spellml 0",
+      "Divider/Usage.spellml 0"
+    ])
+  })
+})
+
 /**
  * The scope tree of a temp copy of the Solitaire example, as a scope explorer sees it:
  * its cards, deck and piles and its game, ONE project -- see `copyFixtureProject()`.
@@ -318,8 +357,8 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   })
 
   /**
-   * Project `name` in the workspace:  `spellFiles` copied from Solitaire,
-   * then `written` ones, after `imports`.
+   * Project `name` in the workspace:
+   * `spellFiles` copied from Solitaire, then `written` ones, after `imports`.
    */
   function makeProject(
     name: string,
@@ -460,7 +499,7 @@ describe("ScopeExplorer scope packs", () => {
   test("the built-ins' pack names its template files relative to core's `src/`, never a checkout's own path", () => {
     const shipped = readFileSync(resolve(environment.coreDir, "core.scopes.js"), "utf8")
     expect(shipped).not.toContain("file:")
-    expect(shipped).toContain('uri: "templates/Notebook.spell"')
+    expect(shipped).toContain('uri: "templates/TwoSidedView.spell"')
   })
 })
 

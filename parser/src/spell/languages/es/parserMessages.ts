@@ -125,6 +125,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
   "site-param-not-on-page":
     'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
+  "page-part-names-a-page": '"{name}" es el nombre de {page}, una página de este proyecto:  ponle otro nombre',
   "site-address-taken": 'La {page} ya está en "{address}":  cada página necesita su propia dirección',
   "site-card-place-not-whole":
     "La fila y la columna de una tarjeta se cuentan desde 1, en números enteros:  {row} y {column} no lo son",
@@ -186,6 +187,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
   "spellx-tag-in-markup":
     "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",
+  /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
+  "unreadable-attribute": 'No se puede leer "{text}" en <{tag}>:  revisa su nombre y sus comillas',
   "markdown-hole":
     'No entiendo "{{hole}}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave',
 

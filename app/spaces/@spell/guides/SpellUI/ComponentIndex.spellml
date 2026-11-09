@@ -1,0 +1,14 @@
+<spell-page "component index" notebook>
+	<header level="1">
+		Components
+		<header>Every Spell UI component family, by topic.</>
+	</>
+
+	<markdown>
+		Every component family, filed under each topic it belongs to, so a family can show up more than once.
+		Each card opens the component's page: its examples, how to use it, its API and its theming tokens.
+	</>
+
+	<!-- Drawn from the site's own list:  a new component's page line adds its card here. -->
+	<ui-docs-index></>
+</spell-page>

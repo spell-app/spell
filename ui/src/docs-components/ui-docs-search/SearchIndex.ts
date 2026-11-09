@@ -1,5 +1,6 @@
 import { withoutAccents } from "spell/ui/util"
 import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell/ui/docs-components/docs-components.types"
+import { SitePages, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
 // A leaf, not the barrel:  the barrel defines `<ui-toc>`
 import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
 import {
@@ -20,6 +21,7 @@ import {
  * What `<ui-docs-search>` searches, and how it ranks:  every component tag, every attribute, every page and every
  * page's sections, built once from the site's data (`components.json5` + `search.json5`);  the page shown's sections
  * come live, per search (`here()`, on the table of contents' `PageOutline`).
+ * - Or a site's own list of pages (`pages`):  each found by its title and its tags.
  * - Matching is blind to case and accents.  The WHOLE query is tried against the title (exact, start,
  *   a word's start, inside), then against each term (a tag, another name, a topic ...);  failing those,
  *   every WORD of the query must start a word somewhere (title or terms), so `button circular` finds `circular` on
@@ -41,9 +43,9 @@ export class SearchIndex {
   /** Folded (`fold()`) title and terms of each entry, made once. */
   private readonly keys: ReadonlyMap<SearchEntry, Key>
 
-  /** Index what loaded:  `data`'s tags and attributes, `search`'s pages and sections;  neither:  an empty index. */
-  constructor({ data, search }: SearchIndexProps = {}) {
-    const entries: SearchEntry[] = []
+  /** Index what loaded:  `data`'s tags and attributes, `search`'s pages and sections, `pages`;  none:  an empty index. */
+  constructor({ data, search, pages }: SearchIndexProps = {}) {
+    const entries: SearchEntry[] = (pages ? SitePages.allOf(pages) : []).flatMap((page) => SearchIndex.sitePage(page))
     const pageOf = new Map<SearchEntry, string>()
     const families = data?.families ?? {}
     const topics = data?.topics ?? []
@@ -264,6 +266,11 @@ export class SearchIndex {
   // ## Entries
   ////////////////
 
+  /** A page of a site's own list:  found by its title and tags, its first tag shown under it;  none with no address. */
+  private static sitePage({ title, href, tags = [] }: SitePage): SearchEntry[] {
+    return href ? [{ kind: "page", title, ...(tags[0] && { context: tags.join(", ") }), href, terms: [...tags] }] : []
+  }
+
   /** A component tag:  its name, its tag in mono, found by its tag, other names and topics. */
   private static component(tag: SiteTag, family: string, topics: SiteDataFile["topics"]): SearchEntry {
     const titles = tag.topics.map((id) => topics.find((topic) => topic.id === id)?.title ?? id)
@@ -300,6 +307,8 @@ export type SearchIndexProps = {
   data?: SiteDataFile
   /** `search.json5`:  pages and their sections */
   search?: SiteSearchFile
+  /** a site's own pages, each found by its title and tags */
+  pages?: readonly SitePage[]
 }
 
 /** What `SearchIndex.match()` scores:  an entry, its key, the folded query and its words, and a bonus. */

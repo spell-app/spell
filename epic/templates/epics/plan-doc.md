@@ -17,6 +17,8 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   Hand-edit only prose: the summary, Overview, phase bodies, item details.
   - in a SPLIT doc (see "Parts"; every new doc), a body's prose is in its part file, `parts/<id>.html`: edit it
     there, at its real path (`<epic folder>/epics/<name>/parts/<id>.html`;  `epic config contentFolder`)
+- A page talks to its reader:  "you", "Your words:", never "the person" or "The person's words:" (epic `epic-engine`, 2026-11-09).
+  These rules say "the person" because you, the agent, are their "you".
 - Write for the person coming back COLD (2026-10-04; the details skill's "Writing for the person" is the same rule):
   they run
   5+ epics, and reads an item weeks later, from another session. Enough that they can pick up ONE phase or item on

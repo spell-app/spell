@@ -1,0 +1,40 @@
+<spell-page "quote examples" notebook>
+	<header level="1">
+		Quote
+		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Quote" sticky="stack" collapsible dividing>
+			<example "Quote" description="A block quote:  a bar on its leading edge, muted text.  `cite` names where the words come from, for readers' tools.">
+				<quote cite="https://en.wikipedia.org/wiki/Alan_Kay">The best way to predict the future is to invent it.</quote>
+			</example>
+		</>
+
+		<section label="Inline" sticky="stack" collapsible dividing>
+			<example "Inline" description="`inline`:  a few words inside a sentence, in the language's own quotation marks.">
+				<text paragraph>She looked up and said <quote inline>not today</quote>, then went back to her book.</text>
+				<text lang="fr" paragraph>Elle a dit <quote inline>pas aujourd'hui</quote>.</text>
+			</example>
+		</>
+	</>
+</spell-page>

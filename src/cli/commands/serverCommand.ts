@@ -66,21 +66,20 @@ export async function startAll(): Promise<number> {
   ]
   if (settings.routes?.some((route) => route.includes("appRoutes"))) rows.push(await editorRow(root))
   if (settings.componentSets?.ui) rows.push(await spellUIRow(page.base))
-  rows.push(...(await reportedRows(page.base, { launched: page.launched })))
+  rows.push(...(await reportedRows(page.base)))
   CLI.out(serverLines(root, rows).join("\n"))
   return rows.some((row) => row.failed) ? CLI.EXIT.ERRORS : CLI.EXIT.OK
 }
 
 /**
  * The rows of the servers route modules run, as they report them (`RouteContext.addServerReport`):  the kit names none.
- * - `running` reads `started` when the page server was started just now.
+ * - Each says its own state, `running`, `started` or why not:  a server may outlive the page server that started it.
  * - NEVER fails `start all`:  they're the modules' extras, and each row says why it isn't running.
  */
-async function reportedRows(base: string, { launched }: { launched: boolean }): Promise<ServerRow[]> {
+async function reportedRows(base: string): Promise<ServerRow[]> {
   try {
     const answer = await fetch(`${base}${SERVER_REPORTS_API}`, { signal: AbortSignal.timeout(REPORTS_TIMEOUT_MS) })
-    const rows = (await answer.json()) as ReportedServer[]
-    return rows.map((row) => ({ ...row, state: launched && row.state === "running" ? "started" : row.state }))
+    return (await answer.json()) as ReportedServer[]
   } catch {
     return []
   }
@@ -162,7 +161,8 @@ const REPORTS_TIMEOUT_MS = 30_000
  * `spell server stop [local|all]`:
  * - `local` (default):  the kit's page server, as `src/server/page/cli.ts stop` (its editor stops with it)
  * - `all`:  every web server `start all` starts (`pageServerRoot()`):  the page server, then the editor too, from its
- *   record, when it's still running;  e.g. after the page server died without stopping it (kill -9)
+ *   record, when it's still running;  e.g. after the page server died without stopping it (kill -9);  then whatever a
+ *   folder's `stopAllServers` hook stops, a server that outlives the page server, one line each.
  * - Throws `CliError` for another word.
  */
 export async function stopServers(which = "local"): Promise<number> {
@@ -174,6 +174,9 @@ export async function stopServers(which = "local"): Promise<number> {
   const stopped = await new SRV.PidFile(root).stop()
   CLI.out(`page server:  ${stopped ? "stopped" : "not running"}`)
   CLI.out(`editor:  ${stopEditor(root, editorPid, { withPageServer: stopped })}`)
+  const stopMore = await CLI.hook<(root: string) => Promise<string | undefined>>("stopAllServers")
+  const line = await stopMore?.(root)
+  if (line) CLI.out(line)
   return CLI.EXIT.OK
 }
 

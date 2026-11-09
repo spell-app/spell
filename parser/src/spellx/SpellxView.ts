@@ -5,8 +5,9 @@ import { SX } from "spell/parser/spellx"
 /**
  * A `.spellml` file's CHUNK TREE, built from the tokens spell's own parser reads it as (epic `elemental-spell` P6, J30):
  * `SpellxView.read(text)` => `SX.SpellxFile`.
- * - Spellx is read by spell's tokenizer and rules (`SP.SpellxTokenizer`, `SP.SpellxTwin`):  each tag line as its
- *   code-spell twin.  This view is what the file SAYS, for the notebook (P12), the editor and agents:
+ * - Spellx is read by spell's tokenizer and rules (`SP.SpellxTokenizer`, `SP.SpellxTwin`):
+ *   each tag line as its code-spell twin.
+ * - This view is what the file SAYS, for the editor's page (P12), the editor and agents:
  *   templates, prose cells, members, notes, handlers, code lines and a drawing's markup, each with its exact span.
  * - It reads the spellx TOKENS, not the parse's matches:  a match holds its twin's code-spell tokens, while the tag's
  *   own head, closers and prose are tokens of their own (`SP.SpellxTagToken` ...).
@@ -26,9 +27,9 @@ export class SpellxView {
     const language = options.language ?? SP.Language.forFile(options.path)
     const parser = language.parser.clone({ module: "spellx view", form: "spellx" } as P.ParserProps) as SP.SpellParser
     const { tokenizer } = parser
-    // a notebook's templates stay where they're written:  its cells, in order (P16)
+    // the templates of a page that draws its body stay where they're written:  its cells, in order (P16)
     if (tokenizer instanceof SP.SpellxTokenizer) {
-      tokenizer.liftsNotebooks = false
+      tokenizer.liftsPageTemplates = false
       // and an `<html>` block stays one, its markup inside it
       tokenizer.unwrapsHtml = false
     }
@@ -140,7 +141,7 @@ export class SpellxView {
         nodes.push(...this.holeAt(start, this.closingOf(start, item.tokens.at(-1)!.end) + 1))
         continue
       }
-      if ((where === "drawing" || where === "notebook") && this.isMarkup(item)) {
+      if ((where === "drawing" || where === "page body") && this.isMarkup(item)) {
         code = undefined
         nodes.push(...this.markupOf(item.tokens))
         continue
@@ -173,7 +174,8 @@ export class SpellxView {
           name: tag.name?.text,
           nameSpan: this.textSpan(tag.name),
           attributes: tag.attributes.map((attribute) => this.attribute(attribute)),
-          children: body ? this.nodesOf(body.tokens, tag.kind === "notebook" ? "notebook" : "template") : [],
+          drawsBody: !!tag.drawsBody,
+          children: body ? this.nodesOf(body.tokens, tag.drawsBody ? "page body" : "template") : [],
           headSpan,
           span
         }
@@ -318,7 +320,7 @@ export class SpellxView {
 
   /** A prose line inside a template that's a heading or a comment:  `## Rank`, a markdown heading (Q12). */
   private isHeading(token: P.Token, where: Where) {
-    return (where === "template" || where === "file" || where === "notebook") && token instanceof P.CommentToken
+    return (where === "template" || where === "file" || where === "page body") && token instanceof P.CommentToken
   }
 
   /** `span`'s text, each line without the indent the first one has. */
@@ -496,7 +498,8 @@ export class SpellxView {
       value: value?.text,
       quote,
       span: { start: attribute.start, end },
-      valueSpan
+      valueSpan,
+      ...(attribute.fromTagWord ? { fromTagWord: true as const } : {})
     }
   }
 
@@ -544,10 +547,11 @@ export class SpellxView {
 }
 
 /**
- * What holds a block's items:  the file, a template, a member's body of spell, a drawing's markup;
- * or a notebook's body, its prose and markup side by side with its members and templates (P16).
+ * What holds a block's items:
+ * - the file, a template, a member's body of spell, a drawing's markup
+ * - or the body of a page that draws its body:  its prose and markup, beside its members and templates (P16)
  */
-type Where = "file" | "template" | "body" | "drawing" | "notebook"
+type Where = "file" | "template" | "body" | "drawing" | "page body"
 
 /** Options for `SpellxView.read()`. */
 export type SpellxReadOptions = {

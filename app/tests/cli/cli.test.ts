@@ -433,11 +433,89 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
     )
   }, 30_000)
 
+  test("--fix leaves an <html> block's tags as written:  the web's markup (epic notebook P8)", () => {
+    const source =
+      '<spell-page "docs" notebook>\n\t<html>\n\t\t<ui-text>as written</ui-text>\n\t</html>\n</spell-page>\n'
+    const html = tempProject("HtmlBlock", source, SP.SPELLML_SUFFIX)
+    expect(spell(["lint", ".", "--fix"], html).stdout).toBe("")
+    expect(readFileSync(resolve(html, `HtmlBlock${SP.SPELLML_SUFFIX}`), "utf8")).toBe(source)
+  }, 30_000)
+
   test("a component's own event stays on its element:  no <on ...> hears it", () => {
     const source = SOURCE.replace("<ui-text on-click={flip it}>face</>", "<modal on-ui-closed={flip it}>face</modal>")
     const { status, stdout } = spell(["lint", "."], tempProject("OwnEvent", source, SP.SPELLML_SUFFIX))
     expect(stdout).not.toContain("HTML's habit")
     expect(status).toBe(0)
+  }, 30_000)
+})
+
+describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
+  const SOURCE = [
+    '<spell-notebook "counter notebook" locked>',
+    '\t<spell-view "counter">',
+    '\t\t<property "count" type="number">0</property>',
+    "\t\t<draw><button>{its count}</button></draw>",
+    "\t</spell-view>",
+    '\t<section label="Counter">',
+    "\t\t<text>A counter starts at 0,",
+    "\t\t\tand adds one.</text>",
+    '\t\t<example "One counter">',
+    "\t\t\t<counter/>",
+    "\t\t</example>",
+    '\t\t<text color="grey">Click it.</text>',
+    '\t\t<example "Two counters" description="Its own.">',
+    "\t\t\t<counter/>",
+    "\t\t</example>",
+    "\t</section>",
+    "</spell-notebook>",
+    ""
+  ].join("\n")
+
+  test("a description before an example is a warning, named, exit 0;  writes nothing", () => {
+    const warned = tempProject("Warned", SOURCE, SP.SPELLML_SUFFIX)
+    const { status, stdout } = spell(["lint", "."], warned)
+    expect(stdout).toBe(
+      "Warned.spellml:7:3  warning:  a description before an example is prose, not its description:  " +
+        'say description="..." on the example instead, or run `spell lint --fix`  (description-before-example)\n'
+    )
+    expect(status).toBe(0)
+    expect(readFileSync(resolve(warned, `Warned${SP.SPELLML_SUFFIX}`), "utf8")).toBe(SOURCE)
+  }, 30_000)
+
+  test("--fix:  <spell-page notebook>, its closer too;  <view> inside it;  the description in its example;  then a second run does nothing", () => {
+    const fixing = tempProject("Pages", SOURCE, SP.SPELLML_SUFFIX)
+    const { status, stdout } = spell(["lint", ".", "--fix"], fixing)
+    expect(stdout).toBe(
+      [
+        "Pages.spellml:1:2  fixed:  <spell-notebook> is <spell-page notebook>",
+        "Pages.spellml:2:3  fixed:  <spell-view> is <view> in a page",
+        "Pages.spellml:7:3  fixed:  the text before <example> is its description",
+        ""
+      ].join("\n")
+    )
+    expect(status).toBe(0)
+    const fixed = readFileSync(resolve(fixing, `Pages${SP.SPELLML_SUFFIX}`), "utf8")
+    expect(fixed).toBe(
+      SOURCE.replace('<spell-notebook "counter notebook"', '<spell-page "counter notebook" notebook')
+        .replace("</spell-notebook>", "</spell-page>")
+        .replace("<spell-view", "<view")
+        .replace("</spell-view>", "</view>")
+        .replace(
+          '<text>A counter starts at 0,\n\t\t\tand adds one.</text>\n\t\t<example "One counter">',
+          '<example "One counter" description="A counter starts at 0, and adds one.">'
+        )
+    )
+    expect(spell(["lint", ".", "--fix"], fixing).stdout).toBe("")
+    expect(readFileSync(resolve(fixing, `Pages${SP.SPELLML_SUFFIX}`), "utf8")).toBe(fixed)
+  }, 30_000)
+
+  test("--fix in Spanish:  <encanto-cuaderno> is <encanto-página cuaderno>", () => {
+    const source = '<encanto-cuaderno "cuaderno de contador">\n\tUn contador cuenta sus clics.\n</encanto-cuaderno>\n'
+    const fixing = tempProject("Paginas", source, `.es${SP.SPELLML_SUFFIX}`)
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    expect(readFileSync(resolve(fixing, `Paginas.es${SP.SPELLML_SUFFIX}`), "utf8")).toBe(
+      '<encanto-página "cuaderno de contador" cuaderno>\n\tUn contador cuenta sus clics.\n</encanto-página>\n'
+    )
   }, 30_000)
 })
 

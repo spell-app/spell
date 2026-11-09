@@ -1,6 +1,8 @@
 import { NONE, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+// Import directly to avoid circular import
+import { TextLiteral } from "spell/parser/spell/rules/core/TextLiteral"
 
 /**
  * Base pattern rule for matching a single-word constant identifier (alpha-numeric, dashes/underscores).
@@ -64,6 +66,24 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
     const constant = SpellConstant.constantIn(value) ?? SpellConstant.constantIn(property)
     const output = member?.valueOutputs && constant ? member.valueOutputs[`${constant.value}`] : undefined
     if (constant && output !== undefined) constant.data.valueOutput = output
+  }
+
+  /**
+   * SIDE EFFECT:  when `value` is one of `member`'s values, a constant or a quoted text, notes what it compiles to:
+   * `locked` for `"bloqueado"`, in `- su candado es "bloqueado"`, on a line giving an inherited member a value.
+   * - Anything else, or a member whose values are themselves:  nothing.  A lookup's result:  call it WHILE PARSING.
+   */
+  static sayForMember(member: P.ScopeVariable | undefined, value: P.Match | undefined) {
+    if (!member?.valueOutputs) return
+    const constant = SpellConstant.constantIn(value)
+    if (constant) {
+      const output = member.valueOutputs[`${constant.value}`]
+      if (output !== undefined) constant.data.valueOutput = output
+      return
+    }
+    for (let each = value; each; each = SpellConstant.onlyChild(each)) {
+      if (each.is(TextLiteral)) return TextLiteral.sayAs(each as P.MatchFor<TextLiteral>, member.valueOutputs)
+    }
   }
 
   /** The property variable `match` reads, through matches of one child (`expression`), if any. */

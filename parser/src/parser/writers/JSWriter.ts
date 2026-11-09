@@ -192,7 +192,9 @@ export class JSWriter extends ProgramWriter {
    */
   ASTStringLiteral(node: P.ASTStringLiteral): string {
     if (!node.quote) return node.value
-    return doubleQuoted(node.raw ?? jsText.inQuotes(node.value, node.quote))
+    return doubleQuoted(
+      node.raw === undefined ? jsText.inQuotes(node.value, node.quote) : jsText.lineBreaksEscaped(node.raw)
+    )
   }
 
   /**
@@ -1641,8 +1643,18 @@ export class JSWriter extends ProgramWriter {
    * - A dotted tag, `<UI.Form>`, is a compile error (`P.ASTJSXElement.tagError()`):
    *   written where the element would be, as a broken `{...}` is.
    *   Spell's `jsxElement` rule reports it with the program's parse errors.
+   * - One drawn apart (`drawnApart`, an example on a page) is a part of its own, which an edit can draw again alone:
+   *   `core.drawPart(this, () => h(...))` (epic `notebook` P4).
+   *   - So is whatever holds one (a section around its examples), so a move elsewhere leaves it in place (epic
+   *     `notebook` I6).
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
+    if (!isDrawnApart(node)) return this.jsxElement(node)
+    return `core.drawPart(this, () => ${this.jsxElement(node)})`
+  }
+
+  /** `node` as Solid's `h()` call -- see `ASTJSXElement()`. */
+  private jsxElement(node: P.ASTJSXElement): string {
     const tag = node.tagName
     const tagError = P.ASTJSXElement.tagError(tag)
     if (tagError) return `null ${this.write(new P.ASTParseError(node.match, { value: tagError }))}`
@@ -1697,8 +1709,10 @@ export class JSWriter extends ProgramWriter {
   }
 
   /**
-   * `value`, the handler of attribute `key`, if it's a press:  `core.pressed(this, () => this.deal())`, a person's
-   * action, which waits its turn (`ActionQueue`, epic `language`, Q6);  `undefined` for any other.
+   * `value`, the handler of attribute `key`, if it's a press:
+   * a person's action, which waits its turn (`ActionQueue`, epic `language`, Q6).
+   * - e.g. `core.pressed(this, () => this.deal())`
+   * - `undefined` for any other.
    * - `onInput`, `onMouseEnter` ... aren't:  they keep up with the person.
    */
   protected pressedHandler(key: string, value: P.ASTNode | undefined): string | undefined {
@@ -1750,8 +1764,8 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * Javascript for each infix operator's meaning (`P.ASTOperator`).
-   * - `equals` is `===`:  spell's `is` means the same thing exactly (epic `spanish` P28;  `==` before)
-   *   -- a choice compared to yes or no is bare, see `comparison()`.
+   * - `equals` is `===`:  spell's `is` means the same thing exactly (epic `spanish` P28;  `==` before).
+   *   A choice compared to yes or no is bare:  see `comparison()`.
    */
   static OPERATORS: Record<P.ASTOperator, string> = {
     and: "&&",
@@ -1865,3 +1879,11 @@ function doubleQuoted(text: string): string {
 
 /** spell's rounding, `round price up`, as javascript says it:  `Math.ceil(price)` -- see `coreCall()`. */
 const ROUNDING: Record<string, string> = { round: "round", roundUp: "ceil", roundDown: "floor" }
+
+/** Is `node` drawn as a part of its own (`drawnApart`), or does it hold one? */
+function isDrawnApart(node: P.ASTJSXElement): boolean {
+  return (
+    node.drawnApart === true ||
+    (node.children ?? []).some((child) => child instanceof P.ASTJSXElement && isDrawnApart(child))
+  )
+}

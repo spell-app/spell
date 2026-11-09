@@ -20,9 +20,22 @@ export const LOCAL_PERSON = import.meta.env?.MODE === "static" ? "you" : "owen"
 export const HOME_ORG = "spell"
 
 /**
+ * Spell UI's component pages, one site of notebooks in the Guides group (epic `notebook` P10).
+ * - Its project file says `"onHome": false`, so the home page shows no card for it.
+ */
+export const SPELL_UI_SITE_PROJECT = "@spell/guides/SpellUI"
+
+/**
+ * A project of a group's list, as the home page reads it:  `SP.ProjectListEntry`, and `"onHome": false` when its
+ * project file says so (epic `notebook` P10).
+ * - Only a project that stays off the home page has it:  the Guides row and the Hero's first-guide button skip it.
+ */
+export type ProjectListEntryWithHome = SP.ProjectListEntry & { onHome?: false }
+
+/**
  * Spell's project GROUPS:  where projects live, each a list the editor shows (`SpellProjectRoot`).
  * - Each one's `path` is its address;  its folder comes from that (`SP.SpellUrls.folderFor()`):
- *   - `@spell/examples`, `@spell/guides`, `@spell/notebooks`, `@spell/library`:
+ *   - `@spell/examples`, `@spell/guides`, `@spell/library`:
  *     the `@spell` space's built-ins, `spaces/@spell/<group>/`, committed
  *   - `@spell/editor`:  the editor's own pieces in Spell, one project each (epic `editor` P22), committed
  *   - `@spell/test`:  the test projects, beside them in `spaces/@spell/test/`, committed and frozen
@@ -67,16 +80,6 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
     type: "guide",
     description: "Usage guides",
     icon: "book open"
-  },
-  {
-    path: "@spell/notebooks",
-    space: "@spell",
-    domain: "notebooks",
-    title: "Notebooks",
-    Type: "Notebook",
-    type: "notebook",
-    description: "Pages of prose and live examples you can edit, each a `.spellml` notebook",
-    icon: "sticky note"
   },
   {
     path: "@spell/library",

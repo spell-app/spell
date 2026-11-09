@@ -40,6 +40,11 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
    */
   @E.once
   private async findEditor(): Promise<void> {
+    // drawn by the editor's Run, it IS the editor:  its dev server has no `/editor` to follow
+    if (EDITOR_RUN_PATH.test(location.pathname)) {
+      this.editorBase = location.origin
+      return
+    }
     for (const address of new Set([this.siteRoot + EDITOR_REDIRECT, EDITOR_REDIRECT])) {
       try {
         const response = await fetch(address)
@@ -60,7 +65,10 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
    */
   @E.lazy
   private get siteRoot(): string {
-    return isServer ? "" : location.pathname.replace(BENCH_PAGE_PATH, "")
+    if (isServer) return ""
+    const { pathname } = location
+    // a site page in the editor's Run:  its address says nothing about the page server's pages, which the editor passes on
+    return BENCH_PAGE_PATH.test(pathname) ? pathname.replace(BENCH_PAGE_PATH, "") : ""
   }
 
   /** The pages the editor previews, at their addresses now. */
@@ -92,3 +100,6 @@ export interface UIDocsThemeBench extends E.AttributeValues<DocsThemeBenchVocabu
 
 /** The bench's page, from its site's root:  what's before it is the site's address. */
 const BENCH_PAGE_PATH = /\/components\/ui\/[^/]*$/
+
+/** A page the editor's Run draws:  its address starts here. */
+const EDITOR_RUN_PATH = /^\/run\//

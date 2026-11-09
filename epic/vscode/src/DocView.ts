@@ -38,6 +38,7 @@
  *   - the Review tab's:  its epic list right of Home (Owen, 2026-10-22)
  *   - Home:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
  *   - `spellEpic.docView.home` stays a palette command, as does "Review:  Home Page" (`spellEpic.reviewView.home`).
+ *   - the Epic Docs tab's:  this window's epic page, right of Home, shown in the Review tab (`showWindowEpic()`)
  * - "Review" has a list button too, "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`):
  *   pick an epic of ANY registered repo (`~/.spell-epic/repos.json5`), its epic page shows there.
  *   No terminal, no Claude:  how Owen gets around the epic pages offline (epic `airplane` P4).
@@ -248,6 +249,7 @@ export class DocView implements vscode.WebviewViewProvider {
     }
     context.subscriptions.push(
       vscode.commands.registerCommand("spellEpic.docView.home", () => DocView.goHome()),
+      vscode.commands.registerCommand("spellEpic.docView.showWindowEpic", () => DocView.showWindowEpic()),
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.detailsView.list", () => DocView.of("details").showList()),
@@ -306,6 +308,18 @@ export class DocView implements vscode.WebviewViewProvider {
       { title: "Review an epic", placeHolder: "Which epic page?", matchOnDescription: true }
     )
     if (picked) await DocView.showFile?.(picked.doc.file, "review")
+  }
+
+  /**
+   * The epic page of this window's epic (`windowEpic()`), in the "Review" tab (epic `epic-engine` I243).
+   * - a warning when the window has none
+   */
+  static async showWindowEpic(): Promise<void> {
+    const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+    const content = root && EpicConfig.contentOf(root)
+    const epic = content && windowEpic(root, content)
+    if (!content || !epic) return void vscode.window.showWarningMessage("Spell Epic:  this window has no epic.")
+    await DocView.showFile?.(join(content, "epics", epic, `${epic}.plan.html`), "review")
   }
 
   /**

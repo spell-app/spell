@@ -179,6 +179,8 @@ def test_ranges_as_a_slice_end_not_included(core: Core) -> None:
     assert core.range_starting_at(items, 1, 2) == ["b", "c"]
     assert core.range_starting_at(items, -3) == ["b", "c", "d"]
     assert core.range_starting_at(items, -2, 2) == ["c", "d"]
+    assert core.range_starting_at("owen@spell", 0, 2) == "ow"
+    assert core.range_starting_at("ow", 5, 1) == ""
     assert core.range_starting_at(items, 4) == []
     assert type(core.range_between(List(items), 9, 10)) is List
     core.remove_range_between(items, 1, 3)
