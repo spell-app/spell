@@ -175,7 +175,7 @@ export class SpellxTwin {
    * A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body.
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
-   * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
+   * - A page's `locked`:  `- its lock is locked` (epic `notebook` P1).
    * - A page's or view's `thumbnail=`:  `- its thumbnail is "..."` (epic `mockup` P16).
    */
   private template(): SpellxTwinLine {
@@ -230,7 +230,7 @@ export class SpellxTwin {
    * - Its sections draw as the docs pages' do, sticky and foldable (epic `notebook` P3, J1):
    *   - each `##` heading and what follows it, a `<section>` the twin makes:  see `markdownLines()`, `gatherSections()`
    *   - each `<section label="...">` written at its top level, with the same look:  see `withSectionLook()`
-   * - `locked`:  a line, `- its lock is "locked"`;  `thumbnail=`, `- its thumbnail is "..."`.
+   * - `locked`:  a line, `- its lock is locked`;  `thumbnail=`, `- its thumbnail is "..."`.
    * - Its own templates aren't in its block:  the tokenizer lifted them out, to before it (`liftPageTemplates()`).
    */
   private drawnPage(): SpellxTwinLine {

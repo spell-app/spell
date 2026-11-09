@@ -28,6 +28,7 @@ import { IsA } from "./IsA"
 import { IsDefined } from "./IsDefined"
 import { IsEmpty } from "./IsEmpty"
 import { IsEqual } from "./IsEqual"
+import { IsListedValue } from "./IsListedValue"
 import { IsExactly } from "./IsExactly"
 import { IsIn } from "./IsIn"
 import { IsSameTypeAs } from "./IsSameTypeAs"
@@ -312,6 +313,9 @@ expressionsEs.addRule(IsA, {
     }
   ]
 })
+
+// después de `is_a`, para que un tipo conocido gane:  `es una reina` con un tipo llamado `reina`
+expressionsEs.addRule(IsListedValue, { syntax: "{operator:is_or_is_not_a} {expression:constant}" })
 
 expressionsEs.addRule(IsSameTypeAs, {
   syntax: "{operator:is_or_is_not} (del|el) mismo tipo que {expression:operand}",

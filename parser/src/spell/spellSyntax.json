@@ -934,7 +934,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -1719,6 +1719,20 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "IsListedValue",
+          "ruleNames": ["is_listed_value"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsListedValue.ts",
+          "line": 16,
+          "purpose": "`{lhs} is [not] a`/`an {value}`, comparing the property that lists the value (epic `language` P39, C4).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not_a} {expression:constant}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
         },
         {
           "className": "MeasureIn",
@@ -4264,7 +4278,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -6319,6 +6333,20 @@
           "syntaxes": [
             {
               "syntax": "{values:quoted_member} {specifier:type_specifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ItIsValue",
+          "ruleNames": ["it_is_value"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ItIsValue.ts",
+          "line": 26,
+          "purpose": "A line in a type's body giving a value to whichever property lists it (epic `language` P39, C4).",
+          "syntaxes": [
+            {
+              "syntax": "it is (a|an)? {value:constant}"
             }
           ],
           "aliases": ["statement"]
@@ -8635,7 +8663,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 64,
+          "line": 65,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

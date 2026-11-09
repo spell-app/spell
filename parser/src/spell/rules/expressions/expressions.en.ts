@@ -27,6 +27,7 @@ import { IsA } from "./IsA"
 import { IsDefined } from "./IsDefined"
 import { IsEmpty } from "./IsEmpty"
 import { IsEqual } from "./IsEqual"
+import { IsListedValue } from "./IsListedValue"
 import { IsExactly } from "./IsExactly"
 import { IsIn } from "./IsIn"
 import { IsSameTypeAs } from "./IsSameTypeAs"
@@ -303,6 +304,9 @@ expressions.addRule(IsA, {
     }
   ]
 })
+
+// after `is_a`, so a known type wins:  `is a queen` with a type named `queen`
+expressions.addRule(IsListedValue, { syntax: "{operator:is_or_is_not_a} {expression:constant}" })
 
 expressions.addRule(IsSameTypeAs, {
   syntax: "{operator:is_or_is_not} the same type as {expression:operand}",

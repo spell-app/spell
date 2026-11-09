@@ -473,7 +473,7 @@ export type LanguageWords = {
   builtInMembers?: Record<string, string[]>
   /**
    * What a stored built-in member's values compile to, when said in the language's own words -- `undefined` if they're English:
-   * e.g. `{ lock: { bloqueado: "locked", desbloqueado: "unlocked" } }`, so `- su candado es "bloqueado"` is `locked`.
+   * e.g. `{ lock: { bloqueado: "locked", desbloqueado: "unlocked" } }`, so `- su candado es bloqueado` is `locked`.
    * - Each key names a built-in member, as `builtInMembers` does.
    */
   builtInMemberValues?: Record<string, Record<string, string>>
@@ -682,7 +682,7 @@ export type SpellxTwinWords = {
    */
   group: string
   /**
-   * A page's `locked`:  a line in its body, `its lock is "locked"` (epic `notebook` P1).
+   * A page's `locked`:  a line in its body, `its lock is locked` (epic `notebook` P1).
    * - Its value quoted:  a built-in member written by hand has no list of values for a bare word to name.
    */
   pageLocked: string

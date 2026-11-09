@@ -553,6 +553,12 @@ export type BuiltInMember = {
    * - A method's with its arguments, e.g. `add (a thing) to (a list)`.
    */
   words: string
+  /**
+   * The words its value can be, in English, e.g. `unlocked` and `locked` for a page's `lock`.
+   * - Each becomes a word the language knows, as a two sided view's `down` is.
+   * - Another language's are the keys of its `builtInMemberValues`.
+   */
+  values?: readonly string[]
   /** What the Type Explorer files it under. */
   kind: "property" | "method"
   /** What it is, or returns, in spell's words, e.g. `number`. */

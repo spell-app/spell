@@ -443,10 +443,11 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         datatype: "text",
         stored: true,
         declarable: true,
+        values: ["unlocked", "locked"],
         docstring: md(
           "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.",
           "- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.",
-          '- Say it on its tag, `<spell-page "guide" locked>`, or in its body, `- its lock is "locked"`.'
+          '- Say it on its tag, `<spell-page "guide" locked>`, or in its body, `- it is locked` or `- its lock is locked`.'
         )
       }
     ]
@@ -828,7 +829,21 @@ export function loadBuiltInTypes(
           // and its values too:  Spanish's `bloqueado` sets a page's `lock` to `locked`
           const valueOutputs = words.builtInMemberValues?.[member.words]
           const values = valueOutputs ? { valueOutputs } : {}
-          addMember({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, ...values, datatype, docstring })
+          // the words it can be:  each one a word the language knows, as a two sided view's `down` is
+          const listedValues = valueOutputs ? Object.keys(valueOutputs) : member.values
+          const listed = listedValues ? { listedValues } : {}
+          for (const value of listedValues ?? []) {
+            if (!scope.constants.get(value, "LOCAL_ONLY")) scope.constants.add({ name: value })
+          }
+          addMember({
+            name,
+            ...(said !== name ? { asWritten: said } : {}),
+            ...renamed,
+            ...values,
+            ...listed,
+            datatype,
+            docstring
+          })
         }
         continue
       }

@@ -344,7 +344,7 @@ export const spanishWords: SP.LanguageWords = {
       menuEach: "su {name} es un menú de {for-each} , cada uno ejecutando {quoted action}",
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
-      pageLocked: 'su candado es "bloqueado"',
+      pageLocked: "su candado es bloqueado",
       templateThumbnail: "su miniatura es {quoted thumbnail}",
       // Spell UI's Spanish words for `<ui-section label sticky="stack" collapsible dividing level>`
       pageSection: {
@@ -464,7 +464,7 @@ export const spanishWords: SP.LanguageWords = {
 
   builtInMemberValues: {
     // lo que vale el candado de una página (épica `notebook` I1)
-    lock: { bloqueado: "locked", desbloqueado: "unlocked" }
+    lock: { desbloqueado: "unlocked", bloqueado: "locked", desbloqueada: "unlocked", bloqueada: "locked" }
   },
 
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */

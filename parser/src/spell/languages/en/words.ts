@@ -312,7 +312,7 @@ export const englishWords: SP.LanguageWords = {
       menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
-      pageLocked: 'its lock is "locked"',
+      pageLocked: "its lock is locked",
       templateThumbnail: "its thumbnail is {quoted thumbnail}",
       pageSection: {
         tag: "section",
