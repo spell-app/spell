@@ -1713,7 +1713,7 @@ What a program's lines about where data lives compile to, and what reads the res
   - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
 - `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
   - Compiled:  `static savedIn = { place, collection }`.
-  - The project's declarations say it too (epic `data` I19):  `savedIn` on the line, `place` on the place's type,
+  - The project's declarations say it too (epic `data` I19):  `savedIn` on the type, `place` on the place's type,
     so in a project importing the type the words below read the place as well (`SP.SpellDeclarations.load()`).
     - A project can't yet name an imported place on its own type's line:  the place's one instance isn't imported.
 - The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found

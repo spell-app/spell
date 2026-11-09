@@ -178,7 +178,8 @@ export class SpellDeclarations {
         // a property's kind, e.g. `CardSuit`:  loading makes it again from the property's own list
         if (!item.stub && !item.valueKind?.property) {
           const { name: type, superType, aka, gender, itemType, units } = item
-          merge({ type, superType, aka, gender, itemType, units, place: SpellDeclarations.placeDeclaration(item) })
+          const place = SpellDeclarations.placeDeclaration(item)
+          merge({ type, superType, aka, gender, itemType, units, place, savedIn: savedDeclaration(item) })
         }
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
@@ -194,9 +195,6 @@ export class SpellDeclarations {
     // a view's slots aren't scope records:  its rule notes them -- see `HasSlots`
     const declaresSlots = (statement.data as { declaresSlots?: SP.DeclaredSlots }).declaresSlots
     if (declaresSlots) merge({ of: declaresSlots.of, slots: declaresSlots.slots })
-    // nor is where a type is saved:  its line notes it -- see `SavedInPlace`
-    const declaresSaved = (statement.data as { declaresSaved?: SP.DeclaresSaved }).declaresSaved
-    if (declaresSaved) merge(declaresSaved)
     // an app's widget defaults aren't scope records either:  its `<ui-defaults>` block notes them (`ui_defaults`)
     const declaresDefaults = (statement.data as { declaresDefaults?: SP.UIDefaultsTable }).declaresDefaults
     if (declaresDefaults) merge({ uiDefaults: declaresDefaults })
@@ -406,13 +404,13 @@ export class SpellDeclarations {
   }
 
   /**
-   * SIDE EFFECT:  `declaration`'s type `of`, if picked, is saved where it says (epic `data` I19).
+   * SIDE EFFECT:  `declaration`'s type, if picked, is saved where it says (epic `data` I19).
    * - Its place's type, when it's loaded;  it's picked along with the type.
    * - A place the project itself imported from a third one isn't in its declarations:
    *   the type still counts as saved, with nothing known of the place, as with a library's kind.
    */
-  private static loadSaved(scope: P.RootScope, names: Set<string>, { of, savedIn }: SP.SpellDeclaration) {
-    const type = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
+  private static loadSaved(scope: P.RootScope, names: Set<string>, { type: name, savedIn }: SP.SpellDeclaration) {
+    const type = name && names.has(name) ? scope.types.get(name, "LOCAL_ONLY") : undefined
     if (!type || !savedIn) return
     const { place, placeType: placeTypeName, collection } = savedIn
     const placeType = scope.types.get(placeTypeName, "LOCAL_ONLY") ?? new P.TypeScope(placeTypeName)
@@ -777,7 +775,7 @@ export class SpellDeclarations {
     for (const declaration of statements) {
       const { type, superType, property, of, datatype, classVariable, asWritten, defined, savedIn } = declaration
       if (type) needs.set(type, [...(needs.get(type) ?? []), superType ?? ""])
-      if (of && savedIn) needs.set(of, [...(needs.get(of) ?? []), savedIn.placeType])
+      if (type && savedIn) needs.set(type, [...(needs.get(type) ?? []), savedIn.placeType])
       if (property && of && datatype) needs.set(of, [...(needs.get(of) ?? []), datatype])
       if (property && of && classVariable) {
         kindsListedBy.set(SP.Language.forFile(defined).propertyKindType(of, asWritten ?? property), of)
@@ -1049,6 +1047,11 @@ const PROP_ORDER = [
   "constantOutputs",
   "enumeration"
 ]
+
+/** Where `type` itself is saved, for its declaration:  `undefined` for a type kept in memory, or one inheriting it. */
+function savedDeclaration({ saved }: P.TypeScope): SP.DeclaredSaved | undefined {
+  return saved && { place: saved.place, placeType: saved.placeType.name, collection: saved.collection }
+}
 
 /** Is `item` a `P.ScopeRule`, the record `scope.addRule()` notes? */
 function isScopeRule(item: unknown): item is P.ScopeRule {

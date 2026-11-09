@@ -10,6 +10,11 @@
     {
       "type": "Recipe",
       "superType": "View",
+      "savedIn": {
+        "place": "family_cookbook",
+        "placeType": "FamilyCookbook",
+        "collection": "recipes"
+      },
       "defined": "/LiveRoom.spell:734-1032"
     },
     {
@@ -34,6 +39,10 @@
     {
       "type": "FamilyCookbook",
       "superType": "Place",
+      "place": {
+        "name": "family_cookbook",
+        "kind": "room"
+      },
       "defined": "/LiveRoom.spell:94-143"
     },
     {

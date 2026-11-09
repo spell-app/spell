@@ -57,9 +57,9 @@ describe("a project's declarations say where a type is saved", () => {
     })
   })
 
-  it("the saved line:  the type, the place, the collection", () => {
+  it("the saved type:  the place and the collection, on the type's own declaration", () => {
     expect(declarations.statements.find(({ savedIn }) => savedIn)).toMatchObject({
-      of: "Recipe",
+      type: "Recipe",
       savedIn: { place: "family_cookbook", placeType: "FamilyCookbook", collection: "recipes" }
     })
   })
@@ -160,7 +160,7 @@ describe("what the compiler knows of an imported place", () => {
     const declarations = libraryDeclarations(LIBRARY)
     const older = {
       ...declarations,
-      statements: declarations.statements.filter(({ savedIn }) => !savedIn).map(({ place: _place, ...rest }) => rest)
+      statements: declarations.statements.map(({ place: _place, savedIn: _savedIn, ...rest }) => rest)
     }
     const { compiled, errors } = importerOf(older, "to look:\n\tprint every recipe")
     expect(errors).toEqual([])
@@ -187,7 +187,7 @@ describe("in Spanish", () => {
 
   it("the declarations say where it's saved", () => {
     expect(declarations.statements.find(({ savedIn }) => savedIn)).toMatchObject({
-      of: "Receta",
+      type: "Receta",
       savedIn: { place: "recetario_familiar", placeType: "RecetarioFamiliar", collection: "recetas" }
     })
   })

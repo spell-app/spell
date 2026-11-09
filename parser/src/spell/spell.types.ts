@@ -676,9 +676,6 @@ export type DeclaredPlace = {
   details?: P.ImportedPlaceDetails
 }
 
-/** What a `saved_in_place` line notes for its project's declarations:  which type, and where -- see `SavedInPlace`. */
-export type DeclaresSaved = { of: string; savedIn: DeclaredSaved }
-
 /** Where a type is saved, as a project's declarations say it -- see `SpellDeclaration.savedIn`. */
 export type DeclaredSaved = {
   /** The place's name, as `core.place()` knows it:  `family_cookbook`. */
@@ -839,7 +836,8 @@ export type SpellDeclaration = {
    */
   place?: DeclaredPlace
   /**
-   * Where type `of` is saved, e.g. for `a recipe is saved in the family cookbook` (epic `data` I19).
+   * Where `type` is saved, e.g. for `a recipe is saved in the family cookbook` (epic `data` I19).
+   * - On the type's own declaration:  a line of its own would leave a blank one behind in the compiled code.
    * - So in a project importing it, `every recipe` reads the place:  see `P.TypeScope.saved`.
    */
   savedIn?: DeclaredSaved

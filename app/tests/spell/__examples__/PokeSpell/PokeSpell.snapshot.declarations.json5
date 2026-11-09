@@ -52,6 +52,11 @@
     {
       "type": "Pokemon",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "pokemon"
+      },
       "defined": "/PokeSpell.api.spell:1235-2101"
     },
     {
@@ -278,6 +283,11 @@
     {
       "type": "PokemonSpecies",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "pokemon_species"
+      },
       "defined": "/PokeSpell.api.spell:2103-3328"
     },
     {
@@ -478,6 +488,11 @@
     {
       "type": "Type",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "types"
+      },
       "defined": "/PokeSpell.api.spell:3330-3777"
     },
     {
@@ -591,6 +606,11 @@
     {
       "type": "Ability",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "abilities"
+      },
       "defined": "/PokeSpell.api.spell:3779-4237"
     },
     {
@@ -654,6 +674,11 @@
     {
       "type": "Move",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "moves"
+      },
       "defined": "/PokeSpell.api.spell:4239-5175"
     },
     {
@@ -808,6 +833,11 @@
     {
       "type": "EvolutionChain",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "evolution_chains"
+      },
       "defined": "/PokeSpell.api.spell:5177-5303"
     },
     {
@@ -825,6 +855,11 @@
     {
       "type": "Generation",
       "superType": "Thing",
+      "savedIn": {
+        "place": "poke_api",
+        "placeType": "PokeApi",
+        "collection": "generations"
+      },
       "defined": "/PokeSpell.api.spell:5305-5706"
     },
     {
@@ -1697,11 +1732,46 @@
     {
       "type": "PokeApi",
       "superType": "Place",
+      "place": {
+        "name": "poke_api",
+        "kind": "web server",
+        "details": {
+          "checkedEvery": 86400,
+          "collections": {
+            "pokemon": {
+              "at": "/pokemon"
+            },
+            "pokemon_species": {
+              "at": "/pokemon-species"
+            },
+            "types": {
+              "at": "/type"
+            },
+            "abilities": {
+              "at": "/ability"
+            },
+            "moves": {
+              "at": "/move"
+            },
+            "evolution_chains": {
+              "at": "/evolution-chain"
+            },
+            "generations": {
+              "at": "/generation"
+            }
+          }
+        }
+      },
       "defined": "/PokeSpell.api.spell:682-1233"
     },
     {
       "type": "Favourite",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_favourites",
+        "placeType": "MyFavourite",
+        "collection": "favourites"
+      },
       "defined": "/Favourites.api.spell:258-393"
     },
     {
@@ -1738,6 +1808,10 @@
     {
       "type": "MyFavourite",
       "superType": "Place",
+      "place": {
+        "name": "my_favourites",
+        "kind": "database on this device"
+      },
       "defined": "/Favourites.api.spell:214-256"
     },
     {
