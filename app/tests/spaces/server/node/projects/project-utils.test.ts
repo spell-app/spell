@@ -1,12 +1,14 @@
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
-import { resolve } from "path"
+import { dirname, resolve } from "path"
 
 import environment from "spell/app/spaces/server/node/environment"
 import { SP } from "spell/parser/spell"
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import { ProjectDrafts } from "spell/app/spaces/server/node/projects/ProjectDrafts"
+import { THIS_MACHINES_PERSON } from "spell/app/spaces/server/node/projects/ProjectRoles"
 
 /**
  * Where a project's files are on disk (epic `people-and-orgs` P11).
@@ -202,6 +204,99 @@ describe("project-utils", () => {
 
     const index = await projectUtils.getIndex(projectId)
     expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spellml"])
+  })
+
+  describe("sub-folders (notebook P10)", () => {
+    const TAG = '<spell-thing "card">\n</spell-thing>\n'
+    /** Write `file` under project `folder`, making its sub-folders. */
+    function write(folder: string, file: string, contents = TAG) {
+      mkdirSync(dirname(resolve(folder, file)), { recursive: true })
+      writeFileSync(resolve(folder, file), contents)
+    }
+
+    test("every folder's files are the project's, listed by their path:  two `Usage.spellml` are two files", async () => {
+      const projectId = project("Folders")
+      const folder = resolve(workspace, "Folders")
+      write(folder, "Button/Usage.spellml")
+      write(folder, "Divider/Usage.spellml")
+      write(folder, "Divider/deep/er/API.spellml")
+
+      const index = await projectUtils.getIndex(projectId)
+      expect(index.imports.map((it) => it.path)).toEqual([
+        "/Folders.spell",
+        "/Button/Usage.spellml",
+        "/Divider/Usage.spellml",
+        "/Divider/deep/er/API.spellml"
+      ])
+      expect(Object.keys(index.manifest)).toEqual(index.imports.map((it) => `${projectId}${it.path}`))
+      expect(index.imports[1]!.contents).toBe(TAG)
+      // new ones go in the project file too, each by its path
+      expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toContain(
+        "/Divider/deep/er/API.spellml"
+      )
+    })
+
+    test("NEVER walks into what isn't the project's source:  private, hidden, built, or another project", async () => {
+      const projectId = project("Fenced")
+      const folder = resolve(workspace, "Fenced")
+      for (const inside of [
+        "__draft/Page.spellml",
+        "versions/Page.spellml",
+        "__data/Page.spellml",
+        ".git/Page.spellml",
+        "build/Page.spellml",
+        "dist/Page.js",
+        "node_modules/x/index.js",
+        "Button/.hidden.spellml",
+        "Button/node_modules/x/index.js",
+        "Inner/Page.spellml",
+        "Odd(1)/Page.spellml"
+      ])
+        write(folder, inside)
+      write(folder, `Inner/${SP.PROJECT_FILE}`, '{ "imports": [] }')
+      write(folder, "Button/Usage.spellml")
+      write(folder, "__snapshots__/Page.spellml")
+
+      const index = await projectUtils.getIndex(projectId)
+      expect(index.imports.map((it) => it.path)).toEqual([
+        "/Fenced.spell",
+        "/__snapshots__/Page.spellml",
+        "/Button/Usage.spellml"
+      ])
+    })
+
+    test("what's generated stays out at any depth:  compiled output and an old name's words", async () => {
+      const projectId = project("Generated")
+      const folder = resolve(workspace, "Generated")
+      const words = SP.SpellWords.script({ lang: "en", types: {} }, "x")
+      write(folder, "Button/Usage.spell.js", "export default 1\n")
+      write(folder, "Button/calculator.en.js", words)
+      write(folder, "Button/socket.io.js", "export const io = 1\n")
+
+      const index = await projectUtils.getIndex(projectId)
+      expect(index.imports.map((it) => it.path)).toEqual(["/Generated.spell", "/Button/socket.io.js"])
+    })
+
+    test("a link to a folder is NOT followed:  it could point back up", async () => {
+      const projectId = project("Linked")
+      const folder = resolve(workspace, "Linked")
+      write(folder, "Button/Usage.spellml")
+      symlinkSync(folder, resolve(folder, "Button/up"))
+
+      const index = await projectUtils.getIndex(projectId)
+      expect(index.imports.map((it) => it.path)).toEqual(["/Linked.spell", "/Button/Usage.spellml"])
+    })
+
+    test("a file only drafted, in a sub-folder, lists by its path", async () => {
+      const projectId = project("Drafted")
+      const { folderForPlace } = projectUtils
+      const drafts = await ProjectDrafts.for(projectId, THIS_MACHINES_PERSON, { folderFor: folderForPlace })
+      await drafts.save("/Button/New.spellml", TAG)
+
+      const index = await projectUtils.getIndex(projectId)
+      expect(index.imports.map((it) => it.path)).toEqual(["/Drafted.spell", "/Button/New.spellml"])
+      expect(index.imports[1]!.contents).toBe(TAG)
+    })
   })
 
   // epic `language` T75:  FizzBuzz's Explainer, gone a moment, came back last, after the counting it listens to

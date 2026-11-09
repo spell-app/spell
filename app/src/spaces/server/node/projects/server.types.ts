@@ -27,6 +27,12 @@ export type GetFolderContentsOptions = {
   pattern?: RegExp
 }
 
+/** Options of `getFilesInside()`. */
+export type GetFilesInsideOptions = {
+  /** Should it stay out of this folder?  `relativePath` is the folder's path from where the walk began, `Button/Icons`. */
+  ignoreFolder?: (relativePath: string) => boolean
+}
+
 ////////////////
 // ## Project JSON payloads
 ////////////////

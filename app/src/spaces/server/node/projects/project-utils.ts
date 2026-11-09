@@ -326,7 +326,34 @@ const GENERATED_SUFFIXES = [
 ]
 
 /**
+ * Folders inside a project that `getIndex()` never walks into, by name, at any depth:  what tools put there isn't its source.
+ * - `build`, `dist`:  what's built, a compiled `.js` would become one of its imports.
+ * - `node_modules`:  someone else's code, and a project in an ordinary web app's folder has one.
+ */
+const FOLDERS_NOT_SOURCE = new Set(["build", "dist", "node_modules"])
+
+/**
+ * Should `getIndex()` stay out of folder `relativePath`, inside the project in folder `projectFolder`?
+ * - `__draft/`, `versions/`:  a person's drafts and saved versions (`ProjectDrafts.isPrivatePath()`)
+ * - spaces' own names, e.g. `__data/` (`SPACES.isSpaceName()`);  `__snapshots__/` is NOT one of them, and is walked
+ * - `FOLDERS_NOT_SOURCE`
+ * - a folder with a project file of its own:  a project inside this one, whose files are its own
+ * - a name an address can't say (`SP.SpellLocation.isValidPathSegment()`), which would stop the whole project listing
+ */
+function isFolderOutsideProject(projectFolder: string, relativePath: string): boolean {
+  const name = basename(relativePath)
+  return (
+    ProjectDrafts.isPrivatePath(relativePath) ||
+    SPACES.isSpaceName(name) ||
+    FOLDERS_NOT_SOURCE.has(name) ||
+    !SP.SpellLocation.isValidPathSegment(name) ||
+    hasProjectFile(resolve(projectFolder, relativePath))
+  )
+}
+
+/**
  * Given a file `name`, return `true` if we should add it to the manifest.
+ * - `name` is its bare name, `Usage.spellml`, with no folder.
  * - RENAME: shares its extension list with `isPreloadFile()` below, kept a separate function so they CAN diverge.
  *   They have:  this one also leaves out compiled output, snapshots, scope packs, page files and words files.
  * - Leaves out spaces' own names, by the list spaces keeps (`SPACES.isSpaceName()`, decision J52):
@@ -347,7 +374,7 @@ function isPreloadFile(name: string) {
 }
 
 /**
- * Is file `name`, in folder `folder`, ANY project's words file -- e.g. `calculator.en.js`, left in a copy named `calc2`?
+ * Is file `filePath`, from folder `folder`, ANY project's words file -- e.g. `calculator.en.js`, left in a copy named `calc2`?
  * - `isManifestFile()` knows the project's own by its name;  an old name's needs its text read.
  * - Named as one (`SP.SpellWords.isWordsFile()`), and written as one (`SP.SpellWords.isWordsScript()`):
  *   a helper with a name like one, `socket.io.js`, still lists.
@@ -355,9 +382,9 @@ function isPreloadFile(name: string) {
  *   Compiling writes the new name's.
  * - NEVER throws:  a file it can't read lists.
  */
-async function isWordsFileOnDisk(folder: string, name: string): Promise<boolean> {
-  if (!SP.SpellWords.isWordsFile(name)) return false
-  const text = await fileUtils.loadTextFile(resolve(folder, name), "OPTIONAL").catch(() => null)
+async function isWordsFileOnDisk(folder: string, filePath: string): Promise<boolean> {
+  if (!SP.SpellWords.isWordsFile(basename(filePath))) return false
+  const text = await fileUtils.loadTextFile(resolve(folder, filePath), "OPTIONAL").catch(() => null)
   return text !== null && SP.SpellWords.isWordsScript(text)
 }
 
@@ -410,6 +437,7 @@ export type GetIndexOptions = {
 /**
  * Return `index` for a project as a JSON blob -- see `ProjectIndexJSON`.
  * - `manifest` portion always reflects current state of file system.
+ *   - Every file of the project, sub-folders too, e.g. `Button/Usage.spellml`:  see `isFolderOutsideProject()`.
  * - `imports` portion is synced with `manifest`:  missing files left out, new files appended as `active`.
  *   - SIDE EFFECT:  a new file's import is saved to disk, in the project's file (`saveProjectFile()`).
  *   - A missing file's import is left out of the index, but NEVER out of the project file:
@@ -428,16 +456,16 @@ export const getIndex = async (
   const location = SP.SpellLocation.getProjectLocation(projectId)
 
   // Get non-hidden files in project which the front-end knows how to deal with
-  const options = { includeFolders: false, ignoreHidden: true, namesOnly: true }
-  const listed = (await fileUtils.getFolderContents(location.serverPath, options)) //
-    .filter((name) => isManifestFile(name, location.projectName))
+  const ignoreFolder = (relativePath: string) => isFolderOutsideProject(location.serverPath, relativePath)
+  const listed = (await fileUtils.getFilesInside(location.serverPath, { ignoreFolder })) //
+    .filter((filePath) => isManifestFile(basename(filePath), location.projectName))
   const isWords = await Promise.all(listed.map((name) => isWordsFileOnDisk(location.serverPath, name)))
   let fileNames = listed.filter((_name, index) => !isWords[index])
   // a file only drafted so far, e.g. a new document before its first Publish (Q23), is the project's too
   const drafts = reading === "your drafts" ? await draftsOf(projectId, person) : undefined
   for (const filePath of (await drafts?.draftedFiles()) ?? []) {
     const name = filePath.replace(/^\/+/, "")
-    if (!fileNames.includes(name) && isManifestFile(name, location.projectName)) fileNames.push(name)
+    if (!fileNames.includes(name) && isManifestFile(basename(name), location.projectName)) fileNames.push(name)
   }
 
   // HACKY: make sure we have at least one valid file by creating a default file
