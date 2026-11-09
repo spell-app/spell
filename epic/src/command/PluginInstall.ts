@@ -51,10 +51,10 @@ import { SessionMoves } from "./SessionMoves"
  * - `--dry-run`:  says what it would do, and writes nothing;  `--json`:  the report as JSON
  * - `--kit`:  the kit's checkout to install from;  default the MAIN checkout of the repo this code is in,
  *   never a worktree's, which goes away
- * - Run from the PUBLISHED `spell` (`npm install spell spell-epic`), the kit is that installed package, and it has no
- *   marketplace file and no `epic/bin` (its code is built into `dist/`):
- *   - the plugin is the `spell-epic` package beside it, its parts at its root (`pluginFolder()`);
- *     without one, `spell`'s own `epic/`, and no `epic` on the `PATH`
+ * - Run from the PUBLISHED `spell` (`npx spell@next epic init`), the kit is that installed package, with no marketplace
+ *   file and its code built into `dist/`:
+ *   - the plugin is `spell`'s own `epic/`, its skills, hooks and `bin/epic` (epic `epic-engine` P66), or a `spell-epic`
+ *     package beside it, when there is one (`pluginFolder()`)
  *   - the marketplace `spell` comes from GitHub (the package's `repository`), as `/plugin marketplace add` would add it:
  *     Claude Code fetches it itself, so `known_marketplaces.json` gets no entry for it
  * - At Publish the root marketplace's source turns to npm (`PluginPackage.sourceToNpm()`):  running this again then
@@ -148,8 +148,8 @@ export class PluginInstall {
   /**
    * The plugin's folder for `kit`:
    * - a checkout:  its `epic/`
-   * - the published `spell`:  the `spell-epic` package Node finds from it (the plugin, `bin/epic` included);
-   *   none installed:  `spell`'s own `epic/`, the plugin without its bin
+   * - the published `spell`:  the `spell-epic` package Node finds from it, when there is one;
+   *   else `spell`'s own `epic/`, `bin/epic` included
    */
   static pluginFolder(kit: string): string {
     const own = join(kit, "epic")
@@ -561,7 +561,7 @@ export class PluginInstall {
 
   /**
    * Step 6:  `~/.local/bin/epic`, a link to the plugin's `bin/epic`.
-   * - the published `spell` without `spell-epic`, which has none:  skipped, saying so
+   * - an install with no `bin/epic` (a `spell` older than epic `epic-engine` P66):  skipped, saying so
    */
   private binLink(step: Step): void {
     const target = join(this.engine, "bin", "epic")

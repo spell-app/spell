@@ -5,12 +5,13 @@
 
 /* Spell UI's breakpoints (`@custom-media`), inlined at build time */
 @import "spell/ui/styles/media.css";
+.SpellPage .SiteEditorPage {
+  --ui-split-panel-bar-size: 14px;
+}
+
 .SiteEditorPage {
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(220px, 280px) 1fr minmax(260px, 320px);
-  gap: 14px;
   padding: 14px;
   color: var(--ui-text-color);
 
@@ -115,12 +116,42 @@
     }
     li {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      position: relative;
+      grid-template-columns: auto auto 1fr auto;
       align-items: start;
       gap: 6px;
     }
     li > input[type="checkbox"] {
       margin-top: 7px;
+    }
+    li[data-being-moved] {
+      opacity: 0.45;
+    }
+    /* where a dragged story would land:  a line above or below this one */
+    li[data-drop]::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      height: 2px;
+      background: var(--ui-primary-color, var(--ui-focus-color));
+      pointer-events: none;
+    }
+    li[data-drop="before"]::after {
+      top: -4px;
+    }
+    li[data-drop="after"]::after {
+      bottom: -4px;
+    }
+    .thumb {
+      margin-top: 5px;
+      padding: 2px;
+      border: 0;
+      border-radius: var(--ui-radius-s, 4px);
+      font-size: 12px;
+      color: var(--ui-text-muted);
+      background: none;
+      cursor: grab;
+      touch-action: none;
     }
     .words {
       display: flex;
@@ -131,26 +162,26 @@
     textarea {
       field-sizing: content;
       resize: none;
-      min-height: 0;
+      /* two rows at least:  `rows` does nothing to a field that sizes to its content */
+      box-sizing: border-box;
+      min-height: calc(2lh + 10px);
       width: 100%;
       padding: 4px 6px;
       font: inherit;
       color: inherit;
-      background: transparent;
-      border: 1px solid transparent;
+      background: var(--ui-input-background, var(--ui-surface));
+      border: 1px solid var(--spell-pane-border-color);
       border-radius: var(--ui-radius-s, 4px);
-    }
-    textarea:hover,
-    textarea:focus {
-      border-color: var(--spell-pane-border-color);
-      background: var(--ui-background-color);
     }
     textarea.details {
       font-size: 12px;
       color: var(--ui-text-muted);
     }
-    /* an empty details field shows only on the story being pointed at or typed in:  not a hint under every story */
-    li:not(:hover, :focus-within) textarea.details:placeholder-shown {
+    /*
+     * an empty details field shows only on the story being pointed at or typed in, not a hint under every story;
+     * a story just added shows it too, its words still to write
+     */
+    li:not(:hover, :focus-within):has(textarea.text:not(:placeholder-shown)) textarea.details:placeholder-shown {
       display: none;
     }
     /* a story done:  its words struck, quiet */
@@ -176,32 +207,25 @@
   color: var(--ui-text-muted);
 }
 
-/* a middling window:  the form under the board, so the board keeps room for its cards */
-@media (width <= 1200px) {
-  .SiteEditorPage {
-    grid-template-columns: minmax(200px, 260px) 1fr;
-    grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
-
-    > .pages {
-      grid-row: 1 / span 2;
-    }
-  }
-}
-
-/* a phone:  one column, the board first, the page scrolling as a whole */
+/*
+ * a phone:  one column, the board first, the page scrolling as a whole, and no bars to drag
+ * - `!important`:  each pane's size and place are inline, the split panel's
+ */
 @media (--ui-mobile) {
   .SiteEditorPage {
-    display: flex;
     flex-direction: column;
     overflow: auto;
 
+    &::part(bar) {
+      display: none;
+    }
     > aside,
     > main {
-      flex: none;
+      flex: none !important;
       overflow: visible;
     }
     > main {
-      order: -1;
+      order: -1 !important;
     }
     .cards {
       flex: none;

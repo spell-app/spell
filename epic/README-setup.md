@@ -87,7 +87,8 @@ cd ~/www/my-app
 npx spell@next epic init
 ```
 
-- That fetches Spell's package and runs its `spell epic`, which runs the epic tool installed beside it.
+- That fetches Spell's package and runs the epic tool inside it.
+  It's a small install, about 100 MB:  the language, the editor and their packages are left out until you ask for them.
   Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
 - `epic` and the plugin then run from npm's cache (`~/.npm/_npx`):
   after `npm cache clean`, run this line again.

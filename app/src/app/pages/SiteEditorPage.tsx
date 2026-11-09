@@ -6,7 +6,7 @@ import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPr
 import { SP } from "spell/parser/spell"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { editor } from "spell/app/app/editor"
-import { SpellPage } from "spell/app/app/solid"
+import { SpellPage, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
@@ -15,7 +15,7 @@ import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
 import type { ProjectIndex } from "./SitePlaces"
-import { SiteGroupPage } from "./SiteGroupPage"
+import { SiteGroupPage, SitesHomePage } from "./SiteGroupPage"
 import { SiteWrites } from "./SiteWrites"
 import { EditorToolbar } from "./SpellEditor"
 
@@ -24,13 +24,17 @@ import "./SiteEditorPage.css"
 /****************
  * ### `<SiteEditorRoute>`
  * The site editor's route, `/site/<address>` (epic `mockup` P4):
- * a group's address shows its sites (`<SiteGroupPage>`), a project's its site's editor.
+ * no address shows every site (`<SitesHomePage>`), a group's address its sites (`<SiteGroupPage>`),
+ * a project's its site's editor.
  ****************/
 export function SiteEditorRoute(props: RouteSectionProps) {
-  const group = createMemo(() => SiteGroupPage.groupAt(props.params.address as string | undefined))
+  const address = () => (props.params.address as string | undefined)?.replace(/\/+$/, "")
+  const group = createMemo(() => SiteGroupPage.groupAt(address()))
   return (
-    <Show when={group()} fallback={<SiteProjectRoute params={props.params} />}>
-      {(path) => <SiteGroupPage group={path()} />}
+    <Show when={address()} fallback={<SitesHomePage />}>
+      <Show when={group()} fallback={<SiteProjectRoute params={props.params} />}>
+        {(path) => <SiteGroupPage group={path()} />}
+      </Show>
     </Show>
   )
 }
@@ -60,6 +64,8 @@ function SiteProjectRoute(props: { params: RouteSectionProps["params"] }) {
  * - The form, on the right:  the picked part's name, title and address;  its address's parameters, read only.
  *   - A page's STORIES under it (epic `mockup` P6):  what it must let people do, plain lines or Agile stories,
  *     to add, tick off, change, reorder and delete (`<SitePageStories>`);  each card counts them.
+ * - The three panels are a `<ui-split-panel>`:  drag between them to resize, the board taking the difference;
+ *   their widths are remembered (`rememberedSizes()`).
  * - Every change is ONE step of the editor's history, written into the site's file (`SiteWrites`):
  *   ⌘Z takes it back, ⌘S saves it (the editor's own keys, `editorHotkeys()`).
  * - A project that isn't a site says so, and how to make one.
@@ -74,6 +80,7 @@ export function SiteEditorPage() {
   const all = createMemo(() => SiteEdits.allParts(parts()))
   const [picked, setPicked] = createSignal<string>()
   const [tab, setTab] = createSignal<SiteEditorTab>("pages")
+  const columns = rememberedSizes(() => SITE_COLUMNS)
   const pickedPart = createMemo(() => all().find((part) => part.name === picked()))
   const addPage = () => {
     const address = SiteEditorPage.freeAddress(all())
@@ -93,7 +100,14 @@ export function SiteEditorPage() {
           </p>
         }
       >
-        <div class="SiteEditorPage">
+        <ui-split-panel
+          class="SiteEditorPage"
+          columns={columns.sizes()}
+          grows="2"
+          min-size={MIN_PANEL_SIZE}
+          resizable
+          on-ui-changed={columns.keep}
+        >
           <aside class="pages" aria-label={appTexts.text("sitePages")}>
             <header>
               <h2>{appTexts.text("sitePages")}</h2>
@@ -193,11 +207,17 @@ export function SiteEditorPage() {
               )}
             </Show>
           </aside>
-        </div>
+        </ui-split-panel>
       </Show>
     </SpellPage>
   )
 }
+
+/** The editor's preference that remembers the panels' widths, and the widths they start with. */
+const SITE_COLUMNS = { id: "siteEditor-columns", sizes: "280px,*,320px" }
+
+/** The narrowest a dragged panel may get. */
+const MIN_PANEL_SIZE = "180px"
 
 /**
  * A card's second line:  a page's address, else what it is;  and how many of its stories are done, when it has some.
@@ -506,8 +526,9 @@ function parametersOf(address: string | undefined): string {
 /****************
  * ### `<SitePageStories>`
  * A page's STORIES, under its form (epic `mockup` P6, Q12):  what it must let people do, kept with the page for good.
- * - Each a row:  its box to tick it off, its words, and its details under them (`- done when:  ...`), each a field
- *   that grows with its text;  buttons to move it up or down, or delete it.
+ * - Each a row:  a thumb to drag it by (or move it with the arrow keys), its box to tick it off, its words,
+ *   its details under them (`- done when:  ...`), each a field of at least two rows that grows with its text;
+ *   and a button to delete it, which asks first unless Option is held.
  * - "Add a story" adds an empty one, its field showing the shape to fill in:  `As a …, I want …, so that …`.
  * - Every change is ONE step of the editor's history, written into the page's own file (`SiteWrites.changeStories()`);
  *   typed words are written when the field is left, never once a keystroke.
@@ -518,13 +539,27 @@ function SitePageStories(props: { name: string }) {
   const write = (next: PageStory[]) => SiteWrites.changeStories(props.name, next)
   const changed = (story: PageStory, change: Partial<PageStory>) =>
     write((stories() ?? []).map((each) => (each === story ? { ...each, ...change } : each)))
-  const moved = (story: PageStory, by: -1 | 1) => {
+  const movedTo = (story: PageStory, at: number) => {
     const list = [...(stories() ?? [])]
-    const at = list.indexOf(story)
-    if (at < 0 || at + by < 0 || at + by >= list.length) return
-    list.splice(at, 1)
-    list.splice(at + by, 0, story)
+    const from = list.indexOf(story)
+    if (from < 0 || at === from || at < 0 || at >= list.length) return
+    list.splice(from, 1)
+    list.splice(at, 0, story)
     write(list)
+  }
+  /** Arrow up or down on a thumb moves its story, and the focus with it:  rows stay put, their stories change. */
+  const movedByKey = (event: KeyboardEvent, story: PageStory) => {
+    const by = event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0
+    if (!by) return
+    event.preventDefault()
+    const at = (stories() ?? []).indexOf(story) + by
+    movedTo(story, at)
+    const rows = (event.currentTarget as HTMLElement).closest("ol")!.children
+    rows[at]?.querySelector<HTMLElement>(".thumb")?.focus()
+  }
+  const removed = async (story: PageStory, event: MouseEvent) => {
+    if (!event.altKey && !(await editor.confirm({ message: appTexts.text("siteStoryConfirmRemove") }))) return
+    write((stories() ?? []).filter((each) => each !== story))
   }
   const added = (story: PageStory) => write([...(stories() ?? []), story])
   return (
@@ -541,6 +576,19 @@ function SitePageStories(props: { name: string }) {
                 <For each={list()} keyed={false}>
                   {(story) => (
                     <li class={{ done: !!story().done }}>
+                      <button
+                        type="button"
+                        class="thumb"
+                        aria-label={appTexts.text("siteStoryMove")}
+                        title={appTexts.text("siteStoryMove")}
+                        onPointerDown={(event) => {
+                          const moving = story()
+                          startStoryMove(event, (at) => movedTo(moving, at))
+                        }}
+                        onKeyDown={(event) => movedByKey(event, story())}
+                      >
+                        <ui-icon name="grip vertical" />
+                      </button>
                       <input
                         type="checkbox"
                         checked={!!story().done}
@@ -550,14 +598,12 @@ function SitePageStories(props: { name: string }) {
                       <div class="words">
                         <textarea
                           class="text"
-                          rows="1"
                           value={story().text}
                           placeholder={appTexts.text("siteNewStory")}
                           onChange={(event) => changed(story(), { text: event.currentTarget.value.trim() })}
                         />
                         <textarea
                           class="details"
-                          rows="1"
                           value={story().details.join("\n")}
                           placeholder={appTexts.text("siteStoryDetails")}
                           onChange={(event) => changed(story(), { details: event.currentTarget.value.split("\n") })}
@@ -567,26 +613,12 @@ function SitePageStories(props: { name: string }) {
                         <ui-button
                           size="mini"
                           appearance="basic"
-                          icon="arrow up"
-                          aria-label={appTexts.text("siteStoryUp")}
-                          title={appTexts.text("siteStoryUp")}
-                          onClick={() => moved(story(), -1)}
-                        />
-                        <ui-button
-                          size="mini"
-                          appearance="basic"
-                          icon="arrow down"
-                          aria-label={appTexts.text("siteStoryDown")}
-                          title={appTexts.text("siteStoryDown")}
-                          onClick={() => moved(story(), 1)}
-                        />
-                        <ui-button
-                          size="mini"
-                          appearance="basic"
                           icon="trash alternate outline"
                           aria-label={appTexts.text("siteStoryRemove")}
                           title={appTexts.text("siteStoryRemove")}
-                          onClick={() => write(list().filter((each) => each !== story()))}
+                          onClick={(event: MouseEvent) =>
+                            void removed(story(), event).catch((error) => editor.showError(error))
+                          }
                         />
                       </span>
                     </li>
@@ -604,4 +636,48 @@ function SitePageStories(props: { name: string }) {
       </Show>
     </section>
   )
+}
+
+/** The attribute saying where a dragged story would land:  `before` or `after` its row. */
+const STORY_DROP = "data-drop"
+
+/** The attribute on the story being dragged. */
+const STORY_MOVING = "data-being-moved"
+
+/**
+ * A press on a story's thumb:  once dragged, a line shows where it would land, and `onMoved` hears where it did.
+ * - Escape moves nothing;  so does a drop back where it started.
+ */
+function startStoryMove(event: PointerEvent, onMoved: (at: number) => void): void {
+  if (event.button !== 0) return
+  const row = (event.currentTarget as HTMLElement).closest("li")!
+  const rows = [...row.parentElement!.children] as HTMLElement[]
+  const from = rows.indexOf(row)
+  let marked: HTMLElement | undefined
+  let landing = from
+  const stop = () => {
+    marked?.removeAttribute(STORY_DROP)
+    row.removeAttribute(STORY_MOVING)
+  }
+  new Dragging(row, event, {
+    carried: [row],
+    follows: false,
+    placing: (_x, y) => {
+      row.setAttribute(STORY_MOVING, "")
+      const above = rows.findIndex((each) => {
+        const { top, bottom } = each.getBoundingClientRect()
+        return y < (top + bottom) / 2
+      })
+      const gap = above < 0 ? rows.length : above
+      landing = gap > from ? gap - 1 : gap
+      marked?.removeAttribute(STORY_DROP)
+      marked = landing === from ? undefined : rows[above < 0 ? rows.length - 1 : gap]
+      marked?.setAttribute(STORY_DROP, above < 0 ? "after" : "before")
+    },
+    onDrop: () => {
+      stop()
+      onMoved(landing)
+    },
+    onCancel: stop
+  })
 }

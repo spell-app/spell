@@ -9,45 +9,88 @@ import type { PackedPackage, PublishCheck } from "spell/cli/publish"
 
 /****************
  * ### ScratchInstall
- * The packed packages, installed the way someone outside would:  a project in the system's temp folder, far from any
- * checkout, `npm install`s every `.tgz`, then these checks run there (epic `repo-split` P19's Verify):
- * 1. node imports `spell/util` and `spell/parser/parser`
- * 2. a page Vite builds, importing `spell/ui/ui-button` and `spell/element`, draws a `<ui-button>` in headless Chromium,
- *    with ONE element base:  the button's class extends the page's own `E.DOMElement`, and the built page holds one
- *    `class DOMElement`
- * 3. `npx spell help` runs;  and `npx epic --help`, when `spell-epic` is among them
- * 4. with `spell-epic`:  `epic init` in a scratch git repo starts the epic server, under a scratch `HOME`, on a free port;
- *    an epic page and the epics pack answer (epic `epic-engine` I246:  it started only from a checkout)
+ * The packed packages, installed the way someone outside would, in the system's temp folder, far from any checkout,
+ * and tried out.  Twice, because there are two ways in (epic `epic-engine` P66):
+ * - LEAN:  `spell` alone, as `npx spell@next epic init` gets it:
+ *   1. it's small enough:  `LEAN_LIMITS`, so the install can't quietly grow again
+ *   2. `npx spell help` runs
+ *   3. `spell epic init` in a scratch git repo starts the epic server, under a scratch `HOME`, on a free port;
+ *      an epic page and the epics pack answer (epic `epic-engine` I246);  every route module loaded;
+ *      an edit saves and formats the page
+ *   4. a command that needs a package left out prints the line to paste
+ * - WHOLE:  every `.tgz`, plus the add-ons that line names (epic `repo-split` P19's Verify):
+ *   1. node imports `spell/util` and `spell/parser/parser`
+ *   2. a page Vite builds, importing `spell/ui/ui-button` and `spell/element`, draws a `<ui-button>` in headless Chromium,
+ *      with ONE element base:  the button's class extends the page's own `E.DOMElement`, and the built page holds one
+ *      `class DOMElement`
+ *   3. `npx spell help` runs, and the command the lean install couldn't;  and `npx epic --help`, and the epic checks
+ *      above, when `spell-epic` is among them
  * - Third-party packages come from the npm registry:  it needs the network.
  * - Each package's name is pinned to its `.tgz` (`overrides`), so the packages' dependencies on each other
  *   (`spell` on `spell-ui` ...) find the packed ones, never the registry's.
- * - Vite is the published `spell`'s own (`vite-plus`);  Chromium is the checkout's Playwright.
+ * - Vite is the whole install's `vite-plus`;  Chromium is the checkout's Playwright.
  * - The folder is removed when every check passes;  else kept, and named, to look into.
  ****************/
 export class ScratchInstall {
-  /** The scratch project's folder. */
+  /** The scratch folder, holding the two projects. */
   readonly dir: string
+
+  /** The project the steps are working in now. */
+  private project: string
 
   constructor(readonly packed: PackedPackage[]) {
     this.dir = mkdtempSync(join(tmpdir(), "spell-publish-"))
+    this.project = this.dir
   }
 
   /** Install, then run the checks;  every result, passed or failed.  NEVER throws. */
   async run(): Promise<PublishCheck[]> {
-    const checks: PublishCheck[] = []
-    const install = this.step("npm install of every .tgz, outside the checkout", () => this.install())
-    checks.push(install)
-    if (install.ok) {
-      checks.push(this.step("node imports spell/util and spell/parser/parser", () => this.nodeImports()))
-      checks.push(await this.asyncStep("a Vite page draws <ui-button>, with one DOMElement", () => this.page()))
-      checks.push(this.step("npx spell help runs", () => this.spellHelp()))
-      if (this.packed.some((pkg) => pkg.name === "spell-epic")) {
-        checks.push(this.step("npx epic --help runs (spell-epic's bin, on spell's code)", () => this.epicHelp()))
-        checks.push(await this.asyncStep("the epic server starts and serves an epic page", () => this.epicServer()))
-      }
-    }
+    const checks = [...(await this.lean()), ...(await this.whole())]
     if (checks.every((check) => check.ok)) rmSync(this.dir, { recursive: true, force: true })
     else checks.push({ check: "scratch project kept, to look into", ok: true, detail: this.dir })
+    return checks
+  }
+
+  /** `spell` alone, as `npx spell@next epic init` installs it. */
+  private async lean(): Promise<PublishCheck[]> {
+    const install = this.step("lean:  npm install of spell alone", () =>
+      this.install(
+        "lean",
+        this.packed.filter((pkg) => pkg.name === SPELL)
+      )
+    )
+    if (!install.ok) return [install]
+    const spellEpic = (...args: string[]) => ["--no-install", SPELL, "epic", ...args]
+    return [
+      install,
+      this.step("lean:  small enough", () => this.leanSize()),
+      this.step("lean:  npx spell help runs", () => this.spellHelp()),
+      await this.asyncStep("lean:  the epic server starts, and an epic page saves", () => this.epicServer(spellEpic)),
+      this.step("lean:  a command needing a left-out package prints the line to paste", () => this.addOnMessage())
+    ]
+  }
+
+  /** Every `.tgz`, plus the add-ons the lean install's message names. */
+  private async whole(): Promise<PublishCheck[]> {
+    const addOns = this.addOns()
+    const install = this.step("whole:  npm install of every .tgz and the add-ons", () =>
+      this.install("whole", this.packed, addOns)
+    )
+    if (!install.ok) return [install]
+    const checks = [
+      install,
+      this.step("whole:  node imports spell/util and spell/parser/parser", () => this.nodeImports()),
+      await this.asyncStep("whole:  a Vite page draws <ui-button>, with one DOMElement", () => this.page()),
+      this.step("whole:  npx spell help runs", () => this.spellHelp()),
+      this.step("whole:  a command needing an add-on runs", () => this.addOnCommand())
+    ]
+    if (this.packed.some((pkg) => pkg.name === "spell-epic")) {
+      checks.push(this.step("whole:  npx epic --help runs (spell-epic's bin, on spell's code)", () => this.epicHelp()))
+      const epic = (...args: string[]) => ["--no-install", "epic", ...args]
+      checks.push(
+        await this.asyncStep("whole:  the epic server starts and serves an epic page", () => this.epicServer(epic))
+      )
+    }
     return checks
   }
 
@@ -55,11 +98,16 @@ export class ScratchInstall {
   // ## The steps
   ////////////////
 
-  /** `npm install` every packed file, each name pinned to its file. */
-  private install(): string {
-    const dependencies = Object.fromEntries(this.packed.map((pkg) => [pkg.name, `file:${pkg.tgz}`]))
-    const overrides = Object.fromEntries(this.packed.map((pkg) => [pkg.name, `$${pkg.name}`]))
-    writeJson(join(this.dir, "package.json"), {
+  /**
+   * `npm install` `packages` and `addOns` in a new project `name`, which becomes the one the steps work in;
+   * each packed name pinned to its file.
+   */
+  private install(name: string, packages: PackedPackage[], addOns: Record<string, string> = {}): string {
+    this.project = join(this.dir, name)
+    mkdirSync(this.project, { recursive: true })
+    const dependencies = { ...addOns, ...Object.fromEntries(packages.map((pkg) => [pkg.name, `file:${pkg.tgz}`])) }
+    const overrides = Object.fromEntries(packages.map((pkg) => [pkg.name, `$${pkg.name}`]))
+    writeJson(join(this.project, "package.json"), {
       name: "spell-scratch",
       private: true,
       type: "module",
@@ -67,7 +115,52 @@ export class ScratchInstall {
       overrides
     })
     this.exec("npm", ["install", "--no-audit", "--no-fund", "--loglevel=error"], { timeout: 600_000 })
-    return `${this.packed.length} packages in ${this.dir}`
+    return `${packages.length} packed, ${Object.keys(addOns).length} add-ons, in ${this.project}`
+  }
+
+  /** The lean install's packages and megabytes, against `LEAN_LIMITS`;  throws when it's over either. */
+  private leanSize(): string {
+    const { packages } = JSON.parse(readFileSync(join(this.project, "node_modules", ".package-lock.json"), "utf8")) as {
+      packages: Record<string, unknown>
+    }
+    const count = Object.keys(packages).length
+    const megabytes = Math.round(Number(this.exec("du", ["-sk", "node_modules"]).split(/\s/)[0]) / 1024)
+    const size = `${count} packages, ${megabytes} MB (limits:  ${LEAN_LIMITS.packages}, ${LEAN_LIMITS.megabytes} MB)`
+    if (count > LEAN_LIMITS.packages || megabytes > LEAN_LIMITS.megabytes) throw new Error(size)
+    return size
+  }
+
+  /** The add-ons as the published `spell` lists them:  its optional `peerDependencies`. */
+  private addOns(): Record<string, string> {
+    const spell = this.packed.find((pkg) => pkg.name === SPELL)
+    if (!spell) return {}
+    const manifest = JSON.parse(this.exec("tar", ["-xzOf", spell.tgz, "package/package.json"])) as {
+      peerDependencies?: Record<string, string>
+      peerDependenciesMeta?: Record<string, { optional?: boolean }>
+    }
+    return Object.fromEntries(
+      Object.entries(manifest.peerDependencies ?? {}).filter(
+        ([name]) => manifest.peerDependenciesMeta?.[name]?.optional
+      )
+    )
+  }
+
+  /** `npx spell projects`, which needs a package left out:  it must fail saying what to install. */
+  private addOnMessage(): string {
+    let output: string
+    try {
+      output = this.exec("npx", ["--no-install", SPELL, "projects"])
+    } catch (error) {
+      output = (error as Error).message
+    }
+    const line = /npm install spell@\S+ .*/.exec(output)?.[0]
+    if (!line) throw new Error(`no line to paste:  ${output.slice(0, 300)}`)
+    return `${line.slice(0, 60)} ...`
+  }
+
+  /** `npx spell projects`, the command the lean install couldn't run. */
+  private addOnCommand(): string {
+    return `${this.exec("npx", ["--no-install", SPELL, "projects"]).split("\n").length} lines`
   }
 
   /** Node imports two names, from the installed packages' built files. */
@@ -98,10 +191,12 @@ export class ScratchInstall {
    * `epic init` in a scratch git repo, under a scratch `HOME` and on a free port:  the epic server starts from the
    * install, then an epic page and the epics pack answer.  The server is stopped again, whatever happens.
    * - `--no-plugin`:  no Claude Code, no editor, no network;  `--no-commit`, `--no-remote`:  nothing to push
+   * - `command`:  `npx`'s arguments for an epic command, so each install tries the way its people will
+   * - an item added afterwards saves and formats the page;  the server's log says no route module failed
    */
-  private async epicServer(): Promise<string> {
-    const home = join(this.dir, "epic-home")
-    const repo = join(this.dir, "epic-repo")
+  private async epicServer(command: (...args: string[]) => string[]): Promise<string> {
+    const home = join(this.project, "epic-home")
+    const repo = join(this.project, "epic-repo")
     for (const folder of [home, repo]) mkdirSync(folder, { recursive: true })
     const port = await SRV.freePort()
     // no git settings handed down (a publish started from a hook, or with another index):  the repo is its own
@@ -113,7 +208,7 @@ export class ScratchInstall {
       GIT_INDEX_FILE: undefined,
       GIT_WORK_TREE: undefined
     }
-    const epic = (...args: string[]) => this.exec("npx", ["--no-install", "epic", ...args], { cwd: repo, env })
+    const epic = (...args: string[]) => this.exec("npx", command(...args), { cwd: repo, env })
     this.exec("git", ["init", "-q"], { cwd: repo, env })
     this.exec(
       "git",
@@ -137,7 +232,13 @@ export class ScratchInstall {
       const page = await answerOf(`${base}/epics/hello/hello.plan.html`)
       if (!page.includes("<epic-page")) throw new Error("its epic page holds no <epic-page>")
       const pack = await answerOf(`${base}/_epic/pack/epics.pack.js`)
-      return `port ${port}:  an epic page, ${page.length} bytes;  the epics pack, ${pack.length} bytes`
+      epic("add", "hello#I", "A scratch issue")
+      const saved = await answerOf(`${base}/epics/hello/hello.plan.html`)
+      if (!saved.includes("A scratch issue")) throw new Error("an item added didn't reach its epic page")
+      const log = readFileSync(join(home, ".spell-epic", "server.log"), "utf8")
+      const failed = /route module \S+ failed to load[^\n]*/.exec(log)?.[0]
+      if (failed) throw new Error(failed)
+      return `port ${port}:  an epic page, ${page.length} bytes;  the epics pack, ${pack.length} bytes;  an item saved`
     } finally {
       try {
         epic("server", "stop")
@@ -152,7 +253,7 @@ export class ScratchInstall {
    * Chromium:  it draws a `<ui-button>`, whose class extends the page's own `E.DOMElement`.
    */
   private async page(): Promise<string> {
-    const page = join(this.dir, "page")
+    const page = join(this.project, "page")
     mkdirSync(page, { recursive: true })
     writeFileSync(join(page, "index.html"), PAGE_HTML)
     writeFileSync(join(page, "main.js"), PAGE_SCRIPT)
@@ -161,7 +262,7 @@ export class ScratchInstall {
       ["--no-install", "vp", "build", "page", "--outDir", "../page-dist", "--emptyOutDir", "--minify", "false"],
       { timeout: 300_000 }
     )
-    const built = join(this.dir, "page-dist")
+    const built = join(this.project, "page-dist")
     const definitions = readdirSync(built, { recursive: true, withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
       .map((entry) => readFileSync(join(entry.parentPath, entry.name), "utf8").match(DOM_ELEMENT_CLASS)?.length ?? 0)
@@ -194,13 +295,17 @@ export class ScratchInstall {
   ////////////////
 
   /**
-   * Run `command` in the scratch folder (or `cwd`);  its output.  Throws with its stderr when it fails.
+   * Run `command` in the current project (or `cwd`);  its output.  Throws with its stderr when it fails.
    * - `env`:  added to this process's;  the checkout's own `epic` variables never reach it
    */
   private exec(
     command: string,
     args: string[],
-    { timeout = 120_000, cwd = this.dir, env = {} }: { timeout?: number; cwd?: string; env?: NodeJS.ProcessEnv } = {}
+    {
+      timeout = 120_000,
+      cwd = this.project,
+      env = {}
+    }: { timeout?: number; cwd?: string; env?: NodeJS.ProcessEnv } = {}
   ): string {
     try {
       return execFileSync(command, args, {
@@ -234,6 +339,16 @@ export class ScratchInstall {
     }
   }
 }
+
+/** The one package everything else is built on, and the only one `npx spell@next epic init` installs. */
+const SPELL = "spell"
+
+/**
+ * The most the lean install may hold, as `du` and npm's own lockfile count it.
+ * - TODO:  40 packages and 120 MB once epic `epic-engine`'s Dependency Safety phase replaces json5-writer, which is
+ *   about 300 of today's 334 packages.
+ */
+const LEAN_LIMITS = { packages: 340, megabytes: 150 }
 
 /**
  * A definition of the element base class in built JavaScript, as esbuild or Rolldown write it, minified or not:

@@ -282,6 +282,7 @@ Nothing is published for the others to use:  each folder imports the others by n
 - The cost:  working on Spell means a clone of this repo.
   Using its parts doesn't:  `npm install spell@next` has every folder, built (the language's imports among them,
   `spell/parser/...`), and `spell-ui@next` has Spell UI alone.
+  The basic install leaves out the packages only some parts need;  a command that needs them prints the line to add them.
 
 ## Where it's going
 
