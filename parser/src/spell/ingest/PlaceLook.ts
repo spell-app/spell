@@ -19,6 +19,9 @@ const MOST_COLLECTIONS = 12
 /** How many pages of each it reads. */
 const MOST_PAGES = 3
 
+/** The slashes an address ends with:  `/people/` and `/people` are one collection, swapi's. */
+const TRAILING_SLASHES = /\/+$/
+
 /** How much of a source's docs it keeps. */
 const MOST_DOCS_CHARS = 8000
 
@@ -201,7 +204,7 @@ async function lookAtWebServer({
     ? collections.map(wantedAt)
     : undefined
   if (wanted && addListed) {
-    const known = new Set(wanted.map(({ at }) => at))
+    const known = new Set(wanted.map(({ at }) => at.replace(TRAILING_SLASHES, "")))
     wanted.push(...(listedIn(body, address) ?? []).filter(({ at }) => !known.has(at)))
   }
   if (!wanted && (Array.isArray(body) || wrappedRows(body))) {
@@ -284,6 +287,7 @@ function wantedAt(given: string): { name: string; at: string } {
     .replace(/\/\{[^{}]*\}.*$/, "")
     .replace(/[?#].*$/, "")
     .replace(/\.json$/, "")
+    .replace(TRAILING_SLASHES, "")
   return { name: named?.trim() || listed.slice(listed.lastIndexOf("/") + 1), at }
 }
 
@@ -427,7 +431,7 @@ function listedIn(body: unknown, address: string): Array<{ name: string; at: str
   if (!body || typeof body !== "object" || Array.isArray(body)) return undefined
   const listed = Object.entries(body).flatMap(([name, value]) => {
     if (typeof value !== "string" || !value.startsWith(`${address}/`)) return []
-    return [{ name, at: value.slice(address.length).replace(/\/+$/, "") }]
+    return [{ name, at: value.slice(address.length).replace(TRAILING_SLASHES, "") }]
   })
   return listed.length ? listed : undefined
 }

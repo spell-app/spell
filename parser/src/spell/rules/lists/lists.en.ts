@@ -43,6 +43,7 @@ import { ListShuffle } from "./ListShuffle"
 import { MergeLists } from "./MergeLists"
 import { NumberRange } from "./NumberRange"
 import { Ordinal } from "./Ordinal"
+import { OrdinalOfExpression } from "./OrdinalOfExpression"
 import { OrdinalPositionExpression } from "./OrdinalPositionExpression"
 import { PossessiveOrdinal } from "./PossessiveOrdinal"
 import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
@@ -405,6 +406,43 @@ lists.addRule(OrdinalPositionExpression, {
         ["the first item of my-list", "core.getItemAt(myList, 0)"],
         ["the tenth card of deck", "core.getItemAt(deck, 9)"],
         ["the penultimate word in words", "core.getItemAt(words, -2)"]
+      ]
+    }
+  ]
+})
+
+lists.addRule(OrdinalOfExpression, {
+  syntax: "the {ordinal} (in|of) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na deck is a list of cards", "block")
+        scope.variables?.add({ name: "authors", datatype: "list of persons" })
+        scope.variables?.add({ name: "my-deck", datatype: "Deck" })
+        scope.variables?.add("loose")
+      },
+      tests: [
+        ["the first of authors", "core.getItemAt(authors, 0)"],
+        ["the last of my-deck", "myDeck.lastItem"],
+        ["the top of my-deck", "myDeck.firstItem"],
+        ["the name of the first of authors", "core.getItemAt(authors, 0)?.name"],
+        ["the first of loose", "core.getItemAt(loose, 0)"]
+      ]
+    },
+    {
+      title: "not a list, or a property it declares:  still a property",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile('a book is a thing:\n\t- its "first" is text\na card is a thing', "block")
+        scope.variables?.add({ name: "my-card", datatype: "Card" })
+        scope.variables?.add({ name: "my-book", datatype: "Book" })
+        scope.variables?.add("loose")
+      },
+      tests: [
+        ["the first of my-book", "myBook.first"],
+        ["the top of my-card", "myCard.top"],
+        ["the top of loose", "loose.top"]
       ]
     }
   ]

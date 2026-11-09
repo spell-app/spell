@@ -9,6 +9,11 @@
     {
       "type": "Post",
       "superType": "Thing",
+      "savedIn": {
+        "place": "my_feed",
+        "placeType": "MyFeed",
+        "collection": "posts"
+      },
       "defined": "/OrgFeed.api.spell:580-735"
     },
     {
@@ -83,6 +88,14 @@
     {
       "type": "MyFeed",
       "superType": "Place",
+      "place": {
+        "name": "my_feed",
+        "kind": "data folder",
+        "at": "/api/places/spaces/@rs/__feed",
+        "details": {
+          "checkedEvery": 30
+        }
+      },
       "defined": "/OrgFeed.api.spell:392-492"
     },
     {

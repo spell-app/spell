@@ -14,7 +14,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
 [designer/](${CLAUDE_PLUGIN_ROOT}/designer/), three files, each one read:
 - [designer.md](${CLAUDE_PLUGIN_ROOT}/designer/designer.md):
   how the rules learn, where the person's asks pull two ways, and
-  **the person's taste** (`T1` ...), their own asks word for word.  They WIN over craft.
+  **House taste** (`T1` ...), the project's own asks, word for word.  They WIN over craft.
   - `Theme: fruity` on a rule:  about the fruity theme's glass and pills;  another theme isn't held to it.
 - [craft.md](${CLAUDE_PLUGIN_ROOT}/designer/craft.md):  **craft** (`C1` ...), interfaces.dev's and jakub.kr's rules, each
   with its source;  where one pulls against the person's, it says so at the rule.
@@ -83,7 +83,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
    - **The agent type**:  returns the ranked list to the session that asked;  it changes nothing itself.
 6. Learn (designer.md says so in its header):
    - The person gives design feedback, in any session:
-     add it to "the person's taste" in the same turn, their words quoted, with
+     add it to "House taste" in the same turn, their words quoted, with
      the epic, phase and date (a new `T<n>`, or a quote added to the rule it repeats).
    - The person rejects a finding:  note it under its rule;  rejected twice, reword the rule or drop it.
    - Commit it with the turn's other spell-epic changes:  the rules are code, versioned per branch.

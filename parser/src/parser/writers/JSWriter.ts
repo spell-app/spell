@@ -1719,7 +1719,8 @@ export class JSWriter extends ProgramWriter {
 
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
-    const value = this.loopDrawn(node.expression, this.bare(node.expression))
+    const looped = this.loopDrawn(node.expression, this.bare(node.expression))
+    const value = node.isChild ? this.listChildDrawn(node.expression, looped) : looped
     if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }

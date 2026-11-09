@@ -788,7 +788,7 @@ export class Generation extends Thing {
 
   // - its "pokemon species" is a list of pokemon species
   static { this.declareProp("pokemonSpecies", { itemType: "PokemonSpecies", init: () => new List({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5570, end: 5620 } }) }
-  get pokemonSpecies() { return this.getProp("pokemonSpecies") }
+  get pokemonSpecies() { return core.linked(this, "pokemonSpecies", PokemonSpecies) }
   set pokemonSpecies(value) { this.setProp("pokemonSpecies", value) }
 
   // - its "types" is a list of types

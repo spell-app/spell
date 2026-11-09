@@ -43,12 +43,15 @@ const HOUR_SECONDS = 3600
  */
 export function describeLook(look: PlaceLook, { kind, name }: { kind: string; name: string }): PlaceDescription {
   const collections: Record<string, CollectionDescription> = {}
-  for (const each of look.collections) {
+  // each look with its own description:  two looks can share a name, so places in the two lists needn't match
+  const described = look.collections.map((each) => {
     const type = typeWordsFor(each.name, name)
-    collections[collectionNameFor(type)] = describeCollection(each, type)
-  }
+    const collection = describeCollection(each, type)
+    collections[collectionNameFor(type)] = collection
+    return { rows: each.rows, collection }
+  })
   for (const collection of Object.values(collections)) findLinks(collection, collections, look.address)
-  look.collections.forEach((each, at) => findIdLinks(each.rows, Object.values(collections)[at]!, collections))
+  for (const { rows, collection } of described) findIdLinks(rows, collection, collections)
   noteListsUnder(look, collections, name)
   return {
     about: {

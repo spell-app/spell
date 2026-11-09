@@ -13,7 +13,7 @@ import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
  */
 export class FirstFewWhere extends SpellExpression<"number|type|body?"> {
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    return P.listOfType(SP.typeName(`${match.groups.type.value}`))
+    return P.listOf(SP.typeName(`${match.groups.type.value}`))
   }
 
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {

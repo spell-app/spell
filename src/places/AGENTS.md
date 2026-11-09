@@ -58,6 +58,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
       unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
       With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
+    - What a web server can do is what its lines say (`restAbilitiesIn()`, in the parser's core;  epic `data` I35):
+      paging by a count and a position, filtering, sorting, naming the fields it gives, being read only.
     - `RestPlace`:  named operations (`operations`, `call()`), each a `POST`;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
@@ -88,6 +90,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Place.signIn` (`PlaceSignIn`):  how a person signs in, for what shows:  core's `showSignIn()`.
     - A session is two weeks at most, a day on a local address:  it ends as `"ended"`, and what's pending stays.
     - `atProtoClientMetadata()`:  the file a program on a real address has to serve;  a local address needs none, and must be `127.0.0.1`.
+      - Spell's cloud answers one for each program, beside its page;  the page says where (`SPELL_ATMOSPHERE.clientFile`).
+      - Anywhere else, it goes at the top of the address, by hand;  missing, a sign-in says which address it couldn't read.
   - [AtProtoPasswordSignIn](AtProtoPasswordSignIn.ts):  a PROGRAM signing in by itself,
     with an app password, no browser (epic `atmosphere` P9).
     - The handle becomes a DID, the DID's document names its host, and the host gives a session (`createSession`).

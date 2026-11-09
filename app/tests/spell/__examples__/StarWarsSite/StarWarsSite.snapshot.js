@@ -1,5 +1,5 @@
 import { core, Thing, View, Page, Site, Place, h } from "@spell/core"
-import { Character, Planet, Film, Species, Vehicle, Starship, WikiPage, Namespace, Title, Thumbnail, Originalimage, ContentUrl, Desktop, Mobile, Card } from "@spell/project/@spell/examples/StarWars"
+import { Character, Planet, Film, Species, Vehicle, Starship, WikiPage, Namespace, Title, Thumbnail, Originalimage, ContentUrl, Desktop, Mobile, Card, StarWar, Wikipedia } from "@spell/project/@spell/examples/StarWars"
 
 core.heading("Reviews:  kept on this device")
 ///////////////////////////////////
@@ -78,29 +78,32 @@ export class PersonFact extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "person" is a character
-  static { this.declareProp("person", { type: "Character" }) }
-  get person() { return this.getProp("person") }
+  static { this.declareProp("person", { type: "Character", link: true }) }
+  get person() { return core.linked(this, "person", Character) }
   set person(value) { this.setProp("person", value) }
 
+  static drawsWaiting = true
   draw() {
     return h("ui-table", { appearance: "definition", celled: true, unstackable: true },
       h("ui-row",
         h("ui-cell", "Born"),
-        h("ui-cell", () => this.person?.birthYear)
+        h("ui-cell", () => core.whileWaiting(() => this.person?.birthYear))
       ),
       h("ui-row",
         h("ui-cell", "Height"),
-        h("ui-cell", () => core.measureShown(this.person?.height, "Length", "centimeter"))
+        h("ui-cell",
+          () => core.whileWaiting(() => core.measureShown(this.person?.height, "Length", "centimeter"))
+        )
       ),
       h("ui-row",
         h("ui-cell", "Gender"),
-        h("ui-cell", () => this.person?.gender)
+        h("ui-cell", () => core.whileWaiting(() => this.person?.gender))
       ),
       h("ui-row",
         h("ui-cell", "Home"),
         h("ui-cell",
           h("ui-link", { link: () => core.siteAddressOf("planet page", this.person?.homeworld) },
-            () => this.person?.homeworld?.name
+            () => core.whileWaiting(() => this.person?.homeworld?.name)
           )
         )
       )
@@ -113,13 +116,14 @@ export class PersonSidebar extends View {
 
   /** Whoever it's showing */
   // - its "person" is a character
-  static { this.declareProp("person", { type: "Character" }) }
-  get person() { return this.getProp("person") }
+  static { this.declareProp("person", { type: "Character", link: true }) }
+  get person() { return core.linked(this, "person", Character) }
   set person(value) { this.setProp("person", value) }
 
+  static drawsWaiting = true
   draw() {
     return [
-      h("ui-header", { size: "medium" }, () => this.person?.name),
+      h("ui-header", { size: "medium" }, () => core.whileWaiting(() => this.person?.name)),
       core.drawThing(new PersonFact({ person: this.person })),
       h("ui-link", { class: "whole-page", link: () => core.siteAddressOf("person page", this.person) },
         "Their whole page"
@@ -175,8 +179,8 @@ export class ReviewDialog extends View {
 
   /** The film it's a review of */
   // - its "film" is a film
-  static { this.declareProp("film", { type: "Film" }) }
-  get film() { return this.getProp("film") }
+  static { this.declareProp("film", { type: "Film", link: true }) }
+  get film() { return core.linked(this, "film", Film) }
   set film(value) { this.setProp("film", value) }
 
   /** The review being written:  saved when it's done */
@@ -185,8 +189,8 @@ export class ReviewDialog extends View {
   get draft() { return this.getProp("draft") }
   set draft(value) { this.setProp("draft", value) }
 
-  saveTheReview() {
-    this.draft.filmTitle = this.film?.title
+  async saveTheReview() {
+    this.draft.filmTitle = (await core.answerOf(this, "film"))?.title
     core.saveThing(this.draft)
     this.draft = new Review({ stars: 5 })
     core.closeSitePart("review dialog")
@@ -194,7 +198,7 @@ export class ReviewDialog extends View {
 
   draw() {
     return [
-      h("ui-header", { size: "medium" }, "Review ", () => this.film?.title),
+      h("ui-header", { size: "medium" }, "Review ", () => core.whileWaiting(() => this.film?.title)),
       h("ui-form", { "prop:value": () => this.draft },
         h("ui-field", { label: "Stars" },
           h("ui-input", { class: "stars", name: "stars", type: "number", min: "1", max: "5" })
@@ -207,7 +211,7 @@ export class ReviewDialog extends View {
         class: "save-review",
         color: "primary",
         disabled: () => this.draft.words === "",
-        onClick: core.pressed(this, () => this.saveTheReview()),
+        onClick: core.pressed(this, async () => await this.saveTheReview()),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Save the review")
     ]
@@ -222,7 +226,7 @@ export class FilmsPage extends Page {
   draw() {
     return [
       core.drawThing(new PageTop({ title: "Films" })),
-      core.drawRead(() => core.everyThing(Film), (film) => [
+      core.drawRead(async () => await core.savedThings(Film, {}, "as drawn"), (film) => [
         h("ui-cell", { "data-column": "Episode" }, () => film.episodeId),
         h("ui-cell", { "data-column": "Title" },
           h("ui-link", { class: "film", link: () => core.siteAddressOf("film page", film) }, () => film.title)
@@ -242,29 +246,32 @@ export class FilmPage extends Page {
 
   /** The film the address names:  /films/:film */
   // - its "film" is a film
-  static { this.declareProp("film", { type: "Film" }) }
-  get film() { return this.getProp("film") }
+  static { this.declareProp("film", { type: "Film", link: true }) }
+  get film() { return core.linked(this, "film", Film) }
   set film(value) { this.setProp("film", value) }
 
   /** What's been said of it, on this device */
   static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spellml", start: 2464, end: 2621 }, readsFrom: ["galaxy_reviews"] }) }
   get reviews() { return core.waitedValue(this, "reviews", async () => {
-    const title = this.film?.title
+    const title = (await core.answerOf(this, "film"))?.title
     return await core.savedThings(Review, { filter: { filmTitle: title } })
-  }, () => [this.film]) }
+  }) }
 
+  static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: this.film?.title })),
       h("ui-text", { color: "grey" },
         "Episode ",
-        () => this.film?.episodeId,
+        () => core.whileWaiting(() => this.film?.episodeId),
         " · directed by ",
-        () => this.film?.director,
+        () => core.whileWaiting(() => this.film?.director),
         " · released ",
-        () => core.dateShown(this.film?.releaseDate)
+        () => core.whileWaiting(() => core.dateShown(this.film?.releaseDate))
       ),
-      h("ui-segment", h("ui-text", { paragraph: true }, () => this.film?.openingCrawl)),
+      h("ui-segment",
+        h("ui-text", { paragraph: true }, () => core.whileWaiting(() => this.film?.openingCrawl))
+      ),
       h("ui-header", { size: "small" }, "Who's in it"),
       core.drawRead(() => this.film?.characters, (person) => h("ui-button", {
         class: "person",
@@ -285,7 +292,7 @@ export class FilmPage extends Page {
           class: "add-review",
           color: "primary",
           icon: "pencil",
-          onClick: core.pressed(this, () => core.showSitePart("review dialog", this.film)),
+          onClick: core.pressed(this, async () => core.showSitePart("review dialog", await core.answerOf(this, "film"))),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Add a review")
       ),
@@ -306,7 +313,7 @@ export class PeoplePage extends Page {
   draw() {
     return [
       core.drawThing(new PageTop({ title: "People" })),
-      core.drawRead(() => core.everyThing(Character), (person) => [
+      core.drawRead(async () => await core.savedThings(Character, {}, "as drawn"), (person) => [
         h("ui-cell", { "data-column": "Name" },
           h("ui-link", { link: () => core.siteAddressOf("person page", person) }, () => person.name)
         ),
@@ -333,10 +340,11 @@ export class PersonPage extends Page {
 
   /** The person the address names:  /people/:person */
   // - its "person" is a character
-  static { this.declareProp("person", { type: "Character" }) }
-  get person() { return this.getProp("person") }
+  static { this.declareProp("person", { type: "Character", link: true }) }
+  get person() { return core.linked(this, "person", Character) }
   set person(value) { this.setProp("person", value) }
 
+  static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: this.person?.name })),
@@ -359,7 +367,7 @@ export class PlanetsPage extends Page {
   draw() {
     return [
       core.drawThing(new PageTop({ title: "Planets" })),
-      core.drawRead(() => core.everyThing(Planet), (planet) => [
+      core.drawRead(async () => await core.savedThings(Planet, {}, "as drawn"), (planet) => [
         h("ui-cell", { "data-column": "Name" },
           h("ui-link", { link: () => core.siteAddressOf("planet page", planet) }, () => planet.name)
         ),
@@ -379,19 +387,20 @@ export class PlanetPage extends Page {
 
   /** The planet the address names:  /planets/:planet */
   // - its "planet" is a planet
-  static { this.declareProp("planet", { type: "Planet" }) }
-  get planet() { return this.getProp("planet") }
+  static { this.declareProp("planet", { type: "Planet", link: true }) }
+  get planet() { return core.linked(this, "planet", Planet) }
   set planet(value) { this.setProp("planet", value) }
 
+  static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: this.planet?.name })),
       h("ui-text", { color: "grey" },
-        () => this.planet?.climate,
+        () => core.whileWaiting(() => this.planet?.climate),
         " · ",
-        () => this.planet?.terrain,
+        () => core.whileWaiting(() => this.planet?.terrain),
         " · ",
-        () => this.planet?.population,
+        () => core.whileWaiting(() => this.planet?.population),
         " people"
       ),
       h("ui-header", { size: "small" }, "Who's from here"),
@@ -419,7 +428,7 @@ export class SpeciesListPage extends Page {
   draw() {
     return [
       core.drawThing(new PageTop({ title: "Species" })),
-      core.drawRead(() => core.everyThing(Species), (one) => [
+      core.drawRead(async () => await core.savedThings(Species, {}, "as drawn"), (one) => [
         h("ui-cell", { "data-column": "Name" },
           h("ui-link", { link: () => core.siteAddressOf("species page", one) }, () => one.name)
         ),
@@ -439,17 +448,18 @@ export class SpeciesPage extends Page {
 
   /** The species the address names:  /species/:species */
   // - its "species" is a species
-  static { this.declareProp("species", { type: "Species" }) }
-  get species() { return this.getProp("species") }
+  static { this.declareProp("species", { type: "Species", link: true }) }
+  get species() { return core.linked(this, "species", Species) }
   set species(value) { this.setProp("species", value) }
 
+  static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: this.species?.name })),
       h("ui-text", { color: "grey" },
-        () => this.species?.classification,
+        () => core.whileWaiting(() => this.species?.classification),
         " · speaks ",
-        () => this.species?.language
+        () => core.whileWaiting(() => this.species?.language)
       ),
       h("ui-header", { size: "small" }, "Its people"),
       core.drawRead(() => this.species?.people, (person) => h("ui-button", {
@@ -474,7 +484,7 @@ export class VehiclesPage extends Page {
   draw() {
     return [
       core.drawThing(new PageTop({ title: "Vehicles" })),
-      core.drawRead(() => core.everyThing(Vehicle), (vehicle) => [
+      core.drawRead(async () => await core.savedThings(Vehicle, {}, "as drawn"), (vehicle) => [
         h("ui-cell", { "data-column": "Name" },
           h("ui-link", { link: () => core.siteAddressOf("vehicle page", vehicle) }, () => vehicle.name)
         ),
@@ -493,14 +503,19 @@ export class VehiclePage extends Page {
 
   /** The vehicle the address names:  /vehicles/:vehicle */
   // - its "vehicle" is a vehicle
-  static { this.declareProp("vehicle", { type: "Vehicle" }) }
-  get vehicle() { return this.getProp("vehicle") }
+  static { this.declareProp("vehicle", { type: "Vehicle", link: true }) }
+  get vehicle() { return core.linked(this, "vehicle", Vehicle) }
   set vehicle(value) { this.setProp("vehicle", value) }
 
+  static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: this.vehicle?.name })),
-      h("ui-text", { color: "grey" }, () => this.vehicle?.model, " · ", () => this.vehicle?.manufacturer),
+      h("ui-text", { color: "grey" },
+        () => core.whileWaiting(() => this.vehicle?.model),
+        " · ",
+        () => core.whileWaiting(() => this.vehicle?.manufacturer)
+      ),
       h("ui-header", { size: "small" }, "Piloted by"),
       core.drawRead(() => this.vehicle?.pilots, (person) => h("ui-button", {
         appearance: "basic",
@@ -527,7 +542,7 @@ export class StarshipsPage extends Page {
   draw() {
     return [
       core.drawThing(new PageTop({ title: "Starships" })),
-      core.drawRead(() => core.everyThing(Starship), (starship) => [
+      core.drawRead(async () => await core.savedThings(Starship, {}, "as drawn"), (starship) => [
         h("ui-cell", { "data-column": "Name" },
           h("ui-link", { link: () => core.siteAddressOf("starship page", starship) }, () => starship.name)
         ),
@@ -546,19 +561,20 @@ export class StarshipPage extends Page {
 
   /** The starship the address names:  /starships/:starship */
   // - its "starship" is a starship
-  static { this.declareProp("starship", { type: "Starship" }) }
-  get starship() { return this.getProp("starship") }
+  static { this.declareProp("starship", { type: "Starship", link: true }) }
+  get starship() { return core.linked(this, "starship", Starship) }
   set starship(value) { this.setProp("starship", value) }
 
+  static drawsWaiting = true
   draw() {
     return [
       core.drawThing(new PageTop({ title: this.starship?.name })),
       h("ui-text", { color: "grey" },
-        () => this.starship?.length,
+        () => core.whileWaiting(() => this.starship?.length),
         " m long · crew ",
-        () => this.starship?.crew,
+        () => core.whileWaiting(() => this.starship?.crew),
         " · ",
-        () => this.starship?.costInCredits,
+        () => core.whileWaiting(() => this.starship?.costInCredits),
         " credits"
       ),
       h("ui-header", { size: "small" }, "Piloted by"),
