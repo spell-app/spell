@@ -47,7 +47,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "show",
       usage: "<page> [--wait] [--timeout 8h]",
-      description: "show the page in this session's VS Code side bar (the Review tab);  --wait:  then wait",
+      description: "show the page in this session's VS Code side bar (the Details tab);  --wait:  then wait",
       example: "epic ask show seo/pick-layout --wait",
       flags: {
         "--wait": "then wait for the answer, as wait does",
@@ -699,11 +699,11 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "show",
       usage: "<file> [--hash <id>] [--review]",
-      description: "show an .html page in the window's side bar:  Epic Docs, or with --review the Review tab",
+      description: "show an .html page in the window's side bar, in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
       example: "epic window show epics/seo/seo.plan.html --review",
       flags: {
         "--hash <id>": "land on that id",
-        "--review": "in the Review tab"
+        "--review": "a page of no kind of its own:  in the Review tab"
       }
     },
     {
@@ -1048,11 +1048,11 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "open",
       usage: "[<page>] [--vs | --review]",
-      description: "show a page in Chrome, or in VS Code's side bar (--vs;  --review:  its Review tab)",
+      description: "show a page in Chrome, or in VS Code's side bar (--vs), in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
       example: "epic pages open epics/seo/seo.plan.html --review",
       flags: {
         "--vs": "in VS Code's side bar",
-        "--review": "in the side bar's Review tab"
+        "--review": "in the side bar;  a page of no kind of its own:  in its Review tab"
       }
     },
     {
@@ -1241,7 +1241,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   docs: { "--json": "print them as JSON" },
   decisions: { "--json": "print them as JSON" },
   owns: { "--json": "print them as JSON" },
-  open: { "--review": "in the side bar's Review tab" },
+  open: { "--review": "kept for old scripts:  an epic page always shows in the Review tab" },
   lint: { "--no-browser": "skip the browser check", "--links": "fail on its links' problems too" },
 
   // an epic page:  phases

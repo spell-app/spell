@@ -396,7 +396,7 @@ As `plan-doc.md`, "Ids":
     | ----------- | ------ | ---------------------------------------------------------------------------------- |
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
-    | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
+    | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), in the last day (a phase:  3 days);  older, grey                 |
     | `requested` | light orange | an issue filed from the person's own words (`requested`), closed done, not reviewed:  their turn to see it (epic `epic-engine` P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
@@ -763,7 +763,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
-| green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
+| green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
