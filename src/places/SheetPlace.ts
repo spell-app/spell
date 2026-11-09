@@ -1,4 +1,5 @@
 import { parseCsv } from "./csv"
+import { FieldNames } from "./FieldNames"
 import { DEFAULT_CEILING } from "./PlaceQuery"
 import {
   PlaceError,
@@ -7,9 +8,11 @@ import {
   type Place,
   type PlaceCapabilities,
   type PlaceCeiling,
-  type PlaceContext
+  type PlaceContext,
+  type PlaceLines,
+  type PlaceRow
 } from "./places.types"
-import { SheetTable } from "./SheetTable"
+import { numberOrText, SheetTable } from "./SheetTable"
 import { WebPlace, type WebPlaceProps } from "./WebPlace"
 import { Workbook } from "./Workbook"
 
@@ -25,7 +28,9 @@ import { Workbook } from "./Workbook"
  * - A CSV file holds one table, so one place is one collection;  any other name is `"not found"`, not an empty list.
  * - A workbook holds a table on each sheet, each a collection named by its tab (`Workbook`):  one tab alone answers any name.
  *   Its cells say which are numbers;  SheetJS, which reads it, loads only when one is first read.
- * - Column names are the fields, and every cell is text unless `numbers` says otherwise.
+ * - Each column is a field, by the program's name for it (`FieldNames`):  a line's, else by its words,
+ *   so `Hair Color` reads as `hairColor`.  The id column keeps its own name.
+ * - Every cell is text unless `numbers` says otherwise.
  * - It can't filter, sort or page, so the engine does (`PlaceQuery`), and it can't be written:  `write: "none"`.
  * - Identity:  the author's `idColumn`, or rows share no identity, and every answer says so (`SheetTable`, `ListAnswer.notes`).
  * - Works from a browser with no key and no server of ours, if the file's server allows it:
@@ -45,17 +50,20 @@ export class SheetPlace extends WebPlace implements Place {
   private readonly idColumn: string | undefined
   /** The columns that hold numbers. */
   private readonly numbers: readonly string[] | undefined
+  /** What a program's lines call its columns. */
+  private readonly collections: PlaceLines["collections"]
   /** How much it will load. */
   private readonly ceiling: PlaceCeiling
   /** What the file is. */
   readonly format: SheetFormat
 
-  constructor({ collection, idColumn, numbers, ceiling, format, ...web }: SheetPlaceProps) {
+  constructor({ collection, idColumn, numbers, collections, ceiling, format, ...web }: SheetPlaceProps) {
     super({ changeIdHeader: false, ...web })
     this.format = format ?? (Workbook.isWorkbookAddress(web.url) ? "excel" : "csv")
     this.collection = collection
     this.idColumn = idColumn
     this.numbers = numbers
+    this.collections = collections
     this.ceiling = { ...DEFAULT_CEILING, ...ceiling }
   }
 
@@ -91,9 +99,7 @@ export class SheetPlace extends WebPlace implements Place {
     const response = await this.answerTo({ url: this.url, urlData: {}, cache: "no-cache" }, context)
     const cells = parseCsv(new TextDecoder().decode(await this.bytesUnderCeiling(response)))
     const { idColumn, numbers } = this
-    const { rows, notes } = new SheetTable({ name: collection, cells, idColumn, numbers })
-    if (rows.length > this.ceiling.rows) this.overCeiling(`${this.ceiling.rows} rows`)
-    return { rows, ...(notes.length && { notes }), handled: {} }
+    return this.answerFrom(collection, new SheetTable({ name: collection, cells, idColumn, numbers }))
   }
 
   /**
@@ -104,9 +110,31 @@ export class SheetPlace extends WebPlace implements Place {
     const response = await this.answerTo({ url: this.url, urlData: {}, cache: "no-cache" }, context)
     const bytes = await this.bytesUnderCeiling(response)
     const { idColumn, numbers } = this
-    const { rows, notes } = new Workbook(bytes, await Workbook.sheetJs(), { idColumn, numbers }).rowsOf(collection)
+    return this.answerFrom(
+      collection,
+      new Workbook(bytes, await Workbook.sheetJs(), { idColumn, numbers }).rowsOf(collection)
+    )
+  }
+
+  /**
+   * The answer `table` makes:  each column by the program's name for it.
+   * - throws `PlaceError` `"over the ceiling"`
+   */
+  private answerFrom(collection: string, { rows, columns, notes }: SheetRows): ListAnswer {
     if (rows.length > this.ceiling.rows) this.overCeiling(`${this.ceiling.rows} rows`)
-    return { rows, ...(notes.length && { notes }), handled: {} }
+    const fields = this.collections?.[collection]?.fields
+    const names = FieldNames.ofColumns(columns, fields, [this.idColumn])
+    return {
+      rows: rows.map((row) => this.withNumbers(names.fromServer(row))),
+      ...(notes.length && { notes }),
+      handled: {}
+    }
+  }
+
+  /** `row`, with the number fields its name for them read as numbers:  `numbers` says them as the program does. */
+  private withNumbers(row: PlaceRow): PlaceRow {
+    for (const field of this.numbers ?? []) if (field in row) row[field] = numberOrText(row[field])
+    return row
   }
 
   /** The file's bytes, stopping as soon as it's more than the ceiling's.  - throws `PlaceError` once it is */
@@ -147,6 +175,9 @@ export class SheetPlace extends WebPlace implements Place {
   }
 }
 
+/** What a sheet's rows are read from. */
+type SheetRows = Pick<SheetTable, "rows" | "columns" | "notes">
+
 /** What a sheet's file is:  CSV text, or an Excel workbook (`.xlsx`). */
 export type SheetFormat = "csv" | "excel"
 
@@ -156,8 +187,10 @@ export type SheetPlaceProps = WebPlaceProps & {
   collection: string
   /** The column holding each row's id.  Left out:  rows share no identity, and it says so. */
   idColumn?: string
-  /** The columns that hold numbers, so they filter and sort as numbers:  a CSV file's cells are all text. */
+  /** The fields that hold numbers, by column or the program's name, so they filter and sort as numbers:  a CSV file's cells are all text. */
   numbers?: readonly string[]
+  /** Each collection's fields' columns, where a program's line names one:  `{ recipes: { fields: { title: "Dish Name" } } }`. */
+  collections?: PlaceLines["collections"]
   /** How much it will load, over `DEFAULT_CEILING`. */
   ceiling?: Partial<PlaceCeiling>
   /** What the file is.  Left out:  an Excel workbook if its address ends `.xlsx`, else CSV. */

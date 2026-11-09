@@ -330,3 +330,25 @@ describe("GoogleSheetPlace behind a PlaceServer", () => {
     await expect(browser.apply([change("update", "r-1", { rating: 5 })], {})).rejects.toThrow(/no column "rating"/)
   })
 })
+
+describe("GoogleSheetPlace, a column under another name (epic `data` I36, T84)", () => {
+  test("reads and writes by the program's names, and the tab keeps its own", async () => {
+    const { place, stub, cells } = await sheet()
+    stub.tabs.get("recipes")!.cells = [
+      ["id", "Dish Name", "Hair Color"],
+      ["r-1", "Soup", "red"]
+    ]
+    const described = place.withLines({ collections: { recipes: { fields: { title: "Dish Name" } } } })
+    expect((await described.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Soup", hairColor: "red" }])
+    const { rows } = await described.apply([change("update", "r-1", { title: "Broth", hairColor: "blue" })], {})
+    expect(rows).toEqual([{ id: "r-1", title: "Broth", hairColor: "blue" }])
+    expect(cells()[1]).toEqual(["r-1", "Broth", "blue"])
+  })
+
+  test("the same lines give the same place;  none, this one", async () => {
+    const { place } = await sheet()
+    const lines = { collections: { recipes: { fields: { title: "Dish Name" } } } }
+    expect(place.withLines(lines)).toBe(place.withLines(lines))
+    expect(place.withLines({})).toBe(place)
+  })
+})

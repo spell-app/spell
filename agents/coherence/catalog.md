@@ -415,6 +415,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - One kind each:  `RestPlace`, `GraphPlace`, `ChunkedPlace` (a folder or one file), `SheetPlace`, `LiveRoomPlace`,
     `AtProtoPlace`, `DevicePlace`, `MemoryPlace`;  their server side in `spell/server/places` (`PlaceServer`, `Referee`).
   - Writes go through `PendingChanges` and `SaveQueue`;  `PlaceHeal` fetches, then replays.
+  - A field's name at the far end, both ways:  `FieldNames` (`spell/places`), a server's fields and a sheet's or Airtable's columns alike.
   - A Spell program says it in one line, `family cookbook is a web server at "..."`;  `spell place ingest` writes it.
   - A folder in spaces by its address (`owen@spell/recipes`), epic `atmosphere`:
     the app's `SpaceFolders`, one `PlaceServer` route that opens each folder as it's asked for (P1).

@@ -252,3 +252,52 @@ describe("SheetPlace, an Excel workbook (epic `data` P38)", () => {
     await expect(place.list("recipes", {}, {})).rejects.toMatchObject({ kind: "over the ceiling" })
   })
 })
+
+describe("SheetPlace, a column under another name (epic `data` I36)", () => {
+  const NAMED = `Recipe ID,Dish Name,Hair Color,Serves
+r-1,Soup,red,4
+r-2,Dal,brown,six
+`
+
+  test("a line's column reads as its field, the rest by their words, and the id column keeps its name", async () => {
+    const { place } = await served(
+      { idColumn: "Recipe ID", collections: { recipes: { fields: { title: "Dish Name" } } } },
+      NAMED
+    )
+    const { rows } = await place.list("recipes", {}, {})
+    expect(rows[0]).toEqual({ "Recipe ID": "r-1", title: "Soup", hairColor: "red", serves: "4" })
+    expect(place.describe().idOf).toBe("Recipe ID")
+  })
+
+  test("a number field named by the program reads as a number, under whatever its column's called", async () => {
+    const { place } = await served({ idColumn: "Recipe ID", numbers: ["serves"] }, NAMED)
+    const { rows } = await place.list("recipes", {}, {})
+    expect(rows.map(({ serves }) => serves)).toEqual([4, "six"])
+  })
+
+  test("an engine filter finds a column by the program's name", async () => {
+    const { places } = await served({ idColumn: "Recipe ID" }, NAMED)
+    const result = places.read({ placeName: "box", collection: "recipes", query: { filter: { hairColor: "brown" } } })
+    expect((await result.load())!.map((row) => row.dishName)).toEqual(["Dal"])
+  })
+
+  test("a workbook's columns are named the same way", async () => {
+    const bytes = workbookBytes({
+      Recipes: [
+        ["id", "Dish Name", "Serves"],
+        ["r-1", "Soup", 4]
+      ]
+    })
+    const http = createServer((_request, reply) => reply.end(Buffer.from(bytes)))
+    await new Promise<void>((done) => http.listen(0, "127.0.0.1", done))
+    servers.push(() => new Promise((done) => http.close(() => done())))
+    const { port } = http.address() as { port: number }
+    const place = new SheetPlace({
+      url: `http://127.0.0.1:${port}/recipes.xlsx`,
+      collection: "recipes",
+      idColumn: "id",
+      collections: { recipes: { fields: { title: "Dish Name" } } }
+    })
+    expect((await place.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Soup", serves: 4 }])
+  })
+})
