@@ -1,0 +1,18 @@
+/*
+ * The look of `<ui-docs-index>`.
+ * - Its section titles reach as far as the page's own:  the notebook page's gutter, when it's on one.
+ */
+:host {
+  display: block;
+  --site-gutter: var(--notebook-gutter, 3em);
+}
+
+.search {
+  display: block;
+  max-width: 24em;
+  margin-block-end: 1em;
+}
+
+ui-section {
+  scroll-margin-block-start: 4em;
+}

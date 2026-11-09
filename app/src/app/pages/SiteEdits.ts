@@ -305,6 +305,10 @@ export type SitePart = {
   state?: string
   /** A picture of a page, a file of the project:  `snapshots/films.png`. */
   picture?: string
+  /** What its tab says, if its line says. */
+  tab?: string
+  /** What it's filed under, as its line writes it:  `Forms, Inputs`. */
+  tags?: string
   /** Which row of its section of the board its card is in, from 1, if its line says. */
   row?: number
   /** Which column of its section, from 1. */
@@ -389,6 +393,8 @@ function spellxPartsIn(text: string, start: number): SitePart[] {
       name: name!,
       address: ATTRIBUTE("address").exec(attributes!)?.[1],
       title: ATTRIBUTE("title").exec(attributes!)?.[1],
+      tab: ATTRIBUTE("tab").exec(attributes!)?.[1],
+      tags: ATTRIBUTE("tags").exec(attributes!)?.[1],
       state: ATTRIBUTE("state").exec(attributes!)?.[1],
       picture: ATTRIBUTE("picture").exec(attributes!)?.[1],
       row: numberIn(ATTRIBUTE("row").exec(attributes!)?.[1]),
@@ -416,7 +422,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
     if (line.text.trim() && !/^[ \t]/.test(line.text)) break
     const written = CODE_PART.exec(line.text)
     if (!written) continue
-    const [, indent, written_name, address, title, state, picture, row, column, color] = written
+    const [, indent, written_name, address, title, tab, tags, state, picture, row, column, color] = written
     const isQuoted = /^".*"$/.test(written_name!)
     const name = isQuoted ? written_name!.slice(1, -1) : written_name!
     while (open.length && open.at(-1)!.indent.length >= indent!.length) open.pop()
@@ -425,6 +431,8 @@ function codePartsIn(text: string, start: number): SitePart[] {
       name,
       address,
       title,
+      tab,
+      tags,
       state,
       picture,
       row: numberIn(row),
@@ -525,11 +533,16 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
 }
 
 /** A spellx part's `line` with its address and title as given:  an attribute added, changed or taken out. */
-function spellxLineWith(line: string, { address, title, state, picture, row, column, color }: PartWords): string {
+function spellxLineWith(
+  line: string,
+  { address, title, tab, tags, state, picture, row, column, color }: PartWords
+): string {
   let changed = line
   for (const [word, value] of [
     ["address", address],
     ["title", title],
+    ["tab", tab],
+    ["tags", tags],
     ["state", state],
     ["picture", picture],
     ["row", row === undefined ? undefined : `${row}`],
@@ -548,6 +561,8 @@ function spellxLineWith(line: string, { address, title, state, picture, row, col
 type PartWords = {
   address?: string
   title?: string
+  tab?: string
+  tags?: string
   state?: string
   picture?: string
   row?: number
@@ -556,8 +571,8 @@ type PartWords = {
 }
 
 /** What `part`'s line says now, besides its name. */
-function wordsOf({ address, title, state, picture, row, column, color }: SitePart): PartWords {
-  return { address, title, state, picture, row, column, color }
+function wordsOf({ address, title, tab, tags, state, picture, row, column, color }: SitePart): PartWords {
+  return { address, title, tab, tags, state, picture, row, column, color }
 }
 
 /** `text` as a number;  none for none. */
@@ -569,17 +584,19 @@ function numberIn(text: string | undefined): number | undefined {
 function codeLineWith(
   line: string,
   part: SitePart,
-  { address, title, state, picture, row, column, color }: PartWords
+  { address, title, tab, tags, state, picture, row, column, color }: PartWords
 ): string {
   const ending = line.endsWith("\n") ? "\n" : ""
   const at = address === undefined ? "" : ` at ${JSON.stringify(address)}`
   const named = title === undefined || !address ? "" : `, named ${JSON.stringify(title)}`
+  const tabbed = tab === undefined || !address ? "" : `, tab ${JSON.stringify(tab)}`
+  const tagged = tags === undefined || !address ? "" : `, tagged ${JSON.stringify(tags)}`
   const stated = state === undefined || !address ? "" : `, ${state}`
   const pictured = picture === undefined || !address ? "" : `, pictured in ${JSON.stringify(picture)}`
   const placed = row === undefined || column === undefined ? "" : `, in row ${row} column ${column}`
   const colored = color === undefined ? "" : `, colored ${color}`
   const name = part.isQuoted ? JSON.stringify(part.name) : part.name
-  return `${part.indent}- it has ${articleOf(part.name)} ${name}${at}${named}${stated}${pictured}${placed}${colored}${ending}`
+  return `${part.indent}- it has ${articleOf(part.name)} ${name}${at}${named}${tabbed}${tagged}${stated}${pictured}${placed}${colored}${ending}`
 }
 
 /** `a` or `an`, for `name`. */
@@ -592,7 +609,7 @@ const SPELLX_PART = /^<(page|dialog|sidebar)\s+"([^"]+)"([^>]*?)\s*(\/>|>)$/
 
 /** A code-spell part's line:  `- it has a films page at "/films", named "Films"`, `- it has a settings dialog`. */
 const CODE_PART =
-  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, (old|new|mocked|built))?(?:, pictured in "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
+  /^([ \t]+)- it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, pictured in "([^"]*)")?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
 
 /** The end of a spellx tag that closes itself, `<page "x"/>`, what follows it in group 1. */
 const SPELLX_CLOSES_ITSELF = /\s*\/>(\s*)$/

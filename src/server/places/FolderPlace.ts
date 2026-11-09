@@ -340,6 +340,7 @@ export class FolderPlace extends ChunkedPlace {
   private async membersChanges(changes: readonly PlaceChange[], { identity }: PlaceContext): Promise<PlaceChange[]> {
     if (identity === undefined) return [...changes]
     const space = this.space!
+    await space.writableOrDie?.()
     const member = await space.memberOf(identity)
     const isSignUp = space.signUpOrDie
       ? await space.signUpOrDie({
@@ -703,6 +704,13 @@ export type FolderSpace = {
   memberOf(identity: string): Promise<SpaceMember | undefined>
   /** Who besides its members reads and writes it (epic `atmosphere` P7, Q13), asked afresh.  Left out:  nobody. */
   settings?(): Promise<SpaceSettings>
+  /**
+   * Is the folder open to writes at all just now, whoever's asking (epic `atmosphere` I22)?
+   * Asked first, of every write by someone:  a member, a sign-up or a public write.
+   * - Left out:  always open.
+   * - throws `PlaceError` `"refused"`, to refuse:  the app's quiet events (`OrgEvents.isQuietAt()`)
+   */
+  writableOrDie?(): Promise<void>
   /**
    * May this change be made, by its kind of thing and who's asking (epic `atmosphere` P23)?  Asked of each change a
    * member makes, so a role writes some kinds and not others:  the app's `SpaceMembers.changeOrDie()`.

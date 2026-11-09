@@ -1,7 +1,7 @@
 /**
  * An org's events, from someone's idea to a quiet record (epic `atmosphere` P32).
- * - A small RS:  Ana is the Board, Bo manages the Events Team;  Cy and Dee are in RS and manage nothing;  Zed isn't in
- *   RS.
+ * - A small RS:  Ana is the Board, Bo manages the Events Team;  Cy, Dee and Eve are in RS and manage nothing;
+ *   Zed isn't in RS.
  * - Through the app's `SpaceFolders`, as a page asks:  the events page's place, `@rs/__admin/events`, and a write to the
  *   event's own shared space.
  */
@@ -10,7 +10,7 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { PlaceError, type Place } from "spell/places"
+import { PlaceError, SPACE_MEMBER_OPERATIONS, SPACE_SHEET_OPERATIONS, type Place } from "spell/places"
 import { SP } from "spell/parser/spell"
 import { RS_EVENT_PROGRAM } from "spell/app/spaces/server/node/people/OrgEvents"
 import { PeopleStore, orgFile, personFile } from "spell/app/spaces/server/node/people/PeopleStore"
@@ -22,6 +22,9 @@ const EVENTS = "@rs/__admin/events"
 
 /** The picnic's own shared space, once it's approved:  a sheet in it. */
 const PICNIC_SHEET = "events_team@rs/picnic/sheet"
+
+/** The picnic's master sign-up sheet, in its private space:  its organizers' alone, but for sign-ups. */
+const PICNIC_MASTER = "events_team@rs/picnic/__private/signups"
 
 const root = mkdtempSync(join(tmpdir(), "spell-org-events-"))
 const folderFor = (address: string) => join(root, ...SP.SpellUrls.folderFor(address)!.path.split("/"))
@@ -55,10 +58,10 @@ async function writeSheet(who: string, id: string) {
 }
 
 beforeAll(async () => {
-  for (const id of ["ana", "bo", "cy", "dee", "zed"]) {
+  for (const id of ["ana", "bo", "cy", "dee", "eve", "zed"]) {
     await storage.write(personFile(id, "rs"), JSON.stringify({ $type: "Person", id, names: id }))
   }
-  const members = ["ana", "bo", "cy", "dee"].map((id) => ({
+  const members = ["ana", "bo", "cy", "dee", "eve"].map((id) => ({
     $type: "Membership",
     person: { $ref: `Person#${id}@rs` },
     role: "editor"
@@ -143,6 +146,24 @@ describe("an org's events", () => {
     expect((await sheet.list("volunteers", {}, { identity: "dee@rs" })).rows.map((row) => row.id)).toEqual(["cy-setup"])
     const moves = (await folders.orgRoles.log("rs")).filter((each) => each.action === "event")
     expect(moves.map((each) => each.name)).toEqual(["proposed", "approved", "planning", "open", "analysis", "quiet"])
+  })
+
+  test("quiet holds for someone who isn't a member of the space:  a sign-up, a public write", async () => {
+    const sheet = (await folders.placeFor(PICNIC_MASTER, "cy@rs"))!
+    await sheet.call!(SPACE_SHEET_OPERATIONS.set, { signUpsFrom: PICNIC_SHEET }, { identity: "cy@rs" })
+    const shared = (await folders.placeFor(PICNIC_SHEET, "cy@rs"))!
+    await shared.call!(SPACE_MEMBER_OPERATIONS.changeSettings, { publicWrite: true }, { identity: "cy@rs" })
+
+    const signUp = sheet.apply!(
+      [{ kind: "insert", collection: "volunteers", id: "eve", fields: { person: "eve@rs", shift: "setup" } }],
+      { identity: "eve@rs" }
+    )
+    await expect(signUp).rejects.toThrow(/quiet/)
+    const publicWrite = shared.apply!(
+      [{ kind: "insert", collection: "volunteers", id: "zed", fields: { shift: "setup" } }],
+      { identity: "zed@rs" }
+    )
+    await expect(publicWrite).rejects.toThrow(/quiet/)
   })
 
   test("the program is RS's to change:  only its Board and Admins", async () => {

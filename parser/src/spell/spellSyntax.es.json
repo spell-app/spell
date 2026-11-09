@@ -8339,20 +8339,20 @@
           "ruleNames": ["site_page"],
           "internal": false,
           "file": "src/spell/rules/sites/SitePage.ts",
-          "line": 35,
+          "line": 45,
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una) {part:site_part_words} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una) {part:quoted_member} en {address:text} (, (llamada|llamado) {title:text})? (, pestaña {tab:text})? (, (etiquetada|etiquetado) {tags:text})? (, {state:site_page_state})? (, (ilustrada|ilustrado) en {picture:text})? (, en la fila {row:number} columna {column:number})? (, de color {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]

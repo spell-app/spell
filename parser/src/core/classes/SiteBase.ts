@@ -414,7 +414,7 @@ export class SiteBase extends App {
   }
 
   /**
-   * Its pages as its navigation lists them:  each one's title (its name without one) and address, its pages under it.
+   * Its pages as its navigation lists them:  each one's title (its name without one), address and tags, its pages under it.
    * - A page with a parameter (`/films/:film`) isn't listed:  it's reached from a page, with a film to show.
    */
   navPages(): SiteNavPage[] {
@@ -427,7 +427,8 @@ export class SiteBase extends App {
             title: entry.title ?? entry.name,
             href: entry.address,
             id: entry.name,
-            ...(entry.tab && { tab: entry.tab })
+            ...(entry.tab && { tab: entry.tab }),
+            ...(entry.tags && { tags: entry.tags })
           }
           return pages.length ? { ...page, pages } : page
         })
@@ -606,7 +607,7 @@ export class SiteBase extends App {
 ////////////////
 
 /** One page as `<ui-site-nav pages>` takes it (Spell UI's `SiteNavPage`:  the core never imports Spell UI). */
-type SiteNavPage = { title: string; href: string; id: string; tab?: string; pages?: SiteNavPage[] }
+type SiteNavPage = { title: string; href: string; id: string; tab?: string; tags?: string[]; pages?: SiteNavPage[] }
 
 /** A site's two columns:  its navigation, then the page. */
 const SITE_LAYOUT =

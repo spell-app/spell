@@ -64,6 +64,17 @@ export class SpellAccounts implements SignInAccounts {
     return undefined
   }
 
+  /**
+   * The account a typed name is:  `ana@spell`, or an org's name for her, `ana@rs` (`PeopleStore.memberCalled()`).
+   * - `undefined` for anything else.
+   */
+  async accountNamed(name: string): Promise<string | undefined> {
+    const org = SP.SpellLocation.accountParts(name)?.org
+    if (!org || (org !== this.org && !(await this.people.hasOrg(org)))) return undefined
+    const account = org === this.org ? name : await this.people.memberCalled(org, name)
+    return (await this.personOf(account)) ? account : undefined
+  }
+
   /** An account for `email`, made if it has none:  its address.  - throws what the people store throws */
   async invite(email: string): Promise<string> {
     const known = await this.accountFor(email)

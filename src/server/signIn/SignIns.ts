@@ -1,17 +1,23 @@
 import { createHash, randomBytes, randomInt } from "node:crypto"
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs"
-import { dirname } from "node:path"
+import { dirname, join } from "node:path"
 
 import {
   CODE_TRIES,
+  PASSWORD_ADDRESS_TRIES,
+  PASSWORD_PROOF_MINUTES,
+  PASSWORD_TRIES,
+  PASSWORD_WAIT_MINUTES,
   SESSION_DAYS,
   SIGN_IN_MINUTES,
   SignInError,
   type Session,
   type SessionMade,
   type SignInAsker,
-  type SignInRefusal
+  type SignInRefusal,
+  type SignInWay
 } from "./signIn.types"
+import { Passwords } from "./Passwords"
 
 /** A minute, a day:  ms. */
 const MINUTE = 60_000
@@ -19,6 +25,23 @@ const DAY = 24 * 60 * MINUTE
 
 /** How many requests it keeps, oldest dropped first:  far more than a request's minutes ever hold. */
 const REQUESTS_KEPT = 1000
+
+/** How many accounts' and addresses' wrong passwords it remembers, oldest dropped first. */
+const TRIES_KEPT = 10_000
+
+/** The file beside the signed-in devices that holds the passwords. */
+const PASSWORDS_FILE = "passwords.json"
+
+/** The one answer to a wrong password, whether or not anyone has that email. */
+const WRONG_PASSWORD = "That email and password don't go together."
+
+/** Wrong passwords counted against one account, or one address. */
+type WrongTries = {
+  /** How many so far. */
+  count: number
+  /** When they're forgotten, ms:  or, at the limit, when the wait is over. */
+  ends: number
+}
 
 /** One sign-in someone asked for, or an invite:  its link and its code, good once, for `SignIns.minutes`. */
 type SignInRequest = {
@@ -70,6 +93,14 @@ type SignInRequest = {
  * - A device's sign-in lasts `SESSION_DAYS`.  Its token is the cookie's, and only its HASH is kept:
  *   a copy of the file signs nobody in.
  *   - Kept in `file`, when it has one, so a restart keeps everyone signed in;  requests are only in memory.
+ * - A PASSWORD (epic `atmosphere` T64), `passwords`, a hash per account in a file beside the devices:
+ *   - `checkPassword()`, then `signInByPassword()`:  the same `SESSION_DAYS` a code or a link makes
+ *   - a wrong password and an account nobody has are refused alike, in about the same time:
+ *     a wrong try's count is by account, or the name typed when there's no such account
+ *   - `PASSWORD_TRIES` wrong tries for an account, `PASSWORD_ADDRESS_TRIES` from an address, then a
+ *     `PASSWORD_WAIT_MINUTES` wait;  only in memory, as requests are
+ *   - `changePassword()`:  the current one, or a sign-in by emailed link or code in the last
+ *     `PASSWORD_PROOF_MINUTES`;  a password replaced ends the account's other devices
  * - The time is `now()`'s:  a test moves it.
  * - Knows nothing of mail, people or requests over HTTP:  `SignInCheck` does those.
  * - Refusals throw `SignInError`, its words for people.
@@ -85,11 +116,16 @@ export class SignIns {
   private readonly requests = new Map<string, SignInRequest>()
   /** Each device signed in, by its token's hash. */
   private readonly sessions = new Map<string, Session>()
+  /** Each account's password. */
+  readonly passwords: Passwords
+  /** Wrong passwords, by what they're counted against:  oldest first. */
+  private readonly wrongTries = new Map<string, WrongTries>()
 
   constructor({ file, now = Date.now, minutes = SIGN_IN_MINUTES }: SignInsProps = {}) {
     this.file = file
     this.now = now
     this.minutes = minutes
+    this.passwords = new Passwords(file ? { file: join(dirname(file), PASSWORDS_FILE) } : {})
     this.readSessions()
   }
 
@@ -188,7 +224,134 @@ export class SignIns {
    * - Its session's `email` is `""`.
    */
   signInLinked(person: string): SessionMade {
-    return this.signIn({ person, email: "" })
+    return this.signIn({ person, email: "" }, "linked account")
+  }
+
+  ////////////////
+  // ## Passwords
+  ////////////////
+
+  /**
+   * Is `password` right for `person`, typed as `typed`, from `address`?
+   * - `person`:  `undefined` for nobody with that name:  it takes as long, and is refused the same.
+   * - throws `SignInError`:  `"wrong password"`;  `"too many tries"`, right or wrong
+   * - SIDE EFFECT:  counts a wrong try
+   */
+  async checkPassword({ person, typed, address, password }: PasswordTry): Promise<string> {
+    const counts = { account: `account:${person ?? typed.toLowerCase()}`, address: `address:${address}` }
+    this.dieIfWaiting(counts)
+    // counted before it's checked, as checking takes a while:  so tries at the same moment can't all get through
+    this.countTry(counts.account, PASSWORD_TRIES)
+    this.countTry(counts.address, PASSWORD_ADDRESS_TRIES)
+    // asked even for nobody, so nobody takes as long as someone
+    const isRight = await this.passwords.matches(person, password)
+    if (!person || !isRight) refuse("wrong password", WRONG_PASSWORD)
+    this.wrongTries.delete(counts.account)
+    this.takeBackTry(counts.address)
+    return person
+  }
+
+  /** A device signed in to `person` with a password `checkPassword()` said was right. */
+  signInByPassword({ person, email }: Pick<Session, "person" | "email">): SessionMade {
+    return this.signIn({ person, email }, "password")
+  }
+
+  /**
+   * Set or change the password of whoever's signed in with `token`.
+   * - A first one needs only that.
+   * - Changing one needs `current`, or a sign-in by emailed link or code just now (`hasFreshProof()`).
+   * - SIDE EFFECT:  replacing a password ends the account's other devices.
+   * - throws `SignInError`:  `"needs proof"`, `"wrong password"`, `"bad password"`, `"too many tries"`
+   */
+  async changePassword({ token, password, current, address }: PasswordChange): Promise<void> {
+    const session = this.personOf(token)
+    if (!session) refuse("needs proof", "Sign in first, then set your password.")
+    if (!this.passwords.has(session.person)) return this.passwords.set(session.person, password)
+    if (!this.hasFreshProof(session)) {
+      if (!current) refuse("needs proof", "Type your current password, or sign in with an emailed link to change it.")
+      await this.currentPasswordOrDie(session.person, current, address)
+    }
+    await this.passwords.set(session.person, password)
+    this.endOtherSessions(session.person, token)
+  }
+
+  /**
+   * Set `person`'s password from this machine, whoever they are:  for its own person only.
+   * - SIDE EFFECT:  replacing a password signs the account out everywhere.
+   * - throws `SignInError` `"bad password"`
+   */
+  async setPasswordFor(person: string, password: string): Promise<void> {
+    const had = this.passwords.has(person)
+    await this.passwords.set(person, password)
+    if (had) this.endOtherSessions(person)
+  }
+
+  /** Does a change of `session`'s password go without the current one?  A sign-in by emailed link or code just now. */
+  hasFreshProof({ way, at }: Session): boolean {
+    return way === "email" && at !== undefined && this.now() - at <= PASSWORD_PROOF_MINUTES * MINUTE
+  }
+
+  /** - throws `SignInError` for a wrong `current`:  `"wrong password"`, or `"too many tries"`, on the same count as signing in */
+  private async currentPasswordOrDie(person: string, current: string, address: string): Promise<void> {
+    await this.checkPassword({ person, typed: person, address, password: current }).catch((error: unknown) => {
+      if (error instanceof SignInError && error.kind === "wrong password") {
+        refuse("wrong password", "That isn't your current password.")
+      }
+      throw error
+    })
+  }
+
+  /** SIDE EFFECT:  every device signed in to `person` ends, but `keep`'s. */
+  private endOtherSessions(person: string, keep?: string): void {
+    const kept = keep ? hashOf(keep) : undefined
+    let changed = false
+    for (const [hash, session] of this.sessions) {
+      if (session.person !== person || hash === kept) continue
+      this.sessions.delete(hash)
+      changed = true
+    }
+    if (changed) this.writeSessions()
+  }
+
+  /** - throws `SignInError` `"too many tries"` while `counts` wait */
+  private dieIfWaiting(counts: { account: string; address: string }): void {
+    const limited = [
+      { key: counts.account, limit: PASSWORD_TRIES },
+      { key: counts.address, limit: PASSWORD_ADDRESS_TRIES }
+    ]
+    for (const { key, limit } of limited) {
+      const tries = this.liveTries(key)
+      if (!tries || tries.count < limit) continue
+      const minutes = Math.ceil((tries.ends - this.now()) / MINUTE)
+      refuse(
+        "too many tries",
+        `Too many wrong passwords:  wait ${minutes} ${minutes === 1 ? "minute" : "minutes"}, or sign in with an emailed link instead.`
+      )
+    }
+  }
+
+  /** `key`'s wrong tries, forgetting them once they've ended. */
+  private liveTries(key: string): WrongTries | undefined {
+    const tries = this.wrongTries.get(key)
+    if (tries && tries.ends <= this.now()) this.wrongTries.delete(key)
+    return this.wrongTries.get(key)
+  }
+
+  /** SIDE EFFECT:  one more wrong try against `key`:  the wait starts afresh with each. */
+  private countTry(key: string, limit: number): void {
+    const count = (this.liveTries(key)?.count ?? 0) + 1
+    this.wrongTries.delete(key)
+    this.wrongTries.set(key, { count: Math.min(count, limit), ends: this.now() + PASSWORD_WAIT_MINUTES * MINUTE })
+    for (const oldest of this.wrongTries.keys()) {
+      if (this.wrongTries.size <= TRIES_KEPT) break
+      this.wrongTries.delete(oldest)
+    }
+  }
+
+  /** SIDE EFFECT:  that try against `key` wasn't wrong after all.  An address isn't forgiven more than that:  it may try many accounts. */
+  private takeBackTry(key: string): void {
+    const tries = this.liveTries(key)
+    if (tries) tries.count = Math.max(0, tries.count - 1)
   }
 
   /** Who a device's token signs in:  `undefined` for none, or one that's ended. */
@@ -212,9 +375,9 @@ export class SignIns {
   ////////////////
 
   /** A device signed in by `request`. */
-  private signIn({ person, email }: Pick<SignInRequest, "person" | "email">): SessionMade {
+  private signIn({ person, email }: Pick<SignInRequest, "person" | "email">, way: SignInWay = "email"): SessionMade {
     const token = secret()
-    this.sessions.set(hashOf(token), { person, email, ends: this.now() + SESSION_DAYS * DAY })
+    this.sessions.set(hashOf(token), { person, email, way, at: this.now(), ends: this.now() + SESSION_DAYS * DAY })
     this.writeSessions()
     return { token, person, email }
   }
@@ -263,9 +426,36 @@ export class SignIns {
   }
 }
 
+/** One try at a password. */
+export type PasswordTry = {
+  /** The account it names:  `undefined` for nobody. */
+  person: string | undefined
+  /** What was typed for who:  counted against, when there's no such account. */
+  typed: string
+  /** The address it came from:  counted against too. */
+  address: string
+  /** The password, exactly as typed. */
+  password: string
+}
+
+/** One change of a password, on a signed-in device. */
+export type PasswordChange = {
+  /** The device's token. */
+  token: string | undefined
+  /** The new password, exactly as typed. */
+  password: string
+  /** The current one:  left out, a sign-in by emailed link or code just now has to do. */
+  current?: string
+  /** The address it came from. */
+  address: string
+}
+
 /** Constructor props of `SignIns`. */
 export type SignInsProps = {
-  /** Where the signed-in devices are kept, a JSON file;  left out:  memory only, so a restart signs everyone out. */
+  /**
+   * Where the signed-in devices are kept, a JSON file;  left out:  memory only, so a restart signs everyone out.
+   * - The passwords' file goes beside it, `passwords.json`.
+   */
   file?: string
   /** The time now, ms;  default `Date.now`. */
   now?: () => number

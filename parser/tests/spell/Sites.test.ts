@@ -51,6 +51,32 @@ describe("a site", () => {
     expect(code).toContain('state: "new"')
   })
 
+  test("a page's tags, split at their commas, in code spell and spellx (P15)", () => {
+    const { code, errors } = compiled(
+      [
+        'a "films page" is a page where:',
+        "\t- to draw it:",
+        "\t\t<header>Films</header>",
+        "galaxy guide is a site:",
+        '\t- it has a "films page" at "/films", tagged "Forms, Inputs, Forms"'
+      ],
+      "/Galaxy.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('tags: ["Forms", "Inputs"]')
+    const spellx = compiled(
+      [
+        '<spell-page "films page"><draw><header>Films</header></draw></>',
+        '<spell-site "galaxy guide">',
+        '\t<page "films page" address="/films" tags="Forms, Inputs"/>',
+        "</>"
+      ],
+      "/Galaxy.spellml"
+    )
+    expect(spellx.errors).toEqual([])
+    expect(spellx.code).toContain('tags: ["Forms", "Inputs"]')
+  })
+
   test("in spellx, `state=` and `picture=` say the same (T14)", () => {
     const { code, errors } = compiled(
       [
