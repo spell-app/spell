@@ -13,15 +13,48 @@ export class Note extends Thing {
 }
 
 export class DeviceNote extends Note {
-  static savedIn = { place: "this_device", collection: "device_notes", select: [] }
+  static savedIn = {
+    place: "this_device",
+    collection: "device_notes",
+    times: ["created", "modified"], select: [] }
+
+  // - it lives in this device
+  @prop({ type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 752, end: 775 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in this device
+  @prop({ type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 752, end: 775 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class FolderNote extends Note {
-  static savedIn = { place: "note_folder", collection: "folder_notes", select: [] }
+  static savedIn = {
+    place: "note_folder",
+    collection: "folder_notes",
+    times: ["created", "modified"], select: [] }
+
+  // - it lives in note folder
+  @prop({ type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 807, end: 830 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in note folder
+  @prop({ type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 807, end: 830 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class SheetNote extends Note {
-  static savedIn = { place: "note_sheet", collection: "sheet_notes", select: [] }
+  static savedIn = {
+    place: "note_sheet",
+    collection: "sheet_notes",
+    times: ["created", "modified"], select: [] }
+
+  // - it lives in note sheet
+  @prop({ type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 861, end: 883 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in note sheet
+  @prop({ type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 861, end: 883 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**

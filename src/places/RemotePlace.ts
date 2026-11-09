@@ -115,6 +115,8 @@ export class RemotePlace extends WebPlace implements Place {
   private readonly lines: PlaceLines | undefined
   /** The fields each collection takes no write to, as last said. */
   private readonly readOnlyFields = new Map<string, Set<string>>()
+  /** What the place behind it last said it can hold of Spell's two times:  a sheet's, by its columns. */
+  private timesHeld: PlaceCapabilities["timesHeld"]
   /** Where its files are read direct, when they are:  a space's own folder's (`readsAt`). */
   private readonly reads: ChunkedPlace | undefined
   /** How a person signs in here, if each person is someone. */
@@ -140,7 +142,7 @@ export class RemotePlace extends WebPlace implements Place {
 
   /** What it can do:  `can`, since a server's answer can't be waited for here. */
   describe(): PlaceCapabilities {
-    return this.capabilities
+    return this.timesHeld === undefined ? this.capabilities : { ...this.capabilities, timesHeld: this.timesHeld }
   }
 
   /** The rows of `collection` that `query` asks for:  the place behind it does what it can, and says. */
@@ -161,6 +163,7 @@ export class RemotePlace extends WebPlace implements Place {
     const { versions, ...answer } = await this.ask<ListAnswer & WithVersions>("list", { collection, query }, context)
     this.note(collection, versions)
     if (answer.readOnlyFields) this.readOnlyFields.set(collection, new Set(answer.readOnlyFields))
+    if (answer.timesHeld !== undefined) this.timesHeld = answer.timesHeld
     return { ...answer, ...(versions && { versions }) }
   }
 

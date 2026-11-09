@@ -106,8 +106,8 @@ describe("what compiles", () => {
   it("is saved in:  a place's name, so `is saved in its own file` keeps its meaning", () => {
     const code = compiled(PLACE, "a recipe is a thing:", "\t- it is saved in its own file").compiled
     expect(code).toContain("savedInFile = true")
-    expect(compiled(PLACE, RECIPE).compiled).toContain(
-      'static savedIn = { place: "family_cookbook", collection: "recipes" }'
+    expect(compiled(PLACE, RECIPE).compiled).toMatch(
+      /static savedIn = \{\s*place: "family_cookbook",\s*collection: "recipes",\s*times: \["created", "modified"\]\s*\}/
     )
   })
 

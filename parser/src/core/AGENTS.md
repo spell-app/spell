@@ -282,6 +282,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A write merged over someone else's raises one too (`Places.onConflict()`), holding what was lost:  Use theirs.
     - On a room, which it follows as its things are made:  your long text replaced raises one (Use mine), and someone
       deleting what you're changing raises one (Restore).
+    - `created` and `modified`, Spell's own times on what's saved (epic `data` T57):  `savedIn.times` says which a type keeps.
+      - `saveNew()` stamps both;  a change stamps `modified` as it goes out (`Places.timesStampedOn()`, for a place that can hold it).
+      - Never a clash, never an undo step, never told as a change.  A row from before them stays with none, and sorts last.
+    - A field that links to things is written as their addresses (`addressOfLinked()`), and a followed list's change writes
+      them back (`rememberLinkedList()`, epic `data` T74).
     - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
     - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
     - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the

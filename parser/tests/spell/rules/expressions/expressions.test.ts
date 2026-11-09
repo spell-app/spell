@@ -110,6 +110,7 @@ describe("priority and precedence", () => {
         "items_reordered:  Priority.declaration",
         "its_known_property:  Priority.preferred",
         "joined:  Precedence.join",
+        "keeps_no_times:  Priority.aboveDeclaration",
         "kept_on_device:  Priority.declaration",
         "key_goes_in_address:  Priority.declaration",
         "key_goes_in_header:  Priority.declaration",

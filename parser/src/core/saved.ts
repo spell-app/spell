@@ -40,7 +40,7 @@ import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { after } from "spell/util/timing"
 
-import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
+import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import type * as PlacesFolder from "spell/places"
 import type { Places } from "spell/places/Places"
 import type { PlaceResult } from "spell/places/PlaceResult"
@@ -55,7 +55,7 @@ import { defineCoreModule } from "./core.types"
 import { nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
-import { PlaceThings, heldBy } from "./places"
+import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
@@ -80,6 +80,8 @@ export type SavedIn = {
   collection: string
   /** The fields anything reads, as the compiler found them:  a place that can leave the rest out does.  Left out:  every field. */
   select?: readonly string[]
+  /** Which of Spell's two times it keeps, as rows name them:  stamped as it's saved.  Left out:  neither (epic `data` T57). */
+  times?: readonly string[]
 }
 
 /** What a rider says to draw:  see `core.drawRead()`. */
@@ -550,8 +552,12 @@ class ProgramPlaces {
     return known && whole?.list.items.some((item) => item === known) ? known : undefined
   }
 
-  /** One list for `owner`'s `field`, holding `things`, the same one while `addresses` are. */
-  linkedList(owner: object, field: string, addresses: readonly string[], things: readonly unknown[]): List {
+  /**
+   * One list for `owner`'s `field`, the same one while `addresses` are:  each of `found` that's there, in order.
+   * - `found` is `addresses`' things, each in its place, nothing where the place holds nothing.
+   * - A change to it writes the addresses back (`rememberLinkedList()`).
+   */
+  linkedList(owner: object, field: string, addresses: readonly string[], found: readonly unknown[]): List {
     let lists = this.linkedLists.get(owner)
     if (!lists) this.linkedLists.set(owner, (lists = new Map()))
     const said = addresses.join("\n")
@@ -560,11 +566,37 @@ class ProgramPlaces {
     const list = core.newScratch(List) as List
     untrackCells(() => {
       whileReading(() => {
-        list.items = [...things]
+        list.items = found.filter(Boolean)
       })
     })
-    lists.set(field, { addresses: said, list })
+    const madeNow = { addresses: said, list }
+    lists.set(field, madeNow)
+    this.heedLinkedList(madeNow, owner, field, found)
     return list
+  }
+
+  /** SIDE EFFECT:  a change to `kept.list`, `owner`'s `field` followed, writes the addresses back. */
+  private heedLinkedList(
+    kept: { addresses: string; list: List },
+    owner: object,
+    field: string,
+    found: readonly unknown[]
+  ): void {
+    const stored = getProp(owner, field) as unknown
+    const entries = stored instanceof List ? stored.items.filter((item) => addressIn(item) !== undefined) : []
+    const entryOf = new Map<unknown, unknown>()
+    found.forEach((thing, at) => {
+      if (thing) entryOf.set(thing, entries[at])
+    })
+    rememberLinkedList(kept.list, {
+      owner: owner as Thing,
+      field,
+      entriesFor: (items) => items.map((item) => entryOf.get(item) ?? addressOfLinked(item)),
+      wrote: (now) => {
+        kept.addresses = now.flatMap((entry) => addressIn(entry) ?? []).join("\n")
+        if (stored instanceof List) whileReading(() => void (stored.items = [...now]))
+      }
+    })
   }
 
   /** Make what `start()` needs of a read:  a result, read by nobody yet. */
@@ -577,8 +609,34 @@ class ProgramPlaces {
       placeName: name,
       collection,
       type: Class.name,
-      query: select ? { ...query, select } : query
+      query: this.withTimesAsRowsCallThem(Class, behind, select ? { ...query, select } : query)
     })
+  }
+
+  /**
+   * `query`, as `behind` can take it where it names Spell's two times (epic `data` T57):
+   * - a sort by `its creado` asks for the row's `created`:  a saved time's field has the same name in every language
+   * - a place that can't hold one has no such field, and may refuse it:  neither asked for nor sorted by there
+   *   (the things are put in order here, those with none last)
+   */
+  private withTimesAsRowsCallThem(Class: SavedClass, behind: PlaceBehind, query: ListQuery): ListQuery {
+    const { times = [] } = savedInOf(Class)
+    if (!times.length) return query
+    const schema = schemaOf(Class)
+    const { timesHeld } = behind.describe()
+    const fieldIn = (name: string) => schema.info(name)?.storedAs ?? name
+    const isTime = (name: string) => times.includes(fieldIn(name))
+    const isHeld = (name: string) => timesHeld === "every field" || !!timesHeld?.includes(fieldIn(name))
+    const { sort, select, ...rest } = query
+    return {
+      ...rest,
+      ...(select && { select: select.filter((name) => !isTime(name) || isHeld(name)) }),
+      ...(sort && {
+        sort: sort
+          .filter(({ field }) => !isTime(field) || isHeld(field))
+          .map((each) => (isTime(each.field) ? { ...each, field: fieldIn(each.field) } : each))
+      })
+    }
   }
 
   /** The fields to ask `behind` for, of `Class`:  only when it can leave the rest out, and nothing's been missed. */
@@ -587,7 +645,7 @@ class ProgramPlaces {
     if (!select || this.askedWhole.has(Class)) return undefined
     const { select: canSelect, idOf = ID_FIELD } = behind.describe()
     if (!this.folder!.canDoAll(canSelect, select)) return undefined
-    this.heedFieldsLeftOut(Class, select)
+    this.heedFieldsLeftOut(Class, select, behind)
     // its id too:  it's what makes it one thing
     return select.includes(idOf) ? select : [...select, idOf]
   }
@@ -602,11 +660,18 @@ class ProgramPlaces {
    * - Costs only a read that finds nothing set.
    * - Not what's being read in, or what only shows it (`whileOnlyShowing()`).
    */
-  private heedFieldsLeftOut(Class: SavedClass, select: readonly string[]): void {
+  private heedFieldsLeftOut(Class: SavedClass, select: readonly string[], behind: PlaceBehind): void {
     if (this.heeded.has(Class)) return
     this.heeded.add(Class)
-    const selected = new Set([...select, ID_FIELD])
     const schema = schemaOf(Class)
+    // a saved time this place can't hold:  asking again can't bring it, and it would ask for a field it hasn't got
+    const { timesHeld } = behind.describe()
+    const { times = [] } = savedInOf(Class)
+    const noneToBring = (name: string) => {
+      const field = schema.info(name)?.storedAs ?? name
+      return times.includes(field) && timesHeld !== "every field" && !timesHeld?.includes(field)
+    }
+    const selected = new Set([...select, ID_FIELD, ...[...schema.declared.keys()].filter(noneToBring)])
     const seen = new Set<string>()
     for (let each: typeof schema | undefined = schema; each; each = each.parent) {
       for (const [name, info] of each.declared) {
@@ -893,6 +958,31 @@ class SavedRead {
     MORE_PAGES.set(this.list, this)
     // so a table of it has its columns before it has a row
     nameTableColumns(this.list, Class)
+  }
+
+  /**
+   * This read, in another order, by the field a table's column is named for:  asked of the place, which sorts every
+   * page, not only those drawn (epic `data` T80).
+   * - `undefined` when no field of its type goes by that name:  a worked-out column has nothing to ask for.
+   * - Resolves once it has its first page.
+   * - throws what the read threw
+   */
+  sortedAtPlace(column: string | undefined, descending: boolean): Promise<List> | undefined {
+    const field = column === undefined ? undefined : this.fieldNamed(column)
+    if (field === undefined) return undefined
+    const read = this.program.readOf(this.Class, { ...this.query, sort: [{ field, descending }] })
+    const answering = read.firstPage()
+    read.hold(answering)
+    return answering
+  }
+
+  /** The declared field a column is named for, however its words are spelled:  `Release Date` => `releaseDate`. */
+  private fieldNamed(column: string): string | undefined {
+    const words = wordsOfName(column)
+    for (let schema = schemaOf(this.Class) as ReturnType<typeof schemaOf> | undefined; schema; schema = schema.parent) {
+      for (const name of schema.declared.keys()) if (wordsOfName(name) === words) return name
+    }
+    return undefined
   }
 
   /** Is there another page it hasn't read? */
@@ -1211,6 +1301,9 @@ class SavedRead {
 
 /** `core`'s methods for what's saved in a place. */
 export const savedMethods = defineCoreModule({
+  /** A mark of the program running, for a room:  `RunAppOptions.programVersion`.  `undefined`:  nobody's asked to reload. */
+  _programVersion: undefined as string | undefined,
+
   /**
    * `thing` is a place of the running program, and `details` what its lines say:  what `x is a web server at "..."` compiles to.
    * - Nothing reaches the place until something's read or written.
@@ -1317,15 +1410,14 @@ export const savedMethods = defineCoreModule({
       if (!said.length) return held
       const known = said.map((address) => program.linkKnown(saved, address))
       if (known.every((one) => one !== undefined)) {
-        const things = known.filter(Boolean)
-        return untrackCells(() => program.linkedList(owner, name, said, things))
+        return untrackCells(() => program.linkedList(owner, name, said, known))
       }
       for (const address of said) program.holdLink(saved, address)
       return core.waitedValue(owner, name, async () => {
         const now = addresses() ?? []
         try {
           const things = await Promise.all(now.map((address) => program.follow(saved, address)))
-          return program.linkedList(owner, name, now, things.filter(Boolean))
+          return program.linkedList(owner, name, now, things)
         } catch (error) {
           if (isAbandoned(error)) forgetWaitedValue(owner, name)
           throw error
@@ -1539,7 +1631,7 @@ export const savedMethods = defineCoreModule({
     const things = program.thingMakerNow!
     const sent = input === undefined ? undefined : things.rowSent(input)
     const { savedIn } = (input as { constructor?: SavedClass } | undefined)?.constructor ?? {}
-    return behind.call(name, sent, {}, savedIn?.collection)
+    return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection)
   },
 
   /**
@@ -1557,8 +1649,17 @@ export const savedMethods = defineCoreModule({
   ): Drawing {
     // a read written straight in the drawing is a function that waits:  what it read shows until a new answer lands
     const current = read.constructor.name === ASYNC_FUNCTION ? (createDeferred(read as never) as typeof read) : read
+    ////// A table's header asking its place for another order:  shown until the read itself changes
+    let sorted: { base: unknown; list: object } | undefined
+    const sortChanged = new Cell()
+    const listShown = () => {
+      sortChanged.read()
+      const base = current()
+      const now = sorted
+      return now && now.base === base ? now.list : base
+    }
     const items = () => {
-      const list = current() as { items?: readonly Item[] } | readonly Item[] | undefined
+      const list = listShown() as { items?: readonly Item[] } | readonly Item[] | undefined
       return (
         Array.isArray(list) ? list : ((list as { items?: readonly Item[] } | undefined)?.items ?? [])
       ) as readonly Item[]
@@ -1566,7 +1667,7 @@ export const savedMethods = defineCoreModule({
     const drawn = () => {
       if (!drawEach) return current() as Drawing
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
-      const more = () => MORE_PAGES.get(current() as object)
+      const more = () => MORE_PAGES.get(listShown() as object)
       const paging = riders.paging?.()
       const atOnce = riders.pageSize?.() ?? MOST_AT_ONCE
       const around = elementOf(riders.items?.())
@@ -1593,7 +1694,7 @@ export const savedMethods = defineCoreModule({
               drawItem,
               // the same read draws the same list, so coming back finds it as it was
               key: () => {
-                const list = current()
+                const list = listShown()
                 return list instanceof List ? list : undefined
               },
               more,
@@ -1602,6 +1703,17 @@ export const savedMethods = defineCoreModule({
       if (row) {
         row.remove()
         keepHeaderRow(row, around!, items)
+        around!.addEventListener(TABLE_SORTING, (event) => {
+          const { key, direction } = (event as CustomEvent<TableSorting>).detail
+          const base = current() as object
+          MORE_PAGES.get(base)
+            ?.sortedAtPlace(key, direction === "descending")
+            ?.then((list) => {
+              sorted = { base, list }
+              sortChanged.changed()
+            })
+            .catch((error: unknown) => void core.notify(core.message("read-failed", { why: whyOf(error) })))
+        })
       }
       const inside = around ? drawnIn(around, list) : list
       // the pager comes AFTER what's around the items:  never one more card, or a row of the table
@@ -1719,6 +1831,7 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
       for (const cell of named) {
         const title = document.createElement(cell.localName)
         title.textContent = cell.getAttribute(COLUMN_NAME)
+        title.setAttribute(COLUMN_KEY, cell.getAttribute(COLUMN_NAME)!)
         const align = cell.getAttribute("align")
         if (align) title.setAttribute("align", align)
         header.append(title)
@@ -1783,6 +1896,20 @@ function drawnInPages<Item>({
 
 /** What a cell's column is called, on the cell:  `<cell "Name">`. */
 const COLUMN_NAME = "data-column"
+
+/** What a table's header cell says it sorts by, in Spell UI's `ui-sorting`:  its column's name. */
+const COLUMN_KEY = "data-key"
+
+/** The event a table sends as a header asks to sort:  Spell UI's. */
+const TABLE_SORTING = "ui-sorting"
+
+/** What `ui-sorting` says, as far as a read cares:  a copy of Spell UI's `TableSortDetail`, as core never imports `ui`. */
+type TableSorting = {
+  /** The header's key:  here, its column's name. */
+  key?: string
+  /** Which way. */
+  direction: "ascending" | "descending"
+}
 
 /** The mark on the header row a table of items makes. */
 const HEADER_ROW = "data-header-row"

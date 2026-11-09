@@ -63,7 +63,20 @@ export class Post extends Thing {
     )
   }
 
-  static savedIn = { place: "my_feed", collection: "posts" }
+  static savedIn = {
+    place: "my_feed",
+    collection: "posts",
+    times: ["created", "modified"], select: ["text", "topic", "posted", "by", "space"] }
+
+  // - it lives in my feed
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my feed
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

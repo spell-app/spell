@@ -56,6 +56,7 @@ import {
 } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
+import { KeepsNoTimes } from "./KeepsNoTimes"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
@@ -859,6 +860,9 @@ placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está
 placesEs.addRule(SavedInPlace, { syntax: "{type:subject_it} (se guarda|vive) en {place:expression}" })
 placesEs.addRule(SavedInPlace, { syntax: `${A} {type:known_type} (se guarda|vive) en {place:expression}` })
 placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive) en {place:expression}" })
+
+placesEs.addRule(KeepsNoTimes, { syntax: "{type:subject_implied} no guarda fechas" })
+placesEs.addRule(KeepsNoTimes, { syntax: `${A} {type:known_type} no guarda fechas` })
 
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })

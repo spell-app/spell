@@ -1,6 +1,7 @@
 import { ApiError, type ApiRequest } from "spell/util/fetching"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   type ApplyAnswer,
   type ListAnswer,
   type ListQuery,
@@ -103,9 +104,15 @@ export class GoogleSheetPlace extends WebPlace implements Place {
     return place
   }
 
+  /** Each tab read so far:  its columns' names, and those the program's lines name. */
+  private readonly sheetsRead = new Map<string, readonly [FieldNames, Readonly<Record<string, string>> | undefined]>()
+
   /** The names of `table`'s columns, for `collection`. */
   private namesOf(table: SheetTable, collection: string): FieldNames {
-    return FieldNames.ofColumns(table.columns, this.props.collections?.[collection]?.fields, [this.idColumn])
+    const named = this.props.collections?.[collection]?.fields
+    const names = FieldNames.ofColumns(table.columns, named, [this.idColumn])
+    this.sheetsRead.set(collection, [names, named])
+    return names
   }
 
   /** What it can do:  be read whole, and written all or none if rows have ids. */
@@ -113,6 +120,7 @@ export class GoogleSheetPlace extends WebPlace implements Place {
     const write = this.idColumn === undefined ? "none" : (["insert", "update", "delete"] as const)
     return {
       kind: "sheet",
+      timesHeld: FieldNames.columnsHeldInEvery(this.sheetsRead.values(), SAVED_TIME_FIELDS),
       ...(this.idColumn !== undefined && { idOf: this.idColumn }),
       filter: "none",
       sort: "none",

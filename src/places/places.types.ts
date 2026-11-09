@@ -104,6 +104,11 @@ export function idOfRow(row: PlaceRow, idField: string | undefined): string | un
 // ## What a place can do
 ////////////////
 
+/** The two times Spell keeps of what's saved, as a row names them in every language (epic `data` T57). */
+export const SAVED_TIME_FIELDS = ["created", "modified"] as const
+/** A row's field Spell stamps. */
+export type SavedTimeField = (typeof SAVED_TIME_FIELDS)[number]
+
 /** Every way a place can page through a list. */
 export const PageKinds = ["none", "offset", "cursor", "range"] as const
 /** How a place pages through a list:  see `PageKinds`. */
@@ -228,6 +233,13 @@ export type PlaceCapabilities = {
    * - Left out:  it knows, or it doesn't care.
    */
   identifiesBy?: "this machine" | "a sign-in"
+  /**
+   * Where it can hold the two times Spell stamps on what's saved, `created` and `modified` (epic `data` T57):
+   * - `"every field"`:  anything it's handed
+   * - a list:  only these, as a sheet with that column has
+   * - Left out:  neither:  a web server decides what it keeps, and may refuse a field it doesn't know
+   */
+  timesHeld?: "every field" | readonly string[]
   /** What aborting one of its requests does. */
   abort: AbortKind
   /** How much the engine will load for what this place can't do, over the usual `DEFAULT_CEILING`. */
@@ -559,6 +571,8 @@ export type ListAnswer = {
    * - For a place behind a server side, whose `canWrite()` a browser can't call:  `RemotePlace` keeps them, and answers from them.
    */
   readOnlyFields?: string[]
+  /** What it can hold of Spell's two times, for a page that can't ask its `describe()`:  `PlaceCapabilities.timesHeld`. */
+  timesHeld?: PlaceCapabilities["timesHeld"]
 }
 
 /** One change to one thing. */
@@ -852,6 +866,17 @@ export type Place = {
    */
   call?(name: string, input: unknown, context: SelectingContext, collection?: string): Promise<unknown>
   /**
+   * What the operation `name` would change, worked out here before the place has answered:  a room's named action.
+   * - `undefined`:  this page can't tell, so nothing shows until the answer.
+   * - `showing`:  puts what's pending on top of rows it reads.
+   * - Changes nothing, and sends nothing.
+   */
+  planCall?(
+    name: string,
+    input: unknown,
+    showing: (collection: string, rows: PlaceRow[]) => PlaceRow[]
+  ): { changes: PlaceChange[] } | Promise<{ changes: PlaceChange[] }> | undefined
+  /**
    * The version of this thing as this place last showed it:  what a change made now is made from.
    * - Left out, or `undefined` for a thing it hasn't shown:  the change says nothing, and the last write wins.
    */
@@ -978,6 +1003,7 @@ export const SPACE_FOLDER_CHECKS_AT_MOST_EVERY = 5
  */
 export const SPACE_FOLDER_CAPABILITIES = {
   kind: "data folder",
+  timesHeld: "every field",
   checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
   identifiesBy: "this machine"
 } as const satisfies Partial<PlaceCapabilities>

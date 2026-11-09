@@ -68,6 +68,7 @@ import { RowsIn } from "./RowsIn"
 import { ListsGiveOnly } from "./ListsGiveOnly"
 import { PageSizeIs } from "./PageSizeIs"
 import { SaveDraft } from "./SaveDraft"
+import { KeepsNoTimes } from "./KeepsNoTimes"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
@@ -904,6 +905,9 @@ places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {pa
 places.addRule(SavedInPlace, { syntax: "{type:subject_it} (is saved|lives) in {place:expression}" })
 places.addRule(SavedInPlace, { syntax: "(a|an) {type:known_type} (is saved|lives) in {place:expression}" })
 places.addRule(SavedInPlace, { syntax: "{type:subject_implied} (is saved|lives) in {place:expression}" })
+
+places.addRule(KeepsNoTimes, { syntax: "{type:subject_it} keeps no times" })
+places.addRule(KeepsNoTimes, { syntax: "(a|an) {type:known_type} keeps no times" })
 
 places.addRule(WhileWaiting, { syntax: "while (waiting|loading) :? {statement_body}?" })
 places.addRule(IfThereAreNone, { syntax: "if there are none :? {statement_body}?" })

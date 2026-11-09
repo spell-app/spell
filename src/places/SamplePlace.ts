@@ -38,6 +38,15 @@ export const SampleSources = ["kept", "the real place", "the type", "nothing"] a
  */
 export type SampleSource = (typeof SampleSources)[number]
 
+/** Where a sample's records come from when it starts over:  copied from the real place when it can be, or made up. */
+export const SampleStarts = ["the real place", "made up"] as const
+/**
+ * Where a sample's records come from when it starts over:
+ * - `"the real place"`:  a few of its records when it answers in time, else made up
+ * - `"made up"`:  from what the type declares, even with the real place there to read
+ */
+export type SampleStart = (typeof SampleStarts)[number]
+
 /****************
  * ### `SamplePlace`
  * Editable records that stand in for a real place while designing, with the line that declares the real one untouched.
@@ -45,6 +54,8 @@ export type SampleSource = (typeof SampleSources)[number]
  * - Reads the real place once per collection, for its first records, and NEVER writes it:  its type holds no way to.
  * - First records:  what's kept from an earlier visit, else a few copied from the real place when it answers in time,
  *   else what `rowsFromType` makes, else none.
+ * - A later read naming fields its first read didn't:  it asks the real place for them, once each, and fills them in.
+ * - `startOver()`:  forgets what it holds and finds its first records again;  `startSampleOver()` for a page showing one.
  * - Copied records may be private, so they stay on this device, in the browser's storage:
  *   nothing here writes a file, so nothing reaches git (epic `data` J2).
  * - Says the real place's `kind` and `idOf`, so a thing keeps its identity across the swap.
@@ -65,6 +76,12 @@ export class SamplePlace extends MemoryPlace {
   private readonly firstRecords = new LoadOnce<string, void>({ failures: "forgotten" })
   /** The field holding a row's id. */
   private readonly idField: string
+  /** Each collection's fields asked of the real place so far:  left out of the map, none yet (it came from an earlier visit). */
+  private readonly fieldsAsked = new Map<string, Set<string> | typeof EVERY_FIELD>()
+  /** The last look for more fields, per collection:  each waits for the one before. */
+  private readonly lastLook = new Map<string, Promise<void>>()
+  /** Where its first records come from. */
+  private start: SampleStart = "the real place"
 
   /** How long it waits for the real place's records, ms. */
   private readonly realPlaceWait: number
@@ -79,6 +96,7 @@ export class SamplePlace extends MemoryPlace {
       isSample: true,
       write: ["insert", "update", "delete"],
       versionCheck: false,
+      timesHeld: "every field",
       live: "none"
     }
     super({ capabilities, ...(kept && { collections: kept }) })
@@ -102,12 +120,14 @@ export class SamplePlace extends MemoryPlace {
   /** The rows `query` asks for, its first records found first. */
   async list(collection: string, query: ListQuery, context: PlaceContext = {}): Promise<ListAnswer> {
     await this.firstRecordsOf(collection, query)
+    await this.moreFieldsOf(collection, query.select)
     return super.list(collection, query, context)
   }
 
   /** The rows with these ids, its first records found first. */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext = {}): Promise<PlaceRow[]> {
     await this.firstRecordsOf(collection, {})
+    await this.moreFieldsOf(collection, context.select)
     return super.getMany(collection, ids, context)
   }
 
@@ -129,6 +149,24 @@ export class SamplePlace extends MemoryPlace {
   }
 
   ////////////////
+  // ## Starting over
+  ////////////////
+
+  /**
+   * Forget every record, kept ones too:  the next read finds its first records again, from where `start` says.
+   * - SIDE EFFECT:  from now on, its first records come from `start`.
+   */
+  startOver(start: SampleStart = "the real place"): void {
+    this.start = start
+    this.forgetEveryCollection()
+    this.sources.clear()
+    this.firstRecords.forget()
+    this.fieldsAsked.clear()
+    this.lastLook.clear()
+    this.copy.keep({})
+  }
+
+  ////////////////
   // ## Its first records
   ////////////////
 
@@ -136,10 +174,11 @@ export class SamplePlace extends MemoryPlace {
   private firstRecordsOf(collection: string, { select }: ListQuery): Promise<void> {
     if (this.holdsCollection(collection)) return Promise.resolve()
     return this.firstRecords.get(collection, async () => {
-      const copied = await this.copiedFromReal(collection, select)
+      const copied = this.start === "made up" ? undefined : await this.copiedFromReal(collection, select)
       const made = copied?.length ? undefined : this.rowsFromType?.(collection)
       const rows = copied?.length ? copied : (made ?? [])
       this.startCollection(collection, this.withIds(rows, collection))
+      this.fieldsAsked.set(collection, select ? new Set(select) : EVERY_FIELD)
       const source = copied?.length ? "the real place" : made?.length ? "the type" : "nothing"
       this.sources.set(collection, source)
     })
@@ -152,7 +191,9 @@ export class SamplePlace extends MemoryPlace {
    */
   private async copiedFromReal(collection: string, select: ListQuery["select"]): Promise<PlaceRow[] | undefined> {
     const signal = AbortSignal.timeout(this.realPlaceWait)
-    const query: ListQuery = { page: { size: SAMPLE_RECORDS }, ...(select && { select }) }
+    // always its id:  what it was copied from names the record, for asking again and for its changes
+    const fields = select && [...new Set([this.idField, ...select])]
+    const query: ListQuery = { page: { size: SAMPLE_RECORDS }, ...(fields && { select: fields }) }
     try {
       const { rows } = await LoadOnce.abortable(this.real.list(collection, query, { signal }), signal)
       return structuredClone(rows.slice(0, SAMPLE_RECORDS))
@@ -160,6 +201,36 @@ export class SamplePlace extends MemoryPlace {
       console.info(`SamplePlace:  couldn't copy "${collection}" from the real place;  making it up instead`, error)
       return undefined
     }
+  }
+
+  /**
+   * The fields `select` names, or all of them, that its records were copied without:  asked of the real place, once each.
+   * - One look at a time per collection, so a read waits for the fields it needs.
+   * - NEVER throws:  a field it can't get stays empty.
+   */
+  private moreFieldsOf(collection: string, select: ListQuery["select"]): Promise<void> {
+    const earlier = this.lastLook.get(collection) ?? Promise.resolve()
+    const look = earlier.then(() => this.askForMissing(collection, select))
+    this.lastLook.set(collection, look)
+    return look
+  }
+
+  /** Ask the real place for whichever fields `select` needs that nothing here has asked for. */
+  private async askForMissing(collection: string, select: ListQuery["select"]): Promise<void> {
+    const source = this.sources.get(collection)
+    const asked = this.fieldsAsked.get(collection)
+    if (asked === EVERY_FIELD || (source !== "the real place" && source !== "kept")) return
+    // no fields named wants them all;  only records copied here are known to be short of some
+    if (!select && !asked) return
+    const missing = select?.filter((field) => !asked?.has(field) && !this.holdsField(collection, field))
+    if (missing && !missing.length) return
+    this.fieldsAsked.set(collection, select ? new Set([...(asked ?? []), ...select]) : EVERY_FIELD)
+    const copied = await this.copiedFromReal(collection, missing)
+    for (const row of copied ?? []) {
+      const id = idOfRow(row, this.idField)
+      if (id !== undefined) this.addMissingFields(collection, id, row)
+    }
+    if (copied) this.copy.keep(this.everyCollection)
   }
 
   /** `rows`, each with an id:  its own, or one made here. */
@@ -183,6 +254,9 @@ export type SamplePlaceProps = {
   /** How long to wait for the real place's records, ms:  3 seconds, unless it's told otherwise. */
   realPlaceWait?: number
 }
+
+/** Every field of a collection has been asked for:  there's nothing more to ask. */
+const EVERY_FIELD = "every field"
 
 /** What `useSample()` is told. */
 export type UseSampleProps = {
@@ -227,6 +301,24 @@ export async function useSample(
   }
   await places.useInstead(placeName, sample)
   return sample
+}
+
+/**
+ * Start the sample behind `placeName` over:  its records forgotten, and found again from where `start` says.
+ * - What was waiting to go to it goes first, so nothing's left to land on the new records.
+ * - Everything showing reads again;  resolves once it has.
+ * - No sample behind that name:  nothing happens.
+ */
+export async function startSampleOver(
+  places: Places,
+  placeName: string,
+  start: SampleStart = "the real place"
+): Promise<void> {
+  const sample = places.placeFor(placeName)
+  if (!(sample instanceof SamplePlace)) return
+  await places.pendingIfAny(placeName)?.queue.save()
+  sample.startOver(start)
+  await places.readAfresh(placeName)
 }
 
 /**

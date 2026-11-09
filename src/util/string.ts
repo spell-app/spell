@@ -226,3 +226,18 @@ export function indented(text: string, indent: string | number): string {
     .map((line) => (line.trim() ? `${prefix}${line}` : line))
     .join("\n")
 }
+
+/**
+ * A short mark of `text`, the same for the same text:  two rounds of FNV-1a.
+ * - Not for security, only for noticing a difference.
+ */
+export function textChecksum(text: string): string {
+  let one = 0x811c9dc5
+  let other = 0x9747b28c
+  for (let at = 0; at < text.length; at++) {
+    const code = text.charCodeAt(at)
+    one = Math.imul(one ^ code, 0x01000193)
+    other = Math.imul(other ^ code, 0x5bd1e995)
+  }
+  return `${(one >>> 0).toString(36)}-${(other >>> 0).toString(36)}`
+}

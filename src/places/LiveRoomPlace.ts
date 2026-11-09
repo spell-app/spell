@@ -7,6 +7,8 @@ import {
   RoomCopy,
   ROOM_ID_FIELD,
   ROOM_TOKEN_PROTOCOL,
+  type RoomAction,
+  type RoomActionAnswer,
   type RoomAnswer,
   type RoomAsk,
   type RoomEntry,
@@ -45,6 +47,7 @@ const ROOM_CAPABILITIES: PlaceCapabilities = {
   atomic: true,
   versionCheck: false,
   edits: true,
+  timesHeld: "every field",
   live: "push",
   abort: "soft"
 }
@@ -118,6 +121,11 @@ export type RoomSocketListeners = {
  * - WHO'S HERE (epic `data` P13):  it says who it is as the connection opens, and the referee tells everyone who's in.
  *   - One for each page, so two windows side by side see each other, whoever they say they are.
  *   - With no connection it knows only this page:  `peopleHere()` is just me.
+ * - A PAGE LEFT OPEN ACROSS A NEW VERSION (epic `data` T5):  it says a mark of its program as it opens (`version`), and
+ *   when it got it.  Told to reload (`onOutOfDate()`), it sends no more:  what's pending stays kept, and goes after the reload.
+ * - A NAMED ACTION THE PAGE HAS THE CODE FOR (`actions`, the same functions its referee runs;  epic `data` T29):
+ *   `planCall()` runs it on this page's copy, to show what it'll do;  `PendingChanges.callShownAtOnce()` holds that, and asks
+ *   the referee, whose answer settles it.
  * - `can`:  nothing it does needs saying, but tests and programs may override.
  * - Connects at its first use.  `close()` stops it, and what's changed meanwhile stays pending until `connect()`.
  ****************/
@@ -176,6 +184,16 @@ export class LiveRoomPlace implements Place {
   readonly signIn?: PlaceSignIn
   /** It has opened before:  the next opening is a reconnect. */
   private hasOpened = false
+  /** A mark of the program this page runs:  left out, it's never told to reload. */
+  private readonly version: string | undefined
+  /** When this page got its program, ms. */
+  private readonly loadedAt = Date.now()
+  /** The referee said this page runs an older version. */
+  private isOutOfDate = false
+  /** Who wants to know this page is out of date. */
+  private readonly outOfDateListeners = new Set<() => void>()
+  /** The named actions this page can run first, to show what they'll do. */
+  private readonly actions: Readonly<Record<string, RoomAction>>
   /** Who's at this page. */
   private readonly person: PlacePerson
   /** Who the referee last said is here. */
@@ -190,11 +208,15 @@ export class LiveRoomPlace implements Place {
     person,
     signIn,
     socket,
+    version,
+    actions = {},
     answerSeconds = ANSWER_SECONDS,
     checkSeconds = CHECK_SECONDS
   }: LiveRoomPlaceProps) {
     this.capabilities = { ...ROOM_CAPABILITIES, ...can }
     this.address = url
+    this.version = version
+    this.actions = actions
     this.token = token ?? pageToken()
     this.person = person ?? personOnThisPage((number) => `Guest ${number}`)
     this.connectTo = socket
@@ -291,7 +313,8 @@ export class LiveRoomPlace implements Place {
     const why = this.hasOpened ? "reconnecting" : "opening"
     this.hasOpened = true
     this.healing = undefined
-    this.send({ kind: "here", from: this.clientId, person: this.person })
+    const { version, loadedAt } = this
+    this.send({ kind: "here", from: this.clientId, person: this.person, ...(version && { version, loadedAt }) })
     this.heal(why)
     this.tellConnection()
     this.backListeners.forEach((listener) => listener())
@@ -369,6 +392,7 @@ export class LiveRoomPlace implements Place {
   apply(changes: readonly PlaceChange[], _context: PlaceContext): Promise<ApplyAnswer> {
     this.startIfNew()
     if (!changes.length) return Promise.resolve({ rows: [] })
+    if (this.isOutOfDate) return Promise.reject(this.noAnswer())
     const stamped = changes.map((change) => (change.changeId ? change : { ...change, changeId: newId("c") }))
     const message: RoomAsk = { kind: "changes", from: this.clientId, changes: stamped }
     const keys = stamped.map(({ changeId }) => changeId!)
@@ -384,6 +408,24 @@ export class LiveRoomPlace implements Place {
     const callId = newId("c")
     const message: RoomAsk = { kind: "call", from: this.clientId, callId, name, input }
     return this.askAndWait([callId], message, (result) => result)
+  }
+
+  /**
+   * What the action `name` would change, run on this page's copy with what `showing` adds:  `undefined` if this page has no code for it.
+   * - Changes nothing, and sends nothing.
+   * - Nothing it says stands until the referee has run it, in the one order.
+   * - throws what the action threw:  a refusal here means little, since this copy can be behind
+   */
+  planCall(
+    name: string,
+    input: unknown,
+    showing: (collection: string, rows: PlaceRow[]) => PlaceRow[]
+  ): RoomActionAnswer | Promise<RoomActionAnswer> | undefined {
+    const action = Object.hasOwn(this.actions, name) ? this.actions[name] : undefined
+    if (!action) return undefined
+    const rows = (collection: string) => showing(collection, this.copy.rowsOf(collection))
+    const row = (collection: string, id: string) => rows(collection).find((each) => each[ROOM_ID_FIELD] === id)
+    return action({ rows, row, input, from: this.clientId })
   }
 
   /** Send `message` and wait for its answer, whoever brings it. */
@@ -410,7 +452,21 @@ export class LiveRoomPlace implements Place {
 
   /** The error for no answer:  an ordinary one, so it's sent again. */
   private noAnswer(): Error {
+    if (this.isOutOfDate) return new Error("this page runs an older version:  reload it")
     return new Error(this.isConnected ? "the room didn't answer in time" : "not connected to the room")
+  }
+
+  /** Hear the referee say this page runs an older version:  once.  Returns what stops it. */
+  onOutOfDate(listener: () => void): () => void {
+    this.outOfDateListeners.add(listener)
+    return () => this.outOfDateListeners.delete(listener)
+  }
+
+  /** The referee says this page runs an older version:  nothing more is sent, and whoever shows this is told. */
+  private tookReload(): void {
+    if (this.isOutOfDate) return
+    this.isOutOfDate = true
+    this.outOfDateListeners.forEach((listener) => listener())
   }
 
   /** Send again everything still waiting:  it's made once, however often it's sent. */
@@ -495,6 +551,8 @@ export class LiveRoomPlace implements Place {
         return this.tookNoAnswer(answer)
       case "people":
         return this.tookPeople(answer.people)
+      case "reload":
+        return this.tookReload()
       default:
         /* "at" */ return this.tookWhereItStands(answer)
     }
@@ -728,6 +786,10 @@ export type LiveRoomPlaceProps = {
   signIn?: PlaceSignIn
   /** Makes its socket, for a test:  default a `ReconnectingSocket`. */
   socket?: (listeners: RoomSocketListeners) => RoomSocket
+  /** The named actions this page has the code for, the same functions its referee runs:  shown at once when called. */
+  actions?: Readonly<Record<string, RoomAction>>
+  /** A mark of the program this page runs:  the same program, the same mark.  See `Referee`. */
+  version?: string
   /** How long it waits for an answer, in seconds. */
   answerSeconds?: number
   /** How often it compares its copy with the referee's, in seconds. */

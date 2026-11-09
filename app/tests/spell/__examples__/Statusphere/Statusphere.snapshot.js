@@ -40,7 +40,20 @@ export class Status extends Thing {
 
   static publishedAs = "xyz.statusphere.status"
 
-  static savedIn = { place: "status_board", collection: "statuses" }
+  static savedIn = {
+    place: "status_board",
+    collection: "statuses",
+    times: ["created", "modified"], select: ["status", "createdAt", "owner"] }
+
+  // a status is saved in the status board
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 415, end: 452 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // a status is saved in the status board
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 415, end: 452 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 // -----------
 core.heading("Statusphere:  where the statuses are kept")

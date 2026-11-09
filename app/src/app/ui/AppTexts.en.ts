@@ -283,6 +283,8 @@ export const APP_TEXTS = {
   inspectorDataSourceSample: "Sample data for {place}:  nothing you change here reaches it.",
   inspectorDataUseSample: "Use a sample",
   inspectorDataChanges: "Change Data",
+  sampleStartOver: "Start over",
+  sampleMadeUp: "Made-up records",
   sampleInUse: "Showing sample data for {places}:  nothing you change reaches the real data.",
   useRealData: "Use the real data",
   find: "Find",

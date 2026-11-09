@@ -137,7 +137,14 @@ export class Character extends Thing {
     ]
   }
 
-  static savedIn = { place: "star_wars", collection: "characters", select: ["name", "height", "mass", "hairColor", "eyeColor", "birthYear", "homeworld", "films", "species", "vehicles", "starships"] }
+  static savedIn = {
+    place: "star_wars",
+    collection: "characters",
+    times: ["modified"], select: ["name", "height", "mass", "hairColor", "eyeColor", "birthYear", "homeworld", "films", "species", "vehicles", "starships"] }
+
+  // - it lives in star wars
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1323, end: 1344 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Planet extends Thing {
@@ -247,7 +254,14 @@ export class Planet extends Thing {
     ]
   }
 
-  static savedIn = { place: "star_wars", collection: "planets", select: ["name", "rotationPeriod", "orbitalPeriod", "diameter", "climate", "terrain", "population", "residents", "films"] }
+  static savedIn = {
+    place: "star_wars",
+    collection: "planets",
+    times: ["modified"], select: ["name", "rotationPeriod", "orbitalPeriod", "diameter", "climate", "terrain", "population", "residents", "films"] }
+
+  // - it lives in star wars
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1859, end: 1880 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Film extends Thing {
@@ -375,7 +389,14 @@ export class Film extends Thing {
     )
   }
 
-  static savedIn = { place: "star_wars", collection: "films", select: ["title", "episodeId", "openingCrawl", "director", "producer", "releaseDate", "characters", "planets", "starships", "vehicles", "species"] }
+  static savedIn = {
+    place: "star_wars",
+    collection: "films",
+    times: ["modified"], select: ["title", "episodeId", "openingCrawl", "director", "producer", "releaseDate", "characters", "planets", "starships", "vehicles", "species"] }
+
+  // - it lives in star wars
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2361, end: 2382 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Species extends Thing {
@@ -486,7 +507,14 @@ export class Species extends Thing {
     ]
   }
 
-  static savedIn = { place: "star_wars", collection: "species", select: ["name", "classification", "averageLifespan", "homeworld", "language", "people", "films"] }
+  static savedIn = {
+    place: "star_wars",
+    collection: "species",
+    times: ["modified"], select: ["name", "classification", "averageLifespan", "homeworld", "language", "people", "films"] }
+
+  // - it lives in star wars
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2836, end: 2857 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Vehicle extends Thing {
@@ -587,7 +615,14 @@ export class Vehicle extends Thing {
     ]
   }
 
-  static savedIn = { place: "star_wars", collection: "vehicles", select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "vehicleClass", "pilots", "films"] }
+  static savedIn = {
+    place: "star_wars",
+    collection: "vehicles",
+    times: ["modified"], select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "vehicleClass", "pilots", "films"] }
+
+  // - it lives in star wars
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3331, end: 3352 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Starship extends Thing {
@@ -696,7 +731,14 @@ export class Starship extends Thing {
     ]
   }
 
-  static savedIn = { place: "star_wars", collection: "starships", select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "starshipClass", "pilots", "films"] }
+  static savedIn = {
+    place: "star_wars",
+    collection: "starships",
+    times: ["modified"], select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "starshipClass", "pilots", "films"] }
+
+  // - it lives in star wars
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3883, end: 3904 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class StarWar extends Place {}
@@ -818,7 +860,18 @@ export class WikiPage extends Thing {
     return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
   }
 
-  static savedIn = { place: "wikipedia", collection: "wiki_pages", select: ["kind", "thumbnail", "about", "contentUrls", "summary", "title"] }
+  static savedIn = {
+    place: "wikipedia",
+    collection: "wiki_pages",
+    times: ["created", "modified"], select: ["kind", "thumbnail", "about", "contentUrls", "summary", "title"] }
+
+  // - it lives in wikipedia
+  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1093, end: 1114 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in wikipedia
+  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1093, end: 1114 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Namespace extends Thing {

@@ -287,6 +287,8 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorDataSourceSample: "Datos de muestra de {place}:  nada de lo que cambies aquí le llega.",
   inspectorDataUseSample: "Usar una muestra",
   inspectorDataChanges: "Cambiar datos",
+  sampleStartOver: "Empezar de nuevo",
+  sampleMadeUp: "Registros inventados",
   sampleInUse: "Se muestran datos de muestra de {places}:  nada de lo que cambies llega a los datos reales.",
   useRealData: "Usar los datos reales",
   find: "Buscar",

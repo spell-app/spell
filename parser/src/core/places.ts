@@ -71,6 +71,7 @@ import {
   ITEMS_KEY,
   keysOf,
   schemaOf,
+  getProp,
   sourcesReadBy,
   TYPE_KEY,
   untrackCells,
@@ -108,6 +109,18 @@ import { Thing } from "./classes/Thing"
 
 /** A thing or a list:  what a row becomes. */
 type SpellObject = Thing | List
+
+/** A list made by following a field of addresses:  `rememberLinkedList()`. */
+export type LinkedListHome = {
+  /** Whose field it is. */
+  owner: SpellObject
+  /** Its name. */
+  field: string
+  /** `items` as the field holds them:  each followed thing as the field had it, a new one by its address. */
+  entriesFor(items: readonly unknown[]): unknown[]
+  /** Those are what the field holds now:  a read of it finds them. */
+  wrote(entries: readonly unknown[]): void
+}
 
 /** Options for `PlaceThings`. */
 export type PlaceThingsOptions = Pick<LoaderOptions, "classNamed"> & {
@@ -183,6 +196,14 @@ const PLACE_WRITES: PlaceWriteListener = {
     if (holder) noteWriteToHeld(target as SpellObject, holder, property, value)
   },
   items(list, before, after) {
+    const linked = LINKED_LISTS.get(list)
+    if (linked) {
+      const home = HOMES.get(linked.owner)
+      if (!home) return
+      const entries = linked.entriesFor(after)
+      home.things.noteWrite(home, linked.field, linked.entriesFor(before), entries)
+      return linked.wrote(entries)
+    }
     const held = LIST_FIELDS.get(list)
     if (held) {
       noteHeldItems(after, held.owner, held.field)
@@ -197,6 +218,33 @@ const PLACE_WRITES: PlaceWriteListener = {
     noteHeldItems(after, list as SpellObject, ITEMS_KEY)
     home.things.noteWrite(home, ITEMS_KEY, before, after)
   }
+}
+
+/** The time that's stamped once. */
+const CREATED_FIELD = "created"
+
+/** Lists made by following a field of addresses:  a change to one writes the addresses back (`rememberLinkedList()`). */
+const LINKED_LISTS = new WeakMap<object, LinkedListHome>()
+
+/**
+ * `list` is what following `owner`'s `field` of addresses made:  a change to it is a write of that field's addresses.
+ * - What `core.linked()` does with a list of addresses it follows (epic `data` T74).
+ */
+export function rememberLinkedList(list: List, home: LinkedListHome): void {
+  LINKED_LISTS.set(list, home)
+}
+
+/** Does `field` of `Class` hold things by their addresses? */
+function isLinkField(Class: never, field: string): boolean {
+  return !!schemaOf(Class as Function).info(field)?.link
+}
+
+/** A thing as a field holding addresses holds it:  a list of them, or a thing by its id, which is its address at its place. */
+export function addressOfLinked(value: unknown): unknown {
+  if (value instanceof List) return value.items.map(addressOfLinked)
+  if (Array.isArray(value)) return value.map(addressOfLinked)
+  if (!(value instanceof Thing) && !(value instanceof List)) return value
+  return HOMES.get(value)?.id ?? value.id
 }
 
 /** Note that `list`, a plain one, is `owner`'s `field`, so a change to it is a write to that field. */
@@ -400,6 +448,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!rows) throw new TypeError("new PlaceThings():  it needs `places`, or a `cache` of rows to find references in")
     super({ entryFor: (ref) => entryOfCachedRow(rows, ref), ...(classNamed && { classNamed }) })
     this.places = places
+    places?.stampTimesBy(
+      (type) => (this.classNamed(type) as { savedIn?: { times?: string[] } } | undefined)?.savedIn?.times ?? []
+    )
     this.showMe = showMe ?? ((thing) => void (core as Partial<Pick<typeof core, "send">>).send?.(thing, SHOW_ME_EVENT))
     if (places) {
       onPlaceWrite(PLACE_WRITES)
@@ -470,15 +521,71 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     this.loaded.set(`${type}#${id}`, thing)
     this.noteChanged(thing, { kind: "added" })
     const group = this.groupNumberFor(pending)
+    const times = this.placesOrDie("saveNew").timesStampedOn(type, this.places!.placeForOrDie(placeName))
+    const now = this.nextStampTime()
+    const allTimes = (thing.constructor as { savedIn?: { times?: readonly string[] } }).savedIn?.times ?? []
+    const names = storedAsNamesOf(schemaOf(thing.constructor))
+    const propertyOf = (field: string) => names.get(field) ?? field
+    // a thing saved again, by undo:  it keeps when it was first saved
+    const createdBefore = allTimes.includes(CREATED_FIELD)
+      ? whileReading(() => getProp(thing, propertyOf(CREATED_FIELD)))
+      : undefined
+    const stampOf = (field: string) =>
+      (field === CREATED_FIELD && createdBefore instanceof Date ? createdBefore : now).toISOString()
+    const stamps = Object.fromEntries(times.map((field) => [field, stampOf(field)]))
+    const timeProperties = allTimes.map(propertyOf)
+    const row = Object.fromEntries(
+      Object.entries(this.rowAsWritten(thing)).filter(([field]) => !timeProperties.includes(field))
+    )
     this.writing(() =>
       pending.insert({
         collection,
         type,
         id,
-        fields: this.writer.rowFor(thing),
+        fields: { ...row, ...stamps },
         ...(group !== undefined && { group })
       })
     )
+    // shown even where the place can't keep them:  what's added here stays on top until it's read again
+    this.showStamps(thing, allTimes.filter((field) => field !== CREATED_FIELD || !createdBefore), now)
+  }
+
+  /** Now, later than any stamp this page made before:  things saved in one moment still have an order. */
+  private nextStampTime(): Date {
+    this.lastStampMs = Math.max(Date.now(), this.lastStampMs + 1)
+    return new Date(this.lastStampMs)
+  }
+
+  /** The last time it stamped, ms:  `nextStampTime()`. */
+  private lastStampMs = 0
+
+  /** SIDE EFFECT:  `thing`'s `fields`, Spell's two times, say `now`:  reading in, so it's no change anybody made. */
+  private showStamps(thing: SpellObject, fields: readonly string[], now: Date): void {
+    const names = storedAsNamesOf(schemaOf(thing.constructor))
+    whileReading(() => {
+      for (const field of fields) writeInto(thing, names.get(field) ?? field, now)
+    })
+  }
+
+  /** Every field of `thing` as its place wants it:  `fieldAsWritten()`. */
+  private rowAsWritten(thing: SpellObject): PlaceRow {
+    const Class = thing.constructor as never
+    return Object.fromEntries(
+      Object.entries(this.writer.rowFor(thing)).map(([field, json]) => [
+        field,
+        isLinkField(Class, field) ? addressOfLinked(getProp(thing, field)) : valueAsWritten(Class, field, json)
+      ])
+    )
+  }
+
+  /**
+   * `value`, held in `field` of `Class`, as its place wants it.
+   * - A number it sent as text goes back as text (`valueAsWritten()`).
+   * - A field that links to things:  their addresses, never a reference (`addressOfLinked()`).
+   */
+  private fieldAsWritten(Class: never, field: string, value: unknown): unknown {
+    if (!Class) return this.writer.jsonFor(value)
+    return valueAsWritten(Class, field, isLinkField(Class, field) ? addressOfLinked(value) : this.writer.jsonFor(value))
   }
 
   /**
@@ -745,12 +852,13 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   private remember(thing: SpellObject, home: ThingHome): void {
     HOMES.set(thing, home)
     if (thing instanceof List) noteHeldItems(thing.items, thing, ITEMS_KEY)
-    for (const key of keysOf(thing)) {
-      const value = (thing as unknown as Record<string, unknown>)[key]
-      if (value instanceof List) rememberListField(value, thing, key)
-    }
     // a list property is made the first time it's read, which may be after this:  it's made now, so a change to it is heard
+    // - while reading, as this is no one asking for it:  a field that links to a thing would go and follow its address
     whileReading(() => {
+      for (const key of keysOf(thing)) {
+        const value = (thing as unknown as Record<string, unknown>)[key]
+        if (value instanceof List) rememberListField(value, thing, key)
+      }
       for (let schema = schemaOf(thing.constructor) as Schema | undefined; schema; schema = schema.parent) {
         for (const [key, info] of schema.declared) {
           if (!info.itemType) continue
@@ -775,8 +883,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const group = this.groupNumberFor(pending)
     // a number its place sent as text goes back as text, and nothing as its word for nothing:  `valueAsWritten()`
     const Class = this.classNamed(type) as never
-    const asJson = Class ? valueAsWritten(Class, field, this.writer.jsonFor(value)) : this.writer.jsonFor(value)
-    const wasJson = Class ? valueAsWritten(Class, field, this.writer.jsonFor(was)) : this.writer.jsonFor(was)
+    const asJson = this.fieldAsWritten(Class, field, value)
+    const wasJson = this.fieldAsWritten(Class, field, was)
     const thing = { collection, type, id, field, ...(group !== undefined && { group }) }
     this.writing(() => {
       if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })
@@ -1194,12 +1302,18 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
  * - Its changes are a group, so nothing leaves and nothing's kept on the device until `commit()`.
  * - The undo step is recorded at `commit()`:  until then there's nothing to undo but `cancel()`.
  * - A thing in no place works the same, with nothing to send.
+ * - An open edit keeps the place it started on:  another place going behind the name ends what it can take.
+ *   - Its held changes stay that place's, and nothing set after reaches the one there now.
  * - A step undone after another place went behind the name does nothing:
  *   so a change made to a sample can't be undone into the real place.
  ****************/
 export class PlaceEdit {
   /** What the property held before:  what `cancel()` and undo put back. */
   private readonly was: unknown
+  /** The place behind the thing as this began:  what its changes are for. */
+  private readonly startedOn: object | undefined
+  /** What the property held after the last `set()`. */
+  private lastSet: unknown
   /** Holds what's written until it's committed:  none, for a thing in no place. */
   private readonly group: (PendingGroup & { number: number }) | undefined
   /** Has it been set yet? */
@@ -1210,14 +1324,21 @@ export class PlaceEdit {
   constructor(private readonly props: PlaceEditProps) {
     const { things, thing, property } = props
     this.was = heldValue(valueOf(thing, property))
+    this.startedOn = things.placeBehind(thing)
     this.group = things.pendingOf(thing)?.startGroup()
   }
 
-  /** The property is now `value`:  shown at once, held until `commit()`. */
+  /** Has another place gone behind the name since this began? */
+  private get hasMoved(): boolean {
+    return this.props.things.placeBehind(this.props.thing) !== this.startedOn
+  }
+
+  /** The property is now `value`:  shown at once, held until `commit()`.  Another place is behind it by now:  nothing happens. */
   set(value: unknown): void {
-    if (this.isOver) return
+    if (this.isOver || this.hasMoved) return
     this.isChanged = true
     this.write(value)
+    this.lastSet = heldValue(valueOf(this.props.thing, this.props.property))
   }
 
   /** It's done:  one undo step, and the change goes out.  Nothing was set:  no step, and nothing goes. */
@@ -1227,11 +1348,10 @@ export class PlaceEdit {
     this.group?.end()
     if (!this.isChanged) return
     const { history, title, thing, property, things } = this.props
-    const after = heldValue(valueOf(thing, property))
+    const after = this.lastSet
     if (isSameHeld(after, this.was)) return
-    const placeThen = things.placeBehind(thing)
     const putIf = (value: unknown) => {
-      if (things.placeBehind(thing) === placeThen) writeInto(thing, property, value, "write")
+      if (things.placeBehind(thing) === this.startedOn) writeInto(thing, property, value, "write")
     }
     const record: UndoRecord = { undo: () => putIf(this.was), redo: () => putIf(after) }
     history?.record(record, { title })
@@ -1242,7 +1362,7 @@ export class PlaceEdit {
     if (this.isOver) return
     this.isOver = true
     this.group?.cancel()
-    if (this.isChanged) whileReading(() => writeInto(this.props.thing, this.props.property, this.was))
+    if (this.isChanged && !this.hasMoved) whileReading(() => writeInto(this.props.thing, this.props.property, this.was))
   }
 
   /** Write `value`, in this edit's group. */

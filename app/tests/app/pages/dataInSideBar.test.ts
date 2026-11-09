@@ -262,7 +262,7 @@ describe.skipIf(!SERVING)("data in the side bar", { timeout: 240_000 }, () => {
     await page.keyboard.press("Enter")
     await expect.poll(async () => (await seen()).title).toBe("Sample soup")
     // the real place back:  its records as they were, the sample's change never in them
-    await page.locator(".SampleBar ui-button").click()
+    await page.locator(".SampleBar ui-button.SampleBarRealData").click()
     await expect.poll(async () => (await seen()).sampleBar, { timeout: 10_000 }).toBeUndefined()
     expect(await realTitles()).toEqual(real)
     expect(real).not.toContain("Sample soup")
