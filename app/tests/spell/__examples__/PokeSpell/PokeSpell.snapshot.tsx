@@ -244,7 +244,18 @@ export class Pokemon extends Thing {
     return core.drawEach(this.stats, withSpellPositions((stat: Stat, place: number) => <ui-progress max-width="36em" value={stat.baseStat} total="255" color="green" size="large" label={`${core.getItemAt(strengthWords, position(place))}:  {value}`} part="strengths" />))
   }
 
-  static savedIn = { place: "poke_api", collection: "pokemon", select: ["number", "name", "height", "weight", "species", "sprites", "cries", "stats", "types"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "pokemon",
+    times: ["created", "modified"], select: ["number", "name", "height", "weight", "species", "sprites", "cries", "stats", "types"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 1262, end: 1282 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 1262, end: 1282 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class PokemonSpecies extends Thing {
@@ -370,7 +381,18 @@ export class PokemonSpecies extends Thing {
     return this.pokemon.drawEvolution()
   }
 
-  static savedIn = { place: "poke_api", collection: "pokemon_species", select: ["number", "name", "evolutionChain", "varieties"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "pokemon_species",
+    times: ["created", "modified"], select: ["number", "name", "evolutionChain", "varieties"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2138, end: 2158 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2138, end: 2158 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Type extends Thing {
@@ -454,7 +476,18 @@ export class Type extends Thing {
     )
   }
 
-  static savedIn = { place: "poke_api", collection: "types", select: ["number", "name", "pokemon"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "types",
+    times: ["created", "modified"], select: ["number", "name", "pokemon"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3354, end: 3374 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3354, end: 3374 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Ability extends Thing {
@@ -495,7 +528,18 @@ export class Ability extends Thing {
   @prop({ itemType: "AbilityPokemon", init: () => new List<AbilityPokemon>({ instanceType: "AbilityPokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4195, end: 4237 } })
   accessor pokemon!: List<AbilityPokemon>
 
-  static savedIn = { place: "poke_api", collection: "abilities", select: ["number", "name", "pokemon"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "abilities",
+    times: ["created", "modified"], select: ["number", "name", "pokemon"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3807, end: 3827 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3807, end: 3827 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Move extends Thing {
@@ -594,7 +638,18 @@ export class Move extends Thing {
   get learnedByPokemon(): List<Pokemon> { return core.linked(this, "learnedByPokemon", Pokemon) as List<Pokemon> }
   set learnedByPokemon(value: List<Pokemon>) { this.setProp("learnedByPokemon", value) }
 
-  static savedIn = { place: "poke_api", collection: "moves", select: ["number", "name", "kind"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "moves",
+    times: ["created", "modified"], select: ["number", "name", "kind"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4263, end: 4283 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4263, end: 4283 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class EvolutionChain extends Thing {
@@ -606,7 +661,18 @@ export class EvolutionChain extends Thing {
   @prop({ type: "Chain", declaredAt: { path: "/PokeSpell.api.spell", start: 5281, end: 5303 } })
   accessor chain!: Chain
 
-  static savedIn = { place: "poke_api", collection: "evolution_chains" }
+  static savedIn = {
+    place: "poke_api",
+    collection: "evolution_chains",
+    times: ["created", "modified"], select: ["number", "chain"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5213, end: 5233 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5213, end: 5233 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Generation extends Thing {
@@ -649,7 +715,18 @@ export class Generation extends Thing {
   @prop({ itemType: "PokeApiName", init: () => new List<PokeApiName>({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5658, end: 5706 } })
   accessor versionGroups!: List<PokeApiName>
 
-  static savedIn = { place: "poke_api", collection: "generations", select: ["number", "name", "types"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "generations",
+    times: ["created", "modified"], select: ["number", "name", "types"] }
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5335, end: 5355 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in poke api
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5335, end: 5355 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class PokemonAbility extends Thing {
@@ -1206,7 +1283,19 @@ export class Favourite extends Thing {
     return core.drawThing(this.pokemon!)
   }
 
-  static savedIn = { place: "my_favourites", collection: "favourites" }
+  static savedIn = {
+    place: "my_favourites",
+    collection: "favourites",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my favourites
+  @prop({ type: "date", declaredAt: { path: "/Favourites.api.spell", start: 287, end: 312 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my favourites
+  @prop({ type: "date", declaredAt: { path: "/Favourites.api.spell", start: 287, end: 312 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**

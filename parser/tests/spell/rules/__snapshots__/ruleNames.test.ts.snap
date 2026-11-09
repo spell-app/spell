@@ -598,6 +598,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "jsxExpression",
       "jsxComment",
     ],
+    "keeps_no_times": [
+      "keeps_no_times",
+      "keeps_no_times",
+    ],
     "list_guard": [
       "list_guard",
       "list_guard",
@@ -1201,6 +1205,8 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "saved_in_place",
       "saved_in_place",
       "saved_in_place",
+      "keeps_no_times",
+      "keeps_no_times",
       "while_waiting",
       "if_there_are_none",
       "if_that_fails_say",
@@ -1484,6 +1490,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "jsxExpression · JSX · 1",
     "jsxFragment · JSX · 1",
     "jsxText · JSX · 1",
+    "keeps_no_times · places · 2",
     "kept_on_device · places · 1",
     "key_if_set · places · 1",
     "key_is_secret · places · 1",

@@ -417,3 +417,68 @@ def test_field_names_as_javascript_writes_them() -> None:
     assert javascript_name("device_count") == "deviceCount"
     assert javascript_name("class_") == "class"
     assert python_name("deviceCount") == "device_count"
+
+
+class TimedNote(Thing):
+    """`a timed note is a thing` + `- it lives in this device`:  its two times, as the compiler gives them."""
+
+    saved_in: ClassVar[dict[str, object]] = {
+        "place": "this_device",
+        "collection": "timed_notes",
+        "times": ["created", "modified"],
+    }
+    title = prop(type="text")
+    created = prop(type="date")
+    modified = prop(type="date")
+
+
+class TimelessNote(Thing):
+    """`- it keeps no times`:  nothing in its `saved_in`."""
+
+    saved_in: ClassVar[dict[str, str]] = {"place": "this_device", "collection": "timeless_notes"}
+    title = prop(type="text")
+
+
+# The rows both cores read:  the JavaScript core's test beside it.
+SAVED_ROW_TIMES = Path(__file__).parents[3] / "core" / "savedRowTimes.expected.json5"
+
+
+def test_a_new_thing_is_stamped_and_a_change_stamps_modified(tmp_path: Path) -> None:
+    core = new_core(tmp_path)
+    with using_core(core):
+        note = TimedNote(title="Soup")
+        core.save_thing(note)
+        assert note.created
+        created = note.created
+        note.title = "Stew"
+        kept = core._places.behind("this_device").rows_now("timed_notes")[0]
+    assert kept["created"] == created
+    assert kept["modified"]
+
+
+def test_a_type_with_no_times_is_left_alone(tmp_path: Path) -> None:
+    core = new_core(tmp_path)
+    with using_core(core):
+        core.save_thing(TimelessNote(title="Soup"))
+        kept = core._places.behind("this_device").rows_now("timeless_notes")[0]
+    assert "created" not in kept
+
+
+def test_a_row_from_before_times_reads_with_nothing_made_up(tmp_path: Path) -> None:
+    rows = _json5_rows()
+    core = new_core(tmp_path)
+    device = core._places.behind("this_device")
+    device.apply([{"kind": "insert", "collection": "timed_notes", "id": "old", "fields": rows["old"]}])
+    with using_core(core):
+        notes = asyncio.run(core.saved_things(TimedNote))
+        assert not notes[0].created
+        notes[0].title = "Changed"
+        kept = device.rows_now("timed_notes")[0]
+    assert "created" not in kept
+    assert kept["modified"]
+
+
+def _json5_rows() -> dict[str, dict[str, object]]:
+    """The fixture's rows:  JSON with one comment line."""
+    lines = [line for line in SAVED_ROW_TIMES.read_text().splitlines() if not line.strip().startswith("//")]
+    return json.loads("\n".join(lines))

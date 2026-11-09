@@ -96,6 +96,7 @@ export class SamplePlace extends MemoryPlace {
       isSample: true,
       write: ["insert", "update", "delete"],
       versionCheck: false,
+      timesHeld: "every field",
       live: "none"
     }
     super({ capabilities, ...(kept && { collections: kept }) })

@@ -16,15 +16,33 @@ class Note(Thing):
 
 
 class DeviceNote(Note):
-    saved_in = {"place": "this_device", "collection": "device_notes"}
+    saved_in = {"place": "this_device", "collection": "device_notes", "times": ["created", "modified"]}
+
+    # - it lives in this device
+    created = prop(type="date")
+
+    # - it lives in this device
+    modified = prop(type="date")
 
 
 class FolderNote(Note):
-    saved_in = {"place": "note_folder", "collection": "folder_notes"}
+    saved_in = {"place": "note_folder", "collection": "folder_notes", "times": ["created", "modified"]}
+
+    # - it lives in note folder
+    created = prop(type="date")
+
+    # - it lives in note folder
+    modified = prop(type="date")
 
 
 class SheetNote(Note):
-    saved_in = {"place": "note_sheet", "collection": "sheet_notes"}
+    saved_in = {"place": "note_sheet", "collection": "sheet_notes", "times": ["created", "modified"]}
+
+    # - it lives in note sheet
+    created = prop(type="date")
+
+    # - it lives in note sheet
+    modified = prop(type="date")
 
 
 class ThisDevice(Place):

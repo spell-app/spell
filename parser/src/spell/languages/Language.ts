@@ -408,6 +408,8 @@ export type LanguageWords = {
   placeKinds?: Readonly<Record<string, string>>
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
+  /** What a saved type's two times are called in this language:  `creado`.  Its rows say `created` and `modified` in every one. */
+  savedTimeWords: { created: string; modified: string }
   /**
    * How an event still HAPPENING is named, which a handler can cancel (epic `elemental-spell` P9, Q27):
    * English's `-ing` (`closing`), Spanish's gerund (`cerrando`) -- see `send`'s rule.

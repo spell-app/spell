@@ -22,7 +22,21 @@ export class Review extends Thing {
   get words() { return this.getProp("words") }
   set words(value) { this.setProp("words", value) }
 
-  static savedIn = { place: "galaxy_reviews", collection: "reviews" }
+  static savedIn = {
+    place: "galaxy_reviews",
+    collection: "reviews",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in galaxy reviews
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in galaxy reviews
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

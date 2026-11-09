@@ -23,6 +23,7 @@ import {
 
 /** What a `MemoryPlace` can do, unless it's told otherwise:  everything but `makesIds`. */
 const MEMORY_CAPABILITIES: PlaceCapabilities = {
+  timesHeld: "every field",
   kind: "in memory database",
   idOf: "id",
   filter: "every field",

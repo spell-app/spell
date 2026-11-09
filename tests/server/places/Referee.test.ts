@@ -230,7 +230,9 @@ describe("Referee, with a calm connection", () => {
 
   test("a page told to reload says so once, and what's pending stays for after", async () => {
     const referee = await newRoom()
-    const { pages: [old] } = await roomWith(1, {}, referee, { version: "v1" })
+    const {
+      pages: [old]
+    } = await roomWith(1, {}, referee, { version: "v1" })
     let toldToReload = 0
     old!.place.onOutOfDate(() => toldToReload++)
     await roomWith(1, {}, referee, { version: "v2" })
@@ -240,6 +242,26 @@ describe("Referee, with a calm connection", () => {
     expect(referee.rows.rowFor("recipes", "r-1")!.title).toBe("Soup")
     expect(old!.pending.changes).toHaveLength(1)
     expect(toldToReload).toBe(1)
+  })
+
+  test("a stamp is never an overwrite:  nobody's told they lost one", async () => {
+    const referee = await newRoom()
+    const heard: string[] = []
+    const page = (from: string) => referee.join((text) => void heard.push(text))
+    const send = (member: ReturnType<typeof page>, from: string, changeId: string) =>
+      member.receive(
+        JSON.stringify({
+          kind: "changes",
+          from,
+          changes: [
+            { kind: "update", collection: "recipes", id: "r-1", changeId, version: "0", fields: { modified: changeId } }
+          ]
+        })
+      )
+    send(page("one"), "one", "c-1")
+    send(page("two"), "two", "c-2")
+    await vi.waitFor(() => expect(referee.sequence).toBeGreaterThanOrEqual(2))
+    expect(heard.filter((text) => text.includes("overwrote"))).toEqual([])
   })
 
   test("a page that says no version is never asked to reload", async () => {
@@ -258,7 +280,10 @@ describe("Referee, with a calm connection", () => {
     /** The last seat:  taken by whoever's first, the same on the page and the referee. */
     const takeSeat: RoomAction = ({ row, input }) => {
       if (row("recipes", "r-1")!.takenBy) throw new PlaceError("That seat's gone", { cause: { kind: "refused" } })
-      return { changes: [{ kind: "update", collection: "recipes", id: "r-1", fields: { takenBy: input } }], result: "yours" }
+      return {
+        changes: [{ kind: "update", collection: "recipes", id: "r-1", fields: { takenBy: input } }],
+        result: "yours"
+      }
     }
 
     test("two press at once:  each shows it taken at once;  one keeps it, the other sees it go back, and the notice", async () => {

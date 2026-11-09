@@ -20,7 +20,19 @@ export class Recipe extends View {
     )
   }
 
-  static savedIn = { place: "family_cookbook", collection: "recipes" }
+  static savedIn = {
+    place: "family_cookbook",
+    collection: "recipes",
+    times: ["created", "modified"]
+  }
+
+  // - it is saved in the family cookbook
+  @prop({ type: "date", declaredAt: { path: "/LiveRoom.spell", start: 759, end: 793 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it is saved in the family cookbook
+  @prop({ type: "date", declaredAt: { path: "/LiveRoom.spell", start: 759, end: 793 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -30,7 +42,10 @@ export class Recipe extends View {
  * - What every view's element does, e.g. drawing its recipe, is `SpellElement`'s.
  */
 export class RecipeElement extends SpellElement<Recipe> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-recipe", "recipe", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-recipe", "recipe", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   onSomeoneElseChange(event: any /* spell: type unknown */) {
     return this.currentThing?.onSomeoneElseChange(event)

@@ -182,7 +182,7 @@ export class PlaceHeal {
     const mostRows = ceiling?.rows ?? DEFAULT_CEILING.rows
     const missing = new Set(ids)
     const rows: PlaceRow[] = []
-    for (let page: string | undefined; ; ) {
+    for (let page: string | undefined; ;) {
       const answer = await place.list(collection, page === undefined ? {} : { page: { at: page } }, {})
       rows.push(...answer.rows)
       for (const row of answer.rows) missing.delete(idOfRow(row, idOf) ?? "")

@@ -351,7 +351,12 @@ function fieldsNeverFilled(Class: new () => unknown, things: readonly unknown[])
     // nothing stored:  what it reads by itself, worked out from what is
     return value !== usual[field] && value !== undefined && value !== null
   }
-  return [...schemaOf(Class).declared.keys()].filter((field) => !things.some((thing) => isFilled(thing, field)))
+  // Spell's own two times, which no line asked for, are no field the place was meant to fill
+  const { times = [] } = (Class as { savedIn?: { times?: readonly string[] } }).savedIn ?? {}
+  return [...schemaOf(Class).declared]
+    .filter(([field, info]) => !times.includes((info as { storedAs?: string }).storedAs ?? field))
+    .map(([field]) => field)
+    .filter((field) => !things.some((thing) => isFilled(thing, field)))
 }
 
 ////////////////

@@ -18,7 +18,21 @@ export class Recipe extends View {
     )
   }
 
-  static savedIn = { place: "family_cookbook", collection: "recipes" }
+  static savedIn = {
+    place: "family_cookbook",
+    collection: "recipes",
+    times: ["created", "modified"]
+  }
+
+  // - it is saved in the family cookbook
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/LiveRoom.spell", start: 759, end: 793 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it is saved in the family cookbook
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/LiveRoom.spell", start: 759, end: 793 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /** A recipe box two people share:  who's here, and what the other one changed (epic data P13) */

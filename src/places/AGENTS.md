@@ -23,6 +23,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Place`:  say what you can do, list a collection;  the rest is optional
     - `PlaceCapabilities`, and `writeAnswerFor()`:  whether a write would be taken, per thing and per field
     - `PlaceError`:  a place THROWS when it fails, unlike preferences' `PrefPlace`
+    - `SAVED_TIME_FIELDS`, `timesHeld` (epic `data` T57):  what a place can hold of the `created` and `modified` Spell stamps:
+      every field, only the columns a sheet has, or (a web server) neither.  `Places.timesStampedOn()` says which go.
   - `PlaceCache`:  ONE row per type and id, its fields reactive.
   - `Places`:  places by name, swapping the one behind a name, and the one cache.
     - `originOf(thing, property)`:  where a value came from, for the editor's side bar (epic `data` P9):
@@ -242,6 +244,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - It sits on top of what's read (`replayOn()`), so you read your own writes.
     - A write back to what it `was`, not yet sent, drops the change:  that's undo before sending.
     - A group is an action's:  held until `end()`, never kept on the device, dropped by `cancel()`.
+      - `callShownAtOnce()` (epic `data` T29):  a named action a page has the code for, held as a group, never sent:
+        the referee's answer settles it (`settled()`);  a refusal drops it, and the notice shows.
+    - `modified` is stamped as a change goes out (`placeChangeFor()`), so it's never a change of its own (epic `data` T57).
     - A change says the version it was made from (`Place.versionOf()`).  Refused as out of date:  a three-way merge per
       field, against its `was`, then sent again;  mine wins, and `Places.onConflict()` hears what was lost.
   - [SaveQueue](SaveQueue.ts):  saving in the background, in order, until it goes through;
@@ -259,6 +264,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       I replaced from offline (`onConflict()`), a delete of what I was changing (`onThingDeleted()`).
     - `PlaceHeal.follow()` is what turns all of it into rows on screen, for a page;  `PlaceThings` does it by itself.
     - A room trusts everyone in it:  no per-person rules yet.
+    - A page left open across a new version (epic `data` T5):  it says a mark of its program as it opens (`version`), and when it
+      got it;  the referee tells a page on an older one to reload (`onOutOfDate()`), and what's pending stays for after.
     - Who's here (epic `data` P13):  `currentPerson()`, `peopleHere()`, `onPeopleHere()`, optional on any `Place`:  one for each page.
       A guest, with no name from the server that served the page, is one per tab:  [people.ts](people.ts);
       a page signed in to a Spell account is that account.

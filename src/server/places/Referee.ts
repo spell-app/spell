@@ -5,6 +5,7 @@ import type { Duplex } from "node:stream"
 import { every } from "spell/util/timing"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   idOfRow,
   type PersonHere,
   type ListQuery,
@@ -324,7 +325,7 @@ export class Referee {
   /** A page runs this version:  it may be the program now, and whoever isn't on that one is told to reload. */
   private noteVersion(send: (text: string) => void, version: ProgramVersion): void {
     this.versions.set(send, version)
-    if (this.newest && version.loadedAt < this.newest.loadedAt) return void this.tellIfOutOfDate(send)
+    if (this.newest && version.loadedAt < this.newest.loadedAt) return this.tellIfOutOfDate(send)
     this.newest = version
     for (const member of this.versions.keys()) this.tellIfOutOfDate(member)
   }
@@ -561,6 +562,8 @@ export class Referee {
       if (kind !== "update" || version === undefined || !fields) continue
       const row = this.copy.rowFor(collection, id!)
       for (const [field, value] of Object.entries(fields)) {
+        // a stamp is nobody's work:  nothing was lost by writing over it
+        if ((SAVED_TIME_FIELDS as readonly string[]).includes(field)) continue
         const last = this.lastWrites.get(`${collection}\n${id}\n${field}`)
         const isUnseen = last && last.from !== from && last.seq > Number(version)
         if (isUnseen && JSON.stringify(row?.[field]) !== JSON.stringify(value)) {
@@ -569,6 +572,19 @@ export class Referee {
       }
     }
     return overwrote
+  }
+
+  /** `change`, without the stamps its store has no place for:  the room keeps them, and the store never refuses for one. */
+  private withoutTimesItCantHold(change: PlaceChange): PlaceChange {
+    const { timesHeld } = this.place.describe()
+    if (timesHeld === "every field" || !change.fields) return change
+    const cantHold = SAVED_TIME_FIELDS.filter((field) => !timesHeld?.includes(field))
+    return {
+      ...change,
+      fields: Object.fromEntries(
+        Object.entries(change.fields).filter(([field]) => !(cantHold as string[]).includes(field))
+      )
+    }
   }
 
   /** Note who wrote what, for telling whoever writes over it. */
@@ -611,7 +627,7 @@ export class Referee {
       throw new PlaceError("This room's store can't be written", { cause: { kind: "refused", whyNot: "place" } })
     }
     const makesIds = this.place.describe().makesIds
-    const toStore = changes.map((change) => this.changeForStore(change, plan, makesIds))
+    const toStore = changes.map((change) => this.withoutTimesItCantHold(this.changeForStore(change, plan, makesIds)))
     const keys = changes.map(({ collection, id }) => `${collection}\n${id}`)
     keys.forEach((key) => this.writing.add(key))
     try {

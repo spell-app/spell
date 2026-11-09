@@ -1,10 +1,10 @@
 244:38 TS2345 Argument of type '(item: Stat, index: number) => Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
 244:118 TS2322 Type 'number' is not assignable to type 'string'.
-445:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1145:42 TS2345 Argument of type '(chain: Chain) => JSX.Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
-1288:5 TS2322 Type 'unknown' is not assignable to type 'List<Pokemon>'.
-1289:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
-1290:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1400:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1407:7 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
-1410:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
+467:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1222:42 TS2345 Argument of type '(chain: Chain) => JSX.Element' is not assignable to parameter of type '(item: unknown, position: number, list: unknown) => Element'.
+1377:5 TS2322 Type 'unknown' is not assignable to type 'List<Pokemon>'.
+1378:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.
+1379:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1489:5 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1496:7 TS2322 Type 'undefined' is not assignable to type 'Pokemon'.
+1499:5 TS2322 Type 'Pokemon | undefined' is not assignable to type 'Pokemon'.

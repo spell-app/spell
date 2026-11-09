@@ -18,7 +18,21 @@ export class Receta extends View {
     )
   }
 
-  static savedIn = { place: "recetario_familiar", collection: "recetas" }
+  static savedIn = {
+    place: "recetario_familiar",
+    collection: "recetas",
+    times: ["created", "modified"]
+  }
+
+  // se guarda en el recetario familiar
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/SalaEnVivo.es.spell", start: 860, end: 894 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // se guarda en el recetario familiar
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/SalaEnVivo.es.spell", start: 860, end: 894 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
 }
 
 /** Una caja de recetas que comparten dos personas:  quién está, y qué cambió la otra (épica data P13) */

@@ -80,6 +80,8 @@ export type SavedIn = {
   collection: string
   /** The fields anything reads, as the compiler found them:  a place that can leave the rest out does.  Left out:  every field. */
   select?: readonly string[]
+  /** Which of Spell's two times it keeps, as rows name them:  stamped as it's saved.  Left out:  neither (epic `data` T57). */
+  times?: readonly string[]
 }
 
 /** What a rider says to draw:  see `core.drawRead()`. */
@@ -600,8 +602,22 @@ class ProgramPlaces {
       placeName: name,
       collection,
       type: Class.name,
-      query: select ? { ...query, select } : query
+      query: this.withTimesAsRowsCallThem(Class, select ? { ...query, select } : query)
     })
+  }
+
+  /** `query`, a sort by `its creado` asking for the row's `created`:  a saved time's field has the same name in every language. */
+  private withTimesAsRowsCallThem(Class: SavedClass, query: ListQuery): ListQuery {
+    if (!query.sort?.length || !savedInOf(Class).times?.length) return query
+    const { sort } = query
+    const schema = schemaOf(Class)
+    return {
+      ...query,
+      sort: sort.map((each) => {
+        const stored = schema.info(each.field)?.storedAs
+        return stored && savedInOf(Class).times!.includes(stored) ? { ...each, field: stored } : each
+      })
+    }
   }
 
   /** The fields to ask `behind` for, of `Class`:  only when it can leave the rest out, and nothing's been missed. */

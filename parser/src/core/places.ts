@@ -445,6 +445,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!rows) throw new TypeError("new PlaceThings():  it needs `places`, or a `cache` of rows to find references in")
     super({ entryFor: (ref) => entryOfCachedRow(rows, ref), ...(classNamed && { classNamed }) })
     this.places = places
+    places?.stampTimesBy((type) => (this.classNamed(type) as { savedIn?: { times?: string[] } } | undefined)?.savedIn?.times ?? [])
     this.showMe = showMe ?? ((thing) => void (core as Partial<Pick<typeof core, "send">>).send?.(thing, SHOW_ME_EVENT))
     if (places) {
       onPlaceWrite(PLACE_WRITES)
@@ -515,15 +516,27 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     this.loaded.set(`${type}#${id}`, thing)
     this.noteChanged(thing, { kind: "added" })
     const group = this.groupNumberFor(pending)
+    const times = this.placesOrDie("saveNew").timesStampedOn(type, this.places!.placeForOrDie(placeName))
+    const now = new Date()
+    const stamps = Object.fromEntries(times.map((field) => [field, now.toISOString()]))
     this.writing(() =>
       pending.insert({
         collection,
         type,
         id,
-        fields: this.rowAsWritten(thing),
+        fields: { ...this.rowAsWritten(thing), ...stamps },
         ...(group !== undefined && { group })
       })
     )
+    this.showStamps(thing, times, now)
+  }
+
+  /** SIDE EFFECT:  `thing`'s `fields`, Spell's two times, say `now`:  reading in, so it's no change anybody made. */
+  private showStamps(thing: SpellObject, fields: readonly string[], now: Date): void {
+    const names = storedAsNamesOf(schemaOf(thing.constructor))
+    whileReading(() => {
+      for (const field of fields) writeInto(thing, names.get(field) ?? field, now)
+    })
   }
 
   /** Every field of `thing` as its place wants it:  `fieldAsWritten()`. */

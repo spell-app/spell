@@ -69,7 +69,7 @@ start the box`
       "to show the minutes of (a recipe):\n\tprint the minutes of the recipe"
     )
     expect(code).toContain(
-      'static savedIn = { place: "family_cookbook", collection: "recipes", select: ["title", "minutes"] }'
+      'static savedIn = { place: "family_cookbook", collection: "recipes", times: ["created", "modified"], select: ["title", "minutes"] }'
     )
   })
 
@@ -229,7 +229,7 @@ start the box`
 })
 
 describe("what's listened to counts as read (epic `data` P13)", () => {
-  const SELECT = /static savedIn = \{ place: "family_cookbook", collection: "recipes", select: \[([^\]]*)\]/
+  const SELECT = /static savedIn = \{ place: "family_cookbook", collection: "recipes", times: \[[^\]]*\], select: \[([^\]]*)\]/
 
   test("`when its notes changes` reads notes, with nothing else that does, or it would be left out", () => {
     const read = compile(

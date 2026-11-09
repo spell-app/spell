@@ -74,6 +74,7 @@ export class ChunkedPlace implements Place {
       page: "none",
       write: canWrite ? ["insert", "update", "delete"] : "none",
       atomic: false,
+      ...(canWrite && { timesHeld: "every field" as const }),
       ...(canWrite && store.writeIfVersion && store.versionOf && { versionCheck: true }),
       live: "poll",
       abort: store.aborts ?? "soft"

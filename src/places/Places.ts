@@ -179,6 +179,21 @@ export class Places {
     return this.typesRead.get(`${placeName}\n${collection}`)
   }
 
+  /** Say which of Spell's two times each type keeps:  what's stamped as a change goes out.  `PlaceThings` does, for a program. */
+  stampTimesBy(timesOf: (type: string) => readonly string[]): void {
+    this.timesOf = timesOf
+  }
+
+  /** Which of Spell's two times `type` keeps at `place`:  those it says, that the place can hold (epic `data` T57). */
+  timesStampedOn(type: string | undefined, place: Place): readonly string[] {
+    const times = type === undefined ? [] : (this.timesOf?.(type) ?? [])
+    const { timesHeld } = place.describe()
+    return timesHeld === "every field" ? times : times.filter((field) => timesHeld?.includes(field))
+  }
+
+  /** See `stampTimesBy()`. */
+  private timesOf: ((type: string) => readonly string[]) | undefined
+
   /** The place named `name`, if there is one. */
   placeFor(name: string): Place | undefined {
     return this.places.get(name)

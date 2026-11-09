@@ -56,6 +56,24 @@ export class FieldNames {
     return names
   }
 
+  /**
+   * Of `fields`, those a sheet has a column for under that very word, which no line of the program's named:
+   * what Spell may write there by itself, so it never adds a column, or writes one a program only reads (epic `data` T57).
+   */
+  columnsHeld(fields: readonly string[], named: Readonly<Record<string, string>> = {}): string[] {
+    return fields.filter((field) => this.theirs.has(field) && !(field in named))
+  }
+
+  /** Of `fields`, those every sheet read so far holds (`columnsHeld()`):  a place says one answer for all its sheets. */
+  static columnsHeldInEvery(
+    sheets: Iterable<readonly [FieldNames, Readonly<Record<string, string>> | undefined]>,
+    fields: readonly string[]
+  ): string[] {
+    let held: string[] | undefined
+    for (const [names, named] of sheets) held = names.columnsHeld(held ?? fields, named)
+    return held ?? []
+  }
+
   /** Remember how each of `columns` is spelled, for writing:  a sheet's header, or a schema. */
   note(columns: Iterable<string>): void {
     for (const column of columns) if (column) this.ourName(column)

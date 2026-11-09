@@ -14,6 +14,7 @@ import {
   type Place,
   type PlaceChange,
   type PlaceRow,
+  type SavedTimeField,
   type SelectingContext
 } from "./places.types"
 
@@ -152,6 +153,9 @@ export type PlaceThingDeleted = {
   /** Make it again, with the same id. */
   restore(): void
 }
+
+/** The time a change stamps as it goes out. */
+const MODIFIED_FIELD: SavedTimeField = "modified"
 
 /** An action's changes, shown at once and held until it ends:  `PendingChanges.startGroup()`. */
 export type PendingGroup = {
@@ -661,7 +665,11 @@ export class PendingChanges {
 
   /** `change` as a place takes it. */
   private placeChangeFor(change: PendingChange, place: Place): PlaceChange {
-    const { type: _type, field: _field, hasLeft: _hasLeft, was: _was, group: _group, ...placeChange } = change
+    const { type, field: _field, hasLeft: _hasLeft, was: _was, group: _group, ...placeChange } = change
+    // a stamp goes with what's changed, and only here:  never a change of its own, so never a clash or an undo step
+    if (change.kind === "update" && this.places.timesStampedOn(type, place).includes(MODIFIED_FIELD)) {
+      return { ...placeChange, fields: { ...placeChange.fields, [MODIFIED_FIELD]: new Date().toISOString() } }
+    }
     if (change.kind !== "insert" || !place.describe().makesIds) return placeChange
     const { id: _id, fields, ...rest } = placeChange
     const { [this.idField]: _idField, ...others } = fields ?? {}

@@ -48,7 +48,21 @@ export class Receta extends Thing {
     )
   }
 
-  static savedIn = { place: "recetario_familiar", collection: "recetas" }
+  static savedIn = {
+    place: "recetario_familiar",
+    collection: "recetas",
+    times: ["created", "modified"]
+  }
+
+  // vive en recetario familiar
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } }) }
+  get creado() { return this.getProp("creado") }
+  set creado(value) { this.setProp("creado", value) }
+
+  // vive en recetario familiar
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } }) }
+  get modificado() { return this.getProp("modificado") }
+  set modificado(value) { this.setProp("modificado", value) }
 }
 
 /**

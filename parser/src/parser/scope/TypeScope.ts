@@ -159,6 +159,8 @@ export class TypeScope extends BlockScope {
    *   so a read above the line that says it means the place too (decision 1 of The Words).
    */
   declare saved?: SavedPlace
+  /** `- it keeps no times`:  it has no `created` or `modified` (epic `data` T57).  Journaled:  see `declareKeepsNoTimes()`. */
+  declare keepsNoTimes?: boolean
   /**
    * Its records are published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10):
    * `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address.
@@ -268,6 +270,11 @@ export class TypeScope extends BlockScope {
   /** SIDE EFFECT:  we're saved as `saved` says -- see `saved`.  Journaled. */
   declareSaved(saved: SavedPlace, declaredBy: P.Match): void {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { saved })
+  }
+
+  /** SIDE EFFECT:  we do without `created` and `modified` -- see `keepsNoTimes`.  Journaled. */
+  declareKeepsNoTimes(declaredBy: P.Match): void {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { keepsNoTimes: true })
   }
 
   /** SIDE EFFECT:  our records are published, as `published` says -- see `published`.  Journaled. */
@@ -386,19 +393,37 @@ export class TypeScope extends BlockScope {
    * - Compiled output still comes from each statement's own AST.
    * - `autoDeclared`:  its type never declared it, so its first `set` did -- see `P.ScopeVariable.autoDeclared`.
    * - The FIRST declaration of a name wins, as for types:  a later getter for the same property adds nothing.
+   *   - But one the type wrote itself takes over a saved time:  `isSavedTime` (epic `data` T57).
    * - A getter's `datatype` comes once its body has parsed:  what it returns -- see spell's `property_value_getter`.
    */
   declareProperty(
     name: string,
     declaredBy: P.Match,
-    { asWritten, datatype, autoDeclared, readAs, measure, output, valueOutputs }: DeclarePropertyOptions = {}
+    { asWritten, datatype, autoDeclared, readAs, measure, output, valueOutputs, isSavedTime }: DeclarePropertyOptions = {}
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
-    if (!existing) {
+    if (existing?.isSavedTime && !isSavedTime && existing.declaredBy !== declaredBy) {
+      const { datatype: datatypeWas, declaredBy: previous } = existing
+      const takeOver = () => {
+        existing.declaredBy = declaredBy
+        existing.datatype = datatype
+        existing.isSavedTime = undefined
+      }
+      takeOver()
+      declaredBy.scope.parser?.journal?.record({
+        undo: () => {
+          existing.declaredBy = previous
+          existing.datatype = datatypeWas
+          existing.isSavedTime = true
+        },
+        redo: takeOver
+      })
+    } else if (!existing) {
       // only what's there:  a declaration writes out what a record holds -- see spell's `SpellDeclarations`
       const props: P.ScopeVariableProps = { name, datatype, declaredBy }
       if (asWritten && asWritten !== name) props.asWritten = asWritten
       if (autoDeclared) props.autoDeclared = true
+      if (isSavedTime) props.isSavedTime = true
       if (readAs) props.readAs = readAs
       if (measure) props.measure = measure
       if (output) props.output = output
@@ -656,6 +681,8 @@ export type Measure = {
 export type DeclarePropertyOptions = {
   /** Its words as written, e.g. `short rank` -- see `P.ScopeVariable.asWritten`. */
   asWritten?: string
+  /** A saved type's `created` or `modified` -- see `P.ScopeVariable.isSavedTime`. */
+  isSavedTime?: boolean
   /** What it holds, e.g. `number`. */
   datatype?: P.Datatype
   /** Declared by its first `set` -- see `P.ScopeVariable.autoDeclared`. */

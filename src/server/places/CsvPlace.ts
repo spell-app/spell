@@ -7,6 +7,7 @@ import { isListPosition, positionAtIndex } from "spell/places/positions"
 import { DEFAULT_CEILING } from "spell/places/PlaceQuery"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   idOfRow,
   type ApplyAnswer,
   type ListAnswer,
@@ -138,6 +139,7 @@ export class CsvPlace implements Place {
   describe(): PlaceCapabilities {
     return {
       kind: "sheet",
+      timesHeld: this.names.columnsHeld(SAVED_TIME_FIELDS, this.fields),
       ...(this.idColumn !== undefined && { idOf: this.idColumn }),
       filter: "none",
       sort: "none",
@@ -237,9 +239,12 @@ export class CsvPlace implements Place {
   /** - throws `PlaceError` `"over the ceiling"`, saying how big the file is */
   private overTheCeiling(howBig: string): never {
     const { rows, bytes } = this.ceiling
-    throw new PlaceError(`CsvPlace:  ${this.name} holds ${howBig};  this place stops at ${rows} rows or ${bytes} bytes`, {
-      cause: { kind: "over the ceiling" }
-    })
+    throw new PlaceError(
+      `CsvPlace:  ${this.name} holds ${howBig};  this place stops at ${rows} rows or ${bytes} bytes`,
+      {
+        cause: { kind: "over the ceiling" }
+      }
+    )
   }
 
   /** The file's version, for a list's answer and `CSV_SAVE_ROWS`:  its `ETag`.  Left out:  it isn't there. */

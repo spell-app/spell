@@ -47,6 +47,7 @@ const ROOM_CAPABILITIES: PlaceCapabilities = {
   atomic: true,
   versionCheck: false,
   edits: true,
+  timesHeld: "every field",
   live: "push",
   abort: "soft"
 }

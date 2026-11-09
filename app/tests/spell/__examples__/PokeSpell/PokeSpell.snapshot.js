@@ -325,7 +325,20 @@ export class Pokemon extends Thing {
     })))
   }
 
-  static savedIn = { place: "poke_api", collection: "pokemon", select: ["number", "name", "height", "weight", "species", "sprites", "cries", "stats", "types"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "pokemon",
+    times: ["created", "modified"], select: ["number", "name", "height", "weight", "species", "sprites", "cries", "stats", "types"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 1262, end: 1282 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 1262, end: 1282 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class PokemonSpecies extends Thing {
@@ -475,7 +488,20 @@ export class PokemonSpecies extends Thing {
     return this.pokemon.drawEvolution()
   }
 
-  static savedIn = { place: "poke_api", collection: "pokemon_species", select: ["number", "name", "evolutionChain", "varieties"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "pokemon_species",
+    times: ["created", "modified"], select: ["number", "name", "evolutionChain", "varieties"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2138, end: 2158 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2138, end: 2158 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Type extends Thing {
@@ -570,7 +596,20 @@ export class Type extends Thing {
     }, () => this.name)
   }
 
-  static savedIn = { place: "poke_api", collection: "types", select: ["number", "name", "pokemon"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "types",
+    times: ["created", "modified"], select: ["number", "name", "pokemon"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3354, end: 3374 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3354, end: 3374 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Ability extends Thing {
@@ -619,7 +658,20 @@ export class Ability extends Thing {
   get pokemon() { return this.getProp("pokemon") }
   set pokemon(value) { this.setProp("pokemon", value) }
 
-  static savedIn = { place: "poke_api", collection: "abilities", select: ["number", "name", "pokemon"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "abilities",
+    times: ["created", "modified"], select: ["number", "name", "pokemon"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3807, end: 3827 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3807, end: 3827 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Move extends Thing {
@@ -738,7 +790,20 @@ export class Move extends Thing {
   get learnedByPokemon() { return core.linked(this, "learnedByPokemon", Pokemon) }
   set learnedByPokemon(value) { this.setProp("learnedByPokemon", value) }
 
-  static savedIn = { place: "poke_api", collection: "moves", select: ["number", "name", "kind"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "moves",
+    times: ["created", "modified"], select: ["number", "name", "kind"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4263, end: 4283 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4263, end: 4283 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class EvolutionChain extends Thing {
@@ -752,7 +817,20 @@ export class EvolutionChain extends Thing {
   get chain() { return this.getProp("chain") }
   set chain(value) { this.setProp("chain", value) }
 
-  static savedIn = { place: "poke_api", collection: "evolution_chains" }
+  static savedIn = {
+    place: "poke_api",
+    collection: "evolution_chains",
+    times: ["created", "modified"], select: ["number", "chain"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5213, end: 5233 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5213, end: 5233 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Generation extends Thing {
@@ -801,7 +879,20 @@ export class Generation extends Thing {
   get versionGroups() { return this.getProp("versionGroups") }
   set versionGroups(value) { this.setProp("versionGroups", value) }
 
-  static savedIn = { place: "poke_api", collection: "generations", select: ["number", "name", "types"] }
+  static savedIn = {
+    place: "poke_api",
+    collection: "generations",
+    times: ["created", "modified"], select: ["number", "name", "types"] }
+
+  // - it lives in poke api
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5335, end: 5355 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in poke api
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5335, end: 5355 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class PokemonAbility extends Thing {
@@ -1441,7 +1532,21 @@ export class Favourite extends Thing {
     return core.drawThing(this.pokemon)
   }
 
-  static savedIn = { place: "my_favourites", collection: "favourites" }
+  static savedIn = {
+    place: "my_favourites",
+    collection: "favourites",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my favourites
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Favourites.api.spell", start: 287, end: 312 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my favourites
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Favourites.api.spell", start: 287, end: 312 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

@@ -8024,7 +8024,7 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 17,
+          "line": 24,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
@@ -8035,6 +8035,23 @@
             },
             {
               "syntax": "{type:subject_implied} (is saved|lives) in {place:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeepsNoTimes",
+          "ruleNames": ["keeps_no_times"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeepsNoTimes.ts",
+          "line": 13,
+          "purpose": "A saved type does without its `created` and `modified` (epic `data` T57).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} keeps no times"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} keeps no times"
             }
           ],
           "aliases": ["statement"]

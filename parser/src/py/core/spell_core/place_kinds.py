@@ -26,7 +26,7 @@ import os
 import re
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +70,12 @@ class PlaceError(Exception):
         self.why_not = why_not
 
 
+# A place that can hold whatever field it's handed:  `PlaceBehind.times_held`.
+EVERY_FIELD = "every field"
+# The kinds on the page server that hold any field, as a sheet with no such column doesn't.
+HOLDS_ANY_FIELD = {"data folder", "the cloud"}
+
+
 class PlaceBehind:
     """What's behind one place:  its rows, by collection, and the changes it takes.
 
@@ -78,6 +84,8 @@ class PlaceBehind:
 
     # the kind's word, as the program's line says it:  `data folder`
     kind = ""
+    # what it can hold of Spell's two times (`created`, `modified`):  `EVERY_FIELD`, or those fields;  none by default
+    times_held: str | Sequence[str] = ()
 
     async def rows(self, collection: str) -> list[Row]:
         """Every row of `collection`.  - throws `PlaceError`"""
@@ -110,6 +118,7 @@ class DeviceFile(PlaceBehind):
     """
 
     kind = "database on this device"
+    times_held = EVERY_FIELD
 
     def __init__(self, file: Path) -> None:
         """The database kept in `file`, which needn't exist yet."""
@@ -174,6 +183,8 @@ class ServerPlace(PlaceBehind):
         self.token = token
         self.lines = dict(lines or {})
         self.post = post or post_json
+        # a sheet says what it can hold in its list's answer, by its columns
+        self.times_held: str | Sequence[str] = EVERY_FIELD if kind in HOLDS_ANY_FIELD else ()
 
     async def rows(self, collection: str) -> list[Row]:
         """Every row of `collection`, asked of the server off the event loop."""
@@ -182,6 +193,8 @@ class ServerPlace(PlaceBehind):
     def rows_now(self, collection: str) -> list[Row]:
         """As `rows()`, waiting here for the answer."""
         answer = self.ask("list", {"collection": collection, "query": {}})
+        if isinstance(answer, dict) and "timesHeld" in answer:
+            self.times_held = answer["timesHeld"]
         return list(answer.get("rows", [])) if isinstance(answer, dict) else []
 
     def apply(self, changes: list[Change]) -> None:

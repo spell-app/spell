@@ -77,6 +77,7 @@ export class FilePlace implements Place {
       page: "none",
       write: ["insert", "update", "delete"],
       atomic: true,
+      timesHeld: "every field",
       ...(this.storage.writeIfVersion && this.storage.versionOf && { versionCheck: true }),
       live: "push",
       abort: "soft"

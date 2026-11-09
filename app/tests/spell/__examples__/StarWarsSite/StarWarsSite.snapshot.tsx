@@ -20,7 +20,19 @@ export class Review extends Thing {
   @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 376, end: 395 } })
   accessor words!: string
 
-  static savedIn = { place: "galaxy_reviews", collection: "reviews" }
+  static savedIn = {
+    place: "galaxy_reviews",
+    collection: "reviews",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in galaxy reviews
+  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in galaxy reviews
+  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**

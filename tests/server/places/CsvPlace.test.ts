@@ -374,6 +374,23 @@ describe("CsvPlace, its ceiling and its positions (epic `data` T55)", () => {
     await expect(bySize.list(RECIPES, {}, {})).rejects.toMatchObject({ kind: "over the ceiling" })
   })
 
+  test("it says it holds a time only where it has that column, and no line names it", async () => {
+    const withColumn = aFile("id,title,modified\nr-1,Soup,\n")
+    await withColumn.place.list(RECIPES, {}, {})
+    expect(withColumn.place.describe().timesHeld).toEqual(["modified"])
+    const without = aFile()
+    await without.place.list(RECIPES, {}, {})
+    expect(without.place.describe().timesHeld).toEqual([])
+    const named = new CsvPlace({
+      file: withColumn.file,
+      collection: RECIPES,
+      idColumn: "id",
+      fields: { modified: "modified" }
+    })
+    await named.list(RECIPES, {}, {})
+    expect(named.describe().timesHeld).toEqual([])
+  })
+
   test("positions still sort by text past 46,656 rows", () => {
     const place = (index: number) => positionAtIndex(index, 5)
     expect(place(46_655) < place(46_656)).toBe(true)
