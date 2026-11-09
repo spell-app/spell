@@ -1,2 +1,2 @@
 
-<div id="spell-app-root"><test-project-app><span class="spell-draw-error" role="alert" title="Failed to parse URL from /api/places/spaces/@rs/__threads/list">⚠ ChatPage can't draw</span></test-project-app></div>
+<div id="spell-app-root"><test-project-app><span class="spell-draw-error" role="alert" title="fetch failed:  this run is offline (/api/places/spaces/@rs/__threads/list)">⚠ ChatPage can't draw</span></test-project-app></div>
