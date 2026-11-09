@@ -389,6 +389,17 @@ describe("Spell's cloud", () => {
       expect((await askTwo("/api/sign-in/ask", { email: ANA }, forged)).status).toBe(403)
     })
 
+    test("a program's client file names the address it was asked at", async () => {
+      const file = "/apps/@spell/examples/RecipeBox/oauth-client-metadata.json"
+      for (const address of [ADDRESS, SECOND]) {
+        const answer = await ask(two.server.port, "GET", file, { headers: { host: new URL(address).host } })
+        expect(JSON.parse(answer.text)).toMatchObject({
+          client_id: `${address}${file}`,
+          redirect_uris: [`${address}/apps/@spell/examples/RecipeBox`]
+        })
+      }
+    })
+
     test("each address is its own client to Bluesky's hosts:  its client file names it", async () => {
       for (const address of [ADDRESS, SECOND]) {
         const file = await ask(two.server.port, "GET", "/api/sign-in/atproto/client.json", { headers: at(address) })
