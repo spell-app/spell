@@ -20,6 +20,8 @@ import {
   type SheetRules
 } from "spell/places/places.types"
 
+import { core } from "./core"
+
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
   /** The place's name, as written:  `family cookbook`. */
@@ -305,11 +307,14 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   room: ({ details, person }, { LiveRoomPlace, SpellSignIn, SPACE_ROOMS_PREFIX, roomForPage }) => {
     const at = withLastThreads((page, remembered) => roomForPage(details.at!.replace(/^ws/, "http"), page, remembered))
     const isSpaces = at.startsWith(`${SPACE_ROOMS_PREFIX}/`)
-    return new LiveRoomPlace({
+    const room = new LiveRoomPlace({
       url: at,
       person,
+      ...(core._programVersion !== undefined && { version: core._programVersion }),
       ...(isSpaces && { signIn: SpellSignIn.for(at), can: { identifiesBy: "this machine" } })
     })
+    room.onOutOfDate(askToReload)
+    return room
   },
   // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
   sheet: (making, folder) => sheetAt(making, folder),
@@ -655,4 +660,18 @@ function withThreadsMarked(folder: PlaceBehind, at: string, tools: typeof Places
     return { ...answer, rows: withPickedThread(answer.rows, picked) }
   }
   return marked
+}
+
+/** Has this page already asked to be reloaded? */
+let hasAskedToReload = false
+
+/** A room says this page runs an older version of the program:  say so, once, with a button that reloads it. */
+function askToReload(): void {
+  if (hasAskedToReload) return
+  hasAskedToReload = true
+  void core.notify(core.message("room-out-of-date"), {
+    class: "warning",
+    time: 0,
+    actions: [{ text: core.message("room-reload"), click: () => globalThis.location?.reload() }]
+  })
 }

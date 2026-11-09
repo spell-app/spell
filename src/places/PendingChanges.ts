@@ -13,7 +13,8 @@ import {
   type ListQuery,
   type Place,
   type PlaceChange,
-  type PlaceRow
+  type PlaceRow,
+  type SelectingContext
 } from "./places.types"
 
 /** How long after the last change a change that's in no group is sent, ms:  a form's typing goes out as one. */
@@ -158,6 +159,8 @@ export type PendingGroup = {
   end(): void
   /** The action was cancelled:  its changes are dropped, and replayed from the place.  Nothing had left. */
   cancel(): void
+  /** What it held has been made another way, and is what the place holds now:  they're gone, and nothing goes back. */
+  settled(): void
 }
 
 /****************
@@ -561,6 +564,11 @@ export class PendingChanges {
         this.settleList()
         this.putBack(dropped)
         if (!this.placeAside) void this.places.heal.healChanges(this.placeName, dropped)
+      },
+      settled: () => {
+        if (!this.openGroups.delete(number)) return
+        this.remove(this.pending.filter(({ group }) => group === number))
+        this.settleList()
       }
     }
   }
@@ -658,6 +666,73 @@ export class PendingChanges {
     const { id: _id, fields, ...rest } = placeChange
     const { [this.idField]: _idField, ...others } = fields ?? {}
     return { ...rest, fields: others }
+  }
+
+  /**
+   * Run the place's named operation, what it'll change shown at once, then asked of the place (epic `data` T29).
+   * - What it'll change (`Place.planCall()`) is held as one group:  shown, never sent.
+   * - The place's answer settles it:  what it made is what shows, made once, however its answer comes.
+   * - Refused:  the group's dropped, what it changed goes back, and the one refusal notice shows;  it throws, as a call does.
+   * - No answer:  the group's dropped too;  it throws, as a call does.
+   * - A place that can't tell what it'll change:  nothing shows until the answer.
+   * - throws what the place threw
+   */
+  async callShownAtOnce(
+    name: string,
+    input: unknown,
+    context: SelectingContext,
+    collection?: string
+  ): Promise<unknown> {
+    const place = this.places.placeForOrDie(this.placeName)
+    const planned = await this.plannedCall(place, name, input)
+    if (!planned?.length) return place.call!(name, input, context, collection)
+    const group = this.startGroup()
+    for (const change of planned) this.holdPlanned(change, group.number)
+    const held = this.pending.filter((change) => change.group === group.number)
+    try {
+      const result = await place.call!(name, input, context, collection)
+      group.settled()
+      return result
+    } catch (error) {
+      group.cancel()
+      if (error instanceof PlaceError) {
+        this.places.tellWriteFailed({
+          placeName: this.placeName,
+          changes: held,
+          error,
+          retry: () => {
+            this.callShownAtOnce(name, input, context, collection).catch((ignored: unknown) =>
+              console.error(`PendingChanges.callShownAtOnce():  "${name}" failed again`, ignored)
+            )
+          }
+        })
+      }
+      throw error
+    }
+  }
+
+  /** What `place`'s operation `name` would change:  nothing, if it can't tell, or it says no here (the place's no is the real one). */
+  private async plannedCall(place: Place, name: string, input: unknown): Promise<readonly PlaceChange[] | undefined> {
+    try {
+      const planned = place.planCall?.(name, input, (collection, rows) => this.replayOn(collection, rows))
+      return planned && "then" in planned ? (await planned).changes : planned?.changes
+    } catch {
+      return undefined
+    }
+  }
+
+  /** Hold `change`, one the place will make itself, in group `number`:  shown, ready to be dropped, and never sent. */
+  private holdPlanned({ kind, collection, id, fields, adds, list }: PlaceChange, group: number): void {
+    if (id === undefined) return
+    const type = this.places.typeReadFrom(this.placeName, collection)
+    const thing = { collection, ...(type !== undefined && { type }), id, group }
+    if (kind === "delete") return this.delete(thing)
+    if (kind === "insert") return this.insert({ ...thing, fields: fields ?? {} })
+    const row = this.placeNow?.rowKnown?.(collection, id) ?? {}
+    const set = (field: string, value: unknown) => this.setField({ ...thing, field, value, was: row[field] })
+    for (const [field, value] of Object.entries(fields ?? {})) set(field, value)
+    for (const [field, by] of Object.entries(adds ?? {})) set(field, Number(row[field] ?? 0) + by)
+    for (const [field, edits] of Object.entries(list ?? {})) set(field, withListEdits(row, field, edits)[field])
   }
 
   /**

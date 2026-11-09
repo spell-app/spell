@@ -847,6 +847,17 @@ export type Place = {
    */
   call?(name: string, input: unknown, context: SelectingContext, collection?: string): Promise<unknown>
   /**
+   * What the operation `name` would change, worked out here before the place has answered:  a room's named action.
+   * - `undefined`:  this page can't tell, so nothing shows until the answer.
+   * - `showing`:  puts what's pending on top of rows it reads.
+   * - Changes nothing, and sends nothing.
+   */
+  planCall?(
+    name: string,
+    input: unknown,
+    showing: (collection: string, rows: PlaceRow[]) => PlaceRow[]
+  ): { changes: PlaceChange[] } | Promise<{ changes: PlaceChange[] }> | undefined
+  /**
    * The version of this thing as this place last showed it:  what a change made now is made from.
    * - Left out, or `undefined` for a thing it hasn't shown:  the change says nothing, and the last write wins.
    */

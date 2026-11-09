@@ -195,6 +195,8 @@ export type TestCheck = {
  * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
  * | `write-refused-used-up` | the same, refused as you've asked for every invitation you have (P31) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `room-out-of-date` | the notice when a room says this page runs an older version of the program (epic `data` T5) | |
+ * | `room-reload` | that notice's button | |
  * | `number-sent-as-other-text` | the console's warning for a number field that sent other text (epic `data` T85) | `field`, `value` |
  * | `read-too-soon`, `read-too-soon-seconds`, `read-too-soon-minute`, `read-too-soon-minutes` | what a read refused for being too soon says, a rate limit's (epic `data` I92) | `seconds`, `minutes` |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
@@ -256,6 +258,8 @@ export const CORE_MESSAGES = {
   "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
   "write-retry": "Retry",
+  "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
+  "room-reload": "Reload",
   "number-sent-as-other-text":
     '{field} is a number, but its place sent "{value}", which reads as nothing;  if that\'s how it says it has none, say so:  `is a number or "{value}"`',
   "page-previous": "Previous",

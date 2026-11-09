@@ -1248,6 +1248,9 @@ class SavedRead {
 
 /** `core`'s methods for what's saved in a place. */
 export const savedMethods = defineCoreModule({
+  /** A mark of the program running, for a room:  `RunAppOptions.programVersion`.  `undefined`:  nobody's asked to reload. */
+  _programVersion: undefined as string | undefined,
+
   /**
    * `thing` is a place of the running program, and `details` what its lines say:  what `x is a web server at "..."` compiles to.
    * - Nothing reaches the place until something's read or written.
@@ -1574,7 +1577,7 @@ export const savedMethods = defineCoreModule({
     const things = program.thingMakerNow!
     const sent = input === undefined ? undefined : things.rowSent(input)
     const { savedIn } = (input as { constructor?: SavedClass } | undefined)?.constructor ?? {}
-    return behind.call(name, sent, {}, savedIn?.collection)
+    return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection)
   },
 
   /**
@@ -1599,7 +1602,7 @@ export const savedMethods = defineCoreModule({
       sortChanged.read()
       const base = current()
       const now = sorted
-      return now?.base === base ? now.list : base
+      return now && now.base === base ? now.list : base
     }
     const items = () => {
       const list = listShown() as { items?: readonly Item[] } | readonly Item[] | undefined
