@@ -1338,7 +1338,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - The long word reads there too, `<spell-view "counter">`;  `</view>` and `</spell-view>` close either.
     - `breakIntoIndentedBlocks()` lifts them to just before the page (`liftPageTemplates()`):
       code spell declares a type only at a file's top level.
-      So a view written in a page is an ordinary view of the project, usable from any file (Q7's A, chosen).
+      It's the page's own, named for it (epic `notebook` P10, Q11, reversing Q7's A):
+      `<view "counter">` in the film page is `a film-page-counter aka counter`, so two pages can each have a `counter`
+      and `<counter/>` finds the page's own (`SpellxTokenizer.nameForPage()`).
       A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
   - A TEMPLATE'S NAME, three ways (`readNamedHead()`):  quoted, `<spell-view "one counter">`;  `name="..."`;  or bare,
     one word first, `<spell-view counter>`, `<view counter>` (epic `notebook` P2).
@@ -1571,6 +1573,16 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
+  - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a `.spellml` file whose only top-level thing is one page tag,
+    comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
+    - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.
+      That's what a site's page lines and `go to the film page` read.
+    - It parses in a small `P.ProjectScope` of its own under the project's, with its own copy of the parser and its own
+      journal (`P.IncrementalProject`, "a file ALONE"):  what it declares is its own, so nothing later can be affected.
+    - Typing in it re-parses it alone;  changing its name or a property re-reads the rest of the project.
+    - The editor compiles the rest plus the pages it's showing (`SpellProject.pagesInPlay`).
+      Every other compile combines every file, its output byte for byte what it was.
+    - Any other file is simply not alone:  no error, and it compiles as ever.
   - `is a <type>` (`is_a`) names a KNOWN type:  built in, imported, declared or stubbed earlier.
     - Else it's a parse error, e.g. `is a crad`.
     - A type first mentioned in an `is a` above its own declaration is one too.
