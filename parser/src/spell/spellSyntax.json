@@ -513,7 +513,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/constants/SpellConstant.ts",
-          "line": 11,
+          "line": 13,
           "purpose": "Base pattern rule for matching a single-word constant identifier (alpha-numeric, dashes/underscores).",
           "syntaxes": [],
           "aliases": []
@@ -5699,7 +5699,7 @@
           "ruleNames": ["property_value_either"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueEither.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Defines a property getter whose value depends on a condition, e.g. `the color of a card is red if its suit is either diamonds or hearts (otherwise it is X)?`",
           "syntaxes": [
             {
@@ -5725,7 +5725,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 50,
+          "line": 51,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
