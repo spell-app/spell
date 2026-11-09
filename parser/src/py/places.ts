@@ -3,7 +3,16 @@
  * what the `py` target can do (`SP.TARGETS`), so a project with a place of any other kind is refused as it compiles.
  * - `database on this device`:  a JSON file beside the compiled program, `<Program>.device.json`
  * - `data folder`, `sheet` and `excel file`:  through the page server's place routes, as a browser's page reaches them
- * - `spell_core`'s `place_kinds.py` makes each;  NOT the Atmosphere, a web server, GraphQL, Airtable, a Google sheet,
- *   a room or the cloud, yet
+ * - `atmosphere account` and `personal atmosphere account`:  signed in with a handle and an app password from the
+ *   environment (epic `data` P46)
+ * - `spell_core`'s `place_kinds.py` makes each;  NOT a web server, GraphQL, Airtable, a Google sheet, a room or the
+ *   cloud, yet
  */
-export const PLACE_KINDS: readonly string[] = ["database on this device", "data folder", "sheet", "excel file"]
+export const PLACE_KINDS: readonly string[] = [
+  "database on this device",
+  "data folder",
+  "sheet",
+  "excel file",
+  "atmosphere account",
+  "personal atmosphere account"
+]
