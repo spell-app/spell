@@ -199,6 +199,11 @@ export type TestCheck = {
  * | `sign-in-check-email` | what shows while it waits for the emailed link or code | `email` |
  * | `sign-in-email`, `sign-in-code` | the fields for a Spell account's email, and its code | |
  * | `sign-in-email-me` | the button that emails the link and code | |
+ * | `sign-in-password` | the field for a Spell account's password (epic `atmosphere` T64) | |
+ * | `sign-in-password-set`, `sign-in-password-change` | the button that opens setting a password, by whether they have one | |
+ * | `sign-in-password-current`, `sign-in-password-new` | that form's fields | |
+ * | `sign-in-password-save`, `sign-in-password-cancel` | that form's buttons | |
+ * | `sign-in-password-saved` | what shows once a password is saved | |
  * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
  * | `sign-in-failed` | what shows when signing in didn't work | `why` |
  * | `sign-in-abuse` | where to report abuse, the host's abuse contact, on a Spell account's bar (epic `atmosphere` P6) | `contact` |
@@ -273,7 +278,15 @@ export const CORE_MESSAGES = {
   "sign-in-check-email":
     "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here.",
   "sign-in-email": "Your email, e.g. ana@example.com",
-  "sign-in-email-me": "Email me a link",
+  "sign-in-email-me": "Email me a link instead",
+  "sign-in-password": "Your password",
+  "sign-in-password-set": "Set a password",
+  "sign-in-password-change": "Change password",
+  "sign-in-password-current": "Your current password",
+  "sign-in-password-new": "A new password, at least 8 characters",
+  "sign-in-password-save": "Save password",
+  "sign-in-password-cancel": "Cancel",
+  "sign-in-password-saved": "Your password is saved.",
   "sign-in-code": "The six-digit code",
   "sign-in": "Sign in",
   "sign-out": "Sign out",

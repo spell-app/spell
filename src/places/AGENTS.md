@@ -141,6 +141,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A step of the one sign-in shape, with the code step's names:
       - `"waiting for a code"`, `enterCode()`
       - `account`:  `"Spell account"`, named apart from an atmosphere one on the bar
+    - Or a password (epic `atmosphere` T64):  `signInWithPassword()`;  signed in, `setPassword()`, and what the bar needs to
+      offer it (`hasPassword`, `currentPasswordNeeded`, `passwordProblem`, `passwordSaved`)
     - The page waits on its one-time request, asking after it every 2 seconds:
       the link confirmed on any device signs it in, or the code typed here.
     - ONE per server on a page (`SpellSignIn.for()`):  a project data folder's `RemotePlace` takes it as its `signIn`.

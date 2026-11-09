@@ -8,6 +8,7 @@ import {
   type AtProtoAsk,
   type AtProtoAskAnswer,
   type AtProtoOutcome,
+  type PasswordState,
   type SignedInAnswer,
   type SignInAskAnswer,
   type SignInMeAnswer,
@@ -28,6 +29,7 @@ import {
   SignInError,
   type AtProtoIdentities,
   type Mailer,
+  type Session,
   type SessionMade,
   type SignInAccounts,
   type SignInRefusal
@@ -44,7 +46,10 @@ const STATUS_OF_REFUSAL: Record<SignInRefusal, number> = {
   used: 410,
   "taken down": 451,
   "not linked": 403,
-  "linked elsewhere": 409
+  "linked elsewhere": 409,
+  "wrong password": 401,
+  "bad password": 400,
+  "needs proof": 403
 }
 
 /** Where an atmosphere sign-in starts when nobody's named:  Bluesky's own host, whose page asks who. */
@@ -119,6 +124,11 @@ const SYSTEMS: [RegExp, string][] = [
  *   - `GET me`:  who's signed in here
  *   - `POST ask { email }`:  a one-time request, and a mail with its link and code;  the page keeps its id
  *   - `POST code { email, code }`:  the code typed on the asking device:  signed in
+ *   - `POST password { email, password }` (epic `atmosphere` T64):  signed in, a wrong one and a stranger answered alike;
+ *     `email` may be an account's name, where `accounts` knows them
+ *   - `POST password/change { password, current? }`:  a signed-in device sets or changes its own
+ *   - `POST password/for { email, password }`:  this machine's person sets anyone's:  this run's token only, never a
+ *     sign-in
  *   - `POST waiting { request }`:  the asking page asks after it;  once its link's confirmed elsewhere, signed in too
  *   - `GET link?key=`:  what the link's page shows:  where it was asked, with one button
  *   - `POST confirm { key }`:  that button:  the device that opened the link, signed in
@@ -214,6 +224,15 @@ export class SignInCheck {
     router.get(at("me"), ...checks, async (request, reply) => answer(reply, await this.me(request)))
     router.post(at("ask"), ...checks, async (request, reply) => answer(reply, await this.ask(request)))
     router.post(at("code"), ...checks, (request, reply) => answer(reply, this.byCode(request, reply)))
+    router.post(at("password"), ...checks, async (request, reply) =>
+      answer(reply, await this.byPassword(request, reply))
+    )
+    router.post(at("password/change"), ...checks, guard.writeCheck, async (request, reply) =>
+      answer(reply, await this.changePassword(request))
+    )
+    router.post(at("password/for"), ...checks, guard.tokenCheck, async (request, reply) =>
+      answer(reply, await this.setPasswordFor(request))
+    )
     router.post(at("waiting"), ...checks, (request, reply) => answer(reply, this.waiting(request, reply)))
     router.get(at("link"), ...checks, (request, reply) => answer(reply, this.link(request)))
     router.post(at("confirm"), ...checks, (request, reply) => answer(reply, this.confirm(request, reply)))
@@ -265,10 +284,16 @@ export class SignInCheck {
     const session = this.signIns.personOf(cookieOf(request, SESSION_COOKIE))
     const linked = session && this.atProto ? await this.accounts.linkedOf?.(session.person) : undefined
     return {
-      ...(session && { person: session.person, email: session.email }),
+      ...(session && { person: session.person, email: session.email, password: this.passwordStateOf(session) }),
       ...(this.abuseContact && { abuseContact: this.abuseContact }),
       ...(this.atProto && { atProto: linked ? { linked: linked.handle } : {} })
     }
+  }
+
+  /** What the page needs to know to offer setting a password. */
+  private passwordStateOf(session: Session): PasswordState {
+    const set = this.signIns.passwords.has(session.person)
+    return { set, currentNeeded: set && !this.signIns.hasFreshProof(session) }
   }
 
   /** - throws `HttpError(451)` for an account Spell took down, naming the abuse contact */
@@ -315,6 +340,60 @@ export class SignInCheck {
       reply,
       refusing(() => this.signIns.byCode(emailIn(request), textIn(request.body, "code")))
     )
+  }
+
+  /**
+   * `POST password { email, password }`:  this device, signed in.
+   * - throws `HttpError(401)` for a wrong password or a stranger, the same;  429 for too many tries;
+   *   451 for an account taken down, only once its password was right
+   */
+  private async byPassword(request: SRV.Request, reply: SRV.Reply): Promise<Required<SignedInAnswer>> {
+    const typed = textIn(request.body, "email")
+    const password = passwordIn(request.body, "password")
+    if (!typed || !password) throw new SRV.HttpError(400, "Type your email and your password.")
+    const email = EMAIL.test(typed) ? typed : ""
+    const named = email ? await this.accounts.accountFor(email) : await this.accounts.accountNamed?.(typed)
+    const person = await refusingAsync(() =>
+      this.signIns.checkPassword({ person: named, typed, address: addressOf(request), password })
+    )
+    await this.notTakenDownOrDie(person)
+    return signedIn(reply, this.signIns.signInByPassword({ person, email }))
+  }
+
+  /**
+   * `POST password/change { password, current? }`:  whoever's signed in here sets or changes their own.
+   * - throws `HttpError(401)` with nobody signed in, or a wrong `current`;  403 without either proof;
+   *   400 for a new one too short or too long;  429 for too many tries;  451 for an account taken down
+   */
+  private async changePassword(request: SRV.Request): Promise<{ password: PasswordState }> {
+    const token = cookieOf(request, SESSION_COOKIE)
+    const session = this.signIns.personOf(token)
+    if (!session) throw new SRV.HttpError(401, "Sign in first, then set your password.")
+    await this.notTakenDownOrDie(session.person)
+    const current = passwordIn(request.body, "current")
+    await refusingAsync(() =>
+      this.signIns.changePassword({
+        token,
+        password: passwordIn(request.body, "password"),
+        address: addressOf(request),
+        ...(current && { current })
+      })
+    )
+    return { password: this.passwordStateOf(session) }
+  }
+
+  /**
+   * `POST password/for { email, password }`:  this machine's person sets anyone's (`spell space cloud password`).
+   * - throws `HttpError(404)` for nobody with that email or name;  400 for a password too short or too long;
+   *   451 for an account taken down
+   */
+  private async setPasswordFor(request: SRV.Request): Promise<{ person: string }> {
+    const typed = textIn(request.body, "email")
+    const person = EMAIL.test(typed) ? await this.accounts.accountFor(typed) : await this.accounts.accountNamed?.(typed)
+    if (!person) throw new SRV.HttpError(404, `${typed} has no Spell account here:  invite them first.`)
+    await this.notTakenDownOrDie(person)
+    await refusingAsync(() => this.signIns.setPasswordFor(person, passwordIn(request.body, "password")))
+    return { person }
   }
 
   /** `POST waiting { request }`:  still waiting, or signed in now. */
@@ -523,11 +602,29 @@ function refusing<T>(run: () => T): T {
   }
 }
 
-/** The email a request's body names.  - throws `HttpError(400)` for one that isn't */
+/** `refusing()`, for work that waits. */
+async function refusingAsync<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run()
+  } catch (error) {
+    if (error instanceof SignInError && error.kind) {
+      throw new SRV.HttpError(STATUS_OF_REFUSAL[error.kind], error.message)
+    }
+    throw error
+  }
+}
+
+/** The email a request's body names.  - throws `HttpError(400)` for one that isn't, without repeating what was typed */
 function emailIn(request: SRV.Request): string {
   const trimmed = textIn(request.body, "email")
-  if (!EMAIL.test(trimmed)) throw new SRV.HttpError(400, `"${trimmed}" isn't an email address`)
+  if (!EMAIL.test(trimmed)) throw new SRV.HttpError(400, "That needs your email address, e.g. ana@example.com.")
   return trimmed
+}
+
+/** A password a body names, exactly as typed:  `""` for anything but text.  Spaces count. */
+function passwordIn(said: unknown, name: string): string {
+  const value = (said as Record<string, unknown> | undefined)?.[name]
+  return typeof value === "string" ? value : ""
 }
 
 /** What a body or query says of `name`, trimmed:  `""` for anything but text. */

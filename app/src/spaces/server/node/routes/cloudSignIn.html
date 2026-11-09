@@ -1,7 +1,9 @@
 <!doctype html>
 <!--
   What someone gets at a program or an org's home that they can't read yet (epic `atmosphere` I14, T59, `SpellCloud`):
-  - nobody signed in:  sign in by email, then this address loads what they asked for
+  - nobody signed in:  sign in by email and password, or "Email me a link instead", then this address loads what they
+    asked for
+  - at `/sign-in?password`:  setting or changing a password, once signed in (epic `atmosphere` T64)
   - signed in, arriving by another site's link (epic `atmosphere` I20):  loads this address once more
     - The session cookie is `SameSite=Strict`, so a link from another site brings no cookie, and the server sent this.
     - This page's own request does bring it, and going to its own address from here brings it too.
@@ -111,6 +113,28 @@
           background: var(--ui-primary-hover, ButtonFace);
         }
       }
+      /* Fields one above another, the main button under them, the second way under that. */
+      form.stacked {
+        display: grid;
+        input,
+        button {
+          width: 100%;
+          box-sizing: border-box;
+        }
+      }
+      /* The second way:  there, but not what the eye goes to first. */
+      button.second {
+        font-weight: inherit;
+        color: var(--ui-text-color, CanvasText);
+        background: transparent;
+        box-shadow: inset 0 0 0 var(--ui-border-width, 1px) var(--ui-border-color-strong, GrayText);
+        &:hover {
+          background: color-mix(in oklch, currentColor 8%, transparent);
+        }
+      }
+      a.back {
+        color: var(--ui-primary-text, LinkText);
+      }
       #problem {
         margin: 16px 0 0;
         color: var(--ui-red-text, #c33);
@@ -132,17 +156,29 @@
         <div class="panel">
           <h1 id="title" hidden>Sign in to see this page</h1>
           <section id="signing-in" hidden>
-            <p>This page belongs to an organization on Spell. Sign in with the email it knows you by.</p>
-            <form id="email-form">
+            <p id="lead">Sign in with your email and password.</p>
+            <!-- post, to a route that ignores it:  a form sent before the script runs can't put a password in an address -->
+            <form id="email-form" class="stacked" method="post" action="/api/sign-in/password">
               <input
                 id="email"
+                name="username"
                 type="email"
                 required
-                autocomplete="email"
+                autocomplete="username"
                 placeholder="you@example.com"
                 aria-label="Your email"
               />
-              <button>Email me a link</button>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autocomplete="current-password"
+                placeholder="Your password"
+                aria-label="Your password"
+              />
+              <button id="sign-in">Sign in</button>
+              <button id="email-link" class="second" type="button">Email me a link instead</button>
             </form>
           </section>
           <section id="waiting" hidden>
@@ -151,6 +187,37 @@
               <input id="code" required autocomplete="one-time-code" aria-label="The code from your email" />
               <button>Sign in</button>
             </form>
+          </section>
+          <section id="set-password" hidden>
+            <p id="password-lead"></p>
+            <form id="password-form" class="stacked" method="post" action="/api/sign-in/password/change">
+              <input id="password-account" name="username" type="text" autocomplete="username" hidden />
+              <input
+                id="current-password"
+                name="current"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Your current password"
+                aria-label="Your current password"
+                hidden
+              />
+              <input
+                id="new-password"
+                name="password"
+                type="password"
+                required
+                minlength="8"
+                maxlength="256"
+                autocomplete="new-password"
+                placeholder="A new password, at least 8 characters"
+                aria-label="A new password, at least 8 characters"
+              />
+              <button id="save-password">Save password</button>
+            </form>
+          </section>
+          <section id="password-saved" hidden>
+            <p>Your password is saved. Next time, sign in with your email and it.</p>
+            <a class="back" href="/">Back to your spaces</a>
           </section>
           <section id="not-yours" hidden>
             <p>You're signed in as <b id="who"></b>, and you don't have access to this page.</p>
@@ -168,18 +235,29 @@
       const RETRY_FRESH_MS = 10_000
       /** At `/sign-in`, signing in leads to the spaces home;  anywhere else, to this address. */
       const SIGN_IN_ONLY = location.pathname === "/sign-in"
+      /** At `/sign-in?password`:  setting a password, once signed in;  signing in first comes back here. */
+      const SETTING_PASSWORD = SIGN_IN_ONLY && new URLSearchParams(location.search).has("password")
+      /** Only an address that holds someone's page can say so:  `/sign-in` guards nothing. */
+      const GATED_LEAD = "This page belongs to an organization on Spell. Sign in with the email it knows you by."
 
       const element = (id) => document.getElementById(id)
       const show = (id) => {
-        for (const each of ["signing-in", "waiting", "not-yours"]) element(each).hidden = each !== id
+        const sections = ["signing-in", "waiting", "set-password", "password-saved", "not-yours"]
+        for (const each of sections) element(each).hidden = each !== id
         element("title").hidden = false
-        element("title").textContent = id === "not-yours" ? "You don't have access" : TITLE
+        element("title").textContent = TITLES[id] ?? TITLE
         element("problem").textContent = ""
       }
       const TITLE = SIGN_IN_ONLY ? "Sign in to Spell" : element("title").textContent
+      /** Each section's title, where it isn't `TITLE`. */
+      const TITLES = {
+        "not-yours": "You don't have access",
+        "set-password": "Your password",
+        "password-saved": "Password saved"
+      }
 
       /** Go where signing in leads.  `replace`, not `reload`:  a navigation of this page's own brings the cookie. */
-      const goOn = () => location.replace(SIGN_IN_ONLY ? "/" : location.href)
+      const goOn = () => location.replace(SIGN_IN_ONLY && !SETTING_PASSWORD ? "/" : location.href)
 
       /**
        * Did this page just go to its own address, and get answered this page again?  Clears the mark.
@@ -224,6 +302,18 @@
       element("email-form").addEventListener(
         "submit",
         saying(async () => {
+          const typed = element("email").value.trim()
+          const password = element("password").value
+          // the field empties, right or wrong:  a password stays on screen no longer than it has to
+          element("password").value = ""
+          await ask("password", { email: typed, password })
+          goOn()
+        })
+      )
+      element("email-link").addEventListener(
+        "click",
+        saying(async () => {
+          if (!element("email").reportValidity()) return
           email = element("email").value.trim()
           const { request } = await ask("ask", { email })
           show("waiting")
@@ -249,8 +339,36 @@
           location.replace(location.href)
         })
       )
-      const { person } = await ask("me").catch(() => ({}))
-      if (person && SIGN_IN_ONLY) {
+      element("password-form").addEventListener(
+        "submit",
+        saying(async () => {
+          const password = element("new-password").value
+          const current = element("current-password").value
+          await ask("password/change", { password, ...(current && { current }) })
+          element("new-password").value = ""
+          element("current-password").value = ""
+          show("password-saved")
+        })
+      )
+
+      /** SIDE EFFECT:  the page sets `person`'s password:  the current one's field only if it's needed. */
+      const showSetPassword = (person, { set = false, currentNeeded = false } = {}) => {
+        element("password-account").value = person
+        element("current-password").hidden = !currentNeeded
+        element("current-password").required = currentNeeded
+        element("password-lead").textContent = !set
+          ? "Choose a password. Then you can sign in with your email and it."
+          : currentNeeded
+            ? "Type your current password and a new one. Forgot it? Sign out, use Email me a link instead, then come back."
+            : "You just signed in with your email, so a new password is all this needs."
+        show("set-password")
+      }
+
+      if (!SIGN_IN_ONLY) element("lead").textContent = GATED_LEAD
+      const { person, password: passwordState } = await ask("me").catch(() => ({}))
+      if (person && SETTING_PASSWORD) {
+        showSetPassword(person, passwordState)
+      } else if (person && SIGN_IN_ONLY) {
         location.replace("/")
       } else if (person && !justRetried() && retry()) {
         // on its way to its own address

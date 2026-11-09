@@ -3,7 +3,8 @@
  * or a linked atmosphere account (P19).
  * - `SignInCheck`:  the ONE sign-in check of a server:  who's signed in, on every request (`request.person`);
  *   and its routes, under `/api/sign-in/`, with the link's confirm page.
- * - `SignIns`:  the rules:  one-time requests, codes, links, the signed-in devices.
+ * - `SignIns`:  the rules:  one-time requests, codes, links, passwords, the signed-in devices.
+ * - `Passwords`:  each account's password, kept only as a slow hash (epic `atmosphere` T64).
  * - `MailCatcher`:  the local mail catcher, a file per mail, behind the one mail seam (`Mailer`).
  * - `SendmailSender`:  real mail through this machine's `sendmail`;  `mailerFor()` says which a server uses.
  * - `AtProtoIdentity`:  who someone is on the atmosphere, asked of their own host:  signing in with an atmosphere
@@ -17,6 +18,7 @@
 
 export * from "./signIn.types"
 export * from "./SignIns"
+export * from "./Passwords"
 export * from "./MailCatcher"
 export * from "./SendmailSender"
 export * from "./SignInCheck"

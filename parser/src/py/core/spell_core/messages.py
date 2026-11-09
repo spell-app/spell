@@ -50,6 +50,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-cloud-signed-out` | the cloud's, nobody signed in:  the JavaScript core's | `place` |
 | `sign-in-check-email` | the same, waiting for its link or code | `email` |
 | `sign-in-email`, `sign-in-email-me`, `sign-in-code` | its fields and button | |
+| `sign-in-password`, `sign-in-password-set`, `sign-in-password-change` | a Spell account's password:  the JS core's | |
+| `sign-in-password-current`, `-new`, `-save`, `-cancel`, `-saved` | setting one:  the JS core's | |
 | `sign-in-abuse` | where to report abuse, on a Spell account's bar:  the JavaScript core's | `contact` |
 | `sign-in-bluesky`, `sign-in-link-bluesky` | a Spell account's Bluesky buttons:  the JavaScript core's | |
 | `sign-in-linked` | a Spell account linked to Bluesky:  the JavaScript core's | `handle` |
@@ -132,7 +134,15 @@ MESSAGES: dict[str, str] = {
         "Check your email:  {email} has a link and a code.  Open the link on any device, or type the code here."
     ),
     "sign-in-email": "Your email, e.g. ana@example.com",
-    "sign-in-email-me": "Email me a link",
+    "sign-in-email-me": "Email me a link instead",
+    "sign-in-password": "Your password",
+    "sign-in-password-set": "Set a password",
+    "sign-in-password-change": "Change password",
+    "sign-in-password-current": "Your current password",
+    "sign-in-password-new": "A new password, at least 8 characters",
+    "sign-in-password-save": "Save password",
+    "sign-in-password-cancel": "Cancel",
+    "sign-in-password-saved": "Your password is saved.",
     "sign-in-code": "The six-digit code",
     "sign-in": "Sign in",
     "sign-out": "Sign out",

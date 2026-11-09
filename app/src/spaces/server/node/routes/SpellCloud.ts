@@ -26,6 +26,37 @@ export const CLOUD_APPS_PREFIX = "/apps"
 /** The port it listens on, unless told otherwise:  the page server's is 4747, the preview's 4848. */
 export const CLOUD_PORT = 4949
 
+/**
+ * What every program on the cloud runs on, `<spell-viewer>` and the runtime (`yarn build:element`):
+ * git-ignored, so nothing else keeps a checkout's current.
+ * - Its `sources`:  more than it needs, on purpose:  a needless build costs a minute, a stale one breaks every page.
+ */
+export const CLOUD_BROWSER_BUNDLE: SRV.BundleSpec = {
+  name: "app-element",
+  title: "the browser bundle programs run on",
+  package: "spell-app",
+  cwd: ".",
+  run: ["yarn", "build:element"],
+  output: "app/dist-element",
+  entry: "spell-viewer.js",
+  sources: [
+    "spell/src/util",
+    "spell/src/places",
+    "spell/src/element",
+    "spell/parser/src",
+    "spell/ui/src",
+    "spell/app/src/app",
+    "spell/app/src/spaces/models",
+    "spell/app/app/static",
+    "spell/app/app/vite.shared.ts",
+    "spell/app/app/vite.solid.config.ts",
+    "spell/app/app/vite.element.config.ts",
+    "spell/app/app/vite.editor.config.ts",
+    "spell/app/app/vite.code.config.ts",
+    "yarn.lock"
+  ]
+}
+
 /** The program groups it serves, and only these:  the built-in ones, which anyone may read anyway. */
 const SERVED_GROUPS = /^\/@spell\/(?:examples|guides)\//
 
