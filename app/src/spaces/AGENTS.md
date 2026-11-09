@@ -287,7 +287,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - APPROVING it (a stage that `approves`) makes it a project under its team (`addProject()`), its organizers its
       Project Managers (`give()`), and copies the program's template project into its shared space
       (`events_team@rs/picnic/SignUpSheet/`).
-    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`);
+    - QUIET:  its spaces read only (`isQuietAt()`, which `SpaceFolders` asks before every write, `quietOrDie()`),
+      whoever's asking:  a member, someone signing up, or someone writing a public space;
       P33's feed leaves it off too.
     - Kept in the Admin space beside the roles, `@rs/__admin/events.json5`:  `{ program?, events }`;  the program the
       Board's and the Admins' to change (`setProgram()`), every move in the org's log (`"event"`, its stage the name).
