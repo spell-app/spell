@@ -87,7 +87,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   | Group | Folder |
   | --- | --- |
-  | `@spell/examples`, `@spell/library`, `@spell/guides` | `spaces/@spell/<group>/`, committed |
+  | `@spell/examples`, `@spell/library`, `@spell/guides`, `@spell/sites` | `spaces/@spell/<group>/`, committed |
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
 

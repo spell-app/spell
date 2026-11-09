@@ -42,6 +42,7 @@ flowchart LR
     examples["@spell/examples"]
     library["@spell/library"]
     guides["@spell/guides"]
+    sites["@spell/sites"]
     tests["@spell/test, frozen"]
   end
   subgraph yours["spell.spaces/, beside the kit's folder:  in no repo"]
@@ -53,7 +54,7 @@ flowchart LR
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
 
-_Five groups in two folders, and one way in:  the server takes an address and works out the folder itself._
+_Six groups in two folders, and one way in:  the server takes an address and works out the folder itself._
 
 ## Addresses:  the folder is in the name
 
@@ -94,6 +95,7 @@ The groups, and where each one's folder is:
 | `@spell/examples` | Examples | [spaces/@spell/examples/](spaces/@spell/examples/), committed | the eleven example apps ([README-examples.md](README-examples.md)) |
 | `@spell/library` | Libraries | [spaces/@spell/library/](spaces/@spell/library/), committed | projects other projects import:  people |
 | `@spell/guides` | Guides | [spaces/@spell/guides/](spaces/@spell/guides/), committed | twelve guides, each a Spell program that reads as prose:  a first walkthrough, A tour of Spell, and how each example works ([README-examples.md](README-examples.md#guides--programs-that-read-as-prose)) |
+| `@spell/sites` | Sites | [spaces/@spell/sites/](spaces/@spell/sites/), committed | sites of Spell's own, mapped page by page:  SpellApp, the editor's own screens |
 | `@spell/test` | Test fixtures, listed only in dev | [spaces/@spell/test/](spaces/@spell/test/), committed and frozen | the 7 projects the tests in [tests/spell/](tests/spell/) compile and compare against snapshots;  the examples and the guides are tested as they are |
 
 - `spell projects` lists them, with how many projects each holds ([README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app)).

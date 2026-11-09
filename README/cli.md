@@ -1080,6 +1080,7 @@ spell projects
 owen@spell       Projects       ...
 @spell/examples  Examples       ... projects
 @spell/guides    Guides         ... projects
+@spell/sites     Sites          1 project
 @spell/library   Libraries      1 project
 @spell/editor    The editor     ... projects
 @spell/test      Test fixtures  ... projects
