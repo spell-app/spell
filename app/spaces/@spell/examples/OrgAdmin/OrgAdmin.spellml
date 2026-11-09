@@ -54,10 +54,13 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 
 	<draw description="The section picked is in the page's address, so a reload comes back to it">
 		<stack class="org-admin" spacing="none">
-			<toolbar class="top-bar" aria-label="Org Admin">
+			<toolbar class="top-bar" appearance="text" aria-label="Org Admin">
 				<for org in every org profile>
 					<text slot="title" size="large">{its name} Admin</text>
 				</for>
+				<item link="OrgChat">Chat</item>
+				<item link="OrgFeed">Feed</item>
+				<item link="Inbox">Inbox</item>
 				<stack slot="right" direction="horizontal">{the sign in menu}</stack>
 			</toolbar>
 			<tabs class="body" parameter="section" direction="vertical" appearance="secondary" aria-label="Sections">

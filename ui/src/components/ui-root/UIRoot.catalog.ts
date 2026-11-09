@@ -1525,6 +1525,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "rows",
       "grow",
       "max-rows",
+      "send-on-enter",
       "autocomplete",
       "rules"
     ],

@@ -54,10 +54,13 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 
 	<dibujar descripción="La sección elegida queda en la dirección de la página, y al recargar vuelve a ella">
 		<ui-stack class="org-admin" spacing="none">
-			<ui-toolbar class="top-bar" aria-label="Administración de la org">
+			<ui-toolbar class="top-bar" appearance="text" aria-label="Administración de la org">
 				<para org en los perfiles>
 					<ui-text slot="title" size="large">Administración de {su nombre}</ui-text>
 				</para>
+				<ui-item link="OrgChat">Chat</ui-item>
+				<ui-item link="OrgFeed">Novedades</ui-item>
+				<ui-item link="Inbox">Bandeja</ui-item>
 				<ui-stack slot="right" direction="horizontal">{el menú de acceso}</ui-stack>
 			</ui-toolbar>
 			<ui-tabs class="body" parameter="sección" direction="vertical" appearance="secondary" aria-label="Secciones">

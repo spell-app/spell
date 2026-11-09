@@ -945,7 +945,8 @@ export class SpaceFolders {
       spacesOf: (org) => roles.pairedSpacesOf(org),
       isInOrg: (org, who) => roles.isInOrg(org, who),
       managersOf: (space) => roles.managersOfSpace(space),
-      placeAt: (address) => this.placeFor(address, undefined)
+      placeAt: (address) => this.placeFor(address, undefined),
+      orgNameOf: (org) => roles.orgName(org)
     })
     this.threadLists.set(key, threads)
     return threads

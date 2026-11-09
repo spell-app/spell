@@ -33,6 +33,8 @@ export type PlaceDetailValue = {
   pagesByOffset?: { limit?: string; offset: string }
   /** What a web server calls how many and which page:  see `NextPageByNumber`. */
   pagesByNumber?: { limit?: string; page: string; first?: number }
+  /** What a web server calls how many and the last row's id:  see `NextPageByLastId`. */
+  pagesByLastId?: { limit?: string; param: string; moreIn?: string }
   /** What it calls the cursor it's sent back:  see `NextPageIn`. */
   nextPageSentAs?: string
   namesLike?: string

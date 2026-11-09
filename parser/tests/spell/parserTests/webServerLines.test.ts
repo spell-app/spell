@@ -222,6 +222,29 @@ describe("what a server can do, said in its lines (epic `data` I35)", () => {
     expect(pages).toHaveLength(2)
   })
 
+  test("the last row's id, until its answer says there's no more, in either language", async () => {
+    const asked = serve({
+      [`${HOST}/recipes?limit=2`]: { data: [{ id: "a" }, { id: "b" }], has_more: true },
+      [`${HOST}/recipes?limit=2&starting_after=b`]: { data: [{ id: "c" }], has_more: false }
+    })
+    core.resetRuntime()
+    const Recipe = recipeIn(
+      `\t- its rows are its "data"`,
+      `\t- it gives up to 2 at a time`,
+      `\t- its next page is asked for with "limit" and the last id as "starting_after", until its "has_more" is no`
+    )
+    expect((await read(Recipe)).map(({ id }) => id)).toEqual(["a", "b", "c"])
+    expect(asked).toHaveLength(2)
+    const es = [
+      `recetario es un servidor web en "${HOST}":`,
+      `\t- su página siguiente se pide con "limit" y el último id como "starting_after", hasta que su "has_more" sea no`
+    ]
+    const spanish = parseSpellProject([{ path: "/C.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain(`param: "starting_after"`)
+    expect(spanish.compiled).toContain(`moreIn: "has_more"`)
+  })
+
   test("a token in its answer goes back by what it calls that, in either language", async () => {
     const asked = serve({
       [`${HOST}/recipes`]: { items: [{ id: 1 }], nextPageToken: "abc" },

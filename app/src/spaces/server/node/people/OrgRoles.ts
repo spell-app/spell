@@ -177,6 +177,11 @@ export class OrgRoles {
     return this.memberSpaceAt(head)
   }
 
+  /** What people call org `org`, as its file says it:  "Willzalone", never a shouted id;  its id with no file. */
+  async orgName(org: string): Promise<string> {
+    return (await this.people.org(org))?.name || org
+  }
+
   /**
    * Every paired space of org `org`, both sides of each, with the name of whose it is (epic `atmosphere` P37):
    * the org's, the Admins', each standing team's and each project's, an event's among them.
@@ -191,7 +196,7 @@ export class OrgRoles {
       { ...sideOf(owner, address, PRIVATE_SPACE), name }
     ]
     const spaces = [
-      ...both({ org, of: { kind: "the-org" } }, `@${org}`, org.toUpperCase()),
+      ...both({ org, of: { kind: "the-org" } }, `@${org}`, await this.orgName(org)),
       { org, of: { kind: "the-admin-space" }, side: "shared", address: `${ADMINS_SHARED}@${org}`, name: "Admins" },
       { org, of: { kind: "the-admin-space" }, side: "private", address: `@${org}/${ADMIN_SPACE}`, name: "Admins" }
     ] satisfies NamedSpace[] as NamedSpace[]

@@ -15,7 +15,7 @@ a "message" is a thing:
 	- it lives in chat
 	- its "text" is text
 	- its "by" is text
-	- its "sent" is text
+	- its "sent" is a date
 	- its "thread" is text
 
 // A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.

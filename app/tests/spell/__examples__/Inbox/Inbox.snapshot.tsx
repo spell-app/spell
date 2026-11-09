@@ -172,66 +172,74 @@ export class InboxPage extends App {
 
   @drawn draw() {
     return (
-      <ui-container class="inbox">
-        <ui-stack>
-          <ui-header size="large">Your inbox</ui-header>
-          <ui-text class="who-reads" color="grey">
-            The org's Board and its Admins can read your inbox, as they can every space in the org.
-          </ui-text>
-          <ui-segment class="write">
-            <ui-header size="medium">Write to someone</ui-header>
-            <ui-form prop:value={this.newMessage}>
-              <ui-stack spacing="sm">
-                <ui-input name="recipients" placeholder="bo@rs, cy@rs" aria-label="Who it's to, by their address" fluid={true} />
-                <ui-input name="text" placeholder="What you'd like to say" aria-label="Your message" fluid={true} />
-                <ui-input name="thread" placeholder="A conversation to answer in, if any" aria-label="The conversation it answers" fluid={true} />
-                <ui-button class="send" color="primary" disabled={this.newMessage.recipients === ""} onClick={core.pressed(this, () => this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                  Send
-                </ui-button>
+      <ui-stack class="org-page" spacing="none">
+        <ui-toolbar class="top-bar" appearance="text" aria-label="Inbox">
+          <ui-text slot="title" size="large">Inbox</ui-text>
+          <ui-item link="OrgChat">Chat</ui-item>
+          <ui-item link="OrgFeed">Feed</ui-item>
+          <ui-item link="OrgAdmin">Admin</ui-item>
+          <ui-stack slot="right" direction="horizontal">{core.signInMenu()}</ui-stack>
+        </ui-toolbar>
+        <ui-container class="inbox">
+          <ui-stack>
+            <ui-text class="who-reads" color="grey">
+              The org's Board and its Admins can read your inbox, as they can every space in the org.
+            </ui-text>
+            <ui-segment class="write">
+              <ui-header size="medium">Write to someone</ui-header>
+              <ui-form prop:value={this.newMessage}>
+                <ui-stack spacing="sm">
+                  <ui-input name="recipients" placeholder="bo@rs, cy@rs" aria-label="Who it's to, by their address" fluid={true} />
+                  <ui-input name="text" placeholder="What you'd like to say" aria-label="Your message" fluid={true} />
+                  <ui-input name="thread" placeholder="A conversation to answer in, if any" aria-label="The conversation it answers" fluid={true} />
+                  <ui-button class="send" color="primary" disabled={this.newMessage.recipients === ""} onClick={core.pressed(this, () => this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                    Send
+                  </ui-button>
+                </ui-stack>
+              </ui-form>
+            </ui-segment>
+            <ui-segment class="mail">
+              <ui-header size="medium">Mail</ui-header>
+              <ui-stack class="mail-choices" spacing="sm">
+                {core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice: MailChoice) => core.drawThing(choice), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading how you hear of it"}</ui-loader>, none: () => <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
+                  <ui-text color="grey">A daily digest of what's new, each morning.</ui-text>
+                  <ui-button class="choose" size="small" onClick={core.pressed(this, () => this.chooseHow())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                    Choose
+                  </ui-button>
+                </ui-stack> })}
               </ui-stack>
-            </ui-form>
-          </ui-segment>
-          <ui-segment class="mail">
-            <ui-header size="medium">Mail</ui-header>
-            <ui-stack class="mail-choices" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice: MailChoice) => core.drawThing(choice), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading how you hear of it"}</ui-loader>, none: () => <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
-                <ui-text color="grey">A daily digest of what's new, each morning.</ui-text>
-                <ui-button class="choose" size="small" onClick={core.pressed(this, () => this.chooseHow())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                  Choose
-                </ui-button>
-              </ui-stack> })}
-            </ui-stack>
-          </ui-segment>
-          <ui-segment class="subscriptions">
-            <ui-header size="medium">Spaces you follow</ui-header>
-            <ui-form prop:value={this.newSubscription}>
-              <ui-input name="space" placeholder="events_team@rs" aria-label="A shared space of the org, by its address" fluid={true} action={true}>
-                <ui-button slot="action" color="primary" disabled={this.newSubscription.space === ""} onClick={core.pressed(this, () => this.subscribe())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                  Follow
-                </ui-button>
-              </ui-input>
-            </ui-form>
-            <ui-stack class="subscription-list" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(Subscription, {}, "as drawn"), (subscription: Subscription) => core.drawThing(subscription), { none: () => <ui-text color="grey">None yet.</ui-text> })}
-            </ui-stack>
-          </ui-segment>
-          <ui-segment class="messages">
-            <ui-header size="medium">Conversations</ui-header>
-            <ui-stack class="message-list" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "sent", descending: true }] }, "as drawn"), (message: Message) => <ui-stack class="row" spacing="xs">
-                {core.drawThing(message)}
-                <ui-button class="reply" icon="reply" size="small" appearance="basic" title="Answer in this conversation:  fills in who it's to and the conversation" onClick={core.pressed(this, () => this.replyToWhoInConversation(message.from, message.thread))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                  Reply
-                </ui-button>
-              </ui-stack>, {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your inbox"}</ui-loader>,
-                none: () => <ui-text class="none" color="grey">Nothing yet.</ui-text>,
-                failed: () => <ui-text color="red">We can't read your inbox right now.</ui-text>
-              })}
-            </ui-stack>
-          </ui-segment>
-        </ui-stack>
-      </ui-container>
+            </ui-segment>
+            <ui-segment class="subscriptions">
+              <ui-header size="medium">Spaces you follow</ui-header>
+              <ui-form prop:value={this.newSubscription}>
+                <ui-input name="space" placeholder="events_team@rs" aria-label="A shared space of the org, by its address" fluid={true} action={true}>
+                  <ui-button slot="action" color="primary" disabled={this.newSubscription.space === ""} onClick={core.pressed(this, () => this.subscribe())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                    Follow
+                  </ui-button>
+                </ui-input>
+              </ui-form>
+              <ui-stack class="subscription-list" spacing="sm">
+                {core.drawRead(async () => await core.savedThings(Subscription, {}, "as drawn"), (subscription: Subscription) => core.drawThing(subscription), { none: () => <ui-text color="grey">None yet.</ui-text> })}
+              </ui-stack>
+            </ui-segment>
+            <ui-segment class="messages">
+              <ui-header size="medium">Conversations</ui-header>
+              <ui-stack class="message-list" spacing="sm">
+                {core.drawRead(async () => await core.savedThings(Message, { sort: [{ field: "sent", descending: true }] }, "as drawn"), (message: Message) => <ui-stack class="row" spacing="xs">
+                  {core.drawThing(message)}
+                  <ui-button class="reply" icon="reply" size="small" appearance="basic" title="Answer in this conversation:  fills in who it's to and the conversation" onClick={core.pressed(this, () => this.replyToWhoInConversation(message.from, message.thread))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                    Reply
+                  </ui-button>
+                </ui-stack>, {
+                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your inbox"}</ui-loader>,
+                  none: () => <ui-text class="none" color="grey">Nothing yet.</ui-text>,
+                  failed: () => <ui-text color="red">We can't read your inbox right now.</ui-text>
+                })}
+              </ui-stack>
+            </ui-segment>
+          </ui-stack>
+        </ui-container>
+      </ui-stack>
     )
   }
 }
@@ -262,6 +270,8 @@ export class InboxPageElement extends SpellElement<InboxPage> {
 }
 core.useElement(InboxPage, InboxPageElement)
 export const inboxPage = new InboxPage()
+// -----------
+core.installStyles(undefined, `/* The toolbar across the top, who's signed in on its right;  the page the theme's colours, light or dark. */¬.org-page {¬  min-height: 100dvh;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬.org-page .top-bar {¬  padding: 6px 12px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬¬.org-page .top-bar::part(menu) {¬  margin-block: 0;¬}¬¬.org-page .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬.org-page ui-container > ui-stack {¬  padding-block: 16px;¬}¬¬/* A phone:  the links go, leaving the name and who's signed in. */¬@media (max-width: 640px) {¬  .org-page .top-bar ui-item {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) inboxPage.start()
 

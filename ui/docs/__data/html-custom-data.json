@@ -53834,7 +53834,7 @@
       "name": "ui-textarea",
       "description": {
         "kind": "markdown",
-        "value": "A textarea is a multi-line field used to elicit a longer response.\n\nAlso known as:  multiline, text area, memo, comment box.\n\n**Events:**  `ui-typed`, `ui-changed`"
+        "value": "A textarea is a multi-line field used to elicit a longer response.\n\nAlso known as:  multiline, text area, memo, comment box.\n\n**Events:**  `ui-typed`, `ui-changed`, `ui-send`"
       },
       "attributes": [
         {
@@ -53999,6 +53999,13 @@
           "description": {
             "kind": "markdown",
             "value": "With `grow`:  the most lines it grows to before it scrolls;  without it, a third of the window (`--ui-input-textarea-grow-max-height`).\n\nTakes:  number"
+          }
+        },
+        {
+          "name": "send-on-enter",
+          "description": {
+            "kind": "markdown",
+            "value": "As a chat app's box (epic `atmosphere` T61):  Enter sends what's typed (`ui-send`), Shift-Enter types a new line.  Nothing is sent while it's empty or only spaces.\n\nTakes:  flag (present / absent)"
           }
         },
         {

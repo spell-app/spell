@@ -1,2 +1,1 @@
-120:5 TS2322 Type 'Date' is not assignable to type 'string'.
-144:62 TS2532 Object is possibly 'undefined'.
+40:61 TS2322 Type 'unknown' is not assignable to type 'Element'.

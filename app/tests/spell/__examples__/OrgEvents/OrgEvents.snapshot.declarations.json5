@@ -10,11 +10,6 @@
     {
       "type": "Event",
       "superType": "Thing",
-      "savedIn": {
-        "place": "org_events",
-        "placeType": "OrgEvent",
-        "collection": "events"
-      },
       "defined": "/OrgEvents.api.spell:512-740"
     },
     {
@@ -77,11 +72,6 @@
     {
       "type": "EventStage",
       "superType": "Thing",
-      "savedIn": {
-        "place": "org_events",
-        "placeType": "OrgEvent",
-        "collection": "event_stages"
-      },
       "defined": "/OrgEvents.api.spell:742-870"
     },
     {
@@ -120,20 +110,12 @@
     {
       "type": "OrgEvent",
       "superType": "Place",
-      "place": {
-        "name": "org_events",
-        "kind": "data folder",
-        "at": "/api/places/spaces/@rs/__admin/events",
-        "details": {
-          "checkedEvery": 30
-        }
-      },
       "defined": "/OrgEvents.api.spell:429-510"
     },
     {
       "type": "EventsPage",
       "superType": "App",
-      "defined": "/OrgEvents.spellml:1125-2718"
+      "defined": "/OrgEvents.spellml:1125-3114"
     },
     {
       "property": "new_event",
@@ -167,7 +149,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spellml:1385-2709"
+      "defined": "/OrgEvents.spellml:1385-3105"
     }
   ],
   "codeLines": [
