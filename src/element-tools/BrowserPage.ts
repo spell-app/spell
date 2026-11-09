@@ -23,6 +23,7 @@ import type { Browser, BrowserContextOptions, LaunchOptions, Page } from "playwr
  *   `spell/element-tools/BrowserPage` (an entry of its own in the kit's `exports`:  spell-epic's `.mjs` checks).
  *   Playwright itself is imported when `launch()` runs:  a tool that never opens a browser doesn't load it.
  * - NEVER a person's own Chrome (Owen's standing rule):  pages are looked at headlessly.
+ *   - The one window a person sees, `launchVisible()`, is Playwright's own Chromium, for them to sign in or look.
  * - STATIC and instance-free:  callers keep Playwright's own `Page`, with everything it can do.
  ****************/
 export class BrowserPage {
@@ -30,6 +31,14 @@ export class BrowserPage {
   static async launch(options?: LaunchOptions): Promise<Browser> {
     const { chromium } = await import("playwright")
     return chromium.launch(options)
+  }
+
+  /**
+   * A Chromium whose windows a person sees and uses, to sign in somewhere (epic `mockup` P12):  Playwright's own,
+   * with none of what's in their Chrome.  Close it with `browser.close()`.
+   */
+  static launchVisible(options?: LaunchOptions): Promise<Browser> {
+    return BrowserPage.launch({ ...options, headless: false })
   }
 
   /** Run `work` with a headless Chromium, closed after it, however it ends. */

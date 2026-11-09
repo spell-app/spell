@@ -6,6 +6,7 @@
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
  * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12);
+ * and `spell place sign-in` / `read-page`, a site behind its own sign-in (epic `mockup` P12, `placeSignIn.ts`);
  * and `spell place ingest` / `update`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
  * as it needs no project.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which the app folder provides today:
@@ -269,6 +270,11 @@ export default function languageCommands(spell: Command): void {
     )
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
+    .option(
+      "--signed-in <place>",
+      "read it as you, with the session spell place sign-in kept under that name:  its cookies go only to their own " +
+        "host, and are never written down;  says so when the session has run out"
+    )
     .option("--docs <address>", "where its docs are, over those it finds by itself")
     .option(
       "--collections <paths>",
@@ -295,6 +301,37 @@ export default function languageCommands(spell: Command): void {
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((address: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))
+    )
+
+  place
+    .command("sign-in")
+    .description(
+      "sign in to a company site or other private place, in a browser window Spell opens (never your own Chrome):  " +
+        "sign in as usual, then press Enter here or close the window.  The session is kept on this machine under the " +
+        "place's name, in ~/.spell/place-sessions, never in a repo"
+    )
+    .argument("<place>", "a name for it, one word, e.g. console")
+    .argument("[address]", "where to sign in, e.g. https://example.com -- default where it signed in last time")
+    .action((name: string, address: string | undefined) =>
+      CLI.runCommand(async () => (await import("./placeSignIn")).placeSignIn(name, address))
+    )
+
+  place
+    .command("read-page")
+    .description(
+      "copy the rows off one page of a signed-in site, for what its API doesn't serve:  a table, or each element a " +
+        "selector matches, kept as samples beside the place.  Headless, as you;  says so when the session has run out"
+    )
+    .argument("<address>", "the page, e.g. https://example.com/racks")
+    .requiredOption("--signed-in <place>", "the session spell place sign-in kept under that name")
+    .requiredOption("--select <selector>", "what to read:  a table, or the CSS selector of each row")
+    .option("--as <collection>", "what these rows are, e.g. racks:  names the samples' file -- default samples")
+    .option(
+      "--into <file>",
+      "the place's .spell file:  the rows go beside it, in <Name>.<collection>.samples.json -- default they're printed"
+    )
+    .action((address: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeSignIn")).placeReadPage(address, command.optsWithGlobals()))
     )
 
   place

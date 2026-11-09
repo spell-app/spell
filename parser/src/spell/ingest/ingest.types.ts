@@ -103,6 +103,8 @@ export type IngestSettings = {
   claudeVia?: string
   /** A key's value by its name:  `undefined` when it isn't there.  Never written anywhere. */
   keyNamed?: (name: string) => string | undefined
+  /** The session kept for a place after signing in to it:  `undefined` if it never did (epic `mockup` P12). */
+  sessionNamed?: (place: string) => ReaderSession | undefined
   /** What time it is:  a test's clock. */
   now?: () => Date
   /** Waits:  a test's. */
@@ -123,6 +125,8 @@ export type IngestAsk = {
   name?: string
   /** The NAME of the key it needs. */
   keySecret?: string
+  /** The name of the place whose kept session it reads as:  `spell place sign-in`'s (epic `mockup` P12). */
+  signedIn?: string
   /** An address to read its docs at, over those it finds by itself. */
   docs?: string
   /**
@@ -461,6 +465,8 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
+    /** The name of the session it's read as, never the session. */
+    signedIn?: string
     /** It answered without the key too, so it takes it only when it's set:  GitHub's, 60 requests an hour without. */
     keyIfSet?: boolean
     /** Who read the samples:  `Claude API`, `claude -p`, or nobody. */
@@ -519,4 +525,21 @@ export type PlaceDescriptionOnDisk = Omit<PlaceDescription, "collections"> & {
   allCollections?: Partial<CollectionDescription>
   /** Each collection, by what Spell calls it, without what `allCollections` says. */
   collections: Record<string, Partial<CollectionDescription>>
+}
+
+/**
+ * A signed-in session, as the reader needs it (epic `mockup` P12):  no node here, so it's handed in.
+ * - The cookies go on each request, and its secrets are taken out of whatever comes back.
+ */
+export type ReaderSession = {
+  /** The place's name. */
+  place: string
+  /** Every cookie with an end has passed it. */
+  hasEnded: boolean
+  /** Every value that must never be written down. */
+  secrets: readonly string[]
+  /** The `Cookie` header for a request to `url`:  none for anywhere else. */
+  cookieFor(url: string): string | undefined
+  /** Was a request to `from` sent to `to` to sign in? */
+  sentToSignIn(from: string, to: string): boolean
 }

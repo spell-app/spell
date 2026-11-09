@@ -135,14 +135,14 @@ export class SiteEdits {
   }
 
   /**
-   * `text` with page `name`'s address, title or state changed;  an empty title takes it out, and the page goes by its name.
+   * `text` with page `name`'s address, title, state or thumbnail changed;  an empty title takes it out, and the page goes by its name.
    * - Only pages have them:  a dialog's or sidebar's are ignored.
    * - throws `TypeError` for an address that doesn't start with `/`, or one another page has
    */
   static withPartChanged(
     text: string,
     name: string,
-    change: { address?: string; title?: string; state?: string }
+    change: { address?: string; title?: string; state?: string; thumbnail?: string }
   ): string {
     const part = SiteEdits.partNamed(text, name)
     if (part.kind !== "page") return text
@@ -158,7 +158,8 @@ export class SiteEdits {
     }
     const state = change.state === undefined ? part.state : change.state || undefined
     const line = text.slice(part.line.start, part.line.end)
-    const said = { ...wordsOf(part), address, title, state }
+    const thumbnail = change.thumbnail === undefined ? part.thumbnail : change.thumbnail || undefined
+    const said = { ...wordsOf(part), address, title, state, thumbnail }
     const changed = part.form === "spellx" ? spellxLineWith(line, said) : codeLineWith(line, part, said)
     return text.slice(0, part.line.start) + changed + text.slice(part.line.end)
   }
