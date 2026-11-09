@@ -106,10 +106,13 @@ function keyGoesFrom({ keySecret, keyHeader, keyInAddress }: PlaceIngestOptions)
  * - `EXIT.ERRORS` when it couldn't change a line for someone.
  * - throws `CliError` for whatever stopped it, having written nothing
  */
-export async function placeUpdate(file: string, { ai = true }: { ai?: boolean }): Promise<number> {
+export async function placeUpdate(
+  file: string,
+  { ai = true, address }: { ai?: boolean; address?: string }
+): Promise<number> {
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(ai, describesSession(file))
-    const result = await ingest.update(file)
+    const result = await ingest.update(file, withValues({ movedTo: address }))
     printUpdate(result)
     return result.couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
   })
@@ -230,7 +233,8 @@ export const diskFiles: IngestFiles = {
   otherSpellBeside: async (path) =>
     filesBeside(path)
       .filter((name) => name.endsWith(".spell") && name !== basename(path))
-      .map((name) => readFileSync(join(dirname(path), name), "utf8"))
+      .map((name) => readFileSync(join(dirname(path), name), "utf8")),
+  namesInFolder: async (path) => (existsSync(path) ? readdirSync(path) : undefined)
 }
 
 /** The files in `path`'s folder. */
@@ -255,20 +259,26 @@ export const readThroughSpell: ReadThrough = async ({
   byName = {},
   bySearch = {},
   byQuery = {},
-  fetch
+  fetch,
+  serverToken
 }) => {
   const { core } = await import("spell/parser/core")
   const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
+  const pageGlobals = globalThis as { location?: unknown; SPELL_SERVER?: unknown }
   const held = {
     fetch: globalThis.fetch,
-    location: (globalThis as { location?: unknown }).location,
+    location: pageGlobals.location,
+    server: pageGlobals.SPELL_SERVER,
     warn: console.warn,
     error: console.error
   }
   const complaints: string[] = []
   const complain = (...said: unknown[]) => void complaints.push(said.map(String).join(" "))
   globalThis.fetch = fetch
-  Object.assign(globalThis, { location: { href: pathToFileURL(`${process.cwd()}/`).href } })
+  Object.assign(globalThis, {
+    location: { href: pathToFileURL(`${process.cwd()}/`).href },
+    ...(serverToken !== undefined && { SPELL_SERVER: { token: serverToken } })
+  })
   console.warn = complain
   console.error = complain
   try {
@@ -313,7 +323,7 @@ export const readThroughSpell: ReadThrough = async ({
     return { byType, complaints: withoutListsUnder(complaints, spell) }
   } finally {
     globalThis.fetch = held.fetch
-    Object.assign(globalThis, { location: held.location })
+    Object.assign(globalThis, { location: held.location, SPELL_SERVER: held.server })
     console.warn = held.warn
     console.error = held.error
   }
@@ -423,7 +433,7 @@ function printDescription(
     .filter(([, { leftOut }]) => !leftOut)
     .map(
       ([name, { readThrough }]) =>
-        `${name}:  ${readThrough?.rows ?? 0} rows${readThrough?.problem ? ` -- ${readThrough.problem}` : ""}`
+        `${name}:  ${readThrough?.rows ?? 0} rows${readThrough?.readByTheLook ? ", by the look itself" : ""}${readThrough?.problem ? ` -- ${readThrough.problem}` : ""}`
     )
   printList("A read through the Spell found:", reads)
   if (spellCantSay.length) printList("What Spell can't say about it:", spellCantSay)
