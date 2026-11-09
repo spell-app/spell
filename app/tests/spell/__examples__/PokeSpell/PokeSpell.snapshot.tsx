@@ -1,4 +1,4 @@
-import { core, Thing, List, App, Place, prop, thing, drawn, position, withSpellPositions } from "@spell/core"
+import { core, Thing, List, App, Place, prop, thing, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("PokéAPI:  every pokemon, and all about it")
@@ -102,19 +102,19 @@ export class Pokemon extends Thing {
   accessor pastTypes!: List<string>
 
   /** Its big picture, the official artwork */
-  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spellml", start: 434, end: 585 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spellml", start: 210, end: 361 }, readsFrom: ["poke_api"] }) }
   get picture() {
     return this.sprites?.other?.officialArtwork?.frontDefault
   }
 
   /** What it says:  its cry, a sound file */
-  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spellml", start: 600, end: 702 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spellml", start: 376, end: 478 }, readsFrom: ["poke_api"] }) }
   get sound() {
     return this.cries?.latest
   }
 
   /** Its number as the games write it, four figures:  #0001 */
-  static { this.declareProp("numberTag", { declaredAt: { path: "/Pokemon.spellml", start: 717, end: 984 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("numberTag", { declaredAt: { path: "/Pokemon.spellml", start: 493, end: 760 }, readsFrom: ["poke_api"] }) }
   get numberTag() {
     if (this.number < 10) return `#000${this.number}`
     if (this.number < 100) return `#00${this.number}`
@@ -123,13 +123,13 @@ export class Pokemon extends Thing {
   }
 
   /** Its family, from the first:  its species' evolution chain */
-  static { this.declareProp("evolutions", { declaredAt: { path: "/Pokemon.spellml", start: 999, end: 1151 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("evolutions", { declaredAt: { path: "/Pokemon.spellml", start: 775, end: 927 }, readsFrom: ["poke_api"] }) }
   get evolutions() {
     return this.species?.evolutionChain?.chain
   }
 
   /** Is it one of your favourites? */
-  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spellml", start: 1166, end: 1311 }, readsFrom: ["my_favourites"] }) }
+  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spellml", start: 942, end: 1087 }, readsFrom: ["my_favourites"] }) }
   get loved() { return core.waitedValue(this, "loved", async () => {
     const address = this.id
     return core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0
@@ -241,7 +241,7 @@ export class Pokemon extends Thing {
 
   // A bar for each of its six numbers:  255 is as strong as any Pokémon gets
   drawStrengths() {
-    return core.drawEach(this.stats, withSpellPositions((stat: Stat, place: number) => <ui-progress max-width="36em" value={stat.baseStat} total="255" color="green" size="large" label={`${core.getItemAt(strengthWords, position(place))}:  {value}`} part="strengths" />))
+    return core.drawEach(this.stats, (stat: Stat) => <ui-progress max-width="36em" value={stat.baseStat} total="255" color="green" size="large" label={`${stat.word}:  {value}`} part="strengths" />)
   }
 
   static savedIn = {
@@ -371,7 +371,7 @@ export class PokemonSpecies extends Thing {
   accessor varieties!: List<Variety>
 
   /** The Pokémon it is, as the games show it first */
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 7887, end: 8023 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8110, end: 8246 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.answerOf(core.getItemAt(this.varieties, 0), "pokemon")
   }, () => [this.varieties]) }
@@ -439,13 +439,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5319, end: 5494 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5542, end: 5717 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5507, end: 6213 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5730, end: 6436 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -925,6 +925,17 @@ export class Stat extends Thing {
   // - its "stat" is a poke api name
   @prop({ type: "PokeApiName" })
   accessor stat!: PokeApiName
+
+  /** What it means, in plain words, by the name PokéAPI gives it */
+  get word() {
+    const name = this.stat?.name
+    if (name === "hp") return "Health"
+    if (name === "attack") return "Attack"
+    if (name === "defense") return "Defence"
+    if (name === "special-attack") return "Special attack"
+    if (name === "special-defense") return "Special defence"
+    return "Speed"
+  }
 }
 
 export class PastStat extends Thing {
@@ -1273,7 +1284,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8205, end: 8260 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8428, end: 8483 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1312,8 +1323,8 @@ core.heading("A Pokémon:  its card, its own page, and its family")
 ////////////////////////////////////////////////////////
 // Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so looking at PokéAPI again never touches a line of this.
 
-/** What each of a Pokémon's six numbers means, in plain words:  PokéAPI always lists them in this order */
-export const strengthWords: any /* spell: list */ = ["Health", "Attack", "Defence", "Special attack", "Special defence", "Speed"]
+core.heading("One of a Pokémon's six numbers")
+//# One of a Pokémon's six numbers
 
 core.heading("A kind of Pokémon:  fire, water, grass ...")
 //# A kind of Pokémon:  fire, water, grass ...
