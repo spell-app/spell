@@ -32,42 +32,6 @@
       "active": true
     },
     {
-      "path": "/Home.spellml",
-      "active": true
-    },
-    {
-      "path": "/GettingStarted.spellml",
-      "active": true
-    },
-    {
-      "path": "/Grammar.spellml",
-      "active": true
-    },
-    {
-      "path": "/Theming.spellml",
-      "active": true
-    },
-    {
-      "path": "/Icons.spellml",
-      "active": true
-    },
-    {
-      "path": "/Utilities.spellml",
-      "active": true
-    },
-    {
-      "path": "/ComponentIndex.spellml",
-      "active": true
-    },
-    {
-      "path": "/KitchenSink.spellml",
-      "active": true
-    },
-    {
-      "path": "/ThemeBench.spellml",
-      "active": true
-    },
-    {
       "path": "/Accordion/Usage.spellml",
       "active": true
     },
