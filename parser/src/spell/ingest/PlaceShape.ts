@@ -31,6 +31,35 @@ const LONGEST_EXAMPLE = 80
 /** How often to ask a place that can't say what changed, unless something says otherwise. */
 export const USUAL_CHECK_SECONDS = 30
 
+/** The kinds that can't say what changed:  a program asks them again, as often as its line says. */
+const KINDS_ASKED_AGAIN: ReadonlySet<string> = new Set([
+  "web server",
+  "graphql server",
+  "data folder",
+  "file",
+  "airtable"
+])
+
+/** What each kind of place can do, when that's the kind's to say, whatever a look's answers show. */
+const KIND_CAN_DO: Readonly<Record<string, Partial<PlaceDescription["canDo"]>>> = {
+  room: {
+    write: "Yes:  everyone in it can change anything.  Never tried.",
+    live: "It says what changed by itself, as it happens.",
+    limits: "It names none.",
+    browsers: "Yes:  a page reaches it by its websocket."
+  },
+  airtable: {
+    write: "Yes:  through a server side that holds its key, ten rows at a time.  Never tried.",
+    limits: "Five requests a second per base, and it cuts off for 30 seconds past that:  its server side minds it.",
+    browsers: "No:  its key has to stay on a server side, so a page goes through one."
+  },
+  "atmosphere account": {
+    write: "Only your own records, signed in.  Never tried.",
+    live: "It says what changed through the public change stream.",
+    browsers: "Yes:  anyone may read one."
+  }
+}
+
 /** The share of a rate limit a program's checks may take. */
 const SHARE_OF_LIMIT = 0.1
 
@@ -69,10 +98,11 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
     notes: [...look.notes],
     agentNotes: [],
     spellCantSay: [],
-    ...(kind === "web server" || kind === "graphql server"
-      ? { checkEverySeconds: checkSecondsWithin(look.headers, Object.keys(collections).length) }
-      : {}),
+    ...(KINDS_ASKED_AGAIN.has(kind) && {
+      checkEverySeconds: checkSecondsWithin(look.headers, Object.keys(collections).length)
+    }),
     ...(kind === "web server" && paceIn(look.docs) !== undefined && { mostPerSecond: paceIn(look.docs)! }),
+    ...(look.serverTakes && { serverTakes: look.serverTakes }),
     spell: []
   }
 }
@@ -565,7 +595,8 @@ function canDoFrom({ headers, writesOffered, docs }: PlaceLook, kind: string): P
         : "It named none in its answers.",
     browsers: origin
       ? `Yes:  it says ${origin === "*" || origin === READER_ORIGIN ? "any page" : `a page from ${origin}`} may read it.`
-      : "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front."
+      : "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front.",
+    ...KIND_CAN_DO[kind]
   }
 }
 
@@ -587,6 +618,12 @@ export function plainNameFor(address: string, kind: string): string {
   if (kind === "sheet" || kind === "google sheet") {
     const file = /([^/?#]+?)(?:\.csv|\.xlsx)?(?:[?#].*)?$/i.exec(address)?.[1]
     return `${wordsFor(file ?? "recipes")} sheet`
+  }
+  if (kind === "airtable") return "airtable base"
+  if (kind === "atmosphere account") return "atmosphere account"
+  if (kind === "room" || kind === "data folder" || kind === "file") {
+    const last = /([^/?#]+?)\/*(?:[?#].*)?$/.exec(address)?.[1]
+    return `${wordsFor(last ?? kind)} ${kind === "data folder" ? "folder" : kind}`
   }
   try {
     const labels = new URL(address).hostname.split(".").filter((label) => !/^(?:www|api|docs|graphql)$/i.test(label))

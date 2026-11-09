@@ -2,6 +2,7 @@ import { backoffFor, rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/u
 import { clockTime } from "spell/util/time"
 import { after } from "spell/util/timing"
 import { addressWithoutKey, keyHidden, putKeyOn, type KeyGoes } from "spell/places/keyGoes"
+import { ROOM_TOKEN_PROTOCOL, type RoomAnswer, type RoomAsk } from "spell/places/RoomCopy"
 
 import { IngestStopped, type ReaderSession } from "./ingest.types"
 
@@ -45,6 +46,15 @@ const MOST_REDIRECTS = 5
 /** A GraphQL request's body that only reads. */
 const ONLY_READS = /^\s*(?:query\b|\{)/
 
+/** What a place server calls a read:  its other requests write (epic `data` T71). */
+const PLACE_SERVER_READS = /\/(?:list|getMany)$/
+
+/** How long it waits for a room to say what it holds. */
+const ROOM_TIMEOUT_MS = 20_000
+
+/** Makes a websocket:  the platform's, or a test's. */
+export type MakesSocket = new (url: string, protocols?: string | string[]) => WebSocket
+
 /** What one request answered. */
 export type ReadAnswer = {
   /** Its status. */
@@ -72,7 +82,8 @@ export type ReadAnswer = {
  *   with none left, it waits for the reset, if that's soon, and else stops, saying when it is.
  * - Stops at a size:  so many requests, so many bytes an answer, so many in all.
  * - NEVER sends a write, but through `tryWrite()`, when the person said it may (`--try-writes`):
- *   - `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks
+ *   - `fetch` refuses anything but a `GET`, a `HEAD`, a GraphQL query, or a place server's own reads where it reads one
+ *     (`readPlaceServer()`), whoever asks
  *   - so a read through the Spell can't write either
  * - The key goes on each request, where its server wants it (`keyGoes`, epic `data` T73),
  *   and its value is taken out of whatever comes back, should a server say it again:  its text, its headers, where it landed.
@@ -100,6 +111,10 @@ export class PoliteReader {
   private bytes = 0
   /** When the last one went. */
   private lastAt = 0
+  /** It reads a place server, whose reads are `POST`s:  it asks as itself, not as a page (`readPlaceServer()`). */
+  private readsPlaceServer = false
+  /** Opens a room. */
+  private readonly Socket: MakesSocket | undefined
   /** How many requests its rate limit last said were left. */
   private limitLeft: number | undefined
   /** When its rate limit last said it resets, in msec since 1970. */
@@ -110,24 +125,36 @@ export class PoliteReader {
     key,
     keyGoes,
     session,
+    Socket = globalThis.WebSocket,
     sleep = (msec) => after(msec / 1000)
   }: {
     fetch: typeof globalThis.fetch
     key?: string
     keyGoes?: KeyGoes
     session?: ReaderSession
+    Socket?: MakesSocket
     sleep?: (msec: number) => Promise<void>
   }) {
     this.send = fetch
     this.key = key
     this.keyGoes = keyGoes
     this.session = session
+    this.Socket = Socket
     this.sleep = sleep
   }
 
   /** Is there still room to ask, within what one look may? */
   get hasRoom(): boolean {
     return this.requests < MOST_REQUESTS && this.bytes < MOST_BYTES
+  }
+
+  /**
+   * SIDE EFFECT:  from now on it may `POST` a place server's reads, and only those (epic `data` T71):
+   * a data folder, a file or an Airtable, behind a `PlaceServer`.
+   * - It names no page it asks from:  a place server takes a token, and refuses a page from elsewhere.
+   */
+  readPlaceServer(): void {
+    this.readsPlaceServer = true
   }
 
   /** The look's done, and a read through the Spell starts:  it gets as much again. */
@@ -166,6 +193,48 @@ export class PoliteReader {
   }
 
   /**
+   * Ask a place server for rows, as a `RemotePlace` does:  `POST <address>/list` (epic `data` T71).
+   * - NEVER throws for an answer, whatever its status;  as `read()` otherwise
+   */
+  async askPlaceServer(address: string, collection: string): Promise<ReadAnswer> {
+    this.readPlaceServer()
+    const body = JSON.stringify({ collection, query: {} })
+    return this.answerTo(`${address}/list`, { method: "POST", headers: { "content-type": "application/json" }, body })
+  }
+
+  /**
+   * Every row a room holds, by collection:  it asks the room's referee for its whole copy, says nothing else, and leaves
+   * (epic `data` T71).
+   * - It doesn't say who's here, so nobody in the room sees it come.
+   * - The key, when there is one, is its server's run token, as the socket's sub-protocol (`ROOM_TOKEN_PROTOCOL`).
+   * - throws `IngestStopped` for no answer in time, a socket that can't open, and past the limits
+   */
+  async roomRows(url: string): Promise<Record<string, Array<Record<string, unknown>>>> {
+    const { Socket } = this
+    if (!Socket) throw new IngestStopped("nothing here can open a room:  this needs a platform with websockets")
+    if (!this.hasRoom)
+      throw new IngestStopped(`stopped reading at its limit, ${MOST_REQUESTS} requests or ${MOST_BYTES} bytes`)
+    await this.waitForGap()
+    this.requests++
+    const stopped = () => new IngestStopped(`${url} didn't let it in, or didn't say what it holds`)
+    return new Promise((resolve, reject) => {
+      const socket = new Socket(url, this.key === undefined ? [] : [`${ROOM_TOKEN_PROTOCOL}${this.key}`])
+      const done = (finish: () => void) => {
+        clearTimeout(timer)
+        socket.close()
+        finish()
+      }
+      const timer = setTimeout(() => done(() => reject(stopped())), ROOM_TIMEOUT_MS)
+      socket.onerror = () => done(() => reject(stopped()))
+      socket.onopen = () => socket.send(JSON.stringify({ kind: "catch-up" } satisfies RoomAsk))
+      socket.onmessage = ({ data }) => {
+        const answer = JSON.parse(`${data as string}`) as RoomAnswer
+        if (answer.kind === "snapshot") done(() => resolve(answer.rows))
+      }
+    })
+  }
+
+  /**
    * Send one write, only because the person said it may (`--try-writes`;  epic `data` P30):
    * to a server that keeps nothing, as JSONPlaceholder keeps nothing, or one they don't mind writing to.
    * - NEVER through `fetch`:  a read through the Spell still can't write.
@@ -188,11 +257,13 @@ export class PoliteReader {
     writes: "only reads" | "may write" = "only reads",
     body: "text" | "bytes too" = "text"
   ): Promise<ReadAnswer> {
-    if (writes === "only reads") refuseWrite(url, (init.method ?? "GET").toUpperCase(), init.body)
+    const method = (init.method ?? "GET").toUpperCase()
+    const isPlaceServerRead = this.readsPlaceServer && method === "POST" && PLACE_SERVER_READS.test(pathOf(url))
+    if (writes === "only reads" && !isPlaceServerRead) refuseWrite(url, method, init.body)
     const headers = new Headers(init.headers)
     headers.set("user-agent", READER_NAME)
     // a browser sets its own, and won't let a page:  so only where it can
-    if (!headers.has("origin") && !this.session) headers.set("origin", READER_ORIGIN)
+    if (!headers.has("origin") && !this.session && !this.readsPlaceServer) headers.set("origin", READER_ORIGIN)
     const asked = this.key === undefined ? url : putKeyOn(url, headers, this.key, this.keyGoes)
     for (let attempt = 1; ; attempt++) {
       if (!this.hasRoom)
@@ -342,6 +413,11 @@ export class PoliteReader {
 /** What stops a read when `session` has ended, and how to go on. */
 export function sessionEnded({ place }: Pick<ReaderSession, "place">): IngestStopped {
   return new IngestStopped(`the session for ${place} has ended:  sign in again, spell place sign-in ${place}`)
+}
+
+/** An address without its query. */
+function pathOf(url: string): string {
+  return url.replace(/[?#].*$/, "")
 }
 
 /** Are `bytes` text, UTF-8 throughout? */

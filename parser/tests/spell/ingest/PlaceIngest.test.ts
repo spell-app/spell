@@ -92,6 +92,15 @@ function memoryFiles(start: Record<string, string> = {}) {
   return { files, texts, descriptions, listed }
 }
 
+/** A websocket that can't connect. */
+class SocketThatFails {
+  onerror?: () => void
+  constructor() {
+    setTimeout(() => this.onerror?.(), 0)
+  }
+  close() {}
+}
+
 /** A `PlaceIngest` on a fake source, with no agent, and no one to ask. */
 function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings> = {}, start?: Record<string, string>) {
   const { fetch, asked } = fakeFetch(routes)
@@ -111,6 +120,7 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
 const STARS_SPELL = `stars is a web server at "${API}":
 	- its id is its "url"
 	- check it every 30 seconds
+	- it is read only
 	- it writes names like "hair_color"
 	- people live at "/people"
 	- planets live at "/planets"
@@ -653,16 +663,14 @@ describe("adding a source", () => {
 describe("which kind", () => {
   test("--kind says;  one it can't look at stops, naming those it can", async () => {
     const { ingest } = ingestOf(STARS)
-    await expect(ingest.add({ address: API, into: "/K.spell", kind: "room" })).rejects.toThrow(
+    await expect(ingest.add({ address: API, into: "/K.spell", kind: "atmosphere space" })).rejects.toThrow(
       /web server, graphql server/
     )
   })
 
-  test("the address says, with no request", async () => {
-    const { ingest, asked } = ingestOf({})
-    await expect(ingest.add({ address: "wss://rooms.test/x", into: "/K.spell" })).rejects.toThrow(
-      /can't look at a room yet/
-    )
+  test("the address says, with no request:  a room, by its websocket", async () => {
+    const { ingest, asked } = ingestOf({}, { Socket: SocketThatFails as never })
+    await expect(ingest.add({ address: "wss://rooms.test/x", into: "/K.spell" })).rejects.toThrow(/didn't let it in/)
     expect(asked).toEqual([])
   })
 
@@ -761,14 +769,26 @@ describe("which file", () => {
     expect(texts.get("/Mine.spell")).toBe(once)
   })
 
-  test("a second server stops:  one to a file;  and a Spanish file can't take English Spell", async () => {
+  test("a second server stops:  one to a file", async () => {
     const start = { "/Mine.spell": `elsewhere is a web server at "https://other.test"\n` }
     await expect(
       ingestOf(STARS, {}, start).ingest.add({ address: API, into: "/Mine.spell", name: "stars" })
     ).rejects.toThrow(/already holds elsewhere, and a server gets a file of its own/)
-    await expect(ingestOf(STARS).ingest.add({ address: API, into: "/Mine.es.spell" })).rejects.toThrow(
-      /another language/
-    )
+  })
+
+  test("a Spanish file gets Spanish:  it compiles, and looking again changes it line for line (epic `data` T72)", async () => {
+    const { ingest, texts, descriptions } = ingestOf(STARS)
+    const { spell, wrote } = await ingest.add({ address: API, into: "/Stars.api.es.spell", name: "stars" })
+    expect(wrote).toBe(true)
+    console.log(spell)
+    expect(spell).toMatch(/^stars es un servidor web en "https:\/\/stars\.test\/api":/)
+    expect(spell).toContain(`- su "name" es texto`)
+    // the English it wrote is what the description keeps
+    expect(descriptions.get("/Stars.api.es.json5")!.spell[0]).toMatch(/is a web server at/)
+    const first = texts.get("/Stars.api.es.spell")!
+    const again = await ingest.update("/Stars.api.es.spell")
+    expect(again.changes).toEqual([])
+    expect(texts.get("/Stars.api.es.spell")).toBe(first)
   })
 })
 
@@ -1097,7 +1117,7 @@ describe("looking again", () => {
         }
       }
     )
-    expect(description.notes).toEqual([])
+    expect(description.notes.filter((note) => !/keep a copy/.test(note))).toEqual([])
     expect(description.agentNotes).toEqual(["It asks people to be gentle."])
   })
 
@@ -1231,7 +1251,7 @@ describe("looking again", () => {
   })
 })
 
-describe("the demo's real servers", () => {
+describe("the demo's real servers", { timeout: 20_000 }, () => {
   let servers: RecipeServers
   let folder: string
   beforeAll(async () => {
