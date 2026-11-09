@@ -52,6 +52,12 @@ export function isCoreCall(node: P.ASTNode): boolean {
   return node instanceof P.ASTScopedMethodInvocation && node.thing instanceof P.ASTCoreExpression
 }
 
+/** Is `node` a loop's answer, `core.map(...)`, maybe in parens? */
+export function isLoopCall(node: P.ASTNode): boolean {
+  while (node instanceof P.ASTParenthesizedExpression) node = node.expression
+  return isCoreCall(node) && (node as P.ASTScopedMethodInvocation).methodName === "map"
+}
+
 /** The text object literal `object` holds under `name`:  `{ name: "x" }`, a string it wrote out or one written as code. */
 export function objectText(object: P.ASTObjectLiteral, name: string): string | undefined {
   for (const property of object.properties ?? []) {

@@ -63,6 +63,7 @@
         "giveDefaults",
         "handDefaultsTo",
         "listDrawn",
+        "listShown",
         "useElement",
         "elementClassOf",
         "css"
