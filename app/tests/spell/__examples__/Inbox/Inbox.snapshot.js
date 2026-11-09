@@ -73,7 +73,21 @@ export class Message extends Thing {
     )
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my inbox
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 580, end: 600 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my inbox
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 580, end: 600 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**
@@ -98,7 +112,20 @@ export class MailChoice extends Thing {
     )
   }
 
-  static savedIn = { place: "my_inbox", collection: "mail_choices" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "mail_choices",
+    times: ["created", "modified"], select: ["how"] }
+
+  // - it lives in my inbox
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 996, end: 1016 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my inbox
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 996, end: 1016 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /** A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update. */
@@ -124,7 +151,21 @@ export class Subscription extends Thing {
     )
   }
 
-  static savedIn = { place: "my_inbox", collection: "subscriptions" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "subscriptions",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my inbox
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1184, end: 1204 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my inbox
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1184, end: 1204 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

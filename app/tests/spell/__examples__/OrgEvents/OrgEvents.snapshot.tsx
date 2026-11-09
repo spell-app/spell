@@ -48,7 +48,19 @@ export class Event extends Thing {
     )
   }
 
-  static savedIn = { place: "org_events", collection: "events" }
+  static savedIn = {
+    place: "org_events",
+    collection: "events",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in org events
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 538, end: 560 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in org events
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 538, end: 560 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class EventStage extends Thing {
@@ -73,7 +85,18 @@ export class EventStage extends Thing {
     )
   }
 
-  static savedIn = { place: "org_events", collection: "event_stages", select: ["name", "movedBy"] }
+  static savedIn = {
+    place: "org_events",
+    collection: "event_stages",
+    times: ["created", "modified"], select: ["name", "movedBy"] }
+
+  // - it lives in org events
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 774, end: 796 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in org events
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 774, end: 796 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**

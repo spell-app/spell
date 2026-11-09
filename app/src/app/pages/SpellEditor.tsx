@@ -334,7 +334,9 @@ const APP_SCROLLER = "spell-app-scroller"
  * ### `<SampleBar>`
  * The app pane's header while a sample stands in for a data place (epic `editor` P26):
  * says plainly that what shows is sample data, so nobody mistakes it for the real thing.
- * - Its button puts the real places back (`InspectorData.showFrom()`).
+ * - Its first button starts the samples over, copied again from the real places;  its second, with made-up records
+ *   even where a real place can be read (`InspectorData.startSamplesOver()`).
+ * - Its last button puts the real places back (`InspectorData.showFrom()`).
  * - No row of its own while every place is the real one.
  ****************/
 function SampleBar(): JSX.Element {
@@ -348,8 +350,15 @@ function SampleBar(): JSX.Element {
             places: InspectorData.listWords(samples().map(InspectorData.placeWords))
           })}
         </span>
+        <ui-button size="mini" onClick={() => void InspectorData.startSamplesOver("the real place")}>
+          {appTexts.text("sampleStartOver")}
+        </ui-button>
+        <ui-button size="mini" onClick={() => void InspectorData.startSamplesOver("made up")}>
+          {appTexts.text("sampleMadeUp")}
+        </ui-button>
         <ui-button
           size="mini"
+          class="SampleBarRealData"
           onClick={() => {
             for (const placeName of samples()) void InspectorData.showFrom(placeName, "real place")
           }}

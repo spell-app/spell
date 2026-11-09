@@ -151,7 +151,19 @@ export class BrowserTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "browser_storage", collection: "browser_tasks" }
+  static savedIn = {
+    place: "browser_storage",
+    collection: "browser_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in browser storage
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in browser storage
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -161,7 +173,10 @@ export class BrowserTask extends Task {
  * - What every view's element does, e.g. drawing its browser task, is `SpellElement`'s.
  */
 export class BrowserTaskElement extends SpellElement<BrowserTask> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-browser-task", "browser task", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-browser-task", "browser task", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   throwAway() {
     return this.currentThing?.throwAway()
@@ -202,7 +217,19 @@ export class ServerTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "task_files", collection: "server_tasks" }
+  static savedIn = {
+    place: "task_files",
+    collection: "server_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task files
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in task files
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -212,7 +239,10 @@ export class ServerTask extends Task {
  * - What every view's element does, e.g. drawing its server task, is `SpellElement`'s.
  */
 export class ServerTaskElement extends SpellElement<ServerTask> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-server-task", "server task", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-server-task", "server task", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   throwAway() {
     return this.currentThing?.throwAway()
@@ -259,7 +289,19 @@ export class SheetTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "task_sheet", collection: "sheet_tasks" }
+  static savedIn = {
+    place: "task_sheet",
+    collection: "sheet_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task sheet
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in task sheet
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -269,7 +311,10 @@ export class SheetTask extends Task {
  * - What every view's element does, e.g. drawing its sheet task, is `SpellElement`'s.
  */
 export class SheetTaskElement extends SpellElement<SheetTask> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-sheet-task", "sheet task", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-sheet-task", "sheet task", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   throwAway() {
     return this.currentThing?.throwAway()
@@ -323,7 +368,19 @@ export class SkyTask extends Task {
   @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 563, end: 594 } })
   accessor owner!: string
 
-  static savedIn = { place: "task_sky", collection: "sky_tasks" }
+  static savedIn = {
+    place: "task_sky",
+    collection: "sky_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task sky
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in task sky
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -334,7 +391,9 @@ export class SkyTask extends Task {
  */
 export class SkyTaskElement extends SpellElement<SkyTask> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-sky-task", "sky task", [
-    { name: "owner", kind: "string", description: "Its owner." }
+    { name: "owner", kind: "string", description: "Its owner." },
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
   ])
 
   throwAway() {

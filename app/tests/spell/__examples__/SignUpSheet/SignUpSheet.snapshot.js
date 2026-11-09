@@ -36,7 +36,21 @@ export class Volunteer extends Thing {
     )
   }
 
-  static savedIn = { place: "sign_up_sheet", collection: "volunteers" }
+  static savedIn = {
+    place: "sign_up_sheet",
+    collection: "volunteers",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in the sign up sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1344, end: 1373 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in the sign up sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1344, end: 1373 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**
@@ -77,7 +91,21 @@ export class Attendee extends Thing {
     )
   }
 
-  static savedIn = { place: "sign_up_sheet", collection: "attendees" }
+  static savedIn = {
+    place: "sign_up_sheet",
+    collection: "attendees",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in the sign up sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1647, end: 1676 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in the sign up sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1647, end: 1676 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /** A ticket someone asked for, for a guest:  an organizer confirms it. */
@@ -118,7 +146,21 @@ export class Ticket extends Thing {
     )
   }
 
-  static savedIn = { place: "sign_up_sheet", collection: "tickets" }
+  static savedIn = {
+    place: "sign_up_sheet",
+    collection: "tickets",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in the sign up sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1858, end: 1887 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in the sign up sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1858, end: 1887 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /** A message in your inbox:  your invitations' count is one, in the conversation "invitations". */
@@ -157,7 +199,21 @@ export class Message extends Thing {
     return h("ui-text", { class: "count" }, () => this.text)
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my inbox
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2269, end: 2289 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my inbox
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2269, end: 2289 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class PublishedVolunteer extends Thing {
@@ -178,7 +234,20 @@ export class PublishedVolunteer extends Thing {
     )
   }
 
-  static savedIn = { place: "published_sheet", collection: "published_volunteers" }
+  static savedIn = {
+    place: "published_sheet",
+    collection: "published_volunteers",
+    times: ["created", "modified"], select: ["person", "shift"] }
+
+  // - it lives in the published sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2471, end: 2502 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in the published sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2471, end: 2502 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

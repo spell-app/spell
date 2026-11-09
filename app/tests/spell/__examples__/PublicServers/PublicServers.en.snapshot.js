@@ -364,7 +364,6 @@ export const words = {
       personalName: "personal name",
       latestRevision: "latest revision",
       revision: "revision",
-      created: "created",
       lastModified: "last modified"
     },
     Edition: {
@@ -384,7 +383,6 @@ export const words = {
       localId: "local id",
       latestRevision: "latest revision",
       revision: "revision",
-      created: "created",
       lastModified: "last modified",
       draw: "draw it"
     },

@@ -35,14 +35,24 @@ import os
 import re
 import time
 import weakref
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from spell_core.lists import List
-from spell_core.place_kinds import ID_FIELD, Change, PlaceBehind, PlaceError, Row, javascript_name, place_behind
+from spell_core.place_kinds import (
+    EVERY_FIELD,
+    ID_FIELD,
+    Change,
+    PlaceBehind,
+    PlaceError,
+    Row,
+    javascript_name,
+    place_behind,
+)
+from spell_core.saving import iso_text
 from spell_core.things import (
     CHANGE_WATCHERS,
     TYPE_KEY,
@@ -56,6 +66,8 @@ from spell_core.things import (
 if TYPE_CHECKING:
     from spell_core.core import Core
 
+# The time a change stamps as it goes out.
+MODIFIED_FIELD = "modified"
 # How a reference to a thing kept elsewhere is written in a row:  `{"$ref": "Planet#tatooine"}`.
 REF_KEY = "$ref"
 # A javascript name's capitals, as Python splits them:  `deviceCount` is `device_count`.
@@ -255,9 +267,9 @@ class ProgramPlaces:
     def add(self, thing: SpellObject) -> None:
         """SIDE EFFECT:  `thing`, made here, is kept where its class says, and in every read of its class."""
         home = self.home_of_class(type(thing))
-        row = row_for(thing)
+        row = row_for(thing) | self.stamp(thing, home, self.times_of(type(thing), home))
         self.send(home.place_name, {"kind": "insert", "collection": home.collection, "id": thing.id, "fields": row})
-        self.homes[thing] = Home(home.place_name, home.collection, row)
+        self.homes[thing] = Home(home.place_name, home.collection, row_for(thing))
         self.things[(type(thing).__name__, str(thing.id))] = thing
         for saved in self.reads.values():
             if saved.cls is type(thing) and thing not in saved.things:
@@ -295,12 +307,35 @@ class ProgramPlaces:
         fields = {name: value for name, value in row.items() if home.row.get(name, _MISSING) != value}
         if not fields:
             return
-        home.row = row
+        if MODIFIED_FIELD in self.times_of(type(changed), home):
+            fields |= self.stamp(changed, home, [MODIFIED_FIELD])
+        home.row = row_for(changed)
         change = {"kind": "update", "collection": home.collection, "id": str(changed.id), "fields": fields}
         try:
             self.send(home.place_name, change)
         except PlaceError as error:
             self.core.console.error(f"Couldn't keep the change to {type(changed).__name__}:  {error}")
+
+    def times_of(self, cls: type, home: Home) -> list[str]:
+        """Which of Spell's two times `cls` keeps at `home`:  its compiled `saved_in`'s, that its place can hold."""
+        saved_in = getattr(cls, "saved_in", None)
+        times = list(saved_in.get("times", ())) if isinstance(saved_in, Mapping) else []
+        held = self.behind(home.place_name).times_held
+        return times if held == EVERY_FIELD else [field for field in times if field in held]
+
+    def stamp(self, thing: SpellObject, _home: Home, fields: Sequence[str]) -> Row:
+        """SIDE EFFECT:  `fields` of `thing`, Spell's two times, say now, as ISO text.  Returns them.
+
+        - No change anybody made:  it isn't sent as one, and `note_change()` hears nothing of it.
+        """
+        now = iso_text(datetime.now(UTC))
+        self.reading += 1
+        try:
+            for field in fields:
+                setattr(thing, _name_of_field(type(thing), field), now)
+        finally:
+            self.reading -= 1
+        return dict.fromkeys(fields, now)
 
     def send(self, place_name: str, change: Change) -> None:
         """Send `change` to the place `place_name`:  held while an `in one go:` runs.  - throws `PlaceError`"""
@@ -372,10 +407,20 @@ def row_for(thing: SpellObject) -> Row:
     """
     row: Row = {}
     for name, value in thing._props.items():
-        if name == ID_FIELD or not isinstance(getattr(type(thing), name, None), Prop):
+        declared = getattr(type(thing), name, None)
+        if name == ID_FIELD or not isinstance(declared, Prop):
             continue
-        row[javascript_name(name)] = _row_value(value)
+        row[declared.stored_as or javascript_name(name)] = _row_value(value)
     return row
+
+
+def _name_of_field(cls: type, field_name: str) -> str:
+    """The property of `cls` a row's field is:  the one `stored_as` it, else by its name."""
+    for name in dir(cls):
+        declared = getattr(cls, name, None)
+        if isinstance(declared, Prop) and declared.stored_as == field_name:
+            return name
+    return python_name(field_name)
 
 
 def _row_value(value: object) -> object:
@@ -394,7 +439,7 @@ def _set_field(thing: SpellObject, field_name: str, value: object, core: "Core")
     - A thing written whole:  made again (`core.from_json()`).
     - A field it doesn't declare:  a plain property, kept as it is.
     """
-    name = python_name(field_name)
+    name = _name_of_field(type(thing), field_name)
     declared = getattr(type(thing), name, None)
     kind = declared.type if isinstance(declared, Prop) else None
     if isinstance(value, dict | list) and _holds_types(value):

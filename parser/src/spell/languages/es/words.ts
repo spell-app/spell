@@ -120,6 +120,7 @@ export const spanishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
+  savedTimeWords: { created: "creado", modified: "modificado" },
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)

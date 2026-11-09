@@ -61,6 +61,8 @@ export class ScopeVariable {
    * - See spell's `AssignmentStatement`.
    */
   declare autoDeclared: boolean | undefined
+  /** A saved type's `created` or `modified`, given by its place's line, not written:  a line that declares it takes it over. */
+  declare isSavedTime: boolean | undefined
   /**
    * `true` for the member naming the ONE list of a family holding an item,
    * e.g. `pile` on `Card` for `a card belongs to one pile`.
@@ -149,6 +151,8 @@ export type ScopeVariableProps = {
   asWritten?: string
   /** See `ScopeVariable.autoDeclared`. */
   autoDeclared?: boolean
+  /** See `ScopeVariable.isSavedTime`. */
+  isSavedTime?: boolean
   /** See `ScopeVariable.exclusive`. */
   exclusive?: boolean
   /** See `ScopeVariable.readAs`. */

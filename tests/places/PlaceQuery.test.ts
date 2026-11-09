@@ -10,6 +10,7 @@ import {
   type PlaceContext,
   type PlaceRow
 } from "spell/places"
+import { rowsInOrder } from "spell/places/PlaceQuery"
 
 /** Five recipes, not in title order. */
 const RECIPES: PlaceRow[] = [
@@ -318,5 +319,14 @@ describe("PlaceQuery.answer(), a search of all of each thing", () => {
     expect(answer.rows).toEqual([])
     expect(answer.handled).toEqual({ search: true })
     expect(place.asks).toEqual([])
+  })
+})
+
+describe("rowsInOrder", () => {
+  test("a row with no value goes last, whichever way it's sorted, in the order it had", () => {
+    const rows = [{ id: "a" }, { id: "b", at: "2026" }, { id: "c" }, { id: "d", at: "2027" }]
+    const order = (descending: boolean) => rowsInOrder(rows, [{ field: "at", descending }]).map(({ id }) => id)
+    expect(order(false)).toEqual(["b", "d", "a", "c"])
+    expect(order(true)).toEqual(["d", "b", "a", "c"])
   })
 })

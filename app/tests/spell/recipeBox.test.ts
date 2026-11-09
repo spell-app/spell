@@ -400,8 +400,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
         await bar.locator("ui-button").click()
         await expect.poll(() => bar.textContent(), WAITING).toContain("You aren't signed in")
         await bar.locator("input").first().waitFor(WAITING)
-        // a refused change raises a notice, and a bare <spell-viewer> page has no toasts to show one (epic `data`'s I item)
-        expect(problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        expect(problems).toEqual([])
         await page.close()
       }
     )
@@ -2172,8 +2171,7 @@ the published sheet is a projection of the sign up sheet:
         await vic.page.screenshot({ path: join(shots, "sign-up-sheet-attendee.png"), fullPage: true })
 
         for (const one of [cy, bo, dee, vic]) {
-          // a refused change raises a notice, and a bare <spell-viewer> page has no toasts to show one
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2271,7 +2269,7 @@ the published sheet is a projection of the sign up sheet:
           .toBe("The Picnic:  your letter")
 
         for (const one of [cy, bo, bosLetter]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2463,7 +2461,7 @@ the published sheet is a projection of the sign up sheet:
         expect(await cySheet.page.locator("ui-segment.published .signed-up").count()).toBe(2)
 
         for (const one of [cy, bo, cySheet, ann, ed, annsLetter]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2629,7 +2627,7 @@ the published sheet is a projection of the sign up sheet:
         await cy.page.screenshot({ path: join(shots, "inbox.png"), fullPage: true })
 
         for (const one of [ana, bo, cy]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2686,7 +2684,7 @@ the published sheet is a projection of the sign up sheet:
         await bo.page.screenshot({ path: join(shots, "inbox-mail.png"), fullPage: true })
 
         for (const one of [bo, cy]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2724,7 +2722,7 @@ the published sheet is a projection of the sign up sheet:
         await expect.poll(() => write.nth(0).inputValue(), WAITING).toBe(address.ana)
         await expect.poll(() => write.nth(2).inputValue(), WAITING).toBe("cake")
 
-        expect(bo.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        expect(bo.problems).toEqual([])
         await bo.close()
       }
     )

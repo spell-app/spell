@@ -22,6 +22,7 @@ const DEFAULT_STORE = "this-device"
 
 /** What preferences can do:  list and write key by key, with nothing clever. */
 const DEVICE_CAPABILITIES: PlaceCapabilities = {
+  timesHeld: "every field",
   kind: "database on this device",
   idOf: ID_FIELD,
   filter: "none",

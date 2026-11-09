@@ -691,6 +691,8 @@ export type DeclaredSaved = {
   placeType: string
   /** The collection its things are in:  `recipes`. */
   collection: string
+  /** `- it keeps no times`:  it has no `created` or `modified` (epic `data` T57). */
+  keepsNoTimes?: boolean
 }
 
 /**

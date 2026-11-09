@@ -151,7 +151,9 @@ export class PlaceServer {
   private async list({ place, body, context }: PlaceAsk): Promise<object> {
     const { collection, query = {} } = body as { collection?: string; query?: ListQuery }
     const answer = await place.list(this.collectionOrDie(collection), query, context)
-    return { ...answer, versions: this.versionsOf(place, collection!, answer.rows) }
+    // after the list:  a sheet says what it holds once its columns are read
+    const { timesHeld } = place.describe()
+    return { ...answer, ...(timesHeld && { timesHeld }), versions: this.versionsOf(place, collection!, answer.rows) }
   }
 
   /** `POST getMany`:  `{ collection, ids, select? }` => `{ rows, versions }`. */

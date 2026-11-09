@@ -232,6 +232,61 @@ describe("following a link", () => {
   })
 })
 
+describe("changing what a link names (epic `data` T74)", () => {
+  /** A stand-in server that records each write it's sent. */
+  function serveWrites(): Array<{ url: string; method: string; body: Record<string, unknown> }> {
+    const writes: Array<{ url: string; method: string; body: Record<string, unknown> }> = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = input instanceof Request ? input : new Request(input, init)
+      if (request.method === "GET") {
+        const route = (ROUTES as Record<string, unknown>)[request.url]
+        return route === undefined ? new Response("no", { status: 404 }) : Response.json(route)
+      }
+      const body = (await request.json()) as Record<string, unknown>
+      writes.push({ url: request.url, method: request.method, body })
+      return Response.json({ ...body, url: request.url })
+    })
+    return writes
+  }
+
+  /** The films, whole, for adding one. */
+  async function filmsIn(run: (names: string) => Record<string, unknown>) {
+    const Film = run("Film").Film as { savedIn: { select?: unknown } } & (new () => unknown)
+    delete Film.savedIn.select
+    return (await core.savedThings(Film)).items as Array<{ title: string }>
+  }
+
+  test("adding to a followed list writes the addresses back", async () => {
+    const writes = serveWrites()
+    const { list, run } = await people()
+    const owen = list[1]!
+    await owen.nameItsFilms()
+    const films = owen.films as unknown as { add(film: unknown): void; items: Array<{ title: string }> }
+    const empire = (await filmsIn(run)).find(({ title }) => title === EMPIRE.title)
+    films.add(empire)
+    await vi.waitFor(() => expect(writes).toHaveLength(1), { timeout: 5000 })
+    expect(writes[0]).toMatchObject({
+      url: OWEN.url,
+      method: "PATCH",
+      body: { films: [A_NEW_HOPE.url, EMPIRE.url] }
+    })
+    expect(owen.films).toBe(films)
+    expect(films.items.map(({ title }) => title)).toEqual(["A New Hope", "The Empire Strikes Back"])
+  })
+
+  test("a single link set to a thing is written as its address", async () => {
+    const writes = serveWrites()
+    const { list, run } = await people()
+    const Planet = run("Planet").Planet as { savedIn: { select?: unknown } } & (new () => unknown)
+    delete Planet.savedIn.select
+    const planets = (await core.savedThings(Planet)).items as Array<{ name: string }>
+    const alderaan = planets.find(({ name }) => name === "Alderaan")
+    list[1]!.homeworld = alderaan
+    await vi.waitFor(() => expect(writes).toHaveLength(1), { timeout: 5000 })
+    expect(writes[0]).toMatchObject({ url: OWEN.url, method: "PATCH", body: { homeworld: ALDERAAN.url } })
+  })
+})
+
 describe("a read by id, after a search brought the row (epic `data` I90)", () => {
   /** The people found by name, read from `routes`:  a read of some of them, not every one. */
   async function lukeFound(routes: Record<string, unknown>) {

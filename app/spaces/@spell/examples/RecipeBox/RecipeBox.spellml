@@ -45,10 +45,8 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 			add (a new recipe with title = "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
 	</action>
 
-	<property "matches" description="Newest first:  a new one joins the end, so they're shown the other way round">
-		set found to every recipe where its title includes the search
-		reverse found
-		return found
+	<property "matches" description="Newest first, by when each was saved">
+		return every recipe where its title includes the search, sorted by its created, newest first
 	</property>
 
 	<action "add the new recipe">

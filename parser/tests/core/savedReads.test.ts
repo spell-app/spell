@@ -2,8 +2,10 @@
  * What a running program does with the reads the compiler gathered (epic `data` P12), on classes written as compiled spell's are.
  * - The compiling half:  `tests/spell/parserTests/readGathering.test.ts`.
  */
+import { parseHTML } from "linkedom"
 import { enableExternalSource, flush } from "solid-js"
-import { beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
+import { render } from "@solidjs/web"
+import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { bridgeSolid, observe } from "spell/util"
 import { core, Place, Thing } from "spell/parser/core"
@@ -136,6 +138,43 @@ describe("what a first draw reads", () => {
     expect(place.requests).toHaveLength(1)
     await core.savedThings(Tag)
     expect(place.requests).toHaveLength(2)
+  })
+})
+
+describe("a table sorted by its header", () => {
+  test("asks its place for the new order, and shows what it answers", async () => {
+    const { document, window } = parseHTML("<!doctype html><html><body></body></html>")
+    Object.assign(globalThis, { document, window, Node: window.Node, Element: window.Element })
+    const place = new CountingPlace({ capabilities: WITH_IDS })
+    await place.apply([
+      { kind: "insert", collection: "recipes", id: "r1", fields: { id: "r1", title: "Beans" } },
+      { kind: "insert", collection: "recipes", id: "r2", fields: { id: "r2", title: "Apples" } }
+    ])
+    const { Recipe } = program(place)
+    const list = await core.savedThings(Recipe)
+    const table = document.createElement("ui-table")
+    table.append(document.createElement("ui-row"))
+    const container = document.createElement("div")
+    document.body.append(container)
+    const leave = render(
+      () =>
+        core.drawRead(
+          () => list,
+          (item) => (item as InstanceType<typeof Recipe>).title as never,
+          { items: () => table, paging: () => "all" } as never
+        ) as never,
+      container
+    )
+    flush()
+    expect(table.textContent).toBe("BeansApples")
+
+    table.dispatchEvent(new window.CustomEvent("ui-sorting", { detail: { key: "Title", direction: "ascending" } }))
+    await vi.waitFor(() => {
+      flush()
+      expect(table.textContent).toBe("ApplesBeans")
+    })
+    expect(place.requests.at(-1)![0]!.query.sort).toEqual([{ field: "title", descending: false }])
+    leave()
   })
 })
 

@@ -23,7 +23,20 @@ export class Listing extends Thing {
     return h("ui-label", { class: "shift" }, () => this.shift)
   }
 
-  static savedIn = { place: "published_sheet", collection: "listings" }
+  static savedIn = {
+    place: "published_sheet",
+    collection: "listings",
+    times: ["created", "modified"], select: ["person", "shift"] }
+
+  // - it lives in the published sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in the published sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Message extends Thing {
@@ -41,7 +54,20 @@ export class Message extends Thing {
     return h("ui-text", { class: "count" }, () => this.text)
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"], select: ["text", "thread"] }
+
+  // - it lives in my inbox
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in my inbox
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /** Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection. */

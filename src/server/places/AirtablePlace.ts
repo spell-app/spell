@@ -6,6 +6,7 @@ import { FieldNames } from "spell/places/FieldNames"
 import { DEFAULT_CEILING } from "spell/places/PlaceQuery"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   type ApplyAnswer,
   type ChangesAnswer,
   type ListAnswer,
@@ -201,6 +202,10 @@ export class AirtablePlace extends WebPlace implements Place {
     return {
       kind: "airtable",
       idOf: ID_FIELD,
+      timesHeld: FieldNames.columnsHeldInEvery(
+        [...this.columnNames].map(([collection, names]) => [names, this.collections[collection]?.fields] as const),
+        SAVED_TIME_FIELDS
+      ),
       ...(this.idColumn === undefined && { makesIds: true }),
       filter: "every field",
       sort: "every field",

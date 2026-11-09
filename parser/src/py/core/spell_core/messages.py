@@ -36,6 +36,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `write-refused-not-listed` | the same, as a sign-up sheet's list doesn't name you:  JS core's | `thing` |
 | `write-refused-used-up` | the same, as you've asked for every invitation you have:  JS core's | `thing` |
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
+| `room-out-of-date`, `room-reload` | a page left open across a new version:  the JavaScript core's | |
+| `number-sent-as-other-text` | a number field that sent other text:  JS core's | `field`, `value` |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
 | `write-lost`, `write-use-mine` | your long text replaced:  the JavaScript core's | `thing`, `field`, `mine` |
@@ -91,6 +93,12 @@ MESSAGES: dict[str, str] = {
     "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
     "write-retry": "Retry",
+    "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
+    "room-reload": "Reload",
+    "number-sent-as-other-text": (
+        '{field} is a number, but its place sent "{value}", which reads as nothing;  '
+        'if that\'s how it says it has none, say so:  `is a number or "{value}"`'
+    ),
     "read-failed": "Can't read this right now:  {why}",
     "read-too-soon": "The server asks to wait:  try again in a little while",
     "read-too-soon-seconds": "The server asks to wait:  it'll be tried again in {seconds} seconds",

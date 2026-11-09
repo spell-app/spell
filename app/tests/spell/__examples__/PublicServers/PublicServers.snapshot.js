@@ -182,7 +182,20 @@ export class Issue extends Thing {
     )
   }
 
-  static savedIn = { place: "github", collection: "issues", select: ["htmlUrl", "number", "title", "state", "comments", "createdAt", "body", "pullRequest"] }
+  static savedIn = {
+    place: "github",
+    collection: "issues",
+    times: ["created", "modified"], select: ["htmlUrl", "number", "title", "state", "comments", "createdAt", "body", "pullRequest"] }
+
+  // - it lives in github
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1729, end: 1747 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in github
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1729, end: 1747 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Contributor extends Thing {
@@ -293,7 +306,20 @@ export class Contributor extends Thing {
   get contributions() { return this.getProp("contributions") }
   set contributions(value) { this.setProp("contributions", value) }
 
-  static savedIn = { place: "github", collection: "contributors", select: ["login", "avatarUrl", "htmlUrl", "kind"] }
+  static savedIn = {
+    place: "github",
+    collection: "contributors",
+    times: ["created", "modified"], select: ["login", "avatarUrl", "htmlUrl", "kind"] }
+
+  // - it lives in github
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2849, end: 2867 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in github
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2849, end: 2867 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class User extends Thing {
@@ -548,7 +574,20 @@ export class User extends Thing {
     publicServers.github.showing = undefined
   }
 
-  static savedIn = { place: "github", collection: "users", select: ["login", "number", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "createdAt", "bio"] }
+  static savedIn = {
+    place: "github",
+    collection: "users",
+    times: ["created", "modified"], select: ["login", "number", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "createdAt", "bio"] }
+
+  // - it lives in github
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3645, end: 3663 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in github
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3645, end: 3663 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class IssueUser extends Thing {
@@ -1521,7 +1560,20 @@ export class Repository extends Thing {
     )
   }
 
-  static savedIn = { place: "github", collection: "repositories", select: ["name", "fullName", "htmlUrl", "description", "createdAt", "stargazersCount", "language"] }
+  static savedIn = {
+    place: "github",
+    collection: "repositories",
+    times: ["created", "modified"], select: ["name", "fullName", "htmlUrl", "description", "createdAt", "stargazersCount", "language"] }
+
+  // - it lives in github
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 8285, end: 8303 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in github
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 8285, end: 8303 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Assignee extends Thing {
@@ -2053,7 +2105,20 @@ export class Book extends Thing {
     publicServers.library.showing = undefined
   }
 
-  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "editions", "title"] }
+  static savedIn = {
+    place: "open_library",
+    collection: "books",
+    times: ["created", "modified"], select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "editions", "title"] }
+
+  // - it lives in open library
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 1594, end: 1618 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in open library
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 1594, end: 1618 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Author extends Thing {
@@ -2152,7 +2217,15 @@ export class Author extends Thing {
     )
   }
 
-  static savedIn = { place: "open_library", collection: "authors", select: ["kind", "name", "birthDate", "bio", "title"] }
+  static savedIn = {
+    place: "open_library",
+    collection: "authors",
+    times: ["modified"], select: ["kind", "name", "birthDate", "bio", "title"] }
+
+  // - it lives in open library
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 2519, end: 2543 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Edition extends Thing {
@@ -2255,7 +2328,15 @@ export class Edition extends Thing {
     )
   }
 
-  static savedIn = { place: "open_library", collection: "editions", select: ["kind", "title", "authors", "publishDate", "publishers"] }
+  static savedIn = {
+    place: "open_library",
+    collection: "editions",
+    times: ["modified"], select: ["kind", "title", "authors", "publishDate", "publishers"] }
+
+  // - it lives in open library
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 3119, end: 3143 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Link extends Thing {
@@ -2566,7 +2647,20 @@ export class Post extends Thing {
     ]
   }
 
-  static savedIn = { place: "jsonplaceholder", collection: "posts" }
+  static savedIn = {
+    place: "jsonplaceholder",
+    collection: "posts",
+    times: ["created", "modified"], select: ["userId", "title", "body", "comments"] }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1264, end: 1291 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1264, end: 1291 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Comment extends Thing {
@@ -2599,7 +2693,20 @@ export class Comment extends Thing {
     )
   }
 
-  static savedIn = { place: "jsonplaceholder", collection: "comments", select: ["name", "email", "body"] }
+  static savedIn = {
+    place: "jsonplaceholder",
+    collection: "comments",
+    times: ["created", "modified"], select: ["name", "email", "body"] }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1434, end: 1461 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1434, end: 1461 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class JsonplaceholderUser extends Thing {
@@ -2648,7 +2755,20 @@ export class JsonplaceholderUser extends Thing {
   get todos() { return core.linked(this, "todos", Todo) }
   set todos(value) { this.setProp("todos", value) }
 
-  static savedIn = { place: "jsonplaceholder", collection: "jsonplaceholder_users", select: ["name", "email", "posts", "todos"] }
+  static savedIn = {
+    place: "jsonplaceholder",
+    collection: "jsonplaceholder_users",
+    times: ["created", "modified"], select: ["name", "email", "posts", "todos"] }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1599, end: 1626 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1599, end: 1626 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Todo extends Thing {
@@ -2684,7 +2804,21 @@ export class Todo extends Thing {
     )
   }
 
-  static savedIn = { place: "jsonplaceholder", collection: "todos" }
+  static savedIn = {
+    place: "jsonplaceholder",
+    collection: "todos",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1900, end: 1927 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in jsonplaceholder
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1900, end: 1927 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Address extends Thing {
@@ -2948,7 +3082,20 @@ export class Forecast extends Thing {
     }, h("ui-row")) })
   }
 
-  static savedIn = { place: "open_meteo", collection: "forecasts", select: ["latitude", "longitude", "timezone", "hours"] }
+  static savedIn = {
+    place: "open_meteo",
+    collection: "forecasts",
+    times: ["created", "modified"], select: ["latitude", "longitude", "timezone", "hours"] }
+
+  // - it lives in open meteo
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OpenMeteo.api.spell", start: 1310, end: 1332 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in open meteo
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OpenMeteo.api.spell", start: 1310, end: 1332 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Hour extends Thing {
@@ -3455,7 +3602,20 @@ export class Artwork extends Thing {
     )
   }
 
-  static savedIn = { place: "met_museum", collection: "artworks", select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "region", "objectUrl"] }
+  static savedIn = {
+    place: "met_museum",
+    collection: "artworks",
+    times: ["created", "modified"], select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "region", "objectUrl"] }
+
+  // - it lives in met museum
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 1517, end: 1539 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in met museum
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 1517, end: 1539 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Constituent extends Thing {
@@ -3802,7 +3962,20 @@ export class Country extends Thing {
   get demonyms() { return this.getProp("demonyms") }
   set demonyms(value) { this.setProp("demonyms", value) }
 
-  static savedIn = { place: "rest_countries", collection: "countries", select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
+  static savedIn = {
+    place: "rest_countries",
+    collection: "countries",
+    times: ["created", "modified"], select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
+
+  // - it lives in rest countries
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/RestCountries.api.spell", start: 1112, end: 1138 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in rest countries
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/RestCountries.api.spell", start: 1112, end: 1138 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class Name extends Thing {

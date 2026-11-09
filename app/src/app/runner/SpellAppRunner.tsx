@@ -1,5 +1,6 @@
 import { Match, Show, Switch, createEffect, createSignal, getOwner, onSettled, runWithOwner, untrack } from "solid-js"
 
+import { textChecksum } from "spell/util/string"
 import type { LSP } from "spell/app/lsp"
 import type { SP } from "spell/parser/spell"
 import type { ThingExplorerState, TypeExplorerState } from "spell/app/app/ui/ui.types"
@@ -444,6 +445,8 @@ async function runProgram(
       keepThings,
       messages,
       projectId: source.projectId,
+      // only a program this page fetched:  an editor's own compiles would each ask every other window to reload
+      ...(source.compiled === undefined && { programVersion: textChecksum(text) }),
       coreUrl: copy.coreUrl,
       loadImport: async (projectId) => {
         const imported = await fetchText(source.importUrl(projectId))

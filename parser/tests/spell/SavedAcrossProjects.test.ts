@@ -215,7 +215,7 @@ describe("a project names an imported place on its own type's line (epic `data` 
       ["a note is a thing:", "\t- it is saved in the family cookbook", '\t- its "text" is text'].join("\n")
     )
     expect(errors).toEqual([])
-    expect(compiled).toContain('static savedIn = { place: "family_cookbook", collection: "notes"')
+    expect(compiled).toMatch(/static savedIn = \{\s+place: "family_cookbook",\s+collection: "notes"/)
   })
 
   it("its top-level line says so too, and Spanish reads the same", () => {
