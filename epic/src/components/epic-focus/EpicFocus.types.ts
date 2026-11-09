@@ -61,7 +61,7 @@ export type FocusEntry = {
   kind: FocusKind
   /** its state as drawn:  `attention` ... */
   state: string
-  /** marked in this pass, not applied yet (the blue badge):  never hidden by the chips */
+  /** marked in this pass, not applied yet (the blue badge):  hidden only with the blues */
   marked: boolean
   /** its element on the page:  the overlay copies its title and body, never moves it */
   element: Element

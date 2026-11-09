@@ -802,14 +802,14 @@ function pageChips(host: Element): string[] {
 /** The chips `host` draws (its `<epic-state-filter>`'s buttons):  a page's toolbar's, or a section's. */
 function chipsOf(host: Element): HTMLButtonElement[] {
   const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
-  return Array.from(filter?.shadowRoot?.querySelectorAll<HTMLButtonElement>("button") ?? [])
+  return Array.from(filter?.shadowRoot?.querySelectorAll<HTMLButtonElement>("button:not(.marked)") ?? [])
 }
 
-/** Click the toolbar's `state` chip, and let the sections and the toolbar follow. */
-async function pickPageState(host: Element, state: string) {
+/** Click the toolbar's `state` chip (`altKey`:  ⌥-click it), and let the sections and the toolbar follow. */
+async function pickPageState(host: Element, state: string, { altKey = false } = {}) {
   chipsOf(host)
     .find((chip) => chip.dataset.state === state)!
-    .click()
+    .dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey }))
   await ElementFixture.tick()
   await ElementFixture.tick()
 }
@@ -829,32 +829,30 @@ describe("<epic-page> toolbar", () => {
   test("a chip per state on the page, the sections' counts added up;  a click filters EVERY section, by the sections' rule", async () => {
     const host = await render(filterPage(["attention", "open", "recent"], ["open", "recent", "recent"]))
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent+3"]))
-    // everything showing:  only that state
+    // a click turns that one off
     await pickPageState(host, "attention")
-    expect(pageChips(host)).toEqual(["attention+1", "open-2", "recent-3"])
-    expect(shownItems(host)).toEqual(["q1"])
-    // a hidden one:  shows too
-    await pickPageState(host, "open")
-    expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent-3"])
-    expect(shownItems(host)).toEqual(["q1", "q2", "t1"])
-    // a shown one, others too:  hides
+    expect(pageChips(host)).toEqual(["attention-1", "open+2", "recent+3"])
+    expect(shownItems(host)).toHaveLength(5)
+    expect(shownItems(host)).not.toContain("q1")
+    // and on again:  everything
     await pickPageState(host, "attention")
-    expect(shownItems(host)).toEqual(["q2", "t1"])
-    // the only one showing:  everything again
-    await pickPageState(host, "open")
     expect(pageChips(host)).toEqual(["attention+1", "open+2", "recent+3"])
     expect(shownItems(host)).toHaveLength(6)
+    // an ⌥-click:  only that one
+    await pickPageState(host, "open", { altKey: true })
+    expect(pageChips(host)).toEqual(["attention-1", "open+2", "recent-3"])
+    expect(shownItems(host)).toEqual(["q2", "t1"])
+    // the last one off:  the next one instead
+    await pickPageState(host, "open")
+    expect(pageChips(host)).toEqual(["attention-1", "open-2", "recent+3"])
+    expect(shownItems(host)).toEqual(["q3", "t2", "t3"])
   })
 
   test("a section's own chip changes the toolbar's:  a state is on only while every section having it shows it", async () => {
     const host = await render(filterPage(["open", "recent"], ["open"]))
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+2", "recent+1"]))
     const questions = host.querySelector("#decisions")!
-    chipsOf(questions)
-      .find((chip) => chip.dataset.state === "open")!
-      .click()
-    await ElementFixture.tick()
-    await ElementFixture.tick()
+    await pickPageState(questions, "open", { altKey: true })
     // Questions shows only open;  Caveats still everything
     expect(pageChips(host)).toEqual(["open+2", "recent-1"])
   })
@@ -934,9 +932,12 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1"]))
-    expect(markedBadge(host)).toEqual(["3", "3 with Claude:  marked in this pass, or being worked on"])
+    expect(markedBadge(host)).toEqual(["3", "3 with Claude (marked in this pass, or being worked on):  hide these\n⌥-click:  show only these"])
     expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
-    expect(markedBadge(questions)).toEqual(["2", "2 with Claude:  marked in this pass, or being worked on"])
+    expect(markedBadge(questions)).toEqual([
+      "2",
+      "2 with Claude (marked in this pass, or being worked on):  hide these\n⌥-click:  show only these"
+    ])
     // each marked item's id chip ringed in the badge's blue (Owen:  "the T1 should be blue outline");  an unmarked one not
     const idChip = (id: string) => host.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="id"]')!
     expect(["q1", "q2", "t1"].map((id) => idChip(id).hasAttribute("data-marked"))).toEqual([true, true, true])
@@ -944,16 +945,22 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     // a section whose items are all marked keeps its badge alone
     expect(chipsOf(todos).map((chip) => chip.dataset.state)).toEqual(["recent"])
     expect(markedBadge(todos)?.[0]).toBe("1")
-    // filtered to recent:  the badges stay, and so do the marked items;  the hidden line leaves them out
-    await pickPageState(host, "recent")
+    // only recent:  the badges stay, but the marked items go with the blues (epic `epic-engine` I242)
+    await pickPageState(host, "recent", { altKey: true })
     expect(pageChips(host)).toEqual(["open-1", "recent+1"])
     expect(markedBadge(host)?.[0]).toBe("3")
     expect(markedBadge(questions)?.[0]).toBe("2")
-    expect(shownItems(host)).toEqual(["q1", "q2", "t1", "t2"])
+    expect(shownItems(host)).toEqual(["t2"])
     const note = questions.shadowRoot!.querySelector('[part~="hidden-note"]')!.shadowRoot!.querySelector("button")!
-    expect(note.textContent).toBe("1 hidden · show all")
+    expect(note.textContent).toBe("3 hidden · show all")
+    // the blue badge, clicked:  the marked items back
+    const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!
+    filter.shadowRoot!.querySelector<HTMLButtonElement>(".marked")!.click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownItems(host)).toEqual(["q1", "q2", "t1", "t2"])
     // Claude applies them:  the badges go, the counts come back
-    await pickPageState(host, "recent")
+    await pickPageState(host, "open")
     routes.inbox.marks = {}
     await client.refresh()
     await ElementFixture.tick()
@@ -1029,7 +1036,10 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".icon.working > svg")).toBeNull()
-    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  under way, being worked on, or marked in this pass"])
+    expect(markedBadge(phases)).toEqual([
+      "1",
+      "1 with Claude (under way, being worked on, or marked in this pass):  hide these\n⌥-click:  show only these"
+    ])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
     // its plan accepted:  Claude is working on it, no longer writing the plan

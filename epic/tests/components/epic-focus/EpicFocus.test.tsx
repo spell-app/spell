@@ -302,12 +302,12 @@ describe("<epic-focus>", () => {
     const host = await render()
     await open(host, { tab: "questions", item: "q2" })
     const chips = () =>
-      focusOf(host)!.shadowRoot!.querySelector('[part~="chips"]')!.shadowRoot!.querySelectorAll<HTMLElement>("button")
+      focusOf(host)!.shadowRoot!.querySelector('[part~="chips"]')!.shadowRoot!.querySelectorAll<HTMLElement>("button:not(.marked)")
     await vi.waitFor(() => expect(chips().length).toBe(2))
-    // everything showing, a click on red:  only red;  the yellow Q2 showing goes, to the tab's first
+    // an ⌥-click on red:  only red;  the yellow Q2 showing goes, to the tab's first
     Array.from(chips())
       .find((chip) => chip.dataset.state === "attention")!
-      .click()
+      .dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
     await ElementFixture.tick()
     expect(shows(host)).toMatchObject({ head: "Q1 First question", where: "3 of 6 · Questions 1 of 1" })
     expect(FocusPlace.read(location.pathname).shown).toEqual({ questions: ["attention"] })

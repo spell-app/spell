@@ -308,11 +308,11 @@ export const TEST_ID = /^m\d+$/
 export const FILTER_STATES = [
   { state: "progress", color: "blue", words: "stateProgress" },
   { state: "handed", color: "blue", words: "stateHanded" },
+  { state: "scheduled", color: "blue", fill: "dotted", words: "stateScheduled" },
   { state: "attention", color: "red", words: "stateAttention" },
   { state: "replied", color: "orange", words: "stateReplied" },
   { state: "requested", color: "light-orange", words: "stateRequested" },
   { state: "open", color: "yellow", words: "stateOpen" },
-  { state: "scheduled", color: "blue", fill: "dotted", words: "stateScheduled" },
   { state: "recent", color: "green", words: "stateRecent" },
   // handled in a phase (epic `epic-engine` P31):  grey, as quiet as canceled, counted apart
   { state: "handled", color: "grey", words: "stateHandled" },
@@ -332,13 +332,13 @@ export const FILTER_STATES = [
  * - `<epic-state-filter phases>` draws these, not the items'
  */
 export const PHASE_FILTER_STATES = [
+  { state: "progress", color: "blue", words: "phaseProgress" },
+  { state: "scheduled", color: "blue", fill: "dotted", words: "phaseScheduled" },
   { state: "attention", color: "red", words: "phaseAttention" },
   { state: "waiting", color: "orange", words: "phaseWaiting" },
   { state: "updated", color: "orange", words: "phaseUpdated" },
-  { state: "progress", color: "blue", words: "phaseProgress" },
   // held by Owen (epic `epic-engine` I221;  Owen, 2026-11-04:  "These are paused, red feels wrong"):  grey
   { state: "paused", color: "grey", words: "phasePaused" },
-  { state: "scheduled", color: "blue", fill: "dotted", words: "phaseScheduled" },
   { state: "recent", color: "green", words: "phaseRecent" },
   { state: "old", color: "grey", words: "phaseOld" }
 ] as const
@@ -353,7 +353,7 @@ export const FILTER_TEXTS = [
     key: "chipWords",
     text: "{count} {words}:  {does}\n{only}",
     description:
-      "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...), " +
+      "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipHide` ...), " +
       "then what an ⌥-click does (`chipAltOnly`)."
   },
   {
@@ -363,14 +363,19 @@ export const FILTER_TEXTS = [
   },
   {
     key: "markedWords",
-    text: "{count} with Claude:  marked in this pass, or being worked on",
+    text: "with Claude (marked in this pass, or being worked on)",
     description:
       "The ONE blue badge's name and tooltip:  how many items are with Claude, whatever their kind -- marked in this pass, or being worked on (epic `epic-engine` P43)."
   },
   { key: "showAll", text: "show everything", description: "A state chip's click:  every state shows again." },
-  { key: "chipOnly", text: "show only these", description: "A state chip's click:  only its state shows." },
   { key: "chipAlso", text: "show these too", description: "A state chip's click, hidden:  its state shows too." },
   { key: "chipHide", text: "hide these", description: "A state chip's click, showing:  its state hides." },
+  {
+    key: "chipNext",
+    text: "show the next ones instead",
+    description: "A state chip's click, the last one showing:  the next colour shows, and this one hides."
+  },
+  { key: "chipStays", text: "nothing else to show", description: "A state chip's click, the only colour there is." },
   {
     key: "stateProgress",
     text: "Claude is working on it",
@@ -412,7 +417,7 @@ export const FILTER_TEXTS = [
   { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." },
   {
     key: "markedPhaseWords",
-    text: "{count} with Claude:  under way, being worked on, or marked in this pass",
+    text: "with Claude (under way, being worked on, or marked in this pass)",
     description:
       "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked " +
       "in this pass (epic `epic-engine` I170)."
@@ -458,7 +463,7 @@ export const FILTER_TEXTS = [
 ] as const
 
 /** Each chip click (`StateFilter.clickDoes()`) => its words' text key. */
-export const CHIP_CLICK_KEYS = { all: "showAll", only: "chipOnly", also: "chipAlso", hide: "chipHide" } as const
+export const CHIP_CLICK_KEYS = { all: "showAll", also: "chipAlso", hide: "chipHide", next: "chipNext", stays: "chipStays" } as const
 
 /** One of `FILTER_STATES`. */
 export type FilterState = (typeof FILTER_STATES)[number]
