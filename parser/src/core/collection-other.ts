@@ -352,6 +352,11 @@ export const collectionOtherMethods = defineCoreModule({
    * - Typed as its collection:  a range of a `Pile` is a `Pile`.
    */
   rangeStartingAt<C>(collection?: C, start?: number | null, count?: number | null): C {
+    // text:  its letters, as text -- `the first 2 letters in its name`, a chat's initials (epic `atmosphere` T61)
+    if (typeof collection === "string") {
+      const letters = core._validateRangeStartingAt(start, count, collection.length)
+      return (letters ? collection.slice(letters.start, letters.end) : "") as C
+    }
     if (!assert.isArrayLike(collection, "core.rangeStartingAt(collection)")) return [] as C
     const range = core._validateRangeStartingAt(start, count, core.itemCountOf(collection))
     if (!range) return emptyRangeOf(collection) as C

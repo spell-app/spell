@@ -7,6 +7,7 @@ export const words = {
       by: "by",
       sent: "sent",
       thread: "thread",
+      initials: "initials",
       draw: "draw it"
     },
     Thread: {
@@ -14,11 +15,17 @@ export const words = {
       side: "side",
       topic: "topic",
       link: "link",
-      current: "current"
+      current: "current",
+      mark: "mark"
     },
     ChatPage: {
       newMessage: "new message",
       picked: "picked",
+      drawerOpen: "drawer open",
+      threadName: "thread name",
+      boxWords: "box words",
+      openTheDrawer: "open the drawer",
+      closeTheDrawer: "close the drawer",
       send: "send it",
       draw: "draw it"
     }

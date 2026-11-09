@@ -104,23 +104,32 @@ export class FeedPage extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   draw() {
-    return h("ui-container", { class: "feed" },
-      h("ui-stack",
-        h("ui-header", { size: "large" }, "What's new"),
-        h("ui-segment", { class: "favourites" },
-          h("ui-header", { size: "medium" }, "More of what you like"),
-          h("ui-stack", { class: "favourite-list", spacing: "sm" },
-            () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isAFavourite), (item) => core.descending(item.posted)), (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your feed"), none: () => h("ui-text", { color: "grey" }, "Nothing yet.") })
-          )
-        ),
-        h("ui-segment", { class: "everything" },
-          h("ui-header", { size: "medium" }, "Everything else"),
-          h("ui-stack", { class: "post-list", spacing: "sm" },
-            () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isOrdinary), (item) => core.descending(item.posted)), (post) => core.drawThing(post), {
-              waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your feed"),
-              none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing new."),
-              failed: () => h("ui-text", { color: "red" }, "We can't read your feed right now.")
-            })
+    return h("ui-stack", { class: "org-page", spacing: "none" },
+      h("ui-toolbar", { class: "top-bar", appearance: "text", "aria-label": "Feed" },
+        h("ui-text", { slot: "title", size: "large" }, "Feed"),
+        h("ui-item", { link: "OrgChat" }, "Chat"),
+        h("ui-item", { link: "Inbox" }, "Inbox"),
+        h("ui-item", { link: "OrgAdmin" }, "Admin"),
+        h("ui-stack", { slot: "right", direction: "horizontal" }, () => core.signInMenu())
+      ),
+      h("ui-container", { class: "feed" },
+        h("ui-stack",
+          h("ui-header", { size: "large" }, "What's new"),
+          h("ui-segment", { class: "favourites" },
+            h("ui-header", { size: "medium" }, "More of what you like"),
+            h("ui-stack", { class: "favourite-list", spacing: "sm" },
+              () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isAFavourite), (item) => core.descending(item.posted)), (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your feed"), none: () => h("ui-text", { color: "grey" }, "Nothing yet.") })
+            )
+          ),
+          h("ui-segment", { class: "everything" },
+            h("ui-header", { size: "medium" }, "Everything else"),
+            h("ui-stack", { class: "post-list", spacing: "sm" },
+              () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isOrdinary), (item) => core.descending(item.posted)), (post) => core.drawThing(post), {
+                waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your feed"),
+                none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing new."),
+                failed: () => h("ui-text", { color: "red" }, "We can't read your feed right now.")
+              })
+            )
           )
         )
       )
@@ -128,5 +137,7 @@ export class FeedPage extends App {
   }
 }
 export const feedPage = new FeedPage()
+// -----------
+core.installStyles(undefined, `/* The toolbar across the top, who's signed in on its right;  the page the theme's colours, light or dark. */¬.org-page {¬  min-height: 100dvh;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬.org-page .top-bar {¬  padding: 6px 12px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬¬.org-page .top-bar::part(menu) {¬  margin-block: 0;¬}¬¬.org-page .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬.org-page ui-container > ui-stack {¬  padding-block: 16px;¬}¬¬/* A phone:  the links go, leaving the name and who's signed in. */¬@media (max-width: 640px) {¬  .org-page .top-bar ui-item {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) feedPage.start()

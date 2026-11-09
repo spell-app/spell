@@ -445,6 +445,12 @@ describe("core._validateRangeStartingAt()", () => {
 })
 
 describe("core.rangeStartingAt()", () => {
+  test("text:  its letters, as text", () => {
+    expect(core.rangeStartingAt("owen@spell", 0, 2)).toBe("ow")
+    expect(core.rangeStartingAt("owen@spell", -5, 5)).toBe("spell")
+    expect(core.rangeStartingAt("ow", 5, 1)).toBe("")
+  })
+
   test("assertion fails and returns empty array if not defined", () => {
     expect(core.rangeStartingAt()).toEqual([])
     expect(assert.failed).toHaveBeenCalled()

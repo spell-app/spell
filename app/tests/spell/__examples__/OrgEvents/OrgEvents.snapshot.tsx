@@ -120,42 +120,51 @@ export class EventsPage extends App {
 
   @drawn draw() {
     return (
-      <ui-container class="org-events">
-        <ui-stack>
-          <ui-header size="large">Events</ui-header>
-          <ui-text color="grey">
-            {"Propose one;  the Events Team says yes;  its organizers take it from there."}
-          </ui-text>
-          <ui-segment class="propose">
-            <ui-header size="medium">Propose an event</ui-header>
-            <ui-form prop:value={this.newEvent}>
-              <ui-stack direction="horizontal" wrap={true}>
-                <ui-input name="name" placeholder="Picnic" aria-label="Its name" fluid={true} />
-                <ui-input name="organizers" placeholder="cy@rs, dee@rs" aria-label="Its organizers" />
+      <ui-stack class="org-page" spacing="none">
+        <ui-toolbar class="top-bar" appearance="text" aria-label="Events">
+          <ui-text slot="title" size="large">Events</ui-text>
+          <ui-item link="OrgChat">Chat</ui-item>
+          <ui-item link="OrgFeed">Feed</ui-item>
+          <ui-item link="Inbox">Inbox</ui-item>
+          <ui-item link="OrgAdmin">Admin</ui-item>
+          <ui-stack slot="right" direction="horizontal">{core.signInMenu()}</ui-stack>
+        </ui-toolbar>
+        <ui-container class="org-events">
+          <ui-stack>
+            <ui-text color="grey">
+              {"Propose one;  the Events Team says yes;  its organizers take it from there."}
+            </ui-text>
+            <ui-segment class="propose">
+              <ui-header size="medium">Propose an event</ui-header>
+              <ui-form prop:value={this.newEvent}>
+                <ui-stack direction="horizontal" wrap={true}>
+                  <ui-input name="name" placeholder="Picnic" aria-label="Its name" fluid={true} />
+                  <ui-input name="organizers" placeholder="cy@rs, dee@rs" aria-label="Its organizers" />
+                </ui-stack>
+              </ui-form>
+              <ui-button class="propose" color="primary" disabled={this.newEvent.name === ""} onClick={core.pressed(this, () => this.proposeTheNewEvent())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Propose it
+              </ui-button>
+            </ui-segment>
+            <ui-segment class="events">
+              <ui-header size="medium">Events</ui-header>
+              <ui-stack class="events" spacing="sm">
+                {core.drawRead(async () => await core.savedThings(Event, {}, "as drawn"), (event: Event) => core.drawThing(event), {
+                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the events"}</ui-loader>,
+                  none: () => <ui-text class="none" color="grey">No events yet.</ui-text>,
+                  failed: () => <ui-text color="red">We can't read the events right now.</ui-text>
+                })}
               </ui-stack>
-            </ui-form>
-            <ui-button class="propose" color="primary" disabled={this.newEvent.name === ""} onClick={core.pressed(this, () => this.proposeTheNewEvent())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-              Propose it
-            </ui-button>
-          </ui-segment>
-          <ui-segment class="events">
-            <ui-header size="medium">Events</ui-header>
-            <ui-stack class="events" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(Event, {}, "as drawn"), (event: Event) => core.drawThing(event), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the events"}</ui-loader>,
-                none: () => <ui-text class="none" color="grey">No events yet.</ui-text>,
-                failed: () => <ui-text color="red">We can't read the events right now.</ui-text>
-              })}
-            </ui-stack>
-          </ui-segment>
-          <ui-segment class="stages">
-            <ui-header size="medium">Stages</ui-header>
-            <ui-stack class="stages" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(EventStage, {}, "as drawn"), (step: EventStage) => core.drawThing(step), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the stages"}</ui-loader> })}
-            </ui-stack>
-          </ui-segment>
-        </ui-stack>
-      </ui-container>
+            </ui-segment>
+            <ui-segment class="stages">
+              <ui-header size="medium">Stages</ui-header>
+              <ui-stack class="stages" spacing="sm">
+                {core.drawRead(async () => await core.savedThings(EventStage, {}, "as drawn"), (step: EventStage) => core.drawThing(step), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the stages"}</ui-loader> })}
+              </ui-stack>
+            </ui-segment>
+          </ui-stack>
+        </ui-container>
+      </ui-stack>
     )
   }
 }
@@ -177,6 +186,8 @@ export class EventsPageElement extends SpellElement<EventsPage> {
 }
 core.useElement(EventsPage, EventsPageElement)
 export const eventsPage = new EventsPage()
+// -----------
+core.installStyles(undefined, `/* The toolbar across the top, who's signed in on its right;  the page the theme's colours, light or dark. */¬.org-page {¬  min-height: 100dvh;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬.org-page .top-bar {¬  padding: 6px 12px;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬¬.org-page .top-bar::part(menu) {¬  margin-block: 0;¬}¬¬.org-page .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬.org-page ui-container > ui-stack {¬  padding-block: 16px;¬}¬¬/* A phone:  the links go, leaving the name and who's signed in. */¬@media (max-width: 640px) {¬  .org-page .top-bar ui-item {¬    display: none;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) eventsPage.start()
 

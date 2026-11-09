@@ -1,32 +1,60 @@
 # Chat
-Every thread you can read, down the side, and the one you picked, live:  a message shows on everyone's open page at once.
+A chat app for your org:  a toolbar with who's signed in, every thread you can read down the side, and the one you picked, live.
+A message shows on everyone's open page at once.
 Where they're kept is in OrgChat.api.spell, and only its first two lines know.
 Everyone in the org reads and writes a team's open thread;  you delete your own messages, and the team's Managers anyone's.
 
 
-## A row for each:  who sent it, when, and what it says
+## A row for each message:  who sent it, when, and what it says
 
 <spell-more-of "message">
+	<property "initials" description="The first two letters of who sent it, for the circle beside their name">first 2 letters in (its by as upper case)</>
+
 	<draw>
-		<segment class="message">
-			<stack spacing="xs">
-				<stack direction="horizontal" spacing="md" align="center" wrap>
-					<text class="by">{its by}</text>
-					<text class="sent" color="grey">{its sent}</text>
+		<stack class="message" direction="horizontal" spacing="md" align="start">
+			<text class="avatar">{its initials}</text>
+			<stack spacing="none">
+				<stack direction="horizontal" spacing="sm" align="center">
+					<text class="by" bold>{its by}</text>
+					<text class="sent" size="small" color="grey">{its sent as a short time}</text>
 					<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Delete this message" title="Delete this message:  yours, or anyone's if you manage the space" onClick={remove it from the messages}/>
 				</stack>
 				<text class="text">{its text}</text>
 			</stack>
-		</segment>
+		</stack>
 	</draw>
 </spell-more-of>
 
 
-## The page:  the threads down the side, the one picked, oldest first, and a line to write in
+## A thread in the list:  a lock on the private ones
+
+<spell-more-of "thread">
+	<property "mark" description="Its icon:  a lock on the private ones">
+		"lock" if its side is "private"
+		"hashtag" otherwise
+	</property>
+</spell-more-of>
+
+
+## The page:  the toolbar, the threads down the side, and the one picked, oldest first, with a box to write in
 
 <spell-app "chat page">
 	<property "new message">a new message</>
 	<property "picked">the first thread in every thread where its current</>
+	<property "drawer open" description="A phone only:  the threads, open in a drawer">yes or no</>
+	<property "thread name" description="The picked thread's name:  nothing until one is picked, as when signed out">
+		the name of its picked if its picked
+		"" otherwise
+	</property>
+	<property "box words" description="What the box says, until something is typed">"Message " + its thread name</>
+
+	<action "open the drawer">
+		set its drawer open to yes
+	</action>
+
+	<action "close the drawer">
+		set its drawer open to no
+	</action>
 
 	<action "send it">
 		set the sent of the new message to a new date
@@ -36,38 +64,49 @@ Everyone in the org reads and writes a team's open thread;  you delete your own 
 	</action>
 
 	<draw>
-		<container class="chat">
-			<stack direction="horizontal" spacing="lg" align="start">
-				<list class="threads" appearance="link" aria-label="Threads">
-					<for thread in every thread sorted by its name a-z loading="Finding your threads">
-						<item link={its link} selected={its current}>
-							<stack spacing="none">
-								<text class="name">{its name}</text>
-								<text class="side" color="grey" size="small">{its side}</text>
-							</stack>
-						</item>
-						<empty><text class="none" color="grey">No threads you can read.</text></empty>
-						<failed><text color="red">We can't find your threads right now.</text></failed>
-					</for>
-				</list>
+		<stack class="org-chat" spacing="none">
+			<toolbar class="top-bar" appearance="text" aria-label="Chat">
+				<button slot="icon" class="show-threads" icon="bars" appearance="transparent" aria-label="Show the threads" title="Show the threads" onClick={open the drawer}/>
+				<text slot="title" size="large">Chat</text>
+				<item link="OrgFeed">Feed</item>
+				<item link="Inbox">Inbox</item>
+				<item link="OrgAdmin">Admin</item>
+				<stack slot="right" direction="horizontal">{the sign in menu}</stack>
+			</toolbar>
+			<stack class="workspace" direction="horizontal" spacing="none">
+				<stack class="sidebar" spacing="none">{draw the thread list of it}</stack>
 				<if its picked>
-					<stack>
-						<header size="large">{the name of its picked}</header>
-						<stack class="message-list" spacing="sm">
-							<for message in every message where its thread is the topic of the picked of the chat page sorted by its sent loading="Joining the thread">
-								<message/>
-								<empty><text class="none" color="grey">Nothing yet:  say hello.</text></empty>
-								<failed><text color="red">We can't join this thread right now.</text></failed>
-							</for>
+					<stack class="main" spacing="none">
+						<stack class="thread-name"><header size="small">{its thread name}</header></stack>
+						<stack class="messages" spacing="none">
+							<stack class="message-list" spacing="none">
+								<for message in every message where its thread is the topic of the picked of the chat page sorted by its sent loading="Joining the thread">
+									<message/>
+									<empty><text class="none" color="grey">Nothing yet:  say hello.</text></empty>
+									<failed><text color="red">We can't join this thread right now.</text></failed>
+								</for>
+							</stack>
 						</stack>
-						<form value={its new message}>
-							<input name="text" placeholder="Write to the thread" aria-label="Your message" fluid action>
-								<button slot="action" class="send" color="primary" disabled={the text of the new message is ""} onClick={send it}>Send</button>
-							</input>
+						<form class="composer" value={its new message}>
+							<stack direction="horizontal" spacing="sm" align="end">
+								<textarea name="text" fluid grow max-rows=8 send-on-enter placeholder={its box words} aria-label="Your message" on-ui-send={send it}/>
+								<button class="send" color="primary" disabled={the text of the new message is ""} onClick={send it}>Send</button>
+							</stack>
 						</form>
 					</stack>
 				</if>
 			</stack>
-		</container>
+			<flyout class="threads-drawer" visible={its drawer open} position="left" width="thin" on-ui-closed={close the drawer}>{draw the thread list of it}</flyout>
+		</stack>
+	</draw>
+
+	<draw "thread list">
+		<menu class="threads" direction="vertical" appearance="secondary" fluid aria-label="Threads">
+			<for thread in every thread sorted by its name a-z loading="Finding your threads">
+				<item link={its link} selected={its current} icon={its mark}>{its name}</item>
+				<empty><text class="none" color="grey">No threads you can read.</text></empty>
+				<failed><text color="red">We can't find your threads right now.</text></failed>
+			</for>
+		</menu>
 	</draw>
 </spell-app>
