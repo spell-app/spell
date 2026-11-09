@@ -113,7 +113,9 @@ describe("a spellx page that draws its body", () => {
     const { code, errors } = compiled(text, "/Contador.es.spellml")
     expect(errors).toEqual([])
     expect(code).toContain("export class CuadernoDelContador extends Page {")
-    expect(code).toContain('return "bloqueado"')
+    expect(code).toContain("get lock() {\n")
+    expect(code).toContain('return "locked"')
+    expect(code).not.toContain("candado")
     expect(code).toContain(
       'h("spell-example", { name: "un contador" }, h("test-project-cuaderno-del-contador-contador"))'
     )
@@ -143,7 +145,7 @@ describe("a spellx page that draws its body", () => {
       const lockedLong = long.replace(` ${flag}>`, ` ${flag} ${locked}>`)
       const lockedShort = short.replace(">\n", ` ${locked}>\n`)
       expect(compiled(lockedLong, path).errors).toEqual([])
-      expect(compiled(lockedLong, path).code).toContain(`return "${locked}"`)
+      expect(compiled(lockedLong, path).code).toContain(`return "locked"`)
       expect(compiled(lockedShort, path)).toEqual(compiled(lockedLong, path))
     })
 
@@ -325,13 +327,61 @@ describe("a spellx page that draws its body", () => {
     test("`locked` on a plain page, in both languages:  its lock", () => {
       for (const [path, text, locked] of [
         ["/Home.spellml", '<spell-page "home" locked>\n\t# Home\n</spell-page>\n', "locked"],
-        ["/Inicio.es.spellml", '<encanto-página "inicio" bloqueado>\n\t# Inicio\n</encanto-página>\n', "bloqueado"]
+        ["/Inicio.es.spellml", '<encanto-página "inicio" bloqueado>\n\t# Inicio\n</encanto-página>\n', "locked"]
       ]) {
         const { code, errors } = compiled(text!, path)
         expect(errors).toEqual([])
         expect(code).toContain(`return "${locked}"`)
         expect(code).toContain("ui-markdown")
       }
+    })
+  })
+
+  // epic `notebook` I1:  the member's own name, and its values, not the words it's given in
+  describe("a default on an inherited member, in Spanish", () => {
+    const KIND = "una carta es una vista reversible donde:\n"
+    test("a value of a built-in template's:  by its own name, in its own value", () => {
+      const { code, errors } = compiled(KIND + "\t- su dirección es abajo\n", "/Carta.es.spell")
+      expect(errors).toEqual([])
+      expect(code).toContain("get direction()")
+      expect(code).toContain('return "down"')
+      expect(code).not.toContain("get dirección")
+    })
+
+    test('a page\'s lock:  `su candado es "bloqueado"`', () => {
+      for (const value of ['"bloqueado"', '"desbloqueado"']) {
+        const output = value.includes("des") ? "unlocked" : "locked"
+        const { code, errors } = compiled(
+          `inicio es una página donde:\n\t- su candado es ${value}\n`,
+          "/Inicio.es.spell"
+        )
+        expect(errors).toEqual([])
+        expect(code).toContain(`get lock() {`)
+        expect(code).toContain(`return "${output}"`)
+      }
+    })
+
+    test("a value it doesn't know stays as said, and a later read goes by the member's name", () => {
+      const text = 'inicio es una página donde:\n\t- su candado es "otro"\n\t- su "aviso" es su candado\n'
+      const { code, errors } = compiled(text, "/Inicio.es.spell")
+      expect(errors).toEqual([])
+      expect(code).toContain('return "otro"')
+      expect(code).toContain("this.lock")
+    })
+
+    test("the value depending on a condition:  the same name and values", () => {
+      const line = "\t- su dirección es arriba si está boca abajo\n"
+      const { code, errors } = compiled(KIND + line, "/Carta.es.spell")
+      expect(errors).toEqual([])
+      expect(code).toContain("get direction()")
+      expect(code).toMatch(/"up"/)
+    })
+
+    test("in English, the same line keeps its words", () => {
+      const { code, errors } = compiled('home is a page where:\n\t- its lock is "locked"\n', "/Home.spell")
+      expect(errors).toEqual([])
+      expect(code).toContain("get lock() {")
+      expect(code).toContain('return "locked"')
     })
   })
 

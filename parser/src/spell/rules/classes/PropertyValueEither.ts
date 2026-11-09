@@ -2,6 +2,7 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
+import { getKnownType } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
@@ -17,7 +18,7 @@ import { type MethodBody } from "./classes.shared"
  * - Compiles to a getter in its class that `if`s on the condition, returning the other value
  *   (or falling through) when absent.
  */
-export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroups> {
+export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroups, { inheritedOutput?: string }> {
   @proto static alias = "statement"
   @proto static declares: P.DeclaresSpec = {
     kind: "property",
@@ -42,6 +43,7 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     if (!match || !this.getBody(match)) return undefined
     const { type, property } = match.groups.type_property.groups
     const refused = SpellStatement.refuseUnknownType(match, type)
+    if (refused === match) PropertyValueEither.noteInheritedMember(match, this.getBody(match))
     return refused === match ? SpellStatement.refuseBuiltInType(match, type, property) : refused
   }
 
@@ -49,12 +51,28 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     const { scope } = match
     const { type, property } = match.groups.type_property.groups
     // make sure type is defined
-    P.TypeScope.getOrStub(scope, type.value, match).declareProperty(`${property.value}`, match, {
-      asWritten: property.raw
+    const typeScope = P.TypeScope.getOrStub(scope, type.value, match)
+    const member = typeScope.inheritedMember(`${property.value}`)
+    typeScope.declareProperty(`${property.value}`, match, {
+      asWritten: property.raw,
+      output: member?.output,
+      valueOutputs: member?.valueOutputs
     })
     // its values, e.g. `red` and `black`, are the property's to declare:  its declaration lists them
     const { value, otherValue } = (this.getBody(match)?.groups ?? {}) as { value?: P.Match; otherValue?: P.Match }
     for (const constant of [value, otherValue]) SpellConstant.declareValue(match, constant)
+  }
+
+  /**
+   * SIDE EFFECT:  an inherited member given a value in the language's own words compiles by the member's name,
+   * in the member's values (epic `notebook` I1), e.g. `- su dirección es arriba si ...` => `get direction()`, `up`.
+   */
+  private static noteInheritedMember(match: P.MatchFor<PropertyValueEither>, body: P.Match | undefined): void {
+    const { type, property } = match.groups.type_property.groups
+    const member = getKnownType(type).inheritedMember(`${property.value}`)
+    if (member?.output) match.data.inheritedOutput = member.output
+    const { value, otherValue } = (body?.groups ?? {}) as { value?: P.Match; otherValue?: P.Match }
+    for (const each of [value, otherValue]) SpellConstant.sayForMember(member, each)
   }
 
   /** Nested scope for the `value_if` body:  `it` / `its` are the thing, as in any getter's. */
@@ -73,7 +91,9 @@ export class PropertyValueEither extends SpellStatement<PropertyValueEitherGroup
     const { type, property } = match.groups.type_property.groups
     return new P.ASTPropertyDefinition(match, {
       type: P.matchAST<P.ASTTypeExpression>(type),
-      property: P.matchAST<P.ASTPropertyLiteral>(property),
+      property: match.data.inheritedOutput
+        ? new P.ASTPropertyLiteral(property, match.data.inheritedOutput)
+        : P.matchAST<P.ASTPropertyLiteral>(property),
       get: new P.ASTMethodDefinition(match, { body: P.matchAST<MethodBody>(this.getBody(match)) })
     })
   }

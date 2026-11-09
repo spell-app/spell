@@ -448,6 +448,11 @@ export const spanishWords: SP.LanguageWords = {
     lock: ["candado"]
   },
 
+  builtInMemberValues: {
+    // lo que vale el candado de una página (épica `notebook` I1)
+    lock: { bloqueado: "locked", desbloqueado: "unlocked" }
+  },
+
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
   declarations: {
     /**

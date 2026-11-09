@@ -465,6 +465,12 @@ export type LanguageWords = {
    */
   builtInMembers?: Record<string, string[]>
   /**
+   * What a stored built-in member's values compile to, when said in the language's own words -- `undefined` if they're English:
+   * e.g. `{ lock: { bloqueado: "locked", desbloqueado: "unlocked" } }`, so `- su candado es "bloqueado"` is `locked`.
+   * - Each key names a built-in member, as `builtInMembers` does.
+   */
+  builtInMemberValues?: Record<string, Record<string, string>>
+  /**
    * Spell's own words the language no longer takes, each with the word that replaced it:
    * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
    * - Two words at most:  `wait for`.

@@ -801,7 +801,10 @@ export function loadBuiltInTypes(
           const name = builtInMemberName(said)
           // compiled by its own name:  Spanish's `nombre` reads and sets `.name`
           const renamed = name !== output ? { output } : {}
-          addMember({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, datatype, docstring })
+          // and its values too:  Spanish's `bloqueado` sets a page's `lock` to `locked`
+          const valueOutputs = words.builtInMemberValues?.[member.words]
+          const values = valueOutputs ? { valueOutputs } : {}
+          addMember({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, ...values, datatype, docstring })
         }
         continue
       }
