@@ -33,6 +33,8 @@ export const spanishMessages: CoreMessages = {
   "write-refused-used-up": "No se pudo guardar tu cambio en {thing}:  ya pediste todas las invitaciones que tienes",
   language: "es",
   "write-retry": "Reintentar",
+  "number-sent-as-other-text":
+    '{field} es un número, pero su lugar envió "{value}", que se lee como nada;  si así dice que no tiene ninguno, dilo:  `es un número o "{value}"`',
   "page-previous": "Anterior",
   "page-next": "Siguiente",
   "page-number": "Página {page}",

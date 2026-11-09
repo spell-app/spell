@@ -93,6 +93,30 @@ function holding(rows: Array<Record<string, unknown>>): KeepingPlace {
 beforeAll(() => bridgeSolid({ enableExternalSource, flush }))
 beforeEach(() => core.resetRuntime())
 
+describe("a thing saved new", () => {
+  test("writes a number as text where the place keeps that field as text", async () => {
+    const place = holding([{ id: "1", height: "172", mass: 77 }])
+    const { Character } = program(place)
+    await core.savedThings(Character)
+    core.saveThing(new Character({ name: "Han", height: 180, mass: 80 }))
+    await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
+    expect(place.sent[0]!.fields).toMatchObject({ height: "180", mass: 80 })
+  })
+})
+
+describe("a number field that sent other text", () => {
+  test("is warned about once, in the program's language", async () => {
+    const place = holding([{ id: "1", avg_ht: "heavy" }])
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    const { Character } = program(place)
+    core.useMessages({ "number-sent-as-other-text": "{field} recibió {value}" })
+    await core.savedThings(Character)
+    core.useMessages()
+    expect(warn).toHaveBeenCalledWith("Character.averageHeight recibió heavy")
+    warn.mockRestore()
+  })
+})
+
 describe("what a place sends, as the type declares it", () => {
   test("names by their words, numbers from their text, its words for nothing quiet", async () => {
     const place = holding([

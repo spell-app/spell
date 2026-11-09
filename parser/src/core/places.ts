@@ -475,10 +475,17 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
         collection,
         type,
         id,
-        fields: this.writer.rowFor(thing),
+        fields: this.rowAsWritten(thing),
         ...(group !== undefined && { group })
       })
     )
+  }
+
+  /** Every field of `thing` as its place wants it:  a number it sent as text goes back as text (`valueAsWritten()`). */
+  private rowAsWritten(thing: SpellObject): PlaceRow {
+    const Class = thing.constructor as never
+    const row = this.writer.rowFor(thing)
+    return Object.fromEntries(Object.entries(row).map(([key, value]) => [key, valueAsWritten(Class, key, value)]))
   }
 
   /**

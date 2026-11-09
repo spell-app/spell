@@ -25,6 +25,7 @@
     "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
     "write-retry": "Retry",
+    "number-sent-as-other-text": "{field} is a number, but its place sent \"{value}\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"{value}\"`",
     "page-previous": "Previous",
     "page-next": "Next",
     "page-number": "Page {page}",
