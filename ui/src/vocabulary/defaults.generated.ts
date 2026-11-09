@@ -1447,6 +1447,11 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
     { name: "remember", kind: "string", group: "behaviour" }
   ],
+  "ui-site-tabs": [
+    { name: "pages", kind: "json", group: "content" },
+    { name: "current", kind: "string", group: "content" },
+    { name: "label", kind: "string", group: "content" }
+  ],
   "ui-slider": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
