@@ -655,7 +655,7 @@ export class EpicProgram {
       )
       .usage(
         "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
-          "[--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
+          "[--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
       )
       .addHelpText("after", INIT_HELP)
 
@@ -1093,6 +1093,7 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   contentFolder        the epic repo:  epics, guides, sagas, the logs
   contentRemote        its address, which everyone pulls from and pushes to ("":  none);  epic init writes it
   baseBranch          the branch worktrees start from and merge into
+  baseBranchProtected  whether the base branch takes only pull requests:  epic init opens one, epic merge refuses
   worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
                        (../spell-app.worktrees), the old .claude/worktrees still read then
   installCommand       what makes a new worktree ready to run
@@ -1170,6 +1171,8 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
                        with the plans, in the epic repo's people/
   the commit           .epic/config.json5 and .gitignore committed on the base branch ("Commit ... on main?",
                        yes suggested);  on another branch it says so;  --no-commit skips it
+                       a base branch that takes only pull requests:  they go on a new branch, epic-setup, which it
+                       pushes and opens a pull request for;  local main stays as it was
   the epic server      started, serving this repo:  its address printed;  --no-server skips it
 Then push the base branch:  a teammate's epic init then clones the plans.
 
@@ -1177,6 +1180,9 @@ Then push the base branch:  a teammate's epic init then clones the plans.
 --no-remote makes none, and the plans stay on this machine.
 --public makes the epic repo public without asking;  with no terminal to ask in, it's private unless --public.
 A public one shows everything in the plans (epic pages, guides, comments) to anyone.
+
+--protected-base:  the base branch takes only pull requests (baseBranchProtected in the config).  Without it,
+epic init asks GitHub, with gh logged in and a GitHub remote, and says in one line when it found so.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that

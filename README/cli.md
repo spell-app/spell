@@ -287,7 +287,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
   - One version for all, the kit's `package.json` `version`.
   - Then `npm pack` into `dist-packs/`, the checks (built code only, every `exports` file packed, one `DOMElement`),
     and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`,
-    `npx spell help`, `npx epic --help`.
+    `npx spell help`, `npx epic --help`, and the epic server started from the install, its page and pack answering.
   - Without `--dry-run`, and only when every check passed:  `npm publish --tag <tag>` for each, lowest first.
   - Logging in with a token, the tags, and what trips people up:  [Publishing to npm](npm.md).
   - The tag is `next` unless you say otherwise:  `npm install spell@next` gets the new version,

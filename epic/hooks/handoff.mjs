@@ -26,10 +26,11 @@
  */
 import { spawn } from "node:child_process"
 import { existsSync, openSync, readFileSync, renameSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { join } from "node:path"
+import { fileURLToPath } from "node:url"
 
-/** The window script, beside this plugin's `hooks/`. */
-const SCRIPT = join(dirname(import.meta.dirname), "src", "window.mjs")
+/** The window script:  by its package name, so it's the code the plugin depends on, in a checkout or an npm install. */
+const SCRIPT = fileURLToPath(import.meta.resolve("spell/epic/window.mjs"))
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")

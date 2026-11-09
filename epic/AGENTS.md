@@ -23,6 +23,9 @@ a folder of the kit `spell`.
   - TypeScript reads their source, as it reads this folder's:  `yarn ts` builds no declarations first.
   - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts), on the kit's
     `spell/toolchain/sourceNames`).
+  - The engine finding its OWN files asks `EngineFiles` ([EngineFiles.mjs](src/config/EngineFiles.mjs)):
+    its code is `epic/src/` in a checkout and `dist/epic/` in an npm install (epic `epic-engine` I246);
+    never a path worked out from `import.meta` by counting folders.
   - Their source runs here as it is, by those names:  `tsx` (`bin/epic`, the `tsx` scripts), Vite and Vitest.
   - Only `app/` sits above it (the lint's `spell/no-upward-import`).
 - Laid out as a plain JS project (epic `epic-eject` J14):

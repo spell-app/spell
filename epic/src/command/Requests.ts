@@ -448,6 +448,7 @@ export class Requests {
    *     - moved aside into `ditched` (`StrayFiles.folderFor()`), never deleted, and only once every check passed
    *   - branch `<epic>` holds all of `main`:  else `main` moved, and the branch merges it first
    *     (`epic worktree merge-main`, in its worktree)
+   * - Refused in one line where `main` takes only pull requests (`baseBranchProtected`).
    * - Returns the commits it brought onto `main`, oldest first (`[]`:  nothing to merge), and what it moved aside.
    * - throws an `EpicCommandError` saying what to do, for any check that fails:  then nothing moved, nothing merged
    * - static:  about the repo `cwd` is in, not the epics folder
@@ -475,7 +476,11 @@ export class Requests {
    * - throws an `EpicCommandError` naming the checkout (`label`) for a check that fails
    */
   private static mergeCheck(epic: string, main: string, { ditch, label }: { ditch: boolean; label: string }) {
-    const base = new EpicConfig(main).baseBranch
+    const { baseBranch: base, baseBranchProtected } = new EpicConfig(main)
+    if (baseBranchProtected)
+      throw new EpicCommandError(
+        `merge:  ${base} takes only pull requests here (baseBranchProtected):  push ${epic} and open one;  nothing merged`
+      )
     const branch = Git.run(["branch", "--show-current"], main).out
     if (branch !== base) throw new EpicCommandError(`merge:  ${label} is on '${branch}', not ${base}`)
     const stray = new StrayFiles(main)

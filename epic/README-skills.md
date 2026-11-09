@@ -160,7 +160,7 @@ _Four ways to leave, by what the work is waiting for._
 | When | Type | What happens |
 | --- | --- | --- |
 | work started in `main` should have its own branch | `/isolate <name>` | moves this session into worktree `<name>`, on branch `<name>`, in a new tinted window or this one (`epic window should-stay` recommends) |
-| the work is finished | `/isolate done` | offers to merge into `main` and to open a pull request, then leaves the worktree, keeping it:  `epic worktree remove <name>` takes it away after, its servers stopped first;  the session stays in the worktree's window, open for you to read, and `epic window close <name>` closes it |
+| the work is finished | `/isolate done` | offers to merge into `main` and to open a pull request (only the pull request, where [`main` takes only those](https://github.com/spell-app/spell/blob/main/README-epics.md#when-main-takes-only-pull-requests)), then leaves the worktree, keeping it:  `epic worktree remove <name>` takes it away after, its servers stopped first;  the session stays in the worktree's window, open for you to read, and `epic window close <name>` closes it |
 | you need to stop, and pick it up later | `/park [<name>]` | commits the work as WIP in its own worktree, with a note, `PARKED-<name>.md`, of where it stopped and what's next |
 | you're ready to go back | `/unpark [<name>]` | finds the parked work, offers its window, merges the new `main` in and carries on |
 | this work needs another one merged first | `/wait-for <name> \| ?` | parks, then checks every minute until the other is merged, removed, exited or every phase done;  merges `main` in and carries on;  `?` lists what it could wait for |
@@ -176,6 +176,7 @@ it carries only this session's files into the worktree, and asks about the rest.
 
 `/isolate done` in a standing epic asks before it does anything:
 a standing epic merges each phase into `main` as it's done, and never leaves its worktree.
+Where `main` takes only pull requests, each phase is pushed and put in a pull request instead.
 
 <details>
 <summary>How <code>/worktrees</code> sorts what's open</summary>

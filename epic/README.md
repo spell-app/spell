@@ -356,7 +356,7 @@ and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, 
 for the pages.
 
 It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
-One command, from a clone of Spell, sets a project up:  `node <clone>/bin/spell.mjs epic init` installs the plugin,
+One command sets a project up:  `npx spell@next epic init` installs the plugin and the extension,
 asks your name and colour, and starts the epic server.
 The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
@@ -434,8 +434,8 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
   ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#with-codex)), untried with a real Codex yet.
 - **Installing from npm:**  a repo that isn't Spell installs the plugin alone, from npm.
   Where it stands:  `spell-epic`, `spell-ui` and `spell` are published, under the `next` tag until Spell's first release
-  (planned for December 1, 2026);  but the epic server can't start from an npm install yet, so a repo that isn't Spell
-  sets up from a clone ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md)).
+  (planned for December 1, 2026);  and a repo that isn't Spell sets up with `npx spell@next epic init`
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md)).
 
 ## The pages
 
