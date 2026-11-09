@@ -16,7 +16,8 @@ import "./SiteBoardView.css"
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
  * - A page's card has a link in its corner, to that page of the running site in a new tab:  `newTabUrlOf`.
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
- *   - a section's card:  the whole section, before or after another, a line showing where
+ *   - a section's card:  up or down, the whole section before or after another, a line showing where;
+ *     or onto a spot of another section, which it joins, its pages with it
  *   - any other card:  to a spot of its own section or another, the spot lit up
  *   - Escape, or a drop anywhere else, moves nothing;  and a press that doesn't move is still a click.
  * - Each spot is an element behind the cards, in the same grid:  so what's under the pointer says where it would land.
@@ -155,25 +156,26 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
     placing: (x, y) => {
       host.setAttribute(BEING_MOVED, "")
       scrollNearEdge(board.parentElement!, x, y)
-      if (card.isSectionCard) {
-        const beside = sectionBeside(board, section, y)
-        mark(beside?.element, beside?.where)
-        return
-      }
       board.setAttribute(MOVING, "")
       open(
         document.elementsFromPoint(x, y).find((each) => each.classList.contains("SiteSection")) as
           | HTMLElement
           | undefined
       )
-      mark(spotAt(x, y, card, section), "spot")
+      const spot = spotAt(x, y, card, section)
+      if (spot || !card.isSectionCard) {
+        mark(spot, "spot")
+        return
+      }
+      const beside = sectionBeside(board, section, y)
+      mark(beside?.element, beside?.where)
     },
     onDrop: () => {
       const landed = marked
       const where = landed?.getAttribute(DROP_MARK)
       stop()
       if (!landed) return
-      if (card.isSectionCard)
+      if (where !== "spot")
         SiteWrites.movePart(card.part.name, { where: where as "before" | "after", part: landed.dataset.section! })
       else
         SiteWrites.dropCard(card.part.name, {
@@ -188,7 +190,7 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
 
 /**
  * The spot `card` would land on with the pointer at `x`, `y`:  none off the board, on its own spot,
- * or in another section when its part can't go under a page.
+ * in its own section for a section's card, or in another section when its part can't go under a page.
  */
 function spotAt(x: number, y: number, card: BoardCard, section: BoardSection): HTMLElement | undefined {
   const spot = document.elementsFromPoint(x, y).find((each) => each.classList.contains("spot")) as
@@ -196,6 +198,7 @@ function spotAt(x: number, y: number, card: BoardCard, section: BoardSection): H
     | undefined
   if (!spot) return undefined
   const isOwnSection = spot.closest<HTMLElement>(".SiteSection")?.dataset.section === section.key
+  if (isOwnSection && card.isSectionCard) return undefined
   if (isOwnSection && Number(spot.dataset.row) === card.row && Number(spot.dataset.column) === card.column)
     return undefined
   return isOwnSection || SiteEdits.canGoUnder(card.part) ? spot : undefined
