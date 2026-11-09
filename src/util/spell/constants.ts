@@ -18,9 +18,6 @@ export const NONE = "NONE"
  */
 export const PACKAGE_VERSION: string = typeof __PACKAGE_VERSION__ === "string" ? __PACKAGE_VERSION__ : "unknown"
 
-/** Show confirmation dialog. */
-export const CONFIRM = "CONFIRM"
-
 /** Task status -- used by `Task`/`TaskList`. */
 export const TaskStatus = {
   UNSTARTED: "UNSTARTED",

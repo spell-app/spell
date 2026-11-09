@@ -43,6 +43,8 @@ describe("StateFilter.nextShown()", () => {
     expect(StateFilter.clickDoes(withBlue, withBlue, "open")).toBe("only")
     expect(StateFilter.clickDoes(withBlue, ["progress", "open"], "open")).toBe("all")
     expect(StateFilter.hides("progress", [])).toBe(false)
+    expect(StateFilter.hides("handed", [])).toBe(false)
+    expect(StateFilter.chipStatesOf(["handed", "progress", "open"])).toEqual(["open"])
     expect(StateFilter.hides("open", ["attention"])).toBe(true)
     expect(StateFilter.hides("open", ["open"])).toBe(false)
   })

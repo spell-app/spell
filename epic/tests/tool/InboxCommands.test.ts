@@ -80,7 +80,7 @@ test("apply:  the SENT urgency from the id chips goes into the doc, logged, and 
     inbox.markSent(M3)
   })
   await commands().inbox.run("x", file, ["apply"], {})
-  expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.getAttribute("state")).toBe("open")
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.getAttribute("state")).toBe("quiet")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 

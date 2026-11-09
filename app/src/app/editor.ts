@@ -1,4 +1,4 @@
-import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal, LoadableFile } from "spell/util"
+import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile } from "spell/util"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -289,23 +289,48 @@ export class EditorStore extends Observable {
     // since defaults are part of the member's type.
     projectRoot ??= editor.rootForNew
     try {
+      projectId ??= await editor.askForProjectId(
+        projectRoot,
+        appTexts.text("askNewAppName", appTexts.groupWords(projectRoot))
+      )
+      if (!projectId) return
       const project = await projectRoot.createApp(projectId)
-      if (project) {
-        editor.showEditor(project.path)
-        editor.showKept(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
-      }
+      editor.showEditor(project.path)
+      editor.showKept(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
     } catch (e) {
       editor.showError(e)
     }
   }
 
-  /** Duplicate current `project` under `newProjectId` (auto-generated if omitted) and show it. */
+  /**
+   * Ask for a project's name in Spell's dialog, and answer its new id;  `undefined` if cancelled or empty.
+   * - `basedOn`:  the project it's made from, whose name it starts with, and whose group it goes in.
+   */
+  async askForProjectId(
+    projectRoot: SPACES.SpellProjectRoot,
+    message: string,
+    basedOn?: SP.SpellProject
+  ): Promise<string | undefined> {
+    const name = await editor.prompt({ message, defaultValue: basedOn?.projectName ?? NEW_PROJECT_NAME })
+    return name ? projectRoot.projectIdForName(name, basedOn?.projectId) : undefined
+  }
+
+  /** Duplicate current `project` under `newProjectId` (no id:  asks for its name) and show it. */
   async duplicateApp(newProjectId?: string): Promise<void> {
     try {
+      const { project, projectRoot } = editor
+      if (editor.canChangeProject) {
+        newProjectId ??= await editor.askForProjectId(
+          projectRoot!,
+          appTexts.text("askNewAppName", appTexts.groupWords(projectRoot)),
+          project!
+        )
+        if (!newProjectId) return
+      }
       // the static build:  a copy of a built-in project is the visitor's own
       const newProject = editor.canChangeProject
-        ? await editor.projectRoot!.duplicateApp(editor.project!.projectId, newProjectId)
-        : await editor.rootForNew.copyHere(editor.project!.projectId)
+        ? await projectRoot!.duplicateApp(project!.projectId, newProjectId!)
+        : await editor.rootForNew.copyHere(project!.projectId)
       if (newProject) {
         editor.showEditor(newProject.path)
         editor.showKept(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
@@ -314,9 +339,15 @@ export class EditorStore extends Observable {
       editor.showError(e)
     }
   }
-  /** Rename current `project` to `newProjectId` and show it. */
+  /** Rename current `project` to `newProjectId` (no id:  asks for its name) and show it. */
   async renameApp(newProjectId?: string): Promise<void> {
     try {
+      newProjectId ??= await editor.askForProjectId(
+        editor.projectRoot!,
+        appTexts.text("askRenameApp", appTexts.groupWords(editor.projectRoot)),
+        editor.project!
+      )
+      if (!newProjectId) return
       const project = await editor.projectRoot!.renameApp(editor.project!.projectId, newProjectId)
       if (project) {
         editor.showEditor(project.path)
@@ -326,11 +357,16 @@ export class EditorStore extends Observable {
       editor.showError(e)
     }
   }
-  /** Delete current `project` (after `CONFIRM`), then navigate to `projectRoot`, which selects another project. */
+  /** Delete current `project` (after asking), then navigate to `projectRoot`, which selects another project. */
   async deleteApp(): Promise<void> {
     try {
       const { projectRoot, project } = editor
-      const removed = await projectRoot!.deleteApp(project!.projectId, CONFIRM)
+      const message = appTexts.text("confirmRemoveApp", {
+        ...appTexts.groupWords(projectRoot),
+        name: project!.projectName!
+      })
+      if (!(await editor.confirm({ message }))) return
+      const removed = await projectRoot!.deleteApp(project!.projectId)
       if (removed) {
         // Navigate to nextProject, or the projectRoot, which will select another project
         editor.showEditor(projectRoot!.path)
@@ -1071,11 +1107,11 @@ export class EditorStore extends Observable {
   async createFile(filePath?: string, contents?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
+      filePath ||= await editor.prompt({ message: appTexts.text("askNewFileName"), defaultValue: NEW_FILE_NAME })
+      if (!filePath) return
       const newFile = await new SPACES.ProjectFiles(editor.project!).create(filePath, contents)
-      if (newFile) {
-        editor.showEditor(newFile.path)
-        editor.showNotice(appTexts.text("fileCreated"))
-      }
+      editor.showEditor(newFile.path)
+      editor.showNotice(appTexts.text("fileCreated"))
     } catch (e) {
       editor.showError(e)
     }
@@ -1084,11 +1120,11 @@ export class EditorStore extends Observable {
   async duplicateFile(newPath?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
+      newPath ||= await editor.prompt({ message: appTexts.text("askNewFileName"), defaultValue: editor.file!.file })
+      if (!newPath) return
       const newFile = await new SPACES.ProjectFiles(editor.project!).duplicate(editor.file!.filePath!, newPath)
-      if (newFile) {
-        editor.showEditor(newFile.path)
-        editor.showNotice(appTexts.text("fileDuplicated"))
-      }
+      editor.showEditor(newFile.path)
+      editor.showNotice(appTexts.text("fileDuplicated"))
     } catch (e) {
       editor.showError(e)
     }
@@ -1097,16 +1133,21 @@ export class EditorStore extends Observable {
   async renameFile(newPath?: string): Promise<void> {
     editor.clearCompileAppSoon()
     try {
-      const renamedFile = await new SPACES.ProjectFiles(editor.project!).rename(editor.file!.filePath!, newPath)
-      if (renamedFile) {
-        editor.showEditor(renamedFile.path)
-        editor.showNotice(appTexts.text("fileRenamed"))
+      const { project, file } = editor
+      if (!newPath) {
+        const name = await editor.prompt({ message: appTexts.text("askRenameFile"), defaultValue: file!.file })
+        if (!name) return
+        newPath = SP.SpellLocation.getFileLocation(project!.projectId, name).filePath!
+        if (newPath === file!.filePath) return
       }
+      const renamedFile = await new SPACES.ProjectFiles(project!).rename(file!.filePath!, newPath)
+      editor.showEditor(renamedFile.path)
+      editor.showNotice(appTexts.text("fileRenamed"))
     } catch (e) {
       editor.showError(e)
     }
   }
-  /** Delete current `file` (after `CONFIRM`), then show next import or `project`. */
+  /** Delete current `file` (after asking), then show next import or `project`. */
   async deleteFile(): Promise<void> {
     editor.clearCompileAppSoon()
     try {
@@ -1117,7 +1158,8 @@ export class EditorStore extends Observable {
       const fileIndex = files.indexOf(file)
       const nextFile = files[fileIndex + (fileIndex === files.length - 1 ? -1 : 1)]
       // actually remove the file
-      const removed = await new SPACES.ProjectFiles(project).delete(file.filePath!, CONFIRM)
+      if (!(await editor.confirm({ message: appTexts.text("confirmRemoveFile", { name: file.file! }) }))) return
+      const removed = await new SPACES.ProjectFiles(project).delete(file.filePath!)
       if (removed) {
         // select the nextFile, or the project (which will select another file)
         editor.showEditor(nextFile?.path || project.path)
@@ -1448,6 +1490,12 @@ const EDIT_COMPILE_DELAY = 10
 
 /** The preference that remembers AutoSave. */
 const AUTO_SAVE_PREF = "autoSave"
+
+/** The name a new project starts with, in the dialog that asks for it. */
+const NEW_PROJECT_NAME = "untitled"
+
+/** The name a new file starts with, in the dialog that asks for it. */
+const NEW_FILE_NAME = "Untitled.spell"
 editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: isStaticBuild })
 
 /** Where each file started, for Discard Changes. */

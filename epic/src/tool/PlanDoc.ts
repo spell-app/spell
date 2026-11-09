@@ -25,6 +25,7 @@ import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary
 
 import {
   CALM_ID,
+  ISSUE_ID,
   CLOSED,
   ITEM_STATUSES,
   KINDS,
@@ -915,6 +916,8 @@ export class PlanDoc extends PlanReader {
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
       urgent: Boolean(data.urgent),
+      requested: Boolean(data.requested),
+      limit: Boolean(data.limit),
       fixed: Boolean(data.fixed),
       awaitsPick: PlanItem.awaitsPick(item),
       reviewAs: data.reviewAs,
@@ -962,11 +965,12 @@ export class PlanDoc extends PlanReader {
   addItem(
     kind: string,
     title: string,
-    { details, titleHTML = false, calm = false, urgent = false }: AddItemOptions = {}
+    { details, titleHTML = false, calm = false, urgent = false, requested = false }: AddItemOptions = {}
   ): string {
     const id = this.nextId(kind)
     const spec = KINDS[kind as ItemKind]
     if (calm && !CALM_ID.test(id)) throw new PlanDocError(`--calm is for a judgement call or an issue, not a ${kind}`)
+    if (requested && kind !== "issue") throw new PlanDocError(`--requested is for an issue, not a ${kind}`)
     const section = this.section(spec.section)
     const heading = titleHTML ? this.titleFromHTML(title) : { title }
     const data: EpicData<"epic-item"> = {
@@ -978,7 +982,8 @@ export class PlanDoc extends PlanReader {
       ...((spec as { limit?: boolean }).limit && { limit: true }),
       ...(this.bedtime && { overnight: true }),
       ...(calm && { calm: true }),
-      ...(urgent && { urgent: true })
+      ...(urgent && { urgent: true }),
+      ...(requested && { requested: true })
     }
     const item = this.make("epic-item", data, heading.slot ? [heading.slot] : [])
     for (const node of this.incoming(details, { question: kind === "question" })) Markup.place(item, node)
@@ -1195,6 +1200,21 @@ export class PlanDoc extends PlanReader {
     this.stamp(item, { at: date === this.today ? this.now : PlanTime.localDay(date), bedtime: false })
     Markup.set(item, { bedtime: undefined })
     return PlanItem.titleOf(item)
+  }
+
+  /**
+   * Issue `id` was filed from Owen's own words (`<epic-item requested>`, epic `epic-engine` P63):  closed by Claude,
+   * it turns light orange until he's seen it, never the grey of a thing Claude tripped over.
+   * - `undefined` when it's marked already
+   * - throws for an item that isn't an issue
+   */
+  setRequested(id: string): string | undefined {
+    const item = this.item(id)
+    if (!ISSUE_ID.test(item.id))
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't an issue:  only an issue is marked requested`)
+    if (item.hasAttribute("requested")) return undefined
+    Markup.set<"epic-item">(item, { requested: true })
+    return "requested"
   }
 
   /**
@@ -1547,7 +1567,7 @@ export class PlanDoc extends PlanReader {
   /**
    * Owen's Do this on `item`, an issue or a judgement call (epic `epic-engine` I232;  Owen, 2026-11-08:  "stay in the
    * issue as above.  When you've done the fix, make it orange so I know to go and review"):  a mark of its own, no todo.
-   * - it stays where it is, wanted (`urgent`):  RED until handled, reviewed or not (`PlanReader.itemState()`)
+   * - it stays where it is, wanted (`urgent`):  BLUE outlined (`handed`) until handled, reviewed or not (`PlanReader.itemState()`)
    * - closed:  reopened;  `calm` and an earlier `fixed` go, so pressing it again on a fix he doesn't like turns it red
    * - his note and picture kept on it, his words;  a Noted card says go ahead
    * - `did`:  what the agent does next (`doThisSteps()`)

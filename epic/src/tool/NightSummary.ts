@@ -129,7 +129,8 @@ export class NightSummary {
    *   (`state="replied"`)
    */
   static isAddressed(item: Element, answered: ReadonlySet<string> = new Set()): boolean {
-    if (item.hasAttribute("fixed") || item.getAttribute("state") === "replied") return false
+    // a manual test's orange (its phase isn't done yet) is no ask of Claude's:  a mark of his on it addresses it
+    if (item.hasAttribute("fixed") || (item.getAttribute("state") === "replied" && !/^m\d/.test(item.id))) return false
     if (answered.has(item.id)) return true
     if (ADDRESSED_ATTRIBUTES.some((name) => item.hasAttribute(name))) return true
     if (item.hasAttribute("urgent") && CALM_ID.test(item.id)) return true

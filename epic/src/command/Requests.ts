@@ -190,6 +190,7 @@ export class Requests {
       if (phase !== undefined)
         throw new EpicCommandError(`file:  epic file ${epic}#${phaseLabel(phase)} ${id}  (the phase goes after a #)`)
       CLI.out(requestLine(this.file(epic, id, where)))
+      await this.markIssuesRequested(epic, where)
       return EXIT.OK
     }
     if (!id || where !== undefined) throw new EpicCommandError(`file:  ${FILE_USAGE}`)
@@ -208,6 +209,17 @@ export class Requests {
     const { filed, phase } = await this.phaseFiled(epic, ref)
     CLI.out(request ? requestLine(this.file(epic, id, filed, phase)) : `${id}  into ${epic}#${filed}`)
     return EXIT.OK
+  }
+
+  /**
+   * Each issue `where` names (`I234`, `filed as I12 and I13`) marked as filed from the person's own words:
+   * closed by Claude, it turns light orange (`epic requested`, epic `epic-engine` P63).
+   * - best effort:  `where` is free text, so an id the epic doesn't have is ignored
+   */
+  private async markIssuesRequested(epic: string, where: string): Promise<void> {
+    const issues = where.match(ISSUE_IN_WHERE) ?? []
+    for (const issue of issues)
+      await EpicTools.runPlanDoc(["requested", epic, issue.toLowerCase()]).catch(() => undefined)
   }
 
   /**
@@ -677,6 +689,9 @@ export type RecordMergedOptions = { cwd?: string; record?: (argv: string[], root
 const VERBS = "send, requests, file, home or merge"
 
 /** How `file` is called, for its errors. */
+/** An issue's id in `epic file`'s "where it went":  `I234`. */
+const ISSUE_IN_WHERE = /\bI\d+\b/g
+
 const FILE_USAGE = 'epic file <epic>#P3 <request id>  |  epic file <epic> <request id> "where it went"'
 
 /** A content block of a prompt, as a transcript holds it:  text, an image ... */

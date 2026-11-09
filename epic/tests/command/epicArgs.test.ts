@@ -266,6 +266,7 @@ describe("planDocArgs():  update", () => {
     ])
     expect(planDocArgs("update", ["seo#J3", "--calm"])).toEqual([["calm", "seo", "J3"]])
     expect(planDocArgs("update", ["seo#J3", "--loud"])).toEqual([["calm", "seo", "J3", "--loud"]])
+    expect(planDocArgs("update", ["seo#I3", "--requested"])).toEqual([["requested", "seo", "I3"]])
   })
 
   // epic `epic-engine` I174:  a manual test the session filed as failed

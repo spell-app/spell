@@ -146,7 +146,8 @@ Everything else stands:
        an `<epic-choices>` of `<epic-option letter title [recommended]>`
      - the outcome:  an `<epic-net-effect>`
      - code:  an `<epic-code>`
-   - CALM by default:  add `--calm` (last), so it shows yellow (open) rather than red.  An issue too.
+   - CALM by default:  add `--calm` (last), so a call shows grey and an issue yellow, rather than red.
+   - An issue filed from the person's own words:  add `--requested` too;  closed, it turns light orange until they've looked.
      - Owen:  "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
        (2026-10-10, "the principle of least surprise").
      - RED (no `--calm`) only when it would surprise them:
