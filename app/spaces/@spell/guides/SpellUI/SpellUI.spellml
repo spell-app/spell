@@ -4,6 +4,16 @@
   and what the side navigation calls it.  A component's Usage page is its address, and its other pages are under it.
 -->
 <spell-site "spell ui">
+	<!-- the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders -->
+	<page "home page" address="/" title="Spell UI"/>
+	<page "getting started page" address="/getting-started" title="Getting started"/>
+	<page "grammar page" address="/grammar" title="Grammar"/>
+	<page "theming page" address="/theming" title="Theming"/>
+	<page "icons page" address="/icons" title="Icons"/>
+	<page "utilities page" address="/utilities" title="Utilities"/>
+	<page "component index page" address="/components" title="Components"/>
+	<page "kitchen sink page" address="/kitchen-sink" title="Kitchen Sink"/>
+	<page "theme bench page" address="/theme-bench" title="Theme bench"/>
 	<page "accordion usage page" address="/accordion" title="Accordion" tab="Usage">
 		<page "accordion examples page" address="/accordion/examples" title="Examples"/>
 		<page "accordion api page" address="/accordion/api" title="API"/>
@@ -70,10 +80,10 @@
 		<page "comment api page" address="/comment/api" title="API"/>
 		<page "comment theming page" address="/comment/theming" title="Theming"/>
 	</>
-	<page "components usage page" address="/components" title="Components" tab="Usage">
-		<page "components examples page" address="/components/examples" title="Examples"/>
-		<page "components api page" address="/components/api" title="API"/>
-		<page "components theming page" address="/components/theming" title="Theming"/>
+	<page "components usage page" address="/ui-components" title="Components element" tab="Usage">
+		<page "components examples page" address="/ui-components/examples" title="Examples"/>
+		<page "components api page" address="/ui-components/api" title="API"/>
+		<page "components theming page" address="/ui-components/theming" title="Theming"/>
 	</>
 	<page "container usage page" address="/container" title="Container" tab="Usage">
 		<page "container examples page" address="/container/examples" title="Examples"/>
@@ -100,6 +110,15 @@
 	<page "detail usage page" address="/detail" title="Detail" tab="Usage">
 		<page "detail examples page" address="/detail/examples" title="Examples"/>
 		<page "detail api page" address="/detail/api" title="API"/>
+	</>
+	<page "diagram usage page" address="/diagram" title="Diagram" tab="Usage">
+		<page "diagram examples page" address="/diagram/examples" title="Examples"/>
+		<page "diagram api page" address="/diagram/api" title="API"/>
+		<page "diagram theming page" address="/diagram/theming" title="Theming"/>
+	</>
+	<page "dimension usage page" address="/dimension" title="Dimension" tab="Usage">
+		<page "dimension examples page" address="/dimension/examples" title="Examples"/>
+		<page "dimension api page" address="/dimension/api" title="API"/>
 	</>
 	<page "dimmer usage page" address="/dimmer" title="Dimmer" tab="Usage">
 		<page "dimmer examples page" address="/dimmer/examples" title="Examples"/>
@@ -335,6 +354,16 @@
 		<page "sidebar api page" address="/sidebar/api" title="API"/>
 		<page "sidebar theming page" address="/sidebar/theming" title="Theming"/>
 	</>
+	<page "sides usage page" address="/sides" title="Sides" tab="Usage">
+		<page "sides examples page" address="/sides/examples" title="Examples"/>
+		<page "sides api page" address="/sides/api" title="API"/>
+		<page "sides theming page" address="/sides/theming" title="Theming"/>
+	</>
+	<page "site-nav usage page" address="/site-nav" title="Site nav" tab="Usage">
+		<page "site-nav examples page" address="/site-nav/examples" title="Examples"/>
+		<page "site-nav api page" address="/site-nav/api" title="API"/>
+		<page "site-nav theming page" address="/site-nav/theming" title="Theming"/>
+	</>
 	<page "site-tabs usage page" address="/site-tabs" title="Site tabs" tab="Usage">
 		<page "site-tabs examples page" address="/site-tabs/examples" title="Examples"/>
 		<page "site-tabs api page" address="/site-tabs/api" title="API"/>
@@ -347,6 +376,11 @@
 	<page "space usage page" address="/space" title="Space" tab="Usage">
 		<page "space examples page" address="/space/examples" title="Examples"/>
 		<page "space api page" address="/space/api" title="API"/>
+	</>
+	<page "split-panel usage page" address="/split-panel" title="Split Panel" tab="Usage">
+		<page "split-panel examples page" address="/split-panel/examples" title="Examples"/>
+		<page "split-panel api page" address="/split-panel/api" title="API"/>
+		<page "split-panel theming page" address="/split-panel/theming" title="Theming"/>
 	</>
 	<page "stack usage page" address="/stack" title="Stack" tab="Usage">
 		<page "stack examples page" address="/stack/examples" title="Examples"/>
@@ -428,6 +462,11 @@
 		<page "transition examples page" address="/transition/examples" title="Examples"/>
 		<page "transition api page" address="/transition/api" title="API"/>
 		<page "transition theming page" address="/transition/theming" title="Theming"/>
+	</>
+	<page "tree usage page" address="/tree" title="Tree" tab="Usage">
+		<page "tree examples page" address="/tree/examples" title="Examples"/>
+		<page "tree api page" address="/tree/api" title="API"/>
+		<page "tree theming page" address="/tree/theming" title="Theming"/>
 	</>
 	<page "tree-diagram usage page" address="/tree-diagram" title="Tree diagram" tab="Usage">
 		<page "tree-diagram examples page" address="/tree-diagram/examples" title="Examples"/>

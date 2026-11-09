@@ -1,0 +1,67 @@
+<spell-page "split-panel examples" notebook>
+	<header level="1">
+		Split Panel
+		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="Columns" sticky="stack" collapsible dividing>
+			<example "Columns" description="Panes side by side, sized by `columns`.  `resizable` puts a bar between them:  drag it, or give it the focus and use the arrow keys.">
+				<split-panel columns="30%,*" resizable style="height: 8em">
+					<segment>Tree</segment>
+					<segment>Code</segment>
+				</split-panel>
+			</example>
+		</>
+
+		<section label="Rows" sticky="stack" collapsible dividing>
+			<example "Rows" description="Panes one above the other, sized by `rows`:  here a fixed height, with the rest above it.">
+				<split-panel rows="*,3em" resizable style="height: 10em">
+					<segment>Code</segment>
+					<segment>Output</segment>
+				</split-panel>
+			</example>
+		</>
+
+		<section label="Nested" sticky="stack" collapsible dividing>
+			<example "Nested" description="A split panel is a pane too.">
+				<split-panel columns="*,*" resizable style="height: 10em">
+					<split-panel rows="*,*" resizable>
+						<segment>Code</segment>
+						<segment>Output</segment>
+					</split-panel>
+					<segment>App</segment>
+				</split-panel>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Panes written anywhere" sticky="stack" collapsible dividing>
+			<example "Panes written anywhere" description="A `<ui-panel>` written anywhere joins the split panel it names with `parent`, as a section joins a section.  So the page can stay flat.">
+				<split-panel id="split-panel-joined" columns="40%,*" resizable style="height: 8em"/>
+				<panel parent="split-panel-joined" appearance="pane" label="Views">The tree</panel>
+				<panel parent="split-panel-joined" appearance="pane" label="Properties">The fields</panel>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Hidden panes" sticky="stack" collapsible dividing>
+			<example "Hidden panes" description="A child with `hidden` isn't a pane:  the others share its room.  Showing it again moves nothing, so a running program in a pane keeps running.">
+				<split-panel columns="*,*,*" resizable style="height: 6em">
+					<segment>One</segment>
+					<segment hidden>Not shown</segment>
+					<segment>Three</segment>
+				</split-panel>
+			</example>
+		</>
+	</>
+</spell-page>

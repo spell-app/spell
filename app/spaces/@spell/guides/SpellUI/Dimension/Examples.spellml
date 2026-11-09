@@ -1,0 +1,31 @@
+<spell-page "dimension examples" notebook>
+	<header level="1">
+		Dimension
+		<header>A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="In the reader's units" sticky="stack" collapsible dividing>
+			<example "In the reader's units" description="`value`, its `dimension` and the `unit` it's in:  shown in the reader's own units, from their region, or their choice.">
+				<text paragraph>Luke is <dimension value="172" dimension="length" unit="cm"/> tall, and weighs <dimension value="77" dimension="weight" unit="kg"/>.</text>
+			</example>
+		</>
+
+		<section label="In the units asked for" sticky="stack" collapsible dividing>
+			<example "In the units asked for" description="`in`, the units to show it in, largest first, joined by `and`.">
+				<text paragraph><dimension value="172" dimension="length" unit="cm" in="feet and inches"/>, <dimension value="172" dimension="length" unit="cm" in="cm"/>, <dimension value="100" dimension="temperature" unit="°C" in="°F"/></text>
+			</example>
+		</>
+
+		<section label="A percent" sticky="stack" collapsible dividing>
+			<example "A percent" description="A `proportion`, a part of a whole:  kept as its fraction (`unit=\"fraction\"`), as Spell keeps one, and shown with its % sign the reader's way, `18%`, Spanish `18 %`.">
+				<text paragraph>The tip is <dimension value="0.18" dimension="proportion" unit="fraction"/>, or <dimension value="20" dimension="proportion" unit="%"/> for good service.</text>
+			</example>
+		</>
+	</>
+</spell-page>

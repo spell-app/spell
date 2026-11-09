@@ -128,7 +128,7 @@ describe("the Spell UI site", () => {
     for (const { path, contents } of PAGES)
       expect({ path, tab: /tab-bar/.test(contents) }).toEqual({ path, tab: false })
     const folders = readdirSync(FOLDER, { withFileTypes: true }).filter((entry) => entry.isDirectory())
-    expect(folders.length).toBe(94)
+    expect(folders.length).toBe(100)
     for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spellml"))).toBe(false)
   })
 

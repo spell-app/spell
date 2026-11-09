@@ -4,6 +4,42 @@
   "onHome": false,
   "imports": [
     {
+      "path": "/Home.spellml",
+      "active": true
+    },
+    {
+      "path": "/GettingStarted.spellml",
+      "active": true
+    },
+    {
+      "path": "/Grammar.spellml",
+      "active": true
+    },
+    {
+      "path": "/Theming.spellml",
+      "active": true
+    },
+    {
+      "path": "/Icons.spellml",
+      "active": true
+    },
+    {
+      "path": "/Utilities.spellml",
+      "active": true
+    },
+    {
+      "path": "/ComponentIndex.spellml",
+      "active": true
+    },
+    {
+      "path": "/KitchenSink.spellml",
+      "active": true
+    },
+    {
+      "path": "/ThemeBench.spellml",
+      "active": true
+    },
+    {
       "path": "/Accordion/Usage.spellml",
       "active": true
     },
@@ -305,6 +341,34 @@
     },
     {
       "path": "/Detail/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/Diagram/Usage.spellml",
+      "active": true
+    },
+    {
+      "path": "/Diagram/Examples.spellml",
+      "active": true
+    },
+    {
+      "path": "/Diagram/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/Diagram/Theming.spellml",
+      "active": true
+    },
+    {
+      "path": "/Dimension/Usage.spellml",
+      "active": true
+    },
+    {
+      "path": "/Dimension/Examples.spellml",
+      "active": true
+    },
+    {
+      "path": "/Dimension/API.spellml",
       "active": true
     },
     {
@@ -1052,6 +1116,38 @@
       "active": true
     },
     {
+      "path": "/Sides/Usage.spellml",
+      "active": true
+    },
+    {
+      "path": "/Sides/Examples.spellml",
+      "active": true
+    },
+    {
+      "path": "/Sides/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/Sides/Theming.spellml",
+      "active": true
+    },
+    {
+      "path": "/SiteNav/Usage.spellml",
+      "active": true
+    },
+    {
+      "path": "/SiteNav/Examples.spellml",
+      "active": true
+    },
+    {
+      "path": "/SiteNav/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/SiteNav/Theming.spellml",
+      "active": true
+    },
+    {
       "path": "/SiteTabs/Usage.spellml",
       "active": true
     },
@@ -1089,6 +1185,22 @@
     },
     {
       "path": "/Space/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/SplitPanel/Usage.spellml",
+      "active": true
+    },
+    {
+      "path": "/SplitPanel/Examples.spellml",
+      "active": true
+    },
+    {
+      "path": "/SplitPanel/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/SplitPanel/Theming.spellml",
       "active": true
     },
     {
@@ -1345,6 +1457,22 @@
     },
     {
       "path": "/Transition/Theming.spellml",
+      "active": true
+    },
+    {
+      "path": "/Tree/Usage.spellml",
+      "active": true
+    },
+    {
+      "path": "/Tree/Examples.spellml",
+      "active": true
+    },
+    {
+      "path": "/Tree/API.spellml",
+      "active": true
+    },
+    {
+      "path": "/Tree/Theming.spellml",
       "active": true
     },
     {

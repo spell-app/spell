@@ -1,0 +1,45 @@
+<spell-page "sides examples" notebook>
+	<header level="1">
+		Sides
+		<header>Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
+		</>
+	</>
+
+	<section label="Types">
+		<section label="Sides" sticky="stack" collapsible dividing>
+			<example "Sides" description="Four lengths, a margin or a padding:  top over left and right over bottom.">
+				<sides aria-label="Margin" value="10 20 10 20"/>
+			</example>
+		</>
+
+		<section label="As an object" sticky="stack" collapsible dividing>
+			<example "As an object" description="Its value as an object, by side names (JSON text in the attribute):  a side left out is empty, and a change gives back an object.">
+				<html>
+					<ui-sides aria-label="Padding" value="{ \"top\": 8, \"bottom\": 8 }"></ui-sides>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Two sides" sticky="stack" collapsible dividing>
+			<example "Two sides" description="Only the sides it names, in one row.">
+				<sides aria-label="Vertical padding" sides="top bottom" value="4 0"/>
+			</example>
+		</>
+
+		<section label="In a property editor" sticky="stack" collapsible dividing>
+			<example "In a property editor" description="A property whose type is `sides` draws one, half a row.">
+				<property-editor compact show-defaults label="Box">
+					<property name="margin" label="Margin" as="sides" default="0 0 0 0"/>
+					<property name="padding" label="Padding" as="sides" default="0 0 0 0"/>
+				</property-editor>
+			</example>
+		</>
+	</>
+</spell-page>

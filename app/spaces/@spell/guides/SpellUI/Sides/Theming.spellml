@@ -1,0 +1,34 @@
+<spell-page "sides theming" notebook>
+	<header level="1">
+		Sides
+		<header>Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#tokens">Tokens</>
+			<item link="#themes">Themes</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-sides" playground>
+				<ui-sides aria-label="Margin" value="10 20 10 20"></>
+				<ui-sides aria-label="Padding" value="{ \"top\": 8, \"bottom\": 8 }"></>
+				<ui-sides aria-label="Vertical padding" sides="top bottom" value="4 0"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-page>

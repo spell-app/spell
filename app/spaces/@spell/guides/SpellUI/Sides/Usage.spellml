@@ -1,0 +1,40 @@
+<spell-page "sides usage" notebook>
+	<header level="1">
+		Sides
+		<header>Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.</>
+	</>
+	<section>
+		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			- `value` takes CSS's text, one to four numbers in CSS's order (top right bottom left), or an object of
+			  side names, `{ top, left, right, bottom }`:  as the property, or as JSON text in the attribute.
+			- It gives back the form it was given:  text in, text out;  an object in, an object out.
+			- `sides="top bottom"` (or `left right`) shows only those, in one row.
+			- In a form it submits CSS's text of all four, an empty side `0`.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-sides").addEventListener("ui-changed", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>Tab moves from box to box;  each is a native number box, so the arrow keys step its length.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A group (`role="group"`), named by its `aria-label` or `<label for>`.
+			- Each box is named by its side (Top, Left ...);  the letters inside are hidden from screen readers.
+		</>
+	</>
+</spell-page>
