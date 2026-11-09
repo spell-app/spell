@@ -1,75 +1,79 @@
-# Epics in your own repo, with your team
+# Epics:  plan on a page, build with your coding agent
+
+An epic is one piece of work a coding agent does for you, start to finish, with its plan on a page that stays true.
+
+You start one by typing a line in Claude Code:
+
+```text
+/epic seo make the docs findable
+```
+
+From that line, the agent:
+- makes a git branch and a worktree of its own, so your checkout isn't touched until you merge
+- writes an EPIC PAGE, open beside your code in VS Code:  what it understood, what it needs to ask you, its plan in phases
+- keeps that page current as it builds:  each phase done, each choice it made without you, each problem it found
+
+![An epic page in a browser:  a toolbar of sections with counts, then a list of issues, each with its id and buttons to answer it](epic/docs/images/epic-page.png)
+
+_An epic page:  everything on it has a short id, and buttons for answering it._
+
+## Why you'd want it
+
+If you've used a coding agent on anything bigger than a small fix, you've met these:
+- **The reasoning scrolls away.**
+  A ticket says what to do, and goes stale the day the work starts.
+  A pull request shows what was done, not the decisions behind it.
+  The chat in between is gone by morning.
+  An epic page holds all three, during the work and after the merge.
+- **The agent guesses, or sits waiting for you.**
+  Here a question goes on the page, with its options, what each would cost, and the one the agent recommends.
+  You answer when you have time.
+- **A new session starts from nothing.**
+  `/epic resume seo` picks up from the page, not from a summary of a chat.
+- **Two agents trip over each other.**
+  Each epic has its own branch, worktree and VS Code window, so several can run at once.
+
+What it costs:
+- every worktree is another checkout, with an install of its own
+- a page can collect more than you'll read:  the work is only as reviewed as you make it
+
+## How you'll use it
+
+1. **Ask.**
+   In a Claude Code session in your repo:  `/epic <name> <what to plan>`.
+   The page opens in VS Code's right side bar, and fills as the agent reads your code.
+2. **Answer its questions, on the page.**
+   Press Choose on the option you want, or leave a note.
+3. **Agree the plan.**
+   Accept Overview once it has understood the job;  it then writes the phases, and you press Accept Phases.
+4. **Let it build.**
+   It works through the phases in its worktree and commits each one.
+   You can go and do something else, or start another epic.
+5. **Review whenever you like.**
+   Every item has buttons:  Approve, Revisit with a note, Do this.
+   Any paragraph takes a comment.
+   Press Send, or wait two minutes for it to send itself, and the agent takes your marks.
+6. **Finish.**
+   `/epic done` merges the branch, or opens a pull or merge request.
+   The worktree goes;  the page stays, as the record.
+
+The pages are plain HTML files, in a git repo of their own beside your code, so a whole team can share them.
+A question or a bug has an id you can say out loud:  "approve J3" works in the chat.
+
+## Try it
+
+In your repo, a git repo with at least one commit:
 
 ```sh
-git clone git@github.com:ana/my-app.git && cd my-app
 npx spell@next epic init
 ```
 
-<details>
-<summary>What it printed</summary>
+It asks your name and a colour, installs the Claude Code plugin and the VS Code extension,
+makes the shared repo for the pages, and starts a small local server that shows them.
+It leaves one config file and a block in `.gitignore` in your repo.
 
-```text
-Initializing Epic for repo ~/www/my-app
-? What do you want to be called? (ben) Ben
-cloning the team's plans…
-? Which colour should your words be?
-  1. red
-  2. orange
-  3. yellow
-  4. olive
-❯ 5. teal
-  6. blue
-  7. violet
-  8. purple
-  9. pink
-  10. brown
-  11. grey
-  12. black
-> Your name  :  Ben
-> Your colour:  teal
-> Epic repo:  git@github.com:ana/my-app.epics.git
-
-Checking the epic plugin:
-> installed epic for Claude Code:  /reload-plugins in a running session
-
-Setting up epic files:
-sharing your colour with the team…
-  already present   ~/www/my-app/.epic/config.json5
-  cloned            ~/www/my-app.epics  (from git@github.com:ana/my-app.epics.git)
-  linked            ~/www/my-app/epics
-  linked            ~/www/my-app/sagas
-  linked            ~/www/my-app/guides
-  linked            ~/www/my-app/pages
-  already present   ~/www/my-app/.gitignore
-  kept              ~/.spell-epic/person.json5  (your name)
-  wrote             ~/www/my-app.epics/people/ben.json5  (your colour, pushed)
-starting the epic server…
-
-Epics initialized!
-To see your epics:
-- Web browser:  http://127.0.0.1:4848/
-- VS Code:  open ~/www/my-app in VS Code (code ~/www/my-app), then the Review view in its right side bar;  epic open <epic> --review shows one there
-More on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
-```
-
-</details>
-
-_Ben joins Ana's repo:  one command, and every plan the team has written is on his machine, and in his browser.
-Real output from this kit's `epic`, in a terminal, on a fresh machine (a scratch home folder), with a stand-in for
-GitHub (local repos at GitHub's addresses), the home folder shortened to `~`;  the colour list as it ends, and the
-server's lines from a run that started one.
-In a terminal the questions are yellow, the answers bold, the files' table gray, and the address a link._
-
-One config file and a block in `.gitignore` are all `epic init` leaves in your repo.
-The plans live next door, in `my-app.epics`, a git repo of their own, which every agent's turn pulls and pushes.
-
-An issue tracker keeps the plan away from the code, a chat scrollback loses it by morning,
-and a pull request reviews the diff, not the decisions behind it.
-
-Here the plan is a page that stays true, the epic page:
-the agent writes it as it plans and builds, in a worktree of its own,
-and you mark it up when you have time.
-What that's like, and why:  [the epic engine's front page](epic/README.md).
+The full steps, what each question means, and working with others are below.
+The method in more depth:  [the epic engine's front page](epic/README.md).
 
 Three things to know before you start:
 - **Sharing works with GitHub and GitLab.**
@@ -164,70 +168,6 @@ From any folder of your repo, a git repo with at least one commit:
 cd ~/www/my-app
 npx spell@next epic init
 ```
-
-<details>
-<summary>What it printed</summary>
-
-```text
-Initializing Epic for repo ~/www/my-app
-? What do you want to be called? (ana) Ana
-? Which colour should your words be?
-  1. red
-  2. orange
-  3. yellow
-  4. olive
-❯ 5. green
-  6. teal
-  7. blue
-  8. violet
-  9. purple
-  10. pink
-  11. brown
-  12. grey
-  13. black
-? What should the shared epics repo be called? (my-app.epics)
-? Private or public?
-❯ 1. private  -- only the people you add can see the plans
-  2. public  -- anyone can read every epic page, guide and comment
-> Your name  :  Ana
-> Your colour:  green
-> Epic repo:  ana/my-app.epics, private
-
-Checking the epic plugin:
-> installed epic for Claude Code:  /reload-plugins in a running session
-
-Setting up epic files:
-making ana/my-app.epics on GitHub…
-sharing your colour with the team…
-  wrote          ~/www/my-app/.epic/config.json5
-  made           ~/www/my-app.epics
-  made, pushed   ana/my-app.epics on GitHub, private  (git@github.com:ana/my-app.epics.git)
-  linked         ~/www/my-app/epics
-  linked         ~/www/my-app/sagas
-  linked         ~/www/my-app/guides
-  linked         ~/www/my-app/pages
-  wrote          ~/www/my-app/.gitignore
-  kept           ~/.spell-epic/person.json5  (your name)
-  wrote          ~/www/my-app.epics/people/ana.json5  (your colour, pushed)
-
-We need to make a commit in the main repo to enable epics.
-? Commit and push .epic/config.json5 and .gitignore on main? (y) y
-pushing main…
-> Committed and pushed
-starting the epic server…
-
-Epics initialized!
-To see your epics:
-- Web browser:  http://127.0.0.1:4848/
-- VS Code:  open ~/www/my-app in VS Code (code ~/www/my-app), then the Review view in its right side bar;  epic open <epic> --review shows one there
-More on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
-```
-
-</details>
-
-_Ana's first `epic init`, against the same stand-in for GitHub as the top of this page:  every question first,
-then a summary, then each step;  a gray line before each slow one (GitHub, the push, the server).
-The settings it wrote are in the file, not printed._
 
 - That fetches Spell's package and runs its `spell epic`, which runs the epic tool installed beside it.
   Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
@@ -409,7 +349,6 @@ git clone git@github.com:ana/my-app.git && cd my-app
 npx spell@next epic init
 ```
 
-- What it printed:  the top of this page.
 - The plugin and the extension are set up on their machine by the same line.
 - It asks your name and your colour, as it asked the first person, from any folder of the code repo:
   it finds the repo's main checkout from wherever it runs.
@@ -424,19 +363,6 @@ npx spell@next epic init
 ```sh
 epic whoami
 ```
-
-<details>
-<summary>What it printed</summary>
-
-```text
-Ana  (Ana Lima, github: ana)
-  kept in ~/.spell-epic/person.json5
-  agent:  claude (Claude's mark, CLAUDECODE)
-```
-
-</details>
-
-_Ana, after her `epic init --name Ana`._
 
 Your SHORT NAME is who you are on the epics:  what's stamped on your replies, comments, picks and log lines.
 - It's the one you kept (`epic init` asks;  `epic whoami Ana` changes it),
@@ -469,19 +395,6 @@ With an epic repo named in the config (`contentRemote`), the same hook then sync
 ```sh
 epic shared sync
 ```
-
-<details>
-<summary>What it printed</summary>
-
-```text
-committed 13ac4ce
-renumbered in seo:  T1 → T2
-sync:  synced
-```
-
-</details>
-
-_Ben's sync, after Ana and he each added a todo to the same epic page:  hers kept T1, his became T2._
 
 - Offline, the commits stay here, and the next sync pushes them.
 - A repo whose config names no `contentRemote` only commits, every turn, and never pulls or pushes,
@@ -625,22 +538,6 @@ glab auth login --hostname git.acme.com  # your own GitLab
 epic guide --list
 ```
 
-<details>
-<summary>What it printed</summary>
-
-```text
-workflow           The loop, start to finish
-find               Find the epic and its page
-plan               Plan an epic
-build              Build a phase
-review             Take what the person sends from the page
-turn               End every turn
-done               Finish an epic
-claude-only-tools  What Claude Code has, and what any agent does instead
-```
-
-</details>
-
 _The epic workflow, for an agent with none of the skills:  `epic guide` prints it, `epic guide build` one topic._
 
 Bob uses Codex, Ana uses Claude Code, and they work the same epic:  the same pages, the same comments,
@@ -653,21 +550,6 @@ An agent with no skills at all gets the workflow from `epic guide`.
 ```sh
 epic plugin install --codex
 ```
-
-<details>
-<summary>What it printed</summary>
-
-```text
-epic for Codex 0.8.0, from ~/www/spell/epic:  changed 5
-  ~/.codex/hooks.json:  the epic hooks (SessionStart, Stop), run from ~/www/spell/epic/hooks
-  Codex skills:  20 linked to ~/www/spell/epic/skills:  airplane, bedtime, bg, coherence, comment, designer, ...
-  ~/.codex/agents/epic-designer.toml:  Codex's designer agent, from ~/www/spell/epic/designer/designer-agent.md
-  ~/.codex/agents/epic-coherence.toml:  Codex's coherence agent, from ~/www/spell/epic/coherence/coherence-agent.md
-  PATH:  ~/.local/bin/epic links to ~/www/spell/epic/bin/epic
-then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them, and lists the skills ($epic review ...)
-```
-
-</details>
 
 - It writes three hooks into Codex's own hooks file, `~/.codex/hooks.json` (`$CODEX_HOME` moves it):
   - as each turn ends, `epic turn end`:  the plans committed and synced, as Claude's turns do
