@@ -17,7 +17,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { TypeDeclaration } from "spell/parser/spell/rules/classes/TypeDeclaration"
 import { OperationAt } from "./OperationAt"
 import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
-import { COLLECTION_NAME, PLACE_KIND_ABILITIES, placeKindWords } from "./places.shared"
+import { COLLECTION_NAME, PLACE_KIND_ABILITIES, isPlaceTypeReadOnly, placeKindWords } from "./places.shared"
 
 /** A key in an address, which anyone reading a browser program can read:  `?key=...`, `user:secret@`. */
 const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\/\/[^/@\s]+:[^/@\s]+@/i
@@ -323,6 +323,32 @@ export class CreatePlace extends TypeDeclaration<
     return snakeCase(`${(match.groups.type as P.Match).raw}`.trim())
   }
 
+  /**
+   * What place `type`'s lines say that the compiler asks about, for a project importing it (epic `data` I19):
+   * `undefined` when they say none of it.
+   * - Only that:  a key's name and the like stay with the project that says them.
+   */
+  static importedDetailsOf(type: P.TypeScope): P.ImportedPlaceDetails | undefined {
+    const { declaredBy } = type
+    if (!declaredBy) return undefined
+    const { checkedEvery, searches, collections } = CreatePlace.detailsOf(declaredBy)
+    const collectionsKept = Object.fromEntries(
+      Object.entries(collections ?? {})
+        .map(([name, { at, searches: own, searchedOnly, askedBy }]) => {
+          const kept: P.ImportedPlaceCollection = definedProps({ at, searches: own, searchedOnly, askedBy })
+          return [name, kept] as const
+        })
+        .filter(([, kept]) => Object.keys(kept).length)
+    )
+    const details: P.ImportedPlaceDetails = definedProps({
+      checkedEvery,
+      searches,
+      readOnly: isPlaceTypeReadOnly(type) || undefined,
+      collections: Object.keys(collectionsKept).length ? collectionsKept : undefined
+    })
+    return Object.keys(details).length ? details : undefined
+  }
+
   /** Everything the lines under `match` say, merged. */
   static detailsOf(match: P.Match): PlaceDetailValue & { operations?: Record<string, string> } {
     const details: PlaceDetailValue & { operations?: Record<string, string> } = {}
@@ -479,4 +505,9 @@ export function plainValueAST(match: P.Match, value: unknown): P.ASTExpression {
       })
   )
   return new P.ASTObjectLiteral(match, { properties })
+}
+
+/** `record` without its `undefined` props. */
+function definedProps<T extends object>(record: T): T {
+  return Object.fromEntries(Object.entries(record).filter(([, value]) => value !== undefined)) as T
 }

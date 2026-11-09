@@ -10,6 +10,11 @@
     {
       "type": "Recipe",
       "superType": "View",
+      "savedIn": {
+        "place": "family_cookbook",
+        "placeType": "FamilyCookbook",
+        "collection": "recipes"
+      },
       "defined": "/RecipeBox.spell:155-586"
     },
     {
@@ -40,6 +45,10 @@
     {
       "type": "FamilyCookbook",
       "superType": "Place",
+      "place": {
+        "name": "family_cookbook",
+        "kind": "in memory database"
+      },
       "defined": "/RecipeBox.spell:113-153"
     },
     {
