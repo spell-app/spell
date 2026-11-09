@@ -508,7 +508,7 @@ type OrgRoster = NonNullable<Awaited<ReturnType<PeopleStore["roster"]>>>
 /** A term's row, with what the page shows people:  its role's name, and who holds it and of what, by name. */
 function namedTermRowOf(term: TermView, names: Map<string, string>): PlaceRow {
   const row = termRowOf(term)
-  const nameOf = (key: unknown) => (key ? names.get(`${key}`) || `${key}` : "")
+  const nameOf = (key: unknown) => (typeof key === "string" && key ? names.get(key) || key : "")
   return {
     ...row,
     roleName: nameOf(term.role),
