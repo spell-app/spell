@@ -62,9 +62,14 @@ Names people choose keep their accents.
 | a place's kinds | `servidor web`, `servidor graphql`, `carpeta de datos`, `archivo`, `sala`, `(hoja\|hoja de cálculo)`, `archivo de excel`, `hoja de google`, `base de datos en este dispositivo`, `base de datos en memoria`, `airtable`, `(atmosphere\|cuenta de atmosphere)`, `(atmosphere personal\|cuenta personal de atmosphere)` |
 | x is a web server (at\|from) "..." | `x es un servidor web (en\|desde) "..."` |
 | x is saved in the cloud | `x se guarda en la nube` |
+| x is stored on this device(, for each tab) | `x se guarda en este dispositivo(, para cada pestaña)` |
+| x is an atmosphere space at "..." | `x es un espacio de atmosphere en "..."` |
 | it (is saved\|lives) in the place | `(se guarda\|vive) en el lugar` (and `su propio archivo` keeps its meaning) |
 | recipes live at "...", a recipe's title is its? "..." | `las recetas están en "..."`, `el título de una receta se llama "..."` |
 | its key is the secret "...", check it every 30 seconds | `su clave es el secreto "..."`, `se revisa cada 30 segundos` |
+| its optional key is the secret "..." | `su clave opcional es el secreto "..."` |
+| show them 12 at a time, page-size="12" | `mostrarlos de 12 en 12`, `tamaño-de-página="12"` |
+| as a date and time, dates and times | `como fecha y hora`, `fechas y horas` |
 | its version is its? "...", its id is its? "..." | `su versión está en "..."`, `su identificador está en "..."` |
 | it includes the account "..." | `incluye la cuenta "..."` |
 | while (waiting\|loading), if there are none, if that fails | `mientras (espera\|carga)`, `si no hay (ninguno\|ninguna)` (agrees with what its loop reads), `si falla` |

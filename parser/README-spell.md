@@ -1254,6 +1254,10 @@ recipe box is an app:
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
 - A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
   `if that fails:` with lines under it draws them instead.
+  - In an action, `if that fails:` runs under the line above it:  `set found to every recipe`, then `if that fails:`.
+- How many a list draws at a time:  `show them 12 at a time`, or `page-size="12"` on a `<for>`;
+  a page holds that many, and scrolling draws that many more.
+- A name in quotes can hold a number:  `its "isbn 10" is text`, and `its isbn 10` reads it.
 - A field finds the server's own spelling by its words:  `its "cook name" is text`.
   - It reads `cook_name` or `cookName`.
   - Even `Cook Name`.
