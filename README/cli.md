@@ -898,6 +898,35 @@ spell place nerd StarWars.api.spell --output star-wars.svg
 - No `--output`:  the spec, printed.
 - `--columns <n>`:  its most columns, 3 by default.
 
+`spell place sign-in <place> [address]` signs you in to a site behind its own sign-in, such as a company's:
+Spell opens a browser window of its own, you sign in as usual, then press Enter or close the window.
+
+```sh
+spell place sign-in work https://example.com
+spell place ingest https://example.com/api --signed-in work --into Work.api.spell
+spell place read-page https://example.com/racks --signed-in work --select "table" --as racks --into Work.api.spell
+```
+
+- The session is kept in `~/.spell/place-sessions`, under the place's name, readable only by you and in no repo.
+  Its values are taken out of everything Spell writes.
+- `spell place ingest --signed-in <place>` reads as you, and `spell place update` keeps doing so.
+  Cookies go only to their own host.
+  When the session has run out, it says so, with the command to sign in again.
+- `spell place read-page` copies rows off one page for what the API doesn't serve:
+  `--select` names a table, or each row.
+  `--into` keeps them beside the place, in `<Name>.<collection>.samples.json`, and without it they're printed.
+- A program made this way reaches the place with no session of its own:  only the look at it was signed in.
+
+`spell site screenshots <site>` takes pictures of a site's old pages while you walk it, in a window Spell opens:
+
+```sh
+spell site screenshots owen@spell/my-site --size 1440x900 --signed-in work
+```
+
+- A small bar on top of each page takes the picture's name and the site's page it's of, picked or new.
+- Save writes `snapshots/<name>.jpg` into the site's project and sets that page's `thumbnail`.
+- A new page is added at the address the browser is on.
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.

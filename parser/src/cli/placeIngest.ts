@@ -46,6 +46,7 @@ export type PlaceIngestOptions = {
   into?: string
   name?: string
   keySecret?: string
+  signedIn?: string
   docs?: string
   collections?: string
   samples?: string
@@ -60,11 +61,12 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, docs, collections, samples, pictures, tryWrites, ai = true } = options
+  const { kind, into, name, keySecret, signedIn, docs, collections, samples, pictures, tryWrites, ai = true } = options
   return stoppedAsCliError(async () => {
-    const result = await ingestFor(ai).add({
+    const ingest = await ingestFor(ai, !!signedIn)
+    const result = await ingest.add({
       address,
-      ...withValues({ kind, into, name, keySecret, docs }),
+      ...withValues({ kind, into, name, keySecret, signedIn, docs }),
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
       ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
@@ -82,24 +84,36 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
  */
 export async function placeUpdate(file: string, { ai = true }: { ai?: boolean }): Promise<number> {
   return stoppedAsCliError(async () => {
-    const result = await ingestFor(ai).update(file)
+    const ingest = await ingestFor(ai, describesSession(file))
+    const result = await ingest.update(file)
     printUpdate(result)
     return result.couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
   })
 }
 
-/** The steps, with the terminal and the disk:  asking an agent unless `ai` is off. */
-function ingestFor(ai: boolean): PlaceIngest {
+/**
+ * The steps, with the terminal and the disk:  asking an agent unless `ai` is off.
+ * - `usesSession`:  loads the kept sessions, only then (the server's places are a lot to load).
+ */
+async function ingestFor(ai: boolean, usesSession: boolean): Promise<PlaceIngest> {
   const chosen = ai ? claudeRunnerFor(process.env, { ai }) : undefined
+  const sessions = usesSession ? new (await import("spell/server/places")).PlaceSessions() : undefined
   return new PlaceIngest({
     fetch: fetchWithFiles(globalThis.fetch),
     ask: askAtTerminal,
     files: diskFiles,
     readThrough: readThroughSpell,
     keyNamed: (secret) => process.env[secret],
+    ...(sessions && { sessionNamed: (place: string) => sessions.named(place) }),
     say: (line) => CLI.err(line),
     ...(chosen && { claude: chosen.run, claudeVia: chosen.via })
   })
+}
+
+/** Does the description beside `file` say it's read signed in?  So only then are the sessions loaded. */
+function describesSession(file: string): boolean {
+  const description = file.replace(/\.(?:spell|spellml)$/, ".json5")
+  return existsSync(description) && /["']?signedIn["']?\s*:/.test(readFileSync(description, "utf8"))
 }
 
 /** `run`'s exit code, its `IngestStopped` a `CliError`.  - throws `CliError`, and whatever else `run` throws */

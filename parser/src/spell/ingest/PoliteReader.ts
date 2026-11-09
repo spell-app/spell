@@ -2,7 +2,7 @@ import { backoffFor, rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/u
 import { clockTime } from "spell/util/time"
 import { after } from "spell/util/timing"
 
-import { IngestStopped } from "./ingest.types"
+import { IngestStopped, type ReaderSession } from "./ingest.types"
 
 /** Says who's asking, so a server's owner can see and say no. */
 export const READER_NAME = "spell-place-ingest (+https://github.com/spell-app/spell)"
@@ -38,6 +38,9 @@ const MOST_RETRIES = 2
 const KEPT_HEADERS =
   /^(?:(?:x-)?rate-?limit.*|retry-after|(?:x-)?api-version|.*-version|allow|access-control-allow-.*|content-type|etag|link|cache-control|server)$/i
 
+/** The most redirects one request of a signed-in session follows. */
+const MOST_REDIRECTS = 5
+
 /** A GraphQL request's body that only reads. */
 const ONLY_READS = /^\s*(?:query\b|\{)/
 
@@ -71,6 +74,11 @@ export type ReadAnswer = {
  *   - `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks
  *   - so a read through the Spell can't write either
  * - The key goes on each request, and its value is taken out of whatever comes back, should a server say it again.
+ * - A signed-in session goes the same way (epic `mockup` P12):  its cookies only to their own host, and its values
+ *   taken out of what comes back.
+ *   - It asks as itself, not as another page, which a signed-in server may refuse.
+ *   - It follows redirects itself, so a cookie never follows one elsewhere:
+ *     sent to sign in, or a 401, and it stops, saying the session has ended.
  * - Plain web APIs, no node:  `fetch` is handed in.
  */
 export class PoliteReader {
@@ -80,6 +88,8 @@ export class PoliteReader {
   private readonly sleep: (msec: number) => Promise<void>
   /** The key's value. */
   private readonly key: string | undefined
+  /** The signed-in session. */
+  private readonly session: ReaderSession | undefined
   /** How many requests so far. */
   private requests = 0
   /** How many bytes so far. */
@@ -94,14 +104,17 @@ export class PoliteReader {
   constructor({
     fetch,
     key,
+    session,
     sleep = (msec) => after(msec / 1000)
   }: {
     fetch: typeof globalThis.fetch
     key?: string
+    session?: ReaderSession
     sleep?: (msec: number) => Promise<void>
   }) {
     this.send = fetch
     this.key = key
+    this.session = session
     this.sleep = sleep
   }
 
@@ -172,7 +185,7 @@ export class PoliteReader {
     const headers = new Headers(init.headers)
     headers.set("user-agent", READER_NAME)
     // a browser sets its own, and won't let a page:  so only where it can
-    if (!headers.has("origin")) headers.set("origin", READER_ORIGIN)
+    if (!headers.has("origin") && !this.session) headers.set("origin", READER_ORIGIN)
     if (this.key !== undefined) headers.set("authorization", `Bearer ${this.key}`)
     for (let attempt = 1; ; attempt++) {
       if (!this.hasRoom)
@@ -180,7 +193,7 @@ export class PoliteReader {
       await this.waitForLimit(url)
       await this.waitForGap()
       this.requests++
-      const response = await this.send(url, { ...init, headers, signal: AbortSignal.timeout(TIMEOUT_MS) })
+      const { response, landedAt } = await this.sent(url, init, headers)
       this.noteLimit(response.headers)
       const isTooMany = response.status === 429 || response.status === 503
       if (isTooMany && response.headers.has("retry-after") && attempt <= MOST_RETRIES) {
@@ -194,7 +207,7 @@ export class PoliteReader {
         continue
       }
       const { bytes, isCut } = await this.bytesOf(response)
-      const landed = response.url || url
+      const landed = landedAt ?? (response.url || url)
       const text = this.withoutKey(new TextDecoder().decode(bytes))
       return {
         status: response.status,
@@ -204,6 +217,39 @@ export class PoliteReader {
         url: landed,
         ...(body === "bytes too" && { bytes })
       }
+    }
+  }
+
+  /**
+   * Send one request;  with a session, its cookies, following redirects itself (see the class).
+   * - `landedAt`:  where a session's request ended up.
+   * - throws `IngestStopped` when the session has ended
+   */
+  private async sent(
+    url: string,
+    init: RequestInit,
+    headers: Headers
+  ): Promise<{ response: Response; landedAt?: string }> {
+    const signal = () => AbortSignal.timeout(TIMEOUT_MS)
+    const session = this.session
+    if (!session) return { response: await this.send(url, { ...init, headers, signal: signal() }) }
+    let at = url
+    for (let redirects = 0; ; redirects++) {
+      const asked = new Headers(headers)
+      const cookie = session.cookieFor(at)
+      if (cookie) asked.set("cookie", cookie)
+      const response = await this.send(at, { ...init, headers: asked, redirect: "manual", signal: signal() })
+      if (response.status === 401) throw sessionEnded(session)
+      const location = response.status >= 300 && response.status < 400 ? response.headers.get("location") : undefined
+      if (!location) return { response, landedAt: at }
+      const next = new URL(location, at).href
+      if (session.sentToSignIn(at, next)) throw sessionEnded(session)
+      if (redirects >= MOST_REDIRECTS)
+        throw new IngestStopped(`${new URL(at).host} redirected more than ${MOST_REDIRECTS} times`)
+      await response.body?.cancel()
+      await this.waitForGap()
+      this.requests++
+      at = next
     }
   }
 
@@ -269,10 +315,20 @@ export class PoliteReader {
     return { bytes: isCut ? bytes.slice(0, MOST_BYTES_AN_ANSWER) : bytes, isCut }
   }
 
-  /** `text`, with the key's value taken out. */
+  /** `text`, with the key's value and the session's taken out. */
   private withoutKey(text: string): string {
-    return this.key ? text.replaceAll(this.key, "[its key]") : text
+    let clean = this.key ? text.replaceAll(this.key, "[its key]") : text
+    for (const secret of this.session?.secrets ?? []) {
+      const inJson = JSON.stringify(secret).slice(1, -1)
+      clean = clean.replaceAll(secret, "[its session]").replaceAll(inJson, "[its session]")
+    }
+    return clean
   }
+}
+
+/** What stops a read when `session` has ended, and how to go on. */
+export function sessionEnded({ place }: Pick<ReaderSession, "place">): IngestStopped {
+  return new IngestStopped(`the session for ${place} has ended:  sign in again, spell place sign-in ${place}`)
 }
 
 /** Are `bytes` text, UTF-8 throughout? */

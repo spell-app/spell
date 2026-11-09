@@ -51,6 +51,25 @@ import { checkProjectName } from "spell/app/cli/cli.types"
 import { loadApp } from "./hooks"
 
 export default function appCommands(spell: Command): void {
+  const site = spell.command("site").description("a site's pages:  the pictures of them on its sitemap")
+
+  site
+    .command("screenshots")
+    .description(
+      "take pictures of a site's old pages, walking it in a browser window Spell opens:  a small bar on top takes a " +
+        "name and the site's page to link it to, picked or new;  Save writes the picture into the site's project and " +
+        "points that page at it"
+    )
+    .argument("<site>", "the site's project folder, or its address, e.g. owen@spell/my-site")
+    .option("--size <size>", "the window's width and height -- default 1440x900")
+    .option("--signed-in <place>", "walk it as you, with the session spell place sign-in kept under that name")
+    .option("--start <address>", "where to start -- default where that session signed in")
+    .action((name: string, _options, command: Command) =>
+      CLI.runCommand(async () =>
+        (await import("./commands/siteScreenshots")).siteScreenshots(name, command.optsWithGlobals())
+      )
+    )
+
   const app = spell
     .command("app")
     .description("the spell app:  a new project, the editor, its static build, the VS Code extension")

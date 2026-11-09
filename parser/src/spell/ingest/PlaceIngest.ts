@@ -26,7 +26,7 @@ import {
   type SpellLine,
   type SpellParts
 } from "./PlaceSpell"
-import { keptHeaders, PoliteReader } from "./PoliteReader"
+import { keptHeaders, PoliteReader, sessionEnded } from "./PoliteReader"
 import { writesTried, writeWordsFor } from "./WritesTried"
 
 /** How many times it leaves out a line Spell can't read, and tries again. */
@@ -95,7 +95,7 @@ export class PlaceIngest {
     const existing = (await files.read(file)) ?? ""
     const already = placeLineAt(existing, address)
     if (already) return this.alreadyThere(file, already, existing)
-    const reader = this.readerFor(ask.keySecret)
+    const reader = this.readerFor(ask.keySecret, ask.signedIn)
     const kind = await this.kindFor(address, ask.kind, reader, ask)
     this.say(`A ${kind}.  Looking at what it holds ...`)
     const look = await lookAtPlace(kind, {
@@ -113,6 +113,7 @@ export class PlaceIngest {
     const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
     if (ask.keySecret) await this.noteKeyIfSet(description, look)
+    noteSignedIn(description, ask.signedIn)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
@@ -150,8 +151,8 @@ export class PlaceIngest {
   /** Look again at one place. */
   private async updateOne(file: string, descriptionPath: string, old: PlaceDescription): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, address, keySecret, docsAt, collectionsAsked, picturesAsked } = old.about
-    const reader = this.readerFor(keySecret)
+    const { name, kind, address, keySecret, signedIn, docsAt, collectionsAsked, picturesAsked } = old.about
+    const reader = this.readerFor(keySecret, signedIn)
     this.say(`Looking again at ${address} ...`)
     // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
     const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
@@ -170,6 +171,7 @@ export class PlaceIngest {
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
     if (keySecret) await this.noteKeyIfSet(description, look)
+    noteSignedIn(description, signedIn)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     await this.notePictures(description, picturesAsked, reader)
     // the agent's notes stay, as it isn't asked again;  everything else, this look says afresh
@@ -250,16 +252,21 @@ export class PlaceIngest {
     )
   }
 
-  /** A reader for this place, with its key.  - throws `IngestStopped` for a key that isn't there */
-  private readerFor(keySecret: string | undefined): PoliteReader {
-    const { fetch, sleep, keyNamed } = this.settings
+  /** A reader for this place, with its key and session.  - throws `IngestStopped` for one that isn't there, or has ended */
+  private readerFor(keySecret: string | undefined, signedIn?: string): PoliteReader {
+    const { fetch, sleep, keyNamed, sessionNamed } = this.settings
     const key = keySecret ? keyNamed?.(keySecret) : undefined
     if (keySecret && key === undefined) {
       throw new IngestStopped(
         `the key named ${keySecret} isn't in the environment:  set it, and it's sent, never written down`
       )
     }
-    return new PoliteReader({ fetch, ...withDefined({ key, sleep }) })
+    const session = signedIn ? sessionNamed?.(signedIn) : undefined
+    if (signedIn && !session) {
+      throw new IngestStopped(`${signedIn} hasn't been signed in to:  spell place sign-in ${signedIn} <address>`)
+    }
+    if (session?.hasEnded) throw sessionEnded(session)
+    return new PoliteReader({ fetch, ...withDefined({ key, session, sleep }) })
   }
 
   /**
@@ -849,6 +856,11 @@ function saidChanges(old: PlaceDescription, now: PlaceDescription): string[] {
 /** What this source does that Spell has no words for:  each said plainly, in the description, as what a program can't do yet. */
 function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): string[] {
   const said = new Set<string>()
+  if (about.signedIn) {
+    said.add(
+      `This was read signed in, as ${about.signedIn}'s session.  A program reaches it with no session of its own.`
+    )
+  }
   const each = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
   // a link to one of its own collections is followed:  `its "homeworld" is a planet`
   const shown = new Set(each.map(([name]) => name))
@@ -924,4 +936,9 @@ function writtenOf(parts: SpellParts, written: readonly string[] | undefined): S
     placeLines: kept(parts.placeLines),
     types: parts.types.map((type) => ({ ...type, lines: kept(type.lines) }))
   }
+}
+
+/** SIDE EFFECT:  `description` says which session it was read as, by name, never its values. */
+function noteSignedIn(description: PlaceDescription, signedIn: string | undefined): void {
+  if (signedIn) description.about.signedIn = signedIn
 }
