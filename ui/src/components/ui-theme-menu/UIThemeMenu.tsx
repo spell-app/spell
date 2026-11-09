@@ -187,8 +187,8 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   /**
    * The bench's page for the place this menu is on, shown alone as the bench opens (Owen:  "start with only the
    * section you came from visible ... Default to `app`"):  `bench-page`, else from this page's address.
-   * - an epic page (`/epics/`):  `epic`;  Spell UI's docs (`/components/`):  `ui`;  a notebook (`/notebooks/`):
-   *   `notebook`;  anywhere else:  `app`
+   * - an epic page (`/epics/`):  `epic`;  Spell UI's docs (`/components/`):  `ui`;  the Spell UI site's notebooks
+   *   (`/guides/SpellUI`):  `notebook`;  anywhere else:  `app`
    */
   get benchPageId(): string {
     const given = this.benchPageAttribute
@@ -670,7 +670,7 @@ const WORKTREE_ROOT = /^\/worktrees\/[^/]+/
 /** Where a page is, by its path => the theme bench's page for it;  first match wins. */
 const BENCH_PLACES: readonly (readonly [RegExp, string])[] = [
   [/\/epics\//, "epic"],
-  [/\/notebooks\//, "notebook"],
+  [/\/guides\/SpellUI(\/|$)/, "notebook"],
   [/\/components\//, "ui"]
 ]
 

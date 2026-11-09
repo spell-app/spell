@@ -517,6 +517,16 @@ describe("project-utils", () => {
     expect(after?.isSite).toBeUndefined()
   })
 
+  test("a project file's `\"onHome\": false` is in the group's list;  none says nothing", async () => {
+    const projectId = await built("OffHome")
+    await projectUtils.saveProjectFile(projectId, { imports: [], onHome: false })
+    const entry = (await projectUtils.getProjectList(projectId)).find((each) => each.path === projectId)
+    expect(entry).toMatchObject({ onHome: false })
+    await projectUtils.saveProjectFile(projectId, { imports: [] })
+    const after = (await projectUtils.getProjectList(projectId)).find((each) => each.path === projectId)
+    expect(Object.keys(after!)).not.toContain("onHome")
+  })
+
   test("deleting a project deletes its build folder too", async () => {
     const projectId = await built("Gone")
     await projectUtils.deleteApp(projectId)

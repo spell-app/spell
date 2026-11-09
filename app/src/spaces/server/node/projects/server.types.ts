@@ -72,6 +72,12 @@ export type ProjectFileJSON = {
    * - The example apps' table, in spell-app's `README-examples.md`, is made from it (`yarn examples:readme`).
    */
   description?: string
+  /**
+   * `false`:  the home page shows no card for it, and its Hero's first-guide button skips it (epic `notebook` P10).
+   * - The project menu still lists it.
+   * - Default, and any other value:  it's on the home page.
+   */
+  onHome?: false
   /** This project's semver, e.g. `"1.2.0"` -- copied into its declarations, for importers' `version` ranges. */
   version?: string
   /** Names it offers importers, e.g. `["Card", "Deck"]` -- default:  everything it declares. */

@@ -458,7 +458,7 @@ export function ProgramPanel(props: { onClose: () => void }) {
 /**
  * `project`'s notebook, if it's one (`NotebookController.notebooksIn()`).
  * - The one open in the editor (`open`), when it's a notebook:  a project of several shows each at its own address,
- *   `/edit/@spell/notebooks/Avatar/Usage.spellml` (epic `elemental-spell` P18).
+ *   `/edit/@spell/guides/SpellUI/Avatar/Usage.spellml` (epic `notebook` P10).
  * - Else its first.
  */
 function notebookOf(

@@ -445,7 +445,6 @@ const APP_TEXTS_ES: AppTextPack = {
   draftEditorTitle: "El editor, con tus borradores de sus piezas",
   homeEditorLine: "Las piezas del propio editor, en Encanto:  cambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",
-  homeNotebooksLine: "Las páginas de Spell UI, escritas en Encanto.",
 
   ////////////////
   // ## Project groups
@@ -466,11 +465,6 @@ const APP_TEXTS_ES: AppTextPack = {
   "theType.guide": "la guía",
   "title.guide": "Guías",
   "description.guide": "Guías de uso",
-  "type.notebook": "cuaderno",
-  "Type.notebook": "Cuaderno",
-  "theType.notebook": "el cuaderno",
-  "title.notebook": "Cuadernos",
-  "description.notebook": "Páginas de prosa y ejemplos vivos que puedes editar",
   "type.library": "biblioteca",
   "Type.library": "Biblioteca",
   "theType.library": "la biblioteca",

@@ -358,7 +358,6 @@ export const APP_TEXTS = {
   draftEditorTitle: "The editor, from your drafts of its pieces",
   homeEditorLine: "The editor's own pieces, in Spell:  change one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",
-  homeNotebooksLine: "Spell UI's pages, written in Spell.",
 
   ////////////////
   // ## Project groups:  each group's words, by its `type` (spaces' `PROJECT_GROUPS`)
@@ -379,11 +378,6 @@ export const APP_TEXTS = {
   "theType.guide": "the guide",
   "title.guide": "Guides",
   "description.guide": "Usage guides",
-  "type.notebook": "notebook",
-  "Type.notebook": "Notebook",
-  "theType.notebook": "the notebook",
-  "title.notebook": "Notebooks",
-  "description.notebook": "Pages of prose and live examples you can edit",
   "type.library": "library",
   "Type.library": "Library",
   "theType.library": "the library",

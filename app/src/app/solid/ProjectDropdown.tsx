@@ -61,7 +61,7 @@ export type ProjectMenuProps = UIMenuJSXAttributes & {
  *   choosing sets it back during the event, and shows the project chosen, which then becomes `editor.project`.
  * - Its trigger shows the project's group icon before its name (a book for a guide ...):  the `trigger` slot.
  *   So does each item.
- * - A group of many projects (the notebooks, a page per Spell UI component) lists them in columns, so the list isn't
+ * - A group of many projects lists them in columns, so the list isn't
  *   one long scroll (Owen, 2026-10-27:  "Make the notebooks menu multi-column so it's not so overwhelming").
  * - Sits in a menu:  wrapped in a `<ui-item class="ProjectDropdown">`.  Look:  `ProjectDropdown.css`.
  * - SEE:  its App UI components page, `app/docs/ProjectDropdown.html` (`/components/app/ProjectDropdown.html`).
@@ -120,10 +120,17 @@ export type ProjectRootState = {
   /** Did loading it fail?  Then it never loads:  see `trackProjectRoot()`. */
   failed: boolean
   /**
-   * Its projects, in order:  `path`, the name to show, its description, if its project file has one, and its
-   * language, when it's all written in another than English (`SP.ProjectListEntry`).
+   * Its projects, in order:  `path`, the name to show, its description, if its project file has one, its language,
+   * when it's all written in another than English (`SP.ProjectListEntry`), and `onHome: false` when it says so.
    */
-  projects: { path: string; name: string; description?: string; language?: string; isSite?: boolean }[]
+  projects: {
+    path: string
+    name: string
+    description?: string
+    language?: string
+    isSite?: boolean
+    onHome?: false
+  }[]
   /** Its icon name. */
   icon?: string
   /** Its words, in the page's language:  its title (`Examples`), what its projects are called (`Example`) ... */
@@ -163,13 +170,16 @@ function readProjectRoot(projectRoot: SPACES.SpellProjectRoot | undefined): Omit
     projects: loaded
       ? // each project's title:  its file's `"title"`, which the list gave, else made from its name (Q45)
         projectRoot!.projectPaths.map((path) => {
-          const entry = projectRoot!.contents?.find((each) => each.path === path)
+          const entry: SPACES.ProjectListEntryWithHome | undefined = projectRoot!.contents?.find(
+            (each) => each.path === path
+          )
           return {
             path,
             name: new SP.SpellProject(path).title,
             description: entry?.description,
             language: entry?.language,
-            isSite: entry?.isSite
+            isSite: entry?.isSite,
+            onHome: entry?.onHome
           }
         })
       : [],

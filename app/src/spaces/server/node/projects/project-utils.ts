@@ -259,9 +259,10 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   return Promise.all(
     projectNames.map(async (projectName) => {
       const path = `${domain.projectRoot}/${projectName}`
-      const { title, description, imports } = await loadProjectFile(path).catch(() => ({
+      const { title, description, onHome, imports } = await loadProjectFile(path).catch(() => ({
         title: undefined,
         description: undefined,
+        onHome: undefined,
         imports: []
       }))
       const files = imports.map((each) => each.path)
@@ -272,7 +273,8 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
         ...(title && { title }),
         ...(description && { description }),
         ...(language && { language }),
-        ...(isSite && { isSite })
+        ...(isSite && { isSite }),
+        ...(onHome === false && { onHome })
       }
     })
   )
