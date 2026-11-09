@@ -136,9 +136,8 @@ and its fallback server loses the engine's scripts and styles.
 <details>
 <summary>What's in the .vsix, and what's built into it</summary>
 
-- Five files, by its [.vscodeignore](vscode/.vscodeignore):
-  `package.json`, the bundle `out/extension.js`, `media/spell.svg`, the Spell hat,
-  and `media/divider-light.svg` and `media/divider-dark.svg`, the toolbar's thin bar.
+- Three files, by its [.vscodeignore](vscode/.vscodeignore):
+  `package.json`, the bundle `out/extension.js`, and `media/spell.svg`, the Spell hat.
 - The bundle is about 340 KB, because it carries the kit's page server (`spell/server`):
   the fallback server below runs it.
   It carries spell-epic's repo list and settings readers too.
@@ -201,10 +200,10 @@ Two quirks you'll meet in the first minute:
 ### The buttons
 
 Every title bar carries the same row, left to right:
-Back, Forward, Reload, Open in Browser, a thin bar, Home Page, the tab's epic-page button, Inspect, Restart Page Server.
+Back, Forward, Reload, Open in Browser, a blank gap, Home Page, the tab's epic-page button, Inspect, Restart Page Server.
 VS Code's own maximize comes last.
 
-- The thin bar is a greyed-out button that does nothing.
+- The gap is a blank, greyed-out button, 22 pixels wide, that does nothing.
 - Details has its list button where the others have Home Page, and no epic-page button.
 
 | Button | What it does |

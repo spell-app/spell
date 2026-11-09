@@ -64,9 +64,9 @@
         "icon": "$(checklist)"
       },
       {
-        "command": "spellEpic.toolbarDivider",
-        "title": "Divider",
-        "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
+        "command": "spellEpic.toolbarGap",
+        "title": "Gap",
+        "icon": "$(blank)",
         "enablement": "false"
       },
       {
@@ -226,7 +226,7 @@
     "menus": {
       "view/title": [
         {
-          "command": "spellEpic.toolbarDivider",
+          "command": "spellEpic.toolbarGap",
           "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
           "group": "navigation@5"
         },
@@ -385,7 +385,7 @@
       ],
       "commandPalette": [
         {
-          "command": "spellEpic.toolbarDivider",
+          "command": "spellEpic.toolbarGap",
           "when": "false"
         },
         {
