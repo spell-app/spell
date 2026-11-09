@@ -14,4 +14,9 @@ describe("serverLines()", () => {
       "  editor           -  -                       the spell app (vite)  didn't answer"
     ])
   })
+
+  test("a URL with no port of its own shows its protocol's", () => {
+    const lines = serverLines("/kit", [{ name: "site", url: "https://test.spell.app", what: "x", state: "running" }])
+    expect(lines[1]).toBe("  site    443  https://test.spell.app  x  running")
+  })
 })

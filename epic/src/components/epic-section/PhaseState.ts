@@ -7,17 +7,18 @@ import { DOC_REVIEW, type PhaseStateName } from "./EpicSection.types"
  * ### `PhaseState`
  * Where a phase stands, as its Phases chip counts it and its status circle draws it (epic `epic-engine` I157;  Owen's
  * colours and order since I170):  ONE state, the first that holds.
- * 1. `attention` (red):  needs Owen, not done:
- *    - its build plan waits for his Accept (`plan="waiting"`, but the doc pass:  `DOC_REVIEW`)
- *    - or a choice set inside it is still open (`choices-open`, written by the epic tool:  epic `epic-engine` P50)
- * 2. `updated` (orange):  its plan changed since he looked, not done:  update blocks in `to-see` neither marked Seen
+ * 1. `attention` (red):  a choice set inside it, not done, is still open (`choices-open`, written by the epic tool:  epic
+ *    `epic-engine` P50)
+ * 2. `waiting` (orange):  its build plan waits for his Accept, not done (`plan="waiting"`, but the doc pass:
+ *    `DOC_REVIEW`):  a plan to read is a review, not a blocker (epic `epic-engine` P63;  red before)
+ * 3. `updated` (orange):  its plan changed since he looked, not done:  update blocks in `to-see` neither marked Seen
  *    nor quiet (`PlanDates.isQuiet()`, 3 days);  an older page's `changes` until the tool's next write
- * 3. `progress` (blue):  under way (`status="active"`), or Claude at work on it (the review inbox's `working`)
- * 4. `paused` (grey, a pause glyph):  still to do, held by Owen (`plan="held"`, epic `epic-engine` I221;  Owen,
+ * 4. `progress` (blue):  under way (`status="active"`), or Claude at work on it (the review inbox's `working`)
+ * 5. `paused` (grey, a pause glyph):  still to do, held by Owen (`plan="held"`, epic `epic-engine` I221;  Owen,
  *    2026-11-04:  "These are paused, red feels wrong"):  not built till he accepts its plan again
- * 5. `scheduled` (dotted blue):  still to do, nothing above
- * 6. `recent` (green):  done in the last 3 days (`done-at`, the same `isQuiet()` window)
- * 7. `old` (grey):  done longer ago, or done with no `done-at`;  DROPPED, at once (never built:  epic `epic-engine`
+ * 6. `scheduled` (dotted blue):  still to do, nothing above
+ * 7. `recent` (green):  done in the last 3 days (`done-at`, the same `isQuiet()` window)
+ * 8. `old` (grey):  done longer ago, or done with no `done-at`;  DROPPED, at once (never built:  epic `epic-engine`
  *    I228)
  * - "not done" above means not FINISHED:  a dropped phase asks nothing either (`PhaseStatuses.isFinished()`)
  * - Owen, 2026-10-29:  "The order, one chip per phase:  red, orange, blue (working), dotted blue, green, grey."
@@ -33,7 +34,8 @@ export class PhaseState {
     if (fields.status === "done") {
       return fields.doneAt && !PlanDates.isQuiet(fields.doneAt, now) ? "recent" : "old"
     }
-    if (PhaseState.isPlanWaiting(fields) || Number(fields.choicesOpen) > 0) return "attention"
+    if (Number(fields.choicesOpen) > 0) return "attention"
+    if (PhaseState.isPlanWaiting(fields)) return "waiting"
     if (PhaseState.newUpdates(fields, live, now).length) return "updated"
     if (fields.status === "active" || live.workedOn) return "progress"
     if (PhaseState.isHeld(fields)) return "paused"

@@ -1,37 +1,25 @@
-import { spawn, spawnSync } from "child_process"
-import {
-  chmodSync,
-  closeSync,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  openSync,
-  readFileSync,
-  readdirSync,
-  writeFileSync
-} from "fs"
+import { spawnSync } from "child_process"
+import { chmodSync, copyFileSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { request } from "http"
 import { homedir, networkInterfaces } from "os"
-import { basename, join } from "path"
+import { join } from "path"
 import { createInterface } from "readline"
-import { setTimeout as sleep } from "timers/promises"
 
 import { CLI } from "spell/cli"
 import { SRV } from "spell/server"
 import { MailCatcher } from "spell/server/signIn"
-import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
 import environment from "spell/app/spaces/server/node/environment"
-import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
-import { CLOUD_PORT, SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
-import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
-
-/** Where the site's addresses are unless `--address` says otherwise. */
-const DEFAULT_ADDRESSES = ["https://test.spell.app", "https://test.spell.space"]
-
-/** The certificate the old shell scripts made:  taken over, so nobody has to trust a new one. */
-const OLD_CERTIFICATE = "test.spell.app+1.pem"
-/** That certificate's key. */
-const OLD_KEY = "test.spell.app+1-key.pem"
+import {
+  DEFAULT_ADDRESSES,
+  LocalSiteError,
+  LocalSiteServer,
+  localSiteTools,
+  machinePersonEmail,
+  namesOf,
+  type LocalSiteRun,
+  type LocalSiteTools
+} from "spell/app/spaces/server/node/routes/LocalSiteServer"
+import { SpellCloud } from "spell/app/spaces/server/node/routes/SpellCloud"
 
 /** The name a Mac keeps Gmail's password under, readable by root alone. */
 const POSTFIX_PASSWORDS = "/etc/postfix/sasl_passwd"
@@ -39,8 +27,8 @@ const POSTFIX_PASSWORDS = "/etc/postfix/sasl_passwd"
 /** Marks the line `setup` adds to the hosts file. */
 const HOSTS_MARK = "# spell space local"
 
-/** A `--home`:  a path of the site, with nothing in it that could break out of the Caddy file. */
-const HOME_PATH = /^\/[^\s"{}]*$/
+/** What's said after anything that needs the site started again:  nobody starts it by hand now. */
+const RESTART_THE_SITE = "spell server stop, then spell server start, from the main checkout"
 
 /** Where a sign-in mail's link is. */
 const SIGN_IN_LINK = /https?:\/\/\S+\/sign-in\/confirm\S*/
@@ -52,28 +40,28 @@ const DEFAULT_PAGE = "/apps/@spell/examples/FamilyCookbook"
 const MAIL_LOOKS = 20
 const MAIL_LOOK_MS = 250
 
-/** How many times `start` checks that something it stopped has let go of its port, and how long between. */
-const PORT_LOOKS = 25
-const PORT_LOOK_MS = 200
-
 /**
  * `spell space local setup | start | mail | sign-in`:  see `LocalSite`.
  * - Node only;  loads spaces' node side alone (no `loadApp()`).
+ * - A `LocalSiteError` is a mistake to say plainly, as `CLI.CliError` is.
  */
 export async function localCommand(verb: string, targets: string[], options: LocalOptions): Promise<number> {
-  const site = new LocalSite()
-  if (verb === "setup") return site.setup(options)
-  if (verb === "start") return site.start(options)
-  if (verb === "mail") return site.mail(options)
-  return site.signIn(targets[0], targets[1])
+  try {
+    const site = new LocalSite()
+    if (verb === "setup") return await site.setup(options)
+    if (verb === "start") return await site.start(options)
+    if (verb === "mail") return await site.mail(options)
+    return await site.signIn(targets[0], targets[1])
+  } catch (error) {
+    if (error instanceof LocalSiteError) throw new CLI.CliError(error.message)
+    throw error
+  }
 }
 
 /** Options of `spell space local`. */
 export type LocalOptions = {
   /** Where the site is reached, `https://test.spell.app`:  each needs `setup` to have made its name. */
   address?: string[]
-  /** `start`:  the page the bare address goes to, remembered:  `/apps/@rs/OrgAdmin`. */
-  home?: string
   /** `setup`:  take the names away again. */
   undo?: boolean
   /** `mail`:  the Gmail address it sends as;  default this machine's person's email. */
@@ -86,11 +74,12 @@ export type LocalOptions = {
  * ### `LocalSite`
  * Spell's cloud at real-looking addresses, for one house network, on a Mac (epic `atmosphere` T57).
  * - Nothing public changes:  the names exist only in each Mac's hosts file, and the certificate only there.
+ * - The main checkout's page server runs the site by itself, once `setup` has been run:  spaces' `LocalSiteServer`.
  * - `setup [--undo]`:  this Mac's certificate, names and trust, and a folder for another Mac that has no `spell`
- * - `start [--address <url>]... [--home <path>]`:  the cloud and Caddy together, until `Ctrl-C`
- *   - Caddy turns `https://test.spell.app` into the cloud's local port, and sends a bare `/` to the home page,
- *     so the cloud's own routes don't change
+ * - `start [--address <url>]...`:  the cloud and Caddy together, here in this terminal, until `Ctrl-C`:  to watch it
+ *   - Caddy turns `https://test.spell.app` into the cloud's local port
  *   - real mail by itself, once `mail` has run
+ *   - while the page server runs the site, it says so and leaves it alone
  * - `mail [--gmail <address>] [--new-password]`:  the Mac's own postfix relays through Gmail
  * - `sign-in [email] [page]`:  asks for the link, finds it in the cloud's caught mail, opens it
  * - Its files are in `~/.spell/local-site`.
@@ -102,35 +91,25 @@ export type LocalOptions = {
 export class LocalSite {
   /** What runs outside commands. */
   private readonly tools: LocalTools
-  /** Its files:  `~/.spell/local-site`. */
-  private readonly folder: string
-  /** Where the shell scripts kept theirs, a certificate taken over from. */
-  private readonly oldFolder: string
+  /** The running site, and this Mac's certificate and settings:  the page server's, too. */
+  private readonly server: LocalSiteServer
   /** This Mac's hosts file. */
   private readonly hostsFile: string
-  /** The spaces folder, an org's own Admin page looked for in. */
-  private readonly spacesDir: string
   /** This machine's person's email. */
   private readonly machineEmail: () => Promise<string>
-  /** What this machine runs on. */
-  private readonly platform: string
 
   constructor({
     tools = macTools(),
     folder = join(homedir(), ".spell", "local-site"),
     oldFolder = join(homedir(), ".spell", "house-site"),
     hostsFile = "/etc/hosts",
-    spacesDir = environment.spellSpacesDir,
     machineEmail = machinePersonEmail,
     platform = process.platform
   }: LocalSiteProps = {}) {
     this.tools = tools
-    this.folder = folder
-    this.oldFolder = oldFolder
+    this.server = new LocalSiteServer({ tools, folder, oldFolder, machineEmail, platform })
     this.hostsFile = hostsFile
-    this.spacesDir = spacesDir
     this.machineEmail = machineEmail
-    this.platform = platform
   }
 
   ////////////////
@@ -141,26 +120,27 @@ export class LocalSite {
    * SIDE EFFECT:  this Mac reaches the site by its names:  certificate, trust, hosts file, and the other Mac's folder.
    * - Run again it asks for nothing it already has.
    * - `undo`:  the names go;  the certificate stays, for next time.
-   * - throws `CliError` off a Mac, or with mkcert or caddy missing
+   * - throws `LocalSiteError` off a Mac, or with mkcert or caddy missing
    */
   async setup({ address, undo }: LocalOptions): Promise<number> {
-    this.macOrDie()
+    const { server } = this
+    server.macOrDie()
     if (undo) {
-      const names = this.settings.names ?? namesOf(DEFAULT_ADDRESSES)
+      const names = server.settings.names ?? namesOf(DEFAULT_ADDRESSES)
       this.changeHosts(names, undefined)
       console.log(`Done:  ${names.join(" and ")} are gone from this Mac.`)
       return 0
     }
-    this.toolsOrDie(["mkcert", "caddy"])
-    this.takeOverOldCertificate()
-    const addresses = address?.length ? address : (this.settings.addresses ?? DEFAULT_ADDRESSES)
+    server.toolsOrDie(["mkcert", "caddy"])
+    server.takeOverOldCertificate()
+    const addresses = address?.length ? address : (server.settings.addresses ?? DEFAULT_ADDRESSES)
     const names = namesOf(addresses)
 
-    if (!this.certificateCovers(names)) {
-      mkdirSync(this.folder, { recursive: true })
-      this.tools.run("mkcert", ["-cert-file", this.certificate, "-key-file", this.key, ...names])
+    if (!server.certificateCovers(names)) {
+      mkdirSync(server.folder, { recursive: true })
+      this.tools.run("mkcert", ["-cert-file", server.certificate, "-key-file", server.key, ...names])
     }
-    this.remember({ addresses, names })
+    server.remember({ addresses, names })
 
     const rootFile = this.rootCertificate()
     const isTrusted = this.tools.succeeds("security", [
@@ -168,7 +148,7 @@ export class LocalSite {
       "-q",
       "-L",
       "-c",
-      this.certificate,
+      server.certificate,
       "-p",
       "ssl",
       "-s",
@@ -181,7 +161,8 @@ export class LocalSite {
     this.changeHosts(names, "127.0.0.1")
 
     const partner = this.writePartnerFolder(names, rootFile)
-    console.log(`Done:  this Mac reaches ${names.join(" and ")}.  Next:  spell space local start`)
+    console.log(`Done:  this Mac reaches ${names.join(" and ")}.`)
+    console.log(`The page server runs the site from now on.  To start it now:  ${RESTART_THE_SITE}`)
     if (partner) console.log(`For another Mac on this network, copy this folder over and run its script:  ${partner}`)
     return 0
   }
@@ -209,7 +190,7 @@ export class LocalSite {
       console.log(`This Mac isn't on a network, so there's no folder for another Mac yet.`)
       return undefined
     }
-    const partner = join(this.folder, "for-partner")
+    const partner = join(this.server.folder, "for-partner")
     mkdirSync(partner, { recursive: true })
     copyFileSync(rootFile, join(partner, "rootCA.pem"))
     const script = join(partner, "trust-this-mac.sh")
@@ -225,121 +206,52 @@ export class LocalSite {
     return join(caRoot, "rootCA.pem")
   }
 
-  /** SIDE EFFECT:  the shell scripts' certificate moves in, the first time;  their folder is left as it was. */
-  private takeOverOldCertificate(): void {
-    const [certificate, key] = [join(this.oldFolder, OLD_CERTIFICATE), join(this.oldFolder, OLD_KEY)]
-    if (existsSync(this.certificate) || !existsSync(certificate) || !existsSync(key)) return
-    mkdirSync(this.folder, { recursive: true })
-    copyFileSync(certificate, this.certificate)
-    copyFileSync(key, this.key)
-    chmodSync(this.key, 0o600)
-    this.remember({ names: namesOf(DEFAULT_ADDRESSES) })
-  }
-
-  /** Whether the certificate is there, and made for every one of `names`. */
-  private certificateCovers(names: string[]): boolean {
-    const covered = this.settings.names ?? []
-    return existsSync(this.certificate) && names.every((name) => covered.includes(name))
-  }
-
   ////////////////
   // ## start
   ////////////////
 
   /**
-   * SIDE EFFECT:  the cloud and Caddy run until `Ctrl-C`, or until either stops:  then both do.
-   * - Stops a cloud already on its port, and a Caddy already on the HTTPS one:  anything else there is left alone.
-   * - `home` is remembered.
-   * - throws `CliError` off a Mac, before `setup`, or with a name `setup` didn't make
+   * SIDE EFFECT:  the site runs here, until `Ctrl-C`, or until either of its programs stops:  then both do.
+   * - For someone who wants to watch it:  the main checkout's page server runs it by itself.
+   * - While the page server runs it, this says so and leaves it alone:  the page server would otherwise be left
+   *   thinking it had a site, and `Ctrl-C` would take the site away until its next restart.
+   * - throws `LocalSiteError` off a Mac, before `setup`, with a name `setup` didn't make,
+   *   or with a port held by something else
    */
-  async start({ address, home }: LocalOptions): Promise<number> {
-    this.macOrDie()
-    this.toolsOrDie(["caddy"])
-    this.takeOverOldCertificate()
-    const addresses = address?.length ? address : (this.settings.addresses ?? DEFAULT_ADDRESSES)
-    const names = namesOf(addresses)
-    if (!this.certificateCovers(names)) {
-      const flags = address?.length ? address.map((each) => ` --address ${each}`).join("") : ""
-      throw new CLI.CliError(`This Mac isn't set up for ${names.join(" and ")} yet:  spell space local setup${flags}`)
-    }
+  async start({ address }: LocalOptions): Promise<number> {
+    if (this.server.runner?.by === "the page server") return this.tellAboutPageServer()
+    const run = await this.server.launch({ address, by: "a terminal" })
+    this.tellAboutStart(run)
+    return this.untilStopped(run)
+  }
 
-    const homePage = this.homePage(home)
-    const caddyFile = join(this.folder, "Caddyfile")
-    writeFileSync(caddyFile, caddyFileFor({ names, certificate: this.certificate, key: this.key, homePage }))
-
-    await this.stopListeners(CLOUD_PORT)
-    await this.stopListeners(HTTPS_PORT, "caddy")
-
-    const mailEnvironment = await this.mailEnvironment()
-    this.tellAboutStart(addresses, homePage, mailEnvironment)
-
-    const logFile = join(this.folder, "caddy.log")
-    const children = [
-      this.tools.start(process.execPath, [SPELL_BIN(), ...cloudArguments(addresses)], { env: mailEnvironment }),
-      this.tools.start("caddy", ["run", "--config", caddyFile], { logFile })
-    ]
-    return this.untilStopped(children, logFile)
+  /** SIDE EFFECT:  says the page server has it, and where to watch. */
+  private tellAboutPageServer(): number {
+    console.log(`The page server is already running the site, so this leaves it alone.`)
+    console.log(`To watch it:  tail -f ${this.server.logFile}`)
+    console.log(`To run it here instead:  spell server stop, then spell space local start`)
+    return 0
   }
 
   /** What `start` waits for:  a `Ctrl-C` is a clean stop;  a program ending on its own is not. */
-  private async untilStopped(children: LocalChild[], logFile: string): Promise<number> {
-    let wasAsked = false
-    const stopBoth = () => {
-      wasAsked = true
-      for (const child of children) child.stop()
-    }
-    process.once("SIGINT", stopBoth)
-    process.once("SIGTERM", stopBoth)
+  private async untilStopped(run: LocalSiteRun): Promise<number> {
+    const stop = () => run.stop()
+    process.once("SIGINT", stop)
+    process.once("SIGTERM", stop)
     try {
-      await Promise.race(children.map((child) => child.exited))
-      const stoppedByItself = !wasAsked
-      for (const child of children) child.stop()
-      await Promise.all(children.map((child) => child.exited))
-      if (!stoppedByItself) return 0
-      console.error(`The site stopped by itself.  Caddy's log is ${logFile};  the cloud's is above.`)
+      if ((await run.ended) === "asked") return 0
+      console.error(`The site stopped by itself.  Caddy's log is ${run.logFile};  the cloud's is above.`)
       return 1
     } finally {
-      process.off("SIGINT", stopBoth)
-      process.off("SIGTERM", stopBoth)
+      process.off("SIGINT", stop)
+      process.off("SIGTERM", stop)
     }
   }
 
-  /**
-   * The page a bare address goes to:  `home`, remembered;  else the one remembered;
-   * else the Admin page of the first org in the spaces folder;  else none.
-   * - throws `CliError` for a `home` that's not a path of the site
-   */
-  private homePage(home: string | undefined): string | undefined {
-    if (home !== undefined) {
-      if (!HOME_PATH.test(home))
-        throw new CLI.CliError(`--home takes a page's path:  /apps/@rs/OrgAdmin, not "${home}"`)
-      this.remember({ home })
-      return home
-    }
-    return this.settings.home ?? this.firstOrgAdminPage()
-  }
-
-  /** The Admin page of the first org here but Spell's own, by name;  `undefined` for none. */
-  private firstOrgAdminPage(): string | undefined {
-    const spell = `@${HOME_ORG}`
-    const org = readdirSync(this.spacesDir)
-      .filter((name) => name.startsWith("@") && name !== spell)
-      .sort()
-      .find((name) => existsSync(join(this.spacesDir, name, "OrgAdmin", "__project.json5")))
-    return org && `/apps/${org}/OrgAdmin`
-  }
-
-  /** The cloud's real-mail settings once postfix relays;  empty, so its mail stays in the catcher, before. */
-  private async mailEnvironment(): Promise<Record<string, string>> {
-    if (!this.tools.output("postconf", ["-h", "relayhost"]).trim()) return {}
-    return { SPELL_MAIL: "sendmail", SPELL_MAIL_FROM: this.settings.mailFrom ?? (await this.machineEmail()) }
-  }
-
-  /** SIDE EFFECT:  says where the site will be, and how mail will go. */
-  private tellAboutStart(addresses: string[], homePage: string | undefined, mail: Record<string, string>): void {
+  /** SIDE EFFECT:  says where the site is, and how mail goes. */
+  private tellAboutStart({ addresses, mail }: LocalSiteRun): void {
     console.log(`Spell's local site, until Ctrl-C:`)
     for (const address of addresses) console.log(`  ${address}`)
-    if (homePage) console.log(`The bare address goes to ${homePage}  (--home changes it)`)
     const lanAddress = this.tools.lanAddress()
     if (lanAddress) console.log(`Another Mac on this network reaches it through this one:  ${lanAddress}`)
     console.log(
@@ -347,26 +259,6 @@ export class LocalSite {
         ? `Mail:  real, through Gmail, as ${mail.SPELL_MAIL_FROM}.`
         : `Mail:  caught on this Mac (spell space cloud mail).  For real mail:  spell space local mail, then start again.`
     )
-  }
-
-  /**
-   * SIDE EFFECT:  what's listening on `port` is stopped, and has let go of it;  when `only` is given, just that program.
-   * - Waits only so long:  whatever still holds the port then says so itself, as the next program can't start.
-   */
-  private async stopListeners(port: number, only?: string): Promise<void> {
-    const listening = () =>
-      this.tools
-        .output("lsof", [`-tiTCP:${port}`, "-sTCP:LISTEN"])
-        .split(/\s+/)
-        .filter(Boolean)
-    const ours = listening().filter(
-      (pid) => !only || basename(this.tools.output("ps", ["-o", "comm=", "-p", pid]).trim()) === only
-    )
-    if (!ours.length) return
-    for (const pid of ours) this.tools.stop(Number(pid))
-    for (let look = 0; look < PORT_LOOKS && listening().some((pid) => ours.includes(pid)); look++) {
-      await this.tools.sleep(PORT_LOOK_MS)
-    }
   }
 
   ////////////////
@@ -377,10 +269,10 @@ export class LocalSite {
    * SIDE EFFECT:  the Mac's postfix sends everything through Gmail, as `gmail`, and a test mail goes out.
    * - Asks for the app password only when there's none, or with `newPassword`.
    * - The password goes to `tee`'s standard input, into a file made root-only first.
-   * - throws `CliError` off a Mac, or for an empty password
+   * - throws `LocalSiteError` off a Mac, `CliError` for an empty password
    */
   async mail({ gmail, newPassword }: LocalOptions): Promise<number> {
-    this.macOrDie()
+    this.server.macOrDie()
     const from = gmail ?? (await this.machineEmail())
     this.sudo(`Setting up this Mac's postfix to send through Gmail`, ["-v"])
 
@@ -399,13 +291,13 @@ export class LocalSite {
 
     this.tools.run("sudo", ["postconf", "-e", ...POSTFIX_SETTINGS])
     this.tools.run("sudo", ["postfix", this.tools.succeeds("sudo", ["postfix", "status"]) ? "reload" : "start"])
-    this.remember({ mailFrom: from })
+    this.server.remember({ mailFrom: from })
 
     this.tools.run("/usr/sbin/sendmail", ["-t", "-i"], {
       input: `Subject: Spell test mail\nFrom: ${from}\nTo: ${from}\n\nIf you can read this, this Mac sends through Gmail.\n`
     })
     console.log(`Sent a test mail to ${from}.  Not there in a minute?  Run:  mailq`)
-    console.log(`Next:  spell space local start, again if it's running`)
+    console.log(`The site sends real mail the next time it starts.  To start it again now:  ${RESTART_THE_SITE}`)
     return 0
   }
 
@@ -422,10 +314,14 @@ export class LocalSite {
    */
   async signIn(_email: string | undefined, _page: string | undefined): Promise<number> {
     const record = this.tools.cloud()
-    if (!record) throw new CLI.CliError("Spell's cloud isn't running:  spell space local start")
+    if (!record) throw new CLI.CliError("Spell's cloud isn't running:  spell server start, or spell space local start")
     const email = _email ?? (await this.machineEmail())
     const site = record.address ?? `http://127.0.0.1:${record.port}`
-    const page = _page ? (_page.startsWith("/") ? _page : `/apps/${_page}`) : (this.settings.page ?? DEFAULT_PAGE)
+    const page = _page
+      ? _page.startsWith("/")
+        ? _page
+        : `/apps/${_page}`
+      : (this.server.settings.page ?? DEFAULT_PAGE)
 
     const before = await this.tools.newestMailTo(email)
     const { status, text } = await this.tools.post(`http://127.0.0.1:${record.port}/api/sign-in/ask`, {
@@ -435,7 +331,7 @@ export class LocalSite {
     if (status !== 200) throw new CLI.CliError(`The cloud said no (${status}):  ${errorIn(text)}`)
 
     const link = await this.newLinkFor(email, before)
-    this.remember({ page })
+    this.server.remember({ page })
     this.tools.open(link)
     console.log(`Press "Yes, sign me in" in your browser, then come back here.`)
     await this.tools.askLine("Press Return to open the page... ")
@@ -458,43 +354,10 @@ export class LocalSite {
   // ## Shared
   ////////////////
 
-  /** The site's certificate, in its folder. */
-  private get certificate(): string {
-    return join(this.folder, "site.pem")
-  }
-
-  /** The certificate's key, in its folder:  NEVER copied anywhere else. */
-  private get key(): string {
-    return join(this.folder, "site-key.pem")
-  }
-
-  /** What it remembers between commands. */
-  private get settings(): LocalSettings {
-    return SRV.DataFile.read<LocalSettings>(join(this.folder, "settings.json5")) ?? {}
-  }
-
-  /** SIDE EFFECT:  `change` is remembered, with what's remembered already. */
-  private remember(change: LocalSettings): void {
-    mkdirSync(this.folder, { recursive: true })
-    SRV.DataFile.write(join(this.folder, "settings.json5"), { ...this.settings, ...change })
-  }
-
   /** SIDE EFFECT:  says why, as `sudo` is about to ask for a password, then runs it. */
   private sudo(why: string, args: string[], input?: string): void {
     console.log(`${why}.  It may ask for this Mac's password.`)
     this.tools.run("sudo", args, input === undefined ? {} : { input })
-  }
-
-  /** - throws `CliError` anywhere but a Mac:  its steps are the Mac's */
-  private macOrDie(): void {
-    if (this.platform !== "darwin") throw new CLI.CliError("spell space local is for a Mac, and this isn't one.")
-  }
-
-  /** - throws `CliError` naming exactly what to install, if any of `names` is missing */
-  private toolsOrDie(names: string[]): void {
-    const missing = names.filter((name) => !this.tools.has(name))
-    if (missing.length)
-      throw new CLI.CliError(`This needs ${missing.join(" and ")}:  brew install ${missing.join(" ")}`)
   }
 }
 
@@ -508,44 +371,18 @@ export type LocalSiteProps = {
   oldFolder?: string
   /** This Mac's hosts file. */
   hostsFile?: string
-  /** The spaces folder. */
-  spacesDir?: string
   /** This machine's person's email. */
   machineEmail?: () => Promise<string>
   /** `process.platform`. */
   platform?: string
 }
 
-/** What `LocalSite` remembers, in its folder's `settings.json5`. */
-type LocalSettings = {
-  /** Where the site is reached. */
-  addresses?: string[]
-  /** The names its certificate was made for. */
-  names?: string[]
-  /** The page a bare address goes to. */
-  home?: string
-  /** The page `sign-in` opened last. */
-  page?: string
-  /** The Gmail address `mail` set up. */
-  mailFrom?: string
-}
-
 /** Everything `LocalSite` does outside itself:  a test's stand-in runs none of it. */
-export type LocalTools = {
-  /** Whether a program is installed. */
-  has(command: string): boolean
-  /** What a program prints;  empty when it fails.  - NEVER throws */
-  output(command: string, args: string[]): string
+export type LocalTools = LocalSiteTools & {
   /** Whether a program ends well, on this terminal.  - NEVER throws */
   succeeds(command: string, args: string[]): boolean
   /** Run a program on this terminal, `input` its standard input.  - throws `CliError` when it fails, naming no input */
   run(command: string, args: string[], options?: { input?: string }): void
-  /** Start a program that keeps running. */
-  start(command: string, args: string[], options: { env?: Record<string, string>; logFile?: string }): LocalChild
-  /** Ask a process to stop. */
-  stop(pid: number): void
-  /** Wait. */
-  sleep(ms: number): Promise<unknown>
   /** Open in the default browser. */
   open(url: string): void
   /** This Mac's address on its network. */
@@ -565,20 +402,9 @@ export type LocalTools = {
   ): Promise<{ status: number; text: string }>
 }
 
-/** A program `LocalTools.start()` started. */
-export type LocalChild = {
-  /** Resolves with its exit code as it ends. */
-  exited: Promise<number>
-  /** Ask it to stop. */
-  stop(): void
-}
-
 ////////////////
 // ## Pure helpers
 ////////////////
-
-/** Where HTTPS listens. */
-const HTTPS_PORT = 443
 
 /** What postfix needs to send everything through Gmail. */
 const POSTFIX_SETTINGS = [
@@ -603,22 +429,6 @@ const TRUST_COMMAND = (rootFile: string): string[] => [
   "/Library/Keychains/System.keychain",
   rootFile
 ]
-
-/** This checkout's `spell` program. */
-const SPELL_BIN = (): string => join(environment.repoDir, "..", "bin", "spell.mjs")
-
-/** The arguments that serve the cloud at `addresses`. */
-function cloudArguments(addresses: string[]): string[] {
-  return ["space", "cloud", "serve", ...addresses.flatMap((address) => ["--address", address])]
-}
-
-/** The host names of `addresses`.  - throws `CliError` for one that isn't `https` */
-function namesOf(addresses: string[]): string[] {
-  return addresses.map((address) => {
-    if (!address.startsWith("https://")) throw new CLI.CliError(`${address}:  the site needs https addresses`)
-    return new URL(address).hostname
-  })
-}
 
 /** The message in a refusal's body, or the body itself. */
 function errorIn(text: string): string {
@@ -645,33 +455,6 @@ export function hostsWith(hosts: string, names: string[], address: string | unde
   const kept = lines.filter((each) => !namesOnly(each)).join("\n")
   if (!line) return kept
   return `${kept.replace(/\n*$/, "")}\n${line}\n`
-}
-
-/** The Caddy file:  HTTPS for `names`, a bare address to `homePage`, the rest to the cloud. */
-export function caddyFileFor({
-  names,
-  certificate,
-  key,
-  homePage
-}: {
-  names: string[]
-  certificate: string
-  key: string
-  homePage: string | undefined
-}): string {
-  return [
-    `# Written by spell space local start:  changes here are written over.`,
-    `{`,
-    `\tadmin off`,
-    `}`,
-    ``,
-    `${names.join(", ")} {`,
-    `\ttls "${certificate}" "${key}"`,
-    ...(homePage ? [`\tredir / ${homePage}`] : []),
-    `\treverse_proxy 127.0.0.1:${CLOUD_PORT}`,
-    `}`,
-    ``
-  ].join("\n")
 }
 
 /** This Mac's address on its network, Wi-Fi or wired first:  `undefined` off every network. */
@@ -714,28 +497,11 @@ export function partnerScript(lanAddress: string, names: string[]): string {
 // ## The real tools
 ////////////////
 
-/** This machine's person's email. */
-async function machinePersonEmail(): Promise<string> {
-  const storage = new DiskStorage(environment.spellSpacesDir)
-  try {
-    const { person } = await new PeopleStore(storage).person(LOCAL_PERSON, HOME_ORG)
-    const email = person?.emails.items[0]
-    if (!email) throw new CLI.CliError(`${LOCAL_PERSON}@${HOME_ORG} has no email:  say which one to use`)
-    return email
-  } finally {
-    storage.close()
-  }
-}
-
 /** The `LocalTools` that really run things. */
 function macTools(): LocalTools {
   const catcher = new MailCatcher({ folder: join(environment.cloudDir, "mail") })
   return {
-    has: (command) => spawnSync("/usr/bin/which", [command], { stdio: "ignore" }).status === 0,
-    output: (command, args) => {
-      const { status, stdout } = spawnSync(command, args, { encoding: "utf8" })
-      return status === 0 ? stdout : ""
-    },
+    ...localSiteTools(),
     succeeds: (command, args) => spawnSync(command, args, { stdio: ["inherit", "ignore", "inherit"] }).status === 0,
     run: (command, args, { input } = {}) => {
       const stdio = input === undefined ? "inherit" : (["pipe", "ignore", "inherit"] as const)
@@ -747,22 +513,6 @@ function macTools(): LocalTools {
         throw new CLI.CliError(`${command} ${args.join(" ")} didn't work${error ? `:  ${error.message}` : ""}`)
       }
     },
-    start: (command, args, { env = {}, logFile }) => {
-      const log = logFile ? openSync(logFile, "a") : undefined
-      const child = spawn(command, args, {
-        env: { ...process.env, ...env },
-        stdio: log === undefined ? "inherit" : ["ignore", log, log]
-      })
-      const exited = new Promise<number>((resolve) => {
-        child.once("exit", (code) => {
-          if (log !== undefined) closeSync(log)
-          resolve(code ?? 0)
-        })
-      })
-      return { exited, stop: () => void child.kill() }
-    },
-    stop: (pid) => process.kill(pid),
-    sleep: (ms) => sleep(ms),
     open: (url) => void SRV.openBrowser(url),
     lanAddress: () => lanAddressOf(networkInterfaces()),
     askSecret: (question) => {

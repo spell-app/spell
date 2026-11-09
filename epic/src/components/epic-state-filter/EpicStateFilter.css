@@ -55,6 +55,11 @@
     --_chip: var(--epic-state-replied, var(--ui-orange));
     --_chip-on: var(--epic-state-replied-on, var(--ui-orange-on));
   }
+  /* what Owen asked for is finished, his turn to see it (`requested`, epic `epic-engine` P63) */
+  .chip[data-color="light-orange"] {
+    --_chip: var(--epic-state-requested, var(--ui-orange-background));
+    --_chip-on: var(--epic-state-requested-on, var(--ui-yellow-on));
+  }
   .chip[data-color="yellow"] {
     --_chip: var(--epic-state-open, var(--ui-yellow));
     --_chip-on: var(--epic-state-open-on, var(--ui-yellow-on));

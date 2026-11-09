@@ -148,6 +148,11 @@ export class PeopleStore {
     return thing instanceof People.Org ? thing : undefined
   }
 
+  /** Is there an org `id`, with a file of its own?  Reads nothing else, so a name made up logs nothing. */
+  async hasOrg(id: string): Promise<boolean> {
+    return (await this.storage.read(orgFile(id))) !== undefined
+  }
+
   /**
    * Give `person` the role `role` in `org`:  a membership added, or the one they have changed (epic `atmosphere` P4, T6).
    * - Writes the org's file, its comments kept;  returns the text written.

@@ -172,7 +172,7 @@ function useCreate(): [string | undefined, string | undefined][] {
   const created: [string | undefined, string | undefined][] = []
   vi.spyOn(SPACES.ProjectFiles.prototype, "create").mockImplementation(async (filePath, contents) => {
     created.push([filePath, contents])
-    return undefined
+    return { path: filePath } as SP.AnySpellFile
   })
   return created
 }

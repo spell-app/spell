@@ -21,6 +21,7 @@ import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
+import { LocalSiteServer } from "./LocalSiteServer"
 
 /** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
 const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
@@ -70,6 +71,9 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     - not up yet (vite takes seconds) or not running:  says so
  * - The editor UI (`EditorServer`):  vite's dev server, started once the page server listens and stopped with it.
  *   The page server and the editor are ONE thing to start.
+ * - The house-network test site (`LocalSiteServer`, epic `atmosphere` T58):  the cloud and Caddy, from the main
+ *   checkout's page server alone, on a Mac set up for it;  stopped with the page server.
+ *   - `SPELL_NO_LOCAL_SITE=1` or a test (`VITEST`):  not started, so a test's server leaves the real ports alone.
  * - Writes refuse a foreign `Origin` (another site posting into our projects).
  *   - The API has no token, since the editor calls it from vite's origin, through vite's proxy.
  * - As it starts:  compiles the built-in projects that are out of date (`@spell/examples`, `@spell/library`),
@@ -78,7 +82,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  */
 const appRoutes: RouteModule = {
   name: "app",
-  setup({ router, guard, web, root, info, live, addPageConfig, onListening, onStop }) {
+  setup({ router, guard, web, root, info, live, addPageConfig, addServerReport, onListening, onStop }) {
     // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
     // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
     // the ONE mail seam:  sign-in mail and inbox mail (P30) both go through it
@@ -117,7 +121,15 @@ const appRoutes: RouteModule = {
     // the daily round (a copy a night, real Spaces' lists), from the main checkout's server alone:
     // every worktree's reads the same spell.spaces
     const checkout = checkoutOf(environment.repoDir)
-    if (checkout && checkout.root === checkout.main) onStop(spacesDailyRound(folders).start())
+    const isMainCheckout = !!checkout && checkout.root === checkout.main
+    if (isMainCheckout) onStop(spacesDailyRound(folders).start())
+    if (!process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE) {
+      const site = new LocalSiteServer({ isMainCheckout })
+      // deliberately not waited for:  the page server's own start mustn't hang on Caddy's
+      onListening(() => void site.startWithPageServer().catch((error: unknown) => console.error(error)))
+      onStop(() => site.stop())
+      addServerReport?.(() => site.report())
+    }
     // the compile cache's cap:  the page server's `cacheLimit` setting (epic `language` Q41)
     const { cacheLimit } = pageServerSettings(root)
     if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)

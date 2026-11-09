@@ -1052,7 +1052,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     const p2 = host.querySelector("#p2")!
     p2.setAttribute("plan", "waiting")
     const state = () => p2.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!.dataset.state
-    await vi.waitFor(() => expect(state()).toBe("attention"))
+    await vi.waitFor(() => expect(state()).toBe("waiting"))
     routes.inbox.marks.p2 = { action: "approve", at: new Date().toISOString() }
     await client.refresh()
     await vi.waitFor(() => expect(state()).toBe("progress"))

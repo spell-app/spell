@@ -290,13 +290,9 @@ export default function appCommands(spell: Command): void {
   local
     .command("start")
     .description(
-      "run the cloud and HTTPS in front of it, until Ctrl-C;  real mail once `spell space local mail` has run"
+      "run the site in this terminal, to watch it, until Ctrl-C:  the page server runs it by itself once `setup` has run"
     )
     .option("--address <url>", "where it's reached;  each needs `setup` -- default what `setup` made", collect, [])
-    .option(
-      "--home <path>",
-      "the page the bare address goes to, remembered, e.g. /apps/@rs/OrgAdmin -- default the first org's Admin page"
-    )
     .action((_options, command: Command) => runLocal("start", [], command))
 
   local

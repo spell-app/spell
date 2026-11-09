@@ -181,7 +181,7 @@ export const APP_TEXTS = {
   siteNoSiteFile: "This project has no site to add a page to:  make one, e.g. `galaxy guide is a site:`",
   // the site editor, `/site/<project>` (epic `mockup` P4)
   siteView: "Site",
-  siteEditorTitle: "{project}:  its site",
+  siteEditorTitle: "{project}:  sitemap",
   siteNotASite: "{project} isn't a site:  a site's file says, e.g., `galaxy guide is a site:`",
   sitePages: "Pages",
   siteAddPage: "Add a page",
@@ -193,6 +193,7 @@ export const APP_TEXTS = {
   siteChangePart: "Change {name}",
   siteMovePart: "Move {name}",
   siteOpenPage: "Open in Edit",
+  siteOpenInNewTab: "Open this page in a new tab",
   siteBackToSite: "Back to the site",
   siteGroupBack: "All sites",
   siteGroupTitle: "Sites",
@@ -399,6 +400,12 @@ export const APP_TEXTS = {
   ////////////////
 
   pathInvalid: "Path '{path}' is invalid!",
+  askNewAppName: "Name for the new {type}?",
+  askRenameApp: "New name for the {type}?",
+  askNewFileName: "Name for the new file?",
+  askRenameFile: "New name for the file?",
+  confirmRemoveApp: "Really remove {type} '{name}'?",
+  confirmRemoveFile: "Really remove file '{name}'?",
   createdApp: "Created {type} {name}.",
   duplicatedApp: "{Type} duplicated.",
   renamedApp: "{Type} renamed.",

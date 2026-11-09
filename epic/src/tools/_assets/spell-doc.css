@@ -76,6 +76,8 @@
   /* an amber, further from red than Spell UI's orange:  the epic pages' own (`--epic-state-replied`, I207) */
   --spell-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
   --spell-state-replied-on: var(--ui-orange-on, #1b1c1d);
+  --spell-state-requested: light-dark(oklch(0.86 0.1 66), oklch(0.89 0.08 68));
+  --spell-state-requested-on: var(--ui-yellow-on, #1b1c1d);
   --spell-state-progress: var(--ui-blue, #2185d0);
   --spell-state-progress-on: var(--ui-blue-on, #fff);
   --spell-state-open: var(--ui-yellow, #fbbd08);
@@ -937,6 +939,8 @@ pre > .spell-code-copy {
   --epic-state-attention-on: var(--spell-state-attention-on);
   --epic-state-replied: var(--spell-state-replied);
   --epic-state-replied-on: var(--spell-state-replied-on);
+  --epic-state-requested: var(--spell-state-requested);
+  --epic-state-requested-on: var(--spell-state-requested-on);
   --epic-state-progress: var(--spell-state-progress);
   --epic-state-progress-on: var(--spell-state-progress-on);
   --epic-state-open: var(--spell-state-open);

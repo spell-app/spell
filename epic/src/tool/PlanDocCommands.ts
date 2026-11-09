@@ -312,6 +312,13 @@ export class PlanDocCommands {
         const lines = await this.edit(file, (plan) => rest.map((id) => calmItem(plan, id, !flags.loud)))
         return this.print(lines.join("\n"))
       }
+      case "requested": {
+        if (!rest.length) need(undefined, "an issue id")
+        const lines = await this.edit(file, (plan) =>
+          rest.map((id) => `${id.toUpperCase()} ${plan.setRequested(id) ?? "requested already"}`)
+        )
+        return this.print(lines.join("\n"))
+      }
       case "failed": {
         // a manual test that failed, filed as an issue by the session (epic `epic-engine` I174);  `off` takes it off
         const test = need(rest[0], "a manual test's id")
@@ -1471,10 +1478,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
-  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm]
+  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
-                                                   wouldn't surprise you, yellow (open) rather than red
+                                                   wouldn't surprise you, grey (a call) or yellow (an issue) rather than red
   add <name> test "title" --step html --should html [--example <png> | "text"] [--if-not html]
                                                    a test your test run steps you through:  what to do (a
                                                    Step may hold <a class="epic-test-action" href> links,
@@ -1486,7 +1493,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    run's order (deferred ones last)
   test --all [--list] [--json]                     every epic with open tests, in your saga order;  the
                                                    first opened in test mode (?test=1&all=1)
-  calm <name> <id>... [--loud]                     calls / issues not urgent (yellow, open), as the page's
+  requested <name> <id>...                         issues filed from the person's own words:  light orange once
+                                                   Claude closes them, until they review them (--requested on add)
+  calm <name> <id>... [--loud]                     calls / issues not urgent (a call grey, an issue yellow), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
   failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"
                                                    on its line, a Noted card linking it, the test left open;

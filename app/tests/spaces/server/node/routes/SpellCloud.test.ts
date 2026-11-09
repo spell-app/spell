@@ -2,7 +2,7 @@
  * `SpellCloud`:  Spell's server for people outside this machine (epic `atmosphere` P8).
  * - Real HTTP, a temporary spell.spaces and folder of its own, asked as a browser outside would, by its address's host.
  */
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
@@ -194,6 +194,94 @@ describe("Spell's cloud", () => {
         expect((await get(path, anasCookie)).status, path).toBe(404)
       }
       expect(existsSync(folderFor("@rs/OrgAdmin"))).toBe(true)
+    })
+
+    describe("the home pages", () => {
+      /** The answer at `path` as JSON, as someone with `cookie`. */
+      const json = async (path: string, cookie = "") => JSON.parse((await get(path, cookie)).text)
+      /** What the spaces home lists for someone with `cookie`:  each one's address. */
+      const addresses = async (cookie = "") =>
+        ((await json("/api/cloud/home", cookie)).spaces as { address: string }[]).map((each) => each.address)
+      const STRANGERS_PAGE = "Sign in to see this page"
+
+      beforeAll(() => {
+        const open = join(folderFor("@rs/noticeboard"), "__settings")
+        mkdirSync(open, { recursive: true })
+        writeFileSync(join(open, "space.json5"), JSON.stringify({ publicRead: true }))
+      })
+
+      test("/ is the one page for everyone;  what it lists is asked for", async () => {
+        const page = await get("/")
+        expect(page.status).toBe(200)
+        expect(page.text).toContain("<ui-root")
+      })
+
+      test("someone in the org:  the org, linking to its home, and their own space", async () => {
+        const answer = await json("/api/cloud/home", anasCookie)
+        expect(answer.person).toBe("ana@spell")
+        expect(answer.spaces).toContainEqual({ address: "@rs", name: expect.any(String), link: "/@rs" })
+        expect(answer.spaces).toContainEqual({ address: "ana@spell", name: "Your space" })
+      })
+
+      test("a stranger:  only what's public and their own, never the org", async () => {
+        const list = await addresses(bosCookie)
+        expect(list).toContain("bo@spell")
+        expect(list).toContain("@rs/noticeboard")
+        expect(list).not.toContain("@rs")
+        expect(list.some((each) => each.includes("__admin") || each.includes("__private"))).toBe(false)
+      })
+
+      test("nobody signed in:  only what's public", async () => {
+        const answer = await json("/api/cloud/home")
+        expect(answer.person).toBeUndefined()
+        expect(answer.spaces.map((each: { address: string }) => each.address)).toEqual(["@rs/noticeboard"])
+      })
+
+      test("an org's home, for someone who reads it:  its programs, and its other spaces they may read", async () => {
+        for (const path of ["/@rs", "/@rs/"]) {
+          const page = await get(path, anasCookie)
+          expect(page.status, path).toBe(200)
+          expect(page.text, path).toContain("<ui-root")
+        }
+        const { org } = await json("/api/cloud/home/orgs/rs", anasCookie)
+        expect(org.programs.map((each: { link: string }) => each.link).sort()).toEqual([
+          "/apps/@rs/Inbox",
+          "/apps/@rs/OrgAdmin",
+          "/apps/@rs/OrgChat",
+          "/apps/@rs/OrgFeed"
+        ])
+        const spaces = org.spaces.map((each: { address: string }) => each.address)
+        expect(spaces).toContain("@rs/noticeboard")
+        expect(spaces).toContain("@rs/__admin")
+        expect(spaces).not.toContain("@rs")
+      })
+
+      test("an org's home, for anyone else:  the sign-in page, the same whether the org is there or not", async () => {
+        const strangers = await get("/@rs", bosCookie)
+        const nobodys = await get("/@rs")
+        const noOrg = await get("/@nope", bosCookie)
+        const badName = await get("/@%2e%2e", bosCookie)
+        for (const page of [strangers, nobodys, noOrg, badName]) {
+          expect(page.status).toBe(200)
+          expect(page.text).toContain(STRANGERS_PAGE)
+          expect(page.text).toBe(strangers.text)
+        }
+      })
+
+      test("what an org's home lists, for anyone else:  not found, the same whether the org is there or not", async () => {
+        for (const [path, cookie] of [
+          ["/api/cloud/home/orgs/rs", bosCookie],
+          ["/api/cloud/home/orgs/rs", ""],
+          ["/api/cloud/home/orgs/nope", anasCookie],
+          ["/api/cloud/home/orgs/%2e%2e", anasCookie]
+        ] as const) {
+          expect((await get(path, cookie)).status, `${path} ${cookie ? "signed in" : ""}`).toBe(404)
+        }
+      })
+
+      test("a path that isn't an org's isn't taken for one", async () => {
+        expect((await get("/nothing-here")).status).toBe(404)
+      })
     })
 
     test("its copy names its org, not the built-in's", () => {

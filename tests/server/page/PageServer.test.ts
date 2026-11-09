@@ -13,6 +13,7 @@ import {
   findById,
   folderUrl,
   replaceById,
+  SERVER_REPORTS_API,
   urlPathOf,
   withWorktreeLoads
 } from "spell/server/page"
@@ -814,6 +815,15 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
     await server.stop()
     rmSync(root, { recursive: true, force: true })
     rmSync(`${root}-content`, { recursive: true, force: true })
+  })
+
+  it("answers with what route modules report, leaving out a report that fails or has no row", async () => {
+    const row = { name: "a site", url: "-", what: "something", state: "running" }
+    const { addServerReport } = server.routeContext()
+    addServerReport!(() => row)
+    addServerReport!(() => undefined)
+    addServerReport!(() => Promise.reject(new Error("no")))
+    expect(JSON.parse((await ask(port, "GET", SERVER_REPORTS_API)).text)).toEqual([row])
   })
 
   it("serves each page its CDN files' local copies, so pages load offline (withLocalCopies())", async () => {

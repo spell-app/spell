@@ -1123,7 +1123,7 @@ describe("PlanDoc states", () => {
     expect(changed("q1")).toBe(PlanTime.isoTime(new Date(2026, 8, 20)))
   })
 
-  test("colours items:  attention, progress (Claude on it), open (queued work too), recent, old", () => {
+  test("colours items:  attention, progress (Claude on it), scheduled (queued work), quiet (a limit), recent, old", () => {
     const plan = freshPlan()
     Markup.set(plan.page, { recentSince: PlanTime.isoTime(new Date(2026, 8, 30)) })
     plan.addItem("question", "open?")
@@ -1147,9 +1147,9 @@ describe("PlanDoc states", () => {
       "attention",
       "attention",
       "open",
-      "open",
+      "scheduled",
       "recent",
-      "open",
+      "quiet",
       "progress",
       "open",
       "progress",
@@ -1165,7 +1165,7 @@ describe("PlanDoc states", () => {
     expect(stateOf(plan, "i2", "q2")).toEqual(["recent", "recent"])
     // nor does a /bedtime run:  an open item it touched keeps its colour
     Markup.set<"epic-item">(el(plan, "t1"), { bedtime: true })
-    expect(stateOf(plan, "t1")).toEqual(["open"])
+    expect(stateOf(plan, "t1")).toEqual(["quiet"])
     expect(problems(plan)).toEqual([])
   })
 
@@ -1186,23 +1186,54 @@ describe("PlanDoc states", () => {
     expect(stateOf(plan, "i1", "t1", "t2", "j1", "t3")).toEqual(["old", "recent", "recent", "open", "open"])
     // a later revisit unsettles it again
     plan.reviewedAs(el(plan, "t1"), "revisit")
-    expect(stateOf(plan, "t1")).toEqual(["open"])
+    expect(stateOf(plan, "t1")).toEqual(["quiet"])
     expect(problems(plan)).toEqual([])
   })
 
-  test("calm (Owen, 2026-10-07):  an open call or issue is blue, not red;  the id chip's urgency, applied", () => {
+  describe("One Color Each (epic `epic-engine` P63)", () => {
+    test("an issue filed from his own words, closed by Claude:  light orange until he reviews it;  Claude's own stays grey", () => {
+      const plan = freshPlan()
+      plan.addItem("issue", "he asked", { calm: true, requested: true })
+      plan.addItem("issue", "tripped over", { calm: true })
+      plan.addItem("issue", "marked after filing", { calm: true })
+      expect(plan.setRequested("i3")).toBe("requested")
+      expect(plan.setRequested("i3")).toBeUndefined()
+      for (const id of ["i1", "i2", "i3"]) plan.setItem(id, "done")
+      expect(stateOf(plan, "i1", "i2", "i3")).toEqual(["requested", "handled", "requested"])
+      plan.review("i1")
+      expect(stateOf(plan, "i1")).toEqual(["recent"])
+      expect(() => plan.addItem("judgement", "no", { requested: true })).toThrow(PlanDocError)
+      plan.addItem("judgement", "a call")
+      expect(() => plan.setRequested("j1")).toThrow(PlanDocError)
+      expect(problems(plan)).toEqual([])
+    })
+
+    test("a manual test:  orange until its phase is done, then yellow;  no phase, yellow", () => {
+      const plan = freshPlan()
+      plan.addItem("test", "no phase")
+      plan.addPhase("Build")
+      plan.setPhase(1, "active")
+      plan.addItem("test", "while it's built")
+      expect(stateOf(plan, "m1", "m2")).toEqual(["open", "replied"])
+      plan.setPhase(1, "done")
+      plan.updateStates()
+      expect(stateOf(plan, "m1", "m2")).toEqual(["open", "open"])
+    })
+  })
+
+  test("calm (Owen, 2026-10-07):  a call is grey, an issue yellow, not red;  the id chip's urgency, applied", () => {
     const plan = freshPlan()
     plan.addItem("judgement", "follows WWOD", { calm: true })
     plan.addItem("judgement", "a real choice")
     plan.addItem("issue", "minor", { calm: true })
     expect(el(plan, "j1").hasAttribute("calm")).toBe(true)
-    expect(stateOf(plan, "j1", "j2", "i1")).toEqual(["open", "attention", "open"])
+    expect(stateOf(plan, "j1", "j2", "i1")).toEqual(["quiet", "attention", "open"])
     expect(() => plan.addItem("question", "calm?", { calm: true })).toThrow(PlanDocError)
     // Owen's id chip, applied:  urgent again, and back;  the same twice changes nothing
     expect(plan.setCalm("j1", false)).toBe("urgent")
     expect(plan.setCalm("j2", true)).toBe("not urgent")
     expect(plan.setCalm("j2", true)).toBeUndefined()
-    expect(stateOf(plan, "j1", "j2")).toEqual(["attention", "open"])
+    expect(stateOf(plan, "j1", "j2")).toEqual(["attention", "quiet"])
     plan.addItem("question", "which?")
     expect(() => plan.setCalm("q1", true)).toThrow(PlanDocError)
     expect(problems(plan)).toEqual([])
@@ -1233,7 +1264,7 @@ describe("PlanDoc states", () => {
     plan.keepNote("j4", { note: "neither", action: "revisit", when: "soon", at: "2026-10-01T09:30:00" })
     plan.setItem("j5", "done")
     plan.queue("j6", "do A")
-    expect(stateOf(plan, "j3", "j4", "j5", "j6")).toEqual(["open", "open", "recent", "open"])
+    expect(stateOf(plan, "j3", "j4", "j5", "j6")).toEqual(["open", "open", "recent", "scheduled"])
     // Claude answers Owen again, with cards:  orange again
     plan.setDetails("j4", reply("2026-10-01 09:40"), { append: true })
     expect(stateOf(plan, "j4")).toEqual(["replied"])
@@ -1474,8 +1505,8 @@ describe("PlanDoc review", () => {
     expect(spec.where.epic).toBe("Demo Plan (<code>demo</code>)")
     const issues = plan.reviewSections({ filter: "open" }).find((s) => s.kind === "issue")!
     const picker = ItemPicker.spec(plan, "/r/x.plan.html", issues, plan.reviewStatus(), "/r")
-    // queued work is open (yellow), not in progress (Q20)
-    expect(picker.questions[0]!.options.map((option) => option.state.color)).toEqual(["yellow"])
+    // queued work is blue, agreed and not started (epic `epic-engine` P63)
+    expect(picker.questions[0]!.options.map((option) => option.state.color)).toEqual(["blue"])
   })
 })
 
@@ -1905,7 +1936,7 @@ describe("PlanDoc review inbox", () => {
       expect(plan.itemState(el(plan, "t2"))).toBe("open")
       expect(plan.setCalm("t2", false)).toBe("urgent")
       plan.queue("t2", "P1")
-      expect(plan.itemState(el(plan, "t2"))).toBe("open")
+      expect(plan.itemState(el(plan, "t2"))).toBe("scheduled")
       plan.setItem("t2", "done")
       expect(plan.itemState(el(plan, "t2"))).toBe("recent")
       plan.addItem("question", "second")
@@ -1918,14 +1949,14 @@ describe("PlanDoc review inbox", () => {
   describe("Do this on an issue or a judgement call (I232)", () => {
     const stateOf = (plan: PlanDoc, id: string) => plan.itemState(el(plan, id))
 
-    test("no todo is made:  it stays where it is, red even after review, Owen's note on it", () => {
+    test("no todo is made:  it stays where it is, blue outlined even after review, Owen's note on it", () => {
       const plan = freshPlan(NOW, PERSON)
       plan.addItem("issue", "needs a file", { details: "<p>Broken.</p>" })
       plan.applyMark({ id: "i1", action: "todo", note: "please do" })
       expect(plan.document.querySelectorAll('epic-item[id^="t"]').length).toBe(0)
       expect(el(plan, "i1").getAttribute("status")).toBe("open")
       expect(el(plan, "i1").hasAttribute("reviewed")).toBe(true)
-      expect(stateOf(plan, "i1")).toBe("attention")
+      expect(stateOf(plan, "i1")).toBe("handed")
       expect(el(plan, "i1").querySelector('epic-reply[re="do this"]')!.textContent).toContain("please do")
     })
 
@@ -1956,7 +1987,7 @@ describe("PlanDoc review inbox", () => {
       expect(stateOf(plan, "i1")).toBe("replied")
       expect(el(plan, "i1").hasAttribute("reviewed")).toBe(false)
       plan.applyMark({ id: "i1", action: "todo" })
-      expect(stateOf(plan, "i1")).toBe("attention")
+      expect(stateOf(plan, "i1")).toBe("handed")
       plan.fixedForReview("i1")
       const accepted = plan.applyMark({ id: "i1", action: "approve" }) as { did: string }
       expect(accepted.did).toBe("approved:  closed (fix accepted)")
@@ -1985,7 +2016,7 @@ describe("PlanDoc review inbox", () => {
       plan.setItem("j1", "done")
       plan.applyMark({ id: "j1", action: "todo" })
       expect(el(plan, "j1").getAttribute("status")).toBe("open")
-      expect(stateOf(plan, "j1")).toBe("attention")
+      expect(stateOf(plan, "j1")).toBe("handed")
       plan.applyMark({ id: "i1", action: "todo" })
       plan.applyMark({ id: "i1", action: "approve" })
       expect(el(plan, "i1").hasAttribute("urgent")).toBe(false)
