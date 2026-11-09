@@ -31,8 +31,12 @@ export class Match<
   Groups extends P.AnyGroups = MatchGroups,
   MatchData extends P.AnyMatchData = P.AnyMatchData
 > extends Assertable {
-  /** Set `false` to skip constructor `assertType`/`assertArrayType` checks, e.g. for production perf. */
-  static DEBUG_MATCH_INITIALIZATION = true
+  /**
+   * Check `scope`, `rule` and `tokens` have the right types when a match is made?
+   * - Off, except in tests:  every shipped parse paid about 4% for it.
+   * - The parser folder's test setup turns it on (`tests/parserTestSetup.ts`).
+   */
+  static DEBUG_MATCH_INITIALIZATION = false
 
   /** Main rule that matched. */
   declare rule: P.Rule
