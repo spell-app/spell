@@ -78,6 +78,7 @@
   &::part(card) {
     grid-row: var(--SiteCard-row);
     grid-column: var(--SiteCard-column);
+    position: relative;
     min-height: 76px;
     z-index: 1;
   }
@@ -121,5 +122,27 @@
   }
   &[data-being-moved]::part(card) {
     opacity: 0.45;
+  }
+
+  /* the page's link to itself in a new tab:  8px inside the card's corner, readable over a picture */
+  .new-tab {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--ui-text-color);
+    background: var(--spell-pane-background);
+    box-shadow: 0 0 0 1px var(--spell-pane-border-color);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--ui-primary-color, var(--ui-focus-color));
+    }
   }
 }

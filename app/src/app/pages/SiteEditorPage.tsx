@@ -10,6 +10,7 @@ import { SpellPage } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
+import { RunSite } from "./RunSite"
 import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
@@ -151,6 +152,8 @@ export function SiteEditorPage() {
                   titleOf={SiteEditorPage.cardTitleOf}
                   lineOf={SiteEditorPage.lineOf}
                   pictureOf={SiteEditorPage.pictureOf}
+                  newTabUrlOf={SiteEditorPage.newTabUrlOf}
+                  newTabLabel={appTexts.text("siteOpenInNewTab")}
                   onPick={setPicked}
                   onOpen={SiteEditorPage.openInEdit}
                 />
@@ -224,6 +227,12 @@ SiteEditorPage.cardTitleOf = (part: SitePart): string => {
 /** A part's picture, as the address of its file;  none when its line names none. */
 SiteEditorPage.pictureOf = (part: SitePart): string | undefined =>
   part.picture && SP.SpellUrls.fileUrl(`${editor.project?.path}/${part.picture}`)
+
+/** The address of a page in the running site, for a new tab;  none for a part with no address. */
+SiteEditorPage.newTabUrlOf = (part: SitePart): string | undefined =>
+  part.kind === "page" && part.address && editor.project
+    ? RunSite.runUrlFor(editor.project.path, part.address)
+    : undefined
 
 /** An address no page has yet, for a new page:  `/new-page`, then `/new-page-2` ... */
 SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {

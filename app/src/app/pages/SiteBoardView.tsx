@@ -1,4 +1,4 @@
-import { For, createMemo } from "solid-js"
+import { For, Show, createMemo } from "solid-js"
 
 import { Dragging } from "spell/util/Dragging"
 import type { UICardJSXAttributes } from "spell/ui/jsx"
@@ -14,6 +14,7 @@ import "./SiteBoardView.css"
  * - A card takes its section's colour (`<ui-card background>`);  a page's is rounded, a dialog's square,
  *   a section's bold and bigger;  a page's screenshot on top, when its line names one.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
+ * - A page's card has a link in its corner, to that page of the running site in a new tab:  `newTabUrlOf`.
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
  *   - a section's card:  the whole section, before or after another, a line showing where
  *   - any other card:  to a spot of its own section or another, the spot lit up
@@ -68,7 +69,24 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
       onClick={() => props.onPick(part().name)}
       onDblClick={() => props.onOpen(part().name)}
       onPointerDown={(event: PointerEvent) => startMove(event, props.card, props.section)}
-    />
+    >
+      <Show when={props.newTabUrlOf(part())}>
+        {(url) => (
+          <a
+            class="new-tab"
+            href={url()}
+            target="_blank"
+            title={props.newTabLabel}
+            aria-label={props.newTabLabel}
+            onClick={(event: MouseEvent) => event.stopPropagation()}
+            onDblClick={(event: MouseEvent) => event.stopPropagation()}
+            onPointerDown={(event: PointerEvent) => event.stopPropagation()}
+          >
+            <ui-icon name="up right from square" />
+          </a>
+        )}
+      </Show>
+    </ui-card>
   )
 }
 
@@ -84,6 +102,10 @@ export type SiteBoardViewProps = {
   lineOf: (part: SitePart) => string
   /** The address of its picture, if it has one. */
   pictureOf: (part: SitePart) => string | undefined
+  /** The address that opens a part in a new tab:  none for what has no page of its own. */
+  newTabUrlOf: (part: SitePart) => string | undefined
+  /** What that link says, to a tooltip and a screen reader. */
+  newTabLabel: string
   /** A click on part `name`'s card. */
   onPick: (name: string) => void
   /** A double click on it. */

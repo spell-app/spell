@@ -210,7 +210,7 @@ const APP_TEXTS_ES: AppTextPack = {
     "Este proyecto no tiene un sitio al que agregar una página:  crea uno, p. ej. `guía galáctica es un sitio:`",
   // el editor del sitio, `/site/<proyecto>` (epic `mockup` P4)
   siteView: "Sitio",
-  siteEditorTitle: "{project}:  su sitio",
+  siteEditorTitle: "{project}:  mapa del sitio",
   siteNotASite: "{project} no es un sitio:  el archivo de un sitio dice, p. ej., `guía galáctica es un sitio:`",
   sitePages: "Páginas",
   siteAddPage: "Agregar una página",
@@ -222,6 +222,7 @@ const APP_TEXTS_ES: AppTextPack = {
   siteChangePart: "Cambiar {name}",
   siteMovePart: "Mover {name}",
   siteOpenPage: "Abrir en Editar",
+  siteOpenInNewTab: "Abrir esta página en una pestaña nueva",
   siteGroupBack: "Todos los sitios",
   siteGroupTitle: "Sitios",
   siteGroupLine: "Cada sitio de este grupo:  abre uno para cambiar sus páginas.",
