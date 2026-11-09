@@ -15340,8 +15340,8 @@
         },
         {
           "name": "icon",
-          "kind": "keyOnly",
-          "description": "Icon header:  a large slotted icon centred above the text."
+          "kind": "icon",
+          "description": "Its icon, by name, drawn before the text.  Bare, it's an icon header:  a large slotted icon centred above the text."
         },
         {
           "name": "dividing",
@@ -15569,6 +15569,10 @@
         {
           "name": "header",
           "description": "The header box (`<div>`, `<h1>` ... `<h6>`, or `<a>`)."
+        },
+        {
+          "name": "icon",
+          "description": "The box of the `icon` attribute's glyph."
         }
       ],
       "states": [

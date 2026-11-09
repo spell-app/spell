@@ -19,8 +19,8 @@ import {
 /**
  * `site_page` rule:  one of a site's pages, and its address (epic `mockup` P1).
  * - e.g. `- it has a film page at "/films/:film", named "Film"`, in a site's body
- * - e.g. `- it has a film page at "/films/:film", named "Film", old, pictured in "snapshots/film.png"`:
- *   how far along it is, and a picture of it, a file of the project (epic `mockup` P13, T14)
+ * - e.g. `- it has a film page at "/films/:film", named "Film", old, thumbnail "snapshots/film.png"`:
+ *   how far along it is, and a thumbnail of it, a file of the project (epic `mockup` P13, T14)
  * - e.g. `- it has a film page at "/films/:film", in row 2 column 3, colored blue`:
  *   where its card sits in its section of the site editor's board, and its colour (epic `mockup` T31);
  *   any part's line may end so
@@ -43,7 +43,7 @@ import {
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.
  */
 export class SitePage extends SpellStatement<
-  "type|part|address|title?|tab?|tags?|state?|picture?|row?|column?|color?|with_nested_statements?|body?",
+  "type|part|address|title?|tab?|tags?|state?|thumbnail?|row?|column?|color?|with_nested_statements?|body?",
   { entry?: SitePageEntry }
 > {
   @proto static priority = Priority.declaration + 1
@@ -83,7 +83,7 @@ export class SitePage extends SpellStatement<
     const tab = match.groups.tab ? textIn(match.groups.tab) : undefined
     const tags = match.groups.tags ? tagsIn(textIn(match.groups.tags)) : undefined
     const state = Wording.meaningOf(match.groups.state)
-    const picture = match.groups.picture ? textIn(match.groups.picture) : undefined
+    const thumbnail = match.groups.thumbnail ? textIn(match.groups.thumbnail) : undefined
     const card = cardDetailsOf(match.groups)
     if (!card) return SpellStatement.refuse(match, cardPlaceMessage(language, match.groups))
     match.data.entry = {
@@ -94,7 +94,7 @@ export class SitePage extends SpellStatement<
       ...(tab && { tab }),
       ...(tags?.length && { tags }),
       ...(state && { state }),
-      ...(picture && { picture }),
+      ...(thumbnail && { thumbnail }),
       ...card,
       ...(params.length && { params })
     }

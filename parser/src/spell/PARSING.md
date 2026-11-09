@@ -1370,6 +1370,27 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     An attribute word the tag takes wins:  `<view locked>` is unnamed and locked.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
     the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
+  - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
+    `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
+    - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
+      `{its name}` in it is a hole, other contents follow it, and it's a child even on a tag closed with `/>`.
+    - Each language's spellings are listed:  `<encabezado "...">`, `<es-encabezado "...">`.
+      A word two languages spell alike but read differently is the language's own (`Language.quotedNameTags`).
+
+    | Tag | The quoted word is |
+    | --- | --- |
+    | `header`, `button`, `item`, `label`, `title`, `link`, `breadcrumb`, `checkbox`, `radio` | its contents |
+    | `tab`, `panel` | its `label` |
+    | `example` | its `name` |
+    | `tree-node` | its `label` |
+    | `cell` | its column (`data-column`) |
+
+    | Left out | Why |
+    | --- | --- |
+    | `text`, `description` | often long, or text mixed with values |
+    | `td`, `th` | the web's own table tags |
+    | `segment`, `column`, `content`, `stack` | they hold layouts;  their short text is mostly in demos |
+    | `author`, `date` | common only in Spell UI's feed and comment demos |
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
     line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
     - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`

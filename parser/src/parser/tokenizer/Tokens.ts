@@ -233,6 +233,10 @@ export class JSXElementToken extends JSXToken<never, JSXElementTokenProps> {
   get isUnaryTag() {
     return this.record.isUnaryTag
   }
+  /** What its quoted word became, the first of its `children`:  `Hardware` in `<header "Hardware">`. */
+  get quotedContents() {
+    return this.record.quotedContents
+  }
   /** What it couldn't read among its attributes, `Ždge="1,048"` -- `undefined` when it read them all. */
   get unreadable() {
     return this.record.unreadable
@@ -255,6 +259,8 @@ export type JSXElementTokenProps = Prettify<P.TokenProps<never>> & {
   tagName: string
   /** Does this represent a unary tag? */
   isUnaryTag?: boolean
+  /** What its quoted word became -- see `JSXElementToken.quotedContents`. */
+  quotedContents?: P.Token[]
   /** What it couldn't read among its attributes -- see `JSXElementToken.unreadable`. */
   unreadable?: string
   /** A chain branch's kind -- see `JSXElementToken.chain`. */

@@ -19791,7 +19791,7 @@
           "name": "icon",
           "description": {
             "kind": "markdown",
-            "value": "Icon header:  a large slotted icon centred above the text.\n\nTakes:  flag (present / absent)"
+            "value": "Its icon, by name, drawn before the text.  Bare, it's an icon header:  a large slotted icon centred above the text.\n\nTakes:  icon name"
           }
         },
         {

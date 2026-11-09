@@ -29,9 +29,10 @@ export class Tokenizer {
   standAloneTags: string[] = []
 
   /**
-   * JSX tags that take a bare quoted string as an attribute, by the attribute it is:
+   * JSX tags that take a bare quoted string, by what it becomes:
    * `<example "one counter">` is `name="one counter"` with `{ example: "name" }`.
    * - e.g. spell's `{ example: "name", "tree-node": "label" }`.
+   * - `P.QUOTED_CONTENTS`:  the word is the tag's contents, `<header "Hardware"/>` ~== `<header>Hardware</header>`.
    * - None by default:  anywhere else a bare string in a tag is no attribute.
    */
   quotedNameTags: Record<string, string> = {}
@@ -527,13 +528,18 @@ export class Tokenizer {
         jsxElement.record.children = children as P.JSXElementToken[]
         jsxElement.record.raw = text.slice(start, children[children.length - 1]!.next)
       }
-    } else if (!jsxElement.record.isUnaryTag) {
-      const children = this.rawTextTags.includes(jsxElement.tagName)
+    } else if (jsxElement.record.isUnaryTag) {
+      if (jsxElement.record.quotedContents?.length) {
+        jsxElement.record.children = jsxElement.record.quotedContents as P.JSXElementToken[]
+      }
+    } else {
+      const matched = this.rawTextTags.includes(jsxElement.tagName)
         ? this.matchRawJSXChildren(jsxElement.tagName, text, jsxElement.next, end)
         : this.matchJSXChildren(jsxElement.tagName, text, jsxElement.next, end)
-      if (children && children.length) {
+      const children = [...(jsxElement.record.quotedContents ?? []), ...(matched ?? [])]
+      if (children.length) {
         jsxElement.record.children = children as P.JSXElementToken[]
-        jsxElement.record.raw = text.slice(start, children[children.length - 1].next)
+        jsxElement.record.raw = text.slice(start, children[children.length - 1]!.next)
       }
     }
 
@@ -589,6 +595,11 @@ export class Tokenizer {
     if (endBit !== ">" && endBit !== "/>") {
       const named = this.matchJSXQuotedName(tagName, text, nextStart, end)
       if (named) nextStart = named.next
+      const quotedContents = named ? undefined : this.matchJSXQuotedContents(tagName, text, nextStart, end)
+      if (quotedContents) {
+        nextStart = quotedContents.next
+        jsxElement.record.quotedContents = quotedContents.contents
+      }
       const attributes: P.JSXAttributeToken[] = named ? [named] : []
       // read what attributes it can;  what it can't is skipped, so the tag still ends at its own `>` (epic `notebook` I5)
       let endBitMatch: RegExpMatchArray | null | undefined
@@ -645,11 +656,44 @@ export class Tokenizer {
    */
   matchJSXQuotedName(tagName: string, text: string, start: number, end: number): P.JSXAttributeToken | undefined {
     const name = this.quotedNameTags[tagName]
-    if (!name) return undefined
+    if (!name || name === P.QUOTED_CONTENTS) return undefined
     const value = this.matchText(text, start, end)
     if (!value) return undefined
     const next = this.eatWhitespace(text, value.next, end)
     return new P.JSXAttributeToken({ name, start, value, raw: text.slice(start, next) })
+  }
+
+  /**
+   * A tag's quoted word at `start`, `"Hardware"` in `<header "Hardware">`, as the tokens its contents would be
+   * between its tags -- only for a tag `quotedNameTags` says takes one (`P.QUOTED_CONTENTS`).
+   * - `{its name}` in it is a hole, as it is between the tags;  anything else in the quotes is text, a `<` too.
+   * - `next`:  where the tag's attributes go on.
+   */
+  private matchJSXQuotedContents(
+    tagName: string,
+    text: string,
+    start: number,
+    end: number
+  ): { contents: P.Token[]; next: number } | undefined {
+    if (this.quotedNameTags[tagName] !== P.QUOTED_CONTENTS) return undefined
+    const value = this.matchText(text, start, end)
+    if (!value) return undefined
+    const wordStart = text.indexOf('"', start) + 1
+    const wordEnd = wordStart + value.innerText.length
+    const contents: P.Token[] = []
+    for (let at = wordStart; at < wordEnd;) {
+      const brace = text.indexOf("{", at)
+      const textEnd = brace < 0 || brace >= wordEnd ? wordEnd : brace
+      const hole = textEnd < wordEnd ? this.matchJSXExpression(text, textEnd, wordEnd) : undefined
+      const stop = hole || textEnd === wordEnd ? textEnd : wordEnd
+      if (stop > at) {
+        const raw = text.slice(at, stop)
+        contents.push(new P.JSXTextToken({ value: raw.replace(/\\(["\\])/g, "$1"), raw, start: at }))
+      }
+      if (hole) contents.push(hole)
+      at = hole ? hole.next : stop
+    }
+    return { contents, next: this.eatWhitespace(text, value.next, end) }
   }
 
   /**

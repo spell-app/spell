@@ -426,6 +426,11 @@ export type LanguageWords = {
    */
   exampleTag: string
   /**
+   * What a quoted word after a tag becomes, for a tag two languages spell alike (`P.Tokenizer.quotedNameTags`):
+   * Spanish's `<panel "Ajustes">` is `etiqueta="Ajustes"`, English's `<panel "Settings">` `label="Settings"`.
+   */
+  quotedNameTags?: Record<string, string>
+  /**
    * An app's widget defaults, a block of sample tags (epic `language` P29):  `<ui-defaults>`, in every language --
    * see `ui_defaults`.
    * - Spell UI's own word, as `<ui-button>` is:  a Spanish page writes it the same way.
@@ -678,6 +683,10 @@ export type SpellxTwinWords = {
    */
   pageLocked: string
   /**
+   * A page's or view's own `thumbnail=`:  a line in its body, `its thumbnail is {quoted thumbnail}` (epic `mockup` P16).
+   */
+  templateThumbnail: string
+  /**
    * A section of a page that draws its body, as its drawing writes it (epic `notebook` P3, J1):
    * Spell UI's `<section>` in the language's words, sticky and foldable as the docs pages' sections are.
    * - The twin wraps each `##` heading and what follows it in one, its `label` the heading.
@@ -699,8 +708,8 @@ export type SpellxTwinWords = {
   sitePageTags: string
   /** What a page's `state=` adds to its line. */
   sitePageState: string
-  /** What a page's `picture=` adds to its line. */
-  sitePagePicture: string
+  /** What a page's `thumbnail=` adds to its line. */
+  sitePageThumbnail: string
   /** What a part's `row=` and `column=` add to its line:  its place in its section of the site editor's board. */
   siteCardPlace: string
   /** What a part's `color=` adds to its line. */

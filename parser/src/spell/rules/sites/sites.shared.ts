@@ -22,8 +22,8 @@ export type SitePageEntry = {
   tags?: string[]
   /** how far along it is, if the line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14) */
   state?: string
-  /** a picture of it, if the line names one:  a file of the project, `snapshots/films.png` */
-  picture?: string
+  /** a thumbnail of it, if the line names one:  a file of the project, `snapshots/films.png` */
+  thumbnail?: string
   /** which row of its section on the site editor's board its card is in, from 1, if the line says */
   row?: number
   /** which column of its section, from 1 */

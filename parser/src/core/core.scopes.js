@@ -271,6 +271,11 @@
       ]
     },
     {
+      path: "type:View/property:thumbnail",
+      detail: "text",
+      description: "A picture of it, a file of its project:  `snapshots/terms.jpg`.\n- Drawn while it has no drawing of its own:  writing one replaces it.\n- A drawing can place it too:  `draw its thumbnail`.\n- A site's card shows it, unless the site's line names its own.\n- Say it on its tag, `<spell-page \"terms\" thumbnail=\"snapshots/terms.jpg\"/>`, or in its body, `- its thumbnail is \"...\"`."
+    },
+    {
       path: "type:Page",
       super: "type:View",
       description: "A view people reach by its own address -- `a home is a page` makes one.\n- Everything a view has.\n- Its address, and moving between pages, aren't built yet:  for now it draws as any view does.\n\n```spell\na home is a page where:\n  - to \"draw it\": <h1>Welcome</h1>\n```",

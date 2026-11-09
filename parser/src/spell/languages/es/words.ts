@@ -125,6 +125,7 @@ export const spanishWords: SP.LanguageWords = {
   appActions: { deshacer: "undo", rehacer: "redo" },
   // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
+  quotedNameTags: { panel: "etiqueta" },
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
   defaultsTag: "ui-defaults",
 
@@ -282,8 +283,7 @@ export const spanishWords: SP.LanguageWords = {
       pestaña: "tab",
       pestana: "tab",
       etiquetas: "tags",
-      ilustración: "picture",
-      ilustracion: "picture",
+      miniatura: "thumbnail",
       fila: "row",
       columna: "column",
       color: "color"
@@ -340,6 +340,7 @@ export const spanishWords: SP.LanguageWords = {
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
       pageLocked: 'su candado es "bloqueado"',
+      templateThumbnail: "su miniatura es {quoted thumbnail}",
       // Spell UI's Spanish words for `<ui-section label sticky="stack" collapsible dividing level>`
       pageSection: {
         tag: "seccion",
@@ -353,7 +354,7 @@ export const spanishWords: SP.LanguageWords = {
       sitePageTab: ", pestaña {quoted tab}",
       sitePageTags: ", etiquetada {quoted tags}",
       sitePageState: ", {state}",
-      sitePagePicture: ", ilustrada en {quoted picture}",
+      sitePageThumbnail: ", miniatura {quoted thumbnail}",
       siteCardPlace: ", en la fila {row} columna {column}",
       siteCardColor: ", de color {color}",
       siteOverlay: "tiene {a words} {words}",
@@ -447,7 +448,9 @@ export const spanishWords: SP.LanguageWords = {
     timestamp: ["marca de tiempo"],
     selection: ["selección", "seleccion"],
     // una página bloqueada:  `su candado es bloqueado` (épica `notebook` P1)
-    lock: ["candado"]
+    lock: ["candado"],
+    // la imagen de una página o vista sin contenido (épica `mockup` P16)
+    thumbnail: ["miniatura"]
   },
 
   builtInMemberValues: {

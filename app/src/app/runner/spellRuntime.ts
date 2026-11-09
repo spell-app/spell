@@ -114,6 +114,7 @@ export function runApp(
   if (appRoot) core.appRoot = appRoot
   core.appLayout = !!layout
   core.siteHost = siteHost
+  core.projectFolder = options.projectId ? `/spaces/${encodeURI(options.projectId)}` : undefined
   return runCompiled(compiled, options)
 }
 
