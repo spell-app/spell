@@ -182,7 +182,7 @@ describe("chrome + Actions", () => {
     const item = host.querySelector("ui-item")!
     expect(host.querySelector("ui-dropdown")).toBeNull()
     expect(item.hasAttribute("disabled")).toBe(true)
-    expect(item.querySelector("ui-icon")!.getAttribute("name")).toBe("ellipsis horizontal")
+    expect(item.getAttribute("icon")).toBe("ellipsis horizontal")
   })
 })
 

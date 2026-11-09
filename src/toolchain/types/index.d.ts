@@ -37,9 +37,3 @@ type Prettify<T> = {
 type SplitString<List, Delimiter extends string = ":"> = List extends `${infer Head}${Delimiter}${infer Tail}`
   ? Head | SplitString<Tail, Delimiter>
   : List
-
-/** `import global from "global"`:  the global object, for code written for a bundler that provided it. */
-declare module "global" {
-  const global: any
-  export default global
-}

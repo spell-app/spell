@@ -18,7 +18,10 @@
     /* ink on the green Add:  never declared before P10, so Add took the text colour (black on green:  axe's 4.3:1) */
     --_epic-act-green-on: var(--ui-green-on, #fff);
     /* a person's voice:  the faint violet of their reply card (`EpicAnswer.css`), its accent the violet ink */
-    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
     --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
     display: block;

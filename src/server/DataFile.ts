@@ -5,7 +5,7 @@ import JSON5 from "json5"
 
 // The JSON5 editor, util's since `repo-split` P1, the one every JSON5 edit goes through (epic `people-and-orgs` P8);
 // an entry of its own in the kit's `exports`, so plain `node` finds it
-import { json5Edited } from "spell/util/node/json5"
+import { commentEnd, json5Edited, stringEnd, wordEnd } from "spell/util/node/json5"
 
 /****************
  * ### `DataFile`
@@ -21,10 +21,10 @@ import { json5Edited } from "spell/util/node/json5"
  *
  * - Named `<name>.json5`.  Its old name, `<name>.json` (`oldName()`), is still READ while there's no `.json5`:
  *   a checkout on older code wrote it, and `epic migrate` renames the ones already there.
- * - WRITTEN only as `.json5`, keeping every comment Owen added by hand (util's `json5Edited()`, on
- *   json5-writer), and the old `.json` beside it removed:  one file, one name.
- * - Laid out as `JSON.stringify(value, null, 2)` would, comments where they were (`layout()`), so json5-writer's own
- *   layout (an object hugging its array's bracket, a blank line before each new key) never piles up save after save.
+ * - WRITTEN only as `.json5`, keeping every comment Owen added by hand (util's `json5Edited()`),
+ *   and the old `.json` beside it removed:  one file, one name.
+ * - Laid out as `JSON.stringify(value, null, 2)` would, comments where they were (`layout()`):
+ *   a value written by hand on one line is spread out, so every save reads the same.
  *   A file with no comments is written exactly as `JSON.stringify()` wrote it before.
  * - The JSON-compatible part of JSON5:  keys and text in double quotes, no trailing commas.
  *   So a plain JSON reader still parses one that has no comments.
@@ -92,7 +92,7 @@ export class DataFile {
    * The text to write for `value` over a file whose text was `source`:  every comment in `source` kept, laid out as
    * `JSON.stringify(value, null, 2)` (`layout()`), ending in a newline.
    * - `source` with no comment (or empty):  exactly `JSON.stringify(value, null, 2)`
-   * - `value` as `JSON.stringify()` sees it:  a key holding `undefined` goes (json5-writer would keep the old one),
+   * - `value` as `JSON.stringify()` sees it:  a key holding `undefined` goes (`json5Edited()` alone would keep the old one),
    *   a class instance is its own fields, `toJSON()` is called
    */
   static textFor(source: string, value: unknown): string {
@@ -229,8 +229,7 @@ function hasComment(text: string): boolean {
  * JSON5 text `text` laid out as `JSON.stringify(value, null, 2)` lays out its value, comments kept:
  * - a comment on a line of its own stays on a line of its own, before what followed it;
  *   one after something on the same line stays at that line's end
- *   - as it was in `source`, the text before the save:  json5-writer moves an array's first comment up onto its
- *     bracket's line
+ *   - as it was in `source`, the text before the save
  * - an empty object or array stays `{}` / `[]`;  blank lines go
  */
 function layout(text: string, source: string): string {
@@ -306,8 +305,8 @@ function tokensOf(text: string): Token[] {
       newlineBefore = true
       at++
     } else if (/\s/.test(char)) at++
-    else if (text.startsWith("//", at)) add("comment", endOf(text.indexOf("\n", at), text))
-    else if (text.startsWith("/*", at)) add("comment", endOf(text.indexOf("*/", at + 2), text, 2))
+    else if (text.startsWith("//", at)) add("comment", commentEnd(text.indexOf("\n", at), text))
+    else if (text.startsWith("/*", at)) add("comment", commentEnd(text.indexOf("*/", at + 2), text, 2))
     else if (char === '"' || char === "'") add("value", stringEnd(text, at))
     else if (char === "{" || char === "[") add("open", at + 1)
     else if (char === "}" || char === "]") add("close", at + 1)
@@ -316,24 +315,4 @@ function tokensOf(text: string): Token[] {
     else add("value", wordEnd(text, at))
   }
   return tokens
-}
-
-/** Where a comment ends:  `found` plus `extra` (the closing `*\/`), or the text's end when it was never closed. */
-function endOf(found: number, text: string, extra = 0): number {
-  return found === -1 ? text.length : found + extra
-}
-
-/** Where the string starting at `start` ends, its closing quote included. */
-function stringEnd(text: string, start: number): number {
-  const quote = text[start]
-  let at = start + 1
-  while (at < text.length && text[at] !== quote) at += text[at] === "\\" ? 2 : 1
-  return Math.min(at + 1, text.length)
-}
-
-/** Where the bare value (a number, `true`, an unquoted key) starting at `start` ends. */
-function wordEnd(text: string, start: number): number {
-  let at = start
-  while (at < text.length && !/[\s,:{}[\]"'/]/.test(text[at])) at++
-  return Math.max(at, start + 1)
 }
