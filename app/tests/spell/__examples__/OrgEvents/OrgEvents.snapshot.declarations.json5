@@ -115,7 +115,7 @@
     {
       "type": "EventsPage",
       "superType": "App",
-      "defined": "/OrgEvents.spellml:1125-2718"
+      "defined": "/OrgEvents.spellml:1125-3114"
     },
     {
       "property": "new_event",
@@ -149,7 +149,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spellml:1385-2709"
+      "defined": "/OrgEvents.spellml:1385-3105"
     }
   ],
   "codeLines": [

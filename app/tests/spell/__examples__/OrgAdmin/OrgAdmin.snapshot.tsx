@@ -288,8 +288,11 @@ export class OrgAdmin extends App {
   @drawn draw() {
     return (
       <ui-stack class="org-admin" spacing="none">
-        <ui-toolbar class="top-bar" aria-label="Org Admin">
+        <ui-toolbar class="top-bar" appearance="text" aria-label="Org Admin">
           {core.drawRead(async () => await core.savedThings(OrgProfile, {}, "as drawn"), (org: OrgProfile) => <ui-text slot="title" size="large">{org.name} Admin</ui-text>)}
+          <ui-item link="OrgChat">Chat</ui-item>
+          <ui-item link="OrgFeed">Feed</ui-item>
+          <ui-item link="Inbox">Inbox</ui-item>
           <ui-stack slot="right" direction="horizontal">{core.signInMenu()}</ui-stack>
         </ui-toolbar>
         <ui-tabs class="body" parameter="section" direction="vertical" appearance="secondary" aria-label="Sections">
@@ -654,7 +657,7 @@ export class OrgAdminElement extends SpellElement<OrgAdmin> {
 core.useElement(OrgAdmin, OrgAdminElement)
 export const orgAdmin = new OrgAdmin()
 // -----------
-core.installStyles(undefined, `/* The page takes the theme's colours and type, light or dark, as its controls do. */¬.org-admin {¬  min-height: 100%;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬/* The section showing stands a little apart from the list of them. */¬.org-admin ui-tab {¬  margin-inline-start: 1rem;¬}¬¬/* The toolbar:  a rule below it, its title over the sections' labels. */¬.org-admin .top-bar {¬  padding-inline: 15px 0;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  margin-block-end: 0.75rem;¬}¬¬/* Tables scroll inside themselves on a narrow page, rather than breaking a date in two. */¬.org-admin ui-row > ui-cell {¬  color: CanvasText;¬  white-space: nowrap;¬  min-inline-size: max-content;¬}¬¬/* An add form:  its button keeps its size as the row wraps. */¬.org-admin .add .row > ui-button {¬  flex: none;¬}¬¬/* A row's take-away button stays quiet until the row is pointed at, or the button has the keyboard. */¬.org-admin ui-table ui-button[icon="close"] {¬  opacity: 0;¬}¬.org-admin ui-table ui-row:hover ui-button[icon="close"],¬.org-admin ui-table ui-button[icon="close"]:focus-within {¬  opacity: 1;¬}¬¬/* A phone has nothing to point with. */¬@media (hover: none) {¬  .org-admin ui-table ui-button[icon="close"] {¬    opacity: 1;¬  }¬}¬¬/* Too narrow for the sections to sit beside what they show:  they go above it. */¬@media (max-width: 640px) {¬  .org-admin ui-tab {¬    min-width: 100%;¬    margin-inline-start: 0;¬    margin-block-start: 0.75rem;¬  }¬}¬`)
+core.installStyles(undefined, `/* The page takes the theme's colours and type, light or dark, as its controls do. */¬.org-admin {¬  min-height: 100%;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬/* The section showing stands a little apart from the list of them. */¬.org-admin ui-tab {¬  margin-inline-start: 1rem;¬}¬¬/* The toolbar:  a rule below it, its title over the sections' labels. */¬.org-admin .top-bar {¬  padding-inline: 15px 0;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  margin-block-end: 0.75rem;¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬.org-admin .top-bar::part(menu) {¬  margin-block: 0;¬}¬.org-admin .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬/* Tables scroll inside themselves on a narrow page, rather than breaking a date in two. */¬.org-admin ui-row > ui-cell {¬  color: CanvasText;¬  white-space: nowrap;¬  min-inline-size: max-content;¬}¬¬/* An add form:  its button keeps its size as the row wraps. */¬.org-admin .add .row > ui-button {¬  flex: none;¬}¬¬/* A row's take-away button stays quiet until the row is pointed at, or the button has the keyboard. */¬.org-admin ui-table ui-button[icon="close"] {¬  opacity: 0;¬}¬.org-admin ui-table ui-row:hover ui-button[icon="close"],¬.org-admin ui-table ui-button[icon="close"]:focus-within {¬  opacity: 1;¬}¬¬/* A phone has nothing to point with. */¬@media (hover: none) {¬  .org-admin ui-table ui-button[icon="close"] {¬    opacity: 1;¬  }¬}¬¬/* Too narrow for the sections to sit beside what they show:  they go above it. */¬@media (max-width: 640px) {¬  .org-admin ui-tab {¬    min-width: 100%;¬    margin-inline-start: 0;¬    margin-block-start: 0.75rem;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) orgAdmin.start()
 

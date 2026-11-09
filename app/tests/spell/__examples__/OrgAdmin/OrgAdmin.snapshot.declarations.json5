@@ -284,7 +284,7 @@
     {
       "type": "OrgAdmin",
       "superType": "App",
-      "defined": "/OrgAdmin.spellml:588-13067"
+      "defined": "/OrgAdmin.spellml:588-13195"
     },
     {
       "property": "new_member",
@@ -444,7 +444,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgAdmin.spellml:2030-3238"
+      "defined": "/OrgAdmin.spellml:2030-3366"
     }
   ],
   "codeLines": [

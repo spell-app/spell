@@ -289,7 +289,7 @@
     {
       "type": "AdministraciónDeLaOrg",
       "superType": "App",
-      "defined": "/AdministracionDeLaOrg.es.spellml:659-14690"
+      "defined": "/AdministracionDeLaOrg.es.spellml:659-14843"
     },
     {
       "property": "miembro_nuevo",
