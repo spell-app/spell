@@ -3,12 +3,14 @@
  * epic `repo-split` P13):
  * - `language`:  the work of spell-parser's commands (`spell compile`, `spell run`, `spell lint` ...), which find
  *   projects the app's way today (`languageCommands.ts`)
+ * - `stopAllServers`:  what `spell server stop all` also stops:  the local site, which a plain stop leaves running (T63)
  * - Each loads only when a command asks (`CLI.needHook()`):  `spell help` never does.
  */
 import type { HookList } from "spell/cli"
 
 export default {
-  language: async () => (await loadApp()).languageCommands
+  language: async () => (await loadApp()).languageCommands,
+  stopAllServers: async () => (await import("spell/app/cli/commands/localCommand")).stopLocalSiteWithAll
 } satisfies HookList
 
 /**

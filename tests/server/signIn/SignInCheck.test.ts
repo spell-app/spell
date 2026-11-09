@@ -67,14 +67,16 @@ let folder: string
 let served: Served
 let mailer: MailCatcher
 let referee: Referee
+let check: SignInCheck
+const accounts = new FakeAccounts()
 
 beforeAll(async () => {
   folder = mkdtempSync(join(tmpdir(), "spell-sign-in-check-"))
   mailer = new MailCatcher({ folder: join(folder, "mail") })
-  const check = new SignInCheck({
+  check = new SignInCheck({
     signIns: new SignIns(),
     mailer,
-    accounts: new FakeAccounts(),
+    accounts,
     abuseContact: "abuse@test.example",
     atProto: atmosphere
   })
@@ -121,6 +123,111 @@ async function mailTo(to: string) {
   }
 }
 
+describe("signing in by password", () => {
+  const PASSWORD = "a long enough one"
+  const NEWER = "another long enough one"
+  const PERSON = { person: "pat@spell", email: "pat@example.com" }
+  const byPassword = (email: string, password: string) => posted("/api/sign-in/password", { email, password })
+  const change = (body: object, cookie: string) =>
+    posted("/api/sign-in/password/change", body, { cookie, origin: `http://127.0.0.1:${served.port}` })
+  const asMachine = (body: object) => posted("/api/sign-in/password/for", body, { "x-server-token": TOKEN })
+
+  beforeAll(async () => {
+    accounts.people.set(PERSON.email, PERSON.person)
+    await asMachine({ email: PERSON.email, password: PASSWORD })
+  })
+
+  test("the right one signs in, with the same cookie the code makes;  who's signed in says it has one", async () => {
+    const right = await byPassword(PERSON.email, PASSWORD)
+    expect(right.status).toBe(200)
+    expect(JSON.parse(right.text)).toEqual(PERSON)
+    expect(`${right.headers["set-cookie"]}`).toMatch(/HttpOnly; SameSite=Strict; Max-Age=2592000/)
+    const cookie = cookieFrom(right.headers)
+    const me = await ask(served.port, "GET", "/api/sign-in/me", { headers: { cookie } })
+    expect(JSON.parse(me.text).password).toEqual({ set: true, currentNeeded: true })
+  })
+
+  test("a wrong password and a stranger get the same answer, the password in no answer", async () => {
+    const wrong = await byPassword(PERSON.email, "not the password")
+    const stranger = await byPassword("nobody@example.com", PASSWORD)
+    expect(wrong.status).toBe(401)
+    expect(stranger.status).toBe(wrong.status)
+    expect(stranger.text).toBe(wrong.text)
+    expect(wrong.text).not.toContain("not the password")
+    expect(wrong.headers["set-cookie"]).toBeUndefined()
+  })
+
+  test("the same answer's words as a field that isn't an email, without repeating what was typed", async () => {
+    const notAnEmail = await byPassword("just some words", PASSWORD)
+    expect(notAnEmail.status).toBe(401)
+    expect((await posted("/api/sign-in/ask", { email: "owen@willzalone" })).text).toContain("your email address")
+  })
+
+  test("too many wrong:  429, saying how long", async () => {
+    const email = "locks@example.com"
+    for (let index = 0; index < 5; index++) await byPassword(email, "guess number one")
+    const locked = await byPassword(email, "guess number one")
+    expect(locked.status).toBe(429)
+    expect(JSON.parse(locked.text).error).toMatch(/wait 15 minutes/)
+  })
+
+  test("an account taken down is refused only by the right password's answer", async () => {
+    await check.signIns.setPasswordFor("eve@spell", PASSWORD)
+    expect((await byPassword("eve@example.com", "not the password")).status).toBe(401)
+    const down = await byPassword("eve@example.com", PASSWORD)
+    expect(down.status).toBe(451)
+    expect(JSON.parse(down.text).error).toContain("abuse@test.example")
+    expect(down.headers["set-cookie"]).toBeUndefined()
+  })
+
+  test("changing:  needs being signed in, then the current one;  ends the others;  the new one works", async () => {
+    expect((await change({ password: NEWER }, "")).status).toBe(403)
+    const cookie = cookieFrom((await byPassword(PERSON.email, PASSWORD)).headers)
+    const elsewhere = cookieFrom((await byPassword(PERSON.email, PASSWORD)).headers)
+    expect((await change({ password: NEWER }, cookie)).status).toBe(403)
+    expect((await change({ password: "short" }, cookie)).status).toBe(403)
+    expect((await change({ password: "short", current: PASSWORD }, cookie)).status).toBe(400)
+
+    const changed = await change({ password: NEWER, current: PASSWORD }, cookie)
+    expect(changed.status).toBe(200)
+    const who = (each: string) => ask(served.port, "GET", "/api/sign-in/me", { headers: { cookie: each } })
+    expect(JSON.parse((await who(cookie)).text).person).toBe(PERSON.person)
+    expect(JSON.parse((await who(elsewhere)).text).person).toBeUndefined()
+    expect((await byPassword(PERSON.email, NEWER)).status).toBe(200)
+    await asMachine({ email: PERSON.email, password: PASSWORD })
+  })
+
+  test("from another site:  refused, whoever's cookie it sends", async () => {
+    const cookie = cookieFrom((await byPassword(PERSON.email, PASSWORD)).headers)
+    const elsewhere = await posted(
+      "/api/sign-in/password/change",
+      { password: NEWER, current: PASSWORD },
+      { cookie, origin: "https://evil.example" }
+    )
+    expect(elsewhere.status).toBe(403)
+  })
+
+  test("forgot it:  an emailed link's sign-in changes it with no current one", async () => {
+    await posted("/api/sign-in/ask", { email: PERSON.email })
+    const { key } = await mailTo(PERSON.email)
+    const cookie = cookieFrom((await posted("/api/sign-in/confirm", { key })).headers)
+    const me = await ask(served.port, "GET", "/api/sign-in/me", { headers: { cookie } })
+    expect(JSON.parse(me.text).password).toEqual({ set: true, currentNeeded: false })
+    expect((await change({ password: NEWER }, cookie)).status).toBe(200)
+    expect((await byPassword(PERSON.email, NEWER)).status).toBe(200)
+    await asMachine({ email: PERSON.email, password: PASSWORD })
+  })
+
+  test("this machine's person sets anyone's:  only with this run's token, never a sign-in", async () => {
+    const cookie = cookieFrom((await byPassword(PERSON.email, PASSWORD)).headers)
+    expect(
+      (await posted("/api/sign-in/password/for", { email: PERSON.email, password: NEWER }, { cookie })).status
+    ).toBe(403)
+    expect((await asMachine({ email: "nobody@example.com", password: NEWER })).status).toBe(404)
+    expect((await asMachine({ email: PERSON.email, password: "short" })).status).toBe(400)
+  })
+})
+
 describe("signing in by email", () => {
   test("asked:  a mail with the link and the code, saying where it was asked from;  the code signs the device in", async () => {
     const asked = await posted("/api/sign-in/ask", { email: "ana@example.com" })
@@ -147,6 +254,7 @@ describe("signing in by email", () => {
       person: "ana@spell",
       email: "ana@example.com",
       abuseContact: "abuse@test.example",
+      password: { set: false, currentNeeded: false },
       atProto: {}
     })
 
@@ -337,7 +445,7 @@ describe("a server at several addresses", () => {
     const check = new SignInCheck({
       signIns: new SignIns(),
       mailer: catcher,
-      accounts: new FakeAccounts(),
+      accounts,
       address: MAIN,
       alsoAt: [`${OTHER}/`],
       atProto: identity

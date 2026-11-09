@@ -314,7 +314,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3),
         its bar drawn by [signInBar.ts](signInBar.ts):
         - until someone signs in, its bar says it takes them to be this machine's person (`identifiesBy: "this machine"`)
-        - it offers to email a link and a code
+        - email and password in a real form a password manager fills, and to email a link and a code instead
+          (epic `atmosphere` T64);  signed in, setting or changing the password
         - signed out, it also says where to report abuse:  the server's abuse contact (`sign-in-abuse`, epic `atmosphere` P6)
     - A SPACE'S LIVE ROOM (epic `atmosphere` P36):  `team chat is a room at "events_team@rs/messages"`, a Spell address.
       - The compiler turns it into the page server's room of that space's collection (`CreatePlace.roomAddressFor()`):

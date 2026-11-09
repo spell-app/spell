@@ -661,6 +661,24 @@ export type PlaceSignIn = {
    * - A wrong one says so (`problem`), and stays waiting.  NEVER throws.
    */
   enterCode?(code: string): Promise<void>
+  /**
+   * Sign in with `who`'s password (epic `atmosphere` T64).  Left out:  a sign-in with no passwords.
+   * - A refused one says so (`problem`).  NEVER throws.
+   */
+  signInWithPassword?(who: string, password: string): Promise<void>
+  /**
+   * Set or change the password of whoever's signed in.  Left out:  as `signInWithPassword()`.
+   * - A refused one says so (`passwordProblem`);  saved, `passwordSaved`.  NEVER throws.
+   */
+  setPassword?(change: { password: string; current?: string }): Promise<void>
+  /** Does the one signed in have a password?  So the offer says Set, or Change. */
+  readonly hasPassword?: boolean
+  /** Does changing it take the current one? */
+  readonly currentPasswordNeeded?: boolean
+  /** Why setting a password last failed, in words for people. */
+  readonly passwordProblem?: string | undefined
+  /** Was a password just saved? */
+  readonly passwordSaved?: boolean
   /** Where the code went, while `"waiting for a code"`. */
   readonly sentTo?: string | undefined
   /** Where to report abuse, the host's abuse contact, which the bar shows (epic `atmosphere` P6).  Left out:  none said. */

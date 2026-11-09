@@ -555,7 +555,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `check`, first:  puts who's signed in on every request, `request.person`
         - from the `spell-session` cookie:  `HttpOnly`, `SameSite=Strict`
       - `route()`:  its routes under `/api/sign-in/`, and two pages
-        - the routes:  `me`, `ask`, `code`, `waiting`, `link`, `confirm`, `out`, `invite`, `mail`;  `atproto` (below)
+        - the routes:  `me`, `ask`, `code`, `password`, `password/change`, `password/for`, `waiting`, `link`, `confirm`,
+          `out`, `invite`, `mail`;  `atproto` (below)
       - the link's page, `/sign-in/confirm` ([confirm.html](signIn/confirm.html)):
         where the request came from (browser, system, this machine or this network), then one button
         - where it came from:  `askerOf()`, by `addressOf()`, which takes `X-Forwarded-For`'s last address only when the
@@ -575,6 +576,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a request is good once, for 20 minutes (`SignInsProps.minutes`), nothing done:  its code (5 wrong tries) or its link
       - a link confirmed on another device signs both in
       - a device stays signed in for 30 days, only its token's hash kept, in a file
+    - PASSWORDS (epic `atmosphere` T64):  beside an emailed link and code, the same 30-day sign-in
+      - `Passwords`:  each account's only as a salted scrypt hash, in `passwords.json` beside `sessions.json`, 0600;
+        never in a person's file or anywhere a space's export or backup reaches
+      - `POST password { email, password }`:  a wrong one, an account with none and a stranger answered alike, in about
+        the same time;  the email may be an account's name, where `SignInAccounts.accountNamed()` says
+      - 5 wrong tries for an account (or a name nobody has, so a lock says nothing), 20 from an address, then 15 minutes,
+        the right one refused too:  said on the page;  in memory, as requests are
+      - `POST password/change { password, current? }`, a signed-in device, behind `Guard`'s write check:
+        a first one needs only that;  changing needs the current one, or a sign-in by emailed link or code in the last
+        20 minutes (`hasFreshProof()`:  how "forgot my password" works), and ends the account's other devices
+      - `POST password/for { email, password }`:  this run's token only, as `invite`:  `spell space cloud password`
+      - at least 8 characters, at most 256, nothing else;  spaces count;  never logged, never in an address or an error
+      - an account taken down:  451, but only after the right password, so a wrong one says nothing
     - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);
       a real mail service waits on the epic's Real Sign-In Mail (Postmark, Q12 A);
       sign-in mail and inbox mail (P30) both go through it

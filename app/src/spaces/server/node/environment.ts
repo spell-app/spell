@@ -203,6 +203,11 @@ const environment = {
    * `EditorServer` sets it as it starts vite (`pageServerProxy()`).  Left out:  vite started some other way.
    */
   serverToken: process.env.SPELL_SERVER_TOKEN || undefined,
+  /**
+   * Whether the editor's dev server listens on this machine alone (epic `atmosphere` P39):
+   * `EditorServer` sets it when the house site gives the editor an address, so Caddy is the one way in.
+   */
+  editorThisMachineOnly: !!process.env.SPELL_EDITOR_THIS_MACHINE_ONLY,
   srcDir,
   packagesDir,
   repoDir,

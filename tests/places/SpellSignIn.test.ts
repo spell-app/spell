@@ -85,6 +85,61 @@ test("an email with no account:  signed out, saying why", async () => {
   expect(signIn.problem).toMatch(/by invite only/)
 })
 
+test("a password:  right, signed in;  wrong, signed out, saying why;  never kept", async () => {
+  let right = false
+  const { asked, fetcher } = fakeServer({
+    me: () => ({ body: right ? { password: { set: true, currentNeeded: true } } : {} }),
+    password: () =>
+      right
+        ? { body: { person: "ana@spell", email: "ana@example.com" } }
+        : { status: 401, body: { error: "That email and password don't go together." } }
+  })
+  const signIn = new SpellSignIn({ fetcher })
+  await signIn.ready
+
+  await signIn.signInWithPassword("ana@example.com", "not the password")
+  expect(signIn.status).toBe("signed out")
+  expect(signIn.problem).toMatch(/don't go together/)
+
+  right = true
+  await signIn.signInWithPassword("ana@example.com", "the right password")
+  expect(signIn.status).toBe("signed in")
+  expect(asked.findLast(({ what }) => what === "password")?.body).toEqual({
+    email: "ana@example.com",
+    password: "the right password"
+  })
+  await vi.waitFor(() => expect(signIn.hasPassword).toBe(true))
+  expect(signIn.currentPasswordNeeded).toBe(true)
+})
+
+test("setting a password:  saved, or why not;  a new attempt forgets the last", async () => {
+  let refused = true
+  const { asked, fetcher } = fakeServer({
+    me: () => ({
+      body: { person: "ana@spell", email: "ana@example.com", password: { set: false, currentNeeded: false } }
+    }),
+    change: () =>
+      refused
+        ? { status: 400, body: { error: "A password takes at least 8 characters, and at most 256." } }
+        : { body: { password: { set: true, currentNeeded: true } } }
+  })
+  const signIn = new SpellSignIn({ fetcher })
+  await signIn.ready
+  expect(signIn.hasPassword).toBe(false)
+
+  await signIn.setPassword({ password: "short" })
+  expect(signIn.passwordProblem).toMatch(/at least 8/)
+  expect(signIn.passwordSaved).toBe(false)
+
+  refused = false
+  await signIn.setPassword({ password: "long enough now", current: "the old one" })
+  expect(asked.at(-1)?.body).toEqual({ password: "long enough now", current: "the old one" })
+  expect(signIn.passwordProblem).toBeUndefined()
+  expect(signIn.passwordSaved).toBe(true)
+  expect(signIn.hasPassword).toBe(true)
+  expect(signIn.status).toBe("signed in")
+})
+
 test("one sign-in per server, for every place on the page", () => {
   expect(SpellSignIn.for("/api/places/spaces/a")).toBe(SpellSignIn.for("/api/places/spaces/b"))
   expect(SpellSignIn.for("http://127.0.0.1:9/x")).not.toBe(SpellSignIn.for("/api/places/spaces/a"))
