@@ -443,7 +443,8 @@ export class SiteBase extends App {
     if (showing?.kind !== "page") return ""
     const pathTo = (entries: SitePageEntry[] | undefined, above: SitePageEntry[]): SitePageEntry[] | undefined => {
       for (const entry of entries ?? []) {
-        if (entry === showing.entry) return [...above, entry]
+        // by name:  a page compiled in as it's shown leaves the site with a new list of the same pages
+        if (entry.name === showing.entry.name) return [...above, entry]
         const found = pathTo(entry.pages, [...above, entry])
         if (found) return found
       }
@@ -622,11 +623,13 @@ const PAGE_LAYOUT = "min-width: 0"
 const NARROW_SITE_CSS = `
 .spell-site-frame { container: spell-site / inline-size; position: relative }
 .spell-site-menu { display: none }
+/* its own scroller, so showing the page's row never scrolls the page */
+.spell-site-nav { position: sticky; inset-block-start: 0.5em; max-height: calc(100dvh - 4em); overflow: auto }
 @container spell-site (width < 40em) {
   .spell-site-menu { display: inline-flex; margin-block-end: 0.5em }
   .spell-site { grid-template-columns: minmax(0, 1fr) !important }
   .spell-site-nav {
-    position: absolute; inset-inline-start: 0; inset-block-start: 2.75em; z-index: 2; width: min(16em, 85%);
+    position: absolute; inset-inline-start: 0; inset-block-start: 2.75em; z-index: var(--ui-z-popup, 1000); width: min(16em, 85%);
     max-height: calc(100% - 2.75em); overflow: auto; background: var(--ui-background, Canvas);
     box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2)); border-radius: var(--ui-radius, 6px);
     translate: calc(-100% - 1em); visibility: hidden; transition: translate 0.2s, visibility 0.2s
