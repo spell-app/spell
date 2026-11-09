@@ -336,6 +336,9 @@ export const PARSER_MESSAGES = {
   /** A dot in a field's name, under a place. */
   "check-time-not-a-time": '"{time}" isn\'t a time of day:  say one as 5am, 5:30pm or 17:00',
   /** `its next page is in its "{header}" header`, a header other than `Link`. */
+  /** `its next page is asked for with "offset" and "limit"`:  the wrong way round.  `{first}` and `{second}` as written. */
+  "next-page-count-first":
+    'How many comes first, then where from:  `its next page is asked for with "{second}" and "{first}"`',
   "next-page-header-not-link":
     'A next page is said in a "Link" header, not "{header}":  `its next page is in its "Link" header`, or name the field of its answer that says it',
   "searched-only":

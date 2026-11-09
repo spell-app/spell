@@ -220,6 +220,19 @@ describe("RestPlace paging", () => {
     expect(last.nextPage).toBeUndefined()
   })
 
+  test("each question goes under the name the server calls it (epic `data` I35)", async () => {
+    const { place, box } = await served(
+      {},
+      {
+        can: { page: "offset", sort: "every field", select: "every field" },
+        params: { limit: "per", offset: "from", sort: "order", select: "only" },
+        pageSize: 2
+      }
+    )
+    await place.list("recipes", { sort: [{ field: "title" }], select: ["title"] }, {})
+    expect(box.asks.at(-1)!.query).toEqual({ order: "name", only: "name,id", per: "2", from: "0" })
+  })
+
   test("by cursor, in its answer", async () => {
     const { place, box } = await served(
       { paging: "cursor" },

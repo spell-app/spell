@@ -4,7 +4,7 @@ import { SP } from "spell/parser/spell"
 
 // Import directly to avoid circular import
 import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
-import { fieldNamed, textIn } from "./PlaceDetail"
+import { fieldNamed, textIn, type PlaceDetailValue } from "./PlaceDetail"
 
 /**
  * A collection's whole name, an NSID:  `com.example.recipe`.
@@ -108,12 +108,14 @@ export function abilitiesOf(saved: P.SavedPlace | undefined) {
 }
 
 /**
- * Is what's saved in `saved` read only:  a kind that is, at a plain address?
+ * Is what's saved in `saved` read only:  a line under its place says so, or a kind that is, at a plain address?
+ * - e.g. `- it is read only` (epic `data` I35)
  * - A sheet at a place server isn't:  `family cookbook is a sheet at "/api/places/recipes"` (epic `data` P14).
  *   No new word:  the address says it, as a data folder's and a file's do.
  * - Nor is the program's own CSV file, `a sheet at "tasks.csv"`:  the page server writes it (epic `language` T65).
  */
 export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
+  if (linesOfPlace(saved)?.readOnly) return true
   if (!abilitiesOf(saved)?.isReadOnly) return false
   const declaredBy = saved?.placeType.declaredBy
   if ((declaredBy?.data as { folderAt?: string } | undefined)?.folderAt) return false
@@ -121,11 +123,16 @@ export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
   return !address || !isPlaceServerAddress(textIn(address))
 }
 
+/** What the lines under the place `saved` names say:  `undefined` for a place with no lines to read. */
+function linesOfPlace(saved: P.SavedPlace | undefined): PlaceDetailValue | undefined {
+  const declaredBy = saved?.placeType.declaredBy
+  const rule = declaredBy?.rule.constructor as unknown as { detailsOf?(match: P.Match): PlaceDetailValue } | undefined
+  return declaredBy && rule?.detailsOf?.(declaredBy)
+}
+
 /** Does a line under the place `saved` names say how often to ask it what changed? */
 export function isCheckedOften(saved: P.SavedPlace): boolean {
-  const { declaredBy } = saved.placeType
-  const rule = declaredBy?.rule.constructor as unknown as { detailsOf?(match: P.Match): { checkedEvery?: number } }
-  return !!declaredBy && rule.detailsOf?.(declaredBy)?.checkedEvery !== undefined
+  return linesOfPlace(saved)?.checkedEvery !== undefined
 }
 
 /**
@@ -135,14 +142,7 @@ export function isCheckedOften(saved: P.SavedPlace): boolean {
  * - `undefined` when no line under its place says so.
  */
 export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fields: string[] } | undefined {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): {
-      searches?: { param: string; fields: string[] }
-      collections?: Record<string, { searches?: { param: string; fields: string[] } }>
-    }
-  }
-  const details = declaredBy ? rule.detailsOf?.(declaredBy) : undefined
+  const details = linesOfPlace(saved)
   return details?.collections?.[saved!.collection]?.searches ?? details?.searches
 }
 
@@ -151,11 +151,7 @@ export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fi
  * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */
 export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { collections?: Record<string, { at?: string }> }
-  }
-  const at = declaredBy && rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.at
+  const at = linesOfPlace(saved)?.collections?.[saved!.collection]?.at
   return !!at && /\{[^{}/]*\}/.test(at)
 }
 
@@ -164,11 +160,7 @@ export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
  * - e.g. `books are searched at "/search.json"` (epic `data` P29)
  */
 export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { collections?: Record<string, { searchedOnly?: boolean }> }
-  }
-  return !!declaredBy && !!rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.searchedOnly
+  return !!linesOfPlace(saved)?.collections?.[saved!.collection]?.searchedOnly
 }
 
 /**
@@ -177,11 +169,7 @@ export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
  * - Empty when no line says so.
  */
 export function askedByOf(saved: P.SavedPlace | undefined): string[] {
-  const declaredBy = saved?.placeType.declaredBy
-  const rule = declaredBy?.rule.constructor as unknown as {
-    detailsOf?(match: P.Match): { collections?: Record<string, { askedBy?: string[] }> }
-  }
-  return (declaredBy && rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.askedBy) || []
+  return linesOfPlace(saved)?.collections?.[saved!.collection]?.askedBy ?? []
 }
 
 /**

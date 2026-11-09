@@ -6766,7 +6766,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 78,
+          "line": 90,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -7198,6 +7198,154 @@
                 },
                 "py": {
                   "code": "class GuerraDeLasGalaxias(Place):\n    pass\n\nguerra_de_las_galaxias = core.place(\n    GuerraDeLasGalaxias(),\n    {\n        \"name\": \"guerra_de_las_galaxias\",\n        \"kind\": \"web server\",\n        \"at\": \"https://swapi.py4e.com/api\",\n        \"kept_on_device\": 20000000,\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageByOffset",
+          "ruleNames": ["next_page_by_offset"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageByOffset.ts",
+          "line": 20,
+          "purpose": "A web server pages by a count and a position, with no next link to follow (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente se pide con {limit:text} y {offset:text}",
+              "example": "museo met es un servidor web en \"https://collectionapi.metmuseum.org\"\n\t- su página siguiente se pide con \"limit\" y \"offset\"",
+              "outputs": {
+                "js": {
+                  "code": "export class MuseoMet extends Place {}\nexport const museoMet = core.place(new MuseoMet(), {\n  name: \"museo_met\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  pagesByOffset: { limit: \"limit\", offset: \"offset\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class MuseoMet extends Place {}\nexport const museoMet = core.place(new MuseoMet(), {\n  name: \"museo_met\",\n  kind: \"web server\",\n  at: \"https://collectionapi.metmuseum.org\",\n  pagesByOffset: { limit: \"limit\", offset: \"offset\" },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class MuseoMet(Place):\n    pass\n\nmuseo_met = core.place(\n    MuseoMet(),\n    {\n        \"name\": \"museo_met\",\n        \"kind\": \"web server\",\n        \"at\": \"https://collectionapi.metmuseum.org\",\n        \"pages_by_offset\": {\"limit\": \"limit\", \"offset\": \"offset\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FiltersBy",
+          "ruleNames": ["filters_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/FiltersBy.ts",
+          "line": 13,
+          "purpose": "Which fields a web server filters by itself (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} filtra por todos los campos",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- filtra por todos los campos",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: \"every field\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: \"every field\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"filters\": \"every field\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} filtra por {fields:searched_fields}",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- filtra por cocina y tiempo",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: [\"cocina\", \"tiempo\"],\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  filters: [\"cocina\", \"tiempo\"],\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"filters\": [\"cocina\", \"tiempo\"],\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SortsBy",
+          "ruleNames": ["sorts_by"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsBy.ts",
+          "line": 12,
+          "purpose": "Which fields a web server sorts by itself, and what it calls that (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} ordena por {fields:searched_fields} (con {param:text})?",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- ordena por titulo y fecha con \"order\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  sorts: [\"titulo\", \"fecha\"],\n  sortedWith: \"order\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  sorts: [\"titulo\", \"fecha\"],\n  sortedWith: \"order\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"sorts\": [\"titulo\", \"fecha\"],\n        \"sorted_with\": \"order\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} ordena por todos los campos (con {param:text})?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "GivesFieldsNamedIn",
+          "ruleNames": ["gives_fields_named_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/GivesFieldsNamedIn.ts",
+          "line": 11,
+          "purpose": "A web server answers with only the fields it's asked for (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} da solo los campos nombrados en {param:text}",
+              "example": "paises es un servidor web en \"https://paises.test\"\n\t- da solo los campos nombrados en \"response_fields\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  fieldsNamedIn: \"response_fields\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  fieldsNamedIn: \"response_fields\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Paise(Place):\n    pass\n\npaises = core.place(\n    Paise(),\n    {\n        \"name\": \"paises\",\n        \"kind\": \"web server\",\n        \"at\": \"https://paises.test\",\n        \"fields_named_in\": \"response_fields\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IsReadOnly",
+          "ruleNames": ["is_read_only"],
+          "internal": false,
+          "file": "src/spell/rules/places/IsReadOnly.ts",
+          "line": 10,
+          "purpose": "A place takes no writes, whatever its kind can do (epic `data` I35).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} es de solo lectura",
+              "example": "paises es un servidor web en \"https://paises.test\"\n\t- es de solo lectura",
+              "outputs": {
+                "js": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  readOnly: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Paise extends Place {}\nexport const paises = core.place(new Paise(), {\n  name: \"paises\",\n  kind: \"web server\",\n  at: \"https://paises.test\",\n  readOnly: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Paise(Place):\n    pass\n\npaises = core.place(\n    Paise(),\n    {\n        \"name\": \"paises\",\n        \"kind\": \"web server\",\n        \"at\": \"https://paises.test\",\n        \"read_only\": True,\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             }

@@ -148,6 +148,127 @@ describe("RestPlace", () => {
   })
 })
 
+describe("what a server can do, said in its lines (epic `data` I35)", () => {
+  /** A place of `lines`, and a recipe saved in it, its `Recipe` class ready to read. */
+  function recipeIn(...lines: string[]) {
+    return runSpell([
+      `cookbook is a web server at "${HOST}":`,
+      ...lines,
+      `a "recipe" is a thing:`,
+      `\t- it lives in the cookbook`,
+      `\t- its "title" is text`,
+      `\t- its "cuisine" is text`
+    ])("Recipe").Recipe as { savedIn: { select?: unknown } }
+  }
+
+  test("every page, by a count and a position:  a page with fewer than it asked for was the last", async () => {
+    const asked = serve({
+      [`${HOST}/recipes?limit=2&offset=0`]: [
+        { id: 1, title: "a" },
+        { id: 2, title: "b" }
+      ],
+      [`${HOST}/recipes?limit=2&offset=2`]: [{ id: 3, title: "c" }]
+    })
+    core.resetRuntime()
+    const Recipe = recipeIn(
+      `\t- its next page is asked for with "limit" and "offset"`,
+      `\t- it gives up to 2 at a time`
+    )
+    expect((await read(Recipe)).map(({ title }) => title)).toEqual(["a", "b", "c"])
+    expect(asked).toHaveLength(2)
+  })
+
+  test("its questions go by the names it calls them", async () => {
+    const asked = serve({ [`${HOST}/recipes?per=2&from=0`]: [{ id: 1, title: "a" }] })
+    core.resetRuntime()
+    const Recipe = recipeIn(`\t- its next page is asked for with "per" and "from"`, `\t- it gives up to 2 at a time`)
+    expect(await read(Recipe)).toHaveLength(1)
+    expect(asked).toEqual([`${HOST}/recipes?per=2&from=0`])
+  })
+
+  test("the count and the position the wrong way round won't compile, saying which comes first", () => {
+    const lines = [`cookbook is a web server at "${HOST}":`, `\t- its next page is asked for with "offset" and "limit"`]
+    const { errors } = parseSpellProject([{ path: "/C.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors.join("\n")).toMatch(/How many comes first.*with "limit" and "offset"/)
+  })
+
+  test("a filter and a sort it says it can do are asked of it;  one it doesn't, it isn't", async () => {
+    const asked = serve({
+      [`${HOST}/recipes?cuisine=thai&order=-title`]: [{ id: 1, title: "a", cuisine: "thai" }],
+      [`${HOST}/recipes`]: [{ id: 1, title: "a", cuisine: "thai" }]
+    })
+    core.resetRuntime()
+    const Recipe = recipeIn(`\t- it filters by cuisine`, `\t- it sorts by title with "order"`)
+    delete Recipe.savedIn.select
+    await core.savedThings(Recipe as never, {
+      filter: { cuisine: "thai" },
+      sort: [{ field: "title", descending: true }]
+    })
+    expect(asked).toEqual([`${HOST}/recipes?cuisine=thai&order=-title`])
+    await core.savedThings(Recipe as never, { filter: { title: "a" } })
+    expect(asked[1]).toEqual(`${HOST}/recipes`)
+  })
+
+  test("every field, in either language;  a field of two words is joined, as in a search's", () => {
+    const compiledFrom = (path: string, lines: string[]) =>
+      parseSpellProject([{ path, contents: `${lines.join("\n")}\n` }]).files[0]!
+    const { compiled, errors } = compiledFrom("/C.spell", [
+      `cookbook is a web server at "${HOST}":`,
+      `\t- it filters by every field`,
+      `\t- it sorts by every field with "order"`
+    ])
+    expect(errors).toEqual([])
+    expect(compiled).toContain(`filters: "every field"`)
+    expect(compiled).toContain(`sorts: "every field"`)
+    expect(compiled).toContain(`sortedWith: "order"`)
+    const spanish = compiledFrom("/C.es.spell", [
+      `recetario es un servidor web en "${HOST}":`,
+      `\t- filtra por todos los campos`,
+      `\t- ordena por todos los campos con "order"`
+    ])
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain(`filters: "every field"`)
+    expect(spanish.compiled).toContain(`sortedWith: "order"`)
+    const joined = compiledFrom("/D.spell", [`cookbook is a web server at "${HOST}":`, `\t- it filters by cook-time`])
+    expect(joined.errors).toEqual([])
+    expect(joined.compiled).toContain(`filters: ["cookTime"]`)
+  })
+
+  test("only the fields it uses are asked for, by what it calls that", async () => {
+    const asked = serve({ [`${HOST}/recipes?response_fields=title%2Cid`]: [{ id: 1, title: "a" }] })
+    core.resetRuntime()
+    const Recipe = recipeIn(`\t- it gives only the fields named in "response_fields"`)
+    Recipe.savedIn.select = ["title"]
+    await core.savedThings(Recipe as never)
+    expect(asked).toEqual([`${HOST}/recipes?response_fields=title%2Cid`])
+  })
+
+  test("read only:  a write won't compile, in either language", () => {
+    const lines = [
+      `cookbook is a web server at "${HOST}":`,
+      `\t- it is read only`,
+      `a "recipe" is a thing:`,
+      `\t- it lives in the cookbook`,
+      `\t- its "title" is text`,
+      `\t- to rename:`,
+      `\t\tset its title to "x"`
+    ]
+    const { errors } = parseSpellProject([{ path: "/C.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors.join("\n")).toMatch(/read only/)
+    const es = [
+      `recetario es un servidor web en "${HOST}":`,
+      `\t- es de solo lectura`,
+      `una "receta" es una cosa:`,
+      `\t- vive en el recetario`,
+      `\t- su "titulo" es texto`,
+      `\t- para renombrar:`,
+      `\t\tponer su titulo a "x"`
+    ]
+    const spanish = parseSpellProject([{ path: "/C.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
+    expect(spanish.errors.join("\n")).toMatch(/solo lectura/)
+  })
+})
+
 describe("a server that searches (epic `data` P26, T70)", () => {
   /** A place that searches names, a type in it, and a search for it, as a program writes them. */
   const SEARCHING = [

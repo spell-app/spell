@@ -51,6 +51,11 @@ import {
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
+import { NextPageByOffset } from "./NextPageByOffset"
+import { FiltersBy } from "./FiltersBy"
+import { SortsBy } from "./SortsBy"
+import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
+import { IsReadOnly } from "./IsReadOnly"
 import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
@@ -400,6 +405,140 @@ places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
 places.addRule(NextPageInLink, { syntax: "{type:subject_its} next page is in its {header:text} header" })
+places.addRule(NextPageByOffset, {
+  syntax: "{type:subject_its} next page is asked for with {limit:text} and {offset:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'met museum is a web server at "https://collectionapi.metmuseum.org"\n\t- its next page is asked for with "limit" and "offset"',
+          [
+            "export class MetMuseum extends Place {}",
+            "export const metMuseum = core.place(new MetMuseum(), {",
+            '  name: "met_museum",',
+            '  kind: "web server",',
+            '  at: "https://collectionapi.metmuseum.org",',
+            '  pagesByOffset: { limit: "limit", offset: "offset" }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(FiltersBy, {
+  syntax: "{type:subject_it} filters by every field",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it filters by every field',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  filters: "every field"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(FiltersBy, {
+  syntax: "{type:subject_it} filters by {fields:searched_fields}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it filters by cuisine and cook-time',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  filters: ["cuisine", "cookTime"]',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(SortsBy, { syntax: "{type:subject_it} sorts by every field (with {param:text})?" })
+places.addRule(SortsBy, {
+  syntax: "{type:subject_it} sorts by {fields:searched_fields} (with {param:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it sorts by title and date with "order"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  sorts: ["title", "date"],',
+            '  sortedWith: "order"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(GivesFieldsNamedIn, {
+  syntax: "{type:subject_it} gives only the fields named in {param:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'countries is a web server at "https://countries.test"\n\t- it gives only the fields named in "response_fields"',
+          [
+            "export class Country extends Place {}",
+            "export const countries = core.place(new Country(), {",
+            '  name: "countries",',
+            '  kind: "web server",',
+            '  at: "https://countries.test",',
+            '  fieldsNamedIn: "response_fields"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(IsReadOnly, {
+  syntax: "{type:subject_it} is (read only|read-only)",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'countries is a web server at "https://countries.test"\n\t- it is read only',
+          [
+            "export class Country extends Place {}",
+            "export const countries = core.place(new Country(), {",
+            '  name: "countries",',
+            '  kind: "web server",',
+            '  at: "https://countries.test",',
+            "  readOnly: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(ListsUnder, {
   syntax: "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
   tests: [

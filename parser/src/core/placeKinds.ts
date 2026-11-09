@@ -71,6 +71,11 @@ export type PlaceDetails = {
    * `its next page is in its "Link" header`.
    */
   nextPageInLink?: boolean
+  /**
+   * What a web server calls how many and where from, when it pages by a position, for every collection:
+   * `its next page is asked for with "limit" and "offset"`.
+   */
+  pagesByOffset?: { limit: string; offset: string }
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
   /** How it spells a field's name, by an example:  `hair_color` (`it writes names like "hair_color"`). */
@@ -85,6 +90,16 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
+  /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
+  filters?: "every field" | readonly string[]
+  /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
+  sorts?: "every field" | readonly string[]
+  /** What a web server calls a sort, when that isn't `sort`:  `it sorts by date with "order"`. */
+  sortedWith?: string
+  /** What a web server calls the fields it's asked for:  `it gives only the fields named in "fields"`. */
+  fieldsNamedIn?: string
+  /** It takes no writes:  `it is read only`. */
+  readOnly?: boolean
   /**
    * Which fields a web server searches, and the query parameter it takes (`it searches names with "search"`).
    * - No fields, all of each thing, and the search's own address:
@@ -193,6 +208,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
       ...restLinesForEveryCollection(details),
+      ...restAbilitiesIn(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.mostPerSecond !== undefined && { mostPerSecond: details.mostPerSecond }),
       ...(deviceCopy && { deviceCopy }),
@@ -440,18 +456,48 @@ function storedAsIn(Class: Function): Record<string, string> {
 
 /**
  * What a web server's lines say of every collection:  its id's field, where its rows are, where its next page is.
- * - Its next page in its `Link` header:  it pages by cursor, with no field for it, as `RestPlace` reads that header then.
  */
-function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn, nextPageInLink }: PlaceDetails) {
-  const pages = nextPageIn !== undefined || !!nextPageInLink
-  if (idColumn === undefined && rowsIn === undefined && !pages) return {}
+function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDetails) {
+  if (idColumn === undefined && rowsIn === undefined && nextPageIn === undefined) return {}
   return {
     allCollections: {
       ...(idColumn !== undefined && idColumn !== ID_FIELD && { fields: { [ID_FIELD]: idColumn } }),
       ...(rowsIn !== undefined && { rowsAt: rowsIn }),
       ...(nextPageIn !== undefined && { nextAt: nextPageIn })
-    },
-    ...(pages && { can: { page: "cursor" as const } })
+    }
+  }
+}
+
+/**
+ * What a web server's lines say it can do, and what it calls each question it's asked (epic `data` I35).
+ * - Its next page in a field or its `Link` header:  it pages by cursor, as `RestPlace` reads that field or header then.
+ */
+function restAbilitiesIn({
+  nextPageIn,
+  nextPageInLink,
+  pagesByOffset,
+  filters,
+  sorts,
+  sortedWith,
+  fieldsNamedIn,
+  readOnly
+}: PlaceDetails) {
+  const page = pagesByOffset ? "offset" : nextPageIn !== undefined || nextPageInLink ? "cursor" : undefined
+  const can = {
+    ...(page && { page: page as "offset" | "cursor" }),
+    ...(filters && { filter: filters }),
+    ...(sorts && { sort: sorts }),
+    ...(fieldsNamedIn !== undefined && { select: "every field" as const }),
+    ...(readOnly && { write: "none" as const })
+  }
+  const params = {
+    ...pagesByOffset,
+    ...(sortedWith !== undefined && { sort: sortedWith }),
+    ...(fieldsNamedIn !== undefined && { select: fieldsNamedIn })
+  }
+  return {
+    ...(Object.keys(can).length > 0 && { can }),
+    ...(Object.keys(params).length > 0 && { params })
   }
 }
 
