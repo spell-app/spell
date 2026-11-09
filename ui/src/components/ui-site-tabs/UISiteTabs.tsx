@@ -10,12 +10,12 @@ import siteTabsCSS from "./UISiteTabs.css?inline"
 /****************
  * ### `<ui-site-tabs>`
  * The component behind `<ui-site-tabs>`:  the shown page's family as tabs (epic `notebook` P10).
- * It takes the same `pages` and `current` as `<ui-site-nav>`, and draws a segmented `<ui-menu>`:
+ * It takes the same `pages` and `current` as `<ui-site-nav>`, and draws a segmented `<ui-toolbar>`:
  *
- *     <ui-menu exportparts="menu: tabs" appearance="segmented" align="fluid" equal aria-label="Button">
+ *     <ui-toolbar exportparts="menu: tabs" appearance="segmented" align="fluid" equal aria-label="Button">
  *       <ui-item link="/button" selected data-page="/button">Usage</ui-item>
  *       <ui-item link="/button/examples" data-page="/button/examples">Examples</ui-item>
- *     </ui-menu>
+ *     </ui-toolbar>
  *
  * - A FAMILY is a parent page and the pages under it:  the parent's tab first, then one per page under it.
  *   - The shown page, when it has pages under it, is the parent;  else the page it's under is.
@@ -29,6 +29,8 @@ import siteTabsCSS from "./UISiteTabs.css?inline"
  * - Which tab is selected is `current`'s, never the click's:  the menu's own selecting is always cancelled.
  * - The row never wraps:  on a phone it scrolls sideways, and the selected tab is scrolled into sight (the row only,
  *   never the page).
+ *   - It's `<ui-toolbar>`'s scrolling row, the section tabs' too:  a `‹` / `›` and a fade at each end with more that way
+ *     (epic `notebook` I11).
  * - Plain data in, no fetching:  a Spell site's pages come from its site file, whoever draws it hands them in.
  ****************/
 export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
@@ -162,7 +164,7 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   render(): JSX.Element {
     return (
       <Show when={this.tabs.length}>
-        <ui-menu
+        <ui-toolbar
           ref={(element: HTMLElement) => (this.menu = element)}
           exportparts={`menu: ${this.partForName("tabs")}`}
           appearance={SEGMENTED}
@@ -174,7 +176,7 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
           <For each={this.tabs} keyed={SitePages.keyOf}>
             {(page) => this.tab(page)}
           </For>
-        </ui-menu>
+        </ui-toolbar>
       </Show>
     )
   }

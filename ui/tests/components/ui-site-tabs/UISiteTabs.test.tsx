@@ -71,7 +71,7 @@ function selected(host: Element): string[] {
 
 /** The menu's box, the row of tabs. */
 function row(host: Element): HTMLElement {
-  return host.shadowRoot!.querySelector("ui-menu")!.shadowRoot!.querySelector<HTMLElement>('[part~="menu"]')!
+  return host.shadowRoot!.querySelector("ui-toolbar")!.shadowRoot!.querySelector<HTMLElement>('[part~="menu"]')!
 }
 
 describe("<ui-site-tabs>", () => {
@@ -85,7 +85,7 @@ describe("<ui-site-tabs>", () => {
     expect(selected(host)).toEqual(["API"])
     expect(link(host, "Usage").getAttribute("href")).toBe("/button")
     expect(link(host, "API").getAttribute("aria-current")).toBe("page")
-    expect(host.shadowRoot!.querySelector("ui-menu")!.getAttribute("aria-label")).toBe("Button")
+    expect(host.shadowRoot!.querySelector("ui-toolbar")!.getAttribute("aria-label")).toBe("Button")
     await expectAccessible(host)
   })
 
@@ -184,9 +184,31 @@ describe("<ui-site-tabs>", () => {
     expect(chosen.right).toBeLessThanOrEqual(view.right + 1)
   })
 
+  test("tabs that don't fit show a `‹` / `›` key at the end with more that way, centred on the row (epic `notebook` I11)", async () => {
+    const host = await siteTabs({ width: 160, current: "/button" })
+    const toolbar = host.shadowRoot!.querySelector("ui-toolbar")!
+    const key = (name: string) => toolbar.shadowRoot!.querySelector<HTMLElement>(`[part~="scroll-${name}"]`)!
+    const showing = (name: string) => key(name).hasAttribute("data-can")
+    await expect.poll(() => showing("end")).toBe(true)
+    await expect.poll(() => showing("start")).toBe(false)
+    const rowBox = row(host).getBoundingClientRect()
+    const keyBox = key("end").getBoundingClientRect()
+    expect(Math.abs(keyBox.top + keyBox.height / 2 - (rowBox.top + rowBox.height / 2))).toBeLessThanOrEqual(1)
+    expect(keyBox.right).toBeLessThanOrEqual(rowBox.right + 1)
+
+    // the row scrolled to its end:  again each time, as drawing can still bring the selected tab back into sight
+    await expect
+      .poll(() => {
+        row(host).scrollLeft = 1000
+        return showing("start")
+      })
+      .toBe(true)
+    await expect.poll(() => showing("end")).toBe(false)
+  })
+
   test("takes the look of the notebook tab bars:  a segmented, equal-width menu filling its row", async () => {
     const host = await siteTabs({ width: 800 })
-    const menu = host.shadowRoot!.querySelector("ui-menu")!
+    const menu = host.shadowRoot!.querySelector("ui-toolbar")!
     expect(menu.getAttribute("appearance")).toBe("segmented")
     expect(menu.getAttribute("align")).toBe("fluid")
     expect(menu.hasAttribute("equal")).toBe(true)

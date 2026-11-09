@@ -53,7 +53,7 @@ export const siteTabsVocabulary = {
     }
   ],
   slots: [],
-  parts: [{ name: "tabs", description: "The `<ui-menu>`'s box, which holds the tabs." }],
+  parts: [{ name: "tabs", description: "The `<ui-toolbar>`'s row, which holds the tabs." }],
   states: [{ name: "empty", description: "The shown page has no family, so no tabs are drawn:  it takes no room." }],
   texts: []
 } as const satisfies E.ComponentVocabulary

@@ -1,7 +1,7 @@
 /*
- * `<ui-site-tabs>` (`UISiteTabs.tsx`):  the shown page's family as a row of tabs, drawn with a segmented `<ui-menu>`.
+ * `<ui-site-tabs>` (`UISiteTabs.tsx`):  the shown page's family as a row of tabs, drawn with a segmented `<ui-toolbar>`.
  * - The tabs' look is the menu's own (`--ui-menu-segmented-*`, `::part(tabs)` for its box).
- * - The row never wraps:  when the tabs don't fit, its box scrolls sideways.
+ * - The row never wraps:  when the tabs don't fit, the toolbar's row scrolls sideways, with its `‹` / `›` keys.
  */
 @layer ui.components {
   :host {
@@ -13,15 +13,11 @@
     display: none;
   }
 
-  /* one row, whatever the width:  a phone's scrolls, its scrollbar hidden */
-  ui-menu::part(menu) {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
+  /* an equal share of the row, never squeezed below its words:  words that don't fit push the row to scroll */
+  ui-item {
+    min-width: max-content;
   }
 
-  /* an equal share of the row, never squeezed below its words:  words that don't fit push the row to scroll */
   ui-item::part(item) {
     min-width: max-content;
     white-space: nowrap;
