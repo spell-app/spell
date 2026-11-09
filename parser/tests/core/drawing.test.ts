@@ -169,13 +169,13 @@ describe("@drawn", () => {
   test("a part that throws shows its stand-in, in its own place;  the parts beside it stay (epic `notebook` I5)", () => {
     const card = new Card({ rank: 2 })
     const parts = () => [
-      core.drawPart(card, () => h("p", { class: "one" }, "One")),
+      core.drawPart(card, () => h("p", { class: "one" }, "One") as unknown as Drawing),
       core.drawPart(card, () => {
         throw new Error("no such part")
       }),
-      core.drawPart(card, () => h("p", { class: "three" }, "Three"))
+      core.drawPart(card, () => h("p", { class: "three" }, "Three") as unknown as Drawing)
     ]
-    draw(() => h("section", parts()))
+    draw(() => h("section", parts()) as unknown as Element)
 
     expect(element.innerHTML).toBe(
       `<section><p class="one">One</p>` +
