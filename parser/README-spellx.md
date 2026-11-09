@@ -246,6 +246,13 @@ spell spellx convert @spell/examples/calculator --dry-run
 **Real today:**  a `.spellml` file compiles and runs, English and Spanish, to exactly what its plain Spell twin does;
 its tree reads as above.
 
+**A quoted word after a tag:**  `<header "Hardware" size="large"/>` draws what
+`<header size="large">Hardware</header>` draws.
+
+- It's the contents of `<header>`, `<button>`, `<item>`, `<label>`, `<title>`, `<link>`, `<breadcrumb>`, `<checkbox>`
+  and `<radio>`, and the `label` of `<tab>` and `<panel>`.
+- `{its name}` inside it reads as it does between the tags, and anything else between the tags comes after it.
+
 **Components by their bare names:**  a drawing writes `<text>`, `<button>`, `<botón>` in a Spanish file, and gets
 Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - A name is one of the project's own views first (`<card>`, its `<solitaire-card>`), then the first of the project's

@@ -1,3 +1,4 @@
+import { Show } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
@@ -16,6 +17,9 @@ import { headerVocabulary } from "./UIHeader.en"
  * - `level` makes a real heading.  A linked heading is `<a role="heading" aria-level>`,
  *   since the link carries the class grammar.
  * - It is an OWNER too (`ownsParts:  header, content`):  a `<ui-header>` or `<ui-content>` inside it belongs to it.
+ * - `icon` is two things, by whether it names one:
+ *   - `icon="gear"`:  that glyph, drawn before the text
+ *   - bare:  the `icon` class, Fomantic's icon header, its slotted icon large and centred above the text
  ****************/
 export class UIHeader extends E.PartComponent<typeof headerVocabulary> {
   @E.proto static vocabulary = headerVocabulary
@@ -23,6 +27,9 @@ export class UIHeader extends E.PartComponent<typeof headerVocabulary> {
     // `disabled`:  only a look
     disabled: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  /** The glyph of a named `icon`;  bare `icon` is a layout, and has none. */
+  readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
 
   render(): JSX.Element {
     return (
@@ -35,6 +42,11 @@ export class UIHeader extends E.PartComponent<typeof headerVocabulary> {
         role={this.link && this.level ? "heading" : undefined}
         aria-level={this.link ? this.level : undefined}
       >
+        <Show when={this.icon}>
+          <span class={UIT.ICON_CLASS} part={this.partForName("icon")}>
+            {this.iconGlyph.svg}
+          </span>
+        </Show>
         <slot />
       </Dynamic>
     )
@@ -45,6 +57,11 @@ export class UIHeader extends E.PartComponent<typeof headerVocabulary> {
     if (this.link) return "a"
     const level = this.level ? (Number(this.level) as UIT.HeaderLevel) : undefined
     return level ? `h${level}` : "div"
+  }
+
+  /** Bare `icon`:  an icon header. */
+  protected get extraClass(): string | undefined {
+    return this.icon === "" ? UIT.ICON_CLASS : undefined
   }
 
   /** Standalone:  the class grammar;  owned:  the bare noun. */

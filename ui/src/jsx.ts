@@ -17049,15 +17049,15 @@ export interface UIHeaderAttributes {
    */
   "prop:sub"?: boolean | ""
   /**
-   * Icon header:  a large slotted icon centred above the text.
-   * - takes:  flag (present / absent)
+   * Its icon, by name, drawn before the text.  Bare, it's an icon header:  a large slotted icon centred above the text.
+   * - takes:  icon name
    */
-  icon?: boolean | ""
+  icon?: string
   /**
    * `icon`, as the DOM element's property.
    * @deprecated write `icon` -- `prop:` stays only for compiled spell
    */
-  "prop:icon"?: boolean | ""
+  "prop:icon"?: string
   /**
    * A rule below it.
    * - takes:  flag (present / absent)

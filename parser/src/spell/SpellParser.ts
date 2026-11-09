@@ -26,6 +26,52 @@ export const CHAIN_TAGS: Record<string, P.JSXChainKind> = {
 }
 
 /** Spell's tokenizer's props -- see `SpellParser.spellTokenizer`. */
+/**
+ * Spell UI's tags whose contents are nearly always one short piece of text, each language's spellings
+ * (epic `language` P38):  `<header "Hardware"/>` ~== `<header>Hardware</header>`.
+ * - The table of what takes a quoted word, and what doesn't and why:  "A tag's quoted word", in `PARSING.md`.
+ */
+const QUOTED_CONTENTS_TAGS = [
+  "header",
+  "ui-header",
+  "encabezado",
+  "es-encabezado",
+  "button",
+  "ui-button",
+  "boton",
+  "botón",
+  "es-boton",
+  "item",
+  "ui-item",
+  "elemento",
+  "es-elemento",
+  "label",
+  "ui-label",
+  "etiqueta",
+  "es-etiqueta",
+  "title",
+  "ui-title",
+  "titulo",
+  "título",
+  "es-titulo",
+  "link",
+  "ui-link",
+  "enlace",
+  "es-enlace",
+  "breadcrumb",
+  "ui-breadcrumb",
+  "ruta-seccion",
+  "ruta-sección",
+  "es-ruta-seccion",
+  "checkbox",
+  "ui-checkbox",
+  "casilla",
+  "es-casilla",
+  "radio",
+  "ui-radio",
+  "es-radio"
+]
+
 const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
   // TODO: backtick as alternative quote, for embedding double quotes?
@@ -52,7 +98,16 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
     "ui-tree-node": "label",
     "nodo-arbol": "etiqueta",
     "nodo-árbol": "etiqueta",
-    "es-nodo-arbol": "etiqueta"
+    "es-nodo-arbol": "etiqueta",
+    // what names a tab or a panel (epic `language` P38);  Spanish's `panel`:  `Language.quotedNameTags`
+    tab: "label",
+    "ui-tab": "label",
+    solapa: "etiqueta",
+    "es-solapa": "etiqueta",
+    panel: "label",
+    "ui-panel": "label",
+    "es-panel": "etiqueta",
+    ...Object.fromEntries(QUOTED_CONTENTS_TAGS.map((tag) => [tag, P.QUOTED_CONTENTS]))
   },
   // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
   // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
@@ -112,7 +167,7 @@ export class SpellParser extends P.Parser {
         "spellxTokenizer",
         () =>
           new SP.SpellxTokenizer({
-            ...SPELL_TOKENIZER_PROPS,
+            ...this.tokenizerProps,
             language: this.language ?? SP.Language.default,
             // a drawing's markup:  `</>` closes any element there (Q40, P7)
             emptyEndTagCloses: true,
@@ -125,7 +180,14 @@ export class SpellParser extends P.Parser {
 
   /** Spell's own tokenizer, for code spell -- and inside a spellx file's tags (`SP.SpellxTokenizer.spell`). */
   get spellTokenizer(): P.Tokenizer {
-    return this.derived("tokenizer", () => new P.Tokenizer(SPELL_TOKENIZER_PROPS))
+    return this.derived("tokenizer", () => new P.Tokenizer(this.tokenizerProps))
+  }
+
+  /** What our tokenizers are made with:  spell's, and what this parser's language reads its own way. */
+  private get tokenizerProps(): P.TokenizerProps {
+    const own = this.language?.words.quotedNameTags
+    if (!own) return SPELL_TOKENIZER_PROPS
+    return { ...SPELL_TOKENIZER_PROPS, quotedNameTags: { ...SPELL_TOKENIZER_PROPS.quotedNameTags, ...own } }
   }
 
   /**

@@ -195,6 +195,37 @@ describe("<ui-header> standalone", () => {
     expect(root(host).className).toBe(classes)
   })
 
+  it("a named icon is drawn before the text, just as a slotted <ui-icon> is, and is no icon header", async () => {
+    /** The glyph's box and the text's, in `host`. */
+    const boxes = (host: HTMLElement, glyph: Element) => {
+      const text = document.createRange()
+      text.selectNode(
+        [...host.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim())!
+      )
+      return { glyph: glyph.getBoundingClientRect(), text: text.getBoundingClientRect() }
+    }
+    const named = await ElementFixture.render(`<ui-header icon="gear">Settings</ui-header>`)
+    const slotted = await ElementFixture.render(`<ui-header><ui-icon name="gear"></ui-icon>Settings</ui-header>`)
+    const box = root(named).querySelector<HTMLElement>(":scope > .icon")!
+    await expect.poll(() => box.querySelector("svg")).not.toBeNull()
+    const icon = slotted.querySelector("ui-icon")!
+    await expect.poll(() => icon.shadowRoot?.querySelector("svg")).toBeTruthy()
+    expect(root(named).className).toBe("ui header")
+    const ours = boxes(named, box.querySelector("svg")!)
+    const theirs = boxes(slotted, icon.shadowRoot!.querySelector("svg")!)
+    expect(ours.glyph.right).toBeLessThanOrEqual(ours.text.left)
+    const middle = (rect: DOMRect) => rect.top + rect.height / 2
+    expect(ours.glyph.height).toBeCloseTo(theirs.glyph.height, 0)
+    expect(middle(ours.glyph) - middle(ours.text)).toBeCloseTo(middle(theirs.glyph) - middle(theirs.text), 0)
+    expect(ours.text.left - ours.glyph.right).toBeCloseTo(theirs.text.left - theirs.glyph.right, 0)
+  })
+
+  it("a bare icon is an icon header, with no glyph of its own", async () => {
+    const host = await ElementFixture.render(`<ui-header icon>H</ui-header>`)
+    expect(root(host).className).toBe("ui icon header")
+    expect(root(host).querySelector(":scope > .icon")).toBeNull()
+  })
+
   it.each([1, 2, 3, 4, 5, 6])("level=%i renders <h%i>, a heading", async (level) => {
     const host = await ElementFixture.render(`<ui-header level="${level}">H</ui-header>`)
     expect(root(host).localName).toBe(`h${level}`)

@@ -561,7 +561,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "color", kind: "color", group: "appearance" },
     { name: "sub", kind: "keyOnly", group: "appearance" },
-    { name: "icon", kind: "keyOnly", group: "content" },
+    { name: "icon", kind: "icon", group: "content" },
     { name: "dividing", kind: "keyOnly", group: "appearance" },
     { name: "block", kind: "keyOnly", group: "layout" },
     { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },

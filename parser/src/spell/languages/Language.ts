@@ -426,6 +426,11 @@ export type LanguageWords = {
    */
   exampleTag: string
   /**
+   * What a quoted word after a tag becomes, for a tag two languages spell alike (`P.Tokenizer.quotedNameTags`):
+   * Spanish's `<panel "Ajustes">` is `etiqueta="Ajustes"`, English's `<panel "Settings">` `label="Settings"`.
+   */
+  quotedNameTags?: Record<string, string>
+  /**
    * An app's widget defaults, a block of sample tags (epic `language` P29):  `<ui-defaults>`, in every language --
    * see `ui_defaults`.
    * - Spell UI's own word, as `<ui-button>` is:  a Spanish page writes it the same way.

@@ -55,8 +55,10 @@ export const headerVocabulary = {
     {
       name: "icon",
       group: "content",
-      kind: "keyOnly",
-      description: "Icon header:  a large slotted icon centred above the text."
+      kind: "icon",
+      description:
+        "Its icon, by name, drawn before the text.  " +
+        "Bare, it's an icon header:  a large slotted icon centred above the text."
     },
     { name: "dividing", group: "appearance", kind: "keyOnly", description: "A rule below it." },
     { name: "block", group: "layout", kind: "keyOnly", description: "In a tinted box." },
@@ -115,7 +117,10 @@ export const headerVocabulary = {
       description: "Text, a slotted `<ui-icon>` / `<img>`, a `<ui-content>` and a nested `<ui-header>` (sub header)."
     }
   ],
-  parts: [{ name: "header", description: "The header box (`<div>`, `<h1>` ... `<h6>`, or `<a>`)." }],
+  parts: [
+    { name: "header", description: "The header box (`<div>`, `<h1>` ... `<h6>`, or `<a>`)." },
+    { name: "icon", description: "The box of the `icon` attribute's glyph." }
+  ],
   states: [
     { name: "in-card", description: "Owned by a card." },
     { name: "in-item", description: "Owned by an item." },

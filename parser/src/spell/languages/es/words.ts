@@ -125,6 +125,7 @@ export const spanishWords: SP.LanguageWords = {
   appActions: { deshacer: "undo", rehacer: "redo" },
   // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
+  quotedNameTags: { panel: "etiqueta" },
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
   defaultsTag: "ui-defaults",
 
