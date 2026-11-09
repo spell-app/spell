@@ -88,20 +88,11 @@ spell lint @spell/examples
 
 ```text
 @spell/examples holds several projects -- name one, or pass --all:
-  @spell/examples/bill-splitter
-  @spell/examples/CajaDeRecetas
-  @spell/examples/calculator
-  @spell/examples/Counter
+...
   @spell/examples/fizzbuzz
-  @spell/examples/flash-cards
-  @spell/examples/habit-tracker
-  @spell/examples/ListaDeTareas
-  @spell/examples/RecipeBox
+...
   @spell/examples/Solitaire
-  @spell/examples/Solitario
-  @spell/examples/StarWars
-  @spell/examples/TaskList
-  @spell/examples/tic-tac-toe
+...
 ```
 
 </details>
@@ -114,20 +105,11 @@ spell lint --all @spell/examples
 <summary>Output</summary>
 
 ```text
-✓ @spell/examples/bill-splitter
-✓ @spell/examples/CajaDeRecetas  1 warning
-✓ @spell/examples/calculator
-✓ @spell/examples/Counter
+...
 ✓ @spell/examples/fizzbuzz
-✓ @spell/examples/flash-cards
-✓ @spell/examples/habit-tracker
-✓ @spell/examples/ListaDeTareas
-✓ @spell/examples/RecipeBox  1 warning
+...
 ✓ @spell/examples/Solitaire
-✓ @spell/examples/Solitario
-✓ @spell/examples/StarWars  6 warnings
-✓ @spell/examples/TaskList
-✓ @spell/examples/tic-tac-toe
+...
 ```
 
 </details>

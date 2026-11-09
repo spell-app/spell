@@ -46,7 +46,7 @@ If you've grown a grammar for a parser generator, that's the part to notice.
 There, a new phrase is an edit to the grammar file and a rebuild;
 in a regular expression, it's one more alternation nobody can read next month.
 Spell has no grammar file.
-Its grammar is 271 syntax strings on 245 rule classes, and a program adds rules of its own as it's read.
+Its grammar is 619 syntax strings on 407 rule classes, and a program adds rules of its own as it's read.
 
 And it doesn't guess.
 The same line compiles to the same code every time, and a line nothing reads is an error where it stands:
@@ -159,40 +159,42 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 
 ## The whole language, module by module
 
-Spell's grammar is twenty modules of rules.
+Spell's grammar is twenty-two modules of rules.
 Each row below is one rule's own test:  a line it reads, and the JavaScript that line becomes.
 
 | Module | What it reads | Rules | A line | Its JavaScript |
 | --- | --- | --- | --- | --- |
 | `spell` | the base:  a file, its blocks and lines, a statement;  a line nothing else reads | 5 | (the whole file) | |
 | core | numbers, text, yes and no, nothing, comments | 12 | `nothing` | `undefined` |
-| variables | names, of one word or several | 9 | `the start pile` | `startPile` |
+| variables | names, of one word or several | 10 | `the start pile` | `startPile` |
 | constants | words that are values | 3 | `red` | `"red"` |
-| expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
+| expressions | comparisons, `and` / `or`, `is a`, `is in` | 40 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
-| properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
-| lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `play` and `stop` a sound, styles | 12 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
-| classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
-| async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
+| properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
+| lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `play` and `stop` a sound, styles | 14 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
+| classes | templates, properties, aliases, saving, versions | 77 | `a card is a thing` | `export class Card extends Thing {}` |
+| async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
-| JSX | elements, fragments, `<markdown>` blocks | 8 | `<a/>` | `h("a")` |
-| types | type names, singular and plural | 11 | `things` | `Thing` |
+| places | where data lives:  a place, what's kept in it, reading and writing it | 77 | `family cookbook is a web server from "https://api.example.com/v1"` | `export class FamilyCookbook extends Place {}` |
+| sites | a site:  its pages, dialogs and sidebars, and going to one | 6 | `film page` | `filmPage` |
+| JSX | elements, fragments, `<markdown>` blocks | 10 | `<a/>` | `h("a")` |
+| types | type names, singular and plural | 12 | `things` | `Thing` |
 | assignment | `set ... to ...`, `... is ...`, `get`, `return` | 4 | `set unknown-var to yes` | `export const unknownVar = true` |
-| statements | statements with nothing else to say | 1 | `do nothing` | `core.doNothing()` |
-| events | firing and handling events | 3 | `on card click` | `on("card-click")` |
+| statements | statements with nothing else to say | 2 | `do nothing` | `core.doNothing()` |
+| events | firing and handling events | 13 | `on card click` | `on("card-click")` |
 | if | `if`, `otherwise`, a value `if ... otherwise` | 6 | `print 1 if bar else 2` | `core.console.log(bar ? 1 : 2)` |
-| methods | `to ...` actions, animations, quoted aliases | 17 | `to start the game` | `export function startTheGame() {}` |
+| methods | `to ...` actions, animations, quoted aliases | 20 | `to start the game` | `export function startTheGame() {}` |
 | tests | `expect`, `should be`, `echo` | 4 | `its rank should be queen` | `core.expect(it.rank, ...)` |
 
-The weight is in `classes`:  52 of the 245 rule classes, and 95 of the 271 syntaxes, are ways to DECLARE
-something (a template, a property, an alias, how a thing is saved).
+The weight is in `classes` and `places`:  154 of the 407 rule classes, and 277 of the 619 syntaxes, are ways to DECLARE
+something (a template, a property, an alias, how a thing is saved, where it's kept).
 A language that reads like English spends most of its grammar letting you say what things ARE;
 doing things is the smaller half.
 
-- Nineteen modules are folders of [the rules folder](src/spell/rules/), one rule class per file;
+- Twenty-one modules are folders of [the rules folder](src/spell/rules/), one rule class per file;
   the base rules sit at the top of it:  a block, a line, a blank line, a line nothing reads.
-- The 245 classes are 228 rules, and 17 base classes that no syntax names.
+- The 407 classes are 359 rules, and 48 base classes that no syntax names.
   There are more syntaxes than rules because a rule with several ways to be written is registered once per way.
 - Every rule, with every syntax and what each target writes for it:
   the generated syntax table, [spellSyntax.json](src/spell/spellSyntax.json), which the Spell Syntax guide draws
@@ -1117,7 +1119,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | --- | --- |
 | [SpellParser.ts](src/spell/SpellParser.ts) | Spell's parser:  its tokenizer settings, the shared root scope |
 | [languages/](src/spell/languages/) | the language packs, English's and Spanish's:  each one's words, inflector and messages, `SP.Language` |
-| [rules/](src/spell/rules/) | the twenty modules;  `SP.spellParser` from their index |
+| [rules/](src/spell/rules/) | the twenty-two modules;  `SP.spellParser` from their index |
 | [SpellProject.ts](src/spell/SpellProject.ts), [SpellFile.ts](src/spell/SpellFile.ts) | a project and its files:  reading, compiling, saving |
 | [hoistClassMembers.ts](src/spell/hoistClassMembers.ts) | gathers each class's members from every file into its class |
 | [SpellLocation.ts](src/spell/SpellLocation.ts), [SpellUrls.ts](src/spell/SpellUrls.ts), [SpellSetup.ts](src/spell/SpellSetup.ts) | addresses, their URLs and folders, the registry of groups |

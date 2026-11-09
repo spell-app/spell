@@ -261,9 +261,9 @@ spell compile @spell/examples/fizzbuzz --target ts/lib --stdout
 
 ```text
 ✓ @spell/examples/fizzbuzz
-import { core } from "spell/parser/core/model"
+import { core, trigger } from "spell/parser/core/model"
 
-/** File FizzBuzz.spell */
+...
 export function playFizzbuzz() {
   core.getRange(1, 100).forEach((number) => {
     ...

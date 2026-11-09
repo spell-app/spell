@@ -71,8 +71,8 @@ spell test @spell/examples/Solitario
 - The command's own lines, `✓ Compiling`, stay English:  the program speaks Spanish, the tool doesn't.
 
 **Ask what a Spanish word starts.**
-On the front page, `spell explain if` lists the two rules `if` starts.
-In Solitario, `si` starts the same two, with Spanish syntax strings:
+On the front page, `spell explain if` lists the five rules `if` starts.
+In Solitario, `si` starts the same five, with Spanish syntax strings:
 
 ```sh
 spell explain si --in @spell/examples/Solitario
@@ -82,15 +82,17 @@ spell explain si --in @spell/examples/Solitario
 <summary>Output</summary>
 
 ```text
+backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
+e.g. imprimir 1 si bar si no 2
+
 if  si {condition:expression} (entonces|:)? {statement_body}?
 e.g. si x
 
-if_there_are_none  si no hay (ninguno|ninguna) :? {statement_body}?
+if_there_are_none  si no hay (ninguno|ninguna|nada) :? {statement_body}?
+
+if_that_fails_say  si falla decir {text:expression}
 
 if_that_fails  si falla :? {statement_body}?
-
-backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
-e.g. imprimir 1 si bar si no 2
 ```
 
 </details>
@@ -340,7 +342,7 @@ spell translate check es
 <summary>Output</summary>
 
 ```text
-Spanish (es):  complete, 20 modules
+Spanish (es):  complete, 21 modules
 ```
 
 </details>
@@ -354,8 +356,13 @@ Spanish (es):  complete, 20 modules
 ## Translating a project
 
 `spell translate` writes an English project again in Spanish, as a project of its own beside it.
-Solitaire comes out linted clean and passing its six tests, with no person in the loop, in under a minute:
-about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
+Written in `.spell` files, Solitaire came out linted clean and passing its six tests, with no person in the loop,
+in under a minute:  about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
+
+**Not yet:  `.spellml` projects.**
+It reads only `.spell` files, so the examples written in `.spellml`, Solitaire and FizzBuzz among them,
+don't translate today.
+The run below is FizzBuzz's test project, the same program in a `.spell` file.
 
 It works in three passes:
 1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.
@@ -374,7 +381,7 @@ Without Claude (`--no-ai`), the lines are still written, and each name the dicti
 Here with `--cold` too, which starts from no glossary and writes only into `--out`:
 
 ```sh
-spell translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzbuzz-es
+spell translate @spell/test/fizzbuzz --to es --no-ai --cold --out /tmp/fizzbuzz-es
 ```
 
 <details>

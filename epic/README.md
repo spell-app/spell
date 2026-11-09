@@ -238,11 +238,11 @@ and Approve (the check).
 A question's option cards each have Choose, and a todo that's work has three of its own:
 the plane, do it in the next phase;  Revisit;  and the x, drop it.
 
-![A judgement call's line on an epic page:  its yellow J4 chip and title, the Approve, Revisit and Make Caveat buttons, the Do Now wand apart, and the note box open under it](docs/images/epic-item.png)
+![A judgement call unfolded on an epic page:  its yellow J9 chip and title;  at the right one group of three buttons, Do this (the thumbs up), Revisit and Approve (the check);  its text and net effect;  and the note box open under it](docs/images/epic-item.png)
 
-_A judgement call on a real epic page, its note box open:  the yellow chip says it's open, and calm;
-Approve, Revisit and Make Caveat sit together, Do Now's wand apart.
-From an older build:  today's buttons are named in the paragraph above._
+_A judgement call on a real epic page, its note box open:  the yellow chip says it's open.
+On an issue or a judgement call the group reads Do this, Revisit, Approve;
+on other items, Make Todo takes Do this's place._
 
 Nothing you press goes anywhere until Send, in the page's header, hands it all over:  you press the paper plane.
 
