@@ -17,7 +17,7 @@ export class Status extends Thing {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 519, end: 548 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 561, end: 590 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
@@ -43,15 +43,15 @@ export class Status extends Thing {
   static savedIn = {
     place: "status_board",
     collection: "statuses",
-    times: ["created", "modified"], select: ["status", "createdAt", "owner"] }
+    times: ["created", "modified"], select: ["status", "createdAt", "owner", "created"] }
 
   // a status is saved in the status board
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 415, end: 452 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 457, end: 494 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // a status is saved in the status board
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 415, end: 452 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 457, end: 494 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -69,7 +69,7 @@ export class StatusBoard extends Place {}
 export const statusBoard = core.place(new StatusBoard(), {
   name: "status_board",
   kind: "personal atmosphere account",
-  collections: { statuses: { at: "xyz.statusphere.status" } }
+  collections: { statuses: { at: "xyz.statusphere.status", fields: { created: "created at" } } }
 })
 
 // -----------
@@ -94,12 +94,10 @@ core.heading("The app:  the emoji to pick, then everyone's statuses, newest firs
 export class Statusphere extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  /** Newest first:  by when each was set, the other way round */
-  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spellml", start: 1028, end: 1202 }, readsFrom: ["status_board"] }) }
+  /** Newest first:  by when each was set */
+  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spellml", start: 1028, end: 1155 }, readsFrom: ["status_board"] }) }
   get recent() { return core.waitedValue(this, "recent", async () => {
-    const found = await core.savedThings(Status, { sort: [{ field: "created_at" }] })
-    core.reverse(found)
-    return found
+    return await core.savedThings(Status, { sort: [{ field: "created", descending: true }] })
   }) }
 
   /** Your status:  a new record in your own account, as Statusphere writes one */
