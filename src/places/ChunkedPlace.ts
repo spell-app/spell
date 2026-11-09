@@ -163,15 +163,15 @@ export class ChunkedPlace implements Place {
 
   /**
    * A thing's version, from its body's text and the store's own version of that text (`stamp`).
-   * - Here:  the stamp, as the store has it.
+   * - Here:  made from the text, on a store that can (`ChunkStore.versionOfText()`), else the stamp as the store has it.
    * - A subclass may make it from the content instead (`FolderPlace`):  `stamp` then goes on in the list as `stamps`,
    *   so a file is still known to have changed without reading it.
    */
   protected thingVersion(
-    _text: string,
+    text: string,
     { stamp }: { collection: string; id: string; stamp: string | undefined }
   ): string | undefined {
-    return stamp
+    return this.store.versionOfText?.(text) ?? stamp
   }
 
   /** Remember a thing's version. */
@@ -428,6 +428,11 @@ export type ChunkStore = {
   versionOf?(address: string): string | undefined
   /** Write `address` whole, only if it's still at `version`:  its new version.  - throws `PlaceError` `"out of date"` */
   writeIfVersion?(address: string, text: string, version: string): Promise<string>
+  /**
+   * A version made from `text` itself, for a store whose own versions are only a stamp:  a thing's version then moves
+   * exactly when what it holds does (`ChunkedPlace.thingVersion()`).
+   */
+  versionOfText?(text: string): string
   /** What aborting one of its reads does;  default `"soft"`. */
   aborts?: AbortKind
 }

@@ -18,6 +18,7 @@ import {
 import { SRV } from "spell/server"
 
 import type { FolderStorage } from "./FolderPlace"
+import { contentHash } from "./contentVersion"
 import { PlaceEvents } from "./PlaceEvents"
 
 /** A one-file place's whole contents:  each collection's rows, by its name. */
@@ -37,8 +38,8 @@ const WRITE_TRIES = 5
  * - Read whole each time, so an edit in VS Code shows on the next read;  a `watch()` is told what changed, thing by thing,
  *   through the storage's own watch.
  * - Written whole, keeping every comment in it (`SRV.DataFile.textFor()`), so a batch is all or none:  `atomic`.
- * - A thing's version is the FILE's, so a save by anyone means "out of date" for every thing:  the engine merges per field,
- *   so only one field truly changed by both is a conflict.
+ * - A thing's version is the FILE's, made from what it holds (`contentHash()`), so a save by anyone of other text means
+ *   "out of date" for every thing:  the engine merges per field, so only one field truly changed by both is a conflict.
  * - On a storage shaped like `FolderStorage`, as `FolderPlace` is.
  * - Node only.
  ****************/
@@ -116,14 +117,20 @@ export class FilePlace implements Place {
     return this.events.watch(target, onEvent)
   }
 
-  /** The file now, its version noted first:  so a save just after makes that version old.  Anything new in it is told. */
-  private async readFile(): Promise<{ contents: FileContents; version: string | undefined; text: string }> {
-    const version = this.storage.versionOf?.(this.path)
-    const text = (await this.storage.read(this.path)) ?? ""
+  /**
+   * The file now, and anything new in it told.
+   * - `version` is made from its text;  `stamp`, the storage's own, noted first, is what a write is checked against:
+   *   so a save just after this makes that write out of date.
+   */
+  private async readFile(): Promise<FileRead> {
+    const stamp = this.storage.versionOf?.(this.path)
+    const read = await this.storage.read(this.path)
+    const text = read ?? ""
     const contents = text.trim() ? SRV.DataFile.parse<FileContents>(text) : {}
+    const version = stamp === undefined || read === undefined ? undefined : contentHash(text)
     this.version = version
     this.tellDifferences(contents)
-    return { contents, version, text }
+    return { contents, version, stamp, text }
   }
 
   /** Tell whoever's watching what's different from what was last seen. */
@@ -161,28 +168,27 @@ export class FilePlace implements Place {
     return this.inTurn(async () => {
       signal?.throwIfAborted()
       for (let tries = 1; ; tries++) {
-        const { contents, version, text } = await this.readFile()
+        const { contents, version, stamp, text } = await this.readFile()
         const stale = changes.find((change) => change.version !== undefined && change.version !== version)
         if (this.describe().versionCheck && stale) this.outOfDate(stale)
         const rows = changes.map((change) => this.madeIn(contents, change)).filter((row) => row !== undefined)
         const written = SRV.DataFile.textFor(text, contents)
         try {
-          await this.writeFile(written, version)
+          await this.writeFile(written, stamp)
         } catch (error) {
           if (tries < WRITE_TRIES && error instanceof PlaceError && error.kind === "out of date") continue
           throw error
         }
-        this.version = this.storage.versionOf?.(this.path)
+        this.version = this.storage.versionOf ? contentHash(written) : undefined
         this.tellDifferences(contents)
         return { rows }
       }
     })
   }
 
-  /** Write the whole file, only if it's still at `version`, on a storage that can tell. */
-  private async writeFile(text: string, version: string | undefined): Promise<void> {
-    if (version !== undefined && this.storage.writeIfVersion)
-      await this.storage.writeIfVersion(this.path, text, version)
+  /** Write the whole file, only if it's still at `stamp`, on a storage that can tell. */
+  private async writeFile(text: string, stamp: string | undefined): Promise<void> {
+    if (stamp !== undefined && this.storage.writeIfVersion) await this.storage.writeIfVersion(this.path, text, stamp)
     else await this.storage.write(this.path, text)
   }
 
@@ -234,6 +240,18 @@ export class FilePlace implements Place {
       this.readFile().catch((error: unknown) => console.error(`FilePlace:  can't read ${this.path} yet:`, error))
     })
   }
+}
+
+/** One reading of the whole file. */
+type FileRead = {
+  /** Each collection's rows. */
+  contents: FileContents
+  /** Made from its text:  every thing's version.  Left out:  no file, or a storage that keeps no versions. */
+  version: string | undefined
+  /** The storage's own version as it was read:  what a write is checked against. */
+  stamp: string | undefined
+  /** Its text;  `""` for no file. */
+  text: string
 }
 
 /** Constructor props of a `FilePlace`. */

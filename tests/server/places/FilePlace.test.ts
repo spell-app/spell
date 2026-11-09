@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs"
+import { readFileSync, statSync, utimesSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
@@ -85,6 +85,29 @@ describe("FilePlace", () => {
     await vi.waitFor(() => expect(pending.hasPending).toBe(false))
     const { rows } = await place.list("recipes", {}, {})
     expect(rows[0]).toMatchObject({ title: "Mine", notes: "Their notes, longer still" })
+  })
+
+  test("a thing's version comes from what the file holds:  a save with the same size and time still moves it", async () => {
+    const { place, file } = oneFile()
+    await place.list("recipes", {}, {})
+    const version = place.versionOf("recipes", "r-1")!
+    const { mtime } = statSync(file)
+    writeFileSync(file, readFileSync(file, "utf8").replace("Soup", "Stew"))
+    utimesSync(file, mtime, mtime)
+    await place.list("recipes", {}, {})
+    expect(place.versionOf("recipes", "r-1")).not.toBe(version)
+    await expect(
+      place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" }, version }], {})
+    ).rejects.toMatchObject({ kind: "out of date" })
+  })
+
+  test("touching the file moves no thing's version", async () => {
+    const { place, file } = oneFile()
+    await place.list("recipes", {}, {})
+    const version = place.versionOf("recipes", "r-1")!
+    utimesSync(file, new Date(), new Date(Date.now() + 5000))
+    await place.list("recipes", {}, {})
+    expect(place.versionOf("recipes", "r-1")).toBe(version)
   })
 
   test("a watcher hears, thing by thing, what a save on the disk changed", async () => {
