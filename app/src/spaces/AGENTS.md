@@ -469,6 +469,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `/editor`
   - It starts the editor once the page server listens, and stops it with the page server:
     [EditorServer.ts](server/node/routes/EditorServer.ts), vite's dev server, run in `app/`.
+  - The house-network test site the same way:  [LocalSiteServer.ts](server/node/routes/LocalSiteServer.ts),
+    the cloud and Caddy, from the main checkout's page server alone, on a Mac `spell space local setup` has set up
+    (epic `atmosphere` T58).
+    - Quiet anywhere else;  a failure is one line in the log, and never stops the page server.
+    - Its row in `spell server start all`:  the route module's `addServerReport`, so the kit names none of it.
+    - A test's page server never starts it (`VITEST`);  `SPELL_NO_LOCAL_SITE=1` turns it off.
 - PROJECT DATA FOLDERS ([SpaceFolders.ts](server/node/places/SpaceFolders.ts), epic `atmosphere` P1):
   where a program's rows live, on disk.
   - E.g. `family cookbook is a data folder at "owen@spell/recipes"` keeps its rows in `@spell/owen@/recipes/`.
@@ -693,7 +699,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a program in an org's SHARED space, `/apps/@rs/OrgAdmin`, for whoever reads that space (`sharedProgramAt()`)
         - someone who can't yet gets `cloudSignIn.html` at its address, whatever the name:
           a program's files are the org's, so it can't load to draw its own sign-in bar
+          - STAYING SIGNED IN (epic `atmosphere` I20):  the session cookie is `SameSite=Strict`, so a link from another
+            site brings no cookie and gets this page;  the page asks `GET /api/sign-in/me` (which does bring it) and,
+            signed in, goes to its own address once more.
+            Once only (`sessionStorage`):  someone who really has no access is told so, and it never loops.
         - `spell space org create` copies the Admin, Inbox, Feed and Chat programs there, each naming the org (`OrgSetup`)
+      - THE HOME PAGES (epic `atmosphere` T59;  [CloudHomes.ts](server/node/routes/CloudHomes.ts), `cloudHome.html`):
+        - `/`, the spaces home:  each org the person asking reads, their own space, and anything else public or whose
+          list names them;  nobody signed in, the public ones and Sign in (`/sign-in`)
+        - `/@rs`, an org's home, for whoever reads the org:  its programs and its other spaces;  anyone else gets the
+          sign-in page, the same whether the org is there or not
+        - Their lists come from `/api/cloud/home` and `/api/cloud/home/orgs/<org>`, only what the person asking may read
+          (`SpaceFolders.mayReadSpace()`);  only an org has a home yet, so a team's or a person's space has no link
       - never the mail catcher's page, a private space, the Admin space, nor anyone's own projects
     - `spell space cloud serve` builds the browser bundle first when it's stale (`browserBundleCurrentOrDie()`):
       it's git-ignored, so nothing else keeps a checkout's current.  Checked as it starts:  a merge needs a restart.
