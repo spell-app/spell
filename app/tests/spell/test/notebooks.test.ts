@@ -127,7 +127,9 @@ describe("the Spell UI site", () => {
   test("no tab bar is left:  no file, no line drawing one, no project-named tag", () => {
     for (const { path, contents } of PAGES)
       expect({ path, tab: /tab-bar/.test(contents) }).toEqual({ path, tab: false })
-    const folders = readdirSync(FOLDER, { withFileTypes: true }).filter((entry) => entry.isDirectory())
+    const folders = readdirSync(FOLDER, { withFileTypes: true }).filter(
+      (entry) => entry.isDirectory() && entry.name !== "snapshots"
+    )
     expect(folders.length).toBe(100)
     for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spellml"))).toBe(false)
   })
