@@ -238,6 +238,18 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
       )
     })
 
+    // epic `notebook` T4
+    test.each([
+      ["a block on its lines, with other markup", "<html>\n\t<div>x</div>\n</html>\n<button>Go</button>"],
+      ["a block on one line, with other markup", "<html><div>x</div></html>\n<button>Go</button>"],
+      ["markup first", "<button>Go</button>\n<html><b>y</b></html>"]
+    ])("there and back, %s:  the <html> block as written", (_case, spellx) => {
+      const spell = SX.CodeSpellWriter.writeMarkup(spellx, { path: "/Counter.spellml" })
+      expect(spell).toContain("<html>")
+      expect(spell).toContain("<ui-button>Go</ui-button>")
+      expect(SX.SpellxWriter.writeMarkup(spell, { path: "/Counter.spellml" })).toBe(spellx)
+    })
+
     test("there and back:  an example's spellx, its code spell, and its spellx again", () => {
       const spellx = "<text>\n\t<button>Go</>\n</text>"
       const spell = SX.CodeSpellWriter.writeMarkup(spellx, { path: "/Counter.spellml" })

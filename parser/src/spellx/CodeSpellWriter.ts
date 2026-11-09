@@ -51,6 +51,10 @@ export class CodeSpellWriter {
    *   - each `</>` naming what it closes
    *   - prose as `<markdown>` blocks
    * - How:  written inside such a page, then taken back out of it:  `markup`'s own lines, at its own indent.
+   * - A top-level `<html>` block keeps its tags (epic `notebook` T4):
+   *   in code spell `<div>` looks just like a component, so without them the way back can't tell which is which
+   *   (`SX.SpellxWriter.writeMarkup()`).
+   *   - How:  written inside an element, where a block keeps them already, and that element taken off.
    * - `options.componentTag`'s `start` is where the element starts in `markup`.
    * - NEVER throws:  markup spellx can't read is written as it is.
    */
@@ -62,11 +66,16 @@ export class CodeSpellWriter {
     const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
     const head = `<${prefix}-${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
-    // where each of `markup`'s lines starts, in it and in the page it's written in (one tab further in)
+    const isWrapped = TOP_LEVEL_HTML_BLOCK.test(markup)
+    const wrapperOpen = isWrapped ? `\t<${WRAPPER_TAG}>\n` : ""
+    const wrapperClose = isWrapped ? `\t</${WRAPPER_TAG}>\n` : ""
+    const indent = isWrapped ? "\t\t" : "\t"
+    // where each of `markup`'s lines starts, in it and in the page it's written in (`indent` further in)
     const starts: Array<{ markup: number; written: number }> = []
     let at = 0
     for (const line of lines) {
-      starts.push({ markup: at, written: head.length + at + starts.length + 1 })
+      const written = head.length + wrapperOpen.length + at + (starts.length + 1) * indent.length
+      starts.push({ markup: at, written })
       at += line.length + 1
     }
     const markupStart = (start: number) => {
@@ -75,19 +84,24 @@ export class CodeSpellWriter {
     }
     const componentTag = options.componentTag
     const written = CodeSpellWriter.write(
-      `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${page}>\n`,
+      `${head}${wrapperOpen}${lines.map((line) => indent + line).join("\n")}\n${wrapperClose}</${prefix}-${page}>\n`,
       {
         ...options,
         language,
-        componentTag: componentTag && ((word, start) => componentTag(word, markupStart(start)))
+        // never asked for the wrapper:  it's not in `markup`, and comes off below
+        componentTag:
+          componentTag &&
+          ((word, start) => (start < starts[0]!.written ? undefined : componentTag(word, markupStart(start))))
       }
     )
     // its drawing's lines:  after the page's line and its `to draw it:`, to its block's end
     const drawing = written.split("\n").slice(2)
     const end = drawing.findIndex((line) => line && !line.startsWith("\t"))
-    return drawing
-      .slice(0, end < 0 ? undefined : end)
-      .map((line) => line.replace(/^\t\t/, ""))
+    const body = drawing.slice(0, end < 0 ? undefined : end).filter((line, index, all) => {
+      return line || all.slice(index).some(Boolean)
+    })
+    return (isWrapped ? body.slice(1, -1) : body)
+      .map((line) => line.replace(isWrapped ? /^\t\t\t/ : /^\t\t/, ""))
       .join("\n")
       .trimEnd()
   }
@@ -332,6 +346,12 @@ function lineComment(indent: string, text: string): string {
 
 /** A component's bare name in spellx markup (`<text>`, `<botón>`):  lowercase letters only, as `SpellJSX` reads it. */
 const BARE_NAME = /^\p{Ll}+$/u
+
+/** A line of an example's body that starts an `<html>` block, at the body's own indent:  top-level. */
+const TOP_LEVEL_HTML_BLOCK = /^<html[\s>]/m
+
+/** The element `writeMarkup()` writes a body holding one of those inside, and takes off again. */
+const WRAPPER_TAG = "section"
 
 /**
  * Spell's own blocks in a drawing, the same words in code spell:  never a pack's component (`<ui-markdown>`).
