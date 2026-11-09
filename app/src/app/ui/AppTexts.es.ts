@@ -519,6 +519,12 @@ const APP_TEXTS_ES: AppTextPack = {
   ////////////////
 
   pathInvalid: "¡La ruta '{path}' no es válida!",
+  askNewAppName: "¿Cómo se llamará {theType}?",
+  askRenameApp: "Nuevo nombre para {theType}:",
+  askNewFileName: "¿Cómo se llamará el archivo nuevo?",
+  askRenameFile: "Nuevo nombre para el archivo:",
+  confirmRemoveApp: "¿Seguro que quieres borrar {theType} '{name}'?",
+  confirmRemoveFile: "¿Seguro que quieres borrar el archivo '{name}'?",
   createdApp: "Se creó {theType} {name}.",
   duplicatedApp: "Se duplicó {theType}.",
   renamedApp: "Se renombró {theType}.",

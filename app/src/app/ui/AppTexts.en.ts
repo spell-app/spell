@@ -432,6 +432,12 @@ export const APP_TEXTS = {
   ////////////////
 
   pathInvalid: "Path '{path}' is invalid!",
+  askNewAppName: "Name for the new {type}?",
+  askRenameApp: "New name for the {type}?",
+  askNewFileName: "Name for the new file?",
+  askRenameFile: "New name for the file?",
+  confirmRemoveApp: "Really remove {type} '{name}'?",
+  confirmRemoveFile: "Really remove file '{name}'?",
   createdApp: "Created {type} {name}.",
   duplicatedApp: "{Type} duplicated.",
   renamedApp: "{Type} renamed.",
