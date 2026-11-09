@@ -42,9 +42,6 @@
    * the item states' colours (decision Q20):  blue Claude is on it, red needs Owen, yellow open, green done lately;
    * a phase's chips the same (I170), grey its `old`
    */
-  .chip:disabled {
-    cursor: default;
-  }
   .chip[data-color="blue"] {
     --_chip: var(--epic-state-progress, var(--ui-blue));
     --_chip-on: var(--epic-state-progress-on, var(--ui-blue-on));

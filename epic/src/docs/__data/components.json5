@@ -483,6 +483,11 @@
           "description": "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  Its Read mark goes under `away:<line>`."
         },
         {
+          "name": "state",
+          "kind": "string",
+          "description": "Which of the section's badges it counts in (`recent`, `progress`, `attention`):  its tick's colour, and what filters it."
+        },
+        {
           "name": "working",
           "kind": "boolean",
           "description": "A phase still under way:  a half-filled circle spinning like a coin in place of the tick, nothing to read yet (Owen, 2026-11-03:  \"P23 icon should be the spinning coin half-circle\")."
@@ -6016,7 +6021,7 @@
         {
           "name": "news",
           "kind": "string",
-          "description": "`kind=\"away\"`:  how much is new, as `<state>:<count>` (`recent:2 progress:1 attention:3 open:2`), written by the tool:  its title's badges, there while it's folded."
+          "description": "`kind=\"away\"`:  how much is new, as `<state>:<count>` (`recent:2 progress:1 attention:3`), written by the tool:  its title's badges, there while it's folded;  a click filters its lines."
         },
         {
           "name": "lines",
@@ -6684,11 +6689,6 @@
       "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  A click toggles a chip and every state of its colour (`StateFilter.nextShown()`), as its tooltip says;  an ⌥-click (Alt-click) shows only that colour, whatever showed (epic `epic-engine` I166).  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, the blues' chip.",
       "noun": "state-filter",
       "attributes": [
-        {
-          "name": "static",
-          "kind": "boolean",
-          "description": "Its chips only say their counts:  no click filters anything."
-        },
         {
           "name": "counts",
           "kind": "string",

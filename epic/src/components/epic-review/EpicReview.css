@@ -114,6 +114,16 @@
     --_act: var(--_epic-act-grey);
   }
   /* pressed, not sent:  dashed in its colour */
+  [data-color="red"] {
+    --_act: var(--ui-red, #c8102e);
+  }
+  /* a toned tick (`tone`):  its colour at rest;  dotted once marked, until it's sent */
+  ui-button[data-tone]::part(button) {
+    color: var(--_act);
+  }
+  ui-button[data-tone][data-fill="dashed"]::part(button) {
+    outline-style: dotted;
+  }
   ui-button[data-fill="dashed"]::part(button) {
     outline: 1.5px dashed var(--_act);
     outline-offset: -2px;

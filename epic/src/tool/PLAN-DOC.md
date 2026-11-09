@@ -86,7 +86,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - What Claude did since the person last pressed Done reading (`<epic-page away-read>`),
       and what needs them, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
-      no section.  `waiting` is its toolbar badge;  `news` its title's badges, by colour (done, under way, needs you, to do).
+      no section.  `waiting` is its toolbar badge;  `news` its title's badges, by colour (done, under way, needs you):  a click filters its lines, and each line's tick wears its badge's colour (`<epic-away-line state>`).
     - It opens by itself the first time a page shows it;  after that it stays as you folded it.
     - An item the person addressed leaves it, however recently it changed (`NightSummary.isAddressed()`,
       epic `epic-engine`

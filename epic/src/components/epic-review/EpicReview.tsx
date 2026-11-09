@@ -297,7 +297,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
       <ui-button
         icon={spec.icon}
         data-action={spec.action}
-        data-color={spec.color}
+        data-color={this.tone ?? spec.color}
+        data-tone={this.tone ? "" : undefined}
         data-fill={this.fillOf(spec)}
         data-busy={busy() && this.review.workedOn() ? "" : undefined}
         title={
