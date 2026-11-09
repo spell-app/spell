@@ -111,6 +111,7 @@ export const spanishWords: SP.LanguageWords = {
     "excel file": "archivo de excel",
     "google sheet": "hoja de google",
     airtable: "airtable",
+    "atmosphere space": "espacio de atmosphere",
     "atmosphere account": "cuenta de atmosphere",
     "personal atmosphere account": "cuenta personal de atmosphere",
     "database on this device": "base de datos en este dispositivo",
@@ -237,6 +238,8 @@ export const spanishWords: SP.LanguageWords = {
       fallo: "failed",
       paginación: "paging",
       paginacion: "paging",
+      "tamaño-de-página": "page-size",
+      "tamano-de-pagina": "page-size",
       como: "as"
     },
     forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
@@ -396,6 +399,7 @@ export const spanishWords: SP.LanguageWords = {
         whole: "mostrar todo en :",
         inPages: "mostrarlos en páginas",
         allAtOnce: "mostrarlos todos",
+        atATime: "mostrarlos de {size} en {size}",
         no: "no",
         pages: "páginas",
         none_: "ninguna",
@@ -507,6 +511,8 @@ export const spanishWords: SP.LanguageWords = {
      */
     methodLine: /^(?:para(?![ \t]+cada\b)|(?:crear[ \t]+)?animaci[oó]n)[ \t]/iu,
     /** A line re-opening a type, its name captured:  `una carta:`, `un solitario donde:`. */
+    placeDeclaration:
+      /^(?!(?:un[oa]?|el|la|los|las|su|sus)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+un[oa]?[ \t].*[ \t](?:en|desde)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
     reopenedType: /^un[oa]?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:donde[ \t]*)?:[ \t]*$/iu
   }
 }

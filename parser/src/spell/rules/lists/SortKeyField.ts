@@ -11,7 +11,7 @@ import { isSortKeyScope } from "./lists.shared"
  * - `Priority.preferred`:  right after `sorted by`, the item's field is what's meant, over a variable called `title`.
  * - Compiles to `item.title`, which a place can sort by.
  */
-export class SortKeyField extends SpellExpression<"property"> {
+export class SortKeyField extends SpellExpression<"property", { member?: unknown }> {
   @proto static priority = Priority.preferred
 
   /** Quick test:  only in a sort key. */
@@ -25,7 +25,10 @@ export class SortKeyField extends SpellExpression<"property"> {
     if (!match) return undefined
     const { itDatatype } = scope as P.MethodScope
     const item = scope.getType(itDatatype)
-    return item?.hasProperty(`${match.groups.property.raw}`.trim()) ? match : undefined
+    const words = `${match.groups.property.raw}`.trim()
+    if (!item?.hasProperty(words)) return undefined
+    match.data.member = item.getMember(words)
+    return match
   }
 
   getAST(match: P.MatchFor<this>): P.ASTPropertyExpression {

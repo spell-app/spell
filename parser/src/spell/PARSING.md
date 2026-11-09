@@ -1830,6 +1830,7 @@ What a program's lines about where data lives compile to, and what reads the res
 - A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
   - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
     a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
+  - In an action, `if that fails:` compiles to a `try` around the line above it, at `Block.getAST()` (`IfThatFails.catchesLineAbove()`).
   - Its read function is named `drawRead`, which `P.DRAWING_NAME` knows:  a drawing never waits, it shows what it has.
 - What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
   `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.

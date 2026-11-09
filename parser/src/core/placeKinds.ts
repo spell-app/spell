@@ -52,8 +52,10 @@ export type PlaceDetails = {
   >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
-  /** It goes without its key where nothing holds it, a browser:  `its key is the secret "GITHUB_TOKEN", if it's set`. */
+  /** It goes without its key where nothing holds it, a browser:  `its optional key is the secret "GITHUB_TOKEN"`. */
   keyIfSet?: boolean
+  /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
+  forEachTab?: boolean
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
   /** Once a day at this time, instead:  `check it once a day at 5am` (`pollWhileVisible()`'s `at`). */
@@ -377,7 +379,14 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       making
     )
   },
-  "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
+  // the words compile (epic `data` Q32):  reading one waits for epic `atmosphere` to take Spaces out of trial (its P11, Q2)
+  "atmosphere space": ({ details }) => {
+    throw new TypeError(
+      `core.place():  "${details.name}" is an atmosphere space, and Spell can't reach those yet:  AT Protocol's Spaces are still on trial`
+    )
+  },
+  "database on this device": ({ details }, { DevicePlace }) =>
+    new DevicePlace({ wholeRows: true, ...(details.forEachTab && { forEachTab: true }) }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
 }
 

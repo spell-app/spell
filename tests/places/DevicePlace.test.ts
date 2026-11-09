@@ -10,6 +10,13 @@ afterEach(async () => {
   await new PrefStore(STORE).forgetAll()
 })
 
+describe("new DevicePlace()", () => {
+  test("for each tab, it keeps things in the browser's per-tab storage", () => {
+    expect(new DevicePlace({ forEachTab: true }).prefPlace).toBe(new PrefStore(STORE, { place: "session" }).place)
+    expect(new DevicePlace().prefPlace).toBe(new PrefStore(STORE).place)
+  })
+})
+
 describe("DevicePlace.list()", () => {
   test("reads back what preferences hold, each with its value as a preference reads", async () => {
     const prefs = new PrefStore(STORE)

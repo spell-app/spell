@@ -380,7 +380,7 @@ export class SpellDeclarations {
           loaded.units = declaration.units
           declaration.units.forEach(SP.noteUnitNames)
         }
-        if (loaded && declaration.place) SpellDeclarations.loadPlace(loaded, declaration.place)
+        if (loaded && declaration.place) SpellDeclarations.loadPlace(scope, loaded, declaration.place)
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
       SpellDeclarations.loadConstants(scope, from, names, declaration, declaredAt)
@@ -398,9 +398,14 @@ export class SpellDeclarations {
     for (const declaration of saved) SpellDeclarations.loadSaved(scope, names, declaration)
   }
 
-  /** SIDE EFFECT:  `type` is the place `place` says, for what the compiler asks of it (epic `data` I19). */
-  private static loadPlace(type: P.TypeScope, { name, kind, at, details }: SP.DeclaredPlace) {
+  /**
+   * SIDE EFFECT:  `type` is the place `place` says, for what the compiler asks of it (epic `data` I19).
+   * - And its one instance, `family_cookbook`, as the words `the family cookbook` mean:
+   *   so a project can name it on its own type's line, `a note is saved in the family cookbook` (T161).
+   */
+  private static loadPlace(scope: P.RootScope, type: P.TypeScope, { name, kind, at, details }: SP.DeclaredPlace) {
     Object.assign(type, definedOnly({ placeName: name, placeKind: kind, placeAt: at, importedPlaceDetails: details }))
+    scope.variables.add({ name, datatype: type.name, kind: "only" })
   }
 
   /**

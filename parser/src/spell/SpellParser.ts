@@ -625,6 +625,7 @@ export class SpellParser extends P.Parser {
    * First lines of the methods `text` defines, found by scanning its lines (epic page `outline-spell`, P22).
    * - Each is `<type>\t<first line>`, its type empty at a file's top.  See `P.Parser.declaredMethods()`.
    * - At a file's top:  `to play a card`, `animation deal the cards`.
+   * - Under a place's line:  `- to refresh is at "/refresh"`, an action its line's address runs (`operation_at`).
    * - In a type's outline body, one tab in:
    *   `- to debug it:` under `solitaire is an app where:` is `solitaire\tto debug it`.
    *   - The type's line is any that declares one (`TYPE_DECLARATION`), or re-opens one, `a solitaire:`.
@@ -761,9 +762,11 @@ export class SpellParser extends P.Parser {
    * Type a top-level `line` declares or re-opens, e.g. `solitaire` for `a solitaire:` -- `undefined` if none.
    * - `onlyOnes`:  the one-of-a-kinds its text declares by a kind other than `app` (`oneOfAKindsIn()`),
    *   e.g. `klondike` for `klondike is a card game where:`.
+   * - A place's line says what its body is about, as a type's does:
+   *   `family-cookbook` for `family cookbook is a web server at "...":`, so its operations can be called ahead (epic `data` T67).
    */
   subjectOf(line: string, onlyOnes?: ReadonlySet<string>): string | undefined {
-    const { typeDeclaration, kindDeclaration, reopenedType } = this.declarations
+    const { typeDeclaration, kindDeclaration, placeDeclaration, reopenedType } = this.declarations
     const declared = new RegExp(typeDeclaration.source, "iu").exec(line)
     if (declared) {
       const [, type, words, created, onlyOne] = declared
@@ -776,6 +779,12 @@ export class SpellParser extends P.Parser {
         created
       )
     }
+    const place = placeDeclaration.exec(line)?.[1]
+    if (place)
+      return place
+        .trim()
+        .split(/[ \t]+/)
+        .join("-")
     const onlyOne = onlyOnes?.size ? new RegExp(kindDeclaration.source, "iu").exec(line) : undefined
     const onlyOneName =
       onlyOne && !onlyOne[1]
@@ -887,10 +896,16 @@ export class SpellParser extends P.Parser {
 type OperandTwinned = { operandInExpressions?: boolean }
 
 /** A method definition's first line:  `to ...`, `animation ...`, `create animation ...` -- see `declaredMethods()`. */
-/** `line` up to its first `:`, trimmed:  a method's first line without its body. */
+/**
+ * `line` up to its first `:`, trimmed:  a method's first line without its body.
+ * - Not a `:` inside quotes:  an operation's address, `to refresh is at "/a:b"`.
+ */
 function firstLineOf(line: string): string {
-  return line.split(":")[0]!.trim()
+  return (FIRST_LINE.exec(line)?.[0] ?? line).trim()
 }
+
+/** A line up to its first `:` outside quotes. */
+const FIRST_LINE = /^(?:[^:"]|"[^"]*")*/
 
 /** A rule which can make its method callable ahead of its definition:  `MethodDefinition`'s. */
 type CallsAhead = { callAhead?: (match: P.Match) => void }
