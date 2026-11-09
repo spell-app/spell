@@ -408,6 +408,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       stand-in;  plain `node` loads it
       - only `epic whoami`, `epic init` and `epic worktree remove --branches` (where the base branch takes only pull
         requests) run it:  never a page served or a hook
+    - `CodeHost` (epic `epic-engine` I248):  which server a repo's code is on (`codeHost`, `"github"` or `"gitlab"`,
+      worked out from `origin` when left out), and the ONE chooser of how to talk to it, `CodeHost.of(config)`:  `GitHub`'s
+      statics or a `GitLab`, the same operations;  nothing else compares host names
+    - `GitLab`:  `glab`, on one instance, self-hosted too;  `$SPELL_EPIC_GLAB` names a stand-in;  plain `node` loads it
     - `Editor` (epic `epic-friend` P16):  which editor the tools drive, VS Code (`code`) or Cursor (`cursor`), the ONE
       reader of it:  `$SPELL_EPIC_EDITOR` (this machine's), else the window's own marks in the environment
       (`ofWindow()`:  Cursor's `CURSOR_TRACE_ID`, its macOS bundle id, its folders in VS Code's `VSCODE_*` paths), else
@@ -506,6 +510,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - left out besides:  `linguist-generated`, a `GENERATED` marker on the FIRST line only, bundles
         - `LocPage` rewrites the LOC guide's tables, dates and left-out list as DOM nodes (`Markup.plain()`), keeping
           its prose and ids;  a missing page is made by `epic pages create durable`
+    - `PullRequest`:  `epic pr <name>`, a branch pushed and its pull or merge request opened, on either host (`CodeHost`)
     - `BaseBranch`:  the local base branch fast-forwarded from `origin`, where it takes only pull requests
       (`baseBranchProtected`):  by the worktree hook and `MainMerge`, safe or not at all;  plain `node` loads it by path
     - `CheckoutServers`:  a checkout's web servers (page server, vite) stopped as it goes (epic `epic-engine` I53)

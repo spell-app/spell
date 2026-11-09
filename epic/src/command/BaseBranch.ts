@@ -39,7 +39,7 @@ export class BaseBranch {
       return behind === "0"
         ? {
             action: "ahead",
-            line: `local ${base} is ${ahead} commit(s) ahead of origin's, which only a pull request can bring there`
+            line: `local ${base} is ${ahead} commit(s) ahead of origin's, which only a pull or merge request can bring there`
           }
         : {
             action: "diverged",

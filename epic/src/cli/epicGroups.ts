@@ -1416,8 +1416,13 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--protected-base":
       "the base branch takes only pull requests:  put the two files on a new branch, epic-setup, and open one",
     "--no-server": "don't start the epic server",
+    "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",
     "--json": "print what it did as JSON"
+  },
+  pr: {
+    "--title <title>": "the request's title (default:  its one commit's subject, else the branch's name)",
+    "--body-file <file>": "the request's description, from a file"
   },
   whoami: {
     "--rename": "keep the name, and write it over your old one wherever it says who wrote something",

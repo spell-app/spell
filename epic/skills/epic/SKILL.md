@@ -653,9 +653,9 @@ than just being able to move on").
        ("6. Doc Review"), before the commit.
      - `epic config baseBranchProtected` prints `true`:  the base branch takes only pull requests, so `epic merge` refuses
        and steps 1-2 below don't apply.
-       No asking, as below:  `epic worktree merge-main`, `git push -u origin <name>`, and `gh pr create` unless one's open
+       No asking, as below:  `epic worktree merge-main`, then `epic pr <name>`, which pushes and opens one unless one's open
        ([the isolate skill](../isolate/SKILL.md), "Finish, when the base branch takes only pull requests").
-       The phase reaches `main` when GitHub merges it;  its changelog entry stays under "2. In worktrees" until then.
+       The phase reaches `main` when the code host merges it;  its changelog entry stays under "2. In worktrees" until then.
      - Then, no asking (the standing epic is the ask):
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
           - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A

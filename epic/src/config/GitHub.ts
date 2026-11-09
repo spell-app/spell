@@ -22,8 +22,24 @@ import { spawnSync } from "node:child_process"
  * - STATIC:  `gh` is the machine's.
  * - Its position:  node's own modules only, so plain `node` loads it (beside `EpicHome`, which does);
  *   NEVER an alias, an `enum` or a parameter property.
+ * - One of the two code hosts:  callers ask `CodeHost.of()`, which hands back this class or a `GitLab`;
+ *   nothing else tells them apart.  `run()` runs `glab` for `GitLab` too:  one runner.
  ****************/
 export class GitHub {
+  /** Which code host this is:  `CodeHost`'s word for it. */
+  static readonly kind = "github"
+
+  /** What a person reads about this host:  what work is proposed through, and how to get its command. */
+  static readonly words: CodeHostWords = {
+    name: "GitHub",
+    command: "gh",
+    pullRequest: "pull request",
+    PullRequest: "Pull request",
+    number: (id) => `#${id}`,
+    install: ["  brew install gh        (other systems:  https://cli.github.com)", "  gh auth login"],
+    openCommand: (base, branch) => `gh pr create --base ${base} --head ${branch} --fill`
+  }
+
   /** The `gh` to run:  `$SPELL_EPIC_GH`, else `gh` on the `PATH`.  Read on every call:  a test sets it. */
   static command(): string {
     return process.env[GH_ENV] || "gh"
@@ -31,8 +47,8 @@ export class GitHub {
 
   /**
    * Run `gh <args>`:  `{ ok, out, err }`, `out` and `err` trimmed.
-   * - `command`:  the `gh` to run, default `command()`
-   * - a missing `gh`, a timeout or a failing command is `ok: false`;  NEVER throws
+   * - `command`:  the command to run, default `command()`;  `GitLab` passes its `glab` here
+   * - a missing command, a timeout or a failing command is `ok: false`;  NEVER throws
    */
   static run(args: string[], { command = GitHub.command(), timeout = TIMEOUT_MS, cwd }: GhRunOptions = {}): GhResult {
     try {
@@ -65,6 +81,20 @@ export class GitHub {
   /** Whether `name` is a GitHub login:  letters, digits and single hyphens, at most 39. */
   static isLogin(name: string): boolean {
     return LOGIN.test(name)
+  }
+
+  /**
+   * The repo page `<epic-commit>` links under, for git address `address`:  `https://github.com/o/r`, which takes
+   * `/commit/<sha>`;  `null` for an address that isn't GitHub's.
+   */
+  static commitBase(address: string | null | undefined): string | null {
+    const repo = GitHub.repoIn(String(address ?? "").trim())
+    return repo ? `https://github.com/${repo}` : null
+  }
+
+  /** Nothing to do:  a new GitHub repo's main takes pushes from everyone added to it.  `CodeHost`'s other side. */
+  static letTeamPush(): string | undefined {
+    return undefined
   }
 
   /** Whether GitHub account `owner` is an organization, not a person;  `false` when gh can't say.  NEVER throws. */
@@ -131,17 +161,23 @@ export class GitHub {
    * - SIDE EFFECT:  a pull request on GitHub
    */
   static openPullRequest({ branch, base, title, body, cwd }: OpenPullRequest): string {
-    const open = GitHub.json<{ url: string }[]>(
-      ["pr", "list", "--head", branch, "--base", base, "--state", "open", "--json", "url"],
-      { cwd, timeout: NETWORK_MS }
-    )
-    if (Array.isArray(open) && open[0]?.url) return open[0].url
+    const open = GitHub.openPullRequestOf(branch, base, cwd)
+    if (open) return open
     const run = GitHub.run(["pr", "create", "--base", base, "--head", branch, "--title", title, "--body", body], {
       cwd,
       timeout: CREATE_TIMEOUT_MS
     })
     if (!run.ok) throw new Error(`gh pr create failed:  ${run.err || run.out || "no reason given"}`, { cause: run })
     return run.out.split("\n").at(-1) ?? ""
+  }
+
+  /** The address of the pull request of `branch` into `base` that's open, from checkout `cwd`;  none:  `undefined`.  NEVER throws. */
+  static openPullRequestOf(branch: string, base: string, cwd: string): string | undefined {
+    const open = GitHub.json<{ url: string }[]>(
+      ["pr", "list", "--head", branch, "--base", base, "--state", "open", "--json", "url"],
+      { cwd, timeout: NETWORK_MS }
+    )
+    return Array.isArray(open) ? open[0]?.url || undefined : undefined
   }
 
   /** `gh <args>`'s output as JSON;  `undefined` when it failed or wasn't JSON.  NEVER throws. */
@@ -183,6 +219,24 @@ export class GitHub {
     const protocol = GitHub.run(["config", "get", "git_protocol", "--host", HOST]).out
     return protocol === "ssh" ? sshUrl : url.endsWith(".git") || !/^https:/.test(url) ? url : `${url}.git`
   }
+}
+
+/** What a person reads about a code host:  `GitHub.words`, `GitLab`'s;  the ONE place that says "merge request". */
+export type CodeHostWords = {
+  /** its name:  GitHub, GitLab */
+  name: string
+  /** its command:  `gh`, `glab` */
+  command: string
+  /** what work is proposed through, in a sentence:  `pull request`, `merge request` */
+  pullRequest: string
+  /** that, starting a sentence */
+  PullRequest: string
+  /** one of them, as this host numbers it:  `#12`, `!12` */
+  number: (id: number) => string
+  /** the lines to run to get its command, logged in, two spaces in */
+  install: string[]
+  /** the line that opens one by hand, for a branch already pushed */
+  openCommand: (base: string, branch: string) => string
 }
 
 /** What `GitHub.run()` returns. */

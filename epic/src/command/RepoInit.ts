@@ -19,7 +19,8 @@ import { CLI } from "spell/cli"
 import { Editor } from "spell/epic/config/Editor"
 import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
-import { GitHub, type RepoVisibility } from "spell/epic/config/GitHub"
+import { CodeHost, type CodeHostClient, type CodeHostKind } from "spell/epic/config/CodeHost"
+import { GitHub, type CodeHostWords, type RepoVisibility } from "spell/epic/config/GitHub"
 import { PeopleColors } from "spell/epic/config/PeopleColors"
 import { VoiceColor } from "spell/epic/config/VoiceColor"
 
@@ -31,7 +32,7 @@ import { Shared } from "./Shared"
 /****************
  * ### `RepoInit`
  * `epic init [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public]
- * [--protected-base] [--no-plugin] [--no-server] [--dry-run] [--json]`:
+ * [--host github|gitlab] [--protected-base] [--no-plugin] [--no-server] [--dry-run] [--json]`:
  * set a repo up for epics (epic `epic-eject` P9), from any folder of its main checkout or a worktree of it;  the ONE
  * command a new repo, and each teammate joining it, runs (epic `epic-friend` P13:  `npx spell@next epic init`).
  *
@@ -44,7 +45,9 @@ import { Shared } from "./Shared"
  *    - worktrees in `../<repo>.worktrees`
  *    - the install command its lock file names (none without one)
  *    - window names from the repo's name;  the window files in the epic folder's `windows/` (git-ignored there)
- *    - a file already there is kept as it is
+ *    - where the code is hosted (`codeHost`):  `--host`, the config's, the `origin` remote's address, or asked in a
+ *      terminal when that address doesn't say (`codeHostChoice()`)
+ *    - a file already there is kept as it is;  `--host`, or that question, writes its `codeHost`
  * 2. makes the epic folder, a git repo of its own, with a folder for each of `sharedFolders`
  *    (`Shared.init()`):  `epics`, `sagas`, `guides`, `pages`
  *    - a LATER person (the config names its `contentRemote`, the folder is missing):  clones it instead
@@ -52,11 +55,12 @@ import { Shared } from "./Shared"
  * 2b. gives the epic repo its REMOTE, so a team shares the plans (`remoteStep()`, epic `epic-friend` P4, Q1):
  *    - the FIRST person:  asks what to call it (`CLI.ask()`, suggesting `<repo>.epics`;  `--content-repo`
  *      answers), and whether it's private or public (private suggested;  `--public` answers;  epic `epic-friend`
- *      T19), makes it on GitHub (`GitHub.createRepo()`), pushes, and writes its address into the config
+ *      T19), makes it on the code host (`CodeHost.of()`:  GitHub or GitLab), pushes, and writes its address into the config
  *      (`contentRemote`)
  *      - no terminal to ask in:  private, unless `--public`;  public says, in one line, that the plans will be too
- *      - its owner:  the code repo's when that's an organization, else the person's own GitHub account
- *      - GitHub only, for now:  without `gh`, or logged out, it says how to get it, and carries on without
+ *      - its owner:  the code repo's when that's an organization (a GitLab group), else the person's own account
+ *      - without the host's command (`gh`, `glab`), or logged out, it says how to get it, and carries on without
+ *      - GitLab protects a new project's default branch:  opened up at once (`letTeamPush()`), or says what to do
  *    - `--remote <address>`:  a repo made already;  `--no-remote`:  none, the plans stay on this machine
  *    - an epic repo with a remote already:  its address written into the config, when it isn't there
  * 3. links those folders in at the checkout's root (`Shared.link()`)
@@ -84,8 +88,9 @@ import { Shared } from "./Shared"
  *   leave the links alone;  on another branch it says so, and commits nothing
  * - a base branch that takes only pull requests (`baseBranchProtected`):  it NEVER commits there
  *   (`commitViaPullRequest()`):  the two files go on a new branch, `epic-setup`, pushed, with a pull request opened
- *   (`gh`), else what to run printed;  the base branch's checkout is left as it was, and epics start once it's merged
- *   - on when `--protected-base` says so, or GitHub does (`protectionStep()`), in one line
+ *   (`gh` or `glab`), else what to run printed;  the base branch's checkout is left as it was, and epics start once
+ *   it's merged;  on GitLab it's a merge request
+ *   - on when `--protected-base` says so, or the code host does (`protectionStep()`), in one line
  * - it starts with "Initializing Epic for repo <main>" and ends with "Epics initialized!", in colour;  the settings it
  *   wrote are in the file, not printed (Owen, 2026-10-29)
  ****************/
@@ -127,7 +132,12 @@ export class RepoInit {
       throw new EpicCommandError("epic init:  give one of --content-repo, --remote or --no-remote")
     if (contentRepo && !REPO_NAME.test(contentRepo))
       throw new EpicCommandError(
-        `epic init:  --content-repo ${contentRepo} isn't a GitHub repo name;  letters, digits, ".", "-" and "_" only`
+        `epic init:  --content-repo ${contentRepo} isn't a repo name;  letters, digits, ".", "-" and "_" only`
+      )
+    const host = flags.host
+    if (host !== undefined && !CodeHost.isKind(host))
+      throw new EpicCommandError(
+        `epic init:  --host ${String(host)} isn't a code host:  one of ${CodeHost.KINDS.join(", ")}`
       )
     const color = stringFlag(flags.color)
     if (color !== undefined && !VoiceColor.isColor(color))
@@ -151,6 +161,7 @@ export class RepoInit {
       contentRepo,
       visibility: flags.public === true ? "public" : undefined,
       noRemote,
+      host,
       say
     })
     print(RepoInit.summaryLines(answers.plan))
@@ -167,6 +178,7 @@ export class RepoInit {
       noRemote,
       color: answers.color,
       cloned: answers.cloned,
+      codeHost: answers.codeHost,
       protectedBase: flags.protectedBase === true,
       say
     })
@@ -175,16 +187,16 @@ export class RepoInit {
     if (flags.noCommit !== true && report.content.action !== "missing") {
       if (RepoInit.changedFiles(report).length) print(["", chalk.bold(RepoInit.commitHeader(report))])
       report.commit = await RepoInit.commitStep({ report, ask, say })
-      print(RepoInit.commitResultLines(report.commit))
+      print(RepoInit.commitResultLines(report.commit, RepoInit.wordsOf(report)))
     } else if (flags.noCommit === true && report.config.settings.baseBranchProtected) {
       const files = RepoInit.changedFiles(report)
       if (files.length)
         print([
-          `> Not committed (--no-commit):  ${report.config.settings.baseBranch} takes only pull requests, so put ` +
-            `${files.join(" and ")} on a branch and open one`
+          `> Not committed (--no-commit):  ${report.config.settings.baseBranch} takes only ` +
+            `${RepoInit.wordsOf(report).pullRequest}s, so put ${files.join(" and ")} on a branch and open one`
         ])
     }
-    // waiting on its pull request, the repo has no config yet, and the server has nothing to serve
+    // waiting on its pull or merge request, the repo has no config yet, and the server has nothing to serve
     if (flags.noServer !== true && report.content.action !== "missing" && report.commit?.action !== "on branch") {
       if (!dryRun) say("starting the epic server…")
       report.server = await this.serverStep({ dryRun })
@@ -197,10 +209,11 @@ export class RepoInit {
   /**
    * `epic init`'s questions, ALL asked before anything is done (Owen, 2026-10-29):  the answers, and what they come to.
    * - their name, every time (`askName()`);  `name` (`--name`) answers it
+   * - where the code is hosted, only when the `origin` address doesn't say and nothing else does (`codeHostChoice()`)
    * - their colour, from the names nobody has (`askColor()`), unless they have one already;  `color` answers it
    *   - a teammate joining, the team's plans not here yet:  cloned FIRST, quietly, so the taken colours are known
    *     (`cloned`;  `init()` reports it)
-   * - the epic repo's name and private or public, only when `init()` will make it on GitHub (`willMakeRepo()`)
+   * - the epic repo's name and private or public, only when `init()` will make it on the code host (`willMakeRepo()`)
    * - no terminal (`ask` off):  nothing asked;  the plan says what the flags and the suggestions come to
    * - SIDE EFFECT:  the clone, for a teammate joining (not `dryRun`)
    */
@@ -213,13 +226,17 @@ export class RepoInit {
     contentRepo,
     visibility,
     noRemote,
+    host,
     say = () => {}
   }: QuestionOptions): Promise<Answers> {
     const { main } = this
-    const settings = RepoInit.settingsOf(main)
-    const content = join(main, settings.contentFolder)
+    const found = RepoInit.settingsOf(main)
+    const content = join(main, found.contentFolder)
     const answers: Answers = { name, color, contentRepo, visibility, plan: {} }
-    if (ask && !name) answers.name = await RepoInit.askName()
+    answers.codeHost = await RepoInit.codeHostChoice({ main, host, ask })
+    const settings = { ...found, codeHost: answers.codeHost.kind }
+    const codeHost = CodeHost.of({ main, codeHost: settings.codeHost })
+    if (ask && !name) answers.name = await RepoInit.askName(codeHost)
     const person = answers.name?.trim() || EpicHome.person().name
     // a teammate joining:  the plans first, for the colours they hold
     const address = settings.contentRemote
@@ -250,9 +267,9 @@ export class RepoInit {
   }
 
   /**
-   * Whether `init()` will make the epic repo on GitHub:  its owner when it will, else `undefined`.
+   * Whether `init()` will make the epic repo on the code host:  its owner when it will, else `undefined`.
    * - not when the epic repo has a remote, the config names one, or `remote` / `noRemote` was given
-   * - only with `gh` installed and logged in (`GitHub.status()`, a few seconds), as `remoteStep()` asks
+   * - only with the host's command installed and logged in (`status()`, a few seconds), as `remoteStep()` asks
    */
   willMakeRepo({
     settings,
@@ -267,8 +284,9 @@ export class RepoInit {
   }): { owner: string } | undefined {
     if (noRemote || remote || settings.contentRemote) return undefined
     if (existsSync(join(content, ".git")) && Git.out(["remote", "get-url", "origin"], content)) return undefined
-    if (GitHub.status() !== "ready") return undefined
-    const owner = RepoInit.ownerFor(this.main)
+    const host = CodeHost.of({ main: this.main, codeHost: settings.codeHost })
+    if (host.status() !== "ready") return undefined
+    const owner = RepoInit.ownerFor(this.main, host)
     return owner ? { owner } : undefined
   }
 
@@ -281,7 +299,7 @@ export class RepoInit {
    * Set the repo up (the class's steps);  what it did, or would do with `dryRun`.
    * - the options:  `InitOptions`
    * - SIDE EFFECT (not `dryRun`):  writes the config and `.gitignore`, makes (or clones) the epic repo and the
-   *   links, may make the epic repo on GitHub and push to it, keeps the person's name in the epic home
+   *   links, may make the epic repo on the code host and push to it, keeps the person's name in the epic home
    */
   async init({
     dryRun = false,
@@ -297,6 +315,7 @@ export class RepoInit {
     commit = false,
     cloned = false,
     protectedBase = false,
+    codeHost,
     say = () => {}
   }: InitOptions = {}): Promise<InitReport> {
     const { main } = this
@@ -305,14 +324,18 @@ export class RepoInit {
     const configFile = join(main, EpicConfig.FILE)
     const hadConfig = existsSync(configFile)
     const found = hadConfig ? new EpicConfig(main).settings : EpicConfig.defaultsFor(main)
-    const protection = RepoInit.protectionStep({ main, configFile, hadConfig, settings: found, protectedBase })
-    const settings = { ...found, baseBranchProtected: protection.on }
+    const hosted = codeHost ?? (await RepoInit.codeHostChoice({ main, ask: false }))
+    const withHost = { ...found, codeHost: hosted.kind }
+    const protection = RepoInit.protectionStep({ main, configFile, hadConfig, settings: withHost, protectedBase })
+    const settings = { ...withHost, baseBranchProtected: protection.on }
     if (!hadConfig && !dryRun) {
       mkdirSync(dirname(configFile), { recursive: true })
       writeFileSync(configFile, RepoInit.configText(settings))
     }
     if (hadConfig && !dryRun && (protection.action === "flag" || protection.action === "detected"))
       RepoInit.keepProtected(configFile)
+    if (hadConfig && !dryRun && (hosted.source === "flag" || hosted.source === "asked"))
+      RepoInit.keepCodeHost(configFile, hosted.kind)
     const content = join(main, settings.contentFolder)
     const folders = settings.sharedFolders
     const report: InitReport = {
@@ -324,6 +347,7 @@ export class RepoInit {
       remote: { action: "skipped" },
       gitignore: { file: join(main, ".gitignore"), action: "ok" },
       protection,
+      codeHost: hosted,
       person: RepoInit.personStep({ dryRun, name }),
       ...(pluginReport && { plugin: pluginReport })
     }
@@ -462,8 +486,8 @@ export class RepoInit {
    *   taken back first, keeping its files (`undoOwnCommit()`)
    * - the branch is made without checking it out (`commitOnSetupBranch()`), then the base branch's checkout put back as
    *   it was (`restoreBase()`):  so "safe to run again", whatever else is staged or changed
-   * - the pull request:  `gh pr create` when `gh` is logged in;  else `pullRequestError` says why, and the lines say what
-   *   to run
+   * - the pull or merge request:  opened when the host's command is logged in;  else `pullRequestError` says why, and the
+   *   lines say what to run
    * - NEVER throws
    * - SIDE EFFECT (not `dryRun`):  a branch, a push, a pull request, the two files out of the checkout
    */
@@ -485,7 +509,9 @@ export class RepoInit {
     if (!files.length) return { action: "none", files, branch: base, ...via }
     if (branch !== base) return { action: "other branch", files, branch, ...via }
     if (dryRun) return { action: "would branch", files, branch: SETUP_BRANCH, ...via }
-    const question = `Put ${files.join(" and ")} on a new branch ${SETUP_BRANCH}, push it, and open a pull request?`
+    const question =
+      `Put ${files.join(" and ")} on a new branch ${SETUP_BRANCH}, push it, and open a ` +
+      `${RepoInit.wordsOf(report).pullRequest}?`
     const answer = ask ? await CLI.ask(question, { suggestion: "y" }) : "y"
     if (/^n/i.test(answer.trim())) return { action: "declined", files, branch, ...via }
     try {
@@ -496,7 +522,8 @@ export class RepoInit {
     }
     const pushed = RepoInit.pushBranch(main, SETUP_BRANCH, say)
     const done: CommitReport = { action: "on branch", files, branch: SETUP_BRANCH, ...via, ...pushed }
-    return pushed.push === "pushed" ? { ...done, ...RepoInit.pullRequestStep(main, base, say) } : done
+    const host = CodeHost.of({ main, codeHost: report.config.settings.codeHost })
+    return pushed.push === "pushed" ? { ...done, ...RepoInit.pullRequestStep(main, base, say, host) } : done
   }
 
   /**
@@ -571,22 +598,30 @@ export class RepoInit {
   }
 
   /**
-   * The pull request for `SETUP_BRANCH`, opened with `gh`:  its address, or why not.
+   * The pull or merge request for `SETUP_BRANCH`, opened by `host`:  its address, or why not.
    * - NEVER throws
-   * - SIDE EFFECT:  a pull request on GitHub
+   * - SIDE EFFECT:  a pull or merge request on the code host
    */
   private static pullRequestStep(
     main: string,
     base: string,
-    say: (text: string) => void
+    say: (text: string) => void,
+    host: CodeHostClient
   ): Pick<CommitReport, "pullRequest" | "pullRequestError"> {
-    const status = GitHub.status()
-    if (status === "missing") return { pullRequestError: "GitHub's command, gh, isn't installed" }
-    if (status === "logged-out") return { pullRequestError: "gh isn't logged in to GitHub" }
-    say("opening the pull request…")
+    const { words } = host
+    const status = host.status()
+    if (status === "missing") return { pullRequestError: `${words.name}'s command, ${words.command}, isn't installed` }
+    if (status === "logged-out") return { pullRequestError: `${words.command} isn't logged in to ${words.name}` }
+    say(`opening the ${words.pullRequest}…`)
     try {
       return {
-        pullRequest: GitHub.openPullRequest({ branch: SETUP_BRANCH, base, title: PR_TITLE, body: PR_BODY, cwd: main })
+        pullRequest: host.openPullRequest({
+          branch: SETUP_BRANCH,
+          base,
+          title: PR_TITLE,
+          body: prBody(words.pullRequest),
+          cwd: main
+        })
       }
     } catch (error) {
       return { pullRequestError: (error as Error).message }
@@ -597,7 +632,7 @@ export class RepoInit {
    * Whether the base branch takes only pull requests, and how that's known;  what `init()` puts in the config.
    * - already on in the config, or in the setup branch's (run again, its pull request not merged yet):  `config`
    * - `protectedBase` (`--protected-base`):  `flag`
-   * - else GitHub's word (`githubRequiresPullRequest()`):  `detected`;  no such rule:  `off`
+   * - else the code host's word (`hostRequiresPullRequest()`):  `detected`;  no such rule:  `off`
    * - a config that says `false` in so many words stays so (a file already there is kept):  `says off`, and a note
    * - NEVER throws:  failing to find out is `off`, never a failed init
    */
@@ -617,7 +652,7 @@ export class RepoInit {
     if (settings.baseBranchProtected || RepoInit.setupBranchSaysProtected(main)) return { action: "config", on: true }
     if (protectedBase) return { action: "flag", on: true }
     try {
-      if (!RepoInit.githubRequiresPullRequest(main, settings.baseBranch)) return { action: "off", on: false }
+      if (!RepoInit.hostRequiresPullRequest(main, settings)) return { action: "off", on: false }
       const written = hadConfig ? (EpicConfig.parse(readFileSync(configFile, "utf8"), configFile) as object) : {}
       return "baseBranchProtected" in written ? { action: "says off", on: false } : { action: "detected", on: true }
     } catch {
@@ -636,11 +671,69 @@ export class RepoInit {
     }
   }
 
-  /** Whether GitHub, as `gh` can see it, requires a pull request into `base` of checkout `main`'s `origin`. */
-  private static githubRequiresPullRequest(main: string, base: string): boolean {
+  /** Whether the code host, as its command can see it, requires a request into the base branch of checkout `main`. */
+  private static hostRequiresPullRequest(main: string, settings: EpicSettings): boolean {
+    const host = CodeHost.of({ main, codeHost: settings.codeHost })
     const origin = Git.out(["remote", "get-url", "origin"], main)
-    const repo = origin ? GitHub.repoIn(origin) : undefined
-    return repo !== undefined && GitHub.status() === "ready" && GitHub.requiresPullRequest(repo, base)
+    const repo = origin ? host.repoIn(origin) : undefined
+    return repo !== undefined && host.status() === "ready" && host.requiresPullRequest(repo, settings.baseBranch)
+  }
+
+  /**
+   * Where the code is hosted, and how that's known (`init()`'s `codeHost`, `epic init`'s question).
+   * - `--host` (`host`):  `flag`;  the config names one:  `config`
+   * - else the `origin` address's:  `address`;  it doesn't say (`git.acme.com`):  `asked` in a terminal, else `assumed`
+   *   GitHub, which `noteLines()` says in one line;  no remote:  `default`, GitHub
+   * - NEVER throws
+   */
+  static async codeHostChoice({
+    main,
+    host,
+    ask
+  }: {
+    main: string
+    host?: CodeHostKind
+    ask: boolean
+  }): Promise<CodeHostReport> {
+    const origin = CodeHost.originOf(main)
+    const hostName = CodeHost.hostOf(origin)
+    const said = { ...(hostName && { host: hostName }), ...(origin && { address: origin }) }
+    if (host) return { kind: host, source: "flag", ...said }
+    if (existsSync(join(main, EpicConfig.FILE))) {
+      try {
+        const written = EpicConfig.parse(readFileSync(join(main, EpicConfig.FILE), "utf8"), EpicConfig.FILE) as {
+          codeHost?: unknown
+        }
+        if (CodeHost.isKind(written.codeHost)) return { kind: written.codeHost, source: "config", ...said }
+      } catch {
+        // an unreadable config:  settled from the address, and `new EpicConfig()` says why it won't read
+      }
+    }
+    if (!CodeHost.isUnknownAddress(origin))
+      return { kind: CodeHost.kindOfAddress(origin), source: origin ? "address" : "default", ...said }
+    if (ask && process.stdin.isTTY && process.stdout.isTTY)
+      return {
+        kind: (await CLI.choose(HOST_QUESTION, HOST_CHOICES)) as CodeHostKind,
+        source: "asked",
+        ...said
+      }
+    return { kind: "github", source: "assumed", ...said }
+  }
+
+  /**
+   * Write `kind` into config file `file` as its `codeHost`, keeping the rest as written.
+   * - a line that's there is changed in place;  else the key goes in through `DataFile`, its comments kept
+   * - SIDE EFFECT:  writes the file
+   */
+  static keepCodeHost(file: string, kind: CodeHostKind): void {
+    const text = readFileSync(file, "utf8")
+    const line = /^(\s*"codeHost":\s*)"(?:[^"\\]|\\.)*"/m
+    if (line.test(text))
+      writeFileSync(
+        file,
+        text.replace(line, (_all, key: string) => key + JSON.stringify(kind))
+      )
+    else DataFile.edit<Record<string, unknown>>(file, (settings) => ({ ...settings, codeHost: kind }))
   }
 
   /**
@@ -655,9 +748,19 @@ export class RepoInit {
     else DataFile.edit<Record<string, unknown>>(file, (settings) => ({ ...settings, baseBranchProtected: true }))
   }
 
-  /** What the commit section says first:  why `epic init` asks to commit, or to open a pull request. */
-  static commitHeader({ config }: Pick<InitReport, "config">): string {
-    return config.settings.baseBranchProtected ? PULL_REQUEST_HEADER : COMMIT_HEADER
+  /** What the commit section says first:  why `epic init` asks to commit, or to open a pull or merge request. */
+  static commitHeader(report: Pick<InitReport, "config"> & Partial<Pick<InitReport, "codeHost">>): string {
+    return report.config.settings.baseBranchProtected
+      ? pullRequestHeader(RepoInit.wordsOf(report).pullRequest)
+      : COMMIT_HEADER
+  }
+
+  /** What a person reads about `report`'s code host:  "merge request" on GitLab, GitHub's by default. */
+  static wordsOf({
+    config,
+    codeHost
+  }: Pick<InitReport, "config"> & Partial<Pick<InitReport, "codeHost">>): CodeHostWords {
+    return CodeHost.wordsFor(config.settings.codeHost, codeHost?.host)
   }
 
   /**
@@ -753,12 +856,13 @@ export class RepoInit {
    *   - `remote` naming another:  throws `EpicCommandError`, saying how to change it
    * - `noRemote`:  `skipped`
    * - `remote`, else the config's `contentRemote`:  made the remote, pushed (`added`)
-   * - else made on GitHub (`made`), when `gh` is there and logged in (`no gh`, `logged out`);  `failed` with gh's
-   *   words when GitHub said no
+   * - else made on the code host (`made`), when its command is there and logged in (`no gh` for either's, `logged out`);
+   *   `failed` with its words when it said no
    *   - its name:  `contentRepo`, else asked when `ask` (in a terminal), else `<repo>.epics`
    *   - private or public:  `visibility`, else asked when `ask` (`askVisibility()`), else private
    * - a push that failed is in `error`:  the repo and its address stand
-   * - SIDE EFFECT (not `dryRun`):  the repo on GitHub, the remote, the push, `contentRemote` in the config
+   * - GitLab:  after the first push, its default branch opened up to teammates (`warning`, when it couldn't be)
+   * - SIDE EFFECT (not `dryRun`):  the repo on the code host, the remote, the push, `contentRemote` in the config
    */
   async remoteStep({
     shared,
@@ -791,10 +895,11 @@ export class RepoInit {
       if (given !== settings.contentRemote) RepoInit.keepRemote(configFile, given)
       return { action: "added", address: given, ...(error && { error }) }
     }
-    // made on GitHub:  only with gh, logged in (Owen:  "this only works with GitHub for now")
-    const gh = GitHub.status()
-    if (gh === "missing") return { action: "no gh" }
-    const owner = gh === "ready" ? RepoInit.ownerFor(this.main) : undefined
+    // made on the code host:  only with its command, logged in
+    const host = CodeHost.of({ main: this.main, codeHost: settings.codeHost })
+    const status = host.status()
+    if (status === "missing") return { action: "no gh" }
+    const owner = status === "ready" ? RepoInit.ownerFor(this.main, host) : undefined
     if (!owner) return { action: "logged out" }
     const suggestion = `${basename(this.main)}.epics`
     const repoName = contentRepo ?? (ask ? await CLI.ask(REPO_QUESTION, { suggestion }) : suggestion)
@@ -803,20 +908,23 @@ export class RepoInit {
     const repo = `${owner}/${repoName}`
     const seenBy = visibility ?? (ask ? await RepoInit.askVisibility() : "private")
     if (dryRun) return { action: "would make", repo, visibility: seenBy }
-    say(`making ${repo} on GitHub…`)
+    say(`making ${repo} on ${host.words.name}…`)
     let address: string
     try {
-      GitHub.createRepo(repo, {
+      host.createRepo(repo, {
         visibility: seenBy,
         description: `The epic pages of ${basename(this.main)}:  plans, guides and sagas`
       })
-      address = GitHub.addressOf(repo)
+      address = host.addressOf(repo)
     } catch (error) {
       return { action: "failed", repo, visibility: seenBy, error: (error as Error).message }
     }
     const error = shared.publish(address)
     RepoInit.keepRemote(configFile, address)
-    return { action: "made", repo, address, visibility: seenBy, ...(error && { error }) }
+    // only once pushed:  GitLab protects a new project's default branch when that first push makes it
+    const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], shared.config.dir) ?? "main"
+    const warning = error ? undefined : host.letTeamPush(repo, branch)
+    return { action: "made", repo, address, visibility: seenBy, ...(error && { error }), ...(warning && { warning }) }
   }
 
   ////////////////
@@ -834,16 +942,17 @@ export class RepoInit {
   }
 
   /**
-   * Whose GitHub account a new epic repo goes in, for the code repo at `main`:  the code repo's owner when that's
-   * an ORGANIZATION (its `origin` on GitHub), else the person's own login;  `undefined` when gh knows no login.
+   * Whose account a new epic repo goes in, for the code repo at `main`:  the code repo's owner when that's
+   * an ORGANIZATION (a GitHub org, a GitLab group or subgroup), else the person's own login;  `undefined` when the
+   * host's command knows no login.
    * - why not always the code repo's owner:  a person can't make a repo in someone else's own account
-   * - runs `gh` (the login, kept as `EpicHome.refreshGithub()` keeps it;  the owner's kind)
+   * - runs its command (the login, `CodeHost.loginOn()`;  the owner's kind)
    */
-  static ownerFor(main: string): string | undefined {
-    const login = EpicHome.refreshGithub()
+  static ownerFor(main: string, host: CodeHostClient): string | undefined {
+    const login = CodeHost.loginOn(host)
     const origin = Git.out(["remote", "get-url", "origin"], main)
-    const owner = origin ? GitHub.ownerIn(origin) : undefined
-    if (owner && owner !== login && GitHub.isOrganization(owner)) return owner
+    const owner = origin ? host.ownerIn(origin) : undefined
+    if (owner && owner !== login && host.isOrganization(owner)) return owner
     return login
   }
 
@@ -888,16 +997,16 @@ export class RepoInit {
 
   /**
    * The name to keep, asked in a terminal EVERY time (Owen, 2026-10-29:  "never asked for my user name"):
-   * "What do you want to be called?", suggesting the name kept already, else their GitHub login, else git's
-   * `user.name`;  Enter keeps it.
-   * - the login looked up first (`EpicHome.refreshGithub()`), and kept, so pages never run `gh`
+   * "What do you want to be called?", suggesting the name kept already, else their login on the code host, else
+   * git's `user.name`;  Enter keeps it.
+   * - the login looked up first (`CodeHost.loginOn()`;  GitHub's is kept, so pages never run `gh`)
    * - `undefined` when nothing was said and nobody knows a name
    * - no terminal:  the suggestion, asking nothing (`CLI.ask()`)
    */
-  static async askName(): Promise<string | undefined> {
-    EpicHome.refreshGithub()
+  static async askName(host: CodeHostClient = GitHub): Promise<string | undefined> {
+    const login = CodeHost.loginOn(host)
     const now = EpicHome.person()
-    const suggestion = (now.source === "kept" ? now.name : undefined) ?? now.github ?? now.fullName ?? ""
+    const suggestion = (now.source === "kept" ? now.name : undefined) ?? login ?? now.github ?? now.fullName ?? ""
     return (await CLI.ask(NAME_QUESTION, { suggestion })) || undefined
   }
 
@@ -977,9 +1086,12 @@ export class RepoInit {
   "contentRemote": ${value("contentRemote")},
   // the branch worktrees start from and merge into
   "baseBranch": ${value("baseBranch")},
-  // whether that branch can't be pushed to, and work reaches it only through a pull request:
-  // epic init opens one, epic merge refuses, and the skills finish with a pull request
+  // whether that branch can't be pushed to, and work reaches it only through a pull request (a merge request, on
+  // GitLab):  epic init opens one, epic merge refuses, and the skills finish with one
   "baseBranchProtected": ${value("baseBranchProtected")},
+  // where the code is hosted, "github" or "gitlab":  picks gh or glab, and which words pages say;
+  // left out, it's worked out from the origin remote each time it's read
+  "codeHost": ${value("codeHost")},
   // where new worktrees go, one folder each:  <worktreesFolder>/<name>
   "worktreesFolder": ${value("worktreesFolder")},
   // what makes a new worktree ready to run, from its root ("":  nothing to install)
@@ -1066,7 +1178,11 @@ export class RepoInit {
       ...RepoInit.fileLines(report),
       ...RepoInit.noteLines(report),
       ...(report.commit?.action && report.commit.action !== "none"
-        ? ["", chalk.bold(RepoInit.commitHeader(report)), ...RepoInit.commitResultLines(report.commit)]
+        ? [
+            "",
+            chalk.bold(RepoInit.commitHeader(report)),
+            ...RepoInit.commitResultLines(report.commit, RepoInit.wordsOf(report))
+          ]
         : []),
       ...RepoInit.doneLines(report)
     ]
@@ -1128,6 +1244,7 @@ export class RepoInit {
    */
   static fileLines(report: InitReport, { head = true }: { head?: boolean } = {}): string[] {
     const { dryRun, config, content, remote, gitignore, person, color, main } = report
+    const hostName = RepoInit.wordsOf(report).name
     const would = (done: string, wouldDo: string) => (dryRun ? wouldDo : done)
     const rows: [string, string][] = [
       [config.action === "kept" ? "already present" : would("wrote", "would write"), config.file]
@@ -1151,7 +1268,7 @@ export class RepoInit {
       default:
       /* case "missing":  its own note */
     }
-    rows.push(...remoteRowsFor(remote))
+    rows.push(...remoteRowsFor(remote, hostName))
     for (const { path, action } of report.links)
       rows.push([action === "ok" ? "already linked" : action, join(main, path)])
     rows.push([
@@ -1176,17 +1293,22 @@ export class RepoInit {
 
   /** What needs a word of its own, under the files:  the epic repo's problems, the colour's, no name. */
   static noteLines(report: InitReport): string[] {
-    const notes = [...protectionNotesFor(report), ...remoteNotesFor(report), ...colorNotesFor(report.color)]
+    const notes = [
+      ...codeHostNotesFor(report),
+      ...protectionNotesFor(report),
+      ...remoteNotesFor(report),
+      ...colorNotesFor(report.color)
+    ]
     if (report.person.action === "none") notes.push("no name yet (git has no user.name):  epic whoami <name> keeps one")
     if (!notes.length) return []
     return ["", chalk.bold("Note:"), ...notes]
   }
 
-  /** What the commit came to (`commitStep()`), under its question. */
-  static commitResultLines(commit: CommitReport): string[] {
+  /** What the commit came to (`commitStep()`), under its question;  `words`:  the code host's. */
+  static commitResultLines(commit: CommitReport, words: CodeHostWords = CodeHost.wordsFor("github")): string[] {
     const { action, files, branch, error, push, pushError } = commit
     const named = files.join(" and ")
-    if (commit.viaPullRequest) return viaPullRequestLines(commit)
+    if (commit.viaPullRequest) return viaPullRequestLines(commit, words)
     switch (action) {
       case "committed":
         if (push === "pushed") return ["> Committed and pushed"]
@@ -1196,7 +1318,7 @@ export class RepoInit {
             `  push it by hand:  git push origin ${branch}`,
             ...(PUSH_REFUSED.test(pushError ?? "")
               ? [
-                  `  or, if ${branch} takes only pull requests:  epic init --protected-base ` +
+                  `  or, if ${branch} takes only ${words.pullRequest}s:  epic init --protected-base ` +
                     "(it moves this commit onto a branch, and opens one)"
                 ]
               : [])
@@ -1222,7 +1344,8 @@ export class RepoInit {
   static doneLines(report: InitReport): string[] {
     if (report.dryRun) return ["", "dry run:  nothing changed"]
     if (report.content.action === "missing") return []
-    if (report.commit?.action === "on branch") return ["", chalk.green.bold(DONE_ONCE_MERGED)]
+    if (report.commit?.action === "on branch")
+      return ["", chalk.green.bold(doneOnceMerged(RepoInit.wordsOf(report).pullRequest))]
     const editor = Editor.of({ setting: report.config.settings.editor })
     const { server, main } = report
     const browser =
@@ -1249,12 +1372,15 @@ export class RepoInit {
 }
 
 /** The epic repo's rows of the files table:  made, pushed to, recorded;  none for a problem (its note says it). */
-function remoteRowsFor({ action, address, repo, visibility, error }: RemoteReport): [string, string][] {
+function remoteRowsFor(
+  { action, address, repo, visibility, error }: RemoteReport,
+  hostName: string
+): [string, string][] {
   switch (action) {
     case "made":
-      return [[error ? "made" : "made, pushed", `${repo} on GitHub, ${visibility}  (${address})`]]
+      return [[error ? "made" : "made, pushed", `${repo} on ${hostName}, ${visibility}  (${address})`]]
     case "would make":
-      return [["would make", `${repo} on GitHub, ${visibility}`]]
+      return [["would make", `${repo} on ${hostName}, ${visibility}`]]
     case "added":
       return [[error ? "remote" : "pushed to", address ?? ""]]
     case "would add":
@@ -1269,24 +1395,33 @@ function remoteRowsFor({ action, address, repo, visibility, error }: RemoteRepor
   }
 }
 
+/** What `epic init` says about where the code is hosted, when it had to guess. */
+function codeHostNotesFor({ codeHost }: InitReport): string[] {
+  if (codeHost?.source !== "assumed") return []
+  return [`${codeHost.host} doesn't say whose it is:  treated as GitHub;  on GitLab, run:  epic init --host gitlab`]
+}
+
 /** What `epic init` says about a base branch that takes only pull requests:  how it knows, or a config against it. */
-function protectionNotesFor({ protection, config }: InitReport): string[] {
+function protectionNotesFor(report: InitReport): string[] {
+  const { protection, config } = report
   const base = config.settings.baseBranch
+  const { name, pullRequest } = RepoInit.wordsOf(report)
   if (protection.action === "detected")
-    return [`GitHub requires a pull request into ${base}:  baseBranchProtected is on (${EpicConfig.FILE})`]
+    return [`${name} requires a ${pullRequest} into ${base}:  baseBranchProtected is on (${EpicConfig.FILE})`]
   if (protection.action === "says off")
     return [
-      `GitHub requires a pull request into ${base}, but ${EpicConfig.FILE} says baseBranchProtected false:  ` +
+      `${name} requires a ${pullRequest} into ${base}, but ${EpicConfig.FILE} says baseBranchProtected false:  ` +
         "epic init --protected-base turns it on"
     ]
   return []
 }
 
 /** What the commit came to, for a base branch that takes only pull requests:  what happened, and what's left to do. */
-function viaPullRequestLines(commit: CommitReport): string[] {
+function viaPullRequestLines(commit: CommitReport, words: CodeHostWords): string[] {
   const { action, files, branch, error, push, pushError, pullRequest, pullRequestError, base } = commit
   const named = files.join(" and ")
-  const openIt = [`  gh pr create --base ${base} --head ${SETUP_BRANCH} --fill`]
+  const asked = words.pullRequest
+  const openIt = [`  ${words.openCommand(base ?? "", SETUP_BRANCH)}`]
   const merged = [
     `> Once it's merged:  git pull on ${base}, and epics work here;  teammates can join then (epic init in their clone)`
   ]
@@ -1303,20 +1438,16 @@ function viaPullRequestLines(commit: CommitReport): string[] {
           ...merged
         ]
       if (push === "nowhere")
-        return [
-          ...said,
-          `> No remote to push to:  push ${SETUP_BRANCH} once there is, and open a pull request`,
-          ...merged
-        ]
-      if (pullRequest) return [...said, `> Pull request:  ${pullRequest}`, ...merged]
-      return [...said, `> Pushed;  no pull request yet (${pullRequestError}).  To open one:`, ...openIt, ...merged]
+        return [...said, `> No remote to push to:  push ${SETUP_BRANCH} once there is, and open a ${asked}`, ...merged]
+      if (pullRequest) return [...said, `> ${words.PullRequest}:  ${pullRequest}`, ...merged]
+      return [...said, `> Pushed;  no ${asked} yet (${pullRequestError}).  To open one:`, ...openIt, ...merged]
     }
     case "would branch":
       return [
-        `> would put ${named} on a new branch ${SETUP_BRANCH}, push it and open a pull request;  ${base} stays as it is`
+        `> would put ${named} on a new branch ${SETUP_BRANCH}, push it and open a ${asked};  ${base} stays as it is`
       ]
     case "declined":
-      return [`> Not done:  ${base} takes only pull requests, so ${named} need one before epics work here`]
+      return [`> Not done:  ${base} takes only ${asked}s, so ${named} need one before epics work here`]
     case "other branch":
       return [`> Not done:  you're on ${branch};  run epic init on ${base}, which puts ${named} on a new branch`]
     case "failed":
@@ -1327,13 +1458,15 @@ function viaPullRequestLines(commit: CommitReport): string[] {
 }
 
 /** What needs saying about the epic repo:  a problem, a push to do by hand, a public repo. */
-function remoteNotesFor({ remote, content, main }: InitReport): string[] {
-  const { address, repo, error, visibility = "private" } = remote
+function remoteNotesFor(report: InitReport): string[] {
+  const { remote, content, main } = report
+  const words = RepoInit.wordsOf(report)
+  const { address, repo, error, warning, visibility = "private" } = remote
   const pushByHand = [`the push failed:  ${error}`, `  push it by hand:  git -C ${content.folder} push -u origin HEAD`]
   switch (remote.action) {
     case "made":
     case "would make":
-      return [...(error ? pushByHand : []), ...publicWarning(visibility)]
+      return [...(error ? pushByHand : []), ...(warning ? [warning] : []), ...publicWarning(visibility)]
     case "added":
       return error ? pushByHand : []
     case "clone failed":
@@ -1345,16 +1478,18 @@ function remoteNotesFor({ remote, content, main }: InitReport): string[] {
       return ["no epic repo (--no-remote):  the plans stay on this machine"]
     case "failed":
       return [
-        `couldn't make ${repo} on GitHub:  ${error}`,
+        `couldn't make ${repo} on ${words.name}:  ${error}`,
         `  another name:  epic init --content-repo <name>;  a repo you made:  epic init --remote <address>`
       ]
     case "no gh":
     case "logged out": {
-      const why = remote.action === "no gh" ? "GitHub's command, gh, isn't installed" : "gh isn't logged in to GitHub"
+      const why =
+        remote.action === "no gh"
+          ? `${words.name}'s command, ${words.command}, isn't installed`
+          : `${words.command} isn't logged in to ${words.name}`
       return [
-        `no epic repo made:  ${why}.  Sharing the epics works only with GitHub for now:`,
-        "  brew install gh        (other systems:  https://cli.github.com)",
-        "  gh auth login",
+        `no epic repo made:  ${why}.  To share the epics, run:`,
+        ...words.install,
         `  then epic init again, in ${main};  or epic init --remote <address>, for a repo you made yourself`
       ]
     }
@@ -1411,6 +1546,8 @@ export type InitReport = {
   gitignore: { file: string; action: "ok" | "updated" | "written" }
   /** whether the base branch takes only pull requests, and how that's known (`protectionStep()`) */
   protection: ProtectionReport
+  /** where the code is hosted, and how that's known (`codeHostChoice()`) */
+  codeHost: CodeHostReport
   /** the name this machine's person goes by:  `kept` now, kept `already`, `would keep` (a dry run), or `none` */
   person: { name: string | undefined; action: "kept" | "already" | "would keep" | "none" }
   /** the epic plugin (`pluginStep()`);  none with `--no-plugin` */
@@ -1441,7 +1578,7 @@ export type CommitReport = {
   base?: string
   /** the pull request's address */
   pullRequest?: string
-  /** why there's none yet:  no `gh`, logged out, or gh's words */
+  /** why there's none yet:  no command, logged out, or its words */
   pullRequestError?: string
   /** why it failed */
   error?: string
@@ -1458,11 +1595,25 @@ export type CommitReport = {
  */
 export type ProtectionReport = { action: "config" | "flag" | "detected" | "off" | "says off"; on: boolean }
 
+/**
+ * Where the code is hosted (`RepoInit.codeHostChoice()`):  `kind`, and how that's known:
+ * `flag` (`--host`), `config`, `address` (`origin`'s), `asked`, `assumed` (unknown host, no terminal:  GitHub), `default`
+ * (no remote)
+ */
+export type CodeHostReport = {
+  kind: CodeHostKind
+  source: "flag" | "config" | "address" | "asked" | "assumed" | "default"
+  /** the `origin` remote's host */
+  host?: string
+  /** the `origin` remote's address */
+  address?: string
+}
+
 /** What `RepoInit.changedFiles()` reads off the report. */
 export type ChangedFilesInput = Pick<InitReport, "main"> & Partial<Pick<InitReport, "dryRun" | "config" | "gitignore">>
 
 /** What `epic init`'s questions came to (`RepoInit.questions()`):  `init()`'s answers, and the summary. */
-export type Answers = Pick<InitOptions, "name" | "color" | "contentRepo" | "visibility" | "cloned"> & {
+export type Answers = Pick<InitOptions, "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost"> & {
   /** what the summary under the questions says */
   plan: Plan
 }
@@ -1486,6 +1637,8 @@ export type QuestionOptions = Pick<
   ask: boolean
   /** only say what it would do:  nothing cloned */
   dryRun: boolean
+  /** where the code is hosted (`--host`) */
+  host?: CodeHostKind
 }
 
 /** What `epic init` did about the epic plugin:  `installed` (and how many `changes`), `already`, ... */
@@ -1555,12 +1708,12 @@ export type ColorStepOptions = {
  * What `epic init` did about the epic repo's remote, the Epic repo (`RepoInit.remoteStep()`):
  * - `action`:
  *   - `cloned`:  a later person's epic folder, cloned from `address`;  `clone failed`, git's words in `error`
- *   - `made`:  `repo` made on GitHub, pushed to, its `address` written in the config
+ *   - `made`:  `repo` made on the code host, pushed to, its `address` written in the config
  *   - `added`:  `address` (`--remote`, or the config's) made the remote, pushed to
  *   - `recorded`:  the remote the epic repo had, written in the config;  `already`:  there already
  *   - `skipped`:  `--no-remote`
- *   - `no gh`, `logged out`:  GitHub's command missing, or not logged in:  nothing made
- *   - `failed`:  GitHub said no (`error`:  gh's words)
+ *   - `no gh`, `logged out`:  the code host's command (`gh` or `glab`) missing, or not logged in:  nothing made
+ *   - `failed`:  the code host said no (`error`:  its words)
  *   - `would ...`:  a dry run's
  * - `error`:  also a push that failed (`made`, `added`):  the remote stands, the push is left to do by hand
  */
@@ -1568,12 +1721,14 @@ export type RemoteReport = {
   action: RemoteAction
   /** the epic repo's address, as git takes it */
   address?: string
-  /** the GitHub repo made, or that would be:  `owner/name` */
+  /** the repo made on the code host, or that would be:  `owner/name` */
   repo?: string
   /** who can see that repo:  `private` or `public` (`made`, `would make`, `failed`) */
   visibility?: RepoVisibility
-  /** git's or gh's words, when something failed */
+  /** git's or the code host's words, when something failed */
   error?: string
+  /** one line about what the team must do by hand:  GitLab's default branch left protected */
+  warning?: string
 }
 
 /** What `epic init` did about the epic repo:  `RemoteReport`. */
@@ -1601,9 +1756,9 @@ export type InitOptions = {
   name?: string
   /** the epic repo's address, made already (`--remote`):  made the epic repo's remote, and pushed to */
   remote?: string
-  /** the name to give the epic repo on GitHub (`--content-repo`);  none:  asked, else `<repo>.epics` */
+  /** the name to give the epic repo on the code host (`--content-repo`);  none:  asked, else `<repo>.epics` */
   contentRepo?: string
-  /** whether the epic repo made on GitHub is private or public (`--public`);  none:  asked, else private */
+  /** whether the epic repo made on the code host is private or public (`--public`);  none:  asked, else private */
   visibility?: RepoVisibility
   /** no remote, no epic repo (`--no-remote`):  the plans stay on this machine;  default `false` */
   noRemote?: boolean
@@ -1622,8 +1777,10 @@ export type InitOptions = {
   commit?: boolean
   /** the team's plans cloned already (`questions()`, for the colours they hold):  reported as `cloned` */
   cloned?: boolean
-  /** the base branch takes only pull requests (`--protected-base`);  default `false`:  GitHub's word, else off */
+  /** the base branch takes only pull requests (`--protected-base`);  default `false`:  the host's word, else off */
   protectedBase?: boolean
+  /** where the code is hosted, settled already (`questions()`);  none:  worked out, asking nothing */
+  codeHost?: CodeHostReport
   /** a progress line, before each slow step (a clone, GitHub, a push, the server);  default:  nothing said */
   say?: (text: string) => void
 }
@@ -1635,7 +1792,7 @@ export type RemoteStepOptions = Pick<InitOptions, "remote" | "contentRepo" | "vi
   dryRun: boolean
   noRemote: boolean
   ask: boolean
-  /** a progress line, before GitHub makes the repo */
+  /** a progress line, before the code host makes the repo */
   say?: (text: string) => void
 }
 
@@ -1645,7 +1802,16 @@ const NAME_QUESTION = "What do you want to be called?"
 /** What `epic init` asks, in a terminal, when they have no colour yet. */
 const COLOR_QUESTION = "Which colour should your words be?"
 
-/** What `epic init` asks, in a terminal, before it makes the epic repo on GitHub. */
+/** What `epic init` asks, in a terminal, when the `origin` address doesn't say whose it is. */
+const HOST_QUESTION = "Where is this repo hosted?"
+
+/** "Where is this repo hosted?"'s two choices, GitHub first:  it's the default. */
+const HOST_CHOICES = [
+  { value: "github", label: "GitHub", hint: "uses gh" },
+  { value: "gitlab", label: "GitLab", hint: "uses glab, self-hosted too" }
+]
+
+/** What `epic init` asks, in a terminal, before it makes the epic repo on the code host. */
 const REPO_QUESTION = "What should the shared epics repo be called?"
 
 /** "Private or public?"'s two choices, private first (`askVisibility()`). */
@@ -1654,10 +1820,10 @@ const VISIBILITY_CHOICES = [
   { value: "public", label: "public", hint: "anyone can read every epic page, guide and comment" }
 ]
 
-/** What `epic init` asks, in a terminal, before it makes the epic repo on GitHub:  who can see it. */
+/** What `epic init` asks, in a terminal, before it makes the epic repo on the code host:  who can see it. */
 const VISIBILITY_QUESTION = "Private or public?"
 
-/** A GitHub repo name:  letters, digits, `.`, `-` and `_`, at most 100. */
+/** A repo name on the code host:  letters, digits, `.`, `-` and `_`, at most 100. */
 const REPO_NAME = /^[\w.-]{1,100}$/
 
 /** The remote steps that write the epic repo's address into the config, so it's to commit. */
@@ -1680,8 +1846,10 @@ const README_EPICS = "https://github.com/spell-app/spell/blob/main/README-epics.
 /** `epic init`'s line, in colour, once the repo is set up. */
 const DONE = "Epics initialized!"
 
-/** `epic init`'s line, in colour, when what's left is a pull request to merge. */
-const DONE_ONCE_MERGED = "Epics are set up, and start here once that pull request is merged."
+/** `epic init`'s line, in colour, when what's left is a request to merge. */
+function doneOnceMerged(pullRequest: string): string {
+  return `Epics are set up, and start here once that ${pullRequest} is merged.`
+}
 
 /** The files section's head. */
 const FILES_HEAD = "Setting up epic files:"
@@ -1690,22 +1858,27 @@ const FILES_HEAD = "Setting up epic files:"
 const COMMIT_HEADER = "We need to make a commit in the main repo to enable epics."
 
 /** What the commit section says first when the base branch takes only pull requests. */
-const PULL_REQUEST_HEADER = "This repo takes only pull requests into its base branch, so epics are enabled through one."
+function pullRequestHeader(pullRequest: string): string {
+  return `This repo takes only ${pullRequest}s into its base branch, so epics are enabled through one.`
+}
 
 /** The branch `epic init` puts its two files on, for a base branch that takes only pull requests. */
 const SETUP_BRANCH = "epic-setup"
 
-/** The pull request `epic init` opens:  its title. */
+/** The pull or merge request `epic init` opens:  its title. */
 const PR_TITLE = "Set up epics"
 
-/** The pull request `epic init` opens:  its body. */
-const PR_BODY =
-  "Adds `.epic/config.json5` and the `.gitignore` lines that the `epic` tooling needs, nothing else.\n\n" +
-  "Once this is merged:  `git pull` on the base branch, and teammates can run `epic init`.\n\n" +
-  "The epic pages live in a repo of their own beside this one, which needs direct pushes:  " +
-  "if an org-wide rule requires pull requests, it must leave that repo out."
+/** The pull or merge request `epic init` opens:  its body. */
+function prBody(pullRequest: string): string {
+  return (
+    "Adds `.epic/config.json5` and the `.gitignore` lines that the `epic` tooling needs, nothing else.\n\n" +
+    "Once this is merged:  `git pull` on the base branch, and teammates can run `epic init`.\n\n" +
+    "The epic pages live in a repo of their own beside this one, which needs direct pushes:  " +
+    `if an org-wide rule requires ${pullRequest}s, it must leave that repo out.`
+  )
+}
 
-/** The comment above the links `epic init` excludes until its pull request is merged (`restoreBase()`). */
+/** The comment above the links `epic init` excludes until its pull or merge request is merged (`restoreBase()`). */
 const EXCLUDE_NOTE = "# epic init:  its links, until the pull request that lists them in .gitignore is merged"
 
 /** A push git's server refused, rather than one that never got there. */

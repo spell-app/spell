@@ -13,6 +13,7 @@ import { RealPath } from "spell/server/RealPath"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { peerRepos } from "spell/server/page/settings"
 import { PeopleColors } from "./PeopleColors.ts"
+import { CodeHost, type CodeHostKind } from "./CodeHost.ts"
 import { Editor, EDITOR_IDS } from "./Editor.ts"
 import { VoiceColor } from "./VoiceColor.ts"
 
@@ -266,6 +267,11 @@ export class EpicConfig {
   /** whether the base branch can't be pushed to:  work reaches it only through a pull request */
   get baseBranchProtected(): boolean {
     return this.settings.baseBranchProtected
+  }
+
+  /** where the code is hosted, `github` or `gitlab`:  ask `CodeHost.of(config)` how to talk to it */
+  get codeHost(): CodeHostKind {
+    return this.settings.codeHost
   }
 
   /**
@@ -933,6 +939,7 @@ export class EpicConfig {
       contentRemote: this.contentRemote,
       baseBranch: this.baseBranch,
       baseBranchProtected: this.baseBranchProtected,
+      codeHost: this.codeHost,
       worktreesFolder: this.worktreesFolder,
       installCommand: this.installCommand,
       installOnCreate: this.installOnCreate,
@@ -1041,6 +1048,7 @@ export class EpicConfig {
     return {
       ...defaults,
       contentFolder,
+      codeHost: CodeHost.kindOfAddress(CodeHost.originOf(main)),
       baseBranch: written.baseBranch === undefined ? EpicConfig.baseBranchOf(main) : "main",
       worktreesFolder: `../${repo}.worktrees`,
       installCommand,
@@ -1110,6 +1118,7 @@ export class EpicConfig {
       contentRemote: valueOf(given, "contentRemote", defaults.contentRemote, file, "", { empty: true }),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
       baseBranchProtected: valueOf(given, "baseBranchProtected", defaults.baseBranchProtected, file),
+      codeHost: codeHostOf(given, defaults.codeHost, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
       installOnCreate: valueOf(given, "installOnCreate", defaults.installOnCreate, file),
@@ -1217,8 +1226,11 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *     epic folder is missing
  * - `baseBranch`:  the branch worktrees start from and merge into (the remote's default branch, from git):
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
+ * - `codeHost`:  where the code is hosted, `"github"` or `"gitlab"`:  `CodeHost.of()` picks `gh` or `glab` by it
+ *   - left out, it's worked out from the `origin` remote each time it's read (`CodeHost.kindOfAddress()`):
+ *     `epic init` writes the value it settled on, for an address that doesn't say (`--host`)
  * - `baseBranchProtected`:  the base branch can't be pushed to, and work reaches it only through a pull request
- *   (`false`, the default;  `epic init` turns it on with `--protected-base`, or when GitHub says so)
+ *   (`false`, the default;  `epic init` turns it on with `--protected-base`, or when the code host says so)
  *   - `epic init` opens a pull request instead of committing on it;  `epic merge` refuses
  *   - the worktree hook and `epic worktree merge-main` fast-forward the local base branch from `origin` first
  *     (`BaseBranch`);  `epic worktree remove --branches` counts a merged pull request as merged (a squash too)
@@ -1311,6 +1323,7 @@ export type EpicSettings = {
   contentRemote: string
   baseBranch: string
   baseBranchProtected: boolean
+  codeHost: CodeHostKind
   worktreesFolder: string
   installCommand: string
   installOnCreate: boolean
@@ -1338,6 +1351,7 @@ export type EpicSettings = {
 /** The keys whose value comes from the repo itself, when a file leaves them out (`EpicConfig.defaultsFor()`). */
 type RepoKey =
   | "contentFolder"
+  | "codeHost"
   | "baseBranch"
   | "worktreesFolder"
   | "installCommand"
@@ -1440,6 +1454,18 @@ function warnOnce(message: string): void {
  * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind, an empty string (unless
  *   `empty`), or a number that isn't more than 0
  */
+/**
+ * The `codeHost` setting of file `file`'s `given`;  left out, `fallback`.
+ * - throws a `TypeError` for anything but `github` or `gitlab`
+ */
+function codeHostOf(given: Record<string, unknown>, fallback: CodeHostKind, file: string): CodeHostKind {
+  const value = given.codeHost
+  if (value === undefined) return fallback
+  if (!CodeHost.isKind(value))
+    throw new TypeError(`EpicConfig:  ${file}'s "codeHost" must be "github" or "gitlab", not ${JSON.stringify(value)}`)
+  return value
+}
+
 function valueOf<T extends string | boolean | number>(
   given: Record<string, unknown>,
   key: string,

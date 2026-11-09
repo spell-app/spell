@@ -10,7 +10,7 @@ import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
-import { GitHub } from "spell/epic/config/GitHub"
+import { CodeHost, type CodeHostClient } from "spell/epic/config/CodeHost"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { URGENT_STATES } from "spell/epic/list/EpicState"
 import { PhaseStatuses } from "spell/epic/phases"
@@ -359,9 +359,9 @@ export class Worktrees {
   static deleteBranch(main: string, branch: string): string {
     const config = new EpicConfig(main)
     if (config.baseBranchProtected) {
-      const why = Worktrees.mergedThroughPullRequest(main, branch, config.baseBranch)
+      const why = Worktrees.mergedThroughPullRequest(main, branch, config.baseBranch, CodeHost.of(config))
       if (!why)
-        return `kept branch ${branch}:  not in ${config.baseBranch}, and no merged pull request has its last commit`
+        return `kept branch ${branch}:  not in ${config.baseBranch}, and no merged ${CodeHost.of(config).words.pullRequest} has its last commit`
       const forced = Git.run(["branch", "-D", branch], main)
       return forced.ok ? `deleted branch ${branch} (${why})` : `kept branch ${branch}:  ${forced.err.split("\n")[0]}`
     }
@@ -372,15 +372,21 @@ export class Worktrees {
   /**
    * Why `branch` counts as merged into `base`, in a repo whose base takes only pull requests;  `undefined` if it doesn't:
    * - all its commits in `base`, local or `origin`'s
-   * - or a pull request GitHub reports merged whose last commit holds the branch's tip:
+   * - or a pull or merge request `host` reports merged whose last commit holds the branch's tip:
    *   so a commit made since the merge keeps the branch
-   * - runs `gh` only when git alone can't say;  `gh` missing or offline:  `undefined`, and the branch stays
+   * - runs its command (`gh`, `glab`) only when git alone can't say;  missing or offline:  `undefined`, and the branch
+   *   stays
    */
-  static mergedThroughPullRequest(main: string, branch: string, base: string): string | undefined {
+  static mergedThroughPullRequest(
+    main: string,
+    branch: string,
+    base: string,
+    host: CodeHostClient
+  ): string | undefined {
     const within = (into: string) => Git.run(["merge-base", "--is-ancestor", branch, into], main).ok
     if (within(base) || within(`refs/remotes/origin/${base}`)) return `in ${base}`
-    const merged = GitHub.mergedPullRequests(branch, base, main).find((pull) => within(pull.head))
-    return merged && `pull request #${merged.number} merged`
+    const merged = host.mergedPullRequests(branch, base, main).find((pull) => within(pull.head))
+    return merged && `${host.words.pullRequest} ${host.words.number(merged.number)} merged`
   }
 
   /** `move --idle`:  move every worktree in the old place that no session works in;  a report each. */

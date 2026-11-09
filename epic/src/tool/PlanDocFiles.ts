@@ -709,9 +709,17 @@ export class PlanDocFiles {
     return PlanDocFiles.gitIn(this.checkoutOf(file), "log", "-1", "--format=%cI", "HEAD~2") || null
   }
 
-  /** The GitHub page of the doc's repo (`PlanCommits.githubBase()` of `origin`), or `null`. */
+  /** The page the doc's repo's commit links go under (`PlanCommits.commitBase()` of `origin`), or `null`. */
   commitBase(file: string): string | null {
-    return PlanCommits.githubBase(PlanDocFiles.gitIn(this.checkoutOf(file), "remote", "get-url", "origin"))
+    return PlanDocFiles.commitBaseOf(this.checkoutOf(file))
+  }
+
+  /** The page checkout `checkout`'s commit links go under, by its `origin` and its code host;  `null` for none. */
+  static commitBaseOf(checkout: string): string | null {
+    return PlanCommits.commitBase(
+      PlanDocFiles.gitIn(checkout, "remote", "get-url", "origin"),
+      EpicConfig.of(checkout).codeHost
+    )
   }
 
   /**
@@ -772,7 +780,7 @@ export class PlanDocFiles {
     const phases = PlanDoc.parse(html).phases
     const timed: (CommitLogEntry & { seconds: number })[] = []
     for (const checkout of [checkouts].flat()) {
-      const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(checkout, "remote", "get-url", "origin"))
+      const repo = PlanDocFiles.commitBaseOf(checkout)
       // a bare date means that day at the CURRENT time to git:  midnight, so the start day's commits count
       const raw = PlanDocFiles.gitIn(
         checkout,

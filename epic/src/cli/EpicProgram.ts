@@ -15,6 +15,7 @@ import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { PluginInstall } from "spell/epic/command/PluginInstall"
 import { SkillsCheck } from "spell/epic/command/SkillsCheck"
 import { RepoInit } from "spell/epic/command/RepoInit"
+import { PullRequest } from "spell/epic/command/PullRequest"
 import { Repos } from "spell/epic/command/Repos"
 import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
@@ -165,6 +166,14 @@ export class EpicProgram {
       )
       .usage("<epic> [--ditch]")
       .addHelpText("after", example("epic merge epic-workflow"))
+
+    this.verb(epic.command("pr"), (args) => new PullRequest().run(args))
+      .description(
+        "push a branch (never forced) and open its pull request against the base branch, a merge request on GitLab;  " +
+          "if one's open, says its address and that the push updated it"
+      )
+      .usage("<name> [--title <title>] [--body-file <file>]")
+      .addHelpText("after", example("epic pr seo --title 'Better titles' --body-file notes.md"))
   }
 
   ////////////////
@@ -650,12 +659,12 @@ export class EpicProgram {
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
         "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
-          ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub, the " +
+          ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub or GitLab, the " +
           "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
         "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
-          "[--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
+          "[--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
       )
       .addHelpText("after", INIT_HELP)
 
@@ -1160,10 +1169,10 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
                        window names from the repo's;  a file already there is kept
   ../<repo>.epics      the epic repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
-  the epic repo        the epic repo on GitHub, so the team shares the plans:  asks what to call it
+  the epic repo        the epic repo on GitHub or GitLab, so the team shares the plans:  asks what to call it
                        (<repo>.epics) and "Private or public?" (private), makes it, pushes, and writes its
-                       address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
-                       it, says how to get it
+                       address in the config (contentRemote);  needs the host's command (gh, glab), logged in:
+                       without it, says how to get it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
@@ -1182,7 +1191,12 @@ Then push the base branch:  a teammate's epic init then clones the plans.
 A public one shows everything in the plans (epic pages, guides, comments) to anyone.
 
 --protected-base:  the base branch takes only pull requests (baseBranchProtected in the config).  Without it,
-epic init asks GitHub, with gh logged in and a GitHub remote, and says in one line when it found so.
+epic init asks GitHub or GitLab, with its command (gh, glab) logged in and a remote there, and says in one line when
+it found so.
+
+--host github|gitlab:  where the code is hosted (codeHost in the config).  Left out, it's read off the origin
+remote's address;  for an address that doesn't say (git.acme.com), epic init asks in a terminal, and with no
+terminal stays on GitHub and says so.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that

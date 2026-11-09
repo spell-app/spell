@@ -45,6 +45,7 @@ describe("EpicConfig", () => {
       contentRemote: "",
       baseBranch: "main",
       baseBranchProtected: false,
+      codeHost: "github",
       worktreesFolder: join(TOP, "repo.worktrees"),
       // no lock file:  nothing to install
       installCommand: "",

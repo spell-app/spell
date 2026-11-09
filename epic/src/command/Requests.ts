@@ -8,6 +8,7 @@ import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
 import { PageServer } from "spell/server/page"
 import { CLI } from "spell/cli"
+import { CodeHost } from "spell/epic/config/CodeHost"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { Transcript } from "spell/epic/config/Transcript"
 import { DataFile } from "spell/epic/data/DataFile"
@@ -479,7 +480,8 @@ export class Requests {
     const { baseBranch: base, baseBranchProtected } = new EpicConfig(main)
     if (baseBranchProtected)
       throw new EpicCommandError(
-        `merge:  ${base} takes only pull requests here (baseBranchProtected):  push ${epic} and open one;  nothing merged`
+        `merge:  ${base} takes only ${CodeHost.of(new EpicConfig(main)).words.pullRequest}s here (baseBranchProtected):  ` +
+          `epic pr ${epic} pushes it and opens one;  nothing merged`
       )
     const branch = Git.run(["branch", "--show-current"], main).out
     if (branch !== base) throw new EpicCommandError(`merge:  ${label} is on '${branch}', not ${base}`)

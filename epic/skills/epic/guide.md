@@ -116,9 +116,8 @@ epic turn end
 2. Merge the worktree's branch into the base branch, when the person says so, and remove the worktree:
    `epic worktree remove <epic>`, never a bare `git worktree remove`.
    - `epic config baseBranchProtected` prints `true`:  the base branch takes only pull requests, and `epic merge` refuses.
-     Offer two things, in the chat:  "Push and open a pull request" (`epic worktree merge-main`, `git push -u origin <epic>`,
-     `gh pr create`) or "Leave it".
-     The rest happens once GitHub merges it:  `git pull` on the base branch, then `epic worktree remove <epic> --branches`.
+     Offer two things, in the chat:  "Push and open a pull request" (`epic worktree merge-main`, `epic pr <epic>`) or "Leave it".
+     The rest happens once it's merged:  `git pull` on the base branch, then `epic worktree remove <epic> --branches`.
 3. Say what shipped, with the page's links (`epic pages link <page> --show`).
 
 ## tidy -- Close what other work made obsolete

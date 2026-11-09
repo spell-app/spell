@@ -422,9 +422,7 @@ describe("epic init:  the epic repo (epic-friend P4)", () => {
     expect(report.links.map((link) => link.action)).toEqual(Array(4).fill("linked"))
     expect(new EpicConfig(app).contentRemote).toBe("")
     const lines = said(report)
-    expect(lines).toContain(
-      "no epic repo made:  GitHub's command, gh, isn't installed.  Sharing the epics works only with GitHub for now:"
-    )
+    expect(lines).toContain("no epic repo made:  GitHub's command, gh, isn't installed.  To share the epics, run:")
     expect(lines).toContain("  brew install gh        (other systems:  https://cli.github.com)")
     expect(lines).toContain("  gh auth login")
     expect(lines.at(-1)).toBe(
@@ -556,7 +554,7 @@ describe("epic init:  the epic repo (epic-friend P4)", () => {
   test("--content-repo, --remote and --no-remote:  one at a time;  a repo name GitHub takes", async () => {
     const init = offline(MAIN)
     await expect(init.run(["--remote", "x", "--no-remote"])).rejects.toThrow(/give one of/)
-    await expect(init.run(["--content-repo", "no way"])).rejects.toThrow(/isn't a GitHub repo name/)
+    await expect(init.run(["--content-repo", "no way"])).rejects.toThrow(/isn't a repo name/)
   })
 
   test("keepRemote():  in place in the line epic init writes;  added to an older file, its comments kept", () => {

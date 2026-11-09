@@ -72,9 +72,9 @@ and you mark it up when you have time.
 What that's like, and why:  [the epic engine's front page](epic/README.md).
 
 Three things to know before you start:
-- **Sharing works only with GitHub, for now.**
-  `epic init` makes the team's epic repo with GitHub's command, `gh`.
-  GitLab, Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
+- **Sharing works with GitHub and GitLab.**
+  `epic init` makes the team's epic repo with the host's own command:  `gh`, or `glab` ([On GitLab](#on-gitlab)).
+  Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
   The skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
@@ -136,7 +136,8 @@ beside the main checkout rather than inside it.
 
 ## Setting it up:  one command, and an extension
 
-You need Claude Code, VS Code, git, Node 24.11 or later, and GitHub's command, `gh`.
+You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's command:  GitHub's `gh`, or GitLab's `glab`
+([On GitLab](#on-gitlab)).
 These steps are for the FIRST person on a team;  everyone after them:  "A teammate joins", below.
 
 ### 1. GitHub's command, logged in
@@ -266,8 +267,8 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
    A file already there is kept as it is.
 3. Makes the epic folder, `../<repo>.epics`, a git repo of its own.
    It holds the four folders, a README, and a `.gitignore` for what's never committed.
-4. Makes the epic repo on GitHub:  private unless you said public, under your account,
-   or under the organization your code repo is on.
+4. Makes the epic repo on GitHub or GitLab:  private unless you said public, under your account,
+   or under the organization or group your code repo is on.
    It pushes the epic repo there, and writes its address in the config, `contentRemote`.
 5. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
 6. Lists the links in a block of your `.gitignore`.
@@ -412,10 +413,10 @@ npx spell@next epic init
 - The plugin and the extension are set up on their machine by the same line.
 - It asks your name and your colour, as it asked the first person, from any folder of the code repo:
   it finds the repo's main checkout from wherever it runs.
-- The epic repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
+- The epic repo is private, unless the first person chose public:  they add each teammate to it on GitHub or GitLab,
   with write access, since every turn pushes.
-- Joining needs no `gh`:  plain git clones the epic repo.
-  With `gh` logged in, though, your short name defaults to your GitHub login.
+- Joining needs no `gh` or `glab`:  plain git clones the epic repo.
+  With one logged in, though, your short name defaults to your login there.
 - The plugin step and the extension are once per machine, so a teammate does those too.
 
 ### Who you are
@@ -524,7 +525,8 @@ What your agent makes of a mark lands in the epic page, under your name, which e
 
 ## <a id="when-main-takes-only-pull-requests"></a>When main takes only pull requests
 
-Plenty of GitHub orgs refuse direct pushes to `main`.
+Plenty of GitHub orgs and GitLab groups refuse direct pushes to `main`.
+Below, "pull request" means a GitLab merge request too;  on GitLab, `epic` says "merge request".
 Tell the repo so with one setting, and nothing `epic` does tries to land there:
 
 ```sh
@@ -535,8 +537,9 @@ epic init --protected-base
 and work reaches it only through a pull request.
 
 **You usually don't have to say so.**
-With `gh` logged in and a GitHub remote, `epic init` asks GitHub whether a rule requires a pull request into the branch
-(a ruleset's `pull_request` rule and, if you're allowed to read it, classic branch protection),
+With `gh` or `glab` logged in, `epic init` asks the host whether the branch takes only requests
+(GitHub:  a ruleset's `pull_request` rule and, if you're allowed to read it, classic branch protection;
+GitLab:  the project's protected branches:  nobody allowed to push, or a push level above yours),
 turns the setting on, and says so in one line.
 If it can't find out, it carries on without it.
 A config that already says `false` stays `false`, and `epic init` tells you how to change it.
@@ -544,7 +547,7 @@ A config that already says `false` stays `false`, and `epic init` tells you how 
 **Setting up the repo goes through a pull request too.**
 `epic init` never commits on `main`:
 - `.epic/config.json5` and `.gitignore` go on a new branch, `epic-setup`, which it pushes.
-- It opens the pull request with `gh pr create`, or prints exactly what to run without `gh`.
+- It opens the pull request with `gh` or `glab`, or prints exactly what to run without one.
 - Your local `main` is left clean:  the two files aren't in it until the merge.
 - Epics start working in the repo once it's merged and you've run `git pull`.
   Teammates can join then.
@@ -566,7 +569,7 @@ The setting changes nothing about it.
 | `/epic done`, `/isolate done` | no "Merge now":  "Push and open a pull request", or "Leave it" |
 | a standing epic's phase | pushed and put in a pull request, rather than merged at once |
 | a new worktree, `epic worktree merge-main` | fast-forward your local `main` from `origin` first |
-| `epic worktree remove --branches` | a branch whose pull request GitHub merged counts as merged, a squash included |
+| `epic worktree remove --branches` | a branch whose pull request the code host merged counts as merged, a squash included |
 
 Local `main` only moves when you pull, so those fast-forwards keep it from going stale.
 They happen only when it's safe:  fast-forward only, nothing uncommitted.
@@ -574,7 +577,9 @@ Offline, or with `main` diverged, they carry on from what you have, and say so.
 
 A branch is deleted only if all its commits are in `main`,
 or a merged pull request holds its last commit:  a commit made after the merge keeps the branch.
-Asking GitHub takes `gh`;  without it, the branch stays, and the line says why.
+Asking the host takes `gh` or `glab`;  without it, the branch stays, and the line says why.
+
+To push a branch and open its pull request by hand:  `epic pr <name>` ([the CLI page](epic/README-cli.md)).
 
 **After a pull request merges,** in the main checkout:
 
@@ -582,6 +587,37 @@ Asking GitHub takes `gh`;  without it, the branch stays, and the line says why.
 git pull
 epic worktree remove <name> --branches
 ```
+
+## <a id="on-gitlab"></a>On GitLab
+
+`epic init` works on GitLab, self-hosted too, as it does on GitHub:  the shared epic repo made, and a setup merge request
+where `main` is protected.
+**So far this has run only against a stand-in `glab`**:  a script that answers as GitLab's API documents,
+with real `git` pushes to a local repo whose hook refuses `main`.
+No real GitLab has been tried yet, so expect rough edges and tell us.
+
+You need GitLab's command, `glab`, logged in:
+
+```sh
+brew install glab                        # other systems:  https://gitlab.com/gitlab-org/cli
+glab auth login                          # gitlab.com
+glab auth login --hostname git.acme.com  # your own GitLab
+```
+
+- **Which host:**  `codeHost` in `.epic/config.json5`, `"github"` or `"gitlab"`.
+  Left out, it's read off the `origin` address each time:  a host with `gitlab` in it is GitLab, `github.com` GitHub,
+  anything else GitHub.
+- **A self-hosted GitLab whose address doesn't say so** (`git.acme.com`):  `epic init --host gitlab`.
+  In a terminal it asks;  with no terminal it stays on GitHub and says so in one line.
+- **Groups and subgroups:**  the epic repo goes under the group your code is in (`group/sub/my-app.epics`),
+  else your own namespace.
+- **The epic repo must take pushes from teammates, every turn.**
+  GitLab protects a new project's default branch, so Developers can't push.
+  `epic init` unprotects it right after the first push.
+  If it can't (no right to), it says so in one line:  unprotect it in the project's
+  Settings › Repository › Protected branches, or nobody else can sync.
+  An epic repo you made yourself (`--remote`) is yours to open up.
+- **Commit links** on the epic pages go to GitLab's `/-/commit/<sha>`.
 
 ## <a id="with-codex"></a>With Codex (or another agent)
 
@@ -755,7 +791,8 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `contentFolder` | `"../<repo>.epics"` | the epic repo:  epics, sagas, guides, pages |
 | `contentRemote` | the epic repo's address, once it's made (or `--remote`);  `""` until then | where every turn pulls the epic repo from and pushes it to, and what a teammate's `epic init` clones;  `""`:  the plans stay on this machine |
 | `baseBranch` | from git:  the remote's default branch, else `main` or `master`, else the branch the main checkout is on | the branch worktrees start from and merge into |
-| `baseBranchProtected` | `false`, unless `--protected-base` or GitHub says otherwise | the base branch can't be pushed to, and work reaches it only through a pull request ([below](#when-main-takes-only-pull-requests)) |
+| `codeHost` | the value it settled on:  `--host`, else the `origin` address's, else GitHub;  left out, worked out from `origin` each time | where the code is hosted, `"github"` or `"gitlab"`:  picks `gh` or `glab` ([On GitLab](#on-gitlab)) |
+| `baseBranchProtected` | `false`, unless `--protected-base` or the code host says otherwise | the base branch can't be pushed to, and work reaches it only through a pull request ([below](#when-main-takes-only-pull-requests)) |
 | `worktreesFolder` | `"../<repo>.worktrees"` | where new worktrees go, one folder each, `<worktreesFolder>/<name>` |
 | `installCommand` | from the lock file;  `""` with none | what makes a new worktree ready to run, from its root;  `""`:  nothing to install |
 | `installOnCreate` | `true` with an install | whether the worktree hook runs the install before it hands the worktree over |
@@ -908,9 +945,10 @@ What you'd trip on today, roughly in the order you'd meet it.
 
 1. **Everything runs from npm's cache.**
    `npx spell@next epic init` installs nothing permanent:  after `npm cache clean`, run it again.
-2. **Sharing needs GitHub.**
-   `epic init` makes the epic repo only through GitHub's `gh`;
+2. **Sharing needs GitHub or GitLab.**
+   `epic init` makes the epic repo through `gh` or `glab`;
    anywhere else, make it by hand and pass `--remote <address>`.
+   GitLab has run only against a stand-in `glab`, not a real server ([On GitLab](#on-gitlab)).
 3. **The review controls reach the DEFAULT repo only.**
    A second repo's pages draw, but their buttons, comments and details pages talk to the default repo's inbox.
    `epic repos default <name>` picks which repo that is.
@@ -954,13 +992,15 @@ What you'd trip on today, roughly in the order you'd meet it.
      - `spell rename imports` renames in the peers `repos.json5` names, so never in your project
      - `spell publish` publishes only the kit's folders that have a `"spellPublish"`
 
-**Real today:**  a repo that isn't Spell, set up with one command, its plans shared by a team through GitHub,
+**Real today:**  a repo that isn't Spell, set up with one command, its plans shared by a team through GitHub
+(GitLab is built, and tried only against a stand-in `glab`),
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
 - Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
-- a host other than GitHub, without making the epic repo by hand
+- a real GitLab, gitlab.com or self-hosted:  `glab`'s flags are from its documentation, not a run against a server
+- a host other than GitHub or GitLab, without making the epic repo by hand
 - two repos reviewed from one server
 - the keys added since the first outside run, tried anywhere but Spell's own repos:
   - `app`
