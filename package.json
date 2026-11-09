@@ -1395,6 +1395,46 @@
     "commands": "./src/cli/commands.ts"
   },
   "spellPublish": {
+    "optionalPeers": [
+      "@atproto/oauth-client-browser",
+      "@atproto/oauth-client-node",
+      "@inkjs/ui",
+      "@solidjs/h",
+      "@solidjs/router",
+      "@solidjs/vite-plugin",
+      "@solidjs/web",
+      "browser-or-node",
+      "dompurify",
+      "entities",
+      "esbuild",
+      "fs-extra",
+      "global",
+      "highlight.js",
+      "ink",
+      "lightningcss",
+      "lodash",
+      "lodash-es",
+      "marked",
+      "monaco-editor",
+      "node-filter-async",
+      "pluralize",
+      "postcss",
+      "query-string",
+      "react",
+      "semver",
+      "solid-js",
+      "temporal-polyfill",
+      "tsx",
+      "vite-plus",
+      "vscode-css-languageservice",
+      "vscode-languageserver",
+      "vscode-languageserver-textdocument",
+      "wrap-ansi",
+      "xlsx"
+    ],
+    "pinnedBy": {
+      "oxfmt": "vite-plus"
+    },
     "files": [
       "repos.json5"
     ],

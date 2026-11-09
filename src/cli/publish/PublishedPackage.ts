@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process"
 import { chmodSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
-import { basename, dirname, join, posix } from "node:path"
+import { createRequire } from "node:module"
+import { basename, dirname, join, posix, relative, sep } from "node:path"
 
 import {
   DIST,
@@ -87,6 +88,7 @@ export class PublishedPackage {
       mkdirSync(dirname(join(folderStage, file)), { recursive: true })
       cpSync(join(folder.root, file), join(folderStage, file), { recursive: true })
     }
+    this.writeFolderBins(folder, folderStage)
     const fromFolder = (path: string) => builtPath(path).replace(/^(\.\/)?dist\//, `../${DIST}/${name}/`)
     const entry = folder.manifest.spell as Record<string, string> | undefined
     const shipped = Object.entries(entry ?? {})
@@ -103,6 +105,27 @@ export class PublishedPackage {
     mkdirSync(folderStage, { recursive: true })
     writeFileSync(join(folderStage, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`)
     return report
+  }
+
+  /**
+   * A folder's own commands, each where the folder's `package.json` has it (`epic/bin/epic`), importing its built
+   * module:  so `spell` alone is enough to run `epic`, as a link on the `PATH` or from `spell epic` (epic `epic-engine`
+   * P66).  A command the checkout has no `bin` entry for isn't written.
+   */
+  private writeFolderBins(folder: PublishedRepo, folderStage: string): void {
+    const own = (folder.manifest.bin ?? {}) as Record<string, string>
+    for (const [name, module] of Object.entries(folder.settings.bin ?? {})) {
+      if (!own[name]) continue
+      const file = join(folderStage, own[name])
+      const built = join(this.stageDir, DIST, basename(folder.root), `${module}.js`)
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(
+        file,
+        `#!/usr/bin/env node\n// \`${name}\`:  runs the built \`${module}\` (written by \`spell publish\`)\n` +
+          `await import("${relative(dirname(file), built).split(sep).join("/")}")\n`
+      )
+      chmodSync(file, 0o755)
+    }
   }
 
   /** `report`'s counts added to the package's own. */
@@ -123,7 +146,9 @@ export class PublishedPackage {
    * The `package.json` npm publishes:  the checkout's, made for an install with no checkout.
    * - Kept:  `KEPT_FIELDS` (name, description, license, `peerDependencies` ...).
    * - `version`:  the one version.
-   * - `dependencies`:  `workspace:*` => the one version, `catalog:` => the catalog's, plus `extraDependencies`.
+   * - `dependencies`:  `workspace:*` => the one version, `catalog:` => the catalog's, plus `extraDependencies` and
+   *   `"spellPublish": { "pinnedBy" }`, minus `"optionalPeers"`.
+   * - `peerDependencies`:  the checkout's, plus each of `"optionalPeers"`, marked optional, at its `dependencies` version.
    * - `exports`:  every name to its built file and declarations (`publishedExports()`).
    * - `bin`, `files`:  what `stage()` wrote.
    * - `sideEffects`, `"spell"` (its commands and hooks) and `"pageServer"`:  their `src/` paths made `dist/` ones.
@@ -150,6 +175,7 @@ export class PublishedPackage {
       ]
     else if (sideEffects !== undefined) out.sideEffects = sideEffects
     out.dependencies = this.dependencies()
+    this.addOptionalPeers(out)
     if (source.spell) out.spell = this.shippedSpellEntry(source.spell as Record<string, string>)
     if (this.folders.length)
       out.spell = { ...(out.spell as object), folders: this.folders.map((f) => basename(f.root)) }
@@ -200,9 +226,51 @@ export class PublishedPackage {
     return shipped.length ? Object.fromEntries(shipped) : undefined
   }
 
-  /** The published `dependencies`. */
+  /** The published `dependencies`:  what npm always installs. */
   private dependencies(): Record<string, string> {
-    return this.resolvedVersions({ ...this.repo.manifest.dependencies, ...this.extraDependencies })
+    const all = this.resolvedVersions({
+      ...this.repo.manifest.dependencies,
+      ...this.extraDependencies,
+      ...this.pinnedDependencies()
+    })
+    return omit(all, this.repo.settings.optionalPeers ?? [])
+  }
+
+  /**
+   * `"spellPublish": { "pinnedBy" }`, each at the version its package depends on, as installed here.
+   * - Throws when that package doesn't depend on it:  the list is stale.
+   */
+  private pinnedDependencies(): Record<string, string> {
+    const resolve = createRequire(join(this.repo.root, "package.json")).resolve
+    return Object.fromEntries(
+      Object.entries(this.repo.settings.pinnedBy ?? {}).map(([name, pinner]) => {
+        const { dependencies } = JSON.parse(readFileSync(resolve(`${pinner}/package.json`), "utf8")) as SourceManifest
+        const version = dependencies?.[name]
+        if (!version) throw new TypeError(`PublishedPackage:  ${pinner} doesn't depend on ${name}:  fix "pinnedBy"`)
+        return [name, version.replace(/^=/, "")]
+      })
+    )
+  }
+
+  /**
+   * `"spellPublish": { "optionalPeers" }` written into `out`, the published `package.json`:  npm doesn't install an
+   * optional peer by itself.
+   * - Throws when one isn't a dependency:  the list is stale.
+   */
+  private addOptionalPeers(out: Record<string, unknown>): void {
+    const names = this.repo.settings.optionalPeers ?? []
+    if (!names.length) return
+    const dependencies = this.repo.manifest.dependencies ?? {}
+    const peers = { ...(out.peerDependencies as Record<string, string> | undefined) }
+    const meta = { ...(out.peerDependenciesMeta as Record<string, unknown> | undefined) }
+    for (const name of names) {
+      const version = dependencies[name]
+      if (!version)
+        throw new TypeError(`PublishedPackage:  "optionalPeers" names ${name}, not a dependency of ${this.name}`)
+      peers[name] = version
+      meta[name] = { optional: true }
+    }
+    Object.assign(out, { peerDependencies: peers, peerDependenciesMeta: meta })
   }
 
   /** `versions` with yarn's `workspace:` and `catalog:` made versions npm reads. */
@@ -383,6 +451,11 @@ export function builtPathOrNone(entry: string, folders: string[] = []): string[]
   if (rest === "**") return [`./${DIST}/${folder}/**`]
   if (!rest?.startsWith("src/")) return []
   return [builtPath(`./${rest}`).replace(/^\.\/dist\//, `./${DIST}/${folder}/`)]
+}
+
+/** `versions` without `names`. */
+function omit(versions: Record<string, string>, names: string[]): Record<string, string> {
+  return Object.fromEntries(Object.entries(versions).filter(([name]) => !names.includes(name)))
 }
 
 /** `value` with `map` applied to every string in it, however deep. */

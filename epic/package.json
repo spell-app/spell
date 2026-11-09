@@ -130,6 +130,7 @@
       ".codex-plugin",
       "src/AGENTS.md",
       "src/tool/PLAN-DOC.md",
+      "README-vscode.md",
       "vscode/package.json",
       "vscode/spell-epic.vsix"
     ],
