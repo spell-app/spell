@@ -51,7 +51,7 @@ README/cli.md, "Scoring coherence"):  each mechanism's copies left and its users
 - **A plan review** counts the copies a plan would add, where its words say how it would do something:
   "this plan adds 3 copies of Timing (raw `setTimeout()`)".
   - Where it can't tell, it says nothing:  no guessing a number.
-- **A change in words** is an improvement, never a signed percent (the person, 2026-10-25):
+- **A change in words** is an improvement, never a signed percent (2026-10-25):
   "29% better (fewer copies)", "12% worse (score down)";  a table's column is "Improvement", its cells the bare
   percent (`17%`, a worse one `−12%`).
 - **Code only:**  the score never counts tests;  tests are a count per repo beside it.
