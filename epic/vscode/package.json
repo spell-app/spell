@@ -64,13 +64,7 @@
         "icon": "$(checklist)"
       },
       {
-        "command": "spellEpic.toolbarDivider1",
-        "title": "Divider",
-        "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
-        "enablement": "false"
-      },
-      {
-        "command": "spellEpic.toolbarDivider2",
+        "command": "spellEpic.toolbarDivider",
         "title": "Divider",
         "icon": { "light": "media/divider-light.svg", "dark": "media/divider-dark.svg" },
         "enablement": "false"
@@ -232,14 +226,9 @@
     "menus": {
       "view/title": [
         {
-          "command": "spellEpic.toolbarDivider1",
+          "command": "spellEpic.toolbarDivider",
           "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
           "group": "navigation@5"
-        },
-        {
-          "command": "spellEpic.toolbarDivider2",
-          "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
-          "group": "navigation@8"
         },
         {
           "command": "spellEpic.docView.back",
@@ -396,11 +385,7 @@
       ],
       "commandPalette": [
         {
-          "command": "spellEpic.toolbarDivider1",
-          "when": "false"
-        },
-        {
-          "command": "spellEpic.toolbarDivider2",
+          "command": "spellEpic.toolbarDivider",
           "when": "false"
         },
         {
