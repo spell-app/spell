@@ -1,4 +1,4 @@
-<spell-page "step usage" notebook>
+<page "step usage" notebook>
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -83,4 +83,4 @@
 			  (a slotted icon too) and the check go.
 		</>
 	</>
-</spell-page>
+</page>

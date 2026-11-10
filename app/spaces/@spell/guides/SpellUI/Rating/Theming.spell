@@ -1,4 +1,4 @@
-<spell-page "rating theming" notebook>
+<page "rating theming" notebook>
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>
@@ -51,4 +51,4 @@
 			inherits.
 		</>
 	</>
-</spell-page>
+</page>

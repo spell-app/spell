@@ -18,7 +18,7 @@ So the card only says what each side looks like:  its `<draw "front">` and its `
 - `clickable` shows a pointer over it, and `<on click>` says what a click does.
 - Each side is a Spell UI `<segment>`:  a raised panel, blue for the word and green for what it means.
 
-<spell-view "flash card" template="two sided view" clickable>
+<view "flash card" template="two sided view" clickable>
 	<property "word">text</>
 	<property "meaning">text</>
 
@@ -34,14 +34,14 @@ So the card only says what each side looks like:  its `<draw "front">` and its `
 			<text size="huge" bold>{its meaning}</text>
 		</segment>
 	</draw>
-</spell-view>
+</view>
 
-<spell-thing "deck" template="list of flash cards" description="The cards to learn"/>
+<thing "deck" template="list of flash cards" description="The cards to learn"/>
 
 ## The quiz:  the deck, and the card showing
 `deal a card` picks a card at random, never the one showing now, and turns it word up.
 
-<spell-app "quiz">
+<app "quiz">
 	<property "deck">a new deck</>
 	<property "card">a flash card</>
 
@@ -61,7 +61,7 @@ So the card only says what each side looks like:  its `<draw "front">` and its `
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>
 
 ## The deck:  four words to start -- add your own
 

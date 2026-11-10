@@ -1,7 +1,7 @@
 # A deck
 The 52 cards of a standard deck, ace of clubs first.
 
-<spell-thing "deck" template="list of cards">
+<thing "deck" template="list of cards">
 	<action "create it" description="One of each card, ace of clubs first:  each starts face down, as every two sided view does">
 		for rank in card ranks
 			for suit in card suits

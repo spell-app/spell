@@ -1,4 +1,4 @@
-<spell-page "diagram api" notebook>
+<page "diagram api" notebook>
 	<header level="1">
 		Diagram
 		<header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.</>
@@ -64,4 +64,4 @@
 			<ui-docs-api family="ui-diagram" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

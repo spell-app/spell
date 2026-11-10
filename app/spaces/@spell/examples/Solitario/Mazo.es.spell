@@ -1,7 +1,7 @@
 # Un mazo
 Las 52 cartas de una baraja estándar, el as de tréboles primero.
 
-<encanto-cosa "mazo" plantilla="lista de cartas">
+<cosa "mazo" plantilla="lista de cartas">
 	<acción "crearlo" descripción="Una carta de cada, el as de tréboles primero:  cada una empieza boca abajo, como toda vista reversible">
 		para rango en rangos de carta
 			para palo en palos de carta
@@ -23,4 +23,4 @@ Las 52 cartas de una baraja estándar, el as de tréboles primero.
 		barajar el mazo
 		el número de cartas en el mazo debería ser 52
 	</probar>
-</encanto-cosa>
+</cosa>

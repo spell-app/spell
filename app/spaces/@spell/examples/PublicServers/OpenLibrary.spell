@@ -1,10 +1,10 @@
 # Open Library
 Books by what they're called, who wrote them, and their covers.
 Every thing it shows is in OpenLibrary.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<spell-more-of>`, so looking again at the server never touches a line of this.
+with `<extend>`, so looking again at the server never touches a line of this.
 Open Library has no list of every book, only a search:  so the page always searches, for what's typed.
 
-<spell-thing "open library page">
+<thing "open library page">
 	<spell>
 		- its "search" is text
 		- its "showing" is a book
@@ -39,13 +39,13 @@ Open Library has no list of every book, only a search:  so the page always searc
 	<draw "book list">
 		<for its found as="cards" columns="5" doubling paging="pages" loading="Asking Open Library" failed="Open Library can't be reached just now." empty="No book is called that." />
 	</draw>
-</spell-thing>
+</thing>
 
 
 # A book
 Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.
 
-<spell-more-of "book">
+<extend "book">
 	<property "writer" description="Who wrote it first:  read from Open Library's record of them, by their id">the first item of its authors</property>
 
 	<draw>
@@ -83,12 +83,12 @@ Its cover, its title and who wrote it:  on its card, every name the search gave;
 		if that fails:
 			<text>Open Library can't say who wrote it just now.</text>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # Who wrote it
 
-<spell-more-of "author">
+<extend "author">
 	<draw "card">
 		<ui-card>
 			<content>
@@ -98,4 +98,4 @@ Its cover, its title and who wrote it:  on its card, every name the search gave;
 			</content>
 		</ui-card>
 	</draw>
-</spell-more-of>
+</extend>

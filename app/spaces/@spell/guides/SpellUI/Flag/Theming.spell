@@ -1,4 +1,4 @@
-<spell-page "flag theming" notebook>
+<page "flag theming" notebook>
 	<header level="1">
 		Flag
 		<header>A flag is used to represent a political state.</>
@@ -82,4 +82,4 @@
 			still applies a theme to the whole site.  Fomantic's `famfamfam` sprite theme isn't ported.
 		</>
 	</>
-</spell-page>
+</page>

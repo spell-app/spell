@@ -2937,7 +2937,7 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
       on a guide and an epic page (epic `epic-workflow` P23)
     - their comments stubbed in the browser, every POST aborted:  no inbox read or written, nobody woken
     - Run it after touching the comments' runtime, the toolbar or the jump dialog.
-  - `node src/demo/check-comments-epic-ui.mjs [--set epics | ui | app | brand] [--checkout <spell-app>] [--page <name>]
+  - `node src/demo/check-comments-epic-ui.mjs [--set epics | ui | app | brand] [--checkout <app>] [--page <name>]
     [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [--dark] [outDir]`, from the root:
     - `--set ui` / `app` / `brand`:  Spell UI's, App UI's or Brand's pages, from the folder `--checkout`'s settings name (`componentSets()`)
       (default the epic server's default repo's;  a spell-app worktree's, to check its pages before they merge), with that checkout's site

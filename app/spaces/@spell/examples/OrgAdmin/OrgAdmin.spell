@@ -8,7 +8,7 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 
 ## The page:  a toolbar, the sections down the side, and the one picked
 
-<spell-app "org admin">
+<app "org admin">
 	<property "new member" description="Who to add, by their address:  ana@rs">a new member</>
 	<property "new team" description="A new standing team, by its name">a new team</>
 	<property "new project" description="A new project, under a team or, with none picked, the org itself">a new project</>
@@ -263,4 +263,4 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 			</for>
 		</stack>
 	</draw>
-</spell-app>
+</app>

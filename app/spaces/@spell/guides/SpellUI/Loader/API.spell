@@ -1,4 +1,4 @@
-<spell-page "loader api" notebook>
+<page "loader api" notebook>
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api family="ui-loader" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

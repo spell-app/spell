@@ -3,7 +3,7 @@ Someone at the table:  their name, what they ordered, and what they owe.
 Each diner is its own element on the page, a row of Spell UI's fields bound to it:
 typing a name or an amount changes the diner, and every sum follows.
 
-<spell-view "diner">
+<view "diner">
 	<property "name">text</>
 	<property "amount" type="number" description="What they ordered, before the tip"/>
 	<property "tip" description="Their share of the tip:  the same part of it as their part of the bill">the amount * bill splitter's percent</>
@@ -22,13 +22,13 @@ typing a name or an amount changes the diner, and every sum follows.
 			</stack>
 		</form>
 	</draw>
-</spell-view>
+</view>
 
-<spell-view "table" template="viewable list of diners" description="The diners, one a row">
+<view "table" template="viewable list of diners" description="The diners, one a row">
 	<draw "placeholder">
 		<text color="grey">Nobody yet:  add someone</text>
 	</draw>
-</spell-view>
+</view>
 
 <spell>
 	// a diner sits at one table

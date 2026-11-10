@@ -1,4 +1,4 @@
-<spell-page "page examples" notebook>
+<page "page examples" notebook>
 	<header level="1">
 		Page
 		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
@@ -59,4 +59,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

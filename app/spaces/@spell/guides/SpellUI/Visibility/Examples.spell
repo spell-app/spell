@@ -1,4 +1,4 @@
-<spell-page "visibility examples" notebook>
+<page "visibility examples" notebook>
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
@@ -394,4 +394,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

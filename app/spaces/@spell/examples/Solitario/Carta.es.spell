@@ -3,7 +3,7 @@ Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el
 Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
 En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
 
-<encanto-vista "carta" plantilla="vista reversible" arrastrable>
+<vista "carta" plantilla="vista reversible" arrastrable>
 	<grupo "rango" descripción="El as es bajo:  as = 1 ... rey = 13"/>
 	<propiedad "rango" uno-de="as, 2 ... 10, jota, dama, rey" frase="es un (rango)"/>
 	<propiedad "valor">la posición de su rango</>
@@ -81,4 +81,4 @@ En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede a
 		la imagen de una nueva carta cuyo rango es as y palo es tréboles debería ser "🃑"
 		la imagen de una nueva carta cuyo rango es rey y palo es diamantes debería ser "🃎"
 	</probar>
-</encanto-vista>
+</vista>

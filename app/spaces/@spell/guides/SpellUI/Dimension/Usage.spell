@@ -1,4 +1,4 @@
-<spell-page "dimension usage" notebook>
+<page "dimension usage" notebook>
 	<header level="1">
 		Dimension
 		<header>A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.</>
@@ -21,4 +21,4 @@
 			- In Spell, `<ui-dimension value={its height}>` is told what its value measures:  its property says.
 		</>
 	</>
-</spell-page>
+</page>

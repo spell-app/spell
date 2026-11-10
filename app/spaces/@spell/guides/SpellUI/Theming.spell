@@ -1,4 +1,4 @@
-<spell-page "theming" notebook>
+<page "theming" notebook>
 	<header level="1">
 		Theming
 		<header>Tokens, layers, the app stylesheet and Fomantic's themes: restyle everything from CSS.</>
@@ -983,4 +983,4 @@
 			  `light-dark()` into variables substituted at `:root`, which breaks `ui-dark` subtrees.
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,10 +1,10 @@
 # Open-Meteo
 The weather to come, hour by hour, today and tomorrow, for a few cities.
 Every thing it shows is in OpenMeteo.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<spell-more-of>`, so looking again at the server never touches a line of this.
+with `<extend>`, so looking again at the server never touches a line of this.
 Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.
 
-<spell-thing "open meteo page">
+<thing "open meteo page">
 	<spell>
 		- its "cities" is a list of cities
 		- its "city" is a city
@@ -45,13 +45,13 @@ Open-Meteo has no list of forecasts:  each is asked for by a latitude and a long
 		if that fails:
 			<text>Open-Meteo can't be reached just now.</text>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # A city
 Where it is on Earth:  what its forecast is asked for by.
 
-<spell-thing "city">
+<thing "city">
 	<spell>
 		- its "name" is text
 		- its "latitude" is a number
@@ -61,13 +61,13 @@ Where it is on Earth:  what its forecast is asked for by.
 	<draw>
 		<item active={it is the public servers' weather's city} onClick={pick it}>{its name}</item>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # Its hours
 A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
 
-<spell-more-of "forecast">
+<extend "forecast">
 	<draw "hour table">
 		<for hour in its hours as="table" appearance="very-basic" padding="compact" collapsing unstackable>
 			<cell "Day"><if the hour of its time is 0>{its time}</if></cell>
@@ -77,4 +77,4 @@ A row an hour:  the day at midnight, the hour, and each measure, in the units th
 			<cell "Wind" align="right">{its wind speed}</cell>
 		</for>
 	</draw>
-</spell-more-of>
+</extend>

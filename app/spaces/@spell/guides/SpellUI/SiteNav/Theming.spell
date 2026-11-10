@@ -1,4 +1,4 @@
-<spell-page "site-nav theming" notebook>
+<page "site-nav theming" notebook>
 	<header level="1">
 		Site nav
 		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
@@ -27,4 +27,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

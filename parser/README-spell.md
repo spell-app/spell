@@ -786,7 +786,7 @@ galaxy guide is a site at "owen@spell/galaxy":
 ```
 
 - `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
-- The tag form is `<spell-site>`, a tag per part inside it.
+- The tag form is `<site>`, a tag per part inside it.
 - Every site lists a not found page and an error page.
 - A line naming a page the site doesn't list, a `:name` the page has no property for, or two pages at one address
   is refused at its line.
@@ -804,8 +804,8 @@ Every move names the page, never its address:
 A page says what it must let people do before it's laid out, first in its own declaration:
 
 ```html
-<spell-page "film page">
-	<spell-stories>
+<page "film page">
+	<stories>
 		- [x] read the film's opening crawl
 		- [x] As a fan, I want to see who's in a film, so that I can find their other films
 			- done when:  its people are listed, each a link to their page

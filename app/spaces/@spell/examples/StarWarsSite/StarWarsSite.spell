@@ -12,7 +12,7 @@
 
 # Every page's top:  its title, and the settings
 
-<spell-view "page top">
+<view "page top">
 	<property "title" type="text"/>
 	<draw>
 		<stack direction="horizontal" align="center" justify="between">
@@ -20,13 +20,13 @@
 			<button class="settings" appearance="basic" icon="cog" onClick={show the settings dialog}>Settings</button>
 		</stack>
 	</draw>
-</spell-view>
+</view>
 
 
 # The films
 
-<spell-page "films page">
-	<spell-stories>
+<page "films page">
+	<stories>
 		- [x] see every film, in the order they came out
 		- [ ] As a fan, I want to sort the films by when they're set, so that I can watch them in story order
 			- done when:  a switch flips the list between release and story order
@@ -43,8 +43,8 @@
 	</draw>
 </>
 
-<spell-page "film page">
-	<spell-stories>
+<page "film page">
+	<stories>
 		- [x] read the film's opening crawl
 		- [x] As a fan, I want to see who's in a film, so that I can find their other films
 			- done when:  its people are listed, each a link to their page
@@ -94,8 +94,8 @@
 
 # The people
 
-<spell-page "people page">
-	<spell-stories>
+<page "people page">
+	<stories>
 		- [ ] find a person by name as I type
 		- [x] see each person's home planet and species at a glance
 		- [x] open a person in the side panel without leaving the list
@@ -111,8 +111,8 @@
 	</draw>
 </>
 
-<spell-page "person page">
-	<spell-stories>
+<page "person page">
+	<stories>
 		- [x] see a person's height, birth year and home planet
 		- [x] As a fan, I want to see every film a person is in, so that I can follow their story
 			- done when:  their films are listed in release order, each a link
@@ -128,7 +128,7 @@
 	</draw>
 </>
 
-<spell-view "person facts" description="A person in a few lines:  the page and the sidebar both show them">
+<view "person facts" description="A person in a few lines:  the page and the sidebar both show them">
 	<property "person" type="character"/>
 	<draw>
 		<table appearance="definition" celled unstackable>
@@ -138,22 +138,22 @@
 			<row><cell>Home</cell><cell><link link={the address of the planet page for (its person's homeworld)}>{its person's homeworld's name}</link></cell></row>
 		</table>
 	</draw>
-</spell-view>
+</view>
 
-<spell-view "person sidebar">
+<view "person sidebar">
 	<property "person" type="character" description="Whoever it's showing"/>
 	<draw>
 		<header size="medium">{its person's name}</header>
 		draw (a new person facts with person = its person)
 		<link class="whole-page" link={the address of the person page for its person}>Their whole page</link>
 	</draw>
-</spell-view>
+</view>
 
 
 # The planets
 
-<spell-page "planets page">
-	<spell-stories>
+<page "planets page">
+	<stories>
 		- [x] see every planet, with its climate and terrain
 		- [ ] sort the planets by how many people live there
 	</>
@@ -168,8 +168,8 @@
 	</draw>
 </>
 
-<spell-page "planet page">
-	<spell-stories>
+<page "planet page">
+	<stories>
 		- [x] see who comes from a planet
 		- [x] see the films a planet appears in
 	</>
@@ -191,8 +191,8 @@
 
 # The species
 
-<spell-page "species list page">
-	<spell-stories>
+<page "species list page">
+	<stories>
 		- [x] see every species, with its classification and language
 		- [ ] filter the species by how long they live
 	</>
@@ -207,8 +207,8 @@
 	</draw>
 </>
 
-<spell-page "species page">
-	<spell-stories>
+<page "species page">
+	<stories>
 		- [x] see the people of a species
 		- [ ] see a species' home world
 	</>
@@ -226,8 +226,8 @@
 
 # The vehicles and starships
 
-<spell-page "vehicles page">
-	<spell-stories>
+<page "vehicles page">
+	<stories>
 		- [x] see every vehicle, with its class and crew
 		- [ ] sort the vehicles by speed
 	</>
@@ -241,8 +241,8 @@
 	</draw>
 </>
 
-<spell-page "vehicle page">
-	<spell-stories>
+<page "vehicle page">
+	<stories>
 		- [x] see who has piloted a vehicle
 		- [x] see the films it appears in
 	</>
@@ -261,8 +261,8 @@
 	</draw>
 </>
 
-<spell-page "starships page">
-	<spell-stories>
+<page "starships page">
+	<stories>
 		- [x] see every starship, with its class and hyperdrive rating
 		- [ ] As a pilot, I want to compare two starships side by side, so that I can pick the faster one
 			- done when:  picking two starships shows their numbers in two columns
@@ -277,8 +277,8 @@
 	</draw>
 </>
 
-<spell-page "starship page">
-	<spell-stories>
+<page "starship page">
+	<stories>
 		- [x] see a starship's pilots
 		- [x] see its length, crew and cost
 	</>
@@ -296,8 +296,8 @@
 
 # Every review, edited like a spreadsheet
 
-<spell-page "reviews page">
-	<spell-stories>
+<page "reviews page">
+	<stories>
 		- [x] see every review written on this device, in one table
 		- [x] As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again
 			- done when:  a cell edits as a spreadsheet's does, and Enter keeps it
@@ -313,7 +313,7 @@
 
 # The dialogs:  the settings, and a review of a film
 
-<spell-view "settings dialog">
+<view "settings dialog">
 	<spell>
 		- its "units" is metric or imperial
 		- its "crawl" is shown or hidden
@@ -336,9 +336,9 @@
 		</form>
 		<button class="done" color="primary" onClick={close the settings dialog}>Done</button>
 	</draw>
-</spell-view>
+</view>
 
-<spell-view "review dialog">
+<view "review dialog">
 	<property "film" type="film" description="The film it's a review of"/>
 	<property "draft" description="The review being written:  saved when it's done">a new review with stars = 5</property>
 	<action "save the review">
@@ -359,12 +359,12 @@
 		</form>
 		<button class="save-review" color="primary" disabled={its draft's words is ""} onClick={save the review}>Save the review</button>
 	</draw>
-</spell-view>
+</view>
 
 
 # The site:  where each page is, its dialogs and sidebars, and the theme it wears
 
-<spell-site "galaxy guide">
+<site "galaxy guide">
 	<property "theme" description="The theme its pages wear:  a hand-drawn sketch, while it's a mockup">"mockup"</property>
 	<page "films page" address="/films" title="Films">
 		<page "film page" address="/films/:film" title="Film"/>

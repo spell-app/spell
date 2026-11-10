@@ -1,9 +1,9 @@
 # Star Wars
 A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWars.api.spell, as `spell place ingest` wrote it:
 say what a field links to, and reading it follows the link, `the name of its homeworld`.
-Each type below adds to its type there, with `<spell-more-of>`:  so looking again at the server never touches a line of this.
+Each type below adds to its type there, with `<extend>`:  so looking again at the server never touches a line of this.
 
-<spell-app "guide">
+<app "guide">
 	<spell>
 		- its "tab" is text
 		- its "search" is text
@@ -121,7 +121,7 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 
 	<property "signal">"Waiting for a signal from the galaxy"</property>
 	<property "lost signal">"The signal from swapi.py4e.com is lost."</property>
-</spell-app>
+</app>
 
 
 # What everything here can do
@@ -147,7 +147,7 @@ Spell has no mixins yet (epic `mixins`), and a thing here shares by HOLDING a ca
 # A card:  a picture, a name, what kind, and a click anywhere on it opens the thing
 Every type holds one of these, with its own words.
 
-<spell-thing "card">
+<thing "card">
 	<property "label" />
 	<property "kind" />
 	<property "shape" />
@@ -187,21 +187,21 @@ Every type holds one of these, with its own words.
 			</stack>
 		</stack>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # What Wikipedia says of it, and where to read the rest
 Not every name has a page, and a name may be someone else's:  Zolan is a medicine.
 
-<spell-more-of "wiki page">
+<extend "wiki page">
 	<property "fits">
 		if its title includes "List of"
 			return no
 		return its about includes "star wars" or its about includes "fictional" or its about includes " film "
 	</property>
-</spell-more-of>
+</extend>
 
-<spell-thing "wiki note">
+<thing "wiki note">
 	<property "name" />
 	<property "page">the wiki page whose id is its name</property>
 	<draw>
@@ -216,13 +216,13 @@ Not every name has a page, and a name may be someone else's:  Zolan is a medicin
 			<text paragraph>{its page's summary} <link link={the page of the desktop of the content urls of its page} target="_blank">Read the rest on Wikipedia</link></text>
 		</if>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # A page's parts
 A table of what's known, leaving out what isn't;  a list under its heading, or nothing if it's empty.
 
-<spell-thing "fact">
+<thing "fact">
 	<property "label" />
 	<property "value" />
 	<spell>
@@ -241,9 +241,9 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 			<cell>{its value}{its date}</cell>
 		</row>
 	</draw>
-</spell-thing>
+</thing>
 
-<spell-thing "fact table">
+<thing "fact table">
 	<spell>
 		- its "facts" is a list of facts
 	</spell>
@@ -255,9 +255,9 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 			</table>
 		</if>
 	</draw>
-</spell-thing>
+</thing>
 
-<spell-thing "section">
+<thing "section">
 	<property "heading" />
 	<spell>
 		- its "things" is a list of things
@@ -271,12 +271,12 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 			<for its things title={its heading} as="cards" columns="4" doubling hide-empty />
 		</>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # A film
 
-<spell-more-of "film">
+<extend "film">
 	<property "card">a new card with label = its title, kind = "Episode " + its episode id, subject = it</property>
 	<action "play it">
 		set the guide's playing to it
@@ -312,12 +312,12 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 		draw (a new section with heading = "What they fly", things = its starships)
 	</draw>
 
-</spell-more-of>
+</extend>
 
 
 # A character
 
-<spell-more-of "character">
+<extend "character">
 	<property "card">a new card with label = its name, kind = "Born " + its birth year, subject = it</property>
 	<property "page">the wiki page whose id is its name</property>
 	<property "picture" description="Their own picture on Wikipedia, or nothing">
@@ -355,12 +355,12 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 		draw (a new section with heading = "What they fly", things = its starships)
 		draw (a new section with heading = "What they drive", things = its vehicles)
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A planet
 
-<spell-more-of "planet">
+<extend "planet">
 	<property "card">a new card with label = its name, kind = its climate, shape = "world", colour = its hue, subject = it</property>
 	<property "hue" description="What colour a world is, from its weather">
 		if its climate includes "frozen"
@@ -401,13 +401,13 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 		draw (a new section with heading = "Who's from here", things = its residents)
 		draw (a new section with heading = "Seen in", things = its films)
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A ship, and a vehicle:  much the same to look at
 Their pages share `to draw a craft`'s words, handed what differs.
 
-<spell-thing "craft page">
+<thing "craft page">
 	<property "model" />
 	<property "maker" />
 	<spell>
@@ -435,9 +435,9 @@ Their pages share `to draw a craft`'s words, handed what differs.
 	<draw>
 		draw (a new fact table with facts = its facts)
 	</draw>
-</spell-thing>
+</thing>
 
-<spell-more-of "starship">
+<extend "starship">
 	<property "card">a new card with label = its name, kind = its starship class, subject = it</property>
 	<draw>
 		draw its card
@@ -453,9 +453,9 @@ Their pages share `to draw a craft`'s words, handed what differs.
 		draw (a new section with heading = "Who flew it", things = its pilots)
 		draw (a new section with heading = "Seen in", things = its films)
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "vehicle">
+<extend "vehicle">
 	<property "card">a new card with label = its name, kind = its vehicle class, subject = it</property>
 	<draw>
 		draw its card
@@ -471,13 +471,13 @@ Their pages share `to draw a craft`'s words, handed what differs.
 		draw (a new section with heading = "Who flew it", things = its pilots)
 		draw (a new section with heading = "Seen in", things = its films)
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A species
 A species with no picture takes the first of its people who has one.
 
-<spell-more-of "species">
+<extend "species">
 	<property "card">a new card with label = its name, kind = its classification, subject = it, species = it</property>
 	<property "picture" description="Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing">
 		set everyone to every character
@@ -510,7 +510,7 @@ A species with no picture takes the first of its people who has one.
 		draw (a new section with heading = "Home", single = its homeworld)
 		draw (a new section with heading = "Who's one", things = its people)
 	</draw>
-</spell-more-of>
+</extend>
 
 
 <spell>

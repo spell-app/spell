@@ -1,4 +1,4 @@
-<spell-page "item api" notebook>
+<page "item api" notebook>
 	<header level="1">
 		Item
 		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api family="ui-item" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

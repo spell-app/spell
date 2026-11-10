@@ -1,4 +1,4 @@
-<spell-page "calendar usage" notebook>
+<page "calendar usage" notebook>
 	<header level="1">
 		Calendar
 		<header>A calendar lets a user pick a date, a time, or both.</>
@@ -146,4 +146,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

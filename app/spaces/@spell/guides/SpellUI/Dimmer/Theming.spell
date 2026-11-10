@@ -1,4 +1,4 @@
-<spell-page "dimmer theming" notebook>
+<page "dimmer theming" notebook>
 	<header level="1">
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
@@ -55,4 +55,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

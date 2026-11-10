@@ -1,7 +1,7 @@
 # The example apps, and ideas for yours
 
 ```html
-<spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
+<view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
 	<spell>
 		- its cards are draggable when the card is face up
@@ -328,7 +328,7 @@ with Markdown around them for a person to read
 First, what a task IS:
 
 ```html
-<spell-view "task" selectable draggable>
+<view "task" selectable draggable>
 	<property "title" description="What to do">text</>
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
@@ -339,7 +339,7 @@ First, what a task IS:
 	<action "throw it away" description="...">return</>
 ```
 
-- `<spell-view "task" selectable draggable>` declares a new template, and what people may do to a task on the page:
+- `<view "task" selectable draggable>` declares a new template, and what people may do to a task on the page:
   - `selectable`:  a click selects a task, and shift or command (ctrl) selects more.
   - `draggable`:  by its grip, to another place in its list (below).
 - Each `<property>` gives it a property, with its kind.
@@ -378,7 +378,7 @@ a form of its own, bound to the task.
 Then the list, which decides which tasks to show:
 
 ```html
-<spell-view "checklist" template="viewable list of tasks">
+<view "checklist" template="viewable list of tasks">
 	<property "showing" one-of="all, active or done"
 		description="What it shows:  every task, the ones still to do, or the ones done"
 		alias="is showing (showing)"
@@ -464,7 +464,7 @@ export class Checklist extends ViewableList {
 
 </details>
 
-And last, the app:  `<spell-app "task list">`, with its checklist, the new task's field, and its actions.
+And last, the app:  `<app "task list">`, with its checklist, the new task's field, and its actions.
 
 ```html
 <action "add the draft" description="The draft, as a new task at the end of the list;  the field empties">
@@ -584,7 +584,7 @@ _Task List in the editor:  the first task is ticked, because the program makes i
 its own `tarea`, in `Tarea.es.spell`, and the same four places, each a `guardián`.
 
 ```html
-<encanto-vista "tarea" seleccionable arrastrable>
+<vista "tarea" seleccionable arrastrable>
 	<propiedad "título" descripción="Lo que hay que hacer">texto</>
 	<propiedad "nota" descripción="Cualquier otra cosa sobre ella">texto</>
 	<propiedad "prioridad" uno-de="baja, normal o alta" />
@@ -650,7 +650,7 @@ a "thumbnail" is a thing:
 _From the same file, shortened._
 
 What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spell), in Spell UI's elements, adding to those types:
-`<spell-more-of "character">`.
+`<extend "character">`.
 So looking at the server again never touches a line of it.
 
 A long list says nothing of how long it is:  it draws what fits, and more as you scroll.
@@ -687,7 +687,7 @@ So [Solitaire.spell](spaces/@spell/examples/Solitaire/Solitaire.spell) is only t
 the solitaire itself, how a click or a drag plays a card, and its kinds of pile, each saying what it may take or give up.
 
 ```html
-<spell-app "solitaire">
+<app "solitaire">
 	<property "score">a number</>
 	<property "hint" description="What the card being dragged would add to the score, e.g. (+10):  shown beside it">text</>
 	<property "deck">a new deck</>
@@ -709,7 +709,7 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `<draw "front">` and its `<draw "back">` look like.
 - Its Inspector card is laid out in a file of its own, [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell):
-  a `<spell-property-editor "card">` of Spell UI's property controls, which the program never compiles.
+  a `<property-editor "card">` of Spell UI's property controls, which the program never compiles.
 - It draws both sides at once, one over the other (its own `<draw>`):
   [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
   and turns the card about its middle as its direction changes, the other side taking over halfway.

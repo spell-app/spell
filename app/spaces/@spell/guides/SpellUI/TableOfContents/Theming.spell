@@ -1,4 +1,4 @@
-<spell-page "table-of-contents theming" notebook>
+<page "table-of-contents theming" notebook>
 	<header level="1">
 		Table of contents
 		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>
@@ -44,4 +44,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

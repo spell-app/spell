@@ -1,4 +1,4 @@
-<spell-page "site-nav usage" notebook>
+<page "site-nav usage" notebook>
 	<header level="1">
 		Site nav
 		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
@@ -42,4 +42,4 @@
 	<section label="Accessibility">
 		<markdown>A `nav` landmark named by `label` ("Site" without one), holding a `tree` of `treeitem`s;  the page shown says `aria-current="page"`, and each page its level and whether it's open.</>
 	</>
-</spell-page>
+</page>

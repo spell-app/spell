@@ -9,7 +9,7 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 
 ## Una receta:  una tarjeta que puedes leer y cambiar
 
-<encanto-más-de "receta">
+<extender "receta">
 	<dibujar>
 		<ui-card>
 			<ui-content>
@@ -28,12 +28,12 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 			</ui-content>
 		</ui-card>
 	</dibujar>
-</encanto-más-de>
+</extender>
 
 
 ## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
 
-<encanto-aplicación "caja de recetas">
+<aplicación "caja de recetas">
 	<propiedad "búsqueda">texto</>
 	<propiedad "receta nueva">una nueva receta con porciones = 4</>
 	<propiedad "menú de la caja">un menú de "deshacer"</>
@@ -104,4 +104,4 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 			</ui-cards>
 		</ui-container>
 	</dibujar>
-</encanto-aplicación>
+</aplicación>

@@ -1,4 +1,4 @@
-<spell-page "grammar" notebook>
+<page "grammar" notebook>
 	<header level="1">
 		Grammar
 		<header>How a component's attributes become Fomantic's class string inside its shadow root.</>
@@ -274,4 +274,4 @@
 			button and suggests `green`. Each component's API tab lists the values its attributes take.
 		</>
 	</>
-</spell-page>
+</page>

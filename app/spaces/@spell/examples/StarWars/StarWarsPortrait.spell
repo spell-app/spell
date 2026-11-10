@@ -2,7 +2,7 @@
 A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.
 A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.
 
-<spell-thing "portrait">
+<thing "portrait">
 	<property "name" />
 	<property "hue" />
 	<property "shape" />
@@ -33,4 +33,4 @@ A species with no picture of its own takes the first of its people who has one: 
 		if that fails:
 			<space />
 	</draw>
-</spell-thing>
+</thing>

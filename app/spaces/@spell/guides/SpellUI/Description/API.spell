@@ -1,4 +1,4 @@
-<spell-page "description api" notebook>
+<page "description api" notebook>
 	<header level="1">
 		Description
 		<header>A description is the text of a card, item, modal, list item, step or comment.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api tag="ui-description" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

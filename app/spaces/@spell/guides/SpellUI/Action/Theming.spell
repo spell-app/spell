@@ -1,4 +1,4 @@
-<spell-page "action theming" notebook>
+<page "action theming" notebook>
 	<header level="1">
 		Action
 		<header>An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.</>
@@ -27,4 +27,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

@@ -524,7 +524,7 @@ the second box on the left of the picture above.
 Each file's name says its language, `Carta.es.spell`, and it reads the way an English one does, its tags too:
 
 ```html
-<encanto-vista "carta" plantilla="vista reversible" arrastrable>
+<vista "carta" plantilla="vista reversible" arrastrable>
 	<grupo "rango" descripción="El as es bajo:  as = 1 ... rey = 13"/>
 	<propiedad "rango" uno-de="as, 2 ... 10, jota, dama, rey" frase="es un (rango)"/>
 	<propiedad "valor">la posición de su rango</>

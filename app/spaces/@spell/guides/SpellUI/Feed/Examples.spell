@@ -1,4 +1,4 @@
-<spell-page "feed examples" notebook>
+<page "feed examples" notebook>
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -465,4 +465,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

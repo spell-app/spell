@@ -1,4 +1,4 @@
-<spell-page "date examples" notebook>
+<page "date examples" notebook>
 	<header level="1">
 		Date
 		<header>A date says when something happened, inline and small inside a feed event.</>
@@ -48,4 +48,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

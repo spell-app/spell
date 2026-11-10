@@ -1,4 +1,4 @@
-<spell-page "video examples" notebook>
+<page "video examples" notebook>
 	<header level="1">
 		Video
 		<header>A video plays a video file in the browser's own player.</>
@@ -36,4 +36,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

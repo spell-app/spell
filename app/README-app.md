@@ -495,10 +495,10 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
   - A type may lay its card out itself, in spellml:  Solitaire's card does, in
-    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), a `<spell-property-editor "card">`.
+    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), a `<property-editor "card">`.
     - Its own file, `<Type>.editor.spell`, or one for the project, `<Project>.editors.spell`:
       never compiled, read by the Inspector (`propertyEditorInSource()`).
-    - Or inline, a `<spell-property-editor>` in the type's own tag.
+    - Or inline, a `<property-editor>` in the type's own tag.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.

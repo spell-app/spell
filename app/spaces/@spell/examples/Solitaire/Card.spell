@@ -3,7 +3,7 @@ A card says what its rank, suit and color are:  a deck, a pile or the game only 
 It's a two sided view:  face up it shows its picture, face down the back every card shares.
 On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
-<spell-view "card" template="two sided view" draggable>
+<view "card" template="two sided view" draggable>
 	<group "rank" description="Ace is low:  ace = 1 ... king = 13"/>
 	<property "rank" one-of="ace, 2 ... 10, jack, queen, king" alias="is a (rank)"/>
 	<property "value">the position of its rank</>

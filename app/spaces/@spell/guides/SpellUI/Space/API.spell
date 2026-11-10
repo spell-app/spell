@@ -1,4 +1,4 @@
-<spell-page "space api" notebook>
+<page "space api" notebook>
 	<header level="1">
 		Space
 		<header>A space is a gap between things:  a line break, a gap in a line, or the room left in a row.</>
@@ -22,4 +22,4 @@
 			<ui-docs-api family="ui-space" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

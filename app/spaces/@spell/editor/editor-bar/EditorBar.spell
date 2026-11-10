@@ -3,7 +3,7 @@ Joined to the top of the window, with three sections:
 Spell's menu, the project's menu and the app's menus, then Run and Edit in the middle, then the tools and you.
 What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`:  each is a thing here that draws itself.
 
-<spell-app "editor bar">
+<app "editor bar">
 	<property "spell menu" description="Spell's menu:  its hat and name, opening the group's projects and Home">a thing</>
 	<property "project menu" description="The project's menu:  its name">a thing</>
 	<property "app menus" description="File, Edit, View, Run and Help">a thing</>
@@ -33,4 +33,4 @@ What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`: 
 			</ui-menu>
 		</ui-menu>
 	</draw>
-</spell-app>
+</app>

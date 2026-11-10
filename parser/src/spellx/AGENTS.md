@@ -12,7 +12,7 @@ when working with code in this folder, `src/spellx/` of the kit's parser folder 
 ## Overview
 
 - SPELLX:  spell's tag-shaped form, a `.spell` file (epic `elemental-spell`).
-  - A template in a prefixed tag (`<spell-view "playing card">`), its members in short tags inside it
+  - A template in a prefixed tag (`<view "playing card">`), its members in short tags inside it
     (`<property>`, `<alias>`, `<action>`, `<on mouse down>`, `<draw "front">` ...), prose between them.
   - The plan, and every decision its shape follows:
     [its epic page](../../../spell.epics/epics/elemental-spell/elemental-spell.plan.html).

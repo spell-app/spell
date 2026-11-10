@@ -3,7 +3,7 @@ A game's stock, its discards, a column on the table:  the game names its piles, 
 Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
 A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
-<spell-view "pile" template="viewable list of cards" droppable>
+<view "pile" template="viewable list of cards" droppable>
 	<property "name" description="What the game calls it, e.g. stock">text</>
 	<property "layout" one-of="stacked, vertical, horizontal or fanned"
 		description="How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css"

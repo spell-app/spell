@@ -1,10 +1,10 @@
 # GitHub
 Anyone on GitHub, a person or an organization, and any repository, found by what you type.
 Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<spell-more-of>`, so looking again at the server never touches a line of this.
+with `<extend>`, so looking again at the server never touches a line of this.
 A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.
 
-<spell-thing "github page">
+<thing "github page">
 	<spell>
 		- its "search" is text
 		- its "showing" is a user
@@ -60,14 +60,14 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 			</stack>
 		</>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # Someone on GitHub
 A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
 A search gives only a little of each:  their page reads them whole, by their login.
 
-<spell-more-of "user">
+<extend "user">
 	<draw>
 		<ui-card onClick={look at it}>
 			<content>
@@ -111,13 +111,13 @@ A search gives only a little of each:  their page reads them whole, by their log
 			</stack>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A repository
 Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
 
-<spell-more-of "repository">
+<extend "repository">
 	<draw>
 		<ui-card>
 			<content>
@@ -129,7 +129,7 @@ Its name, what it's for, and how many people starred it;  its GitHub icon opens 
 			</content>
 		</ui-card>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # What someone on GitHub can do, from anywhere

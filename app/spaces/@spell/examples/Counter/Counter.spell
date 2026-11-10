@@ -4,7 +4,7 @@ A button that counts its clicks:  the smallest app there is.
 ## A counter
 Each counter is its own element on the page.
 
-<spell-view "counter">
+<view "counter">
 	<property "count" type="number" description="How many times it's been clicked:  a new counter starts at 0">0</property>
 	<action "count up">set the count to the count + 1</>
 
@@ -19,13 +19,13 @@ Each counter is its own element on the page.
 		count up of the counter
 		the counter's count should be 2
 	</test>
-</spell-view>
+</view>
 
 ## The app:  one counter, drawn
 
-<spell-app "counter app">
+<app "counter app">
 	<property "counter">a new counter</>
 	<draw>
 		<container>{draw the counter}</container>
 	</draw>
-</spell-app>
+</app>

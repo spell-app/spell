@@ -1,4 +1,4 @@
-<spell-page "action examples" notebook>
+<page "action examples" notebook>
 	<header level="1">
 		Action
 		<header>An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.</>
@@ -58,4 +58,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

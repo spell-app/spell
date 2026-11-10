@@ -1,4 +1,4 @@
-<spell-page "stack usage" notebook>
+<page "stack usage" notebook>
 	<header level="1">
 		Stack
 		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
@@ -33,4 +33,4 @@
 			`justify` and `align` only move things on screen, so keep the order the reading order.
 		</>
 	</>
-</spell-page>
+</page>

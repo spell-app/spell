@@ -3,7 +3,7 @@ Servers other people run, each read through the Spell `spell place ingest` wrote
 The tab chosen, and each page's search, are kept in the page's address (`?server=met&art=van+gogh`), so Back steps through them.
 GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writes, then Open-Meteo's, the weather, then the Met Museum's artworks, then REST Countries', every country.
 
-<spell-app "public servers">
+<app "public servers">
 	<spell>
 		- its "tab" is text
 		- its "github" is a new github page
@@ -48,7 +48,7 @@ GitHub's is first, then Open Library's, then JSONPlaceholder's, which takes writ
 			draw its atlas
 		</>
 	</draw>
-</spell-app>
+</app>
 
 
 # What a book and a city can do, from anywhere

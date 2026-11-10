@@ -1,4 +1,4 @@
-<spell-page "theme-menu api" notebook>
+<page "theme-menu api" notebook>
 	<header level="1">
 		Theme Menu
 		<header>A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-theme-menu" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

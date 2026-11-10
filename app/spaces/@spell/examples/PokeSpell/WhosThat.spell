@@ -2,7 +2,7 @@
 A Pokémon hides in its shadow:  pick its name from four, and it steps into the light.
 Only the first 151, from the very first games:  their names are the ones most kids know.
 
-<spell-thing "guess">
+<thing "guess">
 	<spell>
 		- its "hiding" is a pokemon
 		- its "choices" is a new list of pokemon
@@ -60,4 +60,4 @@ Only the first 151, from the very first games:  their names are the ones most ki
 			<button color="yellow" size="huge" appearance="pill raised" font="title-caps" onClick={set its guessed to choice}>{choice's name}</button>
 		</for>
 	</draw>
-</spell-thing>
+</thing>

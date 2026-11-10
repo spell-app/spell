@@ -3,7 +3,7 @@ A game's stock, its discards, a column on the table:  the game names its piles, 
 Each pile is its own element around its cards' elements, `<games-pile>` around `<games-card>`s.
 A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
-<spell-view "pile" template="viewable list of cards" droppable>
+<view "pile" template="viewable list of cards" droppable>
 	<property "name" description="What the game calls it, e.g. stock">text</>
 	<property "layout" one-of="stacked, vertical, horizontal or fanned"
 		description="How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css"
@@ -41,7 +41,7 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 		the number of cards in the stock should be 1
 		the discards' state should be "discards: 7♥↓"
 	</test>
-</spell-view>
+</view>
 
 <spell>
 	// a card is in one pile at a time:  putting it on another pile takes it off this one

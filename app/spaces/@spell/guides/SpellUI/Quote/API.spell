@@ -1,4 +1,4 @@
-<spell-page "quote api" notebook>
+<page "quote api" notebook>
 	<header level="1">
 		Quote
 		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api family="ui-quote" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "label api" notebook>
+<page "label api" notebook>
 	<header level="1">
 		Label
 		<header>A label displays content classification.</>
@@ -57,4 +57,4 @@
 			<ui-docs-api family="ui-label" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

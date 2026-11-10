@@ -1,4 +1,4 @@
-<spell-page "extra examples" notebook>
+<page "extra examples" notebook>
 	<header level="1">
 		Extra
 		<header>Extra content is set apart from the main content, such as a card's footer.</>
@@ -65,4 +65,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

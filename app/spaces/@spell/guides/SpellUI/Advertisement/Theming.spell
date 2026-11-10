@@ -1,4 +1,4 @@
-<spell-page "advertisement theming" notebook>
+<page "advertisement theming" notebook>
 	<header level="1">
 		Advertisement
 		<header>An ad displays third-party promotional content.</>
@@ -42,4 +42,4 @@
 			page around them.
 		</>
 	</>
-</spell-page>
+</page>

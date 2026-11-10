@@ -1,4 +1,4 @@
-<spell-page "json api" notebook>
+<page "json api" notebook>
 	<header level="1">
 		JSON data
 		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
@@ -29,4 +29,4 @@
 			<ui-docs-api family="ui-json" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "content-parts api" notebook>
+<page "content-parts api" notebook>
 	<header level="1">
 		Content parts
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-parts" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

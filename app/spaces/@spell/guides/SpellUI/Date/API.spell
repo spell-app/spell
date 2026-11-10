@@ -1,4 +1,4 @@
-<spell-page "date api" notebook>
+<page "date api" notebook>
 	<header level="1">
 		Date
 		<header>A date says when something happened, inline and small inside a feed event.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api tag="ui-date" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

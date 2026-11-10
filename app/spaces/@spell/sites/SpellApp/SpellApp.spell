@@ -4,15 +4,15 @@
   Most addresses name a project, so they aren't in the navigation:  Home links to one of each.
 -->
 
-<spell-view "picture">
+<view "picture">
 	<property "file" description="The picture's file, in snapshots/, without its .jpg">text</property>
 	<draw>
 		<image src={"/spaces/@spell/sites/SpellApp/snapshots/" + its file + ".jpg"}/>
 	</draw>
 </>
 
-<spell-page "home page">
-	<spell-stories>
+<page "home page">
+	<stories>
 		- [x] open an example, a guide, a notebook or one of my projects from its card
 		- [x] start from a blank app, a small starter or Solitaire
 		- [x] make a project, an example or a guide from its group's header
@@ -32,8 +32,8 @@
 	</draw>
 </>
 
-<spell-page "notebook page">
-	<spell-stories>
+<page "notebook page">
+	<stories>
 		- [x] read a notebook, its words and its code in cells
 	</>
 	<property "notebook" description="What the address names">text</property>
@@ -42,8 +42,8 @@
 	</draw>
 </>
 
-<spell-page "guide page">
-	<spell-stories>
+<page "guide page">
+	<stories>
 		- [x] read a guide in the editor, its words as the comments of its spell file
 	</>
 	<property "guide" description="What the address names">text</property>
@@ -52,8 +52,8 @@
 	</draw>
 </>
 
-<spell-page "code editor page">
-	<spell-stories>
+<page "code editor page">
+	<stories>
 		- [x] change the code in its file tabs, with the running app beside it
 		- [x] see the program's output, its compiled code and what I can use, in the Program panel under the code
 		- [x] pick a part of the running app and change it in the Inspector
@@ -79,8 +79,8 @@
 	</draw>
 </>
 
-<spell-page "running app page">
-	<spell-stories>
+<page "running app page">
+	<stories>
 		- [x] use the program by itself, with no code showing
 		- [x] restart it
 	</>
@@ -90,8 +90,8 @@
 	</draw>
 </>
 
-<spell-page "site editor page">
-	<spell-stories>
+<page "site editor page">
+	<stories>
 		- [x] see a site's pages as a tree and a board of cards
 		- [x] drag a row to move a page, with its pages
 		- [x] change a page's name, title, address and state
@@ -107,8 +107,8 @@
 	</draw>
 </>
 
-<spell-page "theme editor page">
-	<spell-stories>
+<page "theme editor page">
+	<stories>
 		- [x] change a theme and see it on real pages
 		- [x] save it by name, to pick from every theme menu
 	</>
@@ -117,8 +117,8 @@
 	</draw>
 </>
 
-<spell-page "hosted app page">
-	<spell-stories>
+<page "hosted app page">
+	<stories>
 		- [x] use a program at its own address on Spell's cloud
 	</>
 	<property "project" description="What the address names">text</property>
@@ -130,8 +130,8 @@
 	</draw>
 </>
 
-<spell-page "terms page">
-	<spell-stories>
+<page "terms page">
+	<stories>
 		- [x] read Spell's terms
 	</>
 	<draw>
@@ -139,85 +139,85 @@
 	</draw>
 </>
 
-<spell-view "inspector sidebar">
+<view "inspector sidebar">
 	<draw>
 		draw (a new picture with file = "inspector")
 	</draw>
 </>
 
-<spell-view "palette sidebar">
+<view "palette sidebar">
 	<draw>
 		draw (a new picture with file = "palette")
 	</draw>
 </>
 
-<spell-view "site data sidebar">
+<view "site data sidebar">
 	<draw>
 		draw (a new picture with file = "site-data")
 	</draw>
 </>
 
-<spell-view "project settings dialog">
+<view "project settings dialog">
 	<draw>
 		draw (a new picture with file = "project-settings")
 	</draw>
 </>
 
-<spell-view "code settings dialog">
+<view "code settings dialog">
 	<draw>
 		draw (a new picture with file = "code-settings")
 	</draw>
 </>
 
-<spell-view "project versions dialog">
+<view "project versions dialog">
 	<draw>
 		draw (a new picture with file = "versions")
 	</draw>
 </>
 
-<spell-view "new file dialog">
+<view "new file dialog">
 	<draw>
 		draw (a new picture with file = "new-file")
 	</draw>
 </>
 
-<spell-view "new project dialog">
+<view "new project dialog">
 	<draw>
 		draw (a new picture with file = "new-project")
 	</draw>
 </>
 
-<spell-view "duplicate project dialog">
+<view "duplicate project dialog">
 	<draw>
 		draw (a new picture with file = "duplicate-project")
 	</draw>
 </>
 
-<spell-view "change this dialog">
+<view "change this dialog">
 	<draw>
 		draw (a new picture with file = "change-this")
 	</draw>
 </>
 
-<spell-view "publish clash dialog">
+<view "publish clash dialog">
 	<draw>
 		draw (a new picture with file = "publish-clash")
 	</draw>
 </>
 
-<spell-view "person dialog">
+<view "person dialog">
 	<draw>
 		draw (a new picture with file = "you")
 	</draw>
 </>
 
-<spell-view "sign-in dialog">
+<view "sign-in dialog">
 	<draw>
 		draw (a new picture with file = "sign-in")
 	</draw>
 </>
 
-<spell-site "spell app">
+<site "spell app">
 	<page "home page" address="/" title="Home" state="old" picture="snapshots/home.jpg" color="red"/>
 	<page "notebook page" address="/edit/@spell/guides/SpellUI/:notebook*" title="Notebook" state="old" picture="snapshots/notebook.jpg" color="orange"/>
 	<page "guide page" address="/edit/@spell/guides/:guide" title="Guide" state="old" picture="snapshots/guide.jpg" color="yellow"/>

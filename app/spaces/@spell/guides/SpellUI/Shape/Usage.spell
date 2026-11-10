@@ -1,4 +1,4 @@
-<spell-page "shape usage" notebook>
+<page "shape usage" notebook>
 	<header level="1">
 		Shape
 		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
@@ -114,4 +114,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

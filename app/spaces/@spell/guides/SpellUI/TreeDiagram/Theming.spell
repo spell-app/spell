@@ -1,4 +1,4 @@
-<spell-page "tree-diagram theming" notebook>
+<page "tree-diagram theming" notebook>
 	<header level="1">
 		Tree diagram
 		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
@@ -64,4 +64,4 @@
 			and the colours it takes from Spell UI's tokens.
 		</>
 	</>
-</spell-page>
+</page>

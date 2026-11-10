@@ -3,7 +3,7 @@ La reserva de un juego, sus descartes, una columna en la mesa:  el juego nombra 
 Cada pila es su propio elemento alrededor de los elementos de sus cartas, `<solitario-columna>` alrededor de `<solitario-carta>`s.
 Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias reglas (`soltable`).
 
-<encanto-vista "pila" plantilla="lista visible de cartas" soltable>
+<vista "pila" plantilla="lista visible de cartas" soltable>
 	<propiedad "nombre" descripción="Cómo la llama el juego, p. ej. reserva">texto</>
 	<propiedad "disposición" uno-de="apilada, vertical, horizontal o abanico"
 		descripción="Cómo están sus cartas:  una sobre otra, hacia abajo en una columna, a lo largo de una fila, o en abanico, como se sostiene una mano -- styles.css"
@@ -41,7 +41,7 @@ Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias re
 		el número de cartas en la reserva debería ser 1
 		el estado de los descartes debería ser "descartes: 7♥↓"
 	</probar>
-</encanto-vista>
+</vista>
 
 <encanto>
 	// una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta

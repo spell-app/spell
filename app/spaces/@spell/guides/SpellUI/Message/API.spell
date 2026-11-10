@@ -1,4 +1,4 @@
-<spell-page "message api" notebook>
+<page "message api" notebook>
 	<header level="1">
 		Message
 		<header>A message displays information that explains nearby content.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-message" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

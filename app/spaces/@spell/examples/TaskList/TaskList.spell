@@ -1,13 +1,13 @@
 # Task List
 A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
-Its tasks are this project's own `<spell-view "task">`;  this file holds their list, and the app.
+Its tasks are this project's own `<view "task">`;  this file holds their list, and the app.
 Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
 TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 
 ## The checklist
 The tasks, each its own element inside it:  `<task-list-checklist>`, around its `<task-list-task>`s.
 
-<spell-view "checklist" template="viewable list of tasks">
+<view "checklist" template="viewable list of tasks">
 	<property "showing" one-of="all, active or done"
 		description="What it shows:  every task, the ones still to do, or the ones done"
 		alias="is showing (showing)"
@@ -55,7 +55,7 @@ The tasks, each its own element inside it:  `<task-list-checklist>`, around its 
 		the order of the first should be 2
 		the title of the first task in (the tasks sorted by its order) should be "second"
 	</test>
-</spell-view>
+</view>
 <spell>
 	// a task is in one checklist at a time
 	a task belongs to one checklist
@@ -64,7 +64,7 @@ The tasks, each its own element inside it:  `<task-list-checklist>`, around its 
 ## The app
 Its toolbar, the new task's field, then the list beside the property editor.
 
-<spell-app "task list">
+<app "task list">
 	<property "checklist">a new checklist</>
 	<property "draft" description="The next task's title, as the new task's field holds it">text</>
 	<property "active count">the length of (tasks in the checklist where it is active)</>
@@ -186,4 +186,4 @@ Its toolbar, the new task's field, then the list beside the property editor.
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>
