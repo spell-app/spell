@@ -1,5 +1,5 @@
 ## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
-// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spell.
 // `jsonplaceholder` is what this wrote, from looking at the server:
 //   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
 //     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"

@@ -46,7 +46,7 @@
       "property": "initials",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.spellml:482-629"
+      "defined": "/OrgChat.spell:482-629"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -59,7 +59,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spellml:635-1280"
+      "defined": "/OrgChat.spell:635-1280"
     },
     {
       "type": "Thread",
@@ -105,7 +105,7 @@
       "property": "mark",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.spellml:1389-1514"
+      "defined": "/OrgChat.spell:1389-1514"
     },
     {
       "type": "Chat",
@@ -133,41 +133,41 @@
     {
       "type": "ChatPage",
       "superType": "App",
-      "defined": "/OrgChat.spellml:1671-4971"
+      "defined": "/OrgChat.spell:1671-4971"
     },
     {
       "property": "new_message",
       "asWritten": "new message",
       "of": "ChatPage",
       "datatype": "Message",
-      "defined": "/OrgChat.spellml:1684-1721"
+      "defined": "/OrgChat.spell:1684-1721"
     },
     {
       "property": "picked",
       "of": "ChatPage",
       "datatype": "Thread",
-      "defined": "/OrgChat.spellml:1726-1795"
+      "defined": "/OrgChat.spell:1726-1795"
     },
     {
       "property": "drawer_open",
       "asWritten": "drawer open",
       "of": "ChatPage",
       "datatype": "choice",
-      "defined": "/OrgChat.spellml:1800-1892"
+      "defined": "/OrgChat.spell:1800-1892"
     },
     {
       "property": "thread_name",
       "asWritten": "thread name",
       "of": "ChatPage",
       "datatype": "text",
-      "defined": "/OrgChat.spellml:1897-2064"
+      "defined": "/OrgChat.spell:1897-2064"
     },
     {
       "property": "box_words",
       "asWritten": "box words",
       "of": "ChatPage",
       "datatype": "text",
-      "defined": "/OrgChat.spellml:2079-2187"
+      "defined": "/OrgChat.spell:2079-2187"
     },
     {
       "syntax": "open the drawer (of {thisArg:expression})?",
@@ -181,7 +181,7 @@
       "kind": "method",
       "name": "open the drawer",
       "returns": "nothing",
-      "defined": "/OrgChat.spellml:2193-2248"
+      "defined": "/OrgChat.spell:2193-2248"
     },
     {
       "syntax": "close the drawer (of {thisArg:expression})?",
@@ -195,7 +195,7 @@
       "kind": "method",
       "name": "close the drawer",
       "returns": "nothing",
-      "defined": "/OrgChat.spellml:2262-2317"
+      "defined": "/OrgChat.spell:2262-2317"
     },
     {
       "syntax": "send {thisArg:expression}",
@@ -210,7 +210,7 @@
       "name": "send it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/OrgChat.spellml:2331-2537"
+      "defined": "/OrgChat.spell:2331-2537"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -223,7 +223,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spellml:2551-4478"
+      "defined": "/OrgChat.spell:2551-4478"
     }
   ],
   "codeLines": [

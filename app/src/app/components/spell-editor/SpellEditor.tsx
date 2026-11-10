@@ -314,8 +314,8 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
 
   /**
    * The file our `file` attribute names in `project`, else its first spell file.
-   * - By its path in the project, `Button/Usage.spellml` (a leading `/` is fine), or its whole address
-   * - Else by its bare name, `Usage.spellml`:  the first of that name
+   * - By its path in the project, `Button/Usage.spell` (a leading `/` is fine), or its whole address
+   * - Else by its bare name, `Usage.spell`:  the first of that name
    */
   @E.untracked
   private namedFile(project: SP.SpellProject): SP.SpellFile | undefined {

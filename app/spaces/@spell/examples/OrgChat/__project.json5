@@ -5,7 +5,7 @@
     "path": "/OrgChat.api.spell",
     "active": true
   }, {
-    "path": "/OrgChat.spellml",
+    "path": "/OrgChat.spell",
     "active": true
   }, {
     "path": "/OrgChat.css",

@@ -8,7 +8,7 @@ import type { SourceMapV3, SourcePlace, SpellPlaceEntry } from "./SourceMarks"
  * - By LINE, as the map is by statement:  a compiled line with no mapping of its own belongs to the last one above it.
  * - What's drawn and made counts too (the map's `x_spellPlaces`):  a drawn tag has a line of its own in a statement's
  *   several.
- * - A place's `path` is the map's name for the file, e.g. `Card.spellml`.  Lines count from 0.
+ * - A place's `path` is the map's name for the file, e.g. `Card.spell`.  Lines count from 0.
  * - Knows nothing of spell's projects, or of the editor.
  ****************/
 export class SourceMapLines {

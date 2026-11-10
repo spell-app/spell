@@ -51,7 +51,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/SignUpSheet.spellml:689-986"
+      "defined": "/SignUpSheet.spell:689-986"
     },
     {
       "type": "Attendee",
@@ -92,7 +92,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/SignUpSheet.spellml:1611-2042"
+      "defined": "/SignUpSheet.spell:1611-2042"
     },
     {
       "type": "Ticket",
@@ -139,7 +139,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/SignUpSheet.spellml:1040-1454"
+      "defined": "/SignUpSheet.spell:1040-1454"
     },
     {
       "type": "Message",
@@ -198,7 +198,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/SignUpSheet.spellml:1509-1555"
+      "defined": "/SignUpSheet.spell:1509-1555"
     },
     {
       "type": "PublishedVolunteer",
@@ -233,7 +233,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/SignUpSheet.spellml:472-632"
+      "defined": "/SignUpSheet.spell:472-632"
     },
     {
       "type": "SignUpSheet",
@@ -281,41 +281,41 @@
     {
       "type": "SignUpPage",
       "superType": "App",
-      "defined": "/SignUpSheet.spellml:2154-7868"
+      "defined": "/SignUpSheet.spell:2154-7868"
     },
     {
       "property": "new_volunteer",
       "asWritten": "new volunteer",
       "of": "SignUpPage",
       "datatype": "Volunteer",
-      "defined": "/SignUpSheet.spellml:2170-2211"
+      "defined": "/SignUpSheet.spell:2170-2211"
     },
     {
       "property": "new_attendee",
       "asWritten": "new attendee",
       "of": "SignUpPage",
       "datatype": "Attendee",
-      "defined": "/SignUpSheet.spellml:2216-2255"
+      "defined": "/SignUpSheet.spell:2216-2255"
     },
     {
       "property": "new_ticket",
       "asWritten": "new ticket",
       "of": "SignUpPage",
       "datatype": "Ticket",
-      "defined": "/SignUpSheet.spellml:2260-2295"
+      "defined": "/SignUpSheet.spell:2260-2295"
     },
     {
       "property": "counts",
       "of": "SignUpPage",
       "datatype": "list of messages",
-      "defined": "/SignUpSheet.spellml:2300-2366"
+      "defined": "/SignUpSheet.spell:2300-2366"
     },
     {
       "property": "new_letter",
       "asWritten": "new letter",
       "of": "SignUpPage",
       "datatype": "Message",
-      "defined": "/SignUpSheet.spellml:2371-2407"
+      "defined": "/SignUpSheet.spell:2371-2407"
     },
     {
       "syntax": "take the shift (of {thisArg:expression})?",
@@ -329,7 +329,7 @@
       "kind": "method",
       "name": "take the shift",
       "returns": "nothing",
-      "defined": "/SignUpSheet.spellml:2413-2573"
+      "defined": "/SignUpSheet.spell:2413-2573"
     },
     {
       "syntax": "take setup (of {thisArg:expression})?",
@@ -343,7 +343,7 @@
       "kind": "method",
       "name": "take setup",
       "returns": "nothing",
-      "defined": "/SignUpSheet.spellml:2587-2673"
+      "defined": "/SignUpSheet.spell:2587-2673"
     },
     {
       "syntax": "take serving (of {thisArg:expression})?",
@@ -357,7 +357,7 @@
       "kind": "method",
       "name": "take serving",
       "returns": "nothing",
-      "defined": "/SignUpSheet.spellml:2687-2777"
+      "defined": "/SignUpSheet.spell:2687-2777"
     },
     {
       "syntax": "take cleanup (of {thisArg:expression})?",
@@ -371,7 +371,7 @@
       "kind": "method",
       "name": "take cleanup",
       "returns": "nothing",
-      "defined": "/SignUpSheet.spellml:2791-2881"
+      "defined": "/SignUpSheet.spell:2791-2881"
     },
     {
       "syntax": "ask for the ticket (of {thisArg:expression})?",
@@ -385,7 +385,7 @@
       "kind": "method",
       "name": "ask for the ticket",
       "returns": "nothing",
-      "defined": "/SignUpSheet.spellml:2895-3090"
+      "defined": "/SignUpSheet.spell:2895-3090"
     },
     {
       "syntax": "work out the invitations (of {thisArg:expression})?",
@@ -400,7 +400,7 @@
       "name": "work out the invitations",
       "returns": "nothing",
       "waits": true,
-      "defined": "/SignUpSheet.spellml:3104-3492"
+      "defined": "/SignUpSheet.spell:3104-3492"
     },
     {
       "syntax": "send the letter (of {thisArg:expression})?",
@@ -415,7 +415,7 @@
       "name": "send the letter",
       "returns": "nothing",
       "waits": true,
-      "defined": "/SignUpSheet.spellml:3506-4200"
+      "defined": "/SignUpSheet.spell:3506-4200"
     },
     {
       "syntax": "add the new attendee (of {thisArg:expression})?",
@@ -429,7 +429,7 @@
       "kind": "method",
       "name": "add the new attendee",
       "returns": "nothing",
-      "defined": "/SignUpSheet.spellml:4214-4326"
+      "defined": "/SignUpSheet.spell:4214-4326"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -442,7 +442,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/SignUpSheet.spellml:4340-7859"
+      "defined": "/SignUpSheet.spell:4340-7859"
     }
   ],
   "codeLines": [

@@ -11,25 +11,25 @@
     {
       "type": "FlashCard",
       "superType": "TwoSidedView",
-      "defined": "/FlashCard.spellml:189-1213"
+      "defined": "/FlashCard.spell:189-1213"
     },
     {
       "property": "word",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/FlashCard.spellml:252-318"
+      "defined": "/FlashCard.spell:252-318"
     },
     {
       "property": "meaning",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/FlashCard.spellml:323-388"
+      "defined": "/FlashCard.spell:323-388"
     },
     {
       "type": "Deck",
       "superType": "List",
       "itemType": "FlashCard",
-      "defined": "/FlashCard.spellml:1229-1278"
+      "defined": "/FlashCard.spell:1229-1278"
     },
     {
       "syntax": "test turning a card over",
@@ -38,42 +38,42 @@
       "alias": "statement",
       "kind": "function",
       "name": "turning a card over",
-      "defined": "/FlashCard.spellml:922-1204"
+      "defined": "/FlashCard.spell:922-1204"
     },
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/FlashCards.spellml:357-2368"
+      "defined": "/FlashCards.spell:357-2368"
     },
     {
       "property": "deck",
       "of": "Quiz",
       "datatype": "Deck",
-      "defined": "/FlashCards.spellml:365-392"
+      "defined": "/FlashCards.spell:365-392"
     },
     {
       "property": "card",
       "of": "Quiz",
       "datatype": "FlashCard",
-      "defined": "/FlashCards.spellml:397-457"
+      "defined": "/FlashCards.spell:397-457"
     },
     {
       "property": "known",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spellml:462-492"
+      "defined": "/FlashCards.spell:462-492"
     },
     {
       "property": "tried",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spellml:529-559"
+      "defined": "/FlashCards.spell:529-559"
     },
     {
       "property": "score",
       "of": "Quiz",
       "datatype": "text",
-      "defined": "/FlashCards.spellml:600-731"
+      "defined": "/FlashCards.spell:600-731"
     },
     {
       "syntax": "deal a card (of {thisArg:expression})?",
@@ -88,7 +88,7 @@
       "kind": "method",
       "name": "deal a card",
       "returns": "nothing",
-      "defined": "/FlashCards.spellml:767-998"
+      "defined": "/FlashCards.spell:767-998"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -102,7 +102,7 @@
       "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/FlashCards.spellml:1606-2359"
+      "defined": "/FlashCards.spell:1606-2359"
     },
     {
       "syntax": "show the answer (of {thisArg:expression})?",
@@ -118,7 +118,7 @@
       "name": "show the answer",
       "returns": "nothing",
       "title": "Show the answer",
-      "defined": "/FlashCards.spellml:1011-1096"
+      "defined": "/FlashCards.spell:1011-1096"
     },
     {
       "syntax": "say i knew {thisArg:expression}",
@@ -134,7 +134,7 @@
       "name": "say i knew it",
       "returns": "nothing",
       "title": "I knew it",
-      "defined": "/FlashCards.spellml:1101-1291"
+      "defined": "/FlashCards.spell:1101-1291"
     },
     {
       "syntax": "say i missed {thisArg:expression}",
@@ -150,7 +150,7 @@
       "name": "say i missed it",
       "returns": "nothing",
       "title": "I missed it",
-      "defined": "/FlashCards.spellml:1304-1423"
+      "defined": "/FlashCards.spell:1304-1423"
     },
     {
       "syntax": "start over (of {thisArg:expression})?",
@@ -166,7 +166,7 @@
       "name": "start over",
       "returns": "nothing",
       "title": "Start over",
-      "defined": "/FlashCards.spellml:1436-1538"
+      "defined": "/FlashCards.spell:1436-1538"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
@@ -189,7 +189,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/FlashCards.spellml:2444-2576"
+      "defined": "/FlashCards.spell:2444-2576"
     }
   ],
   "codeLines": [

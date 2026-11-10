@@ -49,7 +49,7 @@ export class Page extends View {
 
   /**
    * Draw this page as the program's page, as an app starts:  `core.startDrawing()`.
-   * - Compiles from `start the counter notebook`, which a `.spellml` page that draws its body says by itself
+   * - Compiles from `start the counter notebook`, which a `.spell` page that draws its body says by itself
    *   (epic `elemental-spell` P16).
    */
   start(): void {

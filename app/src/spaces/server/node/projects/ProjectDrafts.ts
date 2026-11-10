@@ -2,8 +2,8 @@
  * A project's DRAFTS, PUBLISH and VERSIONS, on disk (epic `editor` P24, in atmosphere's shapes).
  * - Your edits go into your DRAFT, never the public file:  one per person per file, every save overwriting it.
  *   - In the project's private folder, `__draft/`, at its file's place, named for you and the day
- *     (Q22, Q24):  `Deck.spellml`'s is `__draft/Deck.owen-2026-11-03.spellml`;  someone signed in is named by their
- *     address, `__draft/Deck.ana@rs-2026-11-07.spellml`.
+ *     (Q22, Q24):  `Deck.spell`'s is `__draft/Deck.owen-2026-11-03.spell`;  someone signed in is named by their
+ *     address, `__draft/Deck.ana@rs-2026-11-07.spell`.
  *   - A draft that's the same as the published file is no draft:  saving one deletes it.
  *   - Two people drafting one file each have their own;  publishing yours shows both when it changed since.
  * - WHERE the private folders are (epic `atmosphere` P26):
@@ -332,7 +332,7 @@ export class ProjectDrafts {
     return caps.length ? Math.min(...caps) : undefined
   }
 
-  /** Every public file of the project, as `/Button/Usage.spellml`:  never the private folders, nor hidden files. */
+  /** Every public file of the project, as `/Button/Usage.spell`:  never the private folders, nor hidden files. */
   private async publicFiles(): Promise<string[]> {
     const files = await fileUtils.getFilesInside(this.projectPath(), { ignoreFolder: ProjectDrafts.isPrivatePath })
     return files.map((file) => `/${file}`).filter((filePath) => !ProjectDrafts.isPrivatePath(filePath))
@@ -456,7 +456,7 @@ function privateAddressOf(space: PairedSpace): string {
   return `${space.address}/${PRIVATE_SPACE}`
 }
 
-/** `/a/Deck.spellml` => `{ folder: ["a"], stem: "Deck", extensions: ".spellml" }` */
+/** `/a/Deck.spell` => `{ folder: ["a"], stem: "Deck", extensions: ".spell" }` */
 function partsOf(filePath: string): { folder: string[]; stem: string; extensions: string } {
   const parts = filePath.replace(/^\/+/, "").split("/")
   const name = parts.pop()!

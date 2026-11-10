@@ -5,7 +5,7 @@ core.heading("GitHub:  a repository's issues, the people who wrote it, anyone by
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ## GitHub:  a repository's issues, the people who wrote it, anyone by their login, and a search of people and repositories
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in GitHub.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in GitHub.spell.
 // `github` is what this wrote, from looking at the server:
 //   spell place ingest https://api.github.com --into GitHub.api.spell --name github --no-ai --key-secret GITHUB_TOKEN
 //     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name},
@@ -1606,7 +1606,7 @@ core.heading("Open Library:  books by what they're called, who wrote them, and t
 ///////////////////////////////////////////////////////////////////////////////////
 // ## Open Library:  books by what they're called, who wrote them, and their covers
 ///////////////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spell.
 // `open library` is what this wrote, from looking at the server:
 //   spell place ingest https://openlibrary.org --into OpenLibrary.api.spell --name "open library" --no-ai
 //     --collections "books=/search.json?q=dune,authors=/authors/{name}.json,editions=/books/{name}.json"
@@ -1711,7 +1711,7 @@ export class Book extends Thing {
   accessor subtitle!: string
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1923, end: 2059 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spell", start: 1923, end: 2059 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -2150,7 +2150,7 @@ export class OpenLibraryPage extends Thing {
   }
 
   /** What the search finds:  Open Library looks, by the title, and gives back the first hundred */
-  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spellml", start: 546, end: 715 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spell", start: 546, end: 715 }, readsFrom: ["open_library"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book: Book) => core.includes(book.title, this.search))
   }, () => [this.search]) }
@@ -2211,7 +2211,7 @@ core.heading("JSONPlaceholder:  posts and their comments, people, and their todo
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ## JSONPlaceholder:  posts and their comments, people, and their todos, on a server for practice
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in JSONPlaceholder.spell.
 // `jsonplaceholder` is what this wrote, from looking at the server:
 //   spell place ingest https://jsonplaceholder.typicode.com --into JSONPlaceholder.api.spell --name jsonplaceholder
 //     --no-ai --try-writes --collections "posts=/posts,comments=/comments,users=/users,todos=/todos"
@@ -2472,13 +2472,13 @@ export class JsonplaceholderPage extends Thing {
   set newTodo(value: Todo) { this.setProp("newTodo", value) }
 
   /** Whose todos and posts these are:  the first person it has */
-  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 547, end: 676 }, readsFrom: ["jsonplaceholder"] }) }
+  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spell", start: 547, end: 676 }, readsFrom: ["jsonplaceholder"] }) }
   get person() { return core.waitedValue(this, "person", async () => {
     return await core.savedThingWithId(JsonplaceholderUser, 1)
   }) }
 
   /** Theirs, from every todo */
-  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spellml", start: 689, end: 778 }, readsFrom: ["jsonplaceholder"] }) }
+  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spell", start: 689, end: 778 }, readsFrom: ["jsonplaceholder"] }) }
   get todos() { return core.waitedValue(this, "todos", async () => {
     return await core.savedThings(Todo, { filter: { userId: 1 } })
   }) }
@@ -2557,7 +2557,7 @@ core.heading("Open-Meteo:  the weather to come, hour by hour, for anywhere on Ea
 ///////////////////////////////////////////////////////////////////////////
 // ## Open-Meteo:  the weather to come, hour by hour, for anywhere on Earth
 ///////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in OpenMeteo.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in OpenMeteo.spell.
 // `open meteo` is what this wrote, from looking at the server:
 //   spell place ingest https://api.open-meteo.com --into OpenMeteo.api.spell --name "open meteo" --no-ai
 //     --collections "forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2"
@@ -2706,13 +2706,13 @@ export class OpenMeteoPage extends Thing {
   }
 
   /** The city's, from Open-Meteo:  asked for by where it is, with no list of them all */
-  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spellml", start: 962, end: 1187 }, readsFrom: ["open_meteo"] }) }
+  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spell", start: 962, end: 1187 }, readsFrom: ["open_meteo"] }) }
   get forecasts() { return core.waitedValue(this, "forecasts", async () => {
     return await core.savedThings(Forecast, { filter: { latitude: this.city?.latitude, longitude: this.city?.longitude } })
   }, () => [this.city]) }
 
   /** Its one forecast:  Open-Meteo answers with one, for the nearest place it has */
-  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spellml", start: 1200, end: 1343 }, readsFrom: ["open_meteo"] }) }
+  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spell", start: 1200, end: 1343 }, readsFrom: ["open_meteo"] }) }
   get forecast() {
     return core.getItemAt(this.forecasts, 0)
   }
@@ -2797,7 +2797,7 @@ core.heading("The Met Museum:  every artwork in its collection, and a search of 
 /////////////////////////////////////////////////////////////////////////////////
 // ## The Met Museum:  every artwork in its collection, and a search of all of it
 /////////////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spell.
 // `met museum` is what this wrote, from looking at the server:
 //   spell place ingest https://collectionapi.metmuseum.org/public/collection --kind "web server" --docs https://metmuseum.github.io
 //     --into MetMuseum.api.spell --name "met museum" --no-ai --collections "artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers"
@@ -3208,7 +3208,7 @@ export class MetMuseumPage extends Thing {
   }
 
   /** What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn */
-  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spellml", start: 542, end: 709 }, readsFrom: ["met_museum"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spell", start: 542, end: 709 }, readsFrom: ["met_museum"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return await core.savedThings(Artwork, { search: { "*": this.search } })
   }, () => [this.search]) }
@@ -3279,7 +3279,7 @@ core.heading("REST Countries:  every country in the world, its flag, its capital
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ## REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spell.
 // `rest countries` is what this wrote, from looking at the server:
 //   spell place ingest https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0 --into RestCountries.api.spell
 //     --name "rest countries" --no-ai --collections "countries=/countries.json"
@@ -3557,7 +3557,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spellml", start: 722, end: 906 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 722, end: 906 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item: Country) => item.name?.common)
   }, () => [this.region]) }

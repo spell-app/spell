@@ -15,7 +15,7 @@ import "spell/app/spaces"
 /**
  * Every page of the Spell UI site (`@spell/guides/SpellUI`, epic `notebook` P10) compiles cleanly, and means the same
  * in code spell:  written as code spell in memory (`SX.CodeSpellWriter`), it compiles to the same javascript.
- * - A notebook is only ever a `.spellml` file (Owen, 2026-10-25:  "one file.  notebooks are only `.spellml`"):
+ * - A notebook is only ever a `.spell` file (Owen, 2026-10-25:  "one file.  notebooks are only `.spell`"):
  *   its code spell is made here, never written beside it.
  * - Its bare names are written as the tags its own compile chose, as the editor's "Show as Code Spell" writes them:
  *   `<counter/>` is `<counter-counter/>`.
@@ -26,7 +26,7 @@ import "spell/app/spaces"
  */
 const SITE = SPACES.SPELL_UI_SITE_PROJECT
 const FOLDER = fixtureFolder(SITE)
-const SITE_FILE = "/SpellUI.spellml"
+const SITE_FILE = "/SpellUI.spell"
 /** How long the whole-project compile below may take. */
 const COMPILE_MS = 300_000
 
@@ -72,9 +72,9 @@ describe("every page of the Spell UI site means the same in code spell", () => {
 
 // epic `elemental-spell` J159:  the page's `<!-- GAP ... -->` notes were warning messages, drawn on the page
 test("the Button's GAP notes are comments:  never drawn", () => {
-  const contents = readFileSync(resolve(FOLDER, "Button", "Examples.spellml"), "utf8")
+  const contents = readFileSync(resolve(FOLDER, "Button", "Examples.spell"), "utf8")
   expect(contents).toContain("<!-- GAP I23:")
-  const files = [{ path: "/Button/Examples.spellml", contents }]
+  const files = [{ path: "/Button/Examples.spell", contents }]
   const [file] = parseSpellProject(files, { parentScope: fixtureImportScope(SITE) }).files
   expect(codeOf(file!.compiled)).not.toContain("GAP")
 })
@@ -131,7 +131,7 @@ describe("the Spell UI site", () => {
       (entry) => entry.isDirectory() && entry.name !== "snapshots"
     )
     expect(folders.length).toBe(100)
-    for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spellml"))).toBe(false)
+    for (const { name } of folders) expect(existsSync(resolve(FOLDER, name, "TabBar.spell"))).toBe(false)
   })
 
   test("every link is a site address, a file of the docs site or a `#`, never one of its old pages", () => {

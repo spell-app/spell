@@ -5,40 +5,40 @@
     "path": "/GitHub.api.spell",
     "active": true
   }, {
-    "path": "/GitHub.spellml",
+    "path": "/GitHub.spell",
     "active": true
   }, {
     "path": "/OpenLibrary.api.spell",
     "active": true
   }, {
-    "path": "/OpenLibrary.spellml",
+    "path": "/OpenLibrary.spell",
     "active": true
   }, {
     "path": "/JSONPlaceholder.api.spell",
     "active": true
   }, {
-    "path": "/JSONPlaceholder.spellml",
+    "path": "/JSONPlaceholder.spell",
     "active": true
   }, {
     "path": "/OpenMeteo.api.spell",
     "active": true
   }, {
-    "path": "/OpenMeteo.spellml",
+    "path": "/OpenMeteo.spell",
     "active": true
   }, {
     "path": "/MetMuseum.api.spell",
     "active": true
   }, {
-    "path": "/MetMuseum.spellml",
+    "path": "/MetMuseum.spell",
     "active": true
   }, {
     "path": "/RestCountries.api.spell",
     "active": true
   }, {
-    "path": "/RestCountries.spellml",
+    "path": "/RestCountries.spell",
     "active": true
   }, {
-    "path": "/PublicServers.spellml",
+    "path": "/PublicServers.spell",
     "active": true
   }],
   "development": {

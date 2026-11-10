@@ -480,7 +480,7 @@ export const APP_TEXTS = {
   outputTab: "Output",
   typescriptTab: "TypeScript",
   pythonTab: "Python",
-  // a .spellml file's code spell, the text it reads as (epic `elemental-spell` P8)
+  // a .spell file's code spell, the text it reads as (epic `elemental-spell` P8)
   codeSpellTab: "Code Spell",
   // a .spell file as spellx:  a view, never a second file (epic `elemental-spell` J95)
   spellxTab: "Spellx",

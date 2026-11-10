@@ -22,7 +22,7 @@ const SHELF = `<spell-view "shelf">
 
 /** The shelf, written by `writer`. */
 function written(writer: P.ProgramWriter) {
-  const { files, scope } = parseSpellProject([{ path: "/Shelf.spellml", contents: SHELF }])
+  const { files, scope } = parseSpellProject([{ path: "/Shelf.spell", contents: SHELF }])
   expect(files[0]!.errors).toEqual([])
   return SP.SpellProject.combineCompiled([files[0]!.match!.AST as P.ASTStatementGroup], writer, "", scope)
 }

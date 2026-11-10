@@ -2089,8 +2089,8 @@
 			<example "Tree" description="A tree shows rows nested in rows, which open and close, and can be selected one or many at a time. \[Tree page](/tree)">
 				<tree choose="many" label="Files" style="width: 16em">
 					<tree-item label="src" icon="folder" open>
-						<tree-item label="Card.spellml" icon="file code" selected/>
-						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="Card.spell" icon="file code" selected/>
+						<tree-item label="Deck.spell" icon="file code"/>
 						<tree-item label="styles" icon="folder">
 							<tree-item label="card.css" icon="file code"/>
 						</tree-item>

@@ -33,7 +33,7 @@ function compiled(drawing: string) {
 </spell-view>`
   const made = parseSpellProject([
     { path: "/Reviews.spell", contents: REVIEWS },
-    { path: "/Shelf.spellml", contents }
+    { path: "/Shelf.spell", contents }
   ])
   const { files, scope } = made
   const shelf = files[1]!

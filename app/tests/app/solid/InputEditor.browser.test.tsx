@@ -151,12 +151,12 @@ describe("<FileDropdown>", () => {
   })
 
   test("a project's folders:  each a header over its files;  the trigger and the tabs say the whole name", async () => {
-    const file = fakeFile("test-project/Button/Usage.spellml", "")
+    const file = fakeFile("test-project/Button/Usage.spell", "")
     const row = (path: string, location: object) => ({ path, location, file: reactiveObject({ isDirty: false }) })
     ;(file.project as unknown as { imports: unknown[] }).imports = [
-      row("test-project/Button/Usage.spellml", { file: "Usage.spellml", folder: "/Button/" }),
+      row("test-project/Button/Usage.spell", { file: "Usage.spell", folder: "/Button/" }),
       row("test-project/Card.spell", { file: "Card.spell", folder: "/" }),
-      row("test-project/Divider/Usage.spellml", { file: "Usage.spellml", folder: "/Divider/" }),
+      row("test-project/Divider/Usage.spell", { file: "Usage.spell", folder: "/Divider/" }),
       row("test-project/Button/styles.css", { file: "styles.css", folder: "/Button/" })
     ]
     setEditor("project", file.project as unknown as EditorStore["project"])

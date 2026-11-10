@@ -34,7 +34,7 @@ const SITE = [
 
 /** A project of `files` parsed with each page alone, as the editor and every compile read it. */
 function projectOf(files: Record<string, string>, parsesAlone?: (path: string) => boolean) {
-  const language = SP.Language.forFile("/x.spellml")
+  const language = SP.Language.forFile("/x.spell")
   const root = SP.Language.rootScopeFor([language])
   const scope = new P.ProjectScope({
     name: "Guide",
@@ -65,9 +65,9 @@ function errorsIn(parse: P.IncrementalParse | undefined): string[] {
 }
 
 describe("what counts as alone", () => {
-  const head = (text: string) => SP.Language.rootScopeFor([SP.Language.forFile("/x.spellml")]).parser as SP.SpellParser
+  const head = (text: string) => SP.Language.rootScopeFor([SP.Language.forFile("/x.spell")]).parser as SP.SpellParser
   const alone = (text: string) =>
-    !!head(text).twinFor(SP.Language.forFile("/x.spellml"), "spellx").aloneHead(text, "/x")
+    !!head(text).twinFor(SP.Language.forFile("/x.spell"), "spellx").aloneHead(text, "/x")
 
   test("one page, a comment before it, its views inside", () => expect(alone(`<!-- notes -->\n${FILM}`)).toBe(true))
   test("a page in `.spell` is not", () => {
@@ -84,61 +84,61 @@ describe("what counts as alone", () => {
 describe("a project of pages alone", () => {
   beforeAll(registerTestComponentPack)
 
-  const FILES = { "/Film.spellml": FILM, "/Other.spellml": OTHER, "/Site.spellml": SITE }
+  const FILES = { "/Film.spell": FILM, "/Other.spell": OTHER, "/Site.spell": SITE }
 
   test("a site reads their names and parameters with no page parsed", () => {
     const { project } = projectOf(FILES, () => false)
-    expect(project.getFile("/Film.spellml")).toBeUndefined()
-    expect(errorsIn(project.getFile("/Site.spellml"))).toEqual([])
+    expect(project.getFile("/Film.spell")).toBeUndefined()
+    expect(errorsIn(project.getFile("/Site.spell"))).toEqual([])
   })
 
   test("a page the site says has a parameter it lacks is refused, by its head", () => {
     const site = SITE.replace('"/other"', '"/other/:nope"')
-    const { project } = projectOf({ ...FILES, "/Site.spellml": site }, () => false)
-    expect(errorsIn(project.getFile("/Site.spellml")).join()).toContain("nope")
+    const { project } = projectOf({ ...FILES, "/Site.spell": site }, () => false)
+    expect(errorsIn(project.getFile("/Site.spell")).join()).toContain("nope")
   })
 
   test("two pages each have a `counter`, their own, named for the page", () => {
     const { project } = projectOf(FILES)
     const code = (path: string) => String(P.JSWriter.instance.writeMatch(project.getFile(path)!.match))
-    expect(code("/Film.spellml")).toContain("class FilmPageCounter extends View")
-    expect(code("/Film.spellml")).toContain('h("guide-film-page-counter")')
-    expect(code("/Other.spellml")).toContain("class OtherPageCounter extends View")
-    expect(errorsIn(project.getFile("/Film.spellml"))).toEqual([])
+    expect(code("/Film.spell")).toContain("class FilmPageCounter extends View")
+    expect(code("/Film.spell")).toContain('h("guide-film-page-counter")')
+    expect(code("/Other.spell")).toContain("class OtherPageCounter extends View")
+    expect(errorsIn(project.getFile("/Film.spell"))).toEqual([])
   })
 
   test("a page is parsed when it's wanted", () => {
-    const { project } = projectOf(FILES, (path) => path === "/Film.spellml")
-    expect(project.getFile("/Other.spellml")).toBeUndefined()
-    const parse = project.parseAlone("/Other.spellml")
+    const { project } = projectOf(FILES, (path) => path === "/Film.spell")
+    expect(project.getFile("/Other.spell")).toBeUndefined()
+    const parse = project.parseAlone("/Other.spell")
     expect(parse?.match).toBeDefined()
-    expect(project.parseAlone("/Other.spellml")).toBeUndefined()
+    expect(project.parseAlone("/Other.spell")).toBeUndefined()
   })
 
   test("typing in a page re-parses it alone, and the site doesn't move", () => {
     const { project } = projectOf(FILES)
-    const site = project.getFile("/Site.spellml")!.match
-    const changed = project.update("/Film.spellml", FILM.replace("# Film", "# Films"))
-    expect(changed).toEqual([project.getFile("/Film.spellml")])
-    expect(project.getFile("/Site.spellml")!.match).toBe(site)
+    const site = project.getFile("/Site.spell")!.match
+    const changed = project.update("/Film.spell", FILM.replace("# Film", "# Films"))
+    expect(changed).toEqual([project.getFile("/Film.spell")])
+    expect(project.getFile("/Site.spell")!.match).toBe(site)
   })
 
   test("a change of the page's name or a property re-reads the rest", () => {
     const { project } = projectOf(FILES)
-    const changed = project.update("/Other.spellml", OTHER.replace('"other page"', '"another page"'))
-    expect(changed).toContain(project.getFile("/Site.spellml"))
+    const changed = project.update("/Other.spell", OTHER.replace('"other page"', '"another page"'))
+    expect(changed).toContain(project.getFile("/Site.spell"))
   })
 
   test("a page's own view can't take another page's name", () => {
     const clashing = FILM.replace("<view counter>", '<view "other">').replace("\t<counter/>\n", "")
     const name = '<spell-page "film page other">\n\t# Hi\n</spell-page>\n'
-    const { project } = projectOf({ ...FILES, "/Film.spellml": clashing, "/Clash.spellml": name })
-    expect(errorsIn(project.getFile("/Film.spellml")).join()).toContain("view")
+    const { project } = projectOf({ ...FILES, "/Film.spell": clashing, "/Clash.spell": name })
+    expect(errorsIn(project.getFile("/Film.spell")).join()).toContain("view")
   })
 
   test("a file that stops being alone starts over", () => {
     const { project } = projectOf(FILES)
-    expect(project.update("/Film.spellml", `${FILM}${OTHER}`)).toEqual([])
+    expect(project.update("/Film.spell", `${FILM}${OTHER}`)).toEqual([])
     expect(project.isBroken).toBe(true)
   })
 })

@@ -8,19 +8,31 @@
     "path": "/Wikipedia.api.spell",
     "active": true
   }, {
-    "path": "/StarWars.spellml",
+    "path": "/StarWars.spell",
     "active": true
   }, {
     "path": "/styles.css",
     "active": true
   }, {
-    "path": "/StarWarsCrawl.spellml",
+    "path": "/StarWarsCrawl.spell",
     "active": true
   }, {
-    "path": "/StarWarsJump.spellml",
+    "path": "/StarWarsJump.spell",
     "active": true
   }, {
-    "path": "/StarWarsPortrait.spellml",
+    "path": "/StarWarsPortrait.spell",
+    "active": true
+  }, {
+    "path": "/StarWars.spell",
+    "active": true
+  }, {
+    "path": "/StarWarsCrawl.spell",
+    "active": true
+  }, {
+    "path": "/StarWarsJump.spell",
+    "active": true
+  }, {
+    "path": "/StarWarsPortrait.spell",
     "active": true
   }],
   "development": {

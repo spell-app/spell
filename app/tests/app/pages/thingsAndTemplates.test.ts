@@ -236,7 +236,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
         (
           window as unknown as { editor: { project: { spellFiles: { path: string; contents: string }[] } } }
         ).editor.project.spellFiles
-          .find((file) => file.path.endsWith("/Card.spellml"))!
+          .find((file) => file.path.endsWith("/Card.spell"))!
           .contents.split("\n")
           .find((line) => line.includes('property "rank"'))!
       )

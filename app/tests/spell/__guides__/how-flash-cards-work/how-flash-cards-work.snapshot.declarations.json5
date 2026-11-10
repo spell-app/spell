@@ -11,42 +11,42 @@
     {
       "type": "FlashCard",
       "superType": "TwoSidedView",
-      "defined": "/HowFlashCardsWork.spellml:1123-1583"
+      "defined": "/HowFlashCardsWork.spell:1123-1583"
     },
     {
       "property": "word",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/HowFlashCardsWork.spellml:1186-1207"
+      "defined": "/HowFlashCardsWork.spell:1186-1207"
     },
     {
       "property": "meaning",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/HowFlashCardsWork.spellml:1212-1236"
+      "defined": "/HowFlashCardsWork.spell:1212-1236"
     },
     {
       "type": "Deck",
       "superType": "List",
       "itemType": "FlashCard",
-      "defined": "/HowFlashCardsWork.spellml:1599-1648"
+      "defined": "/HowFlashCardsWork.spell:1599-1648"
     },
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/HowFlashCardsWork.spellml:1831-2297"
+      "defined": "/HowFlashCardsWork.spell:1831-2297"
     },
     {
       "property": "deck",
       "of": "Quiz",
       "datatype": "Deck",
-      "defined": "/HowFlashCardsWork.spellml:1839-1866"
+      "defined": "/HowFlashCardsWork.spell:1839-1866"
     },
     {
       "property": "card",
       "of": "Quiz",
       "datatype": "FlashCard",
-      "defined": "/HowFlashCardsWork.spellml:1871-1900"
+      "defined": "/HowFlashCardsWork.spell:1871-1900"
     },
     {
       "syntax": "deal a card (of {thisArg:expression})?",
@@ -60,7 +60,7 @@
       "kind": "method",
       "name": "deal a card",
       "returns": "nothing",
-      "defined": "/HowFlashCardsWork.spellml:1906-2056"
+      "defined": "/HowFlashCardsWork.spell:1906-2056"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -73,7 +73,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowFlashCardsWork.spellml:2070-2288"
+      "defined": "/HowFlashCardsWork.spell:2070-2288"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
@@ -96,7 +96,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/HowFlashCardsWork.spellml:2372-2504"
+      "defined": "/HowFlashCardsWork.spell:2372-2504"
     },
     {
       "syntax": "test turning a card over",
@@ -105,7 +105,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "turning a card over",
-      "defined": "/HowFlashCardsWork.spellml:2747-2947"
+      "defined": "/HowFlashCardsWork.spell:2747-2947"
     }
   ],
   "codeLines": [

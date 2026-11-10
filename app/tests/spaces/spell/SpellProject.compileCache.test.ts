@@ -15,7 +15,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
 describe("SpellProject's compile cache", () => {
   const solitaire = fixtureFolder("@spell/examples/Solitaire")
   const workspace = mkdtempSync(resolve(tmpdir(), "spell-compile-cache-"))
-  const FILES = ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml", "Solitaire.spellml", "styles.css"]
+  const FILES = ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell", "styles.css"]
   let entries: Map<string, string>
   let cache: SP.CompileCache
 
@@ -107,7 +107,7 @@ describe("SpellProject's compile cache", () => {
   test("an edit to any of its files compiles the project again:  Card, or Solitaire", async () => {
     const project = makeProject("edits")
     await project.compile()
-    for (const name of ["Card.spellml", "Solitaire.spellml"]) {
+    for (const name of ["Card.spell", "Solitaire.spell"]) {
       const file = project.spellFiles.find((it) => it.file === name)!
       await project.updateText(file, `${file.contents}\n<!-- an edit -->\n`)
       reopen(project)
@@ -119,19 +119,19 @@ describe("SpellProject's compile cache", () => {
   })
 
   test("the key follows a library imported as source:  an edit to it is a new key for the app", async () => {
-    const lib = makeProject("srclib", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"])
-    const app = makeProject("srcapp", ["Solitaire.spellml", "styles.css"], {
+    const lib = makeProject("srclib", ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell"])
+    const app = makeProject("srcapp", ["Solitaire.spell", "styles.css"], {
       imports: [{ path: lib.projectId, source: true }]
     })
     const before = await cache.keyFor(app)
     expect(await cache.keyFor(app)).toBe(before)
-    const card = lib.spellFiles.find((it) => it.file === "Card.spellml")!
+    const card = lib.spellFiles.find((it) => it.file === "Card.spell")!
     card.contents = `${card.contents}\n<!-- an edit -->\n`
     expect(await cache.keyFor(app)).not.toBe(before)
   })
 
   test("a compile with parse errors isn't kept:  it compiles again, to show them", async () => {
-    const project = makeProject("broken", ["Deck.spellml"])
+    const project = makeProject("broken", ["Deck.spell"])
     await project.load(undefined)
     const deck = project.spellFiles[0]!
     await deck.load(undefined)

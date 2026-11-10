@@ -59,7 +59,7 @@ describe("SpellTokensProvider", () => {
 })
 
 /**
- * A `.spellml` file colours by its own tokenizer:  each tag line as its code-spell twin, its tag's own words around it.
+ * A `.spell` file colours by its own tokenizer:  each tag line as its code-spell twin, its tag's own words around it.
  * - The lines are Solitaire's `Card` in spellx, the examples test's fixture (`tests/spell/__spellx__/`).
  */
 describe("SpellTokensProvider.forSpellx()", () => {
@@ -82,7 +82,7 @@ describe("SpellTokensProvider.forSpellx()", () => {
   }
 
   test("a .spellml file (or the old .spellx) is Monaco's spellx language;  a .spell file stays spell", () => {
-    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spellml")).toBe("spellx")
+    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell")).toBe("spellx")
     expect(SpellMonaco.languageForPath(`/@spell/examples/Solitaire/Card${SP.OLD_SPELLML_SUFFIX}`)).toBe("spellx")
     expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell")).toBe("spell")
   })
@@ -160,7 +160,7 @@ describe("SpellTokensProvider.forSpellx()", () => {
     expect(after).toContain('"alias" keyword')
   })
 
-  // epic `debut` I96, Owen:  "<property-editor> in Card.spellml is not syntax coloring";  the prefix, epic `data` P31
+  // epic `debut` I96, Owen:  "<property-editor> in Card.spell is not syntax coloring";  the prefix, epic `data` P31
   test("a <spell-property-editor>'s lines colour as markup, its head as a tag;  a <spell-description>'s stay a comment", () => {
     const [, head, group, property, groupCloser, closer, description, text] = colour(
       [
@@ -188,7 +188,7 @@ describe("SpellTokensProvider.forSpellx()", () => {
     expect(text).toEqual(['"A playing card." comment'])
   })
 
-  // epic `editor` P25:  a property editors file, `Card.editor.spellml`, colours as the inline note did
+  // epic `editor` P25:  a property editors file, `Card.editor.spell`, colours as the inline note did
   test('a property editors file:  each `<property-editor "card">` a tag, its name a string, its lines markup', () => {
     const [, , head, property, closer] = colour(
       [

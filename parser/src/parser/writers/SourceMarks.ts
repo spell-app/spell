@@ -136,7 +136,7 @@ export class SourceMarks {
    * `code`, a compiled file, with what's drawn and made saying where it's written:
    * what the editor runs, never what ships.
    * - `map`:  its source map, as `extract()` made it.  None, or one listing no parts:  `code` as it is.
-   * - A drawn tag:  `h("ui-button", { "data-spell-at": "Card.spellml:12:4" }`, read back by `placeOfDrawn()`.
+   * - A drawn tag:  `h("ui-button", { "data-spell-at": "Card.spell:12:4" }`, read back by `placeOfDrawn()`.
    * - A made thing:  `Object.defineProperty(new Card(), Symbol.for("spell.madeAt"), ...)`, read back by `placeOfThing()`.
    * - Lines stay where they are, and a statement's mapping is at its line's start:  the map still holds.
    */
@@ -167,7 +167,7 @@ export class SourceMarks {
     return code.replace(STAMPED_DRAWN, `$1""`).replace(STAMPED_MADE, `$1""`)
   }
 
-  /** Each place stamped code says a drawn tag is written, in order:  `Card.spellml:12:4`. */
+  /** Each place stamped code says a drawn tag is written, in order:  `Card.spell:12:4`. */
   static placesIn(code: string): string[] {
     return [...code.matchAll(STAMPED_DRAWN)].map(([, , at]) => JSON.parse(at!) as string)
   }
@@ -322,7 +322,7 @@ function withDrawnPlace(after: string, at: string): string {
   return after.startsWith(", {") ? `, { ${prop},${after.slice(", {".length)}` : `, { ${prop} }${after}`
 }
 
-/** `at`, a stamped place, `Card.spellml:12:4`, read:  `undefined` if it isn't one. */
+/** `at`, a stamped place, `Card.spell:12:4`, read:  `undefined` if it isn't one. */
 function placeFrom(at: unknown): SourcePlace | undefined {
   const found = typeof at === "string" ? STAMPED_PLACE.exec(at) : null
   return found ? { path: found[1]!, line: Number(found[2]), column: Number(found[3]) } : undefined
@@ -334,7 +334,7 @@ const DRAWN_AT = SourceMarks.PLACE_ATTRIBUTE
 /** The key of the symbol that says where a thing was made, in the code the editor runs. */
 const MADE_AT = "spell.madeAt"
 
-/** A drawn tag's place in stamped code, `"data-spell-at": "Card.spellml:12:4"`:  what's before its value, and it. */
+/** A drawn tag's place in stamped code, `"data-spell-at": "Card.spell:12:4"`:  what's before its value, and it. */
 const STAMPED_DRAWN = new RegExp(`(${JSON.stringify(DRAWN_AT)}: )("(?:[^"\\\\]|\\\\.)*")`, "g")
 
 /** A made thing's place in stamped code, `Symbol.for("spell.madeAt"), { value: "..." }`:  what's before its value, and it. */

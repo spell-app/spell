@@ -63,7 +63,7 @@ describe("a page's stories", () => {
         '\t<property "film" type="text"/>',
         "</>"
       ],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('<story \\"S1\\">see a film\'s opening crawl</story>')
@@ -74,7 +74,7 @@ describe("a page's stories", () => {
   test("spellx:  `<spell-stories>` says the same", () => {
     const { code, errors } = compiled(
       ['<spell-page "film page">', "\t<spell-stories>", '\t\t<story "S1">see it</story>', "\t</>", "</>"],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('static stories = "<story \\"S1\\">see it</story>"')
@@ -89,7 +89,7 @@ describe("a page's stories", () => {
         "\t</>",
         "</>"
       ],
-      "/Galaxia.es.spellml"
+      "/Galaxia.es.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('static stories = "<historia \\"H1\\" hecha>ver las películas</historia>"')

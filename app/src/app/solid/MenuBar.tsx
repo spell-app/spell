@@ -29,7 +29,7 @@ import {
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
-import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spellml"
+import appMenusSpell from "spell/app/spaces/@spell/editor/app-menus/AppMenus.spell"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import type { MenuItem } from "spell/parser/core"
 
@@ -223,7 +223,7 @@ function DraftPill(): JSX.Element {
   )
 }
 
-/** The Publish action's icon, as `AppMenus.spellml` gives it. */
+/** The Publish action's icon, as `AppMenus.spell` gives it. */
 const PUBLISH_ICON = "paper plane outline"
 
 /****************
@@ -351,7 +351,7 @@ export function ProjectBarMenu(): JSX.Element {
 
 /****************
  * ### `<FileBarMenu>`
- * The File menu:  `menu`, the bar's File in `AppMenus.spellml`, its title and items, keys, icons, greying and ticks.
+ * The File menu:  `menu`, the bar's File in `AppMenus.spell`, its title and items, keys, icons, greying and ticks.
  * - What each does is here:  `itemFor()`, by the item's name.
  * - The project's name is in Duplicate's title.
  * - More Examples ›:  the group's projects (`<ProjectsMenu>`), as the Spell menu shows them.
@@ -445,7 +445,7 @@ function ThemeSubMenu(): JSX.Element {
 /****************
  * ### `<AppBarMenus>`
  * The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name.
- * - The bar, File · Edit · View · Run, is Spell, `AppMenus.spellml`'s `bar menu` (epic `editor`, Backing In Spell):
+ * - The bar, File · Edit · View · Run, is Spell, `AppMenus.spell`'s `bar menu` (epic `editor`, Backing In Spell):
  *   each menu's title, items, order, keys, icons, greying and ticks, and each item's title, in the page's language.
  * - What each item does is here, by the item's name;  so is a title that follows the editor's state
  *   (Undo's, New Example's, Duplicate's, More Examples'), and View's Inspector cards, one row per card.
@@ -708,7 +708,7 @@ export function startInspecting() {
 // ## The menus' Spell
 ////////////////
 
-/** The app menus' thing, `AppMenus.spellml`, loaded once for the page:  every bar menu reads its own menu of it. */
+/** The app menus' thing, `AppMenus.spell`, loaded once for the page:  every bar menu reads its own menu of it. */
 function appMenus(): Promise<{
   thing: AppMenusThing
   menuOf: (thing: object, name: string) => MenuItem[]
@@ -724,7 +724,7 @@ function appMenus(): Promise<{
 let loadingAppMenus: ReturnType<typeof appMenus> | undefined
 
 /**
- * Menu `name` of `AppMenus.spellml`:  its items, once its Spell has loaded, none before.
+ * Menu `name` of `AppMenus.spell`:  its items, once its Spell has loaded, none before.
  * - Its titles in the page's language:  read again as that language's texts arrive (`appTexts.titles`).
  * - NEVER throws:  Spell that won't load leaves the menu empty, and says so on the console.
  */
@@ -791,13 +791,13 @@ export function titled(item: SpellMenuAction): { menu: true; shortcut?: string; 
   return { ...itemState(item), title: item.title }
 }
 
-/** An action of a menu in `AppMenus.spellml`, as `core.menuOf()` gives it. */
+/** An action of a menu in `AppMenus.spell`, as `core.menuOf()` gives it. */
 export type SpellMenuAction = MenuItem & { kind: "action" }
 
-/** A menu of `AppMenus.spellml`'s bar, as `core.menuOf()` gives it:  its title and its items. */
+/** A menu of `AppMenus.spell`'s bar, as `core.menuOf()` gives it:  its title and its items. */
 export type SpellMenu = MenuItem & { kind: "menu" }
 
-/** The app menus' thing, as `AppMenus.spellml` compiles:  the editor's state its items grey and tick by. */
+/** The app menus' thing, as `AppMenus.spell` compiles:  the editor's state its items grey and tick by. */
 type AppMenusThing = {
   canDiscard: boolean
   autoSaving: boolean

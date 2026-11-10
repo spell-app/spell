@@ -355,7 +355,7 @@ function isFolderOutsideProject(projectFolder: string, relativePath: string): bo
 
 /**
  * Given a file `name`, return `true` if we should add it to the manifest.
- * - `name` is its bare name, `Usage.spellml`, with no folder.
+ * - `name` is its bare name, `Usage.spell`, with no folder.
  * - RENAME: shares its extension list with `isPreloadFile()` below, kept a separate function so they CAN diverge.
  *   They have:  this one also leaves out compiled output, snapshots, scope packs, page files and words files.
  * - Leaves out spaces' own names, by the list spaces keeps (`SPACES.isSpaceName()`, decision J52):
@@ -439,7 +439,7 @@ export type GetIndexOptions = {
 /**
  * Return `index` for a project as a JSON blob -- see `ProjectIndexJSON`.
  * - `manifest` portion always reflects current state of file system.
- *   - Every file of the project, sub-folders too, e.g. `Button/Usage.spellml`:  see `isFolderOutsideProject()`.
+ *   - Every file of the project, sub-folders too, e.g. `Button/Usage.spell`:  see `isFolderOutsideProject()`.
  * - `imports` portion is synced with `manifest`:  missing files left out, new files appended as `active`.
  *   - SIDE EFFECT:  a new file's import is saved to disk, in the project's file (`saveProjectFile()`).
  *   - A missing file's import is left out of the index, but NEVER out of the project file:

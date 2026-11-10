@@ -77,7 +77,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:379-1096"
+      "defined": "/Inbox.spell:379-1096"
     },
     {
       "type": "MailChoice",
@@ -106,7 +106,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:1199-1478"
+      "defined": "/Inbox.spell:1199-1478"
     },
     {
       "type": "Subscription",
@@ -135,7 +135,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:1584-1894"
+      "defined": "/Inbox.spell:1584-1894"
     },
     {
       "type": "MyInbox",
@@ -153,21 +153,21 @@
     {
       "type": "InboxPage",
       "superType": "App",
-      "defined": "/Inbox.spellml:2013-5793"
+      "defined": "/Inbox.spell:2013-5793"
     },
     {
       "property": "new_message",
       "asWritten": "new message",
       "of": "InboxPage",
       "datatype": "Message",
-      "defined": "/Inbox.spellml:2027-2064"
+      "defined": "/Inbox.spell:2027-2064"
     },
     {
       "property": "new_subscription",
       "asWritten": "new subscription",
       "of": "InboxPage",
       "datatype": "Subscription",
-      "defined": "/Inbox.spellml:2069-2116"
+      "defined": "/Inbox.spell:2069-2116"
     },
     {
       "syntax": "send {thisArg:expression}",
@@ -181,7 +181,7 @@
       "kind": "method",
       "name": "send it",
       "returns": "nothing",
-      "defined": "/Inbox.spellml:2122-2217"
+      "defined": "/Inbox.spell:2122-2217"
     },
     {
       "syntax": "reply to {callArgs:expression} in {callArgs:expression} (of {thisArg:expression})?",
@@ -205,7 +205,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Inbox.spellml:2231-2389"
+      "defined": "/Inbox.spell:2231-2389"
     },
     {
       "syntax": "choose how (of {thisArg:expression})?",
@@ -219,7 +219,7 @@
       "kind": "method",
       "name": "choose how",
       "returns": "nothing",
-      "defined": "/Inbox.spellml:2403-2490"
+      "defined": "/Inbox.spell:2403-2490"
     },
     {
       "syntax": "subscribe {thisArg:expression}?",
@@ -233,7 +233,7 @@
       "kind": "method",
       "name": "subscribe",
       "returns": "nothing",
-      "defined": "/Inbox.spellml:2504-2621"
+      "defined": "/Inbox.spell:2504-2621"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -246,7 +246,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spellml:2635-5784"
+      "defined": "/Inbox.spell:2635-5784"
     }
   ],
   "codeLines": [

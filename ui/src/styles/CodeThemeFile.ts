@@ -278,7 +278,7 @@ const SCOPES: Readonly<Record<CodeThemeRole, string[]>> = {
   text: ["source", "text"],
   heading: ["comment.line.number-sign.heading.spell", "markup.heading", "entity.name.section"],
   comment: ["comment", "punctuation.definition.comment"],
-  keyword: ["keyword", "storage", "keyword.control.spell", "keyword.operator.word.spell", "entity.name.tag.spellx"],
+  keyword: ["keyword", "storage", "keyword.control.spell", "keyword.operator.word.spell", "entity.name.tag.spell"],
   type: ["entity.name.type", "entity.name.class", "support.class", "support.type"],
   library: ["support.type.primitive", "support.type.builtin", "entity.name.type.primitive"],
   name: ["variable", "variable.other.readwrite"],
@@ -294,7 +294,7 @@ const SCOPES: Readonly<Record<CodeThemeRole, string[]>> = {
   string: ["string", "string.quoted", "markup.inline.raw"],
   tag: ["entity.name.tag", "entity.name.tag.spell", "support.class.component"],
   punctuation: ["punctuation", "keyword.operator", "punctuation.definition.tag", "meta.brace"],
-  attr: ["entity.other.attribute-name", "entity.other.attribute-name.spellx"],
+  attr: ["entity.other.attribute-name", "entity.other.attribute-name.spell"],
   meta: ["meta.preprocessor", "keyword.control.import", "keyword.control.directive"],
   addition: ["markup.inserted"],
   deletion: ["markup.deleted", "invalid"]

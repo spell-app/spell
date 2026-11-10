@@ -25,7 +25,7 @@
         }
       ],
       "returns": "text",
-      "defined": "/Money.spellml:69-331"
+      "defined": "/Money.spell:69-331"
     },
     {
       "syntax": "test money",
@@ -34,36 +34,36 @@
       "alias": "statement",
       "kind": "function",
       "name": "money",
-      "defined": "/Money.spellml:334-465"
+      "defined": "/Money.spell:334-465"
     },
     {
       "type": "Diner",
       "superType": "View",
-      "defined": "/Diner.spellml:236-1179"
+      "defined": "/Diner.spell:236-1179"
     },
     {
       "property": "name",
       "of": "Diner",
       "datatype": "text",
-      "defined": "/Diner.spellml:258-279"
+      "defined": "/Diner.spell:258-279"
     },
     {
       "property": "amount",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spellml:284-315"
+      "defined": "/Diner.spell:284-315"
     },
     {
       "property": "tip",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spellml:368-505"
+      "defined": "/Diner.spell:368-505"
     },
     {
       "property": "share",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spellml:510-576"
+      "defined": "/Diner.spell:510-576"
     },
     {
       "syntax": "remove {thisArg:expression}",
@@ -77,7 +77,7 @@
       "kind": "method",
       "name": "remove it",
       "returns": "nothing",
-      "defined": "/Diner.spellml:582-677"
+      "defined": "/Diner.spell:582-677"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -90,13 +90,13 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Diner.spellml:683-1170"
+      "defined": "/Diner.spell:683-1170"
     },
     {
       "type": "Table",
       "superType": "ViewableList",
       "itemType": "Diner",
-      "defined": "/Diner.spellml:1195-1370"
+      "defined": "/Diner.spell:1195-1370"
     },
     {
       "property": "table",
@@ -104,18 +104,18 @@
       "group": "A diner",
       "datatype": "Table",
       "exclusive": true,
-      "defined": "/Diner.spellml:1425-1453"
+      "defined": "/Diner.spell:1425-1453"
     },
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spellml:324-2325"
+      "defined": "/BillSplitter.spell:324-2325"
     },
     {
       "property": "diners",
       "of": "BillSplitter",
       "datatype": "Table",
-      "defined": "/BillSplitter.spellml:341-371"
+      "defined": "/BillSplitter.spell:341-371"
     },
     {
       "property": "percent",
@@ -125,25 +125,25 @@
         "dimension": "Proportion",
         "unit": "fraction"
       },
-      "defined": "/BillSplitter.spellml:376-506"
+      "defined": "/BillSplitter.spell:376-506"
     },
     {
       "property": "subtotal",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:519-699"
+      "defined": "/BillSplitter.spell:519-699"
     },
     {
       "property": "tip",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:714-756"
+      "defined": "/BillSplitter.spell:714-756"
     },
     {
       "property": "total",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spellml:761-801"
+      "defined": "/BillSplitter.spell:761-801"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -157,7 +157,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/BillSplitter.spellml:807-1069"
+      "defined": "/BillSplitter.spell:807-1069"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -170,7 +170,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spellml:1239-2316"
+      "defined": "/BillSplitter.spell:1239-2316"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -184,7 +184,7 @@
       "kind": "method",
       "name": "add someone",
       "returns": "nothing",
-      "defined": "/BillSplitter.spellml:1082-1225"
+      "defined": "/BillSplitter.spell:1082-1225"
     }
   ],
   "codeLines": [

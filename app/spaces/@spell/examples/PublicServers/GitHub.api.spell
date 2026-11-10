@@ -1,5 +1,5 @@
 ## GitHub:  a repository's issues, the people who wrote it, anyone by their login, and a search of people and repositories
-// A server other people run, and what it holds.  What's drawn from it is in GitHub.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in GitHub.spell.
 // `github` is what this wrote, from looking at the server:
 //   spell place ingest https://api.github.com --into GitHub.api.spell --name github --no-ai --key-secret GITHUB_TOKEN
 //     --collections "issues=/repos/solidjs/solid/issues,contributors=/repos/solidjs/solid/contributors,users=/users/{name},

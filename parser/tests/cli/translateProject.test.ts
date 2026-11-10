@@ -625,25 +625,23 @@ describe("a tag file (language I68)", () => {
     const source = { ...tagSource(), checker: tagChecker() }
     await translateProject(source, options(), fakeClaude().run, glossary())
     const out = join(folder, "Cartas")
-    expect(readdirSync(out)).toContain("Carta.es.spellml")
-    expect(readdirSync(out)).not.toContain("Carta.es.spell")
-    expect(readdirSync(out)).not.toContain("Card.spellml")
-    const tags = readFileSync(join(out, "Carta.es.spellml"), "utf8")
+    expect(readdirSync(out)).toContain("Carta.es.spell")
+    expect(readdirSync(out)).not.toContain("Card.spell")
+    const tags = readFileSync(join(out, "Carta.es.spell"), "utf8")
     expect(tags).toContain('<encanto-cosa "carta">')
     expect(tags).toContain("# The card\nA card has a color and a label.\n")
     expect(tags).not.toContain("// # The card")
     expect(JSON5.parse(readFileSync(join(out, "__project.json5"), "utf8")).imports).toEqual([
-      { path: "/Carta.es.spellml", active: true }
+      { path: "/Carta.es.spell", active: true }
     ])
   })
 
   test("as tags with more problems than plain:  stays plain, and says so", async () => {
-    const problem: LineProblem = { path: "/Carta.es.spellml", line: 3, message: "tags broke it", source: "lint" }
+    const problem: LineProblem = { path: "/Carta.es.spell", line: 3, message: "tags broke it", source: "lint" }
     const source = { ...tagSource(), checker: tagChecker([problem]) }
     await translateProject(source, options(), fakeClaude().run, glossary())
     const out = join(folder, "Cartas")
     expect(readdirSync(out)).toContain("Carta.es.spell")
-    expect(readdirSync(out)).not.toContain("Carta.es.spellml")
     expect(JSON5.parse(readFileSync(join(out, "__project.json5"), "utf8")).imports[0].path).toBe("/Carta.es.spell")
     expect(vi.mocked(CLI.err).mock.calls.join("\n")).toContain("written as plain .spell files")
   })
@@ -666,7 +664,7 @@ describe("a tag file (language I68)", () => {
       glossary()
     )
     expect(printed().join("\n")).toMatch(/\b0 of \d+ lines translated/)
-    expect(readdirSync(join(folder, "Cartas"))).toContain("Carta.es.spellml")
+    expect(readdirSync(join(folder, "Cartas"))).toContain("Carta.es.spell")
   })
 })
 
@@ -760,17 +758,17 @@ A card has a color and a label.
  * - `checker`:  what each check says, over the shape checker `translate()` gives it
  */
 function tagSource(): TranslateSource {
-  const { text: contents, proseLines } = SX.CodeSpellWriter.writeWithProse(CARD_TAGS, { path: "/Card.spellml" })
+  const { text: contents, proseLines } = SX.CodeSpellWriter.writeWithProse(CARD_TAGS, { path: "/Card.spell" })
   const { files } = parseSpellProject([{ path: "/Card.spell", contents }])
   mkdirSync(join(folder, "Cards"), { recursive: true })
   writeFileSync(
     join(folder, "Cards", "__project.json5"),
-    JSON.stringify({ imports: [{ path: "/Card.spellml", active: true }] })
+    JSON.stringify({ imports: [{ path: "/Card.spell", active: true }] })
   )
   return {
     projectName: "Cards",
     folder: join(folder, "Cards"),
-    files: [{ path: "/Card.spell", contents, match: files[0]!.match, tagFile: { path: "/Card.spellml", proseLines } }]
+    files: [{ path: "/Card.spell", contents, match: files[0]!.match, tagFile: { path: "/Card.spell", proseLines } }]
   }
 }
 
@@ -778,7 +776,7 @@ function tagSource(): TranslateSource {
 function tagChecker(afterTags: LineProblem[] = []): TranslateSource["checker"] {
   return (out) => () =>
     Promise.resolve(
-      readdirSync(out).includes("Carta.es.spell") ? { problems: [], files: parsedIn(out) } : { problems: afterTags }
+      !readFileSync(join(out, "Carta.es.spell"), "utf8").includes("<encanto") ? { problems: [], files: parsedIn(out) } : { problems: afterTags }
     )
 }
 

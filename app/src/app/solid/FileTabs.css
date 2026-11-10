@@ -1,5 +1,5 @@
 /*
- * `<FileTabs>`'s place over the code (`FileTabs.tsx`);  the tabs are a pane's bar, in `FileTabs.spellml`.
+ * `<FileTabs>`'s place over the code (`FileTabs.tsx`);  the tabs are a pane's bar, in `FileTabs.spell`.
  * - Its height while its Spell loads:  the code below stays where it'll be.
  * - The bar follows the pane's rounded top.
  */

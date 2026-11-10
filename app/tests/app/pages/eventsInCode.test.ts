@@ -26,7 +26,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       () =>
         (
           window as unknown as { project: { spellFiles: { path: string; contents: string }[] } }
-        ).project.spellFiles.find((file) => file.path.endsWith("/Solitaire.spellml"))!.contents
+        ).project.spellFiles.find((file) => file.path.endsWith("/Solitaire.spell"))!.contents
     )
 
   /** The Code band's row starting with `words`. */

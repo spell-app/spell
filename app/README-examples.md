@@ -35,7 +35,7 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 
 | Example | Address | What it shows | Running |
 | --- | --- | --- | --- |
-| FizzBuzz | [`@spell/examples/fizzbuzz`](spaces/@spell/examples/fizzbuzz/) | Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and an event for each number, which the console prints;  turn on Explainer.spellml for a page that explains it and shows the results | <a href="docs/images/examples/fizzbuzz.png"><img src="docs/images/examples/fizzbuzz.png" width="360" alt="FizzBuzz open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| FizzBuzz | [`@spell/examples/fizzbuzz`](spaces/@spell/examples/fizzbuzz/) | Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and an event for each number, which the console prints;  turn on Explainer.spell for a page that explains it and shows the results | <a href="docs/images/examples/fizzbuzz.png"><img src="docs/images/examples/fizzbuzz.png" width="360" alt="FizzBuzz open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Counter | [`@spell/examples/Counter`](spaces/@spell/examples/Counter/) | A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines | <a href="docs/images/examples/Counter.png"><img src="docs/images/examples/Counter.png" width="360" alt="Counter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Calculator | [`@spell/examples/calculator`](spaces/@spell/examples/calculator/) | A pocket calculator on Spell UI:  an app whose total is worked out as it's read, actions like `clear it` and `press (digit) on it`, and a keypad of buttons in a grid, whose clicks are Spell | <a href="docs/images/examples/calculator.png"><img src="docs/images/examples/calculator.png" width="360" alt="Calculator open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Tic-Tac-Toe | [`@spell/examples/tic-tac-toe`](spaces/@spell/examples/tic-tac-toe/) | Noughts and crosses on Spell UI:  nine squares drawn as buttons in a grid, whose turn it is, and three in a row, written as sentences | <a href="docs/images/examples/tic-tac-toe.png"><img src="docs/images/examples/tic-tac-toe.png" width="360" alt="Tic-Tac-Toe open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
@@ -96,7 +96,7 @@ The table and its pictures come from the example projects, so a new example show
 Everything else on this page is written by hand.
 A new example is tested as soon as its folder is there:  no list to add it to.
 
-1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellml` files.
+1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` files.
    `spell app create <name> --in spaces/@spell/examples` writes a first one.
 2. Give its project file a `"description"`:  one line of what it shows.
    - Without one, the table takes the first comment of its first Spell file.
@@ -189,7 +189,7 @@ clear the calculator
 ```
 
 - The whole program, its other four actions too:
-  [Calculator.spellml](spaces/@spell/examples/calculator/Calculator.spellml).
+  [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell).
 - The keypad's grid, four keys a row, is a `<grid columns="4">` in the same file:
   no CSS.
 
@@ -217,7 +217,7 @@ Two more things the picture won't tell you:
 
 The classic programming exercise:
 count to 100, saying "fizz" for multiples of 3, "buzz" for multiples of 5, and "fizzbuzz" for both.
-Here's all of [FizzBuzz.spellml](spaces/@spell/examples/fizzbuzz/FizzBuzz.spellml), not an excerpt:
+Here's all of [FizzBuzz.spell](spaces/@spell/examples/fizzbuzz/FizzBuzz.spell), not an excerpt:
 
 ```spell
 ## File FizzBuzz.spell
@@ -292,10 +292,10 @@ Each is one file of Spell and a stylesheet, and each shows one thing the languag
 
 | App | What to look at | Its edge |
 | --- | --- | --- |
-| [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spellml) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `tic tac toe's board` there |
-| [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spellml) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
-| [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spellml) | a random card, never the one just shown:  `cards in the deck where it is not quiz's card` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
-| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spellml) | a streak, worked out from a week of yes and no:  `for day in the days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
+| [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spell) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `tic tac toe's board` there |
+| [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spell) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
+| [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spell) | a random card, never the one just shown:  `cards in the deck where it is not quiz's card` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
+| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for day in the days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
 
 ```spell
 // the same mark in all three squares wins
@@ -317,8 +317,8 @@ _From Tic-Tac-Toe:  a phrase with three blanks, which the game says eight times,
 Every framework has its to-do list, and this is Spell's:
 [Task List](spaces/@spell/examples/TaskList/), in two files of Spell, an API file for each place it can keep its tasks,
 and two lines of style.
-- [Task.spellml](spaces/@spell/examples/TaskList/Task.spellml):  what a task is, and how it draws.
-- [TaskList.spellml](spaces/@spell/examples/TaskList/TaskList.spellml):  the list of tasks, then the app around it.
+- [Task.spell](spaces/@spell/examples/TaskList/Task.spell):  what a task is, and how it draws.
+- [TaskList.spell](spaces/@spell/examples/TaskList/TaskList.spell):  the list of tasks, then the app around it.
 - [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell) and the four beside it:  where the tasks are kept (below).
 
 It's written in spellx, Spell in tags:  a tag for each template, and inside it a tag for each property, alias and drawing,
@@ -580,7 +580,7 @@ _Task List in the editor:  the first task is ticked, because the program makes i
 ### Lista de tareas:  the same list, in Spanish
 
 [Lista de tareas](spaces/@spell/examples/ListaDeTareas/) is Task List written in Spanish, in spellx too:
-its own `tarea`, in `Tarea.es.spellml`, and the same four places, each a `guardián`.
+its own `tarea`, in `Tarea.es.spell`, and the same four places, each a `guardián`.
 
 ```html
 <encanto-vista "tarea" seleccionable arrastrable>
@@ -598,7 +598,7 @@ _A task, in Spanish:  Task List's task, in Spanish tags._
 - Its tests are the same three, in Spanish:  `spell test @spell/examples/ListaDeTareas` runs them.
 - It draws with Spell UI's Spanish names (`<formulario>`, `<casilla>`, `<pila>`), and its toolbar says "3 pendientes".
 
-<img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spellml on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
+<img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spell on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
 
 _Lista de tareas in the editor:  the same list, its words in Spanish._
 
@@ -648,7 +648,7 @@ a "thumbnail" is a thing:
 
 _From the same file, shortened._
 
-What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spellml), in Spell UI's elements, adding to those types:
+What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spell), in Spell UI's elements, adding to those types:
 `<spell-more-of "character">`.
 So looking at the server again never touches a line of it.
 
@@ -677,12 +677,12 @@ Klondike in five files, written in spellx, as Task List is.
 Its cards, its deck and its piles are its own files, before the game, in its project file's order:
 
 ```json5
-[{ "path": "/Card.spellml" }, { "path": "/Deck.spellml" }, { "path": "/Pile.spellml" }, { "path": "/Solitaire.spellml" }]
+[{ "path": "/Card.spell" }, { "path": "/Deck.spell" }, { "path": "/Pile.spell" }, { "path": "/Solitaire.spell" }]
 ```
 
 _From [its project file](spaces/@spell/examples/Solitaire/__project.json5), shortened:  each file sees the ones before it._
 
-So [Solitaire.spellml](spaces/@spell/examples/Solitaire/Solitaire.spellml) is only the game:
+So [Solitaire.spell](spaces/@spell/examples/Solitaire/Solitaire.spell) is only the game:
 the solitaire itself, how a click or a drag plays a card, and its kinds of pile, each saying what it may take or give up.
 
 ```html
@@ -702,12 +702,12 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
   ([the language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)),
   and a `<spell>` block inside one is plain Spell.
 - `<group>` tags and `##` lines are headings:  for a person to read, which the editor shows in bold.
-- [Card.spellml](spaces/@spell/examples/Solitaire/Card.spellml) says what its suits, ranks and colors are:
+- [Card.spell](spaces/@spell/examples/Solitaire/Card.spell) says what its suits, ranks and colors are:
   `suit = clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.
-- The card is a `two sided view` ([Card.spellml](spaces/@spell/examples/Solitaire/Card.spellml)):
+- The card is a `two sided view` ([Card.spell](spaces/@spell/examples/Solitaire/Card.spell)):
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `<draw "front">` and its `<draw "back">` look like.
-- Its Inspector card is laid out in a file of its own, [Card.editor.spellml](spaces/@spell/examples/Solitaire/Card.editor.spellml):
+- Its Inspector card is laid out in a file of its own, [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell):
   a `<spell-property-editor "card">` of Spell UI's property controls, which the program never compiles.
 - It draws both sides at once, one over the other (its own `<draw>`):
   [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
@@ -738,12 +738,12 @@ The deal is a loop with a pause in it, so you watch it happen:
 	play from the stock
 ```
 
-_From a `<spell>` block in Solitaire.spellml:  plain Spell, in the outline style._
+_From a `<spell>` block in Solitaire.spell:  plain Spell, in the outline style._
 
 - `pause for 50 msec` lets the page draw before the next line runs:  28 cards dealt, 50 ms apart.
 - What a person starts runs one at a time:
   a second Restart during the deal does nothing, so it can't deal on top of the first.
-- A card is in one pile at a time, as [Pile.spellml](spaces/@spell/examples/Solitaire/Pile.spellml) says
+- A card is in one pile at a time, as [Pile.spell](spaces/@spell/examples/Solitaire/Pile.spell) says
   (`a card belongs to one pile`):  adding it to the stock takes it off the pile it was in.
 
 What you see:
@@ -833,7 +833,7 @@ a "square" is a view where:
 	- it "is empty" if its mark is ""
 ```
 
-_The top of [How Tic-Tac-Toe works](spaces/@spell/guides/how-tic-tac-toe-works/HowTicTacToeWorks.spellml):
+_The top of [How Tic-Tac-Toe works](spaces/@spell/guides/how-tic-tac-toe-works/HowTicTacToeWorks.spell):
 the story in comments, the program between them._
 
 A guide is a Spell project like any example, so it runs:

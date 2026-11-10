@@ -15,7 +15,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
  */
 const FILES = [
   {
-    path: "/Game.spellml",
+    path: "/Game.spell",
     contents: [
       '<spell-thing "board" template="list of squares"/>',
       '<spell-app "game">',
@@ -30,7 +30,7 @@ const FILES = [
     ].join("\n")
   },
   {
-    path: "/Square.spellml",
+    path: "/Square.spell",
     contents: [
       '<spell-thing "square">',
       '\t<property "mark">text</>',
@@ -51,9 +51,9 @@ function compiled(writer: P.ProgramWriter, sources = FILES): string {
 
 /** Tic-Tac-Toe's shape:  the square first, then the app looping over its board, the board's type declared below it. */
 const BOARD_BELOW = [
-  { path: "/Square.spellml", contents: FILES[1]!.contents },
+  { path: "/Square.spell", contents: FILES[1]!.contents },
   {
-    path: "/Game.spellml",
+    path: "/Game.spell",
     contents: [
       '<spell-app "game">',
       '\t<property "board">a new board</>',

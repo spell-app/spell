@@ -99,23 +99,23 @@ describe("StaticFiles", () => {
     const files = new StaticFiles(props)
     const list = await files.fetch({
       url: "/api/projects/create/project",
-      contents: { projectId: OWN, filePath: "MyApp.spellml", contents: "the app" }
+      contents: { projectId: OWN, filePath: "MyApp.spell", contents: "the app" }
     })
     expect(list).toEqual([{ path: OWN }])
-    expect(await files.fetch({ url: `/spaces/${OWN}/MyApp.spellml` })).toBe("the app")
-    expect(await files.fetch({ url: `/api/projects/file/${OWN}/MyApp.spellml`, contents: "changed" })).toBe(true)
+    expect(await files.fetch({ url: `/spaces/${OWN}/MyApp.spell` })).toBe("the app")
+    expect(await files.fetch({ url: `/api/projects/file/${OWN}/MyApp.spell`, contents: "changed" })).toBe(true)
 
     // a new visit:  the page reloaded
     const again = new StaticFiles(props)
     expect(await again.fetch({ url: "/api/projects/list/owen@spell" })).toEqual([{ path: OWN }])
     const index = await again.fetch({ url: `/api/projects/index/${OWN}` })
-    expect(Object.keys(index.manifest)).toEqual([`${OWN}/MyApp.spellml`])
-    expect(index.imports).toEqual([{ path: "/MyApp.spellml", active: true, contents: "changed" }])
+    expect(Object.keys(index.manifest)).toEqual([`${OWN}/MyApp.spell`])
+    expect(index.imports).toEqual([{ path: "/MyApp.spell", active: true, contents: "changed" }])
 
     expect(
       await again.fetch({ url: "/api/projects/remove/project", method: "DELETE", contents: { projectId: OWN } })
     ).toEqual([])
-    expect(await props.place.load(EDITS_STORE, `${OWN}/MyApp.spellml`)).toBeUndefined()
+    expect(await props.place.load(EDITS_STORE, `${OWN}/MyApp.spell`)).toBeUndefined()
   })
 
   test("a visitor's own files:  added, renamed in place, removed", async () => {

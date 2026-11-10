@@ -34,7 +34,7 @@ export class ProjectFiles {
   /**
    * Create a new file within the project, and return it.
    * - `filePath` is relative to the project, and may or may not start with `/`.
-   * - It may be in a folder, `Button/Usage.spellml`:  the server makes the folder.
+   * - It may be in a folder, `Button/Usage.spell`:  the server makes the folder.
    * - throws if the file is already there, or the server says no
    */
   async create(
@@ -93,7 +93,7 @@ export class ProjectFiles {
 
   /**
    * Rename an existing file, keeping its place in the project's file order, and return the renamed file.
-   * - It may go to another folder:  the new path says so, `Button/Usage.spellml`.
+   * - It may go to another folder:  the new path says so, `Button/Usage.spell`.
    * - throws if the file isn't there, the new one is, or the server says no
    */
   async rename(filePath: string, newFilePath: string): Promise<SP.AnySpellFile> {

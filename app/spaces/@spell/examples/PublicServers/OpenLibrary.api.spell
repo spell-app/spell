@@ -1,5 +1,5 @@
 ## Open Library:  books by what they're called, who wrote them, and their covers
-// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spell.
 // `open library` is what this wrote, from looking at the server:
 //   spell place ingest https://openlibrary.org --into OpenLibrary.api.spell --name "open library" --no-ai
 //     --collections "books=/search.json?q=dune,authors=/authors/{name}.json,editions=/books/{name}.json"

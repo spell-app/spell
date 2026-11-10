@@ -239,7 +239,7 @@ type TestFile = { path: string; form: "spellx"; contents: string; match: unknown
  */
 async function mounted(options: { width?: number } = {}) {
   const file: TestFile = {
-    path: "/Counter.spellml",
+    path: "/Counter.spell",
     form: "spellx",
     contents: COUNTER,
     match: undefined,
@@ -284,7 +284,7 @@ let appRoot: HTMLElement | undefined
 /** Compile `contents` with its source marks and run it in `appRoot`, as the editor does:  an edit taken as it runs. */
 async function runProgram(contents: string, { afresh = false } = {}) {
   const runtime = await testRuntime()
-  const { code, map } = compiledSpellProject([{ path: "/Counter.spellml", contents }], { sourceMap: true })
+  const { code, map } = compiledSpellProject([{ path: "/Counter.spell", contents }], { sourceMap: true })
   // the core's names it reads, as a project's compile imports them:  on its own first line, so its marks still fit
   const linked = code.replace(
     /^import \{ h \} from "@spell\/core"/,

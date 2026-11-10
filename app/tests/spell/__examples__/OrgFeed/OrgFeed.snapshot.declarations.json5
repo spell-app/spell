@@ -50,7 +50,7 @@
       "property": "weight",
       "of": "Post",
       "datatype": "number",
-      "defined": "/OrgFeed.spellml:469-681"
+      "defined": "/OrgFeed.spell:469-681"
     },
     {
       "syntax": "{operator:is_or_is_not_a} favourite",
@@ -60,7 +60,7 @@
       "kind": "method",
       "name": "\"is a favourite\"",
       "returns": "choice",
-      "defined": "/OrgFeed.spellml:696-738"
+      "defined": "/OrgFeed.spell:696-738"
     },
     {
       "syntax": "{operator:is_or_is_not} ordinary",
@@ -70,7 +70,7 @@
       "kind": "method",
       "name": "\"is ordinary\"",
       "returns": "choice",
-      "defined": "/OrgFeed.spellml:743-782"
+      "defined": "/OrgFeed.spell:743-782"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -83,7 +83,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgFeed.spellml:788-1147"
+      "defined": "/OrgFeed.spell:788-1147"
     },
     {
       "type": "MyFeed",
@@ -101,7 +101,7 @@
     {
       "type": "FeedPage",
       "superType": "App",
-      "defined": "/OrgFeed.spellml:1254-2617"
+      "defined": "/OrgFeed.spell:1254-2617"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -114,7 +114,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgFeed.spellml:1267-2608"
+      "defined": "/OrgFeed.spell:1267-2608"
     }
   ],
   "codeLines": [

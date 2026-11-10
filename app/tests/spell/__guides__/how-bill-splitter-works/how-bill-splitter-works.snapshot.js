@@ -17,7 +17,7 @@ core.heading("Money:  a number written as dollars and cents, e.g. 12.5 => \"$12.
 //////////////////////////////////////////////////////////////////////////
 // ## Money:  a number written as dollars and cents, e.g. 12.5 => "$12.50"
 //////////////////////////////////////////////////////////////////////////
-// The same lines as the example's `Money.spellml`.
+// The same lines as the example's `Money.spell`.
 // - `round` drops anything smaller than a cent.
 // - The last two lines add a 0 when the cents are under ten, so 3.07 doesn't show as $3.7.
 

@@ -1,7 +1,7 @@
 # Bill Splitter
 // Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.
 // Change a name, an amount or the tip, and every sum follows.
-// A diner is this project's own, in `Diner.spellml`, and how money is written is in `Money.spellml`:
+// A diner is this project's own, in `Diner.spell`, and how money is written is in `Money.spell`:
 // this file holds the bill.
 
 ## The bill

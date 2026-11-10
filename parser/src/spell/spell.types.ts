@@ -22,7 +22,7 @@ export type AnySpellFile = SpellFile | SpellJSFile | SpellCSSFile
 export type CompilableSpellFile = SpellFile | SpellCSSFile
 
 /**
- * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellml`).
+ * The FORM a spell file is written in:  plain Spell, or spellx, its tag-shaped form:  both `Card.spell` (`formOfText()`).
  * - Both read by the same rules, to the same program:  see `SP.SpellParser.form`.
  */
 export type SpellForm = "spell" | "spellx"
@@ -751,7 +751,7 @@ export type SpellDeclarationPlace = {
   name: string
   /** The type it's on, by class name:  `Card`.  None for a type or a top-level function. */
   of?: string
-  /** Its file, by its name in the project:  `Solitaire.spellml`. */
+  /** Its file, by its name in the project:  `Solitaire.spell`. */
   path: string
   /** Its first line. */
   line: number

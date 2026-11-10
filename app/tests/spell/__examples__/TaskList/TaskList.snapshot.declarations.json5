@@ -25,19 +25,19 @@
     {
       "type": "Task",
       "superType": "View",
-      "defined": "/Task.spellml:287-1722"
+      "defined": "/Task.spell:287-1722"
     },
     {
       "property": "title",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spellml:329-376"
+      "defined": "/Task.spell:329-376"
     },
     {
       "property": "notes",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spellml:381-440"
+      "defined": "/Task.spell:381-440"
     },
     {
       "property": "priority",
@@ -48,19 +48,19 @@
         "normal",
         "high"
       ],
-      "defined": "/Task.spellml:445-493"
+      "defined": "/Task.spell:445-493"
     },
     {
       "property": "done",
       "of": "Task",
       "datatype": "choice",
-      "defined": "/Task.spellml:499-525"
+      "defined": "/Task.spell:499-525"
     },
     {
       "property": "order",
       "of": "Task",
       "datatype": "number",
-      "defined": "/Task.spellml:530-674"
+      "defined": "/Task.spell:530-674"
     },
     {
       "syntax": "{operator:is_or_is_not} done",
@@ -70,7 +70,7 @@
       "kind": "method",
       "name": "\"is done\"",
       "returns": "choice",
-      "defined": "/Task.spellml:679-714"
+      "defined": "/Task.spell:679-714"
     },
     {
       "syntax": "{operator:is_or_is_not} active",
@@ -80,7 +80,7 @@
       "kind": "method",
       "name": "\"is active\"",
       "returns": "choice",
-      "defined": "/Task.spellml:719-755"
+      "defined": "/Task.spell:719-755"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -94,7 +94,7 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/Task.spellml:760-926"
+      "defined": "/Task.spell:760-926"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -107,7 +107,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Task.spellml:932-1519"
+      "defined": "/Task.spell:932-1519"
     },
     {
       "syntax": "test checking one off",
@@ -116,7 +116,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "checking one off",
-      "defined": "/Task.spellml:1531-1713"
+      "defined": "/Task.spell:1531-1713"
     },
     {
       "type": "TaskKeeper",
@@ -436,7 +436,7 @@
       "type": "Checklist",
       "superType": "ViewableList",
       "itemType": "Task",
-      "defined": "/TaskList.spellml:587-2435"
+      "defined": "/TaskList.spell:587-2435"
     },
     {
       "property": "showing",
@@ -447,7 +447,7 @@
         "active",
         "done"
       ],
-      "defined": "/TaskList.spellml:647-809"
+      "defined": "/TaskList.spell:647-809"
     },
     {
       "syntax": "{operator:is_or_is_not} showing (expression:all|alls|active|actives|done|dones)",
@@ -463,7 +463,7 @@
           "done"
         ]
       },
-      "defined": "/TaskList.spellml:647-809"
+      "defined": "/TaskList.spell:647-809"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -476,7 +476,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spellml:1312-1521"
+      "defined": "/TaskList.spell:1312-1521"
     },
     {
       "syntax": "keep the order (of {thisArg:expression})?",
@@ -490,7 +490,7 @@
       "kind": "method",
       "name": "keep the order",
       "returns": "nothing",
-      "defined": "/TaskList.spellml:1532-1750"
+      "defined": "/TaskList.spell:1532-1750"
     },
     {
       "syntax": "test the filter",
@@ -499,7 +499,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the filter",
-      "defined": "/TaskList.spellml:1764-1996"
+      "defined": "/TaskList.spell:1764-1996"
     },
     {
       "syntax": "test a dragged order is kept",
@@ -508,7 +508,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a dragged order is kept",
-      "defined": "/TaskList.spellml:2007-2426"
+      "defined": "/TaskList.spell:2007-2426"
     },
     {
       "property": "checklist",
@@ -516,31 +516,31 @@
       "group": "The checklist",
       "datatype": "Checklist",
       "exclusive": true,
-      "defined": "/TaskList.spellml:2500-2531"
+      "defined": "/TaskList.spell:2500-2531"
     },
     {
       "type": "TaskList",
       "superType": "App",
-      "defined": "/TaskList.spellml:2643-7979"
+      "defined": "/TaskList.spell:2643-7979"
     },
     {
       "property": "checklist",
       "of": "TaskList",
       "datatype": "Checklist",
-      "defined": "/TaskList.spellml:2656-2693"
+      "defined": "/TaskList.spell:2656-2693"
     },
     {
       "property": "draft",
       "of": "TaskList",
       "datatype": "text",
-      "defined": "/TaskList.spellml:2698-2790"
+      "defined": "/TaskList.spell:2698-2790"
     },
     {
       "property": "active_count",
       "asWritten": "active count",
       "of": "TaskList",
       "datatype": "number",
-      "defined": "/TaskList.spellml:2795-2877"
+      "defined": "/TaskList.spell:2795-2877"
     },
     {
       "property": "storage",
@@ -554,14 +554,14 @@
         "csv",
         "atmosphere"
       ],
-      "defined": "/TaskList.spellml:2991-3053"
+      "defined": "/TaskList.spell:2991-3053"
     },
     {
       "property": "keeper",
       "of": "TaskList",
       "group": "keeping",
       "datatype": "TaskKeeper",
-      "defined": "/TaskList.spellml:3193-3316"
+      "defined": "/TaskList.spell:3193-3316"
     },
     {
       "syntax": "fill the checklist (of {thisArg:expression})?",
@@ -577,7 +577,7 @@
       "name": "fill the checklist",
       "returns": "nothing",
       "waits": true,
-      "defined": "/TaskList.spellml:3652-4274"
+      "defined": "/TaskList.spell:3652-4274"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -592,7 +592,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/TaskList.spellml:4288-4524"
+      "defined": "/TaskList.spell:4288-4524"
     },
     {
       "syntax": "add the starting task {callArgs:expression} with priority {callArgs:expression} (of {thisArg:expression})?",
@@ -617,7 +617,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/TaskList.spellml:4538-4792"
+      "defined": "/TaskList.spell:4538-4792"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -632,7 +632,7 @@
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/TaskList.spellml:4806-5160"
+      "defined": "/TaskList.spell:4806-5160"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -647,7 +647,7 @@
       "groupDescription": "The toolbar's buttons, and the list's right click:  the same actions",
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spellml:6521-7970"
+      "defined": "/TaskList.spell:6521-7970"
     },
     {
       "syntax": "show all (of {thisArg:expression})?",
@@ -664,7 +664,7 @@
       "name": "show all",
       "returns": "nothing",
       "title": "All",
-      "defined": "/TaskList.spellml:5275-5402"
+      "defined": "/TaskList.spell:5275-5402"
     },
     {
       "syntax": "show to do (of {thisArg:expression})?",
@@ -680,7 +680,7 @@
       "name": "show to do",
       "returns": "nothing",
       "title": "To do",
-      "defined": "/TaskList.spellml:5407-5554"
+      "defined": "/TaskList.spell:5407-5554"
     },
     {
       "syntax": "show done (of {thisArg:expression})?",
@@ -696,7 +696,7 @@
       "name": "show done",
       "returns": "nothing",
       "title": "Done",
-      "defined": "/TaskList.spellml:5559-5706"
+      "defined": "/TaskList.spell:5559-5706"
     },
     {
       "syntax": "remove the done tasks (of {thisArg:expression})?",
@@ -712,7 +712,7 @@
       "name": "remove the done tasks",
       "returns": "nothing",
       "title": "Remove the done tasks",
-      "defined": "/TaskList.spellml:5711-5921"
+      "defined": "/TaskList.spell:5711-5921"
     }
   ],
   "codeLines": [

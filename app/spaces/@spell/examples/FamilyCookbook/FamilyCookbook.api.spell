@@ -1,7 +1,7 @@
 ## Family Cookbook:  your recipes, saved in the cloud
 // The next line keeps them in your own space on Spell's server:  sign in on any device, and they're there.
 // Until you sign in, they're kept in this browser, and the page says so;  once you do, they go up.
-// What's drawn and done with them is in FamilyCookbook.spellml.
+// What's drawn and done with them is in FamilyCookbook.spell.
 family cookbook is saved in the cloud
 
 a "recipe" is a thing:

@@ -26,7 +26,8 @@ describe("ui_defaults", () => {
   })
 
   test("a Spanish block, in Spell UI's Spanish words, compiles to its English ones", () => {
-    // a spellml file reads a tag of any letters, `<botón>`;  code spell's markup, ASCII ones
+    // a tag-shaped file reads a tag of any letters, `<botón>`;  plain Spell's markup, ASCII ones
+    // - a file holding only this block is plain (`SP.formOfText()`), so the old ending keeps it tag-shaped here
     for (const [path, tag] of [
       ["/Tema.es.spell", "es-boton"],
       ["/Tema.es.spellml", "botón"],
@@ -43,11 +44,11 @@ describe("ui_defaults", () => {
 
   test("a block at a spellml file's top level is markup, as in code spell", () => {
     const { code, errors } = compiled(
-      "/Theme.spellml",
+      "/Theme.spell",
       ["<ui-defaults>", '\t<ui-button appearance="pill"/>', "</ui-defaults>"].join("\n")
     )
     expect(errors).toEqual([])
-    expect(code).toContain('core.useDefaults("/Theme.spellml"')
+    expect(code).toContain('core.useDefaults("/Theme.spell"')
   })
 
   test("an unknown widget, attribute or value, or a content attribute, is an error naming what it takes", () => {

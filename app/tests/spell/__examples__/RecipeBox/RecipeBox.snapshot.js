@@ -93,7 +93,7 @@ export class Recipe extends Thing {
  * family cookbook is a spreadsheet at "recipes.xlsx"
  * family cookbook is an excel file at "recipes.xlsx"
  * (the workbook beside this file, read only:  a spreadsheet reads Excel by the ".xlsx" ending, an excel file whatever it ends in)
- * What's drawn and done with them is in RecipeBox.spellml.
+ * What's drawn and done with them is in RecipeBox.spell.
  */
 export class FamilyCookbook extends Place {}
 export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "database on this device" })
@@ -168,7 +168,7 @@ export class RecipeEditor extends View {
   }
 }
 
-core.useDefaults("/RecipeBox.spellml", {
+core.useDefaults("/RecipeBox.spell", {
   "ui-textarea": { grow: true }
 })
 
@@ -222,7 +222,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spellml", start: 3402, end: 3568 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3402, end: 3568 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search)), (item) => core.descending(item.created))
   }, () => [this.search]) }

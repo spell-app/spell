@@ -132,7 +132,7 @@ describe("menus of menus", () => {
 
   test("spellx:  a <menu> inside a <menu>, title=, for-each= and action=", () => {
     const { code, errors } = compiled(
-      "/Editor.spellml",
+      "/Editor.spell",
       [
         '<spell-app "editor">',
         "\t<spell>",

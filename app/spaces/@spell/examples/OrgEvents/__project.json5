@@ -5,7 +5,7 @@
     "path": "/OrgEvents.api.spell",
     "active": true
   }, {
-    "path": "/OrgEvents.spellml",
+    "path": "/OrgEvents.spell",
     "active": true
   }, {
     "path": "/OrgEvents.css",

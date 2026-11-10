@@ -57,9 +57,9 @@ describe("SpellDeclarations, inline", () => {
   test("reads a class member's comment, indented in its class's body", () => {
     expect(compiled).toMatch(/\n {2}\/\*! SPELL: DECLARES \{\n {4}property: "rank", [^\n]*of: "Card"/)
     expect(declarations.statements).toContainEqual(expect.objectContaining({ property: "rank", of: "Card" }))
-    // ...and one from another file, `Pile.spellml`'s `a card belongs to one pile`, which went in `Card.spellml`'s class
+    // ...and one from another file, `Pile.spell`'s `a card belongs to one pile`, which went in `Card.spell`'s class
     const pile = declarations.statements.find(({ property, of }) => property === "pile" && of === "Card")
-    expect(pile).toMatchObject({ exclusive: true, defined: expect.stringMatching(/^\/Pile\.spellml:/) })
+    expect(pile).toMatchObject({ exclusive: true, defined: expect.stringMatching(/^\/Pile\.spell:/) })
   })
 
   test("reads the way it's written, e.g. a function", () => {
@@ -100,7 +100,7 @@ describe("SpellDeclarations, inline", () => {
   })
 
   /**
-   * The Solitaire spell a statement's `defined` points to, e.g. `/Card.spellml:312-365` => `<property "rank" ...`.
+   * The Solitaire spell a statement's `defined` points to, e.g. `/Card.spell:312-365` => `<property "rank" ...`.
    * - So a test reads the example as it is now, not as it was when the test was written.
    */
   function spellOf(defined: string) {
@@ -111,14 +111,14 @@ describe("SpellDeclarations, inline", () => {
 
 /**
  * `SpellDeclarations.importScope()` -- a project parses against another's declarations, NOT its sources.
- * - Solitaire split in two:  a library (`Card`, `Deck`, `Pile`, the card library's) and an app (`Solitaire.spellml`).
+ * - Solitaire split in two:  a library (`Card`, `Deck`, `Pile`, the card library's) and an app (`Solitaire.spell`).
  *   - All spellx:  a library written in tags, imported by its declarations as a code-spell one is.
  * - A method with typed parameters:  `PILES`, a library of its own, as the card library has none.
  */
 describe("SpellDeclarations.importScope()", () => {
   const all = loadFixtureProject("@spell/examples/Solitaire")
-  const library = all.filter(({ path }) => path !== "/Solitaire.spellml")
-  const app = all.filter(({ path }) => path === "/Solitaire.spellml")
+  const library = all.filter(({ path }) => path !== "/Solitaire.spell")
+  const app = all.filter(({ path }) => path === "/Solitaire.spell")
   // read back out of compiled text, as another project would
   const declarations = compiledSpellProject(library, { version: "1.2.0" }).declarations
   const from = "@spell/library/cards"
@@ -146,7 +146,7 @@ describe("SpellDeclarations.importScope()", () => {
   }
 
   test("the app compiles the same against the library's declarations as against its sources", () => {
-    const fromSources = summarize(parseSpellProject(all)).filter(({ path }) => path === "/Solitaire.spellml")
+    const fromSources = summarize(parseSpellProject(all)).filter(({ path }) => path === "/Solitaire.spell")
     const fromDeclarations = summarize(parseSpellProject(app, { parentScope: importLibrary() }))
     // The same:  were a member read its type never declares, it'd warn only where the type is the project's own,
     // never an import's -- the importer may give it anything (see `MemberReadExpression.warnIfUndeclared()`).
@@ -167,7 +167,7 @@ describe("SpellDeclarations.importScope()", () => {
 
     test("a type, its properties and constants:  `declaredAt` -- in the project's own files", () => {
       const card = imports.types.get("Card", "LOCAL_ONLY")!
-      expect(card.declaredAt?.path).toBe(`${projectId}/Card.spellml`)
+      expect(card.declaredAt?.path).toBe(`${projectId}/Card.spell`)
       expect(sourceAt(card.declaredAt)).toMatch(/^<spell-view "card" template="two sided view" draggable>\n/)
       // its suit, its list of suits and each suit:  all made by one statement, its tag
       const suits = /^<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a \(suit\)"\s*\/?>?$/
@@ -202,7 +202,7 @@ describe("SpellDeclarations.importScope()", () => {
     })
 
     test("`declaredAt` defaults to `from`, if the importer doesn't say its project", () => {
-      expect(importLibrary().types.get("Card", "LOCAL_ONLY")?.declaredAt?.path).toBe(`${from}/Card.spellml`)
+      expect(importLibrary().types.get("Card", "LOCAL_ONLY")?.declaredAt?.path).toBe(`${from}/Card.spell`)
     })
 
     /** Library source `at` points to. */

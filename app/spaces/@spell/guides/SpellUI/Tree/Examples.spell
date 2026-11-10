@@ -16,8 +16,8 @@
 			<example "Rows in rows" description="Each row's rows are its children.  The triangle opens and closes a row, with `open`, `ui-opening` and `ui-closing`.">
 				<tree label="Files" style="width: 18em">
 					<tree-item label="src" icon="folder" open>
-						<tree-item label="Card.spellml" icon="file code" selected/>
-						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="Card.spell" icon="file code" selected/>
+						<tree-item label="Deck.spell" icon="file code"/>
 						<tree-item label="styles" icon="folder">
 							<tree-item label="card.css" icon="file code"/>
 						</tree-item>
@@ -31,8 +31,8 @@
 			<example "Many selected" description="With `choose=\"many\"`, Shift takes a range of the rows on screen, and Command or Control adds a row or takes it away.">
 				<tree choose="many" label="Files" style="width: 18em">
 					<tree-item label="src" icon="folder" open>
-						<tree-item label="Card.spellml" icon="file code" selected/>
-						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="Card.spell" icon="file code" selected/>
+						<tree-item label="Deck.spell" icon="file code"/>
 						<tree-item label="styles" icon="folder">
 							<tree-item label="card.css" icon="file code"/>
 						</tree-item>
@@ -72,8 +72,8 @@
 			<example "Filtered" description="`filter` shows only the rows whose words hold it, with the rows they're inside kept open.  It changes no row's `open`.">
 				<tree filter="card" label="Files" style="width: 18em">
 					<tree-item label="src" icon="folder" open>
-						<tree-item label="Card.spellml" icon="file code" selected/>
-						<tree-item label="Deck.spellml" icon="file code"/>
+						<tree-item label="Card.spell" icon="file code" selected/>
+						<tree-item label="Deck.spell" icon="file code"/>
 						<tree-item label="styles" icon="folder">
 							<tree-item label="card.css" icon="file code"/>
 						</tree-item>

@@ -36,7 +36,7 @@ beforeEach(() => {
   project = join(folder, "OldSite")
   mkdirSync(project)
   writeFileSync(join(project, "__project.json5"), "{}\n")
-  writeFileSync(join(project, "Old.spellml"), SITE)
+  writeFileSync(join(project, "Old.spell"), SITE)
   vi.stubEnv("SPELL_PLACE_SESSIONS_DIR", join(folder, "sessions"))
   vi.spyOn(CLI, "out").mockImplementation(() => undefined)
 })
@@ -46,7 +46,7 @@ afterEach(() => {
   rmSync(folder, { recursive: true, force: true })
 })
 
-const siteText = () => readFileSync(join(project, "Old.spellml"), "utf8")
+const siteText = () => readFileSync(join(project, "Old.spell"), "utf8")
 
 describe("what a Save does", () => {
   test("a page picked by its name or its only title", () => {

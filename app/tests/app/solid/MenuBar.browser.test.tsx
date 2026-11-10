@@ -22,7 +22,7 @@ afterEach(() => {
 describe("<AppBarMenus>", () => {
   test("File · Edit · View · Run · Help, each a button;  File's items, their keys from EDITOR_HOTKEYS", async () => {
     const host = await mount(() => <AppBarMenus mode="edit" />)
-    // the bar is Spell's, AppMenus.spellml's bar menu:  loaded a moment after the page, Help after it
+    // the bar is Spell's, AppMenus.spell's bar menu:  loaded a moment after the page, Help after it
     const names = () =>
       [...host.querySelectorAll(".AppBarMenus ui-item.BarMenu")].map((item) => item.textContent?.trim())
     await waitForCondition(() => names().length === 5)

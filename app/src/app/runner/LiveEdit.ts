@@ -43,7 +43,7 @@ export class LiveEdit {
   /** The parts of drawings that changed, each drawn again alone (`core.drawPart()`), not its whole type. */
   readonly parts: readonly PartEdit[] = []
 
-  /** Where each drawn element is written now, by where it was:  `Card.spellml:12:4`. */
+  /** Where each drawn element is written now, by where it was:  `Card.spell:12:4`. */
   readonly places: ReadonlyMap<string, string> = new Map()
 
   private constructor(props: Partial<LiveEdit> & { kind: LiveEditKind }) {

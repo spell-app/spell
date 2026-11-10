@@ -41,7 +41,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PicnicLetter.spellml:249-298"
+      "defined": "/PicnicLetter.spell:249-298"
     },
     {
       "type": "Message",
@@ -76,7 +76,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PicnicLetter.spellml:399-445"
+      "defined": "/PicnicLetter.spell:399-445"
     },
     {
       "type": "PublishedSheet",
@@ -112,19 +112,19 @@
     {
       "type": "PicnicLetter",
       "superType": "App",
-      "defined": "/PicnicLetter.spellml:501-1972"
+      "defined": "/PicnicLetter.spell:501-1972"
     },
     {
       "property": "shifts",
       "of": "PicnicLetter",
       "datatype": "list of listings",
-      "defined": "/PicnicLetter.spellml:518-575"
+      "defined": "/PicnicLetter.spell:518-575"
     },
     {
       "property": "counts",
       "of": "PicnicLetter",
       "datatype": "list of messages",
-      "defined": "/PicnicLetter.spellml:580-646"
+      "defined": "/PicnicLetter.spell:580-646"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -137,7 +137,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PicnicLetter.spellml:652-1963"
+      "defined": "/PicnicLetter.spell:652-1963"
     }
   ],
   "codeLines": [

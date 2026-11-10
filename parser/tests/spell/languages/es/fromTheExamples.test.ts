@@ -134,7 +134,7 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
       "\t</dibujar>",
       "</encanto-vista>"
     ]
-    const codeSpell = SX.CodeSpellWriter.write(spellml.join("\n"), { path: "/prueba.es.spellml" })
+    const codeSpell = SX.CodeSpellWriter.write(spellml.join("\n"), { path: "/prueba.es.spell" })
     expect(codeSpell).toContain("- para dibujar eso:")
     const written = compiledText(codeSpell.split("\n"), { path: "/prueba.es.spell" })
     expect(written.errors).toEqual([])
@@ -181,7 +181,7 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
 })
 
 /** `lines`, one file of its own project, compiled:  its code, its TypeScript and its parse errors. */
-function compiledText(lines: string[], { path = "/prueba.es.spellml" } = {}) {
+function compiledText(lines: string[], { path = "/prueba.es.spell" } = {}) {
   const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
   const ts = file!.scope.parser!.inPlay(() => (P.TSWriter.instance.writeMatch(file!.match) as string | undefined) ?? "")
   return { code: file!.compiled, ts, errors: file!.errors }

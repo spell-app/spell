@@ -188,14 +188,14 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await page.locator(".InspectAppButton [part~=item]").first().click()
     await page.waitForTimeout(500)
     await noteTheGame()
-    const before = await textOf("Solitaire.spellml")
+    const before = await textOf("Solitaire.spell")
     await page.locator("#AddPartButton").click()
     await page.waitForTimeout(800)
     const row = await page.locator('.PalettePopup ui-tree-item[label="Button"]').first().boundingBox()
     // just above the board's first pile
     const stock = await page.locator(".AppPaneBody solitaire-stock-pile").first().boundingBox()
     await drag(row!.x + 40, row!.y + 10, stock!.x + 40, stock!.y - 4)
-    const after = await textOf("Solitaire.spellml")
+    const after = await textOf("Solitaire.spell")
     expect(after).not.toBe(before)
     await expectGameKept()
     expect(await page.locator(".AppPaneBody ui-button").count()).toBeGreaterThan(0)
@@ -227,7 +227,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
 
   test("a drawing changed in the code draws again, on the same elements", async () => {
     await noteTheGame()
-    await edit("Card.spellml", '<text color="blue">', '<text color="red">')
+    await edit("Card.spell", '<text color="blue">', '<text color="red">')
     await expectGameKept()
     const backs = await page.evaluate(() => {
       const card = document.querySelector(".AppPaneBody solitaire-stock-pile solitaire-card")!
@@ -247,7 +247,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       const card = document.querySelector(".AppPaneBody solitaire-stock-pile solitaire-card")!
       ;(window as unknown as { inner: unknown }).inner = card.shadowRoot!.querySelector("[color]")
     })
-    await edit("Solitaire.spellml", "pause for 300 msec", "pause for 200 msec")
+    await edit("Solitaire.spell", "pause for 300 msec", "pause for 200 msec")
     await expectGameKept()
     const isSame = await page.evaluate(() => {
       const card = document.querySelector(".AppPaneBody solitaire-stock-pile solitaire-card")!
@@ -265,14 +265,14 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
 
   test("a new type is taken as it runs;  taking it out says it takes effect on restart, the game going on till then", async () => {
     await noteTheGame()
-    const before = await textOf("Pile.spellml")
+    const before = await textOf("Pile.spell")
     // added:  nothing running can be one of it, so the run goes on (epic `mockup` P4, J15)
-    await edit("Pile.spellml", /$/, '\n<spell-view "extra part"></spell-view>\n')
+    await edit("Pile.spell", /$/, '\n<spell-view "extra part"></spell-view>\n')
     await page.waitForTimeout(SETTLE_MS)
     expect(await page.locator(".RestartNeeded ui-message").count()).toBe(0)
     await expectGameKept()
     // taken out again:  a type gone waits for Restart
-    await edit("Pile.spellml", /[^]*/, before)
+    await edit("Pile.spell", /[^]*/, before)
     await page.waitForSelector(".RestartNeeded ui-message", { timeout: 10_000 })
     await expectGameKept()
     await page.locator(".RestartNeeded ui-button").click()

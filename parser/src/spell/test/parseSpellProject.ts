@@ -152,7 +152,7 @@ export function incrementalSpellProject(files: SpellSourceFile[], keepLastGood =
   return new P.IncrementalProject({
     scope,
     keepLastGood,
-    files: files.map(({ path, contents }) => ({ path, text: contents, parser: parserFor(scope, path) }))
+    files: files.map(({ path, contents }) => ({ path, text: contents, parser: parserFor(scope, path, contents) }))
   })
 }
 

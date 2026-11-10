@@ -244,7 +244,7 @@ export async function getFolderContents(path: string, options: GetFolderContents
 
 /**
  * Every file inside the folder at server `path`, sub-folders too, each as its path from `path`:
- * `Usage.spellml`, `Button/Usage.spellml`.
+ * `Usage.spell`, `Button/Usage.spell`.
  * - `/`-separated on every platform:  these become parts of a project's addresses.
  * - A folder's own files come first, then each of its sub-folders' in turn, each level sorted as `getFolderContents()` does.
  * - Leaves out hidden files and folders, at every level, and any folder `ignoreFolder` turns down.

@@ -227,7 +227,7 @@ describe("Spell's cloud", () => {
         "/apps/ana@spell/Mine",
         "/spaces/@rs/__admin/roster.json5",
         "/spaces/@rs/__private/Notes/__project.json5",
-        "/spaces/@rs/OrgAdmin/__draft/ana/OrgAdmin.spellml",
+        "/spaces/@rs/OrgAdmin/__draft/ana/OrgAdmin.spell",
         "/spaces/@rs/OrgAdmin/%2e%2e/__admin/roster.json5",
         "/spaces/@rs/OrgAdmin/.hidden"
       ]) {

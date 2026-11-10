@@ -1787,7 +1787,7 @@ function lastSelectionForFile(filePath: string, selection?: UIT.EditorSelection)
 
 /** The place in the program in focus -- see `editor.followed`. */
 export type FollowedPlace = {
-  /** Its file, by its name in the project, as a source map says it, e.g. `Card.spellml` */
+  /** Its file, by its name in the project, as a source map says it, e.g. `Card.spell` */
   path: string
   /** Its line, from 0 */
   line: number

@@ -196,32 +196,32 @@
       "property": "picture",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:210-361"
+      "defined": "/Pokemon.spell:210-361"
     },
     {
       "property": "sound",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:376-478"
+      "defined": "/Pokemon.spell:376-478"
     },
     {
       "property": "number_tag",
       "asWritten": "number tag",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:493-760"
+      "defined": "/Pokemon.spell:493-760"
     },
     {
       "property": "evolutions",
       "of": "Pokemon",
       "datatype": "Chain",
-      "defined": "/Pokemon.spellml:775-927"
+      "defined": "/Pokemon.spell:775-927"
     },
     {
       "property": "loved",
       "of": "Pokemon",
       "datatype": "choice",
-      "defined": "/Pokemon.spellml:942-1087"
+      "defined": "/Pokemon.spell:942-1087"
     },
     {
       "syntax": "open {thisArg:expression}",
@@ -236,7 +236,7 @@
       "name": "open it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spellml:1103-1525"
+      "defined": "/Pokemon.spell:1103-1525"
     },
     {
       "syntax": "hear {thisArg:expression}",
@@ -250,7 +250,7 @@
       "kind": "method",
       "name": "hear it",
       "returns": "nothing",
-      "defined": "/Pokemon.spellml:1539-1667"
+      "defined": "/Pokemon.spell:1539-1667"
     },
     {
       "syntax": "love {thisArg:expression}",
@@ -265,7 +265,7 @@
       "name": "love it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spellml:1681-1985"
+      "defined": "/Pokemon.spell:1681-1985"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -278,7 +278,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:1999-2354"
+      "defined": "/Pokemon.spell:1999-2354"
     },
     {
       "type": "PokemonSpecies",
@@ -470,7 +470,7 @@
       "property": "pokemon",
       "of": "PokemonSpecies",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spellml:8110-8246"
+      "defined": "/Pokemon.spell:8110-8246"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -483,7 +483,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:8261-8303"
+      "defined": "/Pokemon.spell:8261-8303"
     },
     {
       "type": "Type",
@@ -567,13 +567,13 @@
       "kind": "method",
       "name": "\"is real\"",
       "returns": "choice",
-      "defined": "/Pokemon.spellml:5542-5717"
+      "defined": "/Pokemon.spell:5542-5717"
     },
     {
       "property": "colour",
       "of": "Type",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:5730-6436"
+      "defined": "/Pokemon.spell:5730-6436"
     },
     {
       "syntax": "pick {thisArg:expression}",
@@ -588,7 +588,7 @@
       "name": "pick it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spellml:6452-6592"
+      "defined": "/Pokemon.spell:6452-6592"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -601,7 +601,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:6606-6795"
+      "defined": "/Pokemon.spell:6606-6795"
     },
     {
       "type": "Ability",
@@ -1242,7 +1242,7 @@
       "property": "word",
       "of": "Stat",
       "datatype": "text",
-      "defined": "/Pokemon.spellml:5059-5439"
+      "defined": "/Pokemon.spell:5059-5439"
     },
     {
       "type": "PastStat",
@@ -1289,7 +1289,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:6918-7028"
+      "defined": "/Pokemon.spell:6918-7028"
     },
     {
       "type": "PokedexNumber",
@@ -1483,7 +1483,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:7124-7149"
+      "defined": "/Pokemon.spell:7124-7149"
     },
     {
       "type": "EffectEntry",
@@ -1716,7 +1716,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:7547-7902"
+      "defined": "/Pokemon.spell:7547-7902"
     },
     {
       "type": "PokeApiName",
@@ -1796,7 +1796,7 @@
       "property": "pokemon",
       "of": "Favourite",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spellml:8428-8483"
+      "defined": "/Pokemon.spell:8428-8483"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1809,7 +1809,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spellml:8496-8521"
+      "defined": "/Pokemon.spell:8496-8521"
     },
     {
       "type": "MyFavourite",
@@ -1823,44 +1823,44 @@
     {
       "type": "Guess",
       "superType": "Thing",
-      "defined": "/WhosThat.spellml:198-2144"
+      "defined": "/WhosThat.spell:198-2144"
     },
     {
       "property": "hiding",
       "of": "Guess",
       "datatype": "Pokemon",
-      "defined": "/WhosThat.spellml:233-258"
+      "defined": "/WhosThat.spell:233-258"
     },
     {
       "property": "choices",
       "of": "Guess",
       "datatype": "list of pokemon",
-      "defined": "/WhosThat.spellml:263-301"
+      "defined": "/WhosThat.spell:263-301"
     },
     {
       "property": "guessed",
       "of": "Guess",
       "datatype": "Pokemon",
-      "defined": "/WhosThat.spellml:306-332"
+      "defined": "/WhosThat.spell:306-332"
     },
     {
       "property": "found_out",
       "asWritten": "found out",
       "of": "Guess",
       "datatype": "choice",
-      "defined": "/WhosThat.spellml:345-393"
+      "defined": "/WhosThat.spell:345-393"
     },
     {
       "property": "right",
       "of": "Guess",
       "datatype": "choice",
-      "defined": "/WhosThat.spellml:406-449"
+      "defined": "/WhosThat.spell:406-449"
     },
     {
       "property": "look",
       "of": "Guess",
       "datatype": "text",
-      "defined": "/WhosThat.spellml:462-591"
+      "defined": "/WhosThat.spell:462-591"
     },
     {
       "syntax": "play again (of {thisArg:expression})?",
@@ -1875,7 +1875,7 @@
       "name": "play again",
       "returns": "nothing",
       "waits": true,
-      "defined": "/WhosThat.spellml:607-879"
+      "defined": "/WhosThat.spell:607-879"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1888,7 +1888,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/WhosThat.spellml:893-1326"
+      "defined": "/WhosThat.spell:893-1326"
     },
     {
       "uiDefaults": {
@@ -1896,49 +1896,49 @@
           "appearance": "pill"
         }
       },
-      "defined": "/PokeSpell.spellml:397-457"
+      "defined": "/PokeSpell.spell:397-457"
     },
     {
       "type": "Pokedex",
       "superType": "App",
-      "defined": "/PokeSpell.spellml:471-4183"
+      "defined": "/PokeSpell.spell:471-4183"
     },
     {
       "property": "tab",
       "of": "Pokedex",
       "datatype": "text",
-      "defined": "/PokeSpell.spellml:494-511"
+      "defined": "/PokeSpell.spell:494-511"
     },
     {
       "property": "search",
       "of": "Pokedex",
       "datatype": "text",
-      "defined": "/PokeSpell.spellml:516-536"
+      "defined": "/PokeSpell.spell:516-536"
     },
     {
       "property": "showing",
       "of": "Pokedex",
       "datatype": "Pokemon",
-      "defined": "/PokeSpell.spellml:541-567"
+      "defined": "/PokeSpell.spell:541-567"
     },
     {
       "property": "trail",
       "of": "Pokedex",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.spellml:572-608"
+      "defined": "/PokeSpell.spell:572-608"
     },
     {
       "property": "picked_kind",
       "asWritten": "picked kind",
       "of": "Pokedex",
       "datatype": "Type",
-      "defined": "/PokeSpell.spellml:613-640"
+      "defined": "/PokeSpell.spell:613-640"
     },
     {
       "property": "game",
       "of": "Pokedex",
       "datatype": "Guess",
-      "defined": "/PokeSpell.spellml:645-670"
+      "defined": "/PokeSpell.spell:645-670"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -1952,7 +1952,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/PokeSpell.spellml:675-741"
+      "defined": "/PokeSpell.spell:675-741"
     },
     {
       "syntax": "go to {callArgs:expression} (of {thisArg:expression})?",
@@ -1973,7 +1973,7 @@
       ],
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spellml:754-899"
+      "defined": "/PokeSpell.spell:754-899"
     },
     {
       "syntax": "go back (of {thisArg:expression})?",
@@ -1988,7 +1988,7 @@
       "name": "go back",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spellml:913-1099"
+      "defined": "/PokeSpell.spell:913-1099"
     },
     {
       "syntax": "surprise me (of {thisArg:expression})?",
@@ -2003,20 +2003,20 @@
       "name": "surprise me",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spellml:1113-1213"
+      "defined": "/PokeSpell.spell:1113-1213"
     },
     {
       "property": "kinds_to_pick",
       "asWritten": "kinds to pick",
       "of": "Pokedex",
       "datatype": "list of types",
-      "defined": "/PokeSpell.spellml:1227-1280"
+      "defined": "/PokeSpell.spell:1227-1280"
     },
     {
       "property": "found",
       "of": "Pokedex",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.spellml:1294-1490"
+      "defined": "/PokeSpell.spell:1294-1490"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2029,7 +2029,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PokeSpell.spellml:1506-2729"
+      "defined": "/PokeSpell.spell:1506-2729"
     }
   ],
   "codeLines": [

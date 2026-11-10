@@ -10,13 +10,13 @@
     {
       "type": "Square",
       "superType": "Thing",
-      "defined": "/Square.spellml:70-548"
+      "defined": "/Square.spell:70-548"
     },
     {
       "property": "mark",
       "of": "Square",
       "datatype": "text",
-      "defined": "/Square.spellml:94-173"
+      "defined": "/Square.spell:94-173"
     },
     {
       "syntax": "{operator:is_or_is_not} empty",
@@ -26,19 +26,19 @@
       "kind": "method",
       "name": "\"is empty\"",
       "returns": "choice",
-      "defined": "/Square.spellml:178-213"
+      "defined": "/Square.spell:178-213"
     },
     {
       "property": "color",
       "of": "Square",
       "datatype": "text",
-      "defined": "/Square.spellml:218-357"
+      "defined": "/Square.spell:218-357"
     },
     {
       "property": "label",
       "of": "Square",
       "datatype": "text",
-      "defined": "/Square.spellml:372-535"
+      "defined": "/Square.spell:372-535"
     },
     {
       "syntax": "play {thisArg:expression}",
@@ -52,13 +52,13 @@
       "kind": "method",
       "name": "play it",
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:3260-3581"
+      "defined": "/TicTacToe.spell:3260-3581"
     },
     {
       "type": "Board",
       "superType": "List",
       "itemType": "Square",
-      "defined": "/TicTacToe.spellml:2760-3076"
+      "defined": "/TicTacToe.spell:2760-3076"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -71,30 +71,30 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/TicTacToe.spellml:2810-3067"
+      "defined": "/TicTacToe.spell:2810-3067"
     },
     {
       "type": "TicTacToe",
       "superType": "App",
-      "defined": "/TicTacToe.spellml:315-2574"
+      "defined": "/TicTacToe.spell:315-2574"
     },
     {
       "property": "board",
       "of": "TicTacToe",
       "datatype": "Board",
-      "defined": "/TicTacToe.spellml:330-359"
+      "defined": "/TicTacToe.spell:330-359"
     },
     {
       "property": "turn",
       "of": "TicTacToe",
       "datatype": "text",
-      "defined": "/TicTacToe.spellml:364-425"
+      "defined": "/TicTacToe.spell:364-425"
     },
     {
       "property": "winner",
       "of": "TicTacToe",
       "datatype": "text",
-      "defined": "/TicTacToe.spellml:430-534"
+      "defined": "/TicTacToe.spell:430-534"
     },
     {
       "syntax": "{operator:is_or_is_not} over",
@@ -104,13 +104,13 @@
       "kind": "method",
       "name": "\"is over\"",
       "returns": "choice",
-      "defined": "/TicTacToe.spellml:539-579"
+      "defined": "/TicTacToe.spell:539-579"
     },
     {
       "property": "message",
       "of": "TicTacToe",
       "datatype": "text",
-      "defined": "/TicTacToe.spellml:584-768"
+      "defined": "/TicTacToe.spell:584-768"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -124,7 +124,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:784-988"
+      "defined": "/TicTacToe.spell:784-988"
     },
     {
       "syntax": "check the line from square {callArgs:expression} through {callArgs:expression} to {callArgs:expression} (of {thisArg:expression})?",
@@ -153,7 +153,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:1266-1549"
+      "defined": "/TicTacToe.spell:1266-1549"
     },
     {
       "syntax": "check for a winner (of {thisArg:expression})?",
@@ -168,7 +168,7 @@
       "kind": "method",
       "name": "check for a winner",
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:1561-2168"
+      "defined": "/TicTacToe.spell:1561-2168"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -182,7 +182,7 @@
       "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/TicTacToe.spellml:2182-2565"
+      "defined": "/TicTacToe.spell:2182-2565"
     },
     {
       "syntax": "start a new game (of {thisArg:expression})?",
@@ -197,7 +197,7 @@
       "kind": "method",
       "name": "start a new game",
       "returns": "nothing",
-      "defined": "/TicTacToe.spellml:1022-1196"
+      "defined": "/TicTacToe.spell:1022-1196"
     },
     {
       "property": "board",
@@ -205,7 +205,7 @@
       "group": "Playing a square",
       "datatype": "Board",
       "exclusive": true,
-      "defined": "/TicTacToe.spellml:3649-3678"
+      "defined": "/TicTacToe.spell:3649-3678"
     },
     {
       "syntax": "test three in a row",
@@ -214,7 +214,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "three in a row",
-      "defined": "/TicTacToe.spellml:3739-4139"
+      "defined": "/TicTacToe.spell:3739-4139"
     }
   ],
   "codeLines": [

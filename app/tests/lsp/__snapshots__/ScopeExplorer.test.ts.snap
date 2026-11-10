@@ -123,20 +123,20 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
   type Site (is a App)
     property current address (text)
   project Solitaire
-    file Card.spellml
+    file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
-    file Jokers.spellml
+    file Jokers.spell
       type Joker (is a Card)
       function test jokers
-    file Deck.spellml
+    file Deck.spell
       type Deck (is a List)
       function test a new deck
       function test two jokers
-    file Pile.spellml
+    file Pile.spell
       type Pile (is a ViewableList)
       function test piles
-    file Solitaire.spellml
+    file Solitaire.spell
       type Solitaire (is a App)
       variable solitaire (Solitaire)
       type StockPile (is a Pile)
@@ -210,21 +210,21 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
   type Site (is a App)
     property current address (text)
   project lib (imported)
-    file Card.spellml
+    file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
-    file Jokers.spellml
+    file Jokers.spell
       type Joker (is a Card)
       function test jokers
-    file Deck.spellml
+    file Deck.spell
       type Deck (is a List)
       function test a new deck
       function test two jokers
-    file Pile.spellml
+    file Pile.spell
       type Pile (is a ViewableList)
       function test piles
   project app
-    file Solitaire.spellml
+    file Solitaire.spell
       type Solitaire (is a App)
       variable solitaire (Solitaire)
       type StockPile (is a Pile)

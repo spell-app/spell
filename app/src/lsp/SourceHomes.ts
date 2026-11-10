@@ -7,7 +7,7 @@ import { SourceEdits, type TextSpan } from "./SourceEdits"
  * - A thing's property, asked for one of two places:
  *   - the line that made it, `a new foundation with suit = clubs` (`ofMaking()`)
  *   - its type's default, the `set its count to 0` of its `to create it` (`ofDefault()`)
- * - It reads the parse, not the words, so it works the same in `.spell`, `.spellml` and every language.
+ * - It reads the parse, not the words, so it works the same in both shapes and every language.
  * - It loads no language service and no code editor, and changes nothing:  `SourceEdits` makes the edit.
  * - Literals are numbers, text, `yes` / `no` and one word of an enumeration;  anything else is code.
  * - Static and instance-free on purpose.

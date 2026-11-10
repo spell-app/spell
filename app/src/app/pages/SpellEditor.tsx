@@ -42,8 +42,8 @@ import {
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { EDITOR_PIECES, isDraftEditor, loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import editorBarSpell from "spell/app/spaces/@spell/editor/editor-bar/EditorBar.spellml"
-import editorLayoutSpell from "spell/app/spaces/@spell/editor/editor-layout/EditorLayout.spellml"
+import editorBarSpell from "spell/app/spaces/@spell/editor/editor-bar/EditorBar.spell"
+import editorLayoutSpell from "spell/app/spaces/@spell/editor/editor-layout/EditorLayout.spell"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -77,7 +77,7 @@ const OUTPUT_ROOM = 440
  * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
  * - The compiled code, while someone's asked for it (`CodeOutputShown`) and there's room, sits beside the code.
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
- *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
+ *   - How they're arranged is Spell, `EditorLayout.spell`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
  * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
  * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13);
@@ -260,7 +260,7 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
  * - While a sample stands in for a data place, a bar across its top says so (`<SampleBar>`, epic `editor` P26).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
- * - A NOTEBOOK page (a `.spellml` page with the `notebook` flag, epic `notebook` P3) is the running program's own
+ * - A NOTEBOOK page (a `.spell` page with the `notebook` flag, epic `notebook` P3) is the running program's own
  *   drawing too, in the same place, inside the docs frame the editor adds round it (`<NotebookPage>`):
  *   its look, "On this page", and each example's code editor, in place.
  *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it,
@@ -389,7 +389,7 @@ function DraftEditorFrame(): JSX.Element {
  * - Output:  what the program logged, and how compiling and running it went (`<ConsoleViewer>`).
  * - JavaScript:  the compiled code (`<OutputRoot>`);  TypeScript and Python:  the project as those targets write it.
  * - The file's other form, a read-only view (epic `elemental-spell` J95:  a template lives in ONE file):
- *   - Code Spell, on a `.spellml` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
+ *   - Code Spell, on a `.spell` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
  *   - Spellx, on a `.spell` file:  it written as spellx (`SX.SpellxWriter`)
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
  * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search in this header.
@@ -475,7 +475,7 @@ export function ProgramPanel(props: { onClose: () => void }) {
 /**
  * `project`'s notebook, if it's one (`NotebookController.notebooksIn()`).
  * - The one open in the editor (`open`), when it's a notebook:  a project of several shows each at its own address,
- *   `/edit/@spell/guides/SpellUI/Avatar/Usage.spellml` (epic `notebook` P10).
+ *   `/edit/@spell/guides/SpellUI/Avatar/Usage.spell` (epic `notebook` P10).
  * - A project with a site:  Run always shows the site (`isRun`), and Edit only the open file, so opening the site
  *   file shows the site file.
  * - Else its first.
@@ -539,7 +539,7 @@ editorPrefs.declare(TAB_PREF, { oneOf: PROGRAM_TABS }).rename("spellEditor.progr
 
 /**
  * Tab `id`, titled in the page's language.
- * - `spell`, the file's other form:  "Code Spell" on a `.spellml` file, "Spellx" on a `.spell` file (`form`).
+ * - `spell`, the file's other form:  "Code Spell" on a tag-shaped file, "Spellx" on a plain one (`form`).
  */
 function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<ProgramTabId> {
   const text = id === "spell" && form !== "spellx" ? "spellxTab" : TAB_LOOKS[id].text
@@ -555,7 +555,7 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
- * - How they're arranged is Spell, `EditorBar.spellml`.
+ * - How they're arranged is Spell, `EditorBar.spell`.
  * - What's in each is still the editor's, handed over here, each a thing that draws itself.
  * - A phone runs only:  no app menus, no Run | Edit (`chrome.css`).
  * - Its spacing is the top bar's one rule (`chrome.css`):  60px between groups, 12px between icons.

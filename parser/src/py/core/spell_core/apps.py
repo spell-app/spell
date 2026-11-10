@@ -83,7 +83,7 @@ class Page(View):
     def start(self) -> None:
         """SIDE EFFECT:  draw this page as the program's page, as an app starts:  see `start_drawing()`.
 
-        - Compiles from `start the counter notebook`, which a `.spellml` page that draws its body says by itself
+        - Compiles from `start the counter notebook`, which a `.spell` page that draws its body says by itself
           (epic `elemental-spell` P16).
         """
         start_drawing(self)

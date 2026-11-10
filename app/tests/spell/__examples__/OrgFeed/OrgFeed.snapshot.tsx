@@ -29,19 +29,19 @@ export class Post extends Thing {
   accessor space!: string
 
   /** How much of it you want:  2 more of it, 1 as it comes, 0 none */
-  static { this.declareProp("weight", { declaredAt: { path: "/OrgFeed.spellml", start: 469, end: 681 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("weight", { declaredAt: { path: "/OrgFeed.spell", start: 469, end: 681 }, readsFrom: ["my_feed"] }) }
   get weight() {
     if (this.by === "ana@rs" && this.topic === "art") return 2
     if (this.by === "ana@rs" && this.topic === "politics") return 0
     return 1
   }
 
-  static { this.declareProp("isAFavourite", { declaredAt: { path: "/OrgFeed.spellml", start: 696, end: 738 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("isAFavourite", { declaredAt: { path: "/OrgFeed.spell", start: 696, end: 738 }, readsFrom: ["my_feed"] }) }
   get isAFavourite() {
     return this.weight === 2
   }
 
-  static { this.declareProp("isOrdinary", { declaredAt: { path: "/OrgFeed.spellml", start: 743, end: 782 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("isOrdinary", { declaredAt: { path: "/OrgFeed.spell", start: 743, end: 782 }, readsFrom: ["my_feed"] }) }
   get isOrdinary() {
     return this.weight === 1
   }
