@@ -28,10 +28,12 @@
  *   - `<Project>.<lang>.names.json5`:  its names dictionary, for a person to review (`TranslationNames`)
  *   - `<Project>.<lang>.translated.json5`:  what each source line was when it was last translated, a hash per line,
  *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
+ * - A TAG FILE (`.spellml`, language I68):  the passes work on the plain Spell it means (`SourceFile.tagFile`),
+ *   and the checked translation is written back as tags (`writeTagFiles()`):  `Card.spellml` => `Carta.es.spellml`.
  * - Loaded only when it runs (`commands.ts` imports the hook's work dynamically):  it loads all of spell.
  */
 import { createHash } from "node:crypto"
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -39,6 +41,7 @@ import { keepingCommentsIn, readJSON5File } from "spell/util/node/json5"
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
 import type { TranslateOptions } from "spell/parser/cli"
 import { claudeRunnerFor, type ChosenRunner } from "spell/parser/cli/claudeRunners"
 import {
@@ -308,6 +311,10 @@ export async function translationOf(
       outputFor(file, translated.files[at]!, plans[at]!, outputPathFor(file.path, names, to), fixes)
     )
     mkdirSync(outFolder, { recursive: true })
+    // a tag file's earlier translation (`--update`):  gone while its plain form is checked, or it declares all twice
+    for (const output of outputs) {
+      if (output.file.tagFile) rmSync(join(outFolder, tagPathFor(output.path)), { force: true })
+    }
     for (const output of outputs) writeFileSync(join(outFolder, output.path), output.lines.join("\n"))
     writeManifest(source, outFolder, names, outName, outputs)
     copyOtherFiles(source.folder, outFolder, elements)
@@ -318,7 +325,7 @@ export async function translationOf(
     mark = performance.now()
     if (review) asking.fixUps = steerPass(review.run!, options, "fixUps")
     const fixUps = new FixUps({ run: askFor("fixUps"), names, glossary })
-    const checked = await fixUp({
+    const fixedUp = await fixUp({
       source,
       outputs,
       outFolder,
@@ -328,6 +335,7 @@ export async function translationOf(
       shapes: new ShapeCheck(),
       onRound: review && ((facts) => review.run!.updatePass(facts))
     })
+    const checked = await writeTagFiles({ source, outputs, outFolder, names, outName, checked: fixedUp })
     review?.run!.endPass()
     timings.fixUps = performance.now() - mark
 
@@ -362,6 +370,7 @@ export async function translationOf(
       calls: { names: namesPass.calls, fixUps: fixUps.durations, via: chosen.via },
       notes: [
         ...namesPass.notes,
+        ...(checked.tagFilesNote ? [checked.tagFilesNote] : []),
         ...(review?.outcome.unreadable.map((why) => `review:  still unreadable, kept as drafted:  ${why}`) ?? []),
         ...fixUps.notes
       ],
@@ -452,7 +461,9 @@ function linePlan(
   const recorded = record?.files[file.path]
   const outPath = recorded && join(outFolder, recorded.output)
   if (!recorded || !outPath || !existsSync(outPath)) return { lines, changed: sourceLines.length }
-  const written = readFileSync(outPath, "utf8").split("\n")
+  // a tag file's translation, read back as the plain lines it was written from
+  const text = readFileSync(outPath, "utf8")
+  const written = (SP.isSpellmlName(outPath) ? SX.CodeSpellWriter.write(text, { path: outPath }) : text).split("\n")
   if (written.length !== recorded.lines.length) return { lines, changed: sourceLines.length }
   const hashes = sourceLines.map(hashOf)
   for (const [now, then] of commonRun(hashes, recorded.lines)) lines[now] = written[then]
@@ -511,6 +522,8 @@ type TranslationOutput = {
   written: Set<number>
   /** The lines written this run from a fix the record has. */
   reused: Set<number>
+  /** Written back as tags:  where each of `lines` went in the file on disk, by index (`writeTagFiles()`). */
+  tagLines?: Map<number, number>
 }
 
 /**
@@ -687,6 +700,106 @@ const SHAPE_MESSAGE = "means something else (compiles to a different program)"
 type CheckResult = Awaited<ReturnType<TranslationChecker>> & {
   checks: number
   shapes?: { statements: number; same: number }
+  /** Why tag files' translations stayed plain, when they did:  `writeTagFiles()`. */
+  tagFilesNote?: string
+}
+
+/**
+ * Write each tag file's translation back as tags (`SX.SpellxWriter`):  `/Carta.es.spell` => `/Carta.es.spellml`.
+ * - Its names, lines and fix-ups were worked out on its plain form, and that's what `checked` parsed:
+ *   line `i` of the translation is line `i` of the source's plain form, so its prose lines are still known.
+ * - Checks the project again, written as tags.  If that has more lint or test problems, or nothing could parse it
+ *   (no checker), the plain `.spell` files stay, and `tagFilesNote` says so:  nothing half-converted is left.
+ * - SIDE EFFECT:  replaces the files in `outFolder`, rewrites the project file, and changes each `output.path`.
+ * - NEVER throws for a file it can't write:  it keeps the plain form.
+ */
+async function writeTagFiles({
+  source,
+  outputs,
+  outFolder,
+  names,
+  outName,
+  checked
+}: {
+  source: TranslateSource
+  outputs: TranslationOutput[]
+  outFolder: string
+  names: TranslationNames
+  outName: string
+  checked: CheckResult
+}): Promise<CheckResult> {
+  const tagged = outputs.filter((output) => output.file.tagFile)
+  if (!tagged.length) return checked
+  const plainPaths = tagged.map((output) => output.path)
+  const tagTexts = tagged.map((output) => tagTextOf(output, checked.files))
+  if (tagTexts.includes(undefined)) {
+    return { ...checked, tagFilesNote: "written as plain .spell files:  nothing parsed them, so they can't be tags" }
+  }
+  const moveTo = (paths: string[], textOf: (at: number) => string) => {
+    tagged.forEach((output, at) => {
+      rmSync(join(outFolder, output.path))
+      output.path = paths[at]!
+      writeFileSync(join(outFolder, output.path), textOf(at))
+    })
+    writeManifest(source, outFolder, names, outName, outputs)
+  }
+  moveTo(plainPaths.map(tagPathFor), (at) => tagTexts[at]!)
+  const after = await source.checker?.(outFolder)()
+  const isCode = ({ source: by }: LineProblem) => by !== "shape"
+  const before = checked.problems.filter(isCode)
+  const problems = after?.problems.filter(isCode)
+  if (!after || !problems || problems.length > before.length) {
+    moveTo(plainPaths, (at) => tagged[at]!.lines.join("\n"))
+    const first = problems?.find((problem) => !before.some((earlier) => earlier.message === problem.message))
+    const why = first ? `:  ${problemLine(first)}` : ""
+    return { ...checked, tagFilesNote: `written as plain .spell files:  as tags they had more problems${why}` }
+  }
+  tagged.forEach((output, at) => (output.tagLines = tagLinesOf(output.lines, tagTexts[at]!)))
+  const byPlainPath = new Map(tagged.map((output, at) => [plainPaths[at]!, output]))
+  const shapeProblems = checked.problems
+    .filter((problem) => !isCode(problem))
+    .map((problem) => {
+      const output = byPlainPath.get(problem.path)
+      return output
+        ? { ...problem, path: output.path, line: output.tagLines!.get(problem.line) ?? problem.line }
+        : problem
+    })
+  return { ...checked, ...after, problems: [...problems, ...shapeProblems], checks: checked.checks + 1 }
+}
+
+/** `output`'s translation as tags, from its parse among `parsed`:  `undefined` if it wasn't parsed. */
+function tagTextOf(output: TranslationOutput, parsed: SourceFile[] | undefined): string | undefined {
+  const { match, contents } = parsed?.find((file) => file.path === output.path) ?? {}
+  if (!match || contents === undefined) return undefined
+  return SX.SpellxWriter.write({
+    text: contents,
+    match,
+    scope: match.scope,
+    proseLines: output.file.tagFile!.proseLines
+  })
+}
+
+/**
+ * Where each of a translation's plain `lines` is in `tagText`, by index:  each found after the one before it.
+ * - A line written as part of a tag, so no longer there as it was, has no place:  it's left out.
+ */
+function tagLinesOf(lines: string[], tagText: string): Map<number, number> {
+  const tagLines = tagText.split("\n").map((line) => line.trim())
+  const found = new Map<number, number>()
+  let from = 0
+  lines.forEach((line, index) => {
+    const text = line.trim()
+    const at = text ? tagLines.indexOf(text, from) : -1
+    if (at < 0) return
+    found.set(index, at)
+    from = at + 1
+  })
+  return found
+}
+
+/** The tag file a plain file's translation becomes:  `/Carta.es.spell` => `/Carta.es.spellml`. */
+function tagPathFor(path: string): string {
+  return `${path.slice(0, -SP.SPELL_SUFFIX.length)}${SP.SPELLML_SUFFIX}`
 }
 
 ////////////////
@@ -817,7 +930,9 @@ function writeManifest(
   const manifestPath = join(source.folder, SP.PROJECT_FILE)
   if (!existsSync(manifestPath)) return
   const manifest = readJSON5File<ProjectManifest>(manifestPath)
-  const renamed = new Map<string, string>(outputs.map((output) => [output.file.path, output.path]))
+  const renamed = new Map<string, string>(
+    outputs.map((output) => [output.file.tagFile?.path ?? output.file.path, output.path])
+  )
   for (const imported of source.imports ?? []) {
     if (imported.translatedPath) renamed.set(imported.path, imported.translatedPath)
   }
@@ -838,15 +953,15 @@ type ProjectManifest = { title?: string; description?: string; imports?: Array<{
 function copyOtherFiles(folder: string, outFolder: string, elements: ElementNames): void {
   for (const name of readdirSync(folder)) {
     const path = join(folder, name)
-    if (!statSync(path).isFile() || NOT_COPIED.test(name)) continue
+    if (!statSync(path).isFile() || SP.isSpellSourceName(name) || NOT_COPIED.test(name)) continue
     const text = readFileSync(path, "utf8")
     writeFileSync(join(outFolder, name), name.endsWith(".css") ? elements.translateStyles(text) : text)
   }
 }
 
-/** The files a translation never copies:  spell, the project file, what compiling writes, snapshots, our own. */
+/** The files a translation never copies, besides its spell (`SP.isSpellSourceName()`):  the project file, what compiling writes, snapshots, our own. */
 const NOT_COPIED =
-  /\.spell$|^__project\.json5$|^project\.json$|\.declarations\.json5$|\.[a-z]{2}\.js$|\.snapshot\.|\.names\.json5$|\.translated\.json5$/
+  /^__project\.json5$|^project\.json$|\.declarations\.json5$|\.[a-z]{2}\.js$|\.snapshot\.|\.names\.json5$|\.translated\.json5$/
 
 ////////////////
 // ## Asking claude
@@ -1066,7 +1181,9 @@ function report(done: {
   )
   if (todo.length) {
     out(`  ${todo.length} lines still need a person, marked // TODO: translate:`)
-    for (const { output, index, why } of todo) out(`    ${output.path.slice(1)}:${index + 1}  ${why.join(", ")}`)
+    for (const { output, index, why } of todo) {
+      out(`    ${output.path.slice(1)}:${(output.tagLines?.get(index) ?? index) + 1}  ${why.join(", ")}`)
+    }
   }
   if (checked.problems.length) {
     out(`  ${checked.problems.length} problems left:`)
