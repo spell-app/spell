@@ -66,7 +66,7 @@ describe("SiteEdits", () => {
       [
         '<spell-page "films page"/>',
         "",
-        '<spell-page "tatooine page"/>',
+        '<page "tatooine page"/>',
         "",
         '<spell-site "galaxy guide">',
         '\t<page "films page" address="/films"/>',

@@ -293,7 +293,9 @@ export default function kitCommands(spell: Command): void {
 
   rename
     .command("spellml")
-    .description("Spell's tag-shaped files, .spellml and .spellx => .spell:  each moved with git mv, and each mention (P40)")
+    .description(
+      "Spell's tag-shaped files, .spellml and .spellx => .spell:  each moved with git mv, and each mention (P40)"
+    )
     .argument("[checkouts...]", "the checkouts to rename in;  none:  this kit")
     .option("--dry-run", "only report what it would change")
     .option("--json", "print each checkout's report as JSON")
@@ -307,7 +309,9 @@ export default function kitCommands(spell: Command): void {
 
   rename
     .command("tags")
-    .description("Spell's tags written short:  <spell-page> => <page>, <spell-more-of> => <extend>, notes => <note> (P41)")
+    .description(
+      "Spell's tags written short:  <spell-page> => <page>, <spell-more-of> => <extend>, notes => <note> (P41)"
+    )
     .argument("[checkouts...]", "the checkouts to rename in;  none:  this kit")
     .option("--dry-run", "only report what it would change")
     .option("--json", "print each checkout's report as JSON")

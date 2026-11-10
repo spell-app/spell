@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
+import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { translateProject, translationOf, type TranslateSource } from "spell/parser/cli/translateProject"
@@ -628,7 +629,7 @@ describe("a tag file (language I68)", () => {
     expect(readdirSync(out)).toContain("Carta.es.spell")
     expect(readdirSync(out)).not.toContain("Card.spell")
     const tags = readFileSync(join(out, "Carta.es.spell"), "utf8")
-    expect(tags).toContain('<encanto-cosa "carta">')
+    expect(tags).toContain('<cosa "carta">')
     expect(tags).toContain("# The card\nA card has a color and a label.\n")
     expect(tags).not.toContain("// # The card")
     expect(JSON5.parse(readFileSync(join(out, "__project.json5"), "utf8")).imports).toEqual([
@@ -776,7 +777,8 @@ function tagSource(): TranslateSource {
 function tagChecker(afterTags: LineProblem[] = []): TranslateSource["checker"] {
   return (out) => () =>
     Promise.resolve(
-      !readFileSync(join(out, "Carta.es.spell"), "utf8").includes("<encanto")
+      // plain until it's written as tags, a line starting `<` (`SP.formOfText()`)
+      SP.formOfText(readFileSync(join(out, "Carta.es.spell"), "utf8")) === "spell"
         ? { problems: [], files: parsedIn(out) }
         : { problems: afterTags }
     )

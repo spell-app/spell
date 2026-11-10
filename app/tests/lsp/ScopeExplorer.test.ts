@@ -17,7 +17,7 @@ import { copyCodeSpellTwin, copyFixtureProject, fixtureFolder, lineOf, loadFixtu
 /** The Solitaire example's Card.spell:  the tests name its lines by what they say (`lineOf()`), as it changes. */
 const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spell"), "utf8")
 /** Its line declaring the card's type. */
-const CARD_TYPE = '<spell-view "card"'
+const CARD_TYPE = '<view "card"'
 /** Its line declaring the card's suit, whose node is `suit`. */
 const SUIT = '<property "suit" one-of'
 /** The card's short name, whose `description=` is its docstring. */

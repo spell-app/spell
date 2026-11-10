@@ -46,7 +46,7 @@ Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spad
             Colors (red, black)
 
 Spell
-  <spell-view "card" template="two sided view" draggable>
+  <view "card" template="two sided view" draggable>
     <group "rank" description="Ace is low:  ace = 1 ... king = 13"/>
     <property "rank" one-of="ace, 2 ... 10, jack, queen, king" alias="is a (rank)"/>
     <property "value">the position of its rank</>
