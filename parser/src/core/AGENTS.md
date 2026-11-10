@@ -288,6 +288,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A field that links to things is written as their addresses (`addressOfLinked()`), and a followed list's change writes
       them back (`rememberLinkedList()`, epic `data` T74).
     - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
+      - `save()` is one undo step, `Edit`, or joins the undoable action it's in (I100).
+      - A draft with nothing changed in it ends when the real thing changes:  so after Undo, Edit shows what's back.
     - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
     - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
       history it's handed, the program's by default;  `cancel()` puts it back (epic `data` P9).
