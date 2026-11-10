@@ -5,7 +5,7 @@ The bar itself (File · Edit · View · Run) and every title are here too;  the 
 What each item does is still the editor's own:  `<AppBarMenus>` in `MenuBar.tsx` fills them in, by name,
 and so are the titles that follow the editor's state (Undo's, New Example's, Duplicate's, More Examples').
 
-<spell-app "app menus" menu-bar="bar menu">
+<app "app menus" menu-bar="bar menu">
 	<property "can discard" description="The file differs from where it started">yes or no</>
 	<property "auto saving" description="AutoSave is on">yes or no</>
 	<property "can publish" description="The project has a draft to publish">yes or no</>
@@ -114,4 +114,4 @@ and so are the titles that follow the editor's state (Undo's, New Example's, Dup
 		<menu "view menu"/>
 		<menu "run menu"/>
 	</menu>
-</spell-app>
+</app>

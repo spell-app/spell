@@ -1,10 +1,10 @@
 # The Met Museum
 Artworks of the Metropolitan Museum of Art, found by what you type.
 Every thing it shows is in MetMuseum.api.spell, as `spell place ingest` wrote it;  the type below adds to its type there,
-with `<spell-more-of>`, so looking again at the server never touches a line of this.
+with `<extend>`, so looking again at the server never touches a line of this.
 Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.
 
-<spell-thing "met museum page">
+<thing "met museum page">
 	<spell>
 		- its "search" is text
 		- to create it:
@@ -41,7 +41,7 @@ Its search answers only ids:  each artwork is read from its own address as it's 
 			</text>
 		</stack>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # An artwork
@@ -49,7 +49,7 @@ A card that turns over:  its picture on the front, what the Met knows of it on t
 Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
 Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
-<spell-more-of "artwork">
+<extend "artwork">
 	<draw>
 		<if its title and its primary image small>
 			<shape class="artwork" direction="over" flip-on="click" aria-label={its title}>
@@ -85,4 +85,4 @@ Only what's in the public domain has a picture:  the rest show what the Met know
 			</extra>
 		</ui-card>
 	</draw>
-</spell-more-of>
+</extend>

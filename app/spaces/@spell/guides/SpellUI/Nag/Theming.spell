@@ -1,4 +1,4 @@
-<spell-page "nag theming" notebook>
+<page "nag theming" notebook>
 	<header level="1">
 		Nag
 		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
@@ -52,4 +52,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

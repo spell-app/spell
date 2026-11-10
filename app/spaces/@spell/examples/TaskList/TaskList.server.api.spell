@@ -6,20 +6,20 @@
 	- check it every 30 seconds
 </data-folder>
 
-<spell-view "server task" template="task">
+<view "server task" template="task">
 	<spell>
 		- it lives in task files
 	</spell>
 	<action "throw it away">
 		remove it from the server tasks
 	</action>
-</spell-view>
+</view>
 
-<spell-thing "server keeper" template="task keeper">
+<thing "server keeper" template="task keeper">
 	<property "kept tasks">every server task</>
 	<action "keep a new task titled (title as text)">
 		set task to a new server task with title = title
 		add task to the server tasks
 		return task
 	</action>
-</spell-thing>
+</thing>

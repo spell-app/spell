@@ -1,4 +1,4 @@
-<spell-page "visibility theming" notebook>
+<page "visibility theming" notebook>
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
@@ -35,4 +35,4 @@
 	<section label="Themes">
 		<markdown>Visibility has no look to restyle.</>
 	</>
-</spell-page>
+</page>

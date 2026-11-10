@@ -1,4 +1,4 @@
-<spell-page "kitchen sink" notebook>
+<page "kitchen sink" notebook>
 	<header level="1">
 		Kitchen Sink
 		<header>Every component family's main example on one page, live: pick a theme and see it everywhere at once.</>
@@ -2130,4 +2130,4 @@
 		</>
 	</>
 
-</spell-page>
+</page>

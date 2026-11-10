@@ -1,4 +1,4 @@
-<spell-page "card api" notebook>
+<page "card api" notebook>
 	<header level="1">
 		Card
 		<header>A card displays site content in a manner similar to a playing card.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-card" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

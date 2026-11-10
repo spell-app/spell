@@ -8,7 +8,7 @@ How a Pokémon looks is in Pokemon.spell, and the guessing game in WhosThat.spel
 	<ui-button appearance="pill"/>
 </ui-defaults>
 
-<spell-app "pokedex">
+<app "pokedex">
 	<spell>
 		- its "tab" is text
 		- its "search" is text
@@ -104,7 +104,7 @@ How a Pokémon looks is in Pokemon.spell, and the guessing game in WhosThat.spel
 	<draw "kind buttons">
 		<for its kinds to pick />
 	</draw>
-</spell-app>
+</app>
 
 
 # Start it

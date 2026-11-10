@@ -1,14 +1,14 @@
-<spell-page "form usage" notebook>
+<page "form usage" notebook>
 	<header level="1">
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>
 	</>
 
 	<!-- Usage › Binding › Repeat's to-do list:  a task list bound to its form, its tasks one row each -->
-	<spell-thing "task">
+	<thing "task">
 		<property "title">text</>
 		<property "done">yes or no</>
-	</spell-thing>
+	</thing>
 	<view "task list">
 		<property "title">text</>
 		<property "tasks">a new list of tasks</>
@@ -380,4 +380,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

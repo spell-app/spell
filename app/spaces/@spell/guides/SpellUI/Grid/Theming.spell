@@ -1,4 +1,4 @@
-<spell-page "grid theming" notebook>
+<page "grid theming" notebook>
 	<header level="1">
 		Grid
 		<header>A grid is used to harmonize negative space in a layout.</>
@@ -70,4 +70,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

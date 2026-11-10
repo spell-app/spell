@@ -32,7 +32,7 @@ so `the amount * the percent` is the tip, with no `/ 100`;  its box, `<input typ
 `<form value={it}>` binds the form to the bill:  each box's `name` is the property it changes.
 The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 
-<spell-app "bill">
+<app "bill">
 	<property "amount" type="number">60</property>
 	<property "percent" type="percent">18%</property>
 	<property "people" type="number">3</property>
@@ -63,7 +63,7 @@ The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 			</segment>
 		</container>
 	</draw>
-</spell-app>
+</app>
 
 ## Checks
 

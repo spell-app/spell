@@ -8,7 +8,7 @@ The left half of that picture is the program.
 Here is what a task is, the seven lines at the top of its file, their descriptions left out:
 
 ```html
-<spell-view "task">
+<view "task">
 	<property "title">text</>
 	<property "notes">text</>
 	<property "priority" one-of="low, normal or high" />

@@ -1,4 +1,4 @@
-<spell-page "statistic examples" notebook>
+<page "statistic examples" notebook>
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
@@ -218,4 +218,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

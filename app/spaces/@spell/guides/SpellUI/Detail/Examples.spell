@@ -1,4 +1,4 @@
-<spell-page "detail examples" notebook>
+<page "detail examples" notebook>
 	<header level="1">
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
@@ -32,4 +32,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

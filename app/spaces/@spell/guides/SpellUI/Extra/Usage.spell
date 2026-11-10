@@ -1,4 +1,4 @@
-<spell-page "extra usage" notebook>
+<page "extra usage" notebook>
 	<header level="1">
 		Extra
 		<header>Extra content is set apart from the main content, such as a card's footer.</>
@@ -37,4 +37,4 @@
 	<section label="Accessibility">
 		<markdown>- A neutral block with no role. Its muted colour is a look only: put nothing in it that a reader must not miss.</>
 	</>
-</spell-page>
+</page>

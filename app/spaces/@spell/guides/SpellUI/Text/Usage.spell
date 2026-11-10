@@ -1,4 +1,4 @@
-<spell-page "text usage" notebook>
+<page "text usage" notebook>
 	<header level="1">
 		Text
 		<header>A text is used to style some inline text with a simple color.</>
@@ -48,4 +48,4 @@
 			  without the class words' look.
 		</>
 	</>
-</spell-page>
+</page>

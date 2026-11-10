@@ -9,7 +9,7 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 
 ## A recipe:  a card you can read and change
 
-<spell-more-of "recipe">
+<extend "recipe">
 	<draw>
 		<card>
 			<content>
@@ -28,12 +28,12 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 			</content>
 		</card>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## The box:  the card for a new recipe, then a card for each one you have
 
-<spell-app "cookbook">
+<app "cookbook">
 	<property "search">text</>
 	<property "new recipe">a new recipe with servings = 4</>
 	<property "box menu">a menu of "undo"</>
@@ -95,4 +95,4 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 			</cards>
 		</container>
 	</draw>
-</spell-app>
+</app>

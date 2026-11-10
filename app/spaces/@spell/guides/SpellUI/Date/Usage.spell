@@ -1,4 +1,4 @@
-<spell-page "date usage" notebook>
+<page "date usage" notebook>
 	<header level="1">
 		Date
 		<header>A date says when something happened, inline and small inside a feed event.</>
@@ -39,4 +39,4 @@
 			- No role or tab stop of its own.
 		</>
 	</>
-</spell-page>
+</page>

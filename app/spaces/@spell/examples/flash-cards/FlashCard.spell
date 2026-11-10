@@ -3,7 +3,7 @@ A word on its front, what it means on its back.
 It's a two sided view, as Solitaire's cards are:  face up it shows the word, face down what it means.
 A click turns it over.
 
-<spell-view "flash card" template="two sided view" clickable>
+<view "flash card" template="two sided view" clickable>
 	<property "word" description="The Spanish word, on its front">text</>
 	<property "meaning" description="What it means, on its back">text</>
 
@@ -33,6 +33,6 @@ A click turns it over.
 		turn the card over
 		the card is face up should be yes
 	</test>
-</spell-view>
+</view>
 
-<spell-thing "deck" template="list of flash cards" description="The cards to learn"/>
+<thing "deck" template="list of flash cards" description="The cards to learn"/>

@@ -1,13 +1,13 @@
 # Lista de tareas
 Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.
-Sus tareas son la `<encanto-vista "tarea">` de este proyecto;  este archivo tiene su lista, y la aplicación.
+Sus tareas son la `<vista "tarea">` de este proyecto;  este archivo tiene su lista, y la aplicación.
 Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,
 ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.
 
 ## La agenda
 Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agenda>`, alrededor de sus `<lista-de-tareas-tarea>`.
 
-<encanto-vista "agenda" plantilla="lista visible de tareas">
+<vista "agenda" plantilla="lista visible de tareas">
 	<propiedad "mostrando" uno-de="todas, pendientes o hechas"
 		descripción="Lo que muestra:  todas las tareas, las pendientes, o las hechas"
 		frase="está mostrando (mostrando)"
@@ -55,7 +55,7 @@ Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agend
 		el orden de la primera debería ser 2
 		el título de la primera tarea en (las tareas ordenadas por su orden) debería ser "segunda"
 	</probar>
-</encanto-vista>
+</vista>
 <encanto>
 	// una tarea está en una sola agenda a la vez
 	una tarea pertenece a una agenda
@@ -64,7 +64,7 @@ Las tareas, cada una un elemento propio dentro de ella:  `<lista-de-tareas-agend
 ## La aplicación
 Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al editor de propiedades.
 
-<encanto-aplicación "lista de tareas">
+<aplicación "lista de tareas">
 	<propiedad "tareas">una nueva agenda</>
 	<propiedad "borrador" descripción="El título de la siguiente tarea, como lo tiene el campo de la nueva tarea">texto</>
 	<propiedad "cuenta pendiente">el largo de (tareas en las tareas donde está pendiente)</>
@@ -185,4 +185,4 @@ Su barra de herramientas, el campo de la nueva tarea, y luego la lista junto al 
 			</pila>
 		</contenedor>
 	</dibujar>
-</encanto-aplicación>
+</aplicación>

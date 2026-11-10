@@ -1,4 +1,4 @@
-<spell-page "space usage" notebook>
+<page "space usage" notebook>
 	<header level="1">
 		Space
 		<header>A space is a gap between things:  a line break, a gap in a line, or the room left in a row.</>
@@ -34,4 +34,4 @@
 			A space has no role and no text:  screen readers pass over it, as over a `<br>`.
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,7 +1,7 @@
 # A Pokémon:  its card, its own page, and its family
-Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so looking at PokéAPI again never touches a line of this.
+Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at PokéAPI again never touches a line of this.
 
-<spell-more-of "pokemon">
+<extend "pokemon">
 	<property "picture" description="Its big picture, the official artwork">
 		return the front default of the official artwork of the other of its sprites
 	</property>
@@ -117,12 +117,12 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 			<progress max-width="36em" value={stat's base stat} total="255" color="green" size="large" label={stat's word + ":  {value}"} />
 		</for>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # One of a Pokémon's six numbers
 
-<spell-more-of "stat">
+<extend "stat">
 	<property "word" description="What it means, in plain words, by the name PokéAPI gives it">
 		set name to the name of its stat
 		if name is "hp"
@@ -137,12 +137,12 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 			return "Special defence"
 		return "Speed"
 	</property>
-</spell-more-of>
+</extend>
 
 
 # A kind of Pokémon:  fire, water, grass ...
 
-<spell-more-of "type">
+<extend "type">
 	<alias "is real" description="Two kinds no Pokémon is:  only in the games' code">
 		return its name is not "unknown" and its name is not "shadow" and its name is not "stellar"
 	</alias>
@@ -181,19 +181,19 @@ Each adds to its type in PokeSpell.api.spell, with `<spell-more-of>`:  so lookin
 	<draw description="A big button:  press it to see every Pokémon of this kind">
 		<button class="kind" color={its colour} size="large" font="title-caps" onClick={pick it}>{its name}</button>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "pokemon type" description="One of a Pokémon's kinds:  a label of its colour">
+<extend "pokemon type" description="One of a Pokémon's kinds:  a label of its colour">
 	<draw>
 		<label class="kind" color={its kind's colour} size="huge" font="title-caps">{its kind's name}</label>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "type pokemon" description="One Pokémon of a kind">
+<extend "type pokemon" description="One Pokémon of a kind">
 	<draw>
 		draw its pokemon
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A family:  how a Pokémon evolves
@@ -201,7 +201,7 @@ PokéAPI keeps a family as a chain:  its first species, and the chains each one 
 So a chain draws its species, then an arrow and the chains it becomes, side by side:
 Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit together after its arrow.
 
-<spell-more-of "chain">
+<extend "chain">
 	<draw>
 		<stack direction="horizontal" align="center" spacing="sm" stackable="34em">
 			{draw its species}
@@ -217,23 +217,23 @@ Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit toge
 	<draw "branches" description="What it becomes:  one, or several side by side, wrapping when they don't fit">
 		<for its evolves to />
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "pokemon species">
+<extend "pokemon species">
 	<property "pokemon" description="The Pokémon it is, as the games show it first">
 		return the pokemon of the first item of its varieties
 	</property>
 	<draw>
 		draw the evolution of its pokemon
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A favourite:  kept on this device, it draws the Pokémon it's of
 
-<spell-more-of "favourite">
+<extend "favourite">
 	<property "pokemon">the pokemon whose id is its address</property>
 	<draw>
 		draw its pokemon
 	</draw>
-</spell-more-of>
+</extend>

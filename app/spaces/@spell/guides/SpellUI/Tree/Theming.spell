@@ -1,4 +1,4 @@
-<spell-page "tree theming" notebook>
+<page "tree theming" notebook>
 	<header level="1">
 		Tree
 		<header>A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.</>
@@ -38,4 +38,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

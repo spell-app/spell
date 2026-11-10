@@ -7,7 +7,7 @@ Everyone in the org reads and writes a team's open thread;  you delete your own 
 
 ## A row for each message:  who sent it, when, and what it says
 
-<spell-more-of "message">
+<extend "message">
 	<property "initials" description="The first two letters of who sent it, for the circle beside their name">first 2 letters in (its by as upper case)</>
 
 	<draw>
@@ -23,22 +23,22 @@ Everyone in the org reads and writes a team's open thread;  you delete your own 
 			</stack>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## A thread in the list:  a lock on the private ones
 
-<spell-more-of "thread">
+<extend "thread">
 	<property "mark" description="Its icon:  a lock on the private ones">
 		"lock" if its side is "private"
 		"hashtag" otherwise
 	</property>
-</spell-more-of>
+</extend>
 
 
 ## The page:  the toolbar, the threads down the side, and the one picked, oldest first, with a box to write in
 
-<spell-app "chat page">
+<app "chat page">
 	<property "new message">a new message</>
 	<property "picked">the first thread in every thread where its current</>
 	<property "drawer open" description="A phone only:  the threads, open in a drawer">yes or no</>
@@ -109,4 +109,4 @@ Everyone in the org reads and writes a team's open thread;  you delete your own 
 			</for>
 		</menu>
 	</draw>
-</spell-app>
+</app>

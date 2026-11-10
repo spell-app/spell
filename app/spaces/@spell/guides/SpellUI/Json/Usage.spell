@@ -1,4 +1,4 @@
-<spell-page "json usage" notebook>
+<page "json usage" notebook>
 	<header level="1">
 		JSON data
 		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
@@ -56,4 +56,4 @@
 			What reads it says what it means:  a tree diagram names itself from the data.
 		</>
 	</>
-</spell-page>
+</page>

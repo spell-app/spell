@@ -27,7 +27,7 @@
 	- starships live at "/starships/"
 </web-server>
 
-<spell-thing "character">
+<thing "character">
 	<spell>
 		- it lives in star wars
 	</spell>
@@ -48,9 +48,9 @@
 	<property "starships">a list of starships</>
 	<property "created" type="date" />
 	<property "edited" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "planet">
+<thing "planet">
 	<spell>
 		- it lives in star wars
 	</spell>
@@ -71,9 +71,9 @@
 	<property "films">a list of films</>
 	<property "created" type="date" />
 	<property "edited" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "film">
+<thing "film">
 	<spell>
 		- it lives in star wars
 	</spell>
@@ -90,9 +90,9 @@
 	<property "species">a list of species</>
 	<property "created" type="date" />
 	<property "edited" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "species">
+<thing "species">
 	<spell>
 		- it lives in star wars
 	</spell>
@@ -112,9 +112,9 @@
 	<property "films">a list of films</>
 	<property "created" type="date" />
 	<property "edited" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "vehicle">
+<thing "vehicle">
 	<spell>
 		- it lives in star wars
 	</spell>
@@ -137,9 +137,9 @@
 	<property "films">a list of films</>
 	<property "created" type="date" />
 	<property "edited" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "starship">
+<thing "starship">
 	<spell>
 		- it lives in star wars
 	</spell>
@@ -166,4 +166,4 @@
 	<property "films">a list of films</>
 	<property "created" type="date" />
 	<property "edited" type="date" />
-</spell-thing>
+</thing>

@@ -1,4 +1,4 @@
-<spell-page "divider api" notebook>
+<page "divider api" notebook>
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>
@@ -35,4 +35,4 @@
 			<ui-docs-api family="ui-divider" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

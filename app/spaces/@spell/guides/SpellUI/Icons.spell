@@ -1,4 +1,4 @@
-<spell-page "icons" notebook>
+<page "icons" notebook>
 	<header level="1">
 		Icons
 		<header>Every icon in the packs Spell UI ships: Font Awesome 7 Free by default, brands and Fomantic's names when a page adds them.</>
@@ -41,4 +41,4 @@
 			[Fomantic-UI](https://github.com/fomantic/Fomantic-UI) (MIT).
 		</>
 	</>
-</spell-page>
+</page>

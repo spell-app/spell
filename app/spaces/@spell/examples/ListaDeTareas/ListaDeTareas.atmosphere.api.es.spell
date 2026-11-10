@@ -6,21 +6,21 @@
 	- las tareas del cielo están en "spaces.spell.examples.listadetareas.tarea"
 </atmosphere>
 
-<encanto-vista "tarea del cielo" plantilla="tarea">
+<vista "tarea del cielo" plantilla="tarea">
 	<encanto>
 		- vive en cielo de tareas
 	</encanto>
 	<acción "tirarla">
 		quitar eso de las tareas del cielo
 	</acción>
-</encanto-vista>
+</vista>
 
 // de quién es:  la cuenta en la que está, que un registro no puede decir
 <encanto>
 	una tarea del cielo tiene un dueño como texto
 </encanto>
 
-<encanto-cosa "guardián del cielo" plantilla="guardián de tareas">
+<cosa "guardián del cielo" plantilla="guardián de tareas">
 	// solo las tuyas:  las tareas de cada uno están en su propia cuenta
 	<encanto>
 		- sus "tareas guardadas" es cada tarea del cielo donde su dueño es el id de esa persona
@@ -30,4 +30,4 @@
 		agregar tarea a las tareas del cielo
 		devolver tarea
 	</acción>
-</encanto-cosa>
+</cosa>

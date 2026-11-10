@@ -1,4 +1,4 @@
-<spell-page "placeholder theming" notebook>
+<page "placeholder theming" notebook>
 	<header level="1">
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
@@ -62,4 +62,4 @@
 			shared tokens.
 		</>
 	</>
-</spell-page>
+</page>

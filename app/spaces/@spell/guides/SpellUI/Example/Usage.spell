@@ -1,4 +1,4 @@
-<spell-page "example usage" notebook>
+<page "example usage" notebook>
 	<header level="1">
 		Example
 		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
@@ -54,4 +54,4 @@
 			- The example's own elements keep their roles:  nothing is wrapped in a landmark.
 		</>
 	</>
-</spell-page>
+</page>

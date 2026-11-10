@@ -1,4 +1,4 @@
-<spell-page "rail usage" notebook>
+<page "rail usage" notebook>
 	<header level="1">
 		Rail
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
@@ -81,4 +81,4 @@
 			  rail: its place beside the content goes.
 		</>
 	</>
-</spell-page>
+</page>

@@ -2,7 +2,7 @@
 A pocket calculator:  a number, an operator, another number, and the total as you type.
 Its keys are Spell UI's buttons, four a row, and each one runs one of the calculator's actions.
 
-<spell-app "calculator">
+<app "calculator">
 	<group "what it keeps" description="The sum being typed:  its left number, its operator and its right number"/>
 	<property "input" description="The number being typed, as text, so each key can add a digit on the end">text</>
 	<property "left">text</>
@@ -110,4 +110,4 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 		the left should be "34"
 		the output should be ""
 	</test>
-</spell-app>
+</app>

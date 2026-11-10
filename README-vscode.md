@@ -339,7 +339,7 @@ The edges:
   | no spell-app checkout in this window's folders | open one, or set `spell.parserRoot` |
   | no spell-app checkout at the `spell.parserRoot` you set | fix the setting, or clear it to use the window's |
   | no `tsx` for the checkout | run `yarn install` at its kit's root |
-  | no language server at `<spell-app>/src/lsp/server.ts` | that checkout is older than the extension, and there's no fallback:  pull it, or point `spell.parserRoot` at a newer one |
+  | no language server at `<app>/src/lsp/server.ts` | that checkout is older than the extension, and there's no fallback:  pull it, or point `spell.parserRoot` at a newer one |
   | no runner bundle | `yarn build:runner` in that spell-app |
   | this file isn't in a Spell project | open a file from a project, one with a `__project.json5` |
 

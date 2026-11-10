@@ -1,4 +1,4 @@
-<spell-page "content-parts theming" notebook>
+<page "content-parts theming" notebook>
 	<header level="1">
 		Content parts
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
@@ -56,4 +56,4 @@
 			each restyling these parts through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

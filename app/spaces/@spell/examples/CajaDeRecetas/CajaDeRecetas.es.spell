@@ -9,7 +9,7 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 
 ## Una receta:  una tarjeta que puedes leer y cambiar
 
-<encanto-más-de "receta">
+<extender "receta">
 	<acción "editarla" descripción="Su pantalla de edición:  nada cambia hasta Guardar">
 		fijar el editando de la caja de recetas a eso
 	</acción>
@@ -33,12 +33,12 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 			</contenido>
 		</tarjeta>
 	</dibujar>
-</encanto-más-de>
+</extender>
 
 
 ## Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar
 
-<encanto-vista "editor de receta">
+<vista "editor de receta">
 	<propiedad "receta" tipo="receta" descripción="La receta que se está cambiando"/>
 	<propiedad "borrador" descripción="Una copia para cambiar:  la receta sigue igual hasta Guardar">un borrador de su receta</propiedad>
 
@@ -74,12 +74,12 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 			</extra>
 		</tarjeta>
 	</dibujar>
-</encanto-vista>
+</vista>
 
 
 ## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
 
-<encanto-aplicación "caja de recetas">
+<aplicación "caja de recetas">
 	<propiedad "búsqueda">texto</>
 	<propiedad "receta nueva">una nueva receta con porciones = 4</>
 	<propiedad "editando" tipo="receta" descripción="La receta en su pantalla de edición, mientras haya una"/>
@@ -157,4 +157,4 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 			</tarjetas>
 		</>
 	</dibujar>
-</encanto-aplicación>
+</aplicación>

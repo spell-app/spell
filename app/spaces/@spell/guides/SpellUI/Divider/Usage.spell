@@ -1,4 +1,4 @@
-<spell-page "divider usage" notebook>
+<page "divider usage" notebook>
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>
@@ -41,4 +41,4 @@
 			  divider line and the `icon` shorthand go.
 		</>
 	</>
-</spell-page>
+</page>

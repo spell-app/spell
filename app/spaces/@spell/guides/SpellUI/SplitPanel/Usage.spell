@@ -1,4 +1,4 @@
-<spell-page "split-panel usage" notebook>
+<page "split-panel usage" notebook>
 	<header level="1">
 		Split Panel
 		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
@@ -33,4 +33,4 @@
 	<section label="Accessibility">
 		<markdown>Each bar of a `resizable` panel is a named `separator`, saying its place as a percent of the two panes beside it.  Tab reaches the bars after every pane, not between them:  each pane is placed by CSS `order`, so nothing has to move.</>
 	</>
-</spell-page>
+</page>

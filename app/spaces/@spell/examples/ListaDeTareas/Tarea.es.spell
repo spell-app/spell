@@ -4,7 +4,7 @@ Cada tarea es un elemento propio en la página, `<lista-de-tareas-tarea>`.
 Un clic la selecciona, mayúsculas y comando (ctrl) seleccionan más, para el editor de propiedades (`seleccionable`);
 arrastrarla la mueve, y las seleccionadas van con ella (`arrastrable`).
 
-<encanto-vista "tarea" seleccionable arrastrable>
+<vista "tarea" seleccionable arrastrable>
 	<propiedad "título" descripción="Lo que hay que hacer">texto</>
 	<propiedad "nota" descripción="Cualquier otra cosa sobre ella">texto</>
 	<propiedad "prioridad" uno-de="baja, normal o alta" />
@@ -33,4 +33,4 @@ arrastrarla la mueve, y las seleccionadas van con ella (`arrastrable`).
 		poner la hecha de la tarea a sí
 		la tarea está hecha debería ser sí
 	</probar>
-</encanto-vista>
+</vista>

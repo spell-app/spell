@@ -3,7 +3,7 @@ Deal seven columns, then build four foundations, ace to king, one suit each:
 [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
 The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
 
-<spell-app "solitaire">
+<app "solitaire">
 	<property "score">a number</>
 	<property "moves" description="The cards played this game:  a stock card turned over isn't one">a number</>
 	<property "hint" description="Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win">text</>
@@ -148,7 +148,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 			</grid>
 		</container>
 	</draw>
-</spell-app>
+</app>
 
 ## Playing a card
 What a click or a drag does:  the card's own moves, and each pile's, as the game plays them.
@@ -210,7 +210,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 Each kind of pile, what it may take or give up, and how it lies.
 While one's empty, it shows its placeholder, if it has one.
 
-<spell-view "stock pile" template="pile"
+<view "stock pile" template="pile"
 	description="The cards not played yet, face down:  a click turns the next one over, so none can be taken from it"
 >
 	<property "layout">stacked</>
@@ -224,18 +224,18 @@ While one's empty, it shows its placeholder, if it has one.
 	<on click description="Empty:  a click turns the discards back over;  a click on one of its cards is the card's">
 		play from the stock
 	</on>
-</spell-view>
+</view>
 
-<spell-view "discard pile" template="pile" description="Where the stock's cards go as they're turned over">
+<view "discard pile" template="pile" description="Where the stock's cards go as they're turned over">
 	<property "layout">stacked</>
 	<spell>
 		- it can never take a card
 	</spell>
 	// only its top card may be picked up
 	<cards draggable when the card is its last card/>
-</spell-view>
+</view>
 
-<spell-view "foundation" template="pile" description="Where a suit is built up, ace to king, one card at a time">
+<view "foundation" template="pile" description="Where a suit is built up, ace to king, one card at a time">
 	<property "layout">stacked</>
 	<property "suit">a card suit</>
 	<spell>
@@ -249,9 +249,9 @@ While one's empty, it shows its placeholder, if it has one.
 	<draw "placeholder" description="A light grey ace of its suit, face up">
 		<text part="placeholder">{the picture of a new card whose rank is ace and suit is its suit}</text>
 	</draw>
-</spell-view>
+</view>
 
-<spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
+<view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
 	// its face-up cards may be picked up, with every card on them
 	<cards draggable when the card is face up/>
@@ -293,7 +293,7 @@ While one's empty, it shows its placeholder, if it has one.
 		add the queen to the column
 		the foundation can take the queen should be no
 	</test>
-</spell-view>
+</view>
 
 <spell>
 	start a new game

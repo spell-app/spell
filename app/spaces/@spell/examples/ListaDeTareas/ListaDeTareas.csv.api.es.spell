@@ -8,16 +8,16 @@
 	- se revisa cada 30 segundos
 </hoja>
 
-<encanto-vista "tarea de la hoja" plantilla="tarea">
+<vista "tarea de la hoja" plantilla="tarea">
 	<encanto>
 		- vive en hoja de tareas
 	</encanto>
 	<acción "tirarla">
 		quitar eso de las tareas de la hoja
 	</acción>
-</encanto-vista>
+</vista>
 
-<encanto-cosa "guardián de la hoja" plantilla="guardián de tareas">
+<cosa "guardián de la hoja" plantilla="guardián de tareas">
 	<encanto>
 		- sus "tareas guardadas" es cada tarea de la hoja
 	</encanto>
@@ -26,4 +26,4 @@
 		agregar tarea a las tareas de la hoja
 		devolver tarea
 	</acción>
-</encanto-cosa>
+</cosa>

@@ -6,7 +6,7 @@ this file holds the bill.
 
 ## The bill
 
-<spell-app "bill splitter">
+<app "bill splitter">
 	<property "diners">a new table</>
 	<property "percent" type="percent" description="The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18">18%</property>
 	<property "subtotal" description="What everyone ordered, added up">
@@ -56,4 +56,4 @@ this file holds the bill.
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>

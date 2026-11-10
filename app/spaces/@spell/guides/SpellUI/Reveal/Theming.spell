@@ -1,4 +1,4 @@
-<spell-page "reveal theming" notebook>
+<page "reveal theming" notebook>
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -55,4 +55,4 @@
 			site.
 		</>
 	</>
-</spell-page>
+</page>

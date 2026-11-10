@@ -1,4 +1,4 @@
-<spell-page "radio api" notebook>
+<page "radio api" notebook>
 	<header level="1">
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api tag="ui-radio" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -9,7 +9,7 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 
 ## A recipe:  a card you can read and change
 
-<spell-more-of "recipe">
+<extend "recipe">
 	<action "edit it" description="Its Edit screen:  nothing changes until Save">
 		set the editing of the recipe box to it
 	</action>
@@ -33,12 +33,12 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 			</content>
 		</card>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## Its Edit screen:  a form over a draft, so nothing changes until Save
 
-<spell-view "recipe editor">
+<view "recipe editor">
 	<property "recipe" type="recipe" description="The recipe being changed"/>
 	<property "draft" description="A copy to change:  the recipe stays as it was until Save">a draft of its recipe</property>
 
@@ -74,12 +74,12 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 			</extra>
 		</card>
 	</draw>
-</spell-view>
+</view>
 
 
 ## The box:  the card for a new recipe, then a card for each one you have
 
-<spell-app "recipe box">
+<app "recipe box">
 	<property "search">text</>
 	<property "new recipe">a new recipe with servings = 4</>
 	<property "editing" type="recipe" description="The recipe on its Edit screen, while one is"/>
@@ -157,4 +157,4 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 			</cards>
 		</>
 	</draw>
-</spell-app>
+</app>

@@ -1,4 +1,4 @@
-<spell-page "split-panel theming" notebook>
+<page "split-panel theming" notebook>
 	<header level="1">
 		Split Panel
 		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
@@ -32,4 +32,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

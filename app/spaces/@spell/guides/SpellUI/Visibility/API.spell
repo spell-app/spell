@@ -1,4 +1,4 @@
-<spell-page "visibility api" notebook>
+<page "visibility api" notebook>
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api family="ui-visibility" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

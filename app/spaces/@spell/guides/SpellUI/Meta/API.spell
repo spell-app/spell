@@ -1,4 +1,4 @@
-<spell-page "meta api" notebook>
+<page "meta api" notebook>
 	<header level="1">
 		Meta
 		<header>A meta holds metadata about the content, such as a date or a category.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api tag="ui-meta" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

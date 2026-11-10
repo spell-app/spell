@@ -1,7 +1,7 @@
 # Un mazo
 Las 52 cartas de una baraja estándar, el as de tréboles primero -- y sus dos comodines, si los pides.
 
-<encanto-cosa "mazo" plantilla="lista de cartas">
+<cosa "mazo" plantilla="lista de cartas">
 	<propiedad "comodines" descripción="Sin comodines, a menos que se haga `con comodines`">sí o no</>
 	<acción "crearlo" descripción="Una carta de cada, el as de tréboles primero, luego sus dos comodines, el rojo y luego el negro:  cada una empieza boca abajo, como toda vista reversible">
 		para rango en rangos de carta
@@ -38,4 +38,4 @@ Las 52 cartas de una baraja estándar, el as de tréboles primero -- y sus dos c
 		la última carta del mazo es el comodín negro debería ser sí
 		el nombre de la carta de abajo del mazo debería ser "comodín negro"
 	</probar>
-</encanto-cosa>
+</cosa>

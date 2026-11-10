@@ -23,7 +23,7 @@
 	- a book's editions live at "{id}/editions.json"
 </web-server>
 
-<spell-thing "book">
+<thing "book">
 	<spell>
 		- it lives in open library
 		- its "authors" is a list of authors, stored as "author_key"
@@ -53,9 +53,9 @@
 	<property "series position">a list of text</>
 	<property "title">text</>
 	<property "subtitle">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "author">
+<thing "author">
 	<spell>
 		- it lives in open library
 	</spell>
@@ -78,9 +78,9 @@
 	<property "revision" type="number" />
 	<property "created" type="created" />
 	<property "last modified">a last modified</>
-</spell-thing>
+</thing>
 
-<spell-thing "edition">
+<thing "edition">
 	<spell>
 		- it lives in open library
 		- its "kind" is a kind, stored as "type"
@@ -102,21 +102,21 @@
 	<property "revision" type="number" />
 	<property "created" type="created" />
 	<property "last modified">a last modified</>
-</spell-thing>
+</thing>
 
-<spell-thing "link">
+<thing "link">
 	<property "title">text</>
 	<property "url">text</>	// an address
 	<spell>
 		- its "kind" is a kind, stored as "type"
 	</spell>
-</spell-thing>
+</thing>
 
-<spell-thing "kind">
+<thing "kind">
 	<property "key">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "remote id">
+<thing "remote id">
 	<property "viaf" type="number" />
 	<property "wikidata">text</>
 	<property "isni" type="number" />
@@ -133,33 +133,33 @@
 	<property "librivox" type="number" />
 	<property "project gutenberg" type="number" />
 	<property "opac sbn">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "created">
+<thing "created">
 	<spell>
 		- its "kind" is text, stored as "type"
 	</spell>
 	<property "value" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "last modified">
+<thing "last modified">
 	<spell>
 		- its "kind" is text, stored as "type"
 	</spell>
 	<property "value" type="date" />
-</spell-thing>
+</thing>
 
-<spell-thing "edition author">
+<thing "edition author">
 	<property "key">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "note">
+<thing "note">
 	<spell>
 		- its "kind" is text, stored as "type"
 	</spell>
 	<property "value">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "work">
+<thing "work">
 	<property "key">text</>
-</spell-thing>
+</thing>

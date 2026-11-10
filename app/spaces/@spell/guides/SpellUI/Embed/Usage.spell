@@ -1,4 +1,4 @@
-<spell-page "embed usage" notebook>
+<page "embed usage" notebook>
 	<header level="1">
 		Embed
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
@@ -126,4 +126,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

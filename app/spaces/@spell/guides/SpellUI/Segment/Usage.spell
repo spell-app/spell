@@ -1,4 +1,4 @@
-<spell-page "segment usage" notebook>
+<page "segment usage" notebook>
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
@@ -69,4 +69,4 @@
 			  the segment's box, colours and `inverted` look go.
 		</>
 	</>
-</spell-page>
+</page>

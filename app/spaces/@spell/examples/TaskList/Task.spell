@@ -4,7 +4,7 @@ Each task is its own element on the page, `<task-list-task>`.
 A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
 a drag moves it, the selected ones with it (`draggable`).
 
-<spell-view "task" selectable draggable>
+<view "task" selectable draggable>
 	<property "title" description="What to do">text</>
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
@@ -33,4 +33,4 @@ a drag moves it, the selected ones with it (`draggable`).
 		set the task's done to yes
 		the task is done should be yes
 	</test>
-</spell-view>
+</view>

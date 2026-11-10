@@ -1,4 +1,4 @@
-<spell-page "meta examples" notebook>
+<page "meta examples" notebook>
 	<header level="1">
 		Meta
 		<header>A meta holds metadata about the content, such as a date or a category.</>
@@ -77,4 +77,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "message theming" notebook>
+<page "message theming" notebook>
 	<header level="1">
 		Message
 		<header>A message displays information that explains nearby content.</>
@@ -55,4 +55,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

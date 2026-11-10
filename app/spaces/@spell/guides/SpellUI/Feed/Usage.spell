@@ -1,4 +1,4 @@
-<spell-page "feed usage" notebook>
+<page "feed usage" notebook>
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -88,4 +88,4 @@
 			  (shorthand or slotted).
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "site-nav examples" notebook>
+<page "site-nav examples" notebook>
 	<header level="1">
 		Site nav
 		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
@@ -43,4 +43,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

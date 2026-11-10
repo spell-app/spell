@@ -1,4 +1,4 @@
-<spell-page "avatar api" notebook>
+<page "avatar api" notebook>
 	<header level="1">
 		Avatar
 		<header>An avatar is a small picture of a person, beside a comment, an item or a card.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api tag="ui-avatar" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "reveal examples" notebook>
+<page "reveal examples" notebook>
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -164,4 +164,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

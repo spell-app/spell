@@ -19,71 +19,71 @@ core.heading("Star Wars:  where it all lives")
 
 export class Character extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1381, end: 1402 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1375, end: 1396 } })
   accessor name!: string
 
   // - its "height" is a length in cm or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1419, end: 1462 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1413, end: 1456 } })
   accessor height!: number
 
   // - its "mass" is a weight in kg or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1467, end: 1508 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 1461, end: 1502 } })
   accessor mass!: number
 
   // - its "hair color" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1520, end: 1547 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1514, end: 1541 } })
   accessor hairColor!: string
 
   // - its "skin color" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1552, end: 1579 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1546, end: 1573 } })
   accessor skinColor!: string
 
   // - its "eye color" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1584, end: 1610 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1578, end: 1604 } })
   accessor eyeColor!: string
 
   // - its "birth year" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1615, end: 1642 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1609, end: 1636 } })
   accessor birthYear!: string
 
   // - its "gender" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1647, end: 1670 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 1641, end: 1664 } })
   accessor gender!: string
 
   // - its "homeworld" is a planet
-  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.api.spell", start: 1675, end: 1709 } }) }
+  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.api.spell", start: 1669, end: 1703 } }) }
   get homeworld(): Planet { return core.linked(this, "homeworld", Planet) as Planet }
   set homeworld(value: Planet) { this.setProp("homeworld", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 1715, end: 1748 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 1709, end: 1742 } }) }
   get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
   set films(value: List<Film>) { this.setProp("films", value) }
 
   // - its "species" is a list of species
-  static { this.declareProp("species", { itemType: "Species", init: () => new List<Species>({ instanceType: "Species" }), declaredAt: { path: "/StarWars.api.spell", start: 1753, end: 1790 } }) }
+  static { this.declareProp("species", { itemType: "Species", init: () => new List<Species>({ instanceType: "Species" }), declaredAt: { path: "/StarWars.api.spell", start: 1747, end: 1784 } }) }
   get species(): List<Species> { return core.linked(this, "species", Species) as List<Species> }
   set species(value: List<Species>) { this.setProp("species", value) }
 
   // - its "vehicles" is a list of vehicles
-  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List<Vehicle>({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.api.spell", start: 1795, end: 1834 } }) }
+  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List<Vehicle>({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.api.spell", start: 1789, end: 1828 } }) }
   get vehicles(): List<Vehicle> { return core.linked(this, "vehicles", Vehicle) as List<Vehicle> }
   set vehicles(value: List<Vehicle>) { this.setProp("vehicles", value) }
 
   // - its "starships" is a list of starships
-  static { this.declareProp("starships", { itemType: "Starship", init: () => new List<Starship>({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.api.spell", start: 1839, end: 1880 } }) }
+  static { this.declareProp("starships", { itemType: "Starship", init: () => new List<Starship>({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.api.spell", start: 1833, end: 1874 } }) }
   get starships(): List<Starship> { return core.linked(this, "starships", Starship) as List<Starship> }
   set starships(value: List<Starship>) { this.setProp("starships", value) }
 
   // - its "created" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1885, end: 1915 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1879, end: 1909 } })
   accessor created!: Date
 
   // - its "edited" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1921, end: 1950 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1915, end: 1944 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 10810, end: 10906 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 10696, end: 10792 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -92,13 +92,13 @@ export class Character extends Thing {
     })
   }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 10919, end: 10970 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 10805, end: 10856 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
 
   /** Their own picture on Wikipedia, or nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 10983, end: 11171 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 10869, end: 11057 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page"))?.fits && (await core.answerOf(this, "page"))?.thumbnail) return (await core.answerOf(this, "page"))?.thumbnail?.source
     return ""
@@ -108,7 +108,7 @@ export class Character extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 11221, end: 11648 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 11107, end: 11534 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Height", value: `${core.measureShown(this.height, "Length", "centimeter")}` }))
@@ -143,66 +143,66 @@ export class Character extends Thing {
     times: ["modified"], select: ["name", "height", "mass", "hairColor", "eyeColor", "birthYear", "homeworld", "films", "species", "vehicles", "starships"] }
 
   // - it lives in star wars
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1348, end: 1369 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1342, end: 1363 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Planet extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2040, end: 2061 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2022, end: 2043 } })
   accessor name!: string
 
   // - its "rotation period" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2078, end: 2124 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2060, end: 2106 } })
   accessor rotationPeriod!: number
 
   // - its "orbital period" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2129, end: 2174 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2111, end: 2156 } })
   accessor orbitalPeriod!: number
 
   // - its "diameter" is a length in km
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 2179, end: 2211 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 2161, end: 2193 } })
   accessor diameter!: number
 
   // - its "climate" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2223, end: 2247 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2205, end: 2229 } })
   accessor climate!: string
 
   // - its "gravity" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2252, end: 2276 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2234, end: 2258 } })
   accessor gravity!: string
 
   // - its "terrain" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2281, end: 2305 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2263, end: 2287 } })
   accessor terrain!: string
 
   // - its "surface water" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2322, end: 2366 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2304, end: 2348 } })
   accessor surfaceWater!: number
 
   // - its "population" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2371, end: 2412 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 2353, end: 2394 } })
   accessor population!: number
 
   // - its "residents" is a list of characters
-  static { this.declareProp("residents", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 2424, end: 2466 } }) }
+  static { this.declareProp("residents", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 2406, end: 2448 } }) }
   get residents(): List<Character> { return core.linked(this, "residents", Character) as List<Character> }
   set residents(value: List<Character>) { this.setProp("residents", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 2471, end: 2504 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 2453, end: 2486 } }) }
   get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
   set films(value: List<Film>) { this.setProp("films", value) }
 
   // - its "created" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2509, end: 2539 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2491, end: 2521 } })
   accessor created!: Date
 
   // - its "edited" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2545, end: 2574 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2527, end: 2556 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 12308, end: 12426 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 12180, end: 12298 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -214,7 +214,7 @@ export class Planet extends Thing {
   }
 
   /** What colour a world is, from its weather */
-  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 12439, end: 12816 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 12311, end: 12688 }, readsFrom: ["star_wars"] }) }
   get hue() {
     if (core.includes(this.climate, "frozen")) return 200
     if (core.includes(this.climate, "arid")) return 38
@@ -227,7 +227,7 @@ export class Planet extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 12866, end: 13447 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 12738, end: 13319 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Climate", value: this.climate }))
@@ -260,69 +260,69 @@ export class Planet extends Thing {
     times: ["modified"], select: ["name", "rotationPeriod", "orbitalPeriod", "diameter", "climate", "terrain", "population", "residents", "films"] }
 
   // - it lives in star wars
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2007, end: 2028 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1989, end: 2010 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Film extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2662, end: 2684 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2632, end: 2654 } })
   accessor title!: string
 
   // - its "episode id" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 2689, end: 2724 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 2659, end: 2694 } })
   accessor episodeId!: number
 
   // - its "opening crawl" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2730, end: 2760 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2700, end: 2730 } })
   accessor openingCrawl!: string
 
   // - its "director" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2765, end: 2790 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2735, end: 2760 } })
   accessor director!: string
 
   // - its "producer" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2795, end: 2820 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 2765, end: 2790 } })
   accessor producer!: string
 
   // - its "release date" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2825, end: 2860 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2795, end: 2830 } })
   accessor releaseDate!: Date
 
   // - its "characters" is a list of characters
-  static { this.declareProp("characters", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 2866, end: 2909 } }) }
+  static { this.declareProp("characters", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 2836, end: 2879 } }) }
   get characters(): List<Character> { return core.linked(this, "characters", Character) as List<Character> }
   set characters(value: List<Character>) { this.setProp("characters", value) }
 
   // - its "planets" is a list of planets
-  static { this.declareProp("planets", { itemType: "Planet", init: () => new List<Planet>({ instanceType: "Planet" }), declaredAt: { path: "/StarWars.api.spell", start: 2914, end: 2951 } }) }
+  static { this.declareProp("planets", { itemType: "Planet", init: () => new List<Planet>({ instanceType: "Planet" }), declaredAt: { path: "/StarWars.api.spell", start: 2884, end: 2921 } }) }
   get planets(): List<Planet> { return core.linked(this, "planets", Planet) as List<Planet> }
   set planets(value: List<Planet>) { this.setProp("planets", value) }
 
   // - its "starships" is a list of starships
-  static { this.declareProp("starships", { itemType: "Starship", init: () => new List<Starship>({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.api.spell", start: 2956, end: 2997 } }) }
+  static { this.declareProp("starships", { itemType: "Starship", init: () => new List<Starship>({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.api.spell", start: 2926, end: 2967 } }) }
   get starships(): List<Starship> { return core.linked(this, "starships", Starship) as List<Starship> }
   set starships(value: List<Starship>) { this.setProp("starships", value) }
 
   // - its "vehicles" is a list of vehicles
-  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List<Vehicle>({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.api.spell", start: 3002, end: 3041 } }) }
+  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List<Vehicle>({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.api.spell", start: 2972, end: 3011 } }) }
   get vehicles(): List<Vehicle> { return core.linked(this, "vehicles", Vehicle) as List<Vehicle> }
   set vehicles(value: List<Vehicle>) { this.setProp("vehicles", value) }
 
   // - its "species" is a list of species
-  static { this.declareProp("species", { itemType: "Species", init: () => new List<Species>({ instanceType: "Species" }), declaredAt: { path: "/StarWars.api.spell", start: 3046, end: 3083 } }) }
+  static { this.declareProp("species", { itemType: "Species", init: () => new List<Species>({ instanceType: "Species" }), declaredAt: { path: "/StarWars.api.spell", start: 3016, end: 3053 } }) }
   get species(): List<Species> { return core.linked(this, "species", Species) as List<Species> }
   set species(value: List<Species>) { this.setProp("species", value) }
 
   // - its "created" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3088, end: 3118 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3058, end: 3088 } })
   accessor created!: Date
 
   // - its "edited" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3124, end: 3153 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3094, end: 3123 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 9609, end: 9709 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 9509, end: 9609 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.title,
@@ -343,7 +343,7 @@ export class Film extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 9887, end: 10186 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 9787, end: 10086 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Directed by", value: this.director }))
@@ -395,71 +395,71 @@ export class Film extends Thing {
     times: ["modified"], select: ["title", "episodeId", "openingCrawl", "director", "producer", "releaseDate", "characters", "planets", "starships", "vehicles", "species"] }
 
   // - it lives in star wars
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2629, end: 2650 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2599, end: 2620 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Species extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3244, end: 3265 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3202, end: 3223 } })
   accessor name!: string
 
   // - its "classification" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3270, end: 3301 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3228, end: 3259 } })
   accessor classification!: string
 
   // - its "designation" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3306, end: 3334 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3264, end: 3292 } })
   accessor designation!: string
 
   // - its "average height" is a number or "n/a" or "unknown"
-  @prop({ type: "number", nothingAs: ["n/a", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3351, end: 3405 } })
+  @prop({ type: "number", nothingAs: ["n/a", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3309, end: 3363 } })
   accessor averageHeight!: number
 
   // - its "skin colors" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3417, end: 3445 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3375, end: 3403 } })
   accessor skinColors!: string
 
   // - its "hair colors" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3450, end: 3478 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3408, end: 3436 } })
   accessor hairColors!: string
 
   // - its "eye colors" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3483, end: 3510 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3441, end: 3468 } })
   accessor eyeColors!: string
 
   // - its "average lifespan" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3515, end: 3548 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3473, end: 3506 } })
   accessor averageLifespan!: string
 
   // - its "homeworld" is a planet
-  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.api.spell", start: 3553, end: 3587 } }) }
+  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.api.spell", start: 3511, end: 3545 } }) }
   get homeworld(): Planet { return core.linked(this, "homeworld", Planet) as Planet }
   set homeworld(value: Planet) { this.setProp("homeworld", value) }
 
   // - its "language" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3593, end: 3618 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3551, end: 3576 } })
   accessor language!: string
 
   // - its "people" is a list of characters
-  static { this.declareProp("people", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 3623, end: 3662 } }) }
+  static { this.declareProp("people", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 3581, end: 3620 } }) }
   get people(): List<Character> { return core.linked(this, "people", Character) as List<Character> }
   set people(value: List<Character>) { this.setProp("people", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 3667, end: 3700 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 3625, end: 3658 } }) }
   get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
   set films(value: List<Film>) { this.setProp("films", value) }
 
   // - its "created" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3705, end: 3735 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3663, end: 3693 } })
   accessor created!: Date
 
   // - its "edited" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3741, end: 3770 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3699, end: 3728 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 16528, end: 16632 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 16346, end: 16450 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -470,7 +470,7 @@ export class Species extends Thing {
   }
 
   /** Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 16645, end: 16943 }, readsFrom: ["star_wars", "wikipedia"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 16463, end: 16761 }, readsFrom: ["star_wars", "wikipedia"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     const everyone = await core.savedThings(Character)
     let found: string = ""
@@ -484,7 +484,7 @@ export class Species extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 16992, end: 17217 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 16810, end: 17035 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Language", value: this.language }))
@@ -513,74 +513,74 @@ export class Species extends Thing {
     times: ["modified"], select: ["name", "classification", "averageLifespan", "homeworld", "language", "people", "films"] }
 
   // - it lives in star wars
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3211, end: 3232 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3169, end: 3190 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Vehicle extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3861, end: 3882 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3807, end: 3828 } })
   accessor name!: string
 
   // - its "model" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3887, end: 3909 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3833, end: 3855 } })
   accessor model!: string
 
   // - its "manufacturer" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3914, end: 3943 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 3860, end: 3889 } })
   accessor manufacturer!: string
 
   // - its "cost in credits" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3960, end: 4006 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 3906, end: 3952 } })
   accessor costInCredits!: number
 
   // - its "length" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4018, end: 4049 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 3964, end: 3995 } })
   accessor length!: number
 
   // - its "max atmosphering speed" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4055, end: 4102 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4001, end: 4048 } })
   accessor maxAtmospheringSpeed!: number
 
   // - its "crew" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4108, end: 4137 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4054, end: 4083 } })
   accessor crew!: number
 
   // - its "passengers" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4143, end: 4178 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4089, end: 4124 } })
   accessor passengers!: number
 
   // - its "cargo capacity" is a number or "none" or "unknown"
-  @prop({ type: "number", nothingAs: ["none", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4196, end: 4251 } })
+  @prop({ type: "number", nothingAs: ["none", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4142, end: 4197 } })
   accessor cargoCapacity!: number
 
   // - its "consumables" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4263, end: 4291 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4209, end: 4237 } })
   accessor consumables!: string
 
   // - its "vehicle class" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4296, end: 4326 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4242, end: 4272 } })
   accessor vehicleClass!: string
 
   // - its "pilots" is a list of characters
-  static { this.declareProp("pilots", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 4331, end: 4370 } }) }
+  static { this.declareProp("pilots", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 4277, end: 4316 } }) }
   get pilots(): List<Character> { return core.linked(this, "pilots", Character) as List<Character> }
   set pilots(value: List<Character>) { this.setProp("pilots", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 4375, end: 4408 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 4321, end: 4354 } }) }
   get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
   set films(value: List<Film>) { this.setProp("films", value) }
 
   // - its "created" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4413, end: 4443 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4359, end: 4389 } })
   accessor created!: Date
 
   // - its "edited" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4449, end: 4478 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4395, end: 4424 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 15785, end: 15874 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 15617, end: 15706 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -621,82 +621,82 @@ export class Vehicle extends Thing {
     times: ["modified"], select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "vehicleClass", "pilots", "films"] }
 
   // - it lives in star wars
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3828, end: 3849 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3774, end: 3795 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Starship extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4570, end: 4591 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4504, end: 4525 } })
   accessor name!: string
 
   // - its "model" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4596, end: 4618 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4530, end: 4552 } })
   accessor model!: string
 
   // - its "manufacturer" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4623, end: 4652 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4557, end: 4586 } })
   accessor manufacturer!: string
 
   // - its "cost in credits" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4669, end: 4715 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4603, end: 4649 } })
   accessor costInCredits!: number
 
   // - its "length" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4727, end: 4758 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWars.api.spell", start: 4661, end: 4692 } })
   accessor length!: number
 
   // - its "max atmosphering speed" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4764, end: 4803 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4698, end: 4737 } })
   accessor maxAtmospheringSpeed!: string
 
   // - its "crew" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4808, end: 4829 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4742, end: 4763 } })
   accessor crew!: string
 
   // - its "passengers" is a number or "n/a" or "unknown"
-  @prop({ type: "number", nothingAs: ["n/a", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4846, end: 4896 } })
+  @prop({ type: "number", nothingAs: ["n/a", "unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4780, end: 4830 } })
   accessor passengers!: number
 
   // - its "cargo capacity" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4901, end: 4946 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4835, end: 4880 } })
   accessor cargoCapacity!: number
 
   // - its "consumables" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4958, end: 4986 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 4892, end: 4920 } })
   accessor consumables!: string
 
   // - its "hyperdrive rating" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 5003, end: 5051 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4937, end: 4985 } })
   accessor hyperdriveRating!: number
 
   // - its "mglt" is a number or "unknown"
-  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 5056, end: 5091 } })
+  @prop({ type: "number", nothingAs: ["unknown"], declaredAt: { path: "/StarWars.api.spell", start: 4990, end: 5025 } })
   accessor mglt!: number
 
   // - its "starship class" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 5103, end: 5134 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWars.api.spell", start: 5037, end: 5068 } })
   accessor starshipClass!: string
 
   // - its "pilots" is a list of characters
-  static { this.declareProp("pilots", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 5139, end: 5178 } }) }
+  static { this.declareProp("pilots", { itemType: "Character", init: () => new List<Character>({ instanceType: "Character" }), declaredAt: { path: "/StarWars.api.spell", start: 5073, end: 5112 } }) }
   get pilots(): List<Character> { return core.linked(this, "pilots", Character) as List<Character> }
   set pilots(value: List<Character>) { this.setProp("pilots", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 5183, end: 5216 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List<Film>({ instanceType: "Film" }), declaredAt: { path: "/StarWars.api.spell", start: 5117, end: 5150 } }) }
   get films(): List<Film> { return core.linked(this, "films", Film) as List<Film> }
   set films(value: List<Film>) { this.setProp("films", value) }
 
   // - its "created" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 5221, end: 5251 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 5155, end: 5185 } })
   accessor created!: Date
 
   // - its "edited" is a date
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 5257, end: 5286 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 5191, end: 5220 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 15124, end: 15214 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 14970, end: 15060 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -737,7 +737,7 @@ export class Starship extends Thing {
     times: ["modified"], select: ["name", "model", "manufacturer", "costInCredits", "length", "crew", "passengers", "starshipClass", "pilots", "films"] }
 
   // - it lives in star wars
-  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4537, end: 4558 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4471, end: 4492 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -779,82 +779,82 @@ core.heading("Wikipedia:  a page each, by its name.  Not every name has one")
 
 export class WikiPage extends Thing {
   // - its "kind" is text, stored as "type"
-  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/Wikipedia.api.spell", start: 1146, end: 1182 } })
+  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/Wikipedia.api.spell", start: 1140, end: 1176 } })
   accessor kind!: string
 
   // - its "displaytitle" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1194, end: 1223 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1188, end: 1217 } })
   accessor displaytitle!: string
 
   // - its "namespace" is a namespace
-  @prop({ type: "Namespace", declaredAt: { path: "/Wikipedia.api.spell", start: 1228, end: 1265 } })
+  @prop({ type: "Namespace", declaredAt: { path: "/Wikipedia.api.spell", start: 1222, end: 1259 } })
   accessor namespace!: Namespace
 
   // - its "wikibase item" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1271, end: 1301 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1265, end: 1295 } })
   accessor wikibaseItem!: string
 
   // - its "titles" is a title
-  @prop({ type: "Title", declaredAt: { path: "/Wikipedia.api.spell", start: 1306, end: 1336 } })
+  @prop({ type: "Title", declaredAt: { path: "/Wikipedia.api.spell", start: 1300, end: 1330 } })
   accessor titles!: Title
 
   // - its "pageid" is a number
-  @prop({ type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1342, end: 1373 } })
+  @prop({ type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1336, end: 1367 } })
   accessor pageid!: number
 
   // - its "thumbnail" is a thumbnail
-  @prop({ type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 1379, end: 1416 } })
+  @prop({ type: "Thumbnail", declaredAt: { path: "/Wikipedia.api.spell", start: 1373, end: 1410 } })
   accessor thumbnail!: Thumbnail
 
   // - its "originalimage" is an originalimage
-  @prop({ type: "Originalimage", declaredAt: { path: "/Wikipedia.api.spell", start: 1422, end: 1467 } })
+  @prop({ type: "Originalimage", declaredAt: { path: "/Wikipedia.api.spell", start: 1416, end: 1461 } })
   accessor originalimage!: Originalimage
 
   // - its "lang" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1473, end: 1494 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1467, end: 1488 } })
   accessor lang!: string
 
   // - its "dir" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1499, end: 1519 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1493, end: 1513 } })
   accessor dir!: string
 
   // - its "revision" is a number
-  @prop({ type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1524, end: 1557 } })
+  @prop({ type: "number", declaredAt: { path: "/Wikipedia.api.spell", start: 1518, end: 1551 } })
   accessor revision!: number
 
   // - its "tid" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1563, end: 1583 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1557, end: 1577 } })
   accessor tid!: string
 
   // - its "timestamp" is a date
-  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1588, end: 1620 } })
+  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1582, end: 1614 } })
   accessor timestamp!: Date
 
   // - its "about" is text, stored as "description"
-  @prop({ type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 1638, end: 1682 } })
+  @prop({ type: "text", storedAs: "description", declaredAt: { path: "/Wikipedia.api.spell", start: 1632, end: 1676 } })
   accessor about!: string
 
   // - its "description source" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1694, end: 1729 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1688, end: 1723 } })
   accessor descriptionSource!: string
 
   // - its "content urls" is a content url
-  @prop({ type: "ContentUrl", declaredAt: { path: "/Wikipedia.api.spell", start: 1734, end: 1772 } })
+  @prop({ type: "ContentUrl", declaredAt: { path: "/Wikipedia.api.spell", start: 1728, end: 1766 } })
   accessor contentUrls!: ContentUrl
 
   // - its "summary" is text, stored as "extract"
-  @prop({ type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 1789, end: 1831 } })
+  @prop({ type: "text", storedAs: "extract", declaredAt: { path: "/Wikipedia.api.spell", start: 1783, end: 1825 } })
   accessor summary!: string
 
   // - its "extract html" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1843, end: 1872 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1837, end: 1866 } })
   accessor extractHtml!: string
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1877, end: 1899 } })
+  @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1871, end: 1893 } })
   accessor title!: string
 
-  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spell", start: 7434, end: 7603 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spell", start: 7396, end: 7565 }, readsFrom: ["wikipedia"] }) }
   get fits() {
     if (core.includes(this.title, "List of")) return false
     return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
@@ -866,11 +866,11 @@ export class WikiPage extends Thing {
     times: ["created", "modified"], select: ["kind", "thumbnail", "about", "contentUrls", "summary", "title"] }
 
   // - it lives in wikipedia
-  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1120, end: 1141 } })
+  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1114, end: 1135 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in wikipedia
-  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1120, end: 1141 } })
+  @prop({ type: "date", declaredAt: { path: "/Wikipedia.api.spell", start: 1114, end: 1135 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -1000,7 +1000,7 @@ core.heading("Star Wars")
 ///////////////
 // A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWars.api.spell, as `spell place ingest` wrote it:
 // say what a field links to, and reading it follows the link, `the name of its homeworld`.
-// Each type below adds to its type there, with `<spell-more-of>`:  so looking again at the server never touches a line of this.
+// Each type below adds to its type there, with `<extend>`:  so looking again at the server never touches a line of this.
 
 export class Card extends Thing {
   // - it has a label
@@ -1074,7 +1074,7 @@ export class WikiNote extends Thing {
   // - it has a name
   @prop() accessor name!: string
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 7683, end: 7734 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 7632, end: 7683 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -1128,7 +1128,7 @@ export class FactTable extends Thing {
   @prop({ itemType: "Fact", init: () => new List<Fact>({ instanceType: "Fact" }) })
   accessor facts!: List<Fact>
 
-  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spell", start: 8893, end: 8951 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spell", start: 8818, end: 8876 }, readsFrom: ["star_wars"] }) }
   @derived get shown() {
     return core.filter(this.facts, (fact: Fact) => fact.isKnown)
   }
@@ -1246,7 +1246,7 @@ export class Guide extends App {
   accessor jumping!: boolean
 
   /** Whatever's found:  the film, character, planet, ship or anything else with that in its name */
-  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spell", start: 641, end: 1434 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spell", start: 628, end: 1421 }, readsFrom: ["star_wars"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const matches = new List<Thing>({ instanceType: "Thing" })
     core.map(core.filter(await core.savedThings(Film, { search: { title: this.search } }, "looks through"), (film: Film) => core.includes(film.title, this.search)), (film: Film) => matches.append(film))
@@ -1566,7 +1566,7 @@ export class Portrait extends Thing {
   get species(): Species { return core.linked(this, "species", Species) as Species }
   set species(value: Species) { this.setProp("species", value) }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWarsPortrait.spell", start: 445, end: 496 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWarsPortrait.spell", start: 439, end: 490 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -1575,7 +1575,7 @@ export class Portrait extends Thing {
     return core.getItemAt(this.name, 0)
   }
 
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWarsPortrait.spell", start: 570, end: 749 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWarsPortrait.spell", start: 564, end: 743 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page"))?.fits && (await core.answerOf(this, "page"))?.thumbnail) return (await core.answerOf(this, "page"))?.thumbnail?.source
     if (await core.answerOf(this, "species")) return await core.answerOf((await core.answerOf(this, "species")), "picture")

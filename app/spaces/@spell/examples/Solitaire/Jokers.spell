@@ -4,7 +4,7 @@ A joker is a card, with what makes it a joker on top:  a subclass of `card`.
 - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
 - A deck holds its two only when it's made `with jokers`.  Solitaire's own game plays without them.
 
-<spell-view "joker" template="card">
+<view "joker" template="card">
 	<group "what's different" description="A joker comes red or black"/>
 	<property "color" one-of="red or black"/>
 	<alias "is the (color) joker"/>
@@ -49,4 +49,4 @@ A joker is a card, with what makes it a joker on top:  a subclass of `card`.
 		the card is not a joker should be yes
 		the card is the red joker should be no
 	</test>
-</spell-view>
+</view>

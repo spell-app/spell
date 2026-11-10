@@ -1,4 +1,4 @@
-<spell-page "json examples" notebook>
+<page "json examples" notebook>
 	<header level="1">
 		JSON data
 		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
@@ -32,4 +32,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

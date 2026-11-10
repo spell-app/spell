@@ -1,4 +1,4 @@
-<spell-page "value api" notebook>
+<page "value api" notebook>
 	<header level="1">
 		Value
 		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api tag="ui-value" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

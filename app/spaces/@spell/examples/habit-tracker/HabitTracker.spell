@@ -6,7 +6,7 @@ Each habit counts its days, and its streak:  the most days in a row you kept it 
 Its name, a yes or no for each day of the week, and what they add up to.
 Each habit is its own element on the page, `<habit-tracker-habit>`.
 
-<spell-view "habit">
+<view "habit">
 	<property "name">text</>
 
 	<group "days" description="A yes or no for each day of the week"/>
@@ -67,12 +67,12 @@ Each habit is its own element on the page, `<habit-tracker-habit>`.
 		set the habit's wednesday to yes
 		the habit's streak should be 4
 	</test>
-</spell-view>
+</view>
 
 ## The week
 The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
-<spell-view "week" template="viewable list of habits">
+<view "week" template="viewable list of habits">
 	<spell>
 		// on the page, its habits can be dragged to another place
 		- its items can be reordered immediately
@@ -85,7 +85,7 @@ The habits, one under the other:  `<habit-tracker-week>`, around its habits' ele
 			<children/>
 		</stack>
 	</draw>
-</spell-view>
+</view>
 <spell>
 	// a habit is in one week
 	a habit belongs to one week
@@ -94,7 +94,7 @@ The habits, one under the other:  `<habit-tracker-week>`, around its habits' ele
 ## The tracker
 The new habit's field, then a habit a row.
 
-<spell-app "habit tracker">
+<app "habit tracker">
 	<property "habits">a new week</>
 	<property "draft" description="The next habit's name, as the new habit's field holds it">text</>
 
@@ -123,4 +123,4 @@ The new habit's field, then a habit a row.
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>

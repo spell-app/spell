@@ -1,4 +1,4 @@
-<spell-page "getting started" notebook>
+<page "getting started" notebook>
 	<header level="1">
 		Getting started
 		<header>Install the package, load the components, and use them from any framework.</>
@@ -174,4 +174,4 @@
 			lists what changed.
 		</>
 	</>
-</spell-page>
+</page>

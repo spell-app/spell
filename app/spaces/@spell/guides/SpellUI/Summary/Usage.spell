@@ -1,4 +1,4 @@
-<spell-page "summary usage" notebook>
+<page "summary usage" notebook>
 	<header level="1">
 		Summary
 		<header>A summary is a feed event's main line:  who did what, and when.</>
@@ -34,4 +34,4 @@
 	<section label="Accessibility">
 		<markdown>- A neutral block with no role; the event around it is a list item of the feed's list.</>
 	</>
-</spell-page>
+</page>

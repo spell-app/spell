@@ -1,4 +1,4 @@
-<spell-page "reveal api" notebook>
+<page "reveal api" notebook>
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -36,4 +36,4 @@
 			<ui-docs-api family="ui-reveal" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

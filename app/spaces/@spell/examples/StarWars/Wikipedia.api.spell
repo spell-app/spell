@@ -15,7 +15,7 @@
 	- wiki pages are found at "/page/summary/{name}"
 </web-server>
 
-<spell-thing "wiki page">
+<thing "wiki page">
 	<spell>
 		- it lives in wikipedia
 		- its "kind" is text, stored as "type"
@@ -42,48 +42,48 @@
 	</spell>
 	<property "extract html">text</>
 	<property "title">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "namespace">
+<thing "namespace">
 	<spell>
 		- its "number" is a number, stored as "id"
 	</spell>
 	<property "text">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "title">
+<thing "title">
 	<property "canonical">text</>
 	<property "normalized">text</>
 	<property "display">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "thumbnail">
+<thing "thumbnail">
 	<property "source">text</>	// an address
 	<property "width" type="number" />
 	<property "height" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "originalimage">
+<thing "originalimage">
 	<property "source">text</>	// an address
 	<property "width" type="number" />
 	<property "height" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "content url">
+<thing "content url">
 	<property "desktop" type="desktop" />
 	<property "mobile" type="mobile" />
-</spell-thing>
+</thing>
 
-<spell-thing "desktop">
+<thing "desktop">
 	<property "page">text</>	// an address
 	<property "revisions">text</>	// an address
 	<property "edit">text</>	// an address
 	<property "talk">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "mobile">
+<thing "mobile">
 	<property "page">text</>	// an address
 	<property "revisions">text</>	// an address
 	<property "edit">text</>	// an address
 	<property "talk">text</>	// an address
-</spell-thing>
+</thing>

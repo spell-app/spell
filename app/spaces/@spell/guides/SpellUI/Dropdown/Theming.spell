@@ -1,4 +1,4 @@
-<spell-page "dropdown theming" notebook>
+<page "dropdown theming" notebook>
 	<header level="1">
 		Dropdown
 		<header>A dropdown allows a user to select a value from a series of options.</>
@@ -56,4 +56,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

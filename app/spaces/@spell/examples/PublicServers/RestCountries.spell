@@ -1,10 +1,10 @@
 # REST Countries
 Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.
 Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<spell-more-of>`, so looking again at the server never touches a line of this.
+with `<extend>`, so looking again at the server never touches a line of this.
 All 250 come in one request, with no paging:  picking a region only looks through them again.
 
-<spell-thing "rest countries page">
+<thing "rest countries page">
 	<spell>
 		- its "region" is text
 		- its "language" is text  // its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`
@@ -58,24 +58,24 @@ All 250 come in one request, with no paging:  picking a region only looks throug
 			<cell "Languages"><stack direction="horizontal" wrap spacing="xs">{draw each language in its languages}</stack></cell>
 		</for>
 	</draw>
-</spell-thing>
+</thing>
 
 
 # Its money
 Its name, its symbol and its code:  `Euro`, `€`, `EUR`.
 
-<spell-more-of "currency">
+<extend "currency">
 	<draw>
 		<text>{its name} ({its symbol}) <text color="grey">{its code}</text></text>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 # A language
 Its name in English, keyed by its code:  `French`, `fra`.
 
-<spell-more-of "language">
+<extend "language">
 	<draw>
 		<text>{its name}</text>
 	</draw>
-</spell-more-of>
+</extend>

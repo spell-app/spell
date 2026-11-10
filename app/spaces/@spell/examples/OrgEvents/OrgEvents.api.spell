@@ -7,7 +7,7 @@
 	- check it every 30 seconds
 </data-folder>
 
-<spell-thing "event">
+<thing "event">
 	<spell>
 		- it lives in org events
 	</spell>
@@ -18,13 +18,13 @@
 	<property "stage name">text</>
 	<property "onward">text</>
 	<property "onward name">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "event stage">
+<thing "event stage">
 	<spell>
 		- it lives in org events
 	</spell>
 	<property "name">text</>
 	<property "moves to">text</>
 	<property "moved by">text</>
-</spell-thing>
+</thing>

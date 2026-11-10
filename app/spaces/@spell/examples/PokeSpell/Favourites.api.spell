@@ -3,10 +3,10 @@
 // Change the next line to keep them somewhere else, and nothing else changes.
 <device-storage "my favourites" />
 
-<spell-thing "favourite">
+<thing "favourite">
 	<spell>
 		- it lives in my favourites
 	</spell>
 	<property "name">text</>
 	<property "address">text</>	// the pokemon's own, at PokéAPI
-</spell-thing>
+</thing>

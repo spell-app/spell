@@ -1,4 +1,4 @@
-<spell-page "label examples" notebook>
+<page "label examples" notebook>
 	<header level="1">
 		Label
 		<header>A label displays content classification.</>
@@ -662,4 +662,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

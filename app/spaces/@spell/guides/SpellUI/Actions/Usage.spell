@@ -1,4 +1,4 @@
-<spell-page "actions usage" notebook>
+<page "actions usage" notebook>
 	<header level="1">
 		Actions
 		<header>Actions hold what a user can do next:  a comment's reply links, a modal's or toast's buttons.</>
@@ -43,4 +43,4 @@
 			- A comment's `minimal` actions show on hover AND on keyboard focus, so they stay reachable with **Tab**.
 		</>
 	</>
-</spell-page>
+</page>

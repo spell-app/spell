@@ -1,4 +1,4 @@
-<spell-page "rail api" notebook>
+<page "rail api" notebook>
 	<header level="1">
 		Rail
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
@@ -37,4 +37,4 @@
 			<ui-docs-api family="ui-rail" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

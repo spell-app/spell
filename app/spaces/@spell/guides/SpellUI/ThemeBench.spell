@@ -1,4 +1,4 @@
-<spell-page "theme bench" notebook>
+<page "theme bench" notebook>
 	<header level="1">
 		Theme bench
 		<header>The theme editor, full width:  Spell's real pages side by side in the theme being made, its big choices and every token, live.</>
@@ -6,4 +6,4 @@
 	<html>
 		<ui-docs-theme-bench></>
 	</>
-</spell-page>
+</page>

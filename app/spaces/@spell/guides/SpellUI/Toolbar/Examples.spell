@@ -1,4 +1,4 @@
-<spell-page "toolbar examples" notebook>
+<page "toolbar examples" notebook>
 	<header level="1">
 		Toolbar
 		<header>A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.</>
@@ -90,4 +90,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

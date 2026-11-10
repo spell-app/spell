@@ -1,4 +1,4 @@
-<spell-page "terms usage" notebook>
+<page "terms usage" notebook>
 	<header level="1">
 		Terms
 		<header>Terms list facts as a label and a value each, lined up.</>
@@ -27,4 +27,4 @@
 	<section label="Accessibility">
 		<markdown>Screen readers hear each label as a term and its value as the term's definition (`role="term"`, `role="definition"`).</>
 	</>
-</spell-page>
+</page>

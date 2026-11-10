@@ -1,4 +1,4 @@
-<spell-page "property-editor examples" notebook>
+<page "property-editor examples" notebook>
 	<header level="1">
 		Property Editor
 		<header>A property editor draws a form from a schema:  one field per property, in groups that open and close, for one thing or many.</>
@@ -102,4 +102,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

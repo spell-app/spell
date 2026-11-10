@@ -1,4 +1,4 @@
-<spell-page "content-parts usage" notebook>
+<page "content-parts usage" notebook>
 	<header level="1">
 		Content parts
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
@@ -81,4 +81,4 @@
 			  its styling and its icon.
 		</>
 	</>
-</spell-page>
+</page>

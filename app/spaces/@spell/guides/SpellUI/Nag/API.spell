@@ -1,4 +1,4 @@
-<spell-page "nag api" notebook>
+<page "nag api" notebook>
 	<header level="1">
 		Nag
 		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-nag" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

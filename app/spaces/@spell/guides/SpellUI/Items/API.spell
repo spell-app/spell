@@ -1,4 +1,4 @@
-<spell-page "items api" notebook>
+<page "items api" notebook>
 	<header level="1">
 		Items
 		<header>A group of items presents a set of site content for display, each an image beside its
@@ -37,4 +37,4 @@
 			<ui-docs-api family="ui-items" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "icon examples" notebook>
+<page "icon examples" notebook>
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -273,4 +273,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

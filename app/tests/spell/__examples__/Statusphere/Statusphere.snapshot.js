@@ -22,7 +22,7 @@ export class Status extends Thing {
   set owner(value) { this.setProp("owner", value) }
 
   /** Its owner's handle, once their account says so;  else the account itself */
-  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 425, end: 693 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 418, end: 686 }, readsFrom: ["status_board"] }) }
   get who() {
     const account = this.owner
     const person = core.getItemAt(core.filter(core.peopleHere(), (person) => person.id === account), 0)
@@ -95,7 +95,7 @@ export class Statusphere extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   /** Newest first:  by when each was set */
-  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 1028, end: 1155 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 1008, end: 1135 }, readsFrom: ["status_board"] }) }
   get recent() { return core.waitedValue(this, "recent", async () => {
     return await core.savedThings(Status, { sort: [{ field: "created", descending: true }] })
   }) }

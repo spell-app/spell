@@ -1,4 +1,4 @@
-<spell-page "diagram examples" notebook>
+<page "diagram examples" notebook>
 	<header level="1">
 		Diagram
 		<header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.</>
@@ -499,4 +499,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

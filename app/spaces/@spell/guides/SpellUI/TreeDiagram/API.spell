@@ -1,4 +1,4 @@
-<spell-page "tree-diagram api" notebook>
+<page "tree-diagram api" notebook>
 	<header level="1">
 		Tree diagram
 		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api family="ui-tree-diagram" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "dropdown usage" notebook>
+<page "dropdown usage" notebook>
 	<header level="1">
 		Dropdown
 		<header>A dropdown allows a user to select a value from a series of options.</>
@@ -156,4 +156,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

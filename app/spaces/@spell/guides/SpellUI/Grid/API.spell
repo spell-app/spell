@@ -1,4 +1,4 @@
-<spell-page "grid api" notebook>
+<page "grid api" notebook>
 	<header level="1">
 		Grid
 		<header>A grid is used to harmonize negative space in a layout.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api family="ui-grid" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

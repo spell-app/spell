@@ -18,23 +18,23 @@
 </carpeta-de-datos>
 
 // La org misma, para el título de la página y como espacio que diseñar.
-<encanto-cosa "perfil">
+<cosa "perfil">
 	<encanto>
 		- vive en roles de la org
 		- su "nombre" es texto, guardado como "name"
 		- su "espacio" es texto, guardado como "space"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
 // Un rol de la org, por su nombre.
-<encanto-cosa "función">
+<cosa "función">
 	<encanto>
 		- vive en roles de la org
 		- su "nombre" es texto, guardado como "name"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
-<encanto-cosa "miembro">
+<cosa "miembro">
 	<encanto>
 		- vive en roles de la org
 		- su "persona" es texto, guardado como "person"
@@ -42,26 +42,26 @@
 		- su "rol" es texto, guardado como "role"
 		- su "cargo" es texto, guardado como "roleName"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
-<encanto-cosa "equipo">
+<cosa "equipo">
 	<encanto>
 		- vive en roles de la org
 		- su "nombre" es texto, guardado como "name"
 		- su "espacio" es texto, guardado como "space"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
-<encanto-cosa "proyecto">
+<cosa "proyecto">
 	<encanto>
 		- vive en roles de la org
 		- su "nombre" es texto, guardado como "name"
 		- su "equipo" es texto, guardado como "team"
 		- su "espacio" es texto, guardado como "space"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
-<encanto-cosa "mandato">
+<cosa "mandato">
 	<encanto>
 		- vive en roles de la org
 		- su "rol" es texto, guardado como "role"
@@ -73,37 +73,37 @@
 		- su "inicio" es texto, guardado como "starts"
 		- su "fin" es texto, guardado como "ends"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
-<encanto-cosa "aprobación">
+<cosa "aprobación">
 	<encanto>
 		- vive en roles de la org
 		- su "nombre" es texto, guardado como "name"
 		- su "versión" es texto, guardado como "version"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
 // Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica.
-<encanto-cosa "diseñador">
+<cosa "diseñador">
 	<encanto>
 		- vive en roles de la org
 		- su "persona" es texto, guardado como "person"
 		- su "espacio" es texto, guardado como "space"
 		- su "nombre persona" es texto, guardado como "personName"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
 // Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers".
-<encanto-cosa "etapa">
+<cosa "etapa">
 	<encanto>
 		- vive en roles de la org
 		- su "nombre" es texto, guardado como "name"
 		- su "siguiente" es texto, guardado como "movesTo"
 		- su "quién mueve" es texto, guardado como "movedBy"
 	</encanto>
-</encanto-cosa>
+</cosa>
 
-<encanto-cosa "cambio">
+<cosa "cambio">
 	<encanto>
 		- vive en roles de la org
 		- su "cuándo" es texto, guardado como "at"
@@ -112,4 +112,4 @@
 		- su "qué" es texto, guardado como "what"
 		- su "por qué" es texto, guardado como "why"
 	</encanto>
-</encanto-cosa>
+</cosa>

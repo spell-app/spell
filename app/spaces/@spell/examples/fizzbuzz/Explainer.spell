@@ -7,7 +7,7 @@ It's FizzBuzz's second listener, beside the console:  one algorithm, two listene
 ## A result
 One number the counting sent, and the word it got.
 
-<spell-thing "result">
+<thing "result">
 	<property "number" type="number"/>
 	<property "word" description="fizz, buzz or fizzbuzz;  empty for a plain number">text</>
 	<property "label" description="What its label says:  its word, or the number itself">
@@ -20,19 +20,19 @@ One number the counting sent, and the word it got.
 		"green" if the word is "buzz"
 		"grey" otherwise
 	</property>
-</spell-thing>
+</thing>
 
-<spell-thing "tally" template="list of results" description="Every result so far, a label each, in a row that wraps">
+<thing "tally" template="list of results" description="Every result so far, a label each, in a row that wraps">
 	<draw>
 		<for result in it as="stack" direction="horizontal" wrap spacing="xs">
 			<label color={the color of the result} appearance="basic">{the label of the result}</label>
 		</for>
 	</draw>
-</spell-thing>
+</thing>
 
 ## The page
 
-<spell-page "fizzbuzz explainer">
+<page "fizzbuzz explainer">
 	<property "tally">a new tally</>
 	<property "fizzes">the number of (results in the tally where its word is "fizz")</>
 	<property "buzzes">the number of (results in the tally where its word is "buzz")</>
@@ -85,12 +85,12 @@ One number the counting sent, and the word it got.
 			</stack>
 		</container>
 	</draw>
-</spell-page>
+</page>
 
 ## Listening
 The page listens itself:  each event the counting sends becomes a result in its tally.
 
-<spell-more-of "fizzbuzz explainer">
+<extend "fizzbuzz explainer">
 	<action "show (word as text) for (number as a number)" description="One result more in the tally">
 		add (a new result with number = number, word = word) to its tally
 	</action>
@@ -98,4 +98,4 @@ The page listens itself:  each event the counting sends becomes a result in its 
 	<on fizz with number as a number>show "fizz" for number</on>
 	<on buzz with number as a number>show "buzz" for number</on>
 	<on plain number with number as a number>show "" for number</on>
-</spell-more-of>
+</extend>

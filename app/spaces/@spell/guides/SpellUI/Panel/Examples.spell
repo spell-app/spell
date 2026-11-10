@@ -1,4 +1,4 @@
-<spell-page "panel examples" notebook>
+<page "panel examples" notebook>
 	<header level="1">
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
@@ -142,4 +142,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,7 +1,7 @@
 # A square
 One of the board's nine:  empty, or holding an X or an O.
 
-<spell-thing "square">
+<thing "square">
 	<property "mark" description="X or O, or empty while nobody has played it">text</>
 	<alias "is empty">if its mark is ""</>
 	<property "color" description="The mark's color:  X blue, O red">
@@ -13,4 +13,4 @@ One of the board's nine:  empty, or holding an X or an O.
 		" " if it is empty
 		its mark otherwise
 	</property>
-</spell-thing>
+</thing>

@@ -9,7 +9,7 @@ Each status is a record in its owner's own atmosphere account, in the shape Stat
 
 ## A status:  the emoji, who set it, and when
 
-<spell-more-of "status">
+<extend "status">
 	<property "who" description="Its owner's handle, once their account says so;  else the account itself">
 		set account to its owner
 		set person to the first person in everyone here where its id is account
@@ -25,12 +25,12 @@ Each status is a record in its owner's own atmosphere account, in the shape Stat
 			<text color="grey" size="small">{its created at}</text>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## The app:  the emoji to pick, then everyone's statuses, newest first
 
-<spell-app "statusphere">
+<app "statusphere">
 	<property "recent" description="Newest first:  by when each was set">
 		return every status sorted by its created, newest first
 	</property>
@@ -66,4 +66,4 @@ Each status is a record in its owner's own atmosphere account, in the shape Stat
 			</for>
 		</container>
 	</draw>
-</spell-app>
+</app>

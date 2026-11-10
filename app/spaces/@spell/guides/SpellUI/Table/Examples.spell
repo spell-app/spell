@@ -1,4 +1,4 @@
-<spell-page "table examples" notebook>
+<page "table examples" notebook>
 	<header level="1">
 		Table
 		<header>A table displays a collection of data grouped into rows.</>
@@ -2665,4 +2665,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

@@ -4,7 +4,7 @@ Click the card, or Show the answer, to turn it over, then say whether you knew i
 the score keeps count, and the next card comes up at random.
 The card is this project's own, in `FlashCard.spell`;  this file holds the quiz, and its words.
 
-<spell-app "quiz">
+<app "quiz">
 	<property "deck">a new deck</>
 	<property "card" description="The card showing">a flash card</>
 	<property "known" type="number" description="How many you knew"/>
@@ -58,7 +58,7 @@ The card is this project's own, in `FlashCard.spell`;  this file holds the quiz,
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>
 
 ## The deck:  twelve Spanish words -- add your own
 

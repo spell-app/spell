@@ -1,4 +1,4 @@
-<spell-page "description usage" notebook>
+<page "description usage" notebook>
 	<header level="1">
 		Description
 		<header>A description is the text of a card, item, modal, list item, step or comment.</>
@@ -44,4 +44,4 @@
 			- A neutral block with no role. Use real elements inside it (`<p>`, `<a>`, lists) for structure.
 		</>
 	</>
-</spell-page>
+</page>

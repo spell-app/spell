@@ -1,4 +1,4 @@
-<spell-page "textarea usage" notebook>
+<page "textarea usage" notebook>
 	<header level="1">
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
@@ -108,4 +108,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

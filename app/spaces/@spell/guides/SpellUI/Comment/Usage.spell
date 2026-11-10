@@ -1,4 +1,4 @@
-<spell-page "comment usage" notebook>
+<page "comment usage" notebook>
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>
@@ -113,4 +113,4 @@
 			  and so does anything in its `reply` slot.
 		</>
 	</>
-</spell-page>
+</page>

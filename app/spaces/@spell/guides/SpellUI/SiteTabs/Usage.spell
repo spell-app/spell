@@ -1,4 +1,4 @@
-<spell-page "site-tabs usage" notebook>
+<page "site-tabs usage" notebook>
 	<header level="1">
 		Site tabs
 		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
@@ -45,4 +45,4 @@
 			`aria-current="page"`. Without a family nothing is drawn, so nothing is announced.
 		</>
 	</>
-</spell-page>
+</page>

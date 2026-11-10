@@ -1,4 +1,4 @@
-<spell-page "advertisement examples" notebook>
+<page "advertisement examples" notebook>
 	<header level="1">
 		Advertisement
 		<header>An ad displays third-party promotional content.</>
@@ -132,4 +132,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

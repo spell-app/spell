@@ -1,4 +1,4 @@
-<spell-page "list examples" notebook>
+<page "list examples" notebook>
 	<header level="1">
 		List
 		<header>A list is used to group related content.</>
@@ -814,4 +814,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

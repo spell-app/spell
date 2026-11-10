@@ -1,4 +1,4 @@
-<spell-page "include api" notebook>
+<page "include api" notebook>
 	<header level="1">
 		Include
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
@@ -51,4 +51,4 @@
 			<ui-docs-api family="ui-include" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

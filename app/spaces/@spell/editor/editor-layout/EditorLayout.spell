@@ -4,7 +4,7 @@ What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  e
 The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
 The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
 
-<spell-app "editor layout">
+<app "editor layout">
 	<property "code" description="The file tabs and the code">a thing</>
 	<property "program panel" description="The program's output and compiled code, under the code">a thing</>
 	<property "app" description="The running program">a thing</>
@@ -24,4 +24,4 @@ The code's column stays where it is when it isn't showing, hidden:  so nothing m
 			{draw its inspector}
 		</ui-split-panel>
 	</draw>
-</spell-app>
+</app>
