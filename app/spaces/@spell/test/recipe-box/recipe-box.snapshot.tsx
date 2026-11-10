@@ -24,7 +24,19 @@ export class Recipe extends View {
     )
   }
 
-  static savedIn = { place: "family_cookbook", collection: "recipes" }
+  static savedIn = {
+    place: "family_cookbook",
+    collection: "recipes",
+    times: ["created", "modified"]
+  }
+
+  // - it is saved in the family cookbook
+  @prop({ type: "date", declaredAt: { path: "/RecipeBox.spell", start: 180, end: 214 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it is saved in the family cookbook
+  @prop({ type: "date", declaredAt: { path: "/RecipeBox.spell", start: 180, end: 214 } })
+  accessor modified!: any /* spell: type unknown */
 
   remove() {
     core.removeSaved(this)
@@ -39,7 +51,9 @@ export class Recipe extends View {
  */
 export class RecipeElement extends SpellElement<Recipe> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-recipe", "recipe", [
-    { name: "servings", kind: "number", description: "Its servings." }
+    { name: "servings", kind: "number", description: "Its servings." },
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
   ])
 
   remove() {

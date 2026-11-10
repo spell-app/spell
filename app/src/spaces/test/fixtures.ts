@@ -162,7 +162,7 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "counter",
   "counter-app",
   "fizzbuzz",
-  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40):  Task List names the Atmosphere too
+  // a note kept on this device, in a data folder and in a CSV file (epic `data` P40)
   "kept-in-places",
   "lists-from-zero",
   "people",
@@ -170,6 +170,8 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   `${EXAMPLES_GROUP}/Solitaire`,
   // a list of things each drawn with a form of its own;  Task List was this one until its tasks moved into places (epic `language` P30)
   `${EXAMPLES_GROUP}/habit-tracker`,
+  // the tasks in all four kinds of place:  this browser's storage, a data folder, a CSV file, the Atmosphere (epic `data` P46)
+  `${EXAMPLES_GROUP}/TaskList`,
   "thing-references"
 ])
 
@@ -398,7 +400,7 @@ function moduleFor(projectId: string): string {
   return `${SP.SPELL_PROJECT_MODULE}${encodeURI(projectId)}`
 }
 
-/** `{ path, contents }` of each spell file (`.spell` or `.spellml`) in test project `projectName`, in its project file's order. */
+/** `{ path, contents }` of each spell file in test project `projectName`, in its project file's order. */
 export function loadFixtureProject(projectName: TestProjectName): SpellSourceFile[] {
   const projectDir = fixtureFolder(projectName)
   return readProjectFile(projectDir)
@@ -420,7 +422,7 @@ export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell
  */
 export function loadCodeSpellTwin(projectName: TestProjectName): SpellSourceFile[] {
   return loadFixtureProject(projectName).map((file) => {
-    if (!SP.isSpellmlName(file.path)) return file
+    if (SP.formOfText(file.contents, file.path) !== "spellx") return file
     const path = file.path.replace(/(ml|x)$/, "")
     return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, bareNameOf(projectName), `.${path}`), "utf8") }
   })

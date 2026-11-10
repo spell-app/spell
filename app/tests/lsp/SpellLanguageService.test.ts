@@ -1007,7 +1007,7 @@ describe("SpellLanguageService", () => {
   // epic `elemental-spell` J95:  the other form is a view, never a second file
   test("custom requests:  Show as Spellx, a .spell file written as spellx;  one that can't be says why", () => {
     const spellx = service.compiled(card, "spellx")
-    expect(spellx).toMatch(/^<spell-view "card"/m)
+    expect(spellx).toMatch(/^<view "card"/m)
     expect(spellx).toContain('\t<property "suit"')
     const unparsed = Object.create(card, { match: { value: undefined } }) as SP.SpellFile
     expect(service.compiled(unparsed, "spellx")).toBe(

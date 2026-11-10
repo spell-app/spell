@@ -21,6 +21,11 @@ import type { RootCatalogEntry } from "./UIRoot.types"
  */
 const FAMILIES = import.meta.glob(["../*/index.ts", "!../ui-root/index.ts"])
 
+// A page with a root imports `ui-toast` when it first shows a toast;  then its provider registers, after `UI.load()`
+if (E.isBrowser()) {
+  void UI.load().then((ui) => ui.toasts.loadFamilyWith(() => RootLoader.load("ui-toast").then(() => UI.load())))
+}
+
 /**
  * The languages Spell UI ships, by language code:  each a lazy chunk of its whole dictionary.
  * - `<ui-root lang="es">` (or the document's `lang`) loads it, and names every tag in it (`useLanguage()`).

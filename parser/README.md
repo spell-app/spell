@@ -316,8 +316,9 @@ core.console.log(1 + 2 * 3)
 
 </details>
 
-**What a word starts:**  `if` starts two rules.
+**What a word starts:**  `if` starts five rules.
 FizzBuzz uses the first;  the second reads a value backwards, the way people say it.
+The other three say what happens when reading from a place comes back empty, or fails.
 
 ```sh
 spell explain if
@@ -334,6 +335,8 @@ backwards_if  if {operator:expression} (else|otherwise) (it is)? {expression}
 e.g. print 1 if bar else 2
 
 if_there_are_none  if there are none :? {statement_body}?
+
+if_that_fails_say  if that fails say {text:expression}
 
 if_that_fails  if that fails :? {statement_body}?
 ```
@@ -484,7 +487,7 @@ The name is the same inside this folder as from every other, so there's no alias
 | [parser/](src/parser/) | `spell/parser/parser` | the parser that knows no language:  tokens, rules, matches, scope, the Spell tree, the writers | [README-parser](README-parser.md) <ul><li>rules as classes:  what moves if you've used a parser generator</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled;  how earlier lines teach later ones</li><li>parsers for other languages, with a dates language in 23 lines;  testing rules;  what it costs</li></ul> |
 | [parser/rulex/](src/parser/rulex/) | `spell/parser/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
 | [markdown/](src/markdown/) | `spell/parser/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
-| [spell/](src/spell/) | `spell/parser/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [spell/](src/spell/) | `spell/parser/spell` | Spell itself:  its twenty-two rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
 | [spellx/](src/spellx/) | `spell/parser/spellx` | Spellx, Spell in tags:  the tree a `.spell` file reads into;  Spell's own parser compiles it | [README-spellx](README-spellx.md) <ul><li>a card in tags, its plain Spell twin, and the tree it reads to</li><li>a closed vocabulary, not HTML's open one;  English and Spanish</li><li>how it reads:  tag tokens, twins, prose, markup, closers</li><li>using it;  the tree's nodes;  the edges</li></ul> |
 | [spell/languages/](src/spell/languages/) | `spell/parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>translating an English project into Spanish, names first, then lines, then fix-ups</li><li>one set of rules, two sets of words;  the edges</li></ul> |
 | [core/](src/core/) | `spell/parser/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>a run keeps an undo history, and what the person chose last time</li><li>who may import it:  one copy per running app</li></ul> |

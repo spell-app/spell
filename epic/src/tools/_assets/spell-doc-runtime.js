@@ -1560,7 +1560,7 @@ function outlineOf(main) {
   /**
    * SECTIONS:  every section, h3 and h4 in `main`, under the section it's in.
    * - not the headings in a plan item's earlier versions (`<epic-original>`):  earlier text, not the page's
-   * - not what an epic page's STAGE hides (`<epic-page stage>`, epic `epic-engine` P29;  `PageStages.hides()`):
+   * - not an epic page's section hidden for being empty (epic `epic-engine` P70;  `PageStages.hides()`):
    *   the toolbar lists only what shows
    */
   function readSections() {

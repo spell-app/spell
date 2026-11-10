@@ -1,7 +1,8 @@
 import { spawn } from "node:child_process"
 import { existsSync, openSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { join } from "node:path"
 
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types.ts"
@@ -80,7 +81,7 @@ export class TurnEnd {
    * - its output appended to `<epic repo>/.git/spell-shared.log`;  a failed commit never shows as a failed hook,
    *   and the next turn's picks up anything left
    * - only in a repo set up for epics whose epic repo exists (`contentRepoOf()`):  the hooks run in every repo
-   * - `epic`:  this plugin's own `bin/epic`, with its packages installed
+   * - `epic`:  this copy's `epic` command, with its packages installed (`EngineFiles.bin`)
    * - returns the command it started, else `undefined`
    * - NEVER throws
    */
@@ -111,5 +112,5 @@ export type TurnEndReport = {
   lines: string[]
 }
 
-/** This plugin's `bin/epic`:  `src/command/` is two folders below the plugin's root. */
-const EPIC = join(dirname(dirname(import.meta.dirname)), "bin", "epic")
+/** The `epic` command of this copy of the code (`EngineFiles.bin`). */
+const EPIC = EngineFiles.bin

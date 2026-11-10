@@ -109,10 +109,12 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
   naming the branch and worktree; its prompt, decisions and review page stay. Its first phase (`add-phase`)
   plans it too
 
-The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got, so which sections show.
+The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got.
 
-- `overview`: only the Overview, Questions and Todo; `phases`: the Phases and Issues too; `building`, or none: everything. A
-  hidden section is still in the file: it's only a view
+- A section hides when it's empty, at every stage (epic `epic-engine` P70), and shows whenever it holds something. While
+  the page is reviewed, an empty section with a New button stays: its title, a short line and the button. A hidden section
+  is still in the file: it's only a view
+- `overview`: its phases, if any, are titled `P1. DRAFT: ...`
 - `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
   `building`; `epic stage <name> overview|phases|building` sets it by hand
 - meanwhile the STAGE BUTTON ends it, on the title row of the work it accepts (Q14;  epic `epic-engine` I180):
@@ -147,7 +149,7 @@ written:
 | Section            | id            | What                                                                                                                                                                                                                                                                                                                                                      |
 | ------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1. Overview        | `#overview`   | 2-sentence summary, the prompt that started the plan (folded in a "Kickoff prompt" aside), the total estimate (written by the tool), then the substance in numbered sub-sections (`#o1` "1.1 Structure" ...): becomes guides                                                                                                                        |
-| 2. Phases          | `#phases`     | progress bar, then one block per phase (`#p1` ...): its estimate as the title's badge; Symptom, Changes, the details (Goal), Done (once done), Commits; Files and Verify hidden until the folder / flask toggle on the Phases title is pressed                                                                                                            |
+| 2. Phases          | `#phases`     | progress bar, then one block per phase (`#p1` ...): its estimate as the title's badge; Symptom, Changes, the details (Goal), Done (once done), Commits; Files and Verify hidden until they're turned on in the gear menu                                                                                                            |
 | 3. Questions       | `#decisions`  | open questions first (waiting on the user; each also asked with AskUserQuestion), then the answered ones, in id order: settled unless new facts arrive. A decision IS an answered question (D13 of `review-review`, 2026-10-04): `decide` writes the answer INTO the question; `add <name>#D` makes a question born answered                              |
 | 4. Judgement calls | `#judgements` | choices Claude made WITHOUT the user (a `/bedtime` run, an agent mid-phase): title the choice, details "chose X over Y because Z" + the options; open until the user reviews it, `close` = accepted, disagreement becomes a question. Its phase's "To review" line lists it while it's open and not reviewed (never hand-write a "Judgement calls:" line) |
 | 5. Todo            | `#todos`      | loose ends: work still to do (todos), and limits and risks we accept (`limit`); "Caveats", `#caveats`, from epic `epic-engine` P32 to P44 (old links follow)                                                                                                                                       |
@@ -263,7 +265,7 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   - item fixes: `Fix I3:  ...` (or `<epic> I3:`), listed in the item's details
 - To review: written by the tool on every edit, LAST: the items added while this phase was active that are still
   open, not reviewed and not under way; none: no line.
-- Files and Verify: still written for every phase; hidden on the page until the folder / flask toggle is pressed.
+- Files and Verify: still written for every phase; hidden on the page until they're turned on in the gear menu.
 - Estimate: wall-clock time for Claude to do the phase, agents included, the person's review not. `30m`, `2h`, `1h30m`,
   or a range, `1-2h`. `update <name>#P<N> --estimate "..."` changes it; the Overview's total follows (every phase's estimate
   added up, and the phases not done; an estimate that won't parse is named as not counted).
@@ -337,7 +339,7 @@ element takes its colour from this table, never a colour that means something el
 | yellow | open, still undecided                       | an open todo; a test whose phase is done; a calm issue; a reviewed issue or judgement call; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (2026-10-10) |
 | light orange | what you asked for is finished: your turn to see it | an issue filed from your own words (`requested`), closed by Claude, until you review it. DARK text |
 | blue   | do it now, or it's with Claude              | a Do this not started (outlined, `handed`); a todo a review queued and "to do" (dotted, `scheduled`); Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
-| green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
+| green  | decided or done, in the last day (a phase:  3 days);  older, grey          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
 | orange | your turn to read: changed since you looked, a plan waiting for your Accept, a manual test whose phase isn't done, and warnings; an item Claude answered with options, waiting for your pick (2026-10-09); an issue or call Claude fixed, waiting for your review (I232) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | a person's voice (you, everyone alike): `--epic-voice-person`, `-text`, `-fill`, `-rule` | a person's reply cards (their mark, name, faint fill and rule); the note box and a marked note; the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's ...): `--epic-voice-agent`, `-text` | an agent's reply cards: their round mark, and their name (the card stays white); an agent's comment-thread messages (their light box) and its "thinking…" stub; a page note's Claude replies and its "answered" chip; a comment's quote while it waits for an agent (epic `epic-friend` P10, Q16: violet before); "recommended" (a thumbs-up, no word) |
@@ -466,7 +468,7 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
 | ----------- | ------ | -------------------------------------------------------------------------------------------- |
 | `progress`  | blue   | Claude is working on it: an Underway status card, or the working spinner (closed or not)     |
 | `old`       | grey   | canceled: no longer relevant (made moot, struck through)                                     |
-| `recent`    | green  | decided or done (decided, done), however long ago                                            |
+| `recent`    | green  | decided or done (decided, done), in the last day (a phase:  3 days);  older, grey                                            |
 | `requested` | light orange | an issue filed from your own words (`requested`), closed done, not reviewed yet: your turn to see it |
 | `scheduled` | blue, dotted | work a review queued (a Make Todo or plane mark), agreed, not started |
 | `replied`   | orange | open, and Claude's LAST reply holds options nothing is picked in yet: your turn to pick      |

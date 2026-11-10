@@ -1,0 +1,18 @@
+## Guardadas en un archivo JSON en el servidor
+// Las tareas son una carpeta de datos del proyecto en el servidor de Spell:  cada tarea un archivo JSON, en `__data/tareas` de este proyecto.
+// Todos los que usan la aplicación las comparten, y cada persona cambia solo las tareas que hizo.
+// Abre una en un editor y cámbiala:  la aplicación lo muestra en su siguiente revisión.
+archivos de tareas es una carpeta de datos en "tareas":
+	- se revisa cada 30 segundos
+
+una "tarea del servidor" es una tarea:
+	- vive en archivos de tareas
+	- para tirarla:
+		quitar eso de las tareas del servidor
+
+un "guardián del servidor" es un guardián de tareas:
+	- sus "tareas guardadas" es cada tarea del servidor
+	- para guardar una tarea nueva titulada (título como texto):
+		poner tarea a una nueva tarea del servidor con título = título
+		agregar tarea a las tareas del servidor
+		devolver tarea

@@ -8,6 +8,7 @@ import { parseHTML } from "linkedom"
 import { RealPath } from "spell/server/RealPath"
 // By file:  the barrel brings every place and their server, which an `epic` command doesn't need
 import { ChunkFiles } from "spell/server/places/ChunkFiles"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { LayeredSettings } from "spell/epic/config/LayeredSettings"
@@ -125,7 +126,7 @@ export class PlanDocFiles {
     this.epics = join(this.content, "epics")
     this.template = template
     this.details = join(this.content, "pages", "details")
-    this.docsPackage = resolve(DOCS_TOOLS, "..", "..")
+    this.docsPackage = EngineFiles.root
     this.docsTools = DOCS_TOOLS
     // under the checkout the content is served in, which isn't this one for spell-epic's own epics (I22);  told its
     // served addresses, so `components/epics/` and `templates/` check as the folders they serve (I27)
@@ -708,9 +709,17 @@ export class PlanDocFiles {
     return PlanDocFiles.gitIn(this.checkoutOf(file), "log", "-1", "--format=%cI", "HEAD~2") || null
   }
 
-  /** The GitHub page of the doc's repo (`PlanCommits.githubBase()` of `origin`), or `null`. */
+  /** The page the doc's repo's commit links go under (`PlanCommits.commitBase()` of `origin`), or `null`. */
   commitBase(file: string): string | null {
-    return PlanCommits.githubBase(PlanDocFiles.gitIn(this.checkoutOf(file), "remote", "get-url", "origin"))
+    return PlanDocFiles.commitBaseOf(this.checkoutOf(file))
+  }
+
+  /** The page checkout `checkout`'s commit links go under, by its `origin` and its code host;  `null` for none. */
+  static commitBaseOf(checkout: string): string | null {
+    return PlanCommits.commitBase(
+      PlanDocFiles.gitIn(checkout, "remote", "get-url", "origin"),
+      EpicConfig.of(checkout).codeHost
+    )
   }
 
   /**
@@ -771,7 +780,7 @@ export class PlanDocFiles {
     const phases = PlanDoc.parse(html).phases
     const timed: (CommitLogEntry & { seconds: number })[] = []
     for (const checkout of [checkouts].flat()) {
-      const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(checkout, "remote", "get-url", "origin"))
+      const repo = PlanDocFiles.commitBaseOf(checkout)
       // a bare date means that day at the CURRENT time to git:  midnight, so the start day's commits count
       const raw = PlanDocFiles.gitIn(
         checkout,
@@ -912,8 +921,8 @@ export const EPIC_STATUSES = ["in progress", "future", "done"] as const
 /** One of `EPIC_STATUSES`. */
 export type EpicStatus = (typeof EPIC_STATUSES)[number]
 
-/** The checkout this file is in (`src/tool/` is two folders down):  the default root. */
-const CHECKOUT = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+/** The engine's folder (`EngineFiles.root`):  the default root. */
+const CHECKOUT = EngineFiles.root
 
 /** The docs tools beside this code:  `src/tools`. */
 const DOCS_TOOLS = fileURLToPath(new URL("../tools", import.meta.url))

@@ -20,6 +20,8 @@ import {
   type SheetRules
 } from "spell/places/places.types"
 
+import { core } from "./core"
+
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
   /** The place's name, as written:  `family cookbook`. */
@@ -52,8 +54,12 @@ export type PlaceDetails = {
   >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
-  /** It goes without its key where nothing holds it, a browser:  `its key is the secret "GITHUB_TOKEN", if it's set`. */
+  /** It goes without its key where nothing holds it, a browser:  `its optional key is the secret "GITHUB_TOKEN"`. */
   keyIfSet?: boolean
+  /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
+  forEachTab?: boolean
+  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its key goes in its "X-Api-Key" header`. */
+  keyGoes?: PlacesFolder.KeyGoes
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
   /** Once a day at this time, instead:  `check it once a day at 5am` (`pollWhileVisible()`'s `at`). */
@@ -107,6 +113,8 @@ export type PlaceDetails = {
   listsGive?: readonly string[]
   /** How many a web server gives at a time, when asked:  `it gives up to 2000 at a time`, every name in one request. */
   pageSize?: number
+  /** What a web server calls that, when it isn't `limit`:  `it gives up to 100 at a time, asked for with "per_page"`. */
+  pageSizeAskedWith?: string
   /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
   filters?: "every field" | readonly string[]
   /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
@@ -231,21 +239,14 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(deviceCopy && { deviceCopy }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
-      ...(details.keyNamed !== undefined && {
-        keyNamed: details.keyNamed,
-        ...(keyFrom && { keyFrom }),
-        ...(details.keyIfSet && { keyIfSet: true })
-      })
+      ...keyLinesOf(details, keyFrom)
     }),
   "graphql server": (making, { GraphPlace }) =>
     new GraphPlace({
       url: making.details.at!,
       collections: graphCollections(making),
-      ...(making.details.keyNamed !== undefined && {
-        keyNamed: making.details.keyNamed,
-        ...(making.keyFrom && { keyFrom: making.keyFrom }),
-        ...(making.details.keyIfSet && { keyIfSet: true })
-      })
+      ...(making.details.versionsIn !== undefined && { versions: { field: making.details.versionsIn } }),
+      ...keyLinesOf(making.details, making.keyFrom)
     }),
   "data folder": ({ details, deviceCopy }, places) => {
     const {
@@ -305,11 +306,14 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   room: ({ details, person }, { LiveRoomPlace, SpellSignIn, SPACE_ROOMS_PREFIX, roomForPage }) => {
     const at = withLastThreads((page, remembered) => roomForPage(details.at!.replace(/^ws/, "http"), page, remembered))
     const isSpaces = at.startsWith(`${SPACE_ROOMS_PREFIX}/`)
-    return new LiveRoomPlace({
+    const room = new LiveRoomPlace({
       url: at,
       person,
+      ...(core._programVersion !== undefined && { version: core._programVersion }),
       ...(isSpaces && { signIn: SpellSignIn.for(at), can: { identifiesBy: "this machine" } })
     })
+    room.onOutOfDate(askToReload)
+    return room
   },
   // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
   sheet: (making, folder) => sheetAt(making, folder),
@@ -360,6 +364,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         kind: "atmosphere account",
         accounts: [making.details.at!],
         collections: atmosphereCollections(making.details),
+        fields: atmosphereFields(making.details),
         person: making.person
       }),
       making
@@ -372,13 +377,27 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         ...(details.at !== undefined && { corner: details.at }),
         ...(details.accounts && { accounts: details.accounts }),
         collections: atmosphereCollections(details),
+        fields: atmosphereFields(details),
         person
       }),
       making
     )
   },
-  "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
+  // the words compile (epic `data` Q32):  reading one waits for epic `atmosphere` to take Spaces out of trial (its P11, Q2)
+  "atmosphere space": ({ details }) => {
+    throw new TypeError(
+      `core.place():  "${details.name}" is an atmosphere space, and Spell can't reach those yet:  AT Protocol's Spaces are still on trial`
+    )
+  },
+  "database on this device": ({ details }, { DevicePlace }) =>
+    new DevicePlace({ wholeRows: true, ...(details.forEachTab && { forEachTab: true }) }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
+}
+
+/** What a place's lines say of its key, for a place on a server:  nothing without one named. */
+function keyLinesOf({ keyNamed, keyIfSet, keyGoes }: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]) {
+  if (keyNamed === undefined) return {}
+  return { keyNamed, ...(keyFrom && { keyFrom }), ...(keyIfSet && { keyIfSet }), ...(keyGoes && { keyGoes }) }
 }
 
 /**
@@ -444,6 +463,13 @@ function withDecimals(place: PlacesFolder.AtProtoPlace, { collection, Class }: P
 /** What an atmosphere account's lines call each collection. */
 function atmosphereCollections({ collections = {} }: PlaceDetails): Record<string, string> {
   return Object.fromEntries(Object.entries(collections).flatMap(([name, { at }]) => (at ? [[name, at]] : [])))
+}
+
+/** The fields an atmosphere account's lines name, by collection:  `a status's created is its "created at"`. */
+function atmosphereFields({ collections = {} }: PlaceDetails): Record<string, Record<string, string>> {
+  return Object.fromEntries(
+    Object.entries(collections).flatMap(([name, { fields }]) => (fields ? [[name, fields]] : []))
+  )
 }
 
 /**
@@ -520,6 +546,7 @@ function restAbilitiesIn({
   pagesByOffset,
   pagesByNumber,
   pagesByLastId,
+  pageSizeAskedWith,
   filters,
   sorts,
   sortedWith,
@@ -538,6 +565,7 @@ function restAbilitiesIn({
   }
   const params = {
     ...(count?.limit !== undefined && { limit: count.limit }),
+    ...(pageSizeAskedWith !== undefined && { limit: pageSizeAskedWith }),
     ...(position && { offset: position.offset }),
     ...(nextPageSentAs !== undefined && { cursor: nextPageSentAs }),
     ...(pagesByLastId && { cursor: pagesByLastId.param }),
@@ -572,7 +600,8 @@ function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
   const list = at ?? collection
   const one = list.replace(/s$/, "")
   const typeName = one.charAt(0).toUpperCase() + one.slice(1)
-  const selected = [ID_FIELD, ...declaredFields(Class).filter((field) => field !== ID_FIELD)]
+  const versionField = details.versionsIn === undefined ? [] : [details.versionsIn]
+  const selected = [...new Set([ID_FIELD, ...versionField, ...declaredFields(Class)])]
   return {
     [collection]: {
       list,
@@ -588,11 +617,19 @@ function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
   }
 }
 
-/** Every field `Class` declares of a plain value, its parents' too:  what can be asked for by name. */
+/**
+ * Every field `Class` declares of a plain value, its parents' too:  what can be asked for by name.
+ * - Not Spell's own two times, which no line named:  a server has no such field to answer with (epic `data` T57).
+ * - Not what Spell's own classes keep off places:  a view's `thumbnail`, say.
+ */
 function declaredFields(Class: Function): string[] {
+  const { times = [] } = (Class as { savedIn?: { times?: readonly string[] } }).savedIn ?? {}
   const names: string[] = []
   for (let schema = schemaOf(Class) as ReturnType<typeof schemaOf> | undefined; schema; schema = schema.parent) {
-    for (const [name, info] of schema.declared) if (isPlainField(info)) names.push(name)
+    for (const [name, info] of schema.declared) {
+      if (info.inPlaces === false) continue
+      if (isPlainField(info) && !times.includes((info as { storedAs?: string }).storedAs ?? name)) names.push(name)
+    }
   }
   return names
 }
@@ -655,4 +692,18 @@ function withThreadsMarked(folder: PlaceBehind, at: string, tools: typeof Places
     return { ...answer, rows: withPickedThread(answer.rows, picked) }
   }
   return marked
+}
+
+/** Has this page already asked to be reloaded? */
+let hasAskedToReload = false
+
+/** A room says this page runs an older version of the program:  say so, once, with a button that reloads it. */
+function askToReload(): void {
+  if (hasAskedToReload) return
+  hasAskedToReload = true
+  void core.notify(core.message("room-out-of-date"), {
+    class: "warning",
+    time: 0,
+    actions: [{ text: core.message("room-reload"), click: () => globalThis.location?.reload() }]
+  })
 }

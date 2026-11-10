@@ -14,6 +14,7 @@ import JSON5 from "json5"
 import { json5Edited } from "spell/util/node/json5"
 import { peekProp, schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
+import type { KeyGoes } from "spell/places/keyGoes"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
   IngestStopped,
@@ -46,6 +47,11 @@ export type PlaceIngestOptions = {
   into?: string
   name?: string
   keySecret?: string
+  /** `--key-header <name>`:  the header its key goes in, when that isn't `Authorization: Bearer`. */
+  keyHeader?: string
+  /** `--key-in-address <name>`:  the question its key goes in the address as. */
+  keyInAddress?: string
+  signedIn?: string
   docs?: string
   collections?: string
   samples?: string
@@ -60,11 +66,14 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, docs, collections, samples, pictures, tryWrites, ai = true } = options
+  const { kind, into, name, keySecret, signedIn, docs, collections, samples, pictures, tryWrites, ai = true } = options
+  const keyGoes = keyGoesFrom(options)
   return stoppedAsCliError(async () => {
-    const result = await ingestFor(ai).add({
+    const ingest = await ingestFor(ai, !!signedIn)
+    const result = await ingest.add({
       address,
-      ...withValues({ kind, into, name, keySecret, docs }),
+      ...withValues({ kind, into, name, keySecret, signedIn, docs }),
+      ...(keyGoes && { keyGoes }),
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
       ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
@@ -76,30 +85,62 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
 }
 
 /**
+ * Where the options say its key goes:  `undefined` for the usual way.
+ * - throws `CliError` for both at once, or either with no key named
+ */
+function keyGoesFrom({ keySecret, keyHeader, keyInAddress }: PlaceIngestOptions): KeyGoes | undefined {
+  if (keyHeader === undefined && keyInAddress === undefined) return undefined
+  if (keyHeader !== undefined && keyInAddress !== undefined) {
+    throw new CLI.CliError("spell place ingest:  a key goes in one place:  --key-header or --key-in-address, not both")
+  }
+  if (keySecret === undefined) {
+    throw new CLI.CliError(
+      "spell place ingest:  --key-header and --key-in-address say where a key goes:  name it too, --key-secret <NAME>"
+    )
+  }
+  return keyHeader !== undefined ? { header: keyHeader } : { inAddress: keyInAddress! }
+}
+
+/**
  * `spell place update <file>`:  look again at the place described beside it.  Its exit code.
  * - `EXIT.ERRORS` when it couldn't change a line for someone.
  * - throws `CliError` for whatever stopped it, having written nothing
  */
-export async function placeUpdate(file: string, { ai = true }: { ai?: boolean }): Promise<number> {
+export async function placeUpdate(
+  file: string,
+  { ai = true, address }: { ai?: boolean; address?: string }
+): Promise<number> {
   return stoppedAsCliError(async () => {
-    const result = await ingestFor(ai).update(file)
+    const ingest = await ingestFor(ai, describesSession(file))
+    const result = await ingest.update(file, withValues({ movedTo: address }))
     printUpdate(result)
     return result.couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
   })
 }
 
-/** The steps, with the terminal and the disk:  asking an agent unless `ai` is off. */
-function ingestFor(ai: boolean): PlaceIngest {
+/**
+ * The steps, with the terminal and the disk:  asking an agent unless `ai` is off.
+ * - `usesSession`:  loads the kept sessions, only then (the server's places are a lot to load).
+ */
+async function ingestFor(ai: boolean, usesSession: boolean): Promise<PlaceIngest> {
   const chosen = ai ? claudeRunnerFor(process.env, { ai }) : undefined
+  const sessions = usesSession ? new (await import("spell/server/places")).PlaceSessions() : undefined
   return new PlaceIngest({
     fetch: fetchWithFiles(globalThis.fetch),
     ask: askAtTerminal,
     files: diskFiles,
     readThrough: readThroughSpell,
     keyNamed: (secret) => process.env[secret],
+    ...(sessions && { sessionNamed: (place: string) => sessions.named(place) }),
     say: (line) => CLI.err(line),
     ...(chosen && { claude: chosen.run, claudeVia: chosen.via })
   })
+}
+
+/** Does the description beside `file` say it's read signed in?  So only then are the sessions loaded. */
+function describesSession(file: string): boolean {
+  const description = file.replace(/\.(?:spell|spellml)$/, ".json5")
+  return existsSync(description) && /["']?signedIn["']?\s*:/.test(readFileSync(description, "utf8"))
 }
 
 /** `run`'s exit code, its `IngestStopped` a `CliError`.  - throws `CliError`, and whatever else `run` throws */
@@ -192,7 +233,8 @@ export const diskFiles: IngestFiles = {
   otherSpellBeside: async (path) =>
     filesBeside(path)
       .filter((name) => name.endsWith(".spell") && name !== basename(path))
-      .map((name) => readFileSync(join(dirname(path), name), "utf8"))
+      .map((name) => readFileSync(join(dirname(path), name), "utf8")),
+  namesInFolder: async (path) => (existsSync(path) ? readdirSync(path) : undefined)
 }
 
 /** The files in `path`'s folder. */
@@ -217,20 +259,26 @@ export const readThroughSpell: ReadThrough = async ({
   byName = {},
   bySearch = {},
   byQuery = {},
-  fetch
+  fetch,
+  serverToken
 }) => {
   const { core } = await import("spell/parser/core")
   const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
+  const pageGlobals = globalThis as { location?: unknown; SPELL_SERVER?: unknown }
   const held = {
     fetch: globalThis.fetch,
-    location: (globalThis as { location?: unknown }).location,
+    location: pageGlobals.location,
+    server: pageGlobals.SPELL_SERVER,
     warn: console.warn,
     error: console.error
   }
   const complaints: string[] = []
   const complain = (...said: unknown[]) => void complaints.push(said.map(String).join(" "))
   globalThis.fetch = fetch
-  Object.assign(globalThis, { location: { href: pathToFileURL(`${process.cwd()}/`).href } })
+  Object.assign(globalThis, {
+    location: { href: pathToFileURL(`${process.cwd()}/`).href },
+    ...(serverToken !== undefined && { SPELL_SERVER: { token: serverToken } })
+  })
   console.warn = complain
   console.error = complain
   try {
@@ -275,7 +323,7 @@ export const readThroughSpell: ReadThrough = async ({
     return { byType, complaints: withoutListsUnder(complaints, spell) }
   } finally {
     globalThis.fetch = held.fetch
-    Object.assign(globalThis, { location: held.location })
+    Object.assign(globalThis, { location: held.location, SPELL_SERVER: held.server })
     console.warn = held.warn
     console.error = held.error
   }
@@ -337,7 +385,12 @@ function fieldsNeverFilled(Class: new () => unknown, things: readonly unknown[])
     // nothing stored:  what it reads by itself, worked out from what is
     return value !== usual[field] && value !== undefined && value !== null
   }
-  return [...schemaOf(Class).declared.keys()].filter((field) => !things.some((thing) => isFilled(thing, field)))
+  // Spell's own two times, which no line asked for, are no field the place was meant to fill
+  const { times = [] } = (Class as { savedIn?: { times?: readonly string[] } }).savedIn ?? {}
+  return [...schemaOf(Class).declared]
+    .filter(([field, info]) => !times.includes((info as { storedAs?: string }).storedAs ?? field))
+    .map(([field]) => field)
+    .filter((field) => !things.some((thing) => isFilled(thing, field)))
 }
 
 ////////////////
@@ -380,7 +433,7 @@ function printDescription(
     .filter(([, { leftOut }]) => !leftOut)
     .map(
       ([name, { readThrough }]) =>
-        `${name}:  ${readThrough?.rows ?? 0} rows${readThrough?.problem ? ` -- ${readThrough.problem}` : ""}`
+        `${name}:  ${readThrough?.rows ?? 0} rows${readThrough?.readByTheLook ? ", by the look itself" : ""}${readThrough?.problem ? ` -- ${readThrough.problem}` : ""}`
     )
   printList("A read through the Spell found:", reads)
   if (spellCantSay.length) printList("What Spell can't say about it:", spellCantSay)

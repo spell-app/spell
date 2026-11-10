@@ -150,7 +150,7 @@ so you can decide from the page alone, when you have time.
 
 A team reviews the same pages:
 each reply carries its writer's name, and the plans sync through an epic repo every turn
-([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others));  a comment reaches the others once it's answered.
+([README-teams.md](README-teams.md#working-with-others));  a comment reaches the others once it's answered.
 
 ### Every epic gets its own branch, worktree and window
 
@@ -238,11 +238,11 @@ and Approve (the check).
 A question's option cards each have Choose, and a todo that's work has three of its own:
 the plane, do it in the next phase;  Revisit;  and the x, drop it.
 
-![A judgement call's line on an epic page:  its yellow J4 chip and title, the Approve, Revisit and Make Caveat buttons, the Do Now wand apart, and the note box open under it](docs/images/epic-item.png)
+![A judgement call unfolded on an epic page:  its yellow J9 chip and title;  at the right one group of three buttons, Do this (the thumbs up), Revisit and Approve (the check);  its text and net effect;  and the note box open under it](docs/images/epic-item.png)
 
-_A judgement call on a real epic page, its note box open:  the yellow chip says it's open, and calm;
-Approve, Revisit and Make Caveat sit together, Do Now's wand apart.
-From an older build:  today's buttons are named in the paragraph above._
+_A judgement call on a real epic page, its note box open:  the yellow chip says it's open.
+On an issue or a judgement call the group reads Do this, Revisit, Approve;
+on other items, Make Todo takes Do this's place._
 
 Nothing you press goes anywhere until Send, in the page's header, hands it all over:  you press the paper plane.
 
@@ -356,7 +356,7 @@ and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, 
 for the pages.
 
 It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
-One command, from a clone of Spell, sets a project up:  `node <clone>/bin/spell.mjs epic init` installs the plugin,
+One command sets a project up:  `npx spell@next epic init` installs the plugin and the extension,
 asks your name and colour, and starts the epic server.
 The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
@@ -431,11 +431,11 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
   The pages, the `epic` command and the epic folder are plain files and programs any agent can use.
   Where it stands:  any agent follows `epic guide` and ends its turns with `epic turn end`;  Codex has the
   end-of-turn hooks and fifteen of the skills, from the same files;  Send doesn't wake it yet
-  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#with-codex)), untried with a real Codex yet.
+  ([README-teams.md](README-teams.md#with-codex)), untried with a real Codex yet.
 - **Installing from npm:**  a repo that isn't Spell installs the plugin alone, from npm.
   Where it stands:  `spell-epic`, `spell-ui` and `spell` are published, under the `next` tag until Spell's first release
-  (planned for December 1, 2026);  but the `spell` published so far has no `spell epic` yet, so a repo that isn't Spell
-  sets up from a clone ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md)).
+  (planned for December 1, 2026);  and a repo that isn't Spell sets up with `npx spell@next epic init`
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md)).
 
 ## The pages
 
@@ -446,7 +446,10 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-skills.md](README-skills.md) | <ul><li>twenty skills you type, eleven hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>three views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
-| [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>epics in your own repo:  four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the epic folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine;  what's still Spell-shaped</li></ul> |
+| [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>what an epic is, why you'd want one, how you'll use it</li><li>try it, in one command</li></ul> |
+| [README-setup.md](README-setup.md) | <ul><li>every step of setting a repo up;  the extension</li><li>on GitLab;  when main takes only pull or merge requests</li><li>the plans live beside your repo;  what your AGENTS.md adds</li></ul> |
+| [README-teams.md](README-teams.md) | <ul><li>joining, who you are, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
+| [README-config.md](README-config.md) | <ul><li>the epic folder;  your settings;  every key of the config file</li><li>worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 

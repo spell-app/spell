@@ -195,6 +195,9 @@ export type TestCheck = {
  * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
  * | `write-refused-used-up` | the same, refused as you've asked for every invitation you have (P31) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `room-out-of-date` | the notice when a room says this page runs an older version of the program (epic `data` T5) | |
+ * | `room-reload` | that notice's button | |
+ * | `number-sent-as-other-text` | the console's warning for a number field that sent other text (epic `data` T85) | `field`, `value` |
  * | `read-too-soon`, `read-too-soon-seconds`, `read-too-soon-minute`, `read-too-soon-minutes` | what a read refused for being too soon says, a rate limit's (epic `data` I92) | `seconds`, `minutes` |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
@@ -255,16 +258,21 @@ export const CORE_MESSAGES = {
   "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
   language: "en",
   "write-retry": "Retry",
+  "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
+  "room-reload": "Reload",
+  "number-sent-as-other-text":
+    '{field} is a number, but its place sent "{value}", which reads as nothing;  if that\'s how it says it has none, say so:  `is a number or "{value}"`',
   "page-previous": "Previous",
   "page-next": "Next",
   "page-number": "Page {page}",
   "read-failed": "Can't read this right now:  {why}",
   "read-too-soon": "The server asks to wait:  try again in a little while",
-  "read-too-soon-seconds": "The server asks to wait:  try again in {seconds} seconds",
-  "read-too-soon-minute": "The server asks to wait:  try again in a minute",
-  "read-too-soon-minutes": "The server asks to wait:  try again in {minutes} minutes",
+  "read-too-soon-seconds": "The server asks to wait:  it'll be tried again in {seconds} seconds",
+  "read-too-soon-minute": "The server asks to wait:  it'll be tried again in a minute",
+  "read-too-soon-minutes": "The server asks to wait:  it'll be tried again in {minutes} minutes",
   "saved-added": "Add",
   "saved-removed": "Remove",
+  "saved-changed": "Edit",
   "write-show-me": "Show me",
   "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
   "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
@@ -313,6 +321,7 @@ export const CORE_MESSAGES = {
   "sign-in-taken-down": "The Spell account that Bluesky account is linked to was taken down by Spell.",
   "sign-in-linked-elsewhere": "That Bluesky account is linked to another Spell account already.",
   "site-no-such-page": "No such page",
+  "site-page-waiting": "This page hasn't been made yet.",
   "site-create-page": "Would you like to create one?",
   "site-create-it": "Create it",
   "site-page-failed": "Sorry, this page couldn't be shown.",
@@ -383,6 +392,10 @@ export type SitePageEntry = {
   tags?: string[]
   /** its address's parameters, each one of the page's own properties:  `["film"]` */
   params?: string[]
+  /** the real page it stands for, on the live site, if the line says */
+  live?: string
+  /** the `<group>` it's under, at the site's top level:  its navigation's heading */
+  group?: string
   /** the pages under it, as the lines under its line list them */
   pages?: SitePageEntry[]
 }

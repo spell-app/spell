@@ -104,7 +104,7 @@ export class Palette {
     return !!file && NotebookPageCells.holdsDrawnPage(file)
   }
 
-  /** Add a new view of the open page's own, last in its body:  `<spell-view "new view">`, drawn later by its name. */
+  /** Add a new view of the open page's own, last in its body:  `<view "new view">`, drawn later by its name. */
   static addNewView(): void {
     const file = editor.file
     const opening = file && NotebookPageCells.drawnPageIn(file.contents ?? "", file.path)
@@ -172,8 +172,8 @@ const TAG_WITH_PREFIX = /<(\/?)[a-z]+-([a-z][\w-]*)/g
 
 /** A new view of a page's own, in each language a page is written in:  `Palette.addNewView()`. */
 const NEW_VIEWS: Record<string, string> = {
-  en: '<spell-view "new view">\n\t<draw><text>A new view</text></draw>\n</spell-view>',
-  es: '<encanto-vista "nueva vista">\n\t<dibujar><texto>Una vista nueva</texto></dibujar>\n</encanto-vista>'
+  en: '<view "new view">\n\t<draw><text>A new view</text></draw>\n</view>',
+  es: '<vista "nueva vista">\n\t<dibujar><texto>Una vista nueva</texto></dibujar>\n</vista>'
 }
 
 /** The preference that remembers whether it's kept open. */

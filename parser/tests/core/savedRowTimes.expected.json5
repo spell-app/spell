@@ -1,0 +1,10 @@
+{
+  // Rows both cores read for Spell's two times (epic `data` T57):  tests/core/savedTimes.test.ts and tests/py/core/tests/test_places.py.
+  "old": { "id": "old", "title": "From before times" },
+  "stamped": {
+    "id": "stamped",
+    "title": "Soup",
+    "created": "2026-11-09T10:00:00.000Z",
+    "modified": "2026-11-09T10:00:00.000Z"
+  }
+}

@@ -1,10 +1,13 @@
 import { Api } from "spell/util/Api"
 import { ApiError, type ApiRequest } from "spell/util/fetching"
-import { rateLimitLeft } from "spell/util/retrying"
+import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
+import { clockTime } from "spell/util/time"
 
 import type { DeviceCopy, KeptCopy } from "./DeviceCopy"
+import { keyHidden, putKeyOn, type KeyGoes } from "./keyGoes"
 import {
   PlaceError,
+  TooSoonError,
   type PlaceCapabilities,
   type PlaceContext,
   type PlaceErrorKind,
@@ -20,6 +23,9 @@ const TRY_AGAIN_STATUSES = new Set([408, 425, 429])
 /** The answers that mean the thing isn't there. */
 const GONE_STATUSES = new Set([404, 410])
 
+/** The longest a request waits by itself for a server's limit to pass:  past that, it says when, and isn't sent. */
+const LONGEST_WAIT_MS = 15_000
+
 /****************
  * ### `WebPlace`
  * What every place that reaches a server over HTTP shares:  `RestPlace` and `GraphPlace` are mappings on top.
@@ -29,12 +35,18 @@ const GONE_STATUSES = new Set([404, 410])
  *   - any other 4xx:  `PlaceError` `"refused"`, or what a subclass says it means (`errorKindFor()`)
  *   - a 5xx, a 408, a 425, a 429, or nothing at all:  thrown as it is, so it counts as no answer, and a change resends
  *   - so is a 403 whose rate limit says no requests are left, GitHub's way (epic `data` I92):  try later, not refused
+ * - It waits out a rate limit (epic `data` T110), told by an answer's `retry-after`, or its limit having none left:
+ *   - nothing's sent until then:  a wait of a few seconds is waited for
+ *   - a longer one throws `TooSoonError` at once, saying when, and what's drawing the read tries again then
+ *   - `waitsOutLimits`:  `false` for a place whose `RateQueue` does this itself
  * - A KEY is named, never written (epic `data`, Q11):
  *   - `keyNamed` says a place needs one, by name;
  *     with `keyIfSet`, it takes one when it's there, and goes without when it isn't, GitHub's way.
  *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through `RemotePlace`.
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
+ *   - It goes as `Authorization: Bearer`, or where `keyGoes` says (epic `data` T73):  a header of its own, or the address.
+ *     What's said of a request hides it (`keyHidden()`), and a copy on this device is kept under the address without it.
  * - With `mostPerSecond`, it keeps to a server's pace (epic `data` P34):
  *   each request waits its turn, the Met Museum's 80 a second (`- it takes up to 80 requests a second`).
  * - With a `deviceCopy`, a read is answered from a copy kept on this device (epic `data` P36):  `answerFromCopy()`.
@@ -49,8 +61,8 @@ export abstract class WebPlace {
   private readonly keyIfSet: boolean
   /** Finds that key, on a server side. */
   private readonly keyFrom: WebPlaceProps["keyFrom"]
-  /** Puts that key on a request. */
-  private readonly sendKey: (headers: Headers, key: string) => void
+  /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
+  private readonly keyGoes: KeyGoes | undefined
   /** The header a change's id goes in:  `false` for none. */
   private readonly changeIdHeader: string | false
   /** Sends the requests. */
@@ -59,6 +71,8 @@ export abstract class WebPlace {
   private readonly mostPerSecond: number | undefined
   /** When the next request may go, in ms since 1970, keeping to `mostPerSecond`. */
   private nextTurn = 0
+  /** Nothing's sent before this, in ms since 1970:  a server said so, or its rate limit has none left. */
+  private askAgainAt = 0
   /** The copy of what it reads, kept on this device:  only when its line says so. */
   private readonly deviceCopy: DeviceCopy | undefined
   /** The addresses being read behind their stale copies:  one request each. */
@@ -69,7 +83,7 @@ export abstract class WebPlace {
     keyNamed,
     keyIfSet = false,
     keyFrom,
-    sendKey = sendAsBearer,
+    keyGoes,
     changeIdHeader = CHANGE_ID_HEADER,
     mostPerSecond,
     deviceCopy
@@ -78,7 +92,7 @@ export abstract class WebPlace {
     this.keyNamed = keyNamed
     this.keyIfSet = keyIfSet
     this.keyFrom = keyFrom
-    this.sendKey = sendKey
+    this.keyGoes = keyGoes
     this.changeIdHeader = changeIdHeader
     this.mostPerSecond = mostPerSecond
     this.deviceCopy = deviceCopy
@@ -154,25 +168,75 @@ export abstract class WebPlace {
   ): Promise<Response> {
     const key = await this.keyOrRefusal()
     const headers = new Headers(request.headers)
-    if (key !== undefined) this.sendKey(headers, key)
+    const url = key === undefined ? request.url : this.urlWithKey(request, headers, key)
     if (changeId !== undefined && this.changeIdHeader) headers.set(this.changeIdHeader, changeId)
+    await this.waitOutLimit(signal)
     await this.waitForTurn()
     try {
-      return await this.api.request<Response>({
+      const response = await this.api.request<Response>({
         ...request,
+        url,
         headers,
         responseType: "response",
         ...(signal && { signal }),
         ...(keepalive && { keepalive })
       })
+      this.noteLimit(response)
+      return response
     } catch (error) {
-      if (!(error instanceof ApiError) || !this.isAnAnswer(error.status) || isOutOfRequests(error)) throw error
+      if (error instanceof Error) error.message = keyHidden(error.message, key)
+      if (!(error instanceof ApiError)) throw error
+      if (error.response) this.noteLimit(error.response)
+      if (!this.isAnAnswer(error.status) || isOutOfRequests(error)) throw error
       const kind = this.errorKindFor(error.status!)
       const message = await this.messageOf(error)
       const whyNot = kind === "refused" ? await this.whyNotOf(error) : undefined
       const needs = kind === "refused" ? await this.needsOf(error) : undefined
       throw new PlaceError(message, { cause: { kind, ...(whyNot && { whyNot }), ...(needs && { needs }) } })
     }
+  }
+
+  /**
+   * `request`'s address, with `key` there if that's where it goes:  its template filled, so nothing's left to fill.
+   * - SIDE EFFECT:  `key` is in `headers`, if it goes there.
+   */
+  private urlWithKey(request: ApiRequest, headers: Headers, key: string): string {
+    if (!this.keyGoes || !("inAddress" in this.keyGoes)) {
+      putKeyOn(request.url, headers, key, this.keyGoes)
+      return request.url
+    }
+    return putKeyOn(this.api.url(request.url, request.urlData), headers, key, this.keyGoes)
+  }
+
+  /** Does it wait out a rate limit itself?  A place whose `RateQueue` already does says no. */
+  protected get waitsOutLimits(): boolean {
+    return true
+  }
+
+  /** SIDE EFFECT:  what `response` says of when to ask next is noted. */
+  private noteLimit(response: Response): void {
+    if (!this.waitsOutLimits) return
+    const askAgainAt = askAgainAtIn(response)
+    if (askAgainAt !== undefined) this.askAgainAt = Math.max(this.askAgainAt, askAgainAt)
+  }
+
+  /**
+   * SIDE EFFECT:  waits out a limit a server named, if that's soon.
+   * - throws `TooSoonError` when it isn't, with nothing sent:  saying when
+   * - throws `signal`'s reason, when it's aborted while it waits
+   */
+  private async waitOutLimit(signal: AbortSignal | undefined): Promise<void> {
+    const wait = this.askAgainAt - Date.now()
+    if (wait <= 0) return
+    if (wait > LONGEST_WAIT_MS) {
+      const at = clockTime(new Date(this.askAgainAt))
+      const message = `${this.constructor.name}:  ${this.url} says to wait:  it'll be asked again at ${at}`
+      throw new TooSoonError(message, { cause: { retryAt: this.askAgainAt } })
+    }
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(resolve, wait)
+      signal?.addEventListener("abort", () => (clearTimeout(timer), reject(signal.reason)), { once: true })
+    })
   }
 
   /** SIDE EFFECT:  waits until this request's turn, keeping to `mostPerSecond`;  at once without one. */
@@ -240,8 +304,8 @@ export type WebPlaceProps = {
    * - It can wait, for a key that's a token made from another (`GoogleToken`).
    */
   keyFrom?: (name: string) => string | undefined | Promise<string | undefined>
-  /** How the key goes on a request;  default `Authorization: Bearer <key>`. */
-  sendKey?: (headers: Headers, key: string) => void
+  /** Where the key goes on a request;  default `Authorization: Bearer <key>`.  SEE:  `KeyGoes`. */
+  keyGoes?: KeyGoes
   /** The header a change's id goes in;  default `CHANGE_ID_HEADER`;  `false`:  send none. */
   changeIdHeader?: string | false
   /**
@@ -270,9 +334,15 @@ export function valueAt(value: unknown, path: string | undefined): unknown {
   return at
 }
 
-/** The usual way a key goes on a request. */
-function sendAsBearer(headers: Headers, key: string): void {
-  headers.set("Authorization", `Bearer ${key}`)
+/**
+ * When `response` says to ask again, in ms since 1970:  `undefined` when it says nothing about that.
+ * - A 429 or a 503's `retry-after`;  else, with no requests left of its rate limit, when that resets.
+ */
+function askAgainAtIn(response: Response): number | undefined {
+  const { status, headers } = response
+  const said = status === 429 || status === 503 ? retryAfter(response) : undefined
+  if (said !== undefined) return Date.now() + said
+  return rateLimitLeft(headers) === 0 ? rateLimitResetAt(headers) : undefined
 }
 
 /** Does `error`'s answer say its rate limit has no requests left:  GitHub's 403, `x-ratelimit-remaining: 0`? */

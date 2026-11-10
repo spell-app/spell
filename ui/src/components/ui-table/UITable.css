@@ -1691,10 +1691,14 @@
     /* a column is never narrower than its heading's longest word:  "Temperature" ran into "Rain" at phone width */
     min-inline-size: min-content;
   }
-  .ui.table:state(rows):not(:state(captioned)) > :is(ui-row, es-fila):state(header):first-child > :is(ui-cell, es-celda):first-child {
+  .ui.table:state(rows):not(:state(captioned))
+    > :is(ui-row, es-fila):state(header):first-child
+    > :is(ui-cell, es-celda):first-child {
     border-start-start-radius: var(--_ui-table-radius);
   }
-  .ui.table:state(rows):not(:state(captioned)) > :is(ui-row, es-fila):state(header):first-child > :is(ui-cell, es-celda):last-child {
+  .ui.table:state(rows):not(:state(captioned))
+    > :is(ui-row, es-fila):state(header):first-child
+    > :is(ui-cell, es-celda):last-child {
     border-start-end-radius: var(--_ui-table-radius);
   }
 
@@ -1731,10 +1735,14 @@
   }
 
   /* Very basic:  no padding at the edges. */
-  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):first-child {
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows)
+    > :is(ui-row, es-fila)
+    > :is(ui-cell, es-celda):first-child {
     padding-inline-start: 0;
   }
-  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda):last-child {
+  .ui[class*="very basic"].table:not(.sortable, .striped):state(rows)
+    > :is(ui-row, es-fila)
+    > :is(ui-cell, es-celda):last-child {
     padding-inline-end: 0;
   }
 
@@ -1769,11 +1777,15 @@
   }
 
   /* Sortable:  a header cell is a control. */
-  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda):not([data-sortable="false"]) {
+  .ui.sortable.table:state(rows)
+    > :is(ui-row, es-fila):state(header)
+    > :is(ui-cell, es-celda):not([data-sortable="false"]) {
     cursor: var(--ui-control-cursor);
     user-select: none;
   }
-  .ui.sortable.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda):not([data-sortable="false"]):hover {
+  .ui.sortable.table:state(rows)
+    > :is(ui-row, es-fila):state(header)
+    > :is(ui-cell, es-celda):not([data-sortable="false"]):hover {
     background: var(--_ui-table-sortable-hover-background);
     color: var(--_ui-table-sortable-hover-color);
   }

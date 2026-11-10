@@ -8,6 +8,7 @@ import {
   PlaceQuery,
   Places,
   RestPlace,
+  TooSoonError,
   type PlaceChange,
   type PlaceConflict,
   type PlaceRow,
@@ -797,5 +798,147 @@ describe("RestPlace, a key", () => {
     await expect(asked).rejects.toMatchObject({ kind: "refused" })
     await expect(asked).rejects.toThrow('needs the key named "RECIPES_KEY"')
     expect(box.asks).toEqual([])
+  })
+})
+
+describe("what's too much to keep (epic `data` T123)", () => {
+  test("a list longer than the place keeps at once is cut there, and said", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ ids: Array.from({ length: 60_000 }, (_each, index) => index) }))
+    const place = new RestPlace({
+      url: "https://example.com",
+      collections: { things: { rowsAt: "ids" } },
+      can: { idOf: "id" }
+    })
+    const { rows, notes } = await place.list("things", {}, {})
+    expect(rows).toHaveLength(50_000)
+    expect(notes![0]).toMatch(/60000 rows, and only the first 50000/)
+    vi.unstubAllGlobals()
+  })
+})
+
+describe("where a key goes (epic `data` T73)", () => {
+  const KEY = "s3cret key&more"
+  const keyed = { keyNamed: "RECIPES_KEY", keyFrom: () => KEY }
+
+  test("said nothing, as `Authorization: Bearer`", async () => {
+    const { box, place } = await served({}, keyed)
+    await place.list("recipes", {}, {})
+    expect(box.asks[0]!.headers.authorization).toBe(`Bearer ${KEY}`)
+    expect(box.asks[0]!.query).toEqual({})
+  })
+
+  test("in a header of its own, as it is, and no `Authorization` beside it", async () => {
+    const { box, place } = await served({}, { ...keyed, keyGoes: { header: "X-Api-Key" } })
+    await place.list("recipes", {}, {})
+    expect(box.asks[0]!.headers["x-api-key"]).toBe(KEY)
+    expect(box.asks[0]!.headers.authorization).toBeUndefined()
+  })
+
+  test("in the address, beside the rest of the query, on a read and on a write", async () => {
+    const { box, place } = await served(
+      {},
+      { ...keyed, keyGoes: { inAddress: "api_key" }, can: { sort: "every field" } }
+    )
+    await place.list("recipes", { sort: [{ field: "title" }] }, {})
+    expect(box.asks[0]!.query).toEqual({ api_key: KEY, sort: "name" })
+    await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Soup" } }], {})
+    expect(box.asks[1]).toMatchObject({ method: "PATCH", path: "/recipes/r-1", query: { api_key: KEY } })
+    expect(box.asks[1]!.headers.authorization).toBeUndefined()
+  })
+
+  test("a next page's address that already holds it asks it once", async () => {
+    const seen: string[] = []
+    const real = globalThis.fetch
+    const next = "https://example.com/recipes?api_key=old&page=2"
+    globalThis.fetch = ((url: string) => {
+      seen.push(url)
+      return Promise.resolve(Response.json([], { headers: seen.length === 1 ? { link: `<${next}>; rel="next"` } : {} }))
+    }) as typeof fetch
+    try {
+      const place = new RestPlace({
+        url: "https://example.com",
+        ...keyed,
+        keyGoes: { inAddress: "api_key" },
+        can: { page: "cursor" }
+      })
+      await place.list("recipes", { page: { at: next } }, {})
+      expect(new URL(seen[0]!).searchParams.getAll("api_key")).toEqual([KEY])
+    } finally {
+      globalThis.fetch = real
+    }
+  })
+
+  test("a failure names the address with its key hidden, however it's written there", async () => {
+    const real = globalThis.fetch
+    const place = new RestPlace({ url: "https://example.com", ...keyed, keyGoes: { inAddress: "api_key" } })
+    for (const status of [500, 400]) {
+      globalThis.fetch = (() => Promise.resolve(new Response("", { status, statusText: "no" }))) as typeof fetch
+      try {
+        const failure = (await place.list("recipes", {}, {}).catch((error: unknown) => error)) as Error
+        expect(failure.message).toContain("[its key]")
+        expect(failure.message).not.toMatch(/s3cret/)
+      } finally {
+        globalThis.fetch = real
+      }
+    }
+  })
+})
+
+describe("a rate limit, in a running program (epic `data` T110)", () => {
+  /** A place whose server answers each of `answers` in turn, then an empty list, counting what's sent. */
+  function answering(...answers: Response[]) {
+    const sent = { count: 0 }
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        // a place from an earlier test, still resending, isn't asking this one
+        if (!`${url}`.startsWith("https://example.com/")) return Promise.resolve(Response.json([]))
+        sent.count++
+        return Promise.resolve(answers.shift() ?? Response.json([]))
+      })
+    )
+    return { sent, place: new RestPlace({ url: "https://example.com", collections: { recipes: {} } }) }
+  }
+
+  afterEach(() => void vi.unstubAllGlobals())
+
+  test("told to wait a long while, nothing more is sent until then, and it says when", async () => {
+    const reset = Math.round(Date.now() / 1000) + 600
+    const limited = { "x-ratelimit-remaining": "0", "x-ratelimit-reset": `${reset}` }
+    const { sent, place } = answering(new Response("", { status: 403, statusText: "limit", headers: limited }))
+    await expect(place.list("recipes", {}, {})).rejects.not.toBeInstanceOf(PlaceError)
+    const failure = (await place.list("recipes", {}, {}).catch((error: unknown) => error)) as TooSoonError
+    expect(failure).toBeInstanceOf(TooSoonError)
+    expect(failure.retryAt).toBe(reset * 1000)
+    expect(failure.message).toMatch(/asked again at \d\d:\d\d/)
+    expect(sent.count).toBe(1)
+  })
+
+  test("an answer saying it was the last request holds the next one back too", async () => {
+    const reset = Math.round(Date.now() / 1000) + 600
+    const last = { "x-ratelimit-remaining": "0", "x-ratelimit-reset": `${reset}` }
+    const { sent, place } = answering(Response.json([], { headers: last }))
+    await place.list("recipes", {}, {})
+    await expect(place.list("recipes", {}, {})).rejects.toBeInstanceOf(TooSoonError)
+    expect(sent.count).toBe(1)
+  })
+
+  test("told to wait a moment, the next read waits, then asks", async () => {
+    const started = Date.now()
+    const { sent, place } = answering(new Response("", { status: 429, headers: { "retry-after": "1" } }))
+    await expect(place.list("recipes", {}, {})).rejects.not.toBeInstanceOf(TooSoonError)
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: [] })
+    expect(Date.now() - started).toBeGreaterThanOrEqual(900)
+    expect(sent.count).toBe(2)
+  })
+
+  test("past the time it said, it asks", async () => {
+    const reset = Math.round(Date.now() / 1000) - 1
+    const { sent, place } = answering(
+      new Response("", { status: 403, headers: { "x-ratelimit-remaining": "0", "x-ratelimit-reset": `${reset}` } })
+    )
+    await expect(place.list("recipes", {}, {})).rejects.toBeDefined()
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: [] })
+    expect(sent.count).toBe(2)
   })
 })

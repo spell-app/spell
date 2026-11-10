@@ -29,6 +29,8 @@ class View(Thing):
     - `core.draw_thing()` draws it as that element, its own `draw()` inside;  with no tag, as any thing draws.
     """
 
+    # a picture of it, a file of its project:  drawn while it has no drawing of its own (`to draw it`, in the page)
+    thumbnail = prop()
     # our element's tag, e.g. `solitaire-card`:  the compiled class names it -- see `core.element_tag_of()`
     element_tag: str | None = None
     # may a page let people drag our things?  `- it is draggable` says yes -- the JavaScript core's `draggable`;

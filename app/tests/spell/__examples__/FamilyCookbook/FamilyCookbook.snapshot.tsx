@@ -8,15 +8,15 @@ core.heading("Family Cookbook:  your recipes, saved in the cloud")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 423, end: 442 } })
+  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 451, end: 473 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 446, end: 472 } })
+  @prop({ type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 478, end: 511 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 476, end: 495 } })
+  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 517, end: 539 } })
   accessor notes!: string
 
   @drawn draw() {
@@ -40,7 +40,19 @@ export class Recipe extends Thing {
     )
   }
 
-  static savedIn = { place: "family_cookbook", collection: "recipes" }
+  static savedIn = {
+    place: "family_cookbook",
+    collection: "recipes",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in family cookbook
+  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 412, end: 439 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in family cookbook
+  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 412, end: 439 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -86,12 +98,10 @@ export class Cookbook extends App {
   @prop({ init: () => new Recipe({ servings: 4 }), early: true })
   accessor newRecipe!: Recipe
 
-  /** Newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1231, end: 1437 }, readsFrom: ["family_cookbook"] }) }
+  /** Newest first, by when each was saved */
+  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1211, end: 1377 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
-    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search))
-    core.reverse(found)
-    return found
+    return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search)), (item: Recipe) => core.descending(item.created))
   }, () => [this.search]) }
 
   addTheNewRecipe() {

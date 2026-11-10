@@ -57,7 +57,10 @@
   }
   .kept {
     --_epic-text-box-warn: var(--ui-orange, #f2711c);
-    --_epic-text-box-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-text-box-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
     --_epic-text-box-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     margin: 0 0 0.75em;
     padding: 8px 10px;

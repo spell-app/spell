@@ -171,6 +171,78 @@ describe("<ui-toolbar> bar slots", () => {
     })
   })
 
+  describe("max-visible", () => {
+    /** `count` items, the first chosen:  a segmented row that chooses as it's clicked. */
+    const items = (count: number) =>
+      Array.from({ length: count }, (_, index) => `<ui-item ${index ? "" : "selected"}>F${index}</ui-item>`).join("")
+    const LOOK = 'appearance="segmented link header"'
+
+    /** The titles the row shows, in order. */
+    const shown = (host: Element) =>
+      [...host.querySelectorAll<HTMLElement>("ui-item")].filter((each) => !each.hidden).map((each) => each.textContent)
+
+    /** The button that lists every item, while it's there. */
+    const listButton = (host: Element) => host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=all-items]")
+
+    /** The list's rows. */
+    const rows = (host: Element) => [...host.shadowRoot!.querySelectorAll<HTMLButtonElement>("[part~=overflow-menu] .row")]
+
+    it("no more items than that:  all of them, and no button", async () => {
+      const { host } = await toolbar(900, items(3), `${LOOK} max-visible="3"`)
+      await ElementFixture.settle()
+      expect(shown(host)).toEqual(["F0", "F1", "F2"])
+      expect(listButton(host)).toBeNull()
+    })
+
+    it("more:  only what's been chosen, and a button listing every item", async () => {
+      const { host } = await toolbar(900, items(5), `${LOOK} max-visible="3"`)
+      await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+      await ElementFixture.settle()
+      expect(shown(host)).toEqual(["F0"])
+      listButton(host)!.click()
+      await ElementFixture.settle()
+      expect(rows(host).map((row) => row.querySelector(".title")!.textContent)).toEqual(["F0", "F1", "F2", "F3", "F4"])
+    })
+
+    it("a pick joins the row, in the page's order, and the one chosen longest ago leaves", async () => {
+      const { host } = await toolbar(900, items(5), `${LOOK} max-visible="2"`)
+      await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+      for (const index of [3, 1]) {
+        listButton(host)!.click()
+        await ElementFixture.settle()
+        rows(host)[index]!.click()
+        await ElementFixture.settle()
+      }
+      await expect.poll(() => shown(host)).toEqual(["F1", "F3"])
+    })
+
+    it("bare, it means 8", async () => {
+      const { host } = await toolbar(900, items(8), `${LOOK} max-visible`)
+      await ElementFixture.settle()
+      expect(host.matches(":state(limited)")).toBe(false)
+      host.append(Object.assign(document.createElement("ui-item"), { textContent: "F8" }))
+      await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+    })
+
+    it("`remember`:  a new row of the same name starts with the same items", async () => {
+      localStorage.removeItem("ui-toolbar-open-items")
+      const first = await toolbar(900, items(5), `${LOOK} max-visible="2" remember="test-row"`)
+      await expect.poll(() => first.host.matches(":state(limited)")).toBe(true)
+      listButton(first.host)!.click()
+      await ElementFixture.settle()
+      rows(first.host)[3]!.click()
+      await expect.poll(() => shown(first.host)).toEqual(["F0", "F3"])
+      const second = await toolbar(900, items(5), `${LOOK} max-visible="2" remember="test-row"`)
+      await expect.poll(() => shown(second.host)).toEqual(["F0", "F3"])
+    })
+
+    it("no `max-visible`:  every item, however many", async () => {
+      const { host } = await toolbar(300, items(20), LOOK)
+      await ElementFixture.settle()
+      expect(shown(host)).toHaveLength(20)
+    })
+  })
+
   it("`tabs`:  a tablist of tabs, the chosen one selected, one Tab stop", async () => {
     const items = "<ui-item selected>One</ui-item><ui-item>Two</ui-item>"
     const { host, menu } = await toolbar(400, items, 'appearance="segmented link header" tabs')

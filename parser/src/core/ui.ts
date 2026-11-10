@@ -152,7 +152,10 @@ export const uiMethods = defineCoreModule({
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
     try {
-      const toast = (await ui.load()).toast(toastOptionsFor(String(message), options))
+      const page = await ui.load()
+      // the first toast of a page with none drawn yet:  its element is loaded now, not by every page up front
+      await page.toasts.ready()
+      const toast = page.toast(toastOptionsFor(String(message), options))
       if (!toastStays(options)) await toast.closed
     } catch (error) {
       core.console.error("notify:  can't show a toast", error)
@@ -372,6 +375,8 @@ export function listenForTableEdits(element: HTMLElement): () => void {
  * - Each declared property, in the order declared (a parent class's first), headed by its words
  *   (`filmTitle` => `film title`), of its kind:  `number`, `date`, `choice` (true or false:
  *   a tick box), one of its values (`its "size" is small or large`);  a list, or a thing, isn't a column.
+ * - NOT Spell's own `created` and `modified` (`savedIn.times`, epic `data` T57):  it stamps them, nobody types them.
+ *   A type that declares its own `created` has it as a column, like any property.
  * - SIDE EFFECT:  a getter on `list`, not enumerable, so its JSON and its items don't change.
  */
 export function nameTableColumns(list: object, Class: Function): void {
@@ -394,6 +399,7 @@ function columnsFor(Class: Function): TableColumn[] {
   const schemas: Schema[] = []
   for (let schema = schemaOf(Class as never) as Schema | undefined; schema; schema = schema.parent)
     schemas.unshift(schema)
+  const times = (Class as { savedIn?: { times?: readonly string[] } }).savedIn?.times ?? []
   const columns: TableColumn[] = []
   for (const schema of schemas) {
     for (const [key, info] of schema.declared) {
@@ -401,7 +407,7 @@ function columnsFor(Class: Function): TableColumn[] {
       const type = info.type
       const values = typeof info.oneOf === "function" ? info.oneOf() : info.oneOf
       const header = key.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
-      if (key === "id") continue
+      if (key === "id" || times.includes(key)) continue
       if (values?.length) columns.push({ key, header, type: "choice", choices: values.map((value) => ({ value })) })
       else if (type === "number" || type === "date") columns.push({ key, header, type })
       else if (type === "choice") columns.push({ key, header, type: "yes-no" })
@@ -569,6 +575,8 @@ type PageUI = {
   load(): Promise<PageUI>
   /** a toast:  `UI.toast()`, its options the ones `notify` uses (Spell UI's `ToastOptions`) */
   toast(options: PageToastOptions): { closed: Promise<void> }
+  /** toasts:  `UI.toasts`;  `ready()` resolves once one can show, importing the family the first time */
+  toasts: { ready(): Promise<void> }
   /** dialogs that answer with a promise:  `UI.modals` */
   modals: {
     alert(options: { message: string; okText?: string }): Promise<void>

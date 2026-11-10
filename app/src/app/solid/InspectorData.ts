@@ -1,5 +1,6 @@
 import { Cell } from "spell/util/reactive"
 import type { Places, SavedOrigin, ValueOrigin, WorkedOutOrigin } from "spell/places/Places"
+import type { SampleStart } from "spell/places/SamplePlace"
 import type { WhyNotWritable } from "spell/places/places.types"
 import type { PlaceEdit, PlaceThings } from "spell/parser/core/places"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
@@ -197,6 +198,25 @@ export class InspectorData {
         const rowsFromType = await runtimeCore()!._sampleRowsMaker()
         await putSampleIn(now.places, placeName, { rowsFromType })
       } else await putRealPlaceBack(now.places, placeName)
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      InspectorData.swapped.changed()
+    }
+  }
+
+  /**
+   * Start every sample in use over:  their records forgotten, then copied from the real place again, or `"made up"`.
+   * - Changes held in the side bar go first.
+   * - NEVER throws:  a failure shows as the editor's error.
+   */
+  static async startSamplesOver(start: SampleStart): Promise<void> {
+    InspectorData.commitEdits()
+    const now = InspectorData.placesNow()
+    if (!now) return
+    try {
+      const { startSampleOver } = await import("spell/places/SamplePlace")
+      await Promise.all(InspectorData.samplesInUse.map((name) => startSampleOver(now.places, name, start)))
     } catch (error) {
       editor.showError(error)
     } finally {

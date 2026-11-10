@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { core, List, Thing } from "spell/parser/core"
-import { listenForTableEdits } from "spell/parser/core/ui"
+import { listenForTableEdits, nameTableColumns } from "spell/parser/core/ui"
 
 /**
  * A program's things edited in a `<ui-table editable>` (`listenForTableEdits()`, epic `mockup` P9):
@@ -52,6 +52,36 @@ function tableOf(rows: unknown, eventName = "ui-editing") {
 }
 
 beforeEach(() => core.resetRuntime())
+
+describe("nameTableColumns()", () => {
+  /** The headers of the table of `Class`'s things. */
+  function headersOf(Class: Function): string[] {
+    const list = {}
+    nameTableColumns(list, Class)
+    return (list as { tableColumns: { header: string }[] }).tableColumns.map((column) => column.header)
+  }
+
+  test("leaves out Spell's own times:  it stamps them, nobody types them", () => {
+    class SavedReview extends Review {
+      static savedIn = { place: "reviews", collection: "reviews", times: ["created", "modified"] }
+      static {
+        this.declareProp("created", { type: "date" })
+        this.declareProp("modified", { type: "date" })
+      }
+    }
+    expect(headersOf(SavedReview)).toEqual(["film", "stars"])
+  })
+
+  test("keeps a `created` the type wrote itself, as it isn't one of its times", () => {
+    class Dated extends Review {
+      static savedIn = { place: "reviews", collection: "reviews", times: ["modified"] }
+      static {
+        this.declareProp("created", { type: "date" })
+      }
+    }
+    expect(headersOf(Dated)).toEqual(["film", "stars", "created"])
+  })
+})
 
 describe("listenForTableEdits()", () => {
   test("writes a table of things into them, and cancels the table's own change", () => {

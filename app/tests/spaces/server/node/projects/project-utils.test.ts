@@ -196,14 +196,14 @@ describe("project-utils", () => {
     expect(index.imports.map((it) => it.path)).toEqual(["/Paged.spell", `/Card${SP.EDITOR_PAGE_SUFFIX}`])
   })
 
-  // epic `elemental-spell` J95, Owen 2026-10-25:  "one file" -- a template is a `.spell` file OR a `.spellml` file
-  test("a .spellml file is an import of its own, as a .spell file is", async () => {
+  // epic `elemental-spell` J95, Owen 2026-10-25:  "one file";  epic `language` P40:  every file `.spell`, in either shape
+  test("a tag-shaped file is an import of its own, as a plain one is", async () => {
     const projectId = project("Tags")
     const folder = resolve(workspace, "Tags")
     writeFileSync(resolve(folder, "Card.spell"), '<spell-thing "card">\n</spell-thing>\n')
 
     const index = await projectUtils.getIndex(projectId)
-    expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spellml"])
+    expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spell"])
   })
 
   describe("sub-folders (notebook P10)", () => {
@@ -352,7 +352,7 @@ describe("project-utils", () => {
       symlinkSync(folder, resolve(folder, "Button/up"))
 
       const index = await projectUtils.getIndex(projectId)
-      expect(index.imports.map((it) => it.path)).toEqual(["/Linked.spell", "/Button/Usage.spellml"])
+      expect(index.imports.map((it) => it.path)).toEqual(["/Linked.spell", "/Button/Usage.spell"])
     })
 
     test("a file only drafted, in a sub-folder, lists by its path", async () => {
@@ -362,7 +362,7 @@ describe("project-utils", () => {
       await drafts.save("/Button/New.spell", TAG)
 
       const index = await projectUtils.getIndex(projectId)
-      expect(index.imports.map((it) => it.path)).toEqual(["/Drafted.spell", "/Button/New.spellml"])
+      expect(index.imports.map((it) => it.path)).toEqual(["/Drafted.spell", "/Button/New.spell"])
       expect(index.imports[1]!.contents).toBe(TAG)
     })
   })
@@ -382,18 +382,18 @@ describe("project-utils", () => {
 
     // the explainer not there:  left out of the index, and the project file left as it is
     const paths = async () => (await projectUtils.getIndex(projectId)).imports.map((it) => it.path)
-    expect(await paths()).toEqual(["/Console.spellml", "/Ordered.spell"])
+    expect(await paths()).toEqual(["/Console.spell", "/Ordered.spell"])
     expect(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")).toBe(before)
 
     // back again:  in its place
     writeFileSync(resolve(folder, "Explainer.spell"), '<spell-page "explainer">\n</spell-page>\n')
-    expect(await paths()).toEqual(["/Console.spellml", "/Explainer.spellml", "/Ordered.spell"])
+    expect(await paths()).toEqual(["/Console.spell", "/Explainer.spell", "/Ordered.spell"])
     expect(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")).toBe(before)
 
     // a new one goes at the end, the gone one's place kept
     rmSync(resolve(folder, "Explainer.spell"))
     writeFileSync(resolve(folder, "Extra.spell"), '<spell-thing "extra">\n</spell-thing>\n')
-    expect(await paths()).toEqual(["/Console.spellml", "/Ordered.spell", "/Extra.spellml"])
+    expect(await paths()).toEqual(["/Console.spell", "/Ordered.spell", "/Extra.spell"])
     expect((await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)).toEqual([
       "/Console.spell",
       "/Explainer.spell",

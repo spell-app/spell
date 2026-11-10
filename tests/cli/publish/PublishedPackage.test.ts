@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
@@ -125,6 +125,86 @@ describe("builtPath()", () => {
     expect(builtPath("./src/window.mjs")).toBe("./dist/window.mjs")
     expect(builtPath("./src/types/index.d.ts")).toBe("./dist/types/index.d.ts")
     expect(builtPath("templates")).toBe("templates")
+  })
+})
+
+describe("what npm doesn't install (epic-engine P66)", () => {
+  const leanRoot = join(ROOT, "lean")
+  const leanManifest = {
+    name: "spell-lean",
+    version: "0.0.1",
+    type: "module",
+    dependencies: { chalk: "^5", heavy: "^1", tool: "catalog:" },
+    peerDependencies: { "solid-js": "2.0.0" },
+    peerDependenciesMeta: { "solid-js": { optional: true } },
+    spellPublish: { optionalPeers: ["heavy", "tool"], pinnedBy: { formatter: "pinner" } }
+  }
+  const lean = (settings: PublishedRepo["settings"] = leanManifest.spellPublish) =>
+    new PublishedPackage(
+      { name: "spell-lean", root: leanRoot, manifest: leanManifest, settings },
+      join(ROOT, "lean-stage"),
+      "2.0.0",
+      {},
+      { tool: "1.2.3" }
+    )
+  mkdirSync(join(ROOT, "lean-stage"), { recursive: true })
+  mkdirSync(join(leanRoot, "node_modules", "pinner"), { recursive: true })
+  writeFileSync(join(leanRoot, "package.json"), JSON.stringify(leanManifest))
+  writeFileSync(
+    join(leanRoot, "node_modules", "pinner", "package.json"),
+    JSON.stringify({ name: "pinner", version: "1.0.0", dependencies: { formatter: "=0.70.0" } })
+  )
+
+  test("optionalPeers leave dependencies, as optional peers at their versions;  a peer already there stays", () => {
+    const published = lean().manifest()
+    expect(published.dependencies).toEqual({ chalk: "^5", formatter: "0.70.0" })
+    expect(published.peerDependencies).toEqual({ "solid-js": "2.0.0", heavy: "^1", tool: "1.2.3" })
+    expect(published.peerDependenciesMeta).toEqual({
+      "solid-js": { optional: true },
+      heavy: { optional: true },
+      tool: { optional: true }
+    })
+  })
+
+  test("pinnedBy:  the version the other package pins, without its =", () => {
+    expect((lean().manifest().dependencies as Record<string, string>).formatter).toBe("0.70.0")
+  })
+
+  test("a stale list throws, naming what to fix", () => {
+    expect(() => lean({ optionalPeers: ["gone"] }).manifest()).toThrow(/"optionalPeers" names gone/)
+    expect(() => lean({ pinnedBy: { other: "pinner" } }).manifest()).toThrow(/pinner doesn't depend on other/)
+  })
+})
+
+describe("a folder's own commands", () => {
+  test("written where its package.json has them, importing the built module, runnable", async () => {
+    const root = join(ROOT, "kit")
+    const folderRoot = join(root, "tool")
+    mkdirSync(join(root, "src"), { recursive: true })
+    mkdirSync(join(folderRoot, "src", "cli"), { recursive: true })
+    writeFileSync(join(root, "src", "index.ts"), "export const kit = 1\n")
+    writeFileSync(join(folderRoot, "src", "cli", "toolMain.ts"), "export const main = 1\n")
+    const kitManifest = { name: "kit", version: "0.0.1", type: "module", spellPublish: {} }
+    const folderManifest = { name: "kit-tool", version: "0.0.1", bin: { tool: "bin/tool" } }
+    const folder: PublishedRepo = {
+      name: "kit/tool",
+      root: folderRoot,
+      manifest: folderManifest,
+      settings: { bin: { tool: "cli/toolMain" } }
+    }
+    const stage = join(ROOT, "kit-stage")
+    const kit = new PublishedPackage(
+      { name: "kit", root, manifest: kitManifest, settings: {} },
+      stage,
+      "2.0.0",
+      {},
+      {},
+      [folder]
+    )
+    await kit.stage()
+    const bin = join(stage, "tool", "bin", "tool")
+    expect(readFileSync(bin, "utf8")).toContain('await import("../../dist/tool/cli/toolMain.js")')
+    expect(statSync(bin).mode & 0o111).toBeTruthy()
   })
 })
 

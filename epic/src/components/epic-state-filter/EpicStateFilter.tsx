@@ -4,7 +4,12 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 // the filter's rule, states and words:  their files, not `epic-section`'s barrel (which would define it here)
-import { MARKED_SHOWS_AS, StateFilter, WITH_CLAUDE, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
+import {
+  MARKED_SHOWS_AS,
+  StateFilter,
+  WITH_CLAUDE,
+  type ChipPick
+} from "spell/epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,

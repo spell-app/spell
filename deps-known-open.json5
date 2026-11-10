@@ -1,0 +1,18 @@
+// What `spell deps check` and `spell publish` allow although it's deprecated, or critical or high (epic `epic-engine` P67).
+// - Each entry says why.
+// - An entry that no longer matches anything fails the check:  take it off when the problem goes.
+// - `in`:  "repo" is the lockfile;  "npm" is what an install from npm gets.
+[
+  {
+    package: "zod",
+    advisories: ["GHSA-mrhx-c7xc-m3w5"],
+    in: ["repo", "npm"],
+    reason: "@atproto's packages need zod 3, and the fix is in zod 4.6.6:  memory exhaustion validating oversized collections.  Only the Bluesky sign-in loads it, and an npm install gets it only with the add-ons."
+  },
+  {
+    package: "dompurify",
+    advisories: ["GHSA-cg2g-xh64-v4q7", "GHSA-mrv2-3pqr-j5jr"],
+    in: ["npm"],
+    reason: "monaco-editor 0.57.0, its latest, pins DOMPurify 3.4.15;  the fix is 3.4.17, in Monaco 0.58 when it ships.  Only an install that adds the app-only packages gets it, and the repo forces 3.4.17 with a resolution, which an npm install can't."
+  }
+]

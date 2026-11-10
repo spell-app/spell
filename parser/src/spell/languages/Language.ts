@@ -408,6 +408,8 @@ export type LanguageWords = {
   placeKinds?: Readonly<Record<string, string>>
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
+  /** What a saved type's two times are called in this language:  `creado`.  Its rows say `created` and `modified` in every one. */
+  savedTimeWords: { created: string; modified: string }
   /**
    * How an event still HAPPENING is named, which a handler can cancel (epic `elemental-spell` P9, Q27):
    * English's `-ing` (`closing`), Spanish's gerund (`cerrando`) -- see `send`'s rule.
@@ -425,6 +427,11 @@ export type LanguageWords = {
    * - Its tokenizer reads a quoted name after it (`P.Tokenizer.quotedNameTags`).
    */
   exampleTag: string
+  /**
+   * What a quoted word after a tag becomes, for a tag two languages spell alike (`P.Tokenizer.quotedNameTags`):
+   * Spanish's `<panel "Ajustes">` is `etiqueta="Ajustes"`, English's `<panel "Settings">` `label="Settings"`.
+   */
+  quotedNameTags?: Record<string, string>
   /**
    * An app's widget defaults, a block of sample tags (epic `language` P29):  `<ui-defaults>`, in every language --
    * see `ui_defaults`.
@@ -466,7 +473,7 @@ export type LanguageWords = {
   builtInMembers?: Record<string, string[]>
   /**
    * What a stored built-in member's values compile to, when said in the language's own words -- `undefined` if they're English:
-   * e.g. `{ lock: { bloqueado: "locked", desbloqueado: "unlocked" } }`, so `- su candado es "bloqueado"` is `locked`.
+   * e.g. `{ lock: { bloqueado: "locked", desbloqueado: "unlocked" } }`, so `- su candado es bloqueado` is `locked`.
    * - Each key names a built-in member, as `builtInMembers` does.
    */
   builtInMemberValues?: Record<string, Record<string, string>>
@@ -507,22 +514,31 @@ export type LanguageWords = {
  * - Several spellings may mean one thing, e.g. `página` and `pagina`:  the first is the one a writer uses.
  */
 export type SpellxWords = {
-  /** The first word of a template's tag:  `spell` in `<spell-view>`, `encanto` in `<encanto-vista>`. */
+  /**
+   * The language's word for Spell:  `spell`, Spanish's `encanto`.
+   * - The block of code spell is the word alone, `<spell>`.
+   * - Before epic `language` P41, every template's tag began with it and a dash, `<spell-view>`:
+   *   those spellings still read, and nothing writes them.
+   */
   prefix: string
   /**
-   * A template's word, after the prefix and its dash:  `view` in `<spell-view>`.
+   * A template's word, `view` in `<view>`:  at a file's top level (epic `language` P41), and `<view>` inside a page.
+   * - The old spelling, after the prefix and its dash, `<spell-view>`, still reads anywhere a template goes.
    * - A word may bring a FLAG too, a bare attribute it stands for (epic `notebook` P1):
    *   `notebook` is `{ kind: "page", flag: "notebook" }`,
-   *   so `<spell-notebook "x">` reads as `<spell-page "x" notebook>`.
+   *   so `<notebook "x">` reads as `<page "x" notebook>`.
    */
   templates: Record<string, SpellxTemplateWord>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
   declarations: Record<string, SpellxDeclarationKind>
+  /** The tags that say where a program's data lives, at a file's top level (epic `language` P40). */
+  places: SpellxPlaceWord[]
   /**
-   * A tag holding prose about what it's in, its word after the prefix and its dash:
-   * `description` in `<spell-description>`, `comment` in `<spell-comment>` (epic `data` P31, Q27).
-   * - The prefix keeps the short words for Spell UI:  `<comment>` in a drawing is `<ui-comment>`.
-   * - The old short tag, `<description>`, is still a note outside a drawing, with a warning.
+   * A tag holding prose about what it's in:  `<note>` (epic `language` P41), `<property-editor>`, `<stories>`.
+   * - In a drawing each is markup:  `<comment>` there is Spell UI's `<ui-comment>`, `<note>` a project's own view.
+   * - The old note words still read where a note goes, with a warning naming `<note>`:
+   *   `<spell-description>`, `<spell-comment>` (epic `data` P31, Q27), and `<description>`, `<comment>`.
+   * - The first word for `description` is the one a writer uses:  `note`.
    */
   notes: Record<string, SpellxNoteKind>
   /** A tag whose head is a spell phrase, handling an event:  `on` in `<on mouse down>`. */
@@ -583,6 +599,8 @@ export type SpellxForWords = {
   inPages: string
   /** A list drawn whole. */
   allAtOnce: string
+  /** How many a list draws at once, with `{size}` for the number. */
+  atATime: string
   /** The word in `loading={no}`. */
   no: string
   /** `paging="pages"`'s value. */
@@ -597,15 +615,35 @@ export type SpellxForWords = {
   nothingFound: string
 }
 
+/**
+ * A tag saying where a program's data lives:  `<web-server "wikipedia" address="...">`, read as its plain line.
+ * - Only at a file's top level:  inside a drawing, `<room/>` is still a project's own view.
+ * - Its body is plain Spell, as an `<action>`'s is.
+ * - The first entry for a tag whose `flag` is set (or that has none) reads it;
+ *   the writer takes any entry whose words a plain line says, so an older line still becomes the tag.
+ */
+export type SpellxPlaceWord = {
+  /** its word, `web-server` */
+  tag: string
+  /** the plain line it reads as, with `{words}` (its name) and `{quoted address}` */
+  line: string
+  /** the bare attribute this entry is for, by its English name:  `<atmosphere personal>` */
+  flag?: string
+  /** the plain line when no `address=` is given, for a kind that can do without */
+  bare?: string
+}
+
 export type SpellxTwinWords = {
+  /** A place a library adds, `<supabase-project "x" address="...">`:  `{words} is {a kind} {kind} at {quoted address} :`. */
+  placeOfKind: string
   /** A template, named by a quoted name:  `{a name} {name} is {a super} {super} :`. */
   template: string
   /** A template with a short name too, `aka=`:  its name as words, `{a words} {words} aka {aka} is ...`. */
   templateAka: string
-  /** A one-of-a-kind template, `<spell-app>` or `<spell-page>`:  `{words} is {a super} {super} :`. */
+  /** A one-of-a-kind template, `<app>` or `<page>`:  `{words} is {a super} {super} :`. */
   singleton: string
-  /** More of a type declared in another file, `<spell-more-of "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
-  moreOf: string
+  /** Adds to a type another file declares, `<extend "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
+  extend: string
   /** What each kind of template extends, when it names no `template=`:  `{ view: "view", "page template": "page" }`. */
   supers: Record<string, string>
   /** A property's twin, by what the tag holds. */
@@ -675,10 +713,14 @@ export type SpellxTwinWords = {
    */
   group: string
   /**
-   * A page's `locked`:  a line in its body, `its lock is "locked"` (epic `notebook` P1).
+   * A page's `locked`:  a line in its body, `its lock is locked` (epic `notebook` P1).
    * - Its value quoted:  a built-in member written by hand has no list of values for a bare word to name.
    */
   pageLocked: string
+  /**
+   * A page's or view's own `thumbnail=`:  a line in its body, `its thumbnail is {quoted thumbnail}` (epic `mockup` P16).
+   */
+  templateThumbnail: string
   /**
    * A section of a page that draws its body, as its drawing writes it (epic `notebook` P3, J1):
    * Spell UI's `<section>` in the language's words, sticky and foldable as the docs pages' sections are.
@@ -701,14 +743,20 @@ export type SpellxTwinWords = {
   sitePageTags: string
   /** What a page's `state=` adds to its line. */
   sitePageState: string
-  /** What a page's `picture=` adds to its line. */
-  sitePagePicture: string
+  /** What a page's `thumbnail=` adds to its line. */
+  sitePageThumbnail: string
+  /** What a page's `live=` adds to its line:  the real page it stands for. */
+  sitePageLive: string
   /** What a part's `row=` and `column=` add to its line:  its place in its section of the site editor's board. */
   siteCardPlace: string
   /** What a part's `color=` adds to its line. */
   siteCardColor: string
   /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
   siteOverlay: string
+  /** A dialog or sidebar whose name doesn't say which it is, `<sidebar "System Notices"/>`:  the line that does. */
+  siteOverlayOf: { dialog: string; sidebar: string }
+  /** The words that say a part is a dialog or sidebar, as a regular expression's alternatives. */
+  siteOverlayWords: string
   /**
    * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
    * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
@@ -735,7 +783,7 @@ export type SpellxPageSectionWords = {
   defaults: Record<string, string | true>
 }
 
-/** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
+/** What a spellx template tag makes:  `<view>` a view's template, `<app>` an app ... */
 export type SpellxTemplateKind =
   | "view"
   | "thing"
@@ -744,13 +792,13 @@ export type SpellxTemplateKind =
   | "page template"
   | "app template"
   | "site"
-  | "more of"
+  | "extend"
 
 /**
  * A template word's meaning, in a language's `SpellxWords.templates`:
  * - its kind, e.g. `view`
  * - or its kind and the flag it brings (epic `notebook` P1):
- *   `{ kind: "page", flag: "notebook" }` for `<spell-notebook>`
+ *   `{ kind: "page", flag: "notebook" }` for `<notebook>`
  * - Read it with `SP.spellxTemplateKind()` and `SP.spellxTemplateFlag()`.
  */
 export type SpellxTemplateWord = SpellxTemplateKind | { kind: SpellxTemplateKind; flag: string }
@@ -775,19 +823,31 @@ export type SpellxDeclarationKind =
   | "test"
   | "menu"
   | "group"
-  // a site's parts, only in a `<spell-site>` (epic `mockup` P1)
+  // a site's parts, only in a `<site>` (epic `mockup` P1)
   | "page"
   | "dialog"
   | "sidebar"
 
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
- * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
+ * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
  * - The property editor may live in a file of its own, `Card.editor.spell` (`SP.isPropertyEditorsName()`).
- * - Or a page's STORIES, `<spell-stories>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
+ * - Or a page's STORIES, `<stories>` (epic `mockup` P6):  what it must let people do, as `<story>` tags, its twin a
  *   `<stories>` block, compiled to its `static stories`.
  */
 export type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"
+
+/**
+ * The words a page or view's name is read by:  `Pinned Screens & Hardware` => `Pinned Screens Hardware`.
+ * - A name is its title (epic `mockup` P17), so it can hold what no type's name can:  `&`, `?`, `'` are left out here.
+ * - What it's called, with them, stays as written.
+ */
+export function plainPartName(name: string): string {
+  return name
+    .replace(/[^\p{L}\p{N}\s-]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
 
 /**
  * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);
@@ -859,4 +919,9 @@ export type DeclarationPatterns = {
   methodLine: RegExp
   /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */
   reopenedType: RegExp
+  /**
+   * A place's line, its name captured:  `family cookbook is a web server at "...":`, so what's under it can be found.
+   * - `iu`, never `g`:  it's tried line by line.
+   */
+  placeDeclaration: RegExp
 }

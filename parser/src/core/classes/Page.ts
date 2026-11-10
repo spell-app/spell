@@ -40,7 +40,7 @@ export class Page extends View {
 
   /**
    * Whether the page may be changed:  in a locked page, every edit is a try-out, saved for nobody.
-   * - `<spell-page "x" locked>` says `locked`;  only the editor reads it, so far (`editor.isLocked()`).
+   * - `<page "x" locked>` says `locked`;  only the editor reads it, so far (`editor.isLocked()`).
    * - Whoever may save the page's design locks or unlocks it.
    * - Spanish's word for it is `candado` (`builtInMembers`).
    */

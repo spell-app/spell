@@ -66,6 +66,12 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "su clave es el secreto "CLAVE_RECETARIO""',
   "key-needs-server-side":
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
+  "key-goes-bad-header":
+    '"{name}" no puede ser el nombre de una cabecera:  es una palabra de letras, dígitos y guiones, p. ej. "X-Api-Key"',
+  "key-goes-bad-question":
+    '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
+  "key-goes-with-no-key":
+    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "- su clave es el secreto "CLAVE_RECETARIO""',
   "place-cant-announce":
     'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
   "change-not-saved":
@@ -90,6 +96,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
+  "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",
   "rider-only-in-a-drawing":
     "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
   "in-one-go-not-atomic":
@@ -111,6 +118,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "atmosphere-reads-here":
     'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda un número decimal como texto, "12.50", que otras aplicaciones leen como texto',
   "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
+  "operation-named-create":
+    'Una acción de {thing} no puede llamarse "create":  es lo que se ejecuta al crear cada {thing}.  Llámala de otro modo, p. ej. "para añadir una {thing} está en ..."',
+  "page-size-a-whole-number": "Una página tiene un número entero de cosas, 1 o más",
+  "atmosphere-not-a-space": '"{address}" no es un espacio:  se escribe "at://did:plc:.../space/familia"',
   "atmosphere-not-a-corner":
     '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
   "atmosphere-not-a-collection":
@@ -119,8 +130,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
   "personal-folder-a-name":
     '"personal" hace una carpeta para cada persona, por un nombre:  escribe solo un nombre, p. ej. carpeta de datos personal en "recetas", no "{address}"',
-  "site-part-not-a-page":
-    '"{part}" no es una de las páginas de este programa:  nombra una página que declare, p. ej. una "página de película" es una página',
+  "stories-not-tags":
+    'Las historias de una página son etiquetas:  <historia "H1">palabras</historia>, una por cada una;  esto no lo es:  {text}',
   "site-address-not-a-path":
     'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
   "site-param-not-on-page":
@@ -268,6 +279,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "value-line-outside-getter":
     'Una línea del cuerpo de una propiedad calculada:  ponla debajo de una, p. ej. "el color de una carta es:"',
   "cant-set-worked-out": "No se puede poner {what}:  spell lo calcula",
+  "not-one-of-its-values": "{what} no puede ser {value}:  es uno de {values}",
+  "it-itself": "Esto",
+  "no-listed-values": "No puede ser {value}:  no tiene ninguna propiedad con una lista de valores",
+  "listed-on-two-properties": '{value} es un valor de su {first} y de su {second}:  di cuál, "su {first} es {value}"',
   "cant-set-belongs-to": "No se puede poner {what}:  es {theHolder} que lo contiene -- muévelo a {aHolder}",
   "the-property": "{theProperty}",
   "the-property-of-a-type": "{theProperty} de {aType}",
@@ -323,8 +338,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
   "spellx-typed-body":
     'una propiedad con tipo= se guarda, y empieza en un valor en la línea de su etiqueta:  <propiedad "{name}" tipo="número">0</>',
+  "say-json-file":
+    'Un lugar que es un solo archivo tiene que decir qué guarda:  escribe "es un archivo json en", o "es un archivo csv en"',
   "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
-  "spellx-short-note": "{tag} ahora es {new}:  el nombre corto es de Spell UI, como <botón> es <ui-button>",
+  "spellx-old-note": "{tag} ahora es {new}:  una etiqueta para cada nota",
 
   ////////////////
   // ## Long forms

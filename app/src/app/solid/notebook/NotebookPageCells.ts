@@ -16,7 +16,7 @@ import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan }
  *     - the title:  a top-level `<header level="1">`, its sub header (a `<header>` inside it) the line under it
  *     - a section:  a top-level `<section label="...">`, this cell its opening tag;
  *       what's inside it, cells of their own, in its section of the page
- *   - `template`:  one of its own templates, `<spell-view "counter">`
+ *   - `template`:  one of its own templates, `<view "counter">`
  *   - `drawing`:  an element drawn in place, `<example "one counter">`, `<section>`;  the examples in it, in order
  *     - an example's description is its own `description="..."`, as `<ui-example>` takes it (epic `notebook` P6):
  *       the text before it is just text
@@ -108,12 +108,12 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a `.spell` file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
+   * Does `file`, a tag-shaped file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
    * - What the palette asks before offering a page's own row, a new view (epic `notebook` P5).
    * - Read and kept as `holdsNotebook()` is.
    */
   static holdsDrawnPage(file: SP.AnySpellFile): boolean {
-    return file.path.endsWith(".spell") && NotebookPageCells.pagesIn(file).drawsBody
+    return "form" in file && file.form === "spellx" && NotebookPageCells.pagesIn(file).drawsBody
   }
 
   /**
@@ -285,7 +285,7 @@ export class NotebookPageCells {
 export type NotebookPageModel = {
   /** its name, `counter notebook` */
   name: string
-  /** is it locked, `<spell-notebook "..." locked>`? */
+  /** is it locked, `<notebook "..." locked>`? */
   locked: boolean
   /** the language's word for `locked`, when it's another's */
   lockWord?: string
@@ -441,7 +441,7 @@ const LEVEL_WORDS: ReadonlySet<string> = new Set(["level", "nivel"])
 /** `label`, in each language. */
 const LABEL_WORDS: ReadonlySet<string> = new Set(["label", "etiqueta"])
 
-/** The flag that makes a page a notebook, by its English name:  `<spell-page "x" notebook>`. */
+/** The flag that makes a page a notebook, by its English name:  `<page "x" notebook>`. */
 const NOTEBOOK_FLAG = "notebook"
 
 /** What each `.spell` file's pages say, for the text it had:  `pagesIn()`. */

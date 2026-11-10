@@ -181,6 +181,11 @@ const ALLOWED: readonly Allowed[] = [
     reason: "only while `images` is on and the element connected"
   },
   {
+    file: "src/docs-components/ui-docs-index/UIDocsIndex.tsx",
+    rule: "no-mutation-observer",
+    reason: "watches the `<ui-site-nav>`, another element"
+  },
+  {
     file: "src/components/ui-toc/UIToc.tsx",
     rule: "no-mutation-observer",
     reason: "watches the FOLLOWED content, another element"

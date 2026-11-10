@@ -106,8 +106,10 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       and the glossary as `context`, for the system prompt (the API caches it).
   - Imported by path, never through the barrel:  `spell/parser/spell/translate/Translator`.
 - `ingest/` (epic `data` P18):  looking at a data source for real, and writing what it found (`spell place ingest`, `spell place update`).
-  - `PlaceIngest` runs the steps;  `PlaceLook`, a look per kind of place;  `PoliteReader`, everything it sends, which can't write;
-    `PlaceShape`, what rows show;  `PlaceReading`, what the agent reads in samples;  `PlaceSpell`, the Spell, and merging a later look.
+  - `PlaceIngest` runs the steps;  `PlaceLook`, a look per kind of place (`PlaceLookOthers`, those of a room, a data folder or a file, an Airtable, an atmosphere account);
+    `PlaceInLanguage` hands what it wrote to the `Translator`, for a file in another language;  `PoliteReader`, everything it sends, which can't write;
+    `PlaceShape`, what rows show;  `PlaceReading`, what the agent reads in samples;  `PlaceSpell`, the Spell, and merging a later look,
+    into a file in either shape (a new one is written in tags, epic `language` P40).
   - Everything else is handed in (`IngestSettings`):  `fetch`, `ClaudeRunner`, files, the question, the read through the Spell.
   - Imported by path, never through the barrel:  `spell/parser/spell/ingest/PlaceIngest`.
 - `highlight/`:  `SpellHighlighter`.

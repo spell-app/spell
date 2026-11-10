@@ -1,9 +1,9 @@
 import { existsSync, realpathSync } from "node:fs"
-import { join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { join, relative } from "node:path"
 
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
 
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EPIC_UI } from "spell/epic/server/server.types"
 
@@ -30,8 +30,8 @@ import { EPIC_UI } from "spell/epic/server/server.types"
  * - STATIC:  reads the disk (the link), keeps nothing.
  ****************/
 export class ServedFolders {
-  /** spell-epic's root:  this engine's checkout (`src/tool/` is two folders down). */
-  static readonly ENGINE = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+  /** spell-epic's root:  this engine's folder (`EngineFiles.root`). */
+  static readonly ENGINE = EngineFiles.root
 
   /**
    * The folders served at another address under checkout `root`, by their address folder, both relative to `root`.

@@ -28,6 +28,7 @@ import { IsA } from "./IsA"
 import { IsDefined } from "./IsDefined"
 import { IsEmpty } from "./IsEmpty"
 import { IsEqual } from "./IsEqual"
+import { IsListedValue } from "./IsListedValue"
 import { IsExactly } from "./IsExactly"
 import { IsIn } from "./IsIn"
 import { IsSameTypeAs } from "./IsSameTypeAs"
@@ -313,6 +314,9 @@ expressionsEs.addRule(IsA, {
   ]
 })
 
+// después de `is_a`, para que un tipo conocido gane:  `es una reina` con un tipo llamado `reina`
+expressionsEs.addRule(IsListedValue, { syntax: "{operator:is_or_is_not_a} {expression:constant}" })
+
 expressionsEs.addRule(IsSameTypeAs, {
   syntax: "{operator:is_or_is_not} (del|el) mismo tipo que {expression:operand}",
   tests: [
@@ -563,11 +567,11 @@ expressionsEs.addRule(TheDate, {
 expressionsEs.addRule(
   Wording.specialize({
     ruleName: "date_style",
-    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "timestamp"]
+    meanings: ["short", "long", "abbreviated", "short_time", "long_time", "date_and_time", "timestamp"]
   }),
   {
     syntax:
-      "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(timestamp:marca de tiempo))"
+      "((short:fecha corta)|(long:fecha larga)|(abbreviated:fecha abreviada)|(short_time:hora corta)|(long_time:hora larga)|(date_and_time:fecha y hora)|(timestamp:marca de tiempo))"
   }
 )
 expressionsEs.addRule(AsADate, {
@@ -578,7 +582,10 @@ expressionsEs.addRule(AsADate, {
       beforeEach(scope: P.Scope) {
         scope.variables?.add({ name: "due", datatype: "date" })
       },
-      tests: [["due como fecha corta", 'core.dateAs(due, "short")']]
+      tests: [
+        ["due como fecha corta", 'core.dateAs(due, "short")'],
+        ["due como fecha y hora", 'core.dateAs(due, "date and time")']
+      ]
     }
   ]
 })

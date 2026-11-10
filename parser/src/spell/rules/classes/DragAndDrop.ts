@@ -26,7 +26,7 @@ export const ABILITY_CONDITION_ES = "cuando :? {expression_body}"
  *   - `is not` turns one off, e.g. for a sub-type:  `a joker is not draggable`.
  * - An optional condition says when (Q42):  `- clickable when it is face down`, `- it is draggable when: it is face up`.
  *   - `it` / `its` are the thing, as in its other methods.
- * - The template's attribute says the same:  `<spell-view "card" draggable>`, its twin `- it is draggable`;
+ * - The template's attribute says the same:  `<view "card" draggable>`, its twin `- it is draggable`;
  *   and so does an ability's own tag, `<clickable when it is face down/>`.
  * - An event implies its ability (Q44):  `- on click:` makes a thing clickable, `- on drag:` draggable;
  *   this line then adds only the `when`.  The page asks `core.isAble()`.

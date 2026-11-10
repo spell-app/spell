@@ -1,16 +1,22 @@
 ## Kept in this browser
 // The tasks stay on this device, in this browser's own storage:  nobody else sees them, and no server is asked.
 // The app starts here, so it runs with no server and no sign-in.
-browser storage is a database on this device
+<device-storage "browser storage" />
 
-a "browser task" is a task:
-	- it lives in browser storage
-	- to throw it away:
+<view "browser task" template="task">
+	<spell>
+		- it lives in browser storage
+	</spell>
+	<action "throw it away">
 		remove it from the browser tasks
+	</action>
+</view>
 
-a "browser keeper" is a task keeper:
-	- its "kept tasks" is every browser task
-	- to keep a new task titled (title as text):
+<thing "browser keeper" template="task keeper">
+	<property "kept tasks">every browser task</>
+	<action "keep a new task titled (title as text)">
 		set task to a new browser task with title = title
 		add task to the browser tasks
 		return task
+	</action>
+</thing>

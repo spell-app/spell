@@ -6,6 +6,7 @@
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
  * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12);
+ * and `spell place sign-in` / `read-page`, a site behind its own sign-in (epic `mockup` P12, `placeSignIn.ts`);
  * and `spell place ingest` / `update`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
  * as it needs no project.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which the app folder provides today:
@@ -47,7 +48,7 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--fix",
       "put right what it can:  retired words (parts => slots), old spellings in a page " +
-        "(<spell-notebook> => <spell-page notebook>, a description before an example => its description=), " +
+        "(<notebook> => <page notebook>, a description before an example => its description=), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)
@@ -257,18 +258,34 @@ export default function languageCommands(spell: Command): void {
         "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes (but with --try-writes), " +
         "and checks the Spell compiles and that a read through it returns rows.  Exits 1 if something needs a person"
     )
-    .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
+    .argument(
+      "<address>",
+      "where it is, e.g. https://swapi.info/api, recipes.csv, wss://rooms.example.com/family, appXXXXXXXXXXXXXX, did:plc:abc123"
+    )
     .option(
       "--kind <kind>",
-      "its kind:  web server, graphql server, sheet (a CSV file, or an Excel .xlsx), google sheet -- default worked out from the address, else it asks"
+      "its kind:  web server, graphql server, sheet (a CSV file, or an Excel .xlsx), google sheet, room, data folder, file, airtable, atmosphere account -- default worked out from the address, else it asks"
     )
     .option(
       "--into <file>",
       "the .spell file for its Spell, one server to a file, e.g. StarWars.api.spell:  your program in another, so " +
-        "spell place update never touches what you drew;  added to, never overwritten -- default it asks"
+        "spell place update never touches what you drew;  added to, never overwritten;  a <Name>.es.spell gets Spanish -- default it asks"
     )
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
+    .option(
+      "--key-header <name>",
+      'the header its key goes in, as it is, e.g. X-Api-Key -- default "Authorization: Bearer <key>";  writes the line that says so'
+    )
+    .option(
+      "--key-in-address <name>",
+      "the question its key goes in the address as, e.g. api_key:  it's hidden from every message;  writes the line that says so"
+    )
+    .option(
+      "--signed-in <place>",
+      "read it as you, with the session spell place sign-in kept under that name:  its cookies go only to their own " +
+        "host, and are never written down;  says so when the session has run out"
+    )
     .option("--docs <address>", "where its docs are, over those it finds by itself")
     .option(
       "--collections <paths>",
@@ -298,6 +315,37 @@ export default function languageCommands(spell: Command): void {
     )
 
   place
+    .command("sign-in")
+    .description(
+      "sign in to a company site or other private place, in a browser window Spell opens (never your own Chrome):  " +
+        "sign in as usual, then press Enter here or close the window.  The session is kept on this machine under the " +
+        "place's name, in ~/.spell/place-sessions, never in a repo"
+    )
+    .argument("<place>", "a name for it, one word, e.g. console")
+    .argument("[address]", "where to sign in, e.g. https://example.com -- default where it signed in last time")
+    .action((name: string, address: string | undefined) =>
+      CLI.runCommand(async () => (await import("./placeSignIn")).placeSignIn(name, address))
+    )
+
+  place
+    .command("read-page")
+    .description(
+      "copy the rows off one page of a signed-in site, for what its API doesn't serve:  a table, or each element a " +
+        "selector matches, kept as samples beside the place.  Headless, as you;  says so when the session has run out"
+    )
+    .argument("<address>", "the page, e.g. https://example.com/racks")
+    .requiredOption("--signed-in <place>", "the session spell place sign-in kept under that name")
+    .requiredOption("--select <selector>", "what to read:  a table, or the CSS selector of each row")
+    .option("--as <collection>", "what these rows are, e.g. racks:  names the samples' file -- default samples")
+    .option(
+      "--into <file>",
+      "the place's .spell file:  the rows go beside it, in <Name>.<collection>.samples.json -- default they're printed"
+    )
+    .action((address: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeSignIn")).placeReadPage(address, command.optsWithGlobals()))
+    )
+
+  place
     .command("update")
     .description(
       "look again at the place a .spell file reaches, described beside it in <Name>.api.json5:  says what changed, " +
@@ -305,6 +353,10 @@ export default function languageCommands(spell: Command): void {
         "something needs a person"
     )
     .argument("<file>", "the place's .spell file, e.g. StarWars.api.spell")
+    .option(
+      "--address <new>",
+      "where it's moved to:  looks there instead, and changes the place's line, e.g. https://swapi.py4e.com/api"
+    )
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((file: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))
@@ -330,11 +382,10 @@ export default function languageCommands(spell: Command): void {
   spellx
     .command("convert")
     .description(
-      "write each .spell file as spellx, the same program in tags:  Card.spell => Card.spellml beside it, " +
-        "Carta.es.spell => Carta.es.spellml -- never in the test projects"
+      "rewrite each plain .spell file in place as spellx, the same program in tags -- never in the test projects"
     )
     .argument("[projects...]", PROJECTS_ARG)
-    .option("--dry-run", "write nothing:  print each .spell file instead")
+    .option("--dry-run", "write nothing:  print each file instead")
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("spellxConvert", projects, command))
 }

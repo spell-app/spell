@@ -8,73 +8,86 @@
 // Its money, its languages and its names come keyed by a code, `"EUR": { ... }`, `"fra": "French"`:
 // each is a list of things, each with its code, `the first translation in its translations where its code is "fra"`.
 
-rest countries is a web server at "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0":
+<web-server "rest countries" address="https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0">
 	- check it every 30 seconds
 	- countries live at "/countries.json"
+</web-server>
 
-a "country" is a thing:
-	- it lives in rest countries
-	- its "name" is a name
-	- its "tld" is a list of text
-	- its "cca2" is text
-	- its "ccn3" is text
-	- its "cca3" is text
-	- its "cioc" is text
-	- its "independent" is yes or no
-	- its "status" is text
-	- its "un member" is yes or no
-	- its "un regional group" is text
-	- its "currencies" is a list of currencies
-	- its "idd" is an idd
-	- its "capital" is a list of text
-	- its "alt spellings" is a list of text
-	- its "region" is text
-	- its "subregion" is text
-	- its "languages" is a list of languages
-	- its "translations" is a list of translations
-	- its "latlng" is a list of numbers
-	- its "landlocked" is yes or no
-	- its "borders" is a list of text
-	- its "area" is a number
-	- its "flag" is text
-	- its "demonyms" is a demonym
+<thing "country">
+	<spell>
+		- it lives in rest countries
+	</spell>
+	<property "name" type="name" />
+	<property "tld">a list of text</>
+	<property "cca2">text</>
+	<property "ccn3">text</>
+	<property "cca3">text</>
+	<property "cioc">text</>
+	<property "independent">yes or no</>
+	<property "status">text</>
+	<property "un member">yes or no</>
+	<property "un regional group">text</>
+	<property "currencies">a list of currencies</>
+	<property "idd" type="idd" />
+	<property "capital">a list of text</>
+	<property "alt spellings">a list of text</>
+	<property "region">text</>
+	<property "subregion">text</>
+	<property "languages">a list of languages</>
+	<property "translations">a list of translations</>
+	<property "latlng">a list of numbers</>
+	<property "landlocked">yes or no</>
+	<property "borders">a list of text</>
+	<property "area" type="number" />
+	<property "flag">text</>
+	<property "demonyms" type="demonym" />
+</thing>
 
-a "name" is a thing:
-	- its "common" is text
-	- its "official" is text
-	- its "native" is a list of natives
+<thing "name">
+	<property "common">text</>
+	<property "official">text</>
+	<property "native">a list of natives</>
+</thing>
 
-a "native" is a thing:
-	- its "code" is text
-	- its "official" is text
-	- its "common" is text
+<thing "native">
+	<property "code">text</>
+	<property "official">text</>
+	<property "common">text</>
+</thing>
 
-a "currency" is a thing:
-	- its "code" is text
-	- its "name" is text
-	- its "symbol" is text
+<thing "currency">
+	<property "code">text</>
+	<property "name">text</>
+	<property "symbol">text</>
+</thing>
 
-an "idd" is a thing:
-	- its "root" is text
-	- its "suffixes" is a list of text
+<thing "idd">
+	<property "root">text</>
+	<property "suffixes">a list of text</>
+</thing>
 
-a "language" is a thing:
-	- its "code" is text
-	- its "name" is text
+<thing "language">
+	<property "code">text</>
+	<property "name">text</>
+</thing>
 
-a "translation" is a thing:
-	- its "code" is text
-	- its "official" is text
-	- its "common" is text
+<thing "translation">
+	<property "code">text</>
+	<property "official">text</>
+	<property "common">text</>
+</thing>
 
-a "demonym" is a thing:
-	- its "eng" is an eng
-	- its "fra" is a fra
+<thing "demonym">
+	<property "eng" type="eng" />
+	<property "fra" type="fra" />
+</thing>
 
-an "eng" is a thing:
-	- its "f" is text
-	- its "m" is text
+<thing "eng">
+	<property "f">text</>
+	<property "m">text</>
+</thing>
 
-a "fra" is a thing:
-	- its "f" is text
-	- its "m" is text
+<thing "fra">
+	<property "f">text</>
+	<property "m">text</>
+</thing>

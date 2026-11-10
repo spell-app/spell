@@ -80,6 +80,7 @@ function ingestOf(beside?: Record<string, string>) {
   const { fetch, asked } = typicode()
   const disk = memoryFiles(beside)
   const ingest = new PlaceIngest({
+    shape: "plain",
     fetch,
     ask: async () => undefined,
     files: disk.files,

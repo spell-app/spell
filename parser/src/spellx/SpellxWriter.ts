@@ -5,17 +5,17 @@ import { SP } from "spell/parser/spell"
  * A `.spell` file written as SPELLX (epic `elemental-spell` P12, Q19):
  * `SpellxWriter.write(file)` => its `.spell` text, a fresh layout of the same program.
  * - The other way from `SX.CodeSpellWriter`, and the same idea:  each declaration line is written as the tag whose
- *   code-spell TWIN (`SP.SpellxTwin`) it is, so the `.spellml` compiles to exactly what the `.spell` did.
+ *   code-spell TWIN (`SP.SpellxTwin`) it is, so it compiles to exactly what the plain file did.
  * - Rule by rule, from the file's PARSE:  each line's statement says what it declares (`create_type`,
  *   `define_property_has`, `to_do_something` ...), and the language's twin words say how it's worded
  *   (`SP.SpellxTwinWords`), so a Spanish file is written in Spanish spellx too.
- *   - A template:  `<spell-view "card" template="two sided view">`, its kind by what it IS (a page, an app, a view,
+ *   - A template:  `<view "card" template="two sided view">`, its kind by what it IS (a page, an app, a view,
  *     a thing), its members inside it
  *   - a member:  `<property>`, `<alias>`, `<action>`, `<draw>`, `<event>`, `<test>`, `<on ...>` ...;
  *     a property's own aliases as its `alias=`, an action's details as its attributes, a lone comment line above a
  *     member as its `description=`
  *   - a body:  its lines as written, at the same depth
- *   - a page that draws prose or examples:  `<spell-page "x" notebook>`, its drawing its own body again
+ *   - a page that draws prose or examples:  `<page "x" notebook>`, its drawing its own body again
  *     (`pageDrawing()`;  epic `notebook` P6, T2):
  *     its `<markdown>` blocks as loose prose, its sections as `##` headings
  * - What has no tag (a file's functions, tests and starting code, a member written another way):
@@ -34,8 +34,8 @@ export class SpellxWriter {
    * - `match`:  its parse (a `block`)
    * - `scope`:  its file scope, which says its language and knows its types
    */
-  static write({ text, match, scope }: SpellxWriteInput): string {
-    const writer = new SpellxWriter(text, scope)
+  static write({ text, match, scope, proseLines }: SpellxWriteInput): string {
+    const writer = new SpellxWriter(text, scope, proseLines)
     writer.indexStatements(match)
     const { tokenizer } = writer
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
@@ -48,7 +48,7 @@ export class SpellxWriter {
    * The spellx `file` reads as, for people to look at:  the editors' "Show as Spellx" view of a `.spell` file.
    * - A `.spell` file:  written as spellx from its last parse, so unsaved edits show.
    * - A `.spell` file:  its own text.
-   * - A view only, never saved:  a template lives in ONE file, `.spell` or `.spellml`, never both
+   * - A view only, never saved:  a template lives in ONE file, in one shape, never both
    *   (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
    * - Throws `TypeError` if a `.spell` file hasn't been parsed yet.
    */
@@ -80,13 +80,13 @@ export class SpellxWriter {
         const word = tag.replace(/^[\p{Ll}]+-/u, "")
         return word !== tag && SP.ComponentPacks.tagFor(word, language.lang) === tag ? word : undefined
       })
-    const { prefix, templates, attributes } = language.words.spellx!
+    const { templates, attributes } = language.words.spellx!
     // read as a page that draws its body, in the language's own words, as `CodeSpellWriter.writeMarkup()` writes it
     const page = Object.keys(templates).find((word) => templates[word] === "page")
     const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
-    const head = `<${prefix}-${page} "markup" ${flag}>\n`
+    const head = `<${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
-    const text = `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${page}>\n`
+    const text = `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${page}>\n`
     const parser = language.parser.clone({ module: "spellx writer", form: "spellx" } as P.ParserProps)
     const edits: Array<{ start: number; end: number; text: string }> = []
     // blocks whose insides are written as they are
@@ -145,7 +145,9 @@ export class SpellxWriter {
 
   private constructor(
     readonly text: string,
-    readonly scope: P.Scope
+    readonly scope: P.Scope,
+    /** the comment lines to write as prose, by index:  `SpellxWriteInput.proseLines` */
+    readonly proseLines?: ReadonlySet<number>
   ) {
     this.lines = text.split("\n")
     this.lineStarts = P.getLineStarts(text)
@@ -196,8 +198,9 @@ export class SpellxWriter {
       lastLine = firstLine + source.length - 1
       // a blank or comment line:  as it is, after a chunk if one's open
       if (item instanceof P.LineToken && !body && this.isQuiet(item)) {
-        if (chunk.length) tail.push(...source)
-        else this.out.push(...source)
+        const quiet = depth <= 1 && this.proseLines?.has(firstLine) ? source.map(proseOfComment) : source
+        if (chunk.length) tail.push(...quiet)
+        else this.out.push(...quiet)
         continue
       }
       const statement = item instanceof P.LineToken ? this.statements.get(item.start) : undefined
@@ -243,6 +246,7 @@ export class SpellxWriter {
   /** A template's line and its members, if `statement` declares one. */
   private template(line: P.LineToken, body: P.BlockToken | undefined, statement: P.Match): Written | undefined {
     const rule = statement.rule.name ?? ""
+    if (PLACE_RULES.has(rule)) return this.place(line, body, statement)
     if (!TEMPLATE_RULES.has(rule)) return undefined
     const name = unquote(groupText(statement, "type"))
     const aka = groupText(statement, "aka")
@@ -251,12 +255,13 @@ export class SpellxWriter {
     if (!superPhrase) return undefined
     const singleton = rule === "create_one_of_a_kind"
     const kind = this.templateKind(statement, superPhrase, singleton)
-    const tagWord = `${this.words.prefix}-${keyFor(this.words.templates, kind)}`
+    // its short word, `<thing>` (epic `language` P41)
+    const tagWord = keyFor(this.words.templates, kind)
     const plainSuper = this.twins.supers[kind]
     const attributes: string[] = []
     if (aka) attributes.push(this.attribute("aka", unquote(aka)!))
     if (superPhrase !== plainSuper) attributes.push(this.attribute("template", superPhrase))
-    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:
+    // a page drawing prose and examples, as `<page "x" notebook>` reads as:
     // its flag back (epic `notebook` P1), and its drawing back as its own body (`pageDrawing()`, P6)
     const drawsBody = kind === "page" && !!body && this.drawsProseOrExamples(body)
     if (drawsBody) attributes.push(keyFor(this.words.attributes, SP.PAGE_DRAWS_BODY_FLAG))
@@ -275,6 +280,44 @@ export class SpellxWriter {
         return this.out.splice(start)
       }
     }
+  }
+
+  /**
+   * A place's line as its tag, `<web-server "wikipedia" address="...">`, its body as written:  it's plain Spell.
+   * - Any entry of the language's `places` whose words the line says, so an older line becomes the tag too;
+   *   a kind a library adds, `<supabase-project>`, by its type's name.
+   * - `undefined`, so it stays in a `<spell>` chunk, for a line no entry says.
+   */
+  private place(line: P.LineToken, body: P.BlockToken | undefined, statement: P.Match): Written | undefined {
+    const opener = groupMatch(statement, "with_nested_statements")
+    const said = this.text
+      .slice(line.start, opener ? opener.start : this.lineEndOf(line.start))
+      .replace(/\s*\/\/(?=(?:[^"]*"[^"]*")*[^"]*$).*$/, "")
+      .replace(/\s*:\s*$/, "")
+      .trim()
+    const found = this.placeTagFor(said, statement)
+    if (!found?.name || found.name.includes('"')) return undefined
+    const attributes = [...(found.flag ? [keyFor(this.words.attributes, found.flag)] : [])]
+    if (found.address) attributes.push(`${keyFor(this.words.attributes, "address")}=${found.address}`)
+    const head = `<${found.tag} ${quoted(found.name)}${attributes.map((attribute) => ` ${attribute}`).join("")}`
+    return {
+      lines: () => (body ? [`${head}>`, ...this.sourceOf(body), `</${found.tag}>`] : [`${head} />`])
+    }
+  }
+
+  /** The place tag plain line `said` is, and what it names:  see `place()`. */
+  private placeTagFor(said: string, statement: P.Match) {
+    for (const { tag, line, flag, bare } of this.words.places) {
+      for (const shape of [line, bare]) {
+        const found = shape && said.match(placeLinePattern(shape))
+        if (found) return { tag, flag, name: found.groups!.words!, address: found.groups!.address }
+      }
+    }
+    const superType = groupText(statement, "superType")
+    const address = groupText(statement, "address")
+    const name = groupText(statement, "type")
+    if (!superType || !address || !name) return undefined
+    return { tag: superType.trim().replace(/\s+/g, "-").toLowerCase(), flag: undefined, name: unquote(name), address }
   }
 
   /**
@@ -371,7 +414,7 @@ export class SpellxWriter {
 
   /**
    * Does `body`, a page's, draw a `<markdown>` block or an `<example>`, so it's written with its flag again?
-   * - That's what a page that draws its body reads as (`<spell-page "x" notebook>`, epic `notebook` P1).
+   * - That's what a page that draws its body reads as (`<page "x" notebook>`, epic `notebook` P1).
    */
   private drawsProseOrExamples(body: P.BlockToken): boolean {
     return this.someMatch([body], (node) => PAGE_BODY_RULES.has(node.rule.name ?? ""))
@@ -862,6 +905,26 @@ export class SpellxWriter {
 /** The rules that declare a template, by what's written:  `a "card" is a view`, `solitaire is an app`. */
 const TEMPLATE_RULES = new Set(["create_type", "create_list_type", "create_viewable_list_type", "create_one_of_a_kind"])
 
+/** The rules that say where a program's data lives. */
+const PLACE_RULES = new Set(["create_place", "stored_on_this_device", "stored_in_memory"])
+
+/** A pattern for a place's plain line (`SP.SpellxPlaceWord`):  its name and address captured, spaces any amount. */
+function placeLinePattern(line: string): RegExp {
+  const source = line
+    .replace(/\s*:\s*$/, "")
+    .split(/\s+/)
+    .map((word) => {
+      if (word === "{words}") return "(?<words>.+?)"
+      if (word === "{quoted") return ""
+      if (word === "address}") return '(?<address>"[^"]*")'
+      if (word === ",") return ","
+      return word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    })
+    .filter(Boolean)
+    .join("\\s+")
+  return new RegExp(`^${source.replace(/\\s\+,/g, "\\s*,")}$`, "iu")
+}
+
 /** The rules that declare a property, outline style. */
 const PROPERTY_RULES = new Set(["define_property_has", "property_value_getter"])
 
@@ -906,6 +969,21 @@ export type SpellxWriteInput = {
   match: P.Match
   /** Its file scope. */
   scope: P.Scope
+  /**
+   * The lines of `text`, by index, that were prose between tags:  written as prose again, not as `//` comments.
+   * - From `SX.CodeSpellWriter.writeWithProse()`, for a file that went through its plain form (`spell translate`).
+   * - Only at a file's top level or a template's:  a body has no prose.
+   */
+  proseLines?: ReadonlySet<number>
+}
+
+/**
+ * A `//` comment `line` as a line of prose:  `\t// Some text` => `\tSome text`.
+ * - Stays a comment if its text starts with `<`, which would read as a tag.
+ */
+function proseOfComment(line: string): string {
+  const prose = line.replace(/^(\s*)\/\/ ?/, "$1")
+  return prose.trimStart().startsWith("<") ? line : prose
 }
 
 /** `template` with each `{key}` filled from `values`;  a key with no value left as written. */

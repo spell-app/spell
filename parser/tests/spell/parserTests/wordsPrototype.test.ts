@@ -162,8 +162,8 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: 'family cookbook is a file at "recipes.json5"',
-    es: 'recetario familiar es un archivo en "recetas.json5"',
+    en: 'family cookbook is a json file at "recipes.json5"',
+    es: 'recetario familiar es un archivo json en "recetas.json5"',
     at: "top",
     today: "compiles",
     withRule: "compiles"

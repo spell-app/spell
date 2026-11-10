@@ -13,7 +13,7 @@ import { SitePartWords } from "./SitePartWords"
 
 /** What a page's line may say after its address:  what the navigation calls it, its tab, its tags, how far along it is, its picture. */
 const PAGE_DETAILS =
-  "(, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, pictured in {picture:text})?"
+  "(, named {title:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})?"
 
 /** What any part's line may end with:  its place in its section of the site editor's board, and its colour there. */
 const CARD_DETAILS = "(, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"

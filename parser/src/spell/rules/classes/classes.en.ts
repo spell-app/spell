@@ -53,6 +53,7 @@ import { PatternText } from "./PatternText"
 import { PropertyBodyMust } from "./PropertyBodyMust"
 import { PropertyMust } from "./PropertyMust"
 import { PropertyValueEither } from "./PropertyValueEither"
+import { ItIsValue } from "./ItIsValue"
 import { PropertyValueGetter } from "./PropertyValueGetter"
 import { QuotedPropertyFormula } from "./QuotedPropertyFormula"
 import { RandomKindValue } from "./RandomKindValue"
@@ -543,13 +544,13 @@ classes.addRule(MarkdownDescription, {
           [
             "a card is a thing:",
             "\t<stories>",
-            "\t\t- [ ] deal a card",
-            "\t\t- [x] As a player, I want to turn a card over",
+            '\t\t<story "S1">deal a card</story>',
+            '\t\t<story "S2" done>As a player, I want to turn a card over</story>',
             "\t</stories>"
           ],
           [
             "export class Card extends Thing {",
-            '  static stories = "- [ ] deal a card\\n- [x] As a player, I want to turn a card over"',
+            '  static stories = "<story \\"S1\\">deal a card</story>\\n<story \\"S2\\" done>As a player, I want to turn a card over</story>"',
             "}"
           ]
         ],
@@ -1741,6 +1742,9 @@ classes.addRule(ItsQuotedProperty, {
 classes.addRule(ItsQuotedProperty, {
   syntax: "{type:subject_implied} {property:body_member_words}"
 })
+
+// in a type's body:  `- it is locked`, `- it is a queen` -- tests in `parserTests/itIsValue.test.ts`
+classes.addRule(ItIsValue, { syntax: "it is (a|an)? {value:constant}" })
 
 classes.addRule(PropertyValueEither, {
   syntax: "{type_property} is {inline_value_if}",

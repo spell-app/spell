@@ -14,6 +14,7 @@ import { SITE_PAGE, THEME_PAGE } from "./pages.types"
  * - `/edit/<address>`:  `<SpellEditor>` in Edit or Debug, e.g. `/edit/@spell/examples/Solitaire/Solitaire.spell`
  * - `/run/<address>`:  the same page in Run, e.g. `/run/owen@spell/errors`
  * - `/theme`:  the theme editor (`<ThemeEditorPage>`)
+ * - `/site`:  every site there is (`<SitesHomePage>`)
  * - `/site/<project>`:  a site's editor, its pages and their addresses (`<SiteEditorPage>`, epic `mockup` P4)
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
  * - ONE route for both (`ProjectPageRoute`), so switching between them keeps the page.

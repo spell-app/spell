@@ -5,6 +5,7 @@ import type { Duplex } from "node:stream"
 import { every } from "spell/util/timing"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   idOfRow,
   type PersonHere,
   type ListQuery,
@@ -20,6 +21,7 @@ import {
   ROOM_TOKEN_PROTOCOL,
   RoomCopy,
   rowForStore,
+  type RoomAction,
   type RoomAnswer,
   type RoomAsk,
   type RoomEntry,
@@ -49,31 +51,14 @@ const LOCAL_HOST = /^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/
 /** The address of a machine asking from here. */
 const LOCAL_ASKER = /^(127\.|::1$|::ffff:127\.)/
 
-/** What the referee's named actions can see and do. */
-export type RoomActionAsk = {
-  /** The rows of `collection`, as they are in the one order. */
-  rows(collection: string): PlaceRow[]
-  /** This row of `collection`. */
-  row(collection: string, id: string): PlaceRow | undefined
-  /** What it was called with. */
-  input: unknown
-  /** Who called it. */
-  from: string
-}
+export type { RoomAction, RoomActionAnswer, RoomActionAsk } from "spell/places/RoomCopy"
 
-/**
- * A named action:  it runs on the referee, in the one order, and says what to change.
- * - A check that fails throws `PlaceError`, `"refused"`:  the last seat's gone, and that's the answer.
- * - The result goes back as `result`.
- */
-export type RoomAction = (ask: RoomActionAsk) => RoomActionAnswer | Promise<RoomActionAnswer>
-
-/** What a named action makes. */
-export type RoomActionAnswer = {
-  /** What to change. */
-  changes: PlaceChange[]
-  /** What to answer. */
-  result?: unknown
+/** What a page says it runs:  see `Referee`. */
+type ProgramVersion = {
+  /** A mark of the program:  the same program, the same mark. */
+  version: string
+  /** When the page got it, ms. */
+  loadedAt: number
 }
 
 /** One page in the room. */
@@ -110,7 +95,7 @@ export type RoomMember = {
  *   - It's written whole values:  this is the store's one writer, so nothing's lost by it.
  *   - A store that makes its own ids (an Airtable with no id column):  it keeps the browser's ids in the room, and each one's name in the store.
  * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.
- *   The compiler's choice of which comes with the words.
+ *   A page with the same code runs it first, to show what it'll do (`LiveRoomPlace`'s `actions`):  this one's answer settles it.
  * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed,
  *   unless they're signed in:  then they're who their sign-in says (epic `atmosphere` P3).
  * - WHO WRITES (epic `atmosphere` T38):  each write reaches the store as its page's person (`PlaceContext.identity`),
@@ -123,6 +108,12 @@ export type RoomMember = {
  *   - Signed in, the cookie rides with the socket:  from any machine (epic `atmosphere` P3, data's T23).
  *   - Not, this machine only:  the token rides as the socket's sub-protocol (`ROOM_TOKEN_PROTOCOL`), never in its address
  *     (data's J49), and anyone else is refused, and told why.
+ * - A PAGE LEFT OPEN ACROSS A NEW VERSION (epic `data` T5):  each page says, as it opens, a mark of the program it runs
+ *   (`version`) and when the page got it (`loadedAt`).
+ *   - The newest to arrive with another mark is the program now, by `loadedAt`:  the marks needn't be in any order,
+ *     and nothing's kept across a restart, as the pages say it again.
+ *   - A page running what isn't that is told to reload, and what it sends is "no answer":  kept there, not lost, for after.
+ *   - A page that says no version:  never out of date.
  * - NOT `StateMirror` (`spell/parser/core/state`), which it doesn't grow from:  see the docstring there.
  * - Node only.  Knows nothing of what a place is, or of Things.
  ****************/
@@ -156,6 +147,10 @@ export class Referee {
   private readonly signedIn = new Map<(text: string) => void, string>()
   /** Who each page writes as, to the store (`PlaceContext.identity`). */
   private readonly writers = new Map<(text: string) => void, string>()
+  /** What each page that said runs, and when it got it. */
+  private readonly versions = new Map<(text: string) => void, ProgramVersion>()
+  /** The program now:  the newest page's. */
+  private newest: ProgramVersion | undefined
   /** Who each page says it is, in the order they came. */
   private readonly people = new Map<(text: string) => void, PersonHere>()
   /** What each change's id made:  oldest first. */
@@ -309,17 +304,41 @@ export class Referee {
         this.members.delete(send)
         this.signedIn.delete(send)
         this.writers.delete(send)
+        this.versions.delete(send)
         if (this.people.delete(send)) this.tellPeople()
       }
     }
   }
 
   /** A page says who it is:  everyone's told who's here. */
-  private isHere({ from, person }: Extract<RoomAsk, { kind: "here" }>, send: (text: string) => void): void {
+  private isHere(
+    { from, person, version, loadedAt = 0 }: Extract<RoomAsk, { kind: "here" }>,
+    send: (text: string) => void
+  ): void {
+    if (version !== undefined) this.noteVersion(send, { version, loadedAt })
     // a page signed in is who its sign-in says, whatever it claims
     const signedIn = this.signedIn.get(send)
     this.people.set(send, { ...person, ...(signedIn && { id: signedIn, name: signedIn }), page: from })
     this.tellPeople()
+  }
+
+  /** A page runs this version:  it may be the program now, and whoever isn't on that one is told to reload. */
+  private noteVersion(send: (text: string) => void, version: ProgramVersion): void {
+    this.versions.set(send, version)
+    if (this.newest && version.loadedAt < this.newest.loadedAt) return this.tellIfOutOfDate(send)
+    this.newest = version
+    for (const member of this.versions.keys()) this.tellIfOutOfDate(member)
+  }
+
+  /** Tell the page `send` to reload, if it runs an older version. */
+  private tellIfOutOfDate(send: (text: string) => void): void {
+    if (this.isOutOfDate(send)) send(JSON.stringify({ kind: "reload" } satisfies RoomAnswer))
+  }
+
+  /** Does the page `send` run something older than the program now? */
+  private isOutOfDate(send: (text: string) => void): boolean {
+    const version = this.versions.get(send)
+    return !!version && !!this.newest && version.version !== this.newest.version
   }
 
   /** Tell everyone who's here. */
@@ -342,6 +361,11 @@ export class Referee {
     }
     const answer = (message: RoomAnswer) => send(JSON.stringify(message))
     const writer = this.writers.get(send)
+    if ((ask.kind === "changes" || ask.kind === "call") && this.isOutOfDate(send)) {
+      const changeIds = ask.kind === "call" ? [ask.callId] : ask.changes.flatMap(({ changeId }) => changeId ?? [])
+      send(JSON.stringify({ kind: "reload" } satisfies RoomAnswer))
+      return answer({ kind: "no answer", changeIds, message: "this page runs an older version:  reload it" })
+    }
     switch (ask.kind) {
       case "catch-up":
         return this.catchUp(ask, answer)
@@ -538,6 +562,8 @@ export class Referee {
       if (kind !== "update" || version === undefined || !fields) continue
       const row = this.copy.rowFor(collection, id!)
       for (const [field, value] of Object.entries(fields)) {
+        // a stamp is nobody's work:  nothing was lost by writing over it
+        if ((SAVED_TIME_FIELDS as readonly string[]).includes(field)) continue
         const last = this.lastWrites.get(`${collection}\n${id}\n${field}`)
         const isUnseen = last && last.from !== from && last.seq > Number(version)
         if (isUnseen && JSON.stringify(row?.[field]) !== JSON.stringify(value)) {
@@ -546,6 +572,19 @@ export class Referee {
       }
     }
     return overwrote
+  }
+
+  /** `change`, without the stamps its store has no place for:  the room keeps them, and the store never refuses for one. */
+  private withoutTimesItCantHold(change: PlaceChange): PlaceChange {
+    const { timesHeld } = this.place.describe()
+    if (timesHeld === "every field" || !change.fields) return change
+    const cantHold = SAVED_TIME_FIELDS.filter((field) => !timesHeld?.includes(field))
+    return {
+      ...change,
+      fields: Object.fromEntries(
+        Object.entries(change.fields).filter(([field]) => !(cantHold as string[]).includes(field))
+      )
+    }
   }
 
   /** Note who wrote what, for telling whoever writes over it. */
@@ -588,7 +627,7 @@ export class Referee {
       throw new PlaceError("This room's store can't be written", { cause: { kind: "refused", whyNot: "place" } })
     }
     const makesIds = this.place.describe().makesIds
-    const toStore = changes.map((change) => this.changeForStore(change, plan, makesIds))
+    const toStore = changes.map((change) => this.withoutTimesItCantHold(this.changeForStore(change, plan, makesIds)))
     const keys = changes.map(({ collection, id }) => `${collection}\n${id}`)
     keys.forEach((key) => this.writing.add(key))
     try {

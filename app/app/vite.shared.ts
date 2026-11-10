@@ -328,7 +328,7 @@ function compiledSpell(): Plugin {
     },
     load(id) {
       const file = id.split("?")[0]!
-      if (!file.endsWith(".spell") || !file.includes(LAYOUT_FOLDER)) return null
+      if (!/\.spell(?:ml)?$/.test(file) || !file.includes(LAYOUT_FOLDER)) return null
       this.addWatchFile(file)
       const bin = path.join(TOP_REPO, "bin/spell.mjs")
       const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {

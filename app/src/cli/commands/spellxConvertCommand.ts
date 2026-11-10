@@ -7,16 +7,13 @@ import { CLI } from "spell/app/cli"
 /**
  * `spell spellx convert [projects...]`:  write each `.spell` file as SPELLX, the same program in tags
  * (epic `elemental-spell` P12) -- `SX.SpellxWriter`.
- * - `Card.spell` => `Card.spellml` beside it;  `Carta.es.spell` => `Carta.es.spellml`, in Spanish spellx.
+ * - Rewrites each plain file in place, as a tag-shaped file has the same name:  `Carta.es.spell`, in Spanish spellx.
  * - What it converts:
- *   - a project:  each of its `.spell` files
- *   - a `.spell` file:  just that one
- *   - a `.spell` file is left alone
+ *   - a project:  each of its plain files
+ *   - a file:  just that one
+ *   - a tag-shaped file is left alone
  * - Lists each file it wrote, then a count on stderr.
- *   - `--dry-run`:  writes nothing, and prints each `.spell` file instead, under a `// <path>` line.
- * - An existing `.spell` beside it is written over.
- * - NOTE:  the `.spell` file stays.  A project holding both declares everything twice,
- *   so move one of them out before it compiles again.
+ *   - `--dry-run`:  writes nothing, and prints each file instead, under a `// <path>` line.
  * - NEVER writes inside `spaces/@spell/test/`:  test projects stay frozen.  `--dry-run` may read them.
  * - Returns the exit code.
  */
@@ -45,7 +42,7 @@ export async function spellxConvertCommand(
     const { match, scope, contents } = file
     if (!match || !scope || contents === undefined) continue
     const spellx = SX.SpellxWriter.write({ text: contents, match, scope })
-    const path = spellxPathFor(file.location.serverPath)
+    const path = file.location.serverPath
     written.push(session.relative(path))
     if (options.dryRun) session.out(`// ${session.relative(path)}\n${spellx}`)
     else writeFileSync(path, spellx)
@@ -55,9 +52,4 @@ export async function spellxConvertCommand(
   const count = `${written.length} file${written.length === 1 ? "" : "s"}`
   session.err(options.dryRun ? `Would write ${count}` : `Wrote ${count}`)
   return CLI.EXIT.OK
-}
-
-/** Where `path`'s spellx goes:  `Card.spell` => `Card.spellml`, `Carta.es.spell` => `Carta.es.spellml`. */
-export function spellxPathFor(path: string): string {
-  return path.replace(/\.spell$/, SP.SPELLML_SUFFIX)
 }

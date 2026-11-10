@@ -6,13 +6,13 @@
  * // => '{\n  // who\n  "name": "O"\n}'
  * ```
  *
- * - The editing itself, `json5Edited()`, is the assembler's (`spell/util/node/json5`, on json5-writer):
+ * - The editing itself, `json5Edited()`, is the kit's (`spell/util/node/json5`):
  *   one helper for every JSON5 write in the repo, the component sets' site data too (epic `epic-workflow` P20).
  *   - It writes a WHOLE value at a time, and removes any key the value leaves out.
  *   - So an edit reads the file, changes the object, and writes all of it back (`editJSON5()`).
  * - Spell writes the JSON-compatible part of JSON5:  keys and text in double quotes, no trailing commas;
  *   a person's comments, wherever they are, stay.
- * - NODE ONLY:  json5-writer is on jscodeshift, which is node's.
+ * - NODE ONLY:  through `spell/util/node/json5`, which reads files.
  */
 import JSON5 from "json5"
 

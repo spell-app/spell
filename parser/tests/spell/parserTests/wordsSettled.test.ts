@@ -71,7 +71,7 @@ describe("a place's line", () => {
     ['family cookbook is a web server from "https://x"', "web server"],
     ['family cookbook is a graphql server at "https://x"', "graphql server"],
     ['family cookbook is a data folder at "recipes"', "data folder"],
-    ['family cookbook is a file at "/api/recipes"', "file"],
+    ['family cookbook is a json file at "/api/recipes"', "file"],
     ['family cookbook is a sheet at "r.csv"', "sheet"],
     ['family cookbook is a spreadsheet at "r.csv"', "sheet"],
     ['family cookbook is a spreadsheet at "r.xlsx"', "sheet"],
@@ -484,6 +484,20 @@ describe("reading", () => {
     const { js, errors } = inAction(`print ${read}`)
     expect(errors).toEqual([])
     expect(js).toContain(wanted)
+  })
+
+  it("a two-word field goes to the place by the name rows use (I99)", () => {
+    const { js, errors } = compiled([
+      PLACE,
+      "a recipe is a thing:",
+      "\t- it lives in the family cookbook",
+      '\t- its "cook time" is a number',
+      "box is an app:",
+      "\t- to go:",
+      "\t\tprint every recipe sorted by its cook time, newest first"
+    ])
+    expect(errors).toEqual([])
+    expect(js).toContain('sort: [{ field: "cookTime", descending: true }]')
   })
 
   it.each([

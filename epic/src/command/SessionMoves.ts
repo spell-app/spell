@@ -14,6 +14,7 @@ import { basename, dirname, join } from "node:path"
 // By package path, `.ts` and all:  the window script and the `UserPromptSubmit` hook load this file with plain `node`
 // (types stripped)
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
 
 /****************
@@ -255,8 +256,8 @@ export type HookOutput =
       systemMessage?: string
     }
 
-/** The engine, `epic/`:  the folder this file's `src/command/` is in. */
-const ENGINE = dirname(dirname(import.meta.dirname))
+/** The engine's folder, `epic/`, in a checkout or an npm install. */
+const ENGINE = EngineFiles.root
 
 /** The plugin's name in Claude Code, when its manifest can't be read:  `epic@spell` (epic `epic-engine` P49, Q42). */
 const PLUGIN = "epic"

@@ -11,34 +11,56 @@ core.heading("Picnic Letter:  where its parts are read from")
 
 export class Listing extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 631, end: 651 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 661, end: 684 } })
   accessor person!: string
 
   // - its "shift" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 655, end: 674 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 689, end: 711 } })
   accessor shift!: string
 
   @drawn draw() {
     return <ui-label class="shift">{this.shift}</ui-label>
   }
 
-  static savedIn = { place: "published_sheet", collection: "listings" }
+  static savedIn = {
+    place: "published_sheet",
+    collection: "listings",
+    times: ["created", "modified"], select: ["person", "shift"] }
+
+  // - it lives in the published sheet
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 618, end: 649 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in the published sheet
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 618, end: 649 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class Message extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 890, end: 908 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 969, end: 990 } })
   accessor text!: string
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 912, end: 932 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 995, end: 1018 } })
   accessor thread!: string
 
   @drawn draw() {
     return <ui-text class="count">{this.text}</ui-text>
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"], select: ["text", "thread"] }
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 937, end: 957 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 937, end: 957 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /** Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection. */
@@ -80,12 +102,12 @@ core.heading("The letter")
 export class PicnicLetter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  static { this.declareProp("shifts", { declaredAt: { path: "/PicnicLetter.spell", start: 518, end: 575 }, readsFrom: ["published_sheet"] }) }
+  static { this.declareProp("shifts", { declaredAt: { path: "/PicnicLetter.spell", start: 484, end: 541 }, readsFrom: ["published_sheet"] }) }
   get shifts() { return core.waitedValue(this, "shifts", async () => {
     return core.filter(await core.savedThings(Listing, {}, "looks through"), (listing: Listing) => core.isCurrentPerson(listing.person))
   }) }
 
-  static { this.declareProp("counts", { declaredAt: { path: "/PicnicLetter.spell", start: 580, end: 646 }, readsFrom: ["my_inbox"] }) }
+  static { this.declareProp("counts", { declaredAt: { path: "/PicnicLetter.spell", start: 546, end: 612 }, readsFrom: ["my_inbox"] }) }
   get counts() { return core.waitedValue(this, "counts", async () => {
     return await core.savedThings(Message, { filter: { thread: "invitations" } })
   }) }

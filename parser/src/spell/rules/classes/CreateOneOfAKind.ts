@@ -12,7 +12,7 @@ import { CreateType } from "./CreateType"
  *   - The type is `Solitaire`, as for `a solitaire is an app`;  its one instance is the variable `solitaire`.
  *   - So there's no `set the solitaire to a new solitaire`:  `print solitaire`, `debug the solitaire` just work.
  * - Only an app or a page, or a kind of one:  `x is a thing` isn't ours.
- *   - A page:  spellx's `<spell-page>` (epic `elemental-spell` Q16), `leaderboard is a page`.
+ *   - A page:  spellx's `<page>` (epic `elemental-spell` Q16), `leaderboard is a page`.
  *   - Its kind may be several words, if DECLARED:  `klondike is a card game`, `high scores is a score page`
  *     (epic `elemental-spell` C27;  see `namesOneOfAKindType()`).
  * - The instance is made where the line is, right after its class:
@@ -114,7 +114,7 @@ const MAX_KIND_WORDS = 4
 
 /**
  * Can `type` be one of a kind:  an app or a page, or a kind of one (`solitaire is an app`, `leaderboard is a page`).
- * - A page:  spellx's `<spell-page>` (epic `elemental-spell` Q16).
+ * - A page:  spellx's `<page>` (epic `elemental-spell` Q16).
  */
 function isOneOfAKindType(type: unknown): boolean {
   return type instanceof P.TypeScope && (type.isA("App") || type.isA("Page"))

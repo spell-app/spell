@@ -3,6 +3,7 @@ import { basename } from "node:path"
 
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   idOfRow,
   type ApplyAnswer,
   type ListAnswer,
@@ -85,16 +86,23 @@ export class ExcelPlace implements Place {
     return place
   }
 
+  /** Each sheet read so far:  its columns' names, and those the program's lines name. */
+  private readonly sheetsRead = new Map<string, readonly [FieldNames, Readonly<Record<string, string>> | undefined]>()
+
   /** The names of the columns of `collection`'s sheet:  none yet for a new workbook's first sheet. */
   private namesOf(workbook: Workbook, collection: string): FieldNames {
     const columns = workbook.sheets.length ? workbook.rowsOf(collection).columns : []
-    return FieldNames.ofColumns(columns, this.collections?.[collection]?.fields, [this.idColumn])
+    const named = this.collections?.[collection]?.fields
+    const names = FieldNames.ofColumns(columns, named, [this.idColumn])
+    this.sheetsRead.set(collection, [names, named])
+    return names
   }
 
   /** What it can do:  all at once.  With no id column it can only add:  nothing says which row a change means. */
   describe(): PlaceCapabilities {
     return {
       kind: "sheet",
+      timesHeld: FieldNames.columnsHeldInEvery(this.sheetsRead.values(), SAVED_TIME_FIELDS),
       ...(this.idColumn !== undefined && { idOf: this.idColumn }),
       filter: "none",
       sort: "none",

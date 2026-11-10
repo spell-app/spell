@@ -27,6 +27,22 @@ function configFile(main: string, text: string): void {
 }
 
 describe("EpicConfig", () => {
+  test("baseBranchProtected:  off unless the file says so, and only a boolean", () => {
+    expect(EpicConfig.settingsFrom("{}", "x.json5", MAIN).baseBranchProtected).toBe(false)
+    expect(EpicConfig.settingsFrom('{ "baseBranchProtected": true }', "x.json5", MAIN).baseBranchProtected).toBe(true)
+    expect(() => EpicConfig.settingsFrom('{ "baseBranchProtected": "yes" }', "x.json5", MAIN)).toThrow(
+      /"baseBranchProtected" must be a boolean/
+    )
+  })
+
+  test("localSetup (epic-engine P69):  off unless the file says so, and only a boolean;  a local file still sets it up", () => {
+    expect(EpicConfig.settingsFrom("{}", "x.json5", MAIN).localSetup).toBe(false)
+    expect(EpicConfig.settingsFrom('{ "localSetup": true }', "x.json5", MAIN).localSetup).toBe(true)
+    expect(() => EpicConfig.settingsFrom('{ "localSetup": 1 }', "x.json5", MAIN)).toThrow(
+      /"localSetup" must be a boolean/
+    )
+  })
+
   test("no file:  the repo's own values, as `epic init` would write them (epic-friend P6);  NOT set up", () => {
     const config = new EpicConfig(MAIN)
     expect(config.isSetUp).toBe(false)
@@ -36,6 +52,9 @@ describe("EpicConfig", () => {
       contentFolder: join(TOP, "repo.epics"),
       contentRemote: "",
       baseBranch: "main",
+      baseBranchProtected: false,
+      localSetup: false,
+      codeHost: "github",
       worktreesFolder: join(TOP, "repo.worktrees"),
       // no lock file:  nothing to install
       installCommand: "",

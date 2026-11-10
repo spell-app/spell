@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
+import { SiteBoard } from "spell/app/app/pages/SiteBoard"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 
 /**
@@ -7,6 +8,32 @@ import { SiteEdits } from "spell/app/app/pages/SiteEdits"
  * in it, in either of Spell's forms.
  */
 describe("SiteEdits", () => {
+  test("a part's thumbnail is read, and kept when its line is rewritten;  a line without one gets none (P16)", () => {
+    const spellx =
+      '<spell-site "s">\n\t<page "a page" address="/a" thumbnail="x.jpg"/>\n\t<page "b page" address="/b"/>\n</>\n'
+    expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ thumbnail: "x.jpg" })
+    const moved = SiteEdits.withPartPlaced(spellx, "a page", { row: 1, column: 2 })
+    expect(moved).toContain('thumbnail="x.jpg"')
+    expect(SiteEdits.withPartPlaced(spellx, "b page", { row: 1, column: 2 })).toContain(
+      '<page "b page" address="/b" row="1" column="2"/>'
+    )
+    const code = 'a "s" is a site:\n\t- it has a "a page" at "/a", thumbnail "x.jpg"\n'
+    expect(SiteEdits.partsIn(code)![0]).toMatchObject({ thumbnail: "x.jpg" })
+    expect(SiteEdits.withPartPlaced(code, "a page", { row: 1, column: 2 })).toContain(', thumbnail "x.jpg"')
+  })
+
+  test("a page's or view's own thumbnail is found in the file declaring it (P16)", () => {
+    expect(SiteEdits.thumbnailOf('<spell-page "a page" thumbnail="x.jpg"/>\n', "a page")).toBe("x.jpg")
+    expect(SiteEdits.thumbnailOf('<spell-view "b dialog" thumbnail="y.jpg">\n</>\n', "b dialog")).toBe("y.jpg")
+    expect(
+      SiteEdits.thumbnailOf('<spell-page "button usage" notebook thumbnail="z.jpg">\n</>\n', "button usage page")
+    ).toBe("z.jpg")
+    expect(SiteEdits.thumbnailOf('a "c page" is a page where:\n\t- its thumbnail is "w.jpg"\n', "c page")).toBe("w.jpg")
+    expect(
+      SiteEdits.thumbnailOf('<spell-page "a page"/>\n<spell-page "other" thumbnail="x.jpg"/>\n', "a page")
+    ).toBeUndefined()
+  })
+
   test("a part's tags and tab are read, and kept when its line is rewritten (P15)", () => {
     const spellx = '<spell-site "s">\n\t<page "a page" address="/a" tab="Usage" tags="Forms, Inputs"/>\n</>\n'
     expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs" })
@@ -39,7 +66,7 @@ describe("SiteEdits", () => {
       [
         '<spell-page "films page"/>',
         "",
-        '<spell-page "tatooine page"/>',
+        '<page "tatooine page"/>',
         "",
         '<spell-site "galaxy guide">',
         '\t<page "films page" address="/films"/>',
@@ -149,7 +176,92 @@ describe("SiteEdits", () => {
     expect(renamed).toContain(declared)
     expect(renamed).toContain(listed)
     expect(() => SiteEdits.withPartRenamed(text, "film page", "films page")).toThrow(/has a "films page" already/)
-    expect(() => SiteEdits.withPartRenamed(text, "film page", "movie")).toThrow(/ends in "page"/)
+    expect(() => SiteEdits.withPartRenamed(text, "film page", 'a "quoted" name')).toThrow(/isn't a name/)
+    expect(SiteEdits.withPartRenamed(text, "film page", "Boxes & Blades")).toContain("Boxes & Blades")
+  })
+
+  describe("a site of its routing alone (P17)", () => {
+    const ROUTING = [
+      '<spell-site "galaxy guide">',
+      '\t<group "Home" color="red"/>',
+      '\t<page "Home" address="/"/>',
+      '\t<sidebar "System Notices" address="/notices"/>',
+      '\t<group "My Stuff"/>',
+      '\t<page "My Inbox" address="/inbox"/>',
+      '\t<page "My Team" address="/team">',
+      '\t\t<page "Roster" address="/team/roster"/>',
+      "\t</>",
+      "</>",
+      ""
+    ].join("\n")
+
+    test("its file is named for it", () => {
+      expect(SiteEdits.isRoutingOnly("/Galaxy.site.spell")).toBe(true)
+      expect(SiteEdits.isRoutingOnly("/Galaxia.site.es.spell")).toBe(true)
+      expect(SiteEdits.isRoutingOnly("/Galaxy.spell")).toBe(false)
+    })
+
+    test("a group holds the lines after it, and is known apart from a page of its name", () => {
+      const parts = SiteEdits.partsIn(ROUTING)!
+      expect(parts.map((part) => [part.kind, part.name, part.title])).toEqual([
+        ["group", SiteEdits.groupKey("Home"), "Home"],
+        ["group", SiteEdits.groupKey("My Stuff"), "My Stuff"]
+      ])
+      expect(parts[0]!.color).toBe("red")
+      expect(parts[0]!.parts.map((part) => part.name)).toEqual(["Home", "System Notices"])
+      expect(parts[1]!.parts.map((part) => part.name)).toEqual(["My Inbox", "My Team"])
+      expect(SiteBoard.sectionsOf(parts).map((section) => section.cards.length)).toEqual([3, 4])
+    })
+
+    test("a page moves into another group;  a group moves with its lines", () => {
+      const into = SiteEdits.withPartMoved(ROUTING, "My Inbox", { where: "into", part: SiteEdits.groupKey("Home") })
+      expect(SiteEdits.partsIn(into)![0]!.parts.map((part) => part.name)).toEqual([
+        "My Inbox",
+        "Home",
+        "System Notices"
+      ])
+      const swapped = SiteEdits.withPartMoved(ROUTING, SiteEdits.groupKey("My Stuff"), {
+        where: "before",
+        part: SiteEdits.groupKey("Home")
+      })
+      expect(SiteEdits.partsIn(swapped)!.map((part) => part.title)).toEqual(["My Stuff", "Home"])
+      expect(SiteEdits.partsIn(swapped)![0]!.parts.map((part) => part.name)).toEqual(["My Inbox", "My Team"])
+    })
+
+    test("a group renamed:  only its own line", () => {
+      const renamed = SiteEdits.withPartRenamed(ROUTING, SiteEdits.groupKey("Home"), "Start")
+      expect(renamed).toContain('<group "Start" color="red"/>')
+      expect(renamed).toContain('<page "Home" address="/"/>')
+    })
+
+    test("a page added lists only its line:  it's made when it's first opened", () => {
+      const added = SiteEdits.withPageAdded(ROUTING, "Help", "/help", { listOnly: true })
+      expect(added).toContain('\t<page "Help" address="/help"/>\n</>')
+      expect(added).not.toContain("<spell-page")
+    })
+
+    test("a live link is written, read back and taken out;  only a web address", () => {
+      const live = SiteEdits.withPartChanged(ROUTING, "Home", { live: "https://example.com/" })
+      expect(live).toContain('<page "Home" address="/" live="https://example.com/"/>')
+      expect(SiteEdits.partNamed(live, "Home").live).toBe("https://example.com/")
+      expect(SiteEdits.withPartChanged(live, "Home", { live: "" })).toBe(ROUTING)
+      expect(() => SiteEdits.withPartChanged(ROUTING, "Home", { live: "javascript:alert(1)" })).toThrow(/https/)
+    })
+
+    test("a card's own file:  named for it, its name free, showing its name", () => {
+      expect(SiteEdits.fileNameFor("Boxes & Blades", [])).toBe("boxes-blades.spell")
+      expect(SiteEdits.fileNameFor("Home", ["home.spell"])).toBe("home-2.spell")
+      expect(SiteEdits.fileNameFor("Películas", [], "es")).toBe("peliculas.es.spell")
+      const page = SiteEdits.partNamed(ROUTING, "My Inbox")
+      expect(SiteEdits.stubFor(page)).toBe('<spell-page "My Inbox">\n\t<header size="large">My Inbox</header>\n</>\n')
+      const sidebar = SiteEdits.partNamed(ROUTING, "System Notices")
+      expect(SiteEdits.stubFor(sidebar)).toContain('<spell-view "System Notices">\n\t<draw>')
+    })
+
+    test("a declaration is found in any file:  a page or a view", () => {
+      const view = '<spell-view "System Notices">\n\t<draw>\n\t</draw>\n</>\n'
+      expect(SiteEdits.declarationOf(view, "System Notices")).toEqual({ start: 0, end: view.length })
+    })
   })
 
   test.each([

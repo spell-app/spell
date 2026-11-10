@@ -7,7 +7,7 @@
 // It takes adding, changing and deleting, and answers as if each was saved, but keeps nothing:
 // what you add is gone when it's read again (JSONPlaceholder.api.json5, its "write").
 
-jsonplaceholder is a web server at "https://jsonplaceholder.typicode.com":
+<web-server "jsonplaceholder" address="https://jsonplaceholder.typicode.com">
 	- check it every 30 seconds
 	- it searches names and titles with "q"
 	- posts live at "/posts"
@@ -17,51 +17,67 @@ jsonplaceholder is a web server at "https://jsonplaceholder.typicode.com":
 	- a post's comments live at "/posts/{id}/comments"
 	- a jsonplaceholder user's posts live at "/users/{id}/posts"
 	- a jsonplaceholder user's todos live at "/users/{id}/todos"
+</web-server>
 
-a "post" is a thing:
-	- it lives in jsonplaceholder
-	- its "user id" is a number
-	- its "title" is text
-	- its "body" is text
-	- its "comments" is a list of comments
+<thing "post">
+	<spell>
+		- it lives in jsonplaceholder
+	</spell>
+	<property "user id" type="number" />
+	<property "title">text</>
+	<property "body">text</>
+	<property "comments">a list of comments</>
+</thing>
 
-a "comment" is a thing:
-	- it lives in jsonplaceholder
-	- its "post id" is a number
-	- its "name" is text
-	- its "email" is text
-	- its "body" is text
+<thing "comment">
+	<spell>
+		- it lives in jsonplaceholder
+	</spell>
+	<property "post id" type="number" />
+	<property "name">text</>
+	<property "email">text</>
+	<property "body">text</>
+</thing>
 
-a "jsonplaceholder user" is a thing:
-	- it lives in jsonplaceholder
-	- its "name" is text
-	- its "username" is text
-	- its "email" is text
-	- its "address" is an address
-	- its "phone" is text
-	- its "website" is text
-	- its "company" is a company
-	- its "posts" is a list of posts
-	- its "todos" is a list of todos
+<thing "jsonplaceholder user">
+	<spell>
+		- it lives in jsonplaceholder
+	</spell>
+	<property "name">text</>
+	<property "username">text</>
+	<property "email">text</>
+	<property "address" type="address" />
+	<property "phone">text</>
+	<property "website">text</>
+	<property "company" type="company" />
+	<property "posts">a list of posts</>
+	<property "todos">a list of todos</>
+</thing>
 
-a "todo" is a thing:
-	- it lives in jsonplaceholder
-	- its "user id" is a number
-	- its "title" is text
-	- its "completed" is yes or no
+<thing "todo">
+	<spell>
+		- it lives in jsonplaceholder
+	</spell>
+	<property "user id" type="number" />
+	<property "title">text</>
+	<property "completed">yes or no</>
+</thing>
 
-an "address" is a thing:
-	- its "street" is text
-	- its "suite" is text
-	- its "city" is text
-	- its "zipcode" is text
-	- its "geo" is a geo
+<thing "address">
+	<property "street">text</>
+	<property "suite">text</>
+	<property "city">text</>
+	<property "zipcode">text</>
+	<property "geo" type="geo" />
+</thing>
 
-a "geo" is a thing:
-	- its "lat" is a number
-	- its "lng" is a number
+<thing "geo">
+	<property "lat" type="number" />
+	<property "lng" type="number" />
+</thing>
 
-a "company" is a thing:
-	- its "name" is text
-	- its "catch phrase" is text
-	- its "bs" is text
+<thing "company">
+	<property "name">text</>
+	<property "catch phrase">text</>
+	<property "bs">text</>
+</thing>

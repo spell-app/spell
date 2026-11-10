@@ -15,6 +15,7 @@ import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { PluginInstall } from "spell/epic/command/PluginInstall"
 import { SkillsCheck } from "spell/epic/command/SkillsCheck"
 import { RepoInit } from "spell/epic/command/RepoInit"
+import { PullRequest } from "spell/epic/command/PullRequest"
 import { Repos } from "spell/epic/command/Repos"
 import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
@@ -165,6 +166,14 @@ export class EpicProgram {
       )
       .usage("<epic> [--ditch]")
       .addHelpText("after", example("epic merge epic-workflow"))
+
+    this.verb(epic.command("pr"), (args) => new PullRequest().run(args))
+      .description(
+        "push a branch (never forced) and open its pull request against the base branch, a merge request on GitLab;  " +
+          "if one's open, says its address and that the push updated it"
+      )
+      .usage("<name> [--title <title>] [--body-file <file>]")
+      .addHelpText("after", example("epic pr seo --title 'Better titles' --body-file notes.md"))
   }
 
   ////////////////
@@ -241,7 +250,7 @@ export class EpicProgram {
     ).usage("<path>... [--json]")
     this.page(
       epic.command("open"),
-      "show an epic's page in VS Code's side bar:  Epic Docs, or with --review the Review tab",
+      "show an epic's page in VS Code's side bar, in the Review tab",
       "epic open seo --review"
     ).usage("<epic> [--review]")
     this.page(
@@ -650,12 +659,13 @@ export class EpicProgram {
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
         "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
-          ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub, the " +
+          ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub or GitLab, the " +
           "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
-        "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
-          "[--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
+        "[--local] [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] " +
+          "[--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] " +
+          "[--json]"
       )
       .addHelpText("after", INIT_HELP)
 
@@ -1093,6 +1103,7 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   contentFolder        the epic repo:  epics, guides, sagas, the logs
   contentRemote        its address, which everyone pulls from and pushes to ("":  none);  epic init writes it
   baseBranch          the branch worktrees start from and merge into
+  baseBranchProtected  whether the base branch takes only pull requests:  epic init opens one, epic merge refuses
   worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
                        (../spell-app.worktrees), the old .claude/worktrees still read then
   installCommand       what makes a new worktree ready to run
@@ -1159,10 +1170,11 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
                        window names from the repo's;  a file already there is kept
   ../<repo>.epics      the epic repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
-  the epic repo        the epic repo on GitHub, so the team shares the plans:  asks what to call it
+  the epic repo        the epic repo on GitHub or GitLab, so the team shares the plans:  asks what to call it
                        (<repo>.epics) and "Private or public?" (private), makes it, pushes, and writes its
-                       address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
-                       it, says how to get it
+                       address in the config (contentRemote);  needs the host's command (gh, glab), logged in:
+                       without it, says how to get it;  GitLab refusing the first push (its default branch
+                       protected):  says what a Maintainer runs, and epic init again finishes it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
@@ -1170,13 +1182,30 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
                        with the plans, in the epic repo's people/
   the commit           .epic/config.json5 and .gitignore committed on the base branch ("Commit ... on main?",
                        yes suggested);  on another branch it says so;  --no-commit skips it
+                       a base branch that takes only pull requests:  they go on a new branch, epic-setup, which it
+                       pushes and opens a pull request for;  local main stays as it was
   the epic server      started, serving this repo:  its address printed;  --no-server skips it
 Then push the base branch:  a teammate's epic init then clones the plans.
 
 --content-repo <name> names the epic repo without asking;  --remote <address> uses one made already;
 --no-remote makes none, and the plans stay on this machine.
 --public makes the epic repo public without asking;  with no terminal to ask in, it's private unless --public.
-A public one shows everything in the plans (epic pages, guides, comments) to anyone.
+Private:  only people added to the repo (on GitLab, and members of its group) can read it;  roles control access.
+Public:  anyone who can reach your code host can read every epic page, guide and comment, without signing in;  roles
+only control who can write.  Picked in the terminal, public asks again, no suggested.
+
+--local sets the repo up on this machine only:  nothing is committed and .gitignore is left alone;  the config and
+the links are listed in .git/info/exclude instead, and nothing is made on GitHub or GitLab unless --content-repo says
+so.  Each teammate runs their own (epic init --local --remote <address>, which clones the plans);  epic init run
+again stays local.  Refused where the base branch tracks .epic/config.json5 already.
+
+--protected-base:  the base branch takes only pull requests (baseBranchProtected in the config).  Without it,
+epic init asks GitHub or GitLab, with its command (gh, glab) logged in and a remote there, and says in one line when
+it found so.
+
+--host github|gitlab:  where the code is hosted (codeHost in the config).  Left out, it's read off the origin
+remote's address;  for an address that doesn't say (git.acme.com), epic init asks in a terminal, and with no
+terminal stays on GitHub and says so.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
@@ -1188,6 +1217,7 @@ Examples:
   epic init --name Ana --color green
   epic init --content-repo my-app.epics
   epic init --remote git@github.com:my-team/my-app.epics.git
+  epic init --local --no-remote
   epic init`
 
 const WHOAMI_HELP = `

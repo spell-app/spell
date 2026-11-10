@@ -126,7 +126,8 @@ the page is the same for both agents.
      - The page NEVER locks:  the person sends partial answers, and sends again whenever they like (2026-10-08).
    - a picture page:  delete the question sections and `<epic-send>`;  nothing to send
 3. In an epic:  format the page once it's written, as the engine's tools do:
-   `yarn vp fmt <its ABSOLUTE path>`, from the kit's root
+   `yarn vp fmt <its ABSOLUTE path>`, run from the plugin's own folder (`${CLAUDE_PLUGIN_ROOT}`), never your repo's root
+   (no `vp` there:  skip this step)
    ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
 
 ### Asking the same question again:  a new ROUND, never a new page

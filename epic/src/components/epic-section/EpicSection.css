@@ -16,8 +16,8 @@
     /* an item list's runs:  the corners at each end (the page sheet, `EpicSection.runs.css`, hands it to the items) */
     --_epic-run-radius: var(--epic-section-run-radius, 8px);
   }
-  /* a section its page's stage hides (`<epic-page stage>`, epic `epic-engine` P29):  still in the file, drawn as nothing */
-  :host(:state(offstage)) {
+  /* empty, with nothing you could add right now (`PageStages.hides()`, epic `epic-engine` P70):  still in the file, drawn as nothing */
+  :host(:state(hidden)) {
     display: none;
   }
   :host([kind="overview-part"]) {
@@ -83,12 +83,15 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ## An item section with no items */
+  /* ## An empty section's line, on its title (`emptyLine()`):  quieter than the title, and no fold on a click */
   .empty {
-    margin: 0 0 4px;
+    margin-inline-end: 8px;
     color: var(--epic-muted, var(--ui-text-muted));
-    font-size: 15px;
+    font-size: 14px;
     font-style: italic;
+    letter-spacing: 0;
+    white-space: nowrap;
+    cursor: default;
   }
 
   /*
@@ -137,7 +140,10 @@
   .new-list {
     --_epic-act-ink: var(--ui-text-color, CanvasText);
     --_epic-act-green: var(--ui-green, #00853a);
-    --_epic-act-person: var(--epic-voice-person-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas)));
+    --_epic-act-person: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--ui-background, Canvas))
+    );
     --_epic-act-person-ink: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
   }

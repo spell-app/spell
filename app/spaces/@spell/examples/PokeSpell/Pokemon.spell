@@ -1,11 +1,6 @@
 # A Pokémon:  its card, its own page, and its family
 Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at PokéAPI again never touches a line of this.
 
-<spell>
-	// What each of a Pokémon's six numbers means, in plain words:  PokéAPI always lists them in this order
-	set strength words to ["Health", "Attack", "Defence", "Special attack", "Special defence", "Speed"]
-</spell>
-
 <extend "pokemon">
 	<property "picture" description="Its big picture, the official artwork">
 		return the front default of the official artwork of the other of its sprites
@@ -118,10 +113,30 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 	</draw>
 
 	<draw "strengths" description="A bar for each of its six numbers:  255 is as strong as any Pokémon gets">
-		<for stat, place in its stats>
-			<progress max-width="36em" value={stat's base stat} total="255" color="green" size="large" label={word place of strength words + ":  {value}"} />
+		<for stat in its stats>
+			<progress max-width="36em" value={stat's base stat} total="255" color="green" size="large" label={stat's word + ":  {value}"} />
 		</for>
 	</draw>
+</extend>
+
+
+# One of a Pokémon's six numbers
+
+<extend "stat">
+	<property "word" description="What it means, in plain words, by the name PokéAPI gives it">
+		set name to the name of its stat
+		if name is "hp"
+			return "Health"
+		if name is "attack"
+			return "Attack"
+		if name is "defense"
+			return "Defence"
+		if name is "special-attack"
+			return "Special attack"
+		if name is "special-defense"
+			return "Special defence"
+		return "Speed"
+	</property>
 </extend>
 
 

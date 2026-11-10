@@ -278,7 +278,7 @@ const SCOPES: Readonly<Record<CodeThemeRole, string[]>> = {
   text: ["source", "text"],
   heading: ["comment.line.number-sign.heading.spell", "markup.heading", "entity.name.section"],
   comment: ["comment", "punctuation.definition.comment"],
-  keyword: ["keyword", "storage", "keyword.control.spell", "keyword.operator.word.spell", "entity.name.tag.spellx"],
+  keyword: ["keyword", "storage", "keyword.control.spell", "keyword.operator.word.spell", "entity.name.tag.spell"],
   type: ["entity.name.type", "entity.name.class", "support.class", "support.type"],
   library: ["support.type.primitive", "support.type.builtin", "entity.name.type.primitive"],
   name: ["variable", "variable.other.readwrite"],

@@ -168,7 +168,7 @@ describe("SpellDeclarations.importScope()", () => {
     test("a type, its properties and constants:  `declaredAt` -- in the project's own files", () => {
       const card = imports.types.get("Card", "LOCAL_ONLY")!
       expect(card.declaredAt?.path).toBe(`${projectId}/Card.spell`)
-      expect(sourceAt(card.declaredAt)).toMatch(/^<spell-view "card" template="two sided view" draggable>\n/)
+      expect(sourceAt(card.declaredAt)).toMatch(/^<view "card" template="two sided view" draggable>\n/)
       // its suit, its list of suits and each suit:  all made by one statement, its tag
       const suits = /^<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a \(suit\)"\s*\/?>?$/
       expect(sourceAt(card.variables.get("suit", "LOCAL_ONLY")?.declaredAt)).toMatch(suits)
@@ -197,7 +197,7 @@ describe("SpellDeclarations.importScope()", () => {
 
     test("renamed, it's still where it was", () => {
       const renamed = importLibrary({ projectId, import: ["Card:Playingcard"] })
-      expect(sourceAt(renamed.types.get("Playingcard", "LOCAL_ONLY")?.declaredAt)).toMatch(/^<spell-view "card"/)
+      expect(sourceAt(renamed.types.get("Playingcard", "LOCAL_ONLY")?.declaredAt)).toMatch(/^<view "card"/)
       expect(renamed.rules.get("is_a_face_card", "LOCAL_ONLY")?.declared?.owner).toBe("Playingcard")
     })
 

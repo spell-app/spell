@@ -7,7 +7,10 @@ import type { EditorStore } from "spell/app/app/editor"
 /** The theme editor's address (`<ThemeEditorPage>`):  `editor.showThemeEditor()` goes there. */
 export const THEME_PAGE = "/theme"
 
-/** Where the site editor's addresses start (`<SiteEditorPage>`):  `/site/<project>`, or a group's sites, `/site/<group>`. */
+/**
+ * Where the site editor's addresses start (`<SiteEditorPage>`):  `/site/<project>`, or a group's sites, `/site/<group>`.
+ * - By itself, every site (`<SitesHomePage>`).
+ */
 export const SITE_PAGE = "/site"
 
 /** The site editor's address for the project at `projectPath`:  `/site/@spell/examples/StarWarsSite`. */

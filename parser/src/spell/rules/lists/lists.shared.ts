@@ -97,3 +97,42 @@ export function getWhereMethod(match: P.Match, arg: P.Match, body: P.Match | und
  * `Card` -- see `getWhereScope()`, `list_iteration`.
  */
 export type ItemVariableData = { itemVariable?: P.ScopeVariable }
+
+////////////////
+// ## A sort key that waits
+////////////////
+
+/**
+ * Does `key`, a sort key's words, read a property that waits, or one which reads one that does (epic `data` T38)?
+ * - e.g. `sorted by its score`, with `its "score" is:  count it` and `count` waiting
+ * - A getter's own words wait, or it reads a getter whose words do.
+ * - Read through the program's own names only:  a property of an imported type says nothing here, and is caught when it runs.
+ * - Asked when the errors are gathered:  a property read may be declared below the sort.
+ */
+export function readsAPropertyThatWaits(key: P.Match | undefined): boolean {
+  return !!key && readsAWaitingProperty(key, new Set())
+}
+
+/** Does a member `match` reads, in its own words or inside them, wait? */
+function readsAWaitingProperty(match: P.Match, seen: Set<object>): boolean {
+  if (seen.has(match)) return false
+  seen.add(match)
+  const { member } = match.data as { member?: unknown }
+  if (member instanceof P.ScopeVariable && getterWaits(member, seen)) return true
+  for (const item of match.matched) if (item instanceof P.Match && readsAWaitingProperty(item, seen)) return true
+  return Object.values(match.data ?? {}).some((value) =>
+    [value].flat().some((item) => item instanceof P.Match && readsAWaitingProperty(item, seen))
+  )
+}
+
+/** Does the property `member` wait:  a getter whose own words do, or that reads one which does? */
+function getterWaits(member: P.ScopeVariable, seen: Set<object>): boolean {
+  const { declaredBy } = member
+  if (!declaredBy || seen.has(member)) return false
+  seen.add(member)
+  let waits = false
+  P.forEachNode([declaredBy.AST as P.ASTNode], (node) => {
+    waits ||= node instanceof P.ASTPropertyDefinition && !!node.get?.waitsItself
+  })
+  return waits || readsAWaitingProperty(declaredBy, seen)
+}

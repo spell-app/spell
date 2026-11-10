@@ -10,11 +10,11 @@ import {
   withClassNames
 } from "spell/app/app/solid/InspectorSource"
 
-import card from "../../../spaces/@spell/examples/Solitaire/Card.spellml?raw"
-import cardEditor from "../../../spaces/@spell/examples/Solitaire/Card.editor.spellml?raw"
-import cartaEditor from "../../../spaces/@spell/examples/Solitario/Carta.editor.es.spellml?raw"
-import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spellml?raw"
-import solitaire from "../../../spaces/@spell/examples/Solitaire/Solitaire.spellml?raw"
+import card from "../../../spaces/@spell/examples/Solitaire/Card.spell?raw"
+import cardEditor from "../../../spaces/@spell/examples/Solitaire/Card.editor.spell?raw"
+import cartaEditor from "../../../spaces/@spell/examples/Solitario/Carta.editor.es.spell?raw"
+import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spell?raw"
+import solitaire from "../../../spaces/@spell/examples/Solitaire/Solitaire.spell?raw"
 
 /**
  * `eventsDeclared()`:  a type's abilities and events in the author's words, with their code (epic `debut` P28),

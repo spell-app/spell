@@ -15,7 +15,7 @@ import "./FileDropdown.css"
  * - Choosing a file shows it in `<SpellEditor>`, or in Run with `useRunner`.
  * - Its trigger shows the file icon before the file's name (the `trigger` slot), as each item does.
  * - Loading (spinning caret, no items) until the project's loaded and has a file.
- * - A file the project doesn't import (a `.spellml` beside its `.spell`) is listed after its imports, by its name,
+ * - A file the project doesn't import (an extra file beside its imports) is listed after its imports, by its name,
  *   so the trigger still names it.
  * - Files in a project's folders group under a header naming the folder, by `groupByFolder()`:
  *   its files at the top come first, with no header.
@@ -132,7 +132,7 @@ export type ProjectFileRow = {
 
 /**
  * `editor`'s project's files and the one shown, read in one go through `tracked()`.
- * - A file the project doesn't import (a `.spellml` beside its `.spell`) is listed after its imports, by its name.
+ * - A file the project doesn't import (an extra file beside its imports) is listed after its imports, by its name.
  * - Call in a component body:  `tracked()` goes with the component.
  */
 export function trackProjectFiles(): () => ProjectFilesState {

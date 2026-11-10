@@ -912,8 +912,8 @@ export class Inspector {
       const shortWords = Object.entries(spellx?.notes ?? {})
         .filter(([, kind]) => kind === "property editor")
         .map(([word]) => word)
-      // the prefixed tag first, `<spell-property-editor>`;  then the old short one, `<property-editor>` (epic `data` P31)
-      return [...shortWords.map((word) => `${spellx!.prefix}-${word}`), ...shortWords]
+      // its tag, `<property-editor>` (epic `language` P41);  then its old spelling, `<spell-property-editor>` (epic `data` P31)
+      return [...shortWords, ...shortWords.map((word) => `${spellx!.prefix}-${word}`)]
     })
     const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
     const root = Inspector.programRoot

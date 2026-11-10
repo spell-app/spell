@@ -268,8 +268,8 @@ export type SetDescriptionParams = {
  * - `py`:  Python on `spell_core`, `py`
  * - `spell`:  the CODE SPELL a `.spell` file means, its "Show as Code Spell" view (epic `elemental-spell` P8);
  *   a `.spell` file's own text
- * - `spellx`:  a `.spell` file written as SPELLX, its "Show as Spellx" view (J95);  a `.spellml` file's own text
- * - The other form is a VIEW, never a file:  a template lives in ONE file, `.spell` or `.spellml` (J95).
+ * - `spellx`:  a plain file written as SPELLX, its "Show as Spellx" view (J95);  a tag-shaped file's own text
+ * - The other form is a VIEW, never a file:  a template lives in ONE file, in one shape (J95).
  */
 export type CompiledTarget = "js" | "ts" | "py" | "spell" | "spellx"
 

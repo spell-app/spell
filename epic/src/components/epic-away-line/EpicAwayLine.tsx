@@ -63,6 +63,7 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
             of={`${AWAY_ID}:${this.line}`}
             shows="buttons"
             buttons="away-line"
+            tone={STATE_TONES[this.state ?? ""]}
             part={this.partForName("read")}
             label={this.translationForKey("buttonsLabel")}
           />
@@ -74,6 +75,9 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     )
   }
 }
+
+/** Its tick's colour:  its badge's, on the section's title. */
+const STATE_TONES: Record<string, string> = { recent: "green", progress: "blue", attention: "red" }
 
 /** A phase under way:  the load indicator its row shows, standing still (epic `epic-engine` I226). */
 const WORKING_ICON = "circle notch"

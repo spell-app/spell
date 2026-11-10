@@ -41,7 +41,7 @@ describe("formatHTML()", () => {
 
   test("throws on a parse error, naming the file", async () => {
     await expect(SRV.formatHTML("parts/p1.htm", "</div></span>")).rejects.toThrow(
-      /^p1\.htm:  SyntaxError: Unexpected closing tag "div"/
+      /^p1\.htm:  Syntax error: unexpected end tag/
     )
   })
 })

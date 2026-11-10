@@ -183,8 +183,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
               data-fill={this.review.isSent() ? "outline" : "dashed"}
               title={this.translationForKey(this.review.isSent() ? "pickedSent" : "pickedUnsent", { letter: pick() })}
             >
-              {/* a pick-any set's several (`A C +1`, epic `epic-engine` P50):  one tight word, `AC+1` */}
-              {pick().replace(/\s+/g, "")}
+              {/* a pick-any set's several (`A C +1`, epic `epic-engine` P50):  one tight word, `AC+1`;
+                  letters with a set's number stay apart:  `B3,A3` */}
+              {/\d/.test(pick()) ? pick().replace(/,?\s+/g, ",") : pick().replace(/\s+/g, "")}
             </span>
           )}
         </Show>
@@ -296,7 +297,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
       <ui-button
         icon={spec.icon}
         data-action={spec.action}
-        data-color={spec.color}
+        data-color={this.tone ?? spec.color}
+        data-tone={this.tone ? "" : undefined}
         data-fill={this.fillOf(spec)}
         data-busy={busy() && this.review.workedOn() ? "" : undefined}
         title={

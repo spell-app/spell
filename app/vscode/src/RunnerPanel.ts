@@ -31,12 +31,11 @@ import type { Diagnostic, LanguageClient } from "vscode-languageclient/node"
  ****************/
 export class RunnerPanel {
   /**
-   * The editor languages a spell source file is:  code spell, and spellx, its tag-shaped form (`Card.spell`;
-   * epic `elemental-spell` P8).
+   * The editor languages a spell source file is:  one, for both its shapes (epic `language` P40).
    */
-  static readonly LANGUAGES: readonly string[] = ["spell", "spellx"]
+  static readonly LANGUAGES: readonly string[] = ["spell"]
 
-  /** Is `document` a spell source file, code spell or spellx -- see `LANGUAGES`? */
+  /** Is `document` a spell source file -- see `LANGUAGES`? */
   static isSpellDocument(document: vscode.TextDocument | undefined): document is vscode.TextDocument {
     return !!document && RunnerPanel.LANGUAGES.includes(document.languageId)
   }

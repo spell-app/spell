@@ -8,15 +8,15 @@ core.heading("Sign-Up Sheet:  where a picnic's sign-ups are kept")
 
 export class Volunteer extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1377, end: 1397 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1429, end: 1452 } })
   accessor person!: string
 
   // - its "shift" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1401, end: 1420 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1457, end: 1479 } })
   accessor shift!: string
 
   // - its "note" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1424, end: 1442 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1484, end: 1505 } })
   accessor note!: string
 
   @drawn draw() {
@@ -31,7 +31,19 @@ export class Volunteer extends Thing {
     )
   }
 
-  static savedIn = { place: "sign_up_sheet", collection: "volunteers" }
+  static savedIn = {
+    place: "sign_up_sheet",
+    collection: "volunteers",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in the sign up sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1388, end: 1417 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in the sign up sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1388, end: 1417 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -40,15 +52,15 @@ export class Volunteer extends Thing {
  */
 export class Attendee extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1680, end: 1700 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1766, end: 1789 } })
   accessor person!: string
 
   // - its "standing" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1704, end: 1726 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1794, end: 1819 } })
   accessor standing!: string
 
   // - its "invitations" is a number
-  @prop({ type: "number", declaredAt: { path: "/SignUpSheet.api.spell", start: 1730, end: 1759 } })
+  @prop({ type: "number", declaredAt: { path: "/SignUpSheet.api.spell", start: 1824, end: 1860 } })
   accessor invitations!: number
 
   @drawn draw() {
@@ -62,25 +74,37 @@ export class Attendee extends Thing {
     )
   }
 
-  static savedIn = { place: "sign_up_sheet", collection: "attendees" }
+  static savedIn = {
+    place: "sign_up_sheet",
+    collection: "attendees",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in the sign up sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1725, end: 1754 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in the sign up sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1725, end: 1754 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /** A ticket someone asked for, for a guest:  an organizer confirms it. */
 export class Ticket extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1891, end: 1911 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2017, end: 2040 } })
   accessor person!: string
 
   // - its "guest" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1915, end: 1934 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2045, end: 2067 } })
   accessor guest!: string
 
   // - its "event" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1938, end: 1957 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2072, end: 2094 } })
   accessor event!: string
 
   // - its "status" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1961, end: 1981 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2099, end: 2122 } })
   accessor status!: string
 
   @drawn draw() {
@@ -96,49 +120,73 @@ export class Ticket extends Thing {
     )
   }
 
-  static savedIn = { place: "sign_up_sheet", collection: "tickets" }
+  static savedIn = {
+    place: "sign_up_sheet",
+    collection: "tickets",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in the sign up sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1976, end: 2005 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in the sign up sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1976, end: 2005 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /** A message in your inbox:  your invitations' count is one, in the conversation "invitations". */
 export class Message extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2293, end: 2311 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2476, end: 2497 } })
   accessor text!: string
 
   // - its "recipients" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2315, end: 2339 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2502, end: 2529 } })
   accessor recipients!: string
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2343, end: 2363 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2534, end: 2557 } })
   accessor thread!: string
 
   // - its "page" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2367, end: 2385 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2562, end: 2583 } })
   accessor page!: string
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2389, end: 2408 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2588, end: 2610 } })
   accessor title!: string
 
   // - its "line" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2412, end: 2430 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2615, end: 2636 } })
   accessor line!: string
 
   @drawn draw() {
     return <ui-text class="count">{this.text}</ui-text>
   }
 
-  static savedIn = { place: "my_inbox", collection: "messages" }
+  static savedIn = {
+    place: "my_inbox",
+    collection: "messages",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2444, end: 2464 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in my inbox
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2444, end: 2464 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 export class PublishedVolunteer extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2506, end: 2526 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2736, end: 2759 } })
   accessor person!: string
 
   // - its "shift" is text
-  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2530, end: 2549 } })
+  @prop({ type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2764, end: 2786 } })
   accessor shift!: string
 
   @drawn draw() {
@@ -150,7 +198,18 @@ export class PublishedVolunteer extends Thing {
     )
   }
 
-  static savedIn = { place: "published_sheet", collection: "published_volunteers" }
+  static savedIn = {
+    place: "published_sheet",
+    collection: "published_volunteers",
+    times: ["created", "modified"], select: ["person", "shift"] }
+
+  // - it lives in the published sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2693, end: 2724 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in the published sheet
+  @prop({ type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2693, end: 2724 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -230,7 +289,7 @@ export class SignUpPage extends App {
   @prop({ init: () => new Ticket(), early: true })
   accessor newTicket!: Ticket
 
-  static { this.declareProp("counts", { declaredAt: { path: "/SignUpSheet.spell", start: 2300, end: 2366 }, readsFrom: ["my_inbox"] }) }
+  static { this.declareProp("counts", { declaredAt: { path: "/SignUpSheet.spell", start: 2224, end: 2290 }, readsFrom: ["my_inbox"] }) }
   get counts() { return core.waitedValue(this, "counts", async () => {
     return await core.savedThings(Message, { filter: { thread: "invitations" } })
   }) }

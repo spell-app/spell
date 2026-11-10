@@ -318,6 +318,8 @@
   /* ## Item */
   :host(:state(in-menu)) > .item,
   .ui.menu .item {
+    /* in a row that scrolls:  where a key's press stops (`ScrollingRow.css`) */
+    scroll-snap-align: var(--_ui-row-snap, none);
     position: relative;
     display: var(--_ui-menu-item-display);
     flex: var(--_ui-menu-item-flex);

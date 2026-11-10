@@ -1,4 +1,9 @@
+import h from "@solidjs/h"
+
+import { prop } from "spell/util"
 import { noAbilities } from "spell/parser/core/abilities"
+import { core } from "spell/parser/core/core"
+import type { Drawing } from "spell/parser/core/drawing"
 // Import directly to avoid circular import
 import { Thing } from "./Thing"
 
@@ -9,11 +14,41 @@ import { Thing } from "./Thing"
  * - The element comes from `core.defineElement()`, which the page running the program fills in:
  *   core may not import Solid or Spell UI.
  * - Its things may be dragged, clicked or selected on the page only when its type says so:
- *   `<spell-view "card" draggable>`, `- it is clickable when it is face down`, or an event that implies it,
+ *   `<view "card" draggable>`, `- it is clickable when it is face down`, or an event that implies it,
  *   `- on click:` (`core.isAble()`).
+ * - A picture of it, its `thumbnail`, draws while it has no drawing of its own (epic `mockup` P16).
  * - Everything else as a `Thing`.
  */
 export class View extends Thing {
+  /**
+   * A picture of it, a file of its project:  `snapshots/terms.jpg`.
+   * - `<page "terms" thumbnail="snapshots/terms.jpg"/>`, or `- its thumbnail is "..."`.
+   * - A type may have data of its own called this, a thing as much as text:  only text is a picture's file.
+   * - Said of the type, so it's no row's field:  a place is never asked for it.
+   */
+  @prop({ inPlaces: false })
+  accessor thumbnail: string | undefined
+
+  /**
+   * Draw our thumbnail:  what a view with no drawing of its own shows.
+   * - Compiled spell's own `to draw it` replaces this, so writing any content replaces the picture.
+   * - throws:  no thumbnail, as a thing with no `to draw` can't be drawn.
+   */
+  draw(): Drawing {
+    return typeof this.thumbnail === "string" ? this.drawThumbnail() : super.draw()
+  }
+
+  /**
+   * Our thumbnail, as an image:  what `draw its thumbnail` places.
+   * - Nothing when we have none.
+   * - Its file is found from the running project's folder, so no page says where its project is.
+   */
+  drawThumbnail(): Drawing {
+    const { thumbnail } = this
+    if (typeof thumbnail !== "string") return null as unknown as Drawing
+    return h("img", { src: core.addressOfFile(thumbnail), alt: "", style: "max-width: 100%" }) as unknown as Drawing
+  }
+
   /**
    * May a page let people drag our things?  `- it is draggable` says yes (epic `outline-spell` P28, `debut` P27).
    * - Even then, only when the list holding one will give it up:  its `can give up` rule.

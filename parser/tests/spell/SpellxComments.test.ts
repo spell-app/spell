@@ -193,7 +193,7 @@ describe("a `<spell-property-editor>`", () => {
  * spellml's own tags carry the prefix (epic `data` P31, Q27;  from I60):  `<spell-description>`, `<spell-comment>`,
  * `<spell-property-editor>`.  The short words are Spell UI's:  `<comment>` in a drawing is `<ui-comment>`.
  */
-describe("the notes' prefix:  the short words are Spell UI's", () => {
+describe("`<note>`, one tag for every note (epic `language` P41);  in a drawing the short words are markup", () => {
   test("`<comment>` in a drawing is markup, never a note:  the drawing holds it", () => {
     const text = [
       '<spell-view "post">',
@@ -215,31 +215,29 @@ describe("the notes' prefix:  the short words are Spell UI's", () => {
     expect(proseIn(text.join("\n"), file!)).toEqual([])
   })
 
-  test("among a template's members, an old short note is still a note, warning with its new tag", () => {
+  test("among a template's members, an old note is still a note, warning with its new tag, `<note>`", () => {
     const text = ['<spell-view "card">', '\t<property "suit">1</>', "\t<comment>A suit.</>", "</spell-view>"].join("\n")
     const [file] = parseSpellProject([{ path: "/Card.spell", contents: text }]).files
     expect(file!.errors).toEqual([])
     expect(proseIn(text, file!)).toEqual(["<comment>A suit.</> prose"])
-    expect(warningsOf(file!)).toEqual([
-      "<comment> is now <spell-comment>:  the short name is Spell UI's, as <button> is <ui-button>"
-    ])
+    expect(warningsOf(file!)).toEqual(["<comment> is now <note>:  one tag for every note"])
   })
 
-  test("the prefixed note warns of nothing, and closes by its own word", () => {
-    const text = [
-      '<spell-view "card">',
-      "\t<spell-comment>",
-      "\t\tA card.",
-      "\t</spell-comment>",
-      '\t<property "suit">1</>',
-      "</spell-view>"
-    ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Card.spell", contents: text }]).files
+  test("`<note>` warns of nothing, and closes by its own word;  the old prefixed note warns, naming `<note>`", () => {
+    const text = (word: string) =>
+      ['<view "card">', `\t<${word}>`, "\t\tA card.", `\t</${word}>`, '\t<property "suit">1</>', "</view>"].join("\n")
+    const [file] = parseSpellProject([{ path: "/Card.spell", contents: text("note") }]).files
     expect(file!.errors).toEqual([])
     expect(warningsOf(file!)).toEqual([])
+    expect(proseIn(text("note"), file!)).toEqual(["<note> head", "A card. prose"])
+    for (const old of ["spell-comment", "spell-description"]) {
+      const [again] = parseSpellProject([{ path: "/Card.spell", contents: text(old) }]).files
+      expect(again!.errors).toEqual([])
+      expect(warningsOf(again!)).toEqual([`<${old}> is now <note>:  one tag for every note`])
+    }
   })
 
-  test("in Spanish:  `<encanto-comentario>`;  the old `<comentario>` warns with it", () => {
+  test("in Spanish:  `<nota>`;  the old `<comentario>` and `<encanto-comentario>` warn with it", () => {
     const parentScope = SP.Language.rootScopeFor([SP.Language.forFile("/Carta.es.spell")])
     const text = [
       '<encanto-vista "carta">',
@@ -249,15 +247,17 @@ describe("the notes' prefix:  the short words are Spell UI's", () => {
     ]
     const [file] = parseSpellProject([{ path: "/Carta.es.spell", contents: text.join("\n") }], { parentScope }).files
     expect(file!.errors).toEqual([])
-    expect(warningsOf(file!)).toEqual([
-      "<comentario> ahora es <encanto-comentario>:  el nombre corto es de Spell UI, como <botón> es <ui-button>"
-    ])
+    expect(warningsOf(file!)).toEqual(["<comentario> ahora es <nota>:  una etiqueta para cada nota"])
     const prefixed = text.map((line) => line.replace("<comentario>", "<encanto-comentario>"))
     const [again] = parseSpellProject([{ path: "/Carta.es.spell", contents: prefixed.join("\n") }], {
       parentScope
     }).files
     expect(again!.errors).toEqual([])
-    expect(warningsOf(again!)).toEqual([])
+    expect(warningsOf(again!)).toEqual(["<encanto-comentario> ahora es <nota>:  una etiqueta para cada nota"])
+    const short = text.map((line) => line.replace("<comentario>", "<nota>").replace("<encanto-vista", "<vista"))
+    const [note] = parseSpellProject([{ path: "/Carta.es.spell", contents: short.join("\n") }], { parentScope }).files
+    expect(note!.errors).toEqual([])
+    expect(warningsOf(note!)).toEqual([])
   })
 })
 

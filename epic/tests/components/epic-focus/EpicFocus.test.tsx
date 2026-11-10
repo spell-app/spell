@@ -302,7 +302,9 @@ describe("<epic-focus>", () => {
     const host = await render()
     await open(host, { tab: "questions", item: "q2" })
     const chips = () =>
-      focusOf(host)!.shadowRoot!.querySelector('[part~="chips"]')!.shadowRoot!.querySelectorAll<HTMLElement>("button:not(.marked)")
+      focusOf(host)!
+        .shadowRoot!.querySelector('[part~="chips"]')!
+        .shadowRoot!.querySelectorAll<HTMLElement>("button:not(.marked)")
     await vi.waitFor(() => expect(chips().length).toBe(2))
     // an ⌥-click on red:  only red;  the yellow Q2 showing goes, to the tab's first
     Array.from(chips())

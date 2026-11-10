@@ -159,6 +159,8 @@ export class TypeScope extends BlockScope {
    *   so a read above the line that says it means the place too (decision 1 of The Words).
    */
   declare saved?: SavedPlace
+  /** `- it keeps no times`:  it has no `created` or `modified` (epic `data` T57).  Journaled:  see `declareKeepsNoTimes()`. */
+  declare keepsNoTimes?: boolean
   /**
    * Its records are published as a Lexicon, AT Protocol's schema language (epic `atmosphere` P10):
    * `- it is published as "xyz.statusphere.status"`, or `- it is published`, named by its project's address.
@@ -270,6 +272,11 @@ export class TypeScope extends BlockScope {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { saved })
   }
 
+  /** SIDE EFFECT:  we do without `created` and `modified` -- see `keepsNoTimes`.  Journaled. */
+  declareKeepsNoTimes(declaredBy: P.Match): void {
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { keepsNoTimes: true })
+  }
+
   /** SIDE EFFECT:  our records are published, as `published` says -- see `published`.  Journaled. */
   declarePublished(published: PublishedAs, declaredBy: P.Match): void {
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { published })
@@ -305,6 +312,32 @@ export class TypeScope extends BlockScope {
       if (member) return member
     }
     return undefined
+  }
+
+  /**
+   * Each property of ours, own or inherited, whose list of values holds `word`, with the value as it's listed.
+   * - The word as listed, or its singular or plural:  `club` is `clubs`.
+   * - Text values only:  `2` never names a rank.
+   * - The nearest record of each name:  a subtype's line about a property keeps its list.
+   * - A lookup:  call it WHILE PARSING.
+   */
+  propertiesListing(word: string): Array<{ property: P.ScopeVariable; value: string }> {
+    const singular = P.singularize(word)
+    const found = new Map<string, { property: P.ScopeVariable; value: string }>()
+    for (const owner of this.chain()) {
+      for (const property of owner.variables.get()) {
+        if (!property.listedValues || found.has(property.name)) continue
+        for (const listed of property.listedValues) {
+          if (typeof listed !== "string") continue
+          const value = P.spellValueOf(listed)
+          if (P.singularize(value) === singular) {
+            found.set(property.name, { property, value })
+            break
+          }
+        }
+      }
+    }
+    return [...found.values()]
   }
 
   /** Is `words` a property a scan found on us, or on a type we're built on?  See `propertiesAhead`. */
@@ -386,23 +419,52 @@ export class TypeScope extends BlockScope {
    * - Compiled output still comes from each statement's own AST.
    * - `autoDeclared`:  its type never declared it, so its first `set` did -- see `P.ScopeVariable.autoDeclared`.
    * - The FIRST declaration of a name wins, as for types:  a later getter for the same property adds nothing.
+   *   - But one the type wrote itself takes over a saved time:  `isSavedTime` (epic `data` T57).
    * - A getter's `datatype` comes once its body has parsed:  what it returns -- see spell's `property_value_getter`.
    */
   declareProperty(
     name: string,
     declaredBy: P.Match,
-    { asWritten, datatype, autoDeclared, readAs, measure, output, valueOutputs }: DeclarePropertyOptions = {}
+    {
+      asWritten,
+      datatype,
+      autoDeclared,
+      readAs,
+      measure,
+      output,
+      valueOutputs,
+      listedValues,
+      isSavedTime
+    }: DeclarePropertyOptions = {}
   ): void {
     const existing = this.variables.get(name, "LOCAL_ONLY")
-    if (!existing) {
+    if (existing?.isSavedTime && !isSavedTime && existing.declaredBy !== declaredBy) {
+      const { datatype: datatypeWas, declaredBy: previous } = existing
+      const takeOver = () => {
+        existing.declaredBy = declaredBy
+        existing.datatype = datatype
+        existing.isSavedTime = undefined
+      }
+      takeOver()
+      declaredBy.scope.parser?.journal?.record({
+        undo: () => {
+          existing.declaredBy = previous
+          existing.datatype = datatypeWas
+          existing.isSavedTime = true
+        },
+        redo: takeOver
+      })
+    } else if (!existing) {
       // only what's there:  a declaration writes out what a record holds -- see spell's `SpellDeclarations`
       const props: P.ScopeVariableProps = { name, datatype, declaredBy }
       if (asWritten && asWritten !== name) props.asWritten = asWritten
       if (autoDeclared) props.autoDeclared = true
+      if (isSavedTime) props.isSavedTime = true
       if (readAs) props.readAs = readAs
       if (measure) props.measure = measure
       if (output) props.output = output
       if (valueOutputs) props.valueOutputs = valueOutputs
+      if (listedValues) props.listedValues = listedValues
       this.variables.add(props)
     }
     // an earlier parse of THIS statement left it:  it's ours again -- see `sameStatement()`
@@ -656,6 +718,8 @@ export type Measure = {
 export type DeclarePropertyOptions = {
   /** Its words as written, e.g. `short rank` -- see `P.ScopeVariable.asWritten`. */
   asWritten?: string
+  /** A saved type's `created` or `modified` -- see `P.ScopeVariable.isSavedTime`. */
+  isSavedTime?: boolean
   /** What it holds, e.g. `number`. */
   datatype?: P.Datatype
   /** Declared by its first `set` -- see `P.ScopeVariable.autoDeclared`. */
@@ -668,6 +732,8 @@ export type DeclarePropertyOptions = {
   output?: string
   /** What each of its values compiles to, when that isn't itself -- see `P.ScopeVariable.valueOutputs`. */
   valueOutputs?: Record<string, string>
+  /** The words its value can be -- see `P.ScopeVariable.listedValues`. */
+  listedValues?: ReadonlyArray<string | number>
 }
 
 /** Constructor props for `TypeScope`. */

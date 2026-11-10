@@ -12,15 +12,54 @@ export class Note extends Thing {
 }
 
 export class DeviceNote extends Note {
-  static savedIn = { place: "this_device", collection: "device_notes", select: [] }
+  static savedIn = {
+    place: "this_device",
+    collection: "device_notes",
+    times: ["created", "modified"], select: [] }
+
+  // - it lives in this device
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 752, end: 775 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in this device
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 752, end: 775 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class FolderNote extends Note {
-  static savedIn = { place: "note_folder", collection: "folder_notes", select: [] }
+  static savedIn = {
+    place: "note_folder",
+    collection: "folder_notes",
+    times: ["created", "modified"], select: [] }
+
+  // - it lives in note folder
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 807, end: 830 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in note folder
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 807, end: 830 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class SheetNote extends Note {
-  static savedIn = { place: "note_sheet", collection: "sheet_notes", select: [] }
+  static savedIn = {
+    place: "note_sheet",
+    collection: "sheet_notes",
+    times: ["created", "modified"], select: [] }
+
+  // - it lives in note sheet
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 861, end: 883 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in note sheet
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/KeptInPlaces.spell", start: 861, end: 883 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

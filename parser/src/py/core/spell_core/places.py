@@ -12,8 +12,8 @@ notes[0].text = "oat milk"                 # written as it changes:  no save ste
 core.remove_saved(notes[0])                # remove it from the notes
 ```
 
-- What's behind each place is `place_kinds.py`'s:  a file beside the program, or the page server's place routes.
-  Nothing reaches a place until something's read or written.
+- What's behind each place is `place_kinds.py`'s:  a file beside the program, the page server's place routes,
+  or an atmosphere account's host.  Nothing reaches a place until something's read or written.
 - ONE thing per type and id, however often it's read:  a read again changes the same thing, quietly.
 - A saved thing WRITES ITSELF as it changes (`note_change()`, the hook a page's patches hear):
   only the fields that changed, as a browser's pending change sends them.
@@ -25,7 +25,8 @@ core.remove_saved(notes[0])                # remove it from the notes
     a page is sent with its values.
 - A row is plain JSON, by the JavaScript names of its fields (`deviceCount`):
   so a page and a Python program read and write the same rows.  Its id is the thing's `id`.
-- Who's here:  this machine's person (`current_person()`), as the page server takes anyone with its token.
+- Who's here (`current_person()`):  who's signed in to an atmosphere account the program names, by their DID;
+  else this machine's person, as the page server takes anyone with its token.
 - Smaller than the JavaScript core's:  no undo of a write, no notices, no samples, no live rooms, no pages of a list.
 - Imports `core` only inside functions:  `core.py` mixes `PlaceMethods` in.
 """
@@ -35,14 +36,25 @@ import os
 import re
 import time
 import weakref
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from spell_core.atmosphere import ATMOSPHERE_KINDS
 from spell_core.lists import List
-from spell_core.place_kinds import ID_FIELD, Change, PlaceBehind, PlaceError, Row, javascript_name, place_behind
+from spell_core.place_kinds import (
+    EVERY_FIELD,
+    ID_FIELD,
+    Change,
+    PlaceBehind,
+    PlaceError,
+    Row,
+    javascript_name,
+    place_behind,
+)
+from spell_core.saving import iso_text
 from spell_core.things import (
     CHANGE_WATCHERS,
     TYPE_KEY,
@@ -56,6 +68,8 @@ from spell_core.things import (
 if TYPE_CHECKING:
     from spell_core.core import Core
 
+# The time a change stamps as it goes out.
+MODIFIED_FIELD = "modified"
 # How a reference to a thing kept elsewhere is written in a row:  `{"$ref": "Planet#tatooine"}`.
 REF_KEY = "$ref"
 # A javascript name's capitals, as Python splits them:  `deviceCount` is `device_count`.
@@ -180,12 +194,19 @@ class ProgramPlaces:
         """Every thing of `cls` its place keeps, as one kept list:  see the module's docs."""
         saved = self.read_of(cls, filter)
         if self.is_due(saved):
-            behind = self.behind(self.home_of_class(cls).place_name)
+            behind = self.behind_of_class(cls)
             # where nothing can wait, a drawing:  read right here (`core.run_at_once()`)
             waits_here = getattr(self.core, "_running_at_once", 0)
             rows = behind.rows_now(self.home_of_class(cls).collection) if waits_here else await self.listed(behind, cls)
             self.take(saved, rows)
         return saved.things
+
+    def behind_of_class(self, cls: type) -> PlaceBehind:
+        """What's behind the place `cls` is kept in, told which of its fields are numbers."""
+        home = self.home_of_class(cls)
+        behind = self.behind(home.place_name)
+        behind.know_numbers(home.collection, _number_fields_of(cls))
+        return behind
 
     async def listed(self, behind: PlaceBehind, cls: type) -> list[Row]:
         """Every row of `cls`'s collection, waited for."""
@@ -255,9 +276,11 @@ class ProgramPlaces:
     def add(self, thing: SpellObject) -> None:
         """SIDE EFFECT:  `thing`, made here, is kept where its class says, and in every read of its class."""
         home = self.home_of_class(type(thing))
-        row = row_for(thing)
+        behind = self.behind_of_class(type(thing))
+        row = row_for(thing) | self.stamp(thing, home, self.times_of(type(thing), home))
         self.send(home.place_name, {"kind": "insert", "collection": home.collection, "id": thing.id, "fields": row})
-        self.homes[thing] = Home(home.place_name, home.collection, row)
+        self.fill_in(thing, behind.fields_it_fills_in())
+        self.homes[thing] = Home(home.place_name, home.collection, row_for(thing))
         self.things[(type(thing).__name__, str(thing.id))] = thing
         for saved in self.reads.values():
             if saved.cls is type(thing) and thing not in saved.things:
@@ -266,6 +289,15 @@ class ProgramPlaces:
                     saved.things.append(thing)
                 finally:
                     self.reading -= 1
+
+    def fill_in(self, thing: SpellObject, fields: Row) -> None:
+        """SIDE EFFECT:  `fields`, the place's say on a new row, set on `thing`:  no change anybody made."""
+        self.reading += 1
+        try:
+            for name, value in fields.items():
+                _set_field(thing, name, value, self.core)
+        finally:
+            self.reading -= 1
 
     def remove(self, thing: SpellObject) -> None:
         """SIDE EFFECT:  `thing` is gone from its place, and from every read:  nothing, if it's kept in none."""
@@ -295,12 +327,35 @@ class ProgramPlaces:
         fields = {name: value for name, value in row.items() if home.row.get(name, _MISSING) != value}
         if not fields:
             return
-        home.row = row
+        if MODIFIED_FIELD in self.times_of(type(changed), home):
+            fields |= self.stamp(changed, home, [MODIFIED_FIELD])
+        home.row = row_for(changed)
         change = {"kind": "update", "collection": home.collection, "id": str(changed.id), "fields": fields}
         try:
             self.send(home.place_name, change)
         except PlaceError as error:
             self.core.console.error(f"Couldn't keep the change to {type(changed).__name__}:  {error}")
+
+    def times_of(self, cls: type, home: Home) -> list[str]:
+        """Which of Spell's two times `cls` keeps at `home`:  its compiled `saved_in`'s, that its place can hold."""
+        saved_in = getattr(cls, "saved_in", None)
+        times = list(saved_in.get("times", ())) if isinstance(saved_in, Mapping) else []
+        held = self.behind(home.place_name).times_held
+        return times if held == EVERY_FIELD else [field for field in times if field in held]
+
+    def stamp(self, thing: SpellObject, _home: Home, fields: Sequence[str]) -> Row:
+        """SIDE EFFECT:  `fields` of `thing`, Spell's two times, say now, as ISO text.  Returns them.
+
+        - No change anybody made:  it isn't sent as one, and `note_change()` hears nothing of it.
+        """
+        now = iso_text(datetime.now(UTC))
+        self.reading += 1
+        try:
+            for field in fields:
+                setattr(thing, _name_of_field(type(thing), field), now)
+        finally:
+            self.reading -= 1
+        return dict.fromkeys(fields, now)
 
     def send(self, place_name: str, change: Change) -> None:
         """Send `change` to the place `place_name`:  held while an `in one go:` runs.  - throws `PlaceError`"""
@@ -333,11 +388,26 @@ class ProgramPlaces:
 
     @property
     def person(self) -> PersonHere:
-        """This machine's person:  `SPELL_PERSON`, else who's signed in to it."""
+        """Who's signed in to an atmosphere account the program names, else this machine's person.
+
+        - This machine's person:  `SPELL_PERSON`, else who's logged in to it.
+        - One object for the program's life:  a later sign-in isn't followed.
+        """
         if self._person is None:
+            signed_in = self.signed_in_person()
             who = os.environ.get("SPELL_PERSON") or _login()
-            self._person = PersonHere(who, who, f"python-{os.getpid()}")
+            page = f"python-{os.getpid()}"
+            self._person = PersonHere(signed_in[0], signed_in[1], page) if signed_in else PersonHere(who, who, page)
         return self._person
+
+    def signed_in_person(self) -> tuple[str, str] | None:
+        """Who the first place that signs in is signed in as:  `None` for nobody.  - NEVER throws"""
+        for place_name, details in self.details.items():
+            if details.get("kind") in ATMOSPHERE_KINDS:
+                who = self.behind(place_name).signed_in_person()
+                if who:
+                    return who
+        return None
 
 
 # A field a row doesn't have:  never equal to any value.
@@ -372,10 +442,30 @@ def row_for(thing: SpellObject) -> Row:
     """
     row: Row = {}
     for name, value in thing._props.items():
-        if name == ID_FIELD or not isinstance(getattr(type(thing), name, None), Prop):
+        declared = getattr(type(thing), name, None)
+        if name == ID_FIELD or not isinstance(declared, Prop):
             continue
-        row[javascript_name(name)] = _row_value(value)
+        row[declared.stored_as or javascript_name(name)] = _row_value(value)
     return row
+
+
+def _number_fields_of(cls: type) -> list[str]:
+    """Every field `cls` declares as a number, by the name a row calls it."""
+    fields = ((name, getattr(cls, name, None)) for name in dir(cls))
+    return [
+        declared.stored_as or javascript_name(name)
+        for name, declared in fields
+        if isinstance(declared, Prop) and declared.type == "number"
+    ]
+
+
+def _name_of_field(cls: type, field_name: str) -> str:
+    """The property of `cls` a row's field is:  the one `stored_as` it, else by its name."""
+    for name in dir(cls):
+        declared = getattr(cls, name, None)
+        if isinstance(declared, Prop) and declared.stored_as == field_name:
+            return name
+    return python_name(field_name)
 
 
 def _row_value(value: object) -> object:
@@ -394,7 +484,7 @@ def _set_field(thing: SpellObject, field_name: str, value: object, core: "Core")
     - A thing written whole:  made again (`core.from_json()`).
     - A field it doesn't declare:  a plain property, kept as it is.
     """
-    name = python_name(field_name)
+    name = _name_of_field(type(thing), field_name)
     declared = getattr(type(thing), name, None)
     kind = declared.type if isinstance(declared, Prop) else None
     if isinstance(value, dict | list) and _holds_types(value):

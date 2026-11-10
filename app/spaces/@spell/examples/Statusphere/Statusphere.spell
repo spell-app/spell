@@ -31,10 +31,8 @@ Each status is a record in its owner's own atmosphere account, in the shape Stat
 ## The app:  the emoji to pick, then everyone's statuses, newest first
 
 <app "statusphere">
-	<property "recent" description="Newest first:  by when each was set, the other way round">
-		set found to every status sorted by its created at
-		reverse found
-		return found
+	<property "recent" description="Newest first:  by when each was set">
+		return every status sorted by its created, newest first
 	</property>
 
 	<action "post (emoji as text)" description="Your status:  a new record in your own account, as Statusphere writes one">

@@ -5,6 +5,8 @@ import { dirname, join } from "node:path"
 import { PlaceError } from "spell/places/places.types"
 import { SRV } from "spell/server"
 
+import { contentHash } from "./contentVersion"
+
 /** How long a file must be quiet before it's told:  an editor's save is often two or three writes. */
 const QUIET_MS = 100
 
@@ -14,8 +16,10 @@ const QUIET_MS = 100
  * - Shaped as the app's `SpaceStorage` is:  `read`, `write`, `list`, `remove`, `watch`, each on `/`-separated paths from `root`.
  *   The app's `DiskStorage` is the same shape, on spaces' folder, so a place can't tell them apart.
  * - Writes through `SRV.FileOperations`:  under the file's lock, all at once.
- * - A version is the file's `ETag`, as `StaticHandler` serves it;  a conflict is the file operations' own check (`ifMatch`).
+ * - `versionOf()` is the file's `ETag`, as `StaticHandler` serves it:  a cheap STAMP, read without opening the file,
+ *   and what the file operations' own conflict check compares (`ifMatch`).
  *   - An `ETag` is the size and the time to the millisecond:  two saves of one size in one millisecond look the same.
+ *   - So a thing's version comes from what the file holds (`versionOfText()`), never the stamp.
  * - Changes heard through `LiveReload`'s watching, so nothing here watches the disk by itself, and a save seen twice is told once.
  * - STATIC, for a tool that writes files straight off and in its own lock (`PlanParts` and `PlanDocFiles`, the epic page tool's,
  *   since epic `data` P6):  `bodyFile()`, `reader()`, `writeChanged()`, `writeListAndBodies()`.
@@ -68,6 +72,11 @@ export class ChunkFiles {
   /** File `path`'s version now:  `undefined` if it isn't there. */
   versionOf(path: string): string | undefined {
     return SRV.FileOperations.etagFor(this.fileFor(path))
+  }
+
+  /** A version made from what a file holds:  a save of other text moves it, however fast, and a `touch` doesn't. */
+  versionOfText(text: string): string {
+    return contentHash(text)
   }
 
   /** Write file `path` whole, only if it's still at `version`:  its new version.  - throws `PlaceError` `"out of date"` */

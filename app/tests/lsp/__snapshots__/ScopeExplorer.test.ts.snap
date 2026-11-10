@@ -46,13 +46,13 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "property state",
   "method draw it",
   "property picture",
-  "property lifted",
   "property pile",
   "method play a card",
   "method put a card on a pile",
   "method count the points for a card on a pile",
   "property direction",
   "enumeration Directions",
+  "property thumbnail",
   "property id",
   "method (a thing) belongs to one (list)",
   "method draw (a thing)",
@@ -93,6 +93,7 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
   type App (is a View)
     method start (an app)
   type View (is a Thing)
+    property thumbnail (text)
   type Page (is a View)
     property lock (text)
   type TwoSidedView (is a View)
@@ -125,9 +126,13 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
+    file Jokers.spell
+      type Joker (is a Card)
+      function test jokers
     file Deck.spell
       type Deck (is a List)
       function test a new deck
+      function test two jokers
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles
@@ -175,6 +180,7 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
   type App (is a View)
     method start (an app)
   type View (is a Thing)
+    property thumbnail (text)
   type Page (is a View)
     property lock (text)
   type TwoSidedView (is a View)
@@ -207,9 +213,13 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
+    file Jokers.spell
+      type Joker (is a Card)
+      function test jokers
     file Deck.spell
       type Deck (is a List)
       function test a new deck
+      function test two jokers
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles

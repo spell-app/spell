@@ -36,6 +36,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `write-refused-not-listed` | the same, as a sign-up sheet's list doesn't name you:  JS core's | `thing` |
 | `write-refused-used-up` | the same, as you've asked for every invitation you have:  JS core's | `thing` |
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
+| `room-out-of-date`, `room-reload` | a page left open across a new version:  the JavaScript core's | |
+| `number-sent-as-other-text` | a number field that sent other text:  JS core's | `field`, `value` |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
 | `write-lost`, `write-use-mine` | your long text replaced:  the JavaScript core's | `thing`, `field`, `mine` |
@@ -57,6 +59,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-linked` | a Spell account linked to Bluesky:  the JavaScript core's | `handle` |
 | `sign-in-not-linked`, `sign-in-taken-down`, `sign-in-linked-elsewhere` | why Bluesky didn't sign in:  JS core's | |
 | `site-no-such-page`, `site-create-page`, `site-create-it` | a site's not found page:  JS core's | |
+| `site-page-waiting` | a page a site lists that isn't made yet:  JS core's | |
 | `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 | `site-menu` | a narrow site's button that opens its navigation:  JS core's | |
 | `table-edit` | the undo step of an editable table's change:  JS core's | |
@@ -90,13 +93,20 @@ MESSAGES: dict[str, str] = {
     "write-refused-used-up": "Couldn't save your change to {thing}:  you've asked for every invitation you have",
     "language": "en",
     "write-retry": "Retry",
+    "room-out-of-date": "This page is out of date.  What you've changed is kept:  reload to go on.",
+    "room-reload": "Reload",
+    "number-sent-as-other-text": (
+        '{field} is a number, but its place sent "{value}", which reads as nothing;  '
+        'if that\'s how it says it has none, say so:  `is a number or "{value}"`'
+    ),
     "read-failed": "Can't read this right now:  {why}",
     "read-too-soon": "The server asks to wait:  try again in a little while",
-    "read-too-soon-seconds": "The server asks to wait:  try again in {seconds} seconds",
-    "read-too-soon-minute": "The server asks to wait:  try again in a minute",
-    "read-too-soon-minutes": "The server asks to wait:  try again in {minutes} minutes",
+    "read-too-soon-seconds": "The server asks to wait:  it'll be tried again in {seconds} seconds",
+    "read-too-soon-minute": "The server asks to wait:  it'll be tried again in a minute",
+    "read-too-soon-minutes": "The server asks to wait:  it'll be tried again in {minutes} minutes",
     "saved-added": "Add",
     "saved-removed": "Remove",
+    "saved-changed": "Edit",
     "write-show-me": "Show me",
     "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
     "write-use-theirs": "Use theirs",
@@ -159,6 +169,7 @@ MESSAGES: dict[str, str] = {
     "page-next": "Next",
     "page-number": "Page {page}",
     "site-no-such-page": "No such page",
+    "site-page-waiting": "This page hasn't been made yet.",
     "site-create-page": "Would you like to create one?",
     "site-create-it": "Create it",
     "site-page-failed": "Sorry, this page couldn't be shown.",

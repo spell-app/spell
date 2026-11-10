@@ -24,7 +24,19 @@ export class Receta extends View {
     )
   }
 
-  static savedIn = { place: "recetario_familiar", collection: "recetas" }
+  static savedIn = {
+    place: "recetario_familiar",
+    collection: "recetas",
+    times: ["created", "modified"]
+  }
+
+  // se guarda en el recetario familiar
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 194, end: 228 } })
+  accessor creado!: any /* spell: type unknown */
+
+  // se guarda en el recetario familiar
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 194, end: 228 } })
+  accessor modificado!: any /* spell: type unknown */
 
   quitarEso() {
     core.removeSaved(this)
@@ -40,7 +52,9 @@ export class Receta extends View {
 export class RecetaElement extends SpellElement<Receta> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-receta", "receta", [
     { name: "título", kind: "string", description: "Its título." },
-    { name: "porciones", kind: "number", description: "Its porciones." }
+    { name: "porciones", kind: "number", description: "Its porciones." },
+    { name: "creado", kind: "json", description: "Its creado." },
+    { name: "modificado", kind: "json", description: "Its modificado." }
   ])
 
   quitarEso() {

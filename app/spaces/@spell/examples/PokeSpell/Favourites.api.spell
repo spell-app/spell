@@ -1,9 +1,12 @@
 ## Your favourites:  kept on this device
 // The Pokémon you love, kept in this browser, beside PokéAPI's own:  one program shows both.
 // Change the next line to keep them somewhere else, and nothing else changes.
-my favourites is a database on this device
+<device-storage "my favourites" />
 
-a "favourite" is a thing:
-	- it lives in my favourites
-	- its "name" is text
-	- its "address" is text  // the pokemon's own, at PokéAPI
+<thing "favourite">
+	<spell>
+		- it lives in my favourites
+	</spell>
+	<property "name">text</>
+	<property "address">text</>	// the pokemon's own, at PokéAPI
+</thing>

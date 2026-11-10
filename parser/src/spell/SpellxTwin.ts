@@ -69,7 +69,7 @@ export class SpellxTwin {
     // its description is comments ending its line:  left out, as a line's comment can't be parsed with it
     // (epic `language` T59)
     // with the block under it, so a tag that opens one ends in its `:`, as its line does when it's parsed:
-    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none
+    // `a square :` reopens a square (`<extend "square">`), where a bare `a square` names none
     // (epic `language` T83)
     const twinText = (line: P.LineToken, next?: P.Token) =>
       SpellxTwin.for(language, parser, line, next)
@@ -150,6 +150,8 @@ export class SpellxTwin {
     switch (tag.category) {
       case "template":
         return this.template()
+      case "place":
+        return this.place()
       case "declaration":
         return this.declaration()
       case "handler": {
@@ -175,7 +177,8 @@ export class SpellxTwin {
    * A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body.
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
    * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
-   * - A page's `locked`:  `- its lock is "locked"` (epic `notebook` P1).
+   * - A page's `locked`:  `- its lock is locked` (epic `notebook` P1).
+   * - A page's or view's `thumbnail=`:  `- its thumbnail is "..."` (epic `mockup` P16).
    */
   private template(): SpellxTwinLine {
     const regrouped =
@@ -190,8 +193,8 @@ export class SpellxTwin {
         ? this.words.siteAt
         : kind === "site" && this.hasAttribute("cloud")
           ? this.words.siteCloud
-          : kind === "more of"
-            ? this.words.moreOf
+          : kind === "extend"
+            ? this.words.extend
             : singleton
               ? this.words.singleton
               : this.attribute("aka")
@@ -202,10 +205,33 @@ export class SpellxTwin {
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
       .map(([, line]) => [this.bullet(), ...this.expand(line)])
     const locked = kind === "page" && this.isLocked ? [[this.bullet(), ...this.expand(this.words.pageLocked)]] : []
-    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked])
+    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked, ...this.thumbnailLines()])
   }
 
-  /** Is the tag `locked`, `<spell-page "x" locked>`? */
+  /**
+   * A place, as the plain line it reads as:  `wikipedia is a web server at "..." :`;  its body is plain Spell.
+   * - A kind no table lists is a library's:  `<supabase-project "x" address="...">`, `x is a supabase project at "..." :`.
+   */
+  private place(): SpellxTwinLine {
+    const { tag, words } = this
+    const place = this.language.words.spellx!.places.find(
+      (each) => each.tag === tag.kind && (!each.flag || this.hasAttribute(each.flag))
+    )
+    const shape = (!this.attribute("address") && place?.bare) || place?.line || words.placeOfKind
+    return this.lineAndBlock(
+      this.expand(shape, { kind: place ? undefined : this.wordsText(tag.kind.replace(/-/g, " ")) })
+    )
+  }
+
+  /** A page's or view's `thumbnail=`, as the line that says it:  none on any other tag, or without one. */
+  private thumbnailLines(): P.Token[][] {
+    const isDrawable = this.tag.kind === "page" || this.tag.kind === "view"
+    return isDrawable && this.attribute("thumbnail")
+      ? [[this.bullet(), ...this.expand(this.words.templateThumbnail)]]
+      : []
+  }
+
+  /** Is the tag `locked`, `<page "x" locked>`? */
   private get isLocked(): boolean {
     return this.tag.attributes.some((attribute) => attribute.name === "locked")
   }
@@ -221,7 +247,7 @@ export class SpellxTwin {
    * - Its sections draw as the docs pages' do, sticky and foldable (epic `notebook` P3, J1):
    *   - each `##` heading and what follows it, a `<section>` the twin makes:  see `markdownLines()`, `gatherSections()`
    *   - each `<section label="...">` written at its top level, with the same look:  see `withSectionLook()`
-   * - `locked`:  a line, `- its lock is "locked"`.
+   * - `locked`:  a line, `- its lock is locked`;  `thumbnail=`, `- its thumbnail is "..."`.
    * - Its own templates aren't in its block:  the tokenizer lifted them out, to before it (`liftPageTemplates()`).
    */
   private drawnPage(): SpellxTwinLine {
@@ -254,7 +280,7 @@ export class SpellxTwin {
       const isMember =
         (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
         (first instanceof SP.SpellxProseToken && !!first.note) ||
-        // its stories, `<spell-stories>`, as `withStoriesAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
+        // its stories, `<stories>`, as `withStoriesAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
         (first instanceof P.JSXElementToken && first.tagName === STORIES && item.tokens.length === 1)
       // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
       if (isCloser) {
@@ -272,6 +298,7 @@ export class SpellxTwin {
       new P.LineToken({ start: this.head.start, line: this.head.line, ch: this.head.ch, indent, tokens })
     const items: Array<P.LineToken | P.BlockToken> = [...members]
     if (this.isLocked) items.push(lineOf([this.bullet(), ...this.expand(this.words.pageLocked)]))
+    items.push(...this.thumbnailLines().map(lineOf))
     if (drawing.length) {
       items.push(lineOf([this.bullet(), ...this.expand(this.words.draw)]))
       SpellxTwin.joinMarkup(drawing)
@@ -542,12 +569,12 @@ export class SpellxTwin {
   }
 
   /**
-   * Template `block` with each `<spell-stories>` note written as code spell's `<stories>` block, its twin (epic `mockup` P6):
-   * ONE line, a raw-text element holding the note's markdown, which `markdown_description` compiles to the
+   * Template `block` with each `<stories>` note written as code spell's `<stories>` block, its twin (epic `mockup` P6):
+   * ONE line, a raw-text element holding the note's `<story>` tags, which `markdown_description` compiles to the
    * template's `static stories`.
    * - `undefined` when it has none:  `block` as it is.
-   * - Its text:  the note's lines as written, less the indent its first line has, so a nested list stays nested;
-   *   a job on the head's own line, `<spell-stories>- [ ] see the films</>`, first.
+   * - Its text:  the note's lines as written, less the indent its first line has, so a story's own lines stay indented;
+   *   a story on the head's own line, `<stories><story "S1">see the films</story></>`, first.
    */
   private static withStoriesAsBlocks(block: P.BlockToken): P.BlockToken | undefined {
     const items = block.tokens
@@ -660,22 +687,37 @@ export class SpellxTwin {
         return this.lineAndBlock(
           this.expand(
             [
-              this.attribute("title") ? words.sitePageTitled : words.sitePage,
+              this.pageTitle ? words.sitePageTitled : words.sitePage,
               this.attribute("tab") ? words.sitePageTab : "",
               this.attribute("tags") ? words.sitePageTags : "",
               // the state is a word of the line, not a text:  `state="old"` is `, old`
               this.attribute("state") ? words.sitePageState.replace("{state}", this.attribute("state")!.text) : "",
-              this.attribute("picture") ? words.sitePagePicture : "",
+              this.attribute("thumbnail") ? words.sitePageThumbnail : "",
+              this.attribute("live") ? words.sitePageLive : "",
               this.siteCardWords()
-            ].join(" ")
+            ].join(" "),
+            { title: this.pageTitle }
           )
         )
       case "dialog":
       case "sidebar":
-        return this.lineAndBlock(this.expand(`${words.siteOverlay} ${this.siteCardWords()}`))
+        return this.lineAndBlock(this.expand(`${this.overlayShape(tag.kind)} ${this.siteCardWords()}`))
       default:
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
+  }
+
+  /** What a page's line calls it:  `title=`;  else, when its name can't be read as words as written, its name. */
+  private get pageTitle(): SP.SpellxText | undefined {
+    const { name } = this.tag
+    return this.attribute("title") ?? (name && this.isPunctuated(name) ? name : undefined)
+  }
+
+  /** The line for dialog or sidebar `kind`:  saying which it is, when its name doesn't (`System Notices`). */
+  private overlayShape(kind: "dialog" | "sidebar"): string {
+    const { siteOverlay, siteOverlayOf, siteOverlayWords } = this.words
+    const says = new RegExp(`(^|\\s)(${siteOverlayWords})(\\s|$)`, "iu").test(this.tag.name?.text ?? "")
+    return says ? siteOverlay : siteOverlayOf[kind]
   }
 
   /**
@@ -812,7 +854,7 @@ export class SpellxTwin {
   private lineAndBlock(tokens: P.Token[], before: P.Token[][] = [], after: P.Token[][] = []): SpellxTwinLine {
     const { line } = this
     const { description, rest } = this.descriptionOf(this.block)
-    // nothing to open:  no `:` ending its words, e.g. `<spell-thing "card" />` is `a "card" is a thing`
+    // nothing to open:  no `:` ending its words, e.g. `<thing "card" />` is `a "card" is a thing`
     const last = tokens.at(-1)
     const bodiless = !rest.length && !before.length && !after.length && !this.inlineBody.length
     if (bodiless && last && SpellxTwin.isSynthetic(last) && last.value === ":") tokens.pop()
@@ -867,6 +909,10 @@ export class SpellxTwin {
     const head = first instanceof P.LineToken ? first.tokens[0] : undefined
     if (!(head instanceof SP.SpellxProseToken) || head.note !== "description" || first!.tokens.length !== 1)
       return { description, rest: items }
+    // what the tokenizer warned of on its head, an old `<spell-description>`:  on our own line, as it goes
+    const warning = SP.spellxWarningOf(head)
+    const ours = this.line.tokens[0]!
+    if (warning && !SP.spellxWarningOf(ours)?.includes(warning)) SP.addSpellxWarning(ours, warning)
     // its text on its head's line, `<description>Flips it ...</>`, or on the lines indented under it
     let taken = 1
     if (head.value) description.push(this.comment(head.value, head.start))
@@ -930,10 +976,20 @@ export class SpellxTwin {
       } else if (name === "name") {
         if (text?.quoted) tokens.push(text.quoted)
         else if (text) tokens.push(this.quote(text))
-      } else tokens.push(...(text?.tokens ?? []))
+      } else if (name === "words" && text && this.isPunctuated(text))
+        tokens.push(...this.synthetic(SP.plainPartName(text.text)))
+      else tokens.push(...(text?.tokens ?? []))
       spaceAfter(tokens)
     }
     return tokens
+  }
+
+  /**
+   * Does name `text`, a page's, a view's or one of a site's parts', hold what no type's name can, `&` or `?`:
+   * its words are then read without them.  An action's name keeps its own, `open (a text)`.
+   */
+  private isPunctuated(text: SP.SpellxText): boolean {
+    return TITLED_KINDS.has(this.tag.kind) && SP.plainPartName(text.text) !== text.text.trim()
   }
 
   /**
@@ -973,6 +1029,8 @@ export class SpellxTwin {
     const paging = own("paging")?.value?.text
     if (paging === words.pages) lines.push(words.inPages)
     else if (paging === words.none_) lines.push(words.allAtOnce)
+    const pageSize = own("page-size")?.value?.text.trim()
+    if (pageSize) lines.push(words.atATime.replaceAll("{size}", pageSize))
     const layout = own("as")?.value?.text
     if (layout) {
       const handedOn = tag.attributes.filter((attribute) => !FOR_OWN_ATTRIBUTES.has(attribute.name))
@@ -1152,6 +1210,9 @@ function childrenOf(token: P.Token): P.Token[] {
   return token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
 }
 
+/** What a name may be a title for:  what's written `<page "Pinned Screens & Hardware">`. */
+const TITLED_KINDS: ReadonlySet<string> = new Set(["page", "view", "dialog", "sidebar"])
+
 /** A page's stories' tag in code spell, `<stories>`:  `STORIES_TAG` (the rules' own;  spellx doesn't import them). */
 const STORIES = "stories"
 
@@ -1159,4 +1220,4 @@ const STORIES = "stories"
 const NOT_PARAMS = new Set(["name", "description", "group"])
 
 /** `<for>`'s own attributes, by their English names:  any other goes on what's around its items. */
-const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "as"])
+const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "page-size", "as"])

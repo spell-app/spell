@@ -8,15 +8,15 @@ import { monaco } from "./monaco"
  * Instant colouring for spell, line by line, from its TOKENS:  words, symbols, numbers, comments, text.
  * - Needs no parse, so it's there from the first keystroke;  colouring from the parse (semantic tokens) goes on top.
  * - Each spell line tokenizes on its own.
- * - Code spell (`Card.spell`) by spell's own tokenizer;  spellx (`Card.spellml`) by its `SP.SpellxTokenizer`,
+ * - Plain Spell by spell's own tokenizer;  a tag-shaped file by its `SP.SpellxTokenizer`,
  *   a provider of its own:  see `forSpellx()`.
  *   - A tag line colours as its code-spell twin does (`SP.SpellxTwin`):  `<property "rank" one-of="...">` reads as
  *     `its "rank" is one of ...`, so `"rank"` is a string and `ace` a word.
  *   - The tag's own words, which its twin never holds:  `property` a keyword, `one-of` an attribute name,
  *     and `<`, `>`, `/>`, `</>` punctuation.
  *   - A line of prose, or a note's, is a comment;  so is each line of a `<!-- ... -->` comment.
- *     - EXCEPT a `<spell-property-editor>`'s lines:  markup as written, coloured as markup (`markupPieces()`).
- *     - A note's head alone on its line, `<spell-description>`, colours as any tag does.
+ *     - EXCEPT a `<property-editor>`'s lines:  markup as written, coloured as markup (`markupPieces()`).
+ *     - A note's head alone on its line, `<note>`, colours as any tag does.
  * - Blocks of another language are coloured as that language, by Monaco's own colouring (`EMBEDDED_BLOCKS`):
  *   - a type's `<css>` block as CSS -- see `LSP.SpellCSS`
  *   - a `<markdown>` block as markdown, in a drawing or a type's outline -- see spell's `markdown_block`
@@ -41,7 +41,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * A provider for spellx files, `Card.spell`:  read by a spellx parser, English's.
+   * A provider for tag-shaped files (`SP.formOfText()`):  read by a spellx parser, English's.
    * - CONSIDER:  each file's own language (`Carta.es.spell`):  a tokens provider is asked for lines, never a file.
    */
   static forSpellx(): SpellTokensProvider {
@@ -242,7 +242,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * Pieces of a note's own head line, `<spell-description>` or `<spell-property-editor>` alone on its line:
+   * Pieces of a note's own head line, `<note>` or `<property-editor>` alone on its line:
    * as any spellx tag's, its word a `keyword` between `delimiter`s.
    */
   private noteHeadPieces(line: string, head: SP.SpellxProseToken): Piece[] {
@@ -250,7 +250,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
     const text = line.slice(head.start, head.end)
     const word = /^<([^\s/>]+)/.exec(text)?.[1]
     if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
-    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spell`)
+    // a property editors file's quoted type name, `<property-editor "card">` (`Card.editor.spell`)
     const name = /"[^"]*"/.exec(text)
     if (name)
       pieces.push({ start: head.start + name.index, end: head.start + name.index + name[0].length, scopes: "string" })
@@ -258,7 +258,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * Pieces of markup from `start` to `end` of `line`:  a drawing's, or a `<spell-property-editor>`'s lines,
+   * Pieces of markup from `start` to `end` of `line`:  a drawing's, or a `<property-editor>`'s lines,
    * as `markupTokens()` colours them.
    */
   private markupPieces(line: string, start: number, end: number): Piece[] {

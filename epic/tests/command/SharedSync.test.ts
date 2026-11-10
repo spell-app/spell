@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Shared } from "spell/epic/command/Shared"
+import { Shared, syncLines } from "spell/epic/command/Shared"
 import { SyncState } from "spell/epic/command/SyncState"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
@@ -172,6 +172,56 @@ describe("Shared.sync()", () => {
     expect(await quiet.shared.sync()).toEqual({ commits: [expect.any(String)] })
     expect(git(REMOTE, "rev-parse", "HEAD")).toBe(before)
     await expect(quiet.shared.run(["sync"])).rejects.toThrow(/contentRemote/)
+  })
+})
+
+describe("Shared.sync():  the first push refused, then a Maintainer's commit (epic-engine P69)", () => {
+  /** GitLab's words, as its pre-receive hook says them;  git puts `remote:` in front of each line. */
+  const HOOK = `#!/bin/sh
+cat >/dev/null
+echo "GitLab:" >&2
+echo "You cannot push the initial commit because the default branch is" >&2
+echo "protected and your role does not allow it." >&2
+exit 1
+`
+
+  test("refused:  the commits wait;  one short line, and the status says the plans aren't shared yet, and why", async () => {
+    const lab = join(TEMP, "lab.git")
+    git(TEMP, "init", "-q", "--bare", "-b", "main", lab)
+    writeFileSync(join(lab, "hooks", "pre-receive"), HOOK, { mode: 0o755 })
+    const cara = person("cara", { remote: lab })
+    cara.shared.init()
+    expect(cara.shared.publish(lab)).toMatch(/cannot push the initial commit/)
+    mkdirSync(join(cara.dir, "guides"), { recursive: true })
+    writeFileSync(join(cara.dir, "guides", "mine.md"), "Cara's plan\n")
+    const { commits, sync } = await cara.shared.sync()
+    expect(commits.length).toBe(1)
+    expect(sync).toMatchObject({ result: "not pushed" })
+    const lines = syncLines(commits, sync)
+    expect(lines).toHaveLength(2)
+    expect(lines[1]).toBe(
+      "sync:  not pushed:  GitLab won't take the epic repo's first push:  its default branch is protected, and a " +
+        "Maintainer has to push the first commit (epic init says how;  your commits wait here)"
+    )
+    // no session-start notice:  it would repeat in every session until a Maintainer acts
+    expect(SyncState.notice(cara.dir)).toBeUndefined()
+    expect(cara.shared.status().unshared).toMatchObject({ never: true, reason: expect.stringMatching(/^GitLab won't/) })
+
+    // the Maintainer:  the hook gone (the branch opened up), an empty first commit of their own, on the branch the
+    // refusal names (the epic repo's own)
+    rmSync(join(lab, "hooks", "pre-receive"))
+    const branch = git(cara.dir, "branch", "--show-current")
+    const maintainer = join(TEMP, "maintainer")
+    git(TEMP, "clone", "-q", lab, maintainer)
+    git(maintainer, "commit", "-q", "--allow-empty", "-m", "First commit of the epic repo")
+    git(maintainer, "push", "-q", "-u", "origin", `HEAD:${branch}`)
+
+    // no history shared:  Cara's commits go on top of theirs, and push
+    const after = await cara.shared.sync()
+    expect(after.sync).toMatchObject({ result: "synced", pushed: true, pulled: 1 })
+    expect(git(lab, "log", "--format=%s", branch).split("\n").at(-1)).toBe("First commit of the epic repo")
+    expect(git(lab, "show", `${branch}:guides/mine.md`)).toBe("Cara's plan")
+    expect(cara.shared.status().unshared).toBeUndefined()
   })
 })
 

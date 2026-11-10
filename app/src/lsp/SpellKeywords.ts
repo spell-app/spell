@@ -82,7 +82,7 @@ export class SpellKeywords {
   /**
    * The accented word to write for `word`, one of the language's SPELLX words typed without its accent
    * (epic `elemental-spell` P8, Q49):  `accion` => `acción`, `descripcion` => `descripción`;  `undefined` for none.
-   * - A tag's word (`<accion>`, `<encanto-pagina>`'s `pagina`) or an attribute's (`uno-de`, `descripcion=`):
+   * - A tag's word (`<accion>`, `<pagina>`'s `pagina`) or an attribute's (`uno-de`, `descripcion=`):
    *   every table of `SP.SpellxWords`.
    * - Only when it's UNAMBIGUOUS:  one accented spelling has `word`'s letters, and means what `word` does when the table
    *   has `word` too (`pagina`, the plain spelling of `página`).

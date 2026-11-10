@@ -97,7 +97,7 @@ The table and its pictures come from the example projects, so a new example show
 Everything else on this page is written by hand.
 A new example is tested as soon as its folder is there:  no list to add it to.
 
-1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellml` files.
+1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` files.
    `spell app create <name> --in spaces/@spell/examples` writes a first one.
 2. Give its project file a `"description"`:  one line of what it shows.
    - Without one, the table takes the first comment of its first Spell file.
@@ -545,29 +545,35 @@ as Statusphere does.
 Each place is an API file of its own, and the app never names one:  it asks its KEEPER.
 
 ```spell
-browser storage is a database on this device
+<device-storage "browser storage" />
 
-a "browser task" is a task:
-	- it lives in browser storage
-	- to throw it away:
+<view "browser task" template="task">
+	<spell>
+		- it lives in browser storage
+	</spell>
+	<action "throw it away">
 		remove it from the browser tasks
+	</action>
+</view>
 
-a "browser keeper" is a task keeper:
-	- its "kept tasks" is every browser task
-	- to keep a new task titled (title as text):
+<thing "browser keeper" template="task keeper">
+	<property "kept tasks">every browser task</>
+	<action "keep a new task titled (title as text)">
 		set task to a new browser task with title = title
 		add task to the browser tasks
 		return task
+	</action>
+</thing>
 ```
 
 _TaskList.browser.api.spell, whole:  a place, its kind of task, and its keeper._
 
 - Every keeper does the three things [TaskList.api.spell](spaces/@spell/examples/TaskList/TaskList.api.spell) says:
   its kept tasks, keeping a new one, and (its kind of task's own) throwing one away.
-- The server's is a project data folder, `task files is a data folder at "tasks"`, a JSON file a task;
-  the CSV file's, `task sheet is a sheet at "tasks.csv"`, a row a task, in the project's `__data/tasks.csv`
+- The server's is a project data folder, `<data-folder "task files" address="tasks">`, a JSON file a task;
+  the CSV file's, `<sheet "task sheet" address="tasks.csv">`, a row a task, in the project's `__data/tasks.csv`
   (a file's name alone is the program's own, and the server writes it, changing only the lines that change);
-  the atmosphere's, `task sky is a personal atmosphere account`, reading only your own.
+  the atmosphere's, `<atmosphere "task sky" personal>`, reading only your own.
 - Picking another place changes the app's `storage`;  `when its storage changes`, it takes that place's keeper,
   and fills the list from it.  A keeper with no tasks starts with the four starting ones.
 - A task saves itself as it changes:  there's no save step.

@@ -96,6 +96,13 @@ export const epicSectionVocabulary = {
         "toolbar's red badge."
     },
     {
+      name: "news",
+      kind: "string",
+      description:
+        '`kind="away"`:  how much is new, as `<state>:<count>` (`recent:2 progress:1 attention:3`), written by the tool:  ' +
+        "its title's badges, there while it's folded;  a click filters its lines."
+    },
+    {
       name: "lines",
       kind: "string",
       description:
@@ -189,7 +196,12 @@ export const epicSectionVocabulary = {
       name: "hidden-note",
       description: 'Under a filtered list (items or phases):  "3 hidden · show all", an `<epic-hidden-note>`.'
     },
-    { name: "empty", description: 'An item section with no items:  "None yet".' },
+    {
+      name: "empty",
+      description:
+        "The short line on an empty section's title, saying what's missing (\"Nothing to do\"):  shown while the page is " +
+        "reviewed, with its New button, or on a link to it."
+    },
     ...REVIEW_PARTS,
     {
       name: "new-item",
@@ -224,7 +236,13 @@ export const epicSectionVocabulary = {
   ],
   states: [
     ...FOLD_STATES,
-    { name: "tools", description: "Its title has tools:  the Phases gear, or a state filter (items in it)." }
+    { name: "tools", description: "Its title has tools:  the Phases gear, or a state filter (items in it)." },
+    {
+      name: "hidden",
+      description:
+        "Empty, drawn as nothing, at every stage:  unless you could add to it right now (a kind with a New button, the " +
+        "page being reviewed).  A link to it still shows it.  Still in the file, and the tool reads it."
+    }
   ],
   texts: [
     ...FOLD_TEXTS,
@@ -237,7 +255,16 @@ export const epicSectionVocabulary = {
     { key: "issuesTitle", text: "Issues" },
     { key: "testsTitle", text: "Manual tests" },
     { key: "logTitle", text: "Log" },
-    { key: "noneYet", text: "None yet", description: "An item section with no items." },
+    { key: "todosEmpty", text: "Nothing to do", description: "The Todo section's title, with no items." },
+    { key: "questionsEmpty", text: "No questions", description: "The Questions section's title, with no items." },
+    { key: "issuesEmpty", text: "No issues", description: "The Issues section's title, with no items." },
+    { key: "testsEmpty", text: "No tests to try", description: "The Manual tests section's title, with no items." },
+    { key: "phasesEmpty", text: "No phases yet", description: "The Phases section's title, with no phases." },
+    {
+      key: "judgementsEmpty",
+      text: "No judgement calls",
+      description: "The Judgement calls section's title, with no items:  only on a link to it."
+    },
     { key: "gearTip", text: "Settings for every phase", description: "The Phases gear's tooltip and name (I166)." },
     {
       key: "showFiles",

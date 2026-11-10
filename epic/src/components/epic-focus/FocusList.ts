@@ -20,7 +20,7 @@ export class FocusList {
    * The entries of `page` (an `<epic-page>`), tab by tab in `FOCUS_KINDS`' order.
    * - `pinned`:  the item showing now, kept whatever its state (Claude closed it while Owen was on it:  it stays until
    *   he moves on)
-   * - a section the page's stage hides (`PageStages.hides()`) is left out
+   * - a section hidden for being empty (`PageStages.hides()`) is left out
    */
   static of(page: ParentNode, reads: FocusReads, pinned?: string): FocusEntry[] {
     const byKind = new Map<FocusKind, FocusEntry[]>()

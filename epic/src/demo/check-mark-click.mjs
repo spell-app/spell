@@ -243,7 +243,7 @@ function HELPERS() {
     let hiddenBy = ""
     for (let node = item; node && node !== page; node = node.parentElement)
       if (node.hasAttribute("data-epic-filtered")) hiddenBy = `${node.id} filtered`
-      else if (node.matches(":state(offstage)")) hiddenBy = `${node.id} offstage`
+      else if (node.matches(":state(hidden)")) hiddenBy = `${node.id} hidden`
     return {
       open: item.hasAttribute("open"),
       top: Math.round(rect?.top ?? 0),

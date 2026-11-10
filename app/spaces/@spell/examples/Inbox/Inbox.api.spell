@@ -3,28 +3,38 @@
 // Sending a message is adding it to your messages:  Spell writes a copy into each inbox it's to,
 // so deleting yours leaves theirs.  A message can't be changed once it's sent.
 // Your org's inbox page names its own org on the next line.
-my inbox is a data folder at "@rs/__inbox":
+<data-folder "my inbox" address="@rs/__inbox">
 	- check it every 30 seconds
+</data-folder>
 
 // A message, or a page a Manager sent:  its title and line, worked out again when you open it.
-a "message" is a thing:
-	- it lives in my inbox
-	- its "text" is text
-	- its "recipients" is text
-	- its "from" is text
-	- its "thread" is text
-	- its "sent" is text
-	- its "page" is text
-	- its "title" is text
-	- its "line" is text
+<thing "message">
+	<spell>
+		- it lives in my inbox
+	</spell>
+	<property "text">text</>
+	<property "recipients">text</>
+	<property "from">text</>
+	<property "thread">text</>
+	<property "sent">text</>
+	<property "page">text</>
+	<property "title">text</>
+	<property "line">text</>
+</thing>
 
 // How you hear of your inbox by mail:  one mail per message, a daily digest, or none.  The first one counts;
 // with none, a daily digest.  Every mail has a link that stops it.
-a "mail choice" is a thing:
-	- it lives in my inbox
-	- its "how" is text
+<thing "mail choice">
+	<spell>
+		- it lives in my inbox
+	</spell>
+	<property "how">text</>
+</thing>
 
 // A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update.
-a "subscription" is a thing:
-	- it lives in my inbox
-	- its "space" is text
+<thing "subscription">
+	<spell>
+		- it lives in my inbox
+	</spell>
+	<property "space">text</>
+</thing>

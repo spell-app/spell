@@ -3,15 +3,19 @@
 // It's every post in every space of RS you may read, each read as you;  a quiet event's are left out.
 // Your org's feed page names its own org on the next line.
 // Kept on this device:  opening it again, and each check, asks only for what's new since.
-my feed is a data folder at "@rs/__feed":
+<data-folder "my feed" address="@rs/__feed">
 	- check it every 30 seconds
 	- keep a copy on this device
+</data-folder>
 
 // A post, as its space has it:  who wrote it, what about, when, and where it's from.
-a "post" is a thing:
-	- it lives in my feed
-	- its "text" is text
-	- its "topic" is text
-	- its "posted" is text
-	- its "by" is text
-	- its "space" is text
+<thing "post">
+	<spell>
+		- it lives in my feed
+	</spell>
+	<property "text">text</>
+	<property "topic">text</>
+	<property "posted">text</>
+	<property "by">text</>
+	<property "space">text</>
+</thing>

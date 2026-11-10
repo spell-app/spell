@@ -3,11 +3,20 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
 import { DrawIt, DrawnLines } from "spell/parser/spell/rules/classes"
+import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { ParseError } from "spell/parser/spell/rules/ParseError"
+import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
 import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
+
+/** The tag of a form:  bound to a thing, its fields write to it. */
+const FORM_TAG = "ui-form"
+/** The attribute naming what a form is bound to. */
+const VALUE_ATTRIBUTE = "value"
+/** A disabled form's fields can't change anything. */
+const DISABLED_ATTRIBUTE = "disabled"
 
 /**
  * `jsxElement` rule:  match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.
@@ -137,6 +146,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       }
     }
     match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
+    SpellJSX.warnAboutListedValues(scope, match, element)
+    SpellJSX.refuseFormOfReadOnlyPlace(scope, match)
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
     if (P.ASTJSXElement.tagError(match.data.tagName)) {
       const message = SP.Language.of(scope).parserMessage("not-an-element", { tag: element.tagName })
@@ -144,6 +155,42 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
     SpellJSX.noteUnreadable(scope, match, element)
     return match
+  }
+
+  /**
+   * SIDE EFFECT:  warns about a plain quoted value that isn't one of its property's values:
+   * `<card suit="banana"/>`, naming the suits (epic `language` P39).
+   * - Only plain text:  `suit={x}` and `rank="[rank]"` can only be known when it runs, where the same check warns.
+   * - Only a project's own view:  anything else's attributes aren't its properties.
+   */
+  private static warnAboutListedValues(scope: P.Scope, match: P.Match, element: P.JSXElementToken): void {
+    const texts = element.attributes?.filter((attribute) => attribute.value instanceof P.TextToken)
+    if (!texts?.length) return
+    const view = scope.getType(SP.typeName(element.tagName))
+    if (!view?.isA("View")) return
+    for (const attribute of texts) {
+      const member = view.getMember(attribute.name)
+      const text = attribute.value as P.TextToken
+      if (!(member instanceof P.ScopeVariable) || !member.listedValues || text.innerText.includes("[")) continue
+      if (SpellConstant.isListed(member, text.innerText)) continue
+      const index = element.attributes!.indexOf(attribute)
+      const at = (match.data.attributes as Array<P.Match | undefined>)[index] ?? match
+      SP.SpellWarnings.note(match, SpellConstant.notOneOfMessage(scope, member, `${text.value}`), at)
+    }
+  }
+
+  /**
+   * SIDE EFFECT:  a form bound to a saved thing, `<ui-form value={it}>`, won't compile while that's saved in a read-only place:
+   * its fields write to the thing (epic `data` T37).
+   * - The same check a `set` line has;  a disabled form writes nothing.
+   */
+  private static refuseFormOfReadOnlyPlace(scope: P.Scope, match: P.MatchFor<SpellJSX>): void {
+    if (match.data.tagName !== FORM_TAG) return
+    const attributes = (match.data.attributes ?? []) as Array<P.Match | undefined>
+    const named = (word: string) => attributes.find((attribute) => attribute?.data.attribute === word)
+    if (named(DISABLED_ATTRIBUTE)) return
+    const value = named(VALUE_ATTRIBUTE)?.data.expression as P.Match | undefined
+    if (value) refuseWriteIfReadOnly(match, scope.getType(value.datatype))
   }
 
   /** SIDE EFFECT:  an element whose tag holds something it couldn't read says so -- see `parseErrorsIn()`. */

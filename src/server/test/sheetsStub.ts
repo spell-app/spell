@@ -43,6 +43,8 @@ export class SheetsStub {
   private limited: { times: number; retryAfter?: string | undefined } = { times: 0 }
   /** Answer every request with this status. */
   answerAll: number | undefined
+  /** The spreadsheet's locale, if it says one:  `de_DE`. */
+  locale: string | undefined
   /** How many tokens it gave out. */
   tokensGiven = 0
   /** Where it is, once `start()` says. */
@@ -117,7 +119,7 @@ export class SheetsStub {
     const [, , , what, ...rest] = path.split("/")
     if (what?.endsWith(":batchUpdate")) return this.batchUpdate(body as BatchUpdate, reply)
     if (what && rest[0] === "values") return this.values(rest[1]!, url, reply)
-    if (what) return this.spreadsheet(reply)
+    if (what) return this.spreadsheet(url, reply)
     return send(reply, 404, { error: { message: "no such thing" } })
   }
 
@@ -147,8 +149,11 @@ export class SheetsStub {
     return send(reply, 200, { range, majorDimension: "ROWS", ...(values.length && { values }) })
   }
 
-  /** `GET .../{spreadsheet}`:  its tabs.  Tab 0 has no `sheetId`, as Google's JSON leaves out zeroes. */
-  private spreadsheet(reply: ServerResponse): void {
+  /** `GET .../{spreadsheet}`:  its tabs, or its locale, by `fields`.  Tab 0 has no `sheetId`, as Google's JSON leaves out zeroes. */
+  private spreadsheet(url: URL, reply: ServerResponse): void {
+    if (url.searchParams.get("fields") === "properties.locale") {
+      return send(reply, 200, { properties: { ...(this.locale && { locale: this.locale }) } })
+    }
     const sheets = [...this.tabs].map(([title, { sheetId }]) => ({
       properties: { title, ...(sheetId && { sheetId }) }
     }))

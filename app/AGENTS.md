@@ -77,6 +77,16 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       - One is noted but doesn't answer:  the file fails and says so.
       - A page whose updates stop for good during a test (Solid's `REACTIVITY_HALTED`) fails that test, naming the
         error, in every file:  [runningEditor.ts](tests/app/pages/runningEditor.ts), "A stopped page".
+      - A test that needs a project in your real space makes it with `createTestProject()`
+        ([testProject.ts](tests/app/pages/testProject.ts)):
+        - it's named with the run's process number, `owen@spell/drafts-test-82913`
+        - the next run removes a killed run's project, whose process is gone
+        - a removal that fails throws, naming the project and its folder
+    - Every Vitest run here fails if it added a folder to your real space, naming it:
+      [realSpaceCheck.ts](tests/realSpaceCheck.ts), the config's `globalSetup` (epic `epic-engine` P68).
+      - It lists each org, person and project by name, so editing a file never trips it.
+      - Another session's running test project isn't counted;  a project you make by hand during a run fails it once.
+      - Python's tests run after Vitest, so it doesn't see them.
   - [The tests' tsconfig](tests/tsconfig.json) checks them with node's settings;
     [the app's tests' one](tests/app/tsconfig.json), with the app's (Solid's JSX).
   - Spell's frozen test projects (`@spell/test`) are HERE, beside the other `@spell` groups:
@@ -278,7 +288,7 @@ The app's part of the page server's settings (its `package.json`'s `"pageServer"
 ## Writing an example
 
 Examples are what people and agents copy, so each one shows the current way (Owen, 2026-10-31, epic `data`).
-- Always spellml, with all of the latest language and UI features.
+- Always the tag shape, with all of the latest language and UI features.
   - No HTML.  Minimal CSS.
 - Separate concerns:  API, UI and custom widgets each in their own files.
 - Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.
@@ -349,7 +359,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 ## Solid 2
 
 - `spell`'s editor app, runners and web components are Solid 2, on `spell-ui`.
-  - Version `2.0.0-rc.17`, for every folder of the kit:  one copy, pinned by the kit's `resolutions`.
+  - Version `2.0.0-rc.21`, for every folder of the kit:  one copy, pinned by the kit's `resolutions`.
   - So is what compiled spell draws (epic `output-targets` P10-P11).
   - React is left only in the `spell` CLI's terminal screens (Ink).
 - The rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), read IN FULL before Solid work
