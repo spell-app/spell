@@ -38,6 +38,7 @@
     "read-too-soon-minutes": "The server asks to wait:  it'll be tried again in {minutes} minutes",
     "saved-added": "Add",
     "saved-removed": "Remove",
+    "saved-changed": "Edit",
     "write-show-me": "Show me",
     "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
     "write-use-theirs": "Use theirs",
