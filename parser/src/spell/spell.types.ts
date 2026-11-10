@@ -57,51 +57,85 @@ export function isProjectFile(name: string): boolean {
 export const SPELL_SUFFIX = ".spell"
 
 /**
- * End of a markup file's name, spell's tag-shaped form (epic `elemental-spell`):  `Card.spellml`, `Carta.es.spellml`.
- * - The name new files get, and the one docs and help say (Owen, 2026-10-27, epic `repo-split` P21).
+ * Ending of a tag-shaped file from before every file ended `.spell` (epic `language` P40;  Owen, 2026-11-09):
+ * `Card.spellml`, `Carta.es.spellml`.
+ * - Still read everywhere, always as tags, so nobody's own project breaks.
+ * - NEVER written:  a new file is `.spell`, and what it says decides its shape (`formOfText()`).
  */
 export const SPELLML_SUFFIX = ".spellml"
 
 /**
- * The markup files' OLD ending, `Card.spellx`:  still read everywhere a `.spellml` file is, never written.
+ * The older ending of a tag-shaped file, `Card.spellx`:  still read as `.spellml` is, never written.
  * - Owen, 2026-10-27:  "support both for now".
  */
 export const OLD_SPELLML_SUFFIX = ".spellx"
 
-/** Every ending a markup file may have:  `.spellml`, then the old `.spellx`. */
+/** The endings that say a file is tag-shaped by themselves:  `.spellml`, then the older `.spellx`. */
 export const SPELLML_SUFFIXES = [SPELLML_SUFFIX, OLD_SPELLML_SUFFIX] as const
 
 /**
- * Is `name` (a file's name or path) a MARKUP file's, spell's tag-shaped form, in any language?
- * - `Card.spellml`, `Carta.es.spellml`, and the old `Card.spellx`
- * - The ONE check:  every place that tells a markup file from code spell by its name asks this.
+ * Does `name` (a file's name or path) end in one of the old endings, `.spellml` or `.spellx`, in any language?
+ * - Only about the NAME:  a file's shape is `formOfText()`'s to say.
  */
 export function isSpellmlName(name: string | undefined): boolean {
   return !!name && SPELLML_SUFFIXES.some((suffix) => name.endsWith(suffix))
 }
 
-/** The form a spell file is written in, by its name:  markup (`isSpellmlName()`), else code spell. */
-export function formOfName(name: string | undefined): SpellForm {
-  return isSpellmlName(name) ? "spellx" : "spell"
+/** A line with a tag's `<` in its very first column, but for the defaults block plain Spell can open with. */
+const TAG_LINE = /^<(?!\/?ui-defaults\b)/m
+
+/**
+ * The shape file `name` is written in, from what it says (epic `language` P40):  `"spellx"` for tags, else `"spell"`.
+ * - Tag-shaped:  any line starting with `<` in the very first column, other than `<ui-defaults>`.
+ *   Plain Spell's top-level lines never start there.
+ *   - Lines inside a `/* ... *\/` or `<!-- ... -->` comment don't count.
+ *   - Right on all 593 of the built-in projects' and Owen's own files, when it was chosen.
+ *   - Their first line alone was wrong on 69:  a tag file usually opens with a heading and some prose.
+ * - The old endings, `.spellml` and `.spellx`, are always tag-shaped:  a file with only prose stays one.
+ * - The ONE check:  everything that tells the two shapes apart asks it, or a file's `form`.
+ * - No text (a new file, one not loaded yet) is plain:  deleting a file's last tag flips it, until one's back.
+ */
+export function formOfText(text: string | undefined, name?: string): SpellForm {
+  if (isSpellmlName(name)) return "spellx"
+  return text && holdsTagLine(text) ? "spellx" : "spell"
+}
+
+/** Is any line of `text`, outside a comment, a tag's in its first column?  See `formOfText()`. */
+function holdsTagLine(text: string): boolean {
+  if (!TAG_LINE.test(text)) return false
+  let closer: string | undefined
+  for (const line of text.split("\n")) {
+    if (closer) {
+      if (line.includes(closer)) closer = undefined
+      continue
+    }
+    if (line.startsWith("/*") || line.startsWith("<!--")) {
+      const end = line.startsWith("/*") ? "*/" : "-->"
+      if (!line.includes(end)) closer = end
+      continue
+    }
+    if (TAG_LINE.test(line)) return true
+  }
+  return false
 }
 
 /**
- * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or markup, in any language?
- * - `Card.spell`, `Carta.es.spell`, `Card.spellml`, `Carta.es.spellml`, the old `Card.spellx`
+ * Is `name` (a file's name or path) a spell SOURCE file's, in any language?
+ * - `Card.spell`, `Carta.es.spell`, and the old endings:  `Card.spellml`, `Carta.es.spellml`, `Card.spellx`
  * - NOT a project's built output, `Solitaire.spell.js`.
- * - NOT a property editors file, `Card.editor.spellml` (`isPropertyEditorsName()`):  it's never compiled.
+ * - NOT a property editors file, `Card.editor.spell` (`isPropertyEditorsName()`):  it's never compiled.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
   return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name)) && !isPropertyEditorsName(name)
 }
 
-/** The end of a property editors file's name:  `.editor.spellml`, `.editors.spellml`, `.editor.es.spellml` ... */
-const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell(?:ml|x)$/
+/** The end of a property editors file's name:  `.editor.spell`, `.editors.spell`, `.editor.es.spell`, and the old endings. */
+const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell(?:ml|x)?$/
 
 /**
  * Is `name` (a file's name or path) a PROPERTY EDITORS file's (epic `editor` P25, from `data`'s P31 Q28)?
- * - `Card.editor.spellml`, one type's;  `Solitaire.editors.spellml`, any of the project's types'
- * - In another language, its code before the ending:  `Carta.editor.es.spellml`
+ * - `Card.editor.spell`, one type's;  `Solitaire.editors.spell`, any of the project's types'
+ * - In another language, its code before the ending:  `Carta.editor.es.spell`
  * - It holds `<spell-property-editor "card">` blocks (or the old short `<property-editor "card">`):
  *   each a type's layout for its Inspector card, as markup.
  * - One of a project's own files, which the editor opens and colours as spellml, and the Inspector reads;

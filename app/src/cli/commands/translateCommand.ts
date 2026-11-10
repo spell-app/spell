@@ -145,10 +145,10 @@ async function parsedFiles(project: SP.SpellProject, files: SP.SpellFile[]): Pro
 /** What a scratch copy of a project leaves out:  what's built, and what's installed. */
 const SCRATCH_SKIPS = new Set(["build", "node_modules", ".git"])
 
-/** A tag file's plain path:  `/Card.spellml` => `/Card.spell`, the old `/Card.spellx` too. */
+/** A tag file's plain path:  `/Card.spell` as it is, the old `/Card.spellml` and `/Card.spellx` as `/Card.spell`. */
 function plainPathFor(path: string): string {
-  const suffix = SP.SPELLML_SUFFIXES.find((each) => path.endsWith(each))!
-  return `${path.slice(0, -suffix.length)}${SP.SPELL_SUFFIX}`
+  const suffix = SP.SPELLML_SUFFIXES.find((each) => path.endsWith(each))
+  return suffix ? `${path.slice(0, -suffix.length)}${SP.SPELL_SUFFIX}` : path
 }
 
 /**

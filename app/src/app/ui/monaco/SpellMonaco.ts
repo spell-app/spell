@@ -142,7 +142,7 @@ export class SpellMonaco {
     const { LANGUAGE, SPELLX_LANGUAGE, LANGUAGES } = SpellMonaco
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
-    monaco.languages.register({ id: LANGUAGE, extensions: [".spell"], mimetypes: ["text/spell", "text/x-spell"] })
+    monaco.languages.register({ id: LANGUAGE, extensions: [SP.SPELL_SUFFIX], mimetypes: ["text/spell", "text/x-spell"] })
     monaco.languages.register({
       id: SPELLX_LANGUAGE,
       extensions: [...SP.SPELLML_SUFFIXES],
@@ -176,11 +176,15 @@ export class SpellMonaco {
     return SpellMonaco.#registered
   }
 
-  /** Monaco language id for a file named `path`, by its extension. */
-  static languageForPath(path: string | undefined): string {
+  /**
+   * Monaco language id for a file named `path` holding `text`, by its extension and, for a spell file, its shape.
+   * - Each shape colours with its own tokenizer (`SP.formOfText()`), so a file can change language as it's edited.
+   */
+  static languageForPath(path: string | undefined, text?: string): string {
     const extension = path?.match(/\.[^./]+$/)?.[0]
-    if (SP.isSpellmlName(extension)) return SpellMonaco.SPELLX_LANGUAGE
-    if (SP.isSpellSourceName(extension)) return SpellMonaco.LANGUAGE
+    if (SP.isSpellSourceName(extension)) {
+      return SP.formOfText(text, extension) === "spellx" ? SpellMonaco.SPELLX_LANGUAGE : SpellMonaco.LANGUAGE
+    }
     if (extension === ".js" || extension === ".jsx") return "javascript"
     if (extension === ".css") return "css"
     if (extension === ".md") return "markdown"

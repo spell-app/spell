@@ -311,10 +311,6 @@ export async function translationOf(
       outputFor(file, translated.files[at]!, plans[at]!, outputPathFor(file.path, names, to), fixes)
     )
     mkdirSync(outFolder, { recursive: true })
-    // a tag file's earlier translation (`--update`):  gone while its plain form is checked, or it declares all twice
-    for (const output of outputs) {
-      if (output.file.tagFile) rmSync(join(outFolder, tagPathFor(output.path)), { force: true })
-    }
     for (const output of outputs) writeFileSync(join(outFolder, output.path), output.lines.join("\n"))
     writeManifest(source, outFolder, names, outName, outputs)
     copyOtherFiles(source.folder, outFolder, elements)
@@ -463,7 +459,9 @@ function linePlan(
   if (!recorded || !outPath || !existsSync(outPath)) return { lines, changed: sourceLines.length }
   // a tag file's translation, read back as the plain lines it was written from
   const text = readFileSync(outPath, "utf8")
-  const written = (SP.isSpellmlName(outPath) ? SX.CodeSpellWriter.write(text, { path: outPath }) : text).split("\n")
+  const written = (SP.formOfText(text, outPath) === "spellx" ? SX.CodeSpellWriter.write(text, { path: outPath }) : text).split(
+    "\n"
+  )
   if (written.length !== recorded.lines.length) return { lines, changed: sourceLines.length }
   const hashes = sourceLines.map(hashOf)
   for (const [now, then] of commonRun(hashes, recorded.lines)) lines[now] = written[then]
@@ -735,21 +733,17 @@ async function writeTagFiles({
   if (tagTexts.includes(undefined)) {
     return { ...checked, tagFilesNote: "written as plain .spell files:  nothing parsed them, so they can't be tags" }
   }
-  const moveTo = (paths: string[], textOf: (at: number) => string) => {
-    tagged.forEach((output, at) => {
-      rmSync(join(outFolder, output.path))
-      output.path = paths[at]!
-      writeFileSync(join(outFolder, output.path), textOf(at))
-    })
+  const rewrite = (textOf: (at: number) => string) => {
+    tagged.forEach((output, at) => writeFileSync(join(outFolder, output.path), textOf(at)))
     writeManifest(source, outFolder, names, outName, outputs)
   }
-  moveTo(plainPaths.map(tagPathFor), (at) => tagTexts[at]!)
+  rewrite((at) => tagTexts[at]!)
   const after = await source.checker?.(outFolder)()
   const isCode = ({ source: by }: LineProblem) => by !== "shape"
   const before = checked.problems.filter(isCode)
   const problems = after?.problems.filter(isCode)
   if (!after || !problems || problems.length > before.length) {
-    moveTo(plainPaths, (at) => tagged[at]!.lines.join("\n"))
+    rewrite((at) => tagged[at]!.lines.join("\n"))
     const first = problems?.find((problem) => !before.some((earlier) => earlier.message === problem.message))
     const why = first ? `:  ${problemLine(first)}` : ""
     return { ...checked, tagFilesNote: `written as plain .spell files:  as tags they had more problems${why}` }
@@ -795,11 +789,6 @@ function tagLinesOf(lines: string[], tagText: string): Map<number, number> {
     from = at + 1
   })
   return found
-}
-
-/** The tag file a plain file's translation becomes:  `/Carta.es.spell` => `/Carta.es.spellml`. */
-function tagPathFor(path: string): string {
-  return `${path.slice(0, -SP.SPELL_SUFFIX.length)}${SP.SPELLML_SUFFIX}`
 }
 
 ////////////////

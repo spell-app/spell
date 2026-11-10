@@ -1275,10 +1275,13 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - A spell file we've parsed => `incremental` re-parses what changed, and each changed file gets its new `match`.
    *   - What it re-parses:  maybe just one indented body, else from the first changed line on, plus every later file.
    * - Otherwise, or if that throws, has ALL of our files `resetCompiled()` so they'll parse + compile again.
+   *   - So does a file that changed shape (`changedShape()`), its first or last tag typed or deleted.
    */
   updatedContentsFor(file: SP.AnySpellFile): void {
     const { incremental } = this
-    if (file instanceof SP.SpellFile && incremental?.has(file.path) && !incremental.isBroken) {
+    // a file that changed shape needs a new parser:  never carry lines from one shape's parse to the other's
+    const flipped = file instanceof SP.SpellFile && this.changedShape(file)
+    if (file instanceof SP.SpellFile && incremental?.has(file.path) && !incremental.isBroken && !flipped) {
       try {
         const changed = incremental.update(file.path, file.parseText)
         changed.forEach((parse) => {
@@ -1293,6 +1296,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     }
     this.incremental = undefined
     this.activeImports.forEach((item) => item.resetCompiled())
+  }
+
+  /** Did `file`'s new text change its shape from the one `incremental` parses it in (`SP.formOfText()`)? */
+  private changedShape(file: SP.SpellFile): boolean {
+    const known = this.incremental?.files.find((it) => it.path === file.path)
+    return !!known && ((known.parser as SP.SpellParser).form ?? "spell") !== file.form
   }
 
   /**

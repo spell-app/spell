@@ -27,6 +27,7 @@ import {
 import { ElementsHelp } from "./ElementsHelp"
 import { RunnerPanel } from "./RunnerPanel"
 import { findSpellApp } from "./spellAppRoot"
+import { formOfText } from "spell/parser/spell/spell.types"
 
 /**
  * A spell-app checkout's language server, from its root:  `tsx` runs it there, reading the root's `tsconfig.json`.
@@ -52,7 +53,7 @@ const COMPILED_TARGETS = {
   // a `.spellml` file's code spell, "Show as Code Spell" (epic `elemental-spell` P8)
   spell: { language: "spell", comment: "//" },
   // a `.spell` file as spellx, "Show as Spellx":  a view, never a second file (J95)
-  spellx: { language: "spellx", comment: "//" }
+  spellx: { language: "spell", comment: "//" }
 } as const
 
 /** A short name for a target:  `js`, `ts`, `py`, `spell` or `spellx` -- see `COMPILED_TARGETS`. */
@@ -147,9 +148,19 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     vscode.commands.registerCommand("spell.showCompiledTypeScript", () => showCompiled("ts")),
     vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py")),
     vscode.commands.registerCommand("spell.showCodeSpell", () => showCompiled("spell")),
-    vscode.commands.registerCommand("spell.showSpellx", () => showCompiled("spellx"))
+    vscode.commands.registerCommand("spell.showSpellx", () => showCompiled("spellx")),
+    vscode.window.onDidChangeActiveTextEditor(noteShape),
+    vscode.workspace.onDidChangeTextDocument(noteShape)
   )
+  noteShape()
   await client.start()
+}
+
+/** Tell the title bar's "Show as" buttons the active file's shape:  one language colours both (`spell.tagShaped`). */
+function noteShape(): void {
+  const document = vscode.window.activeTextEditor?.document
+  const tagShaped = RunnerPanel.isSpellDocument(document) && formOfText(document.getText(), document.fileName) === "spellx"
+  void vscode.commands.executeCommand("setContext", "spell.tagShaped", tagShaped)
 }
 
 /** Stop the language server. */

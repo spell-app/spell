@@ -36,7 +36,7 @@ export function parseSpellProject(
     parser: parentScope.parser!.clone({ module: projectPath }),
     parentScope
   })
-  const parsers = files.map(({ path }) => parserFor(projectScope, path))
+  const parsers = files.map(({ path, contents }) => parserFor(projectScope, path, contents))
 
   // every type, one-of-a-kind, method and property the files declare,
   // so a line can name or call one declared further down
@@ -162,13 +162,13 @@ function languagesOf(files: SpellSourceFile[]): SP.Language[] {
 }
 
 /**
- * The parser file `path` parses with in `projectScope`:  its parser's twin in the language and form the path names
- * (`SP.SpellParser.twinFor()`), e.g. `/Carta.es.spell`, `/Card.spellml` -- else that parser itself.
+ * The parser file `path` parses with in `projectScope`:  its parser's twin in the language its path names
+ * and the shape `contents` is in (`SP.SpellParser.twinFor()`) -- else that parser itself.
  */
-function parserFor(projectScope: P.Scope, path: string): SP.SpellParser {
+function parserFor(projectScope: P.Scope, path: string, contents: string): SP.SpellParser {
   const parser = projectScope.parser as SP.SpellParser
   const lang = SP.Language.langOfFile(path)
-  const form = SP.formOfName(path)
+  const form = SP.formOfText(contents, path)
   return parser.twinFor(lang ? SP.Language.for(lang) : (parser.language ?? SP.Language.default), form)
 }
 

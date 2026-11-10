@@ -3,19 +3,18 @@ import { lstatSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 /**
- * `spell rename spellml [--dry-run] [--json] [checkouts...]`:  Spell's markup files renamed from `.spellx` to
- * `.spellml` (epic `repo-split` P21;  Owen, 2026-10-27), kept so a branch open when it landed can rerun it over its
- * own files and lines before merging `main`.
- * - Each tracked `*.spellx` file is moved to `*.spellml` with `git mv`, so its history follows.
- * - Each tracked text file's mentions of the ending follow:  `Card.spellx` => `Card.spellml`, `*.spellx`,
- *   `` `.spellx` ``, `/Card.spellx` in a project file's imports.
+ * `spell rename spellml [--dry-run] [--json] [checkouts...]`:  Spell's tag-shaped files renamed from `.spellml` and
+ * `.spellx` to `.spell` (epic `language` P40;  Owen, 2026-11-09;  `.spellx` to `.spellml` in epic `repo-split` P21),
+ * kept so a branch open when it landed can rerun it over its own files and lines before merging `main`.
+ * - Each tracked `*.spellml` and `*.spellx` file is moved to `*.spell` with `git mv`, so its history follows.
+ * - Each tracked text file's mentions of the ending follow:  `Card.spellml` => `Card.spell`, `*.spellml`,
+ *   `` `.spellml` ``, `/Card.spellml` in a project file's imports.
  * - Plain node runs it as is (types stripped):  node's own modules only.
  *
  * What it leaves:
- * - the old ending where code still reads it on purpose ("support both for now"):  a line that already says
- *   `.spellml` (`".spellml", ".spellx"`), and the files in `KEPT`
- * - a regular expression's `\.spellx?`, which matches `.spell` and `.spellx` both:
- *   its code moves to `SP.isSpellSourceName()` by hand;  a plain `\.spellx` follows
+ * - the old endings where code still reads them on purpose:  a line that names `.spell` too, as
+ *   `.spell` and `.spellml` (it would read `.spell` and `.spell`, so it's for a person to reword), and the files in `KEPT`
+ * - a regular expression's `\.spellx?`, which matches `.spell` and `.spellx` both;  a plain `\.spellml` follows
  * - every name that isn't the ending:  the form `spellx`, `SpellxTwin`, `spell/parser/spellx`, the language id
  * - the record (`KEPT`):  the changelog, the commit maps, the logs;  and the epic repo, whose pages keep their history
  */
@@ -28,8 +27,9 @@ export class SpellmlRenamer {
   renameCheckout(checkout: string, dryRun: boolean): SpellmlReport {
     const report: SpellmlReport = { checkout, moved: [], files: [], names: 0 }
     for (const file of trackedFiles(checkout)) {
-      if (!file.endsWith(OLD_SUFFIX) || KEPT.test(file)) continue
-      const to = file.slice(0, -OLD_SUFFIX.length) + NEW_SUFFIX
+      const old = OLD_SUFFIXES.find((suffix) => file.endsWith(suffix))
+      if (!old || KEPT.test(file)) continue
+      const to = file.slice(0, -old.length) + NEW_SUFFIX
       if (!dryRun) execFileSync("git", ["mv", file, to], { cwd: checkout })
       report.moved.push({ from: file, to })
     }
@@ -38,7 +38,7 @@ export class SpellmlRenamer {
       if (KEPT.test(file)) continue
       const path = join(checkout, file)
       const before = readText(path)
-      if (before === undefined || !before.includes(OLD_SUFFIX)) continue
+      if (before === undefined || !OLD_SUFFIXES.some((suffix) => before.includes(suffix))) continue
       const { text, count } = this.renameText(before)
       if (!count) continue
       if (!dryRun) writeFileSync(path, text)
@@ -48,11 +48,11 @@ export class SpellmlRenamer {
     return report
   }
 
-  /** `text` with each mention of the `.spellx` ending made `.spellml`, but on a line that already says `.spellml`. */
+  /** `text` with each mention of an old ending made `.spell`, but on a line that names `.spell` too. */
   renameText(text: string): { text: string; count: number } {
     let count = 0
     const lines = text.split("\n").map((line) => {
-      if (line.includes(NEW_SUFFIX)) return line
+      if (NEW_MENTION.test(line)) return line
       return line.replace(MENTION, (_mention, backslash: string) => {
         count++
         return backslash + NEW_SUFFIX
@@ -82,7 +82,7 @@ export function renameSpellmlCommand(kit: string, options: RenameSpellmlOptions 
   const files = reports.reduce((sum, report) => sum + report.files.length, 0)
   const names = reports.reduce((sum, report) => sum + report.names, 0)
   const verb = options.dryRun ? "would move" : "moved"
-  console.log(`${verb} ${moved} .spellx files to .spellml;  ${names} mentions in ${files} files`)
+  console.log(`${verb} ${moved} .spellml and .spellx files to .spell;  ${names} mentions in ${files} files`)
   return reports
 }
 
@@ -90,17 +90,20 @@ export function renameSpellmlCommand(kit: string, options: RenameSpellmlOptions 
 // ## The rules
 ////////////////
 
-/** The markup files' old ending, and their new one (`SP.OLD_SPELLML_SUFFIX`, `SP.SPELLML_SUFFIX`;  the kit can't import spell). */
-const OLD_SUFFIX = ".spellx"
-const NEW_SUFFIX = ".spellml"
+/** The tag-shaped files' old endings (`SP.SPELLML_SUFFIXES`;  the kit can't import spell). */
+const OLD_SUFFIXES = [".spellml", ".spellx"]
+/** Every Spell file's ending (`SP.SPELL_SUFFIX`). */
+const NEW_SUFFIX = ".spell"
+/** A mention of `.spell` itself, not an old ending or a built file's `Card.spell.js`. */
+const NEW_MENTION = /\.spell(?![\w.-])/
 
 /**
- * A mention of the old ending, `Card.spellx`, `*.spellx`, `` `.spellx` ``, a regular expression's `Card\.spellx`;  but not
+ * A mention of an old ending, `Card.spellml`, `*.spellx`, `` `.spellml` ``, a regular expression's `Card\.spellml`;  but not
  * - a regular expression's `\.spellx?`, `.spell` or `.spellx`
  * - a property, `words.spellx`, `this.spellx`
  * - part of a longer word (`.spellxTab`)
  */
-const MENTION = /(?<!\b(?:this|words))(\\?)\.spellx(?![\w?-])/g
+const MENTION = /(?<!\b(?:this|words))(\\?)\.spell(?:ml|x)(?![\w?-])/g
 
 /**
  * Files never moved or rewritten:  the record, and the code that names the old ending on purpose.
@@ -108,10 +111,10 @@ const MENTION = /(?<!\b(?:this|words))(\\?)\.spellx(?![\w?-])/g
  * - this file and its test
  * - the files that list each ending:  the page server's content types (the kit's `mime.ts`), the VS Code extension's
  *   file associations, and spell's own (`SP.SPELLML_SUFFIXES`, in `spell.types.ts`)
- * - the VS Code grammar for markup, whose scope names end in `.spellx` (`source.spellx`)
+ * - the test of the old endings, and the frozen test projects
  */
 const KEPT =
-  /(^|\/)CHANGELOG\.md$|^tools\/one-repo\/|^agents\/(PAPERCUTS|SUSPECTED-BUGS|CODE-DEBT)\.md$|(^|\/)renameSpellml(\.test)?\.ts$|^src\/server\/mime\.ts$|^parser\/src\/spell\/spell\.types\.ts$|^app\/vscode\/package\.json$|^app\/vscode\/syntaxes\/spellx\.tmLanguage\.json$/
+  /(^|\/)CHANGELOG\.md$|^tools\/one-repo\/|^agents\/(PAPERCUTS|SUSPECTED-BUGS|CODE-DEBT)\.md$|(^|\/)renameSpellml(\.test)?\.ts$|^src\/server\/mime\.ts$|^parser\/src\/spell\/spell\.types\.ts$|^app\/vscode\/package\.json$|^parser\/tests\/spell\/spellmlNames\.test\.ts$|^app\/spaces\/@spell\/test\//
 
 /** `checkout`'s tracked files, paths from its root. */
 function trackedFiles(checkout: string): string[] {
