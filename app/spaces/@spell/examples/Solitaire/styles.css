@@ -26,6 +26,20 @@
 }
 
 /****************
+ * The table:  room around the toolbar and cards, its corners rounded
+ ****************/
+
+solitaire-app {
+  display: block;
+  box-sizing: border-box;
+  min-height: 100%;
+  /* room between the felt's edge and the toolbar and cards */
+  padding: 32px;
+  /* rounded at the bottom too, as the frame it sits in is at the top */
+  border-radius: 12px;
+}
+
+/****************
  * The board:  below the game's toolbar, its piles seven to a line
  ****************/
 
