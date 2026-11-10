@@ -1690,7 +1690,7 @@
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
             },
             {
-              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo json)|(plain_file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja|archivo csv)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
             },
             {
               "syntax": "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
@@ -7160,6 +7160,32 @@
                 },
                 "py": {
                   "code": "class Ajuste(Place):\n    pass\n\najustes = core.place(\n    Ajuste(),\n    {\"name\": \"ajustes\", \"kind\": \"database on this device\", \"unclear_numbers\": \",\"},\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StoredInMemory",
+          "ruleNames": ["stored_in_memory"],
+          "internal": false,
+          "file": "src/spell/rules/places/StoredInMemory.ts",
+          "line": 18,
+          "purpose": "A place kept only while the page is open (epic `language` P40; Owen: \"database implies sql\").",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} se guarda en memoria {with_nested_statements}?",
+              "example": "borradores se guarda en memoria",
+              "outputs": {
+                "js": {
+                  "code": "export class Borrador extends Place {}\nexport const borradores = core.place(new Borrador(), {\n  name: \"borradores\",\n  kind: \"in memory database\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Borrador extends Place {}\nexport const borradores = core.place(new Borrador(), {\n  name: \"borradores\",\n  kind: \"in memory database\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Borrador(Place):\n    pass\n\nborradores = core.place(\n    Borrador(),\n    {\"name\": \"borradores\", \"kind\": \"in memory database\", \"unclear_numbers\": \",\"},\n)"
                 }
               }
             }

@@ -71,7 +71,7 @@ describe("a place's line", () => {
     ['family cookbook is a web server from "https://x"', "web server"],
     ['family cookbook is a graphql server at "https://x"', "graphql server"],
     ['family cookbook is a data folder at "recipes"', "data folder"],
-    ['family cookbook is a file at "/api/recipes"', "file"],
+    ['family cookbook is a json file at "/api/recipes"', "file"],
     ['family cookbook is a sheet at "r.csv"', "sheet"],
     ['family cookbook is a spreadsheet at "r.csv"', "sheet"],
     ['family cookbook is a spreadsheet at "r.xlsx"', "sheet"],

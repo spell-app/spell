@@ -33,7 +33,7 @@
  * - Loaded only when it runs (`commands.ts` imports the hook's work dynamically):  it loads all of spell.
  */
 import { createHash } from "node:crypto"
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -459,9 +459,9 @@ function linePlan(
   if (!recorded || !outPath || !existsSync(outPath)) return { lines, changed: sourceLines.length }
   // a tag file's translation, read back as the plain lines it was written from
   const text = readFileSync(outPath, "utf8")
-  const written = (SP.formOfText(text, outPath) === "spellx" ? SX.CodeSpellWriter.write(text, { path: outPath }) : text).split(
-    "\n"
-  )
+  const written = (
+    SP.formOfText(text, outPath) === "spellx" ? SX.CodeSpellWriter.write(text, { path: outPath }) : text
+  ).split("\n")
   if (written.length !== recorded.lines.length) return { lines, changed: sourceLines.length }
   const hashes = sourceLines.map(hashOf)
   for (const [now, then] of commonRun(hashes, recorded.lines)) lines[now] = written[then]

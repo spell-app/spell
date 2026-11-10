@@ -504,6 +504,9 @@ export const PARSER_MESSAGES = {
   "spellx-where-member": "it goes among its template's members, beside the drawing",
   /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
   "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
+  /** `is a file at`:  what kind of file has to be said. */
+  "say-json-file":
+    'A place that\'s one file has to say what\'s in it:  write "is a json file at", or "is a csv file at"',
   /** A tag spellx knows, but can't read yet:  `{tag}` is `<menu>`. */
   "spellx-typed-body":
     'a property with type= is stored, and starts at one value on its tag\'s line:  <property "{name}" type="number">0</>',

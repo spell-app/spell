@@ -182,6 +182,34 @@ export const englishWords: SP.LanguageWords = {
       dialog: "dialog",
       sidebar: "sidebar"
     },
+    // where a program's data lives, each read as its plain line (epic `language` P40):  at a file's top level, no prefix
+    places: [
+      { tag: "web-server", line: "{words} is a web server at {quoted address} :" },
+      { tag: "graphql-server", line: "{words} is a graphql server at {quoted address} :" },
+      { tag: "data-folder", line: "{words} is a data folder at personal {quoted address} :", flag: "personal" },
+      { tag: "data-folder", line: "{words} is a data folder at {quoted address} :" },
+      { tag: "json-file", line: "{words} is a json file at {quoted address} :" },
+      { tag: "room", line: "{words} is a room at {quoted address} :" },
+      { tag: "sheet", line: "{words} is a sheet at {quoted address} :" },
+      { tag: "sheet", line: "{words} is a spreadsheet at {quoted address} :" },
+      { tag: "csv-file", line: "{words} is a csv file at {quoted address} :" },
+      { tag: "excel-file", line: "{words} is an excel file at {quoted address} :" },
+      { tag: "google-sheet", line: "{words} is a google sheet at {quoted address} :" },
+      { tag: "airtable", line: "{words} is an airtable at {quoted address} :" },
+      {
+        tag: "atmosphere",
+        line: "{words} is a personal atmosphere account at {quoted address} :",
+        flag: "personal",
+        bare: "{words} is a personal atmosphere account :"
+      },
+      { tag: "atmosphere", line: "{words} is an atmosphere space at {quoted address} :", flag: "space" },
+      { tag: "atmosphere", line: "{words} is an atmosphere account at {quoted address} :" },
+      { tag: "device-storage", line: "{words} is stored on this device :" },
+      { tag: "device-storage", line: "{words} is a database on this device :" },
+      { tag: "window-storage", line: "{words} is stored on this device , for each tab :" },
+      { tag: "memory-storage", line: "{words} is stored in memory :" },
+      { tag: "memory-storage", line: "{words} is an in memory database :" }
+    ],
     // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
     // `<spell-description>`, `<spell-comment>`,
     // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
@@ -226,6 +254,9 @@ export const englishWords: SP.LanguageWords = {
       aka: "aka",
       template: "template",
       "one-of": "one-of",
+      // a place's (epic `language` P40):  `<web-server "x" address="...">`, `<atmosphere personal>`, `<atmosphere space>`
+      personal: "personal",
+      space: "space",
       type: "type",
       alias: "alias",
       description: "description",
@@ -264,6 +295,7 @@ export const englishWords: SP.LanguageWords = {
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
+      placeOfKind: "{words} is {a kind} {kind} at {quoted address} :",
       template: "{a name} {name} is {a super} {super} :",
       templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
       singleton: "{words} is {a super} {super} :",

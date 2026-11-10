@@ -776,7 +776,9 @@ function tagSource(): TranslateSource {
 function tagChecker(afterTags: LineProblem[] = []): TranslateSource["checker"] {
   return (out) => () =>
     Promise.resolve(
-      !readFileSync(join(out, "Carta.es.spell"), "utf8").includes("<encanto") ? { problems: [], files: parsedIn(out) } : { problems: afterTags }
+      !readFileSync(join(out, "Carta.es.spell"), "utf8").includes("<encanto")
+        ? { problems: [], files: parsedIn(out) }
+        : { problems: afterTags }
     )
 }
 

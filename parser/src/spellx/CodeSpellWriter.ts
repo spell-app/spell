@@ -345,8 +345,13 @@ export class CodeSpellWriter {
 
   /** `tokens` as text:  each as written, with the space after it;  a line's end trimmed. */
   private static textOf(tokens: P.Token[]): string {
+    // a comment ending the line, as a tag's description:  two spaces before it, as one is written
     return tokens
-      .map((token) => String(token))
+      .map((token, index) =>
+        index && token instanceof P.CommentToken && !/\s$/.test(String(tokens[index - 1]))
+          ? `  ${String(token)}`
+          : String(token)
+      )
       .join("")
       .trimEnd()
   }

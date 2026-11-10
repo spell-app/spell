@@ -142,7 +142,11 @@ export class SpellMonaco {
     const { LANGUAGE, SPELLX_LANGUAGE, LANGUAGES } = SpellMonaco
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
-    monaco.languages.register({ id: LANGUAGE, extensions: [SP.SPELL_SUFFIX], mimetypes: ["text/spell", "text/x-spell"] })
+    monaco.languages.register({
+      id: LANGUAGE,
+      extensions: [SP.SPELL_SUFFIX],
+      mimetypes: ["text/spell", "text/x-spell"]
+    })
     monaco.languages.register({
       id: SPELLX_LANGUAGE,
       extensions: [...SP.SPELLML_SUFFIXES],

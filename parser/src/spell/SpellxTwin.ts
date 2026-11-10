@@ -150,6 +150,8 @@ export class SpellxTwin {
     switch (tag.category) {
       case "template":
         return this.template()
+      case "place":
+        return this.place()
       case "declaration":
         return this.declaration()
       case "handler": {
@@ -204,6 +206,21 @@ export class SpellxTwin {
       .map(([, line]) => [this.bullet(), ...this.expand(line)])
     const locked = kind === "page" && this.isLocked ? [[this.bullet(), ...this.expand(this.words.pageLocked)]] : []
     return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags, ...locked, ...this.thumbnailLines()])
+  }
+
+  /**
+   * A place, as the plain line it reads as:  `wikipedia is a web server at "..." :`;  its body is plain Spell.
+   * - A kind no table lists is a library's:  `<supabase-project "x" address="...">`, `x is a supabase project at "..." :`.
+   */
+  private place(): SpellxTwinLine {
+    const { tag, words } = this
+    const place = this.language.words.spellx!.places.find(
+      (each) => each.tag === tag.kind && (!each.flag || this.hasAttribute(each.flag))
+    )
+    const shape = (!this.attribute("address") && place?.bare) || place?.line || words.placeOfKind
+    return this.lineAndBlock(
+      this.expand(shape, { kind: place ? undefined : this.wordsText(tag.kind.replace(/-/g, " ")) })
+    )
   }
 
   /** A page's or view's `thumbnail=`, as the line that says it:  none on any other tag, or without one. */

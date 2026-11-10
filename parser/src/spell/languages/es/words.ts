@@ -105,7 +105,7 @@ export const spanishWords: SP.LanguageWords = {
     "graphql server": "servidor graphql",
     "data folder": "carpeta de datos",
     "the cloud": "la nube",
-    file: "archivo",
+    file: "archivo json",
     room: "sala",
     sheet: "hoja",
     "excel file": "archivo de excel",
@@ -245,11 +245,45 @@ export const spanishWords: SP.LanguageWords = {
     },
     forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
     forListWords: ["sus", "su", "cada", "toda", "todas", "todos", "los", "las", "mis", "estos", "estas"],
+    // dónde viven los datos de un programa, cada una leída como su línea (epic `language` P40)
+    places: [
+      { tag: "servidor-web", line: "{words} es un servidor web en {quoted address} :" },
+      { tag: "servidor-graphql", line: "{words} es un servidor graphql en {quoted address} :" },
+      {
+        tag: "carpeta-de-datos",
+        line: "{words} es una carpeta de datos personal en {quoted address} :",
+        flag: "personal"
+      },
+      { tag: "carpeta-de-datos", line: "{words} es una carpeta de datos en {quoted address} :" },
+      { tag: "archivo-json", line: "{words} es un archivo json en {quoted address} :" },
+      { tag: "sala", line: "{words} es una sala en {quoted address} :" },
+      { tag: "hoja", line: "{words} es una hoja en {quoted address} :" },
+      { tag: "hoja", line: "{words} es una hoja de cálculo en {quoted address} :" },
+      { tag: "archivo-csv", line: "{words} es un archivo csv en {quoted address} :" },
+      { tag: "archivo-de-excel", line: "{words} es un archivo de excel en {quoted address} :" },
+      { tag: "hoja-de-google", line: "{words} es una hoja de google en {quoted address} :" },
+      { tag: "airtable", line: "{words} es un airtable en {quoted address} :" },
+      {
+        tag: "atmosphere",
+        line: "{words} es una cuenta personal de atmosphere en {quoted address} :",
+        flag: "personal",
+        bare: "{words} es una cuenta personal de atmosphere :"
+      },
+      { tag: "atmosphere", line: "{words} es un espacio de atmosphere en {quoted address} :", flag: "space" },
+      { tag: "atmosphere", line: "{words} es una cuenta de atmosphere en {quoted address} :" },
+      { tag: "almacenamiento-del-dispositivo", line: "{words} se guarda en este dispositivo :" },
+      { tag: "almacenamiento-del-dispositivo", line: "{words} es una base de datos en este dispositivo :" },
+      { tag: "almacenamiento-de-ventana", line: "{words} se guarda en este dispositivo , para cada pestaña :" },
+      { tag: "almacenamiento-en-memoria", line: "{words} se guarda en memoria :" },
+      { tag: "almacenamiento-en-memoria", line: "{words} es una base de datos en memoria :" }
+    ],
     attributes: {
       nombre: "name",
       alias: "aka",
       plantilla: "template",
       "uno-de": "one-of",
+      personal: "personal",
+      espacio: "space",
       tipo: "type",
       frase: "alias",
       descripción: "description",
@@ -295,6 +329,7 @@ export const spanishWords: SP.LanguageWords = {
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
+      placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",
       template: "{a name} {name} es {a super} {super} :",
       templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
       moreOf: "{a words} {words} :",

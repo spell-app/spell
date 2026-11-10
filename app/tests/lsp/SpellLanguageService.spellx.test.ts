@@ -57,6 +57,32 @@ describe("SpellLanguageService, spellx", () => {
     expect(service.documentSymbols(old)).toEqual(service.documentSymbols(tile))
   })
 
+  // epic `language` P40:  every file `.spell`, its shape from what it says
+  test("the same file as a .spell parses, colours and outlines as its .spellml;  its plain twin as plain Spell", async () => {
+    const newFolder = resolve(dir, "NewTiles")
+    mkdirSync(newFolder)
+    writeFileSync(resolve(newFolder, "FlipTile.spell"), tileText)
+    writeFileSync(resolve(newFolder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spell", active: true }] }\n`)
+    const newUri = pathToFileURL(resolve(newFolder, "FlipTile.spell")).href
+    await workspace.update(newUri, tileText)
+    const tagged = workspace.fileFor(newUri)!
+    expect(tagged.form).toBe("spellx")
+    expect(service.diagnostics(tagged)).toEqual([])
+    expect(describeTokens(tagged)).toEqual(describeTokens(tile))
+    expect(service.documentSymbols(tagged)).toEqual(service.documentSymbols(tile))
+
+    const plainText = readFileSync(resolve(PAIRS, "FlipTile.spell"), "utf8")
+    const plainFolder = resolve(dir, "PlainTiles")
+    mkdirSync(plainFolder)
+    writeFileSync(resolve(plainFolder, "FlipTile.spell"), plainText)
+    writeFileSync(resolve(plainFolder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spell", active: true }] }\n`)
+    const plainUri = pathToFileURL(resolve(plainFolder, "FlipTile.spell")).href
+    await workspace.update(plainUri, plainText)
+    const plain = workspace.fileFor(plainUri)!
+    expect(plain.form).toBe("spell")
+    expect(service.diagnostics(plain)).toEqual([])
+  })
+
   test("its tags' words, attribute names and closers are coloured as written;  a twin's own words never are (C24)", () => {
     const tokens = describeTokens(tile)
     expect(tokens).toContain(`4:1 "<property" keyword`)

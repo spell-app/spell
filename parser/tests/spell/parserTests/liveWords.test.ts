@@ -89,7 +89,7 @@ describe("the words compile", () => {
         "\t- when someone else changes it:",
         "\t\tprint 1"
       )
-    expect(under('book is a file at "/api/places/x"').warnings.join()).toMatch(/Nobody else can change/)
+    expect(under('book is a json file at "/api/places/x"').warnings.join()).toMatch(/Nobody else can change/)
     expect(under("book is a database on this device").warnings.join()).toMatch(/Nobody else can change/)
     expect(under('book is a web server at "https://x.test"').warnings.join()).toMatch(/this would never run:  add/)
     expect(

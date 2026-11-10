@@ -131,6 +131,10 @@ export class CreatePlace extends TypeDeclaration<
       if (!(scopeType instanceof P.TypeScope) || !scopeType.isA("Place")) return undefined
     }
     const language = SP.Language.of(scope)
+    // Owen, 2026-11-09 (epic `language` P40):  "Let's not have `file` mean `json-file`, make it explicit"
+    if (match.groups.kind && Wording.meaningOf(match.groups.kind) === "plain_file") {
+      return SpellStatement.refuse(match, language.parserMessage("say-json-file"))
+    }
     if (address && KEY_IN_ADDRESS.test(textIn(address))) {
       return SpellStatement.refuse(match, language.parserMessage("key-written"))
     }

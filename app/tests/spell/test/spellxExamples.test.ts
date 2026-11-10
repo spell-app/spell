@@ -32,7 +32,7 @@ const EXAMPLES_DIR = resolve(environment.systemFilesRoot, "examples")
  * (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
  * - An example written as code spell:  its spellx in `__spellx__/<Example>/<File>.spell`.
  * - An example written in spellx (Solitaire, Solitario, Task List ...):  its code spell in `__spell__/<Example>/<File>.spell`.
- * - NOT in the examples:  a template lives in ONE file, `.spell` or `.spellml`, never both.
+ * - NOT in the examples:  a template lives in ONE file, in one shape, never both.
  */
 const SPELLX_FIXTURES_DIR = resolve(environment.repoDir, "tests", "spell", "__spellx__")
 const SPELL_FIXTURES_DIR = CODE_SPELL_TWINS_DIR
@@ -72,9 +72,9 @@ function convertsTheSame(name: string) {
 
   // a file already in spellx stays as it is
   const converted = before.map(({ path, contents, match, scope }) =>
-    path.endsWith(".spell")
+    SP.formOfText(contents, path) === "spellx"
       ? { path, contents }
-      : { path: `${path}ml`, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
+      : { path, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
   )
   const after = parseSpellProject(converted, { parentScope, projectPath }).files
   for (const [index, file] of after.entries()) {
@@ -83,7 +83,7 @@ function convertsTheSame(name: string) {
   }
 }
 
-/** The spell files (`.spell` and `.spellml`) of the project in `folder`, in its project file's order. */
+/** The spell files of the project in `folder`, in its project file's order. */
 function sourcesOf(folder: string): SpellSourceFile[] {
   const { imports } = JSON5.parse(readFileSync(projectFileFor(folder), "utf8")) as {
     imports: Array<{ path: string; active?: boolean }>
@@ -96,7 +96,7 @@ function sourcesOf(folder: string): SpellSourceFile[] {
 /**
  * The examples' fixtures in their other form (`SPELLX_FIXTURES_DIR`, `SPELL_FIXTURES_DIR`), hand-kept since P13
  * (J54, J55), compile to the same javascript as the example's own files, file by file, with no errors.
- * - `Deck.spell` in an example => `__spellx__/<Example>/Deck.spellml`;  `Card.spellml` => `__spell__/<Example>/Card.spell`.
+ * - A plain file in an example has its tags in `__spellx__/<Example>/`;  a tag-shaped one, its plain Spell in `__spell__/<Example>/`, the same name.
  * - A drawing with the web's own elements (`<div>`) is a `<spell>` chunk, or an `<html>` block, there (J83).
  */
 const FIXTURE_EXAMPLES = [SPELLX_FIXTURES_DIR, SPELL_FIXTURES_DIR].flatMap((dir) =>
@@ -118,10 +118,10 @@ describe("the examples' spellx fixtures compile to the same javascript as the ex
 })
 
 // J95:  a template lives in ONE file, so its other form is a view the editor writes, never a second file to drift
-test("no example keeps a template in both forms:  no `Card.spellml` beside `Card.spell`", () => {
+test("no example keeps a template twice:  no old `Card.spellml` beside `Card.spell`", () => {
   const both = readdirSync(EXAMPLES_DIR, { recursive: true, encoding: "utf8" })
     .filter((path) => path.endsWith(".spell"))
-    .filter((path) => existsSync(resolve(EXAMPLES_DIR, path.slice(0, -1))))
+    .filter((path) => existsSync(resolve(EXAMPLES_DIR, `${path}ml`)))
   expect(both).toEqual([])
 })
 
@@ -136,10 +136,9 @@ function fixtureCompilesTheSame(name: string) {
   // its own address, as in the editor:  a line may read it (`a sheet at "tasks.csv"`, the project's own CSV file)
   const projectPath = `@spell/examples/${name}`
   const before = parseSpellProject(sources, { parentScope, projectPath }).files
-  const fixtures = sources.map(({ path }) => {
-    const twin = SP.isSpellmlName(path) ? path.replace(/\.spell$/, SP.SPELL_SUFFIX) : `${path}ml`
-    const dir = SP.isSpellmlName(path) ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
-    return { path: twin, contents: readFileSync(resolve(dir, name, `.${twin}`), "utf8") }
+  const fixtures = sources.map(({ path, contents }) => {
+    const dir = SP.formOfText(contents, path) === "spellx" ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
+    return { path, contents: readFileSync(resolve(dir, name, `.${path}`), "utf8") }
   })
   const after = parseSpellProject(fixtures, { parentScope, projectPath }).files
   for (const [index, file] of after.entries()) {

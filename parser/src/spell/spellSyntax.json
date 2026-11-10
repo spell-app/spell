@@ -1673,7 +1673,7 @@
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
             },
             {
-              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+              "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:json file)|(plain_file:file)|(room:room)|(sheet:sheet|spreadsheet|csv file)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
             },
             {
               "syntax": "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
@@ -7197,6 +7197,32 @@
                 },
                 "py": {
                   "code": "class Setting(Place):\n    pass\n\nsettings = core.place(Setting(), {\"name\": \"settings\", \"kind\": \"database on this device\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StoredInMemory",
+          "ruleNames": ["stored_in_memory"],
+          "internal": false,
+          "file": "src/spell/rules/places/StoredInMemory.ts",
+          "line": 18,
+          "purpose": "A place kept only while the page is open (epic `language` P40; Owen: \"database implies sql\").",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is stored in memory {with_nested_statements}?",
+              "example": "drafts is stored in memory",
+              "outputs": {
+                "js": {
+                  "code": "export class Draft extends Place {}\nexport const drafts = core.place(new Draft(), { name: \"drafts\", kind: \"in memory database\" })"
+                },
+                "ts": {
+                  "code": "export class Draft extends Place {}\nexport const drafts = core.place(new Draft(), { name: \"drafts\", kind: \"in memory database\" })"
+                },
+                "py": {
+                  "code": "class Draft(Place):\n    pass\n\ndrafts = core.place(Draft(), {\"name\": \"drafts\", \"kind\": \"in memory database\"})"
                 }
               }
             }

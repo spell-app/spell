@@ -9,6 +9,7 @@ import { startRecipeServers, type RecipeServers } from "spell/server/test/recipe
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
 import { PlaceIngest, descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceIngest"
 import { PoliteReader, READER_NAME } from "spell/parser/spell/ingest/PoliteReader"
+import { compiledSpellProject } from "spell/parser/spell/test"
 import {
   IngestStopped,
   type IngestFiles,
@@ -106,6 +107,7 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
   const { fetch, asked } = fakeFetch(routes)
   const disk = memoryFiles(start)
   const ingest = new PlaceIngest({
+    shape: "plain",
     fetch,
     ask: async () => undefined,
     files: disk.files,
@@ -1044,9 +1046,13 @@ describe("looking again", () => {
     edit: (text: string) => string,
     changed: Record<string, unknown>,
     others: Record<string, string> = {},
-    { olderTool = false, before }: { olderTool?: boolean; before?: (written: PlaceDescription) => void } = {}
+    {
+      olderTool = false,
+      before,
+      shape = "plain"
+    }: { olderTool?: boolean; before?: (written: PlaceDescription) => void; shape?: IngestSettings["shape"] } = {}
   ) {
-    const added = ingestOf(STARS, {}, others)
+    const added = ingestOf(STARS, { shape }, others)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
     const start = edit(added.texts.get("/Stars.spell")!)
     // what the description says it wrote, written the same way:  an older version of the tool
@@ -1055,6 +1061,7 @@ describe("looking again", () => {
     before?.(written)
     const { fetch } = fakeFetch({ ...STARS, ...changed })
     const ingest = new PlaceIngest({
+      shape,
       fetch,
       ask: async () => undefined,
       files: { ...added.files, read: added.files.read, otherSpellBeside: async () => Object.values(others) },
@@ -1065,6 +1072,7 @@ describe("looking again", () => {
     const result = await ingest.update("/Stars.spell")
     return {
       result,
+      start,
       text: added.texts.get("/Stars.spell")!,
       description: added.descriptions.get("/Stars.json5")!
     }
@@ -1119,6 +1127,60 @@ describe("looking again", () => {
     )
     expect(description.notes.filter((note) => !/keep a copy/.test(note))).toEqual([])
     expect(description.agentNotes).toEqual(["It asks people to be gentle."])
+  })
+
+  // epic `language` P40:  a new file is written in tags;  a look again merges into it, as into a plain one
+  describe("in tags", () => {
+    const TAGS = { shape: "tags" } as const
+
+    test("a new file is in tags, and compiles as the plain Spell does", async () => {
+      const { start } = await updated((same) => same, {}, {}, TAGS)
+      expect(start).toMatch(/^<web-server "stars" address="https:\/\/[^"]*">$/m)
+      expect(start).toContain('<spell-thing "person">')
+      const plain = (await updated((same) => same, {})).start
+      const code = (contents: string) => compiledSpellProject([{ path: "/Stars.spell", contents }]).code
+      expect(code(start).replace(/declaredAt: \{[^}]*\}/g, "")).toBe(code(plain).replace(/declaredAt: \{[^}]*\}/g, ""))
+    })
+
+    test("nothing changed:  the file's as it was, to the byte", async () => {
+      const { result, start, text } = await updated((same) => same, {}, {}, TAGS)
+      expect(result.changes).toEqual([])
+      expect(result.couldntChange).toEqual([])
+      expect(text).toBe(start)
+    })
+
+    test("a new field, a field gone that nothing uses:  done, in tags", async () => {
+      const { mass: _mass, ...withoutMass } = LUKE
+      const { result, text } = await updated(
+        (same) => same,
+        {
+          [`${API}/people`]: [
+            { ...withoutMass, rank: "Jedi" },
+            { ...withoutMass, name: "Leia", url: `${API}/people/2`, rank: "General" }
+          ]
+        },
+        {},
+        TAGS
+      )
+      expect(result.changes.join("\n")).toMatch(/people has a new field, "rank"/)
+      expect(text).toContain('<property "rank">text</>')
+      expect(text).not.toContain('"mass"')
+      expect(text).toMatch(/^<web-server "stars"/m)
+    })
+
+    test("what a person wrote stays:  their tags and their lines", async () => {
+      const greet = '\t<action "greet">\n\t\tprint "hi"\n\t</action>\n'
+      const { result, text } = await updated(
+        (same) => same.replace('\t<property "name">text</>\n', '\t<property "name">text</>\n' + greet),
+        { [`${API}/people`]: [{ ...LUKE, rank: "Jedi" }, LEIA] },
+        {},
+        TAGS
+      )
+      expect(result.couldntChange).toEqual([])
+      expect(text).toContain('<action "greet">')
+      expect(text).toContain('print "hi"')
+      expect(text).toContain('<property "rank">text</>')
+    })
   })
 
   test("nothing changed:  it says so, and the file's as it was", async () => {
@@ -1269,6 +1331,7 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
     const claude: ClaudeRunner = async () => "{}"
     return {
       ingest: new PlaceIngest({
+        shape: "plain",
         fetch: globalThis.fetch,
         ask: async () => undefined,
         files: disk.files,

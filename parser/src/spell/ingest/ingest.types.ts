@@ -107,6 +107,11 @@ export type IngestSettings = {
   files: IngestFiles
   /** Reads through the Spell. */
   readThrough: ReadThrough
+  /**
+   * The shape a new file is written in (epic `language` P40):  `tags`, the default, or `plain` Spell.
+   * - A file already written keeps its own shape, whatever this says.
+   */
+  shape?: "tags" | "plain"
   /** Asks the agent.  Left out:  only what can be worked out with no agent. */
   claude?: ClaudeRunner
   /** What the description says asked:  `Claude API`, `claude -p`. */

@@ -580,7 +580,7 @@ start the box
           path: "/Status.spell",
           source: readFileSync(join(folder, "Status.spell"), "utf8"),
           field: "",
-          more: [file("Statusphere.api.spell"), file("Statusphere.spellml")]
+          more: [file("Statusphere.api.spell"), file("Statusphere.spell")]
         }
         const { page, problems } = await opened(atmospherePage("statusphere", program))
         // each status is a row of its own:  the only stacks naming an account
@@ -1278,10 +1278,10 @@ start the box
 
   /**
    * An example as it ships:  its API file, whose first lines say where it lives, and its drawing beside it.
-   * - `path`:  the API file, `RecipeBox/RecipeBox.api.spell`;  the drawing is the same name, `.spellml`, no `.api`.
+   * - `path`:  the API file, `RecipeBox/RecipeBox.api.spell`;  the drawing is the same name, no `.api`.
    */
   const shipped = (path: string): Program => {
-    const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spellml")
+    const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spell")
     const styles = path.replace(/\.api(\.\w\w)?\.spell$/, ".css")
     return {
       path: `/${path.split("/")[1]}`,

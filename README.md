@@ -503,9 +503,9 @@ That's its match tree:  each indented line is a rule that matched, inside the on
 The last line is the JavaScript it compiles to.
 
 **A whole program, under node** ([README/cli.md](README/cli.md)).
-[FizzBuzz.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spellml) is a loop from 1 to 100,
+[FizzBuzz.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is a loop from 1 to 100,
 an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz:
-each says what the number is, as an event, and its `Console.spellml` prints them
+each says what the number is, as an event, and its `Console.spell` prints them
 ([the parser's front page](https://github.com/spell-app/spell/blob/main/parser/README.md#fizzbuzz) has all eight, beside what they compile to).
 Run it;  a program with a UI would open in your browser, and `--no-browser` skips anything that needs one.
 
@@ -591,7 +591,7 @@ When the page server is already running, its line ends "(already running)".
 
 _The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
-This game's [Solitaire.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml) is written in spellx, Spell in tags,
+This game's [Solitaire.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spell) is written in spellx, Spell in tags,
 and its cards, deck and piles are files of its own beside it.
 A tableau says what it can take:
 `return its color is not the color of the card and its value is the value of the card + 1`.

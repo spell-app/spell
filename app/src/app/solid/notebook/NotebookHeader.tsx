@@ -107,7 +107,7 @@ function nameOf(file: SP.SpellFile): string {
   return file.path
     .split("/")
     .at(-1)!
-    .replace(/\.spell(ml|x)$/, "")
+    .replace(/\.spell(ml|x)?$/, "")
 }
 
 /** The words of each status. */

@@ -64,6 +64,7 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
   "show_them_in": "body?",
   "sign_ups_from": "address",
   "sorts_by": "type|fields?|param?",
+  "stored_in_memory": "type|with_nested_statements?|body?",
   "stored_on_this_device": "type|each_tab?|with_nested_statements?|body?",
   "their_field": "field",
   "there_are_things": "none?|compare?|one?|count?|type?|list?|body?",

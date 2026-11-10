@@ -81,7 +81,12 @@ describe("a file's shape, from its text;  the old endings", () => {
 /** A type's property editor in a file of its own (epic `editor` P25):  read by the Inspector, never compiled. */
 describe("property editors files", () => {
   test("`.editor.spell` and `.editors.spell`, in any language, are property editors files, not spell source", () => {
-    for (const name of ["Card.editor.spell", "Card.editor.spellml", "/x/Solitaire.editors.spell", "Carta.editor.es.spell"]) {
+    for (const name of [
+      "Card.editor.spell",
+      "Card.editor.spellml",
+      "/x/Solitaire.editors.spell",
+      "Carta.editor.es.spell"
+    ]) {
       expect(SP.isPropertyEditorsName(name), name).toBe(true)
       expect(SP.isSpellSourceName(name), name).toBe(false)
     }

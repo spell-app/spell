@@ -67,7 +67,7 @@ function answerAsRecorded(): Asked[] {
 
 /** The example's API file and its page, compiled and run. */
 function jsonPlaceholder() {
-  const files = ["JSONPlaceholder.api.spell", "JSONPlaceholder.spellml"].map((name) => ({
+  const files = ["JSONPlaceholder.api.spell", "JSONPlaceholder.spell"].map((name) => ({
     path: `/${name}`,
     contents: readFileSync(resolve(FOLDER, name), "utf8")
   }))
