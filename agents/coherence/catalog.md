@@ -70,7 +70,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Copies:**
   - `parser/src/markdown/inlines/InlineParser.ts`:  markdown's inlines, by regex, beside `MarkdownTokenizer`
   - `parser/src/spell/rules/JSX/MarkdownBlock.ts`:  its own fence and code-span scanner
-- **History:**  elemental-spell's `.spell` reader was 1,270 lines by hand (its P3) until its P6 moved it onto a
+- **History:**  elemental-spell's `.spellml` reader was 1,270 lines by hand (its P3) until its P6 moved it onto a
   tokenizer subclass and rules.
 
 ### A CSV file

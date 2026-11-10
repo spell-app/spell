@@ -810,7 +810,8 @@ export class SpellxTwin {
   private actionDetails(): P.Token[][] {
     const lines: P.Token[][] = []
     for (const attribute of this.tag.attributes) {
-      const shape = (!attribute.value && this.words.bareActionDetails[attribute.name]) || this.words.actionDetails[attribute.name]
+      const shape =
+        (!attribute.value && this.words.bareActionDetails[attribute.name]) || this.words.actionDetails[attribute.name]
       if (shape) lines.push([this.bullet(), ...this.expand(shape, { [attribute.name]: attribute.value })])
     }
     return lines

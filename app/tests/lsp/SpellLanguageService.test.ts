@@ -71,12 +71,7 @@ describe("SpellLanguageService", () => {
     card = workspace.fileFor(cardUri)!
     deck = workspace.fileFor(deckUri)!
     solitaire = workspace.fileFor(solitaireUri)!
-    expect(changed.map((file) => file.file)).toEqual([
-      "Card.spell",
-      "Deck.spell",
-      "Pile.spell",
-      "Solitaire.spell"
-    ])
+    expect(changed.map((file) => file.file)).toEqual(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"])
   })
 
   test("opening a file parses its whole project, cleanly -- bar warnings of what it never says", () => {
@@ -460,9 +455,7 @@ describe("SpellLanguageService", () => {
       // the card's rank, set in Deck.spell;  Pile's and Solitaire's tests make cards `whose rank is ...`
       const read = at(deck, "add a new card with rank", "rank")
       const files = service.references(deck, read).map(({ uri }) => uri.split("/").pop())
-      expect(new Set(files)).toEqual(
-        new Set(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"])
-      )
+      expect(new Set(files)).toEqual(new Set(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]))
     })
 
     test("document highlights:  the declaration writes, the rest read", () => {
