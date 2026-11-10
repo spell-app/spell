@@ -3,6 +3,7 @@
  * - Data only:  nothing here runs.  `<epic-section>` reads it too:  it lists the new items waiting to be made.
  */
 
+import type { NewSectionKind } from "spell/epic/phases"
 import type { NewKind } from "spell/epic/review"
 
 import type { epicNewItemVocabulary } from "./EpicNewItem.en"
@@ -20,7 +21,7 @@ export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test", "phase"] as 
  *   - `label`:  its name, on the form's kind button and on its waiting card
  *   - `add`:  on its section's button
  *   - `tip`:  the form's kind button's tooltip
- * - `section`:  the section it lands in
+ * - `section`:  the section it lands in;  `PageStages.TAKES_NEW` names the same ones, so an empty one keeps its button
  */
 export const NEW_KIND_LOOKS = {
   todo: { icon: "list check", label: "newTodo", add: "addTodo", tip: "newTodoTip", section: "todos" },
@@ -42,7 +43,7 @@ export const NEW_KIND_LOOKS = {
     label: (typeof NEW_KIND_TEXTS)[number]["key"]
     add: (typeof NEW_ITEM_TEXTS)[number]["key"]
     tip: (typeof NEW_ITEM_TEXTS)[number]["key"]
-    section: string
+    section: NewSectionKind
   }
 >
 

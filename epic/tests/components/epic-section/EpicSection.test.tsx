@@ -17,6 +17,8 @@ import "spell/epic/components/epic-item"
 import "spell/epic/components/epic-commit"
 import "spell/epic/components/epic-event"
 import "spell/epic/components/epic-aside"
+// the page re-reads what hides when its attributes change (`LAYOUT_ATTRIBUTES`)
+import "spell/epic/components/epic-page"
 
 /** Fixture parts the test server serves:  `fixtures/` beside this file, by its URL path. */
 const FIXTURES = new URL("fixtures", import.meta.url).pathname
@@ -216,9 +218,24 @@ describe("<epic-section>", () => {
     expect(host.matches(":state(error)")).toBe(true)
   })
 
-  test("an item section with no items says None yet", async () => {
-    const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
-    expect(host.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("None yet")
+  test("an empty section says what's missing, by kind, on its title", async () => {
+    const lines: Record<string, string> = {
+      todos: "Nothing to do",
+      questions: "No questions",
+      issues: "No issues",
+      tests: "No tests to try",
+      phases: "No phases yet",
+      judgements: "No judgement calls"
+    }
+    for (const [kind, line] of Object.entries(lines)) {
+      const host = await render(`<epic-section id="${kind}" kind="${kind}"></epic-section>`)
+      const empty = host.shadowRoot!.querySelector('[part~="empty"]')
+      expect(empty?.textContent).toBe(line)
+      expect(empty?.closest('[part~="tools"]')).not.toBeNull()
+      host.remove()
+    }
+    const log = await render(`<epic-section id="log" kind="log"></epic-section>`)
+    expect(log.shadowRoot!.querySelector('[part~="empty"]')).toBeNull()
   })
 
   // epic `epic-engine` I166 (Owen, 2026-10-29:  "we can change the 'expand all' to a gear icon which shows menu")
@@ -656,11 +673,11 @@ describe("<epic-section> actions slot", () => {
     toggle(host).click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(true)
-    // the slotted button isn't a child:  an item section holding only it still says None yet
+    // the slotted button isn't a child:  an item section holding only it still says what's missing
     const empty = await render(
       `<epic-section id="todos" kind="todos" open><button slot="actions">C</button></epic-section>`
     )
-    expect(empty.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("None yet")
+    expect(empty.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("Nothing to do")
   })
 })
 
@@ -1002,18 +1019,82 @@ describe("<epic-section> title, folded and open", () => {
   })
 })
 
+// epic `epic-engine` P70 (Owen, 2026-11-09:  "We should just go ahead and hide them in all modes if they are empty")
+describe("<epic-section> hides when empty", () => {
+  /** A page in `stage`:  an empty Todos and Judgement calls, and Questions holding an item. */
+  const PAGE = (stage: string) => `<epic-page stage="${stage}">
+    <epic-section id="todos" kind="todos"></epic-section>
+    <epic-section id="judgements" kind="judgements"></epic-section>
+    <epic-section id="decisions" kind="questions"
+      ><epic-item id="q1" title="Q 1" status="open" state="open"></epic-item
+    ></epic-section>
+  </epic-page>`
+
+  /** Whether section `id` is hidden, as drawn. */
+  function isHidden(id: string): boolean {
+    const section = document.getElementById(id)!
+    return section.matches(":state(hidden)") && section.getBoundingClientRect().height === 0
+  }
+
+  test("outside a review:  empty sections are gone at every stage, and the number skips them", async () => {
+    for (const stage of ["overview", "phases", "building"]) {
+      const todos = await render(PAGE(stage))
+      expect([isHidden("todos"), isHidden("judgements"), isHidden("decisions")]).toEqual([true, true, false])
+      expect(titleText(document.getElementById("decisions")!)).toBe("1. Questions")
+      todos.parentElement!.remove()
+    }
+  })
+
+  test("an empty section comes back the moment its first item arrives, and its number follows", async () => {
+    const todos = await render(PAGE("building"))
+    todos.insertAdjacentHTML("beforeend", `<epic-item id="t1" title="T 1" status="open" state="open"></epic-item>`)
+    await vi.waitFor(() => expect(isHidden("todos")).toBe(false))
+    await vi.waitFor(() => expect(titleText(document.getElementById("decisions")!)).toBe("2. Questions"))
+    expect(todos.shadowRoot!.querySelector('[part~="empty"]')).toBeNull()
+  })
+
+  test("while reviewed:  an empty Todos stays, with its line;  an empty Judgement calls still hides", async () => {
+    const todos = await render(PAGE("building").replace("<epic-page", "<epic-page reviewing"))
+    await vi.waitFor(() => expect(todos.matches(":state(hidden)")).toBe(false))
+    expect(isHidden("judgements")).toBe(true)
+    expect(todos.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("Nothing to do")
+    expect(todos.getBoundingClientRect().height).toBeGreaterThan(0)
+    // the review ends:  it goes
+    todos.parentElement!.removeAttribute("reviewing")
+    await vi.waitFor(() => expect(isHidden("todos")).toBe(true))
+  })
+
+  test("the toolbar hears when a section comes or goes (`epic-count-changed`)", async () => {
+    const todos = await render(PAGE("building"))
+    const heard = vi.fn()
+    document.addEventListener("epic-count-changed", heard)
+    todos.parentElement!.setAttribute("reviewing", "")
+    await vi.waitFor(() => expect(heard).toHaveBeenCalled())
+    document.removeEventListener("epic-count-changed", heard)
+  })
+
+  test("a phase is titled `P1. DRAFT: <name>` while the Overview is agreed, then `P1 · <name>`", async () => {
+    await render(`<epic-page stage="overview"><epic-section id="phases" kind="phases"
+      ><epic-phase id="p-one" title="One" status="todo"></epic-phase></epic-section></epic-page>`)
+    const phase = document.getElementById("p-one") as FoldHost & { contentsEntry: { label: string } }
+    await ElementFixture.settle(phase)
+    expect(titleText(phase)).toBe("P1. DRAFT: One")
+    expect(phase.contentsEntry.label).toBe("P1. DRAFT: One")
+    phase.closest("epic-page")!.setAttribute("stage", "phases")
+    await vi.waitFor(() => expect(titleText(phase)).toBe("P1 · One"))
+    expect(phase.contentsEntry.label).toBe("P1 · One")
+  })
+})
+
 // epic `epic-engine` I191 (Owen, 2026-10-31, the rust epic's P2 To review chips:  "Clicking J2 is broken")
 describe("<epic-section> a link's target shows, whatever hides it", () => {
-  /** Two sections in an `<epic-page>` still agreeing its phases:  its Tests hidden by the stage. */
+  /** Two sections in an `<epic-page>`:  Todos with items, and an empty Judgement calls, hidden. */
   const PAGE = `<epic-page stage="phases">
     <epic-section id="todos" kind="todos"
       ><epic-item id="t1" title="T 1" status="open" state="open"></epic-item
       ><epic-item id="t2" title="T 2" status="open" state="attention"></epic-item
     ></epic-section>
-    <epic-section id="tests" kind="tests"
-      ><epic-item id="m1" title="M 1" status="open" state="open" calm></epic-item
-      ><epic-item id="m2" title="M 2" status="open" state="open" calm></epic-item
-    ></epic-section>
+    <epic-section id="judgements" kind="judgements"></epic-section>
   </epic-page>`
 
   /** The section `id`'s DOM element, with its link API. */
@@ -1021,23 +1102,24 @@ describe("<epic-section> a link's target shows, whatever hides it", () => {
     return document.getElementById(id) as FoldHost & { showLinked(target: Element): boolean }
   }
 
-  test("a section the page's stage hides shows while it holds the link's target;  a link elsewhere hides it again", async () => {
+  test("a section hidden for being empty shows on a link to it;  a link elsewhere hides it again", async () => {
     await render(PAGE)
-    const tests = section("tests")
-    expect(tests.matches(":state(offstage)")).toBe(true)
-    expect(tests.getBoundingClientRect().height).toBe(0)
+    const judgements = section("judgements")
+    expect(judgements.matches(":state(hidden)")).toBe(true)
+    expect(judgements.getBoundingClientRect().height).toBe(0)
 
-    expect(tests.showLinked(document.getElementById("m2")!)).toBe(true)
+    expect(judgements.showLinked(judgements)).toBe(true)
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(tests.matches(":state(offstage)")).toBe(false)
-    expect(tests.getBoundingClientRect().height).toBeGreaterThan(0)
+    expect(judgements.matches(":state(hidden)")).toBe(false)
+    expect(judgements.getBoundingClientRect().height).toBeGreaterThan(0)
+    expect(judgements.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("No judgement calls")
 
-    // a link to a section the stage shows:  nothing was hidden, and the tests go again
+    // a link to a section that shows:  nothing was hidden, and the empty one goes again
     expect(section("todos").showLinked(document.getElementById("t1")!)).toBe(false)
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(tests.matches(":state(offstage)")).toBe(true)
+    expect(judgements.matches(":state(hidden)")).toBe(true)
   })
 
   test("an item the state filter hides shows while a link lands on it;  filtering again hides it", async () => {

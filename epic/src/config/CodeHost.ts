@@ -5,12 +5,13 @@ import { EpicHome } from "./EpicHome.ts"
 import {
   GitHub,
   type CodeHostWords,
+  type FirstPushHelp,
   type GhStatus,
   type MergedPullRequest,
   type OpenPullRequest,
   type RepoVisibility
 } from "./GitHub.ts"
-import { GitLab } from "./GitLab.ts"
+import { GitLab, type FirstPushAttempt } from "./GitLab.ts"
 
 /****************
  * ### `CodeHost`
@@ -89,6 +90,14 @@ export class CodeHost {
   }
 
   /**
+   * Whether git's words `said`, from a push, are a code host refusing a new repo's first push (GitLab's protected
+   * default branch):  for a line that says so, with no client to hand (`epic turn end`, `epic shared status`).
+   */
+  static refusesFirstPush(said: string | undefined): boolean {
+    return GitLab.refusesFirstPush(said)
+  }
+
+  /**
    * This person's login on `host`, its command asked, for a name to suggest.
    * - GitHub's is kept (`EpicHome.refreshGithub()`):  pages show it, never running `gh`
    */
@@ -110,6 +119,7 @@ export type CodeHostConfig = { main: string; codeHost: CodeHostKind }
  * - `requiresPullRequest()`, `mergedPullRequests()`, `openPullRequestOf()`, `openPullRequest()`:  work proposed
  *   through a pull or merge request
  * - `createRepo()`, `addressOf()`, `letTeamPush()`:  a shared repo made and opened up for the team
+ * - `firstPushRefusal()`:  what to do when the host refused that repo's first push (GitLab's protected branch)
  * - `commitBase()`:  the page commit links go under
  * - `words`:  what a person reads
  */
@@ -130,6 +140,7 @@ export type CodeHostClient = {
   createRepo(fullName: string, options?: { visibility?: RepoVisibility; description?: string }): void
   addressOf(fullName: string): string
   letTeamPush(fullName: string, branch: string): string | undefined
+  firstPushRefusal(said: string | undefined, attempt: FirstPushAttempt): FirstPushHelp | undefined
 }
 
 /** What git address `address`'s host says about whose it is;  `undefined` when it doesn't. */

@@ -40,7 +40,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     held by him (`plan="held"`, I221), a DOTTED blue circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
  *     inbox's `working`, I147), a turning spinner in that colour (blue, unless red or orange come first), its tooltip
  *     "Claude is writing this phase's plan" or "Claude is working on it"
- *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter;  a DROPPED one's is struck
+ *   - `P3 · <title>`, or `P3. DRAFT: <title>` while the Overview is agreed (`isDraft`);  (`title`, or `slot="title"`);  a done phase's title reads quieter;  a DROPPED one's is struck
  *     through and grey (`status="dropped"`, epic `epic-engine` I228:  never built), its Dropped field saying why
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
@@ -228,6 +228,17 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /**
+   * A DRAFT:  the page's Overview is still being agreed (`stage="overview"`, epic `epic-engine` P70):  its title reads
+   * `P1. DRAFT: <title>`.  Owen, 2026-11-09:  "OK to show phases when in overview stage, but put as `P1. DRAFT: blah
+   * blah`".
+   * - read again on every layout change (the page's `layout`:  its `stage` changing too)
+   */
+  get isDraft(): boolean {
+    void this.layout
+    return PageStages.of(this.page) === "overview"
+  }
+
+  /**
    * It can be DRAGGED to another place by its title row (epic `epic-engine` P34, the Phases section's `PhaseDrag`):
    * still to do, on a page being reviewed;  its title row shows the grab cursor and says so in its tooltip.
    */
@@ -308,7 +319,9 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   contentsEntry(): ContentsEntry {
     const written = this.domElement.getAttribute("status") ?? ""
     const status: PhaseStatus = written in STATUS_ICONS ? (written as PhaseStatus) : "todo"
-    const label = `${PhaseIds.labelOf(this.domElement)} · ${EpicPhase.titleText(this.domElement)}`
+    const number = PhaseIds.labelOf(this.domElement)
+    const words = EpicPhase.titleText(this.domElement)
+    const label = this.isDraft ? `${number}${this.translationForKey("draftMark")}${words}` : `${number} · ${words}`
     const state = this.withOwensMark(PhaseState.of(PhaseState.fieldsOf(this.domElement), this.live))
     const color = PHASE_FILTER_STATES.find((it) => it.state === state)!.color
     return { label, icon: STATUS_ICONS[status], color }
@@ -325,9 +338,16 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
       title: () => (
         <>
           <span class="id">P{this.phaseNumber}</span>
-          <span class="dot" aria-hidden="true">
-            {" · "}
-          </span>
+          <Show
+            when={this.isDraft}
+            fallback={
+              <span class="dot" aria-hidden="true">
+                {" · "}
+              </span>
+            }
+          >
+            <span class="draft">{this.translationForKey("draftMark")}</span>
+          </Show>
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </>
       ),

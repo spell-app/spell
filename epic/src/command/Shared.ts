@@ -18,6 +18,7 @@ import { Links } from "spell/server/Links"
 import { RealPath, pathInside } from "spell/server/RealPath"
 import type { SRV } from "spell/server"
 import { CLI } from "spell/cli"
+import { CodeHost } from "spell/epic/config/CodeHost"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import {
@@ -33,6 +34,7 @@ import {
 import { EpicCheckout } from "./EpicCheckout"
 import { SharedMigration } from "./SharedMigration"
 import { SharedSync, type SyncReport } from "./SharedSync"
+import { SyncState } from "./SyncState"
 
 /****************
  * ### `Shared`
@@ -222,6 +224,7 @@ export class Shared {
       isRepo,
       dirty: isRepo ? Git.run(["status", "--porcelain"], config.dir).out.split("\n").filter(Boolean).length : 0,
       last: isRepo ? Git.run(["log", "-1", "--format=%h %cr %s"], config.dir).out : "",
+      ...(isRepo && this.unshared()),
       checkouts: this.checkouts().map((checkout) => ({
         checkout: relative(config.main, checkout) || ".",
         links: (manifest(checkout).links ?? config.links).map((path) => ({
@@ -230,6 +233,20 @@ export class Shared {
         }))
       }))
     }
+  }
+
+  /**
+   * Why the plans aren't on the epic repo's remote, when the last sync couldn't push (`SyncState`):  `status()`'s
+   * `unshared`, so a person asking finds it (no session-start notice:  it would repeat until a Maintainer acts)
+   * - `never`:  the remote has no branch of ours yet:  nothing was ever shared
+   */
+  private unshared(): Pick<SharedStatus, "unshared"> {
+    const { dir } = this.config
+    const last = SyncState.read(dir)
+    if (last?.result !== "not pushed") return {}
+    const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], dir) ?? ""
+    const never = !Git.run(["rev-parse", "--verify", "-q", `refs/remotes/origin/${branch}`], dir).ok
+    return { unshared: { reason: pushProblem(last.error), never, at: last.at } }
   }
 
   /**
@@ -388,10 +405,14 @@ export class Shared {
     return importFrom ? "imported" : "created"
   }
 
-  /** The epic repo's remote (`origin`):  its address, `""` for none or no repo yet. */
+  /**
+   * The epic repo's remote (`origin`):  its address as set, `""` for none or no repo yet.
+   * - as set, not as git rewrites it (`url.<base>.insteadOf`, which `git remote get-url` applies):  it's what goes in
+   *   the config, and what the config is compared with
+   */
   get remote(): string {
     const { dir } = this.config
-    return existsSync(join(dir, ".git")) ? (Git.out(["remote", "get-url", "origin"], dir) ?? "") : ""
+    return existsSync(join(dir, ".git")) ? (Git.out(["config", "--get", "remote.origin.url"], dir) ?? "") : ""
   }
 
   /**
@@ -709,8 +730,16 @@ function statusLines(status: SharedStatus): string[] {
     : !status.isRepo
       ? "not a git repo"
       : `${status.dirty} uncommitted, last ${status.last || "(none)"}`
+  const { unshared } = status
   return [
     `epic repo  ${status.dir}  (${repo})`,
+    ...(unshared
+      ? [
+          unshared.never
+            ? `not shared yet:  ${unshared.reason}`
+            : `not pushed since ${unshared.at}:  ${unshared.reason}`
+        ]
+      : []),
     ...status.checkouts.map(
       ({ checkout, links }) => `${checkout.padEnd(40)} ${links.map((link) => `${link.path} ${link.state}`).join(" · ")}`
     )
@@ -727,10 +756,24 @@ export function syncLines(commits: string[], sync?: SyncReport): string[] {
         .map(([from, to]) => `${from.toUpperCase()} → ${to.toUpperCase()}`)
         .join(", ")}`
     )
-  const why = sync.files?.length ? `:  ${sync.files.join(", ")}` : sync.error ? `:  ${sync.error}` : ""
+  const why = sync.files?.length ? `:  ${sync.files.join(", ")}` : sync.error ? `:  ${pushProblem(sync.error)}` : ""
   lines.push(`sync:  ${sync.result}${why}`)
   return lines
 }
+
+/**
+ * Git's words from a sync that couldn't push, in one line:  GitLab refusing the epic repo's first push (fifteen
+ * `remote:` lines) says what that means and where to look;  anything else, git's words as they are.
+ */
+function pushProblem(error: string | undefined): string {
+  if (CodeHost.refusesFirstPush(error)) return FIRST_PUSH_REFUSED
+  return error ?? "git didn't say why"
+}
+
+/** `pushProblem()`'s line for GitLab's refusal of the first push. */
+const FIRST_PUSH_REFUSED =
+  "GitLab won't take the epic repo's first push:  its default branch is protected, and a Maintainer has to push " +
+  "the first commit (epic init says how;  your commits wait here)"
 
 /**
  * Every path with a change in repo `dir`, untracked files one by one:  `git status --porcelain -z`.

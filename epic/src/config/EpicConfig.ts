@@ -82,6 +82,7 @@ export class EpicConfig {
   static readonly DEFAULTS: EpicDefaults = {
     contentRemote: "",
     baseBranchProtected: false,
+    localSetup: false,
     installTimeout: 600,
     extraInstalls: [],
     windows: { worktreeOnly: true, settings: {} },
@@ -267,6 +268,14 @@ export class EpicConfig {
   /** whether the base branch can't be pushed to:  work reaches it only through a pull request */
   get baseBranchProtected(): boolean {
     return this.settings.baseBranchProtected
+  }
+
+  /**
+   * whether `epic init --local` set the repo up:  nothing of epics in the repo itself, all of it on this machine
+   * (epic `epic-engine` P69)
+   */
+  get localSetup(): boolean {
+    return this.settings.localSetup
   }
 
   /** where the code is hosted, `github` or `gitlab`:  ask `CodeHost.of(config)` how to talk to it */
@@ -939,6 +948,7 @@ export class EpicConfig {
       contentRemote: this.contentRemote,
       baseBranch: this.baseBranch,
       baseBranchProtected: this.baseBranchProtected,
+      localSetup: this.localSetup,
       codeHost: this.codeHost,
       worktreesFolder: this.worktreesFolder,
       installCommand: this.installCommand,
@@ -1118,6 +1128,7 @@ export class EpicConfig {
       contentRemote: valueOf(given, "contentRemote", defaults.contentRemote, file, "", { empty: true }),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
       baseBranchProtected: valueOf(given, "baseBranchProtected", defaults.baseBranchProtected, file),
+      localSetup: valueOf(given, "localSetup", defaults.localSetup, file),
       codeHost: codeHostOf(given, defaults.codeHost, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
@@ -1236,6 +1247,12 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *     (`BaseBranch`);  `epic worktree remove --branches` counts a merged pull request as merged (a squash too)
  *   - the skills' finish reads it:  a pull request in place of a merge
  *   - NOT the epic repo, whose own branch every turn pushes to:  an org-wide rule must leave it out
+ * - `localSetup`:  the repo was set up by `epic init --local` (epic `epic-engine` P69:  a colleague "doesn't want
+ *   any of it in the jarvis repo"):  nothing of epics is committed in it, and this file itself is on this machine only
+ *   (`false`, the default)
+ *   - this file and the links are listed in the repo's private ignore list (`.git/info/exclude`), never `.gitignore`
+ *   - `epic init` run again keeps it local:  no `.gitignore` change, no commit
+ *   - each teammate runs their own `epic init --local`, with the epic repo's address (`--remote`)
  * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`../my-app.worktrees`), one folder each:
  *   the worktree hook, the window script, the epics list, the page server's `/worktrees/<w>/`
  *   - outside the repo since epic `epic-eject` P8:  the old place, `.claude/worktrees`, is still read for the
@@ -1323,6 +1340,7 @@ export type EpicSettings = {
   contentRemote: string
   baseBranch: string
   baseBranchProtected: boolean
+  localSetup: boolean
   codeHost: CodeHostKind
   worktreesFolder: string
   installCommand: string

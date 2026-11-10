@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process"
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
@@ -59,5 +59,22 @@ describe("Git", () => {
     expect(SRV.Git.mainRoot(WORKTREE)).toBe(REPO)
     expect(SRV.Git.mainRoot(REPO)).toBe(REPO)
     expect(SRV.Git.mainRoot(TOP)).toBe(TOP)
+  })
+
+  test("exclude():  the main checkout's private ignore list, from a worktree too;  each line once, its note once", () => {
+    const file = join(REPO, ".git", "info", "exclude")
+    expect(SRV.Git.excludeFile(WORKTREE)).toBe(file)
+    expect(SRV.Git.exclude(["/epics", "/.epic/"], "# epic init --local", WORKTREE, { dryRun: true })).toEqual([
+      "/epics",
+      "/.epic/"
+    ])
+    expect(readFileSync(file, "utf8")).not.toContain("/epics")
+    expect(SRV.Git.exclude(["/epics", "/.epic/"], "# epic init --local", WORKTREE)).toEqual(["/epics", "/.epic/"])
+    expect(SRV.Git.exclude(["/epics", "/guides"], "# epic init --local", REPO)).toEqual(["/guides"])
+    expect(readFileSync(file, "utf8")).toMatch(/\n# epic init --local\n\/epics\n\/\.epic\/\n\/guides\n$/)
+    // a link, listed without a slash, is ignored in every checkout;  the worktree's status stays clean
+    mkdirSync(join(TOP, "shared", "epics"), { recursive: true })
+    symlinkSync(join(TOP, "shared", "epics"), join(WORKTREE, "epics"))
+    expect(SRV.Git.run(["status", "--porcelain"], WORKTREE).out).toBe("")
   })
 })

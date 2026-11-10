@@ -1220,7 +1220,11 @@ start the box
         await expect.poll(() => sheetFile("Dee brings soup, and bowls"), WAITING).toMatchObject({ by: address.dee })
 
         // Ana's:  refused, saying why, and it goes back
-        const refusal = dee.page.waitForResponse((answer) => answer.url().endsWith("/apply"))
+        // the save of Ana's row, by what it sends:  the answer to her own last change can still be on its way
+        const refusal = dee.page.waitForResponse(
+          (answer) =>
+            answer.url().endsWith("/apply") && (answer.request().postData() ?? "").includes("Ana brings bread")
+        )
         const bread = (await formTitled(dee.page, "Ana brings bread")).locator("input")
         await bread.click()
         await bread.press(END_OF_LINE)

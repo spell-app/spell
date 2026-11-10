@@ -241,6 +241,12 @@ export type PropInfo = {
    */
   undoable?: boolean
   /**
+   * `false`:  no place holds it, so none is asked for it, e.g. a view's `thumbnail`, a file of its project.
+   * - Spell's runtime reads it (`spell/parser/core/placeKinds`, `saved`);  nothing here does.
+   * - Only on Spell's own classes:  a type that declares a field of that name has its own, which places do hold.
+   */
+  inPlaces?: boolean
+  /**
    * The line that declares it, for the editor's side bar (`Places.originOf()`), on a saved property or a worked-out value that reads a place.
    * - The compiler writes it (epic `data` P12):  one small value per such property, in every build (J3).
    * - A worked-out getter may declare only this and `readsFrom`, and still counts as worked out.

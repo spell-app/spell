@@ -24,8 +24,9 @@ export class View extends Thing {
    * A picture of it, a file of its project:  `snapshots/terms.jpg`.
    * - `<spell-page "terms" thumbnail="snapshots/terms.jpg"/>`, or `- its thumbnail is "..."`.
    * - A type may have data of its own called this, a thing as much as text:  only text is a picture's file.
+   * - Said of the type, so it's no row's field:  a place is never asked for it.
    */
-  @prop()
+  @prop({ inPlaces: false })
   accessor thumbnail: string | undefined
 
   /**

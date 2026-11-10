@@ -227,3 +227,66 @@ describe("GitLab:  talking to glab, self-hosted", () => {
     expect(lab.letTeamPush("team/a", "main")).toMatch(/couldn't check/)
   })
 })
+
+////////////////
+// ## The first push, refused;  who can read a repo (epic-engine P69)
+////////////////
+
+/** GitLab's words for a refused first push, as git printed them from the jarvis run (epic `epic-engine` P69). */
+const REFUSED = `remote: GitLab:
+remote: You cannot push the initial commit because the default branch is
+remote: protected and your role does not allow it.
+remote:
+remote: To resolve this, either:
+remote: - Ask a Maintainer to push the initial commit.
+remote: - Contact an Owner or administrator for help.
+remote:
+remote: Find a Maintainer, Owner, or administrator at:
+remote:
+remote:   https://git.acme.com/team/sub/app.epics/-/project_members
+remote:
+To git.acme.com:team/sub/app.epics.git
+ ! [remote rejected] HEAD -> main (pre-receive hook declined)
+error: failed to push some refs to 'git.acme.com:team/sub/app.epics.git'`
+
+describe("the first push, refused (epic-engine P69)", () => {
+  test("GitLab's words, broken across remote: lines, are known;  any other failure isn't", () => {
+    expect(GitLab.refusesFirstPush(REFUSED)).toBe(true)
+    expect(CodeHost.refusesFirstPush(REFUSED)).toBe(true)
+    expect(GitLab.refusesFirstPush("! [rejected] main -> main (fetch first)")).toBe(false)
+    expect(GitLab.refusesFirstPush(undefined)).toBe(false)
+  })
+
+  test("what a Maintainer runs, filled in for the repo:  clone, an empty commit, push, the protection lifted", () => {
+    const address = "git@git.acme.com:team/sub/app.epics.git"
+    expect(lab.firstPushRefusal(REFUSED, { fullName: "team/sub/app.epics", address, branch: "main" })).toEqual({
+      membersPage: "https://git.acme.com/team/sub/app.epics/-/project_members",
+      branch: "main",
+      commands: [
+        `git clone ${address}`,
+        "cd app.epics",
+        'git commit --allow-empty -m "First commit of the epic repo"',
+        "git push -u origin HEAD:main",
+        "glab api --hostname git.acme.com --method DELETE projects/team%2Fsub%2Fapp.epics/protected_branches/main"
+      ]
+    })
+    expect(lab.firstPushRefusal("network down", { fullName: "t/a", address, branch: "main" })).toBeUndefined()
+    expect(GitHub.firstPushRefusal()).toBeUndefined()
+  })
+
+  test("who can read a repo:  two lines per host, naming its server;  GitLab's private one names the group", () => {
+    const gitlab = GitLab.wordsOn("gitlab.psiquantum.com").canRead
+    expect(Object.keys(gitlab)).toEqual(["private", "public"])
+    expect(gitlab.private).toBe(
+      "only people added to the project, and members of its group, can read it;  roles control access"
+    )
+    expect(gitlab.public).toBe(
+      "anyone who can reach gitlab.psiquantum.com can read every epic page, guide and comment, without signing in;  " +
+        "roles only control who can write"
+    )
+    expect(GitLab.wordsOn().canRead.public).toMatch(/^anyone who can reach gitlab\.com /)
+    expect(GitHub.words.canRead.private).toBe("only people added to the repo can read it;  roles control access")
+    expect(GitHub.words.canRead.public).toMatch(/^anyone who can reach github\.com /)
+    expect(GitHub.words.server).toBe("github.com")
+  })
+})

@@ -27,6 +27,21 @@ npx spell@next epic init
   With one logged in, though, your short name defaults to your login there.
 - The plugin step and the extension are once per machine, so a teammate does those too.
 
+### A teammate joins a local setup
+
+Where the repo was set up with `epic init --local`, nothing about epics is in the code repo,
+so a teammate's `epic init` has nothing to find:  they say where the plans are.
+
+```sh
+npx spell@next epic init --local --remote git@git.acme.com:team/my-app.epics.git
+```
+
+- It clones the epic repo beside the code repo, and writes its address in their own `.epic/config.json5`:
+  every turn of theirs syncs with it from then on.
+- Their config and links go in their repo's private ignore list, as yours did:  nothing to commit.
+- An epic repo with nothing in it yet:  their `epic init` makes the first commit and pushes it.
+- They need write access to the epic repo, on GitHub or GitLab, like any teammate.
+
 ### Who you are
 
 ```sh
