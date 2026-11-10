@@ -25,7 +25,7 @@ async function named(arg: string, cwd?: string) {
 
 const FIZZBUZZ = fixtureProjectId("fizzbuzz")
 const SOLITAIRE = fixtureProjectId("@spell/examples/Solitaire")
-const GAME = `${SOLITAIRE}/Solitaire.spellml`
+const GAME = `${SOLITAIRE}/Solitaire.spell`
 // the frozen ones, `@spell/test`'s, in the order a group lists its projects:  by name
 const ALL_FIXTURES = fixtureProjectNames()
   .filter((name) => !EXAMPLE_PROJECTS.has(name) && !GUIDE_PROJECTS.has(name))
@@ -41,7 +41,7 @@ describe("resolveProject()", () => {
       expect(await named(SOLITAIRE)).toEqual({ kind: "project", id: SOLITAIRE })
     })
     test("a spell file", async () => {
-      expect(await named("@spell/examples/Solitaire/Solitaire.spellml")).toEqual({ kind: "file", id: GAME })
+      expect(await named("@spell/examples/Solitaire/Solitaire.spell")).toEqual({ kind: "file", id: GAME })
     })
     test("a group, by its address, holds only folders with a project.json", async () => {
       expect(await named("@spell/test")).toEqual({ kind: "root", ids: ALL_FIXTURES })
@@ -59,7 +59,7 @@ describe("resolveProject()", () => {
       })
     })
     test("a spell file, relative to cwd", async () => {
-      expect(await named("Solitaire.spellml", fixtureFolder("@spell/examples/Solitaire"))).toEqual({
+      expect(await named("Solitaire.spell", fixtureFolder("@spell/examples/Solitaire"))).toEqual({
         kind: "file",
         id: GAME
       })
@@ -72,7 +72,7 @@ describe("resolveProject()", () => {
         kind: "project",
         id: SOLITAIRE
       })
-      expect(await named("@here/Solitaire.spellml", fixtureFolder("@spell/examples/Solitaire"))).toEqual({
+      expect(await named("@here/Solitaire.spell", fixtureFolder("@spell/examples/Solitaire"))).toEqual({
         kind: "file",
         id: GAME
       })
@@ -83,7 +83,7 @@ describe("resolveProject()", () => {
     test.each([
       "@nope",
       "@spell/test/nope",
-      "@spell/examples/Solitaire/Nope.spellml",
+      "@spell/examples/Solitaire/Nope.spell",
       "@spell/examples/Solitaire/project.json",
       "./no/such/thing"
     ])("%s", async (arg) => {

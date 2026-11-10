@@ -3,7 +3,7 @@
   "description": "The Flash Cards example's two ideas:  a card that's a two sided view, drawing only the side that's up, and a quiz that deals one at random",
   "imports": [
     {
-      "path": "/HowFlashCardsWork.spellml",
+      "path": "/HowFlashCardsWork.spell",
       "active": true
     }
   ]

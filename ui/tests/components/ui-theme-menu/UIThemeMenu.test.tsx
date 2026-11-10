@@ -527,7 +527,7 @@ describe("<ui-theme-menu> Theme bench", () => {
       for (const [path, page] of [
         ["/epics/debut/debut.plan.html", "epic"],
         ["/components/ui/ui-button.html", "ui"],
-        ["/edit/@spell/guides/SpellUI/Avatar/Usage.spellml", "notebook"],
+        ["/edit/@spell/guides/SpellUI/Avatar/Usage.spell", "notebook"],
         ["/edit/@spell/examples/Solitaire", "app"]
       ]) {
         history.replaceState(history.state, "", path)

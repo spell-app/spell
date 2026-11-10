@@ -7,30 +7,49 @@ import { compiledSpellProject, parseSpellProject, registerTestComponentPack } fr
 import "./projectGroups.double"
 
 /**
- * Spell's markup files end in `.spellml`;  the old `.spellx` still reads the same, everywhere
- * (epic `repo-split` P21;  Owen, 2026-10-27:  "support both for now").
+ * Every Spell file ends `.spell`, its shape from what it says (epic `language` P40, `SP.formOfText()`);
+ * the old endings, `.spellml` and `.spellx`, still read, always as tags.
  * - The old ending is written as `SP.OLD_SPELLML_SUFFIX` here, never as a literal:
  *   so `spell rename spellml`, rerun, leaves this file alone.
  */
-describe("markup file names:  .spellml, and the old ending", () => {
+describe("a file's shape, from its text;  the old endings", () => {
   const OLD = SP.OLD_SPELLML_SUFFIX
 
-  test("both are markup, in any language;  .spell is code spell;  a built file is neither", () => {
+  test("the old endings are tags, whatever they say, in any language;  a built file is neither", () => {
     for (const name of ["Card.spellml", "/x/Carta.es.spellml", `Card${OLD}`, `/x/Carta.es${OLD}`]) {
       expect(SP.isSpellmlName(name), name).toBe(true)
-      expect(SP.formOfName(name), name).toBe("spellx")
+      expect(SP.formOfText("only prose", name), name).toBe("spellx")
+      expect(SP.formOfText(undefined, name), name).toBe("spellx")
       expect(SP.isSpellSourceName(name), name).toBe(true)
     }
     for (const name of ["Card.spell", "Carta.es.spell", "Solitaire.spell.js", "Card.spellmlx", undefined]) {
       expect(SP.isSpellmlName(name), name).toBe(false)
     }
-    expect(SP.formOfName("Card.spell")).toBe("spell")
     expect(SP.isSpellSourceName("Solitaire.spell.js")).toBe(false)
   })
 
-  test("new files are .spellml:  the ending listed first", () => {
-    expect(SP.SPELLML_SUFFIX).toBe(".spellml")
-    expect(SP.SPELLML_SUFFIXES[0]).toBe(SP.SPELLML_SUFFIX)
+  describe("a .spell file's shape", () => {
+    test.each([
+      ["a tag in the first column", 'a card is a thing\n<spell-view "x">\n</>', "spellx"],
+      ["a heading and prose, then a tag", '# Title\nSome prose.\n\n<spell-view "x">\n</>', "spellx"],
+      ["a closer alone", "</spell-view>", "spellx"],
+      ["a Spanish tag", '<encanto-vista "x">\n</>', "spellx"],
+      ["plain Spell", 'a card is a thing:\n\t- its "rank" is a number', "spell"],
+      ["a drawing, indented", "a card is a view:\n\t- to draw it:\n\t\t<ui-button/>", "spell"],
+      ["only the defaults block", "<ui-defaults>\n\t<ui-button fluid/>\n</ui-defaults>\nx is 1", "spell"],
+      ["a tag inside a block comment", "/* one\n<spell-view>\n*/\nx is 1", "spell"],
+      ["a tag inside an html comment", "<!-- one\n<spell-view>\n-->\nx is 1", "spell"],
+      ["a one-line comment, then a tag", '<!-- a note -->\n<spell-view "x">\n</>', "spellx"],
+      ["a comparison", "if x <y:\n\treturn 1", "spell"],
+      ["nothing", "", "spell"],
+      ["not loaded", undefined, "spell"]
+    ])("%s", (_name, text, form) => {
+      expect(SP.formOfText(text, "/Card.spell")).toBe(form)
+    })
+  })
+
+  test("the old endings are named first to last, and never written", () => {
+    expect(SP.SPELLML_SUFFIXES).toEqual([".spellml", OLD])
   })
 
   test("a file's language reads the same from either ending, a range after it too", () => {
@@ -61,12 +80,12 @@ describe("markup file names:  .spellml, and the old ending", () => {
 
 /** A type's property editor in a file of its own (epic `editor` P25):  read by the Inspector, never compiled. */
 describe("property editors files", () => {
-  test("`.editor.spellml` and `.editors.spellml`, in any language, are property editors files, not spell source", () => {
-    for (const name of ["Card.editor.spellml", "/x/Solitaire.editors.spellml", "Carta.editor.es.spellml"]) {
+  test("`.editor.spell` and `.editors.spell`, in any language, are property editors files, not spell source", () => {
+    for (const name of ["Card.editor.spell", "Card.editor.spellml", "/x/Solitaire.editors.spell", "Carta.editor.es.spell"]) {
       expect(SP.isPropertyEditorsName(name), name).toBe(true)
       expect(SP.isSpellSourceName(name), name).toBe(false)
     }
-    for (const name of ["Card.spellml", "Card.editor.html", "Editor.spellml"]) {
+    for (const name of ["Card.spell", "Card.spellml", "Card.editor.html", "Editor.spell"]) {
       expect(SP.isPropertyEditorsName(name), name).toBe(false)
     }
   })

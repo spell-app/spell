@@ -30,7 +30,7 @@ afterAll(() => {
 
 describe("an org's own programs", () => {
   test("are a project group of their own, found by address;  nothing lists it", () => {
-    expect(new SP.SpellLocation("@rs/OrgAdmin/OrgAdmin.spellml").projectId).toBe("@rs/OrgAdmin")
+    expect(new SP.SpellLocation("@rs/OrgAdmin/OrgAdmin.spell").projectId).toBe("@rs/OrgAdmin")
     expect(SP.SpellSetup.projectRootPaths).not.toContain("@rs")
   })
 
@@ -73,7 +73,7 @@ describe("spell space org create", () => {
     expect(source("OrgFeed", "OrgFeed.api.spell")).toContain('"@willzalone/__feed"')
     expect(source("OrgChat", "OrgChat.api.spell")).toContain('"@willzalone/__thread"')
     for (const [page, file] of [
-      ["OrgAdmin", "OrgAdmin.spellml"],
+      ["OrgAdmin", "OrgAdmin.spell"],
       ["OrgChat", "OrgChat.api.spell"]
     ] as const) {
       expect(source(page, file)).not.toMatch(/@rs\b|Rock Society|\bRS\b/)

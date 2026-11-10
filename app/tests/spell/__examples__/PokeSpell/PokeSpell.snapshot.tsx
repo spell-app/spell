@@ -102,19 +102,19 @@ export class Pokemon extends Thing {
   accessor pastTypes!: List<string>
 
   /** Its big picture, the official artwork */
-  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spellml", start: 210, end: 361 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/Pokemon.spell", start: 210, end: 361 }, readsFrom: ["poke_api"] }) }
   get picture() {
     return this.sprites?.other?.officialArtwork?.frontDefault
   }
 
   /** What it says:  its cry, a sound file */
-  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spellml", start: 376, end: 478 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("sound", { declaredAt: { path: "/Pokemon.spell", start: 376, end: 478 }, readsFrom: ["poke_api"] }) }
   get sound() {
     return this.cries?.latest
   }
 
   /** Its number as the games write it, four figures:  #0001 */
-  static { this.declareProp("numberTag", { declaredAt: { path: "/Pokemon.spellml", start: 493, end: 760 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("numberTag", { declaredAt: { path: "/Pokemon.spell", start: 493, end: 760 }, readsFrom: ["poke_api"] }) }
   get numberTag() {
     if (this.number < 10) return `#000${this.number}`
     if (this.number < 100) return `#00${this.number}`
@@ -123,13 +123,13 @@ export class Pokemon extends Thing {
   }
 
   /** Its family, from the first:  its species' evolution chain */
-  static { this.declareProp("evolutions", { declaredAt: { path: "/Pokemon.spellml", start: 775, end: 927 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("evolutions", { declaredAt: { path: "/Pokemon.spell", start: 775, end: 927 }, readsFrom: ["poke_api"] }) }
   get evolutions() {
     return this.species?.evolutionChain?.chain
   }
 
   /** Is it one of your favourites? */
-  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spellml", start: 942, end: 1087 }, readsFrom: ["my_favourites"] }) }
+  static { this.declareProp("loved", { declaredAt: { path: "/Pokemon.spell", start: 942, end: 1087 }, readsFrom: ["my_favourites"] }) }
   get loved() { return core.waitedValue(this, "loved", async () => {
     const address = this.id
     return core.itemCountOf(await core.savedThings(Favourite, { filter: { address: address } })) > 0
@@ -371,7 +371,7 @@ export class PokemonSpecies extends Thing {
   accessor varieties!: List<Variety>
 
   /** The Pokémon it is, as the games show it first */
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8110, end: 8246 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spell", start: 8110, end: 8246 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.answerOf(core.getItemAt(this.varieties, 0), "pokemon")
   }, () => [this.varieties]) }
@@ -439,13 +439,13 @@ export class Type extends Thing {
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spellml", start: 5542, end: 5717 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spell", start: 5542, end: 5717 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spellml", start: 5730, end: 6436 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spell", start: 5730, end: 6436 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -1284,7 +1284,7 @@ export class Favourite extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 338, end: 359 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spellml", start: 8428, end: 8483 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spell", start: 8428, end: 8483 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }
@@ -1451,10 +1451,10 @@ core.heading("PokéSpell")
 ///////////////
 // A Pokédex for kids:  look through every Pokémon, find one by name, keep your favourites, and guess who's hiding.
 // Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.
-// How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.spellml.
+// How a Pokémon looks is in Pokemon.spell, and the guessing game in WhosThat.spell.
 
 // Every button is a round-ended pill, unless it says otherwise
-core.useDefaults("/PokeSpell.spellml", {
+core.useDefaults("/PokeSpell.spell", {
   "ui-button": { appearance: "pill" }
 })
 
@@ -1517,13 +1517,13 @@ export class Pokedex extends App {
     await core.randomItemOf(await core.savedThings(Pokemon))?.open()
   }
 
-  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spellml", start: 1227, end: 1280 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spell", start: 1227, end: 1280 }, readsFrom: ["poke_api"] }) }
   get kindsToPick() { return core.waitedValue(this, "kindsToPick", async () => {
     return core.filter(await core.savedThings(Type, {}, "looks through"), (type: Type) => type.isReal)
   }) }
 
   /** Pokémon names are all small letters:  so the search is too */
-  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spellml", start: 1294, end: 1490 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spell", start: 1294, end: 1490 }, readsFrom: ["poke_api"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const lookingFor = this.search.toLocaleLowerCase()
     return core.filter(await core.savedThings(Pokemon, {}, "looks through"), (pokemon: Pokemon) => core.includes(pokemon.name, lookingFor))

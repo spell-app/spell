@@ -10,7 +10,7 @@
 //   family cookbook is a spreadsheet at "recipes.xlsx"
 //   family cookbook is an excel file at "recipes.xlsx"
 //   (the workbook beside this file, read only:  a spreadsheet reads Excel by the ".xlsx" ending, an excel file whatever it ends in)
-// What's drawn and done with them is in RecipeBox.spellml.
+// What's drawn and done with them is in RecipeBox.spell.
 family cookbook is a database on this device
 
 a "recipe" is a thing:

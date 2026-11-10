@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
-/** A `.spellml` view whose drawing is `drawing`, over a list of films;  what it compiles to, and what's wrong. */
-function compiled(drawing: string, path = "/Shelf.spellml") {
+/** A `.spell` view whose drawing is `drawing`, over a list of films;  what it compiles to, and what's wrong. */
+function compiled(drawing: string, path = "/Shelf.spell") {
   const contents = [
     '<spell-thing "film">',
     "\t<spell>",
@@ -141,7 +141,7 @@ describe("<for>", () => {
       "\t</dibujar>",
       "</encanto-vista>"
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Estante.es.spellml", contents }]).files
+    const [file] = parseSpellProject([{ path: "/Estante.es.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain("core.drawRead")
     expect(file!.compiled).toContain("es-tarjetas")
@@ -186,7 +186,7 @@ describe("<for>'s attributes and slots read as the drawing does", () => {
       "\t</draw>",
       "</spell-view>"
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Shelf.spellml", contents }]).files
+    const [file] = parseSpellProject([{ path: "/Shelf.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain("film.title")
     expect(file!.compiled).toContain("label: () => this.heading")

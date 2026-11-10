@@ -11,13 +11,13 @@ when working with code in this folder, `src/spellx/` of the kit's parser folder 
 
 ## Overview
 
-- SPELLX:  spell's tag-shaped form, a `.spellml` file (epic `elemental-spell`).
+- SPELLX:  spell's tag-shaped form, a `.spell` file (epic `elemental-spell`).
   - A template in a prefixed tag (`<spell-view "playing card">`), its members in short tags inside it
     (`<property>`, `<alias>`, `<action>`, `<on mouse down>`, `<draw "front">` ...), prose between them.
   - The plan, and every decision its shape follows:
     [its epic page](../../../spell.epics/epics/elemental-spell/elemental-spell.plan.html).
   - Its page for people:  [README-spellx.md](../../README-spellx.md).
-- A `.spellml` file is read by spell's OWN parser (P6, Q69 A):  `spell/parser/spell`'s `SpellxTokenizer` reads its tags as
+- A `.spell` file is read by spell's OWN parser (P6, Q69 A):  `spell/parser/spell`'s `SpellxTokenizer` reads its tags as
   tokens, and each tag line parses as its code-spell twin (`SpellxTwin`, J44).  It compiles there, with the rest of spell.
 - This folder is its CHUNK TREE, for the editor, the notebook (P12) and agents (J30):
   - [spellx.types.ts](spellx.types.ts):  the tree's nodes, spans and diagnostics

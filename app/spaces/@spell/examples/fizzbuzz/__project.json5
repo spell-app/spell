@@ -1,17 +1,17 @@
 {
   "title": "FizzBuzz",
-  "description": "Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and an event for each number, which the console prints;  turn on Explainer.spellml for a page that explains it and shows the results",
+  "description": "Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and an event for each number, which the console prints;  turn on Explainer.spell for a page that explains it and shows the results",
   "imports": [
     {
-      "path": "/Console.spellml",
+      "path": "/Console.spell",
       "active": true
     },
     {
-      "path": "/Explainer.spellml",
+      "path": "/Explainer.spell",
       "active": false
     },
     {
-      "path": "/FizzBuzz.spellml",
+      "path": "/FizzBuzz.spell",
       "active": true
     }
   ]

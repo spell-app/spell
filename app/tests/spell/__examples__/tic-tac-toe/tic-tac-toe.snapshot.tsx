@@ -49,7 +49,7 @@ core.heading("Tic-Tac-Toe")
 /////////////////
 // Two players take turns, X then O, putting their mark in an empty square.
 // Three in a row, across, down or corner to corner, wins;  nine marks and no row is a draw.
-// A square is this project's own, in `Square.spellml`;
+// A square is this project's own, in `Square.spell`;
 // this file holds the game, its board, and what a click on a square does.
 
 export class Board extends List<Square> {

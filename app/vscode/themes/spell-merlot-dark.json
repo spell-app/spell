@@ -125,7 +125,7 @@
         "storage",
         "keyword.control.spell",
         "keyword.operator.word.spell",
-        "entity.name.tag.spellx"
+        "entity.name.tag.spell"
       ],
       "settings": {
         "foreground": "#ffa51f"
@@ -247,7 +247,7 @@
       "name": "attr",
       "scope": [
         "entity.other.attribute-name",
-        "entity.other.attribute-name.spellx"
+        "entity.other.attribute-name.spell"
       ],
       "settings": {
         "foreground": "#8fc9d4"

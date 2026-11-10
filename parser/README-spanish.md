@@ -14,7 +14,7 @@ It's a Spell program, written in Spanish, and it compiles:
   }
 ```
 
-_Line 10 of [Carta.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spellml),
+_Line 10 of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
 `<frase "es una figura">si su rango es jota, dama o rey</>`, as the compiler writes it (below, "Try it")._
 
 Spanish is Spell's second human language.
@@ -109,12 +109,12 @@ spell explain carta --in @spell/examples/Solitario
 <summary>Output</summary>
 
 ```text
-...Carta.es.spellml:6
+...Carta.es.spell:6
 plantilla Carta, subplantilla de TwoSidedView
 
 propiedades:  rango, valor, palo, color, símbolo, nombre, estado, imagen, pila
 enumeraciones:  Rangos, Palos, Colores
-declarado en Carta.es.spellml:6
+declarado en Carta.es.spell:6
 
 export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "Solitario")
@@ -292,7 +292,7 @@ Solitario's toolbar is one:
 	</barra-herramientas>
 ```
 
-_From [Solitario.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spellml),
+_From [Solitario.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spell),
 its `<dibujar>`:  a bare name is Spell UI's tag, `<texto>` for `<es-texto>`._
 
 - Tag and attribute names are plain ASCII, `es-boton`, `tamano`;  values keep their accents,
@@ -359,7 +359,7 @@ Spanish (es):  complete, 21 modules
 Written in `.spell` files, Solitaire came out linted clean and passing its six tests, with no person in the loop,
 in under a minute:  about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
 
-A project in `.spellml` comes back in tags:  `Carta.spellml` gives `Carta.es.spellml`, its tags in Spanish.
+A project in `.spell` comes back in tags:  `Carta.spell` gives `Carta.es.spell`, its tags in Spanish.
 The passes below work on the plain Spell each tag file means, then write the result back as tags.
 Prose between the tags is translated as a comment is, so `--no-ai` leaves it in English.
 
@@ -396,8 +396,8 @@ fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (3 files, ...)
   shape:  35 of 42 statements compile to the same program as the English
   45 lines still need a person, marked // TODO: translate:
 ...
-    FizzBuzz.es.spellml:9  phrases "play fizzbuzz"
-    FizzBuzz.es.spellml:10  names "number"
+    FizzBuzz.es.spell:9  phrases "play fizzbuzz"
+    FizzBuzz.es.spell:10  names "number"
 ...
   7 problems left:
 ...

@@ -14,7 +14,7 @@ import { EDITOR, SERVING } from "./runningEditor"
 
 /** The project, and the file answered in its place. */
 const PROJECT = "@spell/examples/StarWarsSite"
-const FILE = "StarWarsSite.spellml"
+const FILE = "StarWarsSite.spell"
 
 /** A small site:  a home page with a button to the about page, and an about page with a link back. */
 const SITE = `<spell-page "home page">

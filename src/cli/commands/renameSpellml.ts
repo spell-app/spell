@@ -20,7 +20,7 @@ import { join } from "node:path"
  */
 export class SpellmlRenamer {
   /**
-   * Rename in `checkout` (a git checkout):  move its `.spellx` files, then rewrite the ending in its text files,
+   * Rename in `checkout` (a git checkout):  move its old-ending files, then rewrite the ending in its text files,
    * unless `dryRun`.
    * - NEVER throws for a file it can't read:  it's skipped.
    */
@@ -111,10 +111,10 @@ const MENTION = /(?<!\b(?:this|words))(\\?)\.spell(?:ml|x)(?![\w?-])/g
  * - this file and its test
  * - the files that list each ending:  the page server's content types (the kit's `mime.ts`), the VS Code extension's
  *   file associations, and spell's own (`SP.SPELLML_SUFFIXES`, in `spell.types.ts`)
- * - the test of the old endings, and the frozen test projects
+ * - the tests of the old endings, whose pairs (`Card.spellml` beside `Card.spell`) can only keep them, and the frozen test projects
  */
 const KEPT =
-  /(^|\/)CHANGELOG\.md$|^tools\/one-repo\/|^agents\/(PAPERCUTS|SUSPECTED-BUGS|CODE-DEBT)\.md$|(^|\/)renameSpellml(\.test)?\.ts$|^src\/server\/mime\.ts$|^parser\/src\/spell\/spell\.types\.ts$|^app\/vscode\/package\.json$|^parser\/tests\/spell\/spellmlNames\.test\.ts$|^app\/spaces\/@spell\/test\//
+  /(^|\/)CHANGELOG\.md$|^tools\/one-repo\/|^agents\/(PAPERCUTS|SUSPECTED-BUGS|CODE-DEBT)\.md$|(^|\/)renameSpellml(\.test)?\.ts$|^src\/server\/mime\.ts$|^parser\/src\/spell\/spell\.types\.ts$|^app\/vscode\/package\.json$|^parser\/tests\/spell\/(spellmlNames\.test\.ts|SpellxTwin\.test\.ts|SourceMaps\.test\.ts|spellx\/)|^parser\/tests\/spellx\/(CodeSpellWriter|SpellxWriter)\.test\.ts$|^app\/tests\/lsp\/SpellLanguageService\.spellx\.test\.ts$|^app\/spaces\/@spell\/test\//
 
 /** `checkout`'s tracked files, paths from its root. */
 function trackedFiles(checkout: string): string[] {

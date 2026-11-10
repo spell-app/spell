@@ -22,7 +22,7 @@ describe("a site", () => {
   })
 
   test("written as spellx, `<spell-site>` with `<page>`, `<dialog>` and `<sidebar>`, it compiles the same", () => {
-    const { code, errors } = compiled(TAGS, "/Galaxy.spellml")
+    const { code, errors } = compiled(TAGS, "/Galaxy.spell")
     expect(errors).toEqual([])
     expect(code).toContain(SITE_CLASS)
   })
@@ -71,7 +71,7 @@ describe("a site", () => {
         '\t<page "films page" address="/films" tags="Forms, Inputs"/>',
         "</>"
       ],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(spellx.errors).toEqual([])
     expect(spellx.code).toContain('tags: ["Forms", "Inputs"]')
@@ -85,7 +85,7 @@ describe("a site", () => {
         '\t<page "films page" address="/films" title="Films" state="old" thumbnail="snapshots/a.png"/>',
         "</spell-site>"
       ],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('state: "old",')
@@ -104,7 +104,7 @@ describe("a site", () => {
           "</>",
           '<spell-view "settings dialog" thumbnail="snapshots/s.jpg"/>'
         ],
-        "/Pages.spellml"
+        "/Pages.spell"
       )
       expect(errors).toEqual([])
       expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/t\.jpg"/)
@@ -116,7 +116,7 @@ describe("a site", () => {
     test("content of its own replaces it:  its body draws, with the thumbnail still known", () => {
       const { code, errors } = compiled(
         ['<spell-page "terms page" thumbnail="t.jpg">', "\t<text>Terms</text>", "</>"],
-        "/P.spellml"
+        "/P.spell"
       )
       expect(errors).toEqual([])
       expect(code).toMatch(/\bdraw\(\)/)
@@ -138,7 +138,7 @@ describe("a site", () => {
           "\t</draw>",
           "</>"
         ],
-        "/P.spellml"
+        "/P.spell"
       )
       expect(errors).toEqual([])
       expect(code).toContain("this.drawThumbnail()")
@@ -193,7 +193,7 @@ describe("a site", () => {
         "\t</>",
         "</spell-site>"
       ],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('color: "blue"')
@@ -286,7 +286,7 @@ describe("a site", () => {
           '\t<page "Boxes & Blades" address="/boxes"/>',
           "</>"
         ],
-        "/G.spellml"
+        "/G.spell"
       )
       expect(errors).toEqual([])
       expect(code).toContain("export class BoxesBlade extends Page")
@@ -297,7 +297,7 @@ describe("a site", () => {
     test("a page no file declares yet waits:  no error, listed under the class it will have", () => {
       const { code, errors } = compiled(
         ['<spell-site "galaxy guide">', '\t<page "My Inbox" address="/inbox/:box"/>', "</>"],
-        "/G.spellml"
+        "/G.spell"
       )
       expect(errors).toEqual([])
       expect(code).toContain('name: "My Inbox"')
@@ -307,7 +307,7 @@ describe("a site", () => {
     test("`live=` is the real page it stands for, in spellx and code spell", () => {
       const spellx = compiled(
         ['<spell-site "galaxy guide">', '\t<page "Films" address="/films" live="https://example.com/f"/>', "</>"],
-        "/G.spellml"
+        "/G.spell"
       )
       expect(spellx.errors).toEqual([])
       expect(spellx.code).toContain('live: "https://example.com/f"')
@@ -329,7 +329,7 @@ describe("a site", () => {
           '\t<page "My Inbox" address="/inbox"/>',
           "</>"
         ],
-        "/G.spellml"
+        "/G.spell"
       )
       expect(errors).toEqual([])
       expect(code).toMatch(/name: "Home",[^}]*group: "Home"/)
@@ -339,10 +339,10 @@ describe("a site", () => {
     test("a sidebar or dialog whose name doesn't say which it is, its view in a later file", () => {
       const project = parseSpellProject([
         {
-          path: "/Site.site.spellml",
+          path: "/Site.site.spell",
           contents: ['<spell-site "galaxy guide">', '\t<sidebar "System Notices" address="/n"/>', "</>"].join("\n")
         },
-        { path: "/notices.spellml", contents: ['<spell-view "System Notices">', "\t<draw>x</draw>", "</>"].join("\n") }
+        { path: "/notices.spell", contents: ['<spell-view "System Notices">', "\t<draw>x</draw>", "</>"].join("\n") }
       ])
       const [site] = project.files
       expect(site!.errors).toEqual([])
@@ -359,7 +359,7 @@ describe("a site", () => {
   test("`<sidebar>`, `<page>` and `<dialog>` outside a `<spell-site>` are markup:  Spell UI's", () => {
     const { errors } = compiled(
       ['<spell-notebook "side notes">', "\t<sidebar>", "\t\tNotes", "\t</>", "</>"],
-      "/Notes.spellml"
+      "/Notes.spell"
     )
     // read as markup, a component the test's pack doesn't have:  not a site's part
     expect(errors).toEqual([expect.stringContaining("<sidebar> isn't a component")])
@@ -502,7 +502,7 @@ describe("going to a site's pages", () => {
         '\t<page "error page"/>',
         "</>"
       ],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('static notFoundPage = { name: "not found page" }')

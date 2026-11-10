@@ -1,5 +1,5 @@
 {
   "title": "App menus",
   "description": "The editor's File, Edit, View and Run menus, in Spell (epic `editor` P16, P20)",
-  "imports": [{ "path": "/AppMenus.spellml", "active": true }]
+  "imports": [{ "path": "/AppMenus.spell", "active": true }]
 }

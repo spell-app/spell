@@ -6,7 +6,7 @@ import { handlersInSource } from "spell/app/app/solid/InspectorSource"
  * `handlersInSource()`:  the handlers an element was written with, read at the place the compiler marked on it.
  */
 
-const FILE = "Tip.spellml"
+const FILE = "Tip.spell"
 const SOURCE = [
   "to draw it:",
   "\treturn <div>",
@@ -37,7 +37,7 @@ describe("handlersInSource()", () => {
 
   test("no mark, or no such file, or no tag there:  nothing, never a guess", () => {
     expect(handlersInSource(document.createElement("ui-button"), SOURCES)).toEqual({})
-    expect(handlersInSource(drawnAt(2, 2, "Other.spellml"), SOURCES)).toEqual({})
+    expect(handlersInSource(drawnAt(2, 2, "Other.spell"), SOURCES)).toEqual({})
     expect(handlersInSource(drawnAt(0, 0), SOURCES)).toEqual({})
   })
 })

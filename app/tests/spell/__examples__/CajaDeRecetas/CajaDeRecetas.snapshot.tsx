@@ -68,7 +68,7 @@ export class Receta extends Thing {
  * recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
  * recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
  * (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
- * Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spellml.
+ * Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spell.
  */
 export class RecetarioFamiliar extends Place {}
 export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
@@ -163,7 +163,7 @@ export class EditorDeRecetaElement extends SpellElement<EditorDeReceta> {
 }
 core.useElement(EditorDeReceta, EditorDeRecetaElement)
 
-core.useDefaults("/CajaDeRecetas.es.spellml", {
+core.useDefaults("/CajaDeRecetas.es.spell", {
   "ui-textarea": { grow: true }
 })
 
@@ -215,7 +215,7 @@ export class CajaDeRecetas extends App {
   }
 
   /** Las más nuevas primero, por cuándo se guardó cada una */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 3873, end: 4083 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3873, end: 4083 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => core.includes(receta.título, this.búsqueda)), (item: Receta) => core.descending(item.creado))
   }, () => [this.búsqueda]) }

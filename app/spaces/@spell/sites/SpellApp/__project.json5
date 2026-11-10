@@ -3,7 +3,7 @@
   "description": "Spell's own app as a site:  a page per screen, with a picture of each",
   "imports": [
     {
-      "path": "/SpellApp.spellml",
+      "path": "/SpellApp.spell",
       "active": true
     }
   ]

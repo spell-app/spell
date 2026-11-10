@@ -1,5 +1,5 @@
 ## Star Wars:  where it all lives
-// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spellml;
+// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spell;
 // the pictures and what they're of come from Wikipedia, in Wikipedia.api.spell.
 // `star wars` is what this wrote, from looking at the server:
 //   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"

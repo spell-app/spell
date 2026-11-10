@@ -7,7 +7,7 @@ import { CODE_SITE, SPELLX_SITE, declaresSite } from "spell/app/spaces/models/si
  * a new page, made where an address had none.
  * - Plain text in, text out:  it loads no parser, so it's tested in node, and the editor applies the result as one
  *   step of its history (`RunSite.createPage()`).
- * - A site may be its routing alone, `X.site.spellml`, each page in a file of its own (epic `mockup` P17):
+ * - A site may be its routing alone, `X.site.spell`, each page in a file of its own (epic `mockup` P17):
  *   a page's name is then its title, and `<group>` lines head its board's sections.
  * - It reads both of Spell's forms:  spellx's `<spell-site>`, and code spell's `galaxy guide is a site:`.
  * - Static and instance-free on purpose:  it holds nothing, and every caller has its own text.
@@ -44,7 +44,7 @@ export class SiteEdits {
 
   /**
    * Is the file at `path` a site's routing alone, its pages each in a file of their own (epic `mockup` P17)?
-   * - `JarvisNew.site.spellml`;  in another language, `Sitio.site.es.spellml`.
+   * - `JarvisNew.site.spell`;  in another language, `Sitio.site.es.spell`.
    */
   static isRoutingOnly(path: string): boolean {
     return ROUTING_ONLY_FILE.test(path)
@@ -64,8 +64,8 @@ export class SiteEdits {
   }
 
   /**
-   * The name of a file of its own for part `name`, not one of `taken`:  `My Inbox` => `my-inbox.spellml`.
-   * - `language`:  `es` writes `.es.spellml`.
+   * The name of a file of its own for part `name`, not one of `taken`:  `My Inbox` => `my-inbox.spell`.
+   * - `language`:  `es` writes `.es.spell`.
    */
   static fileNameFor(name: string, taken: readonly string[], language: "en" | "es" = "en"): string {
     const words = name
@@ -75,7 +75,7 @@ export class SiteEdits {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")
     const base = words || "page"
-    const ending = language === "es" ? ".es.spellml" : ".spellml"
+    const ending = language === "es" ? ".es.spell" : ".spell"
     let file = `${base}${ending}`
     for (let number = 2; taken.includes(file); number++) file = `${base}-${number}${ending}`
     return file
@@ -776,7 +776,7 @@ const ATTRIBUTE = (word: string) => new RegExp(`\\b${word}="([^"]*)"`)
 /** A name a part may have:  it starts with a letter or number, and has no quotes or brackets;  it's often a title. */
 const PART_NAME = /^[\p{L}\p{N}][^"<>{}\n]*$/u
 
-/** A file holding a site's routing alone:  `Galaxy.site.spellml`, `Galaxia.site.es.spellml`. */
+/** A file holding a site's routing alone:  `Galaxy.site.spell`, `Galaxia.site.es.spell`. */
 const ROUTING_ONLY_FILE = /\.site(?:\.[a-z]{2})?\.spell(?:ml|x)$/
 
 /** What starts a group's key (`SiteEdits.groupKey()`):  no name can, as a name starts with a letter or number. */

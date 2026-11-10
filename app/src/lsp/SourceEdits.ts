@@ -58,7 +58,7 @@ export class SourceEdits {
 
   /**
    * The tag opening at `opening` in `text`, read as written:  its name, attributes and where each one is.
-   * - Reads `.spell` and `.spellml` alike, and any language:  it only looks at the shape of a tag.
+   * - Reads both shapes alike, and any language:  it only looks at the shape of a tag.
    * - A template tag's quoted name, `<spell-page "counter notebook">`, is its name's, never its attributes:
    *   a new attribute goes after it (`namedEnd`).
    * - `undefined` when no tag opens there.

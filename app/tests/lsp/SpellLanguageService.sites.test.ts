@@ -51,7 +51,7 @@ describe("SpellLanguageService.sitePartUses()", () => {
       '\t<page "planets page" address="/planets"/>',
       "</>"
     ].join("\n")
-    const project = await projectOf("Galaxy.spellml", contents)
+    const project = await projectOf("Galaxy.spell", contents)
     const uses = LSP.SpellLanguageService.sitePartUses(project, "planets page")
     expect(uses.map(({ match }) => contents.slice(match.start, match.end))).toEqual(["planets page"])
   })

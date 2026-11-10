@@ -37,7 +37,7 @@ const SETTLE_MS = 3000
 const PROJECT = "you@spell/my-app"
 
 /** Its file. */
-const FILE = `${PROJECT}/MyApp.spellml`
+const FILE = `${PROJECT}/MyApp.spell`
 
 describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.html")))(
   "the preview's first run",
@@ -271,7 +271,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
       await page.waitForURL("**/edit/you@spell/second-app**", { timeout: 60_000 })
       await page.waitForSelector("#AddPartButton", { timeout: 60_000 })
       await page.waitForTimeout(SETTLE_MS)
-      expect(await kept("spell-static", "you@spell/second-app/MyApp.spellml")).toContain("<ui-container>")
+      expect(await kept("spell-static", "you@spell/second-app/MyApp.spell")).toContain("<ui-container>")
     })
 
     test("a starter is the person's own, and takes what's added", async () => {
@@ -303,7 +303,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
       await page.waitForURL("**/edit/you@spell/task-list**", { timeout: 60_000 })
       await page.waitForTimeout(SETTLE_MS * 2)
       await shot("13-todo")
-      expect(await kept("spell-static", "you@spell/task-list/TaskList.spellml")).toContain("start the task list")
+      expect(await kept("spell-static", "you@spell/task-list/TaskList.spell")).toContain("start the task list")
     })
 
     test.runIf(!!SHOTS)("pictures, in each look", async () => {

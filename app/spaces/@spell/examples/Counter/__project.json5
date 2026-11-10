@@ -3,7 +3,7 @@
   "description": "A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines",
   "imports": [
     {
-      "path": "/Counter.spellml",
+      "path": "/Counter.spell",
       "active": true
     }
   ]

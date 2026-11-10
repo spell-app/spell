@@ -22,7 +22,7 @@ export class Status extends Thing {
   set owner(value) { this.setProp("owner", value) }
 
   /** Its owner's handle, once their account says so;  else the account itself */
-  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spellml", start: 425, end: 693 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 425, end: 693 }, readsFrom: ["status_board"] }) }
   get who() {
     const account = this.owner
     const person = core.getItemAt(core.filter(core.peopleHere(), (person) => person.id === account), 0)
@@ -63,7 +63,7 @@ core.heading("Statusphere:  where the statuses are kept")
 /**
  * Everyone's statuses, each in its owner's own atmosphere account:  yours go in yours, once you sign in.
  * Their shape is Statusphere's own, read in from its Lexicon:  Status.spell, by "spell space lexicon read".
- * What's drawn and done with them is in Statusphere.spellml.
+ * What's drawn and done with them is in Statusphere.spell.
  */
 export class StatusBoard extends Place {}
 export const statusBoard = core.place(new StatusBoard(), {
@@ -81,7 +81,7 @@ core.heading("Statusphere")
 // Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.
 
 // Every emoji to pick is a big, plain button
-core.useDefaults("/Statusphere.spellml", {
+core.useDefaults("/Statusphere.spell", {
   "ui-button": { size: "large", appearance: "basic" }
 })
 
@@ -95,7 +95,7 @@ export class Statusphere extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   /** Newest first:  by when each was set */
-  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spellml", start: 1028, end: 1155 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 1028, end: 1155 }, readsFrom: ["status_board"] }) }
   get recent() { return core.waitedValue(this, "recent", async () => {
     return await core.savedThings(Status, { sort: [{ field: "created", descending: true }] })
   }) }

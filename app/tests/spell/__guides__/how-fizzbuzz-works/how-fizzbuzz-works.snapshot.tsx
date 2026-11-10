@@ -21,8 +21,8 @@ core.heading("One algorithm, two listeners")
 // - a LISTENER hears those events and decides what to do with them
 
 // FizzBuzz has two listeners:
-// - the console, `Console.spellml`, prints each one as a line
-// - the explainer, `Explainer.spellml`, is a page that explains the game and its history,
+// - the console, `Console.spell`, prints each one as a line
+// - the explainer, `Explainer.spell`, is a page that explains the game and its history,
 // and draws each number as a label as it arrives
 // - It's off in the project file, so the example runs as a plain program.
 // - Turn it on, and the same counting fills the page too:  the algorithm doesn't change at all.

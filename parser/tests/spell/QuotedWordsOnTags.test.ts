@@ -52,7 +52,7 @@ describe("a tag's quoted word", () => {
   test("the editor's view of a tag keeps the word in its head", () => {
     const text =
       '<spell-view "notes">\n\t<draw>\n\t\t<header "Hardware" size="large">more</header>\n\t</draw>\n</spell-view>\n'
-    const file = SX.SpellxView.read(text, { path: "Notes.spellml" })
+    const file = SX.SpellxView.read(text, { path: "Notes.spell" })
     const header = [...file.walk()]
       .map(({ node }) => node)
       .find((node) => node.kind === "element" && node.name === "header")

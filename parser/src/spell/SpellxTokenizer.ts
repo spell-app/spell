@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
 /**
- * Spell's tokenizer for a SPELLX file, spell's tag-shaped form (epic `elemental-spell` P6):  `Card.spellml`.
+ * Spell's tokenizer for a SPELLX file, spell's tag-shaped form (epic `elemental-spell` P6):  `Card.spell`.
  * - A spellx file is read by spell's own rules (Q69):  this tokenizer makes its tags tokens a line of spell can hold,
  *   and `SP.SpellxTwin` reads each tag line as the code-spell line it means.
  * - At the START of a line (after its indent):

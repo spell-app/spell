@@ -14,8 +14,8 @@ import { scopesFromPacks } from "spell/app/lsp/ScopesSource"
 import { compiledSpellProject } from "spell/parser/spell/test"
 import { copyCodeSpellTwin, copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
 
-/** The Solitaire example's Card.spellml:  the tests name its lines by what they say (`lineOf()`), as it changes. */
-const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spellml"), "utf8")
+/** The Solitaire example's Card.spell:  the tests name its lines by what they say (`lineOf()`), as it changes. */
+const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spell"), "utf8")
 /** Its line declaring the card's type. */
 const CARD_TYPE = '<spell-view "card"'
 /** Its line declaring the card's suit, whose node is `suit`. */
@@ -25,7 +25,7 @@ const STATE_DESCRIPTION = "Its short name:  Q♠↓ is the queen of spades, face
 /** The `##` heading in the game's file that the card's moves are under, e.g. `play a card`:  their section. */
 const PLAYING_HEADING = "Playing a card"
 
-/** A project whose folders each hold a `Usage.spellml`, as a language server sees it (epic `notebook` P10). */
+/** A project whose folders each hold a `Usage.spell`, as a language server sees it (epic `notebook` P10). */
 describe("ScopeExplorer of a project with sub-folders", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-folders-"))
   const folder = resolve(dir, "Folders")
@@ -38,28 +38,28 @@ describe("ScopeExplorer of a project with sub-folders", () => {
   beforeAll(async () => {
     for (const name of ["Button", "Divider"]) mkdirSync(resolve(folder, name), { recursive: true })
     writeFileSync(resolve(folder, SP.PROJECT_FILE), JSON.stringify({ imports: [] }))
-    writeFileSync(resolve(folder, "Button/Usage.spellml"), '<spell-thing "button usage">\n</spell-thing>\n')
-    writeFileSync(resolve(folder, "Divider/Usage.spellml"), '<spell-thing "divider usage">\n</spell-thing>\n')
-    await workspace.update(uriOf("Button/Usage.spellml"), readFileSync(resolve(folder, "Button/Usage.spellml"), "utf8"))
-    project = workspace.fileFor(uriOf("Button/Usage.spellml"))!.project as SP.SpellProject
+    writeFileSync(resolve(folder, "Button/Usage.spell"), '<spell-thing "button usage">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Divider/Usage.spell"), '<spell-thing "divider usage">\n</spell-thing>\n')
+    await workspace.update(uriOf("Button/Usage.spell"), readFileSync(resolve(folder, "Button/Usage.spell"), "utf8"))
+    project = workspace.fileFor(uriOf("Button/Usage.spell"))!.project as SP.SpellProject
   })
 
   test("two files of one name are two entries, each keyed by its path in the project;  each parses", () => {
-    expect(project.spellFiles.map((file) => file.filePath)).toEqual(["/Button/Usage.spellml", "/Divider/Usage.spellml"])
+    expect(project.spellFiles.map((file) => file.filePath)).toEqual(["/Button/Usage.spell", "/Divider/Usage.spell"])
     expect([...all(explorer.tree(project))].filter((node) => node.kind === "file").map((node) => node.path)).toEqual([
-      "project:Folders/file:Button%2FUsage.spellml",
-      "project:Folders/file:Divider%2FUsage.spellml"
+      "project:Folders/file:Button%2FUsage.spell",
+      "project:Folders/file:Divider%2FUsage.spell"
     ])
     expect(find(explorer.tree(project), "DividerUsage").path).toBe(
-      "project:Folders/file:Divider%2FUsage.spellml/type:DividerUsage"
+      "project:Folders/file:Divider%2FUsage.spell/type:DividerUsage"
     )
   })
 
   test("the views panel's file list names each by its path", () => {
-    const file = workspace.fileFor(uriOf("Divider/Usage.spellml"))!
+    const file = workspace.fileFor(uriOf("Divider/Usage.spell"))!
     expect(service.projectInfo(file).files.map((each) => `${each.file} ${each.errors}`)).toEqual([
-      "Button/Usage.spellml 0",
-      "Divider/Usage.spellml 0"
+      "Button/Usage.spell 0",
+      "Divider/Usage.spell 0"
     ])
   })
 })
@@ -71,7 +71,7 @@ describe("ScopeExplorer of a project with sub-folders", () => {
 describe("ScopeExplorer", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-"))
   copyFixtureProject("@spell/examples/Solitaire", resolve(dir, "Solitaire"))
-  const cardPath = resolve(dir, "Solitaire/Card.spellml")
+  const cardPath = resolve(dir, "Solitaire/Card.spell")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
   const explorer = new LSP.ScopeExplorer(new LSP.SpellLanguageService(workspace))
@@ -113,7 +113,7 @@ describe("ScopeExplorer", () => {
     const member = (name: string) => card.members.find((it) => it.name === name)!
     // the card's moves are declared in the game's file, under its `## Playing a card`
     expect(member("play a card").section).toBe(PLAYING_HEADING)
-    expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spellml$/)
+    expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spell$/)
     expect(member("count the points for a card on a pile").section).toBe(PLAYING_HEADING)
     // the card's own file has no `##` heading
     expect(member("suit").section).toBeUndefined()
@@ -140,7 +140,7 @@ describe("ScopeExplorer", () => {
 
   // known gap, epic `elemental-spell` I9:  a spellx declaration's source stops before its tag's `/>`
   test.fails("a declaration's details:  its docstring, spell source and compiled javascript", () => {
-    expect(find(tree, "suit").path).toBe("project:Solitaire/file:Card.spellml/type:Card/property:suit")
+    expect(find(tree, "suit").path).toBe("project:Solitaire/file:Card.spell/type:Card/property:suit")
     // its `description=`:  its docstring
     expect(details("state").description).toBe(STATE_DESCRIPTION)
     const suit = details("suit")
@@ -170,7 +170,7 @@ describe("ScopeExplorer", () => {
   test("constants show on the type whose statement declared them, NOT the project", () => {
     const project = [...all(tree)].find((node) => node.path === "project:Solitaire")!
     expect(project.members.map((member) => member.name)).not.toContain("ace")
-    expect(find(tree, "ace").path).toBe("project:Solitaire/file:Card.spellml/type:Card/constant:ace")
+    expect(find(tree, "ace").path).toBe("project:Solitaire/file:Card.spell/type:Card/constant:ace")
   })
 
   test("a node lists the rules its statement made", () => {
@@ -287,9 +287,9 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 
   beforeAll(async () => {
     installDiskFetch()
-    lib = makeProject("lib", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"])
+    lib = makeProject("lib", ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell"])
     await lib.compile()
-    app = makeProject("app", ["Solitaire.spellml"], [{ path: lib.projectId, active: true }])
+    app = makeProject("app", ["Solitaire.spell"], [{ path: lib.projectId, active: true }])
     await app.parse()
     // as the server does, before asking for the tree
     for (const imported of LSP.ScopeExplorer.importedProjects(app)) await imported.parse()
@@ -302,7 +302,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 
   test("its types are from its sources:  docs and locations", () => {
     const suit = find(tree, "Card").members.find((member) => member.name === "suit")!
-    expect(find(tree, "suit").uri).toMatch(/\/lib\/Card\.spellml$/)
+    expect(find(tree, "suit").uri).toMatch(/\/lib\/Card\.spell$/)
     expect(explorer.details(app, suit.path)?.line).toBe(lineOf(CARD_TEXT, SUIT))
   })
 
@@ -311,14 +311,14 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
     const fromPile = tableau.members.filter((member) => member.inheritedFrom === "Pile")
     expect(fromPile.length).toBeGreaterThan(0)
     // pointing at the members of its OWN Pile, in the imported project -- NOT the declarations-only one
-    for (const member of fromPile) expect(member.path).toMatch(/^project:lib\/file:Pile\.spellml\/type:Pile\//)
-    expect(find(tree, "Tableau").super).toBe("project:lib/file:Pile.spellml/type:Pile")
+    for (const member of fromPile) expect(member.path).toMatch(/^project:lib\/file:Pile\.spell\/type:Pile\//)
+    expect(find(tree, "Tableau").super).toBe("project:lib/file:Pile.spell/type:Pile")
     expect(explorer.details(app, fromPile[0]!.path)?.line).toBeDefined()
   })
 
   test("once tracked, the imported project's files changing on disk show next time -- as the server does", async () => {
     await disk.track(lib)
-    const cardPath = resolve(workspace, "lib", "Card.spellml")
+    const cardPath = resolve(workspace, "lib", "Card.spell")
     writeFileSync(cardPath, `${readFileSync(cardPath, "utf8")}\n<spell>\n\tcards have a weight as a number\n</spell>\n`)
     await disk.diskChanged(pathToFileURL(cardPath).href, "changed")
     const card = find(explorer.tree(app), "Card")
@@ -326,7 +326,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   })
 
   test("a compiled-only import -- no sources:  our types inherit its methods from its declarations", async () => {
-    const cards = makeProject("cards", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"])
+    const cards = makeProject("cards", ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell"])
     await cards.compile()
     const game = makeProject("game", [], [{ path: cards.projectId, active: true }], {
       "Wildcard.spell": "a wildcard is a card\n"
@@ -353,7 +353,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
     expect(projects.map((entry) => entry.path)).toEqual(["project:lib", "project:app"])
     const json = JSON.stringify(pack)
     expect(json).not.toContain("file://")
-    expect(json).toContain(`spell:/${encodeURI(lib.projectId)}/Card.spellml`)
+    expect(json).toContain(`spell:/${encodeURI(lib.projectId)}/Card.spell`)
   })
 
   /**
@@ -383,7 +383,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 describe("ScopeExplorer scope packs", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scope-packs-"))
   copyFixtureProject("@spell/examples/Solitaire", resolve(dir, "Solitaire"))
-  const cardPath = resolve(dir, "Solitaire/Card.spellml")
+  const cardPath = resolve(dir, "Solitaire/Card.spell")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
   const explorer = new LSP.ScopeExplorer(new LSP.SpellLanguageService(workspace))
@@ -421,7 +421,7 @@ describe("ScopeExplorer scope packs", () => {
   test("no `file://` URIs -- a file's own is `spell:/<file.path>`, and what's in it has none", () => {
     expect(JSON.stringify(pack)).not.toContain("file://")
     const card = workspace.fileFor(cardUri)!
-    const file = pack.entries.find((entry) => entry.path === "project:Solitaire/file:Card.spellml")!
+    const file = pack.entries.find((entry) => entry.path === "project:Solitaire/file:Card.spell")!
     expect(file.uri).toBe(`spell:/${encodeURI(card.path)}`)
     expect(pack.entries.find((entry) => entry.path.endsWith("/property:suit"))!.uri).toBeUndefined()
   })
@@ -507,7 +507,7 @@ describe("ScopeExplorer scope packs", () => {
 describe("ScopeExplorer built-in types", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scope-built-ins-"))
   copyFixtureProject("@spell/examples/Solitaire", resolve(dir, "Solitaire"))
-  const cardPath = resolve(dir, "Solitaire/Card.spellml")
+  const cardPath = resolve(dir, "Solitaire/Card.spell")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
   const service = new LSP.SpellLanguageService(workspace)

@@ -1,5 +1,5 @@
 ## The Met Museum:  every artwork in its collection, and a search of all of it
-// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in MetMuseum.spell.
 // `met museum` is what this wrote, from looking at the server:
 //   spell place ingest https://collectionapi.metmuseum.org/public/collection --kind "web server" --docs https://metmuseum.github.io
 //     --into MetMuseum.api.spell --name "met museum" --no-ai --collections "artworks=/v1/objects,artworks=/v1.1/search?q=sunflowers"

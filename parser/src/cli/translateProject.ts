@@ -28,8 +28,8 @@
  *   - `<Project>.<lang>.names.json5`:  its names dictionary, for a person to review (`TranslationNames`)
  *   - `<Project>.<lang>.translated.json5`:  what each source line was when it was last translated, a hash per line,
  *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
- * - A TAG FILE (`.spellml`, language I68):  the passes work on the plain Spell it means (`SourceFile.tagFile`),
- *   and the checked translation is written back as tags (`writeTagFiles()`):  `Card.spellml` => `Carta.es.spellml`.
+ * - A TAG FILE (`.spell`, language I68):  the passes work on the plain Spell it means (`SourceFile.tagFile`),
+ *   and the checked translation is written back as tags (`writeTagFiles()`):  `Card.spell` => `Carta.es.spell`.
  * - Loaded only when it runs (`commands.ts` imports the hook's work dynamically):  it loads all of spell.
  */
 import { createHash } from "node:crypto"
@@ -703,7 +703,7 @@ type CheckResult = Awaited<ReturnType<TranslationChecker>> & {
 }
 
 /**
- * Write each tag file's translation back as tags (`SX.SpellxWriter`):  `/Carta.es.spell` => `/Carta.es.spellml`.
+ * Write each tag file's translation back as tags (`SX.SpellxWriter`).
  * - Its names, lines and fix-ups were worked out on its plain form, and that's what `checked` parsed:
  *   line `i` of the translation is line `i` of the source's plain form, so its prose lines are still known.
  * - Checks the project again, written as tags.  If that has more lint or test problems, or nothing could parse it

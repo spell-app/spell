@@ -15,7 +15,7 @@ import { EDITOR, SERVING } from "./runningEditor"
 
 /** The project, and its site's file. */
 const PROJECT = "@spell/examples/StarWarsSite"
-const FILE = "StarWarsSite.spellml"
+const FILE = "StarWarsSite.spell"
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 1500

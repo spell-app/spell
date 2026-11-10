@@ -8,7 +8,7 @@ import { monaco } from "./monaco"
  * Instant colouring for spell, line by line, from its TOKENS:  words, symbols, numbers, comments, text.
  * - Needs no parse, so it's there from the first keystroke;  colouring from the parse (semantic tokens) goes on top.
  * - Each spell line tokenizes on its own.
- * - Code spell (`Card.spell`) by spell's own tokenizer;  spellx (`Card.spellml`) by its `SP.SpellxTokenizer`,
+ * - Plain Spell by spell's own tokenizer;  a tag-shaped file by its `SP.SpellxTokenizer`,
  *   a provider of its own:  see `forSpellx()`.
  *   - A tag line colours as its code-spell twin does (`SP.SpellxTwin`):  `<property "rank" one-of="...">` reads as
  *     `its "rank" is one of ...`, so `"rank"` is a string and `ace` a word.
@@ -250,7 +250,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
     const text = line.slice(head.start, head.end)
     const word = /^<([^\s/>]+)/.exec(text)?.[1]
     if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
-    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spellml`)
+    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spell`)
     const name = /"[^"]*"/.exec(text)
     if (name)
       pieces.push({ start: head.start + name.index, end: head.start + name.index + name[0].length, scopes: "string" })

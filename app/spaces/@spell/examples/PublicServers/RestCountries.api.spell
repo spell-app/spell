@@ -1,5 +1,5 @@
 ## REST Countries:  every country in the world, its flag, its capital, its money, its languages and its names
-// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spellml.
+// A server other people run, and what it holds.  What's drawn from it is in RestCountries.spell.
 // `rest countries` is what this wrote, from looking at the server:
 //   spell place ingest https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0 --into RestCountries.api.spell
 //     --name "rest countries" --no-ai --collections "countries=/countries.json"

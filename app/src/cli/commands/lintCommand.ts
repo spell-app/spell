@@ -21,12 +21,12 @@ const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
  * - `--fix`:  puts right what it can, writes it back,
  *   then lists what it did, one line each (`... fixed:  ...`), on stdout (with `--json`, on stderr):
  *   - each retired word in the spell, e.g. `parts` => `slots` -- see `fixRetiredWords()`
- *   - a `.spellml` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
- *   - a `.spellml` page's old spellings, e.g. `<spell-notebook "x">` => `<spell-page "x" notebook>` --
+ *   - a `.spell` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
+ *   - a `.spell` page's old spellings, e.g. `<spell-notebook "x">` => `<spell-page "x" notebook>` --
  *     see `fixPageHabits()`
  *   - each editor page
  *   - What it can't put right is still an error.
- * - A `.spellml` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
+ * - A `.spell` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
  * - A page's example described by a `<text>` just before it is a WARNING, which `--fix` puts right --
  *   see `pageHabitsIn()`.
  * - SIDE EFFECT:  compiles any project they import which has never been compiled --
@@ -133,7 +133,7 @@ async function fixRetiredWords(
 }
 
 /**
- * With `--fix`:  put each HTML habit in `project`'s `.spellml` files right -- only `file`'s, if given --
+ * With `--fix`:  put each HTML habit in `project`'s `.spell` files right -- only `file`'s, if given --
  * and write each changed file back (epic `elemental-spell` P8):
  * - a component written by its tag, where spellx names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`
  * - an action's retired attribute, as spell waits by itself (epic `language` P13):
@@ -197,7 +197,7 @@ async function fixHtmlHabits(
 }
 
 /**
- * With `--fix`:  put each old spelling in `project`'s `.spellml` pages right -- only `file`'s, if given --
+ * With `--fix`:  put each old spelling in `project`'s `.spell` pages right -- only `file`'s, if given --
  * and write each changed file back (epic `notebook` P8):
  * - a template word that brings a flag, written as the page's word and the flag:
  *   `<spell-notebook "x" locked>` => `<spell-page "x" notebook locked>`, its named closer too;
@@ -274,7 +274,7 @@ async function fixPageHabits(
 }
 
 /**
- * The HTML habits in `project`'s `.spellml` files that `--fix` can't put right -- only `file`'s, if given:
+ * The HTML habits in `project`'s `.spell` files that `--fix` can't put right -- only `file`'s, if given:
  * an element's `on-click=` (or any `on-...=`), which spellx handles in its template, with `<on click>...</>`.
  * - NOT a component's own event (`on-ui-closed=`):  it reaches only a listener on that element, never an `<on ...>`.
  * - Each a problem, where it is;  read from the files as last parsed.
@@ -301,7 +301,7 @@ function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Proble
 }
 
 /**
- * The page habits in `project`'s `.spellml` files that `--fix` puts right, as WARNINGS -- only `file`'s, if given:
+ * The page habits in `project`'s `.spell` files that `--fix` puts right, as WARNINGS -- only `file`'s, if given:
  * a description written as a `<text>` just before its example, `description-before-example` (epic `notebook` P8).
  * - A warning, not an error:  the page still draws, the text as prose above the example, not as its description.
  * - Each where its `<text>` is;  read from the files as last parsed.
@@ -403,7 +403,7 @@ async function writeFixes(project: SP.SpellProject, spellFile: SP.SpellFile, fix
 }
 
 /**
- * `project`'s `.spellml` files that have parsed -- only `file`, if it is one.
+ * `project`'s `.spell` files that have parsed -- only `file`, if it is one.
  * - Not a test project's, which `--fix` never changes, unless `"test projects too"`:  a check reads them.
  */
 function spellmlFiles(project: SP.SpellProject, file?: SP.SpellFile, which?: "test projects too"): SP.SpellFile[] {

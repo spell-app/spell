@@ -31,7 +31,7 @@ export const spellEditorVocabulary = {
       name: "file",
       kind: "string",
       description:
-        "Which file to show first, by its path in the project (`Button/Usage.spellml`) or its bare name (`Card.spell`);  default, its first spell file.  Tabs show the others."
+        "Which file to show first, by its path in the project (`Button/Usage.spell`) or its bare name (`Card.spell`);  default, its first spell file.  Tabs show the others."
     },
     {
       name: "app",

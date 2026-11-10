@@ -138,9 +138,9 @@ describe("SpellLanguageService, the X reading a property (epic `language`, P5)",
 	</action>
 </spell-view>
 `
-    writeFileSync(resolve(tiles, "Tile.spellml"), source)
-    writeFileSync(resolve(tiles, SP.PROJECT_FILE), `{ imports: [{ path: "/Tile.spellml", active: true }] }\n`)
-    const tileUri = pathToFileURL(resolve(tiles, "Tile.spellml")).href
+    writeFileSync(resolve(tiles, "Tile.spell"), source)
+    writeFileSync(resolve(tiles, SP.PROJECT_FILE), `{ imports: [{ path: "/Tile.spell", active: true }] }\n`)
+    const tileUri = pathToFileURL(resolve(tiles, "Tile.spell")).href
     await workspace.update(tileUri, source)
     const tile = workspace.fileFor(tileUri)!
     // hover, F12 and colour on `the score`:  the property, never the new local `v` (I10, from M1)

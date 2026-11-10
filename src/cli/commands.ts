@@ -17,7 +17,7 @@
  *   checked, then published under the tag `next` unless told otherwise (epic `repo-split` P19, P22)
  * - `spell rename imports [--dry-run] [repos...]`:  the import rename of epic `repo-split` P20 (`spell-ui/x` =>
  *   `spell/ui/x` ...), kept for branches open when it landed
- * - `spell rename spellml [--dry-run] [checkouts...]`:  Spell's markup files, `.spellx` => `.spellml` (epic
+ * - `spell rename spellml [--dry-run] [checkouts...]`:  Spell's markup files, `.spell` => `.spell` (epic
  *   `repo-split` P21):  moved with `git mv`, and every mention but the record's;  kept for branches open when it landed
  * - `spell rename branches [--dry-run]`:  an epic's old child-repo branches carried into the merged folders, rewritten
  *   as P20's history was (`tools/one-repo/one-repo.ts --step carry-on`)
@@ -291,7 +291,7 @@ export default function kitCommands(spell: Command): void {
 
   rename
     .command("spellml")
-    .description("Spell's markup files, .spellx => .spellml:  each file moved with git mv, and each mention (P21)")
+    .description("Spell's markup files, .spell => .spell:  each file moved with git mv, and each mention (P21)")
     .argument("[checkouts...]", "the checkouts to rename in;  none:  this kit")
     .option("--dry-run", "only report what it would change")
     .option("--json", "print each checkout's report as JSON")

@@ -196,9 +196,9 @@ describe("SiteEdits", () => {
     ].join("\n")
 
     test("its file is named for it", () => {
-      expect(SiteEdits.isRoutingOnly("/Galaxy.site.spellml")).toBe(true)
-      expect(SiteEdits.isRoutingOnly("/Galaxia.site.es.spellml")).toBe(true)
-      expect(SiteEdits.isRoutingOnly("/Galaxy.spellml")).toBe(false)
+      expect(SiteEdits.isRoutingOnly("/Galaxy.site.spell")).toBe(true)
+      expect(SiteEdits.isRoutingOnly("/Galaxia.site.es.spell")).toBe(true)
+      expect(SiteEdits.isRoutingOnly("/Galaxy.spell")).toBe(false)
     })
 
     test("a group holds the lines after it, and is known apart from a page of its name", () => {
@@ -249,9 +249,9 @@ describe("SiteEdits", () => {
     })
 
     test("a card's own file:  named for it, its name free, showing its name", () => {
-      expect(SiteEdits.fileNameFor("Boxes & Blades", [])).toBe("boxes-blades.spellml")
-      expect(SiteEdits.fileNameFor("Home", ["home.spellml"])).toBe("home-2.spellml")
-      expect(SiteEdits.fileNameFor("Películas", [], "es")).toBe("peliculas.es.spellml")
+      expect(SiteEdits.fileNameFor("Boxes & Blades", [])).toBe("boxes-blades.spell")
+      expect(SiteEdits.fileNameFor("Home", ["home.spell"])).toBe("home-2.spell")
+      expect(SiteEdits.fileNameFor("Películas", [], "es")).toBe("peliculas.es.spell")
       const page = SiteEdits.partNamed(ROUTING, "My Inbox")
       expect(SiteEdits.stubFor(page)).toBe('<spell-page "My Inbox">\n\t<header size="large">My Inbox</header>\n</>\n')
       const sidebar = SiteEdits.partNamed(ROUTING, "System Notices")

@@ -106,7 +106,7 @@ core.heading("Flash Cards")
 // A deck of cards to learn from:  a Spanish word on the front, what it means on the back.
 // Click the card, or Show the answer, to turn it over, then say whether you knew it:
 // the score keeps count, and the next card comes up at random.
-// The card is this project's own, in `FlashCard.spellml`;  this file holds the quiz, and its words.
+// The card is this project's own, in `FlashCard.spell`;  this file holds the quiz, and its words.
 
 export class Quiz extends App {
   static elementTag = core.defineElement(this, "test-project", "App")

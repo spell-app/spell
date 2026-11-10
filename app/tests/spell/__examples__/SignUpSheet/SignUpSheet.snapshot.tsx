@@ -289,7 +289,7 @@ export class SignUpPage extends App {
   @prop({ init: () => new Ticket(), early: true })
   accessor newTicket!: Ticket
 
-  static { this.declareProp("counts", { declaredAt: { path: "/SignUpSheet.spellml", start: 2300, end: 2366 }, readsFrom: ["my_inbox"] }) }
+  static { this.declareProp("counts", { declaredAt: { path: "/SignUpSheet.spell", start: 2300, end: 2366 }, readsFrom: ["my_inbox"] }) }
   get counts() { return core.waitedValue(this, "counts", async () => {
     return await core.savedThings(Message, { filter: { thread: "invitations" } })
   }) }

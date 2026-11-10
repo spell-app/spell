@@ -18,7 +18,7 @@ describe("a quoted word on Spell UI's tags", () => {
   /** A view drawing `markup`, compiled to `target`;  `extra` is a file beside it. */
   function compiled(markup: string, target: string, language: "en" | "es", extra?: SpellSourceFile) {
     const [tag, draw, file] =
-      language === "es" ? ["encanto-vista", "dibujar", "Notas.es.spellml"] : ["spell-view", "draw", "Notes.spellml"]
+      language === "es" ? ["encanto-vista", "dibujar", "Notas.es.spell"] : ["spell-view", "draw", "Notes.spell"]
     const contents = `<${tag} "notes">\n\t<${draw}>\n\t\t${markup}\n\t</${draw}>\n</${tag}>\n`
     const sources = [...(extra ? [extra] : []), { path: `/${file}`, contents }]
     const { scope, files } = parseSpellProject(sources)
@@ -95,7 +95,7 @@ describe("a quoted word on Spell UI's tags", () => {
 
   test("a project's own view named like a listed tag takes the word as its contents", () => {
     const own = {
-      path: "/Header.spellml",
+      path: "/Header.spell",
       contents: '<spell-view "header">\n\t<draw>\n\t\t<segment><slot/></segment>\n\t</draw>\n</spell-view>\n'
     }
     expect(compiled('<header "Word"/>', "js/solid", "en", own)).toBe(

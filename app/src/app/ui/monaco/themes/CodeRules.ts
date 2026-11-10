@@ -13,7 +13,7 @@ const HEADING_LEVELS = [1, 2, 3, 4]
  * - Rules for spell's OWN token names, as both colourings name them:
  *   - the instant colouring's scopes (`SpellTokensProvider`):  `comment.header` (a `#` heading), `comment`, `string`,
  *     `number`, `operator`, `identifier`, and `tag` / `delimiter` round a `<css>` block
- *     - a `.spellml` tag's too:  its word a `keyword`, its attributes' names `attribute.name`, its `<`, `>` and closers
+ *     - a `.spell` tag's too:  its word a `keyword`, its attributes' names `attribute.name`, its `<`, `>` and closers
  *       `delimiter`
  *   - the parse's semantic token types (`LSP.SpellLanguageService.TOKEN_LEGEND`):  `keyword`, `type`, `variable`,
  *     `parameter`, `property`, `function`, `enumMember` ...;

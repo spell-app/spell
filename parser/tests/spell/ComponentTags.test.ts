@@ -26,7 +26,7 @@ describe("ComponentTags", () => {
   ].join("\n")
 
   test("each element's tag, as the parse chose it:  the project's own views, then its packs'", () => {
-    const [file] = parseSpellProject([{ path: "/Counter.spellml", contents: TEXT }]).files
+    const [file] = parseSpellProject([{ path: "/Counter.spell", contents: TEXT }]).files
     const tags = SP.ComponentTags.of(file!)
     const counter = TEXT.indexOf("<counter/>")
     expect(tags.componentTag("counter", counter)).toMatch(/-counter$/)
@@ -37,7 +37,7 @@ describe("ComponentTags", () => {
   })
 
   test("backwards:  the bare name a tag stands for;  none for a tag no bare name gives", () => {
-    const [file] = parseSpellProject([{ path: "/Counter.spellml", contents: TEXT }]).files
+    const [file] = parseSpellProject([{ path: "/Counter.spell", contents: TEXT }]).files
     const tags = SP.ComponentTags.of(file!)
     expect(tags.wordFor(tags.tagFor("counter")!)).toBe("counter")
     expect(tags.wordFor("ui-text")).toBe("text")
@@ -46,7 +46,7 @@ describe("ComponentTags", () => {
   })
 
   test("kept per parse:  the same answer until the file parses again", () => {
-    const [file] = parseSpellProject([{ path: "/Counter.spellml", contents: TEXT }]).files
+    const [file] = parseSpellProject([{ path: "/Counter.spell", contents: TEXT }]).files
     expect(SP.ComponentTags.of(file!)).toBe(SP.ComponentTags.of(file!))
   })
 })

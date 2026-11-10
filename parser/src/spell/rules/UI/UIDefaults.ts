@@ -27,7 +27,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  *   everything drawn inside it, as a `<ui-root defaults>` does.
  * - Its own block declares the table, so another project can name its file in `source`
  *   (`uiDefaults` in the declarations;  `SpellDeclarations.uiDefaultsIn()`).
- * - A file's top level:  in a `.spellml` file too, where the block is markup, read as code spell reads it.
+ * - A file's top level:  in a `.spell` file too, where the block is markup, read as code spell reads it.
  */
 export class UIDefaults extends P.TokenType<never, UIDefaultsData> {
   @proto static alias = "statement"

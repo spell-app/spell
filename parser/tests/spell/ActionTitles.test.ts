@@ -47,7 +47,7 @@ describe("an action's title", () => {
       '\t<action "compile and run" title="Compile and Run">print 1</action>',
       "</spell-app>"
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Editor.spellml", contents: english }]).files
+    const [file] = parseSpellProject([{ path: "/Editor.spell", contents: english }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('{ title: "Compile and Run" }')
     const spanish = [
@@ -55,7 +55,7 @@ describe("an action's title", () => {
       '\t<acción "compilar" título="Código">imprimir 1</acción>',
       "</encanto-aplicación>"
     ].join("\n")
-    const [file2] = parseSpellProject([{ path: "/Editor.es.spellml", contents: spanish }]).files
+    const [file2] = parseSpellProject([{ path: "/Editor.es.spell", contents: spanish }]).files
     expect(file2!.errors).toEqual([])
     expect(file2!.compiled).toContain('{ title: "Código" }')
   })
