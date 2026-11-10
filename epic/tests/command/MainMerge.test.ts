@@ -117,6 +117,21 @@ describe("MainMerge.run()", () => {
     expect(git(repo, "ls-files", ".ignore")).toBe(".ignore")
   })
 
+  test("epic init --local's links and config, listed only in .git/info/exclude:  never uncommitted (epic-engine P69)", () => {
+    const repo = makeRepo("local-setup")
+    change(repo, "wip", { "src/wip.txt": "the branch's own work\n" })
+    change(repo, "main", { "src/main.txt": "main's\n" })
+    mkdirSync(join(TEMP, "local-setup.epics", "epics"), { recursive: true })
+    symlinkSync(join(TEMP, "local-setup.epics", "epics"), join(repo, "epics"))
+    mkdirSync(join(repo, ".epic"))
+    writeFileSync(join(repo, ".epic", "config.json5"), '{ "localSetup": true }\n')
+    writeFileSync(join(repo, ".git/info/exclude"), "/.epic/\n/epics\n")
+
+    const report = new MainMerge({ root: repo, ...OPTIONS }).run()
+    expect(report).toMatchObject({ result: "merged", unstaged: [] })
+    expect(git(repo, "status", "--porcelain")).toBe("")
+  })
+
   test("up to date, fast-forward, and refusals", () => {
     const repo = makeRepo("simple")
     expect(new MainMerge({ root: repo, ...OPTIONS }).run().result).toBe("up-to-date")

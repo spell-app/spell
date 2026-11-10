@@ -299,7 +299,7 @@ Every verb here only reads, but `create`, `stage` and `change`:  run them from a
 | Verb | What it does |
 | --- | --- |
 | `epic create <epic> --title "Title"` | makes an epic page from the template, and lists it on the docs' home page;  `--prompt "..."` or `--prompt-file <file>`:  the prompt that started it;  `--saga <id>`:  the saga it serves;  `--future`:  an idea for later, not planned yet;  `--stage <stage>`:  the stage it starts in (`overview`, unless you say);  on a future epic's page, plans it where it is |
-| `epic stage <epic> overview \| phases \| building` | sets the page's stage, which decides what it shows:  `overview` (the Overview, Questions and Todos), `phases` (the Phases and Issues too) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
+| `epic stage <epic> overview \| phases \| building` | sets the page's stage:  `overview` (phases titled as drafts), `phases` (phases agreed) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
 | `epic change <epic> [--for <item>]` | stamps the change marks written by hand (`<epic-change item="q13">words</epic-change>`) with their id, time, answer and the words they replaced, then lists them;  `--for`:  the item of the marks that name none;  any epic edit stamps them too |
 | `epic list [--json]` | lists every epic once:  in progress, future or done, where it runs, and how many of its items you haven't reviewed |
 | `epic summary <epic> [--json]` | prints an epic's phases, the next one, and its open questions, judgement calls, issues, todos, limits and manual tests |

@@ -33,6 +33,11 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
     `spell/app/spaces/test` (the frozen test projects), `spell/ui/test-helpers/...`,
     `spell/server/test/...` (WWOD §4);  every set's element helpers are the kit's, `spell/test-helpers/...`
     (`ElementFixture`, `A11y` ...).
+- **Tests never leave anything in your real space:**
+  - Point a test at a temporary folder (`SPELL_SPACES_DIR`, read when `environment` loads:  set it before importing).
+  - A test that needs the running editor makes its project with `createTestProject()`, and removes it through that:
+    SEE:  `app/AGENTS.md`, "Tests".
+  - Every Vitest run in `app/` fails naming any new folder there (`realSpaceCheck`).
 - **Hand-rolled fakes over mock libraries:**
   - Hooks objects of `vi.fn()`:  `const hooks = { onChange: vi.fn() }`.
   - `vi.mock()` only to cut a module seam, e.g. `vi.mock("./loadRuntime", ...)`

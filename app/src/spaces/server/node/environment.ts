@@ -1,26 +1,13 @@
 import { homedir } from "os"
 import { fileURLToPath } from "url"
-import { basename, dirname, join, resolve } from "path"
+import { dirname, join, resolve } from "path"
 
-// The server's checkout finder, node built-ins only:  the main checkout from any worktree.
-// By the server package's npm name, as every import is (WWOD §4).
-// - NOTE: imports nothing of spell-app's:  app's `vite.config.ts` loads this file.
-import { checkoutOf } from "spell/server/checkout"
+// NOTE: imports nothing of spell-app's but its leaf, `spellSpacesDir`:  app's `vite.config.ts` loads this file,
+// in plain node, so that import names its `.ts`.
 // The one finder of a package's folder (epic `coherence` P29)
 import { packageFolderFor } from "spell/toolchain/sourceNames"
+import { repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
 
-/** spaces' folder, `src/spaces/`:  this file is in `src/spaces/server/node/`. */
-const spacesSrcDir = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
-/** The app folder's code:  `app/src/` in a checkout, `dist/app/` in the published `spell`. */
-const codeDir = resolve(spacesSrcDir, "..")
-/**
- * This checkout's root:  the main one, or a worktree's.
- * - spell-app's code is in its one `src/`, a folder each (`src/app/`, `src/spaces/` ...), since epic `repo-split` P14
- *   (folders at the root since P8, `packages/` before).
- * - In the published `spell` the code is built into `dist/app/`, and the rest (`spaces/`) is in its `app/`:
- *   so the root is that `app/` (epic `repo-split` P22).
- */
-const repoDir = basename(codeDir) === "src" ? dirname(codeDir) : join(dirname(dirname(codeDir)), basename(codeDir))
 /**
  * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:
  * the repo's root.
@@ -66,26 +53,6 @@ const srcDir = entryFolder("spell/parser/spell")
 const coreDir = entryFolder("spell/parser/core")
 /** `app`'s `static/`:  fonts and css the app serves. */
 const staticDir = resolve(packagesDir, "app", "static")
-
-/**
- * The MAIN checkout's root, from this checkout's:  the one a worktree's git shares (`SRV.checkoutOf()`).
- * - found wherever the worktree's folder is
- * - spell.spaces sits beside it, so every worktree reads the same spaces.
- */
-const mainRepoDir = checkoutOf(repoDir)?.main ?? repoDir
-
-/**
- * spell.spaces:  every person's and org's space (decisions Q10, Q24).
- * - ONE folder for main and every worktree, outside git.
- * - By default it's beside the main checkout, `<main checkout>/../spell.spaces`:
- *   `~/www/spell.spaces` (`../spell-spaces` before epic `repo-split` P8).
- * - `SPELL_SPACES_DIR` sets it, e.g. tests' temporary folder.
- * - Laid out by org, each person's space inside it:  `@spell/owen@/errors/` is `owen@spell/errors`.
- * - The page server's `--spaces <dir>` sets it (P8).
- */
-const spellSpacesDir = process.env.SPELL_SPACES_DIR
-  ? resolve(process.env.SPELL_SPACES_DIR)
-  : resolve(dirname(mainRepoDir), "spell.spaces")
 
 /**
  * The folder holding each `SP.SpaceFolderBase` (`SP.SpellUrls.folderFor()`):

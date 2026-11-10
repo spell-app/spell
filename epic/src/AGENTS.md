@@ -500,6 +500,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - it COMMITS the two files it wrote and PUSHES them (`commitStep()`:  the config and `.gitignore`, only those,
           on the base branch, asking first in a terminal, `y` suggested;  pushed to the branch's upstream, else
           `origin`, else nowhere, `pushTarget()`;  on another branch it says so and commits nothing;  `--no-commit`)
+        - `--local` (epic `epic-engine` P69):  nothing in the repo, ever:  no commit, no `.gitignore` lines;  the config
+          and links in `.git/info/exclude` (the kit's `Git.exclude()`, the ONE writer of that file);  `localSetup` in
+          the config keeps it so;  nothing made on the code host unless `--content-repo`
+        - GitLab refusing the epic repo's first push:  what a Maintainer runs (`CodeHostClient.firstPushRefusal()`);
+          run again, it pushes on top of their commit (`pushPending()`, `SharedSync`'s no-shared-history case)
       - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
         what the epic folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)

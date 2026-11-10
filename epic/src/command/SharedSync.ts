@@ -33,6 +33,9 @@ import { SyncState, type SyncRecord, type SyncResult } from "./SyncState"
  *   3. rebase onto the remote's branch;  what stops it is settled by `ContentMerge` (two adds at one place, a later
  *      date) where it can be;  else the rebase is undone, and the state file says which files (`SyncState`), for the
  *      next session's notice
+ *      - NO commit shared with the remote (a Maintainer pushed the epic repo's first commit after GitLab refused ours;
+ *        epic `epic-engine` P69):  this side's commits rebased on top, no renumbering or log tidying, then pushed
+ *        (`ontoUnrelated()`)
  *   4. the logs both sides wrote (a union merge, `merge=union`):  re-sorted by time (`ContentMerge.sortLog()`);  a
  *      field a phase now holds twice (a request filed by each):  joined into one (`joinTwinFields()`)
  *   5. push;  refused or offline:  kept, the next sync pushes
@@ -80,7 +83,8 @@ export class SharedSync {
     if (!fetch.ok) return { result: "offline", error: fetch.err || `exit ${fetch.code}` }
     const theirs = `refs/remotes/origin/${branch}`
     if (!Git.run(["rev-parse", "--verify", "-q", theirs], dir).ok) return this.push({ renumbered: [] })
-    const base = this.git(["merge-base", "HEAD", theirs])
+    const base = Git.out(["merge-base", "HEAD", theirs], dir)
+    if (!base) return this.ontoUnrelated(theirs)
     const behind = this.count(`${base}..${theirs}`)
     let renumbered: Renumbered[] = []
     if (behind && this.count(`${base}..HEAD`)) {
@@ -93,6 +97,21 @@ export class SharedSync {
       if ((await this.sortLogs(base, before, theirs)) || joined) this.shared.commitPending({ session, checkout })
     } else if (behind) this.git(["merge", "-q", "--ff-only", theirs])
     return this.push({ renumbered, pulled: behind })
+  }
+
+  /**
+   * This machine's commits put on top of `theirs` (the remote's branch) when the two share NO commit, then pushed:
+   * what came of it.
+   * - when:  a Maintainer pushed the epic repo's first commit (GitLab refused ours:  its default branch protected),
+   *   or a teammate cloned the repo while it was still empty and started their own
+   * - no renumbering or log tidying:  both need a commit the two sides share, to tell whose ids and lines are new
+   * - a clash stops it as any other does (`rebase()`)
+   */
+  private ontoUnrelated(theirs: string): SyncReport {
+    const pulled = this.count(theirs)
+    const files = this.rebase(theirs)
+    if (files) return { result: "conflict", files, renumbered: [] }
+    return this.push({ renumbered: [], pulled })
   }
 
   ////////////////

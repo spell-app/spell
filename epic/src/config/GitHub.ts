@@ -37,7 +37,15 @@ export class GitHub {
     PullRequest: "Pull request",
     number: (id) => `#${id}`,
     install: ["  brew install gh        (other systems:  https://cli.github.com)", "  gh auth login"],
-    openCommand: (base, branch) => `gh pr create --base ${base} --head ${branch} --fill`
+    openCommand: (base, branch) => `gh pr create --base ${base} --head ${branch} --fill`,
+    // written out:  `HOST` is declared below the class, after this runs
+    server: "github.com",
+    canRead: {
+      private: "only people added to the repo can read it;  roles control access",
+      public:
+        "anyone who can reach github.com can read every epic page, guide and comment, without signing in;  " +
+        "roles only control who can write"
+    }
   }
 
   /** The `gh` to run:  `$SPELL_EPIC_GH`, else `gh` on the `PATH`.  Read on every call:  a test sets it. */
@@ -94,6 +102,11 @@ export class GitHub {
 
   /** Nothing to do:  a new GitHub repo's main takes pushes from everyone added to it.  `CodeHost`'s other side. */
   static letTeamPush(): string | undefined {
+    return undefined
+  }
+
+  /** Nothing to say:  GitHub has no rule against a first push into a new repo.  `GitLab`'s says what to do. */
+  static firstPushRefusal(): FirstPushHelp | undefined {
     return undefined
   }
 
@@ -237,6 +250,26 @@ export type CodeHostWords = {
   install: string[]
   /** the line that opens one by hand, for a branch already pushed */
   openCommand: (base: string, branch: string) => string
+  /** the server people reach it on:  `github.com`, a GitLab's own host */
+  server: string
+  /**
+   * who can read a repo of each visibility, and how access is controlled, in a line:  "Private or public?"'s hints
+   * (epic `epic-engine` P69:  "Maybe describe this in the CLI interface a bit more")
+   */
+  canRead: Record<RepoVisibility, string>
+}
+
+/**
+ * What to do when the code host refused the epic repo's first push (`CodeHostClient.firstPushRefusal()`):
+ * GitLab's protected default branch, which only a Maintainer can push the first commit to.
+ */
+export type FirstPushHelp = {
+  /** the page that lists who can help:  the project's members */
+  membersPage: string
+  /** what a Maintainer runs, a line each, filled in for this repo */
+  commands: string[]
+  /** the branch the plans sync on:  every teammate needs to push to it */
+  branch: string
 }
 
 /** What `GitHub.run()` returns. */

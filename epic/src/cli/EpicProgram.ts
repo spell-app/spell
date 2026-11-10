@@ -663,8 +663,9 @@ export class EpicProgram {
           "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
-        "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
-          "[--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
+        "[--local] [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] " +
+          "[--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] " +
+          "[--json]"
       )
       .addHelpText("after", INIT_HELP)
 
@@ -1172,7 +1173,8 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
   the epic repo        the epic repo on GitHub or GitLab, so the team shares the plans:  asks what to call it
                        (<repo>.epics) and "Private or public?" (private), makes it, pushes, and writes its
                        address in the config (contentRemote);  needs the host's command (gh, glab), logged in:
-                       without it, says how to get it
+                       without it, says how to get it;  GitLab refusing the first push (its default branch
+                       protected):  says what a Maintainer runs, and epic init again finishes it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
@@ -1188,7 +1190,14 @@ Then push the base branch:  a teammate's epic init then clones the plans.
 --content-repo <name> names the epic repo without asking;  --remote <address> uses one made already;
 --no-remote makes none, and the plans stay on this machine.
 --public makes the epic repo public without asking;  with no terminal to ask in, it's private unless --public.
-A public one shows everything in the plans (epic pages, guides, comments) to anyone.
+Private:  only people added to the repo (on GitLab, and members of its group) can read it;  roles control access.
+Public:  anyone who can reach your code host can read every epic page, guide and comment, without signing in;  roles
+only control who can write.  Picked in the terminal, public asks again, no suggested.
+
+--local sets the repo up on this machine only:  nothing is committed and .gitignore is left alone;  the config and
+the links are listed in .git/info/exclude instead, and nothing is made on GitHub or GitLab unless --content-repo says
+so.  Each teammate runs their own (epic init --local --remote <address>, which clones the plans);  epic init run
+again stays local.  Refused where the base branch tracks .epic/config.json5 already.
 
 --protected-base:  the base branch takes only pull requests (baseBranchProtected in the config).  Without it,
 epic init asks GitHub or GitLab, with its command (gh, glab) logged in and a remote there, and says in one line when
@@ -1208,6 +1217,7 @@ Examples:
   epic init --name Ana --color green
   epic init --content-repo my-app.epics
   epic init --remote git@github.com:my-team/my-app.epics.git
+  epic init --local --no-remote
   epic init`
 
 const WHOAMI_HELP = `

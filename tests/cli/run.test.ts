@@ -12,6 +12,9 @@ function plain(drawn: unknown): string {
   return String(drawn).replace(/\x1b\[[0-9;]*m/g, "")
 }
 
+/** No keys typed ahead thrown away:  a test writes its keys as soon as it asks. */
+const NOW = { typedAheadMs: 0 }
+
 /** A stream that says it's a terminal, or not. */
 function stream(isTTY: boolean): PassThrough & { isTTY: boolean } {
   return Object.assign(new PassThrough(), { isTTY })
@@ -34,7 +37,7 @@ describe("ask()", () => {
   test("a terminal:  asks, showing the suggestion;  the answer, trimmed", async () => {
     const input = stream(true)
     const output = stream(true)
-    const answer = CLI.ask("What do you want to be called?", { suggestion: "Ana Lima", input, output })
+    const answer = CLI.ask("What do you want to be called?", { suggestion: "Ana Lima", input, output, ...NOW })
     input.write("  Ana \n")
     expect(await answer).toBe("Ana")
     expect(plain(output.read())).toContain("What do you want to be called? (Ana Lima) ")
@@ -42,7 +45,7 @@ describe("ask()", () => {
 
   test("a terminal, Enter alone:  the suggestion", async () => {
     const input = stream(true)
-    const answer = CLI.ask("Name?", { suggestion: "Ana Lima", input, output: stream(true) })
+    const answer = CLI.ask("Name?", { suggestion: "Ana Lima", input, output: stream(true), ...NOW })
     input.write("\n")
     expect(await answer).toBe("Ana Lima")
   })
@@ -66,7 +69,7 @@ describe("choose()", () => {
   test("a terminal:  a numbered list, the suggestion marked;  Enter takes it", async () => {
     const input = stream(true)
     const output = stream(true)
-    const answer = CLI.choose("Private or public?", choices, { input, output })
+    const answer = CLI.choose("Private or public?", choices, { input, output, ...NOW })
     input.write("\r")
     expect(await answer).toBe("private")
     const drawn = plain(output.read())
@@ -77,22 +80,113 @@ describe("choose()", () => {
 
   test("the down arrow moves the mark, Enter takes it;  a number key takes its choice at once", async () => {
     const input = stream(true)
-    const down = CLI.choose("Private or public?", choices, { input, output: stream(true) })
+    const down = CLI.choose("Private or public?", choices, { input, output: stream(true), ...NOW })
     input.write("\x1b[B")
     input.write("\r")
     expect(await down).toBe("public")
     const keyed = stream(true)
-    const numbered = CLI.choose("Private or public?", choices, { input: keyed, output: stream(true) })
+    const numbered = CLI.choose("Private or public?", choices, { input: keyed, output: stream(true), ...NOW })
     keyed.write("2")
     expect(await numbered).toBe("public")
   })
 
+  test("once picked, the list folds into one line:  the question and the answer", async () => {
+    const input = stream(true)
+    const output = stream(true)
+    const answer = CLI.choose("Private or public?", choices, { input, output, ...NOW })
+    input.write("\x1b[B")
+    input.write("\r")
+    expect(await answer).toBe("public")
+    const drawn = String(output.read())
+    // up over the list and the question, cleared to the end, then the one line
+    expect(drawn).toContain("\x1b[3A\r\x1b[J")
+    expect(plain(drawn).endsWith("? Private or public? public\n")).toBe(true)
+  })
+
+  test("keys typed before the list shows are thrown away:  a stray arrow and Enter pick nothing", async () => {
+    const input = stream(true)
+    input.write("\x1b[B\r")
+    const answer = CLI.choose("Private or public?", choices, { input, output: stream(true), typedAheadMs: 50 })
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    let picked: string | undefined
+    void answer.then((value) => (picked = value))
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(picked).toBeUndefined()
+    input.write("\r")
+    expect(await answer).toBe("private")
+  })
+
+  test("and before a question:  a stray Enter doesn't answer it", async () => {
+    const input = stream(true)
+    input.write("\r")
+    const answer = CLI.ask("Name?", { suggestion: "Ana", input, output: stream(true), typedAheadMs: 50 })
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    input.write("Bo\n")
+    expect(await answer).toBe("Bo")
+  })
+
+  test("more than 9:  digits build the number and move the mark, Enter takes it;  past the end starts again", async () => {
+    const many = Array.from({ length: 13 }, (_, index) => ({ value: `c${index + 1}`, label: `c${index + 1}` }))
+    const input = stream(true)
+    const thirteen = CLI.choose("Which?", many, { input, output: stream(true), ...NOW })
+    input.write("1")
+    input.write("3")
+    input.write("\r")
+    expect(await thirteen).toBe("c13")
+    // 1 then 4 is past 13:  a new number, 4
+    const again = stream(true)
+    const four = CLI.choose("Which?", many, { input: again, output: stream(true), ...NOW })
+    again.write("1")
+    again.write("4")
+    again.write("\r")
+    expect(await four).toBe("c4")
+  })
+
+  test("more than 9:  a pause of a second starts a new number", async () => {
+    const many = Array.from({ length: 13 }, (_, index) => ({ value: `c${index + 1}`, label: `c${index + 1}` }))
+    const input = stream(true)
+    const answer = CLI.choose("Which?", many, { input, output: stream(true), ...NOW })
+    input.write("1")
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+    input.write("2")
+    input.write("\r")
+    expect(await answer).toBe("c2")
+  })
+
   test("Escape:  the suggestion", async () => {
     const input = stream(true)
-    const answer = CLI.choose("Private or public?", choices, { suggestion: "public", input, output: stream(true) })
+    const answer = CLI.choose("Private or public?", choices, {
+      suggestion: "public",
+      input,
+      output: stream(true),
+      ...NOW
+    })
     input.write("\x1b")
     await new Promise((resolve) => setTimeout(resolve, 600))
     expect(await answer).toBe("public")
+  })
+})
+
+describe("waiting()", () => {
+  test("a gray line in a terminal, the work's result;  nothing said with no terminal", async () => {
+    const output = stream(true)
+    expect(CLI.waiting("checking GitLab…", () => 42, { input: stream(false), output })).toBe(42)
+    expect(plain(output.read())).toBe("checking GitLab…\n")
+    const quiet = stream(false)
+    expect(await CLI.waiting("pushing…", async () => "done", { input: stream(false), output: quiet })).toBe("done")
+    expect(quiet.read()).toBeNull()
+  })
+
+  test("throws what the work throws", () => {
+    expect(() =>
+      CLI.waiting(
+        "x",
+        () => {
+          throw new Error("boom")
+        },
+        { input: stream(false), output: stream(false) }
+      )
+    ).toThrow("boom")
   })
 })
 

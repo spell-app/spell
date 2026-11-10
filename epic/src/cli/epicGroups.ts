@@ -1410,7 +1410,12 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--content-repo <name>": "the epic repo's name on GitHub (else asked, or <repo>.epics)",
     "--remote <address>": "use this epic repo, made already",
     "--no-remote": "make no epic repo:  the plans stay on this machine",
-    "--public": "make the epic repo public, without asking (else asked, or private)",
+    "--public":
+      "make the epic repo public, without asking:  anyone who can reach your code host can read the plans (else " +
+      "asked, or private)",
+    "--local":
+      "set up on this machine only:  nothing committed, .gitignore left alone, the config and links in " +
+      ".git/info/exclude;  run again, it stays so",
     "--no-plugin": "don't install the epic plugin for Claude Code",
     "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
     "--protected-base":

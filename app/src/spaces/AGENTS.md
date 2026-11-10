@@ -37,6 +37,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [SpaceStorage.ts](models/SpaceStorage.ts) and [people.ts](models/people.ts):  types only, see "People"
   - [the node side](server/node/), node only:  imported by path (`spell/app/spaces/server/node/...`), never from the barrel
     - [environment.ts](server/node/environment.ts):  where everything is on disk (see "Projects" below)
+    - [spellSpacesDir.ts](server/node/spellSpacesDir.ts):  its part that loads anywhere, for the check after a test run
     - [projects/](server/node/projects/):  projects on disk, and the disk reader (see "Projects" below)
     - [storage/](server/node/storage/) and [people/](server/node/people/):  see "People" below
     - [prefs/](server/node/prefs/):  see "Preferences" below
