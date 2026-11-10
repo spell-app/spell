@@ -164,8 +164,8 @@ describe("a spellx page that draws its body", () => {
       const written = SX.CodeSpellWriter.write(COUNTER, { path: "/Counter.spell" })
       const [file] = parseSpellProject([{ path: "/Counter.spell", contents: written }]).files
       const back = SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
-      expect(back).toContain('<spell-page "counter notebook" notebook>')
-      expect(back).toContain('<spell-view "counter-notebook-counter"')
+      expect(back).toContain('<page "counter notebook" notebook>')
+      expect(back).toContain('<view "counter-notebook-counter"')
     })
   })
 
@@ -186,7 +186,7 @@ describe("a spellx page that draws its body", () => {
       expect(back).not.toContain("<draw>\n")
       expect(back).toContain(
         [
-          '<spell-page "counter notebook" notebook>',
+          '<page "counter notebook" notebook>',
           "\t# A counter",
           "\tA button that counts its clicks.",
           "",
@@ -198,7 +198,7 @@ describe("a spellx page that draws its body", () => {
           "\t## Two of them",
           "\tEach counts on its own:",
           '\t<ui-text color="grey">Click either one.</ui-text>',
-          "</spell-page>"
+          "</page>"
         ].join("\n")
       )
       expect(compiled(back)).toEqual(compiled(COUNTER))
@@ -547,9 +547,12 @@ describe("a spellx page that draws its body", () => {
       expect(inner!.kind === "template" && inner.attributes.map((attribute) => attribute.name)).toEqual(["locked"])
     })
 
-    test("only `view` is short, and only inside a page:  at the top, `<view>` says to write `<spell-view>`", () => {
+    test("at a file's top level every template is short (epic `language` P41);  in a drawing, `<page>` is markup", () => {
       const top = compiled("<view counter>\n\t<draw><text>hi</text></draw>\n</view>\n", "/Counter.spell")
-      expect(top.errors).toEqual(['1:0 "<view>" isn\'t a spellx word:  did you mean "<spell-view>"?'])
+      expect(top.errors).toEqual([])
+      expect(top.code).toEqual(
+        compiled("<spell-view counter>\n\t<draw><text>hi</text></draw>\n</spell-view>\n", "/Counter.spell").code
+      )
       // `<page>` is markup in a page's drawing (Spell UI's `<ui-page>`), never a template
       const page = compiled('<spell-page "home">\n\t<page>Hi</page>\n</spell-page>\n', "/Home.spell")
       expect(page.errors).toEqual([])

@@ -70,11 +70,11 @@ export class CodeSpellWriter {
    */
   static writeMarkup(markup: string, options: CodeSpellWriteOptions = {}): string {
     const language = options.language ?? SP.Language.forFile(options.path)
-    const { prefix, templates, attributes } = language.words.spellx!
-    // a page that draws its body, in the language's own words:  `<spell-page "markup" notebook>`
+    const { templates, attributes } = language.words.spellx!
+    // a page that draws its body, in the language's own words:  `<page "markup" notebook>`
     const page = Object.keys(templates).find((word) => templates[word] === "page")
     const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
-    const head = `<${prefix}-${page} "markup" ${flag}>\n`
+    const head = `<${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
     const isWrapped = TOP_LEVEL_HTML_BLOCK.test(markup)
     const wrapperOpen = isWrapped ? `\t<${WRAPPER_TAG}>\n` : ""
@@ -94,7 +94,7 @@ export class CodeSpellWriter {
     }
     const componentTag = options.componentTag
     const written = CodeSpellWriter.write(
-      `${head}${wrapperOpen}${lines.map((line) => indent + line).join("\n")}\n${wrapperClose}</${prefix}-${page}>\n`,
+      `${head}${wrapperOpen}${lines.map((line) => indent + line).join("\n")}\n${wrapperClose}</${page}>\n`,
       {
         ...options,
         language,

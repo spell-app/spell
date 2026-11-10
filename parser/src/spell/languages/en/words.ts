@@ -164,8 +164,11 @@ export const englishWords: SP.LanguageWords = {
       notebook: { kind: "page", flag: "notebook" },
       // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
       site: "site",
-      // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
-      "more-of": "more of"
+      // adds to a type another file declares:  its fields in a place's file, its drawing in this one
+      // (epic `data` T76;  `<extend>` since epic `language` P41, r12)
+      extend: "extend",
+      // its old word, still read
+      "more-of": "extend"
     },
     declarations: {
       property: "property",
@@ -210,11 +213,17 @@ export const englishWords: SP.LanguageWords = {
       { tag: "memory-storage", line: "{words} is stored in memory :" },
       { tag: "memory-storage", line: "{words} is an in memory database :" }
     ],
-    // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
-    // `<spell-description>`, `<spell-comment>`,
-    // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
-    // and a page's stories, `<stories>` or `<spell-stories>` (epic `mockup` P6):  what it must let people do
-    notes: { description: "description", comment: "comment", "property-editor": "property editor", stories: "stories" },
+    // prose kept, never run (epic `debut` I86):  `<note>`, ONE tag for every note (epic `language` P41)
+    // - a template's own property editor, as markup, `<property-editor>`:  what the Inspector shows for its things
+    // - a page's stories, `<stories>` (epic `mockup` P6):  what it must let people do
+    // - the old words still read, with a warning naming `<note>`:  `<spell-description>`, `<spell-comment>`, `<comment>`
+    notes: {
+      note: "description",
+      description: "description",
+      comment: "comment",
+      "property-editor": "property editor",
+      stories: "stories"
+    },
     handlers: {
       on: "on",
       when: "when",
@@ -299,7 +308,7 @@ export const englishWords: SP.LanguageWords = {
       template: "{a name} {name} is {a super} {super} :",
       templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
       singleton: "{words} is {a super} {super} :",
-      moreOf: "{a words} {words} :",
+      extend: "{a words} {words} :",
       supers: {
         view: "view",
         thing: "thing",

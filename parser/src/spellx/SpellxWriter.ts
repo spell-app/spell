@@ -80,13 +80,13 @@ export class SpellxWriter {
         const word = tag.replace(/^[\p{Ll}]+-/u, "")
         return word !== tag && SP.ComponentPacks.tagFor(word, language.lang) === tag ? word : undefined
       })
-    const { prefix, templates, attributes } = language.words.spellx!
+    const { templates, attributes } = language.words.spellx!
     // read as a page that draws its body, in the language's own words, as `CodeSpellWriter.writeMarkup()` writes it
     const page = Object.keys(templates).find((word) => templates[word] === "page")
     const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
-    const head = `<${prefix}-${page} "markup" ${flag}>\n`
+    const head = `<${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
-    const text = `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${prefix}-${page}>\n`
+    const text = `${head}${lines.map((line) => `\t${line}`).join("\n")}\n</${page}>\n`
     const parser = language.parser.clone({ module: "spellx writer", form: "spellx" } as P.ParserProps)
     const edits: Array<{ start: number; end: number; text: string }> = []
     // blocks whose insides are written as they are
@@ -255,7 +255,8 @@ export class SpellxWriter {
     if (!superPhrase) return undefined
     const singleton = rule === "create_one_of_a_kind"
     const kind = this.templateKind(statement, superPhrase, singleton)
-    const tagWord = `${this.words.prefix}-${keyFor(this.words.templates, kind)}`
+    // its short word, `<thing>` (epic `language` P41)
+    const tagWord = keyFor(this.words.templates, kind)
     const plainSuper = this.twins.supers[kind]
     const attributes: string[] = []
     if (aka) attributes.push(this.attribute("aka", unquote(aka)!))

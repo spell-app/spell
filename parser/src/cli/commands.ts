@@ -48,7 +48,7 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--fix",
       "put right what it can:  retired words (parts => slots), old spellings in a page " +
-        "(<spell-notebook> => <spell-page notebook>, a description before an example => its description=), " +
+        "(<notebook> => <page notebook>, a description before an example => its description=), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)

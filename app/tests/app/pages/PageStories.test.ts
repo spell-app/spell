@@ -73,7 +73,7 @@ describe("PageStories", () => {
   test("Spanish:  its own tags, in a block that's new or already there", () => {
     const es = '<encanto-página "películas"/>\n'
     const text = PageStories.withStories(es, "películas", [{ text: "verlas", done: true }], "es")
-    expect(text).toContain('\t<encanto-historias>\n\t\t<historia "H1" hecha>verlas</historia>\n\t</>\n')
+    expect(text).toContain('\t<historias>\n\t\t<historia "H1" hecha>verlas</historia>\n\t</>\n')
     expect(PageStories.of(text, "películas")).toEqual([{ id: "H1", text: "verlas", done: true }])
   })
 

@@ -193,8 +193,8 @@ export class SpellxTwin {
         ? this.words.siteAt
         : kind === "site" && this.hasAttribute("cloud")
           ? this.words.siteCloud
-          : kind === "more of"
-            ? this.words.moreOf
+          : kind === "extend"
+            ? this.words.extend
             : singleton
               ? this.words.singleton
               : this.attribute("aka")
@@ -909,6 +909,10 @@ export class SpellxTwin {
     const head = first instanceof P.LineToken ? first.tokens[0] : undefined
     if (!(head instanceof SP.SpellxProseToken) || head.note !== "description" || first!.tokens.length !== 1)
       return { description, rest: items }
+    // what the tokenizer warned of on its head, `<spell-description>` for `<note>`:  on our own line, as it goes
+    const warning = SP.spellxWarningOf(head)
+    const ours = this.line.tokens[0]!
+    if (warning && !SP.spellxWarningOf(ours)?.includes(warning)) SP.addSpellxWarning(ours, warning)
     // its text on its head's line, `<description>Flips it ...</>`, or on the lines indented under it
     let taken = 1
     if (head.value) description.push(this.comment(head.value, head.start))

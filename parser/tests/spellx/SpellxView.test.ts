@@ -429,7 +429,7 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
 `)
     expect(messagesOf(file)).toEqual(
       expect.arrayContaining([
-        `1:1-1:21  <property> goes inside a template, e.g. "<spell-view>"`,
+        `1:1-1:21  <property> goes inside a template, e.g. "<view>"`,
         `3:2-3:22  <spell-view> can't go inside <spell-view>:  close <spell-view> first, with "</>"`
       ])
     )

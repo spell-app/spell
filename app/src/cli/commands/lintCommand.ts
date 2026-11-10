@@ -200,8 +200,8 @@ async function fixHtmlHabits(
  * With `--fix`:  put each old spelling in `project`'s `.spell` pages right -- only `file`'s, if given --
  * and write each changed file back (epic `notebook` P8):
  * - a template word that brings a flag, written as the page's word and the flag:
- *   `<spell-notebook "x" locked>` => `<spell-page "x" notebook locked>`, its named closer too;
- *   Spanish's `<encanto-cuaderno>` => `<encanto-página cuaderno>`
+ *   `<notebook "x" locked>` (or the old `<spell-notebook>`) => `<page "x" notebook locked>`, its named closer too;
+ *   Spanish's `<cuaderno>` => `<página cuaderno>`
  * - a view written inside a page by its long word, `<spell-view "counter">` => `<view "counter">` (J2)
  * - a description written as a `<text>` just before its example, moved into the example's own `description`:
  *   see `descriptionsBeforeExamples()`
@@ -234,9 +234,10 @@ async function fixPageHabits(
       const closer = closerOf(text, token.start, word)
       pages.push({ start: token.start, end: closer?.end ?? elementEnd(text, token.start) })
       if (!pageWord || !token.tag.attributes.some((attribute) => attribute.fromTagWord)) return
-      // the flag's word as written is the template's, after its prefix:  `notebook`, `cuaderno`
-      const flagWord = word.slice(words.prefix.length + 1)
-      const page = `${words.prefix}-${pageWord}`
+      // the flag's word as written is the template's, after its old prefix if it has one:  `notebook`, `cuaderno`
+      const flagWord = word.startsWith(`${words.prefix}-`) ? word.slice(words.prefix.length + 1) : word
+      // the page's short word (epic `language` P41):  `<page "x" notebook>`
+      const page = pageWord
       const tag = SourceEdits.tagAt(text, token.start)!
       edits.push(
         fix(text, { start: token.start + 1, end: tag.nameEnd }, page, `fixed:  <${word}> is <${page} ${flagWord}>`),

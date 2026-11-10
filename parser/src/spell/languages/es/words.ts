@@ -158,8 +158,10 @@ export const spanishWords: SP.LanguageWords = {
     prefix: "encanto",
     templates: {
       vista: "view",
-      "más-de": "more of",
-      "mas-de": "more of",
+      // añade a un tipo que declara otro archivo (épica `language` P41):  `<extender "carta">`;  su palabra antigua aún se lee
+      extender: "extend",
+      "más-de": "extend",
+      "mas-de": "extend",
       cosa: "thing",
       página: "page",
       pagina: "page",
@@ -192,9 +194,10 @@ export const spanishWords: SP.LanguageWords = {
       dialogo: "dialog",
       panel: "sidebar"
     },
-    // con el prefijo, como las plantillas (épica `data` P31):
-    // `<encanto-descripción>`, `<encanto-editor-de-propiedades>`
+    // prosa que se guarda y nunca corre:  `<nota>` (épica `language` P41);  `<editor-de-propiedades>`, `<historias>`
+    // - las palabras antiguas aún se leen, con un aviso que nombra `<nota>`:  `<encanto-descripción>`, `<comentario>`
     notes: {
+      nota: "description",
       descripción: "description",
       descripcion: "description",
       comentario: "comment",
@@ -332,7 +335,7 @@ export const spanishWords: SP.LanguageWords = {
       placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",
       template: "{a name} {name} es {a super} {super} :",
       templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
-      moreOf: "{a words} {words} :",
+      extend: "{a words} {words} :",
       singleton: "{words} es {a super} {super} :",
       supers: {
         view: "vista",
