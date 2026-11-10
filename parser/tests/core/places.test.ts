@@ -1008,6 +1008,88 @@ describe("PlaceDraft", () => {
     expect(await onPlace()).toMatchObject({ title: "Stew", serves: 9, tags: ["hot", "spicy"] })
   })
 
+  test("saved, it's one undo step:  Undo takes back that edit, not the step before it (I100)", async () => {
+    const { things, recipe, allSent, onPlace } = await writing()
+    const { history } = core.RUNTIME
+    recipe.doubleIt()
+    const draft = things.draftOf(recipe)
+    const copy = draft.thing as Recipe
+    copy.title = "Stew"
+    copy.serves = 9
+    copy.tags.add("spicy")
+    draft.save()
+    expect(history.steps).toHaveLength(2)
+    expect(history.undoTitle).toBe("Undo Edit")
+
+    history.undo()
+    expect(recipe.title).toBe("Soup")
+    expect(recipe.serves).toBe(4)
+    expect(recipe.tags.items).toEqual(["hot"])
+    expect(history.undoTitle).toBe("Undo Double It")
+    await allSent()
+    expect(await onPlace()).toMatchObject({ title: "Soup", serves: 4, tags: ["hot"] })
+
+    history.redo()
+    expect(recipe.title).toBe("Stew")
+    expect(recipe.serves).toBe(9)
+    expect(recipe.tags.items).toEqual(["hot", "spicy"])
+    await allSent()
+    expect(await onPlace()).toMatchObject({ title: "Stew", serves: 9, tags: ["hot", "spicy"] })
+  })
+
+  test("saved with nothing changed, it's no undo step", async () => {
+    const { things, recipe } = await writing()
+    things.draftOf(recipe).save()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+  })
+
+  test("saved inside an undoable action, it joins that action's step", async () => {
+    const { things, recipe } = await writing()
+    const { history } = core.RUNTIME
+    history.run({ undoneAs: "Rename" }, () => {
+      const draft = things.draftOf(recipe)
+      ;(draft.thing as Recipe).title = "Stew"
+      draft.save()
+    })
+    expect(history.steps).toHaveLength(1)
+    expect(history.undoTitle).toBe("Undo Rename")
+    history.undo()
+    expect(recipe.title).toBe("Soup")
+  })
+
+  test("a draft nobody has typed in follows the real thing:  after Undo, Edit shows what's back (I100)", async () => {
+    const { things, recipe } = await writing()
+    const draft = things.draftOf(recipe)
+    ;(draft.thing as Recipe).title = "Stew"
+    draft.save()
+    // what a form still on the page does as the Save ends:  a new draft, of what was just saved
+    const madeAfterSave = things.draftOf(recipe)
+    expect((madeAfterSave.thing as Recipe).title).toBe("Stew")
+
+    core.RUNTIME.history.undo()
+    expect(things.draftOf(recipe)).not.toBe(madeAfterSave)
+    expect((things.draftOf(recipe).thing as Recipe).title).toBe("Soup")
+  })
+
+  test("a draft with changes in it stays as it is when the real thing changes", async () => {
+    const { things, recipe } = await writing()
+    const draft = things.draftOf(recipe)
+    ;(draft.thing as Recipe).title = "Half typed"
+    recipe.serves = 7
+    expect(things.draftOf(recipe)).toBe(draft)
+    expect((draft.thing as Recipe).title).toBe("Half typed")
+  })
+
+  test("a draft that went out of date, saved later, doesn't end the one that took its place", async () => {
+    const { things, recipe } = await writing()
+    const outOfDate = things.draftOf(recipe)
+    recipe.serves = 7
+    const current = things.draftOf(recipe)
+    expect(current).not.toBe(outOfDate)
+    outOfDate.cancel()
+    expect(things.draftOf(recipe)).toBe(current)
+  })
+
   test("it's kept on this device, and comes back on the next visit", async () => {
     const storage = new MemoryStorage()
     const props = { keepPendingAs: "@owen/cookbook", storage: () => storage }

@@ -881,6 +881,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const { placeName, collection, type, id } = home
     const places = this.placesOrDie("noteWrite")
     this.noteKnownHeld(value)
+    const known = this.loaded.get(`${type}#${id}`)
+    if (known) this.drafts.get(known)?.realThingChanged()
     const pending = places.pendingFor(placeName)
     if (places.placeFor(placeName) !== places.declaredPlaceFor(placeName))
       this.noteWrittenInstead(`${type}#${id}`, field)
@@ -1477,9 +1479,12 @@ function isWorkedOut(thing: object, property: string): boolean {
  * A thing's changes, held apart until they're saved, for an Edit screen with a Cancel button (epic `data`, Q9).
  * - `thing` is a copy:  draw a form on it.  What's written to it goes nowhere, and the real thing doesn't change.
  * - `save()`:  each field changed is written to the real thing, one group, so they go out together.
+ *   - It's ONE undo step (I100):  a form's Save button runs no undoable action, so the step is opened here.
  * - `cancel()`:  the copy is forgotten, and there's nothing to take back.
  * - What it holds is kept on this device, so a draft form comes back on the next visit.
  * - NOT `PendingChanges`:  what's pending shows at once on the real thing, which is what a draft must not do.
+ * - Nothing changed in it yet, and the real thing changes:  it's out of date, so it ends (`realThingChanged()`).
+ *   - With changes in it, it stays:  what someone typed is theirs, and only the fields they changed are saved.
  ****************/
 export class PlaceDraft {
   /** The copy to change. */
@@ -1490,6 +1495,8 @@ export class PlaceDraft {
   private readonly placeAtStart: object | undefined
   /** What's kept on this device. */
   private readonly copy: BrowserCopy
+  /** Saved, cancelled or out of date:  it's no longer the thing's draft. */
+  private isOver = false
 
   constructor(
     private readonly original: SpellObject,
@@ -1532,6 +1539,7 @@ export class PlaceDraft {
 
   /**
    * Write each field changed to the real thing:  one group, shown at once.  Nothing changed:  nothing is sent.
+   * - One undo step, `Edit`;  nothing changed:  no step.  Inside an undoable action, it joins that action's step.
    * - throws `TypeError`, and forgets it, if another place went behind its name since it began (`isStillGood`)
    */
   save(): void {
@@ -1542,10 +1550,14 @@ export class PlaceDraft {
         "PlaceDraft.save():  another place went behind this draft's name since it began;  nothing saved"
       )
     }
-    things.saveDraftFields(this.home, () => {
-      for (const field of Object.keys(this.changed))
-        writeInto(this.original, field, valueOf(this.thing, field), "write")
-    })
+    const write = () =>
+      things.saveDraftFields(this.home, () => {
+        for (const field of Object.keys(this.changed))
+          writeInto(this.original, field, valueOf(this.thing, field), "write")
+      })
+    const history = core.RUNTIME?.history
+    if (history) history.transaction(core.message("saved-changed"), write)
+    else write()
     this.finish()
   }
 
@@ -1554,8 +1566,20 @@ export class PlaceDraft {
     this.finish()
   }
 
-  /** Done with this draft. */
+  /**
+   * The real thing is being changed:  a draft with nothing changed in it is out of date,
+   * so what reads it next gets a new one.
+   * - e.g. Undo after a Save:  the form on the page had already made a new draft, holding what was saved.
+   * - `PlaceThings.noteWrite()` calls it, for every write:  what someone else changes is read in, and doesn't reach it.
+   */
+  realThingChanged(): void {
+    if (!this.hasChanges) this.finish()
+  }
+
+  /** Done with this draft:  only once, so an old one can't take a newer one's place with it. */
   private finish(): void {
+    if (this.isOver) return
+    this.isOver = true
     this.copy.drop()
     this.onEnd()
   }

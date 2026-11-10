@@ -52,6 +52,7 @@ export const words = {
     "read-too-soon-minutes": "El servidor pide esperar:  se volverá a intentar dentro de {minutes} minutos",
     "saved-added": "Agregar",
     "saved-removed": "Quitar",
+    "saved-changed": "Editar",
     "write-show-me": "Muéstrame",
     "write-merged": "{field} de {thing} también cambió en otro sitio.  Se conservó lo tuyo;  lo otro era:  {theirs}",
     "write-use-theirs": "Usar lo otro",
