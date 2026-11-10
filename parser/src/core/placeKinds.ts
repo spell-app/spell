@@ -364,6 +364,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         kind: "atmosphere account",
         accounts: [making.details.at!],
         collections: atmosphereCollections(making.details),
+        fields: atmosphereFields(making.details),
         person: making.person
       }),
       making
@@ -376,6 +377,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
         ...(details.at !== undefined && { corner: details.at }),
         ...(details.accounts && { accounts: details.accounts }),
         collections: atmosphereCollections(details),
+        fields: atmosphereFields(details),
         person
       }),
       making
@@ -461,6 +463,13 @@ function withDecimals(place: PlacesFolder.AtProtoPlace, { collection, Class }: P
 /** What an atmosphere account's lines call each collection. */
 function atmosphereCollections({ collections = {} }: PlaceDetails): Record<string, string> {
   return Object.fromEntries(Object.entries(collections).flatMap(([name, { at }]) => (at ? [[name, at]] : [])))
+}
+
+/** The fields an atmosphere account's lines name, by collection:  `a status's created is its "created at"`. */
+function atmosphereFields({ collections = {} }: PlaceDetails): Record<string, Record<string, string>> {
+  return Object.fromEntries(
+    Object.entries(collections).flatMap(([name, { fields }]) => (fields ? [[name, fields]] : []))
+  )
 }
 
 /**

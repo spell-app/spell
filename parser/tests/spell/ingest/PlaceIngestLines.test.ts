@@ -140,10 +140,20 @@ describe("a server's own times (T57)", () => {
   test("its created and updated fields are Spell's, by their own names, and their lines stay", async () => {
     const { ingest } = ingestOn(kitchenServer().fetch)
     const { spell, description } = await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
-    expect(spell).toContain(`- a recipe's created is its "created_at"`)
-    expect(spell).toContain(`- a recipe's modified is its "updated_at"`)
+    expect(spell).toContain(`- a recipe's created is its "created at"`)
+    expect(spell).toContain(`- a recipe's modified is its "updated at"`)
     expect(spell).toContain(`- its "created at" is a date`)
     expect(description.notes.join("\n")).not.toMatch(/No row read filled/)
+  })
+
+  test("the server's spelling, where the words can't say which field (J237)", async () => {
+    const rows = [
+      { id: 1, created_at: "2024-03-01T10:00:00Z", createdAt: "2024-03-02T10:00:00Z", Updated: "2024-03-04T10:00:00Z" }
+    ]
+    const plain = (async () => Response.json(rows)) as typeof globalThis.fetch
+    const { spell } = await ingestOn(plain).ingest.add({ address: `${API}/recipes`, into: "/K.spell", name: "kitchen" })
+    expect(spell).toContain(`created is its "created_at"`)
+    expect(spell).toContain(`modified is its "Updated"`)
   })
 
   test("a field already called created needs no line, and one that isn't a date doesn't count", async () => {
@@ -164,8 +174,8 @@ describe("a server's own times (T57)", () => {
     disk.texts.set("/K.spell", disk.texts.get("/K.spell")!.replace(/.*created is its.*\n/, ""))
     held.spell = held.spell.filter((line) => !/created is its/.test(line))
     const { changes } = await ingest.update("/K.spell")
-    expect(changes.join("\n")).toMatch(/Added:  - a recipe's created is its "created_at"/)
-    expect(disk.texts.get("/K.spell")).toContain(`- a recipe's created is its "created_at"`)
+    expect(changes.join("\n")).toMatch(/Added:  - a recipe's created is its "created at"/)
+    expect(disk.texts.get("/K.spell")).toContain(`- a recipe's created is its "created at"`)
   })
 })
 

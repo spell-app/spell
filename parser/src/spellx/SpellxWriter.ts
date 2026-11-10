@@ -34,8 +34,8 @@ export class SpellxWriter {
    * - `match`:  its parse (a `block`)
    * - `scope`:  its file scope, which says its language and knows its types
    */
-  static write({ text, match, scope }: SpellxWriteInput): string {
-    const writer = new SpellxWriter(text, scope)
+  static write({ text, match, scope, proseLines }: SpellxWriteInput): string {
+    const writer = new SpellxWriter(text, scope, proseLines)
     writer.indexStatements(match)
     const { tokenizer } = writer
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
@@ -145,7 +145,9 @@ export class SpellxWriter {
 
   private constructor(
     readonly text: string,
-    readonly scope: P.Scope
+    readonly scope: P.Scope,
+    /** the comment lines to write as prose, by index:  `SpellxWriteInput.proseLines` */
+    readonly proseLines?: ReadonlySet<number>
   ) {
     this.lines = text.split("\n")
     this.lineStarts = P.getLineStarts(text)
@@ -196,8 +198,9 @@ export class SpellxWriter {
       lastLine = firstLine + source.length - 1
       // a blank or comment line:  as it is, after a chunk if one's open
       if (item instanceof P.LineToken && !body && this.isQuiet(item)) {
-        if (chunk.length) tail.push(...source)
-        else this.out.push(...source)
+        const quiet = depth <= 1 && this.proseLines?.has(firstLine) ? source.map(proseOfComment) : source
+        if (chunk.length) tail.push(...quiet)
+        else this.out.push(...quiet)
         continue
       }
       const statement = item instanceof P.LineToken ? this.statements.get(item.start) : undefined
@@ -905,6 +908,21 @@ export type SpellxWriteInput = {
   match: P.Match
   /** Its file scope. */
   scope: P.Scope
+  /**
+   * The lines of `text`, by index, that were prose between tags:  written as prose again, not as `//` comments.
+   * - From `SX.CodeSpellWriter.writeWithProse()`, for a file that went through its plain form (`spell translate`).
+   * - Only at a file's top level or a template's:  a body has no prose.
+   */
+  proseLines?: ReadonlySet<number>
+}
+
+/**
+ * A `//` comment `line` as a line of prose:  `\t// Some text` => `\tSome text`.
+ * - Stays a comment if its text starts with `<`, which would read as a tag.
+ */
+function proseOfComment(line: string): string {
+  const prose = line.replace(/^(\s*)\/\/ ?/, "$1")
+  return prose.trimStart().startsWith("<") ? line : prose
 }
 
 /** `template` with each `{key}` filled from `values`;  a key with no value left as written. */
