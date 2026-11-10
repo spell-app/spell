@@ -23,6 +23,8 @@ import "./FileTabs.css"
  * - the bar's ⋯ (`<CodeMoreMenu>`)
  * - what a tab's right-click menu's items do, and are called:  its items and their order are the Spell's `tab menu`
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
+ * - More than eight files:  the ones opened lately, and a button listing every file (its `max-visible`),
+ *   the same ones after a reload, per project (its `remember`).
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
@@ -47,6 +49,7 @@ export function FileTabs() {
     () => [bar(), state(), drafted()] as const,
     ([it, { files, path }, drafts]) => {
       if (!it) return
+      it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
       const File = piece()!.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
       it.files.items = files.map((each) => {
@@ -133,4 +136,8 @@ type TabFile = {
 }
 
 /** The bar in `FileTabs.spellml`, as its compiled class has it. */
-type FileTabBar = { files: { items: TabFile[]; getValues: () => TabFile[] }; more: { draw: () => JSX.Element } }
+type FileTabBar = {
+  files: { items: TabFile[]; getValues: () => TabFile[] }
+  more: { draw: () => JSX.Element }
+  rememberAs: string
+}
