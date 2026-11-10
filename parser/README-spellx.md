@@ -23,8 +23,10 @@
 </spell-view>
 ```
 
-That's a `.spell` file:  a Spell template, one tag per thing it declares, and prose between them.
-(Its old ending, `.spell`, still opens, compiles and colours the same, everywhere a `.spell` file does.)
+That's a `.spell` file in the tag shape:  a Spell template, one tag per thing it declares, and prose between them.
+What a file says decides its shape:  any line starting with `<` in the very first column, other than `<ui-defaults>`, makes it tags;
+without one, it's plain Spell.
+(The old endings, `.spellml` and `.spellx`, still open, compile and colour the same, and are always tags.)
 It compiles to exactly the program its plain Spell twin does, because Spell's own parser reads it:
 each tag line is read as the line of plain Spell it stands for.
 
@@ -101,6 +103,7 @@ reversible:`, and reads to the same tree as the English card.
 | A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
 | An example, in a drawing | `<example "...">` | `<ejemplo "...">` |
 | A block of markup drawn as written | `<html>` | `<html>` |
+| Where a program's data lives, at a file's top level | `<web-server>` `<graphql-server>` `<data-folder>` `<json-file>` `<room>` `<sheet>` `<csv-file>` `<excel-file>` `<google-sheet>` `<airtable>` `<atmosphere>` (`personal`, `space`) `<device-storage>` `<window-storage>` `<memory-storage>` | `<servidor-web>` `<servidor-graphql>` `<carpeta-de-datos>` `<archivo-json>` `<sala>` `<hoja>` `<archivo-csv>` `<archivo-de-excel>` `<hoja-de-google>` `<airtable>` `<atmosphere>` (`personal`, `espacio`) `<almacenamiento-del-dispositivo>` `<almacenamiento-de-ventana>` `<almacenamiento-en-memoria>` |
 | A block of prose, with the prefix | `<spell-description>` `<spell-comment>` | `<encanto-descripción>` `<encanto-comentario>` |
 | A type's property editor, its markup as written | `<spell-property-editor>` | `<encanto-editor-de-propiedades>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
@@ -117,8 +120,14 @@ reversible:`, and reads to the same tree as the English card.
   - Controls and handlers stay short (`<if>`, `<on>`):  a test fails if a Spell UI element ever takes one of their words.
 - A type's property editor, the layout of its Inspector card, can live in a file of its own:
   `Card.editor.spell`, or one for the project, `Solitaire.editors.spell`, a `<spell-property-editor "card">` per type.
-  - The editor opens and colours it as spellml, and the Inspector reads it;  it's never compiled.
+  - The editor opens and colours it in tags, and the Inspector reads it;  it's never compiled.
   - Not the property editor page, `Card.editor.html`, which New Property Editor... makes.
+- A place's tag reads as its plain line (epic `language` P40):
+  `<web-server "wikipedia" address="https://...">` is `wikipedia is a web server at "https://...":`.
+  - Its body is plain Spell, `- check it once a day`, as an `<action>`'s is.
+  - Only at a file's top level:  in a drawing, `<room/>` is still a project's own view.
+  - A kind a library adds gets its tag the same way:  `<supabase-project "x" address="...">`.
+  - `spell spellx convert` and `spell place ingest` write them;  `spell place update` merges into either shape.
 - `<spell-more-of "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
   so a place's fields can stay in one file, and what's drawn in another beside it.
 
@@ -219,8 +228,6 @@ spell spellx convert @spell/examples/calculator --dry-run
 ```
 
 - Each plain file is rewritten in place, as the name stays:  `Carta.es.spell` becomes Spanish spellx.
-  The `.spell` file stays:  keep ONE of the two, and list it in the project's `__project.json5`.
-  Both, and the project declares everything twice.
 - To just look at a file as spellx, Show as Spellx writes it without a second file.
 - `--dry-run` prints each file instead of writing it.  Nothing is written inside the test projects.
 - Each declaration becomes its tag:  a template, and inside it

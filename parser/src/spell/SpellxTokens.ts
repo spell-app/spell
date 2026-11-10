@@ -45,7 +45,7 @@ export type SpellxTagTokenProps = Prettify<P.TokenProps<string>> & {
  */
 export type SpellxTag = {
   /** What kind of tag it is. */
-  category: "template" | "declaration" | "note" | "handler" | "control" | "code" | "unknown"
+  category: "template" | "place" | "declaration" | "note" | "handler" | "control" | "code" | "unknown"
   /** What it means, in English, e.g. `property`, or `view` for `<spell-view>`;  its word for an unknown tag. */
   kind: string
   /** Its word as written, e.g. `property`, `spell-view`, `otherwise if`. */

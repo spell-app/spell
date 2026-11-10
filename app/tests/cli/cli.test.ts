@@ -404,10 +404,10 @@ describe("spell lint:  the old words for waiting (epic language P13)", () => {
   test("--fix takes `animated` out of a spellx action, its details kept", () => {
     const source =
       '<spell-thing "card">\n\t<action "deal it" animated description="Slowly">pause for 1 sec</>\n</spell-thing>\n'
-    const fixing = tempProject("Animated", source, SP.SPELLML_SUFFIX)
+    const fixing = tempProject("Animated", source, SP.SPELL_SUFFIX)
     expect(spell(["lint", "."], fixing).status).toBe(1)
     expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
-    expect(readFileSync(resolve(fixing, `Animated${SP.SPELLML_SUFFIX}`), "utf8")).toBe(source.replace(" animated", ""))
+    expect(readFileSync(resolve(fixing, `Animated${SP.SPELL_SUFFIX}`), "utf8")).toBe(source.replace(" animated", ""))
   }, 30_000)
 })
 
@@ -417,7 +417,7 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
     "\t<draw>\n\t\t<ui-button>Go</ui-button>\n\t\t<ui-text on-click={flip it}>face</>\n\t</>\n</spell-view>\n"
 
   test("--fix names each component bare, its closer with it;  an on-click= is an error it leaves", () => {
-    const habits = tempProject("Habits", SOURCE, SP.SPELLML_SUFFIX)
+    const habits = tempProject("Habits", SOURCE, SP.SPELL_SUFFIX)
     const { status, stdout } = spell(["lint", ".", "--fix"], habits)
     expect(stdout).toBe(
       [
@@ -436,14 +436,14 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
   test("--fix leaves an <html> block's tags as written:  the web's markup (epic notebook P8)", () => {
     const source =
       '<spell-page "docs" notebook>\n\t<html>\n\t\t<ui-text>as written</ui-text>\n\t</html>\n</spell-page>\n'
-    const html = tempProject("HtmlBlock", source, SP.SPELLML_SUFFIX)
+    const html = tempProject("HtmlBlock", source, SP.SPELL_SUFFIX)
     expect(spell(["lint", ".", "--fix"], html).stdout).toBe("")
-    expect(readFileSync(resolve(html, `HtmlBlock${SP.SPELLML_SUFFIX}`), "utf8")).toBe(source)
+    expect(readFileSync(resolve(html, `HtmlBlock${SP.SPELL_SUFFIX}`), "utf8")).toBe(source)
   }, 30_000)
 
   test("a component's own event stays on its element:  no <on ...> hears it", () => {
     const source = SOURCE.replace("<ui-text on-click={flip it}>face</>", "<modal on-ui-closed={flip it}>face</modal>")
-    const { status, stdout } = spell(["lint", "."], tempProject("OwnEvent", source, SP.SPELLML_SUFFIX))
+    const { status, stdout } = spell(["lint", "."], tempProject("OwnEvent", source, SP.SPELL_SUFFIX))
     expect(stdout).not.toContain("HTML's habit")
     expect(status).toBe(0)
   }, 30_000)
@@ -472,18 +472,18 @@ describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
   ].join("\n")
 
   test("a description before an example is a warning, named, exit 0;  writes nothing", () => {
-    const warned = tempProject("Warned", SOURCE, SP.SPELLML_SUFFIX)
+    const warned = tempProject("Warned", SOURCE, SP.SPELL_SUFFIX)
     const { status, stdout } = spell(["lint", "."], warned)
     expect(stdout).toBe(
       "Warned.spell:7:3  warning:  a description before an example is prose, not its description:  " +
         'say description="..." on the example instead, or run `spell lint --fix`  (description-before-example)\n'
     )
     expect(status).toBe(0)
-    expect(readFileSync(resolve(warned, `Warned${SP.SPELLML_SUFFIX}`), "utf8")).toBe(SOURCE)
+    expect(readFileSync(resolve(warned, `Warned${SP.SPELL_SUFFIX}`), "utf8")).toBe(SOURCE)
   }, 30_000)
 
   test("--fix:  <spell-page notebook>, its closer too;  <view> inside it;  the description in its example;  then a second run does nothing", () => {
-    const fixing = tempProject("Pages", SOURCE, SP.SPELLML_SUFFIX)
+    const fixing = tempProject("Pages", SOURCE, SP.SPELL_SUFFIX)
     const { status, stdout } = spell(["lint", ".", "--fix"], fixing)
     expect(stdout).toBe(
       [
@@ -494,7 +494,7 @@ describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
       ].join("\n")
     )
     expect(status).toBe(0)
-    const fixed = readFileSync(resolve(fixing, `Pages${SP.SPELLML_SUFFIX}`), "utf8")
+    const fixed = readFileSync(resolve(fixing, `Pages${SP.SPELL_SUFFIX}`), "utf8")
     expect(fixed).toBe(
       SOURCE.replace('<spell-notebook "counter notebook"', '<spell-page "counter notebook" notebook')
         .replace("</spell-notebook>", "</spell-page>")
@@ -506,14 +506,14 @@ describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
         )
     )
     expect(spell(["lint", ".", "--fix"], fixing).stdout).toBe("")
-    expect(readFileSync(resolve(fixing, `Pages${SP.SPELLML_SUFFIX}`), "utf8")).toBe(fixed)
+    expect(readFileSync(resolve(fixing, `Pages${SP.SPELL_SUFFIX}`), "utf8")).toBe(fixed)
   }, 30_000)
 
   test("--fix in Spanish:  <encanto-cuaderno> is <encanto-página cuaderno>", () => {
     const source = '<encanto-cuaderno "cuaderno de contador">\n\tUn contador cuenta sus clics.\n</encanto-cuaderno>\n'
-    const fixing = tempProject("Paginas", source, `.es${SP.SPELLML_SUFFIX}`)
+    const fixing = tempProject("Paginas", source, `.es${SP.SPELL_SUFFIX}`)
     expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
-    expect(readFileSync(resolve(fixing, `Paginas.es${SP.SPELLML_SUFFIX}`), "utf8")).toBe(
+    expect(readFileSync(resolve(fixing, `Paginas.es${SP.SPELL_SUFFIX}`), "utf8")).toBe(
       '<encanto-página "cuaderno de contador" cuaderno>\n\tUn contador cuenta sus clics.\n</encanto-página>\n'
     )
   }, 30_000)
@@ -938,7 +938,7 @@ describe("spell translate (epic spanish P24-P26)", () => {
   })
 
   test("a tag file comes back as tags, its project file naming it, lint clean (language I68)", () => {
-    const folder = tempProject("Tags", GAME_TAGS, SP.SPELLML_SUFFIX)
+    const folder = tempProject("Tags", GAME_TAGS, SP.SPELL_SUFFIX)
     writeFileSync(resolve(folder, "Tags.es.names.json5"), JSON.stringify(NAMES))
     const out = resolve(TEMP, "JuegoEnTags")
     const { status, stdout } = spell(["translate", folder, "--to", "es", "--no-ai", "--out", out])
@@ -1054,12 +1054,12 @@ describe("spell format", () => {
 
 // epic `elemental-spell` P12
 describe("spell spellx convert", () => {
-  test("--dry-run prints each file as spellx;  then convert writes it beside the .spell file", () => {
+  test("--dry-run prints each file as spellx;  then convert rewrites it in place (epic `language` P40)", () => {
     const folder = tempProject("Deal", 'a "card" is a thing where:\n\t- its "rank" is 1\n')
     const dryRun = spell(["spellx", "convert", "--dry-run", "."], folder)
     expect(dryRun.status).toBe(0)
     expect(dryRun.stdout).toBe('// Deal.spell\n<spell-thing "card">\n\t<property "rank">1</>\n</spell-thing>\n')
-    expect(existsSync(resolve(folder, "Deal.spell"))).toBe(false)
+    expect(readFileSync(resolve(folder, "Deal.spell"), "utf8")).not.toContain("<spell-thing")
 
     expect(spell(["spellx", "convert", "."], folder).stdout).toBe("Deal.spell\n")
     expect(readFileSync(resolve(folder, "Deal.spell"), "utf8")).toContain('<property "rank">1</>')
@@ -1072,14 +1072,14 @@ describe("spell spellx convert", () => {
   })
 })
 
-// epic `elemental-spell` J95, Owen 2026-10-25:  "one file" -- a template is a `.spell` file OR a `.spellml` file
-describe("a project of a .spellml file alone, no .spell copy", () => {
+// epic `elemental-spell` J95, Owen 2026-10-25:  "one file";  epic `language` P40:  `.spell` in tags, or the old `.spellml`
+describe("a project of one tag-shaped file", () => {
   const SOURCE =
     '<spell-thing "card">\n\t<property "rank">7</>\n\t<action "show it">\n\t\tprint its rank\n\t</>\n</spell-thing>\n\n' +
     "<spell>\n\tshow a new card\n</spell>\n"
 
-  test("loads, parses, compiles and runs", () => {
-    const folder = tempProject("Hand", SOURCE, SP.SPELLML_SUFFIX)
+  test.each([SP.SPELL_SUFFIX, SP.SPELLML_SUFFIX])("%s:  loads, parses, compiles and runs", (suffix) => {
+    const folder = tempProject(`Hand${suffix.replace(/\W/g, "")}`, SOURCE, suffix)
     const compiled = spell(["compile", ".", "--stdout"], folder)
     expect(compiled.status).toBe(0)
     expect(compiled.stdout).toContain("export class Card extends Thing {")

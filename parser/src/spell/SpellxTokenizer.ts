@@ -266,7 +266,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
       // an app's widget defaults, at the top (epic `language` P29):  markup, read as code spell reads it
       if (!this.frames.length && this.isDefaultsTag(text, start)) return undefined
-      const word = this.tagWordAt(text, start)
+      const word = this.placeWordOr(this.tagWordAt(text, start), indent)
       if (this.isTagHere(word, indent)) return this.readTag(text, start, end, indent, lineEnd, word)
     }
     const owner = this.ownerOfLine(indent)
@@ -320,7 +320,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     const next = super.nextElementStart(text, from, end, indent)
     if (next >= end || !this.isLineStart(text, next) || !WORD_START.test(text[next + 1] ?? "")) return next
     const lineIndent = next - (text.lastIndexOf("\n", next - 1) + 1)
-    return this.isTagHere(this.tagWordAt(text, next), lineIndent) ? end : next
+    return this.isTagHere(this.placeWordOr(this.tagWordAt(text, next), lineIndent), lineIndent) ? end : next
   }
 
   /** Is `start` a line's first character that isn't a space or tab? */
@@ -339,6 +339,16 @@ export class SpellxTokenizer extends P.Tokenizer {
   ////////////////
   // ## Tags
   ////////////////
+
+  /**
+   * `word`, unless it's a place's word and this is a file's top level:  `<web-server>`, `<room>` (epic `language` P40).
+   * - Anywhere else it stays what it was, so `<room/>` in a drawing is still a project's own view.
+   */
+  private placeWordOr(word: TagWord, indent: number): TagWord {
+    if (word.category !== "unknown" || this.ownerOfTag(indent, word)) return word
+    const lower = word.word.toLowerCase()
+    return this.words.places.some(({ tag }) => tag === lower) ? { ...word, category: "place", kind: lower } : word
+  }
 
   /**
    * What the tag at `start` says it is, by its word:  a template, a member, a note, a handler or a control.
@@ -433,7 +443,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     // in a body drawn as a page's drawing:  a word spellx doesn't know is markup, `<section>`, `<example>` (P16)
     if (drawsItsBody(owner)) return word.category !== "unknown"
     if (!owner || owner.category === "template") return true
-    if (owner.category === "note" || owner.category === "code") return false
+    if (owner.category === "note" || owner.category === "code" || owner.category === "place") return false
     if (word.category === "code" && word.kind === "html") return this.isInDrawing()
     // its actions, and the menus inside it:  sub-menus (epic `language` P19)
     if (owner.kind === "menu" && word.category === "declaration" && (word.kind === "action" || word.kind === "menu"))
@@ -468,6 +478,10 @@ export class SpellxTokenizer extends P.Tokenizer {
   private readTag(text: string, start: number, end: number, indent: number, lineEnd: number, word: TagWord) {
     const isPhrased = word.category === "handler" || word.category === "control"
     const head = isPhrased ? this.readPhraseHead(text, word) : this.readNamedHead(text, start, end, word)
+    // a kind of place a library adds, `<supabase-project "x" address="...">`:  its `address=` says what it is
+    if (word.category === "unknown" && !this.frames.length && head.attributes.some(isAddress)) {
+      word = { ...word, category: "place" }
+    }
     const raw = text.slice(start, head.end)
     // the flag its word brings, as if written:  `<spell-notebook>`'s `notebook`
     if (word.flag && !head.attributes.some((attribute) => attribute.name === word.flag))
@@ -543,7 +557,13 @@ export class SpellxTokenizer extends P.Tokenizer {
       return [this.message("spellx-unknown-word", { tag, suggestion: `<${this.words.prefix}-${word.word}>` })]
     if (word.category === "code" && owner && owner.category !== "template" && word.kind !== "html")
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
-    if (word.category !== "template" && word.category !== "note" && word.category !== "code" && !owner)
+    if (
+      word.category !== "template" &&
+      word.category !== "note" &&
+      word.category !== "code" &&
+      word.category !== "place" &&
+      !owner
+    )
       return [this.message("spellx-outside-template", { tag, template: `<${this.words.prefix}-view>` })]
     return []
   }
@@ -625,7 +645,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       }
       const attribute = this.readAttribute(text, pos, end, name)
       const isBareName =
-        word.category === "template" &&
+        (word.category === "template" || word.category === "place") &&
         !head.name &&
         !head.attributes.length &&
         !attribute.value &&
@@ -1293,6 +1313,11 @@ function closingQuote(text: string, start: number, end: number) {
 /** The first word of `words`, lowercased. */
 function firstWordOf(words: string) {
   return words.toLowerCase().split(/[ \t]+/)[0] ?? ""
+}
+
+/** Is `attribute` a place's address, `address=`? */
+function isAddress(attribute: { name: string }): boolean {
+  return attribute.name === "address"
 }
 
 /** A word of a tag:  letters, digits, `_` and `-`, accents too. */

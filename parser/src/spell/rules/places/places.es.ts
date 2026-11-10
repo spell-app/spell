@@ -16,6 +16,7 @@ import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
 import { StoredOnThisDevice } from "./StoredOnThisDevice"
+import { StoredInMemory } from "./StoredInMemory"
 import { DraftOf } from "./DraftOf"
 import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
@@ -117,6 +118,7 @@ placesEs.addRule(
       "graphql_server",
       "data_folder",
       "file",
+      "plain_file",
       "room",
       "sheet",
       "excel_file",
@@ -128,7 +130,7 @@ placesEs.addRule(
   }),
   {
     syntax:
-      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
+      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(excel_file:archivo de excel/i)|(file:archivo json)|(plain_file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja|archivo csv)|(airtable:airtable)|(atmosphere_space:espacio de atmosphere/i)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
   }
 )
 
@@ -204,6 +206,27 @@ placesEs.addRule(StoredOnThisDevice, {
             '  kind: "database on this device",',
             '  unclearNumbers: ",",',
             "  forEachTab: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(StoredInMemory, {
+  syntax: "{type:type_words} se guarda en memoria {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "borradores se guarda en memoria",
+          [
+            "export class Borrador extends Place {}",
+            "export const borradores = core.place(new Borrador(), {",
+            '  name: "borradores",',
+            '  kind: "in memory database",',
+            '  unclearNumbers: ","',
             "})"
           ]
         ]

@@ -1301,7 +1301,15 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
 A `.spell` file is read by spell's own parser and rules, as sentences and the outline are:
 each tag line reads as its code-spell twin line, so it compiles to exactly what its twin `.spell` file does.
 
-- Which form a file is:  its suffix (`SpellFile.form`, `"spell"` or `"spellx"`).
+- Which form a file is:  what it says (`SP.formOfText()`, `SpellFile.form`, `"spell"` or `"spellx"`;  epic `language` P40).
+  - Tags:  any line starting with `<` in the very first column, other than `<ui-defaults>`;  lines in a comment don't count.
+  - The old endings, `.spellml` and `.spellx`, are always tags.
+- A place's tag, `<web-server "x" address="...">`, at a file's top level only (`SP.SpellxPlaceWord`, the language's `places`):
+  its twin is its plain line, `x is a web server at "..." :`, and its body is plain Spell, as an `<action>`'s.
+  - An unknown word with `address=` there is a kind a library adds:  `<supabase-project>` reads `x is a supabase project at`.
+  - `SX.SpellxWriter` writes a place's line as its tag, by whichever entry's words it says;  none, and it stays in `<spell>`.
+  - A file whose shape changes as it's edited is parsed whole, in a new scope:
+    incremental parsing never carries lines from one shape to the other (`SpellProject.updatedContentsFor()`).
   - Its parser is the language's, cloned for that form:  `SpellParser.twinFor(language, form)`.
   - A spellx parser tokenizes a whole file (`"block"`) with [`SP.SpellxTokenizer`](SpellxTokenizer.ts),
     and everything else (a line, an expression) with spell's own.

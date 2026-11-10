@@ -15,6 +15,7 @@ import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
 import { StoredOnThisDevice } from "./StoredOnThisDevice"
+import { StoredInMemory } from "./StoredInMemory"
 import { DraftOf } from "./DraftOf"
 import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
@@ -95,6 +96,7 @@ const KINDS_AT = [
   "graphql_server",
   "data_folder",
   "file",
+  "plain_file",
   "room",
   "sheet",
   "excel_file",
@@ -122,7 +124,7 @@ const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
 places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }), {
   syntax:
-    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
+    "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:json file)|(plain_file:file)|(room:room)|(sheet:sheet|spreadsheet|csv file)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
 })
 
 places.addRule(Wording.specialize({ ruleName: "place_kind_here", meanings: KINDS_HERE }), {
@@ -245,6 +247,23 @@ places.addRule(StoredOnThisDevice, {
             '  kind: "database on this device",',
             "  forEachTab: true",
             "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(StoredInMemory, {
+  syntax: "{type:type_words} is stored in memory {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "drafts is stored in memory",
+          [
+            "export class Draft extends Place {}",
+            'export const drafts = core.place(new Draft(), { name: "drafts", kind: "in memory database" })'
           ]
         ]
       ]

@@ -278,7 +278,7 @@ The app's part of the page server's settings (its `package.json`'s `"pageServer"
 ## Writing an example
 
 Examples are what people and agents copy, so each one shows the current way (Owen, 2026-10-31, epic `data`).
-- Always spellml, with all of the latest language and UI features.
+- Always the tag shape, with all of the latest language and UI features.
   - No HTML.  Minimal CSS.
 - Separate concerns:  API, UI and custom widgets each in their own files.
 - Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.

@@ -66,8 +66,7 @@ function errorsIn(parse: P.IncrementalParse | undefined): string[] {
 
 describe("what counts as alone", () => {
   const head = (text: string) => SP.Language.rootScopeFor([SP.Language.forFile("/x.spell")]).parser as SP.SpellParser
-  const alone = (text: string) =>
-    !!head(text).twinFor(SP.Language.forFile("/x.spell"), "spellx").aloneHead(text, "/x")
+  const alone = (text: string) => !!head(text).twinFor(SP.Language.forFile("/x.spell"), "spellx").aloneHead(text, "/x")
 
   test("one page, a comment before it, its views inside", () => expect(alone(`<!-- notes -->\n${FILM}`)).toBe(true))
   test("a page in `.spell` is not", () => {

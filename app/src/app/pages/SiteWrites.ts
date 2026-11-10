@@ -75,7 +75,7 @@ export class SiteWrites {
   /** SIDE EFFECT:  a new file for `part`, its own, beside the site's `site`, and shown. */
   private static async createPartFile(part: SitePart, site: SiteFile): Promise<void> {
     const project = editor.project!
-    const language = /\.es\.spell(?:ml|x)$/.test(site.path) ? "es" : "en"
+    const language = /\.es\.spell(?:ml|x)?$/.test(site.path) ? "es" : "en"
     const folder = (site.filePath ?? "").replace(/[^/]*$/, "")
     const taken = project.files.map((file) => file.filePath?.replace(/^.*\//, "") ?? "")
     const fileName = SiteEdits.fileNameFor(part.title ?? part.name, taken, language)
@@ -171,7 +171,7 @@ export class SiteWrites {
       editor.showNotice(appTexts.text("siteStoriesElsewhere", { name }))
       return false
     }
-    const language = /\.es\.spell(?:ml|x)$/.test(file.path) ? "es" : "en"
+    const language = /\.es\.spell(?:ml|x)?$/.test(file.path) ? "es" : "en"
     return SiteWrites.changeText(file, appTexts.text("siteChangeStories", { name }), undefined, (text) =>
       PageStories.withStories(text, name, stories, language)
     )

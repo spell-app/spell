@@ -246,6 +246,7 @@ export class SpellxWriter {
   /** A template's line and its members, if `statement` declares one. */
   private template(line: P.LineToken, body: P.BlockToken | undefined, statement: P.Match): Written | undefined {
     const rule = statement.rule.name ?? ""
+    if (PLACE_RULES.has(rule)) return this.place(line, body, statement)
     if (!TEMPLATE_RULES.has(rule)) return undefined
     const name = unquote(groupText(statement, "type"))
     const aka = groupText(statement, "aka")
@@ -278,6 +279,44 @@ export class SpellxWriter {
         return this.out.splice(start)
       }
     }
+  }
+
+  /**
+   * A place's line as its tag, `<web-server "wikipedia" address="...">`, its body as written:  it's plain Spell.
+   * - Any entry of the language's `places` whose words the line says, so an older line becomes the tag too;
+   *   a kind a library adds, `<supabase-project>`, by its type's name.
+   * - `undefined`, so it stays in a `<spell>` chunk, for a line no entry says.
+   */
+  private place(line: P.LineToken, body: P.BlockToken | undefined, statement: P.Match): Written | undefined {
+    const opener = groupMatch(statement, "with_nested_statements")
+    const said = this.text
+      .slice(line.start, opener ? opener.start : this.lineEndOf(line.start))
+      .replace(/\s*\/\/(?=(?:[^"]*"[^"]*")*[^"]*$).*$/, "")
+      .replace(/\s*:\s*$/, "")
+      .trim()
+    const found = this.placeTagFor(said, statement)
+    if (!found?.name || found.name.includes('"')) return undefined
+    const attributes = [...(found.flag ? [keyFor(this.words.attributes, found.flag)] : [])]
+    if (found.address) attributes.push(`${keyFor(this.words.attributes, "address")}=${found.address}`)
+    const head = `<${found.tag} ${quoted(found.name)}${attributes.map((attribute) => ` ${attribute}`).join("")}`
+    return {
+      lines: () => (body ? [`${head}>`, ...this.sourceOf(body), `</${found.tag}>`] : [`${head} />`])
+    }
+  }
+
+  /** The place tag plain line `said` is, and what it names:  see `place()`. */
+  private placeTagFor(said: string, statement: P.Match) {
+    for (const { tag, line, flag, bare } of this.words.places) {
+      for (const shape of [line, bare]) {
+        const found = shape && said.match(placeLinePattern(shape))
+        if (found) return { tag, flag, name: found.groups!.words!, address: found.groups!.address }
+      }
+    }
+    const superType = groupText(statement, "superType")
+    const address = groupText(statement, "address")
+    const name = groupText(statement, "type")
+    if (!superType || !address || !name) return undefined
+    return { tag: superType.trim().replace(/\s+/g, "-").toLowerCase(), flag: undefined, name: unquote(name), address }
   }
 
   /**
@@ -863,6 +902,26 @@ export class SpellxWriter {
 
 /** The rules that declare a template, by what's written:  `a "card" is a view`, `solitaire is an app`. */
 const TEMPLATE_RULES = new Set(["create_type", "create_list_type", "create_viewable_list_type", "create_one_of_a_kind"])
+
+/** The rules that say where a program's data lives. */
+const PLACE_RULES = new Set(["create_place", "stored_on_this_device", "stored_in_memory"])
+
+/** A pattern for a place's plain line (`SP.SpellxPlaceWord`):  its name and address captured, spaces any amount. */
+function placeLinePattern(line: string): RegExp {
+  const source = line
+    .replace(/\s*:\s*$/, "")
+    .split(/\s+/)
+    .map((word) => {
+      if (word === "{words}") return "(?<words>.+?)"
+      if (word === "{quoted") return ""
+      if (word === "address}") return '(?<address>"[^"]*")'
+      if (word === ",") return ","
+      return word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    })
+    .filter(Boolean)
+    .join("\\s+")
+  return new RegExp(`^${source.replace(/\\s\+,/g, "\\s*,")}$`, "iu")
+}
 
 /** The rules that declare a property, outline style. */
 const PROPERTY_RULES = new Set(["define_property_has", "property_value_getter"])

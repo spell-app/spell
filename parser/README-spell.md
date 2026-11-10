@@ -1217,10 +1217,12 @@ recipe box is an app:
 - In a `.spell` drawing the same loop is one tag:
   `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
+- In a tag-shaped file the same line is a tag, `<web-server "family cookbook" address="https://...">`,
+  its lines inside as they are ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:
   - `a graphql server at`, `a data folder at`
-  - `a file at`, `a room at`
-  - `a sheet at`, `a google sheet at`
+  - `a json file at` (one JSON5 file of every collection's rows;  a bare `a file at` asks which kind), `a room at`
+  - `a sheet at`, or `a csv file at`, `a google sheet at`
   - `a spreadsheet at "recipes.xlsx"` reads an Excel workbook, by its ending;
     `an excel file at` names one whatever its address ends in.
     Each sheet of it is a collection, named by its tab.
@@ -1229,7 +1231,8 @@ recipe box is an app:
   - `an airtable at`, `an atmosphere account at`
   - `a personal atmosphere account`
   - `an atmosphere space at` (it compiles;  reading one says Spell can't reach those yet)
-  - `a database on this device`, or `is stored on this device`, and `is stored on this device, for each tab`;  `an in memory database`
+  - `is stored on this device`, and `is stored on this device, for each tab`;  `is stored in memory`
+    (the older `a database on this device` and `an in memory database` still read)
   - `a data folder at` names a project data folder, three ways:
     - `"recipes"`:  the program's own
     - `personal "recipes"`:  one per person

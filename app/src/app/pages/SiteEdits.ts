@@ -777,7 +777,7 @@ const ATTRIBUTE = (word: string) => new RegExp(`\\b${word}="([^"]*)"`)
 const PART_NAME = /^[\p{L}\p{N}][^"<>{}\n]*$/u
 
 /** A file holding a site's routing alone:  `Galaxy.site.spell`, `Galaxia.site.es.spell`. */
-const ROUTING_ONLY_FILE = /\.site(?:\.[a-z]{2})?\.spell(?:ml|x)$/
+const ROUTING_ONLY_FILE = /\.site(?:\.[a-z]{2})?\.spell(?:ml|x)?$/
 
 /** What starts a group's key (`SiteEdits.groupKey()`):  no name can, as a name starts with a letter or number. */
 const GROUP_KEY = "#group "

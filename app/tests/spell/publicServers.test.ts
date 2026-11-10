@@ -52,6 +52,11 @@ function answerAsRecorded(): Array<{ url: string; key: string | null }> {
   return asked
 }
 
+/** `api`, a file in tags (epic `language` P40), with plain Spell `lines` after it, in a `<spell>` block. */
+function withSpell(api: string, ...lines: string[]): string {
+  return `${api}\n<spell>\n${lines.map((line) => `\t${line}`).join("\n")}\n</spell>\n`
+}
+
 /** The example's types, compiled and run. */
 function github() {
   return runSpellFiles([{ path: "/GitHub.api.spell", contents: readFileSync(API_FILE, "utf8") }])(
@@ -181,7 +186,7 @@ describe("Open Library, through its Spell", () => {
   })
 
   test("every book, with no search, won't compile:  it says how to search", () => {
-    const lines = [readFileSync(OPEN_LIBRARY_FILE, "utf8"), "set found to every book"].join("\n")
+    const lines = withSpell(readFileSync(OPEN_LIBRARY_FILE, "utf8"), "set found to every book")
     expect(() => runSpellFiles([{ path: "/OpenLibrary.api.spell", contents: lines }])).toThrow(
       /books are only found by a search, with no list of them all/
     )
@@ -249,10 +254,7 @@ describe("Open-Meteo, through its Spell", () => {
   })
 
   test("every forecast, without where it's for, won't compile:  it says what to give", () => {
-    const lines = [
-      readFileSync(OPEN_METEO_FILE, "utf8"),
-      "set found to every forecast where its latitude is 52.52"
-    ].join("\n")
+    const lines = withSpell(readFileSync(OPEN_METEO_FILE, "utf8"), "set found to every forecast where its latitude is 52.52")
     expect(() => runSpellFiles([{ path: "/OpenMeteo.api.spell", contents: lines }])).toThrow(
       /forecasts are only found by their latitude, longitude/
     )
@@ -374,7 +376,7 @@ describe("The Met Museum, through its Spell", () => {
   test("every artwork matching the search compiles to the Met's own search;  a place that doesn't search all of each thing refuses it", () => {
     const api = readFileSync(MET_MUSEUM_FILE, "utf8")
     const reads = (lines: string) => () =>
-      runSpellFiles([{ path: "/MetMuseum.api.spell", contents: `${lines}\nset found to every artwork matching "sun"` }])
+      runSpellFiles([{ path: "/MetMuseum.api.spell", contents: withSpell(lines, 'set found to every artwork matching "sun"') }])
     expect(reads(api)).not.toThrow()
     expect(reads(api.replace(/\t- it searches everything with .*\n/, ""))).toThrow(
       /artworks are found this way only in a place that searches all of each thing/
@@ -440,7 +442,7 @@ describe("REST Countries, through its Spell", () => {
       "to french name (a country):",
       '\treturn the common of the first translation in its translations where its code is "fra"'
     ]
-    const contents = [readFileSync(REST_COUNTRIES_FILE, "utf8"), ...nameIn].join("\n")
+    const contents = withSpell(readFileSync(REST_COUNTRIES_FILE, "utf8"), ...nameIn)
     const { Country } = runSpellFiles([{ path: "/RestCountries.api.spell", contents }])("Country") as {
       Country: (new () => unknown) & { savedIn: { select?: unknown } }
     }

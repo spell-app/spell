@@ -201,6 +201,7 @@ describe("priority and precedence", () => {
         "sorts_by:  Priority.declaration",
         "starts_with:  Precedence.comparison",
         "stop_sound:  Priority.overridable",
+        "stored_in_memory:  Priority.aboveDeclaration",
         "stored_on_this_device:  Priority.aboveDeclaration",
         "the_date:  Priority.overridable",
         "their_field:  Priority.specific",

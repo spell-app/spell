@@ -525,6 +525,8 @@ export type SpellxWords = {
   templates: Record<string, SpellxTemplateWord>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
   declarations: Record<string, SpellxDeclarationKind>
+  /** The tags that say where a program's data lives, at a file's top level (epic `language` P40). */
+  places: SpellxPlaceWord[]
   /**
    * A tag holding prose about what it's in, its word after the prefix and its dash:
    * `description` in `<spell-description>`, `comment` in `<spell-comment>` (epic `data` P31, Q27).
@@ -606,7 +608,27 @@ export type SpellxForWords = {
   nothingFound: string
 }
 
+/**
+ * A tag saying where a program's data lives:  `<web-server "wikipedia" address="...">`, read as its plain line.
+ * - Only at a file's top level:  inside a drawing, `<room/>` is still a project's own view.
+ * - Its body is plain Spell, as an `<action>`'s is.
+ * - The first entry for a tag whose `flag` is set (or that has none) reads it;
+ *   the writer takes any entry whose words a plain line says, so an older line still becomes the tag.
+ */
+export type SpellxPlaceWord = {
+  /** its word, `web-server` */
+  tag: string
+  /** the plain line it reads as, with `{words}` (its name) and `{quoted address}` */
+  line: string
+  /** the bare attribute this entry is for, by its English name:  `<atmosphere personal>` */
+  flag?: string
+  /** the plain line when no `address=` is given, for a kind that can do without */
+  bare?: string
+}
+
 export type SpellxTwinWords = {
+  /** A place a library adds, `<supabase-project "x" address="...">`:  `{words} is {a kind} {kind} at {quoted address} :`. */
+  placeOfKind: string
   /** A template, named by a quoted name:  `{a name} {name} is {a super} {super} :`. */
   template: string
   /** A template with a short name too, `aka=`:  its name as words, `{a words} {words} aka {aka} is ...`. */
