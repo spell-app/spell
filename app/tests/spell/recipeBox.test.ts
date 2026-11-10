@@ -605,6 +605,10 @@ start the box
         // someone else's arrives by itself, on the account's live stream
         network.putRecord(BOB, STATUS, "3lbob2", { status: "😎", createdAt: "2026-11-04T11:00:00.000Z" })
         await expect.poll(async () => (await shown()).join(" "), WAITING).toContain("😎@bob.test")
+        // newest first, by when each says it was set (epic `data` I99)
+        await expect
+          .poll(async () => (await shown()).map((row) => /^\S+/u.exec(row.trim())?.[0]), WAITING)
+          .toEqual([expect.stringContaining("🚀"), expect.stringContaining("😎"), expect.stringContaining("🦋")])
         expect(problems).toEqual([])
         await page.close()
       }
