@@ -56,6 +56,37 @@
     display: none;
   }
 
+  /* `max-visible`:  the button listing every item, a quiet key beside the row, which never scrolls away */
+  .ui.toolbar > .all-items {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--_ui-toolbar-button-size);
+    height: var(--_ui-toolbar-button-size);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--_ui-toolbar-button-radius);
+    font: inherit;
+    color: var(--_ui-toolbar-button-color);
+    background: var(--_ui-toolbar-button-background);
+    cursor: var(--ui-control-cursor);
+  }
+  .ui.toolbar > .all-items:hover {
+    color: var(--ui-text-color);
+    background: var(--_ui-toolbar-button-hover-background);
+  }
+  .ui.toolbar > .all-items:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: 1px;
+  }
+  .ui.toolbar > .all-items > svg {
+    width: 0.875em;
+    height: 0.875em;
+    fill: currentColor;
+    pointer-events: none;
+  }
+
   /*
    * the menu's own box scrolls (the scrolling row's sheet):  it takes the room left, its items never shrunk
    * - none of a menu's margin beside its siblings:  the keys and slots before it aren't other blocks,
