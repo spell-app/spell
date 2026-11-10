@@ -1058,7 +1058,7 @@ describe("spell spellx convert", () => {
     const folder = tempProject("Deal", 'a "card" is a thing where:\n\t- its "rank" is 1\n')
     const dryRun = spell(["spellx", "convert", "--dry-run", "."], folder)
     expect(dryRun.status).toBe(0)
-    expect(dryRun.stdout).toBe('// Deal.spell\n<thing "card">\n\t<property "rank">1</>\n</thing>\n')
+    expect(dryRun.stdout).toBe('// Deal.spell\n<thing "card">\n\t<property "rank">1</>\n</>\n')
     expect(readFileSync(resolve(folder, "Deal.spell"), "utf8")).not.toContain("<thing")
 
     expect(spell(["spellx", "convert", "."], folder).stdout).toBe("Deal.spell\n")

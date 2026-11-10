@@ -14,12 +14,7 @@ describe("Solitaire project", () => {
   const files = loadFixtureProject("@spell/examples/Solitaire")
 
   test("loads files in import order", () => {
-    expect(files.map(({ path }) => path)).toEqual([
-      "/Card.spell",
-      "/Deck.spell",
-      "/Pile.spell",
-      "/Solitaire.spell"
-    ])
+    expect(files.map(({ path }) => path)).toEqual(["/Card.spell", "/Deck.spell", "/Pile.spell", "/Solitaire.spell"])
   })
 
   test("parses the same way every time", () => {

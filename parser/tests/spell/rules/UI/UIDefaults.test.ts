@@ -30,8 +30,8 @@ describe("ui_defaults", () => {
     // - a file holding only this block is plain (`SP.formOfText()`), so the old ending keeps it tag-shaped here
     for (const [path, tag] of [
       ["/Tema.es.spell", "es-boton"],
-      ["/Tema.es.spell", "botón"],
-      ["/Tema.es.spell", "ui-botón"]
+      ["/Tema.es.spellml", "botón"],
+      ["/Tema.es.spellml", "ui-botón"]
     ]) {
       const { code, errors } = compiled(
         path!,

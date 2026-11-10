@@ -4,7 +4,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 "Card.spell
   A playing card
   template Card  is a TwoSidedView
-    Properties  rank, value, suit, color, symbol, name, state, picture, pile
+    Properties  rank, value, suit, color, symbol, name, state, picture, lifted, pile
     Actions     is a (rank), is a face card, is a number card, is a (suit), is the (rank) of (suit),
                 draw it, play a card, put a card on a pile, count the points for a card on a pile
     Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -39,7 +39,7 @@ exports[`describeThing() > a type 1`] = `
 "template Card is a TwoSidedView
 Card.spell:6
 
-Properties  rank, value, suit, color, symbol, name, state, picture, pile
+Properties  rank, value, suit, color, symbol, name, state, picture, lifted, pile
 Actions     is a (rank), is a face card, is a number card, is a (suit), is the (rank) of (suit),
             draw it, play a card, put a card on a pile, count the points for a card on a pile
 Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -58,13 +58,13 @@ Spell
     <property "color" one-of="red, black">
       red if it is a diamond or it is a heart
       black otherwise
-    </property>
+    </>
     <property "symbol">
       "♣" if it is a club
       "♦" if it is a diamond
       "♥" if it is a heart
       "♠" otherwise
-    </property>
+    </>
   
     <group "names" description="What a person, a test or the console calls it"/>
     <property "name">its rank + " of " + its suit</>
@@ -73,13 +73,13 @@ Spell
       letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
       arrow is "↑" if it is face up otherwise "↓"
       return letter + its symbol + arrow
-    </property>
+    </>
   
     <group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>
     <draw description="Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns">
       <draw "front" />
       <draw "back" />
-    </draw>
+    </>
     <property "picture" description="Its face:  https://www.compart.com/en/unicode/block/U+1F0A0">
       set column to its value
       if it is a club
@@ -89,13 +89,14 @@ Spell
       if it is a heart
         return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
       return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
-    </property>
+    </>
+    <property "lifted" description="Pulled up out of its pile, over the piles above it, as the cheat does -- styles.css">yes or no</>
     <draw "front">
       <text color={its color}>{its picture}</text>
-    </draw>
+    </>
     <draw "back">
       <text color="blue">🂠</text>
-    </draw>
+    </>
   
     <test "card setup">
       get a new card whose rank is queen, suit is spades and direction is down
@@ -122,5 +123,5 @@ Spell
       the picture of seven should be "🂷"
       the picture of a new card whose rank is ace and suit is clubs should be "🃑"
       the picture of a new card whose rank is king and suit is diamonds should be "🃎"
-    </test>"
+    </>"
 `;
