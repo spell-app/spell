@@ -701,7 +701,7 @@
                     </tr>
                     <tr>
                       <td><code>empty</code></td>
-                      <td>An item section with no items: "None yet".</td>
+                      <td>The short line on an empty section's title, saying what's missing ("Nothing to do"): shown while the page is reviewed, with its New button, or on a link to it.</td>
                     </tr>
                     <tr>
                       <td><code>review-buttons</code></td>
@@ -835,8 +835,8 @@
                 >, red needs you, blue Claude is working on it, yellow open, green decided or done, grey no longer
                 relevant. A chip is FILLED while its items show. The grey chip flips between everything and only what
                 needs you. A filtered list says <code>3 hidden · show all</code> under it. Remembered per page. A link landing on an item the filter hides (a phase's To review chip, a
-                <code>#j2</code> address) shows it anyway, until you pick a chip again; and a section the page's stage hides
-                shows while it holds that item (epic <code>epic-engine</code> I191).
+                <code>#j2</code> address) shows it anyway, until you pick a chip again; and a section hidden for being empty
+                shows on a link to it (epic <code>epic-engine</code> I191).
               </li>
               <li>
                 <b>Counted as drawn</b> (epic <code>epic-engine</code> I147; 2026-10-26: "badges don't match up"):
@@ -867,7 +867,20 @@
                   ><code>&lt;epic-phase&gt;</code></a
                 >).
               </li>
-              <li><b>An empty item section</b> says "None yet".</li>
+              <li>
+                <b>An empty section hides</b>, at every stage (epic <code>epic-engine</code> P70): the Phases, Questions,
+                Judgement calls, Todo, Issues, Manual tests and a Log with no events.
+                <ul>
+                  <li>
+                    While the page is being reviewed, one with a New button stays: its title, a short line on it saying
+                    what's missing ("Nothing to do", "No questions", "No issues", "No tests to try", "No phases yet"),
+                    and its New button.
+                  </li>
+                  <li>Outside a review those hide too: no New button is drawn.</li>
+                  <li>Its state is <code>hidden</code>. The numbers, the toolbar and Focus mode skip it, and a link to it still shows it.</li>
+                  <li>Every other kind always shows: the Overview's sub-sections, a report, Choices.</li>
+                </ul>
+              </li>
               <li>
                 <b>An Overview sub-section</b> sits on the row band; while the page is reviewed it has review buttons
                 (Make Todo, Revisit) and a note box, with Claude's status cards above the note box.

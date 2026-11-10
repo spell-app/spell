@@ -176,7 +176,8 @@
   .id {
     font-variant-numeric: tabular-nums;
   }
-  .dot {
+  .dot,
+  .draft {
     white-space: pre;
   }
 

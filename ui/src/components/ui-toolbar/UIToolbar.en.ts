@@ -38,6 +38,21 @@ export const toolbarVocabulary = {
         "With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  " +
         "With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's " +
         "`--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
+    },
+    {
+      name: "max-visible",
+      group: "layout",
+      kind: "string",
+      description:
+        "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, " +
+        "and a button that's always there lists every item.  An item picked there joins the row, and the one " +
+        "chosen longest ago leaves it."
+    },
+    {
+      name: "remember",
+      group: "layout",
+      kind: "string",
+      description: "With `max-visible`:  a name to keep the row's items under, so they're the same after a reload."
     }
   ],
   slots: [
@@ -55,14 +70,16 @@ export const toolbarVocabulary = {
     { name: "right", description: "The `right` slot's box." },
     { name: "toolbar", description: "The box around the menu and its scroll buttons." },
     { name: "scroll-start", description: "The `‹` button, shown while there's more to scroll back to." },
-    { name: "scroll-end", description: "The `›` button, shown while there's more to scroll on to." }
+    { name: "scroll-end", description: "The `›` button, shown while there's more to scroll on to." },
+    { name: "all-items", description: "`max-visible`:  the button listing every item, while some are put away." }
   ],
   states: [
     ...menuVocabulary.states,
     {
       name: "overflowing",
       description: "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
-    }
+    },
+    { name: "limited", description: "`max-visible`:  there are more items than that, so some are put away." }
   ],
   texts: [
     ...menuVocabulary.texts,

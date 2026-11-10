@@ -57419,6 +57419,20 @@
           }
         },
         {
+          "name": "max-visible",
+          "description": {
+            "kind": "markdown",
+            "value": "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.  An item picked there joins the row, and the one chosen longest ago leaves it.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "remember",
+          "description": {
+            "kind": "markdown",
+            "value": "With `max-visible`:  a name to keep the row's items under, so they're the same after a reload.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

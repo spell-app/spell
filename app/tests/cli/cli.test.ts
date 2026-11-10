@@ -870,6 +870,23 @@ describe("spell translate (epic spanish P24-P26)", () => {
     ""
   ].join("\n")
 
+  /** `GAME`, written in tags. */
+  const GAME_TAGS = [
+    "# The game",
+    "",
+    '<spell-thing "card">',
+    '\t<property "rank" one-of="ace or king" alias="is a (rank)" />',
+    "</spell-thing>",
+    "",
+    "<spell>",
+    "\tto test cards",
+    "\t\tget a new card whose rank is ace",
+    "\t\tit is an ace should be yes",
+    "\t\tit is a king should be no",
+    "</spell>",
+    ""
+  ].join("\n")
+
   /** Its names in Spanish, as a person (or `claude -p`) left them. */
   const NAMES = {
     types: { card: { name: "carta", gender: "feminine" }, game: { name: "juego" } },
@@ -918,6 +935,21 @@ describe("spell translate (epic spanish P24-P26)", () => {
     const lines = readFileSync(spanish, "utf8").split("\n")
     expect(lines[4]).toBe("para probar las cartas  // a mano")
     expect(lines[7]).toBe("\tno es un rey debería ser sí")
+  })
+
+  test("a tag file comes back as tags, its project file naming it, lint clean (language I68)", () => {
+    const folder = tempProject("Tags", GAME_TAGS, SP.SPELLML_SUFFIX)
+    writeFileSync(resolve(folder, "Tags.es.names.json5"), JSON.stringify(NAMES))
+    const out = resolve(TEMP, "JuegoEnTags")
+    const { status, stdout } = spell(["translate", folder, "--to", "es", "--no-ai", "--out", out])
+    expect(stdout).toMatch(/shape:  (\d+) of \1 statements/)
+    expect(status).toBe(0)
+    expect(readdirSync(out).filter((name) => /spell(ml)?$/.test(name))).toEqual(["Tags.es.spellml"])
+    expect(readFileSync(resolve(out, "Tags.es.spellml"), "utf8")).toContain('<encanto-cosa "carta">')
+    expect(JSON.parse(readFileSync(resolve(out, SP.PROJECT_FILE), "utf8")).imports).toEqual([
+      { path: "/Tags.es.spellml", active: true }
+    ])
+    expect(spell(["lint", out]).status).toBe(0)
   })
 
   test("a name the dictionary lacks, with --no-ai:  kept as written, marked TODO in the line and the dictionary, exit 1", () => {
