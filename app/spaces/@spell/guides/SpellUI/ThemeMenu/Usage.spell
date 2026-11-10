@@ -1,4 +1,4 @@
-<spell-page "theme-menu usage" notebook>
+<page "theme-menu usage" notebook>
 	<header level="1">
 		Theme Menu
 		<header>A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.</>
@@ -52,4 +52,4 @@
 			- Nothing for an author to add.
 		</>
 	</>
-</spell-page>
+</page>

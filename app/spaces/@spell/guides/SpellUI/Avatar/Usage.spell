@@ -1,4 +1,4 @@
-<spell-page "avatar usage" notebook>
+<page "avatar usage" notebook>
 	<header level="1">
 		Avatar
 		<header>An avatar is a small picture of a person, beside a comment, an item or a card.</>
@@ -41,4 +41,4 @@
 			- No role of its own, no tab stop.
 		</>
 	</>
-</spell-page>
+</page>

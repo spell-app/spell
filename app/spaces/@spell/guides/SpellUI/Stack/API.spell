@@ -1,4 +1,4 @@
-<spell-page "stack api" notebook>
+<page "stack api" notebook>
 	<header level="1">
 		Stack
 		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
@@ -29,4 +29,4 @@
 			<ui-docs-api family="ui-stack" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

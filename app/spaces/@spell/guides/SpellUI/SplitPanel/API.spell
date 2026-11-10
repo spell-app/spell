@@ -1,4 +1,4 @@
-<spell-page "split-panel api" notebook>
+<page "split-panel api" notebook>
 	<header level="1">
 		Split Panel
 		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-split-panel" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

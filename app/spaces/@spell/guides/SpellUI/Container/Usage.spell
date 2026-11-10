@@ -1,4 +1,4 @@
-<spell-page "container usage" notebook>
+<page "container usage" notebook>
 	<header level="1">
 		Container
 		<header>A container limits content to a maximum width.</>
@@ -101,4 +101,4 @@
 			  but without the container's width and spacing.
 		</>
 	</>
-</spell-page>
+</page>

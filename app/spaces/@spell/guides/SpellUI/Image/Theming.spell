@@ -1,4 +1,4 @@
-<spell-page "image theming" notebook>
+<page "image theming" notebook>
 	<header level="1">
 		Image
 		<header>An image is a graphic representation of something.</>
@@ -45,4 +45,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

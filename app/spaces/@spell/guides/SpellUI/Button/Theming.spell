@@ -1,4 +1,4 @@
-<spell-page "button theming" notebook>
+<page "button theming" notebook>
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -70,4 +70,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

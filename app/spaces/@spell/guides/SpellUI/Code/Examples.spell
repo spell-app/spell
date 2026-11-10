@@ -1,4 +1,4 @@
-<spell-page "code examples" notebook>
+<page "code examples" notebook>
 	<header level="1">
 		Code
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
@@ -75,4 +75,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

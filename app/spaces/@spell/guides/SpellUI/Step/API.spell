@@ -1,4 +1,4 @@
-<spell-page "step api" notebook>
+<page "step api" notebook>
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-step" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "modal examples" notebook>
+<page "modal examples" notebook>
 	<header level="1">
 		Modal
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
@@ -328,4 +328,4 @@
 		</>
 		<message size="small" class="site-not-ported">Not ported: Fomantic's dimmer variations (<text code>blurring</>, <text code>inverted</>), and the transition setting. Instead, set <text code>--ui-modal-dimmer-filter: blur(5px) grayscale(0.7)</> or <text code>--ui-modal-dimmer-background</> on the modal or above it (Theming tab).</>
 	</>
-</spell-page>
+</page>

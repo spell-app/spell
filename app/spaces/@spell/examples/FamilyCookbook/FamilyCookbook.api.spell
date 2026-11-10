@@ -6,11 +6,11 @@
 	family cookbook is saved in the cloud
 </spell>
 
-<spell-thing "recipe">
+<thing "recipe">
 	<spell>
 		- it lives in family cookbook
 	</spell>
 	<property "title">text</>
 	<property "servings" type="number" />
 	<property "notes">text</>
-</spell-thing>
+</thing>

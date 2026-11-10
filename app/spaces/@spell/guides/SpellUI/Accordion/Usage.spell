@@ -1,4 +1,4 @@
-<spell-page "accordion usage" notebook>
+<page "accordion usage" notebook>
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
@@ -137,4 +137,4 @@
 			```
 		</>
 	</>
-</spell-page>
+</page>

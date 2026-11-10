@@ -19,25 +19,25 @@
         "placeType": "RecetarioFamiliar",
         "collection": "recetas"
       },
-      "defined": "/CajaDeRecetas.api.es.spell:775-963"
+      "defined": "/CajaDeRecetas.api.es.spell:775-955"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.api.es.spell:854-879"
+      "defined": "/CajaDeRecetas.api.es.spell:846-871"
     },
     {
       "property": "porciones",
       "of": "Receta",
       "datatype": "number",
-      "defined": "/CajaDeRecetas.api.es.spell:898-926"
+      "defined": "/CajaDeRecetas.api.es.spell:890-918"
     },
     {
       "property": "notas",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.api.es.spell:931-951"
+      "defined": "/CajaDeRecetas.api.es.spell:923-943"
     },
     {
       "syntax": "editar {thisArg:expression}?",
@@ -51,7 +51,7 @@
       "kind": "method",
       "name": "editarla",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:422-554"
+      "defined": "/CajaDeRecetas.es.spell:416-548"
     },
     {
       "type": "RecetarioFamiliar",
@@ -66,19 +66,19 @@
       "type": "EditorDeReceta",
       "superType": "View",
       "gender": "masculine",
-      "defined": "/CajaDeRecetas.es.spell:1517-2976"
+      "defined": "/CajaDeRecetas.es.spell:1505-2956"
     },
     {
       "property": "receta",
       "of": "EditorDeReceta",
       "datatype": "Receta",
-      "defined": "/CajaDeRecetas.es.spell:1553-1585"
+      "defined": "/CajaDeRecetas.es.spell:1533-1565"
     },
     {
       "property": "borrador",
       "of": "EditorDeReceta",
       "datatype": "PlaceDraft",
-      "defined": "/CajaDeRecetas.es.spell:1636-1757"
+      "defined": "/CajaDeRecetas.es.spell:1616-1737"
     },
     {
       "syntax": "aceptar los cambios ((de|del) {thisArg:expression})?",
@@ -92,7 +92,7 @@
       "kind": "method",
       "name": "aceptar los cambios",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:1772-1931"
+      "defined": "/CajaDeRecetas.es.spell:1752-1911"
     },
     {
       "syntax": "olvidar los cambios ((de|del) {thisArg:expression})?",
@@ -106,7 +106,7 @@
       "kind": "method",
       "name": "olvidar los cambios",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:1945-2100"
+      "defined": "/CajaDeRecetas.es.spell:1925-2080"
     },
     {
       "uiDefaults": {
@@ -119,26 +119,26 @@
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:3099-6451"
+      "defined": "/CajaDeRecetas.es.spell:3063-6415"
     },
     {
       "property": "búsqueda",
       "of": "CajaDeRecetas",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:3118-3145"
+      "defined": "/CajaDeRecetas.es.spell:3082-3109"
     },
     {
       "property": "receta_nueva",
       "asWritten": "receta nueva",
       "of": "CajaDeRecetas",
       "datatype": "Receta",
-      "defined": "/CajaDeRecetas.es.spell:3150-3210"
+      "defined": "/CajaDeRecetas.es.spell:3114-3174"
     },
     {
       "property": "editando",
       "of": "CajaDeRecetas",
       "datatype": "Receta",
-      "defined": "/CajaDeRecetas.es.spell:3215-3249"
+      "defined": "/CajaDeRecetas.es.spell:3179-3213"
     },
     {
       "syntax": "crear {thisArg:expression}?",
@@ -153,13 +153,13 @@
       "name": "crearla",
       "returns": "nothing",
       "waits": true,
-      "defined": "/CajaDeRecetas.es.spell:3379-3859"
+      "defined": "/CajaDeRecetas.es.spell:3343-3823"
     },
     {
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spell:3873-4083"
+      "defined": "/CajaDeRecetas.es.spell:3837-4047"
     },
     {
       "syntax": "agregar la receta nueva ((de|del) {thisArg:expression})?",
@@ -173,7 +173,7 @@
       "kind": "method",
       "name": "agregar la receta nueva",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:4100-4235"
+      "defined": "/CajaDeRecetas.es.spell:4064-4199"
     }
   ],
   "codeLines": [

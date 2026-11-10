@@ -21,7 +21,7 @@
 	- artworks live at "/v1/objects"
 </web-server>
 
-<spell-thing "artwork">
+<thing "artwork">
 	<spell>
 		- it lives in met museum
 		- its "highlight" is yes or no, stored as "isHighlight"
@@ -87,9 +87,9 @@
 		- its "timeline work" is yes or no, stored as "isTimelineWork"
 	</spell>
 	<property "gallery number" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "constituent">
+<thing "constituent">
 	<spell>
 		- its "constituent id" is a number, stored as "constituentID"
 	</spell>
@@ -98,23 +98,23 @@
 	<property "constituent ulan url">text</>	// an address
 	<property "constituent wikidata url">text</>	// an address
 	<property "gender">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "measurement">
+<thing "measurement">
 	<property "element name">text</>
 	<property "element description">text</>
 	<property "element measurements">an element measurement</>
-</spell-thing>
+</thing>
 
-<spell-thing "element measurement">
+<thing "element measurement">
 	<property "diameter" type="number" />
 	<property "height" type="number" />
 	<property "width" type="number" />
 	<property "depth" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "tag">
+<thing "tag">
 	<property "term">text</>
 	<property "aat url">text</>	// an address
 	<property "wikidata url">text</>	// an address
-</spell-thing>
+</thing>

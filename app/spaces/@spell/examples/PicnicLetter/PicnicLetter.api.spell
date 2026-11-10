@@ -9,23 +9,23 @@
 	- check it every 30 seconds
 </data-folder>
 
-<spell-thing "listing">
+<thing "listing">
 	<spell>
 		- it lives in the published sheet
 	</spell>
 	<property "person">text</>
 	<property "shift">text</>
-</spell-thing>
+</thing>
 
 // Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
 <data-folder "my inbox" address="@rs/__inbox">
 	- check it every 30 seconds
 </data-folder>
 
-<spell-thing "message">
+<thing "message">
 	<spell>
 		- it lives in my inbox
 	</spell>
 	<property "text">text</>
 	<property "thread">text</>
-</spell-thing>
+</thing>

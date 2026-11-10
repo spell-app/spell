@@ -26,7 +26,7 @@
 	- generations live at "/generation"
 </web-server>
 
-<spell-thing "pokemon">
+<thing "pokemon">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
@@ -53,9 +53,9 @@
 	<property "past stats">a list of past stats</>
 	<property "types">a list of pokemon types</>
 	<property "past types">a list of text</>
-</spell-thing>
+</thing>
 
-<spell-thing "pokemon species">
+<thing "pokemon species">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
@@ -90,9 +90,9 @@
 	<property "flavor text entries">a list of flavor text entries</>
 	<property "genera">a list of genera</>
 	<property "varieties">a list of varieties</>
-</spell-thing>
+</thing>
 
-<spell-thing "type">
+<thing "type">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
@@ -106,9 +106,9 @@
 	<property "names">a list of names</>
 	<property "pokemon">a list of type pokemon</>
 	<property "moves">a list of moves</>
-</spell-thing>
+</thing>
 
-<spell-thing "ability">
+<thing "ability">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
@@ -123,9 +123,9 @@
 	<property "effect changes">a list of effect changes</>
 	<property "flavor text entries">a list of flavor text entries</>
 	<property "pokemon">a list of ability pokemon</>
-</spell-thing>
+</thing>
 
-<spell-thing "move">
+<thing "move">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
@@ -154,17 +154,17 @@
 	<property "machines">a list of text</>
 	<property "flavor text entries">a list of flavor text entries</>
 	<property "learned by pokemon">a list of pokemon</>
-</spell-thing>
+</thing>
 
-<spell-thing "evolution chain">
+<thing "evolution chain">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
 	</spell>
 	<property "chain" type="chain" />
-</spell-thing>
+</thing>
 
-<spell-thing "generation">
+<thing "generation">
 	<spell>
 		- it lives in poke api
 		- its "number" is a number, stored as "id"
@@ -177,184 +177,184 @@
 	<property "pokemon species">a list of pokemon species</>
 	<property "types">a list of types</>
 	<property "version groups">a list of poke api names</>
-</spell-thing>
+</thing>
 
-<spell-thing "pokemon ability">
+<thing "pokemon ability">
 	<spell>
 		- its "hidden" is yes or no, stored as "is_hidden"
 	</spell>
 	<property "slot" type="number" />
 	<property "ability" type="ability" />
-</spell-thing>
+</thing>
 
-<spell-thing "past ability">
+<thing "past ability">
 	<property "generation" type="generation" />
 	<property "abilities">a list of past ability abilities</>
-</spell-thing>
+</thing>
 
-<spell-thing "past ability ability">
+<thing "past ability ability">
 	<spell>
 		- its "hidden" is yes or no, stored as "is_hidden"
 	</spell>
 	<property "slot" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "game index">
+<thing "game index">
 	<property "game index" type="number" />
 	<property "version">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "pokemon move">
+<thing "pokemon move">
 	<property "move" type="move" />
 	<property "version group details">a list of version group details</>
-</spell-thing>
+</thing>
 
-<spell-thing "version group detail">
+<thing "version group detail">
 	<property "level learned at" type="number" />
 	<property "version group">a poke api name</>
 	<property "move learn method">a poke api name</>
 	<property "order" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "sprite">
+<thing "sprite">
 	<property "other" type="other" />
 	<property "back shiny">text</>	// an address
 	<property "front shiny">text</>	// an address
 	<property "back default">text</>	// an address
 	<property "front default">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "other">
+<thing "other">
 	<property "home" type="home" />
 	<property "showdown" type="showdown" />
 	<property "dream world">a dream world</>
 	<property "official artwork">an official artwork</>
-</spell-thing>
+</thing>
 
-<spell-thing "home">
+<thing "home">
 	<property "front shiny">text</>	// an address
 	<property "front default">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "showdown">
+<thing "showdown">
 	<property "back shiny">text</>	// an address
 	<property "front shiny">text</>	// an address
 	<property "back default">text</>	// an address
 	<property "front default">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "dream world">
+<thing "dream world">
 	<property "front default">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "official artwork">
+<thing "official artwork">
 	<property "front shiny">text</>	// an address
 	<property "front default">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "cry">
+<thing "cry">
 	<property "latest">text</>	// an address
 	<property "legacy">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "stat">
+<thing "stat">
 	<property "base stat" type="number" />
 	<property "effort" type="number" />
 	<property "stat">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "past stat">
+<thing "past stat">
 	<property "generation" type="generation" />
 	<property "stats">a list of stats</>
-</spell-thing>
+</thing>
 
-<spell-thing "pokemon type">
+<thing "pokemon type">
 	<property "slot" type="number" />
 	<spell>
 		- its "kind" is a type, stored as "type"
 	</spell>
-</spell-thing>
+</thing>
 
-<spell-thing "pokedex number">
+<thing "pokedex number">
 	<property "entry number" type="number" />
 	<property "pokedex">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "name">
+<thing "name">
 	<property "name">text</>
 	<property "language">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "pal park encounter">
+<thing "pal park encounter">
 	<property "base score" type="number" />
 	<property "rate" type="number" />
 	<property "area">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "flavor text entry">
+<thing "flavor text entry">
 	<property "flavor text">text</>
 	<property "language">a poke api name</>
 	<property "version">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "genus">
+<thing "genus">
 	<property "genus">text</>
 	<property "language">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "variety">
+<thing "variety">
 	<spell>
 		- its "default" is yes or no, stored as "is_default"
 	</spell>
 	<property "pokemon" type="pokemon" />
-</spell-thing>
+</thing>
 
-<spell-thing "damage relation">
+<thing "damage relation">
 	<property "no damage to">a list of types</>
 	<property "half damage to">a list of types</>
 	<property "double damage to">a list of types</>
 	<property "no damage from">a list of types</>
 	<property "half damage from">a list of types</>
 	<property "double damage from">a list of types</>
-</spell-thing>
+</thing>
 
-<spell-thing "type pokemon">
+<thing "type pokemon">
 	<property "slot" type="number" />
 	<property "pokemon" type="pokemon" />
-</spell-thing>
+</thing>
 
-<spell-thing "effect entry">
+<thing "effect entry">
 	<property "effect">text</>
 	<property "short effect">text</>
 	<property "language">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "effect change">
+<thing "effect change">
 	<property "version group">a poke api name</>
 	<property "effect entries">a list of effect entries</>
-</spell-thing>
+</thing>
 
-<spell-thing "ability pokemon">
+<thing "ability pokemon">
 	<spell>
 		- its "hidden" is yes or no, stored as "is_hidden"
 	</spell>
 	<property "slot" type="number" />
 	<property "pokemon" type="pokemon" />
-</spell-thing>
+</thing>
 
-<spell-thing "contest combo">
+<thing "contest combo">
 	<property "normal" type="normal" />
 	<property "super" type="super" />
-</spell-thing>
+</thing>
 
-<spell-thing "normal">
+<thing "normal">
 	<property "use before">a list of moves</>
 	<property "use after">a list of moves</>
-</spell-thing>
+</thing>
 
-<spell-thing "super" />
+<thing "super" />
 
-<spell-thing "meta">
+<thing "meta">
 	<property "ailment">a poke api name</>
 	<property "category">a poke api name</>
 	<property "drain" type="number" />
@@ -363,28 +363,28 @@
 	<property "ailment chance" type="number" />
 	<property "flinch chance" type="number" />
 	<property "stat chance" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "past value">
+<thing "past value">
 	<property "effect entries">a list of text</>
 	<spell>
 		- its "kind" is a type, stored as "type"
 	</spell>
 	<property "version group">a poke api name</>
-</spell-thing>
+</thing>
 
-<spell-thing "chain">
+<thing "chain">
 	<spell>
 		- its "baby" is yes or no, stored as "is_baby"
 	</spell>
 	<property "species">a pokemon species</>
 	<property "evolution details">a list of text</>
 	<property "evolves to">a list of chains</>
-</spell-thing>
+</thing>
 
-<spell-thing "poke api name">
+<thing "poke api name">
 	<property "name">text</>
 	<spell>
 		- its "address" is text, stored as "url"  // never read:  its collection wasn't asked for
 	</spell>
-</spell-thing>
+</thing>

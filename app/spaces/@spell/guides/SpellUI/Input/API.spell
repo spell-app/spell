@@ -1,4 +1,4 @@
-<spell-page "input api" notebook>
+<page "input api" notebook>
 	<header level="1">
 		Input
 		<header>An input is a field used to elicit a response from a user.</>
@@ -57,4 +57,4 @@
 			<ui-docs-api family="ui-input" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "segment examples" notebook>
+<page "segment examples" notebook>
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
@@ -609,4 +609,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

@@ -788,7 +788,7 @@ galaxy guide is a site at "owen@spell/galaxy":
 ```
 
 - `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
-- The tag form is `<spell-site>`, a tag per part inside it.
+- The tag form is `<site>`, a tag per part inside it.
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
 - A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own.
@@ -796,13 +796,13 @@ galaxy guide is a site at "owen@spell/galaxy":
   after it:
 
 ```html
-<spell-site "galaxy guide">
+<site "galaxy guide">
 	<group "Home"/>
 	<page "Home" address="/"/>
 	<sidebar "System Notices" address="/notices"/>
 	<group "My Stuff"/>
 	<page "My Inbox" address="/my-inbox" live="https://example.com/inbox"/>
-</spell-site>
+</site>
 ```
 
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
@@ -821,7 +821,7 @@ Every move names the page, never its address:
 A page says what it must let people do before it's laid out, first in its own declaration:
 
 ```html
-<spell-page "film page">
+<page "film page">
 	<stories>
 		<story "S1" done>read the film's opening crawl</story>
 		<story "S2" done>
@@ -835,7 +835,7 @@ A page says what it must let people do before it's laid out, first in its own de
 
 - Nothing draws the stories:  they're kept with the page for good;  code Spell writes the same block.
 - A story is its words, then two blank lines and its description, if it has one;  `done` ticks it off.
-- In Spanish:  `<encanto-historias>` and `<historia "H1" hecha>`.
+- In Spanish:  `<historias>` and `<historia "H1" hecha>`.
 - The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spell).
 - **Not yet:**  Python runs no site, and a page has no state
   (old, new, mocked, built).

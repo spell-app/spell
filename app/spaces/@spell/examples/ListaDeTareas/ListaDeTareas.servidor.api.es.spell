@@ -6,16 +6,16 @@
 	- se revisa cada 30 segundos
 </carpeta-de-datos>
 
-<encanto-vista "tarea del servidor" plantilla="tarea">
+<vista "tarea del servidor" plantilla="tarea">
 	<encanto>
 		- vive en archivos de tareas
 	</encanto>
 	<acción "tirarla">
 		quitar eso de las tareas del servidor
 	</acción>
-</encanto-vista>
+</vista>
 
-<encanto-cosa "guardián del servidor" plantilla="guardián de tareas">
+<cosa "guardián del servidor" plantilla="guardián de tareas">
 	<encanto>
 		- sus "tareas guardadas" es cada tarea del servidor
 	</encanto>
@@ -24,4 +24,4 @@
 		agregar tarea a las tareas del servidor
 		devolver tarea
 	</acción>
-</encanto-cosa>
+</cosa>

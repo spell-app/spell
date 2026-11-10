@@ -1,4 +1,4 @@
-<spell-page "description examples" notebook>
+<page "description examples" notebook>
 	<header level="1">
 		Description
 		<header>A description is the text of a card, item, modal, list item, step or comment.</>
@@ -84,4 +84,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "toast api" notebook>
+<page "toast api" notebook>
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-toast" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

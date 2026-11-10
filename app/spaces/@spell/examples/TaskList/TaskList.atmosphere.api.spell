@@ -6,25 +6,25 @@
 	- sky tasks live at "spaces.spell.examples.tasklist.task"
 </atmosphere>
 
-<spell-view "sky task" template="task">
+<view "sky task" template="task">
 	<spell>
 		- it lives in task sky
 	</spell>
 	<action "throw it away">
 		remove it from the sky tasks
 	</action>
-</spell-view>
+</view>
 
 // whose it is:  the account it's in, which a record can't claim
 <spell>
 	a sky task has an owner as text
 </spell>
 
-<spell-thing "sky keeper" template="task keeper">
+<thing "sky keeper" template="task keeper">
 	<property "kept tasks" description="only your own:  everyone's tasks are in their own accounts">every sky task where its owner is their id</>
 	<action "keep a new task titled (title as text)">
 		set task to a new sky task with title = title
 		add task to the sky tasks
 		return task
 	</action>
-</spell-thing>
+</thing>

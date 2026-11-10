@@ -5,25 +5,25 @@ Each part shows only what its reader may see:  your own shifts, your own invitat
 
 ## A shift you signed up for
 
-<spell-more-of "listing">
+<extend "listing">
 	<draw>
 		<label class="shift">{its shift}</label>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## Your invitations' count, from your inbox
 
-<spell-more-of "message">
+<extend "message">
 	<draw>
 		<text class="count">{its text}</text>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## The letter
 
-<spell-app "picnic letter">
+<app "picnic letter">
 	<property "shifts">every listing where its person is them</>
 	<property "counts">every message where its thread is "invitations"</>
 
@@ -57,4 +57,4 @@ Each part shows only what its reader may see:  your own shifts, your own invitat
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>

@@ -1,7 +1,7 @@
 # A card's property editor
 What the Inspector shows for a card:  its rank, face and suit to change, and what they make it, to read.
 
-<spell-property-editor "card">
+<property-editor "card">
 	<ui-property-group label="Card" columns="2">
 		<ui-property name="rank" label="Rank" />
 		<ui-property name="direction" label="Face" as="buttons" />
@@ -14,4 +14,4 @@ What the Inspector shows for a card:  its rank, face and suit to change, and wha
 		<ui-property name="state" label="Short name" width="1/2" />
 		<ui-property name="name" label="Name" />
 	</ui-property-group>
-</spell-property-editor>
+</property-editor>

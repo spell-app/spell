@@ -1,4 +1,4 @@
-<spell-page "segment theming" notebook>
+<page "segment theming" notebook>
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
@@ -50,4 +50,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

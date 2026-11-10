@@ -1,7 +1,7 @@
 # A deck
 The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
-<spell-thing "deck" template="list of cards">
+<thing "deck" template="list of cards">
 	<property "jokers" description="No jokers, unless it's made `with jokers`">yes or no</>
 	<action "create it" description="One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does">
 		for rank in card ranks
@@ -38,4 +38,4 @@ The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if yo
 		the last card of the deck is the black joker should be yes
 		the deck's bottom card's name should be "black joker"
 	</test>
-</spell-thing>
+</thing>

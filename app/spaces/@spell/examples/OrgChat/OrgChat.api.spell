@@ -12,7 +12,7 @@
 </data-folder>
 
 // A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`.
-<spell-thing "message">
+<thing "message">
 	<spell>
 		- it lives in chat
 	</spell>
@@ -20,10 +20,10 @@
 	<property "by">text</>
 	<property "sent" type="date" />
 	<property "thread">text</>
-</spell-thing>
+</thing>
 
 // A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.
-<spell-thing "thread">
+<thing "thread">
 	<spell>
 		- it lives in my threads
 	</spell>
@@ -32,4 +32,4 @@
 	<property "topic">text</>
 	<property "link">text</>
 	<property "current">yes or no</>
-</spell-thing>
+</thing>

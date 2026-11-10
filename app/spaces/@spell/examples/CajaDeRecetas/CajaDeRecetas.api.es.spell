@@ -8,7 +8,7 @@
 // Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spell.
 <almacenamiento-del-dispositivo "recetario familiar" />
 
-<encanto-cosa "receta">
+<cosa "receta">
 	<encanto>
 		- vive en recetario familiar
 	</encanto>
@@ -17,4 +17,4 @@
 		- sus "porciones" es un número
 		- sus "notas" es texto
 	</encanto>
-</encanto-cosa>
+</cosa>

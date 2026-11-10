@@ -1,4 +1,4 @@
-<spell-page "site-tabs api" notebook>
+<page "site-tabs api" notebook>
 	<header level="1">
 		Site tabs
 		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api tag="ui-site-tabs" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

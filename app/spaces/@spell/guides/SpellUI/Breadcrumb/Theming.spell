@@ -1,4 +1,4 @@
-<spell-page "breadcrumb theming" notebook>
+<page "breadcrumb theming" notebook>
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
@@ -53,4 +53,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

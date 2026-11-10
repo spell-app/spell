@@ -1,4 +1,4 @@
-<spell-page "shape api" notebook>
+<page "shape api" notebook>
 	<header level="1">
 		Shape
 		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-shape" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

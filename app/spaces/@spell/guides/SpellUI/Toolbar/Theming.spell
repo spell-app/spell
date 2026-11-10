@@ -1,4 +1,4 @@
-<spell-page "toolbar theming" notebook>
+<page "toolbar theming" notebook>
 	<header level="1">
 		Toolbar
 		<header>A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.</>
@@ -36,4 +36,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

@@ -1,4 +1,4 @@
-<spell-page "slider theming" notebook>
+<page "slider theming" notebook>
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>
@@ -46,4 +46,4 @@
 	<section label="Themes">
 		<markdown>The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours a slider inherits.</>
 	</>
-</spell-page>
+</page>

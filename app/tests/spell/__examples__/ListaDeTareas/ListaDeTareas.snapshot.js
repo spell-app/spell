@@ -141,18 +141,18 @@ export class TareaDelNavegador extends Tarea {
   }
 
   // vive en almacén del navegador
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 395, end: 424 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 387, end: 416 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en almacén del navegador
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 395, end: 424 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 387, end: 416 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDelNavegador extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 613, end: 663 }, readsFrom: ["almacén_del_navegador"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 589, end: 639 }, readsFrom: ["almacén_del_navegador"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDelNavegador)
   }) }
@@ -195,18 +195,18 @@ export class TareaDelServidor extends Tarea {
   }
 
   // vive en archivos de tareas
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 558, end: 584 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 550, end: 576 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en archivos de tareas
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 558, end: 584 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 550, end: 576 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDelServidor extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 771, end: 820 }, readsFrom: ["archivos_de_tareas"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 747, end: 796 }, readsFrom: ["archivos_de_tareas"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDelServidor)
   }) }
@@ -252,18 +252,18 @@ export class TareaDeLaHoja extends Tarea {
   }
 
   // vive en hoja de tareas
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 736, end: 758 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 728, end: 750 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en hoja de tareas
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 736, end: 758 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 728, end: 750 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDeLaHoja extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 941, end: 988 }, readsFrom: ["hoja_de_tareas"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 917, end: 964 }, readsFrom: ["hoja_de_tareas"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDeLaHoja)
   }) }
@@ -306,7 +306,7 @@ export class TareaDelCielo extends Tarea {
 
   /** de quién es:  la cuenta en la que está, que un registro no puede decir */
   // una tarea del cielo tiene un dueño como texto
-  static { this.declareProp("dueño", { type: "text", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 746, end: 791 } }) }
+  static { this.declareProp("dueño", { type: "text", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 730, end: 775 } }) }
   get dueño() { return this.getProp("dueño") }
   set dueño(value) { this.setProp("dueño", value) }
 
@@ -317,19 +317,19 @@ export class TareaDelCielo extends Tarea {
   }
 
   // vive en cielo de tareas
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 539, end: 562 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 531, end: 554 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en cielo de tareas
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 539, end: 562 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 531, end: 554 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class GuardiánDelCielo extends GuardiánDeTareas {
   /** solo las tuyas:  las tareas de cada uno están en su propia cuenta */
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 956, end: 1041 }, readsFrom: ["cielo_de_tareas"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 932, end: 1017 }, readsFrom: ["cielo_de_tareas"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDelCielo, { filter: { dueño: core.currentPerson().id } })
   }) }
@@ -360,7 +360,7 @@ core.heading("Lista de tareas")
 // ## Lista de tareas
 /////////////////////
 // Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.
-// Sus tareas son la `<encanto-vista "tarea">` de este proyecto;  este archivo tiene su lista, y la aplicación.
+// Sus tareas son la `<vista "tarea">` de este proyecto;  este archivo tiene su lista, y la aplicación.
 // Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,
 // ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.
 

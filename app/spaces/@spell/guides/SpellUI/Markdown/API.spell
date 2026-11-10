@@ -1,4 +1,4 @@
-<spell-page "markdown api" notebook>
+<page "markdown api" notebook>
 	<header level="1">
 		Markdown
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
@@ -44,4 +44,4 @@
 			<ui-docs-api family="ui-markdown" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

@@ -19,7 +19,7 @@
 	- a jsonplaceholder user's todos live at "/users/{id}/todos"
 </web-server>
 
-<spell-thing "post">
+<thing "post">
 	<spell>
 		- it lives in jsonplaceholder
 	</spell>
@@ -27,9 +27,9 @@
 	<property "title">text</>
 	<property "body">text</>
 	<property "comments">a list of comments</>
-</spell-thing>
+</thing>
 
-<spell-thing "comment">
+<thing "comment">
 	<spell>
 		- it lives in jsonplaceholder
 	</spell>
@@ -37,9 +37,9 @@
 	<property "name">text</>
 	<property "email">text</>
 	<property "body">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "jsonplaceholder user">
+<thing "jsonplaceholder user">
 	<spell>
 		- it lives in jsonplaceholder
 	</spell>
@@ -52,32 +52,32 @@
 	<property "company" type="company" />
 	<property "posts">a list of posts</>
 	<property "todos">a list of todos</>
-</spell-thing>
+</thing>
 
-<spell-thing "todo">
+<thing "todo">
 	<spell>
 		- it lives in jsonplaceholder
 	</spell>
 	<property "user id" type="number" />
 	<property "title">text</>
 	<property "completed">yes or no</>
-</spell-thing>
+</thing>
 
-<spell-thing "address">
+<thing "address">
 	<property "street">text</>
 	<property "suite">text</>
 	<property "city">text</>
 	<property "zipcode">text</>
 	<property "geo" type="geo" />
-</spell-thing>
+</thing>
 
-<spell-thing "geo">
+<thing "geo">
 	<property "lat" type="number" />
 	<property "lng" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "company">
+<thing "company">
 	<property "name">text</>
 	<property "catch phrase">text</>
 	<property "bs">text</>
-</spell-thing>
+</thing>

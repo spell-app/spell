@@ -13,7 +13,7 @@
 	- countries live at "/countries.json"
 </web-server>
 
-<spell-thing "country">
+<thing "country">
 	<spell>
 		- it lives in rest countries
 	</spell>
@@ -41,53 +41,53 @@
 	<property "area" type="number" />
 	<property "flag">text</>
 	<property "demonyms" type="demonym" />
-</spell-thing>
+</thing>
 
-<spell-thing "name">
+<thing "name">
 	<property "common">text</>
 	<property "official">text</>
 	<property "native">a list of natives</>
-</spell-thing>
+</thing>
 
-<spell-thing "native">
+<thing "native">
 	<property "code">text</>
 	<property "official">text</>
 	<property "common">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "currency">
+<thing "currency">
 	<property "code">text</>
 	<property "name">text</>
 	<property "symbol">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "idd">
+<thing "idd">
 	<property "root">text</>
 	<property "suffixes">a list of text</>
-</spell-thing>
+</thing>
 
-<spell-thing "language">
+<thing "language">
 	<property "code">text</>
 	<property "name">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "translation">
+<thing "translation">
 	<property "code">text</>
 	<property "official">text</>
 	<property "common">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "demonym">
+<thing "demonym">
 	<property "eng" type="eng" />
 	<property "fra" type="fra" />
-</spell-thing>
+</thing>
 
-<spell-thing "eng">
+<thing "eng">
 	<property "f">text</>
 	<property "m">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "fra">
+<thing "fra">
 	<property "f">text</>
 	<property "m">text</>
-</spell-thing>
+</thing>

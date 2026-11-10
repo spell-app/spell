@@ -1,7 +1,7 @@
 # The opening:  yellow, receding, and it stops when you say
 A widget of its own:  `ui-modal` is the cinema, and no `ui-*` tilts words away into the distance.
 
-<spell-more-of "film">
+<extend "film">
 	<draw "crawl">
 		<modal class="crawl" visible overlay fullscreen on-ui-closed={end it} aria-label={"The opening of " + its title}>
 			<text class="long-ago" size="big">A long time ago in a galaxy far, far away....</text>
@@ -15,4 +15,4 @@ A widget of its own:  `ui-modal` is the cinema, and no `ui-*` tilts words away i
 			<button class="stop" onClick={end it}>Stop</button>
 		</modal>
 	</draw>
-</spell-more-of>
+</extend>

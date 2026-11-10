@@ -4,7 +4,7 @@ Three in a row, across, down or corner to corner, wins;  nine marks and no row i
 A square is this project's own, in `Square.spell`;
 this file holds the game, its board, and what a click on a square does.
 
-<spell-app "tic tac toe">
+<app "tic tac toe">
 	<property "board">a new board</>
 	<property "turn" description="Whose turn it is:  X or O">text</>
 	<property "winner" description="Who won:  X, O, nobody for a draw, or empty while the game goes on">text</>
@@ -62,13 +62,13 @@ this file holds the game, its board, and what a click on a square does.
 			</card>
 		</container>
 	</draw>
-</spell-app>
+</app>
 
 ## The board
 Nine squares, three a row:  square 1 top left, square 9 bottom right.
 It draws each square as a big button, its mark in the mark's color;  a click plays it.
 
-<spell-thing "board" template="list of squares">
+<thing "board" template="list of squares">
 	<draw>
 		<for square in it as="grid" columns="3" spacing="compact">
 			<column>
@@ -78,19 +78,19 @@ It draws each square as a big button, its mark in the mark's color;  a click pla
 			</column>
 		</for>
 	</draw>
-</spell-thing>
+</thing>
 
 ## Playing a square
-What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
+What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
 
-<spell-more-of "square">
+<extend "square">
 	<action "play it" description="The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn">
 		if tic tac toe is over or it is not empty return
 		set its mark to tic tac toe's turn
 		check for a winner
 		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
 	</action>
-</spell-more-of>
+</extend>
 
 <spell>
 	// a square is on one board

@@ -6,7 +6,7 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 
 ## A row for each:  who it's from, what it says, and its conversation
 
-<spell-more-of "message">
+<extend "message">
 	<draw>
 		<segment class="message">
 			<stack spacing="sm">
@@ -23,12 +23,12 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 			</stack>
 		</segment>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## How you hear of it, by mail:  pick one
 
-<spell-more-of "mail choice">
+<extend "mail choice">
 	<draw>
 		<form value={it} class="mail-choice">
 			<field label="Mail me" inline>
@@ -40,24 +40,24 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 			</field>
 		</form>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## A space you follow, and a button to stop
 
-<spell-more-of "subscription">
+<extend "subscription">
 	<draw>
 		<stack class="subscription" direction="horizontal" spacing="md" align="center">
 			<text>{its space}</text>
 			<button class="unsubscribe" icon="close" size="mini" appearance="transparent" aria-label="Stop following it" title="Stop following it" onClick={remove it from the subscriptions}/>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## The page:  write one, then every message, newest first, each with a Reply
 
-<spell-app "inbox page">
+<app "inbox page">
 	<property "new message">a new message</>
 	<property "new subscription">a new subscription</>
 
@@ -150,4 +150,4 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 			</container>
 		</stack>
 	</draw>
-</spell-app>
+</app>

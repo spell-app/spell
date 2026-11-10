@@ -16,55 +16,55 @@
         "placeType": "MyInbox",
         "collection": "messages"
       },
-      "defined": "/Inbox.api.spell:571-855"
+      "defined": "/Inbox.api.spell:571-849"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:640-661"
+      "defined": "/Inbox.api.spell:634-655"
     },
     {
       "property": "recipients",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:666-693"
+      "defined": "/Inbox.api.spell:660-687"
     },
     {
       "property": "from",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:698-719"
+      "defined": "/Inbox.api.spell:692-713"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:724-747"
+      "defined": "/Inbox.api.spell:718-741"
     },
     {
       "property": "sent",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:752-773"
+      "defined": "/Inbox.api.spell:746-767"
     },
     {
       "property": "page",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:778-799"
+      "defined": "/Inbox.api.spell:772-793"
     },
     {
       "property": "title",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:804-826"
+      "defined": "/Inbox.api.spell:798-820"
     },
     {
       "property": "line",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:831-852"
+      "defined": "/Inbox.api.spell:825-846"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -77,7 +77,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spell:379-1096"
+      "defined": "/Inbox.spell:372-1089"
     },
     {
       "type": "MailChoice",
@@ -87,13 +87,13 @@
         "placeType": "MyInbox",
         "collection": "mail_choices"
       },
-      "defined": "/Inbox.api.spell:1050-1146"
+      "defined": "/Inbox.api.spell:1038-1128"
     },
     {
       "property": "how",
       "of": "MailChoice",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:1123-1143"
+      "defined": "/Inbox.api.spell:1105-1125"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -106,7 +106,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spell:1199-1478"
+      "defined": "/Inbox.spell:1178-1457"
     },
     {
       "type": "Subscription",
@@ -116,13 +116,13 @@
         "placeType": "MyInbox",
         "collection": "subscriptions"
       },
-      "defined": "/Inbox.api.spell:1276-1375"
+      "defined": "/Inbox.api.spell:1252-1345"
     },
     {
       "property": "space",
       "of": "Subscription",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:1350-1372"
+      "defined": "/Inbox.api.spell:1320-1342"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -135,7 +135,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spell:1584-1894"
+      "defined": "/Inbox.spell:1549-1859"
     },
     {
       "type": "MyInbox",
@@ -153,21 +153,21 @@
     {
       "type": "InboxPage",
       "superType": "App",
-      "defined": "/Inbox.spell:2013-5793"
+      "defined": "/Inbox.spell:1965-5745"
     },
     {
       "property": "new_message",
       "asWritten": "new message",
       "of": "InboxPage",
       "datatype": "Message",
-      "defined": "/Inbox.spell:2027-2064"
+      "defined": "/Inbox.spell:1979-2016"
     },
     {
       "property": "new_subscription",
       "asWritten": "new subscription",
       "of": "InboxPage",
       "datatype": "Subscription",
-      "defined": "/Inbox.spell:2069-2116"
+      "defined": "/Inbox.spell:2021-2068"
     },
     {
       "syntax": "send {thisArg:expression}",
@@ -181,7 +181,7 @@
       "kind": "method",
       "name": "send it",
       "returns": "nothing",
-      "defined": "/Inbox.spell:2122-2217"
+      "defined": "/Inbox.spell:2074-2169"
     },
     {
       "syntax": "reply to {callArgs:expression} in {callArgs:expression} (of {thisArg:expression})?",
@@ -205,7 +205,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Inbox.spell:2231-2389"
+      "defined": "/Inbox.spell:2183-2341"
     },
     {
       "syntax": "choose how (of {thisArg:expression})?",
@@ -219,7 +219,7 @@
       "kind": "method",
       "name": "choose how",
       "returns": "nothing",
-      "defined": "/Inbox.spell:2403-2490"
+      "defined": "/Inbox.spell:2355-2442"
     },
     {
       "syntax": "subscribe {thisArg:expression}?",
@@ -233,7 +233,7 @@
       "kind": "method",
       "name": "subscribe",
       "returns": "nothing",
-      "defined": "/Inbox.spell:2504-2621"
+      "defined": "/Inbox.spell:2456-2573"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -246,7 +246,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Inbox.spell:2635-5784"
+      "defined": "/Inbox.spell:2587-5736"
     }
   ],
   "codeLines": [

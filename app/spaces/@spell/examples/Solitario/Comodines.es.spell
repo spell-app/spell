@@ -4,7 +4,7 @@ Un comodín es una carta, con lo que lo hace comodín encima:  una subclase de `
 - Todo lo demás lo toma de `carta`:  se voltea, dibuja sus dos lados y se arrastra como cualquier carta.
 - Un mazo tiene sus dos solo cuando se hace `con comodines`.  El juego de Solitario se juega sin ellos.
 
-<encanto-vista "comodín" plantilla="carta">
+<vista "comodín" plantilla="carta">
 	<grupo "lo que es distinto" descripción="Un comodín es rojo o negro"/>
 	<propiedad "color" uno-de="rojo o negro"/>
 	<frase "es el comodín (color)"/>
@@ -49,4 +49,4 @@ Un comodín es una carta, con lo que lo hace comodín encima:  una subclase de `
 		la carta no es un comodín debería ser sí
 		la carta es el comodín rojo debería ser no
 	</probar>
-</encanto-vista>
+</vista>

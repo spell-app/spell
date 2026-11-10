@@ -1,4 +1,4 @@
-<spell-page "accordion api" notebook>
+<page "accordion api" notebook>
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-accordion" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

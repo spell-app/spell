@@ -29,13 +29,13 @@
     {
       "type": "Bill",
       "superType": "App",
-      "defined": "/HowBillSplitterWorks.spell:1699-2675"
+      "defined": "/HowBillSplitterWorks.spell:1693-2669"
     },
     {
       "property": "amount",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1707-1742"
+      "defined": "/HowBillSplitterWorks.spell:1701-1736"
     },
     {
       "property": "percent",
@@ -45,31 +45,31 @@
         "dimension": "Proportion",
         "unit": "fraction"
       },
-      "defined": "/HowBillSplitterWorks.spell:1755-1793"
+      "defined": "/HowBillSplitterWorks.spell:1749-1787"
     },
     {
       "property": "people",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1806-1840"
+      "defined": "/HowBillSplitterWorks.spell:1800-1834"
     },
     {
       "property": "tip",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1854-1894"
+      "defined": "/HowBillSplitterWorks.spell:1848-1888"
     },
     {
       "property": "total",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1899-1937"
+      "defined": "/HowBillSplitterWorks.spell:1893-1931"
     },
     {
       "property": "each",
       "of": "Bill",
       "datatype": "number",
-      "defined": "/HowBillSplitterWorks.spell:1942-2016"
+      "defined": "/HowBillSplitterWorks.spell:1936-2010"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -82,7 +82,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowBillSplitterWorks.spell:2032-2666"
+      "defined": "/HowBillSplitterWorks.spell:2026-2660"
     },
     {
       "syntax": "test money",
@@ -91,7 +91,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "money",
-      "defined": "/HowBillSplitterWorks.spell:2710-2804"
+      "defined": "/HowBillSplitterWorks.spell:2698-2792"
     },
     {
       "syntax": "test splitting",
@@ -100,7 +100,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "splitting",
-      "defined": "/HowBillSplitterWorks.spell:2807-2912"
+      "defined": "/HowBillSplitterWorks.spell:2795-2900"
     }
   ],
   "codeLines": [

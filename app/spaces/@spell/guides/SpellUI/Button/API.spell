@@ -1,4 +1,4 @@
-<spell-page "button api" notebook>
+<page "button api" notebook>
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -57,4 +57,4 @@
 			<ui-docs-api family="ui-button" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

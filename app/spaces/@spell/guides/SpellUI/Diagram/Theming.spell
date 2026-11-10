@@ -1,4 +1,4 @@
-<spell-page "diagram theming" notebook>
+<page "diagram theming" notebook>
 	<header level="1">
 		Diagram
 		<header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.</>
@@ -27,4 +27,4 @@
 			each restyling this component through its tokens.  The spec's own colours (headers, groups) stay;  the page, box bodies, text and lines follow the theme and dark mode.
 		</>
 	</>
-</spell-page>
+</page>

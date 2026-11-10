@@ -3,7 +3,7 @@ Reparte siete columnas, luego arma cuatro fundaciones, del as al rey, un palo ca
 la [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) tiene sus reglas, y cómo se llama cada pila.
 Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pila`.
 
-<encanto-aplicación "solitario">
+<aplicación "solitario">
 	<propiedad "puntuación">un número</>
 	<propiedad "movimientos" descripción="Las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta">un número</>
 	<propiedad "pista" descripción="Lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. (+10), un arrastre que no cae en nada, una victoria">texto</>
@@ -148,7 +148,7 @@ Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pi
 			</cuadricula>
 		</contenedor>
 	</dibujar>
-</encanto-aplicación>
+</aplicación>
 
 ## Jugar una carta
 Qué hace un clic o un arrastre:  los movimientos propios de la carta, y los de cada pila, como el juego los juega.
@@ -210,7 +210,7 @@ Qué hace un clic o un arrastre:  los movimientos propios de la carta, y los de 
 Cada tipo de pila, qué puede tomar o soltar, y cómo están sus cartas.
 Mientras está vacía, muestra su marcador, si tiene uno.
 
-<encanto-vista "pila de reserva" plantilla="pila"
+<vista "pila de reserva" plantilla="pila"
 	descripción="Las cartas aún sin jugar, boca abajo:  un clic voltea la siguiente, así que no se le puede quitar ninguna"
 >
 	<propiedad "disposición">apilada</>
@@ -224,18 +224,18 @@ Mientras está vacía, muestra su marcador, si tiene uno.
 	<al clic descripción="Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta">
 		robar de la reserva
 	</>
-</encanto-vista>
+</vista>
 
-<encanto-vista "pila de descartes" plantilla="pila" descripción="Adonde van las cartas de la reserva al voltearse">
+<vista "pila de descartes" plantilla="pila" descripción="Adonde van las cartas de la reserva al voltearse">
 	<propiedad "disposición">apilada</>
 	<encanto>
 		- nunca puede tomar una carta
 	</encanto>
 	// solo su carta de arriba se puede levantar
 	<cartas arrastrables cuando la carta es su última carta/>
-</encanto-vista>
+</vista>
 
-<encanto-vista "fundación" plantilla="pila" descripción="Donde se arma un palo, del as al rey, una carta a la vez">
+<vista "fundación" plantilla="pila" descripción="Donde se arma un palo, del as al rey, una carta a la vez">
 	<propiedad "disposición">apilada</>
 	<propiedad "palo">un palo de carta</>
 	<encanto>
@@ -249,9 +249,9 @@ Mientras está vacía, muestra su marcador, si tiene uno.
 	<dibujar "marcador" descripción="Un as gris claro de su palo, boca arriba">
 		<texto part="marcador">{la imagen de una nueva carta cuyo rango es as y palo es su palo}</texto>
 	</dibujar>
-</encanto-vista>
+</vista>
 
-<encanto-vista "columna" plantilla="pila" descripción="Una columna, armada hacia abajo del rey al as, rojo y negro alternados">
+<vista "columna" plantilla="pila" descripción="Una columna, armada hacia abajo del rey al as, rojo y negro alternados">
 	<propiedad "disposición">vertical</>
 	// sus cartas boca arriba se pueden levantar, con cada carta sobre ellas
 	<cartas arrastrables cuando la carta está boca arriba/>
@@ -293,7 +293,7 @@ Mientras está vacía, muestra su marcador, si tiene uno.
 		agregar la dama a la columna
 		la fundación puede tomar la dama debería ser no
 	</probar>
-</encanto-vista>
+</vista>
 
 <encanto>
 	empezar el juego

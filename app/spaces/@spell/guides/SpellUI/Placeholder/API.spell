@@ -1,4 +1,4 @@
-<spell-page "placeholder api" notebook>
+<page "placeholder api" notebook>
 	<header level="1">
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
@@ -43,4 +43,4 @@
 			<ui-docs-api family="ui-placeholder" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

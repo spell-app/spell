@@ -8,7 +8,7 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 
 ## La página:  una barra arriba, las secciones al lado, y la elegida
 
-<encanto-aplicación "administración de la org">
+<aplicación "administración de la org">
 	<propiedad "miembro nuevo" descripción="A quién agregar, por su dirección:  ana@rs">un nuevo miembro</>
 	<propiedad "equipo nuevo" descripción="Un equipo permanente nuevo, por su nombre">un nuevo equipo</>
 	<propiedad "proyecto nuevo" descripción="Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma">un nuevo proyecto</>
@@ -263,4 +263,4 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 			</para>
 		</ui-stack>
 	</dibujar>
-</encanto-aplicación>
+</aplicación>

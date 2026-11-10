@@ -96,7 +96,7 @@ function codeOf(compiled: string): string {
 const PAGES = FILES.filter(({ path }) => path !== SITE_FILE).map(({ path, contents }) => ({
   path,
   contents,
-  name: /^<spell-page "([^"]+)" notebook>/.exec(contents)?.[1]
+  name: /^<page "([^"]+)" notebook>/.exec(contents)?.[1]
 }))
 
 /** Each line of the site file naming a page:  its name and address. */
@@ -110,7 +110,7 @@ describe("the Spell UI site", () => {
   test("every file is one page alone:  nothing before its tag, or after its end tag", () => {
     for (const { path, contents, name } of PAGES) {
       expect({ path, name: !!name }).toEqual({ path, name: true })
-      expect({ path, ends: contents.trimEnd().endsWith("</spell-page>") }).toEqual({ path, ends: true })
+      expect({ path, ends: contents.trimEnd().endsWith("</page>") }).toEqual({ path, ends: true })
     }
   })
 

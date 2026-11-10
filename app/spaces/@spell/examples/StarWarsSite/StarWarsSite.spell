@@ -12,7 +12,7 @@
 
 # Every page's top:  its title, and the settings
 
-<spell-view "page top">
+<view "page top">
 	<property "title" type="text"/>
 	<draw>
 		<stack direction="horizontal" align="center" justify="between">
@@ -20,12 +20,12 @@
 			<button class="settings" appearance="basic" icon="cog" onClick={show the settings dialog}>Settings</button>
 		</stack>
 	</draw>
-</spell-view>
+</view>
 
 
 # The films
 
-<spell-page "films page">
+<page "films page">
 	<stories>
 		<story "S1" done>see every film, in the order they came out</story>
 		<story "S2">
@@ -47,7 +47,7 @@
 	</draw>
 </>
 
-<spell-page "film page">
+<page "film page">
 	<stories>
 		<story "S1" done>read the film's opening crawl</story>
 		<story "S2" done>
@@ -106,7 +106,7 @@
 
 # The people
 
-<spell-page "people page">
+<page "people page">
 	<stories>
 		<story "S1">find a person by name as I type</story>
 		<story "S2" done>see each person's home planet and species at a glance</story>
@@ -123,7 +123,7 @@
 	</draw>
 </>
 
-<spell-page "person page">
+<page "person page">
 	<stories>
 		<story "S1" done>see a person's height, birth year and home planet</story>
 		<story "S2" done>
@@ -144,7 +144,7 @@
 	</draw>
 </>
 
-<spell-view "person facts" description="A person in a few lines:  the page and the sidebar both show them">
+<view "person facts" description="A person in a few lines:  the page and the sidebar both show them">
 	<property "person" type="character"/>
 	<draw>
 		<table appearance="definition" celled unstackable>
@@ -154,21 +154,21 @@
 			<row><cell>Home</cell><cell><link link={the address of the planet page for (its person's homeworld)}>{its person's homeworld's name}</link></cell></row>
 		</table>
 	</draw>
-</spell-view>
+</view>
 
-<spell-view "person sidebar">
+<view "person sidebar">
 	<property "person" type="character" description="Whoever it's showing"/>
 	<draw>
 		<header size="medium">{its person's name}</header>
 		draw (a new person facts with person = its person)
 		<link class="whole-page" link={the address of the person page for its person}>Their whole page</link>
 	</draw>
-</spell-view>
+</view>
 
 
 # The planets
 
-<spell-page "planets page">
+<page "planets page">
 	<stories>
 		<story "S1" done>see every planet, with its climate and terrain</story>
 		<story "S2">sort the planets by how many people live there</story>
@@ -184,7 +184,7 @@
 	</draw>
 </>
 
-<spell-page "planet page">
+<page "planet page">
 	<stories>
 		<story "S1" done>see who comes from a planet</story>
 		<story "S2" done>see the films a planet appears in</story>
@@ -207,7 +207,7 @@
 
 # The species
 
-<spell-page "species list page">
+<page "species list page">
 	<stories>
 		<story "S1" done>see every species, with its classification and language</story>
 		<story "S2">filter the species by how long they live</story>
@@ -223,7 +223,7 @@
 	</draw>
 </>
 
-<spell-page "species page">
+<page "species page">
 	<stories>
 		<story "S1" done>see the people of a species</story>
 		<story "S2">see a species' home world</story>
@@ -242,7 +242,7 @@
 
 # The vehicles and starships
 
-<spell-page "vehicles page">
+<page "vehicles page">
 	<stories>
 		<story "S1" done>see every vehicle, with its class and crew</story>
 		<story "S2">sort the vehicles by speed</story>
@@ -257,7 +257,7 @@
 	</draw>
 </>
 
-<spell-page "vehicle page">
+<page "vehicle page">
 	<stories>
 		<story "S1" done>see who has piloted a vehicle</story>
 		<story "S2" done>see the films it appears in</story>
@@ -277,7 +277,7 @@
 	</draw>
 </>
 
-<spell-page "starships page">
+<page "starships page">
 	<stories>
 		<story "S1" done>see every starship, with its class and hyperdrive rating</story>
 		<story "S2">
@@ -297,7 +297,7 @@
 	</draw>
 </>
 
-<spell-page "starship page">
+<page "starship page">
 	<stories>
 		<story "S1" done>see a starship's pilots</story>
 		<story "S2" done>see its length, crew and cost</story>
@@ -316,7 +316,7 @@
 
 # Every review, edited like a spreadsheet
 
-<spell-page "reviews page">
+<page "reviews page">
 	<stories>
 		<story "S1" done>see every review written on this device, in one table</story>
 		<story "S2" done>
@@ -337,7 +337,7 @@
 
 # The dialogs:  the settings, and a review of a film
 
-<spell-view "settings dialog">
+<view "settings dialog">
 	<spell>
 		- its "units" is metric or imperial
 		- its "crawl" is shown or hidden
@@ -360,9 +360,9 @@
 		</form>
 		<button class="done" color="primary" onClick={close the settings dialog}>Done</button>
 	</draw>
-</spell-view>
+</view>
 
-<spell-view "review dialog">
+<view "review dialog">
 	<property "film" type="film" description="The film it's a review of"/>
 	<property "draft" description="The review being written:  saved when it's done">a new review with stars = 5</property>
 	<action "save the review">
@@ -383,12 +383,12 @@
 		</form>
 		<button class="save-review" color="primary" disabled={its draft's words is ""} onClick={save the review}>Save the review</button>
 	</draw>
-</spell-view>
+</view>
 
 
 # The site:  where each page is, its dialogs and sidebars, and the theme it wears
 
-<spell-site "galaxy guide">
+<site "galaxy guide">
 	<property "theme" description="The theme its pages wear:  a hand-drawn sketch, while it's a mockup">"mockup"</property>
 	<page "films page" address="/films" title="Films">
 		<page "film page" address="/films/:film" title="Film"/>

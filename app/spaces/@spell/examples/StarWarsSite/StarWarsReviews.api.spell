@@ -3,11 +3,11 @@
 // Kept in this browser:  change the next line to keep them somewhere else, and nothing else changes.
 <device-storage "galaxy reviews" />
 
-<spell-thing "review">
+<thing "review">
 	<spell>
 		- it lives in galaxy reviews
 	</spell>
 	<property "film title">text</>
 	<property "stars" type="number" />
 	<property "words">text</>
-</spell-thing>
+</thing>

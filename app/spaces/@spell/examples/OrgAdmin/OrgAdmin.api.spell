@@ -9,15 +9,15 @@
 </data-folder>
 
 // The org itself, for the page's title and as a space to design.
-<spell-thing "org profile">
+<thing "org profile">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "name">text</>
 	<property "space">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "member">
+<thing "member">
 	<spell>
 		- it lives in admin roles
 	</spell>
@@ -25,34 +25,34 @@
 	<property "name">text</>
 	<property "role">text</>
 	<property "role name">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "team">
+<thing "team">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "name">text</>
 	<property "space">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "project">
+<thing "project">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "name">text</>
 	<property "team">text</>
 	<property "space">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "org role">
+<thing "org role">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "name">text</>
 	<property "manages">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "term">
+<thing "term">
 	<spell>
 		- it lives in admin roles
 	</spell>
@@ -64,37 +64,37 @@
 	<property "manages name">text</>
 	<property "starts">text</>
 	<property "ends">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "approved app">
+<thing "approved app">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "name">text</>
 	<property "version">text</>
-</spell-thing>
+</thing>
 
 // A designer changes a space's pages and source, whatever their role there:  a Manager publishes them.
-<spell-thing "designer">
+<thing "designer">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "person">text</>
 	<property "space">text</>
 	<property "person name">text</>
-</spell-thing>
+</thing>
 
 // An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers".
-<spell-thing "stage">
+<thing "stage">
 	<spell>
 		- it lives in admin roles
 	</spell>
 	<property "name">text</>
 	<property "moves to">text</>
 	<property "moved by">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "role change">
+<thing "role change">
 	<spell>
 		- it lives in admin roles
 	</spell>
@@ -103,4 +103,4 @@
 	<property "did">text</>
 	<property "what">text</>
 	<property "why">text</>
-</spell-thing>
+</thing>

@@ -1,4 +1,4 @@
-<spell-page "form api" notebook>
+<page "form api" notebook>
 	<header level="1">
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>
@@ -64,4 +64,4 @@
 			<ui-docs-api family="ui-form" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

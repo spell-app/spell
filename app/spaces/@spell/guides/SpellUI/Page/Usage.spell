@@ -1,4 +1,4 @@
-<spell-page "page usage" notebook>
+<page "page usage" notebook>
 	<header level="1">
 		Page
 		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
@@ -37,4 +37,4 @@
 			- Name a `nav` when a page has more than one menu:  `<ui-menu slot="nav" aria-label="Folders">`.
 		</>
 	</>
-</spell-page>
+</page>

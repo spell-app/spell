@@ -1,4 +1,4 @@
-<spell-page "tab api" notebook>
+<page "tab api" notebook>
 	<header level="1">
 		Tab
 		<header>A tab is a hidden section of content activated by a menu.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-tab" only="states"></>
 		</>
 	</>
-</spell-page>
+</page>

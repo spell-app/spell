@@ -8,20 +8,20 @@
 	- check it every 30 seconds
 </sheet>
 
-<spell-view "sheet task" template="task">
+<view "sheet task" template="task">
 	<spell>
 		- it lives in task sheet
 	</spell>
 	<action "throw it away">
 		remove it from the sheet tasks
 	</action>
-</spell-view>
+</view>
 
-<spell-thing "sheet keeper" template="task keeper">
+<thing "sheet keeper" template="task keeper">
 	<property "kept tasks">every sheet task</>
 	<action "keep a new task titled (title as text)">
 		set task to a new sheet task with title = title
 		add task to the sheet tasks
 		return task
 	</action>
-</spell-thing>
+</thing>

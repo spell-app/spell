@@ -356,7 +356,7 @@ task_sky = core.place(
 # ## Task List
 ##############
 # A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
-# Its tasks are this project's own `<spell-view "task">`;  this file holds their list, and the app.
+# Its tasks are this project's own `<view "task">`;  this file holds their list, and the app.
 # Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
 # TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 

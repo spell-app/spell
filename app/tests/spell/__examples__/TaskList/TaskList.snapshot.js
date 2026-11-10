@@ -141,18 +141,18 @@ export class BrowserTask extends Task {
   }
 
   // - it lives in browser storage
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 298, end: 325 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 292, end: 319 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in browser storage
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 298, end: 325 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 292, end: 319 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class BrowserKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 478, end: 519 }, readsFrom: ["browser_storage"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 460, end: 501 }, readsFrom: ["browser_storage"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(BrowserTask)
   }) }
@@ -191,18 +191,18 @@ export class ServerTask extends Task {
   }
 
   // - it lives in task files
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 466, end: 488 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 460, end: 482 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task files
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 466, end: 488 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 460, end: 482 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class ServerKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 639, end: 679 }, readsFrom: ["task_files"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 621, end: 661 }, readsFrom: ["task_files"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(ServerTask)
   }) }
@@ -247,18 +247,18 @@ export class SheetTask extends Task {
   }
 
   // - it lives in task sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 615, end: 637 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 609, end: 631 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 615, end: 637 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 609, end: 631 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class SheetKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 786, end: 825 }, readsFrom: ["task_sheet"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 768, end: 807 }, readsFrom: ["task_sheet"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SheetTask)
   }) }
@@ -300,7 +300,7 @@ export class SkyTask extends Task {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a sky task has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 642, end: 673 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 630, end: 661 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
@@ -311,19 +311,19 @@ export class SkyTask extends Task {
   }
 
   // - it lives in task sky
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 454, end: 474 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 448, end: 468 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task sky
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 454, end: 474 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 448, end: 468 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class SkyKeeper extends TaskKeeper {
   /** only your own:  everyone's tasks are in their own accounts */
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 735, end: 873 }, readsFrom: ["task_sky"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 717, end: 855 }, readsFrom: ["task_sky"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SkyTask, { filter: { owner: core.currentPerson().id } })
   }) }
@@ -353,7 +353,7 @@ core.heading("Task List")
 // ## Task List
 ///////////////
 // A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
-// Its tasks are this project's own `<spell-view "task">`;  this file holds their list, and the app.
+// Its tasks are this project's own `<view "task">`;  this file holds their list, and the app.
 // Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
 // TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 

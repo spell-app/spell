@@ -1,4 +1,4 @@
-<spell-page "tab theming" notebook>
+<page "tab theming" notebook>
 	<header level="1">
 		Tab
 		<header>A tab is a hidden section of content activated by a menu.</>
@@ -53,4 +53,4 @@
 			menu and the panes through those sheets. The one in the header applies a theme to the whole site.
 		</>
 	</>
-</spell-page>
+</page>

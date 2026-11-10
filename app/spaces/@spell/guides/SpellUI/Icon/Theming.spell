@@ -1,4 +1,4 @@
-<spell-page "icon theming" notebook>
+<page "icon theming" notebook>
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -49,4 +49,4 @@
 			pack (Usage tab).
 		</>
 	</>
-</spell-page>
+</page>

@@ -9,7 +9,7 @@
 </data-folder>
 
 // A post, as its space has it:  who wrote it, what about, when, and where it's from.
-<spell-thing "post">
+<thing "post">
 	<spell>
 		- it lives in my feed
 	</spell>
@@ -18,4 +18,4 @@
 	<property "posted">text</>
 	<property "by">text</>
 	<property "space">text</>
-</spell-thing>
+</thing>

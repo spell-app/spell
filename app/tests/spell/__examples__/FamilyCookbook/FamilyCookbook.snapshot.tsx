@@ -8,15 +8,15 @@ core.heading("Family Cookbook:  your recipes, saved in the cloud")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 457, end: 479 } })
+  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 451, end: 473 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 484, end: 517 } })
+  @prop({ type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 478, end: 511 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 523, end: 545 } })
+  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 517, end: 539 } })
   accessor notes!: string
 
   @drawn draw() {
@@ -47,11 +47,11 @@ export class Recipe extends Thing {
   }
 
   // - it lives in family cookbook
-  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 418, end: 445 } })
+  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 412, end: 439 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in family cookbook
-  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 418, end: 445 } })
+  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 412, end: 439 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -99,7 +99,7 @@ export class Cookbook extends App {
   accessor newRecipe!: Recipe
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1231, end: 1397 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1211, end: 1377 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search)), (item: Recipe) => core.descending(item.created))
   }, () => [this.search]) }

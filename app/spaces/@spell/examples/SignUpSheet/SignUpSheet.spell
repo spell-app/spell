@@ -7,16 +7,16 @@ The organizers' part shows only to them:  the master sheet with its notes, the t
 
 ## A row for each:  who's on which shift
 
-<spell-more-of "published volunteer">
+<extend "published volunteer">
 	<draw>
 		<stack class="signed-up" direction="horizontal" spacing="md" align="center" wrap>
 			<label>{its shift}</label>
 			<text>{its person}</text>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "volunteer">
+<extend "volunteer">
 	<draw>
 		<form value={it} class="master-row">
 			<stack direction="horizontal" spacing="md" align="center" wrap>
@@ -26,9 +26,9 @@ The organizers' part shows only to them:  the master sheet with its notes, the t
 			</stack>
 		</form>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "ticket">
+<extend "ticket">
 	<draw>
 		<stack class="ticket" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its person}</text>
@@ -37,15 +37,15 @@ The organizers' part shows only to them:  the master sheet with its notes, the t
 			<button class="confirm" size="small" disabled={its status is "confirmed"} title="Confirm it:  its guest gets into the attendees' space" onClick={set its status to "confirmed"}>Confirm</button>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "message">
+<extend "message">
 	<draw>
 		<text class="count">{its text}</text>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "attendee">
+<extend "attendee">
 	<draw>
 		<stack class="attendee" direction="horizontal" spacing="md" align="center">
 			<text>{its person}</text>
@@ -54,12 +54,12 @@ The organizers' part shows only to them:  the master sheet with its notes, the t
 			<button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Take them off the list" title="Take them off the list" onClick={remove it from the attendees}/>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## The page:  sign up, the published sheet, then the organizers' part
 
-<spell-app "sign up page">
+<app "sign up page">
 	<property "new volunteer">a new volunteer</>
 	<property "new attendee">a new attendee</>
 	<property "new ticket">a new ticket</>
@@ -195,4 +195,4 @@ The organizers' part shows only to them:  the master sheet with its notes, the t
 			</stack>
 		</container>
 	</draw>
-</spell-app>
+</app>

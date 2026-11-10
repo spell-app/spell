@@ -1,4 +1,4 @@
-<spell-page "loader theming" notebook>
+<page "loader theming" notebook>
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -52,4 +52,4 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</spell-page>
+</page>

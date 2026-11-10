@@ -3,16 +3,16 @@
 // La aplicación empieza aquí, así que funciona sin servidor y sin iniciar sesión.
 <almacenamiento-del-dispositivo "almacén del navegador" />
 
-<encanto-vista "tarea del navegador" plantilla="tarea">
+<vista "tarea del navegador" plantilla="tarea">
 	<encanto>
 		- vive en almacén del navegador
 	</encanto>
 	<acción "tirarla">
 		quitar eso de las tareas del navegador
 	</acción>
-</encanto-vista>
+</vista>
 
-<encanto-cosa "guardián del navegador" plantilla="guardián de tareas">
+<cosa "guardián del navegador" plantilla="guardián de tareas">
 	<encanto>
 		- sus "tareas guardadas" es cada tarea del navegador
 	</encanto>
@@ -21,4 +21,4 @@
 		agregar tarea a las tareas del navegador
 		devolver tarea
 	</acción>
-</encanto-cosa>
+</cosa>

@@ -1,4 +1,4 @@
-<spell-page "segment api" notebook>
+<page "segment api" notebook>
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-segment" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

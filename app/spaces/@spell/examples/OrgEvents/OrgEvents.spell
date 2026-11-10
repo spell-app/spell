@@ -7,7 +7,7 @@ A move you may not make says why, and changes nothing.
 
 ## A row for each event:  where it is, and a button to move it on
 
-<spell-more-of "event">
+<extend "event">
 	<draw>
 		<stack class="event" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its name}</text>
@@ -16,21 +16,21 @@ A move you may not make says why, and changes nothing.
 			<button class="move" size="small" disabled={its onward is ""} title="Move it on to its next stage" onClick={set its stage to its onward}>Move on</button>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
-<spell-more-of "event stage">
+<extend "event stage">
 	<draw>
 		<stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its name}</text>
 			<text color="grey">{its moved by}</text>
 		</stack>
 	</draw>
-</spell-more-of>
+</extend>
 
 
 ## The page:  a form to propose one, the events, and the stages they go through
 
-<spell-app "events page">
+<app "events page">
 	<property "new event" description="An event proposed:  its name, and its organizers' addresses, comma-separated">a new event</>
 
 	<action "propose the new event">
@@ -83,4 +83,4 @@ A move you may not make says why, and changes nothing.
 			</container>
 		</stack>
 	</draw>
-</spell-app>
+</app>

@@ -1,4 +1,4 @@
-<spell-page "tree api" notebook>
+<page "tree api" notebook>
 	<header level="1">
 		Tree
 		<header>A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.</>
@@ -57,4 +57,4 @@
 			<ui-docs-api family="ui-tree" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

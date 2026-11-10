@@ -9,35 +9,35 @@ core.heading("Inbox:  where your messages are kept")
 /** A message, or a page a Manager sent:  its title and line, worked out again when you open it. */
 export class Message extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 640, end: 661 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 634, end: 655 } })
   accessor text!: string
 
   // - its "recipients" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 666, end: 693 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 660, end: 687 } })
   accessor recipients!: string
 
   // - its "from" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 698, end: 719 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 692, end: 713 } })
   accessor from!: string
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 724, end: 747 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 718, end: 741 } })
   accessor thread!: string
 
   // - its "sent" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 752, end: 773 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 746, end: 767 } })
   accessor sent!: string
 
   // - its "page" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 778, end: 799 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 772, end: 793 } })
   accessor page!: string
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 804, end: 826 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 798, end: 820 } })
   accessor title!: string
 
   // - its "line" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 831, end: 852 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 825, end: 846 } })
   accessor line!: string
 
   @drawn draw() {
@@ -66,11 +66,11 @@ export class Message extends Thing {
   }
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 608, end: 628 } })
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 602, end: 622 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 608, end: 628 } })
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 602, end: 622 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -80,7 +80,7 @@ export class Message extends Thing {
  */
 export class MailChoice extends Thing {
   // - its "how" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1123, end: 1143 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1105, end: 1125 } })
   accessor how!: string
 
   @drawn draw() {
@@ -103,18 +103,18 @@ export class MailChoice extends Thing {
     times: ["created", "modified"], select: ["how"] }
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1091, end: 1111 } })
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1073, end: 1093 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1091, end: 1111 } })
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1073, end: 1093 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 /** A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update. */
 export class Subscription extends Thing {
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1350, end: 1372 } })
+  @prop({ type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1320, end: 1342 } })
   accessor space!: string
 
   @drawn draw() {
@@ -133,11 +133,11 @@ export class Subscription extends Thing {
   }
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1318, end: 1338 } })
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1288, end: 1308 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1318, end: 1338 } })
+  @prop({ type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1288, end: 1308 } })
   accessor modified!: any /* spell: type unknown */
 }
 

@@ -15,7 +15,7 @@
 	- forecasts are asked for by their latitude and longitude
 </web-server>
 
-<spell-thing "forecast">
+<thing "forecast">
 	<spell>
 		- it lives in open meteo
 	</spell>
@@ -29,13 +29,13 @@
 	<spell>
 		- its "hours" is a list of hours, stored as "hourly"
 	</spell>
-</spell-thing>
+</thing>
 
-<spell-thing "hour">
+<thing "hour">
 	<property "time" type="date" />
 	<spell>
 		- its "temperature" is a temperature in °C, stored as "temperature_2m"
 		- its "precipitation" is a length in mm
 		- its "wind speed" is a speed in km/h, stored as "wind_speed_10m"
 	</spell>
-</spell-thing>
+</thing>

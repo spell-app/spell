@@ -1,4 +1,4 @@
-<spell-page "site-nav api" notebook>
+<page "site-nav api" notebook>
 	<header level="1">
 		Site nav
 		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
@@ -50,4 +50,4 @@
 			<ui-docs-api family="ui-site-nav" only="texts"></>
 		</>
 	</>
-</spell-page>
+</page>

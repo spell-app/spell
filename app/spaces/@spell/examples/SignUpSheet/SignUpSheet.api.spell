@@ -24,28 +24,28 @@
 		- check it every 30 seconds
 </spell>
 
-<spell-thing "volunteer">
+<thing "volunteer">
 	<spell>
 		- it lives in the sign up sheet
 	</spell>
 	<property "person">text</>
 	<property "shift">text</>
 	<property "note">text</>
-</spell-thing>
+</thing>
 
 // Who may sign up, and how many invitations each may ask for:  the organizers work it out from their standing and
 // their shifts ("work out the invitations", on the page).
-<spell-thing "attendee">
+<thing "attendee">
 	<spell>
 		- it lives in the sign up sheet
 	</spell>
 	<property "person">text</>
 	<property "standing">text</>
 	<property "invitations" type="number" />
-</spell-thing>
+</thing>
 
 // A ticket someone asked for, for a guest:  an organizer confirms it.
-<spell-thing "ticket">
+<thing "ticket">
 	<spell>
 		- it lives in the sign up sheet
 	</spell>
@@ -53,7 +53,7 @@
 	<property "guest">text</>
 	<property "event">text</>
 	<property "status">text</>
-</spell-thing>
+</thing>
 
 // Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
 <data-folder "my inbox" address="@rs/__inbox">
@@ -61,7 +61,7 @@
 </data-folder>
 
 // A message in your inbox:  your invitations' count is one, in the conversation "invitations".
-<spell-thing "message">
+<thing "message">
 	<spell>
 		- it lives in my inbox
 	</spell>
@@ -71,12 +71,12 @@
 	<property "page">text</>
 	<property "title">text</>
 	<property "line">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "published volunteer">
+<thing "published volunteer">
 	<spell>
 		- it lives in the published sheet
 	</spell>
 	<property "person">text</>
 	<property "shift">text</>
-</spell-thing>
+</thing>

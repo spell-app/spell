@@ -1,4 +1,4 @@
-<spell-page "divider theming" notebook>
+<page "divider theming" notebook>
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>
@@ -48,4 +48,4 @@
 			tokens.
 		</>
 	</>
-</spell-page>
+</page>

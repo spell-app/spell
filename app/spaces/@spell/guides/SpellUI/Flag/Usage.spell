@@ -1,4 +1,4 @@
-<spell-page "flag usage" notebook>
+<page "flag usage" notebook>
 	<header level="1">
 		Flag
 		<header>A flag is used to represent a political state.</>
@@ -42,4 +42,4 @@
 			  still show, through a bare `<slot>`.
 		</>
 	</>
-</spell-page>
+</page>

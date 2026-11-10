@@ -25,7 +25,7 @@
 	- repositories are searched with "q" at "/search/repositories"
 </web-server>
 
-<spell-thing "issue">
+<thing "issue">
 	<spell>
 		- it lives in github
 	</spell>
@@ -58,9 +58,9 @@
 	<property "draft">yes or no</>
 	<property "pull request">a pull request</>
 	<property "assignee" type="assignee" />
-</spell-thing>
+</thing>
 
-<spell-thing "contributor">
+<thing "contributor">
 	<spell>
 		- it lives in github
 	</spell>
@@ -85,9 +85,9 @@
 	<property "user view type">text</>
 	<property "site admin">yes or no</>
 	<property "contributions" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "user">
+<thing "user">
 	<spell>
 		- it lives in github
 	</spell>
@@ -127,9 +127,9 @@
 	<property "created at" type="date" />
 	<property "updated at" type="date" />
 	<property "bio">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "issue user">
+<thing "issue user">
 	<property "login">text</>
 	<spell>
 		- its "number" is a number, stored as "id"
@@ -153,9 +153,9 @@
 	</spell>
 	<property "user view type">text</>
 	<property "site admin">yes or no</>
-</spell-thing>
+</thing>
 
-<spell-thing "label">
+<thing "label">
 	<spell>
 		- its "number" is a number, stored as "id"
 	</spell>
@@ -165,22 +165,22 @@
 	<property "color">text</>
 	<property "default">yes or no</>
 	<property "description">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "sub issues summary">
+<thing "sub issues summary">
 	<property "total" type="number" />
 	<property "completed" type="number" />
 	<property "percent completed" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "issue dependencies summary">
+<thing "issue dependencies summary">
 	<property "blocked by" type="number" />
 	<property "total blocked by" type="number" />
 	<property "blocking" type="number" />
 	<property "total blocking" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "reaction">
+<thing "reaction">
 	<property "url">text</>	// an address
 	<property "total count" type="number" />
 	<property "laugh" type="number" />
@@ -189,9 +189,9 @@
 	<property "heart" type="number" />
 	<property "rocket" type="number" />
 	<property "eyes" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "performed via github app">
+<thing "performed via github app">
 	<spell>
 		- its "number" is a number, stored as "id"
 	</spell>
@@ -207,9 +207,9 @@
 	<property "updated at" type="date" />
 	<property "permissions" type="permission" />
 	<property "events">a list of text</>
-</spell-thing>
+</thing>
 
-<spell-thing "owner">
+<thing "owner">
 	<property "login">text</>
 	<spell>
 		- its "number" is a number, stored as "id"
@@ -233,9 +233,9 @@
 	</spell>
 	<property "user view type">text</>
 	<property "site admin">yes or no</>
-</spell-thing>
+</thing>
 
-<spell-thing "permission">
+<thing "permission">
 	<property "actions">text</>
 	<property "administration">text</>
 	<property "checks">text</>
@@ -250,16 +250,16 @@
 	<property "statuses">text</>
 	<property "workflows">text</>
 	<property "repository creation">text</>
-</spell-thing>
+</thing>
 
-<spell-thing "pull request">
+<thing "pull request">
 	<property "url">text</>	// an address
 	<property "html url">text</>	// an address
 	<property "diff url">text</>	// an address
 	<property "patch url">text</>	// an address
-</spell-thing>
+</thing>
 
-<spell-thing "repository">
+<thing "repository">
 	<spell>
 		- it lives in github
 	</spell>
@@ -350,9 +350,9 @@
 	<property "default branch">text</>
 	<property "permissions" type="permission" />
 	<property "score" type="number" />
-</spell-thing>
+</thing>
 
-<spell-thing "assignee">
+<thing "assignee">
 	<property "login">text</>
 	<spell>
 		- its "number" is a number, stored as "id"
@@ -376,12 +376,12 @@
 	</spell>
 	<property "user view type">text</>
 	<property "site admin">yes or no</>
-</spell-thing>
+</thing>
 
-<spell-thing "license">
+<thing "license">
 	<property "key">text</>
 	<property "name">text</>
 	<property "spdx id">text</>
 	<property "url">text</>	// an address
 	<property "node id">text</>
-</spell-thing>
+</thing>

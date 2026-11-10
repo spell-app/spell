@@ -1,4 +1,4 @@
-<spell-page "image examples" notebook>
+<page "image examples" notebook>
 	<header level="1">
 		Image
 		<header>An image is a graphic representation of something.</>
@@ -230,4 +230,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

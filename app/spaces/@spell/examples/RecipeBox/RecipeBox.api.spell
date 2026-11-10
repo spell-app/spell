@@ -13,11 +13,11 @@
 // What's drawn and done with them is in RecipeBox.spell.
 <device-storage "family cookbook" />
 
-<spell-thing "recipe">
+<thing "recipe">
 	<spell>
 		- it lives in family cookbook
 	</spell>
 	<property "title">text</>
 	<property "servings" type="number" />
 	<property "notes">text</>
-</spell-thing>
+</thing>

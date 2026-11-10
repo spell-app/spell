@@ -1,4 +1,4 @@
-<spell-page "home" notebook>
+<page "home" notebook>
 	<segment inverted padding="lg" align="center" appearance="vertical">
 		<header level="1" inverted>
 			Spell UI
@@ -255,4 +255,4 @@
 		<divider spacer/>
 		<button size="large" labeled="right" icon="chevron right" link="/getting-started" color="primary">Get Started Now</>
 	</>
-</spell-page>
+</page>

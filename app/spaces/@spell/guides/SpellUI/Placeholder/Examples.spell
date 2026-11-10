@@ -1,4 +1,4 @@
-<spell-page "placeholder examples" notebook>
+<page "placeholder examples" notebook>
 	<header level="1">
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
@@ -346,4 +346,4 @@
 			</example>
 		</>
 	</>
-</spell-page>
+</page>

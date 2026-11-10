@@ -4,7 +4,7 @@
   Most addresses name a project, so they aren't in the navigation:  Home links to one of each.
 -->
 
-<spell-page "home page" thumbnail="snapshots/home.jpg">
+<page "home page" thumbnail="snapshots/home.jpg">
 	<stories>
 		<story "S1" done>open an example, a guide, a notebook or one of my projects from its card</story>
 		<story "S2" done>start from a blank app, a small starter or Solitaire</story>
@@ -25,21 +25,21 @@
 	</draw>
 </>
 
-<spell-page "notebook page" thumbnail="snapshots/notebook.jpg">
+<page "notebook page" thumbnail="snapshots/notebook.jpg">
 	<stories>
 		<story "S1" done>read a notebook, its words and its code in cells</story>
 	</stories>
 	<property "notebook" description="What the address names">text</property>
 </>
 
-<spell-page "guide page" thumbnail="snapshots/guide.jpg">
+<page "guide page" thumbnail="snapshots/guide.jpg">
 	<stories>
 		<story "S1" done>read a guide in the editor, its words as the comments of its spell file</story>
 	</stories>
 	<property "guide" description="What the address names">text</property>
 </>
 
-<spell-page "code editor page" thumbnail="snapshots/edit.jpg">
+<page "code editor page" thumbnail="snapshots/edit.jpg">
 	<stories>
 		<story "S1" done>change the code in its file tabs, with the running app beside it</story>
 		<story "S2" done>see the program's output, its compiled code and what I can use, in the Program panel under the code</story>
@@ -66,7 +66,7 @@
 	</draw>
 </>
 
-<spell-page "running app page" thumbnail="snapshots/run.jpg">
+<page "running app page" thumbnail="snapshots/run.jpg">
 	<stories>
 		<story "S1" done>use the program by itself, with no code showing</story>
 		<story "S2" done>restart it</story>
@@ -74,7 +74,7 @@
 	<property "project" description="What the address names">text</property>
 </>
 
-<spell-page "site editor page" thumbnail="snapshots/site-pages.jpg">
+<page "site editor page" thumbnail="snapshots/site-pages.jpg">
 	<stories>
 		<story "S1" done>see a site's pages as a tree and a board of cards</story>
 		<story "S2" done>drag a row to move a page, with its pages</story>
@@ -91,14 +91,14 @@
 	</draw>
 </>
 
-<spell-page "theme editor page" thumbnail="snapshots/theme.jpg">
+<page "theme editor page" thumbnail="snapshots/theme.jpg">
 	<stories>
 		<story "S1" done>change a theme and see it on real pages</story>
 		<story "S2" done>save it by name, to pick from every theme menu</story>
 	</stories>
 </>
 
-<spell-page "hosted app page" thumbnail="snapshots/hosted-program.jpg">
+<page "hosted app page" thumbnail="snapshots/hosted-program.jpg">
 	<stories>
 		<story "S1" done>use a program at its own address on Spell's cloud</story>
 	</stories>
@@ -111,39 +111,39 @@
 	</draw>
 </>
 
-<spell-page "terms page" thumbnail="snapshots/terms.jpg">
+<page "terms page" thumbnail="snapshots/terms.jpg">
 	<stories>
 		<story "S1" done>read Spell's terms</story>
 	</stories>
 </>
 
-<spell-view "inspector sidebar" thumbnail="snapshots/inspector.jpg"/>
+<view "inspector sidebar" thumbnail="snapshots/inspector.jpg"/>
 
-<spell-view "palette sidebar" thumbnail="snapshots/palette.jpg"/>
+<view "palette sidebar" thumbnail="snapshots/palette.jpg"/>
 
-<spell-view "site data sidebar" thumbnail="snapshots/site-data.jpg"/>
+<view "site data sidebar" thumbnail="snapshots/site-data.jpg"/>
 
-<spell-view "project settings dialog" thumbnail="snapshots/project-settings.jpg"/>
+<view "project settings dialog" thumbnail="snapshots/project-settings.jpg"/>
 
-<spell-view "code settings dialog" thumbnail="snapshots/code-settings.jpg"/>
+<view "code settings dialog" thumbnail="snapshots/code-settings.jpg"/>
 
-<spell-view "project versions dialog" thumbnail="snapshots/versions.jpg"/>
+<view "project versions dialog" thumbnail="snapshots/versions.jpg"/>
 
-<spell-view "new file dialog" thumbnail="snapshots/new-file.jpg"/>
+<view "new file dialog" thumbnail="snapshots/new-file.jpg"/>
 
-<spell-view "new project dialog" thumbnail="snapshots/new-project.jpg"/>
+<view "new project dialog" thumbnail="snapshots/new-project.jpg"/>
 
-<spell-view "duplicate project dialog" thumbnail="snapshots/duplicate-project.jpg"/>
+<view "duplicate project dialog" thumbnail="snapshots/duplicate-project.jpg"/>
 
-<spell-view "change this dialog" thumbnail="snapshots/change-this.jpg"/>
+<view "change this dialog" thumbnail="snapshots/change-this.jpg"/>
 
-<spell-view "publish clash dialog" thumbnail="snapshots/publish-clash.jpg"/>
+<view "publish clash dialog" thumbnail="snapshots/publish-clash.jpg"/>
 
-<spell-view "person dialog" thumbnail="snapshots/you.jpg"/>
+<view "person dialog" thumbnail="snapshots/you.jpg"/>
 
-<spell-view "sign-in dialog" thumbnail="snapshots/sign-in.jpg"/>
+<view "sign-in dialog" thumbnail="snapshots/sign-in.jpg"/>
 
-<spell-site "spell app">
+<site "spell app">
 	<page "home page" address="/" title="Home" state="old" color="red"/>
 	<page "notebook page" address="/edit/@spell/guides/SpellUI/:notebook*" title="Notebook" state="old" color="orange"/>
 	<page "guide page" address="/edit/@spell/guides/:guide" title="Guide" state="old" color="yellow"/>

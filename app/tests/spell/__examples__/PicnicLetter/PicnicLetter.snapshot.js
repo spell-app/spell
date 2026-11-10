@@ -10,12 +10,12 @@ core.heading("Picnic Letter:  where its parts are read from")
 
 export class Listing extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 667, end: 690 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 661, end: 684 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "shift" is text
-  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 695, end: 717 } }) }
+  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 689, end: 711 } }) }
   get shift() { return this.getProp("shift") }
   set shift(value) { this.setProp("shift", value) }
 
@@ -29,24 +29,24 @@ export class Listing extends Thing {
     times: ["created", "modified"], select: ["person", "shift"] }
 
   // - it lives in the published sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 624, end: 655 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 618, end: 649 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in the published sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 624, end: 655 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 618, end: 649 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class Message extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 987, end: 1008 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 969, end: 990 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "thread" is text
-  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 1013, end: 1036 } }) }
+  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 995, end: 1018 } }) }
   get thread() { return this.getProp("thread") }
   set thread(value) { this.setProp("thread", value) }
 
@@ -60,12 +60,12 @@ export class Message extends Thing {
     times: ["created", "modified"], select: ["text", "thread"] }
 
   // - it lives in my inbox
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 955, end: 975 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 937, end: 957 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my inbox
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 955, end: 975 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 937, end: 957 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -109,12 +109,12 @@ core.heading("The letter")
 export class PicnicLetter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  static { this.declareProp("shifts", { declaredAt: { path: "/PicnicLetter.spell", start: 518, end: 575 }, readsFrom: ["published_sheet"] }) }
+  static { this.declareProp("shifts", { declaredAt: { path: "/PicnicLetter.spell", start: 484, end: 541 }, readsFrom: ["published_sheet"] }) }
   get shifts() { return core.waitedValue(this, "shifts", async () => {
     return core.filter(await core.savedThings(Listing, {}, "looks through"), (listing) => core.isCurrentPerson(listing.person))
   }) }
 
-  static { this.declareProp("counts", { declaredAt: { path: "/PicnicLetter.spell", start: 580, end: 646 }, readsFrom: ["my_inbox"] }) }
+  static { this.declareProp("counts", { declaredAt: { path: "/PicnicLetter.spell", start: 546, end: 612 }, readsFrom: ["my_inbox"] }) }
   get counts() { return core.waitedValue(this, "counts", async () => {
     return await core.savedThings(Message, { filter: { thread: "invitations" } })
   }) }

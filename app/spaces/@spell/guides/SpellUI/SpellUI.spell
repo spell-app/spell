@@ -3,7 +3,7 @@
   Each component has a folder of notebooks, and each notebook is one page here:  this file says where each one is,
   and what the side navigation calls it.  A component's Usage page is its address, and its other pages are under it.
 -->
-<spell-site "spell ui">
+<site "spell ui">
 	<!-- the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders -->
 	<page "home page" address="/" title="Spell UI" thumbnail="snapshots/home.jpg"/>
 	<page "getting started page" address="/getting-started" title="Getting started" thumbnail="snapshots/getting-started.jpg"/>
