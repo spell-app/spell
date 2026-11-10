@@ -91,7 +91,9 @@ describe("a field's name, by its words", () => {
     })
 
     test("any other name is exact", () => {
-      expect(new FieldNames({ created: "created_at" }).fromServer({ createdAt: "other" })).toEqual({ createdAt: "other" })
+      expect(new FieldNames({ created: "created_at" }).fromServer({ createdAt: "other" })).toEqual({
+        createdAt: "other"
+      })
       const sheet = new FieldNames({ title: "Dish Name" })
       expect(sheet.fromServer({ dish_name: "other" })).toEqual({ dishName: "other" })
     })
