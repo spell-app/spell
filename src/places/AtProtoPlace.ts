@@ -2,6 +2,7 @@ import { LoadOnce } from "spell/util/LoadOnce"
 import { ReconnectingSocket } from "spell/util/ReconnectingSocket"
 
 import { AtProtoSignIn, type AtProtoAccess } from "./AtProtoSignIn"
+import { FieldNames } from "./FieldNames"
 import {
   OWNER_FIELD,
   PlaceError,
@@ -220,6 +221,7 @@ type CommitEvent = {
  *     With one account named, that's the whole read:  it throws.
  * - A ROW is its record's fields, its `id`, and `owner`, the account it came from, which can't be claimed:
  *   a record saying `cook: "Ana"` is only what it says;  `owner` is who wrote it.
+ *   - The fields a program's lines name (`a status's created is its "created at"`):  by those names, read and written (`FieldNames`).
  *   - A record's key IS its id, chosen by the browser, the same ids as everywhere else.
  *   - Two accounts may use one key:  the first read keeps it, the person signed in always first, and the other is `<did>/<key>`.
  * - WRITING:  only your own (`whoWrites`), and a change to someone else's is refused, `"owner"`.
@@ -254,6 +256,10 @@ export class AtProtoPlace implements Place {
   private readonly corner: string
   /** A collection's full name, where its lines say. */
   private readonly collections: Readonly<Record<string, string>>
+  /** The fields its lines name, by collection:  see `AtProtoPlaceProps`. */
+  private readonly fields: Readonly<Record<string, Readonly<Record<string, string>>>>
+  /** Each named collection's field names, made when it's first used. */
+  private readonly fieldNames = new Map<string, FieldNames>()
   /** Who's at this page, with nobody signed in. */
   private readonly guest: PlacePerson
   /** What it reaches. */
@@ -302,6 +308,7 @@ export class AtProtoPlace implements Place {
     findsAccounts = true,
     corner = DEFAULT_CORNER,
     collections = {},
+    fields = {},
     person,
     signIn,
     network
@@ -312,6 +319,7 @@ export class AtProtoPlace implements Place {
     this.accounts = accounts
     this.corner = corner
     this.collections = collections
+    this.fields = fields
     this.guest = person ?? { id: "guest", name: "Guest" }
     this.network = { ...REAL_NETWORK, ...settings, ...network }
     this.signIn = signIn ?? signedIn ?? (pageSignIn ??= new AtProtoSignIn({ clientFile }))
@@ -330,9 +338,19 @@ export class AtProtoPlace implements Place {
     this.decimals.set(collection, new Set([...(this.decimals.get(collection) ?? []), ...fields]))
   }
 
-  /** A row, from `collection`'s record:  its own `id` and `owner` are the place's, its decimals numbers again. */
+  /** `collection`'s field names, when a line names any:  a record's others are read as they're held. */
+  private namesOf(collection: string): FieldNames | undefined {
+    const named = this.fields[collection]
+    if (!named) return undefined
+    let names = this.fieldNames.get(collection)
+    if (!names) this.fieldNames.set(collection, (names = new FieldNames(named)))
+    return names
+  }
+
+  /** A row, from `collection`'s record:  its own `id` and `owner` are the place's, its decimals numbers again, its named fields by our names. */
   private rowOf(collection: string, id: string, did: string, record: Record<string, unknown>): PlaceRow {
-    const row = toRow(id, did, record)
+    const asItsHeld = toRow(id, did, record)
+    const row = this.namesOf(collection)?.fromServer(asItsHeld) ?? asItsHeld
     for (const field of this.decimals.get(collection) ?? []) {
       const value = row[field]
       if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) row[field] = Number(value)
@@ -635,7 +653,10 @@ export class AtProtoPlace implements Place {
         ...(known && { value: known.value })
       }
       if (kind === "delete") write.isRemoved = true
-      else write.value = { ...write.value, ...checkedFields(change, this.decimals.get(collection)) }
+      else {
+        const fields = checkedFields(change, this.decimals.get(collection))
+        write.value = { ...write.value, ...(this.namesOf(collection)?.toServer(fields) ?? fields) }
+      }
       // the first:  each change after it in a batch follows on from what the batch just wrote
       write.version ??= change.version
       writes.set(key, write)
@@ -1023,6 +1044,8 @@ export type AtProtoPlaceProps = {
   corner?: string
   /** A collection's name there, by its name here:  in full (`com.example.recipe`), or under the corner. */
   collections?: Readonly<Record<string, string>>
+  /** What a record calls a field, by collection, then by our name:  `{ statuses: { created: "created at" } }`, matched as `FieldNames` does. */
+  fields?: Readonly<Record<string, Readonly<Record<string, string>>>>
   /** Who's at this page with nobody signed in. */
   person?: PlacePerson
   /** Who's signed in.  Left out:  this page's `AtProtoSignIn`. */

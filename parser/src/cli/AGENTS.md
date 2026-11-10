@@ -57,6 +57,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `--model <model>[:<effort>]`, hidden, for experiments:  an exact model and effort for every call
   - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
     `ShapeCheck`, `FixUps`), on parsed files:  no node
+  - a tag file (`.spellml`, epic `language` I68):  the app hands over the plain Spell it means (`SourceFile.tagFile`),
+    parsed from a scratch copy of the project;  once checked, `writeTagFiles()` writes the translation back as tags,
+    or keeps plain `.spell` files, and says so, if the tags have more problems
   - `--out` keeps everything the run writes, its dictionary and record too (epic `spanish` J186):
     a dictionary beside the project is read, never written;  `--update` finds its record by the same `--out`
   - `--review` (epic `spanish` P31, P32):  between the names and the lines, [NamesReview.ts](NamesReview.ts) shows the

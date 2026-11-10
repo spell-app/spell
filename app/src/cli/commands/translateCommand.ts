@@ -1,9 +1,12 @@
-import { existsSync, readdirSync, readFileSync } from "fs"
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
+import { tmpdir } from "os"
 import { basename, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
 import type { TranslateSource } from "spell/parser/cli/translateProject"
 import type {
   DeclarationStatement,
@@ -54,9 +57,9 @@ export async function translateSourceFor(
   return {
     projectName: project.projectName ?? "Project",
     folder: project.location.serverPath,
-    files: await sourceFiles(project),
-    seed: seed && (await sourceFiles(seed)),
-    reference: theirs && (await sourceFiles(theirs)),
+    files: await sourceFiles(session, project),
+    seed: seed && (await sourceFiles(session, seed)),
+    reference: theirs && (await sourceFiles(session, theirs)),
     declarations: declarations?.statements as DeclarationStatement[] | undefined,
     words: declarations && SP.SpellWords.of(declarations),
     imports: await importsOf(project, options.to),
@@ -65,15 +68,87 @@ export async function translateSourceFor(
   }
 }
 
-/** `project`'s spell files, parsed, in its project file's order:  their paths in the project, e.g. `/Card.spell`. */
-async function sourceFiles(project: SP.SpellProject): Promise<SourceFile[]> {
-  const files: SourceFile[] = []
-  for (const file of project.files) {
-    if (!(file instanceof SP.SpellFile)) continue
-    const match = await file.parse()
-    files.push({ path: file.path.slice(project.projectId.length), contents: file.contents ?? "", match })
+/**
+ * `project`'s spell files, parsed, in its project file's order:  their paths in the project, e.g. `/Card.spell`.
+ * - The translator writes plain Spell, line by line, so a tag file is handed over as the plain Spell it means
+ *   (`SourceFile.tagFile`):  a project with any is parsed from a scratch copy of itself, its tag files written plain,
+ *   so each file's names resolve against the rest.  The copy is deleted before this returns.
+ */
+async function sourceFiles(session: CLI.CliSession, project: SP.SpellProject): Promise<SourceFile[]> {
+  const spell = project.files.filter(
+    (file): file is SP.SpellFile => file instanceof SP.SpellFile && SP.isSpellSourceName(file.path)
+  )
+  const tagFiles = spell.filter((file) => file.form === "spellx")
+  await session.parse(project)
+  if (!tagFiles.length) return parsedFiles(project, spell)
+
+  const scratch = mkdtempSync(join(tmpdir(), "spell-translate-"))
+  try {
+    const folder = join(scratch, basename(project.location.serverPath))
+    const original = project.location.serverPath
+    cpSync(original, folder, { recursive: true, filter: (from) => !SCRATCH_SKIPS.has(basename(from)) })
+    const tagFileFor = new Map<string, NonNullable<SourceFile["tagFile"]>>()
+    for (const file of tagFiles) {
+      await file.parse()
+      const { text, proseLines } = SX.CodeSpellWriter.writeWithProse(file.contents ?? "", {
+        path: file.path,
+        componentTag: SP.ComponentTags.of(file).componentTag
+      })
+      const path = file.path.slice(project.projectId.length)
+      const plain = plainPathFor(path)
+      rmSync(join(folder, path))
+      writeFileSync(join(folder, plain), text)
+      tagFileFor.set(plain, { path, proseLines })
+    }
+    // the project file names its files:  the plain ones, in the copy
+    const manifest = join(folder, SP.PROJECT_FILE)
+    if (existsSync(manifest)) {
+      let text = readFileSync(manifest, "utf8")
+      for (const [plain, { path }] of tagFileFor) text = text.split(path).join(plain)
+      writeFileSync(manifest, text)
+    }
+    const copy = await CLI.projectFor(session, folder)
+    await session.parse(copy)
+    const files = await parsedFiles(
+      copy,
+      copy.files.filter((file): file is SP.SpellFile => file instanceof SP.SpellFile && SP.isSpellSourceName(file.path))
+    )
+    return files.map((file) => ({ ...file, tagFile: tagFileFor.get(file.path) }))
+  } finally {
+    rmSync(scratch, { recursive: true, force: true })
   }
-  return files
+}
+
+/**
+ * `files` of `project`, parsed, by their paths in it.
+ * - A file turned off in the project gets a scope of its own under the project's:  so it reads in its own language
+ *   and knows the project's types, and what it declares stays out of the project.
+ */
+async function parsedFiles(project: SP.SpellProject, files: SP.SpellFile[]): Promise<SourceFile[]> {
+  const { scope } = project
+  const offFiles =
+    scope &&
+    new P.ProjectScope({
+      name: "files turned off",
+      path: project.projectId,
+      parser: scope.parser!.clone({ module: `${project.projectId}:off` }),
+      parentScope: scope
+    })
+  const parsed: SourceFile[] = []
+  for (const file of files) {
+    const match = await file.parse(file.isActive ? undefined : offFiles)
+    parsed.push({ path: file.path.slice(project.projectId.length), contents: file.contents ?? "", match })
+  }
+  return parsed
+}
+
+/** What a scratch copy of a project leaves out:  what's built, and what's installed. */
+const SCRATCH_SKIPS = new Set(["build", "node_modules", ".git"])
+
+/** A tag file's plain path:  `/Card.spellml` => `/Card.spell`, the old `/Card.spellx` too. */
+function plainPathFor(path: string): string {
+  const suffix = SP.SPELLML_SUFFIXES.find((each) => path.endsWith(each))!
+  return `${path.slice(0, -suffix.length)}${SP.SPELL_SUFFIX}`
 }
 
 /**
@@ -225,12 +300,15 @@ function translationChecker(folder: string): TranslationChecker {
       if (!reports.length && run.exitCode !== CLI.EXIT.OK) {
         problems.push({ path: pathOf(project.spellFiles[0]!), line: 0, message: run.output.trim(), source: "test" })
       }
-      // the translation as parsed in its own project, for the shape check
-      const parsed: SourceFile[] = []
-      for (const file of project.spellFiles) {
-        parsed.push({ path: pathOf(file), contents: file.contents ?? "", match: await file.parse() })
+      // the translation as parsed in its own project, for the shape check:  every file, one turned off in it too
+      const allFiles = project.files.filter(
+        (file): file is SP.SpellFile => file instanceof SP.SpellFile && SP.isSpellSourceName(file.path)
+      )
+      return {
+        problems,
+        tests: { passed: reports.length - failed, failed },
+        files: await parsedFiles(project, allFiles)
       }
-      return { problems, tests: { passed: reports.length - failed, failed }, files: parsed }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       return { problems: [{ path: project ? pathOf(project.spellFiles[0]!) : "/", line: 0, message, source: "lint" }] }
