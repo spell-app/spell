@@ -32,7 +32,6 @@ describe("diskFetch", () => {
     const spellFiles = project.activeImports.filter((file) => file instanceof SP.SpellFile)
     expect(spellFiles.map((file) => file.filePath)).toEqual([
       "/Card.spellml",
-      "/Jokers.spellml",
       "/Deck.spellml",
       "/Pile.spellml",
       "/Solitaire.spellml"

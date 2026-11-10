@@ -20,12 +20,12 @@ import "spell/ui/components/ui-menu"
  *         - to deal:
  *           - shortcut meta+D
  *           - enabled when its card is face up
- *           - undone as "Deal"
+ *           - undoable as "Deal"
  *         - its "game menu" is a menu of "deal", "-", "undo" and "redo"
  *         - its menu bar is "game menu"
  *         - to draw it:  the card, then `<ui-toolbar menu="game menu" />`
  *       a card is a view where:
- *         - to turn it over:  (undone as "Turn Card")
+ *         - to turn it over:  (undoable as "Turn Card")
  *         - to draw it:  `<span context-menu="game menu">`
  */
 describe("ActionMenus:  a Solitaire's game menu", () => {

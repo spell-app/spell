@@ -9,7 +9,7 @@ una "ficha giratoria" es una vista donde:
 	- para girarla:
 		- atajo meta+G
 		- activa cuando está arriba
-		- se deshace como "Girar ficha"
+		- deshacible como "Girar ficha"
 		si está arriba
 			poner su lado a abajo
 		de lo contrario

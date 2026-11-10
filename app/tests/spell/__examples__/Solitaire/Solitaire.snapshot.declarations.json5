@@ -2,7 +2,6 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Card",
-    "Joker",
     "Deck",
     "Pile",
     "Solitaire",
@@ -11,9 +10,7 @@
     "Foundation",
     "Tableau",
     "test_card_setup",
-    "test_jokers",
     "test_a_new_deck",
-    "test_two_jokers",
     "test_piles",
     "test_the_moves"
   ],
@@ -21,7 +18,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spellml:325-3418"
+      "defined": "/Card.spellml:325-3501"
     },
     {
       "property": "rank",
@@ -147,7 +144,7 @@
       "of": "Card",
       "group": "suit",
       "datatype": "text",
-      "defined": "/Card.spellml:909-1014"
+      "defined": "/Card.spellml:901-1006"
     },
     {
       "property": "name",
@@ -155,7 +152,7 @@
       "group": "names",
       "groupDescription": "What a person, a test or the console calls it",
       "datatype": "text",
-      "defined": "/Card.spellml:1108-1153"
+      "defined": "/Card.spellml:1092-1137"
     },
     {
       "syntax": "{operator:is_or_is_not} {definite_article} (expression:ace|aces|2|3|4|5|6|7|8|9|10|jack|jacks|queen|queens|king|kings) of (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
@@ -188,14 +185,14 @@
           "spades"
         ]
       },
-      "defined": "/Card.spellml:1158-1190"
+      "defined": "/Card.spellml:1142-1174"
     },
     {
       "property": "state",
       "of": "Card",
       "group": "names",
       "datatype": "text",
-      "defined": "/Card.spellml:1194-1450"
+      "defined": "/Card.spellml:1178-1434"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -210,51 +207,21 @@
       "groupDescription": "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Card.spellml:1615-1780"
+      "defined": "/Card.spellml:1591-1756"
     },
     {
       "property": "picture",
       "of": "Card",
       "group": "drawing",
       "datatype": "text",
-      "defined": "/Card.spellml:1791-2384"
+      "defined": "/Card.spellml:1763-2356"
     },
     {
-      "syntax": "play {thisArg:expression}",
-      "output": "play",
-      "rule": "method_call",
+      "property": "lifted",
       "of": "Card",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Playing a card",
-      "kind": "method",
-      "name": "play a card",
-      "waits": true,
-      "defined": "/Solitaire.spellml:6662-6903"
-    },
-    {
-      "syntax": "put {thisArg:expression} on {callArgs:expression}",
-      "output": "put_on_$pile",
-      "rule": "method_call",
-      "of": "Card",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Playing a card",
-      "kind": "method",
-      "name": "put a card on a pile",
-      "params": [
-        {
-          "name": "pile",
-          "datatype": "Pile"
-        }
-      ],
-      "returns": "choice",
-      "waits": true,
-      "defined": "/Solitaire.spellml:7106-7655"
+      "group": "drawing",
+      "datatype": "choice",
+      "defined": "/Card.spellml:2363-2489"
     },
     {
       "syntax": "count the points for {thisArg:expression} on {callArgs:expression}",
@@ -275,7 +242,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spellml:7739-7884"
+      "defined": "/Solitaire.spellml:8070-8215"
     },
     {
       "syntax": "test card setup",
@@ -284,91 +251,13 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spellml:2527-3409"
-    },
-    {
-      "type": "Joker",
-      "superType": "Card",
-      "defined": "/Jokers.spellml:405-1829"
-    },
-    {
-      "property": "color",
-      "classVariable": "Colors",
-      "of": "Joker",
-      "group": "what's different",
-      "groupDescription": "A joker comes red or black",
-      "enumeration": [
-        "red",
-        "black"
-      ],
-      "defined": "/Jokers.spellml:513-551"
-    },
-    {
-      "syntax": "{operator:is_or_is_not} {definite_article} (expression:red|reds|black|blacks) joker",
-      "output": "is_the_$color_joker",
-      "rule": "quoted_property",
-      "of": "Joker",
-      "group": "what's different",
-      "kind": "method",
-      "name": "\"is the (color) joker\"",
-      "values": {
-        "color": [
-          "red",
-          "black"
-        ]
-      },
-      "staticOf": "Joker",
-      "defined": "/Jokers.spellml:556-585"
-    },
-    {
-      "property": "value",
-      "of": "Joker",
-      "group": "what it changes",
-      "groupDescription": "A card's own, written again for a joker",
-      "datatype": "number",
-      "defined": "/Jokers.spellml:672-733"
-    },
-    {
-      "property": "picture",
-      "of": "Joker",
-      "group": "what it changes",
-      "datatype": "text",
-      "defined": "/Jokers.spellml:748-782"
-    },
-    {
-      "property": "name",
-      "of": "Joker",
-      "group": "what it changes",
-      "datatype": "text",
-      "defined": "/Jokers.spellml:797-834"
-    },
-    {
-      "property": "state",
-      "of": "Joker",
-      "group": "what it changes",
-      "datatype": "text",
-      "defined": "/Jokers.spellml:839-1052"
-    },
-    {
-      "syntax": "test jokers",
-      "output": "test_jokers",
-      "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "jokers",
-      "defined": "/Jokers.spellml:1068-1820"
+      "defined": "/Card.spellml:2614-3496"
     },
     {
       "type": "Deck",
       "superType": "List",
       "itemType": "Card",
-      "defined": "/Deck.spellml:97-1667"
-    },
-    {
-      "property": "jokers",
-      "of": "Deck",
-      "datatype": "choice",
-      "defined": "/Deck.spellml:144-228"
+      "defined": "/Deck.spellml:63-911"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -382,13 +271,13 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/Deck.spellml:233-636"
+      "defined": "/Deck.spellml:110-355"
     },
     {
       "property": "state",
       "of": "Deck",
       "datatype": "text",
-      "defined": "/Deck.spellml:649-855"
+      "defined": "/Deck.spellml:362-568"
     },
     {
       "syntax": "test a new deck",
@@ -397,22 +286,13 @@
       "alias": "statement",
       "kind": "function",
       "name": "a new deck",
-      "defined": "/Deck.spellml:871-1253"
-    },
-    {
-      "syntax": "test two jokers",
-      "output": "test_two_jokers",
-      "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "two jokers",
-      "defined": "/Deck.spellml:1265-1658"
+      "defined": "/Deck.spellml:576-906"
     },
     {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spellml:327-1904"
+      "defined": "/Pile.spellml:327-1876"
     },
     {
       "property": "name",
@@ -441,13 +321,13 @@
       "property": "value",
       "of": "Pile",
       "datatype": "number",
-      "defined": "/Pile.spellml:823-929"
+      "defined": "/Pile.spellml:815-921"
     },
     {
       "property": "state",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spellml:944-1171"
+      "defined": "/Pile.spellml:928-1155"
     },
     {
       "syntax": "test piles",
@@ -456,7 +336,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spellml:1187-1895"
+      "defined": "/Pile.spellml:1163-1871"
     },
     {
       "property": "pile",
@@ -464,58 +344,58 @@
       "group": "A pile of cards",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spellml:2016-2042"
+      "defined": "/Pile.spellml:1978-2004"
     },
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:8923-9448"
+      "defined": "/Solitaire.spellml:9249-9761"
     },
     {
       "property": "layout",
       "of": "StockPile",
-      "defined": "/Solitaire.spellml:9082-9108"
+      "defined": "/Solitaire.spellml:9408-9434"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9464-9740"
+      "defined": "/Solitaire.spellml:9767-10038"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
-      "defined": "/Solitaire.spellml:9573-9599"
+      "defined": "/Solitaire.spellml:9876-9902"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9756-10415"
+      "defined": "/Solitaire.spellml:10044-10694"
     },
     {
       "property": "layout",
       "of": "Foundation",
-      "defined": "/Solitaire.spellml:9871-9897"
+      "defined": "/Solitaire.spellml:10159-10185"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spellml:9902-9930"
+      "defined": "/Solitaire.spellml:10190-10218"
     },
     {
       "type": "Tableau",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:10431-12429"
+      "defined": "/Solitaire.spellml:10700-12694"
     },
     {
       "property": "layout",
       "of": "Tableau",
-      "defined": "/Solitaire.spellml:10546-10573"
+      "defined": "/Solitaire.spellml:10815-10842"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spellml:306-6369"
+      "defined": "/Solitaire.spellml:306-6653"
     },
     {
       "property": "score",
@@ -662,7 +542,7 @@
       "kind": "method",
       "name": "reset the stock",
       "returns": "nothing",
-      "defined": "/Solitaire.spellml:2137-2373"
+      "defined": "/Solitaire.spellml:2131-2367"
     },
     {
       "syntax": "play from the stock (of {thisArg:expression})?",
@@ -678,7 +558,7 @@
       "name": "play from the stock",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spellml:2386-2750"
+      "defined": "/Solitaire.spellml:2374-2738"
     },
     {
       "syntax": "deal the cards (of {thisArg:expression})?",
@@ -694,7 +574,7 @@
       "name": "deal the cards",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spellml:2763-3420"
+      "defined": "/Solitaire.spellml:2916-3573"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -708,7 +588,23 @@
       "group": "game",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Solitaire.spellml:5508-6360"
+      "defined": "/Solitaire.spellml:5786-6648"
+    },
+    {
+      "syntax": "turn a stock card (of {thisArg:expression})?",
+      "output": "turn_a_stock_card",
+      "rule": "method_call",
+      "of": "Solitaire",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "dealing",
+      "kind": "method",
+      "name": "turn a stock card",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/Solitaire.spellml:2745-2909"
     },
     {
       "syntax": "start a new game (of {thisArg:expression})?",
@@ -720,13 +616,13 @@
         "expression"
       ],
       "group": "game",
-      "groupDescription": "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three",
+      "groupDescription": "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three",
       "kind": "method",
       "name": "start a new game",
       "returns": "nothing",
       "waits": true,
       "title": "Restart",
-      "defined": "/Solitaire.spellml:3590-3728"
+      "defined": "/Solitaire.spellml:3728-3863"
     },
     {
       "syntax": "auto play (of {thisArg:expression})?",
@@ -743,7 +639,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Auto play",
-      "defined": "/Solitaire.spellml:3741-4871"
+      "defined": "/Solitaire.spellml:3870-4989"
     },
     {
       "syntax": "cheat {thisArg:expression}?",
@@ -760,7 +656,44 @@
       "returns": "nothing",
       "waits": true,
       "title": "Cheat",
-      "defined": "/Solitaire.spellml:4884-5374"
+      "defined": "/Solitaire.spellml:4996-5640"
+    },
+    {
+      "syntax": "play {thisArg:expression}",
+      "output": "play",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing a card",
+      "kind": "method",
+      "name": "play a card",
+      "waits": true,
+      "defined": "/Solitaire.spellml:6937-7206"
+    },
+    {
+      "syntax": "put {thisArg:expression} on {callArgs:expression}",
+      "output": "put_on_$pile",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing a card",
+      "kind": "method",
+      "name": "put a card on a pile",
+      "params": [
+        {
+          "name": "pile",
+          "datatype": "Pile"
+        }
+      ],
+      "returns": "choice",
+      "waits": true,
+      "defined": "/Solitaire.spellml:7409-7986"
     },
     {
       "syntax": "test the moves",
@@ -769,7 +702,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spellml:10914-12420"
+      "defined": "/Solitaire.spellml:11183-12689"
     }
   ],
   "codeLines": [
@@ -788,67 +721,59 @@
     70,
     77,
     85,
-    110,
-    124,
-    140,
-    179,
-    226,
-    229,
-    235,
-    239,
-    244,
-    248,
-    253,
-    263,
-    302,
+    94,
+    108,
+    172,
+    216,
+    220,
+    225,
+    232,
+    255,
+    260,
+    266,
+    273,
+    279,
+    285,
     306,
-    312,
-    321,
-    328,
-    344,
-    367,
-    372,
-    378,
-    385,
-    391,
-    397,
-    418,
-    454,
+    342,
+    352,
+    355,
+    379,
+    382,
+    398,
+    401,
+    405,
+    428,
+    431,
+    449,
+    452,
+    458,
     464,
-    467,
-    491,
-    494,
-    510,
-    513,
+    482,
+    487,
+    492,
+    497,
+    502,
+    507,
+    512,
     517,
-    540,
-    543,
-    561,
-    564,
-    570,
-    576,
-    594,
-    599,
-    604,
-    609,
-    614,
-    619,
-    624,
-    629,
-    634,
-    639,
-    644,
-    649,
-    654,
-    659,
-    665,
-    670,
-    680,
-    690,
-    712,
-    801,
-    804,
-    807,
-    830
+    522,
+    527,
+    532,
+    537,
+    542,
+    547,
+    553,
+    558,
+    568,
+    578,
+    600,
+    697,
+    700,
+    703,
+    706,
+    721,
+    727,
+    746
   ]
 }

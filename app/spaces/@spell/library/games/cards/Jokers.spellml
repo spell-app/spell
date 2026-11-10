@@ -1,30 +1,30 @@
 # Jokers
-// A joker is a card, with what makes it a joker on top:  a subclass of `card`.
-// - It has no rank or suit, so it changes what those decided:  its value, its picture, its name and its short name.
-// - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
-// - A deck holds its two only when it's made `with jokers`.  Solitaire's own game plays without them.
+A joker is a card, with what makes it a joker on top:  a subclass of `card`.
+- It has no rank or suit, so it changes what those decided:  its value, its picture, its name and its short name.
+- Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
+- A deck holds its two only when it's made `with jokers`.
 
-a "joker" is a card:
-	// A joker comes red or black
-	- group "what's different"
-	- its "color" is one of red or black
-	- it "is the (color) joker"
+<spell-view "joker" template="card">
+	<group "what's different" description="A joker comes red or black"/>
+	<property "color" one-of="red or black"/>
+	<alias "is the (color) joker"/>
 
-	// A card's own, written again for a joker
-	- group "what it changes"
-	- its "value" is:
+	<group "what it changes" description="A card's own, written again for a joker"/>
+	<property "value">
 		53 if it is the red joker
 		54 otherwise
-	- its "picture" is:
+	</property>
+	<property "picture">
 		return "🃟"
-	- its "name" is its color + " joker"
-	// Its short name:  *R↑ is the red joker, face up
-	- its "state" is:
+	</property>
+	<property "name">its color + " joker"</>
+	<property "state" description="Its short name:  *R↑ is the red joker, face up">
 		letter is (the first letter of its color) as upper case
 		arrow is "↑" if it is face up otherwise "↓"
 		return "*" + letter + arrow
+	</property>
 
-	- to test jokers:
+	<test "jokers">
 		get a new joker whose color is red and direction is up
 		it is a card should be yes
 		it is a joker should be yes
@@ -48,3 +48,5 @@ a "joker" is a card:
 		the card is a joker should be no
 		the card is not a joker should be yes
 		the card is the red joker should be no
+	</test>
+</spell-view>

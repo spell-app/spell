@@ -9,7 +9,7 @@ a "flip tile" is a view where:
 	- to flip it:
 		- shortcut meta+F
 		- enabled when it is showing up
-		- undone as "Flip Tile"
+		- undoable as "Flip Tile"
 		if it is showing up
 			set its side to down
 		otherwise

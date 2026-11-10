@@ -2177,7 +2177,7 @@ classes.addRule(DefineMenu, {
           input: [
             "a game is an app where:",
             "\t- to deal:",
-            '\t\t- undone as "Deal"',
+            '\t\t- undoable as "Deal"',
             "\t\tnotify 1",
             "\t- to turn the top card over:",
             "\t\tnotify 2",

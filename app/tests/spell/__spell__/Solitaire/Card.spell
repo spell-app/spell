@@ -50,6 +50,8 @@ a "card" is a two sided view:
 		if it is a heart
 			return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+	// Pulled up out of its pile, over the piles above it, as the cheat does -- styles.css
+	- its "lifted" is yes or no
 	- to draw its front:
 		<ui-text color={its color}>{its picture}</ui-text>
 	- to draw its back:

@@ -12,7 +12,7 @@ una "receta" es una vista:
 			<ui-button class="remove" onClick={quitar eso}>Quitar</ui-button>
 		</ui-form>
 	- para quitar eso:
-		- se deshace como "Quitar receta"
+		- deshacible como "Quitar receta"
 		quitar eso de las recetas
 
 caja de recetas es una aplicación:

@@ -57,6 +57,10 @@ solitaire is an app:
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
 		add it to the discards
+	// A click on the empty stock:  one step to undo, where the deal's own turn isn't
+	- to turn a stock card:
+		- undoable as "Turn Card"
+		play from the stock
 	// Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
 	- to deal the cards:
 		for card in the deck
@@ -76,12 +80,12 @@ solitaire is an app:
 		play from the stock
 
 
-	// Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three
+	// Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
 	- group "game"
 	- to start a new game:
 		- titled "Restart"
-		- icon "redo"
 		- shortcut N
+		- undoable
 		clear the score
 		clear the moves
 		clear the hint
@@ -89,8 +93,8 @@ solitaire is an app:
 	// Play every card that can go somewhere, until none can
 	- to auto play:
 		- titled "Auto play"
-		- icon "fast forward"
 		- shortcut A
+		- undoable
 		set anything changed to no
 		if the discards is not empty
 			set test card to the last card of the discards
@@ -119,23 +123,27 @@ solitaire is an app:
 	// Turn up a face-down card from a tableau, at random, onto the discards
 	- to cheat:
 		- titled "Cheat"
-		- icon "eye"
 		- shortcut C
+		- undoable
 		set remaining piles to piles in the tableaus where it is not empty and its first card is face down
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
 		set the card to a random card in (the cards in the pile where the card is face down)
+		// up out of its pile, then over, then down onto the discards
+		set the lifted of the card to yes
+		pause for 300 msec
 		turn the card face up
 		pause for 30 ticks
+		set the lifted of the card to no
 		add the card to the discards
-	- its "game menu" is a menu of "start a new game" , "-" , "auto play" and "cheat"
+	- its "game menu" is a menu of "auto play" , "cheat" , "start a new game" , "undo" and "redo"
 
 	// Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu
 	- to draw it:
 		<ui-container>
-			// the game menu's actions, as buttons:  each its icon and title, and its key;  just their icons when the window's narrow
-			<ui-toolbar menu="game menu" aria-label="Game" shrinkable>
-				<ui-text slot="title" size="large">Klondike Solitaire</ui-text>
+			// the game menu's actions, as buttons:  each its title and its key;  undo and redo just their icons
+			<ui-toolbar class="GameBar" menu="game menu" aria-label="Game" shrinkable>
+				<ui-text class="GameTitle" slot="title" size="large">Spell Solitaire</ui-text>
 				<ui-text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</ui-text>
 			</ui-toolbar>
 			<ui-grid class="Board" columns="7" context-menu="game menu">
@@ -162,6 +170,7 @@ solitaire is an app:
 // the card, and every card on it, onto the first pile that takes it;  it says whether it moved
 // - the stock's card turns over onto the discards instead
 to play a card
+	- undoable as "Play Card"
 	if the card's pile is the solitaire's stock
 		play from the stock
 		return
@@ -172,6 +181,7 @@ to play a card
 // the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 // - the pile it left turns its new last card up;  the move counts, and scores
 to put a card on a pile
+	- undoable as "Move Card"
 	set start pile to the card's pile
 	if start pile cannot give up the card return no
 	if pile cannot take the card return no
@@ -224,7 +234,7 @@ a "stock pile" is a pile:
 		<ui-text part="placeholder">🂠</ui-text>
 	// Empty:  a click turns the discards back over;  a click on one of its cards is the card's
 	- on click:
-		play from the stock
+		turn a stock card
 
 // Where the stock's cards go as they're turned over
 a "discard pile" is a pile:
@@ -288,4 +298,4 @@ a "tableau" is a pile:
 		add the queen to the column
 		the foundation can take the queen should be no
 
-start a new game
+deal the cards

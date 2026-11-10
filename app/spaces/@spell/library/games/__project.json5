@@ -1,0 +1,31 @@
+{
+  "title": "Games",
+  "description": "Pieces to build games on.  In `cards/`, a standard deck of playing cards:  cards that turn over and drag, jokers, a deck with or without them, and piles that take dropped cards, each one its own element, with the styles that draw them",
+  "version": "1.0.0",
+  "imports": [
+    {
+      "path": "/cards/Card.spellml",
+      "active": true
+    },
+    {
+      "path": "/cards/Card.editor.spellml",
+      "active": true
+    },
+    {
+      "path": "/cards/Jokers.spellml",
+      "active": true
+    },
+    {
+      "path": "/cards/Deck.spellml",
+      "active": true
+    },
+    {
+      "path": "/cards/Pile.spellml",
+      "active": true
+    },
+    {
+      "path": "/cards/styles.css",
+      "active": true
+    }
+  ]
+}

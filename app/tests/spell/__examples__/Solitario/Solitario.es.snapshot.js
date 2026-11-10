@@ -16,21 +16,13 @@ export const words = {
       esElRangoDePalo: "es el (rango) de (palo)",
       estado: "estado",
       imagen: "imagen",
-      jugar: "jugar una carta",
-      ponerEnPila: "poner una carta en una pila",
+      levantada: "levantada",
       contarLosPuntosDeCartaEnPila: "contar los puntos de una carta en una pila",
-      pila: "pila"
-    },
-    Comodín: {
-      color: "color",
-      esElComodínColor: "es el comodín (color)",
-      valor: "valor",
-      imagen: "imagen",
-      nombre: "nombre",
-      estado: "estado"
+      pila: "pila",
+      jugar: "jugar una carta",
+      ponerEnPila: "poner una carta en una pila"
     },
     Mazo: {
-      comodines: "comodines",
       create: "crearlo",
       estado: "estado"
     },
@@ -76,6 +68,7 @@ export const words = {
       rehacerLaReserva: "rehacer la reserva",
       robarDeLaReserva: "robar de la reserva",
       repartirLasCartas: "repartir las cartas",
+      voltearLaReserva: "voltear la reserva",
       empezarElJuego: "empezar el juego",
       jugarSolo: "jugar solo",
       hacerTrampa: "hacer trampa"
@@ -169,18 +162,14 @@ export const words = {
       { name: "rango", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "valor", "esUnaFigura", "esUnaCartaNumérica"] },
       { name: "palo", members: ["palo", "color", "símbolo"] },
       { name: "nombres", description: "Cómo la llama una persona, una prueba o la consola", members: ["nombre", "esElRangoDePalo", "estado"] },
-      { name: "dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen"] },
-      { name: "Jugar una carta", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
+      { name: "dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen", "levantada"] },
+      { name: "Jugar una carta", members: ["contarLosPuntosDeCartaEnPila", "jugar", "ponerEnPila"] },
       { name: "Una pila de cartas", members: ["pila"] }
-    ],
-    Comodín: [
-      { name: "lo que es distinto", description: "Un comodín es rojo o negro", members: ["color", "esElComodínColor"] },
-      { name: "lo que cambia", description: "Lo de una carta, escrito otra vez para un comodín", members: ["valor", "imagen", "nombre", "estado"] }
     ],
     Solitario: [
       { name: "pilas", description: "Una de cada, hecha con el solitario", members: ["reserva", "descartes", "tréboles", "diamantes", "corazones", "espadas", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "create"] },
-      { name: "repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas"] },
-      { name: "juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título y su icono una vez, para los tres", members: ["empezarElJuego", "jugarSolo", "hacerTrampa"] }
+      { name: "repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas", "voltearLaReserva"] },
+      { name: "juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres", members: ["empezarElJuego", "jugarSolo", "hacerTrampa"] }
     ]
   }
 }

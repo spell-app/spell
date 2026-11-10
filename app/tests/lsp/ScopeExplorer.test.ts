@@ -287,7 +287,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 
   beforeAll(async () => {
     installDiskFetch()
-    lib = makeProject("lib", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"])
+    lib = makeProject("lib", ["Card.spellml", "Deck.spellml", "Pile.spellml"])
     await lib.compile()
     app = makeProject("app", ["Solitaire.spellml"], [{ path: lib.projectId, active: true }])
     await app.parse()
@@ -326,7 +326,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   })
 
   test("a compiled-only import -- no sources:  our types inherit its methods from its declarations", async () => {
-    const cards = makeProject("cards", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"])
+    const cards = makeProject("cards", ["Card.spellml", "Deck.spellml", "Pile.spellml"])
     await cards.compile()
     const game = makeProject("game", [], [{ path: cards.projectId, active: true }], {
       "Wildcard.spell": "a wildcard is a card\n"

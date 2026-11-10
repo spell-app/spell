@@ -7,7 +7,7 @@ import { shortcutMatches } from "spell/parser/core/acting"
  * Running actions (`acting.ts`, epic `elemental-spell` P10):  the one way every key, click and menu item runs one,
  * shortcuts up the focus chain, menus of actions, and the app's own undo and redo.
  * - The classes are what spell compiles a small card game to:  each action described after its class
- *   (`- to turn it over:` with `- shortcut meta+T`, `- enabled when ...`, `- undone as "Turn Card"`),
+ *   (`- to turn it over:` with `- shortcut meta+T`, `- enabled when ...`, `- undoable as "Turn Card"`),
  *   the game's menu as `- its "game menu" is a menu of "deal", "-", "undo" and "redo"`, its menu bar as
  *   `- its menu bar is "game menu"`.
  */
@@ -85,7 +85,7 @@ describe("core.runAction()", () => {
       way: "click",
       signal: expect.any(AbortSignal)
     })
-    // `undone as "Turn Card"`:  one step, named so (C11)
+    // `undoable as "Turn Card"`:  one step, named so (C11)
     expect(game.undoTitle).toBe("Undo Turn Card")
     expect(core.runAction(game, "undo", "menu")).toBe(true)
     expect(cards[0]!.faceUp).toBe(false)

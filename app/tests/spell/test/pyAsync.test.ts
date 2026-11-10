@@ -38,6 +38,6 @@ describe("Python on asyncio", () => {
 
   test("the top level runs what waits with asyncio.run()", () => {
     expect(cards).toMatch(/^from __future__ import annotations\n\nimport asyncio\n/)
-    expect(cards).toContain("asyncio.run(solitaire.start_a_new_game())")
+    expect(cards).toContain("asyncio.run(solitaire.deal_the_cards())")
   })
 })

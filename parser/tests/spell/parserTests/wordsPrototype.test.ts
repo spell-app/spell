@@ -505,10 +505,10 @@ const LINES: Line[] = [
   },
   {
     en: `- to remove it:
-		- undone as "Remove Recipe"
+		- undoable as "Remove Recipe"
 		remove it from the recipes`,
     es: `- para quitar eso:
-		- se deshace como "Quitar receta"
+		- deshacible como "Quitar receta"
 		quitar eso de las recetas`,
     at: "recipe bullet",
     today: "compiles",
@@ -707,7 +707,7 @@ a "recipe" is a view:
 			<ui-button onClick={remove it}>Remove</ui-button>
 		</ui-form>
 	- to remove it:
-		- undone as "Remove Recipe"
+		- undoable as "Remove Recipe"
 		remove it from the recipes
 
 an "ingredient" is a thing:
@@ -755,7 +755,7 @@ una "receta" es una vista:
 			<ui-button onClick={quitar eso}>Quitar</ui-button>
 		</ui-form>
 	- para quitar eso:
-		- se deshace como "Quitar receta"
+		- deshacible como "Quitar receta"
 		quitar eso de las recetas
 
 un "ingrediente" es una cosa:

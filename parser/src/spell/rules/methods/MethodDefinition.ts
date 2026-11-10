@@ -703,6 +703,8 @@ export class MethodDefinition<
         description.title_from = { member: getter }
       } else description.title = title
     }
+    // `- undoable`:  its undo goes by its title;  one with a fill-in changes, so by its words
+    if (details.undoable) description.undone_as = description.title as string
     statements.push(
       new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description, title })
     )

@@ -1641,6 +1641,10 @@
     :host(:state(in-menu)) > .item > .title {
       min-width: 0;
       max-width: var(--_menu-title-max, none);
+      /* an item's line is exactly its font's size:  clipped to that, a g or a y loses its tail.
+         Room for it, which takes up no room in the row */
+      padding-block: 0.15em;
+      margin-block: -0.15em;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

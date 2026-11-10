@@ -5874,7 +5874,7 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
-              "example": "a game is an app where:\n\t- to deal:\n\t\t- undone as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
+              "example": "a game is an app where:\n\t- to deal:\n\t\t- undoable as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
               "outputs": {
                 "js": {
                   "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\ncore.describeAction(Game, \"deal\", { title: \"deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
@@ -9718,12 +9718,12 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 29,
+          "line": 30,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
               "syntax": "shortcut {keys:shortcut_keys}",
-              "example": "a card is a thing where:\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\t- shortcut meta+T\n\t\t- shortcut F2\n\t\t- enabled when its direction is down\n\t\t- selected when its direction is up\n\t\t- undone as \"Turn Card\"\n\t\t- icon \"rotate\"\n\t\tset its direction to up",
+              "example": "a card is a thing where:\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\t- shortcut meta+T\n\t\t- shortcut F2\n\t\t- enabled when its direction is down\n\t\t- selected when its direction is up\n\t\t- undoable as \"Turn Card\"\n\t\t- icon \"rotate\"\n\t\tset its direction to up",
               "outputs": {
                 "js": {
                   "code": "export class Card extends Thing {\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"turn it over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
@@ -9758,7 +9758,10 @@
               "syntax": "selected when {selected:expression}"
             },
             {
-              "syntax": "undone as {undoneAs:text}"
+              "syntax": "(undoable:undoable)"
+            },
+            {
+              "syntax": "undoable as {undoneAs:text}"
             },
             {
               "syntax": "icon {icon:text}"

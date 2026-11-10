@@ -198,7 +198,7 @@ describe("a spellx page that draws its body", () => {
           "\t## Two of them",
           "\tEach counts on its own:",
           '\t<ui-text color="grey">Click either one.</ui-text>',
-          "</spell-page>"
+          "</>"
         ].join("\n")
       )
       expect(compiled(back)).toEqual(compiled(COUNTER))

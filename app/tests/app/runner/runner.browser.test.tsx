@@ -810,10 +810,10 @@ describe("compiled spell draws with Solid", () => {
     await waitFor(() => discards().children.length === 2)
     expect(consoleText()).toContain("test the moves")
 
-    // Solitaire's own file, which says `start a new game`:  a new score to start from
+    // Solitaire's own file, which says `deal the cards`:  a new score to start from
     const edited = solitaire.compiled!.replace(
-      "core.holdWhile(() => solitaire.startANewGame())\n",
-      "solitaire.score = 1\ncore.holdWhile(() => solitaire.startANewGame())\n"
+      "core.holdWhile(() => solitaire.dealTheCards())\n",
+      "solitaire.score = 1\ncore.holdWhile(() => solitaire.dealTheCards())\n"
     )
     expect(edited).not.toBe(solitaire.compiled)
     setSource({ ...solitaire, compiled: edited })

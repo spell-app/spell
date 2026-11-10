@@ -173,7 +173,7 @@ export class SpellxWriter {
       if (chunk.length) {
         this.out.push(`${indent}<${this.words.prefix}>`)
         for (const line of chunk) this.out.push(line.trim() ? `\t${line}` : "")
-        this.out.push(`${indent}</${this.words.prefix}>`)
+        this.out.push(`${indent}</>`)
       }
       this.out.push(...tail)
       chunk = []
@@ -270,7 +270,7 @@ export class SpellxWriter {
         this.isInDrawnPage = drawsBody
         this.writeBlock(body.tokens, 1)
         this.isInDrawnPage = false
-        this.out.push(`</${tagWord}>`)
+        this.out.push(`</>`)
         // written in place:  hand back nothing more
         return this.out.splice(start)
       }
@@ -544,7 +544,7 @@ export class SpellxWriter {
 
   /**
    * `- its "suit" is one of clubs, hearts` and its aliases => `<property "suit" one-of="clubs, hearts" alias="..." />`;
-   * - `- its "symbol" is:` and its lines => `<property "symbol">` ... `</property>`
+   * - `- its "symbol" is:` and its lines => `<property "symbol">` ... `</>`
    * - `- its "moves" is 0` => `<property "moves">0</>`
    * - `- its "count" is a number starting at 0` => `<property "count" type="number">0</>`
    */
@@ -700,10 +700,11 @@ export class SpellxWriter {
   private detailOf(line: P.LineToken): string | undefined {
     const statement = this.statements.get(line.start)
     if (statement?.rule.name !== "action_detail") return undefined
+    if (groupText(statement, "undoable") !== undefined) return keyFor(this.words.attributes, "undoable")
     for (const [group, attribute] of DETAIL_GROUPS) {
       const value = groupText(statement, group)
       if (value === undefined) continue
-      const plain = attribute === "undone-as" || attribute === "icon" ? unquote(value) : value
+      const plain = attribute === "undoable" || attribute === "icon" ? unquote(value) : value
       if (!plain || plain.includes('"')) return undefined
       return this.attribute(attribute, plain)
     }
@@ -740,7 +741,7 @@ export class SpellxWriter {
 
   /**
    * A member's tag:  `head` and its `attributes`, then its body on its own line (`inline`), or its body's lines
-   * (`body`), or nothing (`/>`);  closed by `closer`, else `</word>` for a body of lines and `</>` for one on its line.
+   * (`body`), or nothing (`/>`);  closed by `</>` (Owen, 2026-11-09:  every closer `</>`), or by `closer`.
    */
   private tag(
     indent: string,
@@ -765,7 +766,7 @@ export class SpellxWriter {
           const from = this.lineOf(firstStart(item))
           return this.sourceOf(item).map((line, index) => (comments.has(from + index) ? htmlComment(line) : line))
         })
-        return [`${open}>`, ...written, `${indent}${closer ?? `</${word}>`}`]
+        return [`${open}>`, ...written, `${indent}${closer ?? "</>"}`]
       }
     }
   }
@@ -872,7 +873,7 @@ const DETAIL_GROUPS: Array<[string, string]> = [
   ["keys", "shortcut"],
   ["enabled", "enabled-when"],
   ["selected", "selected-when"],
-  ["undoneAs", "undone-as"],
+  ["undoneAs", "undoable"],
   ["icon", "icon"]
 ]
 

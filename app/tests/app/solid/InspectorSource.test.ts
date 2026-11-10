@@ -64,7 +64,7 @@ describe("eventsDeclared()", () => {
 
   test("a tag's event:  `<on click>`, its words before its attributes, its code between", () => {
     expect(eventsInSource(["StockPile"], SOLITAIRE).filter((row) => row.kind === "event")).toEqual([
-      { kind: "event", words: "on click", code: "play from the stock" }
+      { kind: "event", words: "on click", code: "turn a stock card" }
     ])
   })
 

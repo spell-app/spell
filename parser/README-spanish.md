@@ -54,13 +54,11 @@ spell test @spell/examples/Solitario
 ```text
 ✓ Compiling @spell/examples/Solitario
 ✓ test la preparación de la carta  (19 checks)
-✓ test los comodines  (15 checks)
-✓ test la creación del mazo  (6 checks)
-✓ test el mazo con comodines  (5 checks)
+✓ test la creación del mazo  (5 checks)
 ✓ test las pilas  (8 checks)
 ✓ test los movimientos  (11 checks)
 
-6 passed
+4 passed
 ```
 
 </details>

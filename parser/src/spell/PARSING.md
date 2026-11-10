@@ -993,7 +993,7 @@ A kind that says so is saved in a file of its own.
       `the total`, `set the total`, a bare `add the input` are `it.total`, `it.addTheInput()`.
       Its scope is a `MethodScope` whose `thingName` is `it`;  the rules that write the thing read it while parsing.
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
-    `- undone as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
+    `- undoable as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,

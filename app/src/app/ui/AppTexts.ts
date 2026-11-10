@@ -116,6 +116,23 @@ export class AppTexts extends Observable {
   }
 
   /**
+   * Speak `lang` from now on, in place of the page's language:
+   * for a page that shows one thing in another language, e.g. `<spell-editor>` under an element with a `lang`.
+   * - Every reader redraws in it.
+   * - Called again before it has loaded:  the last call wins.
+   * - SIDE EFFECT:  page-wide, Spell UI's texts switch too (`UI.i18n.locale`).
+   * - NEVER throws:  a language that fails to load is logged, and the texts stay as they were.
+   */
+  async useLanguage(lang: string): Promise<void> {
+    if (typeof customElements === "undefined") return
+    this.askedLanguage = lang
+    await this.load()
+    await this.loadLanguage(lang).catch((error: unknown) =>
+      console.error(`AppTexts.useLanguage():  the editor's texts in "${lang}" didn't load`, error)
+    )
+  }
+
+  /**
    * Give the page a `lang` when it names none:  the browser's language.
    * - The editor app's entry calls it before anything draws,
    *   so Spell UI's `<ui-root>` and screen readers agree with the texts.
@@ -130,9 +147,11 @@ export class AppTexts extends Observable {
   // ## Loading
   ////////////////
 
-  /** `load()`'s work, which may throw. */
-  private async loadLanguage(): Promise<void> {
-    const lang = pageLanguage()
+  /** Language last asked for with `useLanguage()`, if any. */
+  private askedLanguage: string | undefined
+
+  /** The work of `load()` and `useLanguage()`, which may throw. */
+  private async loadLanguage(lang = pageLanguage()): Promise<void> {
     const code = languageOf(lang)
     const loadPack = Object.hasOwn(LANGUAGES, code) ? LANGUAGES[code] : undefined
     const [{ UI }, { RootLoader }] = await Promise.all([import("spell/ui/core"), import("spell/ui/components/ui-root")])
@@ -145,6 +164,10 @@ export class AppTexts extends Observable {
       for (const tag of pack.tags) ui.i18n.register(pack.lang, tag.texts, tag.tag)
     }
     this.i18n = ui.i18n
+    // another language was asked for while this one loaded:  that call says what we speak
+    if (this.askedLanguage && this.askedLanguage !== lang) return
+    // `RootLoader.useLanguage()` sets the locale only the first time, and never for English
+    if (this.askedLanguage) ui.i18n.locale = lang
     this.lang = loadPack ? code : ENGLISH
   }
 }

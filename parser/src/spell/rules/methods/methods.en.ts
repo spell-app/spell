@@ -1119,7 +1119,7 @@ methods.addRule(ActionDetail, {
             "\t\t- shortcut F2",
             "\t\t- enabled when its direction is down",
             "\t\t- selected when its direction is up",
-            '\t\t- undone as "Turn Card"',
+            '\t\t- undoable as "Turn Card"',
             '\t\t- icon "rotate"',
             "\t\tset its direction to up"
           ],
@@ -1180,7 +1180,8 @@ methods.addRule(ActionDetail, {
 })
 methods.addRule(ActionDetail, { syntax: "enabled when {enabled:expression}" })
 methods.addRule(ActionDetail, { syntax: "selected when {selected:expression}" })
-methods.addRule(ActionDetail, { syntax: "undone as {undoneAs:text}" })
+methods.addRule(ActionDetail, { syntax: "(undoable:undoable)" })
+methods.addRule(ActionDetail, { syntax: "undoable as {undoneAs:text}" })
 methods.addRule(ActionDetail, { syntax: "icon {icon:text}" })
 methods.addRule(ActionDetail, { syntax: "(replacesLast:a new one replaces the last one)" })
 methods.addRule(ActionDetail, {

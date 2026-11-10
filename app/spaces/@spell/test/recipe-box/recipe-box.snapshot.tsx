@@ -65,7 +65,7 @@ export class RecipeBox extends App {
   @prop({ type: "text" })
   accessor draft!: string
 
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 660, end: 746 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 662, end: 748 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search)), (item: Recipe) => item.title)
   }, () => [this.search]) }

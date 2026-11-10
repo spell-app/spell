@@ -49,7 +49,6 @@ describe("projectChoices()", () => {
     expect(choices.slice(1).map((it) => it.value)).toEqual([
       "@spell/examples/Solitaire/Card.spellml",
       "@spell/examples/Solitaire/Deck.spellml",
-      "@spell/examples/Solitaire/Jokers.spellml",
       "@spell/examples/Solitaire/Pile.spellml",
       "@spell/examples/Solitaire/Solitaire.spellml"
     ])

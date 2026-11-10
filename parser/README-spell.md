@@ -397,11 +397,11 @@ Its first line is how you call it, with each blank's type in brackets:
   	- to turn it over:
   		- shortcut meta+T
   		- enabled when it is face down
-  		- undone as "Turn Card"
+  		- undoable as "Turn Card"
   		set its direction to up
   ```
 
-  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undoable`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
   - `- titled "Compile and Run"` is its title in menus, key tooltips and the Inspector, where its words aren't it;
     a fill-in follows the program, `- titled "Duplicate [the project name]…"`.
@@ -412,7 +412,7 @@ Its first line is how you call it, with each blank's type in brackets:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.
   - Its shortcut runs it while it's enabled, from the focused thing up to the app;
-    run any way, an action `undone as "Turn Card"` is one undo step, and the app's undo then reads `Undo Turn Card`.
+    run any way, an action `undoable as "Turn Card"` is one undo step, and the app's undo then reads `Undo Turn Card`.
   - A template's MENU lists its actions, and the app's own `undo` and `redo`, `"-"` a line between groups:
 
     ```spell

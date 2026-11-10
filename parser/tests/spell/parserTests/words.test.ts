@@ -27,7 +27,7 @@ const RECIPE = `a recipe is a thing:
 	- its "minutes" is a number
 	- its "ingredients" is a list of ingredients
 	- to throw out:
-		- undone as "Remove Recipe"
+		- undoable as "Remove Recipe"
 		remove it from the recipes`
 const INGREDIENT = `an ingredient is a thing:
 	- its "name" is text

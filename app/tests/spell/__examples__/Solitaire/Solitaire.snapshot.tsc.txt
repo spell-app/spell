@@ -1,1 +1,0 @@
-289:14 TS2417 Class static side 'typeof Joker' incorrectly extends base class static side 'typeof Card'.

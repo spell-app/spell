@@ -98,7 +98,7 @@ describe("incremental parsing ~== full parse", () => {
   })
 
   test("editing a `belongs to one` line:  its owner member follows -- `the pile of a card` comes and goes", () => {
-    const cards = files.filter((it) => ["/Card.spell", "/Jokers.spell", "/Deck.spell"].includes(it.path))
+    const cards = files.filter((it) => ["/Card.spell", "/Deck.spell"].includes(it.path))
     const membership = "a pile is a list of cards\na card belongs to one pile\na tableau is a pile"
     const reader = [
       "set card to a new card",
@@ -126,7 +126,7 @@ describe("incremental parsing ~== full parse", () => {
       membership
     ]
     for (const contents of edits) {
-      pileFiles.splice(3, 1, { path: "/Pile.spell", contents })
+      pileFiles.splice(2, 1, { path: "/Pile.spell", contents })
       project.update("/Pile.spell", contents)
       expect(summarizeIncremental(project), contents).toEqual(summarize(parseSpellProject(pileFiles)))
     }

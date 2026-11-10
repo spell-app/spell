@@ -10,6 +10,7 @@ import type { monaco } from "spell/app/app/ui/monaco"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the `spell/app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
 import type { SpellCompiled } from "spell/app/app/runner/runner.types"
+import type { StaticFiles } from "spell/app/app/static/StaticFiles"
 import { adoptShadowStyles } from "spell/app/app/runner/shadowStyles"
 import { wordsOfLanguages } from "spell/app/app/runner/words"
 import { SpellEditorPane, type SpellEditorStatus, type MonacoModule } from "spell/app/app/spellEditor/SpellEditorPane"
@@ -50,6 +51,14 @@ export class DOMSpellEditorElement extends E.DOMElement {
   /** Save the files edited since they were last saved.  Resolves once they are. */
   save(): Promise<void> {
     return this.editor?.save() ?? Promise.resolve()
+  }
+
+  /**
+   * A `static` editor only:  forget the edits to its project, read its files as the site wrote them, and compile.
+   * Resolves once that's done.  See `SpellEditor.reset()`.
+   */
+  reset(): Promise<void> {
+    return this.editor?.reset() ?? Promise.resolve()
   }
 
   /** Its component. */
@@ -159,6 +168,27 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
     if (!dirty.length) return
     await Promise.all(dirty.map(async (file) => file.save(undefined)))
     this.setStatus({ state: "saved" })
+  }
+
+  /**
+   * Forget the edits to our project, read its files as the site wrote them, show them, and compile.
+   * - An app that runs what we compile takes it as any edit:  call its `restart()` after, to start it afresh.
+   * - throws a `TypeError` unless we're `static`:  a server's project has no copy to go back to.
+   */
+  async reset(): Promise<void> {
+    if (!this.static) throw new TypeError("<spell-editor>.reset():  only a `static` editor can;  add `static`")
+    const project = this.openedProject
+    if (!project) return
+    this.clearCompileSoon()
+    await (await installStaticFiles()).reset(project.projectId)
+    await Promise.all(
+      project.spellFiles.map(async (file) => {
+        await file.reload()
+        await project.updateText(file, file.contents ?? "")
+      })
+    )
+    this.redraw()
+    await this.compile()
   }
 
   /** Pending `compileSoon()`, if any. */
@@ -296,6 +326,9 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
       this.setStatus({ state: "failed", message: this.textFor("noProject") })
       return
     }
+    // our words in the language around us:  a page can show one project in Spanish on an English page
+    const lang = this.domElement.closest("[lang]")?.getAttribute("lang")
+    if (lang) void appTexts.useLanguage(lang)
     this.setStatus({ state: "loading" })
     let project: SP.SpellProject
     try {
@@ -543,7 +576,7 @@ async function loadSpellUINames(project: SP.SpellProject): Promise<void> {
 const SPELL_UI_PACK = "spell-ui"
 
 /** The page's `StaticFiles` for `static` editors, once installed. */
-let staticFiles: Promise<unknown> | undefined
+let staticFiles: Promise<StaticFiles> | undefined
 
 /**
  * Read every project file from a static site's plain files from now on, and keep edits in this page's memory:
@@ -552,7 +585,7 @@ let staticFiles: Promise<unknown> | undefined
  * - Loaded only then:  an editor on the page server never downloads it.
  * - SIDE EFFECT:  every `LoadableFile` on the page reads through it (`StaticFiles.install()`).
  */
-function installStaticFiles(): Promise<unknown> {
+function installStaticFiles(): Promise<StaticFiles> {
   staticFiles ??= import("spell/app/app/static/StaticFiles").then(({ StaticFiles }) =>
     new StaticFiles({ place: "memory", oldStorage: null }).install()
   )

@@ -59,24 +59,27 @@ export class App extends View {
     return core.RUNTIME.history.redo()
   }
 
-  /** Is there a step to undo?  Live:  a menu item drawn from it greys out by itself. */
+  /**
+   * Is there a step to undo?  Live:  a menu item drawn from it greys out by itself.
+   * - A page drawing a program that runs elsewhere (Python's) has no history here:  nothing to undo.
+   */
   get canUndo(): boolean {
-    return core.RUNTIME.history.canUndo
+    return core.RUNTIME?.history.canUndo ?? false
   }
 
   /** Is there a step to redo?  Live. */
   get canRedo(): boolean {
-    return core.RUNTIME.history.canRedo
+    return core.RUNTIME?.history.canRedo ?? false
   }
 
   /** The Edit menu's undo item, in the program's language:  `Undo Turn Card`, or `Undo` with nothing to undo.  Live. */
   get undoTitle(): string {
-    return core.RUNTIME.history.undoTitle
+    return core.RUNTIME?.history.undoTitle ?? core.message("undo")
   }
 
   /** The Edit menu's redo item:  `Redo Turn Card`, or `Redo`.  Live. */
   get redoTitle(): string {
-    return core.RUNTIME.history.redoTitle
+    return core.RUNTIME?.history.redoTitle ?? core.message("redo")
   }
 
   // `undo` and `redo` are the app's own ACTIONS (epic `elemental-spell` P10):  a menu names them, `- its "edit menu" is
@@ -85,6 +88,7 @@ export class App extends View {
     describedMethods.describeAction(this, "undo", {
       title: "undo",
       titleFrom: "undoTitle",
+      icon: "undo",
       shortcuts: ["meta+Z"],
       enabledWhen: "canUndo",
       refusedWhileBusy: true
@@ -92,6 +96,7 @@ export class App extends View {
     describedMethods.describeAction(this, "redo", {
       title: "redo",
       titleFrom: "redoTitle",
+      icon: "redo",
       shortcuts: ["meta+shift+Z"],
       enabledWhen: "canRedo",
       refusedWhileBusy: true

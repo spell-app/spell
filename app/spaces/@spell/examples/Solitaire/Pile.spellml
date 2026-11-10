@@ -11,17 +11,17 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 	<property "color" description="Its last card's:  what the next card goes on">
 		"none" if it is empty
 		the color of its last card otherwise
-	</property>
+	</>
 	<property "value" description="Its last card's">
 		0 if it is empty
 		the value of its last card otherwise
-	</property>
+	</>
 	<property "state" description="Its name, then its cards' short names:  stock: Q♠↑ 7♥↓">
 		set summary to (its name or "pile") + ":"
 		for card in the pile
 			set summary to summary + " " + the state of the card
 		return summary
-	</property>
+	</>
 
 	<test "piles">
 		set the stock to a new pile with name = "stock"
@@ -40,10 +40,10 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 		its pile is the discards should be yes
 		the number of cards in the stock should be 1
 		the discards' state should be "discards: 7♥↓"
-	</test>
-</spell-view>
+	</>
+</>
 
 <spell>
 	// a card is in one pile at a time:  putting it on another pile takes it off this one
 	a card belongs to one pile
-</spell>
+</>

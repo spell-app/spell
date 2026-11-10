@@ -1616,7 +1616,7 @@ a "recipe" is a view:
 
 adding box is an app:
 	- to add the examples:
-		- undone as "Add Examples"
+		- undoable as "Add Examples"
 		add (a new recipe with title = "Undo a") to the recipes
 		add (a new recipe with title = "Undo b") to the recipes
 	- to draw it:

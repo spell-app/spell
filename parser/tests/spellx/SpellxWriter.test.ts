@@ -25,6 +25,29 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     }
   )
 
+  test("an undoable action:  bare, it goes by its title;  or named otherwise, as spellx and back", () => {
+    const text = [
+      'a "tile" is a view where:',
+      "\t- to flip it:",
+      '\t\t- titled "Flip"',
+      "\t\t- undoable",
+      "\t\tnotify 1",
+      "\t- to turn it:",
+      '\t\t- undoable as "Turn Tile"',
+      "\t\tnotify 2"
+    ].join("\n")
+    const spell = compiled("/Tile.spell", text)
+    expect(spell.errors).toEqual([])
+    expect(spell.code).toContain('undoneAs: "Flip"')
+    expect(spell.code).toContain('undoneAs: "Turn Tile"')
+    const spellx = converted("/Tile.spell", text)
+    expect(spellx).toMatch(/\bundoable(?!=)/)
+    expect(spellx).toContain('undoable="Turn Tile"')
+    const back = compiled("/Tile.spellml", spellx)
+    expect(back.errors).toEqual([])
+    expect(back.code).toBe(spell.code)
+  })
+
   test("a paragraph's blank line stays:  its line break, compiled the same (Owen, 2026-10-27)", () => {
     const lines = [
       'a "note" is a view where:',
@@ -109,8 +132,8 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
         '\t<property "rank">1</>',
         '\t<action "turn it over" description="turns it">',
         "\t\tprint 1",
-        "\t</action>",
-        "</spell-view>",
+        "\t</>",
+        "</>",
         ""
       ].join("\n")
     )
@@ -125,16 +148,9 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
       "play a new card"
     ])
     expect(spellx).toBe(
-      [
-        '<spell-thing "card" />',
-        "",
-        "<spell>",
-        "\tto play a card",
-        "\t\tprint 1",
-        "\tplay a new card",
-        "</spell>",
-        ""
-      ].join("\n")
+      ['<spell-thing "card" />', "", "<spell>", "\tto play a card", "\t\tprint 1", "\tplay a new card", "</>", ""].join(
+        "\n"
+      )
     )
   })
 
@@ -154,8 +170,8 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
         "\t<spell>",
         "\t\t- to draw it:",
         '\t\t\treturn <div class="Box"><ui-text>{its label}</ui-text></div>',
-        "\t</spell>",
-        "</spell-view>",
+        "\t</>",
+        "</>",
         ""
       ].join("\n")
     )

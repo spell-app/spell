@@ -15,7 +15,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
 describe("SpellProject's compile cache", () => {
   const solitaire = fixtureFolder("@spell/examples/Solitaire")
   const workspace = mkdtempSync(resolve(tmpdir(), "spell-compile-cache-"))
-  const FILES = ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml", "Solitaire.spellml", "styles.css"]
+  const FILES = ["Card.spellml", "Deck.spellml", "Pile.spellml", "Solitaire.spellml", "styles.css"]
   let entries: Map<string, string>
   let cache: SP.CompileCache
 
@@ -119,7 +119,7 @@ describe("SpellProject's compile cache", () => {
   })
 
   test("the key follows a library imported as source:  an edit to it is a new key for the app", async () => {
-    const lib = makeProject("srclib", ["Card.spellml", "Jokers.spellml", "Deck.spellml", "Pile.spellml"])
+    const lib = makeProject("srclib", ["Card.spellml", "Deck.spellml", "Pile.spellml"])
     const app = makeProject("srcapp", ["Solitaire.spellml", "styles.css"], {
       imports: [{ path: lib.projectId, source: true }]
     })

@@ -12,7 +12,8 @@ import type { MethodSignatureData } from "./methods.shared"
  *   - `- shortcut meta+T`:  a key that runs it, again for each
  *   - `- enabled when it is face down`:  when it may run
  *   - `- selected when it is face up`:  when it shows checked, in a menu
- *   - `- undone as "Turn Card"`:  its undo's name, `Undo Turn Card`
+ *   - `- undoable`:  ONE undo step, named by its title
+ *   - `- undoable as "Turn Card"`:  one named otherwise, `Undo Turn Card`
  *   - `- icon "rotate"`:  its icon
  *   - `- titled "Turn Over"`:  its title in menus, key tooltips and the Inspector, where its words aren't it
  *     (epic `language` P18);  a fill-in follows the program, `- titled "Duplicate [the project name]…"`
@@ -26,7 +27,7 @@ import type { MethodSignatureData } from "./methods.shared"
  *   Its action's definition gathers them (`detailsOf()`):  a getter for each condition, then
  *   `core.describeAction(Card, "turnOver", {...})` after the class.
  */
-export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoneAs?|icon?|replacesLast?|title?"> {
+export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoable?|undoneAs?|icon?|replacesLast?|title?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
@@ -60,10 +61,11 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undon
       const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
       if (!statement?.is(ActionDetail)) continue
       any = true
-      const { keys, enabled, selected, undoneAs, icon, replacesLast, title } = statement.groups
+      const { keys, enabled, selected, undoable, undoneAs, icon, replacesLast, title } = statement.groups
       if (keys) details.shortcuts.push(`${keys.value}`)
       if (enabled) details.enabled = enabled
       if (selected) details.selected = selected
+      if (undoable) details.undoable = true
       if (undoneAs) details.undoneAs = ActionDetail.textOf(undoneAs)
       if (icon) details.icon = ActionDetail.textOf(icon)
       if (replacesLast) details.replacesLast = true
@@ -91,11 +93,13 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undon
  * - `shortcuts`:  each key, in order
  * - `enabled`, `selected`:  each condition's match, which a getter on the class returns
  * - `undoneAs`, `icon`:  the text each says
+ * - `undoable`:  a bare `- undoable`, so its undo goes by the action's title
  */
 export type ActionDetails = {
   shortcuts: string[]
   enabled?: P.Match
   selected?: P.Match
+  undoable?: boolean
   undoneAs?: string
   icon?: string
   /** `- a new one replaces the last one` */

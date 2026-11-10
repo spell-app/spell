@@ -635,6 +635,8 @@ export type SpellxTwinWords = {
   action: string
   /** An action's details, by attribute:  `{ shortcut: "shortcut {shortcut}" }`. */
   actionDetails: Record<string, string>
+  /** An action's details said with no value, by attribute:  `{ undoable: "undoable" }`, for a bare `undoable`. */
+  bareActionDetails: Record<string, string>
   /** A test:  `to test {words} :`. */
   test: string
   /** An event its things send:  `it sends {name}`. */

@@ -702,7 +702,7 @@ describe("spell run", () => {
 describe("spell test", () => {
   test("reports each test -- its cards', deck's and piles', then its game's", () => {
     const { status, stdout } = spell(["test", "@spell/examples/Solitaire"])
-    const tests = ["card setup", "jokers", "a new deck", "two jokers", "piles", "the moves"]
+    const tests = ["card setup", "a new deck", "piles", "the moves"]
     expect(stdout).toBe(
       `${tests.map((name) => `✓ test ${name}  (${stdout.match(new RegExp(`test ${name}  \\((\\d+) checks`))?.[1]} checks)\n`).join("")}\n${tests.length} passed\n`
     )

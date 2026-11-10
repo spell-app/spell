@@ -35,7 +35,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	<action "create it" description="Every card of the deck into the stock">
 		for card in the deck
 			add it to the stock
-	</action>
+	</>
 
 	<group "dealing" description="Each pauses a moment, so a deal animates"/>
 	<action "reset the stock" description="The discards, turned over, back into the stock">
@@ -44,7 +44,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		for card in the cards
 			add it to the stock
 			turn the card face down
-	</action>
+	</>
 	<action "play from the stock" description="Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty">
 		if the stock is empty
 			reset the stock
@@ -53,7 +53,10 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
 		add it to the discards
-	</action>
+	</>
+	<action "turn a stock card" undoable="Turn Card" description="A click on the empty stock:  one step to undo, where the deal's own turn isn't">
+		play from the stock
+	</>
 	<action "deal the cards" description="Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right">
 		for card in the deck
 			set start pile to the card's pile
@@ -70,17 +73,17 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 					turn the last card of (item column of the tableaus) face up
 				pause for 50 msec
 		play from the stock
-	</action>
+	</>
 
 
-	<group "game" description="Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three"/>
-	<action "start a new game" title="Restart" icon="redo" shortcut="N">
+	<group "game" description="Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three"/>
+	<action "start a new game" title="Restart" shortcut="N" undoable>
 		clear the score
 		clear the moves
 		clear the hint
 		deal the cards
-	</action>
-	<action "auto play" title="Auto play" icon="fast forward" shortcut="A" description="Play every card that can go somewhere, until none can">
+	</>
+	<action "auto play" title="Auto play" shortcut="A" undoable description="Play every card that can go somewhere, until none can">
 		set anything changed to no
 		if the discards is not empty
 			set test card to the last card of the discards
@@ -106,28 +109,33 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				set anything changed to yes
 				pause for 500 msec
 		if anything changed auto play
-	</action>
-	<action "cheat" title="Cheat" icon="eye" shortcut="C" description="Turn up a face-down card from a tableau, at random, onto the discards">
+	</>
+	<action "cheat" title="Cheat" shortcut="C" undoable description="Turn up a face-down card from a tableau, at random, onto the discards">
 		set remaining piles to piles in the tableaus where it is not empty and its first card is face down
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
 		set the card to a random card in (the cards in the pile where the card is face down)
+		// up out of its pile, then over, then down onto the discards
+		set the lifted of the card to yes
+		pause for 300 msec
 		turn the card face up
 		pause for 30 ticks
+		set the lifted of the card to no
 		add the card to the discards
-	</action>
+	</>
 	<menu "game menu">
-		<action "start a new game"/>
-		<action "-"/>
 		<action "auto play"/>
 		<action "cheat"/>
-	</menu>
+		<action "start a new game"/>
+		<action "undo"/>
+		<action "redo"/>
+	</>
 
 	<draw description="Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu">
 		<container>
-			// the game menu's actions, as buttons:  each its icon and title, and its key;  just their icons when the window's narrow
-			<toolbar menu="game menu" aria-label="Game" shrinkable>
-				<text slot="title" size="large">Klondike Solitaire</text>
+			// the game menu's actions, as buttons:  each its title and its key;  undo and redo just their icons
+			<toolbar class="GameBar" menu="game menu" aria-label="Game" shrinkable>
+				<text class="GameTitle" slot="title" size="large">Spell Solitaire</text>
 				<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
 			</toolbar>
 			<grid class="Board" columns="7" context-menu="game menu">
@@ -147,8 +155,8 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				{draw the T7}
 			</grid>
 		</container>
-	</draw>
-</spell-app>
+	</>
+</>
 
 ## Playing a card
 What a click or a drag does:  the card's own moves, and each pile's, as the game plays them.
@@ -157,6 +165,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 	// the card, and every card on it, onto the first pile that takes it;  it says whether it moved
 	// - the stock's card turns over onto the discards instead
 	to play a card
+		- undoable as "Play Card"
 		if the card's pile is the solitaire's stock
 			play from the stock
 			return
@@ -167,6 +176,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 	// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 	// - the pile it left turns its new last card up;  the move counts, and scores
 	to put a card on a pile
+		- undoable as "Move Card"
 		set start pile to the card's pile
 		if start pile cannot give up the card return no
 		if pile cannot take the card return no
@@ -204,7 +214,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 			if it can take the card and points > 0: set the solitaire's hint to " (+" + points + ")"
 		- on card dropped:
 			put the card on it
-</spell>
+</>
 
 ## The piles
 Each kind of pile, what it may take or give up, and how it lies.
@@ -217,30 +227,30 @@ While one's empty, it shows its placeholder, if it has one.
 	<spell>
 		- it can never take a card
 		- it can never let go of a card
-	</spell>
+	</>
 	<draw "placeholder" description="A light grey card, face down">
 		<text part="placeholder">🂠</text>
-	</draw>
+	</>
 	<on click description="Empty:  a click turns the discards back over;  a click on one of its cards is the card's">
-		play from the stock
-	</on>
-</spell-view>
+		turn a stock card
+	</>
+</>
 
 <spell-view "discard pile" template="pile" description="Where the stock's cards go as they're turned over">
 	<property "layout">stacked</>
 	<spell>
 		- it can never take a card
-	</spell>
+	</>
 	// only its top card may be picked up
 	<cards draggable when the card is its last card/>
-</spell-view>
+</>
 
 <spell-view "foundation" template="pile" description="Where a suit is built up, ace to king, one card at a time">
 	<property "layout">stacked</>
 	<property "suit">a card suit</>
 	<spell>
 		- it can never let go of a card
-	</spell>
+	</>
 	// one card at a time, the last of its pile:  its suit, one higher
 	<droppable when>
 		if the card is not the last card of the pile of the card return no
@@ -248,8 +258,8 @@ While one's empty, it shows its placeholder, if it has one.
 	</>
 	<draw "placeholder" description="A light grey ace of its suit, face up">
 		<text part="placeholder">{the picture of a new card whose rank is ace and suit is its suit}</text>
-	</draw>
-</spell-view>
+	</>
+</>
 
 <spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
@@ -292,9 +302,9 @@ While one's empty, it shows its placeholder, if it has one.
 		the foundation can take the two should be yes
 		add the queen to the column
 		the foundation can take the queen should be no
-	</test>
-</spell-view>
+	</>
+</>
 
 <spell>
-	start a new game
-</spell>
+	deal the cards
+</>

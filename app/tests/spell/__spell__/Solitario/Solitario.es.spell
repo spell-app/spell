@@ -5,7 +5,7 @@
 
 solitario es una aplicación:
 	- su "puntuación" es un número
-	// Las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta
+	// Las cartas jugadas en este juego:  voltear la reserva no cuenta
 	- su "movimientos" es un número
 	// Lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. (+10), un arrastre que no cae en nada, una victoria
 	- su "pista" es texto
@@ -57,6 +57,10 @@ solitario es una aplicación:
 		// lo que tarda su giro (styles.css), así se voltea antes de moverse
 		pausar 300 mseg
 		agregar eso a los descartes
+	// Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es
+	- para voltear la reserva:
+		- deshacible como "Voltear carta"
+		robar de la reserva
 	// Junta cada carta en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
 	- para repartir las cartas:
 		para carta en el mazo
@@ -76,12 +80,12 @@ solitario es una aplicación:
 		robar de la reserva
 
 
-	// Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título y su icono una vez, para los tres
+	// Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
 	- grupo "juego"
 	- para empezar el juego:
 		- titulada "Reiniciar"
-		- icono "redo"
 		- atajo N
+		- deshacible
 		limpiar la puntuación
 		limpiar los movimientos
 		limpiar la pista
@@ -89,8 +93,8 @@ solitario es una aplicación:
 	// Juega cada carta que puede ir a algún lado, hasta que ninguna pueda
 	- para jugar solo:
 		- titulada "Jugar solo"
-		- icono "fast forward"
 		- atajo A
+		- deshacible
 		poner hubo cambios a no
 		si los descartes no está vacía
 			poner candidata a la última carta de los descartes
@@ -119,23 +123,27 @@ solitario es una aplicación:
 	// Voltea una carta boca abajo de una columna, al azar, sobre los descartes
 	- para hacer trampa:
 		- titulada "Trampa"
-		- icono "eye"
 		- atajo C
+		- deshacible
 		poner pilas restantes a las pilas en las columnas donde no está vacía y su primera carta está boca abajo
 		si pilas restantes está vacía devolver
 		poner la pila a una pila al azar de pilas restantes
 		poner la carta a una carta al azar de (las cartas en la pila donde la carta está boca abajo)
+		// arriba, fuera de su pila, luego se voltea, luego baja a los descartes
+		poner la levantada de la carta a sí
+		pausar 300 mseg
 		voltear la carta boca arriba
 		pausar 30 tics
+		poner la levantada de la carta a no
 		agregar la carta a los descartes
-	- su "menú del juego" es un menú de "empezar el juego" , "-" , "jugar solo" y "hacer trampa"
+	- su "menú del juego" es un menú de "jugar solo" , "hacer trampa" , "empezar el juego" , "deshacer" y "rehacer"
 
 	// Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego
 	- para dibujar eso:
 		<es-contenedor>
-			// las acciones del menú del juego, como botones:  cada una con su icono, su título y su tecla;  solo sus iconos cuando la ventana es angosta
-			<es-barra-herramientas menu="menú del juego" aria-label="Juego" encogible>
-				<es-texto slot="titulo" tamano="grande">Solitario Klondike</es-texto>
+			// las acciones del menú del juego, como botones:  cada una con su título y su tecla;  deshacer y rehacer solo sus iconos
+			<es-barra-herramientas class="GameBar" menu="menú del juego" aria-label="Juego" encogible>
+				<es-texto class="GameTitle" slot="titulo" tamano="grande">Solitario Encanto</es-texto>
 				<es-texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</es-texto>
 			</es-barra-herramientas>
 			<es-cuadricula class="Board" columnas="7" context-menu="menú del juego">
@@ -162,6 +170,7 @@ solitario es una aplicación:
 // la carta, y cada carta sobre ella, a la primera pila que la tome;  dice si se movió
 // - la carta de la reserva se voltea sobre los descartes en su lugar
 para jugar una carta
+	- deshacible como "Jugar carta"
 	si la pila de la carta es la reserva del solitario
 		robar de la reserva
 		devolver
@@ -172,6 +181,7 @@ para jugar una carta
 // la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
 // - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
 para poner una carta en una pila
+	- deshacible como "Mover carta"
 	poner pila inicial a la pila de la carta
 	si pila inicial no puede soltar la carta devolver no
 	si pila no puede tomar la carta devolver no
@@ -224,7 +234,7 @@ una "pila de reserva" es una pila:
 		<es-texto part="marcador">🂠</es-texto>
 	// Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta
 	- al clic:
-		robar de la reserva
+		voltear la reserva
 
 // Adonde van las cartas de la reserva al voltearse
 una "pila de descartes" es una pila:
@@ -288,4 +298,4 @@ una "columna" es una pila:
 		agregar la dama a la columna
 		la fundación puede tomar la dama debería ser no
 
-empezar el juego
+repartir las cartas

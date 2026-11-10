@@ -147,7 +147,12 @@
               </li>
               <li>
                 Its script API: <code>compile()</code> and <code>save()</code>. Its <code>compiled</code> holds what it
-                last compiled.
+                last compiled. A <code>static</code> one also has <code>reset()</code>, which puts its project back as
+                the site wrote it.
+              </li>
+              <li>
+                Its own words follow the closest <code>lang</code> around it, read each time it opens a project: so a
+                page can show a Spanish example, in a Spanish editor, on an English page.
               </li>
               <li>
                 A page loads it as it loads

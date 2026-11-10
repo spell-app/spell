@@ -12,7 +12,7 @@ a "recipe" is a view:
 			<ui-button class="remove" onClick={remove it}>Remove</ui-button>
 		</ui-form>
 	- to remove it:
-		- undone as "Remove Recipe"
+		- undoable as "Remove Recipe"
 		remove it from the recipes
 
 recipe box is an app:

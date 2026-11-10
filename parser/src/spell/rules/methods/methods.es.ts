@@ -1056,7 +1056,7 @@ methodsEs.addRule(ActionDetail, {
             "\t- para voltearla:",
             "\t\t- atajo meta+T",
             "\t\t- activa cuando su dirección es abajo",
-            '\t\t- se deshace como "Voltear carta"',
+            '\t\t- deshacible como "Voltear carta"',
             "\t\tponer su dirección en arriba"
           ],
           js: [
@@ -1103,7 +1103,8 @@ methodsEs.addRule(ActionDetail, {
 })
 methodsEs.addRule(ActionDetail, { syntax: "activa cuando {enabled:expression}" })
 methodsEs.addRule(ActionDetail, { syntax: "seleccionada cuando {selected:expression}" })
-methodsEs.addRule(ActionDetail, { syntax: "se deshace como {undoneAs:text}" })
+methodsEs.addRule(ActionDetail, { syntax: "(undoable:deshacible)" })
+methodsEs.addRule(ActionDetail, { syntax: "deshacible como {undoneAs:text}" })
 methodsEs.addRule(ActionDetail, { syntax: "(replacesLast:uno nuevo reemplaza al anterior)" })
 methodsEs.addRule(ActionDetail, { syntax: "icono {icon:text}" })
 methodsEs.addRule(ActionDetail, {

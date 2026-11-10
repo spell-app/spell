@@ -47,6 +47,7 @@ En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede a
 			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 	</propiedad>
+	<propiedad "levantada" descripción="Sacada hacia arriba de su pila, sobre las pilas de encima, como hace la trampa -- styles.css">sí o no</>
 	<dibujar "frente">
 		<texto color={su color}>{su imagen}</texto>
 	</dibujar>

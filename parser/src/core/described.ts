@@ -1,12 +1,12 @@
 /**
  * What a program's templates SAY about themselves, beyond their code (epic `elemental-spell` P5):
  * - each ACTION's description:  its title, its shortcuts, when it's enabled or selected, what its undo is called
- *   - `- to turn it over:` then `- shortcut meta+T`, `- enabled when it is face down`, `- undone as "Turn Card"`
+ *   - `- to turn it over:` then `- shortcut meta+T`, `- enabled when it is face down`, `- undoable as "Turn Card"`
  * - each EVENT a template sends, with its parameters:  `- it sends "flipped" with a side as a direction`
  * - Compiled spell writes them after the class:  `core.describeAction(Card, "turnOver", { ... })`.
  * - What reads them:  the event phase (P9), and the actions' one way to run (`acting.ts`, P10),
  *   through `actionsOf()` and `eventsOf()`.
- * - An action `undone as` something is ONE undo step:
+ * - An action `undoable` is ONE undo step:
  *   `describeAction()` declares it so (`declareAction()`, `undoing.ts`, C11).
  * - Kept per class, and inherited:  a joker has a card's actions, and may describe one again.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
@@ -23,7 +23,7 @@ export const describedMethods = defineCoreModule({
    */
   describeAction(Class: Function, name: string, description: ActionDescription): void {
     ownDescriptions(ACTIONS, Class).set(name, description)
-    // `undone as "Turn Card"`:  ONE undo step, through the run's history (C11)
+    // `undoable as "Turn Card"`:  ONE undo step, through the run's history (C11)
     const method = (Class.prototype as Record<string, unknown>)[name]
     if (description.undoneAs !== undefined && typeof method === "function" && !UNDOABLE.has(method)) {
       declareAction(Class, name, { undoneAs: description.undoneAs })

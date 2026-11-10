@@ -230,7 +230,7 @@ export const englishWords: SP.LanguageWords = {
       shortcut: "shortcut",
       "enabled-when": "enabled-when",
       "selected-when": "selected-when",
-      "undone-as": "undone-as",
+      undoable: "undoable",
       icon: "icon",
       title: "title",
       // a menu filled from a list (epic `language` P19, Q21):  `<menu "more examples" for-each={...} action="...">`
@@ -291,10 +291,11 @@ export const englishWords: SP.LanguageWords = {
         shortcut: "shortcut {shortcut}",
         "enabled-when": "enabled when {enabled-when}",
         "selected-when": "selected when {selected-when}",
-        "undone-as": "undone as {quoted undone-as}",
+        undoable: "undoable as {quoted undoable}",
         icon: "icon {quoted icon}",
         title: "titled {quoted title}"
       },
+      bareActionDetails: { undoable: "undoable" },
       test: "to test {words} :",
       event: "it sends {name}",
       eventWith: "with",

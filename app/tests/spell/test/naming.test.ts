@@ -36,7 +36,7 @@ describe("a writer's naming map", () => {
       .replace(/(?<!\b(?:type|instanceType):\s*)"[^"\n]*"/g, '""')
       .replace(/`[^`]*`/g, "``")
     // not `Solitaire`:  its menu says "Klondike Solitaire", as text
-    const types = ["Card", "Joker", "Deck", "Pile", "StockPile", "DiscardPile", "Foundation", "Tableau"]
+    const types = ["Card", "Deck", "Pile", "StockPile", "DiscardPile", "Foundation", "Tableau"]
     const left = types.flatMap((type) => {
       const lines = code.split("\n").filter((line) => new RegExp(`\\b${type}\\b`).test(line))
       return lines.map((line) => `${type}:  ${line.trim()}`)

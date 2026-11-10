@@ -26,7 +26,7 @@
 }
 
 /****************
- * The table:  room around the toolbar and cards, its corners rounded
+ * The table:  green felt, as on a casino's card table, with the words on it in white
  ****************/
 
 solitaire-app {
@@ -37,6 +37,11 @@ solitaire-app {
   padding: 32px;
   /* rounded at the bottom too, as the frame it sits in is at the top */
   border-radius: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;
+}
+.GameTitle,
+.GameBar > [slot] {
+  color: #f2fbf5;
 }
 
 /****************
@@ -51,9 +56,102 @@ solitaire-app {
   margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);
 }
 
+/****************
+ * The toolbar:  its buttons in the middle, each a button of its own, with no frame around them
+ ****************/
+
+.GameBar {
+  --ui-menu-divider: transparent;
+}
+/* the game's name, in the heavy type of Spell's loading screen */
+.GameTitle {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+/* the title and the score take equal room, so the buttons sit in the true middle */
+.GameBar::part(title),
+.GameBar::part(right) {
+  flex: 1 1 0;
+}
+.GameBar::part(right) {
+  justify-content: flex-end;
+}
+.GameBar::part(menu) {
+  flex: 0 1 auto;
+  /* it would scroll, which would cut the pills' shadow */
+  overflow: visible;
+  min-width: 0;
+  gap: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  /* one shadow around each whole pill, with none falling across its buttons */
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+}
+/* two pills, auto play | cheat | restart and undo | redo:  each button shares its edge with the next */
+.GameBar > *::part(item) {
+  padding: 0.55em 1em;
+  margin-left: -1px;
+  border: 0;
+  border-radius: 0;
+  background: Canvas;
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px var(--ui-border-color);
+  transition: background-color 120ms ease-out;
+}
+.GameBar > :not([slot]):nth-of-type(1)::part(item),
+.GameBar > :not([slot]):nth-of-type(4)::part(item) {
+  border-start-start-radius: 99em;
+  border-end-start-radius: 99em;
+}
+.GameBar > :not([slot]):nth-of-type(3)::part(item),
+.GameBar > :not([slot]):nth-of-type(5)::part(item) {
+  border-start-end-radius: 99em;
+  border-end-end-radius: 99em;
+}
+.GameBar > :not([slot]):nth-of-type(4)::part(item) {
+  margin-left: 1em;
+}
+.GameBar > *::part(item):hover {
+  background: color-mix(in srgb, Canvas 92%, CanvasText);
+}
+.GameBar > *::part(item):active {
+  background: color-mix(in srgb, Canvas 84%, CanvasText);
+}
+/* undo and redo:  just their icons, their names kept for a screen reader */
+.GameBar > :not([slot]):nth-of-type(n + 4)::part(title) {
+  font-size: 0;
+}
+.GameBar > :not([slot]):nth-of-type(n + 4)::part(icon) {
+  margin: 0;
+}
+.GameBar > :not([slot]):nth-of-type(n + 4)::part(shortcut) {
+  display: none;
+}
+/* its key, a small key cap */
+.GameBar > *::part(shortcut) {
+  margin-inline-start: 0.6em;
+  padding: 0.1em 0.45em;
+  border-radius: var(--ui-radius-s);
+  background: color-mix(in oklch, currentColor 8%, transparent);
+  font-size: 0.75em;
+}
+
 /* A narrow window, a phone's:  the toolbar loses its title, so the score and buttons fit on one line
-   (its buttons fold to their icons by themselves:  it's shrinkable) */
+   (its buttons fold to their icons, or their first letters, by themselves:  it's shrinkable) */
 @media (width < 36rem) {
+  .GameBar::part(title) {
+    display: none;
+  }
+  .GameBar > *::part(item) {
+    padding-inline: 0.55em;
+  }
+  .GameBar > [slot] {
+    font-size: 0.8em;
+    white-space: nowrap;
+  }
   [slot="title"] {
     display: none;
   }
@@ -162,16 +260,28 @@ solitaire-card::part(back),
 [layout] > *::part(back) {
   transform: rotateY(180deg);
 }
+/* Pulled up out of its pile (the card's "lifted"), as the cheat does:  a card's height and a little above the pile's top,
+   over every card and pile it passes */
+[layout] > * {
+  transition:
+    transform 0.3s ease-in-out,
+    translate 0.3s ease-out;
+}
+[layout] > [lifted] {
+  z-index: 5;
+  translate: 0 calc(-1 * (var(--index) * var(--card-step-down) + 1.08) * var(--card-width) * var(--card-height) * 1em);
+}
+
 @media (prefers-reduced-motion: reduce) {
   [layout] > * {
     transition: none;
   }
 }
 
-/* An empty pile's placeholder:  a faint card in a mid grey, so it shows on a light page and a dark one alike */
+/* An empty pile's placeholder:  a faint pale card on the felt */
 [layout]::part(placeholder) {
-  color: #8a8f99;
-  opacity: 0.35;
+  color: #d8f0e0;
+  opacity: 0.4;
 }
 [layout]::part(placeholder):hover {
   opacity: 0.5;
@@ -181,7 +291,7 @@ solitaire-card::part(back),
  * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",
  * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,
  * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder
- * (above) a mid grey that shows on a light page and a dark one alike
+ * (above) pale, on the felt
  */
 [layout] > *,
 solitaire-card {

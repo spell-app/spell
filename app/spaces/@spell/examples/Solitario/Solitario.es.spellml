@@ -5,7 +5,7 @@ Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pi
 
 <encanto-aplicación "solitario">
 	<propiedad "puntuación">un número</>
-	<propiedad "movimientos" descripción="Las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta">un número</>
+	<propiedad "movimientos" descripción="Las cartas jugadas en este juego:  voltear la reserva no cuenta">un número</>
 	<propiedad "pista" descripción="Lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. (+10), un arrastre que no cae en nada, una victoria">texto</>
 	// el cambio de una propiedad es un evento:  cada uno corre justo después del cambio
 	<cuando su puntuación cambia>
@@ -54,6 +54,9 @@ Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pi
 		pausar 300 mseg
 		agregar eso a los descartes
 	</acción>
+	<acción "voltear la reserva" deshacible="Voltear carta" descripción="Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es">
+		robar de la reserva
+	</acción>
 	<acción "repartir las cartas" descripción="Junta cada carta en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha">
 		para carta en el mazo
 			poner pila inicial a la pila de la carta
@@ -73,14 +76,14 @@ Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pi
 	</acción>
 
 
-	<grupo "juego" descripción="Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título y su icono una vez, para los tres"/>
-	<acción "empezar el juego" título="Reiniciar" icono="redo" atajo="N">
+	<grupo "juego" descripción="Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres"/>
+	<acción "empezar el juego" título="Reiniciar" atajo="N" deshacible>
 		limpiar la puntuación
 		limpiar los movimientos
 		limpiar la pista
 		repartir las cartas
 	</acción>
-	<acción "jugar solo" título="Jugar solo" icono="fast forward" atajo="A" descripción="Juega cada carta que puede ir a algún lado, hasta que ninguna pueda">
+	<acción "jugar solo" título="Jugar solo" atajo="A" deshacible descripción="Juega cada carta que puede ir a algún lado, hasta que ninguna pueda">
 		poner hubo cambios a no
 		si los descartes no está vacía
 			poner candidata a la última carta de los descartes
@@ -107,27 +110,32 @@ Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pi
 				pausar 500 mseg
 		si hubo cambios jugar solo
 	</acción>
-	<acción "hacer trampa" título="Trampa" icono="eye" atajo="C" descripción="Voltea una carta boca abajo de una columna, al azar, sobre los descartes">
+	<acción "hacer trampa" título="Trampa" atajo="C" deshacible descripción="Voltea una carta boca abajo de una columna, al azar, sobre los descartes">
 		poner pilas restantes a las pilas en las columnas donde no está vacía y su primera carta está boca abajo
 		si pilas restantes está vacía devolver
 		poner la pila a una pila al azar de pilas restantes
 		poner la carta a una carta al azar de (las cartas en la pila donde la carta está boca abajo)
+		// arriba, fuera de su pila, luego se voltea, luego baja a los descartes
+		poner la levantada de la carta a sí
+		pausar 300 mseg
 		voltear la carta boca arriba
 		pausar 30 tics
+		poner la levantada de la carta a no
 		agregar la carta a los descartes
 	</acción>
 	<menú "menú del juego">
-		<acción "empezar el juego"/>
-		<acción "-"/>
 		<acción "jugar solo"/>
 		<acción "hacer trampa"/>
+		<acción "empezar el juego"/>
+		<acción "deshacer"/>
+		<acción "rehacer"/>
 	</menú>
 
 	<dibujar descripción="Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego">
 		<contenedor>
-			// las acciones del menú del juego, como botones:  cada una con su icono, su título y su tecla;  solo sus iconos cuando la ventana es angosta
-			<barra-herramientas menu="menú del juego" aria-label="Juego" encogible>
-				<texto slot="titulo" tamano="grande">Solitario Klondike</texto>
+			// las acciones del menú del juego, como botones:  cada una con su título y su tecla;  deshacer y rehacer solo sus iconos
+			<barra-herramientas class="GameBar" menu="menú del juego" aria-label="Juego" encogible>
+				<texto class="GameTitle" slot="titulo" tamano="grande">Solitario Encanto</texto>
 				<texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</texto>
 			</barra-herramientas>
 			<cuadricula class="Board" columnas="7" context-menu="menú del juego">
@@ -157,6 +165,7 @@ Qué hace un clic o un arrastre:  los movimientos propios de la carta, y los de 
 	// la carta, y cada carta sobre ella, a la primera pila que la tome;  dice si se movió
 	// - la carta de la reserva se voltea sobre los descartes en su lugar
 	para jugar una carta
+		- deshacible como "Jugar carta"
 		si la pila de la carta es la reserva del solitario
 			robar de la reserva
 			devolver
@@ -167,6 +176,7 @@ Qué hace un clic o un arrastre:  los movimientos propios de la carta, y los de 
 	// la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
 	// - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
 	para poner una carta en una pila
+		- deshacible como "Mover carta"
 		poner pila inicial a la pila de la carta
 		si pila inicial no puede soltar la carta devolver no
 		si pila no puede tomar la carta devolver no
@@ -222,7 +232,7 @@ Mientras está vacía, muestra su marcador, si tiene uno.
 		<texto part="marcador">🂠</texto>
 	</dibujar>
 	<al clic descripción="Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta">
-		robar de la reserva
+		voltear la reserva
 	</>
 </encanto-vista>
 
@@ -296,5 +306,5 @@ Mientras está vacía, muestra su marcador, si tiene uno.
 </encanto-vista>
 
 <encanto>
-	empezar el juego
+	repartir las cartas
 </encanto>

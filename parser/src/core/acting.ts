@@ -5,7 +5,7 @@
  * - `core.runAction(thing, "turnOver", "key")` is the ONE choke point:
  *   - it runs nothing while the action isn't enabled
  *   - it runs one at a time (`ActionQueue`, epic `language` Q6):  a repeat is ignored, another waits its turn
- *   - an action `undone as "Turn Card"` runs as one undo step (`undoing.ts`, C11)
+ *   - an action `undoable as "Turn Card"` runs as one undo step (`undoing.ts`, C11)
  *   - then it tells whoever listens that the person did it, and how (`core.onActionRun()`):  tours, analytics, tests
  * - Shortcuts:  `core.runShortcut(focused, key)` finds the first ENABLED action bound to the key, starting at the
  *   focused thing and going up its chain to the app (Q35 B), and runs it.

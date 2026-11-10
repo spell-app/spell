@@ -50,6 +50,8 @@ una "carta" es una vista reversible:
 		si es un corazón
 			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+	// Sacada hacia arriba de su pila, sobre las pilas de encima, como hace la trampa -- styles.css
+	- su "levantada" es sí o no
 	- para dibujar su frente:
 		<es-texto color={su color}>{su imagen}</es-texto>
 	- para dibujar su dorso:

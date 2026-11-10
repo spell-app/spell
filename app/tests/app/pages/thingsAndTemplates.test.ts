@@ -177,7 +177,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     const own = await page
       .locator(".PalettePopup .ThisApp ui-tree-item")
       .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
-    expect(own).toEqual(["Card", "Discard pile", "Foundation", "Joker", "Pile", "Stock pile", "Tableau"])
+    expect(own).toEqual(["Card", "Discard pile", "Foundation", "Pile", "Stock pile", "Tableau"])
     const cards = () => page.evaluate(() => document.querySelectorAll("solitaire-card").length)
     const before = await cards()
     await page.locator('.PalettePopup .ThisApp ui-tree-item[label="Card"]').click()

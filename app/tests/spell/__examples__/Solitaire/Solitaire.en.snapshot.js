@@ -17,21 +17,13 @@ export const words = {
       state: "state",
       draw: "draw it",
       picture: "picture",
-      play: "play a card",
-      putOnPile: "put a card on a pile",
+      lifted: "lifted",
       countThePointsForCardOnPile: "count the points for a card on a pile",
-      pile: "pile"
-    },
-    Joker: {
-      color: "color",
-      isTheColorJoker: "is the (color) joker",
-      value: "value",
-      picture: "picture",
-      name: "name",
-      state: "state"
+      pile: "pile",
+      play: "play a card",
+      putOnPile: "put a card on a pile"
     },
     Deck: {
-      jokers: "jokers",
       create: "create it",
       state: "state"
     },
@@ -78,6 +70,7 @@ export const words = {
       playFromTheStock: "play from the stock",
       dealTheCards: "deal the cards",
       draw: "draw it",
+      turnAStockCard: "turn a stock card",
       startANewGame: "start a new game",
       autoPlay: "auto play",
       cheat: "cheat"
@@ -88,18 +81,14 @@ export const words = {
       { name: "rank", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "value", "isAFaceCard", "isANumberCard"] },
       { name: "suit", members: ["suit", "color", "symbol"] },
       { name: "names", description: "What a person, a test or the console calls it", members: ["name", "isTheRankOfSuit", "state"] },
-      { name: "drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["draw", "picture"] },
-      { name: "Playing a card", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
+      { name: "drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["draw", "picture", "lifted"] },
+      { name: "Playing a card", members: ["countThePointsForCardOnPile", "play", "putOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
-    ],
-    Joker: [
-      { name: "what's different", description: "A joker comes red or black", members: ["color", "isTheColorJoker"] },
-      { name: "what it changes", description: "A card's own, written again for a joker", members: ["value", "picture", "name", "state"] }
     ],
     Solitaire: [
       { name: "piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "create"] },
-      { name: "dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards"] },
-      { name: "game", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title and icon once, for all three", members: ["draw", "startANewGame", "autoPlay", "cheat"] }
+      { name: "dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards", "turnAStockCard"] },
+      { name: "game", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three", members: ["draw", "startANewGame", "autoPlay", "cheat"] }
     ]
   }
 }
