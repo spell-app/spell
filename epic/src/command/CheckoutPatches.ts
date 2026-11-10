@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, relative } from "node:path"
 
 import { checkoutOf } from "spell/server/checkout"
@@ -262,14 +262,7 @@ function exclude(target: string): "added" | "there" {
   const checkout = checkoutOf(folder)
   if (!checkout) throw new Error(`${folder} isn't in a git checkout`)
   const line = `/${relative(RealPath.of(checkout.root), RealPath.of(target)).split("\\").join("/")}`
-  // the common git folder:  the main checkout's `.git`
-  const file = join(checkout.main, ".git", "info", "exclude")
-  const text = existsSync(file) ? readFileSync(file, "utf8") : ""
-  if (text.split("\n").includes(line)) return "there"
-  mkdirSync(dirname(file), { recursive: true })
-  const header = text.includes(EXCLUDE_HEADER) ? "" : `${text && !text.endsWith("\n") ? "\n" : ""}${EXCLUDE_HEADER}\n`
-  appendFileSync(file, `${header}${line}\n`)
-  return "added"
+  return Git.exclude([line], EXCLUDE_HEADER, checkout.root).length ? "added" : "there"
 }
 
 /** The stamp in git folder `gitDir`:  the patches its checkout has had. */

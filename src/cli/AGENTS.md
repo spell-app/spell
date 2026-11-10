@@ -25,6 +25,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `rawArgsAfter()`, `out()` / `err()`, `relativePath()`;
     `ask()`, a question asked only in a real terminal;  `choose()`, a pick-one list there (arrows and Enter, or a
     number key;  no library:  the app's Ink pickers are a folder above);  both draw the question bold yellow
+    - `choose()` folds into one line once picked, the question and the answer;  in a list longer than 9, digits move
+      the mark (`1`, `3` lands on 13) and Enter takes it
+    - both throw away keys typed before the question showed (`typedAheadMs`, 100ms;  a test passes 0):
+      a stray arrow or Enter can't pick or answer (epic `epic-engine` P69)
+    - `waiting(text, work)`:  a gray line while something slow runs between questions, and what's typed meanwhile
+      not shown (`stty -echo`, put back after, even on Ctrl+C);  never raw mode, which would stop Ctrl+C
   - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`, `runSpellEpic()` (`spell epic`)
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`

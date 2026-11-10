@@ -11,7 +11,7 @@ import {
   writeFileSync
 } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join } from "node:path"
+import { dirname, join, relative } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Git } from "spell/server/Git"
@@ -32,9 +32,12 @@ const before = { ...process.env }
 process.env.SPELL_EPIC_HOME = join(TEMP, "epic-home")
 process.env.GIT_CONFIG_GLOBAL = join(TEMP, "gitconfig")
 process.env.GIT_CONFIG_NOSYSTEM = "1"
+// and the epic repos the stand-in GitLab makes (`git@lab.acme.test:team/x.git`) are bare repos under `lab/`:  a host
+// of their own, so the code repo's `origin` (on `gitlab.acme.com`) still reads as GitLab's
 writeFileSync(
   join(TEMP, "gitconfig"),
-  "[user]\n  name = Ana Lima\n  email = ana@example.com\n[commit]\n  gpgsign = false\n"
+  "[user]\n  name = Ana Lima\n  email = ana@example.com\n[commit]\n  gpgsign = false\n" +
+    `[url "${join(TEMP, "lab")}/"]\n  insteadOf = git@lab.acme.test:\n`
 )
 afterAll(() => {
   for (const key of ["SPELL_EPIC_HOME", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM"])
@@ -540,7 +543,8 @@ describe("epic init:  the epic repo (epic-friend P4)", () => {
     expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/open.epics --public /m)
     expect(plain(printed)).toMatch(/made, pushed +ana\/open\.epics on GitHub, public/)
     expect(plain(printed)).toContain(
-      "it's PUBLIC:  everything in the plans (epic pages, guides, comments) can be read by anyone"
+      "it's PUBLIC:  anyone who can reach github.com can read every epic page, guide and comment, without signing " +
+        "in;  roles only control who can write"
     )
     // --dry-run says which it would make
     const dry = await withGh(stubGh(codeRepo("open-dry")), () =>
@@ -568,6 +572,218 @@ describe("epic init:  the epic repo (epic-friend P4)", () => {
     expect(EpicConfig.settingsFrom(readFileSync(file, "utf8")).contentRemote).toBe("git@github.com:o/x.git")
   })
 })
+
+describe('epic init --local (epic-engine P69:  a colleague "doesn\'t want any of it in the jarvis repo")', () => {
+  test("nothing in the repo:  .gitignore byte for byte, no commit, git status empty;  the config and links excluded", async () => {
+    const app = codeRepo("local")
+    writeFileSync(join(app, ".gitignore"), "node_modules/\n")
+    git(app, "add", ".gitignore")
+    git(app, "-c", "commit.gpgsign=false", "commit", "-q", "-m", "ignore")
+    const head = git(app, "rev-parse", "HEAD")
+    // gh logged in:  --local alone still makes nothing on the code host
+    const gh = stubGh(app)
+    const report = await withGh(gh, () => new RepoInit({ main: app }).init({ local: true, commit: true }))
+    expect(report.local).toBe(true)
+    expect(report.remote).toEqual({ action: "kept local" })
+    expect(existsSync(gh.log) && readFileSync(gh.log, "utf8")).not.toMatch(/repo create/)
+    expect(readFileSync(join(app, ".gitignore"), "utf8")).toBe("node_modules/\n")
+    expect(git(app, "rev-parse", "HEAD")).toBe(head)
+    expect(git(app, "branch", "--list").trim()).toBe("* main")
+    expect(git(app, "status", "--porcelain")).toBe("")
+    expect(new EpicConfig(app).localSetup).toBe(true)
+    expect(EpicConfig.ofSetUp(app)).toBeDefined()
+    expect(readFileSync(join(app, ".git", "info", "exclude"), "utf8")).toMatch(
+      /# epic init --local:.*\n\/\.epic\/\n\/epics\n\/sagas\n\/guides\n\/pages\n$/
+    )
+    const lines = said(report)
+    expect(lines).toContain("> Setup:  local:  nothing is added to this repo;  it all stays on this machine")
+    expect(
+      tableOf(lines).some((row) => /^ {2}updated +.*\.git\/info\/exclude {2}\(this machine's ignore list/.test(row))
+    ).toBe(true)
+    expect(lines.some((line) => /\.gitignore$/.test(line))).toBe(false)
+    expect(lines).toContain("Nothing was added to this repo:  no commit, no .gitignore lines.")
+    expect(lines).toContain(
+      "On this machine only:  .epic/config.json5, the links (epics, sagas, guides, pages), and their lines in " +
+        ".git/info/exclude."
+    )
+    expect(lines.some((line) => line.startsWith("Each teammate runs their own epic init --local"))).toBe(true)
+
+    // run again, no flag:  local still;  nothing changes
+    const again = await new RepoInit({ main: app }).init({ commit: true })
+    expect(again.local).toBe(true)
+    expect(again.exclude?.action).toBe("ok")
+    expect(readFileSync(join(app, ".gitignore"), "utf8")).toBe("node_modules/\n")
+    expect(git(app, "rev-parse", "HEAD")).toBe(head)
+    expect(git(app, "status", "--porcelain")).toBe("")
+  })
+
+  test("run():  --local commits nothing, and still starts the server;  the help's flag", async () => {
+    const app = codeRepo("local-run")
+    const head = git(app, "rev-parse", "HEAD")
+    const hub = stubHub()
+    const init = new RepoInit({ main: app, plugin: stubPlugin({ installed: true }).make, hub: hub.make })
+    const lines = await printed(() => init.run(["--local", "--no-remote"]))
+    expect(git(app, "rev-parse", "HEAD")).toBe(head)
+    expect(git(app, "status", "--porcelain")).toBe("")
+    expect(lines.some((line) => /commit/i.test(line) && !/no commit/.test(line))).toBe(false)
+    expect(hub.calls).toContain(`address ${app}`)
+    expect(lines).toContain("no epic repo (--no-remote):  the plans stay on this machine")
+  })
+
+  test("a setup committed already:  --local refuses, and changes nothing", async () => {
+    const app = codeRepo("committed")
+    await new RepoInit({ main: app }).init()
+    git(app, "add", "-A")
+    git(app, "-c", "commit.gpgsign=false", "commit", "-q", "-m", "epics")
+    const head = git(app, "rev-parse", "HEAD")
+    const config = readFileSync(join(app, EpicConfig.FILE), "utf8")
+    await expect(new RepoInit({ main: app }).init({ local: true })).rejects.toThrow(
+      /main tracks \.epic\/config\.json5 already/
+    )
+    await expect(offline(app).run(["--local"])).rejects.toThrow(
+      /take it and the \.gitignore's # shared:start block out/
+    )
+    expect(git(app, "rev-parse", "HEAD")).toBe(head)
+    expect(git(app, "status", "--porcelain")).toBe("")
+    expect(readFileSync(join(app, EpicConfig.FILE), "utf8")).toBe(config)
+  })
+
+  test("--no-remote on an epic folder that has a remote:  no contentRemote written, and no turn's sync pushes", async () => {
+    const app = codeRepo("unshared")
+    const bare = join(TEMP, "unshared", "plans.git")
+    git(TEMP, "init", "-q", "--bare", bare)
+    const content = join(TEMP, "unshared", "unshared.epics")
+    mkdirSync(content)
+    git(content, "init", "-q")
+    git(content, "remote", "add", "origin", bare)
+    const report = await new RepoInit({ main: app }).init({ local: true, noRemote: true })
+    expect(report.remote).toEqual({ action: "skipped" })
+    expect(new EpicConfig(app).contentRemote).toBe("")
+    const { Shared } = await import("spell/epic/command/Shared")
+    const shared = new Shared({ checkout: app })
+    expect(shared.syncsWith).toBe("")
+    writeFileSync(join(content, "guides", "note.md"), "mine\n")
+    expect((await shared.sync()).sync).toBeUndefined()
+    expect(git(TEMP, "ls-remote", "--heads", bare)).toBe("")
+  })
+
+  test("a teammate:  --local --remote <repo holding the plans> clones it, and the next sync pushes", async () => {
+    const first = codeRepo("team-first")
+    const bare = join(TEMP, "team-first", "plans.git")
+    git(TEMP, "init", "-q", "--bare", bare)
+    await new RepoInit({ main: first }).init({ local: true, remote: bare })
+    expect(git(TEMP, "ls-remote", "--heads", bare)).not.toBe("")
+
+    const mate = codeRepo("team-mate")
+    const report = await new RepoInit({ main: mate }).init({ local: true, remote: bare })
+    const content = join(TEMP, "team-mate", "team-mate.epics")
+    expect(report.remote).toEqual({ action: "cloned", address: bare })
+    expect(report.content.action).toBe("cloned")
+    expect(new EpicConfig(mate).contentRemote).toBe(bare)
+    expect(git(mate, "status", "--porcelain")).toBe("")
+    expect(said(report)).toContain(`Each teammate runs their own:  epic init --local --remote ${bare}`)
+    const { Shared } = await import("spell/epic/command/Shared")
+    writeFileSync(join(content, "guides", "mate.md"), "the mate's\n")
+    expect((await new Shared({ checkout: mate }).sync()).sync).toMatchObject({ result: "synced", pushed: true })
+    expect(git(TEMP, "--git-dir", bare, "show", "HEAD:guides/mate.md")).toBe("the mate's\n")
+  })
+
+  test("a setup merge request left open:  the ending names it and says to close it;  the branch and request untouched", async () => {
+    const app = codeRepo("open-mr")
+    git(app, "remote", "add", "origin", "git@gitlab.acme.com:team/open-mr.git")
+    git(app, "branch", SETUP)
+    const tip = git(app, "rev-parse", SETUP)
+    const lab = stubGlab(app, {
+      open: '[{"iid":1454,"web_url":"https://gitlab.acme.com/team/open-mr/-/merge_requests/1454","sha":"x"}]'
+    })
+    const report = await withGlab(lab, () => new RepoInit({ main: app }).init({ local: true }))
+    expect(report.setupRequest).toEqual({ address: "https://gitlab.acme.com/team/open-mr/-/merge_requests/1454" })
+    const lines = said(report)
+    expect(lines).toContain(
+      "the merge request an earlier epic init opened is still open:  " +
+        "https://gitlab.acme.com/team/open-mr/-/merge_requests/1454"
+    )
+    expect(lines.some((line) => /close it there:  local mode needs none of it/.test(line))).toBe(true)
+    expect(git(app, "rev-parse", SETUP)).toBe(tip)
+    expect(readFileSync(lab.log, "utf8")).not.toMatch(/mr (close|update)|--method (PUT|DELETE)/)
+  })
+})
+
+describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P69:  "Ask a Maintainer")', () => {
+  test("refused:  says who has to do what, and the Maintainer's commands;  no push-by-hand;  sharing isn't working", async () => {
+    const app = codeRepo("jarvis")
+    git(app, "remote", "add", "origin", "git@gitlab.acme.com:team/jarvis.git")
+    const lab = stubGlab(app, { refuse: true })
+    const report = await withGlab(lab, () => new RepoInit({ main: app }).init({ color: "green" }))
+    const branch = git(join(TEMP, "jarvis", "jarvis.epics"), "branch", "--show-current").trim()
+    expect(report.remote).toMatchObject({
+      action: "made",
+      repo: "team/jarvis.epics",
+      address: "git@lab.acme.test:team/jarvis.epics.git",
+      refusal: { membersPage: "https://gitlab.acme.com/team/jarvis.epics/-/project_members", branch }
+    })
+    const lines = said(report)
+    expect(lines).toContain(
+      `GitLab won't take the epic repo's first push:  ${branch} is protected, and your role can't push the first commit.`
+    )
+    expect(lines).toContain(
+      `  A Maintainer has to push the first commit and allow pushes to ${branch}.  ` +
+        "Find one:  https://gitlab.acme.com/team/jarvis.epics/-/project_members"
+    )
+    expect(lines).toContain("    git clone git@lab.acme.test:team/jarvis.epics.git")
+    expect(lines).toContain(`    git push -u origin HEAD:${branch}`)
+    expect(lines).toContain(
+      `    glab api --hostname gitlab.acme.com --method DELETE projects/team%2Fjarvis.epics/protected_branches/${branch}`
+    )
+    expect(lines.some((line) => /Every teammate needs to push to/.test(line))).toBe(true)
+    expect(lines.some((line) => /push it by hand/.test(line))).toBe(false)
+    expect(lines.some((line) => /pushed at your next turn/.test(line))).toBe(false)
+    expect(lines.some((line) => /\(your colour, shared once the epic repo takes a push\)/.test(line))).toBe(true)
+    expect(
+      lines.some((line) => /^Sharing isn't working yet:  GitLab refused the epic repo's first push/.test(line))
+    ).toBe(true)
+    // the protection wasn't lifted:  nothing went through
+    expect(readFileSync(lab.log, "utf8")).not.toMatch(/--method DELETE/)
+
+    // the Maintainer does as it says:  the rule lifted, an empty first commit
+    rmSync(join(TEMP, "lab", "team", "jarvis.epics.git", "hooks", "pre-receive"))
+    const maintainer = join(TEMP, "jarvis", "maintainer")
+    git(TEMP, "clone", "-q", "git@lab.acme.test:team/jarvis.epics.git", maintainer)
+    git(
+      maintainer,
+      "-c",
+      "commit.gpgsign=false",
+      "commit",
+      "-q",
+      "--allow-empty",
+      "-m",
+      "First commit of the epic repo"
+    )
+    git(maintainer, "push", "-q", "-u", "origin", `HEAD:${branch}`)
+
+    // epic init again:  our commits on top of theirs, pushed, and the team let push
+    const again = await withGlab(lab, () => new RepoInit({ main: app }).init())
+    expect(again.remote).toMatchObject({ action: "already", pushed: true })
+    expect(again.remote.refusal).toBeUndefined()
+    const bare = join(TEMP, "lab", "team", "jarvis.epics.git")
+    const log = git(TEMP, "--git-dir", bare, "log", "--format=%s", branch).trim().split("\n")
+    expect(log.at(-1)).toBe("First commit of the epic repo")
+    expect(log).toContain("The epic repo:  empty")
+    const colorFile = relative(join(TEMP, "jarvis", "jarvis.epics"), report.color!.file!)
+    expect(git(TEMP, "--git-dir", bare, "show", `${branch}:${colorFile}`)).toMatch(/green/)
+    expect(said(again).some((line) => /^ {2}pushed to +git@lab\.acme\.test:team\/jarvis\.epics\.git$/.test(line))).toBe(
+      true
+    )
+    expect(said(again).some((line) => /Sharing isn't working/.test(line))).toBe(false)
+    expect(said(again)).toContain("Your plans are shared now:  pushed to git@lab.acme.test:team/jarvis.epics.git")
+    expect(readFileSync(lab.log, "utf8")).toMatch(
+      /--method DELETE projects\/team%2Fjarvis\.epics\/protected_branches\//
+    )
+  })
+})
+
+/** The branch an earlier `epic init` put its two files on, for a base branch that takes only pull requests. */
+const SETUP = "epic-setup"
 
 /** A code repo `<TEMP>/<name>/<name>` with one commit, nothing set up for epics. */
 /**
@@ -697,6 +913,73 @@ esac
   )
   chmodSync(command, 0o755)
   return { command, repos, log }
+}
+
+/**
+ * A stand-in `glab` beside the code repo at `app`, on `gitlab.acme.com`, logged in as `ana`, `team` a group:
+ * `POST projects` makes a BARE repo under `<TEMP>/lab/`, its address `git@lab.acme.test:team/<name>.git` (which the
+ * test's git config sends there), refusing its first push as GitLab does when `refuse`;  `open`:  its answer to an open merge request's search.
+ * Every call logged in `log`.
+ */
+function stubGlab(app: string, { refuse = false, open = "[]" }: { refuse?: boolean; open?: string } = {}) {
+  const dir = dirname(app)
+  const command = join(dir, "glab")
+  const log = join(dir, "glab.log")
+  const lab = join(TEMP, "lab")
+  const hook = `#!/bin/sh
+cat >/dev/null
+echo "GitLab:" >&2
+echo "You cannot push the initial commit because the default branch is" >&2
+echo "protected and your role does not allow it." >&2
+echo "" >&2
+echo "To resolve this, either:" >&2
+echo "- Ask a Maintainer to push the initial commit." >&2
+exit 1
+`
+  writeFileSync(join(dir, "pre-receive"), hook, { mode: 0o755 })
+  // the shell's own `${...}` written `\${...}`:  this is a template
+  writeFileSync(
+    command,
+    `#!/bin/sh
+echo "$*" >> "${log}"
+H="--hostname gitlab.acme.com"
+for arg in "$@"; do
+  case "$arg" in name=*) name="\${arg#name=}" ;; esac
+  last="$arg"
+done
+case "$*" in
+  "version") echo "glab 1.50.0" ;;
+  "auth status $H") ;;
+  "api $H user") echo '{"id":1,"username":"ana"}' ;;
+  "api $H groups/team") echo '{"id":7}' ;;
+  "api $H --method POST projects "*)
+    mkdir -p "${lab}/team" && git init -q --bare "${lab}/team/$name.git"
+    ${refuse ? `cp "${join(dir, "pre-receive")}" "${lab}/team/$name.git/hooks/pre-receive"` : ":"} ;;
+  *protected_branches?per_page=100) echo '[{"name":"main"},{"name":"master"}]' ;;
+  "api $H --method DELETE "*) ;;
+  *merge_requests*state=opened*) echo '${open}' ;;
+  *merge_requests*) echo '[]' ;;
+  "api $H projects/team%2F"*)
+    path="\${last#projects/team%2F}"
+    printf '{"ssh_url_to_repo":"git@lab.acme.test:team/%s.git","http_url_to_repo":"https://lab.acme.test/team/%s.git"}\n' "$path" "$path" ;;
+  *) echo "stub glab:  $*" >&2; exit 1 ;;
+esac
+`
+  )
+  chmodSync(command, 0o755)
+  return { command, log }
+}
+
+/** `work()`, with `$SPELL_EPIC_GLAB` naming the stand-in `glab`, put back after. */
+async function withGlab<T>(glab: { command: string }, work: () => Promise<T>): Promise<T> {
+  const was = process.env.SPELL_EPIC_GLAB
+  process.env.SPELL_EPIC_GLAB = glab.command
+  try {
+    return await work()
+  } finally {
+    if (was === undefined) delete process.env.SPELL_EPIC_GLAB
+    else process.env.SPELL_EPIC_GLAB = was
+  }
 }
 
 /** `work()`, with `$SPELL_EPIC_GH` naming the stand-in `gh`, put back after. */
