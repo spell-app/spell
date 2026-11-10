@@ -677,7 +677,7 @@ class ProgramPlaces {
       for (const [name, info] of each.declared) {
         if (seen.has(name)) continue
         seen.add(name)
-        if (selected.has(name)) continue
+        if (selected.has(name) || info.inPlaces === false) continue
         const whenUnset = (target: object) => {
           if (isOnlyShowing() || isWhileReading()) return
           if (this.things?.placeOf(target as Thing)) this.askWhole(Class)
