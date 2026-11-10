@@ -41,8 +41,8 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * A provider for spellx files, `Card.spellml`:  read by a spellx parser, English's.
-   * - CONSIDER:  each file's own language (`Carta.es.spellml`):  a tokens provider is asked for lines, never a file.
+   * A provider for tag-shaped files (`SP.formOfText()`):  read by a spellx parser, English's.
+   * - CONSIDER:  each file's own language (`Carta.es.spell`):  a tokens provider is asked for lines, never a file.
    */
   static forSpellx(): SpellTokensProvider {
     const props = { module: "spellx colouring", form: "spellx" } as P.ParserProps

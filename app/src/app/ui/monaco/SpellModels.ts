@@ -141,7 +141,7 @@ export class SpellModels {
     const uri = monaco.Uri.parse(AppAddresses.uriOf(file.path))
     const model =
       monaco.editor.getModel(uri) ??
-      monaco.editor.createModel(file.contents ?? "", SpellMonaco.languageForPath(file.path), uri)
+      monaco.editor.createModel(file.contents ?? "", SpellMonaco.languageForPath(file.path, file.contents), uri)
     const listener = model.onDidChangeContent(() => this.modelEdited(file, model))
     const stopContents = observe(() => this.whenContentsChange(file, model))
     const stopParse = file instanceof SP.SpellFile ? observe(() => this.whenParsed(file, model)) : undefined
@@ -165,6 +165,7 @@ export class SpellModels {
   private modelEdited(file: SP.AnySpellFile, model: monaco.editor.ITextModel): void {
     const text = model.getValue()
     if (text === file.contents) return
+    this.followShape(file, model)
     file.isDirty = true
     if (file instanceof SP.SpellFile) void file.project.updateText(file, text)
     else {
@@ -192,6 +193,13 @@ export class SpellModels {
   private contentsChanged(file: SP.AnySpellFile, model: monaco.editor.ITextModel): void {
     const { contents } = file
     if (contents !== undefined && !model.isDisposed() && contents !== model.getValue()) model.setValue(contents)
+    if (!model.isDisposed()) this.followShape(file, model)
+  }
+
+  /** A spell file's first or last tag typed or deleted:  `model` colours as its new shape (`SP.formOfText()`). */
+  private followShape(file: SP.AnySpellFile, model: monaco.editor.ITextModel): void {
+    const language = SpellMonaco.languageForPath(file.path, model.getValue())
+    if (language !== model.getLanguageId()) monaco.editor.setModelLanguage(model, language)
   }
 
   /**

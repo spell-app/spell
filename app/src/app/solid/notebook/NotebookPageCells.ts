@@ -108,12 +108,12 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a `.spellml` file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
+   * Does `file`, a tag-shaped file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
    * - What the palette asks before offering a page's own row, a new view (epic `notebook` P5).
    * - Read and kept as `holdsNotebook()` is.
    */
   static holdsDrawnPage(file: SP.AnySpellFile): boolean {
-    return file.path.endsWith(".spellml") && NotebookPageCells.pagesIn(file).drawsBody
+    return "form" in file && file.form === "spellx" && NotebookPageCells.pagesIn(file).drawsBody
   }
 
   /**

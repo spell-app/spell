@@ -422,7 +422,7 @@ export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell
  */
 export function loadCodeSpellTwin(projectName: TestProjectName): SpellSourceFile[] {
   return loadFixtureProject(projectName).map((file) => {
-    if (!SP.isSpellmlName(file.path)) return file
+    if (SP.formOfText(file.contents, file.path) !== "spellx") return file
     const path = file.path.replace(/(ml|x)$/, "")
     return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, bareNameOf(projectName), `.${path}`), "utf8") }
   })
