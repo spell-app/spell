@@ -1623,33 +1623,34 @@ describe("<epic-page> stages", () => {
     ReviewClient.adopt(undefined)
   })
 
-  test("overview:  only the Overview, Questions and Caveats show, numbered as they show (the Judgement calls too, holding an item:  I191);  the toolbar's chips count only them", async () => {
+  // epic `epic-engine` P70 (Owen, 2026-11-09:  "OK to show phases when in overview stage, but put as `P1. DRAFT: blah blah`")
+  test("overview:  every section holding something shows, numbered in a row;  the toolbar's chips count them all", async () => {
     const host = await render(stagedPage("overview"))
     await vi.waitFor(() =>
-      expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Judgement calls", "4. Todo"])
+      expect(shownBlocks(host)).toEqual([
+        "1. Overview",
+        "2. Phases",
+        "3. Questions",
+        "4. Judgement calls",
+        "5. Todo",
+        "6. Log"
+      ])
     )
-    // the step label says the stage, not a phase that doesn't show
+    // the step label says the stage, not a phase
     expect(step(host)?.words).toBe("OVERVIEW")
-    // the file still holds them:  only a view
-    expect(host.querySelectorAll(":scope > epic-section")).toHaveLength(5)
     await vi.waitFor(() =>
       expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(4)
     )
   })
 
-  test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
+  test("the stage no longer decides what shows:  phases, building, or no stage (every page before stages) alike", async () => {
     const phases = await render(stagedPage("phases"))
-    await vi.waitFor(() =>
-      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Judgement calls", "5. Todo"])
-    )
+    await vi.waitFor(() => expect(shownBlocks(phases)).toHaveLength(6))
     expect(step(phases)?.words).toBe("PHASES")
     for (const stage of ["building", ""]) {
       const host = await render(stagedPage(stage))
       await vi.waitFor(() => expect(shownBlocks(host)).toHaveLength(6))
     }
-    // the stage moved on (the live update patches the attribute):  the sections follow
-    phases.setAttribute("stage", "building")
-    await vi.waitFor(() => expect(shownBlocks(phases)).toHaveLength(6))
   })
 
   // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane");  its countdown I181
@@ -1665,7 +1666,7 @@ describe("<epic-page> stages", () => {
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
     expect(plane(host).textContent!.trim()).toBe("")
     expect(step(host)?.words).toBe("OVERVIEW")
-    // none on the Phases section, which this stage hides anyway
+    // none on the Phases section:  the page isn't agreeing its phases yet
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
     expect(accept()!.title).toBe(
       "The Overview is agreed:  Claude writes the phases next · 2 questions open · " +

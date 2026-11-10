@@ -146,9 +146,10 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
- *   - `overview`:  only the Overview, Questions and Todo show;  `phases`:  the Phases and Issues too;  `building` (or none):
- *     everything.  Each section hides itself (`<epic-section>`'s `:state(offstage)`), and the toolbar lists only
- *     what shows (`spell-doc-runtime.js` reads the same rule)
+ *   - `overview`:  a phase's title reads `P1. DRAFT: ...`;  `phases`, `building` (or none):  as ever
+ *   - the stage no longer decides what shows (epic `epic-engine` P70):  an empty section hides itself, at every stage,
+ *     unless you could add to it right now (`PageStages.hides()`, `<epic-section>`'s `:state(hidden)`), and the
+ *     toolbar lists only what shows (`spell-doc-runtime.js` reads the same rule)
  *   - Send is the paper plane in every stage (epic `epic-engine` I180;  Owen, 2026-10-29:  "This should just be normal
  *     paper plane");  the stage's Accept is on the title row of the work it accepts (`<epic-stage-button>`):
  *     "Accept Overview" on the Overview's (Q14), "Accept Phases" on the Phases section's;  the step label says the stage
@@ -1602,7 +1603,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /** The sections below that have a state filter (`DOMEpicSectionElement`):  the item sections. */
   private filterHosts(): FilterHost[] {
-    // not the sections the page's stage hides (P29):  their chips would count what doesn't show
+    // not the sections hidden for being empty (P70):  nothing to count
     return Array.from(this.domElement.querySelectorAll<FilterHost>(SECTIONS)).filter(
       (section) => !PageStages.hides(section)
     )

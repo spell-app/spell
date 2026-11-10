@@ -32,6 +32,7 @@ import {
   COUNT_CHANGED,
   COUNTED,
   EMPTY,
+  EMPTY_LINES,
   FILTER,
   FILTER_KEY,
   FILTER_STATES,
@@ -148,7 +149,7 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - an ⌥-click (epic `epic-engine` I166):  only that colour, whatever showed
  *   - a filtered list says `3 hidden · show all` under it
  *   - a link landing on an item it hides shows that item anyway, until the reader picks a chip again
- *     (`showLinked()`, epic `epic-engine` I191);  so does a section the page's stage hides
+ *     (`showLinked()`, epic `epic-engine` I191);  so does a section hidden for being empty
  *   - each item it hides is marked `data-epic-filtered` (page state, never in the file:  the live patch keeps it),
  *     which the page sheet hides (`EpicSection.runs.css`;  a `::slotted(#id)` rule per item before epic `epic-engine`
  *     P45)
@@ -176,7 +177,10 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   Send's place before (P29)
  * - No Plan changes box above the phases any more (Owen, 2026-10-11):  each phase draws its own (`<epic-phase>`).
  *   An older doc's copies (`<epic-updated slot="changes">`, T14) have no slot to show in;  the tool removes them.
- * - An item section with no items says "None yet".
+ * - EMPTY (epic `epic-engine` P70;  Owen, 2026-11-09:  "We should just go ahead and hide them in all modes if they are
+ *   empty"), it hides, at every stage (`PageStages.hides()`, `:state(hidden)`), unless you could add to it right now:
+ *   its kind has a New button and the page is being reviewed.  Those keep their title, a short line on it that says
+ *   what's missing ("Nothing to do", `EMPTY_LINES`) and the New button (`emptyLine()`).
  * - A REPORT (`kind="report"`, P14):  prose a run wrote for Owen to read (an overnight `/bedtime` report).
  *   - right after the Overview, on the page's section band
  *   - titled its own (`title`), never numbered, so the sections after it keep theirs
@@ -270,8 +274,11 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return this.isConnected ? this.place(this.kind) : ""
   })
 
-  /** An item section with nothing in it, and no part on its way. */
-  readonly empty = createMemo(() => this.holdsItems() && !this.slots.hasContent("") && !this.source)
+  /** A section of a kind with an empty line (`EMPTY_LINES`), with nothing in it and no part on its way. */
+  readonly empty = createMemo(() => {
+    void this.slots.filledSlots
+    return !isServer && (this.kind ?? "") in EMPTY_LINES && PageStages.isEmpty(this.domElement)
+  })
 
   /**
    * Its counted children (items, or phases), read again whenever a child comes, goes or changes its status or state:
@@ -392,21 +399,22 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   ////////////////
 
   /**
-   * Hidden by its page's STAGE (`<epic-page stage>`, epic `epic-engine` P29):  a top-level section the stage doesn't
-   * show (`PageStages.hides()`), drawn as nothing (`:state(offstage)`);  still in the file, and the tool reads it.
-   * - read again on every layout change (the page's `layout`:  its `stage` changing too)
+   * Hidden for being EMPTY (`PageStages.hides()`, epic `epic-engine` P70):  a top-level section with nothing in it,
+   * that you couldn't add to right now, drawn as nothing (`:state(hidden)`);  still in the file, and the tool reads it.
+   * - read again on every layout change (the page's `layout`:  its children, and its `reviewing`, changing too)
+   * - a link to it still shows it (`linkedHere`)
    */
-  @E.cssState("offstage")
-  get isOffStage(): boolean {
+  @E.cssState("hidden")
+  get isHidden(): boolean {
     void this.layout
     return this.isConnected && PageStages.hides(this.domElement) && !this.linkedHere
   }
 
   /**
-   * What a link last landed on (the page's `linked`), when it's this section or inside it:  shown, whatever its page's
-   * stage or its filter hides (epic `epic-engine` I191).
+   * What a link last landed on (the page's `linked`), when it's this section or inside it:  shown, whatever would hide
+   * it (epic `epic-engine` I191).
    * - Owen, 2026-10-31, on the rust epic's P2 To review chips:  "Clicking J2 is broken" -- J2 was in the Judgement
-   *   calls, which the page's `phases` stage hides
+   *   calls, which the page's `phases` stage hid then
    */
   get linkedHere(): Element | null {
     const linked = this.pageLinked?.get() ?? null
@@ -428,10 +436,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return hidden
   }
 
-  /** Its title has tools:  the Phases gear, or a state filter with chips (or the marked badge alone). */
+  /** Its title has tools:  the Phases gear, a state filter with chips (or the marked badge alone), or its empty line. */
   @E.cssState("tools")
   get hasTools(): boolean {
-    return this.kind === "phases" || this.hasFilter()
+    return this.kind === "phases" || this.hasFilter() || this.empty()
   }
 
   ////////////////
@@ -487,26 +495,28 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return undefined
   }
 
-  /** Its count's parts the toolbar's badges show, as one string:  what `announceCount()` follows. */
-  get badgeCount(): string {
+  /** What the toolbar shows of it, as one string:  whether it's hidden, and its count's parts.  `announceCount()` follows it. */
+  get toolbarFacts(): string {
     const count = this.count()
-    return count ? `${count.attention} ${count.replied ?? 0} ${count.running ?? 0}` : ""
+    const parts = count ? `${count.attention} ${count.replied ?? 0} ${count.running ?? 0}` : ""
+    return `${this.isHidden ? "hidden" : "shown"} ${parts}`
   }
 
-  /** The badge count it last announced;  `undefined` before its first. */
+  /** The toolbar facts it last announced;  `undefined` before its first. */
   private announced: string | undefined
 
   /**
-   * Its badge count changed after its first:  say so (`COUNT_CHANGED`), so the docs runtime draws the toolbar's
-   * badges again from the live state, as its own chips draw (Owen, 2026-10-26:  "badges don't match up").
-   * - a change of its markup re-counts the page by itself (the live update);  this is for the review inbox's
+   * What the toolbar shows of it changed after its first:  say so (`COUNT_CHANGED`), so the docs runtime draws the
+   * toolbar again from the live state, as its own chips draw (Owen, 2026-10-26:  "badges don't match up").
+   * - a change of its markup re-counts the page by itself (the live update);  this is for the review inbox's, and for a
+   *   section coming or going as a review starts and ends
    * - SIDE EFFECT:  dispatches on its DOM element
    */
-  @E.onChange("badgeCount")
-  protected announceCount(badgeCount: string) {
+  @E.onChange("toolbarFacts")
+  protected announceCount(toolbarFacts: string) {
     const before = this.announced
-    this.announced = badgeCount
-    if (isServer || before === undefined || before === badgeCount) return
+    this.announced = toolbarFacts
+    if (isServer || before === undefined || before === toolbarFacts) return
     this.domElement.dispatchEvent(new CustomEvent(COUNT_CHANGED, { bubbles: true, composed: true }))
   }
 
@@ -538,7 +548,11 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         kind === "phases"
           ? () => (
               <>
+                {this.emptyLine()}
                 {this.filter()}
+                <Show when={this.empty() && this.reviewState.reviewing() && this.newKind()}>
+                  {(newKind) => this.newButton(newKind())}
+                </Show>
                 {/* Accept Phases, before the gear, while the phases are agreed (I180) */}
                 {this.renderStageButton("phases", this.reviewState.reviewing)}
                 {this.gear()}
@@ -556,6 +570,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
               : this.holdsItems()
                 ? () => (
                     <>
+                      {this.emptyLine()}
                       <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
                         {(testing) => this.testButton(testing)}
                       </Show>
@@ -569,11 +584,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       before: kind === "overview-part" ? () => this.saidNote() : undefined,
       after: () => (
         <>
-          <Show when={this.empty()}>
-            <p class={EMPTY} part={this.partForName("empty")}>
-              {this.translationForKey("noneYet")}
-            </p>
-          </Show>
           <Show when={this.hidden().length}>{this.hiddenNote()}</Show>
           {/* Claude's status cards (P13):  at the end of its body, above the note box */}
           <Show when={kind === "overview-part"}>
@@ -621,6 +631,20 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     }
   }
 
+  /**
+   * With nothing in it:  a short line on its title saying what's missing, there while it's folded (epic `epic-engine`
+   * P70).  A section only draws empty while you could add to it, or on a link to it.
+   */
+  private emptyLine(): JSX.Element {
+    return (
+      <Show when={this.empty()}>
+        <span class={EMPTY} part={this.partForName("empty")}>
+          {this.translationForKey(EMPTY_LINES[this.kind as keyof typeof EMPTY_LINES])}
+        </span>
+      </Show>
+    )
+  }
+
   /** The title:  `3. Questions`, an Overview sub-section's `1.2 <its title>`, or a report's own. */
   private heading(): JSX.Element {
     const look = this.look()
@@ -641,7 +665,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * A Todo, Questions, Issues or Manual tests section's NEW button, on its title, while reviewed:
-   * comment dots, round, its name the tooltip.
+   * comment dots, round, its name the tooltip;  the Phases section's too, while it has no phases (epic `epic-engine` P70).
    * - Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers".
    * - A click opens the section, then the form at its end (`openNewForm()`).
    */
@@ -1261,8 +1285,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * `element`'s place, from 1, among its parent's children matching `selector`;  0 when it isn't one.
-   * - `shown`:  among those its page's stage shows only (`PageStages.hides()`):  Questions is `2.` while the Overview
-   *   is agreed, not `3.` after a hidden Phases
+   * - `shown`:  among those that show only (`PageStages.hides()`):  Questions is `2.` after a hidden Phases, not `3.`
    */
   private static placeOf(element: Element, selector: string, { shown = false } = {}): number {
     const siblings = Array.from(element.parentElement?.querySelectorAll(selector) ?? []).filter(
