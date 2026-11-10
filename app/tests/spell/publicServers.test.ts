@@ -254,7 +254,10 @@ describe("Open-Meteo, through its Spell", () => {
   })
 
   test("every forecast, without where it's for, won't compile:  it says what to give", () => {
-    const lines = withSpell(readFileSync(OPEN_METEO_FILE, "utf8"), "set found to every forecast where its latitude is 52.52")
+    const lines = withSpell(
+      readFileSync(OPEN_METEO_FILE, "utf8"),
+      "set found to every forecast where its latitude is 52.52"
+    )
     expect(() => runSpellFiles([{ path: "/OpenMeteo.api.spell", contents: lines }])).toThrow(
       /forecasts are only found by their latitude, longitude/
     )
@@ -376,7 +379,9 @@ describe("The Met Museum, through its Spell", () => {
   test("every artwork matching the search compiles to the Met's own search;  a place that doesn't search all of each thing refuses it", () => {
     const api = readFileSync(MET_MUSEUM_FILE, "utf8")
     const reads = (lines: string) => () =>
-      runSpellFiles([{ path: "/MetMuseum.api.spell", contents: withSpell(lines, 'set found to every artwork matching "sun"') }])
+      runSpellFiles([
+        { path: "/MetMuseum.api.spell", contents: withSpell(lines, 'set found to every artwork matching "sun"') }
+      ])
     expect(reads(api)).not.toThrow()
     expect(reads(api.replace(/\t- it searches everything with .*\n/, ""))).toThrow(
       /artworks are found this way only in a place that searches all of each thing/

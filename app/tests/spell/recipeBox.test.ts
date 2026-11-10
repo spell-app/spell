@@ -68,12 +68,14 @@ type Program = {
 /** The built-in examples:  what people run, in the editor. */
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
-/** The lines a program starts with, up to its first type. */
-const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) ")/m
+/** The lines a program starts with, up to its first type:  in tags, its first template (epic `language` P40). */
+const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) "|^<(?:spell|encanto)-)/m
 
-/** `program` with its place's lines replaced. */
+/** `program` with its place's lines replaced;  in a file in tags, as a `<spell>` block. */
 function withPlace(program: Program, lines: string): Program {
-  return { ...program, source: program.source.replace(PLACE_LINES, `${lines}\n\n`) }
+  const isTagged = SP.formOfText(program.source, program.path) === "spellx"
+  const said = isTagged ? `<spell>\n${lines.replace(/^/gm, "\t")}\n</spell>` : lines
+  return { ...program, source: program.source.replace(PLACE_LINES, `${said}\n\n`) }
 }
 
 /** What each back-end's lines say:  all that differs. */
