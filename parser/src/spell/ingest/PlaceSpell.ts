@@ -243,16 +243,22 @@ const TIME_WORDS: ReadonlyArray<readonly [string, readonly string[]]> = [
 ]
 
 /**
- * Each of Spell's two times `description` holds in a date field of its own by a usual name:  the time, and that field as the server names it.
+ * Each of Spell's two times `description` holds in a date field of its own by a usual name:  the time, and what a line calls that field.
  * - A field already called `created` or `modified` needs no line.
  * - Only a field that's really a date:  a `created` text says nothing of when.
+ * - In its words, `"created at"`, which find `created_at` and `createdAt` alike (`FieldNames`, epic `data` J237).
+ *   - One word, or words two of the row's fields share:  the server's spelling, the only thing that says which.
  */
 function timeFieldsOf({ fields }: CollectionDescription): Array<[string, string]> {
   const dates = Object.entries(fields).filter(([, { type, leftOut }]) => type === "date" && !leftOut)
+  const wordsOfEach = Object.keys(fields).map(wordsFor)
   return TIME_WORDS.flatMap(([time, words]) => {
     if (time in fields) return []
     const found = words.flatMap((each) => dates.filter(([name]) => wordsFor(name) === each)).at(0)
-    return found ? [[time, found[0]] as [string, string]] : []
+    if (!found) return []
+    const inWords = wordsFor(found[0])
+    const isOnlyOne = wordsOfEach.filter((each) => each === inWords).length === 1
+    return [[time, isOnlyOne && inWords.includes(" ") ? inWords : found[0]] as [string, string]]
   })
 }
 
@@ -461,6 +467,7 @@ function namedLinkTypes(
 
 /**
  * What the source calls a field, when its words don't find it:  `, stored as "avg_ht"` on its own line.
+ * - Its words finding it is the rule for a line's named field too:  `its "created at"` finds `created_at` (`FieldNames`).
  * - `hair_color`, `hairColor` and `Hair Color` all find `its "hair color"` by its words (`FieldNames`):  nothing to say.
  */
 function storedAsFor(field: string, { words }: FieldDescription): string {
