@@ -3257,7 +3257,7 @@
           "name": "copy"
         }
       ],
-      "description": "Send what's changed in `copy`, a draft:  one group, shown at once.  What `save the draft` compiles to.  - throws for anything else"
+      "description": "Send what's changed in `copy`, a draft:  one group, shown at once, one undo step.  What `save the draft` compiles to.  - throws for anything else"
     },
     {
       "kind": "method",
