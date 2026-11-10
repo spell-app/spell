@@ -158,20 +158,21 @@ And two markers keep a second look short:
 ## Agreeing the plan:  three stages, each ended by your Accept
 
 No plan mode, and no plan in a chat:  a new epic is agreed on its page, from its first minute.
-Its sections appear as the plan gets that far.
+Its sections appear as they get something in them.
 
-| Stage | What shows | How it ends |
+| Stage | What's different | How it ends |
 | --- | --- | --- |
-| `overview` | the Overview, Questions and Todo | Accept Overview, on the Overview's title row |
-| `phases` | the Phases and Issues too;  each phase has Looks good and Defer, or Accept and Defer once its build plan is up | Accept Phases, on the Phases section's title row:  one press takes the phases and every plan waiting |
-| `building` | everything | every phase built, one after another, with no stop between them |
+| `overview` | its phases, if any, are titled `P1. DRAFT: ...` | Accept Overview, on the Overview's title row |
+| `phases` | each phase has Looks good and Defer, or Accept and Defer once its build plan is up | Accept Phases, on the Phases section's title row:  one press takes the phases and every plan waiting |
+| `building` | each phase has Do this and Revisit | every phase built, one after another, with no stop between them |
 
 - Each answer to a question rewrites the Overview, its changed words orange for 3 days:  nothing to approve.
 - An Accept counts down 5 minutes, a green ring round its thumbs up.
   A second press calls it off;  only when the ring ends does the agent hear it.
 - The button's tooltip counts the open questions:  a reminder, never a lock.
-- A hidden section is still in the file:  a stage is only a view.
-  Judgement calls and Issues show at any stage, once they hold an item.
+- A section hides when it's empty, at every stage, and shows the moment it holds something.
+  - While you're reviewing, an empty section with a New button stays:  its title, a short line and the button.
+  - A hidden section is still in the file:  hiding is only a view.
 
 ## A review round:  your marks wait until you send them
 

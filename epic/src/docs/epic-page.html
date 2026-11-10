@@ -924,14 +924,14 @@
             <ui-icon slot="icon" name="route"></ui-icon>
             <p>
               A page goes through three stages (epic <code>epic-engine</code> P29): the Overview is agreed first, then
-              the phases, then it's built. Its <code>stage</code> says which, and decides what the page shows.
+              the phases, then it's built. Its <code>stage</code> says which.
             </p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
                   <tr>
                     <th>Stage</th>
-                    <th>What shows</th>
+                    <th>Its phases' titles</th>
                     <th>Its Accept</th>
                     <th>An open phase's pills</th>
                   </tr>
@@ -939,19 +939,19 @@
                 <tbody>
                   <tr>
                     <td><code>overview</code></td>
-                    <td>the Overview, Questions, Todos</td>
+                    <td><code>P1. DRAFT: Name</code></td>
                     <td>Accept Overview, on the Overview's title row</td>
-                    <td>(no phases show)</td>
+                    <td>Do this, Revisit</td>
                   </tr>
                   <tr>
                     <td><code>phases</code></td>
-                    <td>the Phases too</td>
+                    <td><code>P1 · Name</code></td>
                     <td>Accept Phases, on the Phases section's title row</td>
                     <td>Looks good, Defer</td>
                   </tr>
                   <tr>
                     <td><code>building</code>, or none</td>
-                    <td>everything</td>
+                    <td><code>P1 · Name</code></td>
                     <td>none:  each phase's plan is accepted on its row</td>
                     <td>Do this, Revisit</td>
                   </tr>
@@ -960,8 +960,10 @@
             </ui-table>
             <ul>
               <li>
-                Hiding is only a view: the file still holds every section, and the toolbar lists only what shows. The
-                sections are numbered as they show (<code>2. Questions</code> while the Overview is agreed).
+                A section hides when it's empty, at every stage, and shows whenever it holds something (epic
+                <code>epic-engine</code> P70). While the page is reviewed, an empty section with a New button stays: its
+                title, a short line and the button. Hiding is only a view: the file still holds every section, the
+                toolbar lists only what shows, and the sections are numbered as they show.
               </li>
               <li>
                 The header's Send is the paper plane in every stage (epic <code>epic-engine</code> I180;  2026-10-29:

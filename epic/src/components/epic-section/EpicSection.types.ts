@@ -204,8 +204,22 @@ export const FOLD_KEY = "spell-folds:"
 /** The page's NUMBERED blocks, as siblings:  the Overview and the sections, but a report and "While you were out". */
 export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:not([kind="${REPORT}"], [kind="${AWAY}"])`
 
-/** The kinds that hold items:  an empty one says "none yet". */
+/** The kinds that hold items. */
 export const ITEM_KINDS = ["questions", "judgements", "todos", "issues", "tests"] as const
+
+/**
+ * Each section kind that can stand empty => the short line on its title, a text key (`EpicSection.emptyLine()`).
+ * - the five with a New button stay, empty, while the page is reviewed (`PageStages.canAddTo()`)
+ * - the Judgement calls have none, and only show empty on a link to them
+ */
+export const EMPTY_LINES = {
+  phases: "phasesEmpty",
+  questions: "questionsEmpty",
+  judgements: "judgementsEmpty",
+  todos: "todosEmpty",
+  issues: "issuesEmpty",
+  tests: "testsEmpty"
+} as const
 
 /**
  * The fields a phase shows or hides by its gear menu, and the Phases section's for every phase (epic `epic-engine`

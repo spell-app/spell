@@ -273,10 +273,15 @@ As `plan-doc.md`, "Ids":
   `list --json` carry it.  No migration step:  an epic with none simply names no saga.
 - `<epic-page standing>` (epic `epic-workflow`):  a STANDING epic, open for good;  each phase merges into `main` on its
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
-- `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
-  which sections the page shows (`PageStages`, `spell/epic/phases`).
-  - `overview`:  the Overview, Questions and Todo;  `phases`:  the Phases and Issues too;  `building`:  everything.
-  - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
+- `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got
+  (`PageStages`, `spell/epic/phases`).
+  - It no longer decides what shows (epic `epic-engine` P70):  a section hides when it's empty, at every stage, and
+    shows whenever it holds something.
+    - An empty section with a New button (Todo, Questions, Issues, Manual tests, Phases) stays while the page is
+      reviewed:  its title, a short line ("Nothing to do") and the button.  Outside a review it hides too.
+    - No migration step:  no markup changed.
+  - `overview`:  a phase's title reads `P1. DRAFT: <title>` (`<epic-phase>`).
+  - None (every page made before P29):  `building`.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.
   - The stage button (`<epic-stage-button>`:  Accept Overview on the Overview's title row, Accept Phases on the Phases

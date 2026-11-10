@@ -308,9 +308,10 @@ Staying in this window (step 0):  skip steps 4 and 6.
 
 NO plan mode, ever, for an epic (epic `epic-engine` P33;  2026-10-24).
 - In Codex:  nothing to avoid:  Codex has no plan mode.
-- The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
-  only the Overview, Questions and Todo until the person presses Accept Overview.
-  - Judgement calls and Issues show at ANY stage once they hold an item (epic `epic-engine` I191).
+- The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, until the
+  person presses Accept Overview.
+  - A section hides when it's empty, at every stage (epic `epic-engine` P70);  anything that holds an item shows.
+    Phases written at this stage show, titled `P1. DRAFT: ...`.
 - Three stages, each ended by the person's Accept on the title row of what it accepts (epic `epic-engine` I180;  the page
   header's before;  `epic stage <name>` prints and sets it):  Accept Overview on the Overview's, Accept Phases on the
   Phases section's, before its gear;  the header's Send stays the paper plane
@@ -1594,7 +1595,7 @@ create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future] [-
                                                     create from the template, in the Overview stage (3.), update the
                                                     docs' home page;  --future:  a future epic (9.);  create on a
                                                     future epic's doc plans it (promoted)
-stage <name> [overview|phases|building]             the page's stage:  what it shows;  the person's Accept buttons move it
+stage <name> [overview|phases|building]             the page's stage;  the person's Accept buttons move it
 add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..] [--verify ..] [--estimate 2h]
           [--after N | --before N]                  last;  just before a last Doc Review (an active or done one goes
                                                     back to do);  --after 11:  the new P12;  --before N:  the new

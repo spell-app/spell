@@ -70,7 +70,8 @@ export const TODO = "todo"
 
 /**
  * The attributes a step label or a number depends on:  a change bumps the page's layout.
- * - `stage`, the page's own (epic `epic-engine` P29):  which sections show, and a phase's review pills
+ * - `stage`, the page's own (epic `epic-engine` P29):  a phase's draft title and review pills
+ * - `reviewing`, the page's own (epic `epic-engine` P70):  which empty sections stay, with their New button
  * - `plan`, a phase's:  whether Send is ringed, waiting on Owen's Accept (`plansWaiting()`)
  */
 export const LAYOUT_ATTRIBUTES = [
@@ -80,6 +81,7 @@ export const LAYOUT_ATTRIBUTES = [
   "kind",
   "commits",
   "stage",
+  "reviewing",
   "to-accept",
   "accepted",
   "plan"
