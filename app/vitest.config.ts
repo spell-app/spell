@@ -20,7 +20,7 @@ const APP_TESTS = "tests/app"
  * less its plain unit tests, which need no editor and stay in `app:node`.
  * - The usual `yarn test` leaves these out:  they take about 15 minutes;  `yarn test:integration` runs them.
  */
-const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits).test.ts"]
+const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits|testProject).test.ts"]
 
 /**
  * spell-app's Vitest config:  one project per folder of `src/`,
@@ -55,6 +55,8 @@ const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits).tes
 export default defineConfig({
   plugins: [standardDecorators(), packageVersion(import.meta.dirname)],
   test: {
+    // fails a run that adds a folder to your real space, naming it
+    globalSetup: ["tests/realSpaceCheck.ts"],
     projects: [
       { extends: true, test: { name: "spaces", dir: "tests/spaces", environment: "node" } },
       { extends: true, test: { name: "lsp", dir: "tests/lsp" } },

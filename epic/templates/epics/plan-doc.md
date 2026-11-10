@@ -109,10 +109,12 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
   naming the branch and worktree; its prompt, decisions and review page stay. Its first phase (`add-phase`)
   plans it too
 
-The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got, so which sections show.
+The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got.
 
-- `overview`: only the Overview, Questions and Todo; `phases`: the Phases and Issues too; `building`, or none: everything. A
-  hidden section is still in the file: it's only a view
+- A section hides when it's empty, at every stage (epic `epic-engine` P70), and shows whenever it holds something. While
+  the page is reviewed, an empty section with a New button stays: its title, a short line and the button. A hidden section
+  is still in the file: it's only a view
+- `overview`: its phases, if any, are titled `P1. DRAFT: ...`
 - `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
   `building`; `epic stage <name> overview|phases|building` sets it by hand
 - meanwhile the STAGE BUTTON ends it, on the title row of the work it accepts (Q14;  epic `epic-engine` I180):

@@ -242,6 +242,12 @@ export const epicPhaseVocabulary = {
   texts: [
     ...FOLD_TEXTS,
     // `status*`:  the review controls' `todo` is Make Todo
+    {
+      key: "draftMark",
+      text: ". DRAFT: ",
+      description:
+        "Between its number and its title while the Overview is agreed:  `P1. DRAFT: <title>` (epic `epic-engine` P70)."
+    },
     { key: "statusTodo", text: "To do", description: "The status icon's name:  `todo`." },
     { key: "statusActive", text: "Under way", description: "The status icon's name:  `active`." },
     { key: "statusDone", text: "Done", description: "The status icon's name:  `done`." },

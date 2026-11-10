@@ -1853,7 +1853,7 @@
       "name": "--ui-dropdown-menu-background",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-dropdown>`'s token.  Default:  `var(--ui-surface)`"
+        "value": "`<ui-dropdown>`'s token.  Default:  `var(--ui-popup-background, var(--ui-surface))`"
       }
     },
     {
@@ -8587,7 +8587,7 @@
       "name": "--ui-select-picker-background",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-select>`'s token.  Default:  `var(--ui-surface)`"
+        "value": "`<ui-select>`'s token.  Default:  `var(--ui-popup-background, var(--ui-surface))`"
       }
     },
     {
@@ -10508,6 +10508,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-ad>`:  The ad box."
+      }
+    },
+    {
+      "name": "::part(all-items)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-toolbar>`:  `max-visible`:  the button listing every item, while some are put away."
       }
     },
     {
@@ -12610,6 +12617,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-page>`:  `theme=\"light\"`.\n- `<ui-root>`:  `theme=\"light\"`."
+      }
+    },
+    {
+      "name": ":state(limited)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-toolbar>`:  `max-visible`:  there are more items than that, so some are put away."
       }
     },
     {
