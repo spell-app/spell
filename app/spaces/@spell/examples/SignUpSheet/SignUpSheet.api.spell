@@ -5,7 +5,7 @@
 // Its tickets are kept here too:  the picnic has 40, each attendee asks for as many as their row says, and a ticket
 // an organizer confirms lets its guest into the attendees' space, where the day's details are.
 // Your event's sheet names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.
-sign up sheet is a data folder at "picnic@rs/__private/signups":
+<data-folder "sign up sheet" address="picnic@rs/__private/signups">
 	- open to sign-ups from "picnic@rs/sheet"
 	- only its attendees add rows
 	- at most 2 rows for each shift
@@ -13,51 +13,70 @@ sign up sheet is a data folder at "picnic@rs/__private/signups":
 	- each person asks for at most their "invitations" tickets
 	- confirmed tickets join "picnic@rs/__attendees"
 	- check it every 30 seconds
+</data-folder>
 
 // What everyone in the picnic sees:  who's on which shift, never an organizer's note.
-the published sheet is a projection of the sign up sheet:
-	- into "picnic@rs/sheet"
-	- showing each row's person and shift
-	- published volunteers live at "volunteers"
-	- check it every 30 seconds
+<spell>
+	the published sheet is a projection of the sign up sheet:
+		- into "picnic@rs/sheet"
+		- showing each row's person and shift
+		- published volunteers live at "volunteers"
+		- check it every 30 seconds
+</spell>
 
-a "volunteer" is a thing:
-	- it lives in the sign up sheet
-	- its "person" is text
-	- its "shift" is text
-	- its "note" is text
+<spell-thing "volunteer">
+	<spell>
+		- it lives in the sign up sheet
+	</spell>
+	<property "person">text</>
+	<property "shift">text</>
+	<property "note">text</>
+</spell-thing>
 
 // Who may sign up, and how many invitations each may ask for:  the organizers work it out from their standing and
 // their shifts ("work out the invitations", on the page).
-an "attendee" is a thing:
-	- it lives in the sign up sheet
-	- its "person" is text
-	- its "standing" is text
-	- its "invitations" is a number
+<spell-thing "attendee">
+	<spell>
+		- it lives in the sign up sheet
+	</spell>
+	<property "person">text</>
+	<property "standing">text</>
+	<property "invitations" type="number" />
+</spell-thing>
 
 // A ticket someone asked for, for a guest:  an organizer confirms it.
-a "ticket" is a thing:
-	- it lives in the sign up sheet
-	- its "person" is text
-	- its "guest" is text
-	- its "event" is text
-	- its "status" is text
+<spell-thing "ticket">
+	<spell>
+		- it lives in the sign up sheet
+	</spell>
+	<property "person">text</>
+	<property "guest">text</>
+	<property "event">text</>
+	<property "status">text</>
+</spell-thing>
 
 // Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
-my inbox is a data folder at "@rs/__inbox":
+<data-folder "my inbox" address="@rs/__inbox">
 	- check it every 30 seconds
+</data-folder>
 
 // A message in your inbox:  your invitations' count is one, in the conversation "invitations".
-a "message" is a thing:
-	- it lives in my inbox
-	- its "text" is text
-	- its "recipients" is text
-	- its "thread" is text
-	- its "page" is text
-	- its "title" is text
-	- its "line" is text
+<spell-thing "message">
+	<spell>
+		- it lives in my inbox
+	</spell>
+	<property "text">text</>
+	<property "recipients">text</>
+	<property "thread">text</>
+	<property "page">text</>
+	<property "title">text</>
+	<property "line">text</>
+</spell-thing>
 
-a "published volunteer" is a thing:
-	- it lives in the published sheet
-	- its "person" is text
-	- its "shift" is text
+<spell-thing "published volunteer">
+	<spell>
+		- it lives in the published sheet
+	</spell>
+	<property "person">text</>
+	<property "shift">text</>
+</spell-thing>

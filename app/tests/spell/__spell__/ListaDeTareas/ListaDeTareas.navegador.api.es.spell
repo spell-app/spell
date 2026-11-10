@@ -1,0 +1,16 @@
+## Guardadas en este navegador
+// Las tareas se quedan en este dispositivo, en el almacenamiento propio de este navegador:  nadie más las ve, y no se le pregunta a ningún servidor.
+// La aplicación empieza aquí, así que funciona sin servidor y sin iniciar sesión.
+almacén del navegador es una base de datos en este dispositivo
+
+una "tarea del navegador" es una tarea:
+	- vive en almacén del navegador
+	- para tirarla:
+		quitar eso de las tareas del navegador
+
+un "guardián del navegador" es un guardián de tareas:
+	- sus "tareas guardadas" es cada tarea del navegador
+	- para guardar una tarea nueva titulada (título como texto):
+		poner tarea a una nueva tarea del navegador con título = título
+		agregar tarea a las tareas del navegador
+		devolver tarea

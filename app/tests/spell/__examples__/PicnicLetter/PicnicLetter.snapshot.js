@@ -10,12 +10,12 @@ core.heading("Picnic Letter:  where its parts are read from")
 
 export class Listing extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 631, end: 651 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 667, end: 690 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "shift" is text
-  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 655, end: 674 } }) }
+  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 695, end: 717 } }) }
   get shift() { return this.getProp("shift") }
   set shift(value) { this.setProp("shift", value) }
 
@@ -29,24 +29,24 @@ export class Listing extends Thing {
     times: ["created", "modified"], select: ["person", "shift"] }
 
   // - it lives in the published sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 624, end: 655 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in the published sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 624, end: 655 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class Message extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 890, end: 908 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 987, end: 1008 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "thread" is text
-  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 912, end: 932 } }) }
+  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 1013, end: 1036 } }) }
   get thread() { return this.getProp("thread") }
   set thread(value) { this.setProp("thread", value) }
 
@@ -60,12 +60,12 @@ export class Message extends Thing {
     times: ["created", "modified"], select: ["text", "thread"] }
 
   // - it lives in my inbox
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 955, end: 975 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my inbox
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 955, end: 975 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

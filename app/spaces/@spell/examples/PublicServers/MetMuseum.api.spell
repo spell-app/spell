@@ -9,7 +9,7 @@
 // It asks for 80 requests a second at most, in its docs:  a program keeps to that.
 // Its search pages by "limit" and "offset", up to 500 at a time;  its list of every id takes neither, and comes whole.
 
-met museum is a web server at "https://collectionapi.metmuseum.org/public/collection":
+<web-server "met museum" address="https://collectionapi.metmuseum.org/public/collection">
 	- its id is its "objectID"
 	- its rows are its "objectIDs"
 	- its lists give only each one's "objectID"
@@ -19,86 +19,102 @@ met museum is a web server at "https://collectionapi.metmuseum.org/public/collec
 	- it takes up to 80 requests a second
 	- it searches everything with "q" at "/v1.1/search"
 	- artworks live at "/v1/objects"
+</web-server>
 
-an "artwork" is a thing:
-	- it lives in met museum
-	- its "highlight" is yes or no, stored as "isHighlight"
-	- its "accession number" is text
-	- its "accession year" is a number
-	- its "public domain" is yes or no, stored as "isPublicDomain"
-	- its "primary image" is text  // an address
-	- its "primary image small" is text  // an address
-	- its "additional images" is a list of text
-	- its "constituents" is a list of constituents
-	- its "department" is text
-	- its "object name" is text
-	- its "title" is text
-	- its "culture" is text
-	- its "period" is text
-	- its "dynasty" is text
-	- its "reign" is text
-	- its "portfolio" is text
-	- its "artist role" is text
-	- its "artist prefix" is text
-	- its "artist display name" is text
-	- its "artist display bio" is text
-	- its "artist suffix" is text
-	- its "artist alpha sort" is text
-	- its "artist nationality" is text
-	- its "artist begin date" is a number
-	- its "artist end date" is a number
-	- its "artist gender" is text
-	- its "artist wikidata url" is text  // an address
-	- its "artist ulan url" is text  // an address
-	- its "object date" is text
-	- its "object begin date" is a number
-	- its "object end date" is a number
-	- its "medium" is text
-	- its "dimensions" is text
-	- its "measurements" is a list of measurements
-	- its "credit line" is text
-	- its "geography type" is text
-	- its "city" is text
-	- its "state" is text
-	- its "county" is text
-	- its "country" is text
-	- its "region" is text
-	- its "subregion" is text
-	- its "locale" is text
-	- its "locus" is text
-	- its "excavation" is text
-	- its "river" is text
-	- its "classification" is text
-	- its "rights and reproduction" is text
-	- its "link resource" is text
-	- its "metadata date" is a date
-	- its "repository" is text
-	- its "object url" is text, stored as "objectURL"  // an address
-	- its "tags" is a list of tags
-	- its "object wikidata url" is text  // an address
-	- its "timeline work" is yes or no, stored as "isTimelineWork"
-	- its "gallery number" is a number
+<spell-thing "artwork">
+	<spell>
+		- it lives in met museum
+		- its "highlight" is yes or no, stored as "isHighlight"
+	</spell>
+	<property "accession number">text</>
+	<property "accession year" type="number" />
+	<spell>
+		- its "public domain" is yes or no, stored as "isPublicDomain"
+	</spell>
+	<property "primary image">text</>	// an address
+	<property "primary image small">text</>	// an address
+	<property "additional images">a list of text</>
+	<property "constituents">a list of constituents</>
+	<property "department">text</>
+	<property "object name">text</>
+	<property "title">text</>
+	<property "culture">text</>
+	<property "period">text</>
+	<property "dynasty">text</>
+	<property "reign">text</>
+	<property "portfolio">text</>
+	<property "artist role">text</>
+	<property "artist prefix">text</>
+	<property "artist display name">text</>
+	<property "artist display bio">text</>
+	<property "artist suffix">text</>
+	<property "artist alpha sort">text</>
+	<property "artist nationality">text</>
+	<property "artist begin date" type="number" />
+	<property "artist end date" type="number" />
+	<property "artist gender">text</>
+	<property "artist wikidata url">text</>	// an address
+	<property "artist ulan url">text</>	// an address
+	<property "object date">text</>
+	<property "object begin date" type="number" />
+	<property "object end date" type="number" />
+	<property "medium">text</>
+	<property "dimensions">text</>
+	<property "measurements">a list of measurements</>
+	<property "credit line">text</>
+	<property "geography type">text</>
+	<property "city">text</>
+	<property "state">text</>
+	<property "county">text</>
+	<property "country">text</>
+	<property "region">text</>
+	<property "subregion">text</>
+	<property "locale">text</>
+	<property "locus">text</>
+	<property "excavation">text</>
+	<property "river">text</>
+	<property "classification">text</>
+	<property "rights and reproduction">text</>
+	<property "link resource">text</>
+	<property "metadata date" type="date" />
+	<property "repository">text</>
+	<spell>
+		- its "object url" is text, stored as "objectURL"  // an address
+	</spell>
+	<property "tags">a list of tags</>
+	<property "object wikidata url">text</>	// an address
+	<spell>
+		- its "timeline work" is yes or no, stored as "isTimelineWork"
+	</spell>
+	<property "gallery number" type="number" />
+</spell-thing>
 
-a "constituent" is a thing:
-	- its "constituent id" is a number, stored as "constituentID"
-	- its "role" is text
-	- its "name" is text
-	- its "constituent ulan url" is text  // an address
-	- its "constituent wikidata url" is text  // an address
-	- its "gender" is text
+<spell-thing "constituent">
+	<spell>
+		- its "constituent id" is a number, stored as "constituentID"
+	</spell>
+	<property "role">text</>
+	<property "name">text</>
+	<property "constituent ulan url">text</>	// an address
+	<property "constituent wikidata url">text</>	// an address
+	<property "gender">text</>
+</spell-thing>
 
-a "measurement" is a thing:
-	- its "element name" is text
-	- its "element description" is text
-	- its "element measurements" is an element measurement
+<spell-thing "measurement">
+	<property "element name">text</>
+	<property "element description">text</>
+	<property "element measurements">an element measurement</>
+</spell-thing>
 
-an "element measurement" is a thing:
-	- its "diameter" is a number
-	- its "height" is a number
-	- its "width" is a number
-	- its "depth" is a number
+<spell-thing "element measurement">
+	<property "diameter" type="number" />
+	<property "height" type="number" />
+	<property "width" type="number" />
+	<property "depth" type="number" />
+</spell-thing>
 
-a "tag" is a thing:
-	- its "term" is text
-	- its "aat url" is text  // an address
-	- its "wikidata url" is text  // an address
+<spell-thing "tag">
+	<property "term">text</>
+	<property "aat url">text</>	// an address
+	<property "wikidata url">text</>	// an address
+</spell-thing>

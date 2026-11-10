@@ -3,73 +3,104 @@
 // Every change goes through Spell's server, under the org's rules, and is logged:
 // a Project Manager can't remove a Team Manager from this page either.
 // Your org's Admin page names its own org on the next line:  "@rs" is the Rock Society's.
-admin roles is a data folder at "@rs/__admin/roles":
+<data-folder "admin roles" address="@rs/__admin/roles">
 	- check it every 30 seconds
 	- stages live at "event_stages"
+</data-folder>
 
 // The org itself, for the page's title and as a space to design.
-an "org profile" is a thing:
-	- it lives in admin roles
-	- its "name" is text
-	- its "space" is text
+<spell-thing "org profile">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "name">text</>
+	<property "space">text</>
+</spell-thing>
 
-a "member" is a thing:
-	- it lives in admin roles
-	- its "person" is text
-	- its "name" is text
-	- its "role" is text
-	- its "role name" is text
+<spell-thing "member">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "person">text</>
+	<property "name">text</>
+	<property "role">text</>
+	<property "role name">text</>
+</spell-thing>
 
-a "team" is a thing:
-	- it lives in admin roles
-	- its "name" is text
-	- its "space" is text
+<spell-thing "team">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "name">text</>
+	<property "space">text</>
+</spell-thing>
 
-a "project" is a thing:
-	- it lives in admin roles
-	- its "name" is text
-	- its "team" is text
-	- its "space" is text
+<spell-thing "project">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "name">text</>
+	<property "team">text</>
+	<property "space">text</>
+</spell-thing>
 
-an "org role" is a thing:
-	- it lives in admin roles
-	- its "name" is text
-	- its "manages" is text
+<spell-thing "org role">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "name">text</>
+	<property "manages">text</>
+</spell-thing>
 
-a "term" is a thing:
-	- it lives in admin roles
-	- its "role" is text
-	- its "holder" is text
-	- its "manages" is text
-	- its "role name" is text
-	- its "holder name" is text
-	- its "manages name" is text
-	- its "starts" is text
-	- its "ends" is text
+<spell-thing "term">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "role">text</>
+	<property "holder">text</>
+	<property "manages">text</>
+	<property "role name">text</>
+	<property "holder name">text</>
+	<property "manages name">text</>
+	<property "starts">text</>
+	<property "ends">text</>
+</spell-thing>
 
-an "approved app" is a thing:
-	- it lives in admin roles
-	- its "name" is text
-	- its "version" is text
+<spell-thing "approved app">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "name">text</>
+	<property "version">text</>
+</spell-thing>
 
 // A designer changes a space's pages and source, whatever their role there:  a Manager publishes them.
-a "designer" is a thing:
-	- it lives in admin roles
-	- its "person" is text
-	- its "space" is text
-	- its "person name" is text
+<spell-thing "designer">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "person">text</>
+	<property "space">text</>
+	<property "person name">text</>
+</spell-thing>
 
 // An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers".
-a "stage" is a thing:
-	- it lives in admin roles
-	- its "name" is text
-	- its "moves to" is text
-	- its "moved by" is text
+<spell-thing "stage">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "name">text</>
+	<property "moves to">text</>
+	<property "moved by">text</>
+</spell-thing>
 
-a "role change" is a thing:
-	- it lives in admin roles
-	- its "at" is text
-	- its "who" is text
-	- its "did" is text
-	- its "what" is text
-	- its "why" is text
+<spell-thing "role change">
+	<spell>
+		- it lives in admin roles
+	</spell>
+	<property "at">text</>
+	<property "who">text</>
+	<property "did">text</>
+	<property "what">text</>
+	<property "why">text</>
+</spell-thing>

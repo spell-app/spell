@@ -1,0 +1,20 @@
+## Kept in a CSV file on the server
+// The tasks are one CSV file on Spell's server, this project's `__data/tasks.csv`:  a row each, under the columns its first line names.
+// Everyone who runs the app shares it, and anyone changes any row:  a CSV file has no column saying whose a row is.
+// Each change rewrites only its own line, so the file reads well in a diff;  open it in a sheet or an editor and change it,
+// and the app shows it at its next check.
+task sheet is a sheet at "tasks.csv":
+	- its id is its "id"
+	- check it every 30 seconds
+
+a "sheet task" is a task:
+	- it lives in task sheet
+	- to throw it away:
+		remove it from the sheet tasks
+
+a "sheet keeper" is a task keeper:
+	- its "kept tasks" is every sheet task
+	- to keep a new task titled (title as text):
+		set task to a new sheet task with title = title
+		add task to the sheet tasks
+		return task

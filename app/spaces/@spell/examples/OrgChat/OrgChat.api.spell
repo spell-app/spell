@@ -6,23 +6,30 @@
 // so the space's own rules hold:  everyone deletes their own messages, and its Managers anyone's.
 // Your org is named on the next two lines:  "@rs/__thread" is whichever thread the page shows, picked from the list
 // down its side, and "@rs/__threads" is that list, every thread of RS you can read.
-chat is a room at "@rs/__thread"
-my threads is a data folder at "@rs/__threads":
+<room "chat" address="@rs/__thread" />
+<data-folder "my threads" address="@rs/__threads">
 	- check it every 30 seconds
+</data-folder>
 
 // A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`.
-a "message" is a thing:
-	- it lives in chat
-	- its "text" is text
-	- its "by" is text
-	- its "sent" is a date
-	- its "thread" is text
+<spell-thing "message">
+	<spell>
+		- it lives in chat
+	</spell>
+	<property "text">text</>
+	<property "by">text</>
+	<property "sent" type="date" />
+	<property "thread">text</>
+</spell-thing>
 
 // A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.
-a "thread" is a thing:
-	- it lives in my threads
-	- its "name" is text
-	- its "side" is text
-	- its "topic" is text
-	- its "link" is text
-	- its "current" is yes or no
+<spell-thing "thread">
+	<spell>
+		- it lives in my threads
+	</spell>
+	<property "name">text</>
+	<property "side">text</>
+	<property "topic">text</>
+	<property "link">text</>
+	<property "current">yes or no</>
+</spell-thing>

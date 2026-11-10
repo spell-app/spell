@@ -11,11 +11,11 @@ core.heading("Picnic Letter:  where its parts are read from")
 
 export class Listing extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 631, end: 651 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 667, end: 690 } })
   accessor person!: string
 
   // - its "shift" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 655, end: 674 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 695, end: 717 } })
   accessor shift!: string
 
   @drawn draw() {
@@ -28,21 +28,21 @@ export class Listing extends Thing {
     times: ["created", "modified"], select: ["person", "shift"] }
 
   // - it lives in the published sheet
-  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } })
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 624, end: 655 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in the published sheet
-  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 596, end: 627 } })
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 624, end: 655 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Message extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 890, end: 908 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 987, end: 1008 } })
   accessor text!: string
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 912, end: 932 } })
+  @prop({ type: "text", declaredAt: { path: "/PicnicLetter.api.spell", start: 1013, end: 1036 } })
   accessor thread!: string
 
   @drawn draw() {
@@ -55,11 +55,11 @@ export class Message extends Thing {
     times: ["created", "modified"], select: ["text", "thread"] }
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } })
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 955, end: 975 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my inbox
-  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 866, end: 886 } })
+  @prop({ type: "date", declaredAt: { path: "/PicnicLetter.api.spell", start: 955, end: 975 } })
   accessor modified!: any /* spell: type unknown */
 }
 

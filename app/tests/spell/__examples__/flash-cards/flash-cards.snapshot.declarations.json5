@@ -43,37 +43,37 @@
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/FlashCards.spell:357-2368"
+      "defined": "/FlashCards.spell:355-2366"
     },
     {
       "property": "deck",
       "of": "Quiz",
       "datatype": "Deck",
-      "defined": "/FlashCards.spell:365-392"
+      "defined": "/FlashCards.spell:363-390"
     },
     {
       "property": "card",
       "of": "Quiz",
       "datatype": "FlashCard",
-      "defined": "/FlashCards.spell:397-457"
+      "defined": "/FlashCards.spell:395-455"
     },
     {
       "property": "known",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spell:462-492"
+      "defined": "/FlashCards.spell:460-490"
     },
     {
       "property": "tried",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spell:529-559"
+      "defined": "/FlashCards.spell:527-557"
     },
     {
       "property": "score",
       "of": "Quiz",
       "datatype": "text",
-      "defined": "/FlashCards.spell:600-731"
+      "defined": "/FlashCards.spell:598-729"
     },
     {
       "syntax": "deal a card (of {thisArg:expression})?",
@@ -88,7 +88,7 @@
       "kind": "method",
       "name": "deal a card",
       "returns": "nothing",
-      "defined": "/FlashCards.spell:767-998"
+      "defined": "/FlashCards.spell:765-996"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -102,7 +102,7 @@
       "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/FlashCards.spell:1606-2359"
+      "defined": "/FlashCards.spell:1604-2357"
     },
     {
       "syntax": "show the answer (of {thisArg:expression})?",
@@ -118,7 +118,7 @@
       "name": "show the answer",
       "returns": "nothing",
       "title": "Show the answer",
-      "defined": "/FlashCards.spell:1011-1096"
+      "defined": "/FlashCards.spell:1009-1094"
     },
     {
       "syntax": "say i knew {thisArg:expression}",
@@ -134,7 +134,7 @@
       "name": "say i knew it",
       "returns": "nothing",
       "title": "I knew it",
-      "defined": "/FlashCards.spell:1101-1291"
+      "defined": "/FlashCards.spell:1099-1289"
     },
     {
       "syntax": "say i missed {thisArg:expression}",
@@ -150,7 +150,7 @@
       "name": "say i missed it",
       "returns": "nothing",
       "title": "I missed it",
-      "defined": "/FlashCards.spell:1304-1423"
+      "defined": "/FlashCards.spell:1302-1421"
     },
     {
       "syntax": "start over (of {thisArg:expression})?",
@@ -166,7 +166,7 @@
       "name": "start over",
       "returns": "nothing",
       "title": "Start over",
-      "defined": "/FlashCards.spell:1436-1538"
+      "defined": "/FlashCards.spell:1434-1536"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
@@ -189,7 +189,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/FlashCards.spell:2444-2576"
+      "defined": "/FlashCards.spell:2442-2574"
     }
   ],
   "codeLines": [

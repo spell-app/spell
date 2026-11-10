@@ -8,17 +8,17 @@ core.heading("Reviews:  kept on this device")
 
 export class Review extends Thing {
   // - its "film title" is text
-  static { this.declareProp("filmTitle", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 321, end: 345 } }) }
+  static { this.declareProp("filmTitle", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 331, end: 358 } }) }
   get filmTitle() { return this.getProp("filmTitle") }
   set filmTitle(value) { this.setProp("filmTitle", value) }
 
   // - its "stars" is a number
-  static { this.declareProp("stars", { type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 349, end: 372 } }) }
+  static { this.declareProp("stars", { type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 363, end: 393 } }) }
   get stars() { return this.getProp("stars") }
   set stars(value) { this.setProp("stars", value) }
 
   // - its "words" is text
-  static { this.declareProp("words", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 376, end: 395 } }) }
+  static { this.declareProp("words", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 399, end: 421 } }) }
   get words() { return this.getProp("words") }
   set words(value) { this.setProp("words", value) }
 
@@ -29,12 +29,12 @@ export class Review extends Thing {
   }
 
   // - it lives in galaxy reviews
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 293, end: 319 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in galaxy reviews
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 293, end: 319 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

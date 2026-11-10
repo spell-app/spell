@@ -9,23 +9,23 @@ core.heading("Feed:  what's new across your org")
 /** A post, as its space has it:  who wrote it, what about, when, and where it's from. */
 export class Post extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 627, end: 645 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 663, end: 684 } })
   accessor text!: string
 
   // - its "topic" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 649, end: 668 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 689, end: 711 } })
   accessor topic!: string
 
   // - its "posted" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 672, end: 692 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 716, end: 739 } })
   accessor posted!: string
 
   // - its "by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 696, end: 712 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 744, end: 763 } })
   accessor by!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 716, end: 735 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 768, end: 790 } })
   accessor space!: string
 
   /** How much of it you want:  2 more of it, 1 as it comes, 0 none */
@@ -67,11 +67,11 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["text", "topic", "posted", "by", "space"] }
 
   // - it lives in my feed
-  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 632, end: 651 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my feed
-  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 632, end: 651 } })
   accessor modified!: any /* spell: type unknown */
 }
 

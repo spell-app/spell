@@ -14,25 +14,25 @@
         "placeType": "FamilyCookbook",
         "collection": "recipes"
       },
-      "defined": "/FamilyCookbook.api.spell:366-495"
+      "defined": "/FamilyCookbook.api.spell:382-548"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/FamilyCookbook.api.spell:423-442"
+      "defined": "/FamilyCookbook.api.spell:457-479"
     },
     {
       "property": "servings",
       "of": "Recipe",
       "datatype": "number",
-      "defined": "/FamilyCookbook.api.spell:446-472"
+      "defined": "/FamilyCookbook.api.spell:484-517"
     },
     {
       "property": "notes",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/FamilyCookbook.api.spell:476-495"
+      "defined": "/FamilyCookbook.api.spell:523-545"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -55,7 +55,7 @@
         "kind": "the cloud",
         "at": "/api/places/spaces/personal/family-cookbook"
       },
-      "defined": "/FamilyCookbook.api.spell:327-364"
+      "defined": "/FamilyCookbook.api.spell:334-371"
     },
     {
       "uiDefaults": {

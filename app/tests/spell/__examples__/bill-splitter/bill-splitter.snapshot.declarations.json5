@@ -109,13 +109,13 @@
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spell:324-2325"
+      "defined": "/BillSplitter.spell:320-2321"
     },
     {
       "property": "diners",
       "of": "BillSplitter",
       "datatype": "Table",
-      "defined": "/BillSplitter.spell:341-371"
+      "defined": "/BillSplitter.spell:337-367"
     },
     {
       "property": "percent",
@@ -125,25 +125,25 @@
         "dimension": "Proportion",
         "unit": "fraction"
       },
-      "defined": "/BillSplitter.spell:376-506"
+      "defined": "/BillSplitter.spell:372-502"
     },
     {
       "property": "subtotal",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:519-699"
+      "defined": "/BillSplitter.spell:515-695"
     },
     {
       "property": "tip",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:714-756"
+      "defined": "/BillSplitter.spell:710-752"
     },
     {
       "property": "total",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:761-801"
+      "defined": "/BillSplitter.spell:757-797"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -157,7 +157,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/BillSplitter.spell:807-1069"
+      "defined": "/BillSplitter.spell:803-1065"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -170,7 +170,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:1239-2316"
+      "defined": "/BillSplitter.spell:1235-2312"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -184,7 +184,7 @@
       "kind": "method",
       "name": "add someone",
       "returns": "nothing",
-      "defined": "/BillSplitter.spell:1082-1225"
+      "defined": "/BillSplitter.spell:1078-1221"
     }
   ],
   "codeLines": [

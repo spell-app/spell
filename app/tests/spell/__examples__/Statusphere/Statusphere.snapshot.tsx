@@ -16,7 +16,7 @@ export class Status extends Thing {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  @prop({ type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 561, end: 590 } })
+  @prop({ type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 574, end: 603 } })
   accessor owner!: string
 
   /** Its owner's handle, once their account says so;  else the account itself */
@@ -46,11 +46,11 @@ export class Status extends Thing {
     times: ["created", "modified"], select: ["status", "createdAt", "owner", "created"] }
 
   // a status is saved in the status board
-  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 457, end: 494 } })
+  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } })
   accessor created!: any /* spell: type unknown */
 
   // a status is saved in the status board
-  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 457, end: 494 } })
+  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } })
   accessor modified!: any /* spell: type unknown */
 }
 // -----------

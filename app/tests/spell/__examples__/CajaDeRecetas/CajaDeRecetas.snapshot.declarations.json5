@@ -19,25 +19,25 @@
         "placeType": "RecetarioFamiliar",
         "collection": "recetas"
       },
-      "defined": "/CajaDeRecetas.api.es.spell:781-916"
+      "defined": "/CajaDeRecetas.api.es.spell:775-963"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.api.es.spell:840-860"
+      "defined": "/CajaDeRecetas.api.es.spell:854-879"
     },
     {
       "property": "porciones",
       "of": "Receta",
       "datatype": "number",
-      "defined": "/CajaDeRecetas.api.es.spell:864-892"
+      "defined": "/CajaDeRecetas.api.es.spell:898-926"
     },
     {
       "property": "notas",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.api.es.spell:896-916"
+      "defined": "/CajaDeRecetas.api.es.spell:931-951"
     },
     {
       "syntax": "editar {thisArg:expression}?",
@@ -60,7 +60,7 @@
         "name": "recetario_familiar",
         "kind": "database on this device"
       },
-      "defined": "/CajaDeRecetas.api.es.spell:720-779"
+      "defined": "/CajaDeRecetas.api.es.spell:751-769"
     },
     {
       "type": "EditorDeReceta",

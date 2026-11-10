@@ -75,197 +75,197 @@
         "placeType": "Github",
         "collection": "issues"
       },
-      "defined": "/GitHub.api.spell:1703-2816"
+      "defined": "/GitHub.api.spell:1718-2993"
     },
     {
       "property": "url",
       "of": "Issue",
       "datatype": "Issue",
-      "defined": "/GitHub.api.spell:1751-1772"
+      "defined": "/GitHub.api.spell:1783-1810"
     },
     {
       "property": "repository_url",
       "asWritten": "repository url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1776-1804"
+      "defined": "/GitHub.api.spell:1816-1847"
     },
     {
       "property": "labels_url",
       "asWritten": "labels url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1823-1847"
+      "defined": "/GitHub.api.spell:1866-1893"
     },
     {
       "property": "comments_url",
       "asWritten": "comments url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1866-1892"
+      "defined": "/GitHub.api.spell:1912-1941"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1911-1935"
+      "defined": "/GitHub.api.spell:1960-1987"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1954-1976"
+      "defined": "/GitHub.api.spell:2006-2031"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1995-2016"
+      "defined": "/GitHub.api.spell:2050-2074"
     },
     {
       "property": "number",
       "of": "Issue",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:2020-2044"
+      "defined": "/GitHub.api.spell:2079-2110"
     },
     {
       "property": "title",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2048-2067"
+      "defined": "/GitHub.api.spell:2116-2138"
     },
     {
       "property": "user",
       "of": "Issue",
       "datatype": "IssueUser",
-      "defined": "/GitHub.api.spell:2071-2098"
+      "defined": "/GitHub.api.spell:2143-2173"
     },
     {
       "property": "labels",
       "of": "Issue",
       "datatype": "list of labels",
-      "defined": "/GitHub.api.spell:2102-2134"
+      "defined": "/GitHub.api.spell:2178-2213"
     },
     {
       "property": "state",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2138-2157"
+      "defined": "/GitHub.api.spell:2218-2240"
     },
     {
       "property": "locked",
       "of": "Issue",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:2161-2186"
+      "defined": "/GitHub.api.spell:2245-2273"
     },
     {
       "property": "assignees",
       "of": "Issue",
       "datatype": "list of assignees",
-      "defined": "/GitHub.api.spell:2190-2228"
+      "defined": "/GitHub.api.spell:2278-2319"
     },
     {
       "property": "comments",
       "of": "Issue",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:2232-2258"
+      "defined": "/GitHub.api.spell:2324-2357"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "Issue",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:2262-2288"
+      "defined": "/GitHub.api.spell:2363-2396"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "Issue",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:2292-2318"
+      "defined": "/GitHub.api.spell:2402-2435"
     },
     {
       "property": "author_association",
       "asWritten": "author association",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2322-2354"
+      "defined": "/GitHub.api.spell:2441-2476"
     },
     {
       "property": "issue_field_values",
       "asWritten": "issue field values",
       "of": "Issue",
       "datatype": "list of texts",
-      "defined": "/GitHub.api.spell:2358-2400"
+      "defined": "/GitHub.api.spell:2481-2526"
     },
     {
       "property": "sub_issues_summary",
       "asWritten": "sub issues summary",
       "of": "Issue",
       "datatype": "SubIssuesSummary",
-      "defined": "/GitHub.api.spell:2404-2452"
+      "defined": "/GitHub.api.spell:2531-2582"
     },
     {
       "property": "issue_dependencies_summary",
       "asWritten": "issue dependencies summary",
       "of": "Issue",
       "datatype": "IssueDependenciesSummary",
-      "defined": "/GitHub.api.spell:2456-2521"
+      "defined": "/GitHub.api.spell:2587-2655"
     },
     {
       "property": "body",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2525-2543"
+      "defined": "/GitHub.api.spell:2660-2681"
     },
     {
       "property": "reactions",
       "of": "Issue",
       "datatype": "Reaction",
-      "defined": "/GitHub.api.spell:2547-2576"
+      "defined": "/GitHub.api.spell:2686-2722"
     },
     {
       "property": "timeline_url",
       "asWritten": "timeline url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2580-2606"
+      "defined": "/GitHub.api.spell:2728-2757"
     },
     {
       "property": "performed_via_github_app",
       "asWritten": "performed via github app",
       "of": "Issue",
       "datatype": "PerformedViaGithubApp",
-      "defined": "/GitHub.api.spell:2625-2685"
+      "defined": "/GitHub.api.spell:2776-2839"
     },
     {
       "property": "state_reason",
       "asWritten": "state reason",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2689-2715"
+      "defined": "/GitHub.api.spell:2844-2873"
     },
     {
       "property": "draft",
       "of": "Issue",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:2719-2743"
+      "defined": "/GitHub.api.spell:2878-2905"
     },
     {
       "property": "pull_request",
       "asWritten": "pull request",
       "of": "Issue",
       "datatype": "PullRequest",
-      "defined": "/GitHub.api.spell:2747-2783"
+      "defined": "/GitHub.api.spell:2910-2949"
     },
     {
       "property": "assignee",
       "of": "Issue",
       "datatype": "Assignee",
-      "defined": "/GitHub.api.spell:2787-2816"
+      "defined": "/GitHub.api.spell:2954-2989"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -288,136 +288,136 @@
         "placeType": "Github",
         "collection": "contributors"
       },
-      "defined": "/GitHub.api.spell:2818-3619"
+      "defined": "/GitHub.api.spell:3010-3916"
     },
     {
       "property": "login",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2871-2890"
+      "defined": "/GitHub.api.spell:3081-3103"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2894-2915"
+      "defined": "/GitHub.api.spell:3108-3132"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2919-2943"
+      "defined": "/GitHub.api.spell:3137-3164"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2962-2987"
+      "defined": "/GitHub.api.spell:3183-3211"
     },
     {
       "property": "url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2991-3008"
+      "defined": "/GitHub.api.spell:3216-3236"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3027-3049"
+      "defined": "/GitHub.api.spell:3255-3280"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3068-3095"
+      "defined": "/GitHub.api.spell:3299-3329"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3114-3141"
+      "defined": "/GitHub.api.spell:3348-3378"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3160-3183"
+      "defined": "/GitHub.api.spell:3397-3423"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3202-3227"
+      "defined": "/GitHub.api.spell:3442-3470"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3246-3277"
+      "defined": "/GitHub.api.spell:3489-3523"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3296-3327"
+      "defined": "/GitHub.api.spell:3542-3576"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3346-3369"
+      "defined": "/GitHub.api.spell:3595-3621"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3388-3412"
+      "defined": "/GitHub.api.spell:3640-3667"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3431-3464"
+      "defined": "/GitHub.api.spell:3686-3722"
     },
     {
       "property": "kind",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3483-3519"
+      "defined": "/GitHub.api.spell:3753-3789"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3523-3551"
+      "defined": "/GitHub.api.spell:3801-3832"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "Contributor",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:3555-3584"
+      "defined": "/GitHub.api.spell:3837-3869"
     },
     {
       "property": "contributions",
       "of": "Contributor",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:3588-3619"
+      "defined": "/GitHub.api.spell:3874-3912"
     },
     {
       "type": "User",
@@ -427,219 +427,219 @@
         "placeType": "Github",
         "collection": "users"
       },
-      "defined": "/GitHub.api.spell:3621-4802"
+      "defined": "/GitHub.api.spell:3933-5311"
     },
     {
       "property": "login",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3667-3686"
+      "defined": "/GitHub.api.spell:3997-4019"
     },
     {
       "property": "number",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:3690-3730"
+      "defined": "/GitHub.api.spell:4036-4076"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3734-3755"
+      "defined": "/GitHub.api.spell:4088-4112"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3759-3783"
+      "defined": "/GitHub.api.spell:4117-4144"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3802-3827"
+      "defined": "/GitHub.api.spell:4163-4191"
     },
     {
       "property": "url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3831-3848"
+      "defined": "/GitHub.api.spell:4196-4216"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3867-3889"
+      "defined": "/GitHub.api.spell:4235-4260"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3908-3935"
+      "defined": "/GitHub.api.spell:4279-4309"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3954-3981"
+      "defined": "/GitHub.api.spell:4328-4358"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4000-4023"
+      "defined": "/GitHub.api.spell:4377-4403"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4042-4067"
+      "defined": "/GitHub.api.spell:4422-4450"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4086-4117"
+      "defined": "/GitHub.api.spell:4469-4503"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4136-4167"
+      "defined": "/GitHub.api.spell:4522-4556"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4186-4209"
+      "defined": "/GitHub.api.spell:4575-4601"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4228-4252"
+      "defined": "/GitHub.api.spell:4620-4647"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4271-4304"
+      "defined": "/GitHub.api.spell:4666-4702"
     },
     {
       "property": "kind",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4323-4359"
+      "defined": "/GitHub.api.spell:4733-4769"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4363-4391"
+      "defined": "/GitHub.api.spell:4781-4812"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "User",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:4395-4424"
+      "defined": "/GitHub.api.spell:4817-4849"
     },
     {
       "property": "name",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4428-4446"
+      "defined": "/GitHub.api.spell:4854-4875"
     },
     {
       "property": "company",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4450-4471"
+      "defined": "/GitHub.api.spell:4880-4904"
     },
     {
       "property": "blog",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4475-4493"
+      "defined": "/GitHub.api.spell:4909-4930"
     },
     {
       "property": "location",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4512-4534"
+      "defined": "/GitHub.api.spell:4949-4974"
     },
     {
       "property": "email",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4538-4557"
+      "defined": "/GitHub.api.spell:4979-5001"
     },
     {
       "property": "twitter_username",
       "asWritten": "twitter username",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4561-4591"
+      "defined": "/GitHub.api.spell:5006-5039"
     },
     {
       "property": "public_repos",
       "asWritten": "public repos",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4595-4625"
+      "defined": "/GitHub.api.spell:5044-5081"
     },
     {
       "property": "public_gists",
       "asWritten": "public gists",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4629-4659"
+      "defined": "/GitHub.api.spell:5087-5124"
     },
     {
       "property": "followers",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4663-4690"
+      "defined": "/GitHub.api.spell:5130-5164"
     },
     {
       "property": "following",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4694-4721"
+      "defined": "/GitHub.api.spell:5170-5204"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "User",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:4725-4751"
+      "defined": "/GitHub.api.spell:5210-5243"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "User",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:4755-4781"
+      "defined": "/GitHub.api.spell:5249-5282"
     },
     {
       "property": "bio",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4785-4802"
+      "defined": "/GitHub.api.spell:5288-5308"
     },
     {
       "syntax": "look at {thisArg:expression}",
@@ -687,642 +687,642 @@
     {
       "type": "IssueUser",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:4804-5592"
+      "defined": "/GitHub.api.spell:5328-6211"
     },
     {
       "property": "login",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4835-4854"
+      "defined": "/GitHub.api.spell:5356-5378"
     },
     {
       "property": "number",
       "of": "IssueUser",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4858-4898"
+      "defined": "/GitHub.api.spell:5395-5435"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4902-4923"
+      "defined": "/GitHub.api.spell:5447-5471"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4927-4951"
+      "defined": "/GitHub.api.spell:5476-5503"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4970-4995"
+      "defined": "/GitHub.api.spell:5522-5550"
     },
     {
       "property": "url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4999-5016"
+      "defined": "/GitHub.api.spell:5555-5575"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5035-5057"
+      "defined": "/GitHub.api.spell:5594-5619"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5076-5103"
+      "defined": "/GitHub.api.spell:5638-5668"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5122-5149"
+      "defined": "/GitHub.api.spell:5687-5717"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5168-5191"
+      "defined": "/GitHub.api.spell:5736-5762"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5210-5235"
+      "defined": "/GitHub.api.spell:5781-5809"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5254-5285"
+      "defined": "/GitHub.api.spell:5828-5862"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5304-5335"
+      "defined": "/GitHub.api.spell:5881-5915"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5354-5377"
+      "defined": "/GitHub.api.spell:5934-5960"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5396-5420"
+      "defined": "/GitHub.api.spell:5979-6006"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5439-5472"
+      "defined": "/GitHub.api.spell:6025-6061"
     },
     {
       "property": "kind",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5491-5527"
+      "defined": "/GitHub.api.spell:6092-6128"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5531-5559"
+      "defined": "/GitHub.api.spell:6140-6171"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "IssueUser",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:5563-5592"
+      "defined": "/GitHub.api.spell:6176-6208"
     },
     {
       "type": "Label",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5594-5824"
+      "defined": "/GitHub.api.spell:6228-6501"
     },
     {
       "property": "number",
       "of": "Label",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5619-5659"
+      "defined": "/GitHub.api.spell:6263-6303"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5663-5684"
+      "defined": "/GitHub.api.spell:6315-6339"
     },
     {
       "property": "url",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5688-5705"
+      "defined": "/GitHub.api.spell:6344-6364"
     },
     {
       "property": "name",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5724-5742"
+      "defined": "/GitHub.api.spell:6383-6404"
     },
     {
       "property": "color",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5746-5765"
+      "defined": "/GitHub.api.spell:6409-6431"
     },
     {
       "property": "default",
       "of": "Label",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:5769-5795"
+      "defined": "/GitHub.api.spell:6436-6465"
     },
     {
       "property": "description",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5799-5824"
+      "defined": "/GitHub.api.spell:6470-6498"
     },
     {
       "type": "SubIssuesSummary",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5826-5957"
+      "defined": "/GitHub.api.spell:6518-6676"
     },
     {
       "property": "total",
       "of": "SubIssuesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5864-5887"
+      "defined": "/GitHub.api.spell:6554-6584"
     },
     {
       "property": "completed",
       "of": "SubIssuesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5891-5918"
+      "defined": "/GitHub.api.spell:6590-6624"
     },
     {
       "property": "percent_completed",
       "asWritten": "percent completed",
       "of": "SubIssuesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5922-5957"
+      "defined": "/GitHub.api.spell:6630-6672"
     },
     {
       "type": "IssueDependenciesSummary",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5959-6138"
+      "defined": "/GitHub.api.spell:6693-6907"
     },
     {
       "property": "blocked_by",
       "asWritten": "blocked by",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6006-6034"
+      "defined": "/GitHub.api.spell:6737-6772"
     },
     {
       "property": "total_blocked_by",
       "asWritten": "total blocked by",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6038-6072"
+      "defined": "/GitHub.api.spell:6778-6819"
     },
     {
       "property": "blocking",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6076-6102"
+      "defined": "/GitHub.api.spell:6825-6858"
     },
     {
       "property": "total_blocking",
       "asWritten": "total blocking",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6106-6138"
+      "defined": "/GitHub.api.spell:6864-6903"
     },
     {
       "type": "Reaction",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:6140-6399"
+      "defined": "/GitHub.api.spell:6924-7249"
     },
     {
       "property": "url",
       "of": "Reaction",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6168-6185"
+      "defined": "/GitHub.api.spell:6950-6970"
     },
     {
       "property": "total_count",
       "asWritten": "total count",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6204-6233"
+      "defined": "/GitHub.api.spell:6989-7025"
     },
     {
       "property": "laugh",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6237-6260"
+      "defined": "/GitHub.api.spell:7031-7061"
     },
     {
       "property": "hooray",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6264-6288"
+      "defined": "/GitHub.api.spell:7067-7098"
     },
     {
       "property": "confused",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6292-6318"
+      "defined": "/GitHub.api.spell:7104-7137"
     },
     {
       "property": "heart",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6322-6345"
+      "defined": "/GitHub.api.spell:7143-7173"
     },
     {
       "property": "rocket",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6349-6373"
+      "defined": "/GitHub.api.spell:7179-7210"
     },
     {
       "property": "eyes",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6377-6399"
+      "defined": "/GitHub.api.spell:7216-7245"
     },
     {
       "type": "PerformedViaGithubApp",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:6401-6854"
+      "defined": "/GitHub.api.spell:7266-7804"
     },
     {
       "property": "number",
       "of": "PerformedViaGithubApp",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6445-6485"
+      "defined": "/GitHub.api.spell:7320-7360"
     },
     {
       "property": "client_id",
       "asWritten": "client id",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6489-6512"
+      "defined": "/GitHub.api.spell:7372-7398"
     },
     {
       "property": "slug",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6516-6534"
+      "defined": "/GitHub.api.spell:7403-7424"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6538-6559"
+      "defined": "/GitHub.api.spell:7429-7453"
     },
     {
       "property": "owner",
       "of": "PerformedViaGithubApp",
       "datatype": "Owner",
-      "defined": "/GitHub.api.spell:6563-6586"
+      "defined": "/GitHub.api.spell:7458-7487"
     },
     {
       "property": "name",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6590-6608"
+      "defined": "/GitHub.api.spell:7493-7514"
     },
     {
       "property": "description",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6612-6637"
+      "defined": "/GitHub.api.spell:7519-7547"
     },
     {
       "property": "external_url",
       "asWritten": "external url",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6641-6667"
+      "defined": "/GitHub.api.spell:7552-7581"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6686-6708"
+      "defined": "/GitHub.api.spell:7600-7625"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "PerformedViaGithubApp",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:6727-6753"
+      "defined": "/GitHub.api.spell:7644-7677"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "PerformedViaGithubApp",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:6757-6783"
+      "defined": "/GitHub.api.spell:7683-7716"
     },
     {
       "property": "permissions",
       "of": "PerformedViaGithubApp",
       "datatype": "Permission",
-      "defined": "/GitHub.api.spell:6787-6820"
+      "defined": "/GitHub.api.spell:7722-7762"
     },
     {
       "property": "events",
       "of": "PerformedViaGithubApp",
       "datatype": "list of texts",
-      "defined": "/GitHub.api.spell:6824-6854"
+      "defined": "/GitHub.api.spell:7768-7801"
     },
     {
       "type": "Owner",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:6856-7639"
+      "defined": "/GitHub.api.spell:7821-8699"
     },
     {
       "property": "login",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6882-6901"
+      "defined": "/GitHub.api.spell:7844-7866"
     },
     {
       "property": "number",
       "of": "Owner",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6905-6945"
+      "defined": "/GitHub.api.spell:7883-7923"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6949-6970"
+      "defined": "/GitHub.api.spell:7935-7959"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6974-6998"
+      "defined": "/GitHub.api.spell:7964-7991"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7017-7042"
+      "defined": "/GitHub.api.spell:8010-8038"
     },
     {
       "property": "url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7046-7063"
+      "defined": "/GitHub.api.spell:8043-8063"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7082-7104"
+      "defined": "/GitHub.api.spell:8082-8107"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7123-7150"
+      "defined": "/GitHub.api.spell:8126-8156"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7169-7196"
+      "defined": "/GitHub.api.spell:8175-8205"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7215-7238"
+      "defined": "/GitHub.api.spell:8224-8250"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7257-7282"
+      "defined": "/GitHub.api.spell:8269-8297"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7301-7332"
+      "defined": "/GitHub.api.spell:8316-8350"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7351-7382"
+      "defined": "/GitHub.api.spell:8369-8403"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7401-7424"
+      "defined": "/GitHub.api.spell:8422-8448"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7443-7467"
+      "defined": "/GitHub.api.spell:8467-8494"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7486-7519"
+      "defined": "/GitHub.api.spell:8513-8549"
     },
     {
       "property": "kind",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7538-7574"
+      "defined": "/GitHub.api.spell:8580-8616"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7578-7606"
+      "defined": "/GitHub.api.spell:8628-8659"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "Owner",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:7610-7639"
+      "defined": "/GitHub.api.spell:8664-8696"
     },
     {
       "type": "Permission",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:7641-8063"
+      "defined": "/GitHub.api.spell:8716-9194"
     },
     {
       "property": "actions",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7671-7692"
+      "defined": "/GitHub.api.spell:8744-8768"
     },
     {
       "property": "administration",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7696-7724"
+      "defined": "/GitHub.api.spell:8773-8804"
     },
     {
       "property": "checks",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7728-7748"
+      "defined": "/GitHub.api.spell:8809-8832"
     },
     {
       "property": "contents",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7752-7774"
+      "defined": "/GitHub.api.spell:8837-8862"
     },
     {
       "property": "discussions",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7778-7803"
+      "defined": "/GitHub.api.spell:8867-8895"
     },
     {
       "property": "issues",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7807-7827"
+      "defined": "/GitHub.api.spell:8900-8923"
     },
     {
       "property": "members",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7831-7852"
+      "defined": "/GitHub.api.spell:8928-8952"
     },
     {
       "property": "merge_queues",
       "asWritten": "merge queues",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7856-7882"
+      "defined": "/GitHub.api.spell:8957-8986"
     },
     {
       "property": "metadata",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7886-7908"
+      "defined": "/GitHub.api.spell:8991-9016"
     },
     {
       "property": "pull_requests",
       "asWritten": "pull requests",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7912-7939"
+      "defined": "/GitHub.api.spell:9021-9051"
     },
     {
       "property": "repository_hooks",
       "asWritten": "repository hooks",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7943-7973"
+      "defined": "/GitHub.api.spell:9056-9089"
     },
     {
       "property": "statuses",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7977-7999"
+      "defined": "/GitHub.api.spell:9094-9119"
     },
     {
       "property": "workflows",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8003-8026"
+      "defined": "/GitHub.api.spell:9124-9150"
     },
     {
       "property": "repository_creation",
       "asWritten": "repository creation",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8030-8063"
+      "defined": "/GitHub.api.spell:9155-9191"
     },
     {
       "type": "PullRequest",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:8065-8253"
+      "defined": "/GitHub.api.spell:9211-9411"
     },
     {
       "property": "url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8097-8114"
+      "defined": "/GitHub.api.spell:9241-9261"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8133-8155"
+      "defined": "/GitHub.api.spell:9280-9305"
     },
     {
       "property": "diff_url",
       "asWritten": "diff url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8174-8196"
+      "defined": "/GitHub.api.spell:9324-9349"
     },
     {
       "property": "patch_url",
       "asWritten": "patch url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8215-8238"
+      "defined": "/GitHub.api.spell:9368-9394"
     },
     {
       "type": "Repository",
@@ -1332,549 +1332,549 @@
         "placeType": "Github",
         "collection": "repositories"
       },
-      "defined": "/GitHub.api.spell:8255-11566"
+      "defined": "/GitHub.api.spell:9428-13150"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8307-8328"
+      "defined": "/GitHub.api.spell:9498-9522"
     },
     {
       "property": "name",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8332-8350"
+      "defined": "/GitHub.api.spell:9527-9548"
     },
     {
       "property": "full_name",
       "asWritten": "full name",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8354-8377"
+      "defined": "/GitHub.api.spell:9553-9579"
     },
     {
       "property": "private",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:8381-8407"
+      "defined": "/GitHub.api.spell:9584-9613"
     },
     {
       "property": "owner",
       "of": "Repository",
       "datatype": "Owner",
-      "defined": "/GitHub.api.spell:8411-8434"
+      "defined": "/GitHub.api.spell:9618-9647"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8438-8460"
+      "defined": "/GitHub.api.spell:9653-9678"
     },
     {
       "property": "description",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8479-8504"
+      "defined": "/GitHub.api.spell:9697-9725"
     },
     {
       "property": "fork",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:8508-8531"
+      "defined": "/GitHub.api.spell:9730-9756"
     },
     {
       "property": "url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8535-8552"
+      "defined": "/GitHub.api.spell:9761-9781"
     },
     {
       "property": "forks_url",
       "asWritten": "forks url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8571-8594"
+      "defined": "/GitHub.api.spell:9800-9826"
     },
     {
       "property": "keys_url",
       "asWritten": "keys url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8613-8635"
+      "defined": "/GitHub.api.spell:9845-9870"
     },
     {
       "property": "collaborators_url",
       "asWritten": "collaborators url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8654-8685"
+      "defined": "/GitHub.api.spell:9889-9923"
     },
     {
       "property": "teams_url",
       "asWritten": "teams url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8704-8727"
+      "defined": "/GitHub.api.spell:9942-9968"
     },
     {
       "property": "hooks_url",
       "asWritten": "hooks url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8746-8769"
+      "defined": "/GitHub.api.spell:9987-10013"
     },
     {
       "property": "issue_events_url",
       "asWritten": "issue events url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8788-8818"
+      "defined": "/GitHub.api.spell:10032-10065"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8837-8861"
+      "defined": "/GitHub.api.spell:10084-10111"
     },
     {
       "property": "assignees_url",
       "asWritten": "assignees url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8880-8907"
+      "defined": "/GitHub.api.spell:10130-10160"
     },
     {
       "property": "branches_url",
       "asWritten": "branches url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8926-8952"
+      "defined": "/GitHub.api.spell:10179-10208"
     },
     {
       "property": "tags_url",
       "asWritten": "tags url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8971-8993"
+      "defined": "/GitHub.api.spell:10227-10252"
     },
     {
       "property": "blobs_url",
       "asWritten": "blobs url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9012-9035"
+      "defined": "/GitHub.api.spell:10271-10297"
     },
     {
       "property": "git_tags_url",
       "asWritten": "git tags url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9054-9080"
+      "defined": "/GitHub.api.spell:10316-10345"
     },
     {
       "property": "git_refs_url",
       "asWritten": "git refs url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9099-9125"
+      "defined": "/GitHub.api.spell:10364-10393"
     },
     {
       "property": "trees_url",
       "asWritten": "trees url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9144-9167"
+      "defined": "/GitHub.api.spell:10412-10438"
     },
     {
       "property": "statuses_url",
       "asWritten": "statuses url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9186-9212"
+      "defined": "/GitHub.api.spell:10457-10486"
     },
     {
       "property": "languages_url",
       "asWritten": "languages url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9231-9258"
+      "defined": "/GitHub.api.spell:10505-10535"
     },
     {
       "property": "stargazers_url",
       "asWritten": "stargazers url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9277-9305"
+      "defined": "/GitHub.api.spell:10554-10585"
     },
     {
       "property": "contributors_url",
       "asWritten": "contributors url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9324-9354"
+      "defined": "/GitHub.api.spell:10604-10637"
     },
     {
       "property": "subscribers_url",
       "asWritten": "subscribers url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9373-9402"
+      "defined": "/GitHub.api.spell:10656-10688"
     },
     {
       "property": "subscription_url",
       "asWritten": "subscription url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9421-9451"
+      "defined": "/GitHub.api.spell:10707-10740"
     },
     {
       "property": "commits_url",
       "asWritten": "commits url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9470-9495"
+      "defined": "/GitHub.api.spell:10759-10787"
     },
     {
       "property": "git_commits_url",
       "asWritten": "git commits url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9514-9543"
+      "defined": "/GitHub.api.spell:10806-10838"
     },
     {
       "property": "comments_url",
       "asWritten": "comments url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9562-9588"
+      "defined": "/GitHub.api.spell:10857-10886"
     },
     {
       "property": "issue_comment_url",
       "asWritten": "issue comment url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9607-9638"
+      "defined": "/GitHub.api.spell:10905-10939"
     },
     {
       "property": "contents_url",
       "asWritten": "contents url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9657-9683"
+      "defined": "/GitHub.api.spell:10958-10987"
     },
     {
       "property": "compare_url",
       "asWritten": "compare url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9702-9727"
+      "defined": "/GitHub.api.spell:11006-11034"
     },
     {
       "property": "merges_url",
       "asWritten": "merges url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9746-9770"
+      "defined": "/GitHub.api.spell:11053-11080"
     },
     {
       "property": "archive_url",
       "asWritten": "archive url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9789-9814"
+      "defined": "/GitHub.api.spell:11099-11127"
     },
     {
       "property": "downloads_url",
       "asWritten": "downloads url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9833-9860"
+      "defined": "/GitHub.api.spell:11146-11176"
     },
     {
       "property": "issues_url",
       "asWritten": "issues url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9879-9903"
+      "defined": "/GitHub.api.spell:11195-11222"
     },
     {
       "property": "pulls_url",
       "asWritten": "pulls url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9922-9945"
+      "defined": "/GitHub.api.spell:11241-11267"
     },
     {
       "property": "milestones_url",
       "asWritten": "milestones url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9964-9992"
+      "defined": "/GitHub.api.spell:11286-11317"
     },
     {
       "property": "notifications_url",
       "asWritten": "notifications url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10011-10042"
+      "defined": "/GitHub.api.spell:11336-11370"
     },
     {
       "property": "labels_url",
       "asWritten": "labels url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10061-10085"
+      "defined": "/GitHub.api.spell:11389-11416"
     },
     {
       "property": "releases_url",
       "asWritten": "releases url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10104-10130"
+      "defined": "/GitHub.api.spell:11435-11464"
     },
     {
       "property": "deployments_url",
       "asWritten": "deployments url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10149-10178"
+      "defined": "/GitHub.api.spell:11483-11515"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "Repository",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:10197-10223"
+      "defined": "/GitHub.api.spell:11534-11567"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "Repository",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:10227-10253"
+      "defined": "/GitHub.api.spell:11573-11606"
     },
     {
       "property": "pushed_at",
       "asWritten": "pushed at",
       "of": "Repository",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:10257-10282"
+      "defined": "/GitHub.api.spell:11612-11644"
     },
     {
       "property": "git_url",
       "asWritten": "git url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10286-10307"
+      "defined": "/GitHub.api.spell:11650-11674"
     },
     {
       "property": "ssh_url",
       "asWritten": "ssh url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10311-10332"
+      "defined": "/GitHub.api.spell:11679-11703"
     },
     {
       "property": "clone_url",
       "asWritten": "clone url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10336-10359"
+      "defined": "/GitHub.api.spell:11708-11734"
     },
     {
       "property": "svn_url",
       "asWritten": "svn url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10378-10399"
+      "defined": "/GitHub.api.spell:11753-11777"
     },
     {
       "property": "homepage",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10418-10440"
+      "defined": "/GitHub.api.spell:11796-11821"
     },
     {
       "property": "size",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10444-10466"
+      "defined": "/GitHub.api.spell:11826-11855"
     },
     {
       "property": "stargazers_count",
       "asWritten": "stargazers count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10470-10504"
+      "defined": "/GitHub.api.spell:11861-11902"
     },
     {
       "property": "watchers_count",
       "asWritten": "watchers count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10508-10540"
+      "defined": "/GitHub.api.spell:11908-11947"
     },
     {
       "property": "language",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10544-10566"
+      "defined": "/GitHub.api.spell:11953-11978"
     },
     {
       "property": "issues",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10570-10619"
+      "defined": "/GitHub.api.spell:11995-12044"
     },
     {
       "property": "projects",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10623-10676"
+      "defined": "/GitHub.api.spell:12049-12102"
     },
     {
       "property": "downloads",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10680-10735"
+      "defined": "/GitHub.api.spell:12107-12162"
     },
     {
       "property": "wiki",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10739-10784"
+      "defined": "/GitHub.api.spell:12167-12212"
     },
     {
       "property": "pages",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10788-10835"
+      "defined": "/GitHub.api.spell:12217-12264"
     },
     {
       "property": "discussions",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10839-10898"
+      "defined": "/GitHub.api.spell:12269-12328"
     },
     {
       "property": "forks_count",
       "asWritten": "forks count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10902-10931"
+      "defined": "/GitHub.api.spell:12340-12376"
     },
     {
       "property": "archived",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10935-10962"
+      "defined": "/GitHub.api.spell:12382-12412"
     },
     {
       "property": "disabled",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10966-10993"
+      "defined": "/GitHub.api.spell:12417-12447"
     },
     {
       "property": "open_issues_count",
       "asWritten": "open issues count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10997-11032"
+      "defined": "/GitHub.api.spell:12452-12494"
     },
     {
       "property": "license",
       "of": "Repository",
       "datatype": "License",
-      "defined": "/GitHub.api.spell:11036-11062"
+      "defined": "/GitHub.api.spell:12500-12533"
     },
     {
       "property": "allow_forking",
       "asWritten": "allow forking",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:11066-11098"
+      "defined": "/GitHub.api.spell:12539-12574"
     },
     {
       "property": "template",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:11102-11154"
+      "defined": "/GitHub.api.spell:12591-12643"
     },
     {
       "property": "web_commit_signoff_required",
       "asWritten": "web commit signoff required",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:11158-11204"
+      "defined": "/GitHub.api.spell:12655-12704"
     },
     {
       "property": "pull_requests",
       "asWritten": "pull requests",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:11208-11271"
+      "defined": "/GitHub.api.spell:12721-12784"
     },
     {
       "property": "pull_request_creation_policy",
       "asWritten": "pull request creation policy",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11275-11317"
+      "defined": "/GitHub.api.spell:12796-12841"
     },
     {
       "property": "topics",
       "of": "Repository",
       "datatype": "list of users",
-      "defined": "/GitHub.api.spell:11321-11352"
+      "defined": "/GitHub.api.spell:12846-12880"
     },
     {
       "property": "visibility",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11356-11380"
+      "defined": "/GitHub.api.spell:12885-12912"
     },
     {
       "property": "forks",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:11384-11407"
+      "defined": "/GitHub.api.spell:12917-12947"
     },
     {
       "property": "open_issues",
       "asWritten": "open issues",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:11411-11440"
+      "defined": "/GitHub.api.spell:12953-12989"
     },
     {
       "property": "watchers",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:11444-11470"
+      "defined": "/GitHub.api.spell:12995-13028"
     },
     {
       "property": "default_branch",
       "asWritten": "default branch",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11474-11502"
+      "defined": "/GitHub.api.spell:13034-13065"
     },
     {
       "property": "permissions",
       "of": "Repository",
       "datatype": "Permission",
-      "defined": "/GitHub.api.spell:11506-11539"
+      "defined": "/GitHub.api.spell:13070-13110"
     },
     {
       "property": "score",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:11543-11566"
+      "defined": "/GitHub.api.spell:13116-13146"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1892,173 +1892,173 @@
     {
       "type": "Assignee",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:11568-12354"
+      "defined": "/GitHub.api.spell:13167-14048"
     },
     {
       "property": "login",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11597-11616"
+      "defined": "/GitHub.api.spell:13193-13215"
     },
     {
       "property": "number",
       "of": "Assignee",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:11620-11660"
+      "defined": "/GitHub.api.spell:13232-13272"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11664-11685"
+      "defined": "/GitHub.api.spell:13284-13308"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11689-11713"
+      "defined": "/GitHub.api.spell:13313-13340"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11732-11757"
+      "defined": "/GitHub.api.spell:13359-13387"
     },
     {
       "property": "url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11761-11778"
+      "defined": "/GitHub.api.spell:13392-13412"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11797-11819"
+      "defined": "/GitHub.api.spell:13431-13456"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11838-11865"
+      "defined": "/GitHub.api.spell:13475-13505"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11884-11911"
+      "defined": "/GitHub.api.spell:13524-13554"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11930-11953"
+      "defined": "/GitHub.api.spell:13573-13599"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11972-11997"
+      "defined": "/GitHub.api.spell:13618-13646"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12016-12047"
+      "defined": "/GitHub.api.spell:13665-13699"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12066-12097"
+      "defined": "/GitHub.api.spell:13718-13752"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12116-12139"
+      "defined": "/GitHub.api.spell:13771-13797"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12158-12182"
+      "defined": "/GitHub.api.spell:13816-13843"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12201-12234"
+      "defined": "/GitHub.api.spell:13862-13898"
     },
     {
       "property": "kind",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12253-12289"
+      "defined": "/GitHub.api.spell:13929-13965"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12293-12321"
+      "defined": "/GitHub.api.spell:13977-14008"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "Assignee",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:12325-12354"
+      "defined": "/GitHub.api.spell:14013-14045"
     },
     {
       "type": "License",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:12356-12508"
+      "defined": "/GitHub.api.spell:14065-14236"
     },
     {
       "property": "key",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12383-12400"
+      "defined": "/GitHub.api.spell:14090-14110"
     },
     {
       "property": "name",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12404-12422"
+      "defined": "/GitHub.api.spell:14115-14136"
     },
     {
       "property": "spdx_id",
       "asWritten": "spdx id",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12426-12447"
+      "defined": "/GitHub.api.spell:14141-14165"
     },
     {
       "property": "url",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12451-12468"
+      "defined": "/GitHub.api.spell:14170-14190"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:12487-12508"
+      "defined": "/GitHub.api.spell:14209-14233"
     },
     {
       "type": "Github",
@@ -2095,7 +2095,7 @@
           }
         }
       },
-      "defined": "/GitHub.api.spell:1141-1701"
+      "defined": "/GitHub.api.spell:1152-1702"
     },
     {
       "type": "GithubPage",
@@ -2170,154 +2170,154 @@
         "placeType": "OpenLibrary",
         "collection": "books"
       },
-      "defined": "/OpenLibrary.api.spell:1570-2490"
+      "defined": "/OpenLibrary.api.spell:1585-2661"
     },
     {
       "property": "authors",
       "of": "Book",
       "datatype": "list of authors",
-      "defined": "/OpenLibrary.api.spell:1622-1680"
+      "defined": "/OpenLibrary.api.spell:1648-1706"
     },
     {
       "property": "author_name",
       "asWritten": "author name",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:1684-1719"
+      "defined": "/OpenLibrary.api.spell:1718-1756"
     },
     {
       "property": "cover_edition",
       "asWritten": "cover edition",
       "of": "Book",
       "datatype": "Edition",
-      "defined": "/OpenLibrary.api.spell:1723-1787"
+      "defined": "/OpenLibrary.api.spell:1773-1837"
     },
     {
       "property": "cover_height",
       "asWritten": "cover height",
       "of": "Book",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:1791-1821"
+      "defined": "/OpenLibrary.api.spell:1849-1886"
     },
     {
       "property": "cover_i",
       "asWritten": "cover i",
       "of": "Book",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:1825-1846"
+      "defined": "/OpenLibrary.api.spell:1892-1916"
     },
     {
       "property": "cover_width",
       "asWritten": "cover width",
       "of": "Book",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:1874-1903"
+      "defined": "/OpenLibrary.api.spell:1944-1980"
     },
     {
       "property": "ebook_access",
       "asWritten": "ebook access",
       "of": "Book",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:1907-1933"
+      "defined": "/OpenLibrary.api.spell:1986-2015"
     },
     {
       "property": "edition_count",
       "asWritten": "edition count",
       "of": "Book",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:1937-1968"
+      "defined": "/OpenLibrary.api.spell:2020-2058"
     },
     {
       "property": "first_publish_year",
       "asWritten": "first publish year",
       "of": "Book",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:1972-2008"
+      "defined": "/OpenLibrary.api.spell:2064-2107"
     },
     {
       "property": "fulltext",
       "of": "Book",
       "datatype": "choice",
-      "defined": "/OpenLibrary.api.spell:2012-2065"
+      "defined": "/OpenLibrary.api.spell:2125-2178"
     },
     {
       "property": "ia",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2069-2095"
+      "defined": "/OpenLibrary.api.spell:2190-2219"
     },
     {
       "property": "ia_collection",
       "asWritten": "ia collection",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2099-2136"
+      "defined": "/OpenLibrary.api.spell:2224-2264"
     },
     {
       "property": "language",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2140-2172"
+      "defined": "/OpenLibrary.api.spell:2269-2304"
     },
     {
       "property": "lending_edition_s",
       "asWritten": "lending edition s",
       "of": "Book",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2176-2207"
+      "defined": "/OpenLibrary.api.spell:2309-2343"
     },
     {
       "property": "lending_identifier_s",
       "asWritten": "lending identifier s",
       "of": "Book",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2211-2245"
+      "defined": "/OpenLibrary.api.spell:2348-2385"
     },
     {
       "property": "public_scan_b",
       "asWritten": "public scan b",
       "of": "Book",
       "datatype": "choice",
-      "defined": "/OpenLibrary.api.spell:2249-2281"
+      "defined": "/OpenLibrary.api.spell:2390-2425"
     },
     {
       "property": "editions",
       "of": "Book",
       "datatype": "list of editions",
-      "defined": "/OpenLibrary.api.spell:2285-2321"
+      "defined": "/OpenLibrary.api.spell:2430-2469"
     },
     {
       "property": "series_key",
       "asWritten": "series key",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2325-2359"
+      "defined": "/OpenLibrary.api.spell:2474-2511"
     },
     {
       "property": "series_name",
       "asWritten": "series name",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2363-2398"
+      "defined": "/OpenLibrary.api.spell:2516-2554"
     },
     {
       "property": "series_position",
       "asWritten": "series position",
       "of": "Book",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2402-2441"
+      "defined": "/OpenLibrary.api.spell:2559-2601"
     },
     {
       "property": "title",
       "of": "Book",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2445-2464"
+      "defined": "/OpenLibrary.api.spell:2606-2628"
     },
     {
       "property": "subtitle",
       "of": "Book",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2468-2490"
+      "defined": "/OpenLibrary.api.spell:2633-2658"
     },
     {
       "property": "writer",
@@ -2376,111 +2376,111 @@
         "placeType": "OpenLibrary",
         "collection": "authors"
       },
-      "defined": "/OpenLibrary.api.spell:2492-3089"
+      "defined": "/OpenLibrary.api.spell:2678-3393"
     },
     {
       "property": "links",
       "of": "Author",
       "datatype": "list of links",
-      "defined": "/OpenLibrary.api.spell:2547-2577"
+      "defined": "/OpenLibrary.api.spell:2750-2783"
     },
     {
       "property": "kind",
       "of": "Author",
       "datatype": "Kind",
-      "defined": "/OpenLibrary.api.spell:2581-2619"
+      "defined": "/OpenLibrary.api.spell:2800-2838"
     },
     {
       "property": "key",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2623-2640"
+      "defined": "/OpenLibrary.api.spell:2850-2870"
     },
     {
       "property": "name",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2644-2662"
+      "defined": "/OpenLibrary.api.spell:2875-2896"
     },
     {
       "property": "source_records",
       "asWritten": "source records",
       "of": "Author",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2666-2704"
+      "defined": "/OpenLibrary.api.spell:2901-2942"
     },
     {
       "property": "birth_date",
       "asWritten": "birth date",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2708-2732"
+      "defined": "/OpenLibrary.api.spell:2947-2974"
     },
     {
       "property": "bio",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2736-2753"
+      "defined": "/OpenLibrary.api.spell:2979-2999"
     },
     {
       "property": "title",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2757-2776"
+      "defined": "/OpenLibrary.api.spell:3004-3026"
     },
     {
       "property": "alternate_names",
       "asWritten": "alternate names",
       "of": "Author",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:2780-2819"
+      "defined": "/OpenLibrary.api.spell:3031-3073"
     },
     {
       "property": "remote_ids",
       "asWritten": "remote ids",
       "of": "Author",
       "datatype": "RemoteId",
-      "defined": "/OpenLibrary.api.spell:2823-2854"
+      "defined": "/OpenLibrary.api.spell:3078-3112"
     },
     {
       "property": "photos",
       "of": "Author",
       "datatype": "list of numbers",
-      "defined": "/OpenLibrary.api.spell:2858-2891"
+      "defined": "/OpenLibrary.api.spell:3117-3153"
     },
     {
       "property": "death_date",
       "asWritten": "death date",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2895-2919"
+      "defined": "/OpenLibrary.api.spell:3158-3185"
     },
     {
       "property": "personal_name",
       "asWritten": "personal name",
       "of": "Author",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:2923-2950"
+      "defined": "/OpenLibrary.api.spell:3190-3220"
     },
     {
       "property": "latest_revision",
       "asWritten": "latest revision",
       "of": "Author",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:2954-2987"
+      "defined": "/OpenLibrary.api.spell:3225-3265"
     },
     {
       "property": "revision",
       "of": "Author",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:2991-3017"
+      "defined": "/OpenLibrary.api.spell:3271-3304"
     },
     {
       "property": "last_modified",
       "asWritten": "last modified",
       "of": "Author",
       "datatype": "LastModified",
-      "defined": "/OpenLibrary.api.spell:3051-3089"
+      "defined": "/OpenLibrary.api.spell:3349-3390"
     },
     {
       "type": "Edition",
@@ -2490,117 +2490,117 @@
         "placeType": "OpenLibrary",
         "collection": "editions"
       },
-      "defined": "/OpenLibrary.api.spell:3091-3754"
+      "defined": "/OpenLibrary.api.spell:3410-4186"
     },
     {
       "property": "kind",
       "of": "Edition",
       "datatype": "Kind",
-      "defined": "/OpenLibrary.api.spell:3147-3185"
+      "defined": "/OpenLibrary.api.spell:3476-3514"
     },
     {
       "property": "title",
       "of": "Edition",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3189-3208"
+      "defined": "/OpenLibrary.api.spell:3526-3548"
     },
     {
       "property": "authors",
       "of": "Edition",
       "datatype": "list of edition-authors",
-      "defined": "/OpenLibrary.api.spell:3212-3254"
+      "defined": "/OpenLibrary.api.spell:3553-3598"
     },
     {
       "property": "publish_date",
       "asWritten": "publish date",
       "of": "Edition",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3258-3284"
+      "defined": "/OpenLibrary.api.spell:3603-3632"
     },
     {
       "property": "source_records",
       "asWritten": "source records",
       "of": "Edition",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:3288-3326"
+      "defined": "/OpenLibrary.api.spell:3637-3678"
     },
     {
       "property": "number_of_pages",
       "asWritten": "number of pages",
       "of": "Edition",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3330-3363"
+      "defined": "/OpenLibrary.api.spell:3683-3723"
     },
     {
       "property": "publishers",
       "of": "Edition",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:3367-3401"
+      "defined": "/OpenLibrary.api.spell:3729-3766"
     },
     {
       "property": "physical_format",
       "asWritten": "physical format",
       "of": "Edition",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3405-3434"
+      "defined": "/OpenLibrary.api.spell:3771-3803"
     },
     {
       "property": "notes",
       "of": "Edition",
       "datatype": "Note",
-      "defined": "/OpenLibrary.api.spell:3438-3459"
+      "defined": "/OpenLibrary.api.spell:3808-3836"
     },
     {
       "property": "full_title",
       "asWritten": "full title",
       "of": "Edition",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3463-3487"
+      "defined": "/OpenLibrary.api.spell:3842-3869"
     },
     {
       "property": "covers",
       "of": "Edition",
       "datatype": "list of numbers",
-      "defined": "/OpenLibrary.api.spell:3491-3524"
+      "defined": "/OpenLibrary.api.spell:3874-3910"
     },
     {
       "property": "works",
       "of": "Edition",
       "datatype": "list of works",
-      "defined": "/OpenLibrary.api.spell:3528-3558"
+      "defined": "/OpenLibrary.api.spell:3915-3948"
     },
     {
       "property": "key",
       "of": "Edition",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3562-3579"
+      "defined": "/OpenLibrary.api.spell:3953-3973"
     },
     {
       "property": "local_id",
       "asWritten": "local id",
       "of": "Edition",
       "datatype": "list of texts",
-      "defined": "/OpenLibrary.api.spell:3583-3615"
+      "defined": "/OpenLibrary.api.spell:3978-4013"
     },
     {
       "property": "latest_revision",
       "asWritten": "latest revision",
       "of": "Edition",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3619-3652"
+      "defined": "/OpenLibrary.api.spell:4018-4058"
     },
     {
       "property": "revision",
       "of": "Edition",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3656-3682"
+      "defined": "/OpenLibrary.api.spell:4064-4097"
     },
     {
       "property": "last_modified",
       "asWritten": "last modified",
       "of": "Edition",
       "datatype": "LastModified",
-      "defined": "/OpenLibrary.api.spell:3716-3754"
+      "defined": "/OpenLibrary.api.spell:4142-4183"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2618,213 +2618,213 @@
     {
       "type": "Link",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:3756-3877"
+      "defined": "/OpenLibrary.api.spell:4203-4351"
     },
     {
       "property": "title",
       "of": "Link",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3780-3799"
+      "defined": "/OpenLibrary.api.spell:4225-4247"
     },
     {
       "property": "url",
       "of": "Link",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3803-3820"
+      "defined": "/OpenLibrary.api.spell:4252-4272"
     },
     {
       "property": "kind",
       "of": "Link",
       "datatype": "Kind",
-      "defined": "/OpenLibrary.api.spell:3839-3877"
+      "defined": "/OpenLibrary.api.spell:4303-4341"
     },
     {
       "type": "Kind",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:3879-3920"
+      "defined": "/OpenLibrary.api.spell:4368-4413"
     },
     {
       "property": "key",
       "of": "Kind",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3903-3920"
+      "defined": "/OpenLibrary.api.spell:4390-4410"
     },
     {
       "type": "RemoteId",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:3922-4389"
+      "defined": "/OpenLibrary.api.spell:4430-4991"
     },
     {
       "property": "viaf",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:3951-3973"
+      "defined": "/OpenLibrary.api.spell:4457-4486"
     },
     {
       "property": "wikidata",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:3977-3999"
+      "defined": "/OpenLibrary.api.spell:4492-4517"
     },
     {
       "property": "isni",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4003-4025"
+      "defined": "/OpenLibrary.api.spell:4522-4551"
     },
     {
       "property": "amazon",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4029-4049"
+      "defined": "/OpenLibrary.api.spell:4557-4580"
     },
     {
       "property": "bookbrainz",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4053-4077"
+      "defined": "/OpenLibrary.api.spell:4585-4612"
     },
     {
       "property": "goodreads",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4081-4108"
+      "defined": "/OpenLibrary.api.spell:4617-4651"
     },
     {
       "property": "gnd",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4112-4133"
+      "defined": "/OpenLibrary.api.spell:4657-4685"
     },
     {
       "property": "imdb",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4137-4155"
+      "defined": "/OpenLibrary.api.spell:4691-4712"
     },
     {
       "property": "lc_naf",
       "asWritten": "lc naf",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4159-4179"
+      "defined": "/OpenLibrary.api.spell:4717-4740"
     },
     {
       "property": "librarything",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4183-4209"
+      "defined": "/OpenLibrary.api.spell:4745-4774"
     },
     {
       "property": "musicbrainz",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4213-4238"
+      "defined": "/OpenLibrary.api.spell:4779-4807"
     },
     {
       "property": "storygraph",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4242-4266"
+      "defined": "/OpenLibrary.api.spell:4812-4839"
     },
     {
       "property": "inventaire",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4270-4294"
+      "defined": "/OpenLibrary.api.spell:4844-4871"
     },
     {
       "property": "librivox",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4298-4324"
+      "defined": "/OpenLibrary.api.spell:4876-4909"
     },
     {
       "property": "project_gutenberg",
       "asWritten": "project gutenberg",
       "of": "RemoteId",
       "datatype": "number",
-      "defined": "/OpenLibrary.api.spell:4328-4363"
+      "defined": "/OpenLibrary.api.spell:4915-4957"
     },
     {
       "property": "opac_sbn",
       "asWritten": "opac sbn",
       "of": "RemoteId",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4367-4389"
+      "defined": "/OpenLibrary.api.spell:4963-4988"
     },
     {
       "type": "Created",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4391-4479"
+      "defined": "/OpenLibrary.api.spell:5008-5125"
     },
     {
       "property": "kind",
       "of": "Created",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4418-4454"
+      "defined": "/OpenLibrary.api.spell:5045-5081"
     },
     {
       "property": "value",
       "of": "Created",
       "datatype": "date",
-      "defined": "/OpenLibrary.api.spell:4458-4479"
+      "defined": "/OpenLibrary.api.spell:5093-5121"
     },
     {
       "type": "LastModified",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4481-4575"
+      "defined": "/OpenLibrary.api.spell:5142-5265"
     },
     {
       "property": "kind",
       "of": "LastModified",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4514-4550"
+      "defined": "/OpenLibrary.api.spell:5185-5221"
     },
     {
       "property": "value",
       "of": "LastModified",
       "datatype": "date",
-      "defined": "/OpenLibrary.api.spell:4554-4575"
+      "defined": "/OpenLibrary.api.spell:5233-5261"
     },
     {
       "type": "EditionAuthor",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4577-4629"
+      "defined": "/OpenLibrary.api.spell:5282-5337"
     },
     {
       "property": "key",
       "of": "EditionAuthor",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4612-4629"
+      "defined": "/OpenLibrary.api.spell:5314-5334"
     },
     {
       "type": "Note",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4631-4714"
+      "defined": "/OpenLibrary.api.spell:5354-5461"
     },
     {
       "property": "kind",
       "of": "Note",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4655-4691"
+      "defined": "/OpenLibrary.api.spell:5388-5424"
     },
     {
       "property": "value",
       "of": "Note",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4695-4714"
+      "defined": "/OpenLibrary.api.spell:5436-5458"
     },
     {
       "type": "Work",
       "superType": "Thing",
-      "defined": "/OpenLibrary.api.spell:4716-4757"
+      "defined": "/OpenLibrary.api.spell:5478-5523"
     },
     {
       "property": "key",
       "of": "Work",
       "datatype": "text",
-      "defined": "/OpenLibrary.api.spell:4740-4757"
+      "defined": "/OpenLibrary.api.spell:5500-5520"
     },
     {
       "type": "OpenLibrary",
@@ -2854,7 +2854,7 @@
           }
         }
       },
-      "defined": "/OpenLibrary.api.spell:1093-1568"
+      "defined": "/OpenLibrary.api.spell:1104-1569"
     },
     {
       "type": "OpenLibraryPage",
@@ -2914,32 +2914,32 @@
         "placeType": "Jsonplaceholder",
         "collection": "posts"
       },
-      "defined": "/JSONPlaceholder.api.spell:1240-1405"
+      "defined": "/JSONPlaceholder.api.spell:1255-1461"
     },
     {
       "property": "user_id",
       "asWritten": "user id",
       "of": "Post",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:1295-1320"
+      "defined": "/JSONPlaceholder.api.spell:1328-1360"
     },
     {
       "property": "title",
       "of": "Post",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1324-1343"
+      "defined": "/JSONPlaceholder.api.spell:1366-1388"
     },
     {
       "property": "body",
       "of": "Post",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1347-1365"
+      "defined": "/JSONPlaceholder.api.spell:1393-1414"
     },
     {
       "property": "comments",
       "of": "Post",
       "datatype": "list of comments",
-      "defined": "/JSONPlaceholder.api.spell:1369-1405"
+      "defined": "/JSONPlaceholder.api.spell:1419-1458"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2962,32 +2962,32 @@
         "placeType": "Jsonplaceholder",
         "collection": "comments"
       },
-      "defined": "/JSONPlaceholder.api.spell:1407-1557"
+      "defined": "/JSONPlaceholder.api.spell:1478-1669"
     },
     {
       "property": "post_id",
       "asWritten": "post id",
       "of": "Comment",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:1465-1490"
+      "defined": "/JSONPlaceholder.api.spell:1554-1586"
     },
     {
       "property": "name",
       "of": "Comment",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1494-1512"
+      "defined": "/JSONPlaceholder.api.spell:1592-1613"
     },
     {
       "property": "email",
       "of": "Comment",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1516-1535"
+      "defined": "/JSONPlaceholder.api.spell:1618-1640"
     },
     {
       "property": "body",
       "of": "Comment",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1539-1557"
+      "defined": "/JSONPlaceholder.api.spell:1645-1666"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3010,61 +3010,61 @@
         "placeType": "Jsonplaceholder",
         "collection": "jsonplaceholder_users"
       },
-      "defined": "/JSONPlaceholder.api.spell:1559-1874"
+      "defined": "/JSONPlaceholder.api.spell:1686-2066"
     },
     {
       "property": "name",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1630-1648"
+      "defined": "/JSONPlaceholder.api.spell:1775-1796"
     },
     {
       "property": "username",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1652-1674"
+      "defined": "/JSONPlaceholder.api.spell:1801-1826"
     },
     {
       "property": "email",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1678-1697"
+      "defined": "/JSONPlaceholder.api.spell:1831-1853"
     },
     {
       "property": "address",
       "of": "JsonplaceholderUser",
       "datatype": "Address",
-      "defined": "/JSONPlaceholder.api.spell:1701-1728"
+      "defined": "/JSONPlaceholder.api.spell:1858-1891"
     },
     {
       "property": "phone",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1732-1751"
+      "defined": "/JSONPlaceholder.api.spell:1897-1919"
     },
     {
       "property": "website",
       "of": "JsonplaceholderUser",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1755-1776"
+      "defined": "/JSONPlaceholder.api.spell:1924-1948"
     },
     {
       "property": "company",
       "of": "JsonplaceholderUser",
       "datatype": "Company",
-      "defined": "/JSONPlaceholder.api.spell:1780-1806"
+      "defined": "/JSONPlaceholder.api.spell:1953-1986"
     },
     {
       "property": "posts",
       "of": "JsonplaceholderUser",
       "datatype": "list of posts",
-      "defined": "/JSONPlaceholder.api.spell:1810-1840"
+      "defined": "/JSONPlaceholder.api.spell:1992-2025"
     },
     {
       "property": "todos",
       "of": "JsonplaceholderUser",
       "datatype": "list of todos",
-      "defined": "/JSONPlaceholder.api.spell:1844-1874"
+      "defined": "/JSONPlaceholder.api.spell:2030-2063"
     },
     {
       "type": "Todo",
@@ -3074,26 +3074,26 @@
         "placeType": "Jsonplaceholder",
         "collection": "todos"
       },
-      "defined": "/JSONPlaceholder.api.spell:1876-2011"
+      "defined": "/JSONPlaceholder.api.spell:2083-2255"
     },
     {
       "property": "user_id",
       "asWritten": "user id",
       "of": "Todo",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:1931-1956"
+      "defined": "/JSONPlaceholder.api.spell:2156-2188"
     },
     {
       "property": "title",
       "of": "Todo",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:1960-1979"
+      "defined": "/JSONPlaceholder.api.spell:2194-2216"
     },
     {
       "property": "completed",
       "of": "Todo",
       "datatype": "choice",
-      "defined": "/JSONPlaceholder.api.spell:1983-2011"
+      "defined": "/JSONPlaceholder.api.spell:2221-2252"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3111,78 +3111,78 @@
     {
       "type": "Address",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.api.spell:2013-2153"
+      "defined": "/JSONPlaceholder.api.spell:2272-2436"
     },
     {
       "property": "street",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2041-2061"
+      "defined": "/JSONPlaceholder.api.spell:2297-2320"
     },
     {
       "property": "suite",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2065-2084"
+      "defined": "/JSONPlaceholder.api.spell:2325-2347"
     },
     {
       "property": "city",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2088-2106"
+      "defined": "/JSONPlaceholder.api.spell:2352-2373"
     },
     {
       "property": "zipcode",
       "of": "Address",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2110-2131"
+      "defined": "/JSONPlaceholder.api.spell:2378-2402"
     },
     {
       "property": "geo",
       "of": "Address",
       "datatype": "Geo",
-      "defined": "/JSONPlaceholder.api.spell:2135-2153"
+      "defined": "/JSONPlaceholder.api.spell:2407-2432"
     },
     {
       "type": "Geo",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.api.spell:2155-2224"
+      "defined": "/JSONPlaceholder.api.spell:2453-2540"
     },
     {
       "property": "lat",
       "of": "Geo",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:2178-2199"
+      "defined": "/JSONPlaceholder.api.spell:2474-2502"
     },
     {
       "property": "lng",
       "of": "Geo",
       "datatype": "number",
-      "defined": "/JSONPlaceholder.api.spell:2203-2224"
+      "defined": "/JSONPlaceholder.api.spell:2508-2536"
     },
     {
       "type": "Company",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.api.spell:2226-2321"
+      "defined": "/JSONPlaceholder.api.spell:2557-2664"
     },
     {
       "property": "name",
       "of": "Company",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2253-2271"
+      "defined": "/JSONPlaceholder.api.spell:2582-2603"
     },
     {
       "property": "catch_phrase",
       "asWritten": "catch phrase",
       "of": "Company",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2275-2301"
+      "defined": "/JSONPlaceholder.api.spell:2608-2637"
     },
     {
       "property": "bs",
       "of": "Company",
       "datatype": "text",
-      "defined": "/JSONPlaceholder.api.spell:2305-2321"
+      "defined": "/JSONPlaceholder.api.spell:2642-2661"
     },
     {
       "type": "Jsonplaceholder",
@@ -3215,7 +3215,7 @@
           }
         }
       },
-      "defined": "/JSONPlaceholder.api.spell:792-1238"
+      "defined": "/JSONPlaceholder.api.spell:803-1239"
     },
     {
       "type": "JsonplaceholderPage",
@@ -3277,69 +3277,69 @@
         "placeType": "OpenMeteo",
         "collection": "forecasts"
       },
-      "defined": "/OpenMeteo.api.spell:1282-1622"
+      "defined": "/OpenMeteo.api.spell:1297-1730"
     },
     {
       "property": "latitude",
       "of": "Forecast",
       "datatype": "number",
-      "defined": "/OpenMeteo.api.spell:1336-1362"
+      "defined": "/OpenMeteo.api.spell:1369-1402"
     },
     {
       "property": "longitude",
       "of": "Forecast",
       "datatype": "number",
-      "defined": "/OpenMeteo.api.spell:1366-1393"
+      "defined": "/OpenMeteo.api.spell:1408-1442"
     },
     {
       "property": "generationtime_ms",
       "asWritten": "generationtime ms",
       "of": "Forecast",
       "datatype": "number",
-      "defined": "/OpenMeteo.api.spell:1397-1432"
+      "defined": "/OpenMeteo.api.spell:1448-1490"
     },
     {
       "property": "utc_offset_seconds",
       "asWritten": "utc offset seconds",
       "of": "Forecast",
       "datatype": "number",
-      "defined": "/OpenMeteo.api.spell:1436-1472"
+      "defined": "/OpenMeteo.api.spell:1496-1539"
     },
     {
       "property": "timezone",
       "of": "Forecast",
       "datatype": "text",
-      "defined": "/OpenMeteo.api.spell:1476-1498"
+      "defined": "/OpenMeteo.api.spell:1545-1570"
     },
     {
       "property": "timezone_abbreviation",
       "asWritten": "timezone abbreviation",
       "of": "Forecast",
       "datatype": "text",
-      "defined": "/OpenMeteo.api.spell:1502-1537"
+      "defined": "/OpenMeteo.api.spell:1575-1613"
     },
     {
       "property": "elevation",
       "of": "Forecast",
       "datatype": "number",
-      "defined": "/OpenMeteo.api.spell:1541-1568"
+      "defined": "/OpenMeteo.api.spell:1618-1652"
     },
     {
       "property": "hours",
       "of": "Forecast",
       "datatype": "list of hours",
-      "defined": "/OpenMeteo.api.spell:1572-1622"
+      "defined": "/OpenMeteo.api.spell:1670-1720"
     },
     {
       "type": "Hour",
       "superType": "Thing",
-      "defined": "/OpenMeteo.api.spell:1624-1849"
+      "defined": "/OpenMeteo.api.spell:1747-2002"
     },
     {
       "property": "time",
       "of": "Hour",
       "datatype": "date",
-      "defined": "/OpenMeteo.api.spell:1649-1669"
+      "defined": "/OpenMeteo.api.spell:1769-1796"
     },
     {
       "property": "temperature",
@@ -3349,7 +3349,7 @@
         "dimension": "Temperature",
         "unit": "celsius"
       },
-      "defined": "/OpenMeteo.api.spell:1673-1741"
+      "defined": "/OpenMeteo.api.spell:1814-1882"
     },
     {
       "property": "precipitation",
@@ -3359,7 +3359,7 @@
         "dimension": "Length",
         "unit": "millimeter"
       },
-      "defined": "/OpenMeteo.api.spell:1745-1782"
+      "defined": "/OpenMeteo.api.spell:1887-1924"
     },
     {
       "property": "wind_speed",
@@ -3370,7 +3370,7 @@
         "dimension": "Speed",
         "unit": "kilometerPerHour"
       },
-      "defined": "/OpenMeteo.api.spell:1786-1849"
+      "defined": "/OpenMeteo.api.spell:1929-1992"
     },
     {
       "type": "OpenMeteo",
@@ -3391,7 +3391,7 @@
           }
         }
       },
-      "defined": "/OpenMeteo.api.spell:972-1280"
+      "defined": "/OpenMeteo.api.spell:983-1281"
     },
     {
       "type": "OpenMeteoPage",
@@ -3507,374 +3507,374 @@
         "placeType": "MetMuseum",
         "collection": "artworks"
       },
-      "defined": "/MetMuseum.api.spell:1489-3491"
+      "defined": "/MetMuseum.api.spell:1504-3824"
     },
     {
       "property": "highlight",
       "of": "Artwork",
       "datatype": "choice",
-      "defined": "/MetMuseum.api.spell:1543-1596"
+      "defined": "/MetMuseum.api.spell:1568-1621"
     },
     {
       "property": "accession_number",
       "asWritten": "accession number",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:1600-1630"
+      "defined": "/MetMuseum.api.spell:1633-1666"
     },
     {
       "property": "accession_year",
       "asWritten": "accession year",
       "of": "Artwork",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:1634-1666"
+      "defined": "/MetMuseum.api.spell:1671-1710"
     },
     {
       "property": "public_domain",
       "asWritten": "public domain",
       "of": "Artwork",
       "datatype": "choice",
-      "defined": "/MetMuseum.api.spell:1670-1730"
+      "defined": "/MetMuseum.api.spell:1728-1788"
     },
     {
       "property": "primary_image",
       "asWritten": "primary image",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:1734-1761"
+      "defined": "/MetMuseum.api.spell:1800-1830"
     },
     {
       "property": "primary_image_small",
       "asWritten": "primary image small",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:1780-1813"
+      "defined": "/MetMuseum.api.spell:1849-1885"
     },
     {
       "property": "additional_images",
       "asWritten": "additional images",
       "of": "Artwork",
       "datatype": "list of texts",
-      "defined": "/MetMuseum.api.spell:1832-1873"
+      "defined": "/MetMuseum.api.spell:1904-1948"
     },
     {
       "property": "constituents",
       "of": "Artwork",
       "datatype": "list of constituents",
-      "defined": "/MetMuseum.api.spell:1877-1921"
+      "defined": "/MetMuseum.api.spell:1953-2000"
     },
     {
       "property": "department",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:1925-1949"
+      "defined": "/MetMuseum.api.spell:2005-2032"
     },
     {
       "property": "object_name",
       "asWritten": "object name",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:1953-1978"
+      "defined": "/MetMuseum.api.spell:2037-2065"
     },
     {
       "property": "title",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:1982-2001"
+      "defined": "/MetMuseum.api.spell:2070-2092"
     },
     {
       "property": "culture",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2005-2026"
+      "defined": "/MetMuseum.api.spell:2097-2121"
     },
     {
       "property": "period",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2030-2050"
+      "defined": "/MetMuseum.api.spell:2126-2149"
     },
     {
       "property": "dynasty",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2054-2075"
+      "defined": "/MetMuseum.api.spell:2154-2178"
     },
     {
       "property": "reign",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2079-2098"
+      "defined": "/MetMuseum.api.spell:2183-2205"
     },
     {
       "property": "portfolio",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2102-2125"
+      "defined": "/MetMuseum.api.spell:2210-2236"
     },
     {
       "property": "artist_role",
       "asWritten": "artist role",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2129-2154"
+      "defined": "/MetMuseum.api.spell:2241-2269"
     },
     {
       "property": "artist_prefix",
       "asWritten": "artist prefix",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2158-2185"
+      "defined": "/MetMuseum.api.spell:2274-2304"
     },
     {
       "property": "artist_display_name",
       "asWritten": "artist display name",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2189-2222"
+      "defined": "/MetMuseum.api.spell:2309-2345"
     },
     {
       "property": "artist_display_bio",
       "asWritten": "artist display bio",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2226-2258"
+      "defined": "/MetMuseum.api.spell:2350-2385"
     },
     {
       "property": "artist_suffix",
       "asWritten": "artist suffix",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2262-2289"
+      "defined": "/MetMuseum.api.spell:2390-2420"
     },
     {
       "property": "artist_alpha_sort",
       "asWritten": "artist alpha sort",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2293-2324"
+      "defined": "/MetMuseum.api.spell:2425-2459"
     },
     {
       "property": "artist_nationality",
       "asWritten": "artist nationality",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2328-2360"
+      "defined": "/MetMuseum.api.spell:2464-2499"
     },
     {
       "property": "artist_begin_date",
       "asWritten": "artist begin date",
       "of": "Artwork",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:2364-2399"
+      "defined": "/MetMuseum.api.spell:2504-2546"
     },
     {
       "property": "artist_end_date",
       "asWritten": "artist end date",
       "of": "Artwork",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:2403-2436"
+      "defined": "/MetMuseum.api.spell:2552-2592"
     },
     {
       "property": "artist_gender",
       "asWritten": "artist gender",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2440-2467"
+      "defined": "/MetMuseum.api.spell:2598-2628"
     },
     {
       "property": "artist_wikidata_url",
       "asWritten": "artist wikidata url",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2471-2504"
+      "defined": "/MetMuseum.api.spell:2633-2669"
     },
     {
       "property": "artist_ulan_url",
       "asWritten": "artist ulan url",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2523-2552"
+      "defined": "/MetMuseum.api.spell:2688-2720"
     },
     {
       "property": "object_date",
       "asWritten": "object date",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2571-2596"
+      "defined": "/MetMuseum.api.spell:2739-2767"
     },
     {
       "property": "object_begin_date",
       "asWritten": "object begin date",
       "of": "Artwork",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:2600-2635"
+      "defined": "/MetMuseum.api.spell:2772-2814"
     },
     {
       "property": "object_end_date",
       "asWritten": "object end date",
       "of": "Artwork",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:2639-2672"
+      "defined": "/MetMuseum.api.spell:2820-2860"
     },
     {
       "property": "medium",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2676-2696"
+      "defined": "/MetMuseum.api.spell:2866-2889"
     },
     {
       "property": "dimensions",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2700-2724"
+      "defined": "/MetMuseum.api.spell:2894-2921"
     },
     {
       "property": "measurements",
       "of": "Artwork",
       "datatype": "list of measurements",
-      "defined": "/MetMuseum.api.spell:2728-2772"
+      "defined": "/MetMuseum.api.spell:2926-2973"
     },
     {
       "property": "credit_line",
       "asWritten": "credit line",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2776-2801"
+      "defined": "/MetMuseum.api.spell:2978-3006"
     },
     {
       "property": "geography_type",
       "asWritten": "geography type",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2805-2833"
+      "defined": "/MetMuseum.api.spell:3011-3042"
     },
     {
       "property": "city",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2837-2855"
+      "defined": "/MetMuseum.api.spell:3047-3068"
     },
     {
       "property": "state",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2859-2878"
+      "defined": "/MetMuseum.api.spell:3073-3095"
     },
     {
       "property": "county",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2882-2902"
+      "defined": "/MetMuseum.api.spell:3100-3123"
     },
     {
       "property": "country",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2906-2927"
+      "defined": "/MetMuseum.api.spell:3128-3152"
     },
     {
       "property": "region",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2931-2951"
+      "defined": "/MetMuseum.api.spell:3157-3180"
     },
     {
       "property": "subregion",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2955-2978"
+      "defined": "/MetMuseum.api.spell:3185-3211"
     },
     {
       "property": "locale",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:2982-3002"
+      "defined": "/MetMuseum.api.spell:3216-3239"
     },
     {
       "property": "locus",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3006-3025"
+      "defined": "/MetMuseum.api.spell:3244-3266"
     },
     {
       "property": "excavation",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3029-3053"
+      "defined": "/MetMuseum.api.spell:3271-3298"
     },
     {
       "property": "river",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3057-3076"
+      "defined": "/MetMuseum.api.spell:3303-3325"
     },
     {
       "property": "classification",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3080-3108"
+      "defined": "/MetMuseum.api.spell:3330-3361"
     },
     {
       "property": "rights_and_reproduction",
       "asWritten": "rights and reproduction",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3112-3149"
+      "defined": "/MetMuseum.api.spell:3366-3406"
     },
     {
       "property": "link_resource",
       "asWritten": "link resource",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3153-3180"
+      "defined": "/MetMuseum.api.spell:3411-3441"
     },
     {
       "property": "metadata_date",
       "asWritten": "metadata date",
       "of": "Artwork",
       "datatype": "date",
-      "defined": "/MetMuseum.api.spell:3184-3213"
+      "defined": "/MetMuseum.api.spell:3446-3482"
     },
     {
       "property": "repository",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3217-3241"
+      "defined": "/MetMuseum.api.spell:3488-3515"
     },
     {
       "property": "object_url",
       "asWritten": "object url",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3245-3292"
+      "defined": "/MetMuseum.api.spell:3532-3579"
     },
     {
       "property": "tags",
       "of": "Artwork",
       "datatype": "list of tags",
-      "defined": "/MetMuseum.api.spell:3311-3339"
+      "defined": "/MetMuseum.api.spell:3606-3637"
     },
     {
       "property": "object_wikidata_url",
       "asWritten": "object wikidata url",
       "of": "Artwork",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3343-3376"
+      "defined": "/MetMuseum.api.spell:3642-3678"
     },
     {
       "property": "timeline_work",
       "asWritten": "timeline work",
       "of": "Artwork",
       "datatype": "choice",
-      "defined": "/MetMuseum.api.spell:3395-3455"
+      "defined": "/MetMuseum.api.spell:3709-3769"
     },
     {
       "property": "gallery_number",
       "asWritten": "gallery number",
       "of": "Artwork",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:3459-3491"
+      "defined": "/MetMuseum.api.spell:3781-3820"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3892,126 +3892,126 @@
     {
       "type": "Constituent",
       "superType": "Thing",
-      "defined": "/MetMuseum.api.spell:3493-3761"
+      "defined": "/MetMuseum.api.spell:3841-4147"
     },
     {
       "property": "constituent_id",
       "asWritten": "constituent id",
       "of": "Constituent",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:3524-3583"
+      "defined": "/MetMuseum.api.spell:3882-3941"
     },
     {
       "property": "role",
       "of": "Constituent",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3587-3605"
+      "defined": "/MetMuseum.api.spell:3953-3974"
     },
     {
       "property": "name",
       "of": "Constituent",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3609-3627"
+      "defined": "/MetMuseum.api.spell:3979-4000"
     },
     {
       "property": "constituent_ulan_url",
       "asWritten": "constituent ulan url",
       "of": "Constituent",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3631-3665"
+      "defined": "/MetMuseum.api.spell:4005-4042"
     },
     {
       "property": "constituent_wikidata_url",
       "asWritten": "constituent wikidata url",
       "of": "Constituent",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3684-3722"
+      "defined": "/MetMuseum.api.spell:4061-4102"
     },
     {
       "property": "gender",
       "of": "Constituent",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3741-3761"
+      "defined": "/MetMuseum.api.spell:4121-4144"
     },
     {
       "type": "Measurement",
       "superType": "Thing",
-      "defined": "/MetMuseum.api.spell:3763-3913"
+      "defined": "/MetMuseum.api.spell:4164-4326"
     },
     {
       "property": "element_name",
       "asWritten": "element name",
       "of": "Measurement",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3794-3820"
+      "defined": "/MetMuseum.api.spell:4193-4222"
     },
     {
       "property": "element_description",
       "asWritten": "element description",
       "of": "Measurement",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:3824-3857"
+      "defined": "/MetMuseum.api.spell:4227-4263"
     },
     {
       "property": "element_measurements",
       "asWritten": "element measurements",
       "of": "Measurement",
       "datatype": "ElementMeasurement",
-      "defined": "/MetMuseum.api.spell:3861-3913"
+      "defined": "/MetMuseum.api.spell:4268-4323"
     },
     {
       "type": "ElementMeasurement",
       "superType": "Thing",
-      "defined": "/MetMuseum.api.spell:3915-4063"
+      "defined": "/MetMuseum.api.spell:4343-4526"
     },
     {
       "property": "diameter",
       "of": "ElementMeasurement",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:3955-3981"
+      "defined": "/MetMuseum.api.spell:4380-4413"
     },
     {
       "property": "height",
       "of": "ElementMeasurement",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:3985-4009"
+      "defined": "/MetMuseum.api.spell:4419-4450"
     },
     {
       "property": "width",
       "of": "ElementMeasurement",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:4013-4036"
+      "defined": "/MetMuseum.api.spell:4456-4486"
     },
     {
       "property": "depth",
       "of": "ElementMeasurement",
       "datatype": "number",
-      "defined": "/MetMuseum.api.spell:4040-4063"
+      "defined": "/MetMuseum.api.spell:4492-4522"
     },
     {
       "type": "Tag",
       "superType": "Thing",
-      "defined": "/MetMuseum.api.spell:4065-4191"
+      "defined": "/MetMuseum.api.spell:4543-4679"
     },
     {
       "property": "term",
       "of": "Tag",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:4088-4106"
+      "defined": "/MetMuseum.api.spell:4564-4585"
     },
     {
       "property": "aat_url",
       "asWritten": "aat url",
       "of": "Tag",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:4110-4131"
+      "defined": "/MetMuseum.api.spell:4590-4614"
     },
     {
       "property": "wikidata_url",
       "asWritten": "wikidata url",
       "of": "Tag",
       "datatype": "text",
-      "defined": "/MetMuseum.api.spell:4150-4176"
+      "defined": "/MetMuseum.api.spell:4633-4662"
     },
     {
       "type": "MetMuseum",
@@ -4033,7 +4033,7 @@
           }
         }
       },
-      "defined": "/MetMuseum.api.spell:1053-1487"
+      "defined": "/MetMuseum.api.spell:1064-1488"
     },
     {
       "type": "MetMuseumPage",
@@ -4108,223 +4108,223 @@
         "placeType": "RestCountry",
         "collection": "countries"
       },
-      "defined": "/RestCountries.api.spell:1085-1874"
+      "defined": "/RestCountries.api.spell:1100-2024"
     },
     {
       "property": "name",
       "of": "Country",
       "datatype": "Name",
-      "defined": "/RestCountries.api.spell:1142-1162"
+      "defined": "/RestCountries.api.spell:1175-1202"
     },
     {
       "property": "tld",
       "of": "Country",
       "datatype": "list of texts",
-      "defined": "/RestCountries.api.spell:1166-1193"
+      "defined": "/RestCountries.api.spell:1208-1238"
     },
     {
       "property": "cca2",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1197-1215"
+      "defined": "/RestCountries.api.spell:1243-1264"
     },
     {
       "property": "ccn3",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1219-1237"
+      "defined": "/RestCountries.api.spell:1269-1290"
     },
     {
       "property": "cca3",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1241-1259"
+      "defined": "/RestCountries.api.spell:1295-1316"
     },
     {
       "property": "cioc",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1263-1281"
+      "defined": "/RestCountries.api.spell:1321-1342"
     },
     {
       "property": "independent",
       "of": "Country",
       "datatype": "choice",
-      "defined": "/RestCountries.api.spell:1285-1315"
+      "defined": "/RestCountries.api.spell:1347-1380"
     },
     {
       "property": "status",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1319-1339"
+      "defined": "/RestCountries.api.spell:1385-1408"
     },
     {
       "property": "un_member",
       "asWritten": "un member",
       "of": "Country",
       "datatype": "choice",
-      "defined": "/RestCountries.api.spell:1343-1371"
+      "defined": "/RestCountries.api.spell:1413-1444"
     },
     {
       "property": "un_regional_group",
       "asWritten": "un regional group",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1375-1406"
+      "defined": "/RestCountries.api.spell:1449-1483"
     },
     {
       "property": "currencies",
       "of": "Country",
       "datatype": "list of currencies",
-      "defined": "/RestCountries.api.spell:1410-1450"
+      "defined": "/RestCountries.api.spell:1488-1531"
     },
     {
       "property": "idd",
       "of": "Country",
       "datatype": "Idd",
-      "defined": "/RestCountries.api.spell:1454-1473"
+      "defined": "/RestCountries.api.spell:1536-1561"
     },
     {
       "property": "capital",
       "of": "Country",
       "datatype": "list of texts",
-      "defined": "/RestCountries.api.spell:1477-1508"
+      "defined": "/RestCountries.api.spell:1567-1601"
     },
     {
       "property": "alt_spellings",
       "asWritten": "alt spellings",
       "of": "Country",
       "datatype": "list of texts",
-      "defined": "/RestCountries.api.spell:1512-1549"
+      "defined": "/RestCountries.api.spell:1606-1646"
     },
     {
       "property": "region",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1553-1573"
+      "defined": "/RestCountries.api.spell:1651-1674"
     },
     {
       "property": "subregion",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1577-1600"
+      "defined": "/RestCountries.api.spell:1679-1705"
     },
     {
       "property": "languages",
       "of": "Country",
       "datatype": "list of languages",
-      "defined": "/RestCountries.api.spell:1604-1642"
+      "defined": "/RestCountries.api.spell:1710-1751"
     },
     {
       "property": "translations",
       "of": "Country",
       "datatype": "list of translations",
-      "defined": "/RestCountries.api.spell:1646-1690"
+      "defined": "/RestCountries.api.spell:1756-1803"
     },
     {
       "property": "latlng",
       "of": "Country",
       "datatype": "list of numbers",
-      "defined": "/RestCountries.api.spell:1694-1727"
+      "defined": "/RestCountries.api.spell:1808-1844"
     },
     {
       "property": "landlocked",
       "of": "Country",
       "datatype": "choice",
-      "defined": "/RestCountries.api.spell:1731-1760"
+      "defined": "/RestCountries.api.spell:1849-1881"
     },
     {
       "property": "borders",
       "of": "Country",
       "datatype": "list of texts",
-      "defined": "/RestCountries.api.spell:1764-1795"
+      "defined": "/RestCountries.api.spell:1886-1920"
     },
     {
       "property": "area",
       "of": "Country",
       "datatype": "number",
-      "defined": "/RestCountries.api.spell:1799-1821"
+      "defined": "/RestCountries.api.spell:1925-1954"
     },
     {
       "property": "flag",
       "of": "Country",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1825-1843"
+      "defined": "/RestCountries.api.spell:1960-1981"
     },
     {
       "property": "demonyms",
       "of": "Country",
       "datatype": "Demonym",
-      "defined": "/RestCountries.api.spell:1847-1874"
+      "defined": "/RestCountries.api.spell:1986-2020"
     },
     {
       "type": "Name",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:1876-1983"
+      "defined": "/RestCountries.api.spell:2041-2160"
     },
     {
       "property": "common",
       "of": "Name",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1900-1920"
+      "defined": "/RestCountries.api.spell:2063-2086"
     },
     {
       "property": "official",
       "of": "Name",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:1924-1946"
+      "defined": "/RestCountries.api.spell:2091-2116"
     },
     {
       "property": "native",
       "of": "Name",
       "datatype": "list of natives",
-      "defined": "/RestCountries.api.spell:1950-1983"
+      "defined": "/RestCountries.api.spell:2121-2157"
     },
     {
       "type": "Native",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:1985-2079"
+      "defined": "/RestCountries.api.spell:2177-2283"
     },
     {
       "property": "code",
       "of": "Native",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2011-2029"
+      "defined": "/RestCountries.api.spell:2201-2222"
     },
     {
       "property": "official",
       "of": "Native",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2033-2055"
+      "defined": "/RestCountries.api.spell:2227-2252"
     },
     {
       "property": "common",
       "of": "Native",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2059-2079"
+      "defined": "/RestCountries.api.spell:2257-2280"
     },
     {
       "type": "Currency",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2081-2173"
+      "defined": "/RestCountries.api.spell:2300-2404"
     },
     {
       "property": "code",
       "of": "Currency",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2109-2127"
+      "defined": "/RestCountries.api.spell:2326-2347"
     },
     {
       "property": "name",
       "of": "Currency",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2131-2149"
+      "defined": "/RestCountries.api.spell:2352-2373"
     },
     {
       "property": "symbol",
       "of": "Currency",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2153-2173"
+      "defined": "/RestCountries.api.spell:2378-2401"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -4342,36 +4342,36 @@
     {
       "type": "Idd",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2175-2253"
+      "defined": "/RestCountries.api.spell:2421-2506"
     },
     {
       "property": "root",
       "of": "Idd",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2199-2217"
+      "defined": "/RestCountries.api.spell:2442-2463"
     },
     {
       "property": "suffixes",
       "of": "Idd",
       "datatype": "list of texts",
-      "defined": "/RestCountries.api.spell:2221-2253"
+      "defined": "/RestCountries.api.spell:2468-2503"
     },
     {
       "type": "Language",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2255-2323"
+      "defined": "/RestCountries.api.spell:2523-2599"
     },
     {
       "property": "code",
       "of": "Language",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2283-2301"
+      "defined": "/RestCountries.api.spell:2549-2570"
     },
     {
       "property": "name",
       "of": "Language",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2305-2323"
+      "defined": "/RestCountries.api.spell:2575-2596"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -4389,76 +4389,76 @@
     {
       "type": "Translation",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2325-2424"
+      "defined": "/RestCountries.api.spell:2616-2727"
     },
     {
       "property": "code",
       "of": "Translation",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2356-2374"
+      "defined": "/RestCountries.api.spell:2645-2666"
     },
     {
       "property": "official",
       "of": "Translation",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2378-2400"
+      "defined": "/RestCountries.api.spell:2671-2696"
     },
     {
       "property": "common",
       "of": "Translation",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2404-2424"
+      "defined": "/RestCountries.api.spell:2701-2724"
     },
     {
       "type": "Demonym",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2426-2494"
+      "defined": "/RestCountries.api.spell:2744-2829"
     },
     {
       "property": "eng",
       "of": "Demonym",
       "datatype": "Eng",
-      "defined": "/RestCountries.api.spell:2453-2472"
+      "defined": "/RestCountries.api.spell:2769-2794"
     },
     {
       "property": "fra",
       "of": "Demonym",
       "datatype": "Fra",
-      "defined": "/RestCountries.api.spell:2476-2494"
+      "defined": "/RestCountries.api.spell:2800-2825"
     },
     {
       "type": "Eng",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2496-2554"
+      "defined": "/RestCountries.api.spell:2846-2911"
     },
     {
       "property": "f",
       "of": "Eng",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2520-2535"
+      "defined": "/RestCountries.api.spell:2867-2885"
     },
     {
       "property": "m",
       "of": "Eng",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2539-2554"
+      "defined": "/RestCountries.api.spell:2890-2908"
     },
     {
       "type": "Fra",
       "superType": "Thing",
-      "defined": "/RestCountries.api.spell:2556-2613"
+      "defined": "/RestCountries.api.spell:2928-2993"
     },
     {
       "property": "f",
       "of": "Fra",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2579-2594"
+      "defined": "/RestCountries.api.spell:2949-2967"
     },
     {
       "property": "m",
       "of": "Fra",
       "datatype": "text",
-      "defined": "/RestCountries.api.spell:2598-2613"
+      "defined": "/RestCountries.api.spell:2972-2990"
     },
     {
       "type": "RestCountry",
@@ -4475,7 +4475,7 @@
           }
         }
       },
-      "defined": "/RestCountries.api.spell:927-1083"
+      "defined": "/RestCountries.api.spell:938-1084"
     },
     {
       "type": "RestCountriesPage",

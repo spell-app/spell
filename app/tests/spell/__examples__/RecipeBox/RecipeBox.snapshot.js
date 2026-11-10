@@ -7,17 +7,17 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1162, end: 1181 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1170, end: 1192 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1185, end: 1211 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1197, end: 1230 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1215, end: 1234 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1236, end: 1258 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 

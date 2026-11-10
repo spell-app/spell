@@ -7,17 +7,17 @@ core.heading("Family Cookbook:  your recipes, saved in the cloud")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 423, end: 442 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 457, end: 479 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 446, end: 472 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 484, end: 517 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 476, end: 495 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 523, end: 545 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -55,12 +55,12 @@ export class Recipe extends Thing {
   }
 
   // - it lives in family cookbook
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 392, end: 419 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 418, end: 445 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in family cookbook
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 392, end: 419 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 418, end: 445 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

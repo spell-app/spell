@@ -121,14 +121,14 @@
     {
       "type": "TaskKeeper",
       "superType": "Thing",
-      "defined": "/TaskList.api.spell:959-1238"
+      "defined": "/TaskList.api.spell:959-1278"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "TaskKeeper",
       "datatype": "list of tasks",
-      "defined": "/TaskList.api.spell:1064-1099"
+      "defined": "/TaskList.api.spell:988-1110"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -148,7 +148,7 @@
         }
       ],
       "returns": "Task",
-      "defined": "/TaskList.api.spell:1157-1238"
+      "defined": "/TaskList.api.spell:1115-1267"
     },
     {
       "type": "BrowserTask",
@@ -158,7 +158,7 @@
         "placeType": "BrowserStorage",
         "collection": "browser_tasks"
       },
-      "defined": "/TaskList.browser.api.spell:249-363"
+      "defined": "/TaskList.browser.api.spell:241-407"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -172,19 +172,19 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.browser.api.spell:311-363"
+      "defined": "/TaskList.browser.api.spell:337-396"
     },
     {
       "type": "BrowserKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.browser.api.spell:365-587"
+      "defined": "/TaskList.browser.api.spell:423-682"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "BrowserKeeper",
       "datatype": "list of browser-tasks",
-      "defined": "/TaskList.browser.api.spell:405-443"
+      "defined": "/TaskList.browser.api.spell:478-519"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -204,7 +204,7 @@
         }
       ],
       "returns": "BrowserTask",
-      "defined": "/TaskList.browser.api.spell:447-587"
+      "defined": "/TaskList.browser.api.spell:524-671"
     },
     {
       "type": "BrowserStorage",
@@ -213,7 +213,7 @@
         "name": "browser_storage",
         "kind": "database on this device"
       },
-      "defined": "/TaskList.browser.api.spell:203-247"
+      "defined": "/TaskList.browser.api.spell:220-235"
     },
     {
       "type": "ServerTask",
@@ -223,7 +223,7 @@
         "placeType": "TaskFile",
         "collection": "server_tasks"
       },
-      "defined": "/TaskList.server.api.spell:392-499"
+      "defined": "/TaskList.server.api.spell:410-569"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -237,19 +237,19 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.server.api.spell:448-499"
+      "defined": "/TaskList.server.api.spell:500-558"
     },
     {
       "type": "ServerKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.server.api.spell:501-719"
+      "defined": "/TaskList.server.api.spell:585-840"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "ServerKeeper",
       "datatype": "list of server-tasks",
-      "defined": "/TaskList.server.api.spell:540-577"
+      "defined": "/TaskList.server.api.spell:639-679"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -269,7 +269,7 @@
         }
       ],
       "returns": "ServerTask",
-      "defined": "/TaskList.server.api.spell:581-719"
+      "defined": "/TaskList.server.api.spell:684-829"
     },
     {
       "type": "TaskFile",
@@ -282,7 +282,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/TaskList.server.api.spell:322-390"
+      "defined": "/TaskList.server.api.spell:336-393"
     },
     {
       "type": "SheetTask",
@@ -292,7 +292,7 @@
         "placeType": "TaskSheet",
         "collection": "sheet_tasks"
       },
-      "defined": "/TaskList.csv.api.spell:548-653"
+      "defined": "/TaskList.csv.api.spell:560-717"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -306,19 +306,19 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.csv.api.spell:603-653"
+      "defined": "/TaskList.csv.api.spell:649-706"
     },
     {
       "type": "SheetKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.csv.api.spell:655-869"
+      "defined": "/TaskList.csv.api.spell:733-984"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "SheetKeeper",
       "datatype": "list of sheet-tasks",
-      "defined": "/TaskList.csv.api.spell:693-729"
+      "defined": "/TaskList.csv.api.spell:786-825"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -338,7 +338,7 @@
         }
       ],
       "returns": "SheetTask",
-      "defined": "/TaskList.csv.api.spell:733-869"
+      "defined": "/TaskList.csv.api.spell:830-973"
     },
     {
       "type": "TaskSheet",
@@ -351,7 +351,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/TaskList.csv.api.spell:458-546"
+      "defined": "/TaskList.csv.api.spell:466-549"
     },
     {
       "type": "SkyTask",
@@ -361,7 +361,7 @@
         "placeType": "TaskSky",
         "collection": "sky_tasks"
       },
-      "defined": "/TaskList.atmosphere.api.spell:397-496"
+      "defined": "/TaskList.atmosphere.api.spell:401-552"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -375,26 +375,26 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.atmosphere.api.spell:448-496"
+      "defined": "/TaskList.atmosphere.api.spell:486-541"
     },
     {
       "property": "owner",
       "of": "SkyTask",
       "group": "Kept in your atmosphere account",
       "datatype": "text",
-      "defined": "/TaskList.atmosphere.api.spell:563-594"
+      "defined": "/TaskList.atmosphere.api.spell:642-673"
     },
     {
       "type": "SkyKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.atmosphere.api.spell:596-893"
+      "defined": "/TaskList.atmosphere.api.spell:684-1028"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "SkyKeeper",
       "datatype": "list of sky-tasks",
-      "defined": "/TaskList.atmosphere.api.spell:695-757"
+      "defined": "/TaskList.atmosphere.api.spell:735-873"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -414,7 +414,7 @@
         }
       ],
       "returns": "SkyTask",
-      "defined": "/TaskList.atmosphere.api.spell:761-893"
+      "defined": "/TaskList.atmosphere.api.spell:878-1017"
     },
     {
       "type": "TaskSky",
@@ -430,7 +430,7 @@
           }
         }
       },
-      "defined": "/TaskList.atmosphere.api.spell:294-395"
+      "defined": "/TaskList.atmosphere.api.spell:307-385"
     },
     {
       "type": "Checklist",

@@ -4,20 +4,28 @@
 // Your event's letter names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.
 
 // Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection.
-published sheet is a data folder at "picnic@rs/sheet":
+<data-folder "published sheet" address="picnic@rs/sheet">
 	- listings live at "volunteers"
 	- check it every 30 seconds
+</data-folder>
 
-a "listing" is a thing:
-	- it lives in the published sheet
-	- its "person" is text
-	- its "shift" is text
+<spell-thing "listing">
+	<spell>
+		- it lives in the published sheet
+	</spell>
+	<property "person">text</>
+	<property "shift">text</>
+</spell-thing>
 
 // Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
-my inbox is a data folder at "@rs/__inbox":
+<data-folder "my inbox" address="@rs/__inbox">
 	- check it every 30 seconds
+</data-folder>
 
-a "message" is a thing:
-	- it lives in my inbox
-	- its "text" is text
-	- its "thread" is text
+<spell-thing "message">
+	<spell>
+		- it lives in my inbox
+	</spell>
+	<property "text">text</>
+	<property "thread">text</>
+</spell-thing>

@@ -22,18 +22,6 @@
   }, {
     "path": "/StarWarsPortrait.spell",
     "active": true
-  }, {
-    "path": "/StarWars.spell",
-    "active": true
-  }, {
-    "path": "/StarWarsCrawl.spell",
-    "active": true
-  }, {
-    "path": "/StarWarsJump.spell",
-    "active": true
-  }, {
-    "path": "/StarWarsPortrait.spell",
-    "active": true
   }],
   "development": {
     "apis": ["StarWars.api.json5", "Wikipedia.api.json5"]

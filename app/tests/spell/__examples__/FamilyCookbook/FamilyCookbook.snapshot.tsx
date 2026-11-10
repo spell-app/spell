@@ -8,15 +8,15 @@ core.heading("Family Cookbook:  your recipes, saved in the cloud")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 423, end: 442 } })
+  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 457, end: 479 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 446, end: 472 } })
+  @prop({ type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 484, end: 517 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 476, end: 495 } })
+  @prop({ type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 523, end: 545 } })
   accessor notes!: string
 
   @drawn draw() {
@@ -47,11 +47,11 @@ export class Recipe extends Thing {
   }
 
   // - it lives in family cookbook
-  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 392, end: 419 } })
+  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 418, end: 445 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in family cookbook
-  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 392, end: 419 } })
+  @prop({ type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 418, end: 445 } })
   accessor modified!: any /* spell: type unknown */
 }
 

@@ -12,9 +12,12 @@
 // Una tarea guardada en cualquier lugar se guarda sola al cambiar:  marcarla, o escribir su título, queda guardado, sin paso de guardar.
 // Su lugar en la lista se guarda igual, como su orden:  así las tareas vuelven en el orden en que la gente las arrastró.
 
-un "guardián de tareas" es una cosa:
+<encanto-cosa "guardián de tareas">
 	// las tareas que tiene, en cualquier orden:  la aplicación las pone en su propio orden
-	- sus "tareas guardadas" es una lista de tareas
-	// una tarea nueva, guardada desde ahora, que devuelve
-	- para guardar una tarea nueva titulada (título como texto):
+	<encanto>
+		- sus "tareas guardadas" es una lista de tareas
+	</encanto>
+	<acción "guardar una tarea nueva titulada (título como texto)" descripción="una tarea nueva, guardada desde ahora, que devuelve">
 		devolver una nueva tarea con título = título
+	</acción>
+</encanto-cosa>

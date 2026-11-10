@@ -6,10 +6,15 @@
 //   recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
 // (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
 // Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spell.
-recetario familiar es una base de datos en este dispositivo
+<almacenamiento-del-dispositivo "recetario familiar" />
 
-una "receta" es una cosa:
-	- vive en recetario familiar
-	- su "título" es texto
-	- sus "porciones" es un número
-	- sus "notas" es texto
+<encanto-cosa "receta">
+	<encanto>
+		- vive en recetario familiar
+	</encanto>
+	<propiedad "título">texto</>
+	<encanto>
+		- sus "porciones" es un número
+		- sus "notas" es texto
+	</encanto>
+</encanto-cosa>
