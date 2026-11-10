@@ -1,6 +1,7 @@
 import {
   GitHub,
   type CodeHostWords,
+  type FirstPushHelp,
   type GhResult,
   type GhRunOptions,
   type GhStatus,
@@ -84,9 +85,10 @@ export class GitLab {
     return GitLab.wordsOn(this.host)
   }
 
-  /** What a person reads about GitLab at `host`:  self-hosted, how to log in names it. */
+  /** What a person reads about GitLab at `host`:  self-hosted, how to log in names it, and who can read a repo. */
   static wordsOn(host?: string): CodeHostWords {
     const named = host && host !== DEFAULT_HOST ? ` --hostname ${host}` : ""
+    const server = host || DEFAULT_HOST
     return {
       name: "GitLab",
       command: "glab",
@@ -97,8 +99,27 @@ export class GitLab {
         "  brew install glab      (other systems:  https://gitlab.com/gitlab-org/cli)",
         `  glab auth login${named}`
       ],
-      openCommand: (base, branch) => `glab mr create --source-branch ${branch} --target-branch ${base} --fill --yes`
+      openCommand: (base, branch) => `glab mr create --source-branch ${branch} --target-branch ${base} --fill --yes`,
+      server,
+      canRead: {
+        private: "only people added to the project, and members of its group, can read it;  roles control access",
+        public:
+          `anyone who can reach ${server} can read every epic page, guide and comment, without signing in;  ` +
+          "roles only control who can write"
+      }
     }
+  }
+
+  /**
+   * Whether git's words `said`, from a push, are GitLab refusing a new project's FIRST push:  "You cannot push the
+   * initial commit because the default branch is protected and your role does not allow it."
+   * - GitLab breaks that sentence across `remote:` lines:  they're taken out, and the words joined, before comparing
+   */
+  static refusesFirstPush(said: string | undefined): boolean {
+    const joined = String(said ?? "")
+      .replace(/^remote:[ \t]?/gm, "")
+      .replace(/\s+/g, " ")
+    return FIRST_PUSH_REFUSED.test(joined)
   }
 
   /** Run `glab <args>`:  as `GitHub.run()`, `glab` by default.  NEVER throws. */
@@ -302,6 +323,34 @@ export class GitLab {
   }
 
   /**
+   * What to do about git's words `said` from the first push of project `fullName` (git address `address`) to
+   * `branch`, when they're GitLab's refusal (`refusesFirstPush()`):  a Maintainer pushes the first commit, then lets
+   * everyone push;  `undefined` for any other failure.
+   * - the commands, filled in for this project:  clone it, an empty first commit (the Maintainer hasn't the plans;
+   *   ours go on top of it), push it, then what `letTeamPush()` runs, the branch's protection lifted
+   * - NEVER throws
+   */
+  firstPushRefusal(
+    said: string | undefined,
+    { fullName, address, branch }: FirstPushAttempt
+  ): FirstPushHelp | undefined {
+    if (!GitLab.refusesFirstPush(said)) return undefined
+    const server = this.host ?? GitLab.partsOf(address)?.host ?? DEFAULT_HOST
+    const folder = fullName.slice(fullName.lastIndexOf("/") + 1)
+    return {
+      membersPage: `https://${server}/${fullName}/-/project_members`,
+      branch,
+      commands: [
+        `git clone ${address}`,
+        `cd ${folder}`,
+        'git commit --allow-empty -m "First commit of the epic repo"',
+        `git push -u origin HEAD:${branch}`,
+        `glab api --hostname ${server} --method DELETE projects/${encoded(fullName)}/protected_branches/${encoded(branch)}`
+      ]
+    }
+  }
+
+  /**
    * Let every teammate push to `branch` of project `fullName`:  run once the branch exists (its first push), which is
    * when GitLab protects a new project's default branch, Developers kept out.
    * - a line saying what to do by hand when it couldn't (no right to, offline);  `undefined` when it's done
@@ -347,6 +396,19 @@ function canPush(level: PushLevel, me: number | undefined, mine: number | undefi
   if (level.access_level === NO_ONE) return false
   return mine === undefined || level.access_level === null || mine >= level.access_level
 }
+
+/** What `GitLab.firstPushRefusal()` is told about the push that failed. */
+export type FirstPushAttempt = {
+  /** the project, `team/sub/app.epics` */
+  fullName: string
+  /** its git address, as the push used it */
+  address: string
+  /** the branch pushed */
+  branch: string
+}
+
+/** GitLab's words for a first push its protected default branch refused, joined onto one line. */
+const FIRST_PUSH_REFUSED = /cannot push the initial commit because the default branch is protected/i
 
 /** What names the `glab` command `GitLab` runs, when set:  a test's stand-in, or a path to none. */
 const GLAB_ENV = "SPELL_EPIC_GLAB"

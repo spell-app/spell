@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process"
-import { dirname } from "node:path"
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
 
 // By its file, with its `.ts`:  plain `node` loads this file (above)
 import { GitError, type GitOptions, type GitResult } from "./server.types.ts"
@@ -15,6 +16,7 @@ import { GitError, type GitOptions, type GitResult } from "./server.types.ts"
  * Git.mustRun(["merge", "--ff-only", "x"], root)  // => its output;  throws a `GitError`
  * Git.config("user.name")                         // => "Ana Lima", or undefined when git doesn't know it
  * Git.mainRoot(root)                              // => the MAIN checkout of the repo holding `root`
+ * Git.exclude(["/epics"], "# epic init", root)   // => ["/epics"]:  the lines it added to the private ignore list
  * ```
  *
  * - All `static`:  no state (WWOD §8 › "Singleton services are classes").
@@ -72,6 +74,38 @@ export class Git {
    */
   static config(key: string, cwd = process.cwd()): string | undefined {
     return Git.out(["config", key], cwd) || undefined
+  }
+
+  /**
+   * The repo's private ignore list, `info/exclude` in its COMMON git folder:  the main checkout's `.git/info/exclude`,
+   * from the main checkout or any worktree, so every checkout of the repo reads it.
+   * - found by git (`git rev-parse --git-path info/exclude`), never put together by hand
+   * - throws a `GitError` outside a git repo
+   */
+  static excludeFile(cwd = process.cwd()): string {
+    return resolve(cwd, Git.mustRun(["rev-parse", "--git-path", "info/exclude"], cwd))
+  }
+
+  /**
+   * Add `lines` to the repo's private ignore list (`excludeFile()`), each one it doesn't have yet:  the lines added.
+   * - the ONE writer of that file:  `epic init --local`, its pull-request setup and `epic worktree patch` all go
+   *   through here
+   * - `note`:  a comment line above them, added once, the first time any of them goes in
+   * - a link is listed WITHOUT a trailing slash (`/epics`):  git sees a link as a file, which `/epics/` never matches
+   * - `dryRun`:  the lines it would add, nothing written
+   * - throws a `GitError` outside a git repo
+   * - SIDE EFFECT (not `dryRun`):  appends to the file, making it and its folder when missing
+   */
+  static exclude(lines: string[], note: string, cwd = process.cwd(), { dryRun = false } = {}): string[] {
+    const file = Git.excludeFile(cwd)
+    const text = existsSync(file) ? readFileSync(file, "utf8") : ""
+    const listed = new Set(text.split("\n"))
+    const missing = [...new Set(lines)].filter((line) => !listed.has(line))
+    if (!missing.length || dryRun) return missing
+    mkdirSync(dirname(file), { recursive: true })
+    const head = listed.has(note) ? [] : [note]
+    appendFileSync(file, `${text && !text.endsWith("\n") ? "\n" : ""}${[...head, ...missing].join("\n")}\n`)
+    return missing
   }
 
   /**

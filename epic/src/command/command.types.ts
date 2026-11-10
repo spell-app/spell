@@ -444,6 +444,11 @@ export type SharedStatus = {
   isRepo: boolean
   dirty: number
   last: string
+  /**
+   * when the last sync couldn't push (`SyncState`):  why, in a line, and whether the plans were ever shared;
+   * none when it went through, or never ran
+   */
+  unshared?: { reason: string; never: boolean; at: string }
   checkouts: { checkout: string; links: LinkReport[] }[]
 }
 

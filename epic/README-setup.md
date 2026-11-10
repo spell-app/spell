@@ -97,6 +97,10 @@ npx spell@next epic init
 In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow, then sums up the
 answers (`> Your name  :  Ana`, the values bold) before it does anything.
 A pick-one question is a numbered list:  the arrow keys and Enter, or a number key, pick.
+In a list longer than 9, digits move the mark (`1` then `3` lands on 13) and Enter takes it.
+Once you pick, the list folds into one line:  the question and your answer.
+Keys pressed while nothing is asking (a gray line says what it's waiting on, `checking GitLab…`) aren't shown, and
+are thrown away:  a stray arrow can't move the next pick, nor a stray Enter answer it.
 A teammate joining has the team's plans cloned before the colour question, so the list leaves out the colours taken.
 - **What do you want to be called?**  Your short name on the pages, suggesting the one you keep already,
   else your GitHub login;  asked every time, Enter keeps it.
@@ -106,10 +110,18 @@ A teammate joining has the team's plans cloned before the colour question, so th
   `--color green` answers it;  any CSS colour works too.
 - **What should the epic repo be called?**  Only when it's about to make one on GitHub.  Suggesting `<repo>.epics`, here `my-app.epics`.
   `--content-repo <name>` answers it.
-- **Private or public?**  A list of the two, private marked.
-  `--public` answers it;  with no terminal to ask in, it's private unless you say `--public`.
-  A public repo shows everything in the plans to anyone:  epic pages, guides, comments.
-  `epic init` says so in a line of its own.
+- **Private or public?**  A list of the two, private marked, each saying who can read the plans, naming your server:
+
+  ```text
+  ? Private or public?
+  ❯ 1. private  -- only people added to the project, and members of its group, can read it;  roles control access
+    2. public  -- anyone who can reach git.acme.com can read every epic page, guide and comment, without signing in;  roles only control who can write
+  ```
+
+  - On GitHub, private leaves out the group ("only people added to the repo"), and public names github.com.
+  - Picking public asks again, in one line, with no suggested:  no, or Enter, makes it private, and says so.
+  - `--public` answers it and asks nothing;  with no terminal to ask in, it's private unless you say `--public`.
+  - A public repo gets a line of its own at the end, saying so.
 - **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files;  suggesting yes,
   and with no terminal to ask in, yes.  It pushes to the branch's upstream, else `origin`.
   `--no-commit` leaves them for you.
@@ -145,6 +157,7 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
 - Each step is skipped when it's done, so it's safe to run again:  a second run's table says `already` on every row.
 - `--remote <address>` uses an epic repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
+- `--local` puts nothing in your repo at all:  [below](#nothing-in-your-repo).
 
 Try it first in a throwaway repo:  `--dry-run` says what it would do, and writes nothing.
 
@@ -253,13 +266,37 @@ Its epic page, `~/www/my-app.epics/epics/seo/seo.plan.html`, opens in the Review
 
 What happens from there:  [the epic engine's front page](README.md).
 
+## <a id="nothing-in-your-repo"></a>Nothing in your repo:  `--local`
+
+When the team doesn't want any of it in the code repo, set epics up on your machine only:
+
+```sh
+epic init --local
+```
+
+- **Nothing is committed**, and your `.gitignore` is left as it was:  no branch, no merge request.
+- `.epic/config.json5` and the links into the epic folder are listed in the repo's PRIVATE ignore list,
+  `.git/info/exclude`, which git never shares.
+  - Every worktree reads that list and the main checkout's config, so `git status` stays empty there too.
+  - A fresh clone has none of it.
+- Nothing is made on GitHub or GitLab, unless you ask:
+  `--content-repo <name>` makes the epic repo, `--remote <address>` uses one made already, `--no-remote` none.
+- The config remembers it (`localSetup`):  `epic init` run again stays local.
+- Each teammate runs their own:  `epic init --local --remote <address>` clones the plans, and syncs with them from then on.
+- A setup merge request an earlier `epic init` left open:  it says to close it, and its address, and touches nothing.
+- Refused where the base branch tracks `.epic/config.json5` already:  take that and the `.gitignore` block out first.
+- **Its limit:**  what a branch's own `.epic/` would carry (`.epic/generators.json5`, the generated files
+  `epic worktree merge-main` rebuilds instead of merging) isn't in your branches.
+  Merging `main` in merges those files as git does, by line.
+
 ## <a id="on-gitlab"></a>On GitLab
 
 `epic init` works on GitLab, self-hosted too, as it does on GitHub:  the shared epic repo made, and a setup merge request
 where `main` is protected.
-**So far this has run only against a stand-in `glab`**:  a script that answers as GitLab's API documents,
-with real `git` pushes to a local repo whose hook refuses `main`.
-No real GitLab has been tried yet, so expect rough edges and tell us.
+It has met one real GitLab so far, a company's own:  what it found is in [The first push](#gitlab-first-push) below.
+The rest has run against a stand-in `glab`:  a script that answers as GitLab's API documents,
+with real `git` pushes to local repos whose hooks refuse as GitLab does.
+Expect rough edges, and tell us.
 
 You need GitLab's command, `glab`, logged in:
 
@@ -282,6 +319,29 @@ glab auth login --hostname git.acme.com  # your own GitLab
   If it can't (no right to), it says so in one line:  unprotect it in the project's
   Settings › Repository › Protected branches, or nobody else can sync.
   An epic repo you made yourself (`--remote`) is yours to open up.
+- <a id="gitlab-first-push"></a>**The first push, refused.**  Where your role can't push a new project's first commit,
+  GitLab refuses it:  "You cannot push the initial commit because the default branch is protected and your role does
+  not allow it."
+  - `epic init` says so, and that a Maintainer has to push the first commit and let everyone push to `main`;
+    it gives the project's members page, to find one.
+  - It prints exactly what the Maintainer runs, filled in for your repo:
+
+    ```sh
+    git clone git@git.acme.com:team/my-app.epics.git
+    cd my-app.epics
+    git commit --allow-empty -m "First commit of the epic repo"
+    git push -u origin HEAD:main
+    glab api --hostname git.acme.com --method DELETE projects/team%2Fmy-app.epics/protected_branches/main
+    ```
+
+  - The first commit is empty:  the Maintainer hasn't your plans.  Yours go on top of it.
+  - The last line lifts `main`'s protection.  To keep it protected instead:  Settings › Repository ›
+    Protected branches, "Allowed to push and merge" set to Developers and Maintainers.
+  - Every teammate needs push rights to `main` too:  the plans sync by pushing to it at the end of every turn.
+  - Once they're done, `epic init` again pushes your plans on top, and says they're shared;  or the next turn's sync
+    does it by itself.
+  - Meanwhile your commits wait in the epic folder;  the turns stay quiet about it, `epic turn end` says it in one
+    line, and `epic shared status` says why the plans aren't shared yet.
 - **Commit links** on the epic pages go to GitLab's `/-/commit/<sha>`.
 
 ## <a id="when-main-takes-only-pull-requests"></a>When main takes only pull requests

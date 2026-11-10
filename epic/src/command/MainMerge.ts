@@ -215,7 +215,8 @@ export class MainMerge {
     // leaves the index, kept on disk.
     // (A file both sides track, though ignored, stays.)
     // ONLY `.gitignore`s, never this machine's `.git/info/exclude`:  a file listed there was untracked by every merge
-    // (the kit's `.ignore`, epic `epic-engine` P17, dropped from `main` twice)
+    // (the kit's `.ignore`, epic `epic-engine` P17, dropped from `main` twice);  `changedFiles()` reads both, as it
+    // only asks what's left uncommitted
     const base = Git.out(["merge-base", "HEAD", "MERGE_HEAD"], root) ?? ""
     const conflicted = Git.lines(["diff", "--name-only", "--diff-filter=U"], root)
     const theirs = Git.lines(["diff", "--name-only", base, "MERGE_HEAD"], root)
@@ -640,9 +641,13 @@ function emptyReport(branch: string): MergeMainReport {
   return { branch, result: "up-to-date", conflicts: [], untracked: [], regenerated: [], review: [], unstaged: [] }
 }
 
-/** Tracked files changed, deleted or new (not ignored) in the working tree, against the index. */
+/**
+ * Tracked files changed, deleted or new (not ignored) in the working tree, against the index.
+ * - ignored by git's STANDARD rules:  the `.gitignore`s, and this machine's own `.git/info/exclude`, where
+ *   `epic init --local` lists the plans' links and `.epic/` (epic `epic-engine` P69):  else they'd read as uncommitted
+ */
 function changedFiles(root: string): string[] {
-  const out = mustGit(root, ["ls-files", "-z", "--modified", "--others", "--exclude-per-directory=.gitignore"])
+  const out = mustGit(root, ["ls-files", "-z", "--modified", "--others", "--exclude-standard"])
   return [...new Set(out.split("\0").filter(Boolean))]
 }
 
