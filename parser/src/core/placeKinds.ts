@@ -620,12 +620,14 @@ function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
 /**
  * Every field `Class` declares of a plain value, its parents' too:  what can be asked for by name.
  * - Not Spell's own two times, which no line named:  a server has no such field to answer with (epic `data` T57).
+ * - Not what Spell's own classes keep off places:  a view's `thumbnail`, say.
  */
 function declaredFields(Class: Function): string[] {
   const { times = [] } = (Class as { savedIn?: { times?: readonly string[] } }).savedIn ?? {}
   const names: string[] = []
   for (let schema = schemaOf(Class) as ReturnType<typeof schemaOf> | undefined; schema; schema = schema.parent) {
     for (const [name, info] of schema.declared) {
+      if (info.inPlaces === false) continue
       if (isPlainField(info) && !times.includes((info as { storedAs?: string }).storedAs ?? name)) names.push(name)
     }
   }
