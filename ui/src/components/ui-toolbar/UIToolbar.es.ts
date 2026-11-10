@@ -16,7 +16,9 @@ export const toolbarEs = {
     interactive: "interactivo",
     shrinkable: "encogible",
     tabs: "pestanas",
-    "scroll-first": "desplazar-primero"
+    "scroll-first": "desplazar-primero",
+    "max-visible": "max-visibles",
+    remember: "recordar"
   },
   slots: { title: "titulo", center: "centro", right: "derecha", overflow: "desborde" },
   parts: { center: "centro", right: "derecha", overflow: "desborde", "overflow-menu": "menu-desborde" },

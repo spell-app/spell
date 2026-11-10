@@ -8491,7 +8491,7 @@
             },
             {
               "name": "--ui-dropdown-menu-background",
-              "default": "var(--ui-surface)"
+              "default": "var(--ui-popup-background, var(--ui-surface))"
             },
             {
               "name": "--ui-dropdown-menu-color",
@@ -35065,7 +35065,7 @@
             },
             {
               "name": "--ui-select-picker-background",
-              "default": "var(--ui-surface)"
+              "default": "var(--ui-popup-background, var(--ui-surface))"
             },
             {
               "name": "--ui-select-picker-color",
@@ -45093,6 +45093,22 @@
               "fieldName": "scrollFirst"
             },
             {
+              "name": "max-visible",
+              "description": "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.  An item picked there joins the row, and the one chosen longest ago leaves it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxVisible"
+            },
+            {
+              "name": "remember",
+              "description": "With `max-visible`:  a name to keep the row's items under, so they're the same after a reload.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "remember"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -45303,6 +45319,10 @@
             {
               "name": "scroll-end",
               "description": "The `›` button, shown while there's more to scroll on to."
+            },
+            {
+              "name": "all-items",
+              "description": "`max-visible`:  the button listing every item, while some are put away."
             }
           ],
           "cssStates": [
@@ -45333,6 +45353,10 @@
             {
               "name": "overflowing",
               "description": "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
+            },
+            {
+              "name": "limited",
+              "description": "`max-visible`:  there are more items than that, so some are put away."
             },
             {
               "name": "disabled",

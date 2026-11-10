@@ -486,6 +486,20 @@ describe("reading", () => {
     expect(js).toContain(wanted)
   })
 
+  it("a two-word field goes to the place by the name rows use (I99)", () => {
+    const { js, errors } = compiled([
+      PLACE,
+      "a recipe is a thing:",
+      "\t- it lives in the family cookbook",
+      '\t- its "cook time" is a number',
+      "box is an app:",
+      "\t- to go:",
+      "\t\tprint every recipe sorted by its cook time, newest first"
+    ])
+    expect(errors).toEqual([])
+    expect(js).toContain('sort: [{ field: "cookTime", descending: true }]')
+  })
+
   it.each([
     ["todas las recetas", "core.savedThings(Receta)"],
     ["todas recetas", "core.savedThings(Receta)"],

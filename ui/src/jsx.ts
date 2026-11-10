@@ -49822,6 +49822,26 @@ export interface UIToolbarAttributes {
    */
   "prop:scrollFirst"?: boolean | ""
   /**
+   * More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.  An item picked there joins the row, and the one chosen longest ago leaves it.
+   * - takes:  text
+   */
+  "max-visible"?: string
+  /**
+   * `max-visible`, as the DOM element's property.
+   * @deprecated write `max-visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxVisible"?: string
+  /**
+   * With `max-visible`:  a name to keep the row's items under, so they're the same after a reload.
+   * - takes:  text
+   */
+  remember?: string
+  /**
+   * `remember`, as the DOM element's property.
+   * @deprecated write `remember` -- `prop:` stays only for compiled spell
+   */
+  "prop:remember"?: string
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
