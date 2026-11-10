@@ -315,6 +315,21 @@ describe("AtProtoPlace", () => {
     expect(network.asksOf("com.atproto.repo.putRecord")[0]?.host).toBe("two")
   })
 
+  it('reads and writes the fields its lines name:  `a recipe\'s created is its "created at"` (I99)', async () => {
+    network.putRecord(ALICE, NSID, "r-1", { title: "Soup", createdAt: "2026-01-01" })
+    await signIn.signIn(ALICE)
+    const named = place("personal atmosphere account", { fields: { recipes: { created: "created at" } } })
+    const [row] = await allRows(named)
+    expect(row).toMatchObject({ title: "Soup", created: "2026-01-01", createdAt: "2026-01-01" })
+
+    await named.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { created: "2026-02-02" } }], {})
+    expect(network.recordsOf(ALICE, NSID).get("r-1")?.value).toEqual({
+      title: "Soup",
+      createdAt: "2026-02-02",
+      $type: NSID
+    })
+  })
+
   it("makes a new record again, the same, when its answer was lost", async () => {
     await signIn.signIn(BOB)
     const shared = place()

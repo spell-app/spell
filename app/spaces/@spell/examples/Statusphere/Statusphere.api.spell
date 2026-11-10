@@ -4,6 +4,7 @@
 // What's drawn and done with them is in Statusphere.spellml.
 status board is a personal atmosphere account:
 	- statuses live at "xyz.statusphere.status"
+	- a status's created is its "created at"
 
 a status is saved in the status board
 
