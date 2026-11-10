@@ -985,6 +985,18 @@ describe("spell translate (epic spanish P24-P26)", () => {
     expect(readFileSync(resolve(TEMP, "Mazo", "Mazo.es.spell"), "utf8")).toBe('un "mazo" es una cosa\n')
   })
 
+  test("Spell UI's tags and their values come back in Spanish, from its own dictionaries (language I68)", () => {
+    const folder = tempProject(
+      "DeckView",
+      'a "deck" is a view:\n\t- to draw it:\n\t\t<ui-button color="red">Deal</ui-button>\n'
+    )
+    spell(["translate", folder, "--to", "es", "--no-ai", "--out", resolve(TEMP, "VistaMazo")])
+    const [file] = readdirSync(resolve(TEMP, "VistaMazo")).filter((name) => name.endsWith(".es.spell"))
+    const translated = readFileSync(resolve(TEMP, "VistaMazo", file!), "utf8")
+    expect(translated).toContain('<es-boton color="rojo">')
+    expect(translated).not.toContain("<ui-button")
+  })
+
   test("a language with no pack:  says which there are, exit 2", () => {
     const { status, stderr } = spell(["translate", tempProject("Klingon", "print 1\n"), "--to", "tlh"])
     expect(status).toBe(2)
