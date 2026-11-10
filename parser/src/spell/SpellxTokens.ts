@@ -46,7 +46,7 @@ export type SpellxTagTokenProps = Prettify<P.TokenProps<string>> & {
 export type SpellxTag = {
   /** What kind of tag it is. */
   category: "template" | "place" | "declaration" | "note" | "handler" | "control" | "code" | "unknown"
-  /** What it means, in English, e.g. `property`, or `view` for `<spell-view>`;  its word for an unknown tag. */
+  /** What it means, in English, e.g. `property`, or `view` for `<view>`;  its word for an unknown tag. */
   kind: string
   /** Its word as written, e.g. `property`, `spell-view`, `otherwise if`. */
   word: string
@@ -87,7 +87,7 @@ export function isPageDrawingItsBody(
 
 /**
  * The page flag that has the editor show a page in place, editable, by its English name:
- * `<spell-page "x" notebook>`.
+ * `<page "x" notebook>`.
  * - Since epic `notebook` P2 the language doesn't need it:  a page with no `<draw>` draws its body, flag or not.
  */
 export const PAGE_DRAWS_BODY_FLAG = "notebook"
@@ -117,7 +117,7 @@ export type SpellxAttribute = {
   /** It as written, `columns="4"`:  `<for>` hands on what isn't its own to what's around its items. */
   raw?: string
   /**
-   * Brought by its tag's word, not written:  `<spell-notebook>`'s `notebook` (epic `notebook` P1).
+   * Brought by its tag's word, not written:  `<notebook>`'s `notebook` (epic `notebook` P1).
    * - Its `start` is the tag's word's, and it has no text of its own.
    */
   fromTagWord?: true
@@ -154,7 +154,7 @@ export class SpellxProseToken extends P.CommentToken {
   }
 
   /**
-   * Is its text MARKUP as written, a line of a `<spell-property-editor>`:  `<ui-property name="rank" />`?
+   * Is its text MARKUP as written, a line of a `<property-editor>`:  `<ui-property name="rank" />`?
    * - Still a comment, compiled as one;  only its colouring reads it as markup (epic `debut` I96).
    */
   get isMarkup(): boolean {
@@ -180,9 +180,9 @@ export class SpellxCommentToken extends P.CommentToken {}
 
 /**
  * A spellx note, one of:
- * - a member's long `<spell-description>`
- * - a `<spell-comment>` among its lines
- * - a `<spell-property-editor>`
+ * - a member's long `<note>`
+ * - a `<note>` among its lines
+ * - a `<property-editor>`
  * - a page's `<stories>` (epic `mockup` P6)
  */
 type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"

@@ -54,7 +54,7 @@ export type SpellxAttribute = {
   span: SpellxSpan
   /** its value, inside its quotes or braces */
   valueSpan: SpellxSpan | undefined
-  /** brought by its tag's word, not written:  `<spell-notebook>`'s `notebook`;  its `span` is the tag's word */
+  /** brought by its tag's word, not written:  `<notebook>`'s `notebook`;  its `span` is the tag's word */
   fromTagWord?: true
 }
 
@@ -66,7 +66,7 @@ export type SpellxQuote = '"' | "'" | "{"
 ////////////////
 
 /**
- * A TEMPLATE:  `<spell-view "playing card" aka="card" template="two sided view">`, its members inside.
+ * A TEMPLATE:  `<view "playing card" aka="card" template="two sided view">`, its members inside.
  * - The only tags with the language's prefix (Q37):  `spell-` in English, `encanto-` in Spanish.
  */
 export type SpellxTemplate = {

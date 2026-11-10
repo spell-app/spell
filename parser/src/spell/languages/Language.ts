@@ -796,7 +796,7 @@ export type SpellxTemplateKind =
  * A template word's meaning, in a language's `SpellxWords.templates`:
  * - its kind, e.g. `view`
  * - or its kind and the flag it brings (epic `notebook` P1):
- *   `{ kind: "page", flag: "notebook" }` for `<spell-notebook>`
+ *   `{ kind: "page", flag: "notebook" }` for `<notebook>`
  * - Read it with `SP.spellxTemplateKind()` and `SP.spellxTemplateFlag()`.
  */
 export type SpellxTemplateWord = SpellxTemplateKind | { kind: SpellxTemplateKind; flag: string }
@@ -822,14 +822,14 @@ export type SpellxDeclarationKind =
   | "test"
   | "menu"
   | "group"
-  // a site's parts, only in a `<spell-site>` (epic `mockup` P1)
+  // a site's parts, only in a `<site>` (epic `mockup` P1)
   | "page"
   | "dialog"
   | "sidebar"
 
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
- * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
+ * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
  * - The property editor may live in a file of its own, `Card.editor.spell` (`SP.isPropertyEditorsName()`).
  * - Or a page's STORIES, `<stories>` (epic `mockup` P6):  what it must let people do, as `<story>` tags, its twin a
  *   `<stories>` block, compiled to its `static stories`.

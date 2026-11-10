@@ -22,7 +22,7 @@ export class MethodScope extends BlockScope {
   declare itDatatype: P.Datatype | undefined
   /**
    * The variable holding the thing our lines run on, where it isn't `this` -- set on construction, with `thisVar`.
-   * - A template's test (`<test>` in `<spell-app "calculator">`):  `it`, the new calculator the test makes,
+   * - A template's test (`<test>` in `<app "calculator">`):  `it`, the new calculator the test makes,
    *   so its `the total` and its bare `add the input` are that calculator's (epic `language` T86).
    * - Then `thisVar` is a REAL variable, not an alias:  a `get` in its lines declares `it_2`, as after any `it`.
    * - Rules that write the thing read it WHILE PARSING (`P.MethodScope.withThing()`), into `match.data`.

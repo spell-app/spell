@@ -14,7 +14,7 @@ import { Thing } from "./Thing"
  * - The element comes from `core.defineElement()`, which the page running the program fills in:
  *   core may not import Solid or Spell UI.
  * - Its things may be dragged, clicked or selected on the page only when its type says so:
- *   `<spell-view "card" draggable>`, `- it is clickable when it is face down`, or an event that implies it,
+ *   `<view "card" draggable>`, `- it is clickable when it is face down`, or an event that implies it,
  *   `- on click:` (`core.isAble()`).
  * - A picture of it, its `thumbnail`, draws while it has no drawing of its own (epic `mockup` P16).
  * - Everything else as a `Thing`.
@@ -22,7 +22,7 @@ import { Thing } from "./Thing"
 export class View extends Thing {
   /**
    * A picture of it, a file of its project:  `snapshots/terms.jpg`.
-   * - `<spell-page "terms" thumbnail="snapshots/terms.jpg"/>`, or `- its thumbnail is "..."`.
+   * - `<page "terms" thumbnail="snapshots/terms.jpg"/>`, or `- its thumbnail is "..."`.
    * - A type may have data of its own called this, a thing as much as text:  only text is a picture's file.
    * - Said of the type, so it's no row's field:  a place is never asked for it.
    */

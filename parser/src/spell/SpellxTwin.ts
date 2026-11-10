@@ -69,7 +69,7 @@ export class SpellxTwin {
     // its description is comments ending its line:  left out, as a line's comment can't be parsed with it
     // (epic `language` T59)
     // with the block under it, so a tag that opens one ends in its `:`, as its line does when it's parsed:
-    // `a square :` reopens a square (`<spell-more-of "square">`), where a bare `a square` names none
+    // `a square :` reopens a square (`<extend "square">`), where a bare `a square` names none
     // (epic `language` T83)
     const twinText = (line: P.LineToken, next?: P.Token) =>
       SpellxTwin.for(language, parser, line, next)
@@ -231,7 +231,7 @@ export class SpellxTwin {
       : []
   }
 
-  /** Is the tag `locked`, `<spell-page "x" locked>`? */
+  /** Is the tag `locked`, `<page "x" locked>`? */
   private get isLocked(): boolean {
     return this.tag.attributes.some((attribute) => attribute.name === "locked")
   }
@@ -280,7 +280,7 @@ export class SpellxTwin {
       const isMember =
         (first instanceof SP.SpellxTagToken && ["declaration", "handler", "note"].includes(first.tag.category)) ||
         (first instanceof SP.SpellxProseToken && !!first.note) ||
-        // its stories, `<spell-stories>`, as `withStoriesAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
+        // its stories, `<stories>`, as `withStoriesAsBlocks()` wrote them:  its outline's, never drawn (epic `mockup` P6)
         (first instanceof P.JSXElementToken && first.tagName === STORIES && item.tokens.length === 1)
       // a closer in the drawing (an `<html>` block's) compiles to nothing:  left out, so the markup around it joins
       if (isCloser) {
@@ -854,7 +854,7 @@ export class SpellxTwin {
   private lineAndBlock(tokens: P.Token[], before: P.Token[][] = [], after: P.Token[][] = []): SpellxTwinLine {
     const { line } = this
     const { description, rest } = this.descriptionOf(this.block)
-    // nothing to open:  no `:` ending its words, e.g. `<spell-thing "card" />` is `a "card" is a thing`
+    // nothing to open:  no `:` ending its words, e.g. `<thing "card" />` is `a "card" is a thing`
     const last = tokens.at(-1)
     const bodiless = !rest.length && !before.length && !after.length && !this.inlineBody.length
     if (bodiless && last && SpellxTwin.isSynthetic(last) && last.value === ":") tokens.pop()
@@ -909,7 +909,7 @@ export class SpellxTwin {
     const head = first instanceof P.LineToken ? first.tokens[0] : undefined
     if (!(head instanceof SP.SpellxProseToken) || head.note !== "description" || first!.tokens.length !== 1)
       return { description, rest: items }
-    // what the tokenizer warned of on its head, `<spell-description>` for `<note>`:  on our own line, as it goes
+    // what the tokenizer warned of on its head, an old `<spell-description>`:  on our own line, as it goes
     const warning = SP.spellxWarningOf(head)
     const ours = this.line.tokens[0]!
     if (warning && !SP.spellxWarningOf(ours)?.includes(warning)) SP.addSpellxWarning(ours, warning)
@@ -1210,7 +1210,7 @@ function childrenOf(token: P.Token): P.Token[] {
   return token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
 }
 
-/** What a name may be a title for:  what's written `<spell-page "Pinned Screens & Hardware">`. */
+/** What a name may be a title for:  what's written `<page "Pinned Screens & Hardware">`. */
 const TITLED_KINDS: ReadonlySet<string> = new Set(["page", "view", "dialog", "sidebar"])
 
 /** A page's stories' tag in code spell, `<stories>`:  `STORIES_TAG` (the rules' own;  spellx doesn't import them). */

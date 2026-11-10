@@ -423,7 +423,7 @@ function wordFor(table: Record<string, unknown>, meaning: string): string | unde
 }
 
 /**
- * The span of the named closer of the template opening at `opening`, `</spell-notebook>`:  none, for a `</>`.
+ * The span of the named closer of the template opening at `opening`, `</notebook>`:  none, for a `</>`.
  * - The first after it:  a template never holds another of its own word.
  */
 function closerOf(text: string, opening: number, word: string): TextSpan | undefined {

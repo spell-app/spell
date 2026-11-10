@@ -585,7 +585,7 @@ function typeTagsIn(source: string, name: string): { head: string; body: string 
 }
 
 /**
- * Where each template's tag for type `name` opens in `text`, at a line's start:  `<view "card">`, `<spell-thing "card">`.
+ * Where each template's tag for type `name` opens in `text`, at a line's start:  `<view "card">`, `<thing "card">`.
  * - `start`:  its `<`;  `word`:  its tag as written, for its closer;  `headEnd`:  just past its quoted name.
  */
 function typeTagStarts(text: string, name: string): { start: number; word: string; headEnd: number }[] {

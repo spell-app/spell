@@ -159,7 +159,7 @@ export const englishWords: SP.LanguageWords = {
       app: "app",
       "page-template": "page template",
       "app-template": "app template",
-      // `<spell-page notebook>` (epic `notebook` P1):
+      // `<page notebook>` (epic `notebook` P1):
       // a page that draws its body, its prose, examples and its own templates
       notebook: { kind: "page", flag: "notebook" },
       // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
@@ -180,7 +180,7 @@ export const englishWords: SP.LanguageWords = {
       menu: "menu",
       // a heading over the members after it (epic `elemental-spell` P16)
       group: "group",
-      // a site's parts (epic `mockup` P1):  only in a `<spell-site>`, markup anywhere else (`<sidebar>` is Spell UI's)
+      // a site's parts (epic `mockup` P1):  only in a `<site>`, markup anywhere else (`<sidebar>` is Spell UI's)
       page: "page",
       dialog: "dialog",
       sidebar: "sidebar"
@@ -289,7 +289,7 @@ export const englishWords: SP.LanguageWords = {
       selectable: "selectable",
       clickable: "clickable",
       group: "group",
-      // a site's, and its pages' (epic `mockup` P1):  `<spell-site "x" at="...">`, `<page "x" address="/x">`
+      // a site's, and its pages' (epic `mockup` P1):  `<site "x" at="...">`, `<page "x" address="/x">`
       at: "at",
       cloud: "cloud",
       address: "address",

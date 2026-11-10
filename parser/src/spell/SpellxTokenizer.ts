@@ -388,7 +388,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     if (lower.startsWith(`${prefix}-`)) {
       // the old spelling, `<spell-page>` (before epic `language` P41):  still read, never written
-      // - `notebook` is a page with its flag:  `<spell-notebook>` is `<spell-page notebook>` (epic `notebook` P1)
+      // - `notebook` is a page with its flag:  `<notebook>` is `<page notebook>` (epic `notebook` P1)
       const entry = templates[lower.slice(prefix.length + 1)]
       const kind = SP.spellxTemplateKind(entry)
       if (kind) return { category: "template", kind, flag: SP.spellxTemplateFlag(entry), word: first, wordEnd }
@@ -397,7 +397,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (note) return { category: "note", kind: note, word: first, wordEnd }
     }
     // a view written inside a page by its short word, `<view counter>` (epic `notebook` P2, Q6):
-    // - only `view` here, as `<page>` in a drawing is Spell UI's `<ui-page>`;  at a file's top level every template's
+    // - only `view` and `thing` here (`SHORT_TEMPLATE_KINDS`), as `<page>` in a drawing is Spell UI's `<ui-page>`;
+    //   at a file's top level every template's
     //   short word is its template (`topTemplateOr()`, epic `language` P41)
     const short = SP.spellxTemplateKind(templates[lower])
     if (short && SHORT_TEMPLATE_KINDS.has(short))
@@ -447,7 +448,7 @@ export class SpellxTokenizer extends P.Tokenizer {
   /**
    * Is a tag with `word`, on a line `indent` in, spellx's here -- else spell's markup?
    * - At the top, and among a template's members:  every tag;  a word spellx doesn't know is an error.
-   * - In a body of spell:  notes (`<spell-comment>`) and controls.
+   * - In a body of spell:  notes (`<note>`) and controls.
    * - In a drawing (or a control in one):  notes, controls and a placed slot, `<draw "front" />`.
    * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them);
    *   and its sub-menus, `<menu "file menu" />` (epic `language` P19).
@@ -479,7 +480,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
   }
 
-  /** Is a line `indent` in inside a note:  a `<spell-property-editor>`, a `<spell-comment>` ... open at less indent? */
+  /** Is a line `indent` in inside a note:  a `<property-editor>`, a `<note>` ... open at less indent? */
   private isInNote(indent: number) {
     return this.frames.some((frame) => frame.category === "note" && frame.indent < indent)
   }
@@ -509,7 +510,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       word = { ...word, category: "place" }
     }
     const raw = text.slice(start, head.end)
-    // the flag its word brings, as if written:  `<spell-notebook>`'s `notebook`
+    // the flag its word brings, as if written:  `<notebook>`'s `notebook`
     if (word.flag && !head.attributes.some((attribute) => attribute.name === word.flag))
       head.attributes.push({ name: word.flag, word: word.word, start: start + 1, fromTagWord: true })
     const tag: SP.SpellxTag = {
@@ -642,7 +643,7 @@ export class SpellxTokenizer extends P.Tokenizer {
    * Read a named tag's head, from its word:  an optional quoted name, then attributes, to its `>` or `/>`.
    * - `name="..."` names it too (Q39).
    * - A template's name may be bare too, one word, first (epic `notebook` P2, Q6):
-   *   `<view counter>`, `<spell-view counter>`.
+   *   `<view counter>`, `<view "counter">`.
    *   An attribute word it takes wins:  `<view locked>` is locked, not named.
    * - It may run over several lines.
    */
@@ -1233,7 +1234,7 @@ type TagWord = {
   word: string
   wordEnd: number
   /**
-   * Is it a note written by its short word, `<note>`, `<property-editor>`, not `<spell-property-editor>`?
+   * Is it a note written by its short word, `<note>`, `<property-editor>`, not with the old prefix?
    * - A note where a note goes (the old `<description>` with a warning naming `<note>`);  but in a drawing it's
    *   markup, Spell UI's `<ui-comment>` for `<comment>`, or a project's own view.
    */
@@ -1244,7 +1245,7 @@ type TagWord = {
    * - Inside a page, a view:  `<view counter>` (epic `notebook` P2, Q6)
    */
   isShortTemplate?: boolean
-  /** The flag a template's word brings, as if written:  `notebook` for `<spell-notebook>` (epic `notebook` P1). */
+  /** The flag a template's word brings, as if written:  `notebook` for `<notebook>` (epic `notebook` P1). */
   flag?: string
   /** Does its body draw, as a page's drawing (`SP.SpellxTag.drawsBody`)?  Worked out once, as its head is read. */
   drawsBody?: boolean
@@ -1402,17 +1403,18 @@ function isPage(frame: { category: string; kind: string } | undefined): boolean 
 /** A site's own declarations:  its parts (epic `mockup` P1). */
 const SITE_PARTS = new Set(["page", "dialog", "sidebar"])
 
-/** Is `frame` a site's, `<spell-site>`? */
+/** Is `frame` a site's, `<site>`? */
 function isSite(frame: { category: string; kind: string } | undefined): boolean {
   return frame?.category === "template" && frame.kind === "site"
 }
 
 /**
- * The template kinds that may be written by their SHORT word inside a page:  `<view counter>` (epic `notebook` P2).
- * - Only `view`:  `<page>` there is Spell UI's `<ui-page>`, `<app>` and the rest have no place inside a page.
+ * The template kinds that may be written by their SHORT word inside a page:  `<view counter>` (epic `notebook` P2),
+ * and a thing of the page's own, `<thing "task">` (epic `language` P41:  Spell UI's Form usage page holds one).
+ * - Only those:  `<page>` there is Spell UI's `<ui-page>`, `<app>` and the rest have no place inside a page.
  * - At a file's top level, every template is written by its short word (epic `language` P41).
  */
-const SHORT_TEMPLATE_KINDS: ReadonlySet<string> = new Set(["view"])
+const SHORT_TEMPLATE_KINDS: ReadonlySet<string> = new Set(["view", "thing"])
 
 /** Does the tag head starting `line` close itself, its first `>` outside quotes and braces after a `/`? */
 function isSelfClosingHead(line: string): boolean {
