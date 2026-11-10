@@ -1505,7 +1505,7 @@ export const savedMethods = defineCoreModule({
     return things.draftOf(thing as unknown as Thing).thing as unknown as T
   },
 
-  /** Send what's changed in `copy`, a draft:  one group, shown at once.  What `save the draft` compiles to.  - throws for anything else */
+  /** Send what's changed in `copy`, a draft:  one group, shown at once, one undo step.  What `save the draft` compiles to.  - throws for anything else */
   saveDraft(copy: unknown): void {
     draftOfCopy(copy, "saveDraft").save()
   },
