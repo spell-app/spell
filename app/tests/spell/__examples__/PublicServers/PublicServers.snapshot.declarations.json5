@@ -639,7 +639,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/GitHub.spellml:2800-3263"
+      "defined": "/GitHub.spell:2800-3263"
     },
     {
       "syntax": "look at {thisArg:expression}",
@@ -655,7 +655,7 @@
       "name": "look at (a user)",
       "returns": "nothing",
       "waits": true,
-      "defined": "/GitHub.spellml:5229-5309"
+      "defined": "/GitHub.spell:5229-5309"
     },
     {
       "syntax": "look away from {thisArg:expression}",
@@ -671,7 +671,7 @@
       "name": "look away from (a user)",
       "returns": "nothing",
       "waits": true,
-      "defined": "/GitHub.spellml:5312-5404"
+      "defined": "/GitHub.spell:5312-5404"
     },
     {
       "type": "IssueUser",
@@ -1876,7 +1876,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/GitHub.spellml:4707-5038"
+      "defined": "/GitHub.spell:4707-5038"
     },
     {
       "type": "Assignee",
@@ -2089,19 +2089,19 @@
     {
       "type": "GithubPage",
       "superType": "Thing",
-      "defined": "/GitHub.spellml:417-2526"
+      "defined": "/GitHub.spell:417-2526"
     },
     {
       "property": "search",
       "of": "GithubPage",
       "datatype": "text",
-      "defined": "/GitHub.spellml:458-478"
+      "defined": "/GitHub.spell:458-478"
     },
     {
       "property": "showing",
       "of": "GithubPage",
       "datatype": "User",
-      "defined": "/GitHub.spellml:483-506"
+      "defined": "/GitHub.spell:483-506"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -2115,7 +2115,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/GitHub.spellml:511-553"
+      "defined": "/GitHub.spell:511-553"
     },
     {
       "syntax": "try {callArgs:expression} (of {thisArg:expression})?",
@@ -2136,7 +2136,7 @@
       ],
       "returns": "nothing",
       "waits": true,
-      "defined": "/GitHub.spellml:566-651"
+      "defined": "/GitHub.spell:566-651"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2149,7 +2149,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/GitHub.spellml:665-1675"
+      "defined": "/GitHub.spell:665-1675"
     },
     {
       "type": "Book",
@@ -2306,7 +2306,7 @@
       "property": "writer",
       "of": "Book",
       "datatype": "Author",
-      "defined": "/OpenLibrary.spellml:1923-2059"
+      "defined": "/OpenLibrary.spell:1923-2059"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2319,7 +2319,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OpenLibrary.spellml:2073-2319"
+      "defined": "/OpenLibrary.spell:2073-2319"
     },
     {
       "syntax": "open {thisArg:expression}",
@@ -2335,7 +2335,7 @@
       "name": "open (a book)",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PublicServers.spellml:2025-2092"
+      "defined": "/PublicServers.spell:2025-2092"
     },
     {
       "syntax": "close {thisArg:expression}",
@@ -2351,7 +2351,7 @@
       "name": "close (a book)",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PublicServers.spellml:2095-2168"
+      "defined": "/PublicServers.spell:2095-2168"
     },
     {
       "type": "Author",
@@ -2843,19 +2843,19 @@
     {
       "type": "OpenLibraryPage",
       "superType": "Thing",
-      "defined": "/OpenLibrary.spellml:393-1726"
+      "defined": "/OpenLibrary.spell:393-1726"
     },
     {
       "property": "search",
       "of": "OpenLibraryPage",
       "datatype": "text",
-      "defined": "/OpenLibrary.spellml:440-460"
+      "defined": "/OpenLibrary.spell:440-460"
     },
     {
       "property": "showing",
       "of": "OpenLibraryPage",
       "datatype": "Book",
-      "defined": "/OpenLibrary.spellml:465-488"
+      "defined": "/OpenLibrary.spell:465-488"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -2869,13 +2869,13 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/OpenLibrary.spellml:493-534"
+      "defined": "/OpenLibrary.spell:493-534"
     },
     {
       "property": "found",
       "of": "OpenLibraryPage",
       "datatype": "list of books",
-      "defined": "/OpenLibrary.spellml:546-715"
+      "defined": "/OpenLibrary.spell:546-715"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2888,7 +2888,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OpenLibrary.spellml:729-1309"
+      "defined": "/OpenLibrary.spell:729-1309"
     },
     {
       "type": "Post",
@@ -2936,7 +2936,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:2878-3022"
+      "defined": "/JSONPlaceholder.spell:2878-3022"
     },
     {
       "type": "Comment",
@@ -2984,7 +2984,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:3187-3326"
+      "defined": "/JSONPlaceholder.spell:3187-3326"
     },
     {
       "type": "JsonplaceholderUser",
@@ -3090,7 +3090,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:2387-2710"
+      "defined": "/JSONPlaceholder.spell:2387-2710"
     },
     {
       "type": "Address",
@@ -3204,26 +3204,26 @@
     {
       "type": "JsonplaceholderPage",
       "superType": "Thing",
-      "defined": "/JSONPlaceholder.spellml:440-2256"
+      "defined": "/JSONPlaceholder.spell:440-2256"
     },
     {
       "property": "new_todo",
       "asWritten": "new todo",
       "of": "JsonplaceholderPage",
       "datatype": "Todo",
-      "defined": "/JSONPlaceholder.spellml:490-535"
+      "defined": "/JSONPlaceholder.spell:490-535"
     },
     {
       "property": "person",
       "of": "JsonplaceholderPage",
       "datatype": "JsonplaceholderUser",
-      "defined": "/JSONPlaceholder.spellml:547-676"
+      "defined": "/JSONPlaceholder.spell:547-676"
     },
     {
       "property": "todos",
       "of": "JsonplaceholderPage",
       "datatype": "list of todos",
-      "defined": "/JSONPlaceholder.spellml:689-778"
+      "defined": "/JSONPlaceholder.spell:689-778"
     },
     {
       "syntax": "add the new todo (of {thisArg:expression})?",
@@ -3238,7 +3238,7 @@
       "name": "add the new todo",
       "returns": "nothing",
       "waits": true,
-      "defined": "/JSONPlaceholder.spellml:792-907"
+      "defined": "/JSONPlaceholder.spell:792-907"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3251,7 +3251,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/JSONPlaceholder.spellml:921-1584"
+      "defined": "/JSONPlaceholder.spell:921-1584"
     },
     {
       "type": "Forecast",
@@ -3380,19 +3380,19 @@
     {
       "type": "OpenMeteoPage",
       "superType": "Thing",
-      "defined": "/OpenMeteo.spellml:412-2205"
+      "defined": "/OpenMeteo.spell:412-2205"
     },
     {
       "property": "cities",
       "of": "OpenMeteoPage",
       "datatype": "list of cities",
-      "defined": "/OpenMeteo.spellml:457-489"
+      "defined": "/OpenMeteo.spell:457-489"
     },
     {
       "property": "city",
       "of": "OpenMeteoPage",
       "datatype": "City",
-      "defined": "/OpenMeteo.spellml:494-514"
+      "defined": "/OpenMeteo.spell:494-514"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -3406,19 +3406,19 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/OpenMeteo.spellml:519-950"
+      "defined": "/OpenMeteo.spell:519-950"
     },
     {
       "property": "forecasts",
       "of": "OpenMeteoPage",
       "datatype": "list of forecasts",
-      "defined": "/OpenMeteo.spellml:962-1187"
+      "defined": "/OpenMeteo.spell:962-1187"
     },
     {
       "property": "forecast",
       "of": "OpenMeteoPage",
       "datatype": "Forecast",
-      "defined": "/OpenMeteo.spellml:1200-1343"
+      "defined": "/OpenMeteo.spell:1200-1343"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3431,30 +3431,30 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OpenMeteo.spellml:1357-1817"
+      "defined": "/OpenMeteo.spell:1357-1817"
     },
     {
       "type": "City",
       "superType": "Thing",
-      "defined": "/OpenMeteo.spellml:2291-2528"
+      "defined": "/OpenMeteo.spell:2291-2528"
     },
     {
       "property": "name",
       "of": "City",
       "datatype": "text",
-      "defined": "/OpenMeteo.spellml:2325-2343"
+      "defined": "/OpenMeteo.spell:2325-2343"
     },
     {
       "property": "latitude",
       "of": "City",
       "datatype": "number",
-      "defined": "/OpenMeteo.spellml:2348-2374"
+      "defined": "/OpenMeteo.spell:2348-2374"
     },
     {
       "property": "longitude",
       "of": "City",
       "datatype": "number",
-      "defined": "/OpenMeteo.spellml:2379-2406"
+      "defined": "/OpenMeteo.spell:2379-2406"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -3467,7 +3467,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OpenMeteo.spellml:2419-2519"
+      "defined": "/OpenMeteo.spell:2419-2519"
     },
     {
       "syntax": "pick {thisArg:expression}",
@@ -3482,7 +3482,7 @@
       "kind": "method",
       "name": "pick (a city)",
       "returns": "nothing",
-      "defined": "/PublicServers.spellml:2171-2235"
+      "defined": "/PublicServers.spell:2171-2235"
     },
     {
       "type": "Artwork",
@@ -3872,7 +3872,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/MetMuseum.spellml:2442-2928"
+      "defined": "/MetMuseum.spell:2442-2928"
     },
     {
       "type": "Constituent",
@@ -4023,13 +4023,13 @@
     {
       "type": "MetMuseumPage",
       "superType": "Thing",
-      "defined": "/MetMuseum.spellml:413-2078"
+      "defined": "/MetMuseum.spell:413-2078"
     },
     {
       "property": "search",
       "of": "MetMuseumPage",
       "datatype": "text",
-      "defined": "/MetMuseum.spellml:458-478"
+      "defined": "/MetMuseum.spell:458-478"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -4043,13 +4043,13 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/MetMuseum.spellml:483-530"
+      "defined": "/MetMuseum.spell:483-530"
     },
     {
       "property": "found",
       "of": "MetMuseumPage",
       "datatype": "list of artworks",
-      "defined": "/MetMuseum.spellml:542-709"
+      "defined": "/MetMuseum.spell:542-709"
     },
     {
       "syntax": "try {callArgs:expression} (of {thisArg:expression})?",
@@ -4070,7 +4070,7 @@
       ],
       "returns": "nothing",
       "waits": true,
-      "defined": "/MetMuseum.spellml:723-779"
+      "defined": "/MetMuseum.spell:723-779"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -4083,7 +4083,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/MetMuseum.spellml:793-2069"
+      "defined": "/MetMuseum.spell:793-2069"
     },
     {
       "type": "Country",
@@ -4322,7 +4322,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RestCountries.spellml:3453-3537"
+      "defined": "/RestCountries.spell:3453-3537"
     },
     {
       "type": "Idd",
@@ -4369,7 +4369,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RestCountries.spellml:3666-3698"
+      "defined": "/RestCountries.spell:3666-3698"
     },
     {
       "type": "Translation",
@@ -4465,19 +4465,19 @@
     {
       "type": "RestCountriesPage",
       "superType": "Thing",
-      "defined": "/RestCountries.spellml:450-3338"
+      "defined": "/RestCountries.spell:450-3338"
     },
     {
       "property": "region",
       "of": "RestCountriesPage",
       "datatype": "text",
-      "defined": "/RestCountries.spellml:499-519"
+      "defined": "/RestCountries.spell:499-519"
     },
     {
       "property": "language",
       "of": "RestCountriesPage",
       "datatype": "text",
-      "defined": "/RestCountries.spellml:524-546"
+      "defined": "/RestCountries.spell:524-546"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -4491,13 +4491,13 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/RestCountries.spellml:638-710"
+      "defined": "/RestCountries.spell:638-710"
     },
     {
       "property": "countries",
       "of": "RestCountriesPage",
       "datatype": "list of countries",
-      "defined": "/RestCountries.spellml:722-906"
+      "defined": "/RestCountries.spell:722-906"
     },
     {
       "syntax": "pick region {callArgs:expression} (of {thisArg:expression})?",
@@ -4517,7 +4517,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/RestCountries.spellml:920-986"
+      "defined": "/RestCountries.spell:920-986"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -4530,48 +4530,48 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RestCountries.spellml:1000-2345"
+      "defined": "/RestCountries.spell:1000-2345"
     },
     {
       "type": "PublicServer",
       "superType": "App",
-      "defined": "/PublicServers.spellml:502-1878"
+      "defined": "/PublicServers.spell:502-1878"
     },
     {
       "property": "tab",
       "of": "PublicServer",
       "datatype": "text",
-      "defined": "/PublicServers.spellml:532-549"
+      "defined": "/PublicServers.spell:532-549"
     },
     {
       "property": "github",
       "of": "PublicServer",
       "datatype": "GithubPage",
-      "defined": "/PublicServers.spellml:554-587"
+      "defined": "/PublicServers.spell:554-587"
     },
     {
       "property": "library",
       "of": "PublicServer",
       "datatype": "OpenLibraryPage",
-      "defined": "/PublicServers.spellml:592-632"
+      "defined": "/PublicServers.spell:592-632"
     },
     {
       "property": "weather",
       "of": "PublicServer",
       "datatype": "OpenMeteoPage",
-      "defined": "/PublicServers.spellml:637-675"
+      "defined": "/PublicServers.spell:637-675"
     },
     {
       "property": "museum",
       "of": "PublicServer",
       "datatype": "MetMuseumPage",
-      "defined": "/PublicServers.spellml:680-717"
+      "defined": "/PublicServers.spell:680-717"
     },
     {
       "property": "atlas",
       "of": "PublicServer",
       "datatype": "RestCountriesPage",
-      "defined": "/PublicServers.spellml:722-762"
+      "defined": "/PublicServers.spell:722-762"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -4585,7 +4585,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/PublicServers.spellml:767-807"
+      "defined": "/PublicServers.spell:767-807"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -4598,7 +4598,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PublicServers.spellml:820-1370"
+      "defined": "/PublicServers.spell:820-1370"
     }
   ],
   "codeLines": [

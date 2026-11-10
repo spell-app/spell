@@ -53,7 +53,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
       }
       return route.fulfill({ json: request })
     })
-    await context.route(/\/spaces\/.*Counter\.spellml/, async (route) => {
+    await context.route(/\/spaces\/.*Counter\.spell/, async (route) => {
       if (route.request().method() !== "GET" || onDisk === undefined) return route.fallback()
       return route.fulfill({ contentType: "text/plain", body: onDisk })
     })
@@ -87,7 +87,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     await page.waitForFunction(() => document.querySelector(".ChangeThisBox ui-code"))
     expect(asked).toMatchObject({
       projectId: "@spell/examples/Counter",
-      filePath: "/Counter.spellml",
+      filePath: "/Counter.spell",
       kind: "ui-button",
       text: "say Pressed"
     })

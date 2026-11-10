@@ -19,8 +19,8 @@ describe("RunSite", () => {
     expect(RunSite.siteAddressIn("@spell/examples/StarWarsSite", "/run/@spell/examples/StarWarsSite")).toBe("/")
     expect(
       RunSite.siteAddressIn(
-        "@spell/examples/StarWarsSite/StarWarsSite.spellml",
-        "/run/@spell/examples/StarWarsSite/StarWarsSite.spellml"
+        "@spell/examples/StarWarsSite/StarWarsSite.spell",
+        "/run/@spell/examples/StarWarsSite/StarWarsSite.spell"
       )
     ).toBe("/")
   })

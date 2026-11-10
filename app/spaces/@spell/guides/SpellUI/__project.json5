@@ -4,1555 +4,1555 @@
   "onHome": false,
   "imports": [
     {
-      "path": "/Home.spellml",
+      "path": "/Home.spell",
       "active": true
     },
     {
-      "path": "/GettingStarted.spellml",
+      "path": "/GettingStarted.spell",
       "active": true
     },
     {
-      "path": "/Grammar.spellml",
+      "path": "/Grammar.spell",
       "active": true
     },
     {
-      "path": "/Theming.spellml",
+      "path": "/Theming.spell",
       "active": true
     },
     {
-      "path": "/Icons.spellml",
+      "path": "/Icons.spell",
       "active": true
     },
     {
-      "path": "/Utilities.spellml",
+      "path": "/Utilities.spell",
       "active": true
     },
     {
-      "path": "/ComponentIndex.spellml",
+      "path": "/ComponentIndex.spell",
       "active": true
     },
     {
-      "path": "/KitchenSink.spellml",
+      "path": "/KitchenSink.spell",
       "active": true
     },
     {
-      "path": "/ThemeBench.spellml",
+      "path": "/ThemeBench.spell",
       "active": true
     },
     {
-      "path": "/Accordion/Usage.spellml",
+      "path": "/Accordion/Usage.spell",
       "active": true
     },
     {
-      "path": "/Accordion/Examples.spellml",
+      "path": "/Accordion/Examples.spell",
       "active": true
     },
     {
-      "path": "/Accordion/API.spellml",
+      "path": "/Accordion/API.spell",
       "active": true
     },
     {
-      "path": "/Accordion/Theming.spellml",
+      "path": "/Accordion/Theming.spell",
       "active": true
     },
     {
-      "path": "/Action/Usage.spellml",
+      "path": "/Action/Usage.spell",
       "active": true
     },
     {
-      "path": "/Action/Examples.spellml",
+      "path": "/Action/Examples.spell",
       "active": true
     },
     {
-      "path": "/Action/API.spellml",
+      "path": "/Action/API.spell",
       "active": true
     },
     {
-      "path": "/Action/Theming.spellml",
+      "path": "/Action/Theming.spell",
       "active": true
     },
     {
-      "path": "/Actions/Usage.spellml",
+      "path": "/Actions/Usage.spell",
       "active": true
     },
     {
-      "path": "/Actions/Examples.spellml",
+      "path": "/Actions/Examples.spell",
       "active": true
     },
     {
-      "path": "/Actions/API.spellml",
+      "path": "/Actions/API.spell",
       "active": true
     },
     {
-      "path": "/Advertisement/Usage.spellml",
+      "path": "/Advertisement/Usage.spell",
       "active": true
     },
     {
-      "path": "/Advertisement/Examples.spellml",
+      "path": "/Advertisement/Examples.spell",
       "active": true
     },
     {
-      "path": "/Advertisement/API.spellml",
+      "path": "/Advertisement/API.spell",
       "active": true
     },
     {
-      "path": "/Advertisement/Theming.spellml",
+      "path": "/Advertisement/Theming.spell",
       "active": true
     },
     {
-      "path": "/Audio/Usage.spellml",
+      "path": "/Audio/Usage.spell",
       "active": true
     },
     {
-      "path": "/Audio/Examples.spellml",
+      "path": "/Audio/Examples.spell",
       "active": true
     },
     {
-      "path": "/Audio/API.spellml",
+      "path": "/Audio/API.spell",
       "active": true
     },
     {
-      "path": "/Author/Usage.spellml",
+      "path": "/Author/Usage.spell",
       "active": true
     },
     {
-      "path": "/Author/Examples.spellml",
+      "path": "/Author/Examples.spell",
       "active": true
     },
     {
-      "path": "/Author/API.spellml",
+      "path": "/Author/API.spell",
       "active": true
     },
     {
-      "path": "/Avatar/Usage.spellml",
+      "path": "/Avatar/Usage.spell",
       "active": true
     },
     {
-      "path": "/Avatar/Examples.spellml",
+      "path": "/Avatar/Examples.spell",
       "active": true
     },
     {
-      "path": "/Avatar/API.spellml",
+      "path": "/Avatar/API.spell",
       "active": true
     },
     {
-      "path": "/Breadcrumb/Usage.spellml",
+      "path": "/Breadcrumb/Usage.spell",
       "active": true
     },
     {
-      "path": "/Breadcrumb/Examples.spellml",
+      "path": "/Breadcrumb/Examples.spell",
       "active": true
     },
     {
-      "path": "/Breadcrumb/API.spellml",
+      "path": "/Breadcrumb/API.spell",
       "active": true
     },
     {
-      "path": "/Breadcrumb/Theming.spellml",
+      "path": "/Breadcrumb/Theming.spell",
       "active": true
     },
     {
-      "path": "/Button/Usage.spellml",
+      "path": "/Button/Usage.spell",
       "active": true
     },
     {
-      "path": "/Button/Examples.spellml",
+      "path": "/Button/Examples.spell",
       "active": true
     },
     {
-      "path": "/Button/API.spellml",
+      "path": "/Button/API.spell",
       "active": true
     },
     {
-      "path": "/Button/Theming.spellml",
+      "path": "/Button/Theming.spell",
       "active": true
     },
     {
-      "path": "/Calendar/Usage.spellml",
+      "path": "/Calendar/Usage.spell",
       "active": true
     },
     {
-      "path": "/Calendar/Examples.spellml",
+      "path": "/Calendar/Examples.spell",
       "active": true
     },
     {
-      "path": "/Calendar/API.spellml",
+      "path": "/Calendar/API.spell",
       "active": true
     },
     {
-      "path": "/Calendar/Theming.spellml",
+      "path": "/Calendar/Theming.spell",
       "active": true
     },
     {
-      "path": "/Card/Usage.spellml",
+      "path": "/Card/Usage.spell",
       "active": true
     },
     {
-      "path": "/Card/Examples.spellml",
+      "path": "/Card/Examples.spell",
       "active": true
     },
     {
-      "path": "/Card/API.spellml",
+      "path": "/Card/API.spell",
       "active": true
     },
     {
-      "path": "/Card/Theming.spellml",
+      "path": "/Card/Theming.spell",
       "active": true
     },
     {
-      "path": "/Checkbox/Usage.spellml",
+      "path": "/Checkbox/Usage.spell",
       "active": true
     },
     {
-      "path": "/Checkbox/Examples.spellml",
+      "path": "/Checkbox/Examples.spell",
       "active": true
     },
     {
-      "path": "/Checkbox/API.spellml",
+      "path": "/Checkbox/API.spell",
       "active": true
     },
     {
-      "path": "/Checkbox/Theming.spellml",
+      "path": "/Checkbox/Theming.spell",
       "active": true
     },
     {
-      "path": "/Code/Usage.spellml",
+      "path": "/Code/Usage.spell",
       "active": true
     },
     {
-      "path": "/Code/Examples.spellml",
+      "path": "/Code/Examples.spell",
       "active": true
     },
     {
-      "path": "/Code/API.spellml",
+      "path": "/Code/API.spell",
       "active": true
     },
     {
-      "path": "/Code/Theming.spellml",
+      "path": "/Code/Theming.spell",
       "active": true
     },
     {
-      "path": "/Comment/Usage.spellml",
+      "path": "/Comment/Usage.spell",
       "active": true
     },
     {
-      "path": "/Comment/Examples.spellml",
+      "path": "/Comment/Examples.spell",
       "active": true
     },
     {
-      "path": "/Comment/API.spellml",
+      "path": "/Comment/API.spell",
       "active": true
     },
     {
-      "path": "/Comment/Theming.spellml",
+      "path": "/Comment/Theming.spell",
       "active": true
     },
     {
-      "path": "/Components/Usage.spellml",
+      "path": "/Components/Usage.spell",
       "active": true
     },
     {
-      "path": "/Components/Examples.spellml",
+      "path": "/Components/Examples.spell",
       "active": true
     },
     {
-      "path": "/Components/API.spellml",
+      "path": "/Components/API.spell",
       "active": true
     },
     {
-      "path": "/Components/Theming.spellml",
+      "path": "/Components/Theming.spell",
       "active": true
     },
     {
-      "path": "/Container/Usage.spellml",
+      "path": "/Container/Usage.spell",
       "active": true
     },
     {
-      "path": "/Container/Examples.spellml",
+      "path": "/Container/Examples.spell",
       "active": true
     },
     {
-      "path": "/Container/API.spellml",
+      "path": "/Container/API.spell",
       "active": true
     },
     {
-      "path": "/Container/Theming.spellml",
+      "path": "/Container/Theming.spell",
       "active": true
     },
     {
-      "path": "/Content/Usage.spellml",
+      "path": "/Content/Usage.spell",
       "active": true
     },
     {
-      "path": "/Content/Examples.spellml",
+      "path": "/Content/Examples.spell",
       "active": true
     },
     {
-      "path": "/Content/API.spellml",
+      "path": "/Content/API.spell",
       "active": true
     },
     {
-      "path": "/ContentParts/Usage.spellml",
+      "path": "/ContentParts/Usage.spell",
       "active": true
     },
     {
-      "path": "/ContentParts/Examples.spellml",
+      "path": "/ContentParts/Examples.spell",
       "active": true
     },
     {
-      "path": "/ContentParts/API.spellml",
+      "path": "/ContentParts/API.spell",
       "active": true
     },
     {
-      "path": "/ContentParts/Theming.spellml",
+      "path": "/ContentParts/Theming.spell",
       "active": true
     },
     {
-      "path": "/Date/Usage.spellml",
+      "path": "/Date/Usage.spell",
       "active": true
     },
     {
-      "path": "/Date/Examples.spellml",
+      "path": "/Date/Examples.spell",
       "active": true
     },
     {
-      "path": "/Date/API.spellml",
+      "path": "/Date/API.spell",
       "active": true
     },
     {
-      "path": "/Description/Usage.spellml",
+      "path": "/Description/Usage.spell",
       "active": true
     },
     {
-      "path": "/Description/Examples.spellml",
+      "path": "/Description/Examples.spell",
       "active": true
     },
     {
-      "path": "/Description/API.spellml",
+      "path": "/Description/API.spell",
       "active": true
     },
     {
-      "path": "/Detail/Usage.spellml",
+      "path": "/Detail/Usage.spell",
       "active": true
     },
     {
-      "path": "/Detail/Examples.spellml",
+      "path": "/Detail/Examples.spell",
       "active": true
     },
     {
-      "path": "/Detail/API.spellml",
+      "path": "/Detail/API.spell",
       "active": true
     },
     {
-      "path": "/Diagram/Usage.spellml",
+      "path": "/Diagram/Usage.spell",
       "active": true
     },
     {
-      "path": "/Diagram/Examples.spellml",
+      "path": "/Diagram/Examples.spell",
       "active": true
     },
     {
-      "path": "/Diagram/API.spellml",
+      "path": "/Diagram/API.spell",
       "active": true
     },
     {
-      "path": "/Diagram/Theming.spellml",
+      "path": "/Diagram/Theming.spell",
       "active": true
     },
     {
-      "path": "/Dimension/Usage.spellml",
+      "path": "/Dimension/Usage.spell",
       "active": true
     },
     {
-      "path": "/Dimension/Examples.spellml",
+      "path": "/Dimension/Examples.spell",
       "active": true
     },
     {
-      "path": "/Dimension/API.spellml",
+      "path": "/Dimension/API.spell",
       "active": true
     },
     {
-      "path": "/Dimmer/Usage.spellml",
+      "path": "/Dimmer/Usage.spell",
       "active": true
     },
     {
-      "path": "/Dimmer/Examples.spellml",
+      "path": "/Dimmer/Examples.spell",
       "active": true
     },
     {
-      "path": "/Dimmer/API.spellml",
+      "path": "/Dimmer/API.spell",
       "active": true
     },
     {
-      "path": "/Dimmer/Theming.spellml",
+      "path": "/Dimmer/Theming.spell",
       "active": true
     },
     {
-      "path": "/Divider/Usage.spellml",
+      "path": "/Divider/Usage.spell",
       "active": true
     },
     {
-      "path": "/Divider/Examples.spellml",
+      "path": "/Divider/Examples.spell",
       "active": true
     },
     {
-      "path": "/Divider/API.spellml",
+      "path": "/Divider/API.spell",
       "active": true
     },
     {
-      "path": "/Divider/Theming.spellml",
+      "path": "/Divider/Theming.spell",
       "active": true
     },
     {
-      "path": "/Dropdown/Usage.spellml",
+      "path": "/Dropdown/Usage.spell",
       "active": true
     },
     {
-      "path": "/Dropdown/Examples.spellml",
+      "path": "/Dropdown/Examples.spell",
       "active": true
     },
     {
-      "path": "/Dropdown/API.spellml",
+      "path": "/Dropdown/API.spell",
       "active": true
     },
     {
-      "path": "/Dropdown/Theming.spellml",
+      "path": "/Dropdown/Theming.spell",
       "active": true
     },
     {
-      "path": "/Embed/Usage.spellml",
+      "path": "/Embed/Usage.spell",
       "active": true
     },
     {
-      "path": "/Embed/Examples.spellml",
+      "path": "/Embed/Examples.spell",
       "active": true
     },
     {
-      "path": "/Embed/API.spellml",
+      "path": "/Embed/API.spell",
       "active": true
     },
     {
-      "path": "/Embed/Theming.spellml",
+      "path": "/Embed/Theming.spell",
       "active": true
     },
     {
-      "path": "/Emoji/Usage.spellml",
+      "path": "/Emoji/Usage.spell",
       "active": true
     },
     {
-      "path": "/Emoji/Examples.spellml",
+      "path": "/Emoji/Examples.spell",
       "active": true
     },
     {
-      "path": "/Emoji/API.spellml",
+      "path": "/Emoji/API.spell",
       "active": true
     },
     {
-      "path": "/Emoji/Theming.spellml",
+      "path": "/Emoji/Theming.spell",
       "active": true
     },
     {
-      "path": "/Example/Usage.spellml",
+      "path": "/Example/Usage.spell",
       "active": true
     },
     {
-      "path": "/Example/Examples.spellml",
+      "path": "/Example/Examples.spell",
       "active": true
     },
     {
-      "path": "/Example/API.spellml",
+      "path": "/Example/API.spell",
       "active": true
     },
     {
-      "path": "/Example/Theming.spellml",
+      "path": "/Example/Theming.spell",
       "active": true
     },
     {
-      "path": "/Extra/Usage.spellml",
+      "path": "/Extra/Usage.spell",
       "active": true
     },
     {
-      "path": "/Extra/Examples.spellml",
+      "path": "/Extra/Examples.spell",
       "active": true
     },
     {
-      "path": "/Extra/API.spellml",
+      "path": "/Extra/API.spell",
       "active": true
     },
     {
-      "path": "/Feed/Usage.spellml",
+      "path": "/Feed/Usage.spell",
       "active": true
     },
     {
-      "path": "/Feed/Examples.spellml",
+      "path": "/Feed/Examples.spell",
       "active": true
     },
     {
-      "path": "/Feed/API.spellml",
+      "path": "/Feed/API.spell",
       "active": true
     },
     {
-      "path": "/Feed/Theming.spellml",
+      "path": "/Feed/Theming.spell",
       "active": true
     },
     {
-      "path": "/Flag/Usage.spellml",
+      "path": "/Flag/Usage.spell",
       "active": true
     },
     {
-      "path": "/Flag/Examples.spellml",
+      "path": "/Flag/Examples.spell",
       "active": true
     },
     {
-      "path": "/Flag/API.spellml",
+      "path": "/Flag/API.spell",
       "active": true
     },
     {
-      "path": "/Flag/Theming.spellml",
+      "path": "/Flag/Theming.spell",
       "active": true
     },
     {
-      "path": "/Flyout/Usage.spellml",
+      "path": "/Flyout/Usage.spell",
       "active": true
     },
     {
-      "path": "/Flyout/Examples.spellml",
+      "path": "/Flyout/Examples.spell",
       "active": true
     },
     {
-      "path": "/Flyout/API.spellml",
+      "path": "/Flyout/API.spell",
       "active": true
     },
     {
-      "path": "/Flyout/Theming.spellml",
+      "path": "/Flyout/Theming.spell",
       "active": true
     },
     {
-      "path": "/Form/Usage.spellml",
+      "path": "/Form/Usage.spell",
       "active": true
     },
     {
-      "path": "/Form/Examples.spellml",
+      "path": "/Form/Examples.spell",
       "active": true
     },
     {
-      "path": "/Form/API.spellml",
+      "path": "/Form/API.spell",
       "active": true
     },
     {
-      "path": "/Form/Theming.spellml",
+      "path": "/Form/Theming.spell",
       "active": true
     },
     {
-      "path": "/Grid/Usage.spellml",
+      "path": "/Grid/Usage.spell",
       "active": true
     },
     {
-      "path": "/Grid/Examples.spellml",
+      "path": "/Grid/Examples.spell",
       "active": true
     },
     {
-      "path": "/Grid/API.spellml",
+      "path": "/Grid/API.spell",
       "active": true
     },
     {
-      "path": "/Grid/Theming.spellml",
+      "path": "/Grid/Theming.spell",
       "active": true
     },
     {
-      "path": "/Icon/Usage.spellml",
+      "path": "/Icon/Usage.spell",
       "active": true
     },
     {
-      "path": "/Icon/Examples.spellml",
+      "path": "/Icon/Examples.spell",
       "active": true
     },
     {
-      "path": "/Icon/API.spellml",
+      "path": "/Icon/API.spell",
       "active": true
     },
     {
-      "path": "/Icon/Theming.spellml",
+      "path": "/Icon/Theming.spell",
       "active": true
     },
     {
-      "path": "/IconPicker/Usage.spellml",
+      "path": "/IconPicker/Usage.spell",
       "active": true
     },
     {
-      "path": "/IconPicker/Examples.spellml",
+      "path": "/IconPicker/Examples.spell",
       "active": true
     },
     {
-      "path": "/IconPicker/API.spellml",
+      "path": "/IconPicker/API.spell",
       "active": true
     },
     {
-      "path": "/IconPicker/Theming.spellml",
+      "path": "/IconPicker/Theming.spell",
       "active": true
     },
     {
-      "path": "/Image/Usage.spellml",
+      "path": "/Image/Usage.spell",
       "active": true
     },
     {
-      "path": "/Image/Examples.spellml",
+      "path": "/Image/Examples.spell",
       "active": true
     },
     {
-      "path": "/Image/API.spellml",
+      "path": "/Image/API.spell",
       "active": true
     },
     {
-      "path": "/Image/Theming.spellml",
+      "path": "/Image/Theming.spell",
       "active": true
     },
     {
-      "path": "/Include/Usage.spellml",
+      "path": "/Include/Usage.spell",
       "active": true
     },
     {
-      "path": "/Include/Examples.spellml",
+      "path": "/Include/Examples.spell",
       "active": true
     },
     {
-      "path": "/Include/API.spellml",
+      "path": "/Include/API.spell",
       "active": true
     },
     {
-      "path": "/Include/Theming.spellml",
+      "path": "/Include/Theming.spell",
       "active": true
     },
     {
-      "path": "/Input/Usage.spellml",
+      "path": "/Input/Usage.spell",
       "active": true
     },
     {
-      "path": "/Input/Examples.spellml",
+      "path": "/Input/Examples.spell",
       "active": true
     },
     {
-      "path": "/Input/API.spellml",
+      "path": "/Input/API.spell",
       "active": true
     },
     {
-      "path": "/Input/Theming.spellml",
+      "path": "/Input/Theming.spell",
       "active": true
     },
     {
-      "path": "/Item/Usage.spellml",
+      "path": "/Item/Usage.spell",
       "active": true
     },
     {
-      "path": "/Item/Examples.spellml",
+      "path": "/Item/Examples.spell",
       "active": true
     },
     {
-      "path": "/Item/API.spellml",
+      "path": "/Item/API.spell",
       "active": true
     },
     {
-      "path": "/Item/Theming.spellml",
+      "path": "/Item/Theming.spell",
       "active": true
     },
     {
-      "path": "/Items/Usage.spellml",
+      "path": "/Items/Usage.spell",
       "active": true
     },
     {
-      "path": "/Items/Examples.spellml",
+      "path": "/Items/Examples.spell",
       "active": true
     },
     {
-      "path": "/Items/API.spellml",
+      "path": "/Items/API.spell",
       "active": true
     },
     {
-      "path": "/Items/Theming.spellml",
+      "path": "/Items/Theming.spell",
       "active": true
     },
     {
-      "path": "/Json/Usage.spellml",
+      "path": "/Json/Usage.spell",
       "active": true
     },
     {
-      "path": "/Json/Examples.spellml",
+      "path": "/Json/Examples.spell",
       "active": true
     },
     {
-      "path": "/Json/API.spellml",
+      "path": "/Json/API.spell",
       "active": true
     },
     {
-      "path": "/Keys/Usage.spellml",
+      "path": "/Keys/Usage.spell",
       "active": true
     },
     {
-      "path": "/Keys/Examples.spellml",
+      "path": "/Keys/Examples.spell",
       "active": true
     },
     {
-      "path": "/Keys/API.spellml",
+      "path": "/Keys/API.spell",
       "active": true
     },
     {
-      "path": "/Label/Usage.spellml",
+      "path": "/Label/Usage.spell",
       "active": true
     },
     {
-      "path": "/Label/Examples.spellml",
+      "path": "/Label/Examples.spell",
       "active": true
     },
     {
-      "path": "/Label/API.spellml",
+      "path": "/Label/API.spell",
       "active": true
     },
     {
-      "path": "/Label/Theming.spellml",
+      "path": "/Label/Theming.spell",
       "active": true
     },
     {
-      "path": "/List/Usage.spellml",
+      "path": "/List/Usage.spell",
       "active": true
     },
     {
-      "path": "/List/Examples.spellml",
+      "path": "/List/Examples.spell",
       "active": true
     },
     {
-      "path": "/List/API.spellml",
+      "path": "/List/API.spell",
       "active": true
     },
     {
-      "path": "/List/Theming.spellml",
+      "path": "/List/Theming.spell",
       "active": true
     },
     {
-      "path": "/Loader/Usage.spellml",
+      "path": "/Loader/Usage.spell",
       "active": true
     },
     {
-      "path": "/Loader/Examples.spellml",
+      "path": "/Loader/Examples.spell",
       "active": true
     },
     {
-      "path": "/Loader/API.spellml",
+      "path": "/Loader/API.spell",
       "active": true
     },
     {
-      "path": "/Loader/Theming.spellml",
+      "path": "/Loader/Theming.spell",
       "active": true
     },
     {
-      "path": "/Markdown/Usage.spellml",
+      "path": "/Markdown/Usage.spell",
       "active": true
     },
     {
-      "path": "/Markdown/Examples.spellml",
+      "path": "/Markdown/Examples.spell",
       "active": true
     },
     {
-      "path": "/Markdown/API.spellml",
+      "path": "/Markdown/API.spell",
       "active": true
     },
     {
-      "path": "/Markdown/Theming.spellml",
+      "path": "/Markdown/Theming.spell",
       "active": true
     },
     {
-      "path": "/Menu/Usage.spellml",
+      "path": "/Menu/Usage.spell",
       "active": true
     },
     {
-      "path": "/Menu/Examples.spellml",
+      "path": "/Menu/Examples.spell",
       "active": true
     },
     {
-      "path": "/Menu/API.spellml",
+      "path": "/Menu/API.spell",
       "active": true
     },
     {
-      "path": "/Menu/Theming.spellml",
+      "path": "/Menu/Theming.spell",
       "active": true
     },
     {
-      "path": "/Message/Usage.spellml",
+      "path": "/Message/Usage.spell",
       "active": true
     },
     {
-      "path": "/Message/Examples.spellml",
+      "path": "/Message/Examples.spell",
       "active": true
     },
     {
-      "path": "/Message/API.spellml",
+      "path": "/Message/API.spell",
       "active": true
     },
     {
-      "path": "/Message/Theming.spellml",
+      "path": "/Message/Theming.spell",
       "active": true
     },
     {
-      "path": "/Meta/Usage.spellml",
+      "path": "/Meta/Usage.spell",
       "active": true
     },
     {
-      "path": "/Meta/Examples.spellml",
+      "path": "/Meta/Examples.spell",
       "active": true
     },
     {
-      "path": "/Meta/API.spellml",
+      "path": "/Meta/API.spell",
       "active": true
     },
     {
-      "path": "/Modal/Usage.spellml",
+      "path": "/Modal/Usage.spell",
       "active": true
     },
     {
-      "path": "/Modal/Examples.spellml",
+      "path": "/Modal/Examples.spell",
       "active": true
     },
     {
-      "path": "/Modal/API.spellml",
+      "path": "/Modal/API.spell",
       "active": true
     },
     {
-      "path": "/Modal/Theming.spellml",
+      "path": "/Modal/Theming.spell",
       "active": true
     },
     {
-      "path": "/Nag/Usage.spellml",
+      "path": "/Nag/Usage.spell",
       "active": true
     },
     {
-      "path": "/Nag/Examples.spellml",
+      "path": "/Nag/Examples.spell",
       "active": true
     },
     {
-      "path": "/Nag/API.spellml",
+      "path": "/Nag/API.spell",
       "active": true
     },
     {
-      "path": "/Nag/Theming.spellml",
+      "path": "/Nag/Theming.spell",
       "active": true
     },
     {
-      "path": "/Page/Usage.spellml",
+      "path": "/Page/Usage.spell",
       "active": true
     },
     {
-      "path": "/Page/Examples.spellml",
+      "path": "/Page/Examples.spell",
       "active": true
     },
     {
-      "path": "/Page/API.spellml",
+      "path": "/Page/API.spell",
       "active": true
     },
     {
-      "path": "/Page/Theming.spellml",
+      "path": "/Page/Theming.spell",
       "active": true
     },
     {
-      "path": "/Panel/Usage.spellml",
+      "path": "/Panel/Usage.spell",
       "active": true
     },
     {
-      "path": "/Panel/Examples.spellml",
+      "path": "/Panel/Examples.spell",
       "active": true
     },
     {
-      "path": "/Panel/API.spellml",
+      "path": "/Panel/API.spell",
       "active": true
     },
     {
-      "path": "/Panel/Theming.spellml",
+      "path": "/Panel/Theming.spell",
       "active": true
     },
     {
-      "path": "/Placeholder/Usage.spellml",
+      "path": "/Placeholder/Usage.spell",
       "active": true
     },
     {
-      "path": "/Placeholder/Examples.spellml",
+      "path": "/Placeholder/Examples.spell",
       "active": true
     },
     {
-      "path": "/Placeholder/API.spellml",
+      "path": "/Placeholder/API.spell",
       "active": true
     },
     {
-      "path": "/Placeholder/Theming.spellml",
+      "path": "/Placeholder/Theming.spell",
       "active": true
     },
     {
-      "path": "/Popup/Usage.spellml",
+      "path": "/Popup/Usage.spell",
       "active": true
     },
     {
-      "path": "/Popup/Examples.spellml",
+      "path": "/Popup/Examples.spell",
       "active": true
     },
     {
-      "path": "/Popup/API.spellml",
+      "path": "/Popup/API.spell",
       "active": true
     },
     {
-      "path": "/Popup/Theming.spellml",
+      "path": "/Popup/Theming.spell",
       "active": true
     },
     {
-      "path": "/Progress/Usage.spellml",
+      "path": "/Progress/Usage.spell",
       "active": true
     },
     {
-      "path": "/Progress/Examples.spellml",
+      "path": "/Progress/Examples.spell",
       "active": true
     },
     {
-      "path": "/Progress/API.spellml",
+      "path": "/Progress/API.spell",
       "active": true
     },
     {
-      "path": "/Progress/Theming.spellml",
+      "path": "/Progress/Theming.spell",
       "active": true
     },
     {
-      "path": "/PropertyEditor/Usage.spellml",
+      "path": "/PropertyEditor/Usage.spell",
       "active": true
     },
     {
-      "path": "/PropertyEditor/Examples.spellml",
+      "path": "/PropertyEditor/Examples.spell",
       "active": true
     },
     {
-      "path": "/PropertyEditor/API.spellml",
+      "path": "/PropertyEditor/API.spell",
       "active": true
     },
     {
-      "path": "/Quote/Usage.spellml",
+      "path": "/Quote/Usage.spell",
       "active": true
     },
     {
-      "path": "/Quote/Examples.spellml",
+      "path": "/Quote/Examples.spell",
       "active": true
     },
     {
-      "path": "/Quote/API.spellml",
+      "path": "/Quote/API.spell",
       "active": true
     },
     {
-      "path": "/Radio/Usage.spellml",
+      "path": "/Radio/Usage.spell",
       "active": true
     },
     {
-      "path": "/Radio/Examples.spellml",
+      "path": "/Radio/Examples.spell",
       "active": true
     },
     {
-      "path": "/Radio/API.spellml",
+      "path": "/Radio/API.spell",
       "active": true
     },
     {
-      "path": "/Radio/Theming.spellml",
+      "path": "/Radio/Theming.spell",
       "active": true
     },
     {
-      "path": "/Rail/Usage.spellml",
+      "path": "/Rail/Usage.spell",
       "active": true
     },
     {
-      "path": "/Rail/Examples.spellml",
+      "path": "/Rail/Examples.spell",
       "active": true
     },
     {
-      "path": "/Rail/API.spellml",
+      "path": "/Rail/API.spell",
       "active": true
     },
     {
-      "path": "/Rail/Theming.spellml",
+      "path": "/Rail/Theming.spell",
       "active": true
     },
     {
-      "path": "/Rating/Usage.spellml",
+      "path": "/Rating/Usage.spell",
       "active": true
     },
     {
-      "path": "/Rating/Examples.spellml",
+      "path": "/Rating/Examples.spell",
       "active": true
     },
     {
-      "path": "/Rating/API.spellml",
+      "path": "/Rating/API.spell",
       "active": true
     },
     {
-      "path": "/Rating/Theming.spellml",
+      "path": "/Rating/Theming.spell",
       "active": true
     },
     {
-      "path": "/Reveal/Usage.spellml",
+      "path": "/Reveal/Usage.spell",
       "active": true
     },
     {
-      "path": "/Reveal/Examples.spellml",
+      "path": "/Reveal/Examples.spell",
       "active": true
     },
     {
-      "path": "/Reveal/API.spellml",
+      "path": "/Reveal/API.spell",
       "active": true
     },
     {
-      "path": "/Reveal/Theming.spellml",
+      "path": "/Reveal/Theming.spell",
       "active": true
     },
     {
-      "path": "/Root/Usage.spellml",
+      "path": "/Root/Usage.spell",
       "active": true
     },
     {
-      "path": "/Root/Examples.spellml",
+      "path": "/Root/Examples.spell",
       "active": true
     },
     {
-      "path": "/Root/API.spellml",
+      "path": "/Root/API.spell",
       "active": true
     },
     {
-      "path": "/Root/Theming.spellml",
+      "path": "/Root/Theming.spell",
       "active": true
     },
     {
-      "path": "/Search/Usage.spellml",
+      "path": "/Search/Usage.spell",
       "active": true
     },
     {
-      "path": "/Search/Examples.spellml",
+      "path": "/Search/Examples.spell",
       "active": true
     },
     {
-      "path": "/Search/API.spellml",
+      "path": "/Search/API.spell",
       "active": true
     },
     {
-      "path": "/Search/Theming.spellml",
+      "path": "/Search/Theming.spell",
       "active": true
     },
     {
-      "path": "/Section/Usage.spellml",
+      "path": "/Section/Usage.spell",
       "active": true
     },
     {
-      "path": "/Section/Examples.spellml",
+      "path": "/Section/Examples.spell",
       "active": true
     },
     {
-      "path": "/Section/API.spellml",
+      "path": "/Section/API.spell",
       "active": true
     },
     {
-      "path": "/Section/Theming.spellml",
+      "path": "/Section/Theming.spell",
       "active": true
     },
     {
-      "path": "/Segment/Usage.spellml",
+      "path": "/Segment/Usage.spell",
       "active": true
     },
     {
-      "path": "/Segment/Examples.spellml",
+      "path": "/Segment/Examples.spell",
       "active": true
     },
     {
-      "path": "/Segment/API.spellml",
+      "path": "/Segment/API.spell",
       "active": true
     },
     {
-      "path": "/Segment/Theming.spellml",
+      "path": "/Segment/Theming.spell",
       "active": true
     },
     {
-      "path": "/Select/Usage.spellml",
+      "path": "/Select/Usage.spell",
       "active": true
     },
     {
-      "path": "/Select/Examples.spellml",
+      "path": "/Select/Examples.spell",
       "active": true
     },
     {
-      "path": "/Select/API.spellml",
+      "path": "/Select/API.spell",
       "active": true
     },
     {
-      "path": "/Select/Theming.spellml",
+      "path": "/Select/Theming.spell",
       "active": true
     },
     {
-      "path": "/Shape/Usage.spellml",
+      "path": "/Shape/Usage.spell",
       "active": true
     },
     {
-      "path": "/Shape/Examples.spellml",
+      "path": "/Shape/Examples.spell",
       "active": true
     },
     {
-      "path": "/Shape/API.spellml",
+      "path": "/Shape/API.spell",
       "active": true
     },
     {
-      "path": "/Shape/Theming.spellml",
+      "path": "/Shape/Theming.spell",
       "active": true
     },
     {
-      "path": "/Sidebar/Usage.spellml",
+      "path": "/Sidebar/Usage.spell",
       "active": true
     },
     {
-      "path": "/Sidebar/Examples.spellml",
+      "path": "/Sidebar/Examples.spell",
       "active": true
     },
     {
-      "path": "/Sidebar/API.spellml",
+      "path": "/Sidebar/API.spell",
       "active": true
     },
     {
-      "path": "/Sidebar/Theming.spellml",
+      "path": "/Sidebar/Theming.spell",
       "active": true
     },
     {
-      "path": "/Sides/Usage.spellml",
+      "path": "/Sides/Usage.spell",
       "active": true
     },
     {
-      "path": "/Sides/Examples.spellml",
+      "path": "/Sides/Examples.spell",
       "active": true
     },
     {
-      "path": "/Sides/API.spellml",
+      "path": "/Sides/API.spell",
       "active": true
     },
     {
-      "path": "/Sides/Theming.spellml",
+      "path": "/Sides/Theming.spell",
       "active": true
     },
     {
-      "path": "/SiteNav/Usage.spellml",
+      "path": "/SiteNav/Usage.spell",
       "active": true
     },
     {
-      "path": "/SiteNav/Examples.spellml",
+      "path": "/SiteNav/Examples.spell",
       "active": true
     },
     {
-      "path": "/SiteNav/API.spellml",
+      "path": "/SiteNav/API.spell",
       "active": true
     },
     {
-      "path": "/SiteNav/Theming.spellml",
+      "path": "/SiteNav/Theming.spell",
       "active": true
     },
     {
-      "path": "/SiteTabs/Usage.spellml",
+      "path": "/SiteTabs/Usage.spell",
       "active": true
     },
     {
-      "path": "/SiteTabs/Examples.spellml",
+      "path": "/SiteTabs/Examples.spell",
       "active": true
     },
     {
-      "path": "/SiteTabs/API.spellml",
+      "path": "/SiteTabs/API.spell",
       "active": true
     },
     {
-      "path": "/SiteTabs/Theming.spellml",
+      "path": "/SiteTabs/Theming.spell",
       "active": true
     },
     {
-      "path": "/Slider/Usage.spellml",
+      "path": "/Slider/Usage.spell",
       "active": true
     },
     {
-      "path": "/Slider/Examples.spellml",
+      "path": "/Slider/Examples.spell",
       "active": true
     },
     {
-      "path": "/Slider/API.spellml",
+      "path": "/Slider/API.spell",
       "active": true
     },
     {
-      "path": "/Slider/Theming.spellml",
+      "path": "/Slider/Theming.spell",
       "active": true
     },
     {
-      "path": "/Space/Usage.spellml",
+      "path": "/Space/Usage.spell",
       "active": true
     },
     {
-      "path": "/Space/Examples.spellml",
+      "path": "/Space/Examples.spell",
       "active": true
     },
     {
-      "path": "/Space/API.spellml",
+      "path": "/Space/API.spell",
       "active": true
     },
     {
-      "path": "/SplitPanel/Usage.spellml",
+      "path": "/SplitPanel/Usage.spell",
       "active": true
     },
     {
-      "path": "/SplitPanel/Examples.spellml",
+      "path": "/SplitPanel/Examples.spell",
       "active": true
     },
     {
-      "path": "/SplitPanel/API.spellml",
+      "path": "/SplitPanel/API.spell",
       "active": true
     },
     {
-      "path": "/SplitPanel/Theming.spellml",
+      "path": "/SplitPanel/Theming.spell",
       "active": true
     },
     {
-      "path": "/Stack/Usage.spellml",
+      "path": "/Stack/Usage.spell",
       "active": true
     },
     {
-      "path": "/Stack/Examples.spellml",
+      "path": "/Stack/Examples.spell",
       "active": true
     },
     {
-      "path": "/Stack/API.spellml",
+      "path": "/Stack/API.spell",
       "active": true
     },
     {
-      "path": "/Statistic/Usage.spellml",
+      "path": "/Statistic/Usage.spell",
       "active": true
     },
     {
-      "path": "/Statistic/Examples.spellml",
+      "path": "/Statistic/Examples.spell",
       "active": true
     },
     {
-      "path": "/Statistic/API.spellml",
+      "path": "/Statistic/API.spell",
       "active": true
     },
     {
-      "path": "/Statistic/Theming.spellml",
+      "path": "/Statistic/Theming.spell",
       "active": true
     },
     {
-      "path": "/Step/Usage.spellml",
+      "path": "/Step/Usage.spell",
       "active": true
     },
     {
-      "path": "/Step/Examples.spellml",
+      "path": "/Step/Examples.spell",
       "active": true
     },
     {
-      "path": "/Step/API.spellml",
+      "path": "/Step/API.spell",
       "active": true
     },
     {
-      "path": "/Step/Theming.spellml",
+      "path": "/Step/Theming.spell",
       "active": true
     },
     {
-      "path": "/Sticky/Usage.spellml",
+      "path": "/Sticky/Usage.spell",
       "active": true
     },
     {
-      "path": "/Sticky/Examples.spellml",
+      "path": "/Sticky/Examples.spell",
       "active": true
     },
     {
-      "path": "/Sticky/API.spellml",
+      "path": "/Sticky/API.spell",
       "active": true
     },
     {
-      "path": "/Sticky/Theming.spellml",
+      "path": "/Sticky/Theming.spell",
       "active": true
     },
     {
-      "path": "/Summary/Usage.spellml",
+      "path": "/Summary/Usage.spell",
       "active": true
     },
     {
-      "path": "/Summary/Examples.spellml",
+      "path": "/Summary/Examples.spell",
       "active": true
     },
     {
-      "path": "/Summary/API.spellml",
+      "path": "/Summary/API.spell",
       "active": true
     },
     {
-      "path": "/Tab/Usage.spellml",
+      "path": "/Tab/Usage.spell",
       "active": true
     },
     {
-      "path": "/Tab/Examples.spellml",
+      "path": "/Tab/Examples.spell",
       "active": true
     },
     {
-      "path": "/Tab/API.spellml",
+      "path": "/Tab/API.spell",
       "active": true
     },
     {
-      "path": "/Tab/Theming.spellml",
+      "path": "/Tab/Theming.spell",
       "active": true
     },
     {
-      "path": "/Table/Usage.spellml",
+      "path": "/Table/Usage.spell",
       "active": true
     },
     {
-      "path": "/Table/Examples.spellml",
+      "path": "/Table/Examples.spell",
       "active": true
     },
     {
-      "path": "/Table/API.spellml",
+      "path": "/Table/API.spell",
       "active": true
     },
     {
-      "path": "/Table/Theming.spellml",
+      "path": "/Table/Theming.spell",
       "active": true
     },
     {
-      "path": "/TableOfContents/Usage.spellml",
+      "path": "/TableOfContents/Usage.spell",
       "active": true
     },
     {
-      "path": "/TableOfContents/Examples.spellml",
+      "path": "/TableOfContents/Examples.spell",
       "active": true
     },
     {
-      "path": "/TableOfContents/API.spellml",
+      "path": "/TableOfContents/API.spell",
       "active": true
     },
     {
-      "path": "/TableOfContents/Theming.spellml",
+      "path": "/TableOfContents/Theming.spell",
       "active": true
     },
     {
-      "path": "/Terms/Usage.spellml",
+      "path": "/Terms/Usage.spell",
       "active": true
     },
     {
-      "path": "/Terms/Examples.spellml",
+      "path": "/Terms/Examples.spell",
       "active": true
     },
     {
-      "path": "/Terms/API.spellml",
+      "path": "/Terms/API.spell",
       "active": true
     },
     {
-      "path": "/Text/Usage.spellml",
+      "path": "/Text/Usage.spell",
       "active": true
     },
     {
-      "path": "/Text/Examples.spellml",
+      "path": "/Text/Examples.spell",
       "active": true
     },
     {
-      "path": "/Text/API.spellml",
+      "path": "/Text/API.spell",
       "active": true
     },
     {
-      "path": "/Text/Theming.spellml",
+      "path": "/Text/Theming.spell",
       "active": true
     },
     {
-      "path": "/Textarea/Usage.spellml",
+      "path": "/Textarea/Usage.spell",
       "active": true
     },
     {
-      "path": "/Textarea/Examples.spellml",
+      "path": "/Textarea/Examples.spell",
       "active": true
     },
     {
-      "path": "/Textarea/API.spellml",
+      "path": "/Textarea/API.spell",
       "active": true
     },
     {
-      "path": "/Textarea/Theming.spellml",
+      "path": "/Textarea/Theming.spell",
       "active": true
     },
     {
-      "path": "/ThemeEditor/Usage.spellml",
+      "path": "/ThemeEditor/Usage.spell",
       "active": true
     },
     {
-      "path": "/ThemeEditor/Examples.spellml",
+      "path": "/ThemeEditor/Examples.spell",
       "active": true
     },
     {
-      "path": "/ThemeEditor/API.spellml",
+      "path": "/ThemeEditor/API.spell",
       "active": true
     },
     {
-      "path": "/ThemeEditor/Theming.spellml",
+      "path": "/ThemeEditor/Theming.spell",
       "active": true
     },
     {
-      "path": "/ThemeMenu/Usage.spellml",
+      "path": "/ThemeMenu/Usage.spell",
       "active": true
     },
     {
-      "path": "/ThemeMenu/Examples.spellml",
+      "path": "/ThemeMenu/Examples.spell",
       "active": true
     },
     {
-      "path": "/ThemeMenu/API.spellml",
+      "path": "/ThemeMenu/API.spell",
       "active": true
     },
     {
-      "path": "/ThemeMenu/Theming.spellml",
+      "path": "/ThemeMenu/Theming.spell",
       "active": true
     },
     {
-      "path": "/Title/Usage.spellml",
+      "path": "/Title/Usage.spell",
       "active": true
     },
     {
-      "path": "/Title/Examples.spellml",
+      "path": "/Title/Examples.spell",
       "active": true
     },
     {
-      "path": "/Title/API.spellml",
+      "path": "/Title/API.spell",
       "active": true
     },
     {
-      "path": "/Toast/Usage.spellml",
+      "path": "/Toast/Usage.spell",
       "active": true
     },
     {
-      "path": "/Toast/Examples.spellml",
+      "path": "/Toast/Examples.spell",
       "active": true
     },
     {
-      "path": "/Toast/API.spellml",
+      "path": "/Toast/API.spell",
       "active": true
     },
     {
-      "path": "/Toast/Theming.spellml",
+      "path": "/Toast/Theming.spell",
       "active": true
     },
     {
-      "path": "/Toolbar/Usage.spellml",
+      "path": "/Toolbar/Usage.spell",
       "active": true
     },
     {
-      "path": "/Toolbar/Examples.spellml",
+      "path": "/Toolbar/Examples.spell",
       "active": true
     },
     {
-      "path": "/Toolbar/API.spellml",
+      "path": "/Toolbar/API.spell",
       "active": true
     },
     {
-      "path": "/Toolbar/Theming.spellml",
+      "path": "/Toolbar/Theming.spell",
       "active": true
     },
     {
-      "path": "/Transition/Usage.spellml",
+      "path": "/Transition/Usage.spell",
       "active": true
     },
     {
-      "path": "/Transition/Examples.spellml",
+      "path": "/Transition/Examples.spell",
       "active": true
     },
     {
-      "path": "/Transition/API.spellml",
+      "path": "/Transition/API.spell",
       "active": true
     },
     {
-      "path": "/Transition/Theming.spellml",
+      "path": "/Transition/Theming.spell",
       "active": true
     },
     {
-      "path": "/Tree/Usage.spellml",
+      "path": "/Tree/Usage.spell",
       "active": true
     },
     {
-      "path": "/Tree/Examples.spellml",
+      "path": "/Tree/Examples.spell",
       "active": true
     },
     {
-      "path": "/Tree/API.spellml",
+      "path": "/Tree/API.spell",
       "active": true
     },
     {
-      "path": "/Tree/Theming.spellml",
+      "path": "/Tree/Theming.spell",
       "active": true
     },
     {
-      "path": "/TreeDiagram/Usage.spellml",
+      "path": "/TreeDiagram/Usage.spell",
       "active": true
     },
     {
-      "path": "/TreeDiagram/Examples.spellml",
+      "path": "/TreeDiagram/Examples.spell",
       "active": true
     },
     {
-      "path": "/TreeDiagram/API.spellml",
+      "path": "/TreeDiagram/API.spell",
       "active": true
     },
     {
-      "path": "/TreeDiagram/Theming.spellml",
+      "path": "/TreeDiagram/Theming.spell",
       "active": true
     },
     {
-      "path": "/Value/Usage.spellml",
+      "path": "/Value/Usage.spell",
       "active": true
     },
     {
-      "path": "/Value/Examples.spellml",
+      "path": "/Value/Examples.spell",
       "active": true
     },
     {
-      "path": "/Value/API.spellml",
+      "path": "/Value/API.spell",
       "active": true
     },
     {
-      "path": "/Video/Usage.spellml",
+      "path": "/Video/Usage.spell",
       "active": true
     },
     {
-      "path": "/Video/Examples.spellml",
+      "path": "/Video/Examples.spell",
       "active": true
     },
     {
-      "path": "/Video/API.spellml",
+      "path": "/Video/API.spell",
       "active": true
     },
     {
-      "path": "/Visibility/Usage.spellml",
+      "path": "/Visibility/Usage.spell",
       "active": true
     },
     {
-      "path": "/Visibility/Examples.spellml",
+      "path": "/Visibility/Examples.spell",
       "active": true
     },
     {
-      "path": "/Visibility/API.spellml",
+      "path": "/Visibility/API.spell",
       "active": true
     },
     {
-      "path": "/Visibility/Theming.spellml",
+      "path": "/Visibility/Theming.spell",
       "active": true
     },
     {
-      "path": "/Zoom/Usage.spellml",
+      "path": "/Zoom/Usage.spell",
       "active": true
     },
     {
-      "path": "/Zoom/Examples.spellml",
+      "path": "/Zoom/Examples.spell",
       "active": true
     },
     {
-      "path": "/Zoom/API.spellml",
+      "path": "/Zoom/API.spell",
       "active": true
     },
     {
-      "path": "/Zoom/Theming.spellml",
+      "path": "/Zoom/Theming.spell",
       "active": true
     },
     {
-      "path": "/SpellUI.spellml",
+      "path": "/SpellUI.spell",
       "active": true
     }
   ]

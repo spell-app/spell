@@ -99,47 +99,47 @@ describe("SourceHomes", () => {
   ].join("\n")
 
   test("a type's default:  its create line, in place", () => {
-    const { home, text } = edited("/Card.spellml", CARD, "Card", "count", 5)
+    const { home, text } = edited("/Card.spell", CARD, "Card", "count", 5)
     expect(home.kind).toBe("default")
     expect(text).toBe(CARD.replace("set its count to 2", "set its count to 5"))
   })
 
   test("a default written as text keeps its quotes", () => {
-    const { text } = edited("/Card.spellml", CARD, "Card", "title", "bye")
+    const { text } = edited("/Card.spell", CARD, "Card", "title", "bye")
     expect(text).toBe(CARD.replace(`set its title to "hi"`, `set its title to "bye"`))
   })
 
   test("a default written as one of its words stays a word", () => {
-    const { home, text } = edited("/Card.spellml", CARD, "Card", "suit", "hearts")
+    const { home, text } = edited("/Card.spell", CARD, "Card", "suit", "hearts")
     expect(home.kind).toBe("default")
     expect(text).toBe(CARD.replace("set its suit to clubs", "set its suit to hearts"))
   })
 
   test("a default that's code is an expression", () => {
-    expect(edited("/Card.spellml", CARD, "Card", "score", 5).home.kind).toBe("expression")
+    expect(edited("/Card.spell", CARD, "Card", "score", 5).home.kind).toBe("expression")
   })
 
   test("a value on the line that made it wins over the default", () => {
-    const { home, text } = edited("/Card.spellml", CARD, "Card", "title", "y", "a new card with")
+    const { home, text } = edited("/Card.spell", CARD, "Card", "title", "y", "a new card with")
     expect(home.kind).toBe("written")
     expect(text).toBe(CARD.replace(`title = "x"`, `title = "y"`))
   })
 
   test("a value that line doesn't give can be added to it, joined to what it says", () => {
-    const { home } = edited("/Card.spellml", CARD, "Card", "suit", "hearts", "a new card with")
+    const { home } = edited("/Card.spell", CARD, "Card", "suit", "hearts", "a new card with")
     expect(home).toMatchObject({ kind: "notWritten", place: "making", hasWith: true })
     expect(CARD.slice(0, (home as MakingHome).at).endsWith(`count = 1`)).toBe(true)
   })
 
   test("a making that says nothing yet is told so", () => {
     const code = CARD.replace(` with title = "x", count = 1`, "")
-    const { home } = edited("/Card.spellml", code, "Card", "suit", "hearts", "a new card")
+    const { home } = edited("/Card.spell", code, "Card", "suit", "hearts", "a new card")
     expect(home).toMatchObject({ kind: "notWritten", place: "making", hasWith: false })
   })
 
   test("a value on a making comes off with its comma, or with its `with` when it's the only one", () => {
     const removed = (contents: string, name: string) => {
-      const parsed = parseSpellProject([{ path: "/Card.spellml", contents }])
+      const parsed = parseSpellProject([{ path: "/Card.spell", contents }])
       const home = SourceHomes.ofMaking(parsed.files[0]!, contents.indexOf("a new card"), name) as FileHome
       return SourceEdits.applied(contents, [SourceEdits.replacing(contents, home.removal!, "")])
     }
@@ -160,7 +160,7 @@ describe("SourceHomes", () => {
   })
 
   test("nothing in the source says:  set while running", () => {
-    expect(edited("/Card.spellml", CARD, "Card", "nickname", "x").home.kind).toBe("running")
+    expect(edited("/Card.spell", CARD, "Card", "nickname", "x").home.kind).toBe("running")
   })
 
   // epic `language` T87:  the rewritten Counter says its start in its property, not in a `to create it`
@@ -171,7 +171,7 @@ describe("SourceHomes", () => {
       `</spell-view>`,
       ``
     ].join("\n")
-    const fromTags = edited("/Counter.spellml", tags, "Counter", "count", 5)
+    const fromTags = edited("/Counter.spell", tags, "Counter", "count", 5)
     expect(fromTags.home.kind).toBe("default")
     expect(fromTags.text).toBe(tags.replace(">0</property>", ">5</property>"))
 
@@ -187,7 +187,7 @@ describe("SourceHomes", () => {
       `</spell-thing>`,
       ``
     ]
-    expect(edited("/Card.spellml", ranks.join("\n"), "Card", "rank", "jack").home.kind).not.toBe("default")
+    expect(edited("/Card.spell", ranks.join("\n"), "Card", "rank", "jack").home.kind).not.toBe("default")
   })
 
   test("a code-spell file too", () => {

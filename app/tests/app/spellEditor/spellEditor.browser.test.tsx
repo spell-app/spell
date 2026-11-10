@@ -47,10 +47,10 @@ describe("<SpellEditorPane>", () => {
   })
 
   test("a file in a folder is named by its path in the project", () => {
-    const files = [file("Button/Usage.spellml"), file("Divider/Usage.spellml")]
+    const files = [file("Button/Usage.spell"), file("Divider/Usage.spell")]
     const { host } = mountPane({ files, file: files[0], onSelect: vi.fn() })
     const tabs = host.querySelectorAll<HTMLButtonElement>(".SpellEditorTabs button")
-    expect([...tabs].map((tab) => tab.textContent)).toEqual(["Button/Usage.spellml", "Divider/Usage.spellml"])
+    expect([...tabs].map((tab) => tab.textContent)).toEqual(["Button/Usage.spell", "Divider/Usage.spell"])
   })
 
   test("one file:  no tabs;  no Monaco yet:  a placeholder", () => {
@@ -93,7 +93,7 @@ describe("<SpellEditorPane>", () => {
 })
 
 describe("SpellEditor namedFile()", () => {
-  const files = [file("Card.spellml"), file("Button/Usage.spellml"), file("Divider/Usage.spellml")]
+  const files = [file("Card.spell"), file("Button/Usage.spell"), file("Divider/Usage.spell")]
   /** The file `<spell-editor file="...">` opens, with `files` as its project's. */
   const named = (name: string | undefined) =>
     (SpellEditor.prototype as unknown as { namedFile: (project: object) => unknown }).namedFile.call(
@@ -102,15 +102,15 @@ describe("SpellEditor namedFile()", () => {
     )
 
   test("by its path in the project, with or without the leading slash", () => {
-    expect(named("Divider/Usage.spellml")).toBe(files[2])
-    expect(named("/Divider/Usage.spellml")).toBe(files[2])
+    expect(named("Divider/Usage.spell")).toBe(files[2])
+    expect(named("/Divider/Usage.spell")).toBe(files[2])
   })
 
   test("by its address, or bare name:  the first of that name;  else the first file", () => {
-    expect(named("@spell/examples/Proj/Divider/Usage.spellml")).toBe(files[2])
-    expect(named("Usage.spellml")).toBe(files[1])
-    expect(named("Card.spellml")).toBe(files[0])
-    expect(named("Nope.spellml")).toBe(files[0])
+    expect(named("@spell/examples/Proj/Divider/Usage.spell")).toBe(files[2])
+    expect(named("Usage.spell")).toBe(files[1])
+    expect(named("Card.spell")).toBe(files[0])
+    expect(named("Nope.spell")).toBe(files[0])
     expect(named(undefined)).toBe(files[0])
   })
 })

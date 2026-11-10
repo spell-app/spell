@@ -4,23 +4,23 @@
   "version": "1.0.0",
   "imports": [
     {
-      "path": "/cards/Card.spellml",
+      "path": "/cards/Card.spell",
       "active": true
     },
     {
-      "path": "/cards/Card.editor.spellml",
+      "path": "/cards/Card.editor.spell",
       "active": true
     },
     {
-      "path": "/cards/Jokers.spellml",
+      "path": "/cards/Jokers.spell",
       "active": true
     },
     {
-      "path": "/cards/Deck.spellml",
+      "path": "/cards/Deck.spell",
       "active": true
     },
     {
-      "path": "/cards/Pile.spellml",
+      "path": "/cards/Pile.spell",
       "active": true
     },
     {

@@ -72,7 +72,7 @@ Most of them work on Spell projects, and you name a project the way the editor d
 | `Card.spell`, `./path/to/Project`, `.` | a Spell file, or the project in a folder;  a lone `.spell` file counts as a one-file project |
 | `@here` | the project in the current folder |
 | `@spell/examples/Solitaire`, `owen@spell/x` | one project, by its address |
-| `@spell/examples/Solitaire/Card.spellml` | one file in a project:  its name has a dot |
+| `@spell/examples/Solitaire/Card.spell` | one file in a project:  its name has a dot |
 | `@spell/examples`, `owen@spell`, `@spell` | a group, or every group of a space:  pick from their projects, or pass `--all` |
 | nothing | the project here;  outside one, `spell` asks, completing as you type |
 
@@ -459,7 +459,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
 | `spell format --check` | writes nothing, lists the files that would change, and exits 1 if any would |
-| `spell spellx convert --dry-run` | writes nothing, prints each `.spellml` file instead |
+| `spell spellx convert --dry-run` | writes nothing, prints each `.spell` file instead |
 
 - The targets are `SP.TARGETS`:  `ts/solid`, `ts/lib`, `py`
   ([spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
@@ -589,7 +589,7 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spellml:15
+app/spaces/@spell/examples/Solitaire/Card.spell:15
 
 Spell
     <property "color" one-of="red, black">

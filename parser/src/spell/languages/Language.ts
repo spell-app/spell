@@ -352,7 +352,7 @@ export type ParserMessages = Record<ParserMessageKey, string>
 
 /**
  * The language part of a spell file's name, before its `.spell`:  `es` in `Carta.es.spell`, `pt-BR` in `x.pt-BR.spell`.
- * - A markup file says it the same way:  `Carta.es.spellml`, or the old `Carta.es.spellx` (`SP.isSpellmlName()`).
+ * - A markup file says it the same way:  `Carta.es.spell`, or the old `Carta.es.spell` (`SP.isSpellmlName()`).
  * - A path may follow with a range, as in declarations' `defined`:  `/Carta.es.spell:71-92`.
  */
 const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spell(?:ml|x)?(?::[\d-]*)?$/
@@ -783,7 +783,7 @@ export type SpellxDeclarationKind =
 /**
  * A spellx block of prose:  a member's long description, a comment among its lines,
  * or a template's own property editor (`<spell-property-editor>`):  the Inspector's layout for its things, as markup.
- * - The property editor may live in a file of its own, `Card.editor.spellml` (`SP.isPropertyEditorsName()`).
+ * - The property editor may live in a file of its own, `Card.editor.spell` (`SP.isPropertyEditorsName()`).
  * - Or a page's STORIES, `<spell-stories>` (epic `mockup` P6):  what it must let people do, as markdown, its twin a
  *   `<stories>` block, compiled to its `static stories`.
  */

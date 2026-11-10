@@ -19,9 +19,9 @@ import { EDITOR, KIT, SERVING } from "./runningEditor"
  */
 
 /** The editor bar's piece, the file this test changes. */
-const BAR = path.join(KIT, "app/spaces/@spell/editor/editor-bar/EditorBar.spellml")
+const BAR = path.join(KIT, "app/spaces/@spell/editor/editor-bar/EditorBar.spell")
 
-/** Today's draft of the bar, as the server names one:  `__draft/EditorBar.owen-2026-11-03.spellml` (P24, Q24). */
+/** Today's draft of the bar, as the server names one:  `__draft/EditorBar.owen-2026-11-03.spell` (P24, Q24). */
 const BAR_DRAFTS = path.join(path.dirname(BAR), "__draft")
 
 describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
@@ -70,7 +70,7 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
       .join("-")
     mkdirSync(BAR_DRAFTS, { recursive: true })
     writeFileSync(
-      path.join(BAR_DRAFTS, `EditorBar.owen-${day}.spellml`),
+      path.join(BAR_DRAFTS, `EditorBar.owen-${day}.spell`),
       original.replace(`class="AppMenu tight EditorBar"`, `class="AppMenu tight EditorBar DraftProbe"`)
     )
     await page.goto(`${EDITOR}edit/@spell/editor/editor-bar`, { timeout: 60_000 })

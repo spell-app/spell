@@ -11,10 +11,10 @@ import { CLI } from "spell/app/cli"
  * - What it converts:
  *   - a project:  each of its `.spell` files
  *   - a `.spell` file:  just that one
- *   - a `.spellml` file is left alone
+ *   - a `.spell` file is left alone
  * - Lists each file it wrote, then a count on stderr.
- *   - `--dry-run`:  writes nothing, and prints each `.spellml` file instead, under a `// <path>` line.
- * - An existing `.spellml` beside it is written over.
+ *   - `--dry-run`:  writes nothing, and prints each `.spell` file instead, under a `// <path>` line.
+ * - An existing `.spell` beside it is written over.
  * - NOTE:  the `.spell` file stays.  A project holding both declares everything twice,
  *   so move one of them out before it compiles again.
  * - NEVER writes inside `spaces/@spell/test/`:  test projects stay frozen.  `--dry-run` may read them.

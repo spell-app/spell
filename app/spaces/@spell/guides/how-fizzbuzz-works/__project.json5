@@ -3,7 +3,7 @@
   "description": "The FizzBuzz example, line by line:  a loop and a choice that send events, and a listener that prints them",
   "imports": [
     {
-      "path": "/HowFizzBuzzWorks.spellml",
+      "path": "/HowFizzBuzzWorks.spell",
       "active": true
     }
   ]

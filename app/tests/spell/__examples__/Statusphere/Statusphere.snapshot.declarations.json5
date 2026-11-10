@@ -53,7 +53,7 @@
     {
       "property": "who",
       "of": "Status",
-      "defined": "/Statusphere.spellml:425-693"
+      "defined": "/Statusphere.spell:425-693"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -66,7 +66,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Statusphere.spellml:709-900"
+      "defined": "/Statusphere.spell:709-900"
     },
     {
       "type": "StatusBoard",
@@ -91,18 +91,18 @@
           "appearance": "basic"
         }
       },
-      "defined": "/Statusphere.spellml:276-350"
+      "defined": "/Statusphere.spell:276-350"
     },
     {
       "type": "Statusphere",
       "superType": "App",
-      "defined": "/Statusphere.spellml:1013-2343"
+      "defined": "/Statusphere.spell:1013-2343"
     },
     {
       "property": "recent",
       "of": "Statusphere",
       "datatype": "list of statuses",
-      "defined": "/Statusphere.spellml:1028-1202"
+      "defined": "/Statusphere.spell:1028-1202"
     },
     {
       "syntax": "post {callArgs:expression} (of {thisArg:expression})?",
@@ -122,7 +122,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Statusphere.spellml:1218-1419"
+      "defined": "/Statusphere.spell:1218-1419"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -135,7 +135,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Statusphere.spellml:1433-2334"
+      "defined": "/Statusphere.spell:1433-2334"
     }
   ],
   "codeLines": [

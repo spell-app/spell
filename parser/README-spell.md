@@ -152,7 +152,7 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:
-  in [Solitaire's game](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml), one block of plain Spell holds its play, `to play a card`, a sentence,
+  in [Solitaire's game](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spell), one block of plain Spell holds its play, `to play a card`, a sentence,
   and what a pile does while a card is dragged over it, an outline under `a pile:`.
 - That the two compile the same is a test's job, [outline.test.ts](tests/spell/parserTests/outline.test.ts),
   not a hope.
@@ -263,7 +263,7 @@ every later line can use the alias, in this project and in any project that impo
 - The blank reads the word in the form you wrote it:  `(suit)` reads `spade`, `(suits)` reads `spades`.
   So the card at the top of this page answers to `the card is the queen of spade`;
   the Solitaire example's card wrote `(suits)`, and answers to `the queen of spades`.
-- An alias reaches every file of its project, e.g. from Solitaire's `Card.spellml` to its `Solitaire.spellml`:
+- An alias reaches every file of its project, e.g. from Solitaire's `Card.spell` to its `Solitaire.spell`:
   a tableau's `return the card is a king` reads an alias the card made, `is a (rank)`.
   - It travels with its project's declarations too, to a project that imports it.
 
@@ -312,8 +312,8 @@ Its first line is how you call it, with each blank's type in brackets:
     A markup line anywhere else is still an error.
 - An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
-  - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spellml` declares
-    ([Solitaire.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml)).
+  - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spell` declares
+    ([Solitaire.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spell)).
 - An action that pauses (`pause for 50 msec`) waits, and so does every action that calls it:
   each call waits for it to finish, with no word in the source, in JavaScript, TypeScript and Python alike.
   - One project-wide pass works this out, by name:  if one `play` waits, every `play` does.
@@ -530,14 +530,14 @@ export class Tableau extends Pile {
 - A tag's name is its app's, then its template's:  the tableau is `<solitaire-tableau>`.
 - `to draw it` returns markup, with Spell inside its braces:
   `<text color={its color}>{its picture}</text>`, the front of
-  [Solitaire's Card.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellml).
+  [Solitaire's Card.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell).
   - A click on the card is its own handler there, `<on click>`, whose body is `play it`.
 - The element's attributes are its card's properties, and its methods call its card's:
   the TypeScript target writes that element out as a class, `CardElement`
   ([README-targets](README-targets.md#the-card-line-by-line)).
 - `draw each card in the deck` draws each in turn:  `core.drawItems(deck)`.
 - A thing has ONE drawing, its `to draw it`:  a card face down checks its own direction there,
-  in the two sided view it's built on ([Solitaire's Card.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellml), below).
+  in the two sided view it's built on ([Solitaire's Card.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell), below).
   - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
     `- to draw it:` unquoted takes a method's body, which returns it.
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
@@ -758,12 +758,12 @@ One thing of a running program is named by its template, then its name or its pl
 A project, and each file in it, has an ADDRESS:  a group, then the project, then the file.
 
 ```text
-@spell/examples/Solitaire/Solitaire.spellml
+@spell/examples/Solitaire/Solitaire.spell
 
 @spell/examples                       the group:  its space, then its short name, examples
 @spell                                the space:  an org, or a person at one, as in owen@spell
 @spell/examples/Solitaire             the project's address:  its name is ONE part, with no dot
-/Solitaire.spellml                     the file in it:  every file's name has a dot
+/Solitaire.spell                     the file in it:  every file's name has a dot
 /assets/                              a folder in it:  a slash at the end
 ```
 
@@ -813,7 +813,7 @@ A page says what it must let people do before it's laid out, first in its own de
 ```
 
 - Nothing draws the stories:  they're the page's description, kept for good;  code Spell writes `<stories>`.
-- The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spellml).
+- The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spell).
 - **Not yet:**  Python runs no site, and a page has no state
   (old, new, mocked, built).
 
@@ -826,10 +826,10 @@ Here's Solitaire's project file, its files in the order they run:
 ```json5
 {
   "imports": [
-    { "path": "/Card.spellml", "active": true },
-    { "path": "/Deck.spellml", "active": true },
-    { "path": "/Pile.spellml", "active": true },
-    { "path": "/Solitaire.spellml", "active": true },
+    { "path": "/Card.spell", "active": true },
+    { "path": "/Deck.spell", "active": true },
+    { "path": "/Pile.spell", "active": true },
+    { "path": "/Solitaire.spell", "active": true },
     { "path": "/styles.css", "active": true }
   ]
 }
@@ -838,7 +838,7 @@ Here's Solitaire's project file, its files in the order they run:
 - `imports` lists the project's own files by path, and other projects by address, naming what it takes from them:
   `{ "path": "@spell/library/people", "active": true, "import": ["Person"] }`.
 - Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`, and `"packs"`:
-  the component packs a `.spellml` drawing names components from by their bare names, Spell UI's (`["spell-ui"]`)
+  the component packs a `.spell` drawing names components from by their bare names, Spell UI's (`["spell-ui"]`)
   unless it says more ([README-spellx.md](README-spellx.md)).
 - A file's human language is in its name, not the project file:  `Carta.es.spell` is Spanish, `Card.spell` English.
 - A project file can start as `{}`, as the card's did:  the first compile lists the folder's files in it,
@@ -1191,7 +1191,7 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- In a `.spellml` drawing the same loop is one tag:
+- In a `.spell` drawing the same loop is one tag:
   `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:

@@ -25,7 +25,7 @@ describe("eventsDeclared()", () => {
 
   /** The rows of the types named `classNames`, its own first, as `sources` declare them. */
   function eventsInSource(classNames: string[], sources: string[]) {
-    const files = sources.map((contents, index) => ({ path: `File${index}.spellml`, contents }))
+    const files = sources.map((contents, index) => ({ path: `File${index}.spell`, contents }))
     const { files: parsed } = parseSpellProject(files)
     const places = SP.SpellDeclarationPlaces.of(
       parsed.map((file, index) => ({ match: file.match, parseText: files[index]!.contents }))
@@ -121,7 +121,7 @@ describe("eventsDeclared()", () => {
     expect(markup).toMatch(/^<ui-property-group label="Card" columns="2">/)
     expect(markup).toContain('<ui-property name="suit" label="Suit" as="buttons" width="16" />')
     expect(markup).not.toContain("property-editor")
-    // Card.spellml holds none of its own any more
+    // Card.spell holds none of its own any more
     expect(propertyEditorInSource(["card"], [card], WORDS)).toBe("")
   })
 
@@ -145,7 +145,7 @@ describe("eventsDeclared()", () => {
     expect(propertyEditorInSource(["card"], [card], WORDS, [editors])).toBe('<ui-property name="rank" />')
     expect(propertyEditorInSource(["pile"], [pile], WORDS, [editors])).toBe('<ui-property name="cards" />')
     expect(propertyEditorInSource(["deck"], [], WORDS, [editors])).toBe("")
-    // Spanish's, in `Carta.editor.es.spellml`
+    // Spanish's, in `Carta.editor.es.spell`
     const carta = '<encanto-editor-de-propiedades "carta">\n\t<ui-property name="palo" />\n</>'
     expect(propertyEditorInSource(["carta"], [], WORDS, [carta])).toBe('<ui-property name="palo" />')
   })
@@ -177,7 +177,7 @@ a card is a thing where:
 describe("startingValues()", () => {
   /** The starting values of the type `classNames` names, as `sources` declare it. */
   function startingIn(classNames: string[], sources: string[]) {
-    const files = sources.map((contents, index) => ({ path: `File${index}.spellml`, contents }))
+    const files = sources.map((contents, index) => ({ path: `File${index}.spell`, contents }))
     const { files: parsed } = parseSpellProject(files)
     const places = SP.SpellDeclarationPlaces.of(
       parsed.map((file, index) => ({ match: file.match, parseText: files[index]!.contents }))

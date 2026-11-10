@@ -4,7 +4,7 @@ import { FILE_ICON, fileIconFor } from "spell/app/app/solid/chrome"
 
 describe("fileIconFor()", () => {
   test("a small icon per kind of file", () => {
-    expect(fileIconFor("Card.spellml")).toBe("hat wizard")
+    expect(fileIconFor("Card.spell")).toBe("hat wizard")
     expect(fileIconFor("Deck.spell")).toBe("hat wizard")
     expect(fileIconFor("styles.css")).toBe("css3 alternate")
     expect(fileIconFor("main.ts")).toBe("js")

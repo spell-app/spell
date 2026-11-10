@@ -334,7 +334,7 @@ export default function languageCommands(spell: Command): void {
         "Carta.es.spell => Carta.es.spellml -- never in the test projects"
     )
     .argument("[projects...]", PROJECTS_ARG)
-    .option("--dry-run", "write nothing:  print each .spellml file instead")
+    .option("--dry-run", "write nothing:  print each .spell file instead")
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("spellxConvert", projects, command))
 }

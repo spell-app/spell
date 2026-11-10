@@ -163,9 +163,9 @@ describe.skipIf(!SERVING)("code follows along", () => {
     await open(page, "Solitaire")
     await chooseOutput(page, "JavaScript")
     const place = await writtenPlace(page, "ui-text", "Moves")
-    expect(place.file).toBe("Solitaire.spellml")
+    expect(place.file).toBe("Solitaire.spell")
 
-    await showFile(page, "Solitaire.spellml")
+    await showFile(page, "Solitaire.spell")
     await page.waitForTimeout(1500)
     await clickCodeLine(page, place.line)
     const state = await following(page)
@@ -233,13 +233,13 @@ describe.skipIf(!SERVING)("code follows along", () => {
       const { editor } = window as unknown as DebugGlobals
       const code = editor.shownCodeEditor!
       const before = code.getScrollTop()
-      editor.followed = { path: "Deck.spellml", line: 1, from: "parts" }
+      editor.followed = { path: "Deck.spell", line: 1, from: "parts" }
       await new Promise((resolve) => setTimeout(resolve, 800))
       return { before, after: code.getScrollTop(), file: editor.file?.file, focused: code.hasTextFocus() }
     })
     expect(moved.after).toBe(moved.before)
     expect(moved.focused).toBe(true)
-    expect(moved.file).not.toBe("Deck.spellml")
+    expect(moved.file).not.toBe("Deck.spell")
   })
 
   test("in Spanish, too", { timeout: 150_000 }, async () => {

@@ -87,7 +87,7 @@
 }
 
 /****************
- * Turning over:  a card draws both its sides (Card.spellml), back to back, and turns over in 3D
+ * Turning over:  a card draws both its sides (Card.spell), back to back, and turns over in 3D
  * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
  *   Its back side is drawn already turned half round, so it faces you when the card does.
  * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.

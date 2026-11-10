@@ -4,7 +4,7 @@ import { SP } from "spell/parser/spell"
 /**
  * Which tag each bare component name in a spellx file became, as its last parse chose (epic `notebook` P6).
  * - e.g. `<card>` => `<solitaire-card>` (the project's own view), `<button>` => `<ui-button>` (a pack's)
- * - The ONE answer for every code spell view of a `.spellml` file:
+ * - The ONE answer for every code spell view of a `.spell` file:
  *   - the language server's (`LSP.SpellLanguageService.codeSpellOf()`)
  *   - the editor's code-spell tab
  *   - the Spell view of an example, on a page that draws its body
@@ -88,7 +88,7 @@ export class ComponentTags {
 
 /** What `ComponentTags.of()` reads:  a file's path (its language), its last parse and its scope (its packs). */
 export type ComponentTagsFile = {
-  /** its path, `/Counter.es.spellml`:  its language */
+  /** its path, `/Counter.es.spell`:  its language */
   path: string
   /** its last parse, if it's been parsed */
   match?: P.Match

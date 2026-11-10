@@ -9,13 +9,13 @@
     "path": "/Favourites.api.spell",
     "active": true
   }, {
-    "path": "/Pokemon.spellml",
+    "path": "/Pokemon.spell",
     "active": true
   }, {
-    "path": "/WhosThat.spellml",
+    "path": "/WhosThat.spell",
     "active": true
   }, {
-    "path": "/PokeSpell.spellml",
+    "path": "/PokeSpell.spell",
     "active": true
   }, {
     "path": "/styles.css",

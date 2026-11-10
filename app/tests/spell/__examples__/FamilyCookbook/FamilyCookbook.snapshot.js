@@ -54,7 +54,7 @@ export class Recipe extends Thing {
 /**
  * The next line keeps them in your own space on Spell's server:  sign in on any device, and they're there.
  * Until you sign in, they're kept in this browser, and the page says so;  once you do, they go up.
- * What's drawn and done with them is in FamilyCookbook.spellml.
+ * What's drawn and done with them is in FamilyCookbook.spell.
  */
 export class FamilyCookbook extends Place {}
 export const familyCookbook = core.place(new FamilyCookbook(), {
@@ -73,7 +73,7 @@ core.heading("Family Cookbook")
 // Where they're kept is in FamilyCookbook.api.spell, and only its first line knows.
 
 // Every notes box grows as you type
-core.useDefaults("/FamilyCookbook.spellml", {
+core.useDefaults("/FamilyCookbook.spell", {
   "ui-textarea": { grow: true }
 })
 
@@ -97,7 +97,7 @@ export class Cookbook extends App {
   set newRecipe(value) { this.setProp("newRecipe", value) }
 
   /** Newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spellml", start: 1231, end: 1437 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1231, end: 1437 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search))
     core.reverse(found)

@@ -72,7 +72,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spellml:402-776"
+      "defined": "/OrgEvents.spell:402-776"
     },
     {
       "type": "EventStage",
@@ -115,7 +115,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spellml:835-1003"
+      "defined": "/OrgEvents.spell:835-1003"
     },
     {
       "type": "OrgEvent",
@@ -133,14 +133,14 @@
     {
       "type": "EventsPage",
       "superType": "App",
-      "defined": "/OrgEvents.spellml:1125-3114"
+      "defined": "/OrgEvents.spell:1125-3114"
     },
     {
       "property": "new_event",
       "asWritten": "new event",
       "of": "EventsPage",
       "datatype": "Event",
-      "defined": "/OrgEvents.spellml:1140-1264"
+      "defined": "/OrgEvents.spell:1140-1264"
     },
     {
       "syntax": "propose the new event (of {thisArg:expression})?",
@@ -154,7 +154,7 @@
       "kind": "method",
       "name": "propose the new event",
       "returns": "nothing",
-      "defined": "/OrgEvents.spellml:1270-1371"
+      "defined": "/OrgEvents.spell:1270-1371"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -167,7 +167,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spellml:1385-3105"
+      "defined": "/OrgEvents.spell:1385-3105"
     }
   ],
   "codeLines": [

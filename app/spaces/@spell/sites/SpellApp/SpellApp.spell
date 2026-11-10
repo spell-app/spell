@@ -23,7 +23,7 @@
 			<button appearance="basic" onClick={show the new project dialog}>New Project</button>
 			<link link={"/edit/@spell/examples/Solitaire"}>The code editor</link>
 			<link link={"/run/@spell/examples/Solitaire"}>A running app</link>
-			<link link={"/edit/@spell/guides/SpellUI/Accordion/Usage.spellml"}>A notebook</link>
+			<link link={"/edit/@spell/guides/SpellUI/Accordion/Usage.spell"}>A notebook</link>
 			<link link={"/edit/@spell/guides/a-first-spell"}>A guide</link>
 			<link link={"/site/@spell/examples/StarWarsSite"}>The site editor</link>
 			<link link={"/apps/@spell/examples/TaskList"}>A hosted app</link>

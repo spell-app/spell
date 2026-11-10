@@ -4,7 +4,7 @@ import { SX } from "spell/parser/spellx"
 import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan } from "spell/app/lsp/SourceEdits"
 
 /**
- * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16):
+ * A `.spell` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16):
  * an example's code, the lock.
  * - A notebook is any page with the `notebook` flag:  the editor shows it in place, editable.
  * - Moving, adding and deleting cells is the editor's drag and drop (`PartEdits`, epic `notebook` P5):
@@ -29,7 +29,7 @@ import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan }
  */
 export class NotebookPageCells {
   /**
-   * The notebook in `text`, a `.spellml` file at `path` (its language from its name):  its tag and its cells.
+   * The notebook in `text`, a `.spell` file at `path` (its language from its name):  its tag and its cells.
    * - `undefined` when the file holds no notebook.
    * - NEVER throws.
    */
@@ -54,7 +54,7 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a `.spellml` file, hold a notebook?  Read from its chunk tree, kept until its text changes.
+   * Does `file`, a `.spell` file, hold a notebook?  Read from its chunk tree, kept until its text changes.
    * - Its text, not its parse:  a project compiled from the cache parses nothing (`SP.CompileCache`).
    * - NEVER throws.
    */
@@ -68,7 +68,7 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a `.spellml` file, hold a LOCKED page, `<spell-page "x" locked>`, a notebook or not?
+   * Does `file`, a `.spell` file, hold a LOCKED page, `<spell-page "x" locked>`, a notebook or not?
    * - What the editor asks before keeping or saving a file (`editor.isLocked()`, epic `notebook` P3).
    * - Read and kept as `holdsNotebook()` is.
    */
@@ -108,12 +108,12 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a `.spellml` file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
+   * Does `file`, a `.spell` file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
    * - What the palette asks before offering a page's own row, a new view (epic `notebook` P5).
    * - Read and kept as `holdsNotebook()` is.
    */
   static holdsDrawnPage(file: SP.AnySpellFile): boolean {
-    return file.path.endsWith(".spellml") && NotebookPageCells.pagesIn(file).drawsBody
+    return file.path.endsWith(".spell") && NotebookPageCells.pagesIn(file).drawsBody
   }
 
   /**
@@ -444,7 +444,7 @@ const LABEL_WORDS: ReadonlySet<string> = new Set(["label", "etiqueta"])
 /** The flag that makes a page a notebook, by its English name:  `<spell-page "x" notebook>`. */
 const NOTEBOOK_FLAG = "notebook"
 
-/** What each `.spellml` file's pages say, for the text it had:  `pagesIn()`. */
+/** What each `.spell` file's pages say, for the text it had:  `pagesIn()`. */
 const PAGES_READ = new WeakMap<SP.AnySpellFile, PagesRead>()
 
 /**

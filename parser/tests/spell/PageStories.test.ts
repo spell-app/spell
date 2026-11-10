@@ -62,7 +62,7 @@ describe("a page's stories", () => {
         '\t<property "film" type="text"/>',
         "</>"
       ],
-      "/Galaxy.spellml"
+      "/Galaxy.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain(
@@ -75,7 +75,7 @@ describe("a page's stories", () => {
   test("Spanish spellx:  `<encanto-historias>`", () => {
     const { code, errors } = compiled(
       ['<encanto-página "página de películas">', "\t<encanto-historias>", "\t\t- [ ] ver las películas", "\t</>", "</>"],
-      "/Galaxia.es.spellml"
+      "/Galaxia.es.spell"
     )
     expect(errors).toEqual([])
     expect(code).toContain('static stories = "- [ ] ver las películas"')

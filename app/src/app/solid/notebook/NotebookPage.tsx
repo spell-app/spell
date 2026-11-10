@@ -23,7 +23,7 @@ import "./NotebookPage.css"
 /****************
  * ### `<NotebookPage>`
  * The docs frame round a NOTEBOOK page the running program draws, in the app area (epic `notebook` P3, Q4):
- * a `.spellml` page with the `notebook` flag, `<spell-page "x" notebook>` or its short spelling `<spell-notebook "x">`.
+ * a `.spell` page with the `notebook` flag, `<spell-page "x" notebook>` or its short spelling `<spell-notebook "x">`.
  * - The PROGRAM draws the page, in the app's mount point (`program`), as any app draws:
  *   its title, its sections, sticky and foldable, and its examples, `<spell-example>`.
  *   - So drag and drop, the Inspector and the palette work on it as on any app,

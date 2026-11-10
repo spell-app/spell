@@ -58,7 +58,7 @@ describe("a property's change", () => {
   })
 
   test("in tags:  one line, or its code between, closed by </>, </when> or its words", () => {
-    const long = compile("/test.spellml", TAGS, "\t<when its score changes>\n\t\tprint its score\n\t</>")
+    const long = compile("/test.spell", TAGS, "\t<when its score changes>\n\t\tprint its score\n\t</>")
     expect(long).toContain("onScoreChange(event) {")
     for (const form of [
       "\t<on score change print its score/>",
@@ -66,7 +66,7 @@ describe("a property's change", () => {
       "\t<when score changes>print its score</when>",
       "\t<on its score change>\n\t\tprint its score\n\t</on its score change>"
     ]) {
-      expect(compile("/test.spellml", TAGS, form), form).toBe(long)
+      expect(compile("/test.spell", TAGS, form), form).toBe(long)
     }
   })
 

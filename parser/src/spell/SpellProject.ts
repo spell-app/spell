@@ -356,7 +356,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Parse our active spell files from scratch into `scope`, in order, and hand each file its result.
    * - Each by its own language's rules:  a file in another language than our scope's parser reads
-   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a spellx file, `Card.spellml`.
+   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a spellx file, `Card.spell`.
    * - Other files, e.g. `.css`, parse themselves.
    */
   parseImports(): void {
@@ -1195,7 +1195,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return first instanceof P.ASTCoreMethodInvocation && first.methodName === "test"
   }
 
-  /** Which of `files` is named for the project, e.g. `Solitaire.spellml` in `Solitaire`:  `undefined` if none is. */
+  /** Which of `files` is named for the project, e.g. `Solitaire.spell` in `Solitaire`:  `undefined` if none is. */
   private mainFileIn(files: readonly { path: string }[]): number | undefined {
     const name = this.projectName?.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
     const at = files.findIndex(({ path }) => {
@@ -1616,7 +1616,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       throw new TypeError(`SpellProject.getFileForPath('${fullPath}'): path is not a file path.`)
     }
     const name = location.file ?? ""
-    // a property editors file, `Card.editor.spellml` (epic `editor` P25):  text the Inspector reads, never compiled
+    // a property editors file, `Card.editor.spell` (epic `editor` P25):  text the Inspector reads, never compiled
     if (SP.isPropertyEditorsName(name)) return new SP.SpellJSFile(fullPath)
     const suffix = Object.keys(SpellProject.extensionMap).find((suffix) => name.endsWith(suffix))
     const Constructor = suffix ? SpellProject.extensionMap[suffix] : SP.SpellFile

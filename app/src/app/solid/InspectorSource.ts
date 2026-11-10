@@ -10,7 +10,7 @@ import { endOfTag, SourceEdits } from "spell/app/lsp/SourceEdits"
  * - A type's events, abilities and actions:  where the compiler says each is declared (`SP.SpellDeclarationPlace`,
  *   epic `editor` P23), so every one is found, in every language.
  * - A type's property editor, and where a new event goes:  by its words, in the type's tag or its outline header;
- *   a property editor may be in a file of its own, `Card.editor.spellml` (epic `data` P31).
+ *   a property editor may be in a file of its own, `Card.editor.spell` (epic `data` P31).
  */
 
 /**
@@ -351,7 +351,7 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
  * The property editor a type was written with, its markup as written
  * (epic `debut` I86;  its own file, epic `editor` P25):
  * - first, in a property editors file (`editors`):
- *   `<spell-property-editor "card">`'s lines, in `Card.editor.spellml` or the project's `Solitaire.editors.spellml`
+ *   `<spell-property-editor "card">`'s lines, in `Card.editor.spell` or the project's `Solitaire.editors.spell`
  * - else inline, in the type's spellml:  `<spell-property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`
  * - `""` if it has none.
  * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):

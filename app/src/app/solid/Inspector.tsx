@@ -896,7 +896,7 @@ export class Inspector {
    * The property editor `thing`'s type was written with, its markup (epic `debut` I86):
    * its `<spell-property-editor>` (or the old short `<property-editor>`), else the one of a type it inherits;
    * `""` if none, and the Inspector draws its bands.
-   * - Its own file first, `Card.editor.spellml` or `Solitaire.editors.spellml` (epic `editor` P25),
+   * - Its own file first, `Card.editor.spell` or `Solitaire.editors.spell` (epic `editor` P25),
    *   then inline in the type's spellml.
    * - Read from the program's files as they are now, so an edit shows once the app runs again.
    * - A built-in template's property, named in the program's language (`name="dirección"`):

@@ -18,7 +18,7 @@ inside the element's own shadow root, with a toolbar holding Restart and Debug.
 - It never loads the editor.
   Monaco, the code editor inside VS Code, is a 4.2 MB file of its own, and only a `<spell-editor>` asks for it.
 - The JavaScript comes from the page server, which compiles
-  [Calculator.spellml](spaces/@spell/examples/calculator/Calculator.spellml) when it starts, or the first time it's asked.
+  [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell) when it starts, or the first time it's asked.
 
 The same code runs that calculator in three places:  in this element, in the editor in your browser,
 and in VS Code's Run Project panel.
@@ -134,7 +134,7 @@ Where it stops:
 | `run(compiled)` | runs code pushed to it, a `SpellCompiled`:  `{ projectId, compiled }`, and the scope pack, declarations and words if you have them.  Pushed code wins over `project` and `src`, and works before the element joins the page |
 | `restart()` | runs it again afresh:  the toolbar's Restart |
 | `pushed` | the property holding the code pushed to it last;  dropped when `project`, `src`, `scopes`, `name` or `editor` changes |
-| `spell-open` | the event a Type Explorer link sends:  `detail.href` is the source it points at, `spell:/@spell/examples/Solitaire/Solitaire.spellml#L12` |
+| `spell-open` | the event a Type Explorer link sends:  `detail.href` is the source it points at, `spell:/@spell/examples/Solitaire/Solitaire.spell#L12` |
 
 | `<spell-editor>` | What it does |
 | --- | --- |
@@ -445,9 +445,9 @@ A compile, in the order the Program panel's Output tab logs it:
 3. `executeCompiledApp()` runs it on the runtime, carrying things over when it's the project it ran last.
 4. The console ends "Example executed without errors.", or with the error.
 
-### A `.spellml` file
+### A `.spell` file
 
-A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
+A `.spell` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
 - A template lives in ONE file, `.spell` or `.spellml`, never both:  its other form is a read-only view.
   - The Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
@@ -462,16 +462,16 @@ you open and change them in the editor, as any project (epic `editor` P22).
 The group is listed on your own machine only, never in the public preview.
 
 ```text
-app/spaces/@spell/editor/file-tabs/FileTabs.spellml          the tabs:  what each shows and how it looks, in Spell
+app/spaces/@spell/editor/file-tabs/FileTabs.spell          the tabs:  what each shows and how it looks, in Spell
 app/src/app/solid/FileTabs.tsx                               the editor's side:  which files there are, what showing one does
-app/spaces/@spell/editor/editor-bar/EditorBar.spellml        the top bar:  its three sections, in Spell
-app/spaces/@spell/editor/editor-layout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
+app/spaces/@spell/editor/editor-bar/EditorBar.spell        the top bar:  its three sections, in Spell
+app/spaces/@spell/editor/editor-layout/EditorLayout.spell  the panes:  code, Program panel, app, Inspector, in Spell
 app/src/app/pages/SpellEditor.tsx                            what's in each section and pane, each a thing that draws itself
-app/spaces/@spell/editor/app-menus/AppMenus.spellml          the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
+app/spaces/@spell/editor/app-menus/AppMenus.spell          the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
 app/src/app/solid/MenuBar.tsx                                the editor's side:  what each item does, and titles that follow its state (Undo's)
 ```
 
-- A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
+- A `.spell` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
 - It runs on the layout's own copy of the runtime, so a program's run never touches it.
   A program's things stay the only ones in the Views card, and its console stays its own.
 - It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
@@ -495,8 +495,8 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
   - A type may lay its card out itself, in spellml:  Solitaire's card does, in
-    [Card.editor.spellml](spaces/@spell/examples/Solitaire/Card.editor.spellml), a `<spell-property-editor "card">`.
-    - Its own file, `<Type>.editor.spellml`, or one for the project, `<Project>.editors.spellml`:
+    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), a `<spell-property-editor "card">`.
+    - Its own file, `<Type>.editor.spell`, or one for the project, `<Project>.editors.spell`:
       never compiled, read by the Inspector (`propertyEditorInSource()`).
     - Or inline, a `<spell-property-editor>` in the type's own tag.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
@@ -543,7 +543,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - `These 3 | All cards` says what a change applies to;  of several types, there's no "All".
   - What's selected is found again by where it's written, after a recompile, a reload or a move.
 - Hold the mouse over what you selected to see where it is written:
-  `Written in Deck.spellml, line 8:  52 of these come from this one place`.
+  `Written in Deck.spell, line 8:  52 of these come from this one place`.
 - The ✕ in the selected part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
@@ -698,7 +698,7 @@ The code column:
 
 | Address | Page |
 | --- | --- |
-| `/edit/<address>` | the editor, on a project or one file:  `/edit/@spell/examples/Solitaire/Solitaire.spellml` |
+| `/edit/<address>` | the editor, on a project or one file:  `/edit/@spell/examples/Solitaire/Solitaire.spell` |
 | `/run/<address>` | Run:  the app alone, full size, under its header:  `/run/@spell/examples/calculator` |
 | anything else | the chooser:  your projects, the examples and the guides side by side, each with a Create button;  in dev, the frozen test projects too |
 
@@ -758,7 +758,7 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   and the rest, from [the language service](README-lsp.md#what-it-answers-request-by-request),
   called in the page itself.
   - That's why the language service must stay safe to run in a browser.
-- Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spellml`,
+- Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`,
   a view of its file:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.
 - The editors on it are Solid components, `MonacoEditor` and `FileEditor`.

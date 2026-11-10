@@ -31,10 +31,10 @@ describe("diskFetch", () => {
     await project.load(undefined)
     const spellFiles = project.activeImports.filter((file) => file instanceof SP.SpellFile)
     expect(spellFiles.map((file) => file.filePath)).toEqual([
-      "/Card.spellml",
-      "/Deck.spellml",
-      "/Pile.spellml",
-      "/Solitaire.spellml"
+      "/Card.spell",
+      "/Deck.spell",
+      "/Pile.spell",
+      "/Solitaire.spell"
     ])
 
     await project.parse()
@@ -55,10 +55,10 @@ describe("diskFetch", () => {
   })
 
   test("it answers a file's URL, split by its group and project:  `/spaces/<project>/<file>`", async () => {
-    const url = SP.SpellUrls.fileUrl(`${solitaire}/Solitaire.spellml`)
-    expect(url).toBe("/spaces/@spell/examples/Solitaire/Solitaire.spellml")
+    const url = SP.SpellUrls.fileUrl(`${solitaire}/Solitaire.spell`)
+    expect(url).toBe("/spaces/@spell/examples/Solitaire/Solitaire.spell")
     expect(await diskFetch({ url })).toBe(
-      readFileSync(fixtureFolder("@spell/examples/Solitaire", "Solitaire.spellml"), "utf8")
+      readFileSync(fixtureFolder("@spell/examples/Solitaire", "Solitaire.spell"), "utf8")
     )
     expect(await diskFetch({ url: SP.SpellUrls.indexUrl(solitaire) })).toHaveProperty("imports")
     // each project with its title and description, from its project file
@@ -79,8 +79,8 @@ describe("diskFetch", () => {
 
   describe("locationForDiskPath", () => {
     test("a file under a known root's folder maps onto that root", () => {
-      expect(locationForDiskPath(fixtureFolder("@spell/examples/Solitaire", "Solitaire.spellml"))?.path).toBe(
-        `${solitaire}/Solitaire.spellml`
+      expect(locationForDiskPath(fixtureFolder("@spell/examples/Solitaire", "Solitaire.spell"))?.path).toBe(
+        `${solitaire}/Solitaire.spell`
       )
     })
 

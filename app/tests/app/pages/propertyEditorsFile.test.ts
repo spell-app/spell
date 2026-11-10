@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { EDITOR, SERVING } from "./runningEditor"
 
 /**
- * A type's property editor in a file of its own (epic `editor` P25):  Solitaire's `Card.editor.spellml`,
+ * A type's property editor in a file of its own (epic `editor` P25):  Solitaire's `Card.editor.spell`,
  * opened in the editor and tweaked, and the Inspector on a card shows the tweak.
  * - Owen:  "if I wanted to edit the property-editor, I could open that file in the spell editor and just tweak it".
  * - NOTHING reaches the disk:  every save is answered here, so the built-in example can't change.
@@ -64,7 +64,7 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
         : route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
     )
     page = await context.newPage()
-    await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.editor.spellml`, { timeout: 60_000 })
+    await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.editor.spell`, { timeout: 60_000 })
     await page.waitForSelector(".monaco-editor .view-line", { timeout: 60_000 })
     await page.waitForTimeout(4000)
     await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
@@ -75,15 +75,15 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
     await browser?.close()
   })
 
-  test("the Inspector on a card reads Card.editor.spellml", async () => {
+  test("the Inspector on a card reads Card.editor.spell", async () => {
     await selectACard(page)
     expect(await shownLabels(page)).toContain("Rank")
   }, 60_000)
 
   test("a label tweaked in the file shows in the Inspector, once saved", async () => {
-    // selecting the card followed it to Card.spellml:  back to its editor's file
+    // selecting the card followed it to Card.spell:  back to its editor's file
     await page.evaluate(() =>
-      (window as unknown as DebugGlobals).editor.showEditor("@spell/examples/Solitaire/Card.editor.spellml")
+      (window as unknown as DebugGlobals).editor.showEditor("@spell/examples/Solitaire/Card.editor.spell")
     )
     await page.waitForFunction(
       () => (window as unknown as DebugGlobals).editor.shownCodeEditor?.getValue().includes("property editor"),

@@ -14,7 +14,7 @@
       ],
       "kind": "function",
       "returns": "nothing",
-      "defined": "/FizzBuzz.spellml:451-827"
+      "defined": "/FizzBuzz.spell:451-827"
     }
   ],
   "codeLines": [

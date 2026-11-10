@@ -18,7 +18,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spellml:325-3501"
+      "defined": "/Card.spell:325-3501"
     },
     {
       "property": "rank",
@@ -41,7 +41,7 @@
         "queen",
         "king"
       ],
-      "defined": "/Card.spellml:448-526"
+      "defined": "/Card.spell:448-526"
     },
     {
       "syntax": "{operator:is_or_is_not_a} (expression:ace|aces|2|3|4|5|6|7|8|9|10|jack|jacks|queen|queens|king|kings)",
@@ -67,14 +67,14 @@
           "king"
         ]
       },
-      "defined": "/Card.spellml:448-526"
+      "defined": "/Card.spell:448-526"
     },
     {
       "property": "value",
       "of": "Card",
       "group": "rank",
       "datatype": "number",
-      "defined": "/Card.spellml:530-572"
+      "defined": "/Card.spell:530-572"
     },
     {
       "syntax": "{operator:is_or_is_not_a} face card",
@@ -85,7 +85,7 @@
       "kind": "method",
       "name": "\"is a face card\"",
       "returns": "choice",
-      "defined": "/Card.spellml:577-635"
+      "defined": "/Card.spell:577-635"
     },
     {
       "syntax": "{operator:is_or_is_not_a} number card",
@@ -96,7 +96,7 @@
       "kind": "method",
       "name": "\"is a number card\"",
       "returns": "choice",
-      "defined": "/Card.spellml:640-690"
+      "defined": "/Card.spell:640-690"
     },
     {
       "property": "suit",
@@ -109,7 +109,7 @@
         "hearts",
         "spades"
       ],
-      "defined": "/Card.spellml:713-792"
+      "defined": "/Card.spell:713-792"
     },
     {
       "syntax": "{operator:is_or_is_not_a} (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
@@ -126,7 +126,7 @@
           "spades"
         ]
       },
-      "defined": "/Card.spellml:713-792"
+      "defined": "/Card.spell:713-792"
     },
     {
       "property": "color",
@@ -137,14 +137,14 @@
         "red",
         "black"
       ],
-      "defined": "/Card.spellml:796-894"
+      "defined": "/Card.spell:796-894"
     },
     {
       "property": "symbol",
       "of": "Card",
       "group": "suit",
       "datatype": "text",
-      "defined": "/Card.spellml:901-1006"
+      "defined": "/Card.spell:901-1006"
     },
     {
       "property": "name",
@@ -152,7 +152,7 @@
       "group": "names",
       "groupDescription": "What a person, a test or the console calls it",
       "datatype": "text",
-      "defined": "/Card.spellml:1092-1137"
+      "defined": "/Card.spell:1092-1137"
     },
     {
       "syntax": "{operator:is_or_is_not} {definite_article} (expression:ace|aces|2|3|4|5|6|7|8|9|10|jack|jacks|queen|queens|king|kings) of (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
@@ -185,14 +185,14 @@
           "spades"
         ]
       },
-      "defined": "/Card.spellml:1142-1174"
+      "defined": "/Card.spell:1142-1174"
     },
     {
       "property": "state",
       "of": "Card",
       "group": "names",
       "datatype": "text",
-      "defined": "/Card.spellml:1178-1434"
+      "defined": "/Card.spell:1178-1434"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -207,21 +207,21 @@
       "groupDescription": "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Card.spellml:1591-1756"
+      "defined": "/Card.spell:1591-1756"
     },
     {
       "property": "picture",
       "of": "Card",
       "group": "drawing",
       "datatype": "text",
-      "defined": "/Card.spellml:1763-2356"
+      "defined": "/Card.spell:1763-2356"
     },
     {
       "property": "lifted",
       "of": "Card",
       "group": "drawing",
       "datatype": "choice",
-      "defined": "/Card.spellml:2363-2489"
+      "defined": "/Card.spell:2363-2489"
     },
     {
       "syntax": "count the points for {thisArg:expression} on {callArgs:expression}",
@@ -242,7 +242,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spellml:8070-8215"
+      "defined": "/Solitaire.spell:8070-8215"
     },
     {
       "syntax": "test card setup",
@@ -251,13 +251,13 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spellml:2614-3496"
+      "defined": "/Card.spell:2614-3496"
     },
     {
       "type": "Deck",
       "superType": "List",
       "itemType": "Card",
-      "defined": "/Deck.spellml:63-911"
+      "defined": "/Deck.spell:63-911"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -271,13 +271,13 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/Deck.spellml:110-355"
+      "defined": "/Deck.spell:110-355"
     },
     {
       "property": "state",
       "of": "Deck",
       "datatype": "text",
-      "defined": "/Deck.spellml:362-568"
+      "defined": "/Deck.spell:362-568"
     },
     {
       "syntax": "test a new deck",
@@ -286,19 +286,19 @@
       "alias": "statement",
       "kind": "function",
       "name": "a new deck",
-      "defined": "/Deck.spellml:576-906"
+      "defined": "/Deck.spell:576-906"
     },
     {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spellml:327-1876"
+      "defined": "/Pile.spell:327-1876"
     },
     {
       "property": "name",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spellml:392-462"
+      "defined": "/Pile.spell:392-462"
     },
     {
       "property": "layout",
@@ -310,24 +310,24 @@
         "horizontal",
         "fanned"
       ],
-      "defined": "/Pile.spellml:467-533"
+      "defined": "/Pile.spell:467-533"
     },
     {
       "property": "color",
       "of": "Pile",
-      "defined": "/Pile.spellml:668-808"
+      "defined": "/Pile.spell:668-808"
     },
     {
       "property": "value",
       "of": "Pile",
       "datatype": "number",
-      "defined": "/Pile.spellml:815-921"
+      "defined": "/Pile.spell:815-921"
     },
     {
       "property": "state",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spellml:928-1155"
+      "defined": "/Pile.spell:928-1155"
     },
     {
       "syntax": "test piles",
@@ -336,7 +336,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spellml:1163-1871"
+      "defined": "/Pile.spell:1163-1871"
     },
     {
       "property": "pile",
@@ -344,82 +344,82 @@
       "group": "A pile of cards",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spellml:1978-2004"
+      "defined": "/Pile.spell:1978-2004"
     },
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9249-9761"
+      "defined": "/Solitaire.spell:9249-9761"
     },
     {
       "property": "layout",
       "of": "StockPile",
-      "defined": "/Solitaire.spellml:9408-9434"
+      "defined": "/Solitaire.spell:9408-9434"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9767-10038"
+      "defined": "/Solitaire.spell:9767-10038"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
-      "defined": "/Solitaire.spellml:9876-9902"
+      "defined": "/Solitaire.spell:9876-9902"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:10044-10694"
+      "defined": "/Solitaire.spell:10044-10694"
     },
     {
       "property": "layout",
       "of": "Foundation",
-      "defined": "/Solitaire.spellml:10159-10185"
+      "defined": "/Solitaire.spell:10159-10185"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spellml:10190-10218"
+      "defined": "/Solitaire.spell:10190-10218"
     },
     {
       "type": "Tableau",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:10700-12694"
+      "defined": "/Solitaire.spell:10700-12694"
     },
     {
       "property": "layout",
       "of": "Tableau",
-      "defined": "/Solitaire.spellml:10815-10842"
+      "defined": "/Solitaire.spell:10815-10842"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spellml:306-6653"
+      "defined": "/Solitaire.spell:306-6653"
     },
     {
       "property": "score",
       "of": "Solitaire",
       "datatype": "number",
-      "defined": "/Solitaire.spellml:319-345"
+      "defined": "/Solitaire.spell:319-345"
     },
     {
       "property": "moves",
       "of": "Solitaire",
       "datatype": "number",
-      "defined": "/Solitaire.spellml:350-454"
+      "defined": "/Solitaire.spell:350-454"
     },
     {
       "property": "hint",
       "of": "Solitaire",
       "datatype": "text",
-      "defined": "/Solitaire.spellml:459-575"
+      "defined": "/Solitaire.spell:459-575"
     },
     {
       "property": "deck",
       "of": "Solitaire",
       "datatype": "Deck",
-      "defined": "/Solitaire.spellml:1045-1072"
+      "defined": "/Solitaire.spell:1045-1072"
     },
     {
       "property": "stock",
@@ -427,91 +427,91 @@
       "group": "piles",
       "groupDescription": "One of each, made with the solitaire",
       "datatype": "StockPile",
-      "defined": "/Solitaire.spellml:1147-1201"
+      "defined": "/Solitaire.spell:1147-1201"
     },
     {
       "property": "discards",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "DiscardPile",
-      "defined": "/Solitaire.spellml:1206-1268"
+      "defined": "/Solitaire.spell:1206-1268"
     },
     {
       "property": "clubs",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spellml:1273-1341"
+      "defined": "/Solitaire.spell:1273-1341"
     },
     {
       "property": "diamonds",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spellml:1346-1423"
+      "defined": "/Solitaire.spell:1346-1423"
     },
     {
       "property": "hearts",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spellml:1428-1499"
+      "defined": "/Solitaire.spell:1428-1499"
     },
     {
       "property": "spades",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spellml:1504-1575"
+      "defined": "/Solitaire.spell:1504-1575"
     },
     {
       "property": "T1",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1580-1625"
+      "defined": "/Solitaire.spell:1580-1625"
     },
     {
       "property": "T2",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1630-1675"
+      "defined": "/Solitaire.spell:1630-1675"
     },
     {
       "property": "T3",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1680-1725"
+      "defined": "/Solitaire.spell:1680-1725"
     },
     {
       "property": "T4",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1730-1775"
+      "defined": "/Solitaire.spell:1730-1775"
     },
     {
       "property": "T5",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1780-1825"
+      "defined": "/Solitaire.spell:1780-1825"
     },
     {
       "property": "T6",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1830-1875"
+      "defined": "/Solitaire.spell:1830-1875"
     },
     {
       "property": "T7",
       "of": "Solitaire",
       "group": "piles",
       "datatype": "Tableau",
-      "defined": "/Solitaire.spellml:1880-1925"
+      "defined": "/Solitaire.spell:1880-1925"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -526,7 +526,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/Solitaire.spellml:1930-2048"
+      "defined": "/Solitaire.spell:1930-2048"
     },
     {
       "syntax": "reset the stock (of {thisArg:expression})?",
@@ -542,7 +542,7 @@
       "kind": "method",
       "name": "reset the stock",
       "returns": "nothing",
-      "defined": "/Solitaire.spellml:2131-2367"
+      "defined": "/Solitaire.spell:2131-2367"
     },
     {
       "syntax": "play from the stock (of {thisArg:expression})?",
@@ -558,7 +558,7 @@
       "name": "play from the stock",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spellml:2374-2738"
+      "defined": "/Solitaire.spell:2374-2738"
     },
     {
       "syntax": "deal the cards (of {thisArg:expression})?",
@@ -574,7 +574,7 @@
       "name": "deal the cards",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spellml:2916-3573"
+      "defined": "/Solitaire.spell:2916-3573"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -588,7 +588,7 @@
       "group": "game",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Solitaire.spellml:5786-6648"
+      "defined": "/Solitaire.spell:5786-6648"
     },
     {
       "syntax": "turn a stock card (of {thisArg:expression})?",
@@ -604,7 +604,7 @@
       "name": "turn a stock card",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spellml:2745-2909"
+      "defined": "/Solitaire.spell:2745-2909"
     },
     {
       "syntax": "start a new game (of {thisArg:expression})?",
@@ -622,7 +622,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Restart",
-      "defined": "/Solitaire.spellml:3728-3863"
+      "defined": "/Solitaire.spell:3728-3863"
     },
     {
       "syntax": "auto play (of {thisArg:expression})?",
@@ -639,7 +639,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Auto play",
-      "defined": "/Solitaire.spellml:3870-4989"
+      "defined": "/Solitaire.spell:3870-4989"
     },
     {
       "syntax": "cheat {thisArg:expression}?",
@@ -656,7 +656,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Cheat",
-      "defined": "/Solitaire.spellml:4996-5640"
+      "defined": "/Solitaire.spell:4996-5640"
     },
     {
       "syntax": "play {thisArg:expression}",
@@ -671,7 +671,7 @@
       "kind": "method",
       "name": "play a card",
       "waits": true,
-      "defined": "/Solitaire.spellml:6937-7206"
+      "defined": "/Solitaire.spell:6937-7206"
     },
     {
       "syntax": "put {thisArg:expression} on {callArgs:expression}",
@@ -693,7 +693,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitaire.spellml:7409-7986"
+      "defined": "/Solitaire.spell:7409-7986"
     },
     {
       "syntax": "test the moves",
@@ -702,7 +702,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spellml:11183-12689"
+      "defined": "/Solitaire.spell:11183-12689"
     }
   ],
   "codeLines": [

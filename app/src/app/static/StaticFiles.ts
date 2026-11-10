@@ -355,7 +355,7 @@ export const PROJECTS_STORE = "spell-static-projects"
 type OwnProject = {
   /** Its name for people, when its folder's name can't say it. */
   title?: string
-  /** Its files, in order, each `/MyApp.spellml`. */
+  /** Its files, in order, each `/MyApp.spell`. */
   files: string[]
   /** When it was made, ms. */
   created: number

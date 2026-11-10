@@ -29,8 +29,8 @@ describe("ui_defaults", () => {
     // a spellml file reads a tag of any letters, `<botón>`;  code spell's markup, ASCII ones
     for (const [path, tag] of [
       ["/Tema.es.spell", "es-boton"],
-      ["/Tema.es.spellml", "botón"],
-      ["/Tema.es.spellml", "ui-botón"]
+      ["/Tema.es.spell", "botón"],
+      ["/Tema.es.spell", "ui-botón"]
     ]) {
       const { code, errors } = compiled(
         path!,
@@ -43,11 +43,11 @@ describe("ui_defaults", () => {
 
   test("a block at a spellml file's top level is markup, as in code spell", () => {
     const { code, errors } = compiled(
-      "/Theme.spellml",
+      "/Theme.spell",
       ["<ui-defaults>", '\t<ui-button appearance="pill"/>', "</ui-defaults>"].join("\n")
     )
     expect(errors).toEqual([])
-    expect(code).toContain('core.useDefaults("/Theme.spellml"')
+    expect(code).toContain('core.useDefaults("/Theme.spell"')
   })
 
   test("an unknown widget, attribute or value, or a content attribute, is an error naming what it takes", () => {

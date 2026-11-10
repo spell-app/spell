@@ -11,7 +11,7 @@ export const STARTER_PROGRAMS = {
   /** Nothing in it yet:  what's added goes in its container. */
   blank: {
     name: "my-app",
-    fileName: "MyApp.spellml",
+    fileName: "MyApp.spell",
     contents: (title: string) => `# ${title}
 
 <spell-app "my app">
@@ -25,7 +25,7 @@ export const STARTER_PROGRAMS = {
   /** A button that counts its clicks. */
   counter: {
     name: "counter",
-    fileName: "Counter.spellml",
+    fileName: "Counter.spell",
     contents: (title: string) => `# ${title}
 A button that counts its clicks.
 
@@ -44,7 +44,7 @@ A button that counts its clicks.
   /** A little game:  roll a die, and see how far you get. */
   dice: {
     name: "roll-a-six",
-    fileName: "RollASix.spellml",
+    fileName: "RollASix.spell",
     contents: (title: string) => `# ${title}
 A little game:  how many rolls does it take to roll a six?
 
@@ -93,13 +93,13 @@ export type ProjectArchive = {
   name: string
   /** Its name for people, when its folder's name can't say it. */
   title?: string
-  /** Its files, in order:  each path from the project, `/MyApp.spellml`, and its text. */
+  /** Its files, in order:  each path from the project, `/MyApp.spell`, and its text. */
   files: ProjectArchiveFile[]
 }
 
 /** One file of a `ProjectArchive`. */
 export type ProjectArchiveFile = {
-  /** Its path from the project, `/MyApp.spellml`. */
+  /** Its path from the project, `/MyApp.spell`. */
   path: string
   /** Its text. */
   contents: string

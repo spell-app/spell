@@ -28,7 +28,7 @@ describe("a fenced code block in spellx prose", () => {
       "</spell-thing>",
       ""
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Bill.spellml", contents: text }]).files
+    const [file] = parseSpellProject([{ path: "/Bill.spell", contents: text }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain("tip")
     expect(file!.compiled).not.toMatch(/tipEach|tip_each/)
@@ -44,7 +44,7 @@ describe("a fenced code block in spellx prose", () => {
       "</spell-thing>",
       ""
     ]
-    const [file] = parseSpellProject([{ path: "/Bill.spellml", contents: text.join("\n") }]).files
+    const [file] = parseSpellProject([{ path: "/Bill.spell", contents: text.join("\n") }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain("class Bill")
   })

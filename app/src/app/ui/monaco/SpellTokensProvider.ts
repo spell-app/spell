@@ -41,8 +41,8 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * A provider for spellx files, `Card.spellml`:  read by a spellx parser, English's.
-   * - CONSIDER:  each file's own language (`Carta.es.spellml`):  a tokens provider is asked for lines, never a file.
+   * A provider for spellx files, `Card.spell`:  read by a spellx parser, English's.
+   * - CONSIDER:  each file's own language (`Carta.es.spell`):  a tokens provider is asked for lines, never a file.
    */
   static forSpellx(): SpellTokensProvider {
     const props = { module: "spellx colouring", form: "spellx" } as P.ParserProps
@@ -250,7 +250,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
     const text = line.slice(head.start, head.end)
     const word = /^<([^\s/>]+)/.exec(text)?.[1]
     if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
-    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spellml`)
+    // a property editors file's quoted type name, `<spell-property-editor "card">` (`Card.editor.spell`)
     const name = /"[^"]*"/.exec(text)
     if (name)
       pieces.push({ start: head.start + name.index, end: head.start + name.index + name[0].length, scopes: "string" })

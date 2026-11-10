@@ -17,7 +17,7 @@ function projectWith(file: { path: string; file: string }) {
   return project as unknown as SP.SpellProject
 }
 
-const FILE = { path: "@spell/examples/Proj/Button/Usage.spellml", file: "Usage.spellml", onRemove: () => {} }
+const FILE = { path: "@spell/examples/Proj/Button/Usage.spell", file: "Usage.spell", onRemove: () => {} }
 
 describe("ProjectFiles, a file in a folder", () => {
   afterEach(() => {
@@ -27,13 +27,13 @@ describe("ProjectFiles, a file in a folder", () => {
   test("rename() sends the new path, so a file can move to another folder", async () => {
     const fetch = vi.spyOn(LoadableFile, "fetch").mockResolvedValue({})
     await expect(
-      new SPACES.ProjectFiles(projectWith(FILE)).rename("/Button/Usage.spellml", "/Divider/Usage.spellml")
+      new SPACES.ProjectFiles(projectWith(FILE)).rename("/Button/Usage.spell", "/Divider/Usage.spell")
     ).rejects.toThrow()
     expect(fetch.mock.calls[0]![0]).toMatchObject({
       contents: {
         projectId: "@spell/examples/Proj",
-        filePath: "/Button/Usage.spellml",
-        newFilePath: "/Divider/Usage.spellml"
+        filePath: "/Button/Usage.spell",
+        newFilePath: "/Divider/Usage.spell"
       }
     })
   })

@@ -28,7 +28,7 @@ export class SpellMonaco {
   /** Language id for code spell, `Card.spell`. */
   static LANGUAGE = "spell"
 
-  /** Language id for spellx, spell's tag-shaped form, `Card.spellml`. */
+  /** Language id for spellx, spell's tag-shaped form, `Card.spell`. */
   static SPELLX_LANGUAGE = "spellx"
 
   /** Both of spell's languages:  what its features and headings are for. */

@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import fileTabs from "spell/app/spaces/@spell/editor/file-tabs/FileTabs.spellml"
+import fileTabs from "spell/app/spaces/@spell/editor/file-tabs/FileTabs.spell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"
@@ -16,7 +16,7 @@ import "./FileTabs.css"
 
 /****************
  * ### `<FileTabs>`
- * Every file of the project as a tab over the code:  the tabs themselves are Spell, `FileTabs.spellml`.
+ * Every file of the project as a tab over the code:  the tabs themselves are Spell, `FileTabs.spell`.
  * This is the editor's side of them, which Spell can't reach yet (epic `editor`'s Backing In Spell):
  * - which files there are, and which is showing (`trackProjectFiles()`), kept in the bar's files as they change
  * - what showing one does:  `editor.showEditor()`
@@ -101,13 +101,13 @@ export function FileTabs() {
   )
 }
 
-/** The tab menu's items, `FileTabs.spellml`'s `tab menu` on `bar`, their titles in the page's language. */
+/** The tab menu's items, `FileTabs.spell`'s `tab menu` on `bar`, their titles in the page's language. */
 function tabMenu(piece: LayoutPiece, bar: object) {
   piece.useTitles(appTexts.titles)
   return piece.menu(bar, "tab menu")
 }
 
-/** An item of a tab's right-click menu, by its name in `FileTabs.spellml`:  its title the Spell's. */
+/** An item of a tab's right-click menu, by its name in `FileTabs.spell`:  its title the Spell's. */
 function tabMenuItem(item: SpellMenuAction): JSX.Element {
   switch (item.name) {
     case "duplicateFile":
@@ -121,7 +121,7 @@ function tabMenuItem(item: SpellMenuAction): JSX.Element {
   }
 }
 
-/** A file in `FileTabs.spellml`, as its compiled class has it. */
+/** A file in `FileTabs.spell`, as its compiled class has it. */
 type TabFile = {
   path: string
   name: string
@@ -132,5 +132,5 @@ type TabFile = {
   show: () => void
 }
 
-/** The bar in `FileTabs.spellml`, as its compiled class has it. */
+/** The bar in `FileTabs.spell`, as its compiled class has it. */
 type FileTabBar = { files: { items: TabFile[]; getValues: () => TabFile[] }; more: { draw: () => JSX.Element } }

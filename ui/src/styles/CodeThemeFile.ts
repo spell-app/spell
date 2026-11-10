@@ -294,7 +294,7 @@ const SCOPES: Readonly<Record<CodeThemeRole, string[]>> = {
   string: ["string", "string.quoted", "markup.inline.raw"],
   tag: ["entity.name.tag", "entity.name.tag.spell", "support.class.component"],
   punctuation: ["punctuation", "keyword.operator", "punctuation.definition.tag", "meta.brace"],
-  attr: ["entity.other.attribute-name", "entity.other.attribute-name.spellx"],
+  attr: ["entity.other.attribute-name", "entity.other.attribute-name.spell"],
   meta: ["meta.preprocessor", "keyword.control.import", "keyword.control.directive"],
   addition: ["markup.inserted"],
   deletion: ["markup.deleted", "invalid"]

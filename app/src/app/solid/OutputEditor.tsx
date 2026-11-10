@@ -48,7 +48,7 @@ export function OutputToolbar() {
  * ### `<OutputEditor>`
  * Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.
  * - With `target`:  the whole project's code for that target, written after each compile (`project.codeFor()`).
- * - With `target="spell"`:  the code spell `editor.file` means, a `.spellml` file's, written from its tags' twins.
+ * - With `target="spell"`:  the code spell `editor.file` means, a `.spell` file's, written from its tags' twins.
  * - With `target="spellx"`:  `editor.file` as spellx, a `.spell` file's, written by `SX.SpellxWriter`.
  * - Those two are a file's OTHER FORM, a view:
  *   a template lives in ONE file, `.spell` or `.spellml` (epic `elemental-spell` J95).
@@ -112,14 +112,14 @@ export type OtherTarget = keyof typeof TARGET_LOOKS
 const TARGET_LOOKS = {
   "ts/solid": { language: "typescript", comment: "//" },
   py: { language: "python", comment: "#" },
-  // not a target:  the code spell a `.spellml` file means (epic `elemental-spell` P8)
+  // not a target:  the code spell a `.spell` file means (epic `elemental-spell` P8)
   spell: { language: "spell", comment: "//" },
   // not a target either:  a `.spell` file as spellx (J95)
   spellx: { language: "spellx", comment: "//" }
 } as const
 
 /**
- * The code spell `file` means, as text:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`);
+ * The code spell `file` means, as text:  a `.spell` file's, written from its tags' twins (`SX.CodeSpellWriter`);
  * any other spell file's own text;  nothing for a file that isn't spell.
  * - Its drawings' bare component names as its last parse took them, its own views too (`<card>` =>
  *   `<solitaire-card>`):  `SP.ComponentTags`, as VS Code's view and a notebook's Spell view read them (epic `notebook` P6).
@@ -142,7 +142,7 @@ function codeSpellOf(file: typeof editor.file): string {
 
 /**
  * `file` as spellx, as text:  a `.spell` file's, written by `SX.SpellxWriter` from its last parse;
- * a `.spellml` file's own text;  nothing for a file that isn't spell.
+ * a `.spell` file's own text;  nothing for a file that isn't spell.
  * - NEVER throws:  a file that can't be written says why, as a comment.
  */
 function spellxOf(file: typeof editor.file): string {

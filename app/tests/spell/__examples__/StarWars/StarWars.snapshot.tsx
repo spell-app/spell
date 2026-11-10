@@ -5,7 +5,7 @@ core.heading("Star Wars:  where it all lives")
 ////////////////////////////////////
 // ## Star Wars:  where it all lives
 ////////////////////////////////////
-// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spellml;
+// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spell;
 // the pictures and what they're of come from Wikipedia, in Wikipedia.api.spell.
 // `star wars` is what this wrote, from looking at the server:
 //   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"
@@ -83,7 +83,7 @@ export class Character extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 1809, end: 1831 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 10810, end: 10906 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 10810, end: 10906 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -92,13 +92,13 @@ export class Character extends Thing {
     })
   }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 10919, end: 10970 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 10919, end: 10970 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
 
   /** Their own picture on Wikipedia, or nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 10983, end: 11171 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 10983, end: 11171 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page"))?.fits && (await core.answerOf(this, "page"))?.thumbnail) return (await core.answerOf(this, "page"))?.thumbnail?.source
     return ""
@@ -108,7 +108,7 @@ export class Character extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 11221, end: 11648 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 11221, end: 11648 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Height", value: `${core.measureShown(this.height, "Length", "centimeter")}` }))
@@ -195,7 +195,7 @@ export class Planet extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2313, end: 2335 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 12308, end: 12426 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 12308, end: 12426 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -207,7 +207,7 @@ export class Planet extends Thing {
   }
 
   /** What colour a world is, from its weather */
-  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 12439, end: 12816 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 12439, end: 12816 }, readsFrom: ["star_wars"] }) }
   get hue() {
     if (core.includes(this.climate, "frozen")) return 200
     if (core.includes(this.climate, "arid")) return 38
@@ -220,7 +220,7 @@ export class Planet extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 12866, end: 13447 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 12866, end: 13447 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Climate", value: this.climate }))
@@ -308,7 +308,7 @@ export class Film extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2785, end: 2807 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 9609, end: 9709 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 9609, end: 9709 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.title,
@@ -329,7 +329,7 @@ export class Film extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 9887, end: 10186 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 9887, end: 10186 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Directed by", value: this.director }))
@@ -438,7 +438,7 @@ export class Species extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3280, end: 3302 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16528, end: 16632 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 16528, end: 16632 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -449,7 +449,7 @@ export class Species extends Thing {
   }
 
   /** Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 16645, end: 16943 }, readsFrom: ["star_wars", "wikipedia"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 16645, end: 16943 }, readsFrom: ["star_wars", "wikipedia"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     const everyone = await core.savedThings(Character)
     let found: string = ""
@@ -463,7 +463,7 @@ export class Species extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 16992, end: 17217 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spell", start: 16992, end: 17217 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List<Fact>({ instanceType: "Fact" })
     known.append(new Fact({ label: "Language", value: this.language }))
@@ -552,7 +552,7 @@ export class Vehicle extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 3831, end: 3853 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 15785, end: 15874 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 15785, end: 15874 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -661,7 +661,7 @@ export class Starship extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 4479, end: 4501 } })
   accessor edited!: Date
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 15124, end: 15214 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spell", start: 15124, end: 15214 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -812,7 +812,7 @@ export class WikiPage extends Thing {
   @prop({ type: "text", declaredAt: { path: "/Wikipedia.api.spell", start: 1707, end: 1726 } })
   accessor title!: string
 
-  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 7434, end: 7603 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spell", start: 7434, end: 7603 }, readsFrom: ["wikipedia"] }) }
   get fits() {
     if (core.includes(this.title, "List of")) return false
     return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
@@ -1021,7 +1021,7 @@ export class WikiNote extends Thing {
   // - it has a name
   @prop() accessor name!: string
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 7683, end: 7734 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 7683, end: 7734 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -1075,7 +1075,7 @@ export class FactTable extends Thing {
   @prop({ itemType: "Fact", init: () => new List<Fact>({ instanceType: "Fact" }) })
   accessor facts!: List<Fact>
 
-  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spellml", start: 8893, end: 8951 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spell", start: 8893, end: 8951 }, readsFrom: ["star_wars"] }) }
   @derived get shown() {
     return core.filter(this.facts, (fact: Fact) => fact.isKnown)
   }
@@ -1193,7 +1193,7 @@ export class Guide extends App {
   accessor jumping!: boolean
 
   /** Whatever's found:  the film, character, planet, ship or anything else with that in its name */
-  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 641, end: 1434 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spell", start: 641, end: 1434 }, readsFrom: ["star_wars"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const matches = new List<Thing>({ instanceType: "Thing" })
     core.map(core.filter(await core.savedThings(Film, { search: { title: this.search } }, "looks through"), (film: Film) => core.includes(film.title, this.search)), (film: Film) => matches.append(film))
@@ -1513,7 +1513,7 @@ export class Portrait extends Thing {
   get species(): Species { return core.linked(this, "species", Species) as Species }
   set species(value: Species) { this.setProp("species", value) }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWarsPortrait.spellml", start: 445, end: 496 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWarsPortrait.spell", start: 445, end: 496 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -1522,7 +1522,7 @@ export class Portrait extends Thing {
     return core.getItemAt(this.name, 0)
   }
 
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWarsPortrait.spellml", start: 570, end: 749 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWarsPortrait.spell", start: 570, end: 749 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page"))?.fits && (await core.answerOf(this, "page"))?.thumbnail) return (await core.answerOf(this, "page"))?.thumbnail?.source
     if (await core.answerOf(this, "species")) return await core.answerOf((await core.answerOf(this, "species")), "picture")

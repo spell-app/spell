@@ -2,10 +2,10 @@
   "title": "Flash Cards",
   "description": "A deck of Spanish words to quiz yourself on:  each card a two sided view that turns over on a click, you say whether you knew it, and a toolbar keeps the score",
   "imports": [{
-    "path": "/FlashCard.spellml",
+    "path": "/FlashCard.spell",
     "active": true
   }, {
-    "path": "/FlashCards.spellml",
+    "path": "/FlashCards.spell",
     "active": true
   }]
 }

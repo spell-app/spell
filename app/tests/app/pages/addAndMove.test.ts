@@ -14,7 +14,7 @@ import { EDITOR, SERVING } from "./runningEditor"
  */
 
 /** The file a blank program is answered for:  a project in tags, the example's text never read. */
-const FILE = "TaskList.spellml"
+const FILE = "TaskList.spell"
 
 /** A program with nothing in it. */
 const BLANK = `# A new app
@@ -537,7 +537,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.route(/\/api\/projects\/index\//, async (route) => {
       const response = await route.fetch()
       const index = (await response.json()) as { imports?: { path: string; active: boolean }[] }
-      for (const each of index.imports ?? []) if (each.path.endsWith("/Explainer.spellml")) each.active = true
+      for (const each of index.imports ?? []) if (each.path.endsWith("/Explainer.spell")) each.active = true
       await route.fulfill({ response, json: index })
     })
     await other.route(/\/api\/projects\/file\//, (route) =>

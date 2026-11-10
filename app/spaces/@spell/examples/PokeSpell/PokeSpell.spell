@@ -1,7 +1,7 @@
 # PokéSpell
 A Pokédex for kids:  look through every Pokémon, find one by name, keep your favourites, and guess who's hiding.
 Every Pokémon is in PokeSpell.api.spell, as `spell place ingest` wrote it;  your favourites are in Favourites.api.spell.
-How a Pokémon looks is in Pokemon.spellml, and the guessing game in WhosThat.spellml.
+How a Pokémon looks is in Pokemon.spell, and the guessing game in WhosThat.spell.
 
 // Every button is a round-ended pill, unless it says otherwise
 <ui-defaults>

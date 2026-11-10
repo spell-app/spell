@@ -83,12 +83,12 @@ core.heading("The letter")
 export class PicnicLetter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  static { this.declareProp("shifts", { declaredAt: { path: "/PicnicLetter.spellml", start: 518, end: 575 }, readsFrom: ["published_sheet"] }) }
+  static { this.declareProp("shifts", { declaredAt: { path: "/PicnicLetter.spell", start: 518, end: 575 }, readsFrom: ["published_sheet"] }) }
   get shifts() { return core.waitedValue(this, "shifts", async () => {
     return core.filter(await core.savedThings(Listing, {}, "looks through"), (listing) => core.isCurrentPerson(listing.person))
   }) }
 
-  static { this.declareProp("counts", { declaredAt: { path: "/PicnicLetter.spellml", start: 580, end: 646 }, readsFrom: ["my_inbox"] }) }
+  static { this.declareProp("counts", { declaredAt: { path: "/PicnicLetter.spell", start: 580, end: 646 }, readsFrom: ["my_inbox"] }) }
   get counts() { return core.waitedValue(this, "counts", async () => {
     return await core.savedThings(Message, { filter: { thread: "invitations" } })
   }) }

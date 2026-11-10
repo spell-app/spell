@@ -5,7 +5,7 @@
     "path": "/OrgFeed.api.spell",
     "active": true
   }, {
-    "path": "/OrgFeed.spellml",
+    "path": "/OrgFeed.spell",
     "active": true
   }, {
     "path": "/OrgFeed.css",

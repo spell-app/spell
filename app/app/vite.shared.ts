@@ -42,7 +42,7 @@ export const TOP_REPO = (() => {
  *   (`vitest`:  node, so `@solidjs/web`'s server build, `renderToString`).
  * - `standardDecorators()` FIRST:  it and the Solid plugin are both `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
- * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spellml`.
+ * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spell`.
  * - `iconPacks`:  a BUILD that bundles `spell-ui` emits its built-in icon packs
  *   beside the chunk that loads them (`iconPacksBesideBuiltIns()`).
  *   Omit for `vitest`, and for builds that import `ui` from `spell-ui.js`.
@@ -106,7 +106,7 @@ export function pageServerProxy({ target, token }: { target: string; token?: str
     "/spaces": passed,
     "/element": passed,
     // Spell UI's component pages and their images:  what a notebook links and shows, as the page does
-    // (`@spell/guides/SpellUI/Avatar/Usage.spellml`, epic `notebook` P10)
+    // (`@spell/guides/SpellUI/Avatar/Usage.spell`, epic `notebook` P10)
     "/components": passed,
     // the epic pages and their engine's files:  the theme editor previews one, on this address (`<ThemeEditorPage>`,
     // epic `debut` P24)
@@ -301,14 +301,14 @@ function iconPacksBesideBuiltIns(): Plugin {
   }
 }
 
-/** The editor's own pieces, the group `@spell/editor`:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
+/** The editor's own pieces, the group `@spell/editor`:  any other `.spell` is a program's, read as text (a test's `?raw`). */
 const LAYOUT_FOLDER = "/spaces/@spell/editor/"
 
 /** Where the editor's pieces keep their last good compiles:  the app's `build/`, never committed, one file per piece. */
 const LAST_GOOD_FOLDER = "app/build/editor-pieces"
 
 /**
- * A `.spellml` file of the editor's own pieces (the group `@spell/editor`), imported,
+ * A `.spell` file of the editor's own pieces (the group `@spell/editor`), imported,
  * is its project's compiled javascript, as text (`layoutSpell.ts`).
  * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`.
  * - Compiled in a process of its own, as the preview build compiles, so no config loads the parser.
@@ -328,7 +328,7 @@ function compiledSpell(): Plugin {
     },
     load(id) {
       const file = id.split("?")[0]!
-      if (!file.endsWith(".spellml") || !file.includes(LAYOUT_FOLDER)) return null
+      if (!file.endsWith(".spell") || !file.includes(LAYOUT_FOLDER)) return null
       this.addWatchFile(file)
       const bin = path.join(TOP_REPO, "bin/spell.mjs")
       const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {

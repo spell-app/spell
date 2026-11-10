@@ -155,8 +155,8 @@ describe("clicks and drags as events:  each short form compiles as its long form
   describe("in tags", () => {
     for (const { title, at, long, short } of TAG_CASES) {
       test(title, () => {
-        const expected = compile("/test.spellml", TAGS, at, long)
-        for (const form of short) expect(compile("/test.spellml", TAGS, at, form), form).toBe(expected)
+        const expected = compile("/test.spell", TAGS, at, long)
+        for (const form of short) expect(compile("/test.spell", TAGS, at, form), form).toBe(expected)
       })
     }
   })
@@ -168,9 +168,9 @@ describe("clicks and drags as events:  each short form compiles as its long form
   })
 
   test("an ability's tag, the view's bare attribute and the outline's line are the same ability", () => {
-    const tag = compile("/test.spellml", TAGS, "card", "\t<draggable/>")
+    const tag = compile("/test.spell", TAGS, "card", "\t<draggable/>")
     const attribute = compile(
-      "/test.spellml",
+      "/test.spell",
       TAGS.replace('template="two sided view"', 'template="two sided view" draggable'),
       "card",
       ""
@@ -194,7 +194,7 @@ describe("clicks and drags as events:  each short form compiles as its long form
 
   test("a one-line tag's code on new lines is an error;  so is a closer naming another tag", () => {
     const errors = errorsOf(
-      "/test.spellml",
+      "/test.spell",
       TAGS,
       "card",
       "\t<on drag print 1\n\t\tprint 2 />\n\t<on click>\n\t\tprint 3\n\t</on drag>"

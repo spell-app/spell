@@ -26,8 +26,8 @@ const BOOK_PAGE = `<spell-thing "book page">
 </spell-thing>`
 
 const FILES = [
-  { path: "/Shelf.spellml", contents: SHELF },
-  { path: "/BookPage.spellml", contents: BOOK_PAGE }
+  { path: "/Shelf.spell", contents: SHELF },
+  { path: "/BookPage.spell", contents: BOOK_PAGE }
 ]
 
 /** `FILES`, in the order given, written by `writer`. */

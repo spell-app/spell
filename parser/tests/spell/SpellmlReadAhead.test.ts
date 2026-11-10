@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, test } from "vite-plus/test"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
- * A `.spellml` view reading a property its file declares further down (epic `language` P17, data's I40):
+ * A `.spell` view reading a property its file declares further down (epic `language` P17, data's I40):
  * `its lost signal` above `<property "lost signal">` reads both words, as code spell does.
  */
 describe("a spellml view reads a property declared below its drawing", () => {
@@ -27,7 +27,7 @@ describe("a spellml view reads a property declared below its drawing", () => {
       '\t<property "lost signal">"Lost."</property>',
       "</spell-view>"
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Shelf.spellml", contents }]).files
+    const [file] = parseSpellProject([{ path: "/Shelf.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain("failedSay: () => this.lostSignal")
     expect(file!.compiled).toContain('h("ui-text", () => this.lostSignal)')
@@ -64,7 +64,7 @@ describe("an action a later <spell-more-of> adds is callable above it", () => {
       "\t</action>",
       "</spell-more-of>"
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Board.spellml", contents }]).files
+    const [file] = parseSpellProject([{ path: "/Board.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain("this.forEach((square) => square.play())")
     expect(file!.compiled).toContain("square.play()")

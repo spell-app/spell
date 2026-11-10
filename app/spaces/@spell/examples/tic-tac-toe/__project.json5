@@ -2,10 +2,10 @@
   "title": "Tic-Tac-Toe",
   "description": "Noughts and crosses on Spell UI:  nine squares drawn as buttons in a grid, whose turn it is, and three in a row, written as sentences",
   "imports": [{
-    "path": "/Square.spellml",
+    "path": "/Square.spell",
     "active": true
   }, {
-    "path": "/TicTacToe.spellml",
+    "path": "/TicTacToe.spell",
     "active": true
   }]
 }

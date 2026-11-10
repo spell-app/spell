@@ -14,7 +14,7 @@ It's a Spell program, written in Spanish, and it compiles:
   }
 ```
 
-_Line 10 of [Carta.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spellml),
+_Line 10 of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
 `<frase "es una figura">si su rango es jota, dama o rey</>`, as the compiler writes it (below, "Try it")._
 
 Spanish is Spell's second human language.
@@ -105,12 +105,12 @@ spell explain carta --in @spell/examples/Solitario
 <summary>Output</summary>
 
 ```text
-...Carta.es.spellml:6
+...Carta.es.spell:6
 plantilla Carta, subplantilla de TwoSidedView
 
 propiedades:  rango, valor, palo, color, símbolo, nombre, estado, imagen, pila
 enumeraciones:  Rangos, Palos, Colores
-declarado en Carta.es.spellml:6
+declarado en Carta.es.spell:6
 
 export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "Solitario")
@@ -288,7 +288,7 @@ Solitario's toolbar is one:
 	</barra-herramientas>
 ```
 
-_From [Solitario.es.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spellml),
+_From [Solitario.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spell),
 its `<dibujar>`:  a bare name is Spell UI's tag, `<texto>` for `<es-texto>`._
 
 - Tag and attribute names are plain ASCII, `es-boton`, `tamano`;  values keep their accents,

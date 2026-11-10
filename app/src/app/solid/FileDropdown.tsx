@@ -150,7 +150,7 @@ export function trackProjectFiles(): () => ProjectFilesState {
 
 /**
  * The row for the file at `path`, `location` its place.
- * - A file in a folder drops its spell ending, so its folder can name it:  `Button/Usage`, for `Button/Usage.spellml`.
+ * - A file in a folder drops its spell ending, so its folder can name it:  `Button/Usage`, for `Button/Usage.spell`.
  *   Any other ending stays:  `Button/styles.css`.
  * - At the project's top it keeps its whole name, as `Card.spell`;  another project's import, its address.
  */

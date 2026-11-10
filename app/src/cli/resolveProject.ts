@@ -3,7 +3,7 @@
  * project root.
  * - Spell addresses (`SP.SpellLocation.isAddress()`, epic `people-and-orgs` P4):
  *   - `@spell/examples/Solitaire`, `owen@spell/errors`:  a project
- *   - `@spell/examples/Solitaire/Card.spellml`:  a file in one
+ *   - `@spell/examples/Solitaire/Card.spell`:  a file in one
  *   - `@spell/examples`, `owen@spell`:  a whole group;  `@spell`:  every group in that space
  * - `@here` ~== `.`, and `@here/Foo.spell` ~== `./Foo.spell`:
  *   the command line's own word, not an address.

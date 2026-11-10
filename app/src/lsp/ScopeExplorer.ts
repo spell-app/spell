@@ -588,7 +588,7 @@ export class ScopeExplorer {
   }
 
   /**
-   * Path of `file`'s entry, in `project`:  by its path in the project, `Button/Usage.spellml`,
+   * Path of `file`'s entry, in `project`:  by its path in the project, `Button/Usage.spell`,
    * as files in different folders can share a name.
    */
   private static filePath(project: SP.SpellProject, file: SP.SpellFile): string {

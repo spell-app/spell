@@ -5,9 +5,9 @@ import { SP } from "spell/parser/spell"
 import type { MenuItem } from "spell/parser/core"
 
 /**
- * The editor's own layout pieces, written in Spell (`.spellml`, epic `editor` P6, its first stage of turtles):
+ * The editor's own layout pieces, written in Spell (`.spell`, epic `editor` P6, its first stage of turtles):
  * - The pieces are projects of the group `@spell/editor` (`app/spaces/@spell/editor/`, epic `editor` P22):
- *   a `.spellml` file there is imported as its compiled javascript, as text:  `compiledSpell()`, in `vite.shared.ts`.
+ *   a `.spell` file there is imported as its compiled javascript, as text:  `compiledSpell()`, in `vite.shared.ts`.
  * - It runs on the LAYOUT'S OWN copy of the runtime, never the one programs run on (`editor.loadRuntime()`):
  *   a program's run resets its runtime, lists every thing made on it in the Things tab, and writes on its console.
  *   - a build:  `loadRuntime()`, as each `<spell-viewer>` has its own

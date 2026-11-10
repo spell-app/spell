@@ -148,7 +148,7 @@ describe("<ui-toolbar> bar slots", () => {
 
   describe("scroll-first", () => {
     /** Five long items:  a segmented `shrinkable` row of them, `width` wide. */
-    const FILES = ["Card.spellml", "Deck.spellml", "Pile.spellml", "Solitaire.spellml", "styles.css"]
+    const FILES = ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell", "styles.css"]
       .map((name, index) => `<ui-item ${index ? "" : "selected"}>${name}</ui-item>`)
       .join("")
     const LOOK = 'appearance="segmented link header" shrinkable'

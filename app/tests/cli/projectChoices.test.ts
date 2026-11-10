@@ -47,12 +47,12 @@ describe("projectChoices()", () => {
     const choices = await CLI.projectChoices("@spell/examples/Solitaire/")
     expect(choices[0]).toEqual({ value: "@spell/examples/Solitaire", label: "entire project", isFinal: true })
     expect(choices.slice(1).map((it) => it.value)).toEqual([
-      "@spell/examples/Solitaire/Card.spellml",
-      "@spell/examples/Solitaire/Deck.spellml",
-      "@spell/examples/Solitaire/Pile.spellml",
-      "@spell/examples/Solitaire/Solitaire.spellml"
+      "@spell/examples/Solitaire/Card.spell",
+      "@spell/examples/Solitaire/Deck.spell",
+      "@spell/examples/Solitaire/Pile.spell",
+      "@spell/examples/Solitaire/Solitaire.spell"
     ])
-    expect(await values("@spell/examples/Solitaire/s")).toEqual(["@spell/examples/Solitaire/Solitaire.spellml"])
+    expect(await values("@spell/examples/Solitaire/s")).toEqual(["@spell/examples/Solitaire/Solitaire.spell"])
     expect(await values("@spell/examples/Solitaire/x")).toEqual([])
   })
 

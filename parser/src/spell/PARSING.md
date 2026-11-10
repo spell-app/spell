@@ -15,7 +15,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 - [`Parser.parse(input, ruleName, scope)`](../parser/Parser.ts) tokenizes,
   then calls `scope.getRuleOrDie(ruleName).parse()`.
 - [`SpellParser.tokenize()`](SpellParser.ts) calls `Tokenizer.tokenize()`.
-  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a `.spellml` file's,
+  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a `.spell` file's,
     `SP.SpellxTokenizer`, for a whole file (the `"block"` rule) only;  see "Spellx", below.
   - For the `"block"` rule, it then calls [`breakIntoIndentedBlocks()`](../parser/tokenizer/Tokenizer.ts).
   - The result is ONE root `BlockToken`:  its lines (`LineToken`s), and nested blocks of the same kind.
@@ -894,7 +894,7 @@ A kind that says so is saved in a file of its own.
   - The colon stays required:  a lone `a game` is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
-  - In a `.spellml` file its tag is `<spell-more-of "game">`, its members inside (epic `data` T76):
+  - In a `.spell` file its tag is `<spell-more-of "game">`, its members inside (epic `data` T76):
     so a place's fields can stay in one plain `.spell` file, and what's drawn in a `.spellml` file beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
@@ -1278,7 +1278,7 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
 
 ## Spellx:  a third style of spell (epic `elemental-spell` P6, Q69)
 
-A `.spellml` file is read by spell's own parser and rules, as sentences and the outline are:
+A `.spell` file is read by spell's own parser and rules, as sentences and the outline are:
 each tag line reads as its code-spell twin line, so it compiles to exactly what its twin `.spell` file does.
 
 - Which form a file is:  its suffix (`SpellFile.form`, `"spell"` or `"spellx"`).
@@ -1444,7 +1444,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - The way back, a `.spell` file written as spellx, is `SX.SpellxWriter` (`spell spellx convert`, P12):
   rule by rule over the parse, each declaration as the tag whose twin it is, the rest in `<spell>` chunks.
 - Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):
-  a `.es.spellml` file is a Spanish code-spell file's twin, its words the language's.
+  a `.es.spell` file is a Spanish code-spell file's twin, its words the language's.
 - Its tests:  each pair in `tests/spell/spellx/`, `X.spellml` beside the `X.spell` it means, compiles the same and has no
   errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
 - A file's CHUNK TREE (`SX.SpellxView`, `spell/parser/spellx`) is built from these same tokens, for the editor, the
@@ -1589,14 +1589,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
     - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file:
-      a `.spellml` view's drawing above its `<property>` tags too, through the file's skeleton.
+      a `.spell` view's drawing above its `<property>` tags too, through the file's skeleton.
     - `SpellParser.declaredProperties()` scans:  a body's `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`;
       a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
     - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
-  - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a `.spellml` file whose only top-level thing is one page tag,
+  - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a `.spell` file whose only top-level thing is one page tag,
     comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
     - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.
       That's what a site's page lines and `go to the film page` read.
@@ -1927,7 +1927,7 @@ sidebars any of them opens.
 - Compiled output is never one of a project's own files.
   - The server's index lists only spell, CSS and javascript files, and property editor pages:  see `isManifestFile()`.
     - `.spell`, `.spellml`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
-    - A property editors file, `Card.editor.spellml` or `Solitaire.editors.spellml` (`SP.isPropertyEditorsName()`,
+    - A property editors file, `Card.editor.spell` or `Solitaire.editors.spell` (`SP.isPropertyEditorsName()`,
       epic `editor` P25) lists as one of its own:  a text file, never compiled, which the Inspector reads.
     - So no other target's output, e.g. `<Project>.spell.py`, is ever listed.
   - Of those, it leaves out:
@@ -1944,7 +1944,7 @@ sidebars any of them opens.
   - The list:  `GENERATED_SUFFIXES`, beside `isManifestFile()`.
 - A file's kind is the END of its name (`SpellProject.getFileForPath()`):
   `helpers.min.js` is javascript, and only what ends in none of `.css`, `.js`, `.jsx`, `.editor.html` is parsed as spell;
-  a property editors file, `Card.editor.spellml`, is text, never parsed.
+  a property editors file, `Card.editor.spell`, is text, never parsed.
 - What spell BUILDS for a project goes in its build folder, not beside its source (epic `people-and-orgs` P11).
   - That's `build/` at spell-app's root, never committed, each checkout its own.
     It mirrors the project's path:
@@ -2250,12 +2250,12 @@ sidebars any of them opens.
   - The map names each file by its name in the project (`Card.spell`) and carries its text (`sourcesContent`).
   - Code run from somewhere the map file can't be reached (the editor's `blob:` URL, `spell run`'s temp file)
     carries it inline:  `P.SourceMarks.inline()`.
-  - A `.spellml` file's positions are its own (Q69), so its map points at its `.spellml` lines.
+  - A `.spell` file's positions are its own (Q69), so its map points at its `.spell` lines.
   - What's drawn and made has marks too (epic `editor` P7):  each drawn tag and each `a new card`, its place
     (`SP.SpellProject.partPlaceOf()`) listed in the map's `x_spellPlaces`.
     - The code stays EXACTLY the same.
     - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
-      where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
+      where it's written:  `data-spell-at="Card.spell:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
     - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
   - Where each declaration is written goes in the map too (epic `editor` P23), as `x_spellDeclarations`:
     every type, property, method, event and ability, its file, lines and type (`SP.SpellDeclarationPlaces`).
