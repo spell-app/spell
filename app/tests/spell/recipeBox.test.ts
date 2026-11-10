@@ -1385,6 +1385,12 @@ start the box
         await title.fill("Saved dish")
         await page.locator(".editor .save").click()
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["Saved dish", ...examples.slice(1)])
+
+        // Undo takes back that edit, and Edit shows what's back (epic `data` I100)
+        await undoOn(page).click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+        await page.locator(".edit").first().click()
+        await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])
         expect(problems).toEqual([])
         await page.close()
       }
