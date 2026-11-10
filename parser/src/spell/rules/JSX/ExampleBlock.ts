@@ -20,7 +20,7 @@ import { SpellJSX } from "./SpellJSX"
  * - Named as spellx names its tags, by a quoted name after its word:
  *   the tokenizer reads that as `name="..."` (`P.Tokenizer.quotedNameTags`).
  *   `name="one counter"` works too.
- * - The same in code spell and spellx:  so a `.spell` page and its `.spellml` twin compile the same.
+ * - The same in code spell and spellx:  so a plain page and its tag-shaped twin compile the same.
  * - What's inside is drawn as any drawing's markup is:  `<counter/>` is the project's view in a spellx file.
  * - Compiles to `h("spell-example", { name: "one counter" }, ...)`:  the result alone.
  *   - Its code isn't compiled in:  the editor shows it from the file (the app's `NotebookPage`), in spellx or html.

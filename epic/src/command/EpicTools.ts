@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs"
-import { join } from "node:path"
+import { join, relative } from "node:path"
 
 import { settingsParts } from "spell/server/page/settings"
 import { CLI } from "spell/cli"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { firstPackageDir, KIT_PACKAGES } from "spell/epic/tools/packageDir"
 
 import { EpicCheckout } from "./EpicCheckout"
@@ -50,13 +51,14 @@ export class EpicTools {
       process.stderr.write(`epic:  ${data} doesn't install ${spec.package?.join(" or ")}, so has no ${name} to run\n`)
       return Promise.resolve(EXIT.ERRORS)
     }
+    const tool = EpicTools.builtTool(spec, code)
     const toolCwd = spec.cwd && (existsSync(join(data, spec.cwd)) ? join(data, spec.cwd) : join(code, spec.cwd))
-    return CLI.runChild(process.execPath, [...CLI.toolArgs(spec, code), ...args], {
+    return CLI.runChild(process.execPath, [...CLI.toolArgs(tool, code), ...args], {
       cwd: toolCwd || cwd,
       env: {
         ...process.env,
         EPIC_CHECKOUT: data,
-        ...(spec.tsx ? { TSX_TSCONFIG_PATH: join(code, spec.tsx) } : {}),
+        ...(tool.tsx ? { TSX_TSCONFIG_PATH: join(code, tool.tsx) } : {}),
         ...env
       }
     })
@@ -71,6 +73,16 @@ export class EpicTools {
   static codeOf(spec: ToolSpec, data: string, codeRoot = EpicCheckout.CODE_ROOT): string | undefined {
     if (spec.package) return firstPackageDir(spec.package, data)
     return spec.code === "caller" ? data : codeRoot
+  }
+
+  /**
+   * `spec` as it runs from code folder `code`:  as written in a checkout;
+   * in an npm install, the built `.js`, from the engine's folder, and no `tsx` (`EngineFiles`).
+   */
+  private static builtTool(spec: ToolSpec, code: string): ToolSpec {
+    if (spec.package || !EngineFiles.isBuilt || code !== EngineFiles.root) return spec
+    const { tsx: _tsx, ...plain } = spec
+    return { ...plain, tool: relative(code, EngineFiles.path(spec.tool)) }
   }
 
   ////////////////

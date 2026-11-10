@@ -561,7 +561,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "color", kind: "color", group: "appearance" },
     { name: "sub", kind: "keyOnly", group: "appearance" },
-    { name: "icon", kind: "keyOnly", group: "content" },
+    { name: "icon", kind: "icon", group: "content" },
     { name: "dividing", kind: "keyOnly", group: "appearance" },
     { name: "block", kind: "keyOnly", group: "layout" },
     { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
@@ -1773,7 +1773,9 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "icon-column", kind: "boolean", group: "appearance" },
     { name: "tabs", kind: "boolean", group: "behaviour" },
     { name: "interactive", kind: "boolean", group: "behaviour" },
-    { name: "scroll-first", kind: "boolean", group: "layout" }
+    { name: "scroll-first", kind: "boolean", group: "layout" },
+    { name: "max-visible", kind: "string", group: "layout" },
+    { name: "remember", kind: "string", group: "layout" }
   ],
   "ui-transition": [
     { name: "duration", kind: "string", group: "behaviour" },

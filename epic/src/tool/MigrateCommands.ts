@@ -3,6 +3,7 @@ import { existsSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 
 import { stringFlag } from "spell/epic/command/command.types"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
 import { PlanDocError } from "./planDoc.types"
 
@@ -256,15 +257,12 @@ export class MigrateCommands {
   private runDocsTool(args: string[]): number {
     const { files } = this
     // under `tsx`:  its `root-links` step links through `spell/server`, which plain `node` can't load (`docLinksRun()`)
-    const run = spawnSync(
-      process.execPath,
-      ["--import", "tsx", join(files.docsTools, "migrate.js"), "--root", files.root, ...args],
-      {
-        cwd: files.docsPackage,
-        encoding: "utf8",
-        env: { ...files.toolEnv, TSX_TSCONFIG_PATH: join(files.docsPackage, "tsconfig.json") }
-      }
+    const script = EngineFiles.nodeRun(
+      join(files.docsTools, "migrate.js"),
+      ["--root", files.root, ...args],
+      files.toolEnv
     )
+    const run = spawnSync(process.execPath, script.args, { cwd: files.docsPackage, encoding: "utf8", env: script.env })
     for (const line of (run.stdout ?? "").split("\n").filter(Boolean)) this.owner.print(line)
     for (const line of (run.stderr ?? "").split("\n").filter(Boolean)) this.owner.warn(line)
     return run.status ?? 1

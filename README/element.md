@@ -508,7 +508,7 @@ epics:  current
   The hash includes the build's own format, `spell-pack 2` today:
   a change to what the build writes bumps it, and every pack goes stale at once until it's rebuilt.
 - The cost of one script:  a pack arrives whole.
-  spell-epic's is 48 tags in 36 families, about 640 kB minified and 178 kB gzipped,
+  spell-epic's is 56 tags in 43 families, about 1021 kB minified and 288 kB gzipped,
   and it defines every one of its tags as it registers, whichever of them the page uses.
 
 ## Styling through the shadow root
@@ -692,7 +692,7 @@ It ships no bundle of its own, though:  it's source, bundled by whoever draws wi
 so on a page it arrives inside Spell UI's core, and packs leave it out.
 
 What it costs you, writing one:
-- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.17, pinned to one copy across every repo.
+- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.21, pinned to one copy across every repo.
 - **A component is a class.**
   No function components, and no hand-written Solid effects in a component file:
   the lint guard flags them, and names the decorator to use ([README/toolchain.md](toolchain.md)).

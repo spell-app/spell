@@ -6,6 +6,7 @@ import { FieldNames } from "spell/places/FieldNames"
 import { DEFAULT_CEILING } from "spell/places/PlaceQuery"
 import {
   PlaceError,
+  SAVED_TIME_FIELDS,
   type ApplyAnswer,
   type ChangesAnswer,
   type ListAnswer,
@@ -201,6 +202,10 @@ export class AirtablePlace extends WebPlace implements Place {
     return {
       kind: "airtable",
       idOf: ID_FIELD,
+      timesHeld: FieldNames.columnsHeldInEvery(
+        [...this.columnNames].map(([collection, names]) => [names, this.collections[collection]?.fields] as const),
+        SAVED_TIME_FIELDS
+      ),
       ...(this.idColumn === undefined && { makesIds: true }),
       filter: "every field",
       sort: "every field",
@@ -804,6 +809,11 @@ export class AirtablePlace extends WebPlace implements Place {
   }
 
   /** What Airtable said, in its own words:  its `type` first, which says which mistake it is. */
+  /** Its `RateQueue` waits out a limit by itself. */
+  protected get waitsOutLimits(): boolean {
+    return false
+  }
+
   protected async messageOf(error: ApiError): Promise<string> {
     const { type, message } = await airtableErrorIn(error)
     if (error.status === 401)

@@ -48,6 +48,9 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     // a value said for a built-in template's property, in its own language:  `arriba` is `up` (epic `language` T74)
     if (match) SpellConstant.sayFor(match.groups.thing, match.groups.value)
+    // a quoted value that isn't one of its values:  `set its lock to "banana"` (epic `language` P39)
+    const wrongValue = match && SpellConstant.wrongValueOf(scope, match.groups.thing, match.groups.value)
+    if (match && wrongValue) return SpellStatement.refuse(match, wrongValue)
     const read = match && MemberReadExpression.memberRead(match.groups.thing)
     // what's saved in a read-only place can't be set:  the line that says so may be anywhere (epic `data` P11)
     if (match && read) {

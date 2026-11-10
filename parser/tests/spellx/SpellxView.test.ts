@@ -350,7 +350,7 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
       /"<xyz>" isn't a spellx word:  here, use one of <property>, <alias>, .*<on>, <when>, <while>, <draggable>, <clickable>, <selectable>, <droppable>$/
     )
     expect(attribute).toMatch(
-      /<property> has no "zzz":  it takes "name", "aka", .*"group", "at", "cloud", "address", "state", "tab", "tags", "picture", "row", "column", "color"$/
+      /<property> has no "zzz":  it takes "name", "aka", .*"group", "at", "cloud", "address", "state", "tab", "tags", "thumbnail", "live", "row", "column", "color"$/
     )
   })
 
@@ -429,7 +429,7 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
 `)
     expect(messagesOf(file)).toEqual(
       expect.arrayContaining([
-        `1:1-1:21  <property> goes inside a template, e.g. "<spell-view>"`,
+        `1:1-1:21  <property> goes inside a template, e.g. "<view>"`,
         `3:2-3:22  <spell-view> can't go inside <spell-view>:  close <spell-view> first, with "</>"`
       ])
     )

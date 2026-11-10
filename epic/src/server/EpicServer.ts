@@ -1,6 +1,7 @@
+import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, statSync } from "node:fs"
 import { join, resolve } from "node:path"
-import { fileURLToPath, pathToFileURL } from "node:url"
+import { pathToFileURL } from "node:url"
 
 import { SRV, type Handler, type ServedFile } from "spell/server"
 import {
@@ -17,6 +18,7 @@ import {
 import type { SiteTab } from "spell/server/site/site.types"
 import { resolvedFile } from "spell/toolchain/sourceNames"
 
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
@@ -167,7 +169,7 @@ export class EpicServer {
   }: { home?: string; engine?: string; repos?: Repo[]; token?: string; epicUi?: string } = {}) {
     this.home = resolve(home)
     this.engine = resolve(engine)
-    this.epicUiDir = resolve(epicUi ?? join(this.engine, EPIC_UI.dir))
+    this.epicUiDir = resolve(epicUi ?? EngineFiles.path(EPIC_UI.dir, this.engine))
     this.repos = repos ?? new RepoList({ home: this.home }).repos()
     this.defaultRepo = this.repos.find((repo) => repo.isDefault) ?? this.repos[0]
     this.setMounts = [...this.epicUiMounts(), ...this.componentSetMounts()]
@@ -199,11 +201,11 @@ export class EpicServer {
     router.get(SRV.SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
     // a repo's own address:  its home page, as spell-app's page server's `/`
     for (const repo of this.repos) {
-      if (!existsSync(join(repo.content, HOME_PAGE))) continue
       router.get(repo.prefix, (request, reply, next) =>
-        request.path.endsWith("/") ? reply.redirect(`${repo.prefix}${HOME_PAGE}`) : next()
+        request.path.endsWith("/") && hasHomePage(repo) ? reply.redirect(`${repo.prefix}${HOME_PAGE}`) : next()
       )
-      if (repo === this.defaultRepo) router.get("/", (_request, reply) => reply.redirect(`/${HOME_PAGE}`))
+      if (repo === this.defaultRepo)
+        router.get("/", (_request, reply, next) => (hasHomePage(repo) ? reply.redirect(`/${HOME_PAGE}`) : next()))
     }
     const repo = this.defaultRepo
     // each repo's app (the top bar's App tab):  the default's at `/` too
@@ -348,9 +350,9 @@ export class EpicServer {
   private mounts(): SRV.Mount[] {
     const engine = Object.values(ENGINE_ROUTES).map((route) => ({
       prefix: route.prefix,
-      dir: join(this.engine, route.dir)
+      dir: EngineFiles.path(route.dir, this.engine)
     }))
-    const templates = join(this.engine, ENGINE_ROUTES.templates.dir)
+    const templates = EngineFiles.path(ENGINE_ROUTES.templates.dir, this.engine)
     const repoTemplates = this.repos.map((repo) => ({ prefix: `${repo.prefix}templates/`, dir: templates }))
     // at one prefix the first folder holding the path answers (`SRV.StaticHandler`):  the content, then the checkout
     const repos = [
@@ -527,14 +529,14 @@ export class EpicServer {
     }
     if (!watchCode) return
     for (const route of Object.values(ENGINE_ROUTES)) {
-      const dir = join(this.engine, route.dir)
+      const dir = EngineFiles.path(route.dir, this.engine)
       live.watch(dir, { servedAt: route.prefix })
       // the old paths too (`/src/tools/_assets/`), unless the route IS its folder's path (`/templates/`)
       if (route.prefix !== `/${route.dir}/`) live.watch(dir, { servedAt: `/${route.dir}/` })
     }
     // the templates at each repo's prefix
     for (const repo of this.repos)
-      live.watch(join(this.engine, ENGINE_ROUTES.templates.dir), { servedAt: `${repo.prefix}templates/` })
+      live.watch(EngineFiles.path(ENGINE_ROUTES.templates.dir, this.engine), { servedAt: `${repo.prefix}templates/` })
     for (const mount of this.setMounts) if (existsSync(mount.dir)) live.watch(mount.dir, { servedAt: mount.prefix })
   }
 
@@ -613,11 +615,11 @@ async function epicServerOn(port: number): Promise<EpicServerInfo | undefined> {
   }
 }
 
-/** spell-epic's checkout:  `src/server/` is two folders down. */
-const ENGINE_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+/** The engine's folder, in a checkout or an npm install (`EngineFiles`). */
+const ENGINE_ROOT = EngineFiles.root
 
 /** spell-epic's `epic` command:  what a background server runs (`hub serve`). */
-const EPIC_BIN = join(ENGINE_ROOT, "bin", "epic")
+const EPIC_BIN = EngineFiles.bin
 
 /**
  * The route modules, from spell-epic's checkout, in the order the kit's page server loads them:
@@ -631,19 +633,39 @@ export const ROUTE_MODULES: readonly string[] = repoSettings(ENGINE_ROOT)?.route
 /**
  * Folders whose code, when newer than a running server, makes `ensure()` restart it
  * (`SRV.newestChange()`:  every `.ts` / `.js` / `.mjs` file in them;  `_assets/` and `node_modules/` skipped):
- * - ALL of spell-epic's code, `src/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
+ * - ALL of spell-epic's code, `src/`, or its built `dist/epic/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
  *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
  *   missed a change to the rest
  * - the server package's, `spell/server` (the kit's `src/server/`), where Node's resolver finds it (`packageDir()`)
  *   - not the default repo's own kit (`buildBundles()`):  a change there needs a restart
  */
-export const SOURCES = [join(ENGINE_ROOT, "src"), ...[packageDir("spell/server")].filter((dir) => dir !== undefined)]
+export const SOURCES = [EngineFiles.code, ...[packageDir("spell/server")].filter((dir) => dir !== undefined)]
 
 /** The package holding the default repo's own bundle build (`BundleBuild`):  its kit's page server, from its checkout. */
 const PAGE_SERVER = "spell/server/page"
 
 /** Spell UI's site bundle, in its package (`spell-ui`):  Epic UI's when the default repo's settings name none. */
 const SPELL_UI_ASSETS = "site/_assets"
+
+/**
+ * Does `repo` have its home page (`HOME_PAGE`)?  A repo `epic init` just set up has none until the first page is made,
+ * so this writes it, by the docs index's script, the first time it's asked.
+ * - asked at the request, not as the server starts:  `epic init` starts the server before anything writes the page
+ * - NEVER throws:  no page, `false`
+ */
+function hasHomePage(repo: Repo): boolean {
+  const file = join(repo.content, HOME_PAGE)
+  if (existsSync(file)) return true
+  spawnSync(process.execPath, [EngineFiles.path(DOCS_INDEX)], {
+    cwd: repo.checkout,
+    stdio: "ignore",
+    env: { ...process.env, EPIC_CHECKOUT: repo.checkout }
+  })
+  return existsSync(file)
+}
+
+/** The docs index's script, which writes a repo's home page, as a checkout has it. */
+const DOCS_INDEX = "src/tools/index.js"
 
 /** A repo's home page, in its epic folder:  where its address (`/`, `/r/<repo>/`) leads. */
 const HOME_PAGE = "pages/index.html"

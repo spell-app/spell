@@ -3257,7 +3257,7 @@
           "name": "copy"
         }
       ],
-      "description": "Send what's changed in `copy`, a draft:  one group, shown at once.  What `save the draft` compiles to.  - throws for anything else"
+      "description": "Send what's changed in `copy`, a draft:  one group, shown at once, one undo step.  What `save the draft` compiles to.  - throws for anything else"
     },
     {
       "kind": "method",
@@ -3533,6 +3533,24 @@
       "of": "core",
       "module": "sites",
       "description": "Where a running site's address lives, as the host keeps it:  `undefined` for none, and the site keeps its own."
+    },
+    {
+      "property": "projectFolder",
+      "of": "core",
+      "module": "sites",
+      "description": "The folder of the program running, as an address:  `/spaces/@spell/sites/SpellApp`."
+    },
+    {
+      "kind": "method",
+      "name": "addressOfFile",
+      "of": "core",
+      "module": "sites",
+      "params": [
+        {
+          "name": "file"
+        }
+      ],
+      "description": "The address of `file`, a file of the running project:  `snapshots/terms.jpg` => `/spaces/.../snapshots/terms.jpg`."
     },
     {
       "kind": "method",

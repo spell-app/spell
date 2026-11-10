@@ -105,12 +105,13 @@ export const spanishWords: SP.LanguageWords = {
     "graphql server": "servidor graphql",
     "data folder": "carpeta de datos",
     "the cloud": "la nube",
-    file: "archivo",
+    file: "archivo json",
     room: "sala",
     sheet: "hoja",
     "excel file": "archivo de excel",
     "google sheet": "hoja de google",
     airtable: "airtable",
+    "atmosphere space": "espacio de atmosphere",
     "atmosphere account": "cuenta de atmosphere",
     "personal atmosphere account": "cuenta personal de atmosphere",
     "database on this device": "base de datos en este dispositivo",
@@ -119,12 +120,14 @@ export const spanishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
+  savedTimeWords: { created: "creado", modified: "modificado" },
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)
   appActions: { deshacer: "undo", rehacer: "redo" },
   // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
+  quotedNameTags: { panel: "etiqueta" },
   // an app\'s widget defaults, sample tags (`ui_defaults`, epic `language` P29):  Spell UI\'s word, in every language
   defaultsTag: "ui-defaults",
 
@@ -146,7 +149,7 @@ export const spanishWords: SP.LanguageWords = {
 
   /**
    * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
-   * - Spell is `encanto` in Spanish (Q36):  `<encanto-vista>`.
+   * - Spell is `encanto` in Spanish (Q36):  `<vista>`.
    * - With their accents (Q49);  each also without, as a person may type it, which the editor upgrades.
    * - A template's short name is `alias` here, as in Spanish spell's `una cuenta bancaria alias cuenta`;
    *   what English calls an alias is a `frase` (J7).
@@ -155,8 +158,10 @@ export const spanishWords: SP.LanguageWords = {
     prefix: "encanto",
     templates: {
       vista: "view",
-      "más-de": "more of",
-      "mas-de": "more of",
+      // añade a un tipo que declara otro archivo (épica `language` P41):  `<extender "carta">`;  su palabra antigua aún se lee
+      extender: "extend",
+      "más-de": "extend",
+      "mas-de": "extend",
       cosa: "thing",
       página: "page",
       pagina: "page",
@@ -166,7 +171,7 @@ export const spanishWords: SP.LanguageWords = {
       "plantilla-de-pagina": "page template",
       "plantilla-de-aplicación": "app template",
       "plantilla-de-aplicacion": "app template",
-      // una página que dibuja su cuerpo:  `<encanto-página cuaderno>` (épica `notebook` P1)
+      // una página que dibuja su cuerpo:  `<página cuaderno>` (épica `notebook` P1)
       cuaderno: { kind: "page", flag: "notebook" },
       // páginas entre las que la gente se mueve por su dirección (épica `mockup` P1)
       sitio: "site"
@@ -182,21 +187,22 @@ export const spanishWords: SP.LanguageWords = {
       menú: "menu",
       menu: "menu",
       grupo: "group",
-      // las partes de un sitio (épica `mockup` P1):  solo en un `<encanto-sitio>`
+      // las partes de un sitio (épica `mockup` P1):  solo en un `<sitio>`
       página: "page",
       pagina: "page",
       diálogo: "dialog",
       dialogo: "dialog",
       panel: "sidebar"
     },
-    // con el prefijo, como las plantillas (épica `data` P31):
-    // `<encanto-descripción>`, `<encanto-editor-de-propiedades>`
+    // prosa que se guarda y nunca corre:  `<nota>` (épica `language` P41);  `<editor-de-propiedades>`, `<historias>`
+    // - las palabras antiguas aún se leen, con un aviso que nombra `<nota>`:  `<encanto-descripción>`, `<comentario>`
     notes: {
+      nota: "description",
       descripción: "description",
       descripcion: "description",
       comentario: "comment",
       "editor-de-propiedades": "property editor",
-      // las historias de una página (épica `mockup` P6):  `<encanto-historias>`
+      // las historias de una página (épica `mockup` P6):  `<historias>`
       historias: "stories"
     },
     handlers: {
@@ -236,15 +242,51 @@ export const spanishWords: SP.LanguageWords = {
       fallo: "failed",
       paginación: "paging",
       paginacion: "paging",
+      "tamaño-de-página": "page-size",
+      "tamano-de-pagina": "page-size",
       como: "as"
     },
     forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
     forListWords: ["sus", "su", "cada", "toda", "todas", "todos", "los", "las", "mis", "estos", "estas"],
+    // dónde viven los datos de un programa, cada una leída como su línea (epic `language` P40)
+    places: [
+      { tag: "servidor-web", line: "{words} es un servidor web en {quoted address} :" },
+      { tag: "servidor-graphql", line: "{words} es un servidor graphql en {quoted address} :" },
+      {
+        tag: "carpeta-de-datos",
+        line: "{words} es una carpeta de datos personal en {quoted address} :",
+        flag: "personal"
+      },
+      { tag: "carpeta-de-datos", line: "{words} es una carpeta de datos en {quoted address} :" },
+      { tag: "archivo-json", line: "{words} es un archivo json en {quoted address} :" },
+      { tag: "sala", line: "{words} es una sala en {quoted address} :" },
+      { tag: "hoja", line: "{words} es una hoja en {quoted address} :" },
+      { tag: "hoja", line: "{words} es una hoja de cálculo en {quoted address} :" },
+      { tag: "archivo-csv", line: "{words} es un archivo csv en {quoted address} :" },
+      { tag: "archivo-de-excel", line: "{words} es un archivo de excel en {quoted address} :" },
+      { tag: "hoja-de-google", line: "{words} es una hoja de google en {quoted address} :" },
+      { tag: "airtable", line: "{words} es un airtable en {quoted address} :" },
+      {
+        tag: "atmosphere",
+        line: "{words} es una cuenta personal de atmosphere en {quoted address} :",
+        flag: "personal",
+        bare: "{words} es una cuenta personal de atmosphere :"
+      },
+      { tag: "atmosphere", line: "{words} es un espacio de atmosphere en {quoted address} :", flag: "space" },
+      { tag: "atmosphere", line: "{words} es una cuenta de atmosphere en {quoted address} :" },
+      { tag: "almacenamiento-del-dispositivo", line: "{words} se guarda en este dispositivo :" },
+      { tag: "almacenamiento-del-dispositivo", line: "{words} es una base de datos en este dispositivo :" },
+      { tag: "almacenamiento-de-ventana", line: "{words} se guarda en este dispositivo , para cada pestaña :" },
+      { tag: "almacenamiento-en-memoria", line: "{words} se guarda en memoria :" },
+      { tag: "almacenamiento-en-memoria", line: "{words} es una base de datos en memoria :" }
+    ],
     attributes: {
       nombre: "name",
       alias: "aka",
       plantilla: "template",
       "uno-de": "one-of",
+      personal: "personal",
+      espacio: "space",
       tipo: "type",
       frase: "alias",
       descripción: "description",
@@ -282,17 +324,18 @@ export const spanishWords: SP.LanguageWords = {
       pestaña: "tab",
       pestana: "tab",
       etiquetas: "tags",
-      ilustración: "picture",
-      ilustracion: "picture",
+      miniatura: "thumbnail",
+      "en-vivo": "live",
       fila: "row",
       columna: "column",
       color: "color"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
+      placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",
       template: "{a name} {name} es {a super} {super} :",
       templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
-      moreOf: "{a words} {words} :",
+      extend: "{a words} {words} :",
       singleton: "{words} es {a super} {super} :",
       supers: {
         view: "vista",
@@ -340,7 +383,8 @@ export const spanishWords: SP.LanguageWords = {
       menuEach: "su {name} es un menú de {for-each} , cada uno ejecutando {quoted action}",
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
-      pageLocked: 'su candado es "bloqueado"',
+      pageLocked: "su candado es bloqueado",
+      templateThumbnail: "su miniatura es {quoted thumbnail}",
       // Spell UI's Spanish words for `<ui-section label sticky="stack" collapsible dividing level>`
       pageSection: {
         tag: "seccion",
@@ -354,10 +398,13 @@ export const spanishWords: SP.LanguageWords = {
       sitePageTab: ", pestaña {quoted tab}",
       sitePageTags: ", etiquetada {quoted tags}",
       sitePageState: ", {state}",
-      sitePagePicture: ", ilustrada en {quoted picture}",
+      sitePageThumbnail: ", miniatura {quoted thumbnail}",
+      sitePageLive: ", en vivo {quoted live}",
       siteCardPlace: ", en la fila {row} columna {column}",
       siteCardColor: ", de color {color}",
       siteOverlay: "tiene {a words} {words}",
+      siteOverlayOf: { dialog: "tiene un diálogo {words}", sidebar: "tiene un panel {words}" },
+      siteOverlayWords: "diálogo|dialogo|modal|panel|lateral",
       viewFlags: {
         draggable: "es arrastrable",
         droppable: "es soltable",
@@ -392,6 +439,7 @@ export const spanishWords: SP.LanguageWords = {
         whole: "mostrar todo en :",
         inPages: "mostrarlos en páginas",
         allAtOnce: "mostrarlos todos",
+        atATime: "mostrarlos de {size} en {size}",
         no: "no",
         pages: "páginas",
         none_: "ninguna",
@@ -448,12 +496,14 @@ export const spanishWords: SP.LanguageWords = {
     timestamp: ["marca de tiempo"],
     selection: ["selección", "seleccion"],
     // una página bloqueada:  `su candado es bloqueado` (épica `notebook` P1)
-    lock: ["candado"]
+    lock: ["candado"],
+    // la imagen de una página o vista sin contenido (épica `mockup` P16)
+    thumbnail: ["miniatura"]
   },
 
   builtInMemberValues: {
     // lo que vale el candado de una página (épica `notebook` I1)
-    lock: { bloqueado: "locked", desbloqueado: "unlocked" }
+    lock: { desbloqueado: "unlocked", bloqueado: "locked", desbloqueada: "unlocked", bloqueada: "locked" }
   },
 
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
@@ -501,6 +551,8 @@ export const spanishWords: SP.LanguageWords = {
      */
     methodLine: /^(?:para(?![ \t]+cada\b)|(?:crear[ \t]+)?animaci[oó]n)[ \t]/iu,
     /** A line re-opening a type, its name captured:  `una carta:`, `un solitario donde:`. */
+    placeDeclaration:
+      /^(?!(?:un[oa]?|el|la|los|las|su|sus)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+un[oa]?[ \t].*[ \t](?:en|desde)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
     reopenedType: /^un[oa]?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:donde[ \t]*)?:[ \t]*$/iu
   }
 }

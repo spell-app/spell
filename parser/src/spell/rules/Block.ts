@@ -70,6 +70,10 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     })
     const errors = matched.flatMap((match) => Block.getParseErrors(match) ?? [])
     if (errors.length) result.data.errors = errors
+    // what catches the line above it needs one:  `if that fails:`, as the errors are gathered
+    matched.forEach((item, index) => {
+      if (index > 0 && item.data.statement instanceof P.Match) item.data.statement.data.lineAbove = true
+    })
     return result
   }
 
@@ -123,8 +127,11 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
       // returns a statement-shaped node -- not statically representable.
       if (!(item instanceof P.Match)) return
       context.group = this.groupOpenedBy(match, index) ?? context.group
+      const from = statements.length
       statements.push(...this.statementsFor(item, index, context))
       const statement = this.statementOf(item)
+      // `if that fails:` in an action takes the line above it inside its `try`
+      if (statement) (statement.rule as CatchesLineAbove).catchesLineAbove?.(statement, statements, from)
       if (statement && autoDeclared.has(statement)) statements.push(...autoDeclared.get(statement)!)
       if (statement) statements.push(...Block.flatBodyStatements(statement))
     })
@@ -449,4 +456,9 @@ export type BlockMatchData = {
    * - Set by `SpellStatement.parseNestedBlock()`;  `Block.getAST()` writes its `return` (epic `language` I47).
    */
   returnsLast?: P.Match
+}
+
+/** A rule whose line changes the line above it:  see `IfThatFails.catchesLineAbove()`. */
+type CatchesLineAbove = {
+  catchesLineAbove?(match: P.Match, statements: P.ASTNode[], from: number): boolean
 }

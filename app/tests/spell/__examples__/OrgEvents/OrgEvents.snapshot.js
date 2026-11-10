@@ -7,37 +7,37 @@ core.heading("Org Events:  an org's events, from an idea to a quiet record")
 
 export class Event extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 564, end: 582 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 593, end: 614 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "organizers" is text
-  static { this.declareProp("organizers", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 586, end: 610 } }) }
+  static { this.declareProp("organizers", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 619, end: 646 } }) }
   get organizers() { return this.getProp("organizers") }
   set organizers(value) { this.setProp("organizers", value) }
 
   // - its "proposed" is text
-  static { this.declareProp("proposed", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 614, end: 636 } }) }
+  static { this.declareProp("proposed", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 651, end: 676 } }) }
   get proposed() { return this.getProp("proposed") }
   set proposed(value) { this.setProp("proposed", value) }
 
   // - its "stage" is text
-  static { this.declareProp("stage", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 640, end: 659 } }) }
+  static { this.declareProp("stage", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 681, end: 703 } }) }
   get stage() { return this.getProp("stage") }
   set stage(value) { this.setProp("stage", value) }
 
   // - its "stage name" is text
-  static { this.declareProp("stageName", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 663, end: 687 } }) }
+  static { this.declareProp("stageName", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 708, end: 735 } }) }
   get stageName() { return this.getProp("stageName") }
   set stageName(value) { this.setProp("stageName", value) }
 
   // - its "onward" is text
-  static { this.declareProp("onward", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 691, end: 711 } }) }
+  static { this.declareProp("onward", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 740, end: 763 } }) }
   get onward() { return this.getProp("onward") }
   set onward(value) { this.setProp("onward", value) }
 
   // - its "onward name" is text
-  static { this.declareProp("onwardName", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 715, end: 740 } }) }
+  static { this.declareProp("onwardName", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 768, end: 796 } }) }
   get onwardName() { return this.getProp("onwardName") }
   set onwardName(value) { this.setProp("onwardName", value) }
 
@@ -57,22 +57,36 @@ export class Event extends Thing {
     )
   }
 
-  static savedIn = { place: "org_events", collection: "events" }
+  static savedIn = {
+    place: "org_events",
+    collection: "events",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in org events
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 559, end: 581 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in org events
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 559, end: 581 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 export class EventStage extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 800, end: 818 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 879, end: 900 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "moves to" is text
-  static { this.declareProp("movesTo", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 822, end: 844 } }) }
+  static { this.declareProp("movesTo", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 905, end: 930 } }) }
   get movesTo() { return this.getProp("movesTo") }
   set movesTo(value) { this.setProp("movesTo", value) }
 
   // - its "moved by" is text
-  static { this.declareProp("movedBy", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 848, end: 870 } }) }
+  static { this.declareProp("movedBy", { type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 935, end: 960 } }) }
   get movedBy() { return this.getProp("movedBy") }
   set movedBy(value) { this.setProp("movedBy", value) }
 
@@ -83,7 +97,20 @@ export class EventStage extends Thing {
     )
   }
 
-  static savedIn = { place: "org_events", collection: "event_stages", select: ["name", "movedBy"] }
+  static savedIn = {
+    place: "org_events",
+    collection: "event_stages",
+    times: ["created", "modified"], select: ["name", "movedBy"] }
+
+  // - it lives in org events
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 845, end: 867 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in org events
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 845, end: 867 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**

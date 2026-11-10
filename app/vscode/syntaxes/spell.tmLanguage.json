@@ -2,63 +2,129 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Spell",
   "scopeName": "source.spell",
-  "comment": "Coarse colouring until the language server's semantic tokens arrive:  comments, strings, numbers, statement words;  a type's <css> block, coloured as CSS, and a <markdown> block, coloured as markdown, for good (the language server leaves their insides alone).",
+  "comment": "Coarse colouring until the language server's semantic tokens arrive:  comments, strings, numbers, statement words;  a type's <css> block, coloured as CSS, and a <markdown> block, coloured as markdown, for good (the language server leaves their insides alone).  Tags, for a file in the tag shape (epic `language` P40):  a tag only at a line's start or right after another's `>`, so `x <y` in plain Spell isn't one.",
   "patterns": [
-    { "include": "#css" },
-    { "include": "#css-close" },
-    { "include": "#markdown" },
-    { "include": "#markdown-close" },
-    { "include": "#comment" },
-    { "include": "#string" },
-    { "include": "#number" },
-    { "include": "#keyword" }
+    {
+      "include": "#css"
+    },
+    {
+      "include": "#css-close"
+    },
+    {
+      "include": "#markdown"
+    },
+    {
+      "include": "#markdown-close"
+    },
+    {
+      "include": "#html-comment"
+    },
+    {
+      "include": "#closer"
+    },
+    {
+      "include": "#tag"
+    },
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#number"
+    },
+    {
+      "include": "#keyword"
+    }
   ],
   "repository": {
     "css": {
       "comment": "A <css> line opens a block that lasts while lines aren't </css>:  a `while` rule, so an unclosed `{` in the CSS can't swallow the </css>.",
       "begin": "^\\s*(<)(css)(>)\\s*$",
       "beginCaptures": {
-        "1": { "name": "punctuation.definition.tag.begin.spell" },
-        "2": { "name": "entity.name.tag.spell" },
-        "3": { "name": "punctuation.definition.tag.end.spell" }
+        "1": {
+          "name": "punctuation.definition.tag.begin.spell"
+        },
+        "2": {
+          "name": "entity.name.tag.spell"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.spell"
+        }
       },
       "while": "^(?!\\s*</css>\\s*$)",
       "contentName": "meta.embedded.block.css",
-      "patterns": [{ "include": "source.css" }]
+      "patterns": [
+        {
+          "include": "source.css"
+        }
+      ]
     },
     "css-close": {
       "match": "^\\s*(</)(css)(>)\\s*$",
       "captures": {
-        "1": { "name": "punctuation.definition.tag.begin.spell" },
-        "2": { "name": "entity.name.tag.spell" },
-        "3": { "name": "punctuation.definition.tag.end.spell" }
+        "1": {
+          "name": "punctuation.definition.tag.begin.spell"
+        },
+        "2": {
+          "name": "entity.name.tag.spell"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.spell"
+        }
       }
     },
     "markdown": {
       "comment": "A <markdown> line opens a block that lasts while lines aren't </markdown>:  each line is coloured past the block's indent and one more, so a # heading or a > quote counts as markdown's.",
       "begin": "^(\\s*)(<)(markdown)(>)\\s*$",
       "beginCaptures": {
-        "2": { "name": "punctuation.definition.tag.begin.spell" },
-        "3": { "name": "entity.name.tag.spell" },
-        "4": { "name": "punctuation.definition.tag.end.spell" }
+        "2": {
+          "name": "punctuation.definition.tag.begin.spell"
+        },
+        "3": {
+          "name": "entity.name.tag.spell"
+        },
+        "4": {
+          "name": "punctuation.definition.tag.end.spell"
+        }
       },
       "while": "^(?!\\s*</markdown>\\s*$)(?:\\1\\s?)?",
       "contentName": "meta.embedded.block.markdown",
-      "patterns": [{ "include": "text.html.markdown" }]
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
     },
     "markdown-close": {
       "match": "^\\s*(</)(markdown)(>)\\s*$",
       "captures": {
-        "1": { "name": "punctuation.definition.tag.begin.spell" },
-        "2": { "name": "entity.name.tag.spell" },
-        "3": { "name": "punctuation.definition.tag.end.spell" }
+        "1": {
+          "name": "punctuation.definition.tag.begin.spell"
+        },
+        "2": {
+          "name": "entity.name.tag.spell"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.spell"
+        }
       }
     },
     "comment": {
       "patterns": [
-        { "name": "comment.line.double-slash.spell", "match": "//.*$" },
-        { "name": "comment.line.double-dash.spell", "match": "--.*$" },
-        { "name": "comment.line.number-sign.heading.spell", "match": "^\\s*#+.*$" }
+        {
+          "name": "comment.line.double-slash.spell",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.line.double-dash.spell",
+          "match": "--.*$"
+        },
+        {
+          "name": "comment.line.number-sign.heading.spell",
+          "match": "^\\s*#+.*$"
+        }
       ]
     },
     "string": {
@@ -67,13 +133,23 @@
           "name": "string.quoted.double.spell",
           "begin": "\"",
           "end": "\"",
-          "patterns": [{ "name": "constant.character.escape.spell", "match": "\\\\." }]
+          "patterns": [
+            {
+              "name": "constant.character.escape.spell",
+              "match": "\\\\."
+            }
+          ]
         },
         {
           "name": "string.quoted.single.spell",
           "begin": "'",
           "end": "'",
-          "patterns": [{ "name": "constant.character.escape.spell", "match": "\\\\." }]
+          "patterns": [
+            {
+              "name": "constant.character.escape.spell",
+              "match": "\\\\."
+            }
+          ]
         }
       ]
     },
@@ -81,12 +157,109 @@
       "name": "constant.numeric.spell",
       "match": "(?<![\\w-])-?\\d+(\\.\\d+)?\\b"
     },
+    "closer": {
+      "comment": "</>, or a named closer, </property>.",
+      "match": "(</)([\\p{L}][\\p{L}\\p{N}-]*)?(>)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.spell"
+        },
+        "2": {
+          "name": "entity.name.tag.spell"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.spell"
+        }
+      }
+    },
+    "tag": {
+      "comment": "A tag's head:  its word, a quoted name, attributes;  or, for a handler or control word, a spell phrase up to its >.  Ends at > or />.",
+      "begin": "(?:^\\s*|(?<=>))(<)([\\p{L}][\\p{L}\\p{N}-]*)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.spell"
+        },
+        "2": {
+          "name": "entity.name.tag.spell"
+        }
+      },
+      "end": "(/?>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.spell"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#attribute"
+        },
+        {
+          "include": "#hole"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#keyword"
+        }
+      ]
+    },
+    "attribute": {
+      "match": "([\\p{L}][\\p{L}\\p{N}-]*)(=)",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name.spell"
+        },
+        "2": {
+          "name": "punctuation.separator.key-value.spell"
+        }
+      }
+    },
+    "hole": {
+      "comment": "A {hole}:  spell inside an attribute's value.",
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.begin.spell"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.end.spell"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    "html-comment": {
+      "comment": "<!-- ... -->, anywhere, over as many lines as it takes:  never drawn (Owen, 2026-10-26).",
+      "begin": "<!--",
+      "end": "-->",
+      "name": "comment.block.html.spell",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.spell"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.spell"
+        }
+      }
+    },
     "keyword": {
       "comment": "Generated by scripts/vscode-grammar.ts from the language packs:  English, Spanish.",
       "patterns": [
         {
           "name": "keyword.control.spell",
-          "match": "^\\s*(guarda\\s+una\\s+copia\\s+en\\s+este\\s+dispositivo|mientras\\s+algo\\s+se\\s+arrastra\\s+sobre\\s+ella|mientras\\s+algo\\s+se\\s+arrastra\\s+sobre\\s+ello|mientras\\s+algo\\s+se\\s+arrastra\\s+sobre\\s+él|cada\\s+persona\\s+añade\\s+como\\s+mucho\\s+sus|mientras\\s+el\\s+raton\\s+esta\\s+presionado|mientras\\s+el\\s+raton\\s+está\\s+presionado|mientras\\s+el\\s+ratón\\s+esta\\s+presionado|mientras\\s+el\\s+ratón\\s+está\\s+presionado|mientras\\s+el\\s+raton\\s+esta\\s+sobre\\s+ella|mientras\\s+el\\s+raton\\s+está\\s+sobre\\s+ella|mientras\\s+el\\s+ratón\\s+esta\\s+sobre\\s+ella|mientras\\s+el\\s+ratón\\s+está\\s+sobre\\s+ella|cada\\s+persona\\s+pide\\s+como\\s+mucho\\s+sus|a\\s+new\\s+one\\s+replaces\\s+the\\s+last\\s+one|mientras\\s+el\\s+raton\\s+esta\\s+sobre\\s+el|mientras\\s+el\\s+raton\\s+esta\\s+sobre\\s+él|mientras\\s+el\\s+raton\\s+está\\s+sobre\\s+el|mientras\\s+el\\s+raton\\s+está\\s+sobre\\s+él|mientras\\s+el\\s+ratón\\s+esta\\s+sobre\\s+el|mientras\\s+el\\s+ratón\\s+esta\\s+sobre\\s+él|mientras\\s+el\\s+ratón\\s+está\\s+sobre\\s+el|mientras\\s+el\\s+ratón\\s+está\\s+sobre\\s+él|uno\\s+nuevo\\s+reemplaza\\s+al\\s+anterior|cuando\\s+otra\\s+persona\\s+la\\s+cambia|cuando\\s+otra\\s+persona\\s+lo\\s+cambia|when\\s+someone\\s+else\\s+changes\\s+it|while\\s+something\\s+dragged\\s+over|las\\s+fechas\\s+se\\s+muestran\\s+como|abierta\\s+a\\s+inscripciones\\s+de|keep\\s+a\\s+copy\\s+on\\s+this\\s+device|while\\s+the\\s+mouse\\s+is\\s+over\\s+it|desplazarse\\s+hasta\\s+arriba|while\\s+the\\s+mouse\\s+is\\s+down|crear\\s+un\\s+tipo\\s+nombrado|crear\\s+un\\s+tipo\\s+llamada|crear\\s+un\\s+tipo\\s+llamado|mostrarlos\\s+en\\s+paginas|mostrarlos\\s+en\\s+páginas|create\\s+a\\s+type\\s+called|create\\s+a\\s+type\\s+named|finalizar\\s+animacion|finalizar\\s+animación|seleccionada\\s+cuando|cancelar\\s+animacion|cancelar\\s+animación|dates\\s+are\\s+shown\\s+as|show\\s+them\\s+in\\s+pages|terminar\\s+animacion|terminar\\s+animación|cuando\\s+cambia\\s+una|detener\\s+animacion|detener\\s+animación|finalizar\\s+proceso|if\\s+that\\s+fails\\s+say|if\\s+there\\s+are\\s+none|iniciar\\s+animacion|iniciar\\s+animación|mostrando\\s+de\\s+cada|mostrando\\s+de\\s+toda|scroll\\s+to\\s+the\\s+top|si\\s+no\\s+hay\\s+ninguna|si\\s+no\\s+hay\\s+ninguno|at\\s+the\\s+same\\s+time|cancel\\s+animation|cancelar\\s+proceso|cuando\\s+cambia\\s+un|finalizar\\s+prueba|finish\\s+animation|mostrarlos\\s+todos|terminar\\s+proceso|al\\s+mismo\\s+tiempo|de\\s+lo\\s+contrario|deshacible\\s+como|detener\\s+proceso|end\\s+print\\s+group|iniciar\\s+proceso|mientras\\s+espera|mostrar\\s+todo\\s+en|para\\s+actualizar|para\\s+dibujar\\s+su|parar\\s+animacion|parar\\s+animación|terminar\\s+prueba|cancel\\s+process|cuando\\s+algo\\s+se|empezar\\s+prueba|finish\\s+process|iniciar\\s+prueba|mientras\\s+carga|mientras\\s+tanto|only\\s+where\\s+its|show\\s+it\\s+all\\s+in|si\\s+falla\\s+decir|si\\s+no\\s+hay\\s+nada|stop\\s+animation|terminar\\s+grupo|when\\s+something|activa\\s+cuando|end\\s+animation|if\\s+that\\s+fails|mostrarlos\\s+en|no\\s+hacer\\s+nada|parar\\s+proceso|selected\\s+when|show\\s+them\\s+all|showing\\s+every|solo\\s+donde\\s+su|while\\s+loading|while\\s+waiting|enabled\\s+when|mientras\\s+una|on\\s+something|otherwise\\s+if|recargar\\s+las|recargar\\s+los|show\\s+them\\s+in|showing\\s+each|stop\\s+process|aleatorizar|each\\s+person|end\\s+process|esperar\\s+que|mientras\\s+un|recargar\\s+el|recargar\\s+la|to\\s+draw\\s+its|undoable\\s+as|al\\s+cambiar|como\\s+mucho|conectar\\s+a|connect\\s+to|cuando\\s+una|de\\s+una\\s+vez|deshacible|dibujar\\s+el|dibujar\\s+la|dibujar\\s+su|do\\s+nothing|mostrar\\s+el|mostrar\\s+la|reintentar|reload\\s+the|reproducir|to\\s+upgrade|animacion|animación|animation|anteponer|confirmar|confirmed|consultar|crear\\s+una|create\\s+an|cuando\\s+un|dentro\\s+de|descartar|go\\s+to\\s+the|in\\s+one\\s+go|meanwhile|notificar|otherwise|pause\\s+for|precargar|preguntar|randomize|try\\s+again|adjuntar|advertir|cancelar|crear\\s+un|create\\s+a|devolver|disparar|draw\\s+its|eliminar|end\\s+test|imprimir|invertir|mientras|only\\s+its|shortcut|show\\s+the|si\\s+falla|solo\\s+sus|titulada|undoable|wait\\s+for|while\\s+an|agregar|at\\s+most|barajar|confirm|dibujar|discard|else\\s+if|esperar|guardar|iniciar|ir\\s+a\\s+el|ir\\s+a\\s+la|limpiar|mezclar|obtener|open\\s+to|preload|prepend|repetir|reverse|shuffle|trigger|when\\s+an|while\\s+a|anadir|añadir|anexar|append|avisar|cancel|cargar|cerrar|cuando|enviar|expect|lanzar|notify|pausar|prompt|quitar|remove|repeat|return|titled|vaciar|when\\s+a|alert|atajo|await|check|clear|close|empty|fetch|fijar|icono|mover|on\\s+an|parar|pasar|poner|print|query|salir|si\\s+no|start|traer|while|draw|echo|else|exit|fire|icon|into|join|load|move|must|on\\s+a|para|pass|play|save|send|sino|stop|unir|warn|when|add|eco|for|get|let|one|por|sea|set|al|if|it|on|si|to)(?![\\p{L}\\p{M}\\d_-])"
+          "match": "^\\s*(guarda\\s+una\\s+copia\\s+en\\s+este\\s+dispositivo|mientras\\s+algo\\s+se\\s+arrastra\\s+sobre\\s+ella|mientras\\s+algo\\s+se\\s+arrastra\\s+sobre\\s+ello|mientras\\s+algo\\s+se\\s+arrastra\\s+sobre\\s+él|cada\\s+persona\\s+añade\\s+como\\s+mucho\\s+sus|mientras\\s+el\\s+raton\\s+esta\\s+presionado|mientras\\s+el\\s+raton\\s+está\\s+presionado|mientras\\s+el\\s+ratón\\s+esta\\s+presionado|mientras\\s+el\\s+ratón\\s+está\\s+presionado|mientras\\s+el\\s+raton\\s+esta\\s+sobre\\s+ella|mientras\\s+el\\s+raton\\s+está\\s+sobre\\s+ella|mientras\\s+el\\s+ratón\\s+esta\\s+sobre\\s+ella|mientras\\s+el\\s+ratón\\s+está\\s+sobre\\s+ella|cada\\s+persona\\s+pide\\s+como\\s+mucho\\s+sus|a\\s+new\\s+one\\s+replaces\\s+the\\s+last\\s+one|mientras\\s+el\\s+raton\\s+esta\\s+sobre\\s+el|mientras\\s+el\\s+raton\\s+esta\\s+sobre\\s+él|mientras\\s+el\\s+raton\\s+está\\s+sobre\\s+el|mientras\\s+el\\s+raton\\s+está\\s+sobre\\s+él|mientras\\s+el\\s+ratón\\s+esta\\s+sobre\\s+el|mientras\\s+el\\s+ratón\\s+esta\\s+sobre\\s+él|mientras\\s+el\\s+ratón\\s+está\\s+sobre\\s+el|mientras\\s+el\\s+ratón\\s+está\\s+sobre\\s+él|uno\\s+nuevo\\s+reemplaza\\s+al\\s+anterior|cuando\\s+otra\\s+persona\\s+la\\s+cambia|cuando\\s+otra\\s+persona\\s+lo\\s+cambia|when\\s+someone\\s+else\\s+changes\\s+it|while\\s+something\\s+dragged\\s+over|las\\s+fechas\\s+se\\s+muestran\\s+como|abierta\\s+a\\s+inscripciones\\s+de|keep\\s+a\\s+copy\\s+on\\s+this\\s+device|while\\s+the\\s+mouse\\s+is\\s+over\\s+it|desplazarse\\s+hasta\\s+arriba|while\\s+the\\s+mouse\\s+is\\s+down|crear\\s+un\\s+tipo\\s+nombrado|crear\\s+un\\s+tipo\\s+llamada|crear\\s+un\\s+tipo\\s+llamado|mostrarlos\\s+en\\s+paginas|mostrarlos\\s+en\\s+páginas|create\\s+a\\s+type\\s+called|create\\s+a\\s+type\\s+named|finalizar\\s+animacion|finalizar\\s+animación|seleccionada\\s+cuando|cancelar\\s+animacion|cancelar\\s+animación|dates\\s+are\\s+shown\\s+as|show\\s+them\\s+in\\s+pages|terminar\\s+animacion|terminar\\s+animación|cuando\\s+cambia\\s+una|detener\\s+animacion|detener\\s+animación|finalizar\\s+proceso|if\\s+that\\s+fails\\s+say|if\\s+there\\s+are\\s+none|iniciar\\s+animacion|iniciar\\s+animación|mostrando\\s+de\\s+cada|mostrando\\s+de\\s+toda|scroll\\s+to\\s+the\\s+top|si\\s+no\\s+hay\\s+ninguna|si\\s+no\\s+hay\\s+ninguno|at\\s+the\\s+same\\s+time|cancel\\s+animation|cancelar\\s+proceso|cuando\\s+cambia\\s+un|finalizar\\s+prueba|finish\\s+animation|mostrarlos\\s+todos|terminar\\s+proceso|al\\s+mismo\\s+tiempo|de\\s+lo\\s+contrario|detener\\s+proceso|end\\s+print\\s+group|iniciar\\s+proceso|mientras\\s+espera|mostrar\\s+todo\\s+en|para\\s+actualizar|para\\s+dibujar\\s+su|parar\\s+animacion|parar\\s+animación|se\\s+deshace\\s+como|terminar\\s+prueba|cancel\\s+process|cuando\\s+algo\\s+se|empezar\\s+prueba|finish\\s+process|iniciar\\s+prueba|mientras\\s+carga|mientras\\s+tanto|only\\s+where\\s+its|show\\s+it\\s+all\\s+in|si\\s+falla\\s+decir|si\\s+no\\s+hay\\s+nada|stop\\s+animation|terminar\\s+grupo|when\\s+something|activa\\s+cuando|end\\s+animation|if\\s+that\\s+fails|mostrarlos\\s+de|mostrarlos\\s+en|no\\s+hacer\\s+nada|parar\\s+proceso|selected\\s+when|show\\s+them\\s+all|showing\\s+every|solo\\s+donde\\s+su|while\\s+loading|while\\s+waiting|enabled\\s+when|mientras\\s+una|on\\s+something|otherwise\\s+if|recargar\\s+las|recargar\\s+los|show\\s+them\\s+in|showing\\s+each|stop\\s+process|aleatorizar|each\\s+person|end\\s+process|esperar\\s+que|mientras\\s+un|recargar\\s+el|recargar\\s+la|to\\s+draw\\s+its|al\\s+cambiar|como\\s+mucho|conectar\\s+a|connect\\s+to|cuando\\s+una|de\\s+una\\s+vez|dibujar\\s+el|dibujar\\s+la|dibujar\\s+su|do\\s+nothing|mostrar\\s+el|mostrar\\s+la|reintentar|reload\\s+the|reproducir|to\\s+upgrade|animacion|animación|animation|anteponer|confirmar|confirmed|consultar|crear\\s+una|create\\s+an|cuando\\s+un|dentro\\s+de|descartar|go\\s+to\\s+the|in\\s+one\\s+go|meanwhile|notificar|otherwise|pause\\s+for|precargar|preguntar|randomize|show\\s+them|try\\s+again|undone\\s+as|adjuntar|advertir|cancelar|crear\\s+un|create\\s+a|devolver|disparar|draw\\s+its|eliminar|end\\s+test|imprimir|invertir|mientras|only\\s+its|shortcut|show\\s+the|si\\s+falla|solo\\s+sus|titulada|wait\\s+for|while\\s+an|agregar|at\\s+most|barajar|confirm|dibujar|discard|else\\s+if|esperar|guardar|iniciar|ir\\s+a\\s+el|ir\\s+a\\s+la|limpiar|mezclar|obtener|open\\s+to|preload|prepend|repetir|reverse|shuffle|trigger|when\\s+an|while\\s+a|anadir|añadir|anexar|append|avisar|cancel|cargar|cerrar|cuando|enviar|expect|lanzar|notify|pausar|prompt|quitar|remove|repeat|return|titled|vaciar|when\\s+a|alert|atajo|await|check|clear|close|empty|fetch|fijar|icono|it\\s+is|mover|on\\s+an|parar|pasar|poner|print|query|salir|si\\s+no|start|traer|while|draw|echo|else|está|exit|fire|icon|into|join|load|move|must|on\\s+a|para|pass|play|save|send|sino|stop|unir|warn|when|add|eco|for|get|let|one|por|sea|set|al|es|if|it|on|si|to)(?![\\p{L}\\p{M}\\d_-])"
         },
         {
           "name": "keyword.operator.word.spell",

@@ -2,7 +2,15 @@ import { untrackCells } from "spell/util/reactive"
 import { Loadable } from "spell/util/spell/Loadable"
 
 import type { Places } from "./Places"
-import { idOfRow, type ListAnswer, type ListHandled, type ListQuery, type Place, type PlaceRow } from "./places.types"
+import {
+  idOfRow,
+  type DecimalMark,
+  type ListAnswer,
+  type ListHandled,
+  type ListQuery,
+  type Place,
+  type PlaceRow
+} from "./places.types"
 
 /** Everything a result can say about its rows. */
 export const ResultStatuses = ["still waiting", "complete", "from an earlier visit", "couldn't update"] as const
@@ -103,6 +111,11 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
   /** What the place, or the engine, wants known about these rows, in words:  see `ListAnswer.notes`. */
   get notes(): readonly string[] {
     return this.answer?.notes ?? []
+  }
+
+  /** How a number its text can't settle reads, when the place knows:  see `ListAnswer.unclearNumbers`. */
+  get unclearNumbers(): DecimalMark | undefined {
+    return this.answer?.unclearNumbers
   }
 
   /** The place's last answer, without its rows. */

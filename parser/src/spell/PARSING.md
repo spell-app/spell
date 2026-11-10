@@ -859,6 +859,26 @@ A kind that says so is saved in a file of its own.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 
+## A property's list of values:  `- it is locked` (epic `language` P39)
+
+A property with a list of values keeps it on its record, `P.ScopeVariable.listedValues`, however it got one:
+a line of the built-in types table, a built-in template, or a project's own `one of`.
+
+- The list is in its language:  Spanish's `candado` lists `bloqueado`, and `valueOutputs` says what each compiles to.
+- Each word is a constant the language knows, so `its lock is locked` needs no quotes.
+- `P.TypeScope.propertiesListing(word)` finds the properties that list a word, own or inherited, singular or plural.
+- Three things read the list:
+  - `it_is_value`, a line in a type's body:  `- it is locked`, `- it is a queen`, Spanish's `- está bloqueada`
+    - starts with its literal words, so it's filed under them and no other line tries it
+    - the same getter as naming the property;  it outranks setting a variable named `it`
+    - a word on no list, or on two properties' lists, is a parse error;  a variable or property of that name isn't ours
+  - `is_equal` and `is_listed_value`, comparing:  `if it is clubs`, `if it is a queen`
+    - `is_listed_value` only when the word names no type:  a known type's `is_a` wins
+  - the check on a plain quoted value, `SpellConstant.wrongValueMessage()`:
+    - a line giving it a value, or a `set`, is refused:  `- its lock is "banana"`
+    - a comparison, a new thing or a drawing's tag warns:  `<card suit="banana"/>`
+    - a value from a variable or with a `[fill-in]` isn't checked:  that's for the run-time check
+
 ## Outline bodies:  `a card is a thing where:`
 
 - The OUTLINE style (epic `outline-spell`):  a type's heading, then indented lines all about that type.
@@ -895,7 +915,7 @@ A kind that says so is saved in a file of its own.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
   - In a `.spell` file its tag is `<extend "game">`, its members inside (epic `data` T76):
-    so a place's fields can stay in one plain `.spell` file, and what's drawn in a `.spellml` file beside it.
+    so a place's fields can stay in one file, and what's drawn in another beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
   - Their class:  `SubjectRule`, in `types/`.
@@ -1281,7 +1301,15 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
 A `.spell` file is read by spell's own parser and rules, as sentences and the outline are:
 each tag line reads as its code-spell twin line, so it compiles to exactly what its twin `.spell` file does.
 
-- Which form a file is:  its suffix (`SpellFile.form`, `"spell"` or `"spellx"`).
+- Which form a file is:  what it says (`SP.formOfText()`, `SpellFile.form`, `"spell"` or `"spellx"`;  epic `language` P40).
+  - Tags:  any line starting with `<` in the very first column, other than `<ui-defaults>`;  lines in a comment don't count.
+  - The old endings, `.spellml` and `.spellx`, are always tags.
+- A place's tag, `<web-server "x" address="...">`, at a file's top level only (`SP.SpellxPlaceWord`, the language's `places`):
+  its twin is its plain line, `x is a web server at "..." :`, and its body is plain Spell, as an `<action>`'s.
+  - An unknown word with `address=` there is a kind a library adds:  `<supabase-project>` reads `x is a supabase project at`.
+  - `SX.SpellxWriter` writes a place's line as its tag, by whichever entry's words it says;  none, and it stays in `<spell>`.
+  - A file whose shape changes as it's edited is parsed whole, in a new scope:
+    incremental parsing never carries lines from one shape to the other (`SpellProject.updatedContentsFor()`).
   - Its parser is the language's, cloned for that form:  `SpellParser.twinFor(language, form)`.
   - A spellx parser tokenizes a whole file (`"block"`) with [`SP.SpellxTokenizer`](SpellxTokenizer.ts),
     and everything else (a line, an expression) with spell's own.
@@ -1307,13 +1335,19 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
   - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
     controls;  in a drawing, those and a placed slot;  in a menu, its actions (`isTagHere()`).
-  - A NOTE carries the prefix, as a template does (epic `data` P31, Q27):  `<note>`, `<note>`,
-    `<property-editor>`;  Spanish's `<nota>` ...
-    - The short words are Spell UI's:  `<comment>` in a drawing is markup, `<ui-comment>`, as `<button>` is
-      `<ui-button>`.
-    - An old short note elsewhere (among a template's members, in an action) still reads as a note,
-      with a warning naming its new tag (`spellx-short-note`):
-      noted on the token (`SP.addSpellxWarning()`), and `BlockLine` notes it on its line (`SP.SpellWarnings.note()`).
+  - SHORT TAGS (epic `language` P41):  at a file's top level a template's tag is its own word, `<page>`, `<thing>`,
+    `<extend>` (`topTemplateOr()`, `isShortTemplate`);  inside a site `<page>` is its part, in a drawing Spell UI's.
+    - The old spelling, with the language's prefix, `<spell-page>`, `<encanto-vista>`, `<spell-more-of>`, still reads
+      anywhere a template goes;  a short closer closes it, and the other way round.  Nothing writes it.
+    - Code that finds a template in text without parsing it asks `SP.spellxTemplateTagOf()` (`spellxTags.ts`,
+      the packs' words alone, so a page with no parser may import it by path).
+  - A NOTE is `<note>` (`<nota>`), and `<property-editor>`, `<stories>`:  prose kept, never run.
+    - In a drawing their words are markup:  `<comment>` is `<ui-comment>`, as `<button>` is `<ui-button>`;
+      `<note>` a project's own view.
+    - An old note word elsewhere (`<spell-description>`, `<spell-comment>`, a short `<description>` or `<comment>`
+      among a template's members) still reads as a note, with a warning naming `<note>` (`spellx-old-note`):
+      noted on the token (`SP.addSpellxWarning()`), and `BlockLine` notes it on its line (`SP.SpellWarnings.note()`);
+      a `<spell-description>` first in a tag, read as its docstring, passes its warning to the tag's line.
   - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
     else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
   - A `<spell>` chunk (the bare prefix, `<encanto>` in Spanish;  epic `elemental-spell` P12) is code spell as written:
@@ -1336,7 +1370,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose).
     - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
       its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
-      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is "locked"`.
+      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is locked`.
       - Its SECTIONS draw as the docs pages' do, sticky and foldable, so the program draws the docs look
         (epic `notebook` P3, J1;  the words, `SpellxTwinWords.pageSection`):
         - each `##` heading's run is a `<section label="..." sticky="stack" collapsible dividing level="2">`
@@ -1354,11 +1388,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
         the drawing's `markdown_block`.
     - It starts by itself, as any app or page does (`SpellProject.startedByItself()`):  nothing is added to start it.
   - A PAGE'S OWN VIEWS (epic `notebook` P2, Q1, Q6):  any page, drawing its body or not, may hold templates.
-    - `<view counter>`:  `view` is the templates table read WITHOUT its prefix, as a note's short word is
-      (`tagWordAt()`, `isShortTemplate`), so Spanish's `<vista>` comes free.
-      Only `view` may be short (`SHORT_TEMPLATE_KINDS`), and only inside a page:  `<page>` is Spell UI's `<ui-page>`;
-      at a file's top, `<view>` is `spellx-unknown-word`, naming `<view>`;  in a drawing it's markup.
-    - The long word reads there too, `<view "counter">`;  `</view>` and `</view>` close either.
+    - `<view counter>`:  a view, or a thing (`<thing "task">`), is what a page holds by its short word (`tagWordAt()`,
+      `isShortTemplate`, `SHORT_TEMPLATE_KINDS`), Spanish's `<vista>` too:  `<page>` inside a page is Spell UI's `<ui-page>`;
+      in a drawing it's markup.
+    - The old spelling reads there too, `<spell-view "counter">`.
     - `breakIntoIndentedBlocks()` lifts them to just before the page (`liftPageTemplates()`):
       code spell declares a type only at a file's top level.
       It's the page's own, named for it (epic `notebook` P10, Q11, reversing Q7's A):
@@ -1366,10 +1399,31 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       and `<counter/>` finds the page's own (`SpellxTokenizer.nameForPage()`).
       A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
   - A TEMPLATE'S NAME, three ways (`readNamedHead()`):  quoted, `<view "one counter">`;  `name="..."`;  or bare,
-    one word first, `<view counter>`, `<view counter>` (epic `notebook` P2).
+    one word first, `<view counter>` (epic `notebook` P2).
     An attribute word the tag takes wins:  `<view locked>` is unnamed and locked.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
     the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
+  - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
+    `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
+    - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
+      `{its name}` in it is a hole, other contents follow it, and it's a child even on a tag closed with `/>`.
+    - Each language's spellings are listed:  `<encabezado "...">`, `<es-encabezado "...">`.
+      A word two languages spell alike but read differently is the language's own (`Language.quotedNameTags`).
+
+    | Tag | The quoted word is |
+    | --- | --- |
+    | `header`, `button`, `item`, `label`, `title`, `link`, `breadcrumb`, `checkbox`, `radio` | its contents |
+    | `tab`, `panel` | its `label` |
+    | `example` | its `name` |
+    | `tree-node` | its `label` |
+    | `cell` | its column (`data-column`) |
+
+    | Left out | Why |
+    | --- | --- |
+    | `text`, `description` | often long, or text mixed with values |
+    | `td`, `th` | the web's own table tags |
+    | `segment`, `column`, `content`, `stack` | they hold layouts;  their short text is mostly in demos |
+    | `author`, `date` | common only in Spell UI's feed and comment demos |
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
     line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
     - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
@@ -1809,6 +1863,7 @@ What a program's lines about where data lives compile to, and what reads the res
 - A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
   - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
     a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
+  - In an action, `if that fails:` compiles to a `try` around the line above it, at `Block.getAST()` (`IfThatFails.catchesLineAbove()`).
   - Its read function is named `drawRead`, which `P.DRAWING_NAME` knows:  a drawing never waits, it shows what it has.
 - What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
   `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
@@ -1818,8 +1873,8 @@ What a program's lines about where data lives compile to, and what reads the res
     changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
     `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
 - A target that says `places: false` (a library) refuses a project that names one;  one that lists the kinds it keeps
-  (Python's:  a database on this device, a data folder, a sheet, an Excel file;  `PY.PLACE_KINDS`, epic `data` P40)
-  refuses a place of any other kind, by its word:  the Atmosphere is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
+  (Python's:  a database on this device, a data folder, a sheet, an Excel file, an atmosphere account;  `PY.PLACE_KINDS`, epic `data` P40, P46)
+  refuses a place of any other kind, by its word:  a web server is "not in Python yet" (`SpellProject.placeKindRefusedBy()`).
 
 ## Sites
 
@@ -1861,7 +1916,7 @@ sidebars any of them opens.
 - Its theme (epic `mockup` P8):  a property of its own, `<property "theme">"mockup"</property>` (`- its "theme" is
   "mockup"`), no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
   alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
-- A page's stories (epic `mockup` P6) are the page's own, `<stories>` / `<stories>` in its outline:  "Markdown" below.
+- A page's stories (epic `mockup` P6) are the page's own, `<stories>` in its outline:  "Markdown" below.
 - Spellx:  `<site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
   `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
   (`<sidebar>` is Spell UI's).
@@ -1926,7 +1981,7 @@ sidebars any of them opens.
   - An old `project.json` is read too.
 - Compiled output is never one of a project's own files.
   - The server's index lists only spell, CSS and javascript files, and property editor pages:  see `isManifestFile()`.
-    - `.spell`, `.spellml`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
+    - `.spell` (and the old `.spellml`, `.spellx`), `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
     - A property editors file, `Card.editor.spell` or `Solitaire.editors.spell` (`SP.isPropertyEditorsName()`,
       epic `editor` P25) lists as one of its own:  a text file, never compiled, which the Inspector reads.
     - So no other target's output, e.g. `<Project>.spell.py`, is ever listed.
@@ -2435,7 +2490,8 @@ sidebars any of them opens.
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
   - a page's STORIES, `<stories>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static stories`
-    - what the page must let people do, a markdown list, `- [x]` for one done;  nothing draws them
+    - what the page must let people do, one `<story "S1" done>` tag each (epic `mockup` P17):  anything else in the
+      block is refused;  nothing draws them
     - spellx writes it `<stories>` (Spanish `<historias>`), a note whose twin is the `<stories>` block
       (`SpellxTwin.withStoriesAsBlocks()`)
     - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between

@@ -337,6 +337,8 @@ export class FakeAtmosphere {
   private run(method: string, params: Record<string, unknown>, as: string | undefined, host: string): unknown {
     const repo = `${(params.repo ?? params.did) as string}`
     switch (method) {
+      case "com.atproto.repo.describeRepo":
+        return { collections: [...this.accountOrDie(repo).records.keys()] }
       case "com.atproto.repo.listRecords":
         return this.listRecords(repo, params)
       case "com.atproto.repo.getRecord":

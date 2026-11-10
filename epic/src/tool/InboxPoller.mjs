@@ -43,6 +43,8 @@ import { dirname, join } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 import { fileURLToPath } from "node:url"
 
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
+
 export class InboxPoller {
   /**
    * - `look`:  one look, its answer (`MonitorCheck`), or `undefined` when it failed;  default `epic session listen
@@ -192,8 +194,8 @@ const RETRY_MS = 60_000
 /** The longest a look may take, ms:  past it, the look failed. */
 const LOOK_TIMEOUT_MS = 60_000
 
-/** This checkout's `epic` command:  the look runs this copy's code. */
-const EPIC = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "bin", "epic")
+/** This copy's `epic` command:  the look runs this copy's code. */
+const EPIC = EngineFiles.bin
 
 /**
  * The folder of the one-poller-per-session files, `<session pid>.pid` each, holding its poller's process id:

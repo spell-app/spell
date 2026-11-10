@@ -68,12 +68,18 @@ type Program = {
 /** The built-in examples:  what people run, in the editor. */
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
-/** The lines a program starts with, up to its first type. */
-const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) ")/m
+/**
+ * The lines a program starts with, up to its first type:  in tags, its first template (epic `language` P40),
+ * by its short word (epic `language` P41) or its old prefixed one.
+ */
+const PLACE_LINES =
+  /^[\s\S]*?(?=^(?:a|an|una) "|^<(?:(?:spell|encanto)-)?(?:view|thing|page|app|extend|vista|cosa|página|aplicación|extender)\b)/m
 
-/** `program` with its place's lines replaced. */
+/** `program` with its place's lines replaced;  in a file in tags, as a `<spell>` block. */
 function withPlace(program: Program, lines: string): Program {
-  return { ...program, source: program.source.replace(PLACE_LINES, `${lines}\n\n`) }
+  const isTagged = SP.formOfText(program.source, program.path) === "spellx"
+  const said = isTagged ? `<spell>\n${lines.replace(/^/gm, "\t")}\n</spell>` : lines
+  return { ...program, source: program.source.replace(PLACE_LINES, `${said}\n\n`) }
 }
 
 /** What each back-end's lines say:  all that differs. */
@@ -130,13 +136,17 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
    */
   function serve(name: string, { path, source, more }: Program, { token }: { token?: "none" } = {}): string {
     programs.set(`/programs/${name}.js`, compiledProgram(path, source, more))
-    programs.set(`/${name}.html`, pageFor(name, token === "none" ? undefined : DEMO_TOKEN))
+    programs.set(`/${name}.html`, pageFor(name, token === "none" ? undefined : DEMO_TOKEN, languageOf(path)))
     return `${servers.url}/${name}.html`
   }
 
-  /** A page:  `<spell-viewer>`, and nothing else.  `token`:  what its server hands it, as the demo's own does. */
-  function pageFor(name: string, token: string | undefined = DEMO_TOKEN): string {
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+  /**
+   * A page:  `<spell-viewer>`, and nothing else.
+   * - `token`:  what its server hands it, as the demo's own does
+   * - `lang`:  the page's language, which loads a Spanish program's `<es-tarjeta>` tags, as the editor's words file does
+   */
+  function pageFor(name: string, token: string | undefined = DEMO_TOKEN, lang = "en"): string {
+    return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
 <script type="module" src="/element/spell-viewer.js"></script>
 <style>body { margin: 0 }</style>
@@ -400,8 +410,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
         await bar.locator("ui-button").click()
         await expect.poll(() => bar.textContent(), WAITING).toContain("You aren't signed in")
         await bar.locator("input").first().waitFor(WAITING)
-        // a refused change raises a notice, and a bare <spell-viewer> page has no toasts to show one (epic `data`'s I item)
-        expect(problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        expect(problems).toEqual([])
         await page.close()
       }
     )
@@ -577,7 +586,7 @@ start the box
           path: "/Status.spell",
           source: readFileSync(join(folder, "Status.spell"), "utf8"),
           field: "",
-          more: [file("Statusphere.api.spell"), file("Statusphere.spellml")]
+          more: [file("Statusphere.api.spell"), file("Statusphere.spell")]
         }
         const { page, problems } = await opened(atmospherePage("statusphere", program))
         // each status is a row of its own:  the only stacks naming an account
@@ -602,6 +611,10 @@ start the box
         // someone else's arrives by itself, on the account's live stream
         network.putRecord(BOB, STATUS, "3lbob2", { status: "😎", createdAt: "2026-11-04T11:00:00.000Z" })
         await expect.poll(async () => (await shown()).join(" "), WAITING).toContain("😎@bob.test")
+        // newest first, by when each says it was set (epic `data` I99)
+        await expect
+          .poll(async () => (await shown()).map((row) => /^\S+/u.exec(row.trim())?.[0]), WAITING)
+          .toEqual([expect.stringContaining("🚀"), expect.stringContaining("😎"), expect.stringContaining("🦋")])
         expect(problems).toEqual([])
         await page.close()
       }
@@ -1211,7 +1224,11 @@ start the box
         await expect.poll(() => sheetFile("Dee brings soup, and bowls"), WAITING).toMatchObject({ by: address.dee })
 
         // Ana's:  refused, saying why, and it goes back
-        const refusal = dee.page.waitForResponse((answer) => answer.url().endsWith("/apply"))
+        // the save of Ana's row, by what it sends:  the answer to her own last change can still be on its way
+        const refusal = dee.page.waitForResponse(
+          (answer) =>
+            answer.url().endsWith("/apply") && (answer.request().postData() ?? "").includes("Ana brings bread")
+        )
         const bread = (await formTitled(dee.page, "Ana brings bread")).locator("input")
         await bread.click()
         await bread.press(END_OF_LINE)
@@ -1250,7 +1267,10 @@ start the box
     await page.close()
   })
 
-  /** Each built-in example, and what it should say:  the words differ, the classes don't. */
+  /**
+   * Each built-in example, and what it should say:  the words differ, the classes don't.
+   * - So each is found by its class alone:  `<card>` is `<ui-card>` in English, `<tarjeta>` is `<es-tarjeta>` in Spanish (T87).
+   */
   const SHIPPED = [
     {
       path: "RecipeBox/RecipeBox.api.spell",
@@ -1268,10 +1288,10 @@ start the box
 
   /**
    * An example as it ships:  its API file, whose first lines say where it lives, and its drawing beside it.
-   * - `path`:  the API file, `RecipeBox/RecipeBox.api.spell`;  the drawing is the same name, `.spellml`, no `.api`.
+   * - `path`:  the API file, `RecipeBox/RecipeBox.api.spell`;  the drawing is the same name, no `.api`.
    */
   const shipped = (path: string): Program => {
-    const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spellml")
+    const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spell")
     const styles = path.replace(/\.api(\.\w\w)?\.spell$/, ".css")
     return {
       path: `/${path.split("/")[1]}`,
@@ -1289,13 +1309,13 @@ start the box
   /** The titles an example's cards show. */
   const cardsOn = (page: Page) =>
     page
-      .locator("ui-form.recipe ui-input.title input")
+      .locator(".recipe .title input")
       .evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value))
 
   /** Undo:  the one item of the box's own toolbar. */
   const undoOn = (page: Page) =>
     page
-      .locator("ui-toolbar.undo")
+      .locator(".undo")
       .getByText(/Undo|Deshacer/)
       .first()
 
@@ -1306,55 +1326,103 @@ start the box
       async () => {
         const name = `example-${path.replace(/\W/g, "")}`
         const { page, problems } = await opened(serve(name, shipped(path)))
-        const none = page.locator("ui-text.none")
-        const add = page.locator("ui-button.add")
-        const isAddOff = () => add.evaluate((button) => (button as HTMLButtonElement).disabled)
+        const none = page.locator(".none")
+        const add = page.locator(".add")
+        const isAddOff = () => add.evaluate((button) => button.matches(":state(disabled)"))
         await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
-        expect(await isAddOff()).toBe(true)
+        // a page language's tags load after the page's first drawing:  `<es-boton>` may not be defined yet
+        await expect.poll(isAddOff, WAITING).toBe(true)
 
         // every field shown, and labelled
-        const firstCard = page.locator("ui-form.recipe").first()
-        expect(await firstCard.locator("ui-field").count()).toBe(3)
-        expect(await firstCard.locator("ui-input.serves input").inputValue()).toBe("2")
+        const firstCard = page.locator(".recipe").first()
+        expect(await firstCard.locator("ui-field, es-campo").count()).toBe(3)
+        expect(await firstCard.locator(".serves input").inputValue()).toBe("2")
         expect(await firstCard.locator("textarea").inputValue()).not.toBe("")
 
         // a search follows every letter typed, and says when it finds nothing
-        await page.locator("ui-input.search input").fill("Dal")
+        await page.locator(".search input").fill("Dal")
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["Dal"])
-        await page.locator("ui-input.search input").fill("birria")
+        await page.locator(".search input").fill("birria")
         await expect.poll(() => none.textContent(), WAITING).toBe(noMatches)
-        await page.locator("ui-input.search input").fill("")
+        await page.locator(".search input").fill("")
         await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
 
         // a new one:  first of all, with what was typed, and the new card is empty again
-        await page.locator("ui-input.draft input").fill("birria")
-        await page.locator("ui-card.new textarea").pressSequentially("Slowly")
+        await page.locator(".draft input").fill("birria")
+        await page.locator(".new textarea").pressSequentially("Slowly")
         await expect.poll(isAddOff, WAITING).toBe(false)
         await add.click()
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria", ...examples])
-        expect(await page.locator("ui-input.draft input").inputValue()).toBe("")
+        expect(await page.locator(".draft input").inputValue()).toBe("")
 
         // typing in a card stays in that card, whatever it now says
-        const card = page.locator("ui-form.recipe ui-input.title input").first()
+        const card = page.locator(".recipe .title input").first()
         await card.click()
         await card.press(END_OF_LINE)
         await page.keyboard.type(" again")
         await expect.poll(() => cardsOn(page), WAITING).toContain("birria again")
 
         // remove, and undo:  back where it was, with what it said
-        await page.locator("ui-button.remove").first().click()
+        await page.locator(".remove").first().click()
         await expect.poll(() => cardsOn(page), WAITING).not.toContain("birria again")
         await undoOn(page).click()
         await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria again", ...examples])
         expect(await firstCard.locator("textarea").inputValue()).toBe("Slowly")
 
         // with none left, it says so
-        while (await page.locator("ui-button.remove").count()) await page.locator("ui-button.remove").first().click()
+        while (await page.locator(".remove").count()) await page.locator(".remove").first().click()
         await expect.poll(() => none.textContent(), WAITING).toBe(noRecipes)
         expect(problems).toEqual([])
         await page.close()
       }
     )
+
+    test(
+      `the example ${path}'s Edit screen:  nothing changes until Save, and Cancel forgets`,
+      { timeout: 60_000 },
+      async () => {
+        const name = `edit-${path.replace(/\W/g, "")}`
+        const { page, problems } = await opened(serve(name, shipped(path)))
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+        const title = page.locator(".editor .edit-title input")
+
+        // Cancel:  the copy is forgotten, and the recipe never changed
+        await page.locator(".edit").first().click()
+        await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])
+        await title.fill("Scratch")
+        await page.locator(".editor .cancel").click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+
+        // Save:  the new words land
+        await page.locator(".edit").first().click()
+        await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])
+        await title.fill("Saved dish")
+        await page.locator(".editor .save").click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["Saved dish", ...examples.slice(1)])
+
+        // Undo takes back that edit, and Edit shows what's back (epic `data` I100)
+        await undoOn(page).click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+        await page.locator(".edit").first().click()
+        await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+
+    test(`the example ${path}, a new one stays on top after a reload`, { timeout: 60_000 }, async () => {
+      const name = `reload-${path.replace(/\W/g, "")}`
+      const { page, problems } = await opened(serve(name, shipped(path)))
+      await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+      await page.locator(".draft input").fill("Newest of all")
+      await page.locator(".add").click()
+      await expect.poll(() => cardsOn(page), WAITING).toEqual(["Newest of all", ...examples])
+      await page.waitForTimeout(500)
+      await page.reload()
+      await expect.poll(() => cardsOn(page), WAITING).toEqual(["Newest of all", ...examples])
+      expect(problems).toEqual([])
+      await page.close()
+    })
   }
 
   // Changing its first lines is all a different back-end takes:  the example as it ships, not a copy
@@ -1384,6 +1452,25 @@ start the box
       await page.close()
     })
   }
+
+  test("the example RecipeBox in a room:  a new one stays on top after a reload", { timeout: 60_000 }, async () => {
+    const url = serve(
+      "shipped-room-reload",
+      withPlace(shipped("RecipeBox/RecipeBox.api.spell"), BACK_ENDS["a room"]!(servers.url))
+    )
+    const { page, problems } = await opened(url)
+    await page.locator(".recipe").first().waitFor(WAITING)
+    await page.locator(".draft input").fill("Roomy stew")
+    await page.locator(".add").click()
+    await expect.poll(() => cardsOn(page), WAITING).toContain("Roomy stew")
+    await expect.poll(() => cardsOn(page).then(([first]) => first), WAITING).toBe("Roomy stew")
+    await page.waitForTimeout(500)
+    await page.reload()
+    await expect.poll(() => cardsOn(page).then(([first]) => first), WAITING).toBe("Roomy stew")
+    await page.locator(".remove").first().click()
+    expect(problems).toEqual([])
+    await page.close()
+  })
 
   test(
     "the example, when its place can't be reached:  it says so, in words, with Try again",
@@ -2172,8 +2259,7 @@ the published sheet is a projection of the sign up sheet:
         await vic.page.screenshot({ path: join(shots, "sign-up-sheet-attendee.png"), fullPage: true })
 
         for (const one of [cy, bo, dee, vic]) {
-          // a refused change raises a notice, and a bare <spell-viewer> page has no toasts to show one
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2271,7 +2357,7 @@ the published sheet is a projection of the sign up sheet:
           .toBe("The Picnic:  your letter")
 
         for (const one of [cy, bo, bosLetter]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2463,7 +2549,7 @@ the published sheet is a projection of the sign up sheet:
         expect(await cySheet.page.locator("ui-segment.published .signed-up").count()).toBe(2)
 
         for (const one of [cy, bo, cySheet, ann, ed, annsLetter]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2629,7 +2715,7 @@ the published sheet is a projection of the sign up sheet:
         await cy.page.screenshot({ path: join(shots, "inbox.png"), fullPage: true })
 
         for (const one of [ana, bo, cy]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2686,7 +2772,7 @@ the published sheet is a projection of the sign up sheet:
         await bo.page.screenshot({ path: join(shots, "inbox-mail.png"), fullPage: true })
 
         for (const one of [bo, cy]) {
-          expect(one.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+          expect(one.problems).toEqual([])
           await one.close()
         }
       }
@@ -2724,7 +2810,7 @@ the published sheet is a projection of the sign up sheet:
         await expect.poll(() => write.nth(0).inputValue(), WAITING).toBe(address.ana)
         await expect.poll(() => write.nth(2).inputValue(), WAITING).toBe("cake")
 
-        expect(bo.problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        expect(bo.problems).toEqual([])
         await bo.close()
       }
     )
@@ -2915,6 +3001,9 @@ the published sheet is a projection of the sign up sheet:
     )
   })
 })
+
+/** A program's language, by its file's name:  `/CajaDeRecetas.api.es.spell` is Spanish. */
+const languageOf = (path: string) => (/\.es\./.exec(path) ? "es" : "en")
 
 /** `source`, one file, as a runner is handed it:  with its imports. */
 function compiledProgram(path: string, source: string, more: { path: string; contents: string }[] = []): string {

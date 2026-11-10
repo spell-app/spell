@@ -1,6 +1,8 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+// Import directly:  in `core`'s util barrel it would cost every page its bytes, as for `TocPreferences`
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { E } from "spell/ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-menu.js` instead of splitting a shared chunk
@@ -25,6 +27,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>
  *       <nav class="ui … menu" part="menu">  <slot>  </nav>       (the menu's own box, which scrolls)
  *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
+ *       <button class="all-items" part="all-items" aria-label title>▾</button>     (`max-visible`, while some are put away)
  *       <div class="right" part="right">  <slot name="right">  </div>      (pushed to the end)
  *     </div>
  *
@@ -45,6 +48,12 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - `scroll-first`, without a `segmented` look:  once only its icons are left, it scrolls with them, no overflow button.
  *   - `scroll-first`, with a `segmented` look:  it does scroll with them while the row has `--ui-toolbar-scroll-min`
  *     (200px) to show, then it's the dropdown:  a row of many files stays a row for as long as it can.
+ * - `max-visible`:  a row of many (a project's files) shows only the ones chosen lately, and a button lists them all.
+ *   - Only with more items than that;  a bare `max-visible` means 8.
+ *     An attribute, not on by default:  a toolbar of actions has nothing chosen to go by.
+ *   - The row keeps the page's order.  The item chosen longest ago leaves it first;  the chosen one never does.
+ *   - An item left out is `hidden`, so the menu's own rules skip it, and its overflow menu is the list.
+ *   - `remember` keeps the row across reloads.
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -97,6 +106,143 @@ export class UIToolbar extends UIMenu {
   }
 
   ////////////////
+  // ## Only the open items (`max-visible`)
+  ////////////////
+
+  /** The most items the row shows;  `undefined`:  every one. */
+  get visibleLimit(): number | undefined {
+    const text = this.attributes["max-visible"]
+    if (text == null) return undefined
+    const count = Math.floor(Number(text))
+    return count >= 1 ? count : DEFAULT_MAX_VISIBLE
+  }
+
+  /** There are more items than `visibleLimit`:  the rest are put away, and the list's button shows. */
+  @E.cssState("limited")
+  @E.state
+  accessor isLimited = false
+
+  /** The items the row shows, by `value` (else text), the one chosen most lately first. */
+  @E.state accessor openValues: readonly string[] = []
+
+  /** The chosen item when the row last followed it. */
+  @E.state accessor followedValue: string | undefined = undefined
+
+  /** The items this toolbar hid:  an item the page hid stays the page's. */
+  private readonly putAway = new WeakSet<Element>()
+
+  protected override isPutAway(element: Element): boolean {
+    return this.putAway.has(element)
+  }
+
+  protected override get hasOverflowMenu(): boolean {
+    return super.hasOverflowMenu || this.isLimited
+  }
+
+  /** The list's button, while drawn. */
+  private allItemsButton: HTMLButtonElement | undefined
+
+  protected override get overflowOpener(): HTMLButtonElement | undefined {
+    return this.isDropdown ? super.overflowOpener : this.allItemsButton
+  }
+
+  /** The list's button's icon. */
+  readonly allItemsGlyph = new E.IconGlyph({ owner: this, name: () => (this.isLimited ? ALL_ITEMS_ICON : undefined) })
+
+  /** `putAwayTheRest()` once after Solid's update, however often asked. */
+  private readonly limitRefresh = new E.Queued({ when: E.afterSolidUpdate, run: () => this.putAwayTheRest() })
+
+  protected override onItemsChanged() {
+    this.limitRefresh.ask()
+  }
+
+  /** SIDE EFFECT:  the row's items, as last kept under `remember`, then the items fitted to them. */
+  @E.onChange("visibleLimit", "remember", "isReady")
+  protected onLimitChanged(limit: number | undefined, remember: string | undefined, isReady: boolean) {
+    if (!isReady) return
+    if (limit && remember) {
+      const kept = UIToolbar.store.get(remember)
+      this.openValues = Array.isArray(kept) ? kept.filter((each) => typeof each === "string") : []
+    }
+    this.limitRefresh.ask()
+  }
+
+  /** Show the open items, put the others away, and keep the chosen one in the row and in view. */
+  @E.untracked
+  private putAwayTheRest() {
+    const items = this.rowElements().filter(
+      (each) => this.itemOf(each) && (!(each as HTMLElement).hidden || this.putAway.has(each))
+    ) as HTMLElement[]
+    const limit = this.visibleLimit
+    if (!limit || items.length <= limit) {
+      for (const item of items) this.showInRow(item, true)
+      this.isLimited = false
+      return
+    }
+    const chosen = items.find((each) => this.itemOf(each)?.isSelected)
+    const chosenValue = chosen && UIToolbar.valueOf(chosen)
+    // an item not drawn yet keeps its place:  a reload's items arrive a few at a time
+    const others = this.openValues.filter((each) => each !== chosenValue)
+    let open = [...(chosenValue === undefined ? [] : [chosenValue]), ...others].slice(0, limit)
+    if (!open.length) open = items.slice(0, limit).map((each) => UIToolbar.valueOf(each))
+    for (const item of items) this.showInRow(item, open.includes(UIToolbar.valueOf(item)))
+    this.isLimited = true
+    this.keepOpenValues(open)
+    if (chosen && chosenValue !== this.followedValue) {
+      this.followedValue = chosenValue
+      const box = this.itemOf(chosen)?.focusTarget
+      if (box) E.beforeNextPaint(() => this.scrolling.bringIntoView(box, { smoothly: true }))
+    }
+  }
+
+  /** Show `item` in the row, or put it away:  only ever hides what it can show again. */
+  private showInRow(item: HTMLElement, isShown: boolean) {
+    if (isShown) {
+      if (this.putAway.delete(item)) item.hidden = false
+    } else if (!item.hidden) {
+      this.putAway.add(item)
+      item.hidden = true
+    }
+  }
+
+  /** SIDE EFFECT:  the open items are `open`, kept under `remember` when they changed. */
+  private keepOpenValues(open: string[]) {
+    if (open.join(SEPARATOR) === this.openValues.join(SEPARATOR)) return
+    this.openValues = open
+    if (this.remember) UIToolbar.store.set(this.remember, open)
+  }
+
+  /** Where every toolbar's `remember` is kept:  made on first use, so a server render never touches storage. */
+  private static get store(): PrefStore {
+    return (UIToolbar.madeStore ??= new PrefStore(OPEN_ITEMS_STORE))
+  }
+  private static madeStore?: PrefStore
+
+  /** The button that lists every item:  always there, outside the row that scrolls. */
+  private allItems(): JSX.Element {
+    return (
+      <Show when={this.isLimited && !this.isDropdown}>
+        <button
+          ref={(element: HTMLButtonElement) => (this.allItemsButton = element)}
+          type="button"
+          class={ALL_ITEMS}
+          part={this.toolbarPart(ALL_ITEMS)}
+          style={this.overflowMenu.anchorStyle}
+          aria-haspopup="menu"
+          aria-expanded={this.overflowMenu.ariaExpanded}
+          aria-controls={this.overflowMenuId}
+          aria-label={this.moreText}
+          title={this.moreText}
+          onClick={() => (this.isOverflowOpen ? this.closeOverflow() : this.openOverflow())}
+          onKeyDown={this.onOverflowButtonKey}
+        >
+          {this.allItemsGlyph.svg}
+        </button>
+      </Show>
+    )
+  }
+
+  ////////////////
   // ## Rendering
   ////////////////
 
@@ -115,6 +261,7 @@ export class UIToolbar extends UIMenu {
         {this.scrolling.key(START)}
         {super.render()}
         {this.scrolling.key(END)}
+        {this.allItems()}
         {this.barSlot(RIGHT)}
       </div>
     )
@@ -133,7 +280,7 @@ export class UIToolbar extends UIMenu {
   }
 
   /** A part of the toolbar's own (its vocabulary adds them to the menu's, which TypeScript knows). */
-  private toolbarPart(name: "toolbar" | "scroll-start" | "scroll-end" | BarSlot): string {
+  private toolbarPart(name: "toolbar" | "scroll-start" | "scroll-end" | typeof ALL_ITEMS | BarSlot): string {
     return this.partForName(name as never)
   }
 }
@@ -164,6 +311,21 @@ const CENTER = "center"
 
 /** The bar's `right` slot:  at the end. */
 const RIGHT = "right"
+
+/** Class word and part of the button listing every item. */
+const ALL_ITEMS = "all-items"
+
+/** Its icon. */
+const ALL_ITEMS_ICON = "caret down"
+
+/** `max-visible` with no number. */
+const DEFAULT_MAX_VISIBLE = 8
+
+/** What `remember` is kept under, in this browser. */
+const OPEN_ITEMS_STORE = "ui-toolbar-open-items"
+
+/** Joins two lists of values to compare them:  no value holds it. */
+const SEPARATOR = "\0"
 
 /** A slot of the bar's layout around the items. */
 type BarSlot = typeof ICON | typeof TITLE | typeof CENTER | typeof RIGHT

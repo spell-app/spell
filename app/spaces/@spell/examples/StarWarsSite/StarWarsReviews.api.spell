@@ -1,10 +1,13 @@
 ## Reviews:  kept on this device
 // What people think of a film, written on the site's film pages (epic `mockup` P8).
 // Kept in this browser:  change the next line to keep them somewhere else, and nothing else changes.
-galaxy reviews is a database on this device
+<device-storage "galaxy reviews" />
 
-a "review" is a thing:
-	- it lives in galaxy reviews
-	- its "film title" is text
-	- its "stars" is a number
-	- its "words" is text
+<thing "review">
+	<spell>
+		- it lives in galaxy reviews
+	</spell>
+	<property "film title">text</>
+	<property "stars" type="number" />
+	<property "words">text</>
+</thing>

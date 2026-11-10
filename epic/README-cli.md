@@ -288,7 +288,7 @@ these are the verbs under it.
 | `epic file <epic>#P3 <rN>` | files a request into a phase:  its words, context and screenshots into the phase's Requests field, the request marked filed there |
 | `epic file <epic> <rN> "where it went"` | marks a request with no phase, saying where it went:  `"dropped:  done in P2"` |
 | `epic home [<epic>]` | prints the tooling home, the epic that requests about the tooling itself go to;  with an epic, sets it |
-| `epic merge <epic> [--ditch]` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in;  run it in the main checkout.  A stray snapshot or generated file there is moved aside first;  `--ditch` moves up to 3 others too, once you agree |
+| `epic merge <epic> [--ditch]` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in;  run it in the main checkout.  A stray snapshot or generated file there is moved aside first;  `--ditch` moves up to 3 others too, once you agree.  Refuses, in one line, where `main` takes only pull requests |
 
 - A request is written BEFORE anyone is told, so nothing is lost when the epic's own session is closed.
 
@@ -299,7 +299,7 @@ Every verb here only reads, but `create`, `stage` and `change`:  run them from a
 | Verb | What it does |
 | --- | --- |
 | `epic create <epic> --title "Title"` | makes an epic page from the template, and lists it on the docs' home page;  `--prompt "..."` or `--prompt-file <file>`:  the prompt that started it;  `--saga <id>`:  the saga it serves;  `--future`:  an idea for later, not planned yet;  `--stage <stage>`:  the stage it starts in (`overview`, unless you say);  on a future epic's page, plans it where it is |
-| `epic stage <epic> overview \| phases \| building` | sets the page's stage, which decides what it shows:  `overview` (the Overview, Questions and Todos), `phases` (the Phases and Issues too) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
+| `epic stage <epic> overview \| phases \| building` | sets the page's stage:  `overview` (phases titled as drafts), `phases` (phases agreed) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
 | `epic change <epic> [--for <item>]` | stamps the change marks written by hand (`<epic-change item="q13">words</epic-change>`) with their id, time, answer and the words they replaced, then lists them;  `--for`:  the item of the marks that name none;  any epic edit stamps them too |
 | `epic list [--json]` | lists every epic once:  in progress, future or done, where it runs, and how many of its items you haven't reviewed |
 | `epic summary <epic> [--json]` | prints an epic's phases, the next one, and its open questions, judgement calls, issues, todos, limits and manual tests |
@@ -487,9 +487,10 @@ Lost track?  `epic status`.
 | `epic worktree status <name>` | prints, as JSON, where a worktree, branch, epic page or session of that name stands |
 | `epic worktree create <name>` | makes worktree `<name>` on branch `<name>`, as Claude Code's `EnterWorktree` does through the worktree hook, and prints its folder:  for Codex, or any agent with no worktree hook;  reused when it's there |
 | `epic worktree path <name>` | prints a worktree's folder, or where a new one would go;  a session enters it by name, never by this path, or Claude Code would ask |
-| `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after, or `--branches`:  each repo's, when merged);  `--force`:  git's, for one with changes |
+| `epic pr <name>` | pushes branch `<name>` (`git push -u origin`, never forced) and opens its pull request against the base branch, a merge request on GitLab;  if one's open, says its address and that the push updated it;  `--title <title>`, `--body-file <file>`;  refuses a branch that's unknown or has nothing ahead of the base;  `gh` or `glab` missing or logged out:  the branch is pushed, and it prints what to run |
+| `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after, or `--branches`:  each repo's, when merged;  where `main` takes only pull requests, a merged pull request counts, a squash included);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
-| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  then installs the packages when it changed `yarn.lock` (the repo's install command), and renames Spell UI's old names the branch still writes (`spell ui rename`);  `--continue` after you resolve any other conflict (below);  `--json` |
+| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  then installs the packages when it changed a lockfile (the repo's install command), and renames Spell UI's old names the branch still writes (`spell ui rename`);  `--continue` after you resolve any other conflict (below);  `--json` |
 | `epic worktree patch [--all]` | gives this checkout (`--all`:  `main` and every worktree) the fixes its repo lists in `.epic/config.json5`'s `checkoutPatches` that it doesn't have yet:  a file copied from `main` and git-excluded, or a command run once;  `--dry-run`, `--json`;  the session-start hook runs it by itself |
 | `epic worktree move <name> \| --idle` | moves a worktree from the old place inside the repo, `.claude/worktrees`, to beside it;  `--idle`:  every one no session works in;  `--dry-run` |
 | `epic session list [<words> ...]` | lists this repo's saved Claude Code sessions, newest first, matching every word;  `--limit <n>`, `--all` |
@@ -510,7 +511,9 @@ Lost track?  `epic status`.
 - Never a bare `git merge main` either.
   A bundle or a snapshot is made from BOTH sides' source, so no line merge of the two is right:
   `merge-main` runs its generator on the merged source instead
-  (the snapshots' update, and any generator the repo lists:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file)).
+  (a root lockfile's own tool, the snapshots' update by the repo's own runner, and any generator the repo lists:
+  [README-config.md](README-config.md#the-config-file)).
+  - Where `main` takes only pull requests, it fast-forwards local `main` from `origin` first, when that's safe.
   - It prints what it regenerated, then each snapshot entry neither side had, under
     `REVIEW <file>:  neither side had these values`:  new behaviour nobody has looked at yet.
   - Any other conflict stops it mid-merge, and it exits 1 listing the files:
@@ -527,7 +530,7 @@ Lost track?  `epic status`.
 
 - A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
   through `checkoutPatches`, not when each branch merges `main`
-  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file)).
+  ([README-config.md](README-config.md#the-config-file)).
   - Add the fix on `main`, list it there, then `epic worktree patch --all`;  new and reopened sessions catch up by
     themselves.
   - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
@@ -593,7 +596,7 @@ an epic or saga page goes to Review, a details or choice page to Details, anythi
 | `epic window move` | carries the window files, once, from the main checkout's old `workspaces/` folder to the windows folder (`windowsFolder`), the old files kept;  `--dry-run` |
 
 Two kinds of server serve the pages:  each checkout's own page server, and ONE epic server for the machine,
-which serves every repo that uses spell-epic (its address and routes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#one-epic-server-for-the-machine)).
+which serves every repo that uses spell-epic (its address and routes:  [README-config.md](README-config.md#one-epic-server-for-the-machine)).
 
 | Verb | What it does |
 | --- | --- |
@@ -634,13 +637,13 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 - `whoami` and `whois` say who is who on the pages.
 - `plugin install` sets Claude Code up, or Codex.
 
-Every key of the config file, and what `epic init` writes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file).
+Every key of the config file, and what `epic init` writes:  [README-config.md](README-config.md#the-config-file).
 
 | Verb | What it does |
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic settings [<key>] [--json]` | prints how the epic tooling behaves for you, each value and the file that set it:  three files named `epic_settings.json5`, merged key by key, the later winning:  the kit's own, the epic repo's root (your team's, optional), and `~/.spell/` (yours, optional);  a file that won't read, or a bad value, is said on stderr, and the layer below stands |
-| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--no-plugin`, `--no-commit`, `--no-server`;  `--dry-run` first;  safe to run again |
+| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](README-setup.md#on-gitlab)), `--protected-base` ([main takes only pull requests](README-setup.md#when-main-takes-only-pull-requests)), `--no-plugin`, `--no-commit`, `--no-server`;  `--dry-run` first;  safe to run again |
 | `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
 | `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--kit <folder>` names another checkout;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer and coherence as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
@@ -710,7 +713,7 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   A team shares the epic pages and every comment on them through the epic repo, every turn, each under its
   writer's name, and each person's Claude answers that person's comments;
   but the marks you press on items, and your Send, stay on your own machine.
-  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.
+  [README-teams.md](README-teams.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.
 
 ## See also
 

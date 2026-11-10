@@ -378,6 +378,7 @@ describe("PlaceThings, a refresh", () => {
     const morning = new Date(Date.UTC(2026, 10, 7, 17, 14, 42))
     expect(core.dateAs(morning, "timestamp")).toBe("2026-11-07T17:14:42.000Z")
     expect(core.dateAs(morning, "reader")).toBe(morning.toLocaleDateString(undefined, { dateStyle: "medium" }))
+    expect(core.dateAs(new Date(2026, 10, 7, 9, 14), "date and time")).toBe("Nov 7, 2026, 9:14 AM")
     expect(core.dateAs(morning, "nonsense")).toBe(core.dateAs(morning, "plain"))
     try {
       core.showDatesAs("short")
@@ -822,11 +823,24 @@ describe("PlaceThings, refused", () => {
 })
 
 describe("core.notify's actions", () => {
+  test("a page with no toast element yet loads it before the toast shows", async () => {
+    const order: string[] = []
+    const key = Symbol.for("spell-ui:runtime")
+    const page = globalThis as unknown as Record<symbol, unknown>
+    const toast = () => (order.push("shown"), { closed: Promise.resolve() })
+    const ready = async () => void order.push("loaded")
+    const runtime = { load: async () => runtime, toast, toasts: { ready } }
+    page[key] = runtime
+    await core.notify("Oops", { actions: [{ text: "Retry", click: () => {} }] })
+    delete page[key]
+    expect(order).toEqual(["loaded", "shown"])
+  })
+
   test("each reaches the page's toast with its handler, and the toast stays until it's closed", async () => {
     const toast = vi.fn(() => ({ closed: Promise.resolve() }))
     const key = Symbol.for("spell-ui:runtime")
     const page = globalThis as unknown as Record<symbol, unknown>
-    const runtime = { load: async () => runtime, toast }
+    const runtime = { load: async () => runtime, toast, toasts: { ready: async () => {} } }
     page[key] = runtime
     const click = vi.fn()
     await core.notify("Oops", { actions: [{ text: "Retry", click }] })
@@ -992,6 +1006,88 @@ describe("PlaceDraft", () => {
     await allSent()
     expect(place.sent.map((changes) => changes.length)).toEqual([3])
     expect(await onPlace()).toMatchObject({ title: "Stew", serves: 9, tags: ["hot", "spicy"] })
+  })
+
+  test("saved, it's one undo step:  Undo takes back that edit, not the step before it (I100)", async () => {
+    const { things, recipe, allSent, onPlace } = await writing()
+    const { history } = core.RUNTIME
+    recipe.doubleIt()
+    const draft = things.draftOf(recipe)
+    const copy = draft.thing as Recipe
+    copy.title = "Stew"
+    copy.serves = 9
+    copy.tags.add("spicy")
+    draft.save()
+    expect(history.steps).toHaveLength(2)
+    expect(history.undoTitle).toBe("Undo Edit")
+
+    history.undo()
+    expect(recipe.title).toBe("Soup")
+    expect(recipe.serves).toBe(4)
+    expect(recipe.tags.items).toEqual(["hot"])
+    expect(history.undoTitle).toBe("Undo Double It")
+    await allSent()
+    expect(await onPlace()).toMatchObject({ title: "Soup", serves: 4, tags: ["hot"] })
+
+    history.redo()
+    expect(recipe.title).toBe("Stew")
+    expect(recipe.serves).toBe(9)
+    expect(recipe.tags.items).toEqual(["hot", "spicy"])
+    await allSent()
+    expect(await onPlace()).toMatchObject({ title: "Stew", serves: 9, tags: ["hot", "spicy"] })
+  })
+
+  test("saved with nothing changed, it's no undo step", async () => {
+    const { things, recipe } = await writing()
+    things.draftOf(recipe).save()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+  })
+
+  test("saved inside an undoable action, it joins that action's step", async () => {
+    const { things, recipe } = await writing()
+    const { history } = core.RUNTIME
+    history.run({ undoneAs: "Rename" }, () => {
+      const draft = things.draftOf(recipe)
+      ;(draft.thing as Recipe).title = "Stew"
+      draft.save()
+    })
+    expect(history.steps).toHaveLength(1)
+    expect(history.undoTitle).toBe("Undo Rename")
+    history.undo()
+    expect(recipe.title).toBe("Soup")
+  })
+
+  test("a draft nobody has typed in follows the real thing:  after Undo, Edit shows what's back (I100)", async () => {
+    const { things, recipe } = await writing()
+    const draft = things.draftOf(recipe)
+    ;(draft.thing as Recipe).title = "Stew"
+    draft.save()
+    // what a form still on the page does as the Save ends:  a new draft, of what was just saved
+    const madeAfterSave = things.draftOf(recipe)
+    expect((madeAfterSave.thing as Recipe).title).toBe("Stew")
+
+    core.RUNTIME.history.undo()
+    expect(things.draftOf(recipe)).not.toBe(madeAfterSave)
+    expect((things.draftOf(recipe).thing as Recipe).title).toBe("Soup")
+  })
+
+  test("a draft with changes in it stays as it is when the real thing changes", async () => {
+    const { things, recipe } = await writing()
+    const draft = things.draftOf(recipe)
+    ;(draft.thing as Recipe).title = "Half typed"
+    recipe.serves = 7
+    expect(things.draftOf(recipe)).toBe(draft)
+    expect((draft.thing as Recipe).title).toBe("Half typed")
+  })
+
+  test("a draft that went out of date, saved later, doesn't end the one that took its place", async () => {
+    const { things, recipe } = await writing()
+    const outOfDate = things.draftOf(recipe)
+    recipe.serves = 7
+    const current = things.draftOf(recipe)
+    expect(current).not.toBe(outOfDate)
+    outOfDate.cancel()
+    expect(things.draftOf(recipe)).toBe(current)
   })
 
   test("it's kept on this device, and comes back on the next visit", async () => {
@@ -1594,6 +1690,24 @@ describe("a sample, under things", () => {
     await useRealPlace(places, "family cookbook")
     things.thingsFrom(result)
     expect(keysOf(dish)).not.toContain("day")
+  })
+
+  test("an edit left open as a sample goes in keeps the place it started on", async () => {
+    const { places, things, result, dish, applied, allSent } = await aDish()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Meant for the real one")
+    await useSample(places, "family cookbook")
+    things.thingsFrom(result)
+    edit.set("Set too late")
+    expect(dish.title).not.toBe("Set too late")
+    edit.commit()
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+
+    await useRealPlace(places, "family cookbook")
+    await vi.waitFor(() => expect(applied).toHaveBeenCalled())
+    expect(JSON.stringify(applied.mock.calls)).toContain("Meant for the real one")
+    expect(JSON.stringify(applied.mock.calls)).not.toContain("Set too late")
   })
 
   test("the program's undo can't carry a sample's change into the real place", async () => {

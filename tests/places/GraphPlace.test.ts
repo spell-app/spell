@@ -264,3 +264,38 @@ describe("GraphPlace.listMany()", () => {
     expect(() => place.addCollection("recipes", { list: "other", fields: ["id"] })).not.toThrow()
   })
 })
+
+describe("versions, when a mapping names their field (epic `data` T19)", () => {
+  const VERSIONED = { ...RECIPES, fields: [...RECIPES.fields, "version"] } as const
+  const read = (place: GraphPlace) => place.list("recipes", { select: ["title"], page: { size: 1 } }, {})
+
+  test("a read asks for it, and an update sends it back in its input", async () => {
+    const { place, box } = await served({ collections: { recipes: VERSIONED }, versions: { field: "version" } })
+    expect(place.describe().versionCheck).toBe(true)
+    const { rows } = await read(place)
+    expect(rows[0]!.version).toBe(box.recipes.get("r-1")!.version)
+    const version = place.versionOf("recipes", "r-1")!
+    await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" }, version }], {})
+    expect(box.recipes.get("r-1")!.name).toBe("Mine")
+    expect(place.versionOf("recipes", "r-1")).not.toBe(version)
+  })
+
+  test("someone else got there first:  CONFLICT is out of date;  nothing known yet is too", async () => {
+    const { place, box } = await served({ collections: { recipes: VERSIONED }, versions: { field: "version" } })
+    await read(place)
+    const version = place.versionOf("recipes", "r-1")!
+    box.change("r-1", { notes: "Theirs" })
+    const stale = { kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" }, version } as const
+    await expect(place.apply([stale], {})).rejects.toMatchObject({ kind: "out of date" })
+    const unknown = { kind: "update", collection: "recipes", id: "r-2", fields: { title: "Mine" } } as const
+    await expect(place.apply([unknown], {})).rejects.toMatchObject({ kind: "out of date" })
+  })
+
+  test("with no versions named, nothing changes:  the last save wins", async () => {
+    const { place } = await served()
+    expect(place.describe().versionCheck).toBeUndefined()
+    await expect(
+      place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" } }], {})
+    ).resolves.toBeDefined()
+  })
+})

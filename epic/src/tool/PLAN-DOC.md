@@ -86,7 +86,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - What Claude did since the person last pressed Done reading (`<epic-page away-read>`),
       and what needs them, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
-      no section.  `waiting` is its toolbar badge.
+      no section.  `waiting` is its toolbar badge;  `news` its title's badges, by colour (done, under way, needs you):  a click filters its lines, and each line's tick wears its badge's colour (`<epic-away-line state>`).
+    - It opens by itself the first time a page shows it;  after that it stays as you folded it.
     - An item the person addressed leaves it, however recently it changed (`NightSummary.isAddressed()`,
       epic `epic-engine`
       I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
@@ -272,10 +273,15 @@ As `plan-doc.md`, "Ids":
   `list --json` carry it.  No migration step:  an epic with none simply names no saga.
 - `<epic-page standing>` (epic `epic-workflow`):  a STANDING epic, open for good;  each phase merges into `main` on its
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
-- `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
-  which sections the page shows (`PageStages`, `spell/epic/phases`).
-  - `overview`:  the Overview, Questions and Todo;  `phases`:  the Phases and Issues too;  `building`:  everything.
-  - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
+- `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got
+  (`PageStages`, `spell/epic/phases`).
+  - It no longer decides what shows (epic `epic-engine` P70):  a section hides when it's empty, at every stage, and
+    shows whenever it holds something.
+    - An empty section with a New button (Todo, Questions, Issues, Manual tests, Phases) stays while the page is
+      reviewed:  its title, a short line ("Nothing to do") and the button.  Outside a review it hides too.
+    - No migration step:  no markup changed.
+  - `overview`:  a phase's title reads `P1. DRAFT: <title>` (`<epic-phase>`).
+  - None (every page made before P29):  `building`.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.
   - The stage button (`<epic-stage-button>`:  Accept Overview on the Overview's title row, Accept Phases on the Phases
@@ -396,7 +402,7 @@ As `plan-doc.md`, "Ids":
     | ----------- | ------ | ---------------------------------------------------------------------------------- |
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
-    | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), however long ago                 |
+    | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), in the last day (a phase:  3 days);  older, grey                 |
     | `requested` | light orange | an issue filed from the person's own words (`requested`), closed done, not reviewed:  their turn to see it (epic `epic-engine` P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
@@ -763,7 +769,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them)             |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
-| green  | decided or done (however long ago)       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
+| green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (next phase), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |

@@ -222,7 +222,9 @@ export function reactiveObject<T extends object>(init: T): T {
     }
     Object.defineProperty(target, key, {
       get: () => getProp(target, key),
-      set: (value) => setProp(target, key, value),
+      set: (value) => {
+        setProp(target, key, value)
+      },
       enumerable: true,
       configurable: true
     })

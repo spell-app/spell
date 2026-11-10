@@ -170,7 +170,7 @@ core.heading("Playing a square")
 //////////////////////
 // ## Playing a square
 //////////////////////
-// What a click on a square does, added to this project's square:  `<spell-more-of>` adds to a type another file declares.
+// What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
 
 /** a square is on one board */
 

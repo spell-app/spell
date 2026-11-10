@@ -23,8 +23,10 @@
 </view>
 ```
 
-That's a `.spell` file:  a Spell template, one tag per thing it declares, and prose between them.
-(Its old ending, `.spell`, still opens, compiles and colours the same, everywhere a `.spell` file does.)
+That's a `.spell` file in the tag shape:  a Spell template, one tag per thing it declares, and prose between them.
+What a file says decides its shape:  any line starting with `<` in the very first column, other than `<ui-defaults>`, makes it tags;
+without one, it's plain Spell.
+(The old endings, `.spellml` and `.spellx`, still open, compile and colour the same, and are always tags.)
 It compiles to exactly the program its plain Spell twin does, because Spell's own parser reads it:
 each tag line is read as the line of plain Spell it stands for.
 
@@ -96,12 +98,13 @@ reversible:`, and reads to the same tree as the English card.
 
 | What it is | English | Spanish |
 | --- | --- | --- |
-| A template's tag, with the prefix | `<view>` `<thing>` `<page>` `<app>` `<page-template>` `<app-template>` `<notebook>` `<extend>` | `<vista>` `<cosa>` `<página>` `<aplicación>` `<plantilla-de-página>` `<plantilla-de-aplicación>` `<cuaderno>` `<extender>` |
-| A view inside a page, its prefix dropped | `<view>` | `<vista>` |
+| A template's tag, at a file's top level | `<view>` `<thing>` `<page>` `<app>` `<page-template>` `<app-template>` `<notebook>` `<extend>` | `<vista>` `<cosa>` `<página>` `<aplicación>` `<plantilla-de-página>` `<plantilla-de-aplicación>` `<cuaderno>` `<extender>` |
+| A view inside a page | `<view>` | `<vista>` |
 | A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
 | An example, in a drawing | `<example "...">` | `<ejemplo "...">` |
 | A block of markup drawn as written | `<html>` | `<html>` |
-| A block of prose, with the prefix | `<note>` `<note>` | `<nota>` `<nota>` |
+| Where a program's data lives, at a file's top level | `<web-server>` `<graphql-server>` `<data-folder>` `<json-file>` `<room>` `<sheet>` `<csv-file>` `<excel-file>` `<google-sheet>` `<airtable>` `<atmosphere>` (`personal`, `space`) `<device-storage>` `<window-storage>` `<memory-storage>` | `<servidor-web>` `<servidor-graphql>` `<carpeta-de-datos>` `<archivo-json>` `<sala>` `<hoja>` `<archivo-csv>` `<archivo-de-excel>` `<hoja-de-google>` `<airtable>` `<atmosphere>` (`personal`, `espacio`) `<almacenamiento-del-dispositivo>` `<almacenamiento-de-ventana>` `<almacenamiento-en-memoria>` |
+| A block of prose, kept and never run | `<note>` | `<nota>` |
 | A type's property editor, its markup as written | `<property-editor>` | `<editor-de-propiedades>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
@@ -109,18 +112,27 @@ reversible:`, and reads to the same tree as the English card.
 | An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undoable` `icon` `title` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `deshacible` `icono` `título` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
 
 - Spanish words read with their accents and without:  `<pagina>` is `<página>`.
+- The old spellings still read, and nothing writes them:  a template's tag with Spell's name before it, `<spell-page>`,
+  `<encanto-vista>`;  `<spell-more-of>` for `<extend>`;  `<spell-description>` and `<spell-comment>` for `<note>`, with a
+  warning.  `spell rename tags` writes a checkout's short.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
 - In a drawing, a tag that isn't a Spell word is a component's:  `<text>`, `<image>`, `<solitaire-card>`.
-- The notes carry the prefix, as templates do, so their short words are Spell UI's:
-  `<comment>` in a drawing is `<ui-comment>`, as `<button>` is `<ui-button>`.
-  - An old short note, `<description>`, outside a drawing still reads as a note, with a warning naming its new tag.
+- In a drawing a note's word is markup:  `<comment>` is Spell UI's `<ui-comment>`, as `<button>` is `<ui-button>`,
+  and `<note>` a project's own view, if it has one.
+  - An old short note, `<description>` or `<comment>`, outside a drawing still reads as a note, with a warning naming `<note>`.
   - Controls and handlers stay short (`<if>`, `<on>`):  a test fails if a Spell UI element ever takes one of their words.
 - A type's property editor, the layout of its Inspector card, can live in a file of its own:
   `Card.editor.spell`, or one for the project, `Solitaire.editors.spell`, a `<property-editor "card">` per type.
-  - The editor opens and colours it as spellml, and the Inspector reads it;  it's never compiled.
+  - The editor opens and colours it in tags, and the Inspector reads it;  it's never compiled.
   - Not the property editor page, `Card.editor.html`, which New Property Editor... makes.
+- A place's tag reads as its plain line (epic `language` P40):
+  `<web-server "wikipedia" address="https://...">` is `wikipedia is a web server at "https://...":`.
+  - Its body is plain Spell, `- check it once a day`, as an `<action>`'s is.
+  - Only at a file's top level:  in a drawing, `<room/>` is still a project's own view.
+  - A kind a library adds gets its tag the same way:  `<supabase-project "x" address="...">`.
+  - `spell spellx convert` and `spell place ingest` write them;  `spell place update` merges into either shape.
 - `<extend "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
-  so a place's fields can stay in a plain `.spell` file, and what's drawn in a `.spellml` file beside it.
+  so a place's fields can stay in one file, and what's drawn in another beside it.
 
 </details>
 
@@ -153,11 +165,11 @@ The catch, and it catches everybody once:  a body line ending in `</>` ends its 
 
 ## Using it
 
-A `.spellml` file in a project compiles with the rest:  list it in the project's `__project.json5` as any `.spell` file,
+A tag-shaped file in a project compiles with the rest:  list it in the project's `__project.json5` as any `.spell` file,
 and the two kinds use what each other declares.
 
 **One file per template.**
-A template lives in ONE file, `Card.spell` or `Card.spellml`, never both:  two copies drift apart.
+A template lives in ONE file, in one shape:  two copies drift apart.
 The other form is a read-only view, written when you ask for it:
 - on a `.spell` file, Show as Spellx (VS Code's title bar;  the editor app's Spellx tab)
 - on a `.spell` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
@@ -196,11 +208,11 @@ for (const { node, depth } of file.walk()) ...
 
 | Node | What it is | Inside it |
 | --- | --- | --- |
-| `template` | `<view>` and the other prefixed tags | its members and prose |
+| `template` | `<view>` and the other templates' tags | its members and prose |
 | `prose` | markdown between tags | -- |
 | `declaration` | `<property>`, `<alias>`, `<action>`, `<draw>`, `<event>`, `<test>`, `<menu>` | a body;  a drawing's markup;  a menu's `<action>`s |
 | `handler` | `<on ...>`, `<when ...>`, `<while ...>`, its `phrase` | a body |
-| `note` | `<note>`, `<note>`, `<property-editor>`, its markdown `text` | -- |
+| `note` | `<note>`, `<property-editor>`, `<stories>`, its markdown `text` | -- |
 | `code` | a run of a body's Spell `lines` | -- |
 | `element` | a component in a drawing, `<text>`, `<button>` | markup |
 | `text`, `hole` | markup text;  a `{spell expression}` | -- |
@@ -218,9 +230,7 @@ for (const { node, depth } of file.walk()) ...
 spell spellx convert @spell/examples/calculator --dry-run
 ```
 
-- `Card.spell` becomes `Card.spellml`, beside it;  `Carta.es.spell` becomes `Carta.es.spellml`, in Spanish spellx.
-  The `.spell` file stays:  keep ONE of the two, and list it in the project's `__project.json5`.
-  Both, and the project declares everything twice.
+- Each plain file is rewritten in place, as the name stays:  `Carta.es.spell` becomes Spanish spellx.
 - To just look at a file as spellx, Show as Spellx writes it without a second file.
 - `--dry-run` prints each file instead of writing it.  Nothing is written inside the test projects.
 - Each declaration becomes its tag:  a template, and inside it
@@ -245,6 +255,13 @@ spell spellx convert @spell/examples/calculator --dry-run
 
 **Real today:**  a `.spell` file compiles and runs, English and Spanish, to exactly what its plain Spell twin does;
 its tree reads as above.
+
+**A quoted word after a tag:**  `<header "Hardware" size="large"/>` draws what
+`<header size="large">Hardware</header>` draws.
+
+- It's the contents of `<header>`, `<button>`, `<item>`, `<label>`, `<title>`, `<link>`, `<breadcrumb>`, `<checkbox>`
+  and `<radio>`, and the `label` of `<tab>` and `<panel>`.
+- `{its name}` inside it reads as it does between the tags, and anything else between the tags comes after it.
 
 **Components by their bare names:**  a drawing writes `<text>`, `<button>`, `<botón>` in a Spanish file, and gets
 Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
@@ -442,8 +459,7 @@ markdown, markup and examples, where they sit.
   - It reads the same in plain Spell.
 - Any page may hold its own views:  `<view counter>`, or `<view "one counter">` for a name of several words.
   - Spanish says `<vista contador>`.
-  - `view` is the only template word that may drop its prefix, and only inside a page:  `<page>` is Spell UI's.
-  - `<view "counter">` reads there too.
+  - A view, or a thing of its own (`<thing "task">`), is what goes inside a page:  `<page>` there is Spell UI's.
   - Each is an ordinary view of the project, drawn from any file:  written where it's first used.
 - A template's name may be bare, one word:  `<view counter>` is `<view "counter">`.
   A word the tag takes as an attribute stays one:  `<view locked>`.
@@ -452,8 +468,11 @@ markdown, markup and examples, where they sit.
   - Its own views read just before it.
   - It starts by itself, as any app or page does.
 - `locked` on any page is the page's `lock` (Spanish `bloqueado`).
+  - In plain Spell that's `- it is locked`, or `- its lock is locked`.
   - In the editor every edit to a locked page is a try-out, saved for nobody.
   - Whoever may save the page locks or unlocks it.
+- `thumbnail="snapshots/terms.jpg"` on a page or view (Spanish `miniatura=`) is a picture of it, a file of its project:
+  it draws while there is no drawing of its own, and a drawing can place it with `draw its thumbnail`.
 - **Notebooks:**  a page with the `notebook` flag, written `<page "x" notebook>` or `<notebook "x">`.
   - Both read the same;  Spanish says `<página cuaderno>` or `<cuaderno>`.
   - The flag only says the editor shows the page in place, editable.
@@ -464,12 +483,9 @@ markdown, markup and examples, where they sit.
   `/edit/@spell/guides/SpellUI/Divider/Usage.spell`.
 - `spell lint --fix` rewrites the old spellings:
   - `<notebook>` as `<page notebook>`
-  - a `<view>` inside a page as `<view>`
   - a description written before an example as its `description="..."`
 
 **Not yet:**
-- A member of a template from another file:  a template's tag is in ONE file, and spellx has no tag that adds to it.
-  Plain Spell's `a card:` does, in a `<spell>` chunk:  Solitaire's moves are its game's, written so.
 - A top-level action, a function:  `<action>` goes inside a template;  a `<spell>` chunk holds one.
 - `it can take a card when:`, `to draw each item:`:  no tags of their own yet, so `<spell>` chunks.
   - An ability has its own tag:  `<clickable when it is face down/>`, a list's `<cards draggable when ... />`.

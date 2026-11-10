@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from "node:fs"
-import { dirname, join, relative, resolve, sep } from "node:path"
-import { fileURLToPath } from "node:url"
+import { join, relative, sep } from "node:path"
 
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { SharedComments } from "spell/epic/tool/SharedComments"
@@ -15,7 +15,7 @@ import { ComponentSetFolders } from "./ComponentSetFolders"
 const COMMENT_FOLDERS = ["guides", "pages", "epics"]
 
 /** Epic UI's folder, the engine's own (`EPIC_UI`):  its pages take comments too, in inbox files beside them. */
-const EPIC_UI_DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", EPIC_UI.dir)
+const EPIC_UI_DOCS = EngineFiles.path(EPIC_UI.dir)
 
 /** Folders under those that hold no pages of their own:  a split epic page's bodies, experiments' output. */
 const SKIPPED = /(^|\/)(parts|experiments|node_modules)(\/|$)/

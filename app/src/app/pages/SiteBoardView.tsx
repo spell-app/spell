@@ -12,7 +12,7 @@ import "./SiteBoardView.css"
  * ### `<SiteBoardView>`
  * The site editor's board:  a block per section, one under the other, each a grid of `<ui-card>`s (`SiteBoard`).
  * - A card takes its section's colour (`<ui-card background>`);  a page's is rounded, a dialog's square,
- *   a section's bold and bigger;  a page's screenshot on top, when its line names one.
+ *   a section's bold and bigger;  its thumbnail on top, when it has one.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
  * - A page's card has a link in its corner, to that page of the running site in a new tab:  `newTabUrlOf`.
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
@@ -62,7 +62,7 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
       ]}
       data-part={part().name}
       background={props.card.color as UICardJSXAttributes["background"]}
-      image={props.pictureOf(part())}
+      image={props.thumbnailOf(part())}
       heading={props.titleOf(part())}
       description={props.lineOf(part())}
       title={props.lineOf(part())}
@@ -101,8 +101,8 @@ export type SiteBoardViewProps = {
   titleOf: (part: SitePart) => string
   /** The quiet line under its title. */
   lineOf: (part: SitePart) => string
-  /** The address of its picture, if it has one. */
-  pictureOf: (part: SitePart) => string | undefined
+  /** The address of its thumbnail, if it has one. */
+  thumbnailOf: (part: SitePart) => string | undefined
   /** The address that opens a part in a new tab:  none for what has no page of its own. */
   newTabUrlOf: (part: SitePart) => string | undefined
   /** What that link says, to a tooltip and a screen reader. */

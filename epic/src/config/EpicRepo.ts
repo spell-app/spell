@@ -269,7 +269,7 @@ function currentUrl(url: string, renames: ReadonlyMap<string, string>): string {
   return current
 }
 
-/** `url` with its scheme, user, `.git` and trailing `/` dropped, lower-cased:  `github.com/o/r`. */
+/** `url` with its scheme, user, `.git` and trailing `/` or GitLab's `/-` dropped, lower-cased:  `github.com/o/r`. */
 function normalUrl(url: string): string {
   return url
     .trim()
@@ -278,6 +278,7 @@ function normalUrl(url: string): string {
     .replace(/^[^@/]+@/, "")
     .replace(/^([^/:]+):(?!\d)/, "$1/")
     .replace(/\/+$/, "")
+    .replace(/\/-$/, "")
     .replace(/\.git$/, "")
 }
 

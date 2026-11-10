@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { SpellConstant } from "spell/parser/spell/rules/constants"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
@@ -67,6 +68,16 @@ export class NewThing extends SpellStatement<
       if (name && name !== key) match.data.builtInNames = { ...match.data.builtInNames, [key]: name }
       if (variable?.valueOutputs)
         match.data.builtInValues = { ...match.data.builtInValues, [key]: variable.valueOutputs }
+      // a quoted value that isn't one of its values:  `a new card whose suit is "banana"` (epic `language` P39)
+      const member = key ? scopeType.getMember(key) : undefined
+      if (member instanceof P.ScopeVariable) {
+        const wrongValue = SpellConstant.wrongValueMessage(
+          match.scope,
+          member,
+          item.groups.value as P.Match | undefined
+        )
+        if (wrongValue) SP.SpellWarnings.note(match, wrongValue, item)
+      }
     }
   }
 

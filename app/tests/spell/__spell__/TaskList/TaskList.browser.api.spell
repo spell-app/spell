@@ -1,0 +1,16 @@
+## Kept in this browser
+// The tasks stay on this device, in this browser's own storage:  nobody else sees them, and no server is asked.
+// The app starts here, so it runs with no server and no sign-in.
+browser storage is a database on this device
+
+a "browser task" is a task:
+	- it lives in browser storage
+	- to throw it away:
+		remove it from the browser tasks
+
+a "browser keeper" is a task keeper:
+	- its "kept tasks" is every browser task
+	- to keep a new task titled (title as text):
+		set task to a new browser task with title = title
+		add task to the browser tasks
+		return task

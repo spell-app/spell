@@ -3,7 +3,7 @@
 // hasta cuándo.  Cada cambio pasa por el servidor de Encanto, con las reglas de la org, y queda en el registro:
 // tampoco desde esta página puede un Project Manager quitar a un Team Manager.
 // La página de tu org nombra su propia org en la línea siguiente:  "@rs" es la de la Rock Society.
-roles de la org es una carpeta de datos en "@rs/__admin/roles":
+<carpeta-de-datos "roles de la org" dirección="@rs/__admin/roles">
 	- se revisa cada 30 segundos
 	- los perfiles están en "org_profiles"
 	- las funciones están en "org_roles"
@@ -15,70 +15,101 @@ roles de la org es una carpeta de datos en "@rs/__admin/roles":
 	- los diseñadores están en "designers"
 	- las etapas están en "event_stages"
 	- los cambios están en "role_changes"
+</carpeta-de-datos>
 
 // La org misma, para el título de la página y como espacio que diseñar.
-un "perfil" es una cosa:
-	- vive en roles de la org
-	- su "nombre" es texto, guardado como "name"
-	- su "espacio" es texto, guardado como "space"
+<cosa "perfil">
+	<encanto>
+		- vive en roles de la org
+		- su "nombre" es texto, guardado como "name"
+		- su "espacio" es texto, guardado como "space"
+	</encanto>
+</cosa>
 
 // Un rol de la org, por su nombre.
-una "función" es una cosa:
-	- vive en roles de la org
-	- su "nombre" es texto, guardado como "name"
+<cosa "función">
+	<encanto>
+		- vive en roles de la org
+		- su "nombre" es texto, guardado como "name"
+	</encanto>
+</cosa>
 
-un "miembro" es una cosa:
-	- vive en roles de la org
-	- su "persona" es texto, guardado como "person"
-	- su "nombre" es texto, guardado como "name"
-	- su "rol" es texto, guardado como "role"
-	- su "cargo" es texto, guardado como "roleName"
+<cosa "miembro">
+	<encanto>
+		- vive en roles de la org
+		- su "persona" es texto, guardado como "person"
+		- su "nombre" es texto, guardado como "name"
+		- su "rol" es texto, guardado como "role"
+		- su "cargo" es texto, guardado como "roleName"
+	</encanto>
+</cosa>
 
-un "equipo" es una cosa:
-	- vive en roles de la org
-	- su "nombre" es texto, guardado como "name"
-	- su "espacio" es texto, guardado como "space"
+<cosa "equipo">
+	<encanto>
+		- vive en roles de la org
+		- su "nombre" es texto, guardado como "name"
+		- su "espacio" es texto, guardado como "space"
+	</encanto>
+</cosa>
 
-un "proyecto" es una cosa:
-	- vive en roles de la org
-	- su "nombre" es texto, guardado como "name"
-	- su "equipo" es texto, guardado como "team"
-	- su "espacio" es texto, guardado como "space"
+<cosa "proyecto">
+	<encanto>
+		- vive en roles de la org
+		- su "nombre" es texto, guardado como "name"
+		- su "equipo" es texto, guardado como "team"
+		- su "espacio" es texto, guardado como "space"
+	</encanto>
+</cosa>
 
-un "mandato" es una cosa:
-	- vive en roles de la org
-	- su "rol" es texto, guardado como "role"
-	- su "titular" es texto, guardado como "holder"
-	- su "ámbito" es texto, guardado como "manages"
-	- su "cargo" es texto, guardado como "roleName"
-	- su "nombre titular" es texto, guardado como "holderName"
-	- su "nombre ámbito" es texto, guardado como "managesName"
-	- su "inicio" es texto, guardado como "starts"
-	- su "fin" es texto, guardado como "ends"
+<cosa "mandato">
+	<encanto>
+		- vive en roles de la org
+		- su "rol" es texto, guardado como "role"
+		- su "titular" es texto, guardado como "holder"
+		- su "ámbito" es texto, guardado como "manages"
+		- su "cargo" es texto, guardado como "roleName"
+		- su "nombre titular" es texto, guardado como "holderName"
+		- su "nombre ámbito" es texto, guardado como "managesName"
+		- su "inicio" es texto, guardado como "starts"
+		- su "fin" es texto, guardado como "ends"
+	</encanto>
+</cosa>
 
-una "aprobación" es una cosa:
-	- vive en roles de la org
-	- su "nombre" es texto, guardado como "name"
-	- su "versión" es texto, guardado como "version"
+<cosa "aprobación">
+	<encanto>
+		- vive en roles de la org
+		- su "nombre" es texto, guardado como "name"
+		- su "versión" es texto, guardado como "version"
+	</encanto>
+</cosa>
 
 // Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica.
-un "diseñador" es una cosa:
-	- vive en roles de la org
-	- su "persona" es texto, guardado como "person"
-	- su "espacio" es texto, guardado como "space"
-	- su "nombre persona" es texto, guardado como "personName"
+<cosa "diseñador">
+	<encanto>
+		- vive en roles de la org
+		- su "persona" es texto, guardado como "person"
+		- su "espacio" es texto, guardado como "space"
+		- su "nombre persona" es texto, guardado como "personName"
+	</encanto>
+</cosa>
 
 // Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers".
-una "etapa" es una cosa:
-	- vive en roles de la org
-	- su "nombre" es texto, guardado como "name"
-	- su "siguiente" es texto, guardado como "movesTo"
-	- su "quién mueve" es texto, guardado como "movedBy"
+<cosa "etapa">
+	<encanto>
+		- vive en roles de la org
+		- su "nombre" es texto, guardado como "name"
+		- su "siguiente" es texto, guardado como "movesTo"
+		- su "quién mueve" es texto, guardado como "movedBy"
+	</encanto>
+</cosa>
 
-un "cambio" es una cosa:
-	- vive en roles de la org
-	- su "cuándo" es texto, guardado como "at"
-	- su "quién" es texto, guardado como "who"
-	- su "hecho" es texto, guardado como "did"
-	- su "qué" es texto, guardado como "what"
-	- su "por qué" es texto, guardado como "why"
+<cosa "cambio">
+	<encanto>
+		- vive en roles de la org
+		- su "cuándo" es texto, guardado como "at"
+		- su "quién" es texto, guardado como "who"
+		- su "hecho" es texto, guardado como "did"
+		- su "qué" es texto, guardado como "what"
+		- su "por qué" es texto, guardado como "why"
+	</encanto>
+</cosa>

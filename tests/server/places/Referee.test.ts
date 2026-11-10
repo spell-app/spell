@@ -2,9 +2,17 @@ import { createServer } from "node:http"
 import type { AddressInfo } from "node:net"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { LiveRoomPlace, MemoryPlace, PlaceError, positionBetween, type PlaceRow } from "spell/places"
+import {
+  LiveRoomPlace,
+  MemoryPlace,
+  PlaceError,
+  positionBetween,
+  type LiveRoomPlaceProps,
+  type PlaceRow,
+  type PlaceWriteFailure
+} from "spell/places"
 import { SRV } from "spell/server"
-import { Referee } from "spell/server/places"
+import { Referee, type RoomAction } from "spell/server/places"
 
 import { TestPage, newRoom, seededRandom, withoutMarks, type Trouble } from "./Referee.helpers"
 import { TroubledPlace } from "../../places/fakePlaces"
@@ -23,10 +31,15 @@ const pagesToClose: TestPage[] = []
 const roomsToClose: Referee[] = []
 
 /** A room, with `count` pages in it, each having read it. */
-async function roomWith(count: number, trouble: Trouble = {}, referee?: Referee) {
+async function roomWith(
+  count: number,
+  trouble: Trouble = {},
+  referee?: Referee,
+  props: Partial<LiveRoomPlaceProps> = {}
+) {
   const room = referee ?? (await newRoom())
   roomsToClose.push(room)
-  const pages = Array.from({ length: count }, (_, index) => new TestPage(room, trouble, 7 + index * 13))
+  const pages = Array.from({ length: count }, (_, index) => new TestPage(room, trouble, 7 + index * 13, props))
   pagesToClose.push(...pages)
   await Promise.all(pages.map((page) => page.read()))
   return { room, pages }
@@ -181,6 +194,137 @@ describe("Referee, with a calm connection", () => {
     await settled(room, pages)
     expect(pages[1]!.deleted).toEqual([])
     expect(pages[1]!.shown.has("r-1")).toBe(false)
+  })
+
+  test("a page from an older version is asked to reload, sends nothing, and what it had stays pending", async () => {
+    const referee = await newRoom()
+    const asked: string[] = []
+    const oldSend = (text: string) => void asked.push(text)
+    const oldPage = referee.join(oldSend)
+    const newPage = referee.join(() => {})
+    const person = { id: "x", name: "X" }
+    oldPage.receive(JSON.stringify({ kind: "here", from: "old", person, version: "v1", loadedAt: 100 }))
+    expect(asked.filter((text) => text.includes("reload"))).toEqual([])
+    newPage.receive(JSON.stringify({ kind: "here", from: "new", person, version: "v2", loadedAt: 200 }))
+    expect(asked.filter((text) => text.includes("reload"))).toEqual([JSON.stringify({ kind: "reload" })])
+
+    asked.length = 0
+    const changes = [{ kind: "update", collection: "recipes", id: "r-1", changeId: "c-1", fields: { title: "Old" } }]
+    oldPage.receive(JSON.stringify({ kind: "changes", from: "old", changes }))
+    expect(asked.map((text) => (JSON.parse(text) as { kind: string }).kind)).toEqual(["reload", "no answer"])
+    expect(referee.sequence).toBe(0)
+  })
+
+  test("two pages of the same program:  nobody's asked to reload, and a later page's older mark changes nothing", async () => {
+    const referee = await newRoom()
+    const asked: string[] = []
+    const first = referee.join((text) => void asked.push(text))
+    const later = referee.join((text) => void asked.push(text))
+    const person = { id: "x", name: "X" }
+    first.receive(JSON.stringify({ kind: "here", from: "a", person, version: "v2", loadedAt: 200 }))
+    later.receive(JSON.stringify({ kind: "here", from: "b", person, version: "v2", loadedAt: 300 }))
+    expect(asked.filter((text) => text.includes("reload"))).toEqual([])
+    later.receive(JSON.stringify({ kind: "here", from: "b", person, version: "v1", loadedAt: 100 }))
+    expect(asked.filter((text) => text.includes("reload"))).toHaveLength(1)
+  })
+
+  test("a page told to reload says so once, and what's pending stays for after", async () => {
+    const referee = await newRoom()
+    const {
+      pages: [old]
+    } = await roomWith(1, {}, referee, { version: "v1" })
+    let toldToReload = 0
+    old!.place.onOutOfDate(() => toldToReload++)
+    await roomWith(1, {}, referee, { version: "v2" })
+    await vi.waitFor(() => expect(toldToReload).toBe(1))
+    old!.set("r-1", "title", "Kept")
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(referee.rows.rowFor("recipes", "r-1")!.title).toBe("Soup")
+    expect(old!.pending.changes).toHaveLength(1)
+    expect(toldToReload).toBe(1)
+  })
+
+  test("a stamp is never an overwrite:  nobody's told they lost one", async () => {
+    const referee = await newRoom()
+    const heard: string[] = []
+    const page = (from: string) => referee.join((text) => void heard.push(text))
+    const send = (member: ReturnType<typeof page>, from: string, changeId: string) =>
+      member.receive(
+        JSON.stringify({
+          kind: "changes",
+          from,
+          changes: [
+            { kind: "update", collection: "recipes", id: "r-1", changeId, version: "0", fields: { modified: changeId } }
+          ]
+        })
+      )
+    send(page("one"), "one", "c-1")
+    send(page("two"), "two", "c-2")
+    await vi.waitFor(() => expect(referee.sequence).toBeGreaterThanOrEqual(2))
+    expect(heard.filter((text) => text.includes("overwrote"))).toEqual([])
+  })
+
+  test("a page that says no version is never asked to reload", async () => {
+    const referee = await newRoom()
+    const asked: string[] = []
+    const plain = referee.join((text) => void asked.push(text))
+    const newPage = referee.join(() => {})
+    plain.receive(JSON.stringify({ kind: "here", from: "p", person: { id: "x", name: "X" } }))
+    newPage.receive(
+      JSON.stringify({ kind: "here", from: "n", person: { id: "y", name: "Y" }, version: "v2", loadedAt: 200 })
+    )
+    expect(asked.filter((text) => text.includes("reload"))).toEqual([])
+  })
+
+  describe("a named action the page has the code for", () => {
+    /** The last seat:  taken by whoever's first, the same on the page and the referee. */
+    const takeSeat: RoomAction = ({ row, input }) => {
+      if (row("recipes", "r-1")!.takenBy) throw new PlaceError("That seat's gone", { cause: { kind: "refused" } })
+      return {
+        changes: [{ kind: "update", collection: "recipes", id: "r-1", fields: { takenBy: input } }],
+        result: "yours"
+      }
+    }
+
+    test("two press at once:  each shows it taken at once;  one keeps it, the other sees it go back, and the notice", async () => {
+      const referee = await newRoom({ takeSeat })
+      const { room, pages } = await roomWith(2, {}, referee, { actions: { takeSeat } })
+      const failures: PlaceWriteFailure[] = []
+      pages.forEach((page) => page.places.onWriteFailed((failure) => failures.push(failure)))
+
+      const answers = pages.map((page, index) => page.pending.callShownAtOnce("takeSeat", `p${index}`, {}))
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(pages.map((page) => page.shown.get("r-1")!.takenBy)).toEqual(["p0", "p1"])
+
+      const settled_ = await Promise.allSettled(answers)
+      expect(settled_.map(({ status }) => status).sort()).toEqual(["fulfilled", "rejected"])
+      await settled(room, pages)
+      const winner = settled_.findIndex(({ status }) => status === "fulfilled")
+      expect(pages.map((page) => page.shown.get("r-1")!.takenBy)).toEqual([`p${winner}`, `p${winner}`])
+      expect(failures).toHaveLength(1)
+      expect(failures[0]!.error.message).toBe("That seat's gone")
+      expect(pages.map((page) => page.pending.changes.length)).toEqual([0, 0])
+    })
+
+    test("its answer settles it:  nothing's sent as a change of mine", async () => {
+      const referee = await newRoom({ takeSeat })
+      const { room, pages } = await roomWith(1, {}, referee, { actions: { takeSeat } })
+      await expect(pages[0]!.pending.callShownAtOnce("takeSeat", "me", {})).resolves.toBe("yours")
+      await settled(room, pages)
+      expect(referee.sequence).toBe(1)
+      expect(pages[0]!.screen["r-1"]).toMatchObject({ takenBy: "me" })
+    })
+
+    test("an action the page has no code for waits for the referee", async () => {
+      const referee = await newRoom({ takeSeat })
+      const { pages } = await roomWith(1, {}, referee)
+      const answer = pages[0]!.pending.callShownAtOnce("takeSeat", "me", {})
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(pages[0]!.shown.get("r-1")!.takenBy).toBeUndefined()
+      await expect(answer).resolves.toBe("yours")
+    })
   })
 
   test("a named action re-runs on the referee:  the last seat goes to one, and the other's refused", async () => {

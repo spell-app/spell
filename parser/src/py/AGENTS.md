@@ -119,7 +119,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Not counted:  a plain `List`, a thing made inside a test, a helper's scratch result (made `core.quietly()`).
     - A name falls back to a thing the program keeps at its top level, as javascript's does.
 - PLACES (epic `data` P40):  a type saved in a place, as the JavaScript core's `saved.ts` has it
-  ([places.py](core/spell_core/places.py)), for three kinds ([place_kinds.py](core/spell_core/place_kinds.py)):
+  ([places.py](core/spell_core/places.py)), for four kinds ([place_kinds.py](core/spell_core/place_kinds.py)):
   - a database on this device:  one JSON file beside the compiled program, `<Program>.device.json`
     (`run_program()` tells the core where the program is)
   - a data folder and a sheet (an Excel workbook too):  the page server's place routes, as a browser's `RemotePlace`
@@ -127,8 +127,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - from `SPELL_SERVER_URL` and `SPELL_SERVER_TOKEN`:  `spell run --target py` sets both, from the running page
       server (its `.spell-server.token.json`, the kit's `SRV.PidFile.readToken()`)
     - with none, a read or a write says how to get them
+  - an atmosphere account ([atmosphere.py](core/spell_core/atmosphere.py), epic `data` P46):
+    - signed in with an app password:  `ATMOSPHERE_HANDLE` and `ATMOSPHERE_APP_PASSWORD`, from the environment
+    - reads need no sign-in;  a write needs one, and says how
+    - `core.current_person()` is who's signed in
   - any other kind is refused while compiling, by its word (`PY.PLACE_KINDS`, spell's `SP.TARGETS`):
-    the Atmosphere is "not in Python yet"
+    a web server is "not in Python yet"
+  - a place's key is found in the environment (`key_from()`)
+  - a server saying to wait (a rate limit, a 429 or 503) is waited out when that's soon, and said when it isn't
+    (`open_minding_limits()`, as the JavaScript `WebPlace`)
   - a saved thing writes itself as it changes, heard where a page's patches are (`note_change()`):
     only the fields that changed;  rows by javascript's field names, so a page and Python share them
   - writes go as they're made, waiting for the answer;  reads wait off the event loop, and in a drawing, right there

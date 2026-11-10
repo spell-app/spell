@@ -331,7 +331,7 @@ const SPELL_HIGHLIGHTER = /\/parser\/src\/spell\/highlight\/SpellHighlighter\.ts
 const SPELL_EDITOR = /\/components\/spell-editor\/SpellEditor\.tsx$/
 
 /** In `spell-solid-shared.js`:  the names it exports. */
-const SHARED_NAMES = /^export const \{ (.+) \} = from$/m
+const SHARED_NAMES = /^export const \{ (.+) \} = sharedModules$/m
 
 /** In `spell-solid-shared.js`:  the specifiers it takes from a page (`SpellUI.packModules`' keys), as JSON. */
 const SHARED_SPECIFIERS = /^const specifiers = (.+)$/m

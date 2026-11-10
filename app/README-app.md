@@ -448,10 +448,9 @@ A compile, in the order the Program panel's Output tab logs it:
 ### A `.spell` file
 
 A `.spell` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
-- A template lives in ONE file, `.spell` or `.spellml`, never both:  its other form is a read-only view.
-  - The Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
+- A template lives in ONE file, in one shape:  its other shape is a read-only view.
+  - The Program panel has it as a tab:  Code Spell on a tag-shaped file, Spellx on a plain one.
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
-  - A project may list a `.spellml` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
 
 ### The editor in Spell
@@ -656,7 +655,7 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
   - JavaScript:  what the open file compiled to
   - TypeScript and Python:  the whole project as those targets write it, from the last compile
     (`SpellProject.codeFor()`, in spell-parser)
-  - the file's other form:  Code Spell on a `.spellml` file, Spellx on a `.spell` file
+  - the file's other shape:  Code Spell on a tag-shaped file, Spellx on a plain one
   - Sentence Tree:  the Spell tree of the cursor's line
   - Reference:  what you can use, your app's templates and Spell's, each with what it holds, searchable from the
     panel's header;  a click says what it is, and Show in Code for your own
@@ -776,8 +775,11 @@ For a project that is a site, View › Site opens its own page, `/site/<project>
 *The Star Wars site, the example the site editor was built on.*
 
 - **Pages:**  a tree of the site's pages, dialogs and sidebars (drag a row to move it), a board of cards
-  (double-click opens the page in Edit, with Back to the site there), and the picked page's form:
-  its name, title, address, parameters and jobs.
+  (double-click opens the page's own file in Edit, making it first if there's none, with Back to the site there),
+  and the picked page's form:  its name, title, address, live link, parameters and stories.
+- A card's new-tab icon opens the real page it stands for, and only shows when its line has a `live=` link.
+- A site can be its routing alone, `Galaxy.site.spell`:  titles and addresses, `<group>` lines heading the board's
+  sections, and each page a file of its own.
 - **Data:**  each place the site reads as a NERD, only its linking fields, on `<ui-diagram>`;
   click a box and it turns over to every field, and its sample rows show in `<ui-table editable>`.
 - Every change is one undo step in the site file;  renaming a page renames every `go to` naming it, in every file.

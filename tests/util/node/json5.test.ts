@@ -53,11 +53,63 @@ describe("json5Edited()", () => {
     )
   })
 
-  test("a null is written as null, at any depth, where json5-writer alone throws (I22)", () => {
+  test("a null is written as null, at any depth (I22)", () => {
     const source = '{\n  // who listens\n  "listening": "a",\n  "marks": { "j1": "x" }\n}\n'
     const edited = json5Edited(source, { listening: null, marks: { j1: null } })
     expect(edited).toContain("// who listens")
     expect(JSON5.parse(edited)).toEqual({ listening: null, marks: { j1: null } })
+  })
+
+  test("a removed key takes the comments above and beside it;  the others stay", () => {
+    const source = '{\n  // above a\n  "a": 1, // beside a\n  // above b\n  "b": 2, // beside b\n  "c": 3\n}\n'
+    expect(json5Edited(source, { a: 1, c: 3 })).toBe('{\n  // above a\n  "a": 1, // beside a\n  "c": 3\n}\n')
+  })
+
+  test("the last key removed:  the comma before it goes, the comment beside that stays", () => {
+    expect(json5Edited('{\n  "a": 1, // why\n  "b": 2\n}\n', { a: 1 })).toBe('{\n  "a": 1 // why\n}\n')
+  })
+
+  test("a new key goes last, after the comment beside the old last, which gets a comma", () => {
+    expect(json5Edited('{\n  "a": 1 // why\n}\n', { a: 1, b: { c: [2] } })).toBe(
+      '{\n  "a": 1, // why\n  "b": {\n    "c": [\n      2\n    ]\n  }\n}\n'
+    )
+  })
+
+  test("an object on one line stays on one line", () => {
+    expect(json5Edited('{ "a": 1, "b": 2 }', { a: 5, c: [1] })).toBe('{ "a": 5, "c": [1] }\n')
+  })
+
+  test("an array is matched by position:  items past the new length go, new ones are added", () => {
+    expect(json5Edited("[\n  // one\n  1,\n  // two\n  2\n]\n", [9])).toBe("[\n  // one\n  9\n]\n")
+    expect(json5Edited("[\n  // one\n  1\n]\n", [1, 2])).toBe("[\n  // one\n  1,\n  2\n]\n")
+  })
+
+  test("everything removed:  empty, unless a comment of its own stays", () => {
+    expect(json5Edited('{\n  "a": 1\n}\n', {})).toBe("{}\n")
+    expect(json5Edited('{\n  "a": 1\n  // the end of it\n}\n', {})).toBe("{\n  // the end of it\n}\n")
+    expect(json5Edited('{\n  "a": 1\n  // the end of it\n}\n', { b: 2 })).toBe('{\n  // the end of it\n  "b": 2\n}\n')
+  })
+
+  test("what didn't change keeps its exact text:  quotes, unquoted keys, a trailing comma", () => {
+    const source = "{\n  name: 'Owen', // who\n  'age': +50,\n}\n"
+    expect(json5Edited(source, { name: "Owen", age: 50 })).toBe(source)
+    expect(json5Edited(source, { name: "O", age: 50 })).toBe("{\n  name: \"O\", // who\n  'age': +50,\n}\n")
+  })
+
+  test("text that looks like a comment, or holds brackets and quotes, is only text", () => {
+    const source = '{\n  // real\n  "a // no": "b /* no */ } ] \\" still"\n}\n'
+    expect(json5Edited(source, { "a // no": "c" })).toBe('{\n  // real\n  "a // no": "c"\n}\n')
+  })
+
+  test("a key holding undefined is left as it was;  a value's toJSON() is what's written", () => {
+    expect(json5Edited('{\n  // c\n  "a": 1\n}', { a: undefined, b: 2 })).toBe('{\n  // c\n  "a": 1,\n  "b": 2\n}\n')
+    expect(JSON5.parse(json5Edited('{\n  // c\n  "a": 1\n}', { a: new Date(0) }))).toEqual({
+      a: "1970-01-01T00:00:00.000Z"
+    })
+  })
+
+  test("text that won't read as JSON5 throws a SyntaxError", () => {
+    expect(() => json5Edited("{ // broken\n", {})).toThrow(SyntaxError)
   })
 
   test("an empty source:  the value alone, two-space indented", () => {

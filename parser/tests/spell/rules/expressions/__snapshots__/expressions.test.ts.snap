@@ -17,6 +17,7 @@ exports[`testing spell module expressions > rule group specs > match snapshot --
   "is_equal": "operator|expression",
   "is_exactly": "operator|expression",
   "is_in": "operator|expression",
+  "is_listed_value": "operator|expression",
   "is_same_type_as": "operator|expression",
   "joined": "operator|expression",
   "measure_in": "units",

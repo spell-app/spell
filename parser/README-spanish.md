@@ -69,8 +69,8 @@ spell test @spell/examples/Solitario
 - The command's own lines, `✓ Compiling`, stay English:  the program speaks Spanish, the tool doesn't.
 
 **Ask what a Spanish word starts.**
-On the front page, `spell explain if` lists the two rules `if` starts.
-In Solitario, `si` starts the same two, with Spanish syntax strings:
+On the front page, `spell explain if` lists the five rules `if` starts.
+In Solitario, `si` starts the same five, with Spanish syntax strings:
 
 ```sh
 spell explain si --in @spell/examples/Solitario
@@ -80,15 +80,17 @@ spell explain si --in @spell/examples/Solitario
 <summary>Output</summary>
 
 ```text
+backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
+e.g. imprimir 1 si bar si no 2
+
 if  si {condition:expression} (entonces|:)? {statement_body}?
 e.g. si x
 
-if_there_are_none  si no hay (ninguno|ninguna) :? {statement_body}?
+if_there_are_none  si no hay (ninguno|ninguna|nada) :? {statement_body}?
+
+if_that_fails_say  si falla decir {text:expression}
 
 if_that_fails  si falla :? {statement_body}?
-
-backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
-e.g. imprimir 1 si bar si no 2
 ```
 
 </details>
@@ -338,7 +340,7 @@ spell translate check es
 <summary>Output</summary>
 
 ```text
-Spanish (es):  complete, 20 modules
+Spanish (es):  complete, 21 modules
 ```
 
 </details>
@@ -352,8 +354,12 @@ Spanish (es):  complete, 20 modules
 ## Translating a project
 
 `spell translate` writes an English project again in Spanish, as a project of its own beside it.
-Solitaire comes out linted clean and passing its six tests, with no person in the loop, in under a minute:
-about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
+Written in `.spell` files, Solitaire came out linted clean and passing its six tests, with no person in the loop,
+in under a minute:  about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
+
+A project in `.spell` comes back in tags:  `Carta.spell` gives `Carta.es.spell`, its tags in Spanish.
+The passes below work on the plain Spell each tag file means, then write the result back as tags.
+Prose between the tags is translated as a comment is, so `--no-ai` leaves it in English.
 
 It works in three passes:
 1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.
@@ -379,27 +385,27 @@ spell translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzb
 <summary>Output</summary>
 
 ```text
-fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (1 files, ...)
-  10 of 10 lines translated
+fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (3 files, ...)
+  127 of 127 lines translated
   names:  /tmp/fizzbuzz-es/fizzbuzz.es.names.json5
   pre-calculated:  none (--cold)
-  passes:  names ..., lines ..., fix-ups ... (0 lines fixed in 0 rounds, 1 check)
+  passes:  names ..., lines ..., fix-ups ... (0 lines fixed in 0 rounds, 2 checks)
   claude -p:  0 calls:  fix-ups 0
-  shape:  7 of 7 statements compile to the same program as the English
-  7 lines still need a person, marked // TODO: translate:
-    FizzBuzz.es.spell:2  phrases "play fizzbuzz"
-    FizzBuzz.es.spell:3  names "number"
-    FizzBuzz.es.spell:4  names "number", texts "fizzbuzz"
-    FizzBuzz.es.spell:5  names "number", texts "fizz"
-    FizzBuzz.es.spell:6  names "number", texts "buzz"
-    FizzBuzz.es.spell:7  names "number"
+  shape:  35 of 42 statements compile to the same program as the English
+  45 lines still need a person, marked // TODO: translate:
+...
     FizzBuzz.es.spell:9  phrases "play fizzbuzz"
+    FizzBuzz.es.spell:10  names "number"
+...
+  7 problems left:
+...
 ```
 
 </details>
 
 - Every line is Spanish but its names:  `para number de 1 a 100`, `si el number dividido por 15 es un entero: ...`.
-  It exits 1, because seven lines still need a person.
+  It exits 1, because 45 lines still need a person.
+  The seven shape problems are lines with an untranslated phrase, which can't compile until a person or Claude names it.
 - With Claude, the same command fills the names in and fixes the lines;
   through the Claude API when `ANTHROPIC_API_KEY` is set, else through `claude -p`, a little slower.
 - `--update` re-translates only the English lines changed since the last run:  hand edits to the Spanish stay.

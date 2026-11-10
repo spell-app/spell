@@ -47,7 +47,8 @@ and publishes under `next`, so `latest` moves only when you say so.
 1. Builds each package and packs it into the kit's `dist-packs/` (git-ignored).
 2. Checks each pack:  built code only, every file its `exports` names is in it, one copy of the element base class.
 3. Installs the packs in a scratch project outside the checkout, and tries them:
-   a node import, a Vite page that draws a `<ui-button>`, `npx spell help`, `npx epic --help`.
+   a node import, a Vite page that draws a `<ui-button>`, `npx spell help`, `npx epic --help`,
+   and the epic server started from the install, an epic page and the epics pack answering.
 4. Publishes each, `spell` first:  `npm publish <pack> --tag next`.
 
 `--dry-run` stops after step 3, and is the run to make first.

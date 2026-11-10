@@ -2,6 +2,7 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Recipe",
+    "RecipeEditor",
     "RecipeBox",
     "FamilyCookbook"
   ],
@@ -14,25 +15,39 @@
         "placeType": "FamilyCookbook",
         "collection": "recipes"
       },
-      "defined": "/RecipeBox.api.spell:1105-1234"
+      "defined": "/RecipeBox.api.spell:1095-1255"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/RecipeBox.api.spell:1162-1181"
+      "defined": "/RecipeBox.api.spell:1164-1186"
     },
     {
       "property": "servings",
       "of": "Recipe",
       "datatype": "number",
-      "defined": "/RecipeBox.api.spell:1185-1211"
+      "defined": "/RecipeBox.api.spell:1191-1224"
     },
     {
       "property": "notes",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/RecipeBox.api.spell:1215-1234"
+      "defined": "/RecipeBox.api.spell:1230-1252"
+    },
+    {
+      "syntax": "edit {thisArg:expression}",
+      "output": "edit",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "edit it",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spell:358-477"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -45,7 +60,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:343-943"
+      "defined": "/RecipeBox.spell:491-1235"
     },
     {
       "type": "FamilyCookbook",
@@ -54,7 +69,65 @@
         "name": "family_cookbook",
         "kind": "database on this device"
       },
-      "defined": "/RecipeBox.api.spell:1059-1103"
+      "defined": "/RecipeBox.api.spell:1074-1089"
+    },
+    {
+      "type": "RecipeEditor",
+      "superType": "View",
+      "defined": "/RecipeBox.spell:1330-2595"
+    },
+    {
+      "property": "recipe",
+      "of": "RecipeEditor",
+      "datatype": "Recipe",
+      "defined": "/RecipeBox.spell:1354-1385"
+    },
+    {
+      "property": "draft",
+      "of": "RecipeEditor",
+      "datatype": "PlaceDraft",
+      "defined": "/RecipeBox.spell:1429-1539"
+    },
+    {
+      "syntax": "save {thisArg:expression}",
+      "output": "save",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "save it",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spell:1553-1684"
+    },
+    {
+      "syntax": "cancel {thisArg:expression}",
+      "output": "cancel",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "cancel it",
+      "returns": "nothing",
+      "defined": "/RecipeBox.spell:1698-1842"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "RecipeEditor",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeBox.spell:1856-2586"
     },
     {
       "uiDefaults": {
@@ -62,25 +135,31 @@
           "grow": true
         }
       },
-      "defined": "/RecipeBox.spell:220-269"
+      "defined": "/RecipeBox.spell:242-291"
     },
     {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spell:1059-3677"
+      "defined": "/RecipeBox.spell:2687-5635"
     },
     {
       "property": "search",
       "of": "RecipeBox",
       "datatype": "text",
-      "defined": "/RecipeBox.spell:1073-1096"
+      "defined": "/RecipeBox.spell:2701-2724"
     },
     {
       "property": "new_recipe",
       "asWritten": "new recipe",
       "of": "RecipeBox",
       "datatype": "Recipe",
-      "defined": "/RecipeBox.spell:1101-1154"
+      "defined": "/RecipeBox.spell:2729-2782"
+    },
+    {
+      "property": "editing",
+      "of": "RecipeBox",
+      "datatype": "Recipe",
+      "defined": "/RecipeBox.spell:2787-2819"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -95,13 +174,13 @@
       "name": "create it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/RecipeBox.spell:1202-1633"
+      "defined": "/RecipeBox.spell:2925-3356"
     },
     {
       "property": "matches",
       "of": "RecipeBox",
       "datatype": "list of recipes",
-      "defined": "/RecipeBox.spell:1647-1853"
+      "defined": "/RecipeBox.spell:3370-3536"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -115,7 +194,7 @@
       "kind": "method",
       "name": "add the new recipe",
       "returns": "nothing",
-      "defined": "/RecipeBox.spell:1869-1989"
+      "defined": "/RecipeBox.spell:3552-3672"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -128,7 +207,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:2003-3668"
+      "defined": "/RecipeBox.spell:3686-4197"
     }
   ],
   "codeLines": [
@@ -136,15 +215,23 @@
     8,
     13,
     18,
-    23,
-    67,
-    79,
-    89,
-    92,
+    24,
+    28,
     97,
-    103,
-    124,
+    110,
+    114,
+    120,
+    125,
     131,
-    136
+    136,
+    170,
+    183,
+    186,
+    191,
+    197,
+    203,
+    224,
+    229,
+    234
   ]
 }

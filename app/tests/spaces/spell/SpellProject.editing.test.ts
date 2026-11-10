@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, afterEach, vi } from "vite-plus/test"
 
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { installDiskFetch } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { fixtureProjectId } from "spell/app/spaces/test"
@@ -38,6 +39,23 @@ describe("SpellProject editing", () => {
     ])
     expect(project.spellFiles.every((file) => file.isActive)).toBe(true)
     expect(new SP.SpellFile(`${solitaire}/NotImported.spell`).isActive).toBe(false)
+  })
+
+  // epic `language` P40:  a file's shape is what it says, so deleting its last tag, or typing its first, flips it
+  test("a file that changes shape as it's edited is parsed whole, in its new shape, and back", async () => {
+    const parserOf = () => (game.scope?.parser as SP.SpellParser | undefined)?.form ?? "spell"
+    const codeOf = () => P.JSWriter.instance.writeMatch(game.match!) as string
+    const before = codeOf()
+    expect(game.form).toBe("spellx")
+    expect(parserOf(), "at first").toBe("spellx")
+    await project.updateText(game, 'a "marker" is a thing:\n\t- its "count" is a number\n')
+    expect(game.form).toBe("spell")
+    expect(parserOf(), "plain").toBe("spell")
+    expect(codeOf()).toContain("class Marker")
+    await project.updateText(game, gameText)
+    expect(game.form).toBe("spellx")
+    expect(parserOf(), "back").toBe("spellx")
+    expect(codeOf()).toBe(before)
   })
 
   test("`updateText()` takes the text, and returns the files whose parse changed", async () => {

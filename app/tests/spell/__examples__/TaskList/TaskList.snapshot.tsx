@@ -151,7 +151,19 @@ export class BrowserTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "browser_storage", collection: "browser_tasks" }
+  static savedIn = {
+    place: "browser_storage",
+    collection: "browser_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in browser storage
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 292, end: 319 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in browser storage
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 292, end: 319 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -161,7 +173,10 @@ export class BrowserTask extends Task {
  * - What every view's element does, e.g. drawing its browser task, is `SpellElement`'s.
  */
 export class BrowserTaskElement extends SpellElement<BrowserTask> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-browser-task", "browser task", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-browser-task", "browser task", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   throwAway() {
     return this.currentThing?.throwAway()
@@ -170,7 +185,7 @@ export class BrowserTaskElement extends SpellElement<BrowserTask> {
 core.useElement(BrowserTask, BrowserTaskElement)
 
 export class BrowserKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 405, end: 443 }, readsFrom: ["browser_storage"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 460, end: 501 }, readsFrom: ["browser_storage"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(BrowserTask)
   }) }
@@ -202,7 +217,19 @@ export class ServerTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "task_files", collection: "server_tasks" }
+  static savedIn = {
+    place: "task_files",
+    collection: "server_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task files
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 460, end: 482 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in task files
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 460, end: 482 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -212,7 +239,10 @@ export class ServerTask extends Task {
  * - What every view's element does, e.g. drawing its server task, is `SpellElement`'s.
  */
 export class ServerTaskElement extends SpellElement<ServerTask> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-server-task", "server task", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-server-task", "server task", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   throwAway() {
     return this.currentThing?.throwAway()
@@ -221,7 +251,7 @@ export class ServerTaskElement extends SpellElement<ServerTask> {
 core.useElement(ServerTask, ServerTaskElement)
 
 export class ServerKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 540, end: 577 }, readsFrom: ["task_files"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 621, end: 661 }, readsFrom: ["task_files"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(ServerTask)
   }) }
@@ -259,7 +289,19 @@ export class SheetTask extends Task {
     core.removeSaved(this)
   }
 
-  static savedIn = { place: "task_sheet", collection: "sheet_tasks" }
+  static savedIn = {
+    place: "task_sheet",
+    collection: "sheet_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task sheet
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 609, end: 631 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in task sheet
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 609, end: 631 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -269,7 +311,10 @@ export class SheetTask extends Task {
  * - What every view's element does, e.g. drawing its sheet task, is `SpellElement`'s.
  */
 export class SheetTaskElement extends SpellElement<SheetTask> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-sheet-task", "sheet task", [])
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-sheet-task", "sheet task", [
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
+  ])
 
   throwAway() {
     return this.currentThing?.throwAway()
@@ -278,7 +323,7 @@ export class SheetTaskElement extends SpellElement<SheetTask> {
 core.useElement(SheetTask, SheetTaskElement)
 
 export class SheetKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 693, end: 729 }, readsFrom: ["task_sheet"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 768, end: 807 }, readsFrom: ["task_sheet"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SheetTask)
   }) }
@@ -320,10 +365,22 @@ export class SkyTask extends Task {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a sky task has an owner as text
-  @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 563, end: 594 } })
+  @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 630, end: 661 } })
   accessor owner!: string
 
-  static savedIn = { place: "task_sky", collection: "sky_tasks" }
+  static savedIn = {
+    place: "task_sky",
+    collection: "sky_tasks",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in task sky
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 448, end: 468 } })
+  accessor created!: any /* spell: type unknown */
+
+  // - it lives in task sky
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 448, end: 468 } })
+  accessor modified!: any /* spell: type unknown */
 }
 
 /**
@@ -334,7 +391,9 @@ export class SkyTask extends Task {
  */
 export class SkyTaskElement extends SpellElement<SkyTask> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-sky-task", "sky task", [
-    { name: "owner", kind: "string", description: "Its owner." }
+    { name: "owner", kind: "string", description: "Its owner." },
+    { name: "created", kind: "json", description: "Its created." },
+    { name: "modified", kind: "json", description: "Its modified." }
   ])
 
   throwAway() {
@@ -345,7 +404,7 @@ core.useElement(SkyTask, SkyTaskElement)
 
 export class SkyKeeper extends TaskKeeper {
   /** only your own:  everyone's tasks are in their own accounts */
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 695, end: 757 }, readsFrom: ["task_sky"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 717, end: 855 }, readsFrom: ["task_sky"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SkyTask, { filter: { owner: core.currentPerson().id } })
   }) }
@@ -375,7 +434,7 @@ core.heading("Task List")
 // ## Task List
 ///////////////
 // A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
-// Its tasks are this project's own `<spell-view "task">`;  this file holds their list, and the app.
+// Its tasks are this project's own `<view "task">`;  this file holds their list, and the app.
 // Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
 // TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 

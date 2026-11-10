@@ -36,9 +36,19 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 				</stack>
 			</form>
 			{draw the found of it}
+			{draw the issues of it}
 			<text size="small" paragraph>
 				From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
 			</text>
+		</stack>
+	</draw>
+
+	<draw "issues" description="Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request">
+		<stack spacing="sm">
+			<header size="medium">Solid's issues</header>
+			<for the first 6 issues where its pull request is nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open issues." />
+			<header size="medium">Solid's pull requests</header>
+			<for the first 6 issues where its pull request is not nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open pull requests." />
 		</stack>
 	</draw>
 
@@ -68,6 +78,14 @@ A person or an organization:  a card in a search, and a page of their own, with 
 A search gives only a little of each:  their page reads them whole, by their login.
 
 <extend "user">
+	<action "look at it" description="Their own page, in the GitHub tab">
+		set the showing of the github of the public servers to it
+	</action>
+
+	<action "look away from it" description="Put their page away again, with its Back button">
+		set the showing of the github of the public servers to nothing
+	</action>
+
 	<draw>
 		<ui-card onClick={look at it}>
 			<content>
@@ -114,6 +132,23 @@ A search gives only a little of each:  their page reads them whole, by their log
 </extend>
 
 
+# An issue
+GitHub lists a pull request among a repository's issues:  this page tells them apart by its "pull request".
+
+<extend "issue">
+	<draw>
+		<ui-card>
+			<content>
+				<header>
+					{its title} <link link={its html url} target="_blank" aria-label="On GitHub"><icon name="github" /></link>
+				</header>
+				<meta>#{its number} · {its state}</meta>
+			</content>
+		</ui-card>
+	</draw>
+</extend>
+
+
 # A repository
 Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
 
@@ -131,14 +166,3 @@ Its name, what it's for, and how many people starred it;  its GitHub icon opens 
 	</draw>
 </extend>
 
-
-# What someone on GitHub can do, from anywhere
-Shown on their own page, and put away again by its Back button, in the GitHub tab of the public servers.
-
-<spell>
-	to look at (a user):
-		set the showing of the github of the public servers to it
-
-	to look away from (a user):
-		set the showing of the github of the public servers to nothing
-</spell>

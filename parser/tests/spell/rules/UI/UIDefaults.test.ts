@@ -26,7 +26,8 @@ describe("ui_defaults", () => {
   })
 
   test("a Spanish block, in Spell UI's Spanish words, compiles to its English ones", () => {
-    // a spellml file reads a tag of any letters, `<botón>`;  code spell's markup, ASCII ones
+    // a tag-shaped file reads a tag of any letters, `<botón>`;  plain Spell's markup, ASCII ones
+    // - a file holding only this block is plain (`SP.formOfText()`), so the old ending keeps it tag-shaped here
     for (const [path, tag] of [
       ["/Tema.es.spell", "es-boton"],
       ["/Tema.es.spell", "botón"],

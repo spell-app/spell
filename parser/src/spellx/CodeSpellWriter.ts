@@ -30,6 +30,16 @@ export class CodeSpellWriter {
    * - NEVER throws on a file:  a line spellx can't read is written as it is.
    */
   static write(text: string, options: CodeSpellWriteOptions = {}): string {
+    return CodeSpellWriter.writeWithProse(text, options).text
+  }
+
+  /**
+   * `write()`, and which of the lines it wrote were PROSE:  a line between tags, written as a `//` comment.
+   * - For a writer that means to go back to tags (`spell translate`):
+   *   `SX.SpellxWriter.write()`'s `proseLines` writes those lines as prose again.
+   * - NEVER throws on a file, as `write()`.
+   */
+  static writeWithProse(text: string, options: CodeSpellWriteOptions = {}): { text: string; proseLines: Set<number> } {
     const language = options.language ?? SP.Language.forFile(options.path)
     const parser = language.parser.clone({ module: "code spell writer", form: "spellx" } as P.ParserProps)
     const componentTag =
@@ -41,7 +51,7 @@ export class CodeSpellWriter {
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     writer.writeItems(root?.tokens ?? [], 0, "file")
     while (writer.lines.at(-1) === "") writer.lines.pop()
-    return `${writer.lines.join("\n")}\n`
+    return { text: `${writer.lines.join("\n")}\n`, proseLines: writer.proseLines }
   }
 
   /**
@@ -60,11 +70,11 @@ export class CodeSpellWriter {
    */
   static writeMarkup(markup: string, options: CodeSpellWriteOptions = {}): string {
     const language = options.language ?? SP.Language.forFile(options.path)
-    const { prefix, templates, attributes } = language.words.spellx!
-    // a page that draws its body, in the language's own words:  `<spell-page "markup" notebook>`
+    const { templates, attributes } = language.words.spellx!
+    // a page that draws its body, in the language's own words:  `<page "markup" notebook>`
     const page = Object.keys(templates).find((word) => templates[word] === "page")
     const flag = Object.keys(attributes).find((word) => attributes[word] === SP.PAGE_DRAWS_BODY_FLAG)
-    const head = `<${prefix}-${page} "markup" ${flag}>\n`
+    const head = `<${page} "markup" ${flag}>\n`
     const lines = markup.split("\n")
     const isWrapped = TOP_LEVEL_HTML_BLOCK.test(markup)
     const wrapperOpen = isWrapped ? `\t<${WRAPPER_TAG}>\n` : ""
@@ -84,7 +94,7 @@ export class CodeSpellWriter {
     }
     const componentTag = options.componentTag
     const written = CodeSpellWriter.write(
-      `${head}${wrapperOpen}${lines.map((line) => indent + line).join("\n")}\n${wrapperClose}</${prefix}-${page}>\n`,
+      `${head}${wrapperOpen}${lines.map((line) => indent + line).join("\n")}\n${wrapperClose}</${page}>\n`,
       {
         ...options,
         language,
@@ -108,6 +118,8 @@ export class CodeSpellWriter {
 
   /** The lines written so far. */
   private readonly lines: string[] = []
+  /** Which of `lines` were prose between tags, by index. */
+  private readonly proseLines = new Set<number>()
 
   private constructor(
     readonly parser: SP.SpellParser,
@@ -131,7 +143,7 @@ export class CodeSpellWriter {
       if (!(item instanceof P.LineToken)) continue
       const twin = SP.SpellxTwin.lineOf(item, items[index + 1], this.parser)
       if (!twin) {
-        this.writeLine(item.tokens, indent)
+        this.writeLine(item.tokens, indent, "", where !== "body")
         continue
       }
       if (twin.takesNextItem || twin.swallowsNextItem) index++
@@ -150,18 +162,24 @@ export class CodeSpellWriter {
     }
   }
 
-  /** Write a line of `tokens`, `indent` in:  its trailing comments first, a line each, then the rest after `bullet`. */
-  private writeLine(tokens: P.Token[], indent: string, bullet = "") {
+  /**
+   * Write a line of `tokens`, `indent` in:  its trailing comments first, a line each, then the rest after `bullet`.
+   * - `mayBeProse`:  it's between tags, so a line of prose here is noted in `proseLines`
+   */
+  private writeLine(tokens: P.Token[], indent: string, bullet = "", mayBeProse = false) {
     const code = tokens.filter((token) => !(token instanceof SP.SpellxCloserToken))
     let end = code.length
     while (end > 0 && isCommentLike(code[end - 1])) end--
     const comments = code.slice(end) as P.CommentToken[]
     // a line of prose, or a note's:  a comment;  a line of a `<!-- ... -->` comment:  a `//` line, empty or not
     if (end === 0) {
-      for (const comment of comments)
+      for (const comment of comments) {
+        if (mayBeProse && comment.value && comment instanceof SP.SpellxProseToken)
+          this.proseLines.add(this.lines.length)
         this.lines.push(
           comment.value || comment instanceof SP.SpellxCommentToken ? lineComment(indent, comment.value) : ""
         )
+      }
       if (!tokens.length) this.lines.push("")
       return
     }
@@ -327,8 +345,13 @@ export class CodeSpellWriter {
 
   /** `tokens` as text:  each as written, with the space after it;  a line's end trimmed. */
   private static textOf(tokens: P.Token[]): string {
+    // a comment ending the line, as a tag's description:  two spaces before it, as one is written
     return tokens
-      .map((token) => String(token))
+      .map((token, index) =>
+        index && token instanceof P.CommentToken && !/\s$/.test(String(tokens[index - 1]))
+          ? `  ${String(token)}`
+          : String(token)
+      )
       .join("")
       .trimEnd()
   }

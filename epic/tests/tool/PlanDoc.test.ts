@@ -1550,10 +1550,13 @@ describe("PlanDoc commits", () => {
   })
 
   test("finds the GitHub page from the remote, https or ssh", () => {
-    expect(PlanCommits.githubBase("https://github.com/spell-app/spell-app.git")).toBe(BASE)
-    expect(PlanCommits.githubBase("git@github.com:spell-app/spell-app.git")).toBe(BASE)
-    expect(PlanCommits.githubBase("ssh://git@github.com/spell-app/spell-app")).toBe(BASE)
-    expect(PlanCommits.githubBase("https://gitlab.com/x/y.git")).toBe(null)
+    expect(PlanCommits.commitBase("https://github.com/spell-app/spell-app.git", "github")).toBe(BASE)
+    expect(PlanCommits.commitBase("git@github.com:spell-app/spell-app.git", "github")).toBe(BASE)
+    expect(PlanCommits.commitBase("ssh://git@github.com/spell-app/spell-app", "github")).toBe(BASE)
+    expect(PlanCommits.commitBase("https://gitlab.com/x/y.git", "github")).toBe(null)
+    expect(PlanCommits.commitBase("git@git.acme.com:team/sub/app.git", "gitlab")).toBe(
+      "https://git.acme.com/team/sub/app/-"
+    )
   })
 
   test("a phase's commits after Done (else Goal), before Files and To review;  replaced by sha;  the repo on the page", () => {

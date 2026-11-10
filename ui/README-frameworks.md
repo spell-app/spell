@@ -4,7 +4,7 @@
 PASS /src/tools/frameworks/vanilla.html (vanilla)
 PASS /src/tools/frameworks/react.html (react 19.3.1)
 PASS /src/tools/frameworks/vue.html (vue 3.5.44)
-PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.17 (app) + identity hook)
+PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.21 (app) + identity hook)
 ```
 
 That's `yarn smoke`, on four pages that each hold one `<ui-dropdown>`:
@@ -193,7 +193,7 @@ app.mount("#root")
 ## Solid 2:  one Solid on the page, and plain props
 
 ✓ Checked by [`solid.html`](src/tools/frameworks/solid.html), a compiled Solid 2 app,
-[`app.tsx`](src/tools/frameworks/solid/app.tsx), on Solid 2.0.0-rc.17:  the components' own copy.
+[`app.tsx`](src/tools/frameworks/solid/app.tsx), on Solid 2.0.0-rc.21:  the components' own copy.
 Every prop is a plain one, the same name as in HTML:
 - an event is `on-` and the event's own name, `on-ui-change={fn}`
 - data is the property's name, `options={options}`, and arrives as the array itself, not as text
@@ -237,7 +237,7 @@ render(
   - Text for an attribute stays an attribute, as ever.
 - Not `onUIChange`:  Solid lowercases a camelCase handler's name, so it would listen for `uichange`.
 - Neither namespace:  Solid 2 has no `on:` (a compile error since rc.17), and `prop:` is no longer needed.
-- **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.17.
+- **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.21.
   Two copies of Solid on one page break silently:
   two registries, two owners ([the element framework](https://github.com/spell-app/spell/blob/main/README/element.md)).
   - In Vite, that's `resolve.dedupe`:  `["solid-js", "@solidjs/web"]`, as every Spell build sets it.
@@ -348,7 +348,7 @@ button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
 A framework app with a bundler installs it, with Solid 2 as a peer, and imports what it uses:
 
 ```sh
-npm install spell-ui@next solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
+npm install spell-ui@next solid-js@2.0.0-rc.21 @solidjs/web@2.0.0-rc.21
 ```
 
 ```js
@@ -405,7 +405,7 @@ declarations:  ok
 PASS /src/tools/frameworks/vanilla.html (vanilla)
 PASS /src/tools/frameworks/react.html (react 19.3.1)
 PASS /src/tools/frameworks/vue.html (vue 3.5.44)
-PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.17 (app) + identity hook)
+PASS /src/tools/frameworks/solid.html (solid 2.0.0-rc.21 (app) + identity hook)
 PASS /src/tools/frameworks/perf.html (perf (production))
 PASS /src/tools/smoke/compat-solid-1.9.html (solid 1.9.9 (esm.sh) + vendored Solid 2)
 PASS /src/tools/smoke/translate.html (es (<ui-root> in Spanish))

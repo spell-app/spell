@@ -6,10 +6,11 @@
 //     --samples authors=OL79034A,editions=OL32848840M --pictures "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"
 // `spell place update OpenLibrary.api.spell` looks again, and changes only this file and OpenLibrary.api.json5.
 // It has no list of every book:  a program searches it, `every book where its title includes ...`.
+// A book's editions are read from its own list of them, when its page shows them.
 // Each book's authors are their ids, each read from the author's own record when something reads it;
 // its cover is a picture on another server, covers.openlibrary.org, its address built from the book's cover id.
 
-open library is a web server at "https://openlibrary.org":
+<web-server "open library" address="https://openlibrary.org">
 	- its id is its "key"
 	- its rows are its "docs"
 	- check it every 30 seconds
@@ -19,112 +20,146 @@ open library is a web server at "https://openlibrary.org":
 	- authors are found at "/authors/{name}.json"
 	- editions are found at "/books/{name}.json"
 	- a book's "cover i" is a picture at "https://covers.openlibrary.org/b/id/{id}-M.jpg"
+	- a book's editions live at "{id}/editions.json"
+</web-server>
 
-a "book" is a thing:
-	- it lives in open library
-	- its "authors" is a list of authors, stored as "author_key"
-	- its "author name" is a list of text
-	- its "cover edition" is an edition, stored as "cover_edition_key"
-	- its "cover height" is a number
-	- its "cover i" is text  // a picture's address
-	- its "cover width" is a number
-	- its "ebook access" is text
-	- its "edition count" is a number
-	- its "first publish year" is a number
-	- its "fulltext" is yes or no, stored as "has_fulltext"
-	- its "ia" is a list of text
-	- its "ia collection" is a list of text
-	- its "language" is a list of text
-	- its "lending edition s" is text
-	- its "lending identifier s" is text
-	- its "public scan b" is yes or no
-	- its "series key" is a list of text
-	- its "series name" is a list of text
-	- its "series position" is a list of text
-	- its "title" is text
-	- its "subtitle" is text
+<thing "book">
+	<spell>
+		- it lives in open library
+		- its "authors" is a list of authors, stored as "author_key"
+	</spell>
+	<property "author name">a list of text</>
+	<spell>
+		- its "cover edition" is an edition, stored as "cover_edition_key"
+	</spell>
+	<property "cover height" type="number" />
+	<property "cover i">text</>	// a picture's address
+	<property "cover width" type="number" />
+	<property "ebook access">text</>
+	<property "edition count" type="number" />
+	<property "first publish year" type="number" />
+	<spell>
+		- its "fulltext" is yes or no, stored as "has_fulltext"
+	</spell>
+	<property "ia">a list of text</>
+	<property "ia collection">a list of text</>
+	<property "language">a list of text</>
+	<property "lending edition s">text</>
+	<property "lending identifier s">text</>
+	<property "public scan b">yes or no</>
+	<property "editions">a list of editions</>
+	<property "series key">a list of text</>
+	<property "series name">a list of text</>
+	<property "series position">a list of text</>
+	<property "title">text</>
+	<property "subtitle">text</>
+</thing>
 
-an "author" is a thing:
-	- it lives in open library
-	- its "links" is a list of links
-	- its "kind" is a kind, stored as "type"
-	- its "key" is text
-	- its "name" is text
-	- its "source records" is a list of text
-	- its "birth date" is text
-	- its "bio" is text
-	- its "title" is text
-	- its "alternate names" is a list of text
-	- its "remote ids" is a remote id
-	- its "photos" is a list of numbers
-	- its "death date" is text
-	- its "personal name" is text
-	- its "latest revision" is a number
-	- its "revision" is a number
-	- its "created" is a created
-	- its "last modified" is a last modified
+<thing "author">
+	<spell>
+		- it lives in open library
+	</spell>
+	<property "links">a list of links</>
+	<spell>
+		- its "kind" is a kind, stored as "type"
+	</spell>
+	<property "key">text</>
+	<property "name">text</>
+	<property "source records">a list of text</>
+	<property "birth date">text</>
+	<property "bio">text</>
+	<property "title">text</>
+	<property "alternate names">a list of text</>
+	<property "remote ids">a remote id</>
+	<property "photos">a list of numbers</>
+	<property "death date">text</>
+	<property "personal name">text</>
+	<property "latest revision" type="number" />
+	<property "revision" type="number" />
+	<property "created" type="created" />
+	<property "last modified">a last modified</>
+</thing>
 
-an "edition" is a thing:
-	- it lives in open library
-	- its "kind" is a kind, stored as "type"
-	- its "title" is text
-	- its "authors" is a list of edition authors
-	- its "publish date" is text
-	- its "source records" is a list of text
-	- its "number of pages" is a number
-	- its "publishers" is a list of text
-	- its "physical format" is text
-	- its "notes" is a note
-	- its "full title" is text
-	- its "covers" is a list of numbers
-	- its "works" is a list of works
-	- its "key" is text
-	- its "local id" is a list of text
-	- its "latest revision" is a number
-	- its "revision" is a number
-	- its "created" is a created
-	- its "last modified" is a last modified
+<thing "edition">
+	<spell>
+		- it lives in open library
+		- its "kind" is a kind, stored as "type"
+	</spell>
+	<property "title">text</>
+	<property "authors">a list of edition authors</>
+	<property "publish date">text</>
+	<property "source records">a list of text</>
+	<property "number of pages" type="number" />
+	<property "publishers">a list of text</>
+	<property "physical format">text</>
+	<property "notes" type="note" />
+	<property "full title">text</>
+	<property "covers">a list of numbers</>
+	<property "works">a list of works</>
+	<property "key">text</>
+	<property "local id">a list of text</>
+	<property "latest revision" type="number" />
+	<property "revision" type="number" />
+	<property "created" type="created" />
+	<property "last modified">a last modified</>
+</thing>
 
-a "link" is a thing:
-	- its "title" is text
-	- its "url" is text  // an address
-	- its "kind" is a kind, stored as "type"
+<thing "link">
+	<property "title">text</>
+	<property "url">text</>	// an address
+	<spell>
+		- its "kind" is a kind, stored as "type"
+	</spell>
+</thing>
 
-a "kind" is a thing:
-	- its "key" is text
+<thing "kind">
+	<property "key">text</>
+</thing>
 
-a "remote id" is a thing:
-	- its "viaf" is a number
-	- its "wikidata" is text
-	- its "isni" is a number
-	- its "amazon" is text
-	- its "bookbrainz" is text
-	- its "goodreads" is a number
-	- its "gnd" is a number
-	- its "imdb" is text
-	- its "lc naf" is text
-	- its "librarything" is text
-	- its "musicbrainz" is text
-	- its "storygraph" is text
-	- its "inventaire" is text
-	- its "librivox" is a number
-	- its "project gutenberg" is a number
-	- its "opac sbn" is text
+<thing "remote id">
+	<property "viaf" type="number" />
+	<property "wikidata">text</>
+	<property "isni" type="number" />
+	<property "amazon">text</>
+	<property "bookbrainz">text</>
+	<property "goodreads" type="number" />
+	<property "gnd" type="number" />
+	<property "imdb">text</>
+	<property "lc naf">text</>
+	<property "librarything">text</>
+	<property "musicbrainz">text</>
+	<property "storygraph">text</>
+	<property "inventaire">text</>
+	<property "librivox" type="number" />
+	<property "project gutenberg" type="number" />
+	<property "opac sbn">text</>
+</thing>
 
-a "created" is a thing:
-	- its "kind" is text, stored as "type"
-	- its "value" is a date
+<thing "created">
+	<spell>
+		- its "kind" is text, stored as "type"
+	</spell>
+	<property "value" type="date" />
+</thing>
 
-a "last modified" is a thing:
-	- its "kind" is text, stored as "type"
-	- its "value" is a date
+<thing "last modified">
+	<spell>
+		- its "kind" is text, stored as "type"
+	</spell>
+	<property "value" type="date" />
+</thing>
 
-an "edition author" is a thing:
-	- its "key" is text
+<thing "edition author">
+	<property "key">text</>
+</thing>
 
-a "note" is a thing:
-	- its "kind" is text, stored as "type"
-	- its "value" is text
+<thing "note">
+	<spell>
+		- its "kind" is text, stored as "type"
+	</spell>
+	<property "value">text</>
+</thing>
 
-a "work" is a thing:
-	- its "key" is text
+<thing "work">
+	<property "key">text</>
+</thing>

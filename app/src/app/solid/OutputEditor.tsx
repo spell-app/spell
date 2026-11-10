@@ -51,7 +51,7 @@ export function OutputToolbar() {
  * - With `target="spell"`:  the code spell `editor.file` means, a `.spell` file's, written from its tags' twins.
  * - With `target="spellx"`:  `editor.file` as spellx, a `.spell` file's, written by `SX.SpellxWriter`.
  * - Those two are a file's OTHER FORM, a view:
- *   a template lives in ONE file, `.spell` or `.spellml` (epic `elemental-spell` J95).
+ *   a template lives in ONE file, in one shape (epic `elemental-spell` J95).
  * - Coloured by Monaco's own highlighting for the language;  it doesn't follow the cursor in `<InputEditor>`.
  * - A target whose writer can't write the project shows why, as a comment, instead of its code.
  * - SEE:  its App UI components page, `app/docs/OutputEditor.html` (`/components/app/OutputEditor.html`).

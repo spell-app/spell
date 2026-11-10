@@ -733,7 +733,7 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
   <summary>Output</summary>
 
   ```text
-  Spanish (es):  complete, 20 modules
+  Spanish (es):  complete, 21 modules
   ```
 
   </details>
@@ -814,6 +814,6 @@ These guides need a checkout with the epic folder beside it, and the page server
 
 - [README-rulex](README-rulex.md):  the syntax every rule is written in, construct by construct;  the natural next page
 - [README-markdown](README-markdown.md):  the second language on the parser, built the way this page describes
-- [README-spell](README-spell.md):  Spell's twenty rule modules, its compiler, and its own recipe for a rule
+- [README-spell](README-spell.md):  Spell's twenty-two rule modules, its compiler, and its own recipe for a rule
 - [PARSING.md](src/spell/PARSING.md):  the map of Spell's parse, for when you change how parsing works
 - [The parser folder's AGENTS.md](src/parser/AGENTS.md):  the rules for working in it

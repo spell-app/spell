@@ -48,12 +48,12 @@
       "of": "Status",
       "group": "Statusphere:  where the statuses are kept",
       "datatype": "text",
-      "defined": "/Statusphere.api.spell:519-548"
+      "defined": "/Statusphere.api.spell:574-603"
     },
     {
       "property": "who",
       "of": "Status",
-      "defined": "/Statusphere.spell:425-693"
+      "defined": "/Statusphere.spell:418-686"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -66,7 +66,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Statusphere.spell:709-900"
+      "defined": "/Statusphere.spell:702-893"
     },
     {
       "type": "StatusBoard",
@@ -82,7 +82,7 @@
           }
         }
       },
-      "defined": "/Statusphere.api.spell:322-413"
+      "defined": "/Statusphere.api.spell:333-443"
     },
     {
       "uiDefaults": {
@@ -96,13 +96,13 @@
     {
       "type": "Statusphere",
       "superType": "App",
-      "defined": "/Statusphere.spell:1013-2343"
+      "defined": "/Statusphere.spell:993-2276"
     },
     {
       "property": "recent",
       "of": "Statusphere",
       "datatype": "list of statuses",
-      "defined": "/Statusphere.spell:1028-1202"
+      "defined": "/Statusphere.spell:1008-1135"
     },
     {
       "syntax": "post {callArgs:expression} (of {thisArg:expression})?",
@@ -122,7 +122,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Statusphere.spell:1218-1419"
+      "defined": "/Statusphere.spell:1151-1352"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -135,7 +135,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Statusphere.spell:1433-2334"
+      "defined": "/Statusphere.spell:1366-2267"
     }
   ],
   "codeLines": [
@@ -145,11 +145,11 @@
     18,
     24,
     32,
-    54,
-    70,
-    80,
-    84,
-    92,
-    97
+    67,
+    83,
+    93,
+    97,
+    103,
+    108
   ]
 }

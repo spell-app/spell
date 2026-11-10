@@ -170,7 +170,10 @@ export class Stock {
       morning: morningNote(worktree, name),
       sessions: here
     }
-    return this.classifyCheckout(item)
+    const classified = this.classifyCheckout(item)
+    // a base branch that takes only pull requests:  no local merge to offer
+    if (config.baseBranchProtected) classified.actions = classified.actions?.filter(({ id }) => id !== "merge")
+    return classified
   }
 
   /** Set `group`, `why` and `actions` on a worktree / branch item. */

@@ -1,7 +1,7 @@
 {
   "name": "spell-epic",
   "displayName": "Spell Epic",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "private": true,
   "description": "spell-epic's side bar:  the Review, Details and Epic Docs tabs, live from spell-epic's one page server per machine;  the window bridge Claude Code sessions reach their window through, and the handoff.",
   "license": "MIT",

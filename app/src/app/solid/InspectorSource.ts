@@ -1,5 +1,7 @@
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import type { SP } from "spell/parser/spell"
+// By path, not the barrel:  the template words alone, no parser
+import { spellxTemplateTagOf } from "spell/parser/spell/spellxTags"
 // By file:  the folder's barrel loads the language service
 import { endOfTag, SourceEdits } from "spell/app/lsp/SourceEdits"
 
@@ -111,7 +113,7 @@ export function placeOfDeclaredEvent(
     for (const place of places) {
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
-      // an ability that's its type tag's bare attribute (`<spell-view "card" draggable>`) has no code to edit
+      // an ability that's its type tag's bare attribute (`<view "card" draggable>`) has no code to edit
       if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
         return codePlaceOf(place, lines)
       }
@@ -268,9 +270,9 @@ function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boo
   return codeColumnOf(place, lines) !== undefined || place.endLine > place.line || place.kind !== "ability"
 }
 
-/** Is `place` an ability its type's tag says with a bare attribute, `<spell-view "card" draggable>`? */
+/** Is `place` an ability its type's tag says with a bare attribute, `<view "card" draggable>`? */
 function isOnTypeTag(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
-  return place.kind === "ability" && /^\s*<spell-/.test(lines[place.line] ?? "")
+  return place.kind === "ability" && !!spellxTemplateTagOf(lines[place.line] ?? "")
 }
 
 /** A bare ability's word, as its attribute says it:  `it is draggable` => `draggable`. */
@@ -311,7 +313,7 @@ function codeColumnOf(place: SP.SpellDeclarationPlace, lines: readonly string[])
   if (place.codeColumn !== undefined) return place.codeColumn
   const line = lines[place.line] ?? ""
   const colon = colonOutsideQuotes(line, place.column)
-  if (colon < 0 || /^\s*<spell-/.test(line)) return undefined
+  if (colon < 0 || spellxTemplateTagOf(line)) return undefined
   const after = line.slice(colon + 1)
   return after.trim() && !/^\s*\/?>\s*$/.test(after) ? colon + 1 + (after.length - after.trimStart().length) : undefined
 }
@@ -351,14 +353,14 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
  * The property editor a type was written with, its markup as written
  * (epic `debut` I86;  its own file, epic `editor` P25):
  * - first, in a property editors file (`editors`):
- *   `<spell-property-editor "card">`'s lines, in `Card.editor.spell` or the project's `Solitaire.editors.spell`
- * - else inline, in the type's spellml:  `<spell-property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`
+ *   `<property-editor "card">`'s lines, in `Card.editor.spell` or the project's `Solitaire.editors.spell`
+ * - else inline, in the type's file:  `<property-editor>`'s lines inside `<view "card"> ... </view>`
  * - `""` if it has none.
  * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):
  *   its own type's first, so a type's own editor wins over the one it inherits.
  * - `sources`:  the program's spell files' text;  `editors`:  its property editors files' text.
- * - `words`:  the tag's words, every language's (`<spell-property-editor>`, `<encanto-editor-de-propiedades>`),
- *   and the old short ones (`<property-editor>`;  epic `data` P31).
+ * - `words`:  the tag's words, every language's (`<property-editor>`, `<editor-de-propiedades>`;  epic `language` P41),
+ *   and their old spellings (`<spell-property-editor>`;  epic `data` P31).
  * - Closed by its own words or `</>`.
  */
 export function propertyEditorInSource(
@@ -407,7 +409,7 @@ export function withClassNames(markup: string, names: ReadonlyMap<string, string
 
 /**
  * The markup of the property editor for type `name` in a property editors file's `source`, by any of `words`:
- * `<spell-property-editor "card">` ... `</spell-property-editor>` (or `</>`;  the old short `<property-editor "card">` too);  `undefined` if it has none.
+ * `<property-editor "card">` ... `</property-editor>` (or `</>`;  the old `<spell-property-editor "card">` too);  `undefined` if it has none.
  */
 function namedEditorIn(source: string, name: string, words: readonly string[]): string | undefined {
   for (const word of words) {
@@ -505,16 +507,15 @@ function letters(text: string): string {
 
 /**
  * The 0-based line ranges, both ends in, where type `name` is written in `text`:
- * each `<spell-* "name"> ... </spell-*>`, and each outline header for it (`a card:`) with the lines under it.
+ * each template's tag for it, `<view "name"> ... </view>` (or the old `<spell-view>`), and each outline header for it
+ * (`a card:`) with the lines under it.
  */
 function typeLineRanges(text: string, name: string): [number, number][] {
   const ranges: [number, number][] = []
   const lineOf = (offset: number) => text.slice(0, offset).split("\n").length - 1
-  const opening = new RegExp(`<spell-([\\w-]+)\\s+"${escapeForRegExp(name)}"`, "gi")
-  let match: RegExpExecArray | null
-  while ((match = opening.exec(text))) {
-    const close = text.indexOf(`</spell-${match[1]}>`, match.index)
-    ranges.push([lineOf(match.index), lineOf(close < 0 ? text.length : close)])
+  for (const { start, word } of typeTagStarts(text, name)) {
+    const close = text.indexOf(`</${word}>`, start)
+    ranges.push([lineOf(start), lineOf(close < 0 ? text.length : close)])
   }
   const lines = text.split("\n")
   const header = new RegExp(
@@ -566,21 +567,33 @@ export function escapeForRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-/** The bodies of each `<spell-view "name"> ... </spell-view>` (any `<spell-*>` tag) in `source`. */
+/** The bodies of each `<view "name"> ... </view>` (any template's tag) in `source`. */
 function typeBodies(source: string, name: string): string[] {
   return typeTagsIn(source, name).map((tag) => tag.body)
 }
 
-/** Each `<spell-view "name"> ... </spell-view>` (any `<spell-*>` tag) in `source`:  its head, then its body. */
+/** Each `<view "name"> ... </view>` (any template's tag) in `source`:  its head, then its body. */
 function typeTagsIn(source: string, name: string): { head: string; body: string }[] {
   const found: { head: string; body: string }[] = []
-  const opening = new RegExp(`<spell-([\\w-]+)\\s+"${escapeForRegExp(name)}"`, "gi")
-  let match: RegExpExecArray | null
-  while ((match = opening.exec(source))) {
-    const end = endOfTag(source, match.index + match[0].length)
+  for (const { start, word, headEnd } of typeTagStarts(source, name)) {
+    const end = endOfTag(source, headEnd)
     if (end < 0) continue
-    const close = source.indexOf(`</spell-${match[1]}>`, end)
-    found.push({ head: source.slice(match.index, end), body: source.slice(end + 1, close < 0 ? undefined : close) })
+    const close = source.indexOf(`</${word}>`, end)
+    found.push({ head: source.slice(start, end), body: source.slice(end + 1, close < 0 ? undefined : close) })
+  }
+  return found
+}
+
+/**
+ * Where each template's tag for type `name` opens in `text`, at a line's start:  `<view "card">`, `<thing "card">`.
+ * - `start`:  its `<`;  `word`:  its tag as written, for its closer;  `headEnd`:  just past its quoted name.
+ */
+function typeTagStarts(text: string, name: string): { start: number; word: string; headEnd: number }[] {
+  const opening = new RegExp(`^[ \\t]*<(\\p{L}[\\p{L}\\p{N}_-]*)\\s+"${escapeForRegExp(name)}"`, "gimu")
+  const found: { start: number; word: string; headEnd: number }[] = []
+  for (const match of text.matchAll(opening)) {
+    if (!spellxTemplateTagOf(match[0])) continue
+    found.push({ start: match.index + match[0].indexOf("<"), word: match[1]!, headEnd: match.index + match[0].length })
   }
   return found
 }

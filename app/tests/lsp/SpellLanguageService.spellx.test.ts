@@ -23,7 +23,7 @@ describe("SpellLanguageService, spellx", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-"))
   const folder = resolve(dir, "Tiles")
   mkdirSync(folder)
-  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8")
+  const tileText = shortNotes(readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8"))
   writeFileSync(resolve(folder, "FlipTile.spellml"), tileText)
   writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`)
   const tileUri = pathToFileURL(resolve(folder, "FlipTile.spellml")).href
@@ -57,14 +57,40 @@ describe("SpellLanguageService, spellx", () => {
     expect(service.documentSymbols(old)).toEqual(service.documentSymbols(tile))
   })
 
+  // epic `language` P40:  every file `.spell`, its shape from what it says
+  test("the same file as a .spell parses, colours and outlines as its .spellml;  its plain twin as plain Spell", async () => {
+    const newFolder = resolve(dir, "NewTiles")
+    mkdirSync(newFolder)
+    writeFileSync(resolve(newFolder, "FlipTile.spell"), tileText)
+    writeFileSync(resolve(newFolder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spell", active: true }] }\n`)
+    const newUri = pathToFileURL(resolve(newFolder, "FlipTile.spell")).href
+    await workspace.update(newUri, tileText)
+    const tagged = workspace.fileFor(newUri)!
+    expect(tagged.form).toBe("spellx")
+    expect(service.diagnostics(tagged)).toEqual([])
+    expect(describeTokens(tagged)).toEqual(describeTokens(tile))
+    expect(service.documentSymbols(tagged)).toEqual(service.documentSymbols(tile))
+
+    const plainText = readFileSync(resolve(PAIRS, "FlipTile.spell"), "utf8")
+    const plainFolder = resolve(dir, "PlainTiles")
+    mkdirSync(plainFolder)
+    writeFileSync(resolve(plainFolder, "FlipTile.spell"), plainText)
+    writeFileSync(resolve(plainFolder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spell", active: true }] }\n`)
+    const plainUri = pathToFileURL(resolve(plainFolder, "FlipTile.spell")).href
+    await workspace.update(plainUri, plainText)
+    const plain = workspace.fileFor(plainUri)!
+    expect(plain.form).toBe("spell")
+    expect(service.diagnostics(plain)).toEqual([])
+  })
+
   test("its tags' words, attribute names and closers are coloured as written;  a twin's own words never are (C24)", () => {
     const tokens = describeTokens(tile)
     expect(tokens).toContain(`4:1 "<property" keyword`)
     expect(tokens).toContain(`4:11 "\\"side\\"" property declaration`)
     expect(tokens).toContain(`4:18 "one-of" property`)
     expect(tokens).toContain(`6:1 "/>" keyword`)
-    expect(tokens).toContain(`11:2 "<spell-description>" keyword`)
-    expect(tokens).toContain(`11:21 "Turns it over." comment`)
+    expect(tokens).toContain(`11:2 "<note>" keyword`)
+    expect(tokens).toContain(`11:8 "Turns it over." comment`)
     expect(tokens).toContain(`16:1 "</action>" keyword`)
     expect(tokens).toContain(`30:1 "<on" keyword`)
     expect(tokens).toContain(`31:0 "</spell-view>" keyword`)
@@ -220,7 +246,7 @@ describe("SpellLanguageService, a spellx file its project imports", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-import-"))
   const folder = resolve(dir, "Tiles")
   mkdirSync(folder)
-  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8")
+  const tileText = shortNotes(readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8"))
   writeFileSync(resolve(folder, "FlipTile.spellml"), tileText)
   writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`)
   const uri = pathToFileURL(resolve(folder, "FlipTile.spellml")).href
@@ -313,3 +339,11 @@ describe("SpellLanguageService, Spanish spellx", () => {
     expect(fixed.every((word) => /[áéíóú]/.test(word))).toBe(true)
   })
 })
+
+/**
+ * `text` with its notes written as Spell writes them now, `<note>` (epic `language` P41):
+ * the pair fixtures keep the old `<spell-description>`, which reads with a warning naming `<note>`.
+ */
+function shortNotes(text: string): string {
+  return text.replace(/<(\/?)spell-description>/g, "<$1note>")
+}

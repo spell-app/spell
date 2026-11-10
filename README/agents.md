@@ -392,7 +392,7 @@ The kit's [.epic/config.json5](../.epic/config.json5), key by key:
 - The keys it leaves out (`installTimeout`, `repoTemplates`, `app`) take their defaults.
 - `epic config [key]` prints what's in force;  `epic init` writes every key, with a comment each.
 - Every key and its default, in README-epics.md:
-  [The config file](../README-epics.md#the-config-file).
+  [The config file](https://github.com/spell-app/spell/blob/main/epic/README-config.md#the-config-file).
 
 </details>
 
@@ -458,7 +458,7 @@ the plugin's worktrees, review loop and skills, driven from Codex and others the
 Codex already reads every `AGENTS.md`, and WWOD and both command lines are plain files and programs any agent can use.
 
 Where it stands:  Codex runs fifteen of the epic plugin's skills and its end-of-turn hooks, from the same files
-([README-epics.md](../README-epics.md#with-codex)), untried with a real Codex yet;
+([README-teams.md](https://github.com/spell-app/spell/blob/main/epic/README-teams.md#with-codex)), untried with a real Codex yet;
 any other agent follows `epic guide`.
 Waking a session from the page, the worktree hook and window moves are still Claude Code's.
 

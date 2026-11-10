@@ -7,8 +7,11 @@ import { loopItemOf } from "./places.shared"
 // Import directly to avoid circular import
 import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
 
+/** What the failure's called, in the `catch` an `if that fails:` compiles to in an action. */
+const CAUGHT_ERROR = "error"
+
 /** Which of a read's riders a line is:  what `core.drawRead()` calls each. */
-export type RiderKind = "waiting" | "none" | "failed" | "failedSay" | "items" | "whole" | "paging"
+export type RiderKind = "waiting" | "none" | "failed" | "failedSay" | "items" | "whole" | "paging" | "pageSize"
 
 /**
  * `read_rider` rule:  what a read in a drawing shows while it has no list to show (epic `data` P11).
@@ -40,8 +43,13 @@ export class ReadRider extends SpellStatement<"body?"> {
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens)
     if (!match) return undefined
-    if (DrawIt.drawingIn(scope)) return match
+    if (DrawIt.drawingIn(scope) || this.parseInAction(match)) return match
     return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("rider-only-in-a-drawing"))
+  }
+
+  /** Can this rider go outside a drawing, in an action?  `if that fails:` can. */
+  protected parseInAction(_match: P.Match): boolean {
+    return false
   }
 
   /** Its body reads as the drawing around the loop does:  in a `<for>`'s body, `its` is still the drawing's, not the item's. */
@@ -108,6 +116,36 @@ export class ShowThemAll extends ShowThemPaged {
 }
 
 /**
+ * `show them 12 at a time`:  how many a long list draws at once:  a page of `show them in pages`, or each lot of more as you
+ * scroll -- see `core.drawRead()` (epic `data` Q35).
+ * - e.g. `<for films paging="pages" page-size="12">`, the same thing as an attribute
+ * - Left out:  24.
+ * - Spanish says the number twice, `mostrarlos de 12 en 12`:  two different numbers aren't this rule.
+ * - A whole number, 1 or more:  anything else won't compile.
+ */
+export class ShowThemAtATime extends SpellStatement<"size|same?"> {
+  @proto static alias = "statement"
+  @proto static priority = Priority.declaration
+  @proto static loops = true
+  @proto static kind: RiderKind = "pageSize"
+  declare kind: RiderKind
+
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match) return undefined
+    const { size, same } = match.groups
+    if (same && same.raw !== size.raw) return undefined
+    const howMany = Number(size.raw)
+    if (Number.isInteger(howMany) && howMany >= 1) return match
+    return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("page-size-a-whole-number"))
+  }
+
+  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
+    return riderSaying(match, "pageSize", P.matchAST(match.groups.size))
+  }
+}
+
+/**
  * The scope a rider written in a loop's body reads in:  the loop's own, outside it.
  * - So `<for its films loading={its signal}>` and its `<failed>` mean the drawing's `its`, as a rider under the loop would.
  */
@@ -169,7 +207,58 @@ export class IfThereAreNone extends ReadRider {
   }
 }
 
-/** `if that fails:` -- see `ReadRider`. */
+/**
+ * `if that fails:` -- see `ReadRider`.
+ * - In an action too (epic `data` T34), under the line it's about:  a read of a place, say, as in a drawing:
+ *
+ *   ```spell
+ *   set recipes to every recipe
+ *   if that fails:
+ *   	show the error
+ *   ```
+ *
+ *   - Compiles to `try { recipes = await ... } catch { ... }`.
+ *   - Refused when the errors are gathered if it has no line above it.
+ *   - A variable the line declares is declared above the `try`, so what's after it can read it.
+ */
 export class IfThatFails extends ReadRider {
   @proto static kind: RiderKind = "failed"
+
+  /** SIDE EFFECT:  notes it's in an action, which needs a line above it. */
+  protected parseInAction(match: P.Match): boolean {
+    const refusal = SP.Language.of(match.scope).parserMessage("rider-needs-a-line-above")
+    SP.SpellWarnings.refuseIf(match, refusal, () => !(match.data as { lineAbove?: unknown }).lineAbove)
+    return true
+  }
+
+  /**
+   * SIDE EFFECT:  in an action, replaces this line's own output (`from` on in `statements`) and the line above with a `try`.
+   * - Returns whether it did:  in a drawing, it stays a rider.
+   * - What a `Block` asks of a rule whose line changes the line above it.
+   */
+  catchesLineAbove(match: P.Match, statements: P.ASTNode[], from: number): boolean {
+    if (DrawIt.drawingIn(match.scope)) return false
+    statements.length = from
+    const above = statements.pop()
+    if (!above) return true
+    const handler = (this.getBody(match as P.MatchFor<this>)?.AST ??
+      new P.ASTStatementBlock(match, { statements: [] })) as P.ASTStatementBlock
+    if (above instanceof P.ASTAssignmentStatement && above.isNewVariable) {
+      const { thing, value } = above
+      const nothing = new P.ASTNothingLiteral(above.match)
+      statements.push(new P.ASTAssignmentStatement(above.match, { thing, value: nothing, isNewVariable: true }))
+      statements.push(
+        new P.ASTTryCatchBlock(match, {
+          body: new P.ASTAssignmentStatement(above.match, { thing, value }),
+          errorArg: CAUGHT_ERROR,
+          catchBlock: handler
+        })
+      )
+    } else {
+      statements.push(
+        new P.ASTTryCatchBlock(match, { body: above as P.ASTStatement, errorArg: CAUGHT_ERROR, catchBlock: handler })
+      )
+    }
+    return true
+  }
 }

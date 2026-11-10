@@ -1,6 +1,6 @@
 {
   "name": "spell-epic",
-  "version": "0.8.7",
+  "version": "0.8.9",
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
@@ -48,14 +48,14 @@
     "tsx": "4.20.3"
   },
   "devDependencies": {
-    "@solidjs/h": "2.0.0-rc.17",
-    "@solidjs/web": "2.0.0-rc.17",
+    "@solidjs/h": "2.0.0-rc.21",
+    "@solidjs/web": "2.0.0-rc.21",
     "@types/node": "^22.20.4",
     "@vitest/browser-playwright": "catalog:",
     "axe-core": "^4.13.0",
     "esbuild": "^0.28.2",
     "playwright": "1.63.0",
-    "solid-js": "2.0.0-rc.17",
+    "solid-js": "2.0.0-rc.21",
     "spell": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
@@ -113,6 +113,10 @@
     "exclude": [
       "demo/**"
     ],
+    "verbatim": [
+      "tools/_assets/**",
+      "components/__pack/*.js"
+    ],
     "files": [
       "epic_settings.json5",
       "templates",
@@ -126,6 +130,7 @@
       ".codex-plugin",
       "src/AGENTS.md",
       "src/tool/PLAN-DOC.md",
+      "README-vscode.md",
       "vscode/package.json",
       "vscode/spell-epic.vsix"
     ],

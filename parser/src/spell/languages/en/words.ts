@@ -117,6 +117,7 @@ export const englishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `list of cards`. */
   listOfWord: "of",
+  savedTimeWords: { created: "created", modified: "modified" },
   // `closing`, `opening`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /ing$/,
   // the app's own actions, as a menu names them (`define_menu`, epic `elemental-spell` P10)
@@ -158,13 +159,16 @@ export const englishWords: SP.LanguageWords = {
       app: "app",
       "page-template": "page template",
       "app-template": "app template",
-      // `<spell-page notebook>` (epic `notebook` P1):
+      // `<page notebook>` (epic `notebook` P1):
       // a page that draws its body, its prose, examples and its own templates
       notebook: { kind: "page", flag: "notebook" },
       // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
       site: "site",
-      // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
-      "more-of": "more of"
+      // adds to a type another file declares:  its fields in a place's file, its drawing in this one
+      // (epic `data` T76;  `<extend>` since epic `language` P41, r12)
+      extend: "extend",
+      // its old word, still read
+      "more-of": "extend"
     },
     declarations: {
       property: "property",
@@ -176,16 +180,50 @@ export const englishWords: SP.LanguageWords = {
       menu: "menu",
       // a heading over the members after it (epic `elemental-spell` P16)
       group: "group",
-      // a site's parts (epic `mockup` P1):  only in a `<spell-site>`, markup anywhere else (`<sidebar>` is Spell UI's)
+      // a site's parts (epic `mockup` P1):  only in a `<site>`, markup anywhere else (`<sidebar>` is Spell UI's)
       page: "page",
       dialog: "dialog",
       sidebar: "sidebar"
     },
-    // prose kept, never run, each with the prefix (epic `debut` I86;  the prefix, epic `data` P31):
-    // `<spell-description>`, `<spell-comment>`,
-    // and a template's own property editor, as markup, `<spell-property-editor>`:  what the Inspector shows for its things
-    // and a page's stories, `<spell-stories>` (epic `mockup` P6):  what it must let people do
-    notes: { description: "description", comment: "comment", "property-editor": "property editor", stories: "stories" },
+    // where a program's data lives, each read as its plain line (epic `language` P40):  at a file's top level, no prefix
+    places: [
+      { tag: "web-server", line: "{words} is a web server at {quoted address} :" },
+      { tag: "graphql-server", line: "{words} is a graphql server at {quoted address} :" },
+      { tag: "data-folder", line: "{words} is a data folder at personal {quoted address} :", flag: "personal" },
+      { tag: "data-folder", line: "{words} is a data folder at {quoted address} :" },
+      { tag: "json-file", line: "{words} is a json file at {quoted address} :" },
+      { tag: "room", line: "{words} is a room at {quoted address} :" },
+      { tag: "sheet", line: "{words} is a sheet at {quoted address} :" },
+      { tag: "sheet", line: "{words} is a spreadsheet at {quoted address} :" },
+      { tag: "csv-file", line: "{words} is a csv file at {quoted address} :" },
+      { tag: "excel-file", line: "{words} is an excel file at {quoted address} :" },
+      { tag: "google-sheet", line: "{words} is a google sheet at {quoted address} :" },
+      { tag: "airtable", line: "{words} is an airtable at {quoted address} :" },
+      {
+        tag: "atmosphere",
+        line: "{words} is a personal atmosphere account at {quoted address} :",
+        flag: "personal",
+        bare: "{words} is a personal atmosphere account :"
+      },
+      { tag: "atmosphere", line: "{words} is an atmosphere space at {quoted address} :", flag: "space" },
+      { tag: "atmosphere", line: "{words} is an atmosphere account at {quoted address} :" },
+      { tag: "device-storage", line: "{words} is stored on this device :" },
+      { tag: "device-storage", line: "{words} is a database on this device :" },
+      { tag: "window-storage", line: "{words} is stored on this device , for each tab :" },
+      { tag: "memory-storage", line: "{words} is stored in memory :" },
+      { tag: "memory-storage", line: "{words} is an in memory database :" }
+    ],
+    // prose kept, never run (epic `debut` I86):  `<note>`, ONE tag for every note (epic `language` P41)
+    // - a template's own property editor, as markup, `<property-editor>`:  what the Inspector shows for its things
+    // - a page's stories, `<stories>` (epic `mockup` P6):  what it must let people do
+    // - the old words still read, with a warning naming `<note>`:  `<spell-description>`, `<spell-comment>`, `<comment>`
+    notes: {
+      note: "description",
+      description: "description",
+      comment: "comment",
+      "property-editor": "property editor",
+      stories: "stories"
+    },
     handlers: {
       on: "on",
       when: "when",
@@ -215,6 +253,7 @@ export const englishWords: SP.LanguageWords = {
       "hide-empty": "hide-empty",
       failed: "failed",
       paging: "paging",
+      "page-size": "page-size",
       as: "as"
     },
     forFlagsNotAfter: ["is", "are", "not", "isn't", "aren't"],
@@ -224,6 +263,9 @@ export const englishWords: SP.LanguageWords = {
       aka: "aka",
       template: "template",
       "one-of": "one-of",
+      // a place's (epic `language` P40):  `<web-server "x" address="...">`, `<atmosphere personal>`, `<atmosphere space>`
+      personal: "personal",
+      space: "space",
       type: "type",
       alias: "alias",
       description: "description",
@@ -247,24 +289,26 @@ export const englishWords: SP.LanguageWords = {
       selectable: "selectable",
       clickable: "clickable",
       group: "group",
-      // a site's, and its pages' (epic `mockup` P1):  `<spell-site "x" at="...">`, `<page "x" address="/x">`
+      // a site's, and its pages' (epic `mockup` P1):  `<site "x" at="...">`, `<page "x" address="/x">`
       at: "at",
       cloud: "cloud",
       address: "address",
       state: "state",
       tab: "tab",
       tags: "tags",
-      picture: "picture",
+      thumbnail: "thumbnail",
+      live: "live",
       row: "row",
       column: "column",
       color: "color"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
+      placeOfKind: "{words} is {a kind} {kind} at {quoted address} :",
       template: "{a name} {name} is {a super} {super} :",
       templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
       singleton: "{words} is {a super} {super} :",
-      moreOf: "{a words} {words} :",
+      extend: "{a words} {words} :",
       supers: {
         view: "view",
         thing: "thing",
@@ -310,7 +354,8 @@ export const englishWords: SP.LanguageWords = {
       menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
-      pageLocked: 'its lock is "locked"',
+      pageLocked: "its lock is locked",
+      templateThumbnail: "its thumbnail is {quoted thumbnail}",
       pageSection: {
         tag: "section",
         label: "label",
@@ -323,10 +368,13 @@ export const englishWords: SP.LanguageWords = {
       sitePageTab: ", tab {quoted tab}",
       sitePageTags: ", tagged {quoted tags}",
       sitePageState: ", {state}",
-      sitePagePicture: ", pictured in {quoted picture}",
+      sitePageThumbnail: ", thumbnail {quoted thumbnail}",
+      sitePageLive: ", live {quoted live}",
       siteCardPlace: ", in row {row} column {column}",
       siteCardColor: ", colored {color}",
       siteOverlay: "it has {a words} {words}",
+      siteOverlayOf: { dialog: "it has {a words} {words} dialog", sidebar: "it has {a words} {words} sidebar" },
+      siteOverlayWords: "dialog|modal|sidebar|flyout",
       viewFlags: {
         draggable: "it is draggable",
         droppable: "it is droppable",
@@ -361,6 +409,7 @@ export const englishWords: SP.LanguageWords = {
         whole: "show it all in :",
         inPages: "show them in pages",
         allAtOnce: "show them all",
+        atATime: "show them {size} at a time",
         no: "no",
         pages: "pages",
         none_: "none",
@@ -415,6 +464,9 @@ export const englishWords: SP.LanguageWords = {
     ],
     /** A line starting a method:  `to play a card`, `animation deal`. */
     methodLine: /^(?:to|(?:create[ \t]+)?animation)[ \t]/iu,
+    /** A place's line, its name captured:  `family cookbook is a web server at "...":`. */
+    placeDeclaration:
+      /^(?!(?:an?|its?|the)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+is[ \t]+an?[ \t].*[ \t](?:at|from)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
     /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`. */
     reopenedType: /^an?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:where[ \t]*)?:[ \t]*$/iu
   }

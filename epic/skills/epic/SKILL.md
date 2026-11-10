@@ -308,9 +308,10 @@ Staying in this window (step 0):  skip steps 4 and 6.
 
 NO plan mode, ever, for an epic (epic `epic-engine` P33;  2026-10-24).
 - In Codex:  nothing to avoid:  Codex has no plan mode.
-- The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
-  only the Overview, Questions and Todo until the person presses Accept Overview.
-  - Judgement calls and Issues show at ANY stage once they hold an item (epic `epic-engine` I191).
+- The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, until the
+  person presses Accept Overview.
+  - A section hides when it's empty, at every stage (epic `epic-engine` P70);  anything that holds an item shows.
+    Phases written at this stage show, titled `P1. DRAFT: ...`.
 - Three stages, each ended by the person's Accept on the title row of what it accepts (epic `epic-engine` I180;  the page
   header's before;  `epic stage <name>` prints and sets it):  Accept Overview on the Overview's, Accept Phases on the
   Phases section's, before its gear;  the header's Send stays the paper plane
@@ -651,6 +652,11 @@ than just being able to move on").
        the repo's text-rewriting skill (spell-app's `/fussbudget`) on the files the phase changed,
        and the guide and the READMEs the phase made untrue brought in line, in the readme voice
        ("6. Doc Review"), before the commit.
+     - `epic config baseBranchProtected` prints `true`:  the base branch takes only pull requests, so `epic merge` refuses
+       and steps 1-2 below don't apply.
+       No asking, as below:  `epic worktree merge-main`, then `epic pr <name>`, which pushes and opens one unless one's open
+       ([the isolate skill](../isolate/SKILL.md), "Finish, when the base branch takes only pull requests").
+       The phase reaches `main` when the code host merges it;  its changelog entry stays under "2. In worktrees" until then.
      - Then, no asking (the standing epic is the ask):
        1. `main` moved (`git log --oneline HEAD..main` not empty):  `epic worktree merge-main`.
           - A multi-repo top (`epic config repos` prints names;  [the isolate skill](../isolate/SKILL.md), "A
@@ -1318,7 +1324,8 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
      - a rough size
    - one question per HIGH-LEVEL open choice (what, where, how far, when):  options side by side, one recommended.
      Not the small ones:  those are the plan's.
-   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, from the kit's root
+   - Then format it:  `yarn vp fmt <its ABSOLUTE path>`, run from the plugin's own folder (`${CLAUDE_PLUGIN_ROOT}`), never
+     your repo's root (no `vp` there:  skip this step)
      ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
    - Then `epic ask show <name>/analysis --wait`:  Bash, in the background.
      It opens in the side bar's Review tab.
@@ -1588,7 +1595,7 @@ create <name> [--title "Title"] [--prompt "..." | --prompt-file f] [--future] [-
                                                     create from the template, in the Overview stage (3.), update the
                                                     docs' home page;  --future:  a future epic (9.);  create on a
                                                     future epic's doc plans it (promoted)
-stage <name> [overview|phases|building]             the page's stage:  what it shows;  the person's Accept buttons move it
+stage <name> [overview|phases|building]             the page's stage;  the person's Accept buttons move it
 add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..] [--verify ..] [--estimate 2h]
           [--after N | --before N]                  last;  just before a last Doc Review (an active or done one goes
                                                     back to do);  --after 11:  the new P12;  --before N:  the new

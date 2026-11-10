@@ -47,7 +47,7 @@ export class NotebookController {
 
   /**
    * `project`'s notebooks:  its `.spell` files holding a page with the `notebook` flag, in its order --
-   * `<spell-page "x" notebook>`, `<spell-notebook "x">`, `<encanto-cuaderno "x">` ...
+   * `<page "x" notebook>`, `<notebook "x">`, `<cuaderno "x">` ...
    * - Read from the files' text (`NotebookPageCells.holdsNotebook()`), so the page shows as soon as the project's
    *   loaded;  `[]` until then.
    */

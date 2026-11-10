@@ -1,4 +1,4 @@
-import { core, Thing, App, Place, h } from "@spell/core"
+import { core, Thing, App, View, Place, h } from "@spell/core"
 
 core.heading("Recipe Box:  where the recipes are kept")
 /////////////////////////////////////////////
@@ -7,25 +7,41 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1162, end: 1181 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1164, end: 1186 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1185, end: 1211 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1191, end: 1224 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1215, end: 1234 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1230, end: 1252 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
+
+  /** Its Edit screen:  nothing changes until Save */
+  edit() {
+    recipeBox.editing = this
+  }
 
   draw() {
     return h("ui-card",
       h("ui-content",
         h("ui-form", { class: "recipe", value: this },
           h("ui-field", { label: "Recipe name" },
+            h("ui-button", {
+              class: "edit",
+              slot: "actions",
+              icon: "pencil",
+              size: "mini",
+              appearance: "transparent",
+              "aria-label": "Edit",
+              title: "Edit",
+              onClick: core.pressed(this, () => this.edit()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }),
             h("ui-button", {
               class: "remove",
               slot: "actions",
@@ -48,7 +64,21 @@ export class Recipe extends Thing {
     )
   }
 
-  static savedIn = { place: "family_cookbook", collection: "recipes" }
+  static savedIn = {
+    place: "family_cookbook",
+    collection: "recipes",
+    times: ["created", "modified"]
+  }
+
+  // - it lives in family cookbook
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1125, end: 1152 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it lives in family cookbook
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1125, end: 1152 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 }
 
 /**
@@ -73,16 +103,80 @@ core.heading("Recipe Box")
 ////////////////
 // ## Recipe Box
 ////////////////
-// Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
+// Your recipes, on cards:  find one, add one, change one as you type or on its Edit screen, remove one and undo it.
 // Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 
 // Every notes box grows as you type
+
+export class RecipeEditor extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  /** The recipe being changed */
+  // - its "recipe" is a recipe
+  static { this.declareProp("recipe", { type: "Recipe" }) }
+  get recipe() { return this.getProp("recipe") }
+  set recipe(value) { this.setProp("recipe", value) }
+
+  /** A copy to change:  the recipe stays as it was until Save */
+  get draft() {
+    return core.draftOf(this.recipe)
+  }
+
+  /** Every changed field, sent together */
+  save() {
+    core.saveDraft(this.draft)
+    recipeBox.editing = undefined
+  }
+
+  /** Forget the copy:  the recipe never changed */
+  cancel() {
+    core.discardDraft(this.draft)
+    recipeBox.editing = undefined
+  }
+
+  draw() {
+    return h("ui-card", { class: "editor" },
+      h("ui-content",
+        h("ui-form", { "prop:value": () => this.draft },
+          h("ui-header", { size: "small" }, "Edit ", () => this.recipe?.title),
+          h("ui-field", { label: "Recipe name" },
+            h("ui-input", { class: "edit-title", name: "title", size: "large" })
+          ),
+          h("ui-field", { label: "Serves", inline: true },
+            h("ui-input", { class: "serves", name: "servings", type: "number", min: "1", labeled: "right", label: "people" })
+          ),
+          h("ui-field", { label: "Notes" }, h("ui-textarea", { name: "notes", rows: "2" }))
+        )
+      ),
+      h("ui-extra",
+        h("ui-button", {
+          class: "save",
+          size: "small",
+          color: "primary",
+          disabled: () => this.draft.title === "",
+          onClick: core.pressed(this, () => this.save()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Save"),
+        h("ui-button", {
+          class: "cancel",
+          size: "small",
+          onClick: core.pressed(this, () => this.cancel()),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Cancel")
+      )
+    )
+  }
+}
+
 core.useDefaults("/RecipeBox.spell", {
   "ui-textarea": { grow: true }
 })
 
 core.heading("A recipe:  a card you can read and change")
 //## A recipe:  a card you can read and change
+
+core.heading("Its Edit screen:  a form over a draft, so nothing changes until Save")
+//## Its Edit screen:  a form over a draft, so nothing changes until Save
 
 core.heading("The box:  the card for a new recipe, then a card for each one you have")
 //## The box:  the card for a new recipe, then a card for each one you have
@@ -99,6 +193,12 @@ export class RecipeBox extends App {
   static { this.declareProp("newRecipe", { init: () => new Recipe({ servings: 4 }), early: true }) }
   get newRecipe() { return this.getProp("newRecipe") }
   set newRecipe(value) { this.setProp("newRecipe", value) }
+
+  /** The recipe on its Edit screen, while one is */
+  // - its "editing" is a recipe
+  static { this.declareProp("editing", { type: "Recipe" }) }
+  get editing() { return this.getProp("editing") }
+  set editing(value) { this.setProp("editing", value) }
 
   /** With nothing kept yet, a few to start from */
   async create() {
@@ -121,12 +221,10 @@ export class RecipeBox extends App {
     }
   }
 
-  /** Newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1647, end: 1853 }, readsFrom: ["family_cookbook"] }) }
+  /** Newest first, by when each was saved */
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3370, end: 3536 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
-    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search))
-    core.reverse(found)
-    return found
+    return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search)), (item) => core.descending(item.created))
   }, () => [this.search]) }
 
   addTheNewRecipe() {
@@ -146,7 +244,15 @@ export class RecipeBox extends App {
           h("ui-field", { label: "Search" }, h("ui-input", { class: "search", name: "search", icon: "search" }))
         )
       ),
-      h("ui-cards", { columns: "3", doubling: true },
+      () => this.drawScreen()
+    )
+  }
+
+  // Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
+  drawScreen() {
+    if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
+    else {
+      return h("ui-cards", { columns: "3", doubling: true, part: "screen" },
         h("ui-card", { class: "new" },
           h("ui-content",
             h("ui-form", { "prop:value": () => this.newRecipe },
@@ -172,11 +278,11 @@ export class RecipeBox extends App {
           )
         ),
         () => core.drawRead(() => this.matches, (recipe) => core.drawThing(recipe), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding your recipes"),
-          none: () => h("ui-text", { class: "none", color: "grey" },
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "screen" }, "Finding your recipes"),
+          none: () => h("ui-text", { class: "none", color: "grey", part: "screen" },
             () => this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."
           ),
-          failed: () => h("ui-message", { class: "failed", color: "red" },
+          failed: () => h("ui-message", { class: "failed", color: "red", part: "screen" },
             "We can't reach your recipes right now.",
             h("ui-button", {
               class: "again",
@@ -186,7 +292,7 @@ export class RecipeBox extends App {
           )
         })
       )
-    )
+    }
   }
 }
 export const recipeBox = new RecipeBox()

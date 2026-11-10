@@ -276,6 +276,27 @@ describe("GoogleSheetPlace.apply()", () => {
   })
 })
 
+describe("GoogleSheetPlace, its numbers (epic `data` T83)", () => {
+  test("a sheet's locale says how a number its text can't settle reads", async () => {
+    const { place, stub } = await sheet()
+    stub.locale = "de_DE"
+    expect((await place.list("recipes", {}, {})).unclearNumbers).toBe(",")
+  })
+
+  test("one locale read is enough", async () => {
+    const { place, stub } = await sheet()
+    stub.locale = "en_US"
+    expect((await place.list("recipes", {}, {})).unclearNumbers).toBe(".")
+    await place.list("recipes", {}, {})
+    expect(stub.asksOf(/\/spreadsheet-id$|sheets\/[^/]+$/)).toBeLessThanOrEqual(1)
+  })
+
+  test("no locale said:  it's left to the program's language", async () => {
+    const { place } = await sheet()
+    expect((await place.list("recipes", {}, {})).unclearNumbers).toBeUndefined()
+  })
+})
+
 describe("GoogleSheetPlace, limits", () => {
   test("a limit hit:  it waits as the 429 says, and the read goes through", async () => {
     const { place, stub } = await sheet()

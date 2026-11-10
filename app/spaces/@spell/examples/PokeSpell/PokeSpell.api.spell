@@ -8,7 +8,7 @@
 //
 // Pokémon belongs to Nintendo, Game Freak and Creatures.
 
-poke api is a web server at "https://pokeapi.co/api/v2":
+<web-server "poke api" address="https://pokeapi.co/api/v2">
 	- its id is its "url"
 	- its rows are its "results"
 	- its next page is its "next"
@@ -24,286 +24,367 @@ poke api is a web server at "https://pokeapi.co/api/v2":
 	- moves live at "/move"
 	- evolution chains live at "/evolution-chain"
 	- generations live at "/generation"
+</web-server>
 
-a "pokemon" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "name" is text
-	- its "base experience" is a number
-	- its "height" is a number
-	- its "default" is yes or no, stored as "is_default"
-	- its "order" is a number
-	- its "weight" is a number
-	- its "abilities" is a list of pokemon abilities
-	- its "past abilities" is a list of past abilities
-	- its "forms" is a list of poke api names
-	- its "game indices" is a list of game indices
-	- its "held items" is a list of text
-	- its "location area encounters" is text  // an address
-	- its "moves" is a list of pokemon moves
-	- its "species" is a pokemon species
-	- its "sprites" is a sprite
-	- its "cries" is a cry
-	- its "stats" is a list of stats
-	- its "past stats" is a list of past stats
-	- its "types" is a list of pokemon types
-	- its "past types" is a list of text
+<thing "pokemon">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "name">text</>
+	<property "base experience" type="number" />
+	<property "height" type="number" />
+	<spell>
+		- its "default" is yes or no, stored as "is_default"
+	</spell>
+	<property "order" type="number" />
+	<property "weight" type="number" />
+	<property "abilities">a list of pokemon abilities</>
+	<property "past abilities">a list of past abilities</>
+	<property "forms">a list of poke api names</>
+	<property "game indices">a list of game indices</>
+	<property "held items">a list of text</>
+	<property "location area encounters">text</>	// an address
+	<property "moves">a list of pokemon moves</>
+	<property "species">a pokemon species</>
+	<property "sprites" type="sprite" />
+	<property "cries" type="cry" />
+	<property "stats">a list of stats</>
+	<property "past stats">a list of past stats</>
+	<property "types">a list of pokemon types</>
+	<property "past types">a list of text</>
+</thing>
 
-a "pokemon species" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "name" is text
-	- its "order" is a number
-	- its "gender rate" is a number
-	- its "capture rate" is a number
-	- its "base happiness" is a number
-	- its "baby" is yes or no, stored as "is_baby"
-	- its "legendary" is yes or no, stored as "is_legendary"
-	- its "mythical" is yes or no, stored as "is_mythical"
-	- its "hatch counter" is a number
-	- its "gender differences" is yes or no, stored as "has_gender_differences"
-	- its "forms switchable" is yes or no
-	- its "growth rate" is a poke api name
-	- its "pokedex numbers" is a list of pokedex numbers
-	- its "egg groups" is a list of poke api names
-	- its "color" is a poke api name
-	- its "shape" is a poke api name
-	- its "evolves from species" is a pokemon species
-	- its "evolution chain" is an evolution chain
-	- its "habitat" is a poke api name
-	- its "generation" is a generation
-	- its "names" is a list of names
-	- its "pal park encounters" is a list of pal park encounters
-	- its "form descriptions" is a list of text
-	- its "flavor text entries" is a list of flavor text entries
-	- its "genera" is a list of genera
-	- its "varieties" is a list of varieties
+<thing "pokemon species">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "name">text</>
+	<property "order" type="number" />
+	<property "gender rate" type="number" />
+	<property "capture rate" type="number" />
+	<property "base happiness" type="number" />
+	<spell>
+		- its "baby" is yes or no, stored as "is_baby"
+		- its "legendary" is yes or no, stored as "is_legendary"
+		- its "mythical" is yes or no, stored as "is_mythical"
+	</spell>
+	<property "hatch counter" type="number" />
+	<spell>
+		- its "gender differences" is yes or no, stored as "has_gender_differences"
+	</spell>
+	<property "forms switchable">yes or no</>
+	<property "growth rate">a poke api name</>
+	<property "pokedex numbers">a list of pokedex numbers</>
+	<property "egg groups">a list of poke api names</>
+	<property "color">a poke api name</>
+	<property "shape">a poke api name</>
+	<property "evolves from species">a pokemon species</>
+	<property "evolution chain">an evolution chain</>
+	<property "habitat">a poke api name</>
+	<property "generation" type="generation" />
+	<property "names">a list of names</>
+	<property "pal park encounters">a list of pal park encounters</>
+	<property "form descriptions">a list of text</>
+	<property "flavor text entries">a list of flavor text entries</>
+	<property "genera">a list of genera</>
+	<property "varieties">a list of varieties</>
+</thing>
 
-a "type" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "name" is text
-	- its "damage relations" is a damage relation
-	- its "past damage relations" is a list of text
-	- its "game indices" is a list of game indices
-	- its "generation" is a generation
-	- its "move damage class" is a poke api name
-	- its "names" is a list of names
-	- its "pokemon" is a list of type pokemon
-	- its "moves" is a list of moves
+<thing "type">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "name">text</>
+	<property "damage relations">a damage relation</>
+	<property "past damage relations">a list of text</>
+	<property "game indices">a list of game indices</>
+	<property "generation" type="generation" />
+	<property "move damage class">a poke api name</>
+	<property "names">a list of names</>
+	<property "pokemon">a list of type pokemon</>
+	<property "moves">a list of moves</>
+</thing>
 
-an "ability" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "name" is text
-	- its "main series" is yes or no, stored as "is_main_series"
-	- its "generation" is a generation
-	- its "names" is a list of names
-	- its "effect entries" is a list of effect entries
-	- its "effect changes" is a list of effect changes
-	- its "flavor text entries" is a list of flavor text entries
-	- its "pokemon" is a list of ability pokemon
+<thing "ability">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "name">text</>
+	<spell>
+		- its "main series" is yes or no, stored as "is_main_series"
+	</spell>
+	<property "generation" type="generation" />
+	<property "names">a list of names</>
+	<property "effect entries">a list of effect entries</>
+	<property "effect changes">a list of effect changes</>
+	<property "flavor text entries">a list of flavor text entries</>
+	<property "pokemon">a list of ability pokemon</>
+</thing>
 
-a "move" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "name" is text
-	- its "accuracy" is a number
-	- its "pp" is a number
-	- its "priority" is a number
-	- its "power" is a number
-	- its "contest combos" is a contest combo
-	- its "contest type" is a poke api name
-	- its "contest effect" is a poke api name
-	- its "damage class" is a poke api name
-	- its "effect entries" is a list of effect entries
-	- its "effect changes" is a list of text
-	- its "generation" is a generation
-	- its "meta" is a meta
-	- its "names" is a list of names
-	- its "past values" is a list of past values
-	- its "stat changes" is a list of text
-	- its "super contest effect" is a poke api name
-	- its "target" is a poke api name
-	- its "kind" is a type, stored as "type"
-	- its "machines" is a list of text
-	- its "flavor text entries" is a list of flavor text entries
-	- its "learned by pokemon" is a list of pokemon
+<thing "move">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "name">text</>
+	<property "accuracy" type="number" />
+	<property "pp" type="number" />
+	<property "priority" type="number" />
+	<property "power" type="number" />
+	<property "contest combos">a contest combo</>
+	<property "contest type">a poke api name</>
+	<property "contest effect">a poke api name</>
+	<property "damage class">a poke api name</>
+	<property "effect entries">a list of effect entries</>
+	<property "effect changes">a list of text</>
+	<property "generation" type="generation" />
+	<property "meta" type="meta" />
+	<property "names">a list of names</>
+	<property "past values">a list of past values</>
+	<property "stat changes">a list of text</>
+	<property "super contest effect">a poke api name</>
+	<property "target">a poke api name</>
+	<spell>
+		- its "kind" is a type, stored as "type"
+	</spell>
+	<property "machines">a list of text</>
+	<property "flavor text entries">a list of flavor text entries</>
+	<property "learned by pokemon">a list of pokemon</>
+</thing>
 
-an "evolution chain" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "chain" is a chain
+<thing "evolution chain">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "chain" type="chain" />
+</thing>
 
-a "generation" is a thing:
-	- it lives in poke api
-	- its "number" is a number, stored as "id"
-	- its "name" is text
-	- its "abilities" is a list of text
-	- its "main region" is a poke api name
-	- its "moves" is a list of moves
-	- its "names" is a list of names
-	- its "pokemon species" is a list of pokemon species
-	- its "types" is a list of types
-	- its "version groups" is a list of poke api names
+<thing "generation">
+	<spell>
+		- it lives in poke api
+		- its "number" is a number, stored as "id"
+	</spell>
+	<property "name">text</>
+	<property "abilities">a list of text</>
+	<property "main region">a poke api name</>
+	<property "moves">a list of moves</>
+	<property "names">a list of names</>
+	<property "pokemon species">a list of pokemon species</>
+	<property "types">a list of types</>
+	<property "version groups">a list of poke api names</>
+</thing>
 
-a "pokemon ability" is a thing:
-	- its "hidden" is yes or no, stored as "is_hidden"
-	- its "slot" is a number
-	- its "ability" is an ability
+<thing "pokemon ability">
+	<spell>
+		- its "hidden" is yes or no, stored as "is_hidden"
+	</spell>
+	<property "slot" type="number" />
+	<property "ability" type="ability" />
+</thing>
 
-a "past ability" is a thing:
-	- its "generation" is a generation
-	- its "abilities" is a list of past ability abilities
+<thing "past ability">
+	<property "generation" type="generation" />
+	<property "abilities">a list of past ability abilities</>
+</thing>
 
-a "past ability ability" is a thing:
-	- its "hidden" is yes or no, stored as "is_hidden"
-	- its "slot" is a number
+<thing "past ability ability">
+	<spell>
+		- its "hidden" is yes or no, stored as "is_hidden"
+	</spell>
+	<property "slot" type="number" />
+</thing>
 
-a "game index" is a thing:
-	- its "game index" is a number
-	- its "version" is a poke api name
+<thing "game index">
+	<property "game index" type="number" />
+	<property "version">a poke api name</>
+</thing>
 
-a "pokemon move" is a thing:
-	- its "move" is a move
-	- its "version group details" is a list of version group details
+<thing "pokemon move">
+	<property "move" type="move" />
+	<property "version group details">a list of version group details</>
+</thing>
 
-a "version group detail" is a thing:
-	- its "level learned at" is a number
-	- its "version group" is a poke api name
-	- its "move learn method" is a poke api name
-	- its "order" is a number
+<thing "version group detail">
+	<property "level learned at" type="number" />
+	<property "version group">a poke api name</>
+	<property "move learn method">a poke api name</>
+	<property "order" type="number" />
+</thing>
 
-a "sprite" is a thing:
-	- its "other" is an other
-	- its "back shiny" is text  // an address
-	- its "front shiny" is text  // an address
-	- its "back default" is text  // an address
-	- its "front default" is text  // an address
+<thing "sprite">
+	<property "other" type="other" />
+	<property "back shiny">text</>	// an address
+	<property "front shiny">text</>	// an address
+	<property "back default">text</>	// an address
+	<property "front default">text</>	// an address
+</thing>
 
-an "other" is a thing:
-	- its "home" is a home
-	- its "showdown" is a showdown
-	- its "dream world" is a dream world
-	- its "official artwork" is an official artwork
+<thing "other">
+	<property "home" type="home" />
+	<property "showdown" type="showdown" />
+	<property "dream world">a dream world</>
+	<property "official artwork">an official artwork</>
+</thing>
 
-a "home" is a thing:
-	- its "front shiny" is text  // an address
-	- its "front default" is text  // an address
+<thing "home">
+	<property "front shiny">text</>	// an address
+	<property "front default">text</>	// an address
+</thing>
 
-a "showdown" is a thing:
-	- its "back shiny" is text  // an address
-	- its "front shiny" is text  // an address
-	- its "back default" is text  // an address
-	- its "front default" is text  // an address
+<thing "showdown">
+	<property "back shiny">text</>	// an address
+	<property "front shiny">text</>	// an address
+	<property "back default">text</>	// an address
+	<property "front default">text</>	// an address
+</thing>
 
-a "dream world" is a thing:
-	- its "front default" is text  // an address
+<thing "dream world">
+	<property "front default">text</>	// an address
+</thing>
 
-an "official artwork" is a thing:
-	- its "front shiny" is text  // an address
-	- its "front default" is text  // an address
+<thing "official artwork">
+	<property "front shiny">text</>	// an address
+	<property "front default">text</>	// an address
+</thing>
 
-a "cry" is a thing:
-	- its "latest" is text  // an address
-	- its "legacy" is text  // an address
+<thing "cry">
+	<property "latest">text</>	// an address
+	<property "legacy">text</>	// an address
+</thing>
 
-a "stat" is a thing:
-	- its "base stat" is a number
-	- its "effort" is a number
-	- its "stat" is a poke api name
+<thing "stat">
+	<property "base stat" type="number" />
+	<property "effort" type="number" />
+	<property "stat">a poke api name</>
+</thing>
 
-a "past stat" is a thing:
-	- its "generation" is a generation
-	- its "stats" is a list of stats
+<thing "past stat">
+	<property "generation" type="generation" />
+	<property "stats">a list of stats</>
+</thing>
 
-a "pokemon type" is a thing:
-	- its "slot" is a number
-	- its "kind" is a type, stored as "type"
+<thing "pokemon type">
+	<property "slot" type="number" />
+	<spell>
+		- its "kind" is a type, stored as "type"
+	</spell>
+</thing>
 
-a "pokedex number" is a thing:
-	- its "entry number" is a number
-	- its "pokedex" is a poke api name
+<thing "pokedex number">
+	<property "entry number" type="number" />
+	<property "pokedex">a poke api name</>
+</thing>
 
-a "name" is a thing:
-	- its "name" is text
-	- its "language" is a poke api name
+<thing "name">
+	<property "name">text</>
+	<property "language">a poke api name</>
+</thing>
 
-a "pal park encounter" is a thing:
-	- its "base score" is a number
-	- its "rate" is a number
-	- its "area" is a poke api name
+<thing "pal park encounter">
+	<property "base score" type="number" />
+	<property "rate" type="number" />
+	<property "area">a poke api name</>
+</thing>
 
-a "flavor text entry" is a thing:
-	- its "flavor text" is text
-	- its "language" is a poke api name
-	- its "version" is a poke api name
+<thing "flavor text entry">
+	<property "flavor text">text</>
+	<property "language">a poke api name</>
+	<property "version">a poke api name</>
+</thing>
 
-a "genus" is a thing:
-	- its "genus" is text
-	- its "language" is a poke api name
+<thing "genus">
+	<property "genus">text</>
+	<property "language">a poke api name</>
+</thing>
 
-a "variety" is a thing:
-	- its "default" is yes or no, stored as "is_default"
-	- its "pokemon" is a pokemon
+<thing "variety">
+	<spell>
+		- its "default" is yes or no, stored as "is_default"
+	</spell>
+	<property "pokemon" type="pokemon" />
+</thing>
 
-a "damage relation" is a thing:
-	- its "no damage to" is a list of types
-	- its "half damage to" is a list of types
-	- its "double damage to" is a list of types
-	- its "no damage from" is a list of types
-	- its "half damage from" is a list of types
-	- its "double damage from" is a list of types
+<thing "damage relation">
+	<property "no damage to">a list of types</>
+	<property "half damage to">a list of types</>
+	<property "double damage to">a list of types</>
+	<property "no damage from">a list of types</>
+	<property "half damage from">a list of types</>
+	<property "double damage from">a list of types</>
+</thing>
 
-a "type pokemon" is a thing:
-	- its "slot" is a number
-	- its "pokemon" is a pokemon
+<thing "type pokemon">
+	<property "slot" type="number" />
+	<property "pokemon" type="pokemon" />
+</thing>
 
-an "effect entry" is a thing:
-	- its "effect" is text
-	- its "short effect" is text
-	- its "language" is a poke api name
+<thing "effect entry">
+	<property "effect">text</>
+	<property "short effect">text</>
+	<property "language">a poke api name</>
+</thing>
 
-an "effect change" is a thing:
-	- its "version group" is a poke api name
-	- its "effect entries" is a list of effect entries
+<thing "effect change">
+	<property "version group">a poke api name</>
+	<property "effect entries">a list of effect entries</>
+</thing>
 
-an "ability pokemon" is a thing:
-	- its "hidden" is yes or no, stored as "is_hidden"
-	- its "slot" is a number
-	- its "pokemon" is a pokemon
+<thing "ability pokemon">
+	<spell>
+		- its "hidden" is yes or no, stored as "is_hidden"
+	</spell>
+	<property "slot" type="number" />
+	<property "pokemon" type="pokemon" />
+</thing>
 
-a "contest combo" is a thing:
-	- its "normal" is a normal
-	- its "super" is a super
+<thing "contest combo">
+	<property "normal" type="normal" />
+	<property "super" type="super" />
+</thing>
 
-a "normal" is a thing:
-	- its "use before" is a list of moves
-	- its "use after" is a list of moves
+<thing "normal">
+	<property "use before">a list of moves</>
+	<property "use after">a list of moves</>
+</thing>
 
-a "super" is a thing:
+<thing "super" />
 
-a "meta" is a thing:
-	- its "ailment" is a poke api name
-	- its "category" is a poke api name
-	- its "drain" is a number
-	- its "healing" is a number
-	- its "crit rate" is a number
-	- its "ailment chance" is a number
-	- its "flinch chance" is a number
-	- its "stat chance" is a number
+<thing "meta">
+	<property "ailment">a poke api name</>
+	<property "category">a poke api name</>
+	<property "drain" type="number" />
+	<property "healing" type="number" />
+	<property "crit rate" type="number" />
+	<property "ailment chance" type="number" />
+	<property "flinch chance" type="number" />
+	<property "stat chance" type="number" />
+</thing>
 
-a "past value" is a thing:
-	- its "effect entries" is a list of text
-	- its "kind" is a type, stored as "type"
-	- its "version group" is a poke api name
+<thing "past value">
+	<property "effect entries">a list of text</>
+	<spell>
+		- its "kind" is a type, stored as "type"
+	</spell>
+	<property "version group">a poke api name</>
+</thing>
 
-a "chain" is a thing:
-	- its "baby" is yes or no, stored as "is_baby"
-	- its "species" is a pokemon species
-	- its "evolution details" is a list of text
-	- its "evolves to" is a list of chains
+<thing "chain">
+	<spell>
+		- its "baby" is yes or no, stored as "is_baby"
+	</spell>
+	<property "species">a pokemon species</>
+	<property "evolution details">a list of text</>
+	<property "evolves to">a list of chains</>
+</thing>
 
-a "poke api name" is a thing:
-	- its "name" is text
-	- its "address" is text, stored as "url"  // never read:  its collection wasn't asked for
+<thing "poke api name">
+	<property "name">text</>
+	<spell>
+		- its "address" is text, stored as "url"  // never read:  its collection wasn't asked for
+	</spell>
+</thing>

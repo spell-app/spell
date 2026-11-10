@@ -191,7 +191,6 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
 import { findUp } from "spell/util/node/findUp"
@@ -204,13 +203,11 @@ import { RealPath, pathInside } from "spell/server/RealPath"
 
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { Editor } from "spell/epic/config/Editor.ts"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 import { SessionMoves } from "spell/epic/command/SessionMoves.ts"
 import { WorktreeGuard } from "spell/epic/command/WorktreeGuard.ts"
-
-/** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
-const ENGINE = dirname(dirname(fileURLToPath(import.meta.url)))
 
 /** Whether `envCheckout()` has said its `EPIC_CHECKOUT` is stale:  once per process. */
 let staleSaid = false
@@ -795,7 +792,7 @@ export class Window {
     if (!plan.open && !(move && plan.start)) return { ...plan, file, refused }
     if (plan.open) {
       // the engine's own hook, the one the plugin runs (`hooks/hooks.json`)
-      const hook = join(ENGINE, "hooks", "worktree.mjs")
+      const hook = EngineFiles.path("hooks/worktree.mjs")
       const input = JSON.stringify({ name, cwd: MAIN_ROOT })
       const made = spawnSync(process.execPath, [hook, "create"], { input, encoding: "utf8" })
       if (made.status !== 0) throw new Error(`worktree ${name} not made:  ${made.stderr.trim()}`)

@@ -406,7 +406,12 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       logged in), `login()` (`EpicHome.refreshGithub()`'s), `isOrganization()`, `createRepo()`, `addressOf()`
       (SSH or HTTPS, as gh's `git_protocol` says);  never throws but where it says so;  `$SPELL_EPIC_GH` names a
       stand-in;  plain `node` loads it
-      - only `epic whoami` and `epic init` run it:  never a page served or a hook
+      - only `epic whoami`, `epic init` and `epic worktree remove --branches` (where the base branch takes only pull
+        requests) run it:  never a page served or a hook
+    - `CodeHost` (epic `epic-engine` I248):  which server a repo's code is on (`codeHost`, `"github"` or `"gitlab"`,
+      worked out from `origin` when left out), and the ONE chooser of how to talk to it, `CodeHost.of(config)`:  `GitHub`'s
+      statics or a `GitLab`, the same operations;  nothing else compares host names
+    - `GitLab`:  `glab`, on one instance, self-hosted too;  `$SPELL_EPIC_GLAB` names a stand-in;  plain `node` loads it
     - `Editor` (epic `epic-friend` P16):  which editor the tools drive, VS Code (`code`) or Cursor (`cursor`), the ONE
       reader of it:  `$SPELL_EPIC_EDITOR` (this machine's), else the window's own marks in the environment
       (`ofWindow()`:  Cursor's `CURSOR_TRACE_ID`, its macOS bundle id, its folders in VS Code's `VSCODE_*` paths), else
@@ -444,7 +449,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - a class per verb group, a method per verb:
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
       - `Worktrees` (`worktree`), with `MainMerge`
-        (`worktree merge-main`:  installs the packages when it changed a lockfile)
+        (`worktree merge-main`:  installs the packages when it changed a lockfile, a root lockfile both sides changed
+        rewritten by its own tool, snapshots updated by the repo's own runner, `snapshotUpdateOf()`)
         - then renames Spell UI's old names the branch still writes (`renameOldNames()`, epic `epic-engine` I143):
           the kit's `spell ui rename --write` over what the merged branch differs from `main` in, once every repo is
           merged, committed on its own;  generated files and links out of the checkout (the epic folder) left out;
@@ -494,6 +500,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - it COMMITS the two files it wrote and PUSHES them (`commitStep()`:  the config and `.gitignore`, only those,
           on the base branch, asking first in a terminal, `y` suggested;  pushed to the branch's upstream, else
           `origin`, else nowhere, `pushTarget()`;  on another branch it says so and commits nothing;  `--no-commit`)
+        - `--local` (epic `epic-engine` P69):  nothing in the repo, ever:  no commit, no `.gitignore` lines;  the config
+          and links in `.git/info/exclude` (the kit's `Git.exclude()`, the ONE writer of that file);  `localSetup` in
+          the config keeps it so;  nothing made on the code host unless `--content-repo`
+        - GitLab refusing the epic repo's first push:  what a Maintainer runs (`CodeHostClient.firstPushRefusal()`);
+          run again, it pushes on top of their commit (`pushPending()`, `SharedSync`'s no-shared-history case)
       - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
         what the epic folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)
@@ -504,6 +515,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - left out besides:  `linguist-generated`, a `GENERATED` marker on the FIRST line only, bundles
         - `LocPage` rewrites the LOC guide's tables, dates and left-out list as DOM nodes (`Markup.plain()`), keeping
           its prose and ids;  a missing page is made by `epic pages create durable`
+    - `PullRequest`:  `epic pr <name>`, a branch pushed and its pull or merge request opened, on either host (`CodeHost`)
+    - `BaseBranch`:  the local base branch fast-forwarded from `origin`, where it takes only pull requests
+      (`baseBranchProtected`):  by the worktree hook and `MainMerge`, safe or not at all;  plain `node` loads it by path
     - `CheckoutServers`:  a checkout's web servers (page server, vite) stopped as it goes (epic `epic-engine` I53)
       - `stop()`, BEFORE a removal:  the worktree hook, `epic worktree remove` (`/isolate done`, `/worktrees`' clean-up
         through `Stock`), `epic worktree move`

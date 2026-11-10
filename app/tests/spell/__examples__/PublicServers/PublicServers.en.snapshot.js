@@ -31,7 +31,8 @@ export const words = {
       stateReason: "state reason",
       draft: "draft",
       pullRequest: "pull request",
-      assignee: "assignee"
+      assignee: "assignee",
+      draw: "draw it"
     },
     Contributor: {
       login: "login",
@@ -87,9 +88,9 @@ export const words = {
       createdAt: "created at",
       updatedAt: "updated at",
       bio: "bio",
-      draw: "draw it",
-      lookAtUser: "look at (a user)",
-      lookAwayFromUser: "look away from (a user)"
+      lookAtUser: "look at it",
+      lookAwayFromUser: "look away from it",
+      draw: "draw it"
     },
     IssueUser: {
       login: "login",
@@ -336,15 +337,16 @@ export const words = {
       lendingEditionS: "lending edition s",
       lendingIdentifierS: "lending identifier s",
       publicScanB: "public scan b",
+      editions: "editions",
       seriesKey: "series key",
       seriesName: "series name",
       seriesPosition: "series position",
       title: "title",
       subtitle: "subtitle",
       writer: "writer",
-      draw: "draw it",
-      open: "open (a book)",
-      close: "close (a book)"
+      open: "open it",
+      close: "close it",
+      draw: "draw it"
     },
     Author: {
       links: "links",
@@ -362,7 +364,6 @@ export const words = {
       personalName: "personal name",
       latestRevision: "latest revision",
       revision: "revision",
-      created: "created",
       lastModified: "last modified"
     },
     Edition: {
@@ -382,8 +383,8 @@ export const words = {
       localId: "local id",
       latestRevision: "latest revision",
       revision: "revision",
-      created: "created",
-      lastModified: "last modified"
+      lastModified: "last modified",
+      draw: "draw it"
     },
     Link: {
       title: "title",
@@ -518,8 +519,8 @@ export const words = {
       name: "name",
       latitude: "latitude",
       longitude: "longitude",
-      draw: "draw it",
-      pick: "pick (a city)"
+      pick: "pick it",
+      draw: "draw it"
     },
     Artwork: {
       highlight: "highlight",
@@ -697,16 +698,5 @@ export const words = {
       create: "create it",
       draw: "draw it"
     }
-  },
-  groups: {
-    User: [
-      { name: "What someone on GitHub can do, from anywhere", members: ["lookAtUser", "lookAwayFromUser"] }
-    ],
-    Book: [
-      { name: "What a book and a city can do, from anywhere", members: ["open", "close"] }
-    ],
-    City: [
-      { name: "What a book and a city can do, from anywhere", members: ["pick"] }
-    ]
   }
 }

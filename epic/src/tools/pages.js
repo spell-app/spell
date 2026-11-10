@@ -11,6 +11,7 @@ import { openInChromeTab } from "spell/server/open"
 import { RealPath, pathInside } from "spell/server/RealPath"
 import { componentSetAddressOf, componentSetFileOf, pageServerRoot, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell/epic/window.mjs"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "spell/epic/server/server.types.ts"
 
@@ -21,7 +22,7 @@ import { firstPackageDir, KIT_PACKAGES } from "./packageDir.ts"
 export const TOOLS = dirname(fileURLToPath(import.meta.url))
 
 /** spell-epic's root:  the package the docs tools are in (`package.json`, where `yarn` runs their scripts). */
-export const PACKAGE = resolve(TOOLS, "..", "..")
+export const PACKAGE = EngineFiles.root
 
 /** `src/tools/_assets`:  what every page loads. */
 export const ASSETS = join(TOOLS, "_assets")
@@ -63,7 +64,7 @@ export const TEMPLATES = join(PACKAGE, "templates")
  * Epic UI's pages (`src/docs/`):  the ENGINE's own, as the templates are, wherever spell-epic is;  their page paths
  * are `components/epics/...`, as spell-app's page server serves them (`EPIC_UI`, `pagePath()`).
  */
-export const EPIC_UI_DOCS = join(PACKAGE, EPIC_UI.dir)
+export const EPIC_UI_DOCS = EngineFiles.path(EPIC_UI.dir)
 
 /**
  * Every COMPONENT SET's pages, named by their address:  `components/app/...` for `packages/app/docs/...`
@@ -394,7 +395,8 @@ export function tidy(files, { format = files } = {}) {
   const formatted = format.map(at)
   const runs = [
     docLinksRun(paths),
-    ...(formatted.length ? [{ command: "yarn", args: ["vp", "fmt", ...formatted] }] : [])
+    // in an npm install, no formatter:  it's the kit's dev tool (`vp`, by yarn), with its settings
+    ...(formatted.length && !EngineFiles.isBuilt ? [{ command: "yarn", args: ["vp", "fmt", ...formatted] }] : [])
   ]
   for (const { command, args, env } of runs) {
     const run = spawnSync(command, args, { cwd: PACKAGE, encoding: "utf8", env })
@@ -430,15 +432,15 @@ export function formattedAlready(files) {
 
 /**
  * How to run `doc-links.js` with `args` as a child `node`, for `spawnSync(command, args, { env })`.
- * - under `tsx`, with this package's `tsconfig.json`, from whatever folder it runs in:  every repo's files by their
- *   package names (`spell/server`, epic `repo-split` P14)
+ * - in a checkout, under `tsx`, with this package's `tsconfig.json`, from whatever folder it runs in:  every repo's
+ *   files by their package names (`spell/server`, epic `repo-split` P14);  plain `node` in an npm install
+ *   (`EngineFiles.nodeRun()`)
  * - the one way the tools run it (`tidy()`, `update.js`, goals' check, its own test)
  */
 export function docLinksRun(args) {
   return {
     command: process.execPath,
-    args: ["--import", "tsx", join(TOOLS, "doc-links.js"), ...args],
-    env: { ...process.env, TSX_TSCONFIG_PATH: join(PACKAGE, "tsconfig.json") }
+    ...EngineFiles.nodeRun(join(TOOLS, "doc-links.js"), args)
   }
 }
 
@@ -503,8 +505,8 @@ function ensureEpicServer() {
   return { base, port: Number(new URL(base).port) }
 }
 
-/** spell-epic's `epic` command:  `bin/epic` at its root. */
-const EPIC_BIN = join(PACKAGE, "bin", "epic")
+/** spell-epic's `epic` command (`EngineFiles.bin`). */
+const EPIC_BIN = EngineFiles.bin
 
 /**
  * A template's `html` as a new page holds it, wherever the page goes:  its links are ROOT PATHS already (epic

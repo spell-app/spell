@@ -3,7 +3,7 @@
  * (epic `debut` P27, Q47).
  * - ONE answer for each, `core.isAble(thing, "draggable", holder)`:  the page asks nothing else.
  * - A thing's type says each ability ONE word at a time, compiled to a flag on its class:
- *   - `- it is draggable`, `<spell-view "card" draggable>`, `<draggable/>`:  `static draggable = true`
+ *   - `- it is draggable`, `<view "card" draggable>`, `<draggable/>`:  `static draggable = true`
  *   - `- it is not draggable`:  `false`, e.g. for a sub-type, `a joker is not draggable`
  *   - with a condition, `- draggable when it is face up`:  `true`, and a getter that says when, `draggableWhen`
  * - Unsaid, an event says it (Q44):  `- on click:` makes a thing clickable, `- on drag:` draggable,

@@ -433,7 +433,9 @@ export class SpellxView {
   private element(token: P.JSXElementToken): SX.SpellxElement {
     const children = (token.children ?? []) as P.Token[]
     const unary = !!token.isUnaryTag
-    const headEnd = unary || !children.length ? token.end : children[0]!.start
+    // a quoted word's contents are in the head:  `<header "Hardware">`
+    const afterHead = children[token.quotedContents?.length ?? 0]
+    const headEnd = unary || !afterHead ? token.end : afterHead.start
     return {
       kind: "element",
       name: token.tagName,

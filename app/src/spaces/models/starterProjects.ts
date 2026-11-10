@@ -14,12 +14,12 @@ export const STARTER_PROGRAMS = {
     fileName: "MyApp.spell",
     contents: (title: string) => `# ${title}
 
-<spell-app "my app">
+<app "my app">
 \t<draw>
 \t\t<ui-container>
 \t\t</ui-container>
 \t</draw>
-</spell-app>
+</app>
 `
   },
   /** A button that counts its clicks. */
@@ -29,7 +29,7 @@ export const STARTER_PROGRAMS = {
     contents: (title: string) => `# ${title}
 A button that counts its clicks.
 
-<spell-app "my app">
+<app "my app">
 \t<property "count">a number</>
 \t<action "create it">set its count to 0</>
 \t<action "count up">set its count to its count + 1</>
@@ -38,7 +38,7 @@ A button that counts its clicks.
 \t\t\t<ui-button onClick={count up}>Clicked {its count} times</ui-button>
 \t\t</ui-container>
 \t</draw>
-</spell-app>
+</app>
 `
   },
   /** A little game:  roll a die, and see how far you get. */
@@ -48,7 +48,7 @@ A button that counts its clicks.
     contents: (title: string) => `# ${title}
 A little game:  how many rolls does it take to roll a six?
 
-<spell-app "my app">
+<app "my app">
 \t<property "roll">a number</>
 \t<property "rolls">a number</>
 \t<action "create it">
@@ -65,7 +65,7 @@ A little game:  how many rolls does it take to roll a six?
 \t\t\t<ui-text>You rolled {its roll}, in {its rolls} rolls</ui-text>
 \t\t</ui-container>
 \t</draw>
-</spell-app>
+</app>
 `
   }
 } as const

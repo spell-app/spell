@@ -134,6 +134,26 @@
 }
 
 /* A group:  its title and line, its create button, then its cards */
+/* the sites home page's title (`<SitesHomePage>`) */
+.Home .SitesHeader {
+  margin: 0 4px;
+
+  h1 {
+    margin: 0;
+    font-family: var(--ui-font-family-heading);
+    font-size: 32px;
+    font-weight: var(--ui-font-weight-bold);
+    letter-spacing: -0.01em;
+  }
+  p {
+    margin: 4px 0 0;
+    font-family: var(--Home-serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ui-text-muted);
+  }
+}
+
 .Home .ProjectCards {
   display: flex;
   flex-direction: column;

@@ -56,14 +56,15 @@ const TOP_TAG = /^<([\p{L}\p{N}-]+)[ \t]+"([^"]*)"/u
 /**
  * The name of the one page alone in spellx file `text`:  `undefined` when it isn't just one page, comments aside.
  * - Read from the lines at the file's left edge:  everything inside a page is indented.
- * - Its opening tag says the language's word for a page (`spell-page`, `spell-notebook`, Spanish's).
+ * - Its opening tag says the language's word for a page (`page`, `notebook`, Spanish's), or its old spelling (`spell-page`).
  */
 export function alonePageName(text: string, language: SP.Language): string | undefined {
   const words = language.words.spellx
   if (!words) return undefined
   const isPageWord = (word: string): boolean => {
-    const short = word.startsWith(`${words.prefix}-`) ? word.slice(words.prefix.length + 1) : undefined
-    const kind = short === undefined ? undefined : words.templates[short]
+    // short, `<page>` (epic `language` P41), or its old spelling, `<spell-page>`
+    const short = word.startsWith(`${words.prefix}-`) ? word.slice(words.prefix.length + 1) : word
+    const kind = words.templates[short]
     return (typeof kind === "string" ? kind : kind?.kind) === "page"
   }
   let name: string | undefined

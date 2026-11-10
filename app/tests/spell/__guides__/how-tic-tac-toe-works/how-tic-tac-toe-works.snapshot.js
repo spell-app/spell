@@ -17,7 +17,7 @@ core.heading("A square:  empty, or holding an X or an O")
 ///////////////////////////////////////////////
 // ## A square:  empty, or holding an X or an O
 ///////////////////////////////////////////////
-// A `<spell-thing>` is a kind of thing the program keeps:  here, one square of the board.
+// A `<thing>` is a kind of thing the program keeps:  here, one square of the board.
 // Its `<alias>` is a phrase you can say of it:  `the square is empty`.
 
 export class Square extends Thing {
@@ -138,7 +138,7 @@ core.heading("Playing a square")
 //////////////////////
 // Nothing happens if someone has won, or the square is taken.
 // Otherwise:  the mark goes in, the game checks for a winner, and the turn passes to the other player.
-// `<spell-more-of "square">` adds this action to the square, declared above:
+// `<extend "square">` adds this action to the square, declared above:
 // it's here, after the game, because it needs the game's turn;  the board, below, draws a button that calls it.
 
 core.heading("The board:  nine squares, three a row")

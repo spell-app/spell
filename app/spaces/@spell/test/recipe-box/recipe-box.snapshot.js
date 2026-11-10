@@ -25,7 +25,21 @@ export class Recipe extends View {
     )
   }
 
-  static savedIn = { place: "family_cookbook", collection: "recipes" }
+  static savedIn = {
+    place: "family_cookbook",
+    collection: "recipes",
+    times: ["created", "modified"]
+  }
+
+  // - it is saved in the family cookbook
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/RecipeBox.spell", start: 180, end: 214 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - it is saved in the family cookbook
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/RecipeBox.spell", start: 180, end: 214 } }) }
+  get modified() { return this.getProp("modified") }
+  set modified(value) { this.setProp("modified", value) }
 
   remove() {
     core.removeSaved(this)

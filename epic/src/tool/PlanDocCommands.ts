@@ -31,7 +31,6 @@ import { ItemPicker } from "./ItemPicker"
 import { MigrateCommands, type SessionFinder } from "./MigrateCommands"
 import { OptionCommands } from "./OptionCommands"
 import { PlanDoc } from "./PlanDoc"
-import { PlanCommits } from "./PlanCommits"
 import { EPIC_STATUSES, PlanDocFiles, type EpicListing } from "./PlanDocFiles"
 import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
@@ -653,7 +652,7 @@ export class PlanDocCommands {
     if (!found) throw new PlanDocError(`no commit "${sha}" in ${folders.join(", ")}`)
     const { folder, full } = found
     const base = this.files.commitBase(file)
-    const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(folder, "remote", "get-url", "origin"))
+    const repo = PlanDocFiles.commitBaseOf(folder)
     const { done, where } = await this.edit(file, (plan) => {
       const target = phase !== undefined ? { phase: plan.phasePlace(String(phase)) } : { item: String(item) }
       const where = target.phase !== undefined ? plan.phaseLabel(target.phase) : target.item!.toUpperCase()
@@ -709,9 +708,8 @@ export class PlanDocCommands {
     const repos = stringFlag(flags.repo)?.split(",").filter(Boolean) ?? []
     if (!maps.length || !repos.length)
       throw new PlanDocError("commits remap <map> [<map> ...] --repo <old repo>  [--to <repo>] [--dry-run]")
-    const to =
-      stringFlag(flags.to) ?? PlanCommits.githubBase(PlanDocFiles.gitIn(this.files.root, "remote", "get-url", "origin"))
-    if (!to) throw new PlanDocError("commits remap:  this checkout's remote isn't GitHub:  --to <repo>")
+    const to = stringFlag(flags.to) ?? PlanDocFiles.commitBaseOf(this.files.root)
+    if (!to) throw new PlanDocError("commits remap:  this checkout's remote has no web page:  --to <repo>")
     const remap = new CommitRemap({
       ids: CommitRemap.readMap(maps.map((map) => resolve(map))),
       from: repos,

@@ -1,9 +1,11 @@
+import { CodeHost, type CodeHostKind } from "spell/epic/config/CodeHost"
+
 import type { ParsedCommit } from "./planDoc.types"
 
 /****************
  * ### `PlanCommits`
  * Commits as an epic page lists them:  what a commit subject says it did (`P3:  Name -- summary`, `Fix I3:  ...`), the
- * repo's GitHub page, and finding a listed one (`<epic-commit sha>`).
+ * repo's page on its code host, and finding a listed one (`<epic-commit sha>`).
  * - STATIC and instance-free on purpose:  pure functions of their arguments;  never runs git (the command line does,
  *   and hands the log in).
  * - From `src/tools/plan-doc.js` (epic `epic-components`, P7).
@@ -42,14 +44,13 @@ export class PlanCommits {
   }
 
   /**
-   * The GitHub page of a repo, from its remote's URL (`git remote get-url origin`);  `null` when it isn't GitHub.
-   * - `https://github.com/o/r.git`, `git@github.com:o/r.git`, `ssh://git@github.com/o/r` -> `https://github.com/o/r`
+   * The page a repo's commit links go under, from its remote's URL (`git remote get-url origin`);
+   * `null` for an address that isn't that host's.
+   * - `<epic-commit>` adds `/commit/<sha>`:  on GitLab this is `https://host/group/project/-`, giving GitLab's
+   *   `/-/commit/<sha>`
    */
-  static githubBase(remote: string | null | undefined): string | null {
-    const match = String(remote ?? "")
-      .trim()
-      .match(/github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/)
-    return match ? `https://github.com/${match[1]}/${match[2]}` : null
+  static commitBase(remote: string | null | undefined, kind: CodeHostKind): string | null {
+    return CodeHost.commitBase(kind, String(remote ?? "").trim())
   }
 
   /**

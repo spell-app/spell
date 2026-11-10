@@ -11,7 +11,7 @@
 //   The content snapshots are (`toMatchFileSnapshot()`'s own files, which no `.snap` update rewrites).
 // - The same paths are `merge=binary` in the `.gitattributes` beside them (each folder keeps its own):  keep the two in
 //   step.
-// - `yarn.lock` is the kit's too (the one install), but not listed here.
+// - `yarn.lock` isn't here:  the merge rewrites a root lockfile with its own tool (`MainMerge`, `LOCKFILE_REGENERATORS`).
 {
   "generators": [
     {

@@ -31,6 +31,12 @@ export type TokenMatcher<T = P.Token> = (text: string, start?: number, end?: num
  * Policy for automatically removing whitespace from the token stream.
  * - REFACTOR: idiomatic TS enum string pattern?
  */
+/**
+ * In `Tokenizer.quotedNameTags`:  this tag's quoted word is its contents, not an attribute.
+ * - `<header "Hardware"/>` ~== `<header>Hardware</header>`.
+ */
+export const QUOTED_CONTENTS = "#contents"
+
 export const WhitespacePolicy = {
   ALL: "ALL", // Leave ALL whitespace
   NONE: "NONE", // Remove ALL whitespace

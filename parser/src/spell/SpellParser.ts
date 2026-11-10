@@ -26,6 +26,52 @@ export const CHAIN_TAGS: Record<string, P.JSXChainKind> = {
 }
 
 /** Spell's tokenizer's props -- see `SpellParser.spellTokenizer`. */
+/**
+ * Spell UI's tags whose contents are nearly always one short piece of text, each language's spellings
+ * (epic `language` P38):  `<header "Hardware"/>` ~== `<header>Hardware</header>`.
+ * - The table of what takes a quoted word, and what doesn't and why:  "A tag's quoted word", in `PARSING.md`.
+ */
+const QUOTED_CONTENTS_TAGS = [
+  "header",
+  "ui-header",
+  "encabezado",
+  "es-encabezado",
+  "button",
+  "ui-button",
+  "boton",
+  "botón",
+  "es-boton",
+  "item",
+  "ui-item",
+  "elemento",
+  "es-elemento",
+  "label",
+  "ui-label",
+  "etiqueta",
+  "es-etiqueta",
+  "title",
+  "ui-title",
+  "titulo",
+  "título",
+  "es-titulo",
+  "link",
+  "ui-link",
+  "enlace",
+  "es-enlace",
+  "breadcrumb",
+  "ui-breadcrumb",
+  "ruta-seccion",
+  "ruta-sección",
+  "es-ruta-seccion",
+  "checkbox",
+  "ui-checkbox",
+  "casilla",
+  "es-casilla",
+  "radio",
+  "ui-radio",
+  "es-radio"
+]
+
 const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // Only support double-quotes as quote symbols (so we can do contractions with single quotes)
   // TODO: backtick as alternative quote, for embedding double quotes?
@@ -52,7 +98,16 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
     "ui-tree-node": "label",
     "nodo-arbol": "etiqueta",
     "nodo-árbol": "etiqueta",
-    "es-nodo-arbol": "etiqueta"
+    "es-nodo-arbol": "etiqueta",
+    // what names a tab or a panel (epic `language` P38);  Spanish's `panel`:  `Language.quotedNameTags`
+    tab: "label",
+    "ui-tab": "label",
+    solapa: "etiqueta",
+    "es-solapa": "etiqueta",
+    panel: "label",
+    "ui-panel": "label",
+    "es-panel": "etiqueta",
+    ...Object.fromEntries(QUOTED_CONTENTS_TAGS.map((tag) => [tag, P.QUOTED_CONTENTS]))
   },
   // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
   // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
@@ -112,7 +167,7 @@ export class SpellParser extends P.Parser {
         "spellxTokenizer",
         () =>
           new SP.SpellxTokenizer({
-            ...SPELL_TOKENIZER_PROPS,
+            ...this.tokenizerProps,
             language: this.language ?? SP.Language.default,
             // a drawing's markup:  `</>` closes any element there (Q40, P7)
             emptyEndTagCloses: true,
@@ -125,11 +180,18 @@ export class SpellParser extends P.Parser {
 
   /** Spell's own tokenizer, for code spell -- and inside a spellx file's tags (`SP.SpellxTokenizer.spell`). */
   get spellTokenizer(): P.Tokenizer {
-    return this.derived("tokenizer", () => new P.Tokenizer(SPELL_TOKENIZER_PROPS))
+    return this.derived("tokenizer", () => new P.Tokenizer(this.tokenizerProps))
+  }
+
+  /** What our tokenizers are made with:  spell's, and what this parser's language reads its own way. */
+  private get tokenizerProps(): P.TokenizerProps {
+    const own = this.language?.words.quotedNameTags
+    if (!own) return SPELL_TOKENIZER_PROPS
+    return { ...SPELL_TOKENIZER_PROPS, quotedNameTags: { ...SPELL_TOKENIZER_PROPS.quotedNameTags, ...own } }
   }
 
   /**
-   * Which FORM of spell we read:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellml`).
+   * Which FORM of spell we read:  plain Spell, or spellx, its tag-shaped form (`SP.formOfText()`).
    * - Only our tokenizer differs:  a spellx file's tags are tokens of their own (`SP.SpellxTokenizer`), and each tag
    *   line reads as its code-spell twin (`SP.SpellxTwin`), parsed by the same rules (epic `elemental-spell` P6).
    * - A project's spellx files parse with its twin of that form (`twinFor()`).
@@ -345,7 +407,12 @@ export class SpellParser extends P.Parser {
     if (this.form !== "spellx") return undefined
     const name = SP.alonePageName(text, this.language ?? SP.Language.default)
     if (!name) return undefined
-    return new SP.AlonePage(this, name, SP.alonePageProperties(text, this.language ?? SP.Language.default), path)
+    return new SP.AlonePage(
+      this,
+      SP.plainPartName(name),
+      SP.alonePageProperties(text, this.language ?? SP.Language.default),
+      path
+    )
   }
 
   /** A clone of us, as `P.Parser.clone()`, but none of our twins:  a family is one project's (`twinFor()`). */
@@ -558,6 +625,7 @@ export class SpellParser extends P.Parser {
    * First lines of the methods `text` defines, found by scanning its lines (epic page `outline-spell`, P22).
    * - Each is `<type>\t<first line>`, its type empty at a file's top.  See `P.Parser.declaredMethods()`.
    * - At a file's top:  `to play a card`, `animation deal the cards`.
+   * - Under a place's line:  `- to refresh is at "/refresh"`, an action its line's address runs (`operation_at`).
    * - In a type's outline body, one tab in:
    *   `- to debug it:` under `solitaire is an app where:` is `solitaire\tto debug it`.
    *   - The type's line is any that declares one (`TYPE_DECLARATION`), or re-opens one, `a solitaire:`.
@@ -694,9 +762,11 @@ export class SpellParser extends P.Parser {
    * Type a top-level `line` declares or re-opens, e.g. `solitaire` for `a solitaire:` -- `undefined` if none.
    * - `onlyOnes`:  the one-of-a-kinds its text declares by a kind other than `app` (`oneOfAKindsIn()`),
    *   e.g. `klondike` for `klondike is a card game where:`.
+   * - A place's line says what its body is about, as a type's does:
+   *   `family-cookbook` for `family cookbook is a web server at "...":`, so its operations can be called ahead (epic `data` T67).
    */
   subjectOf(line: string, onlyOnes?: ReadonlySet<string>): string | undefined {
-    const { typeDeclaration, kindDeclaration, reopenedType } = this.declarations
+    const { typeDeclaration, kindDeclaration, placeDeclaration, reopenedType } = this.declarations
     const declared = new RegExp(typeDeclaration.source, "iu").exec(line)
     if (declared) {
       const [, type, words, created, onlyOne] = declared
@@ -709,6 +779,12 @@ export class SpellParser extends P.Parser {
         created
       )
     }
+    const place = placeDeclaration.exec(line)?.[1]
+    if (place)
+      return place
+        .trim()
+        .split(/[ \t]+/)
+        .join("-")
     const onlyOne = onlyOnes?.size ? new RegExp(kindDeclaration.source, "iu").exec(line) : undefined
     const onlyOneName =
       onlyOne && !onlyOne[1]
@@ -820,10 +896,16 @@ export class SpellParser extends P.Parser {
 type OperandTwinned = { operandInExpressions?: boolean }
 
 /** A method definition's first line:  `to ...`, `animation ...`, `create animation ...` -- see `declaredMethods()`. */
-/** `line` up to its first `:`, trimmed:  a method's first line without its body. */
+/**
+ * `line` up to its first `:`, trimmed:  a method's first line without its body.
+ * - Not a `:` inside quotes:  an operation's address, `to refresh is at "/a:b"`.
+ */
 function firstLineOf(line: string): string {
-  return line.split(":")[0]!.trim()
+  return (FIRST_LINE.exec(line)?.[0] ?? line).trim()
 }
+
+/** A line up to its first `:` outside quotes. */
+const FIRST_LINE = /^(?:[^:"]|"[^"]*")*/
 
 /** A rule which can make its method callable ahead of its definition:  `MethodDefinition`'s. */
 type CallsAhead = { callAhead?: (match: P.Match) => void }

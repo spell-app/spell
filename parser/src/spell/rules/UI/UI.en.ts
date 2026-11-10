@@ -87,11 +87,11 @@ UI.addRule(Print, {
 UI.addRule(
   Wording.specialize({
     ruleName: "shown_dates",
-    meanings: ["short", "long", "abbreviated", "timestamp", "plain", "reader"]
+    meanings: ["short", "long", "abbreviated", "date_and_time", "timestamp", "plain", "reader"]
   }),
   {
     syntax:
-      "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
+      "((short:short dates)|(long:long dates)|(abbreviated:(abbreviated|abbrev|abbr) dates)|(date_and_time:dates and times)|(timestamp:timestamps)|(plain:plain dates)|(reader:the reader's))"
   }
 )
 UI.addRule(ShowDatesAs, {
@@ -101,6 +101,7 @@ UI.addRule(ShowDatesAs, {
       compileAs: "statement",
       tests: [
         ["dates are shown as short dates", 'core.showDatesAs("short")'],
+        ["dates are shown as dates and times", 'core.showDatesAs("date and time")'],
         ["dates are shown as the reader's", 'core.showDatesAs("reader")']
       ]
     }

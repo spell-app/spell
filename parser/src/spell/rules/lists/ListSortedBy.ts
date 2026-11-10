@@ -3,7 +3,14 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { PostfixOperatorSuffix, Precedence, SuffixLeft } from "spell/parser/spell/rules/expressions"
-import { getWhereMethod, isItemScope, itemScope, noteSortKeyScope, type ItemVariableData } from "./lists.shared"
+import {
+  getWhereMethod,
+  isItemScope,
+  itemScope,
+  noteSortKeyScope,
+  readsAPropertyThatWaits,
+  type ItemVariableData
+} from "./lists.shared"
 
 /** What a sort key's code calls the item:  in spell, only `it` and `its` name it. */
 const ITEM_VARIABLE = "item"
@@ -24,6 +31,7 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
   /**
    * Not inside a predicate or a key -- see the class docs.
    * - SIDE EFFECT:  a key that waits won't compile:  it would sort by promises, in no order (epic `data` I15).
+   *   - So does one reading a property that waits, however many names away (`readsAPropertyThatWaits()`, T38).
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     if (isItemScope(scope)) return undefined
@@ -31,7 +39,13 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     if (!match) return undefined
     ListSortedBy.warnIfItDoesntAgree(match, tokens)
     const message = SP.Language.of(scope).parserMessage("sort-key-waits")
-    SP.SpellWarnings.refuseIf(match, message, () => getWhereMethod(match, match, this.getBody(match)).waitsItself)
+    SP.SpellWarnings.refuseIf(
+      match,
+      message,
+      // the method first:  building it makes sure each member is resolved
+      () =>
+        getWhereMethod(match, match, this.getBody(match)).waitsItself || readsAPropertyThatWaits(this.getBody(match))
+    )
     return match
   }
 
@@ -116,7 +130,8 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     const props = [
       new P.ASTObjectLiteralProperty(match, {
         property: "field" as never,
-        value: new P.ASTStringLiteral(match, { value: JSON.stringify(field) })
+        // as compiled code and rows name it:  a key's own property is `created_at` until it's written out
+        value: new P.ASTStringLiteral(match, { value: JSON.stringify(P.JSWriter.instance.nameOf(field)) })
       })
     ]
     // `newest first` (`sort_key_order`)

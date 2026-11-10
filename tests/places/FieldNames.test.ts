@@ -65,6 +65,40 @@ describe("a field's name, by its words", () => {
     expect(names.fromServer({ Title: "Not this", "Dish Name": "Soup" })).toEqual({ title: "Soup" })
   })
 
+  describe('a name given in plain words:  `its "created at"` (J237)', () => {
+    test.each(["created_at", "createdAt", "CreatedAt", "Created At", "created-at"])("finds %s", (their) => {
+      const names = new FieldNames({ created: "created at" })
+      expect(names.fromServer({ [their]: "then" })).toEqual({ created: "then", createdAt: "then" })
+      expect(names.toServer({ created: "now" })).toEqual({ [their]: "now" })
+    })
+
+    test("the words exactly come first", () => {
+      const names = new FieldNames({ created: "created at" })
+      expect(names.fromServer({ created_at: "spelled", "created at": "exact" }).created).toBe("exact")
+    })
+
+    test("the first spelling is it:  a second spelling of those words is a field of its own", () => {
+      const names = new FieldNames({ created: "created at" })
+      expect(names.fromServer({ created_at: "first", createdAt: "second" })).toEqual({
+        created: "first",
+        createdAt: "second"
+      })
+    })
+
+    test("before it's read one:  the server's style, else ours", () => {
+      expect(new FieldNames({ created: "created at" }, "snake").serverName("created")).toBe("created_at")
+      expect(new FieldNames({ created: "created at" }).serverName("created")).toBe("createdAt")
+    })
+
+    test("any other name is exact", () => {
+      expect(new FieldNames({ created: "created_at" }).fromServer({ createdAt: "other" })).toEqual({
+        createdAt: "other"
+      })
+      const sheet = new FieldNames({ title: "Dish Name" })
+      expect(sheet.fromServer({ dish_name: "other" })).toEqual({ dishName: "other" })
+    })
+  })
+
   test("with no style, a field it hasn't read keeps our name", () => {
     expect(new FieldNames().serverName("eyeColor")).toBe("eyeColor")
   })

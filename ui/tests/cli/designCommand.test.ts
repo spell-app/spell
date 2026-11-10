@@ -10,7 +10,7 @@ describe("DESIGN_TOOLS", () => {
   test("build:  Spell UI's own script, under tsx, from the kit's root", () => {
     expect(CLI.toolArgs(DESIGN_TOOLS.build, "/kit")).toEqual([
       "--import",
-      CLI.TSX_LOADER,
+      CLI.tsxLoader(),
       "/kit/ui/scripts/design-build.ts"
     ])
   })

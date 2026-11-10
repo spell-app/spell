@@ -3,13 +3,13 @@
  * of one width, so a section's columns line up with the others'.
  * - A card's DOM element has no box (`display: contents`):  its `::part(card)` is what sits in the grid,
  *   at its `--SiteCard-row` and `--SiteCard-column`.
- * - On a board with any picture, every card is the same size, and a picture shows only as much of itself as fits,
+ * - On a board with any thumbnail, every card is the same size, and a thumbnail shows only as much of itself as fits,
  *   from its top:  a tall sidebar is cut off.
  */
 .SiteBoard {
   --SiteBoard-card-width: 156px;
   --SiteBoard-gap: 12px;
-  --SiteBoard-picture-height: 96px;
+  --SiteBoard-thumbnail-height: 96px;
   display: flex;
   flex-direction: column;
   gap: 26px;
@@ -93,11 +93,11 @@
   }
   &::part(image) {
     flex: none;
-    height: var(--SiteBoard-picture-height);
+    height: var(--SiteBoard-thumbnail-height);
     overflow: hidden;
     pointer-events: none;
   }
-  /* its title and line, centred in what's left under a picture */
+  /* its title and line, centred in what's left under a thumbnail */
   &::part(content) {
     flex: 1 1 auto;
     display: flex;
@@ -139,7 +139,7 @@
     opacity: 0.45;
   }
 
-  /* the page's link to itself in a new tab:  8px inside the card's corner, readable over a picture */
+  /* the page's link to itself in a new tab:  8px inside the card's corner, readable over a thumbnail */
   .new-tab {
     position: absolute;
     top: 8px;

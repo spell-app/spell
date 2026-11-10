@@ -67,10 +67,15 @@
    * - room kept for a hidden `‹` left the row's start further in than its end
    * - the row fades out under a key while there's more that way
    * - a key's press stops on a whole item (scroll snap):  without it, it could stop mid-label
+   *   - `proximity`, never `mandatory`:  mandatory dragged a row someone was scrolling back to its last stopping place,
+   *     and, on a row of items with no box of their own (`<ui-item>`), jumped it somewhere else as it first drew
+   * - `--_ui-row-snap`:  how an item in its own shadow root takes part (`UIMenu.css`, "Item");  `::slotted()` can't reach
+   *   that box, and the `<ui-item>` it does reach draws none
    */
   .scrolling-row > .ui.menu {
     anchor-name: --ui-scrolling-row;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
+    --_ui-row-snap: start;
     scroll-padding-inline: var(--_ui-toolbar-button-size);
     --_toolbar-fade-start: 0px;
     --_toolbar-fade-end: 0px;

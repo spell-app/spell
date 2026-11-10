@@ -9,6 +9,9 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 /** The tags this rule reads in a type's outline:  its description, and a page's stories. */
 const DESCRIPTION_TAGS: ReadonlySet<string> = new Set([MARKDOWN_TAG, STORIES_TAG])
 
+/** Each `<story "S1" done>...</story>` in a stories block, in English or Spanish:  all a block may hold. */
+const STORY_TAGS = /<(story|historia)\b[^>]*>[^]*?<\/\1>/g
+
 /**
  * `markdown_description` rule:  a type's description, as markdown, in its outline (epic `drawable-thing`, P14).
  *
@@ -35,14 +38,14 @@ const DESCRIPTION_TAGS: ReadonlySet<string> = new Set([MARKDOWN_TAG, STORIES_TAG
  * ```spell
  * a "film page" is a page
  *   <stories>
- *     - [ ] see a film's opening crawl
- *     - [x] As a fan, I want to see who's in a film, so that I can find their other films
- *       - done when:  its people are listed, each a link
+ *     <story "S1">see a film's opening crawl</story>
+ *     <story "S2" done>As a fan, I want to see who's in a film, so that I can find their other films</story>
  *   </stories>
  * ```
  *
- *   - A job is a markdown list item, a plain line or an Agile story;  a task list's `[x]` ticks it off.
- *   - spellx writes it `<spell-stories>`, whose twin is this block.
+ *   - One tag a story (epic `mockup` P17):  its words, then two blank lines and its description, if it has one.
+ *   - Spanish:  `<historia "H1" hecha>`.  Anything else in the block is refused, saying what to write.
+ *   - spellx writes the block `<stories>`, its twin this block.
  */
 export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionData> {
   @proto static alias = "statement"
@@ -63,7 +66,16 @@ export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionD
     }
     match.data.typeName = type.name
     match.data.markdown = rawTextOf(element)
-    if (element.tagName === STORIES_TAG) match.data.isStories = true
+    if (element.tagName === STORIES_TAG) {
+      match.data.isStories = true
+      const stray = match.data.markdown.replace(STORY_TAGS, "").trim()
+      if (stray) {
+        return SpellStatement.refuse(
+          match,
+          SP.Language.of(scope).parserMessage("stories-not-tags", { text: stray.split("\n")[0]!.trim() })
+        )
+      }
+    }
     return match
   }
 

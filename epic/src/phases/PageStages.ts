@@ -1,9 +1,11 @@
 /****************
  * ### `PageStages`
- * An epic page's STAGE (epic `epic-engine` P29):  how far planning has got, and so which sections the page shows.
- * - `overview`:  the Overview is being agreed;  only the Overview, Questions and Todos show
- * - `phases`:  the phases are being agreed;  the Phases section shows too
- * - `building`:  everything shows, as every page did before stages
+ * An epic page's STAGE (epic `epic-engine` P29):  how far planning has got, and the ONE rule for which sections hide.
+ * - `overview`:  the Overview is being agreed;  its phases, if any, are titled `P1. DRAFT: ...`
+ * - `phases`:  the phases are being agreed
+ * - `building`:  it's being built
+ * - The stage no longer decides what shows (epic `epic-engine` P70):  a section hides when it's empty, at every
+ *   stage (`hides()`).
  * - Written as `<epic-page stage="overview">`;  a page with none (every page made before P29) reads as `building`,
  *   so it looks as it always did:  an optional attribute, no migration.
  * - Hiding a section is only a VIEW:  the file still holds every section, and the tool reads them all.
@@ -16,26 +18,32 @@ export class PageStages {
   /** The stages, in the order a page goes through them. */
   static readonly ALL = ["overview", "phases", "building"] as const
 
-  /** The stage of a page that names none:  everything shows. */
+  /** The stage of a page that names none. */
   static readonly DEFAULT: PageStage = "building"
 
   /**
-   * The top-level section kinds each stage shows (`<epic-section kind>`);  `building` shows every kind.
-   * - the Overview (`<epic-overview>`) always shows, and its sub-sections with it
-   * - the Phases stage shows the Issues too:  the problems found while planning, before any build plan (Owen,
-   *   2026-10-25:  "we're creating 'issues' ... before making the plan, so show those when in 'accept phases' mode")
+   * The top-level section kinds that hide with nothing in them (`<epic-section kind>`).
+   * - every other kind always shows:  the Overview's sub-sections, While you were out, a report, Choices, a saga's Epics
+   * - Owen (2026-11-09, epic `data`'s Hide Empty Sections):  "We should just go ahead and hide them in all modes if they
+   *   are empty."
    */
-  static readonly SHOWN: Readonly<Record<PlanningStage, readonly string[]>> = {
-    overview: ["questions", "todos"],
-    phases: ["phases", "questions", "todos", "issues"]
-  }
+  static readonly HIDES_WHEN_EMPTY: readonly string[] = [
+    "phases",
+    "questions",
+    "judgements",
+    "todos",
+    "issues",
+    "tests",
+    "log"
+  ]
 
   /**
-   * The section kinds every stage shows once they hold an item:  a judgement call or an issue made while planning is
-   * news, never hidden behind the stage (Owen, 2026-10-31, epic `epic-engine` I191:  "If Js or Is have been created,
-   * show them even if we are in planning mode").
+   * The section kinds with a New button while the page is reviewed:  empty, they stay, so the first one can be added.
+   * - `NEW_KIND_LOOKS` (`<epic-new-item>`) is typed against this list, and a test holds the two equal
+   * - Owen, 2026-11-09:  "For something like todos which has an add button, leave the header with "Nothing todo" type
+   *   message and add button"
    */
-  static readonly SHOWN_WHEN_HELD: readonly string[] = ["judgements", "issues"]
+  static readonly TAKES_NEW = ["phases", "questions", "todos", "issues", "tests"] as const
 
   /** Is `value` one of the stages? */
   static isStage(value: unknown): value is PageStage {
@@ -62,12 +70,6 @@ export class PageStages {
     return stage !== "building"
   }
 
-  /** Does a page in `stage` show a top-level section of `kind`? */
-  static shows(stage: PageStage, kind: string | null | undefined): boolean {
-    if (stage === "building") return true
-    return PageStages.SHOWN[stage].includes(kind ?? "")
-  }
-
   /**
    * How many questions are open on `page` (an `<epic-page>`):  its Questions section's open items, what a stage
    * button's tooltip counts (a reminder, never a lock).
@@ -77,17 +79,34 @@ export class PageStages {
   }
 
   /**
-   * Is `element` hidden by its page's stage?  True for a top-level `<epic-section>` its page's stage doesn't show,
-   * and for anything inside one.
+   * Is `element` hidden?  True for an empty top-level `<epic-section>` of a kind that hides (`HIDES_WHEN_EMPTY`), and
+   * for anything inside one.
+   * - not one you could add to right now (`canAddTo()`):  it stays, with a short line and its New button
    * - the Overview and its sub-sections never are;  outside an `<epic-page>`, nothing is
-   * - nor the Judgement calls or Issues once they hold an item, at any stage (`SHOWN_WHEN_HELD`)
+   * - everything that leaves a hidden section out asks this:  the numbers, the toolbar, its chips and Focus mode
    */
   static hides(element: Element): boolean {
     const section = element.closest("epic-page > epic-section")
-    if (!section) return false
-    const kind = section.getAttribute("kind")
-    if (PageStages.SHOWN_WHEN_HELD.includes(kind ?? "") && section.querySelector(":scope > epic-item")) return false
-    return !PageStages.shows(PageStages.of(section.parentElement), kind)
+    if (!section || !PageStages.HIDES_WHEN_EMPTY.includes(section.getAttribute("kind") ?? "")) return false
+    return PageStages.isEmpty(section) && !PageStages.canAddTo(section)
+  }
+
+  /**
+   * Has `section` nothing in it, and no part on its way?
+   * - what's in it:  any child element but one of a named slot (the page's own buttons) or one the runtime added
+   * - a `source` part may hold anything, so it never counts as empty:  the Log's, on every current page
+   */
+  static isEmpty(section: Element): boolean {
+    if (section.hasAttribute("source")) return false
+    return !Array.from(section.children).some(
+      (child) => !child.hasAttribute("slot") && !child.hasAttribute(RUNTIME_ADDED)
+    )
+  }
+
+  /** Could something be added to `section` right now:  its kind has a New button, and its page is being reviewed? */
+  static canAddTo(section: Element): boolean {
+    const takesNew = (PageStages.TAKES_NEW as readonly (string | null)[]).includes(section.getAttribute("kind"))
+    return takesNew && !!section.parentElement?.hasAttribute(REVIEWING)
   }
 }
 
@@ -96,6 +115,15 @@ export type PageStage = (typeof PageStages.ALL)[number]
 
 /** A stage the page is still being agreed in, which a stage button ends:  `overview` or `phases`. */
 export type PlanningStage = Exclude<PageStage, "building">
+
+/** One of `PageStages.TAKES_NEW`:  a section a New button adds to. */
+export type NewSectionKind = (typeof PageStages.TAKES_NEW)[number]
+
+/** Set on `<epic-page>` while it's reviewed (`ReviewState`). */
+const REVIEWING = "reviewing"
+
+/** What the docs runtime marks a child it added with:  no child of the page's own. */
+const RUNTIME_ADDED = "data-spell-added"
 
 /** A page's open questions, from the `<epic-page>`:  what a stage button's tooltip counts (`openQuestions()`). */
 const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'

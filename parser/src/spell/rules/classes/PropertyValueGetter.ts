@@ -78,8 +78,16 @@ export class PropertyValueGetter extends SpellStatement<
     // a draft kept in a property, `- its "draft" is a draft of its recipe`:  the stored property's line would read
     // `a draft` as a type named `Draft`, which there's none of (epic `data` T135)
     if (this.getBody(match)?.datatype === DRAFT_DATATYPE) match.priority = Priority.aboveDeclaration
-    match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
+    match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(
+      getKnownType(match.groups.type),
+      `${match.groups.property.value}`,
+      scope
+    )
     PropertyValueGetter.noteInheritedMember(match, this.getBody(match))
+    // a quoted value that isn't one of its values:  `- its lock is "banana"` (epic `language` P39)
+    const member = getKnownType(match.groups.type).inheritedMember(`${match.groups.property.value}`)
+    const wrongValue = SpellConstant.wrongValueMessage(scope, member, this.getBody(match))
+    if (wrongValue) return SpellStatement.refuse(match, wrongValue)
     this.warnIfAlwaysTheSame(match)
     this.warnIfReadsAfterWait(match)
     // a possessive misspelled, `a card' value is ...` (epic `language` T24)
@@ -129,11 +137,10 @@ export class PropertyValueGetter extends SpellStatement<
    * - Its own, e.g. `number`;  else, for one of a list (`- its "layout" is one of stacked or vertical`),
    *   the kind of its values, e.g. `PileLayout` -- see `DefinePropertyHas.declareKind()`.
    */
-  private static inheritedTypeOf(match: P.MatchFor<PropertyValueGetter>): string | undefined {
-    const { superType } = getKnownType(match.groups.type)
-    const words = `${match.groups.property.value}`
+  static inheritedTypeOf(typeScope: P.TypeScope, words: string, scope: P.Scope): string | undefined {
+    const { superType } = typeScope
     const owner = superType
-      ? match.scope
+      ? scope
           .getType(superType)
           ?.chain()
           .find((type) => type.variables.get(words, "LOCAL_ONLY"))
@@ -141,8 +148,8 @@ export class PropertyValueGetter extends SpellStatement<
     const member = owner?.variables.get(words, "LOCAL_ONLY")
     if (!owner || !member) return undefined
     if (typeof member.datatype === "string") return member.datatype
-    const kind = SP.Language.of(match.scope).propertyKindType(owner.name, `${member.name}`)
-    return match.scope.getType(kind)?.valueKind?.property ? kind : undefined
+    const kind = SP.Language.of(scope).propertyKindType(owner.name, `${member.name}`)
+    return scope.getType(kind)?.valueKind?.property ? kind : undefined
   }
 
   /**
@@ -184,7 +191,8 @@ export class PropertyValueGetter extends SpellStatement<
       asWritten: property.raw,
       readAs,
       output: member?.output,
-      valueOutputs: member?.valueOutputs
+      valueOutputs: member?.valueOutputs,
+      listedValues: member?.listedValues
     })
     // its own list of values, `one of red, black`:  as a stored property's
     const values = specifier?.AST

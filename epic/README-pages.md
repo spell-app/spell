@@ -1,17 +1,17 @@
 # The pages you review on
 
-![An epic page, scrolled down to its sections.  The header:  EPIC-ENGINE, the paper plane (Send) in the middle, then
-at the right the step pill P57 with 4 agents running, and the gear.  The toolbar:  eight section icons;  at its right,
-counts of 5 blue, 252 yellow, 1 green and 307 grey.  Then the eight sections, Overview to Log, each with its counts;
-Issues is open, filtered to its coloured items:  six yellow open issues and one green one just
-done.](docs/images/epic-page.png)
+![An epic page, scrolled down to its sections.  The header:  REPO-SPLIT, the paper plane (Send) in the middle, then
+at the right the step pill P25 and the gear.  The toolbar:  eight section icons;  at its right,
+counts of 127 yellow and 290 grey.  Then the sections, Overview to Issues, each with its counts;
+Issues is open, filtered to its coloured items:  a list of yellow open issues, each with Do this, Revisit and
+Approve.](docs/images/epic-page.png)
 
-_A real epic page, mid-build:  this repo's epic-engine epic at P57, its Issues section open and showing only what
+_A real epic page, mid-build:  this repo's repo-split epic at P25, its Issues section open and showing only what
 isn't settled._
 
-Count the chips at the toolbar's right:  565 items, 5 blue, 252 yellow, 1 green, 307 grey, and no red or orange.
+Count the chips at the toolbar's right:  417 items, 127 yellow, 290 grey, and no red or orange.
 Red and orange mean a person is needed, so nothing here is waiting on you:
-blue is with Claude, yellow is open, and you get to it when you have time.
+yellow is open, and you get to it when you have time.
 
 If you've run a project from an issue tracker and a pull-request thread, you know where the time goes:
 grooming the list, and scrolling the conversation for whatever is still open.
@@ -20,7 +20,7 @@ built are ONE page, and the agent keeps it true as it works.
 You review on the page, item by item, when you have time;  the answers come back INTO the items, not into a chat.
 
 - The page is plain HTML in the epic folder, a git repo of its own beside the code
-  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-epic-folder--your-plans-in-a-repo-of-their-own) says what it holds).
+  ([README-config.md](README-config.md#the-epic-folder--your-plans-in-a-repo-of-their-own) says what it holds).
   The page server serves it live:  an edit the agent makes shows in place,
   and your scroll, your folds and your half-typed notes stay where they were.
 - You read it in VS Code's side bar, the Review tab ([README-vscode.md](README-vscode.md)), or in any browser.
@@ -112,6 +112,9 @@ a link to `#todos` lands on the todos of any epic page, a year from now.
 
 Three more appear only when they have something to say, and the eight never move for them:
 - **0. While you were out** (`#away`), first, above the Overview.
+  Its title has badges for what's new, by colour, so you can tell while it's folded;  a click on one filters the lines,
+  and each line's tick wears its badge's colour, dotted once you've marked it and until you send;
+  it opens the first time a page shows it, then stays as you left it.
   What Claude did since you last pressed Done reading, and what needs you now, in the order to look at it.
   The tool writes it on every edit, never by hand;  each line has its own Read.
   What you've already addressed leaves it, and a finished phase ages out after 3 days (`epic settings`).
@@ -119,12 +122,13 @@ Three more appear only when they have something to say, and the eight never move
 - **Choices** (`#choices`), between the Overview and the Phases:  an open-ended list you pick from, round after round.
 - **A report**, after the Overview:  what a run wrote for you to read, like an overnight `/bedtime`.
 
-![The Phases section opened, under the sticky header and toolbar:  its title with a 3/15 count of open phases, a
-folder and a flask toggle;  then P1 to P15, each with an estimate (1-2h, 3-4h, 1-2d) and its review buttons.  P1 to P12
-have a green tick, P13 · CLI to the Kit and P14 · One Import Name a half-filled blue circle and an orange pen with a
-count, P15 · Doc Review an empty circle.](docs/images/epic-phases.png)
+![The Phases section opened, under the sticky header and toolbar:  its title with counts of 2 phases to do and 14
+done, and a gear;  then P1 to P16, each with the time it took (30m, 58m) or an estimate (3-4h), a thumbs up and Revisit,
+and a gear of its own.  Fourteen have a green tick;  P12 · Signed-In Ingest and P16 · Doc Review a dotted blue circle
+and a green thumbs up.](docs/images/epic-phases.png)
 
-_Phases:  done ones ticked, two under way, one to do;  an orange pen counts the changes to a phase's plan._
+_Phases:  done ones ticked, the two still to do a dotted circle.
+The gears turn on each phase's Files and Verify;  an orange pen, on a phase whose plan changed, counts the changes._
 
 You'll come back to most pages cold, weeks later, from another session.
 Three habits make that safe:
@@ -154,20 +158,21 @@ And two markers keep a second look short:
 ## Agreeing the plan:  three stages, each ended by your Accept
 
 No plan mode, and no plan in a chat:  a new epic is agreed on its page, from its first minute.
-Its sections appear as the plan gets that far.
+Its sections appear as they get something in them.
 
-| Stage | What shows | How it ends |
+| Stage | What's different | How it ends |
 | --- | --- | --- |
-| `overview` | the Overview, Questions and Todo | Accept Overview, on the Overview's title row |
-| `phases` | the Phases and Issues too;  each phase has Looks good and Defer, or Accept and Defer once its build plan is up | Accept Phases, on the Phases section's title row:  one press takes the phases and every plan waiting |
-| `building` | everything | every phase built, one after another, with no stop between them |
+| `overview` | its phases, if any, are titled `P1. DRAFT: ...` | Accept Overview, on the Overview's title row |
+| `phases` | each phase has Looks good and Defer, or Accept and Defer once its build plan is up | Accept Phases, on the Phases section's title row:  one press takes the phases and every plan waiting |
+| `building` | each phase has Do this and Revisit | every phase built, one after another, with no stop between them |
 
 - Each answer to a question rewrites the Overview, its changed words orange for 3 days:  nothing to approve.
 - An Accept counts down 5 minutes, a green ring round its thumbs up.
   A second press calls it off;  only when the ring ends does the agent hear it.
 - The button's tooltip counts the open questions:  a reminder, never a lock.
-- A hidden section is still in the file:  a stage is only a view.
-  Judgement calls and Issues show at any stage, once they hold an item.
+- A section hides when it's empty, at every stage, and shows the moment it holds something.
+  - While you're reviewing, an empty section with a New button stays:  its title, a short line and the button.
+  - A hidden section is still in the file:  hiding is only a view.
 
 ## A review round:  your marks wait until you send them
 
@@ -223,12 +228,13 @@ The command behind each step, and why a finished `wait` is what wakes a session:
 - A revisit on a judgement call or a todo that's work starts with `do it` already in its note box, Revisit on with it:
   type over it to say something else.
 
-![One judgement call, J4, unfolded:  a yellow J4 chip and its title;  at the right the Approve, Revisit and Make Caveat
-buttons, and apart from them Do Now (the wand);  its text below;  then the note box, "Your note:  a question,
-instructions, why", with Revisit Later and Skip This beside it.](docs/images/epic-item.png)
+![One judgement call, J9, unfolded:  a yellow J9 chip and its title;  at the right one group of three buttons, Do this
+(the thumbs up), Revisit and Approve (the check);  its text and net effect below;  then the note box, "Your note:  a
+question, instructions, why", with its Saved mark and picture button at the corner.](docs/images/epic-item.png)
 
-_An item, from an older build:  its id chip, review buttons, text and note box.
-Today its one group reads Make Todo, Revisit, Approve, and the wand (Do Now) is gone._
+_An item:  its id chip, review buttons, text and note box.
+On an issue or a judgement call the group reads Do this, Revisit, Approve;
+on other items, Make Todo takes Do this's place._
 
 Every mark, and what applying it does:
 
@@ -241,7 +247,7 @@ Every mark, and what applying it does:
 | Revisit | the history arrow, blue, then a note | asked now:  answered INTO the item as a reply;  a plain note left for later:  a comment thread on the item;  with a pick or a picture:  talked over first, and recorded once you agree |
 | a todo's plane | "Do it in the next phase", green | queued into the first phase still to do |
 | a todo's x | "Drop it", grey | canceled, "dropped in review" |
-| Skip This | the note box's x, grey | reviewed, nothing else;  your note kept as your reply;  on a test:  canceled |
+| Skip This | an older page's note box x, grey | reviewed, nothing else;  your note kept as your reply;  on a test:  canceled |
 | new | `+`, or New todo / New question / New issue at the end of those sections | made, with your note as its details |
 
 - Each applied mark logs one line:  `J9 approved:  closed (accepted)`.
@@ -323,9 +329,9 @@ Marks are for items.
 For anything else on a page (a sentence of a guide, a row of a table, a line of the Overview)
 there's a comment:  a thread, anchored to the words it quotes, much like a code-review comment on a line.
 
-![A comment thread on a guide, The Python Target.  The header has Send, dashed blue with a count of 1, and "nobody is
-listening";  the toolbar's bullhorn has an orange 17.  Under a list about $SPELL_SEED, an orange thread, M3, quoting
-"$SPELL_SEED:  every visitor is dealt from...":  "You:  Is this optional?", then "Claude:  Yes, it's optional ...",
+![A comment thread on a guide, The Python Target.  The header has Send, filled blue with a count of 1, and "nobody is
+listening";  the toolbar's bullhorn has an orange 17.  Under a list about $SPELL_SEED, an orange thread, C3, quoting
+"Is this optional?":  "You:  Is this optional?", then "Claude:  Yes, it's optional ...",
 with a check, a reply arrow and an x at its top right, a trash can, and an empty reply box at its
 foot.](docs/images/comment-thread.png)
 
@@ -469,7 +475,7 @@ tool's folder, and `epic pages template <name>` prints where one is.
 ### Saga pages
 
 A saga is an epic of epics, an aim too big for one:
-the one below is how Spell reads and what it can say, served by five epics so far.
+the one below is how Spell reads and what it can say, served by nine epics so far.
 Its page is where you see the whole aim at once, and you review it like an epic page,
 with `/epic review SAGA:/<id>`.
 
@@ -477,10 +483,10 @@ with `/epic review SAGA:/<id>`.
 - Below it, a card per epic that names the saga, drawn live by the page server;  then Questions and a Log.
 - `epic saga page <id>` makes the page, from the saga's line in the sagas' list.
 
-![A saga page, SPELL-LANGUAGE:  its header with Send and Review Now, its meta lines (the review command, the saga's
+![A saga page, SPELL-LANGUAGE:  its header with Send and the gear, its meta lines (the review command, the saga's
 address SAGA:/spell-language, its dates);  the Overview's one-line purpose, "Done so far" and "Ideas not done yet"
-folded;  then the Epics section, ACTIVE 2 (Outline Spell, starred, 26/29 phases;  Spanish, 0/12) and PLANNING 1
-(Mixins, a seedling, future).](docs/images/saga-page.png)
+folded;  then the Epics section, ACTIVE 3 (Atmosphere, Data and The Spell Language, each starred, with its phases done)
+and PLANNING 1 (Mixins, a seedling).](docs/images/saga-page.png)
 
 _A saga's page:  its overview, then its epics as cards, grouped as on the Epics list._
 
@@ -488,13 +494,13 @@ _A saga's page:  its overview, then its epics as cards, grouped as on the Epics 
 
 When a question needs a picture, or more than Claude Code's question modal holds (four options, four questions),
 the agent writes a DETAILS PAGE (`/details`) and shows it in the side bar's Details tab.
-You answer ON the page:  a radio per option card, a comment box on each, "Other" for your own answer, then Send.
+You answer ON the page:  a Choose pill per option card, a Comment link on each, "Other" for your own answer, then Send.
 A page still waiting for your answer is never replaced there:  the next one waits its turn, and the tab says so.
 
 ![A details page, "Shared editing (CRDT):  analysis":  its header says "Sent 10/11/26 20:11 · 4 of 4 decided" and
 "nobody is waiting yet";  a tab per question, Q1 to Q4;  Q1, "What do people edit together?", with three option cards,
-A recommended (a thumbs-up), C picked (a filled radio and a green outline), each with a folded aside and a comment box,
-then an "Other" box.](docs/images/details-page.png)
+A recommended (a thumbs-up), C picked ("Chosen", dashed, and a green outline), the others with a Choose pill, each with
+a Comment link, then an "Other" box.](docs/images/details-page.png)
 
 _A details page after you've answered:  the recommended option has the thumbs-up, your pick the green outline._
 
@@ -511,11 +517,11 @@ _A details page after you've answered:  the recommended option has the thumbs-up
 
 A CHOICE PAGE (`epic choices create`) is a table of names the agent recommends, one row per use:
 you type over any you'd call something else, then press "Do it".
-A changed row gets an orange bar and a button to put the recommendation back.
+A changed row gets a blue edge, its box dashed blue, and a button to put the recommendation back.
 
-![A choice page, "Page kinds":  a table of Purpose, Current and Recommended, one row per kind of page;  one row's box
-changed and tinted orange, with a revert button;  at the bottom, a feedback box, the purple "Do it" button and a green
-line saying what was sent.](docs/images/choice-page.png)
+![A choice page, "Page kinds":  a table of Purpose, Current, Recommended and Explanation, one row per kind of page;  one
+row's box changed, dashed and tinted blue, with a blue edge and a revert button;  at the bottom, a feedback box, the
+purple "Do it" button and a green line saying what was sent.](docs/images/choice-page.png)
 
 _A choice page:  the boxes start with the recommendation;  "Do it" sends the table._
 
@@ -541,8 +547,8 @@ how the thing it built works, and how to use it.
 Doc Review, an epic's last phase, writes it (`epic pages create durable guides/<page>.html`);
 the epic page links it in its meta lines, and its comments go to the epic that wrote it.
 
-![A guide, "Epic Pages":  a Send button and "nobody is listening" in its header, a row of section tabs, then its first
-section, "What an epic page is", opened, with a bullhorn beside the section's fold button.](docs/images/guide-page.png)
+![A guide, "Epic Pages":  Send (the paper plane) and "nobody is listening" in its header, a row of section tabs, then
+its first section, "What an epic page is", opened, with a bullhorn at the right of its title.](docs/images/guide-page.png)
 
 _A guide, with the pointer on its first section:  the bullhorn shows, to comment on it._
 
@@ -552,9 +558,9 @@ The docs' HOME PAGE, their front door, has a card per area, and each area has a 
 Epics, Sagas, Guides.
 `epic pages index` writes them all.
 
-![The Epics list:  cards grouped as FAVORITES 3 (Epic Engine with a red mark, Outline Spell, Repo Split, each starred),
-ACTIVE 2 (READMEs;  Review Review, paused) and PLANNING 9 (Epic Goals, Feedback, Mixins), each card with its title,
-phase count, saga and date.](docs/images/epic-list.png)
+![The Epics list:  cards grouped as FAVORITES 5 (Atmosphere, Data, Epic Engine, The Editor and The Spell Language, each
+starred) and ACTIVE 5 (Coherence, paused;  Repo Split;  Review Review), each card with its title, phase count or state
+mark, saga and date.](docs/images/epic-list.png)
 
 _The Epics list, every epic as a card, grouped by where it stands._
 

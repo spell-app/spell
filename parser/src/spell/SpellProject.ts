@@ -5,6 +5,8 @@ import { PY } from "spell/parser/py"
 // each runner runs its own copy.  See `spellRuntime.ts`.
 import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
 import { SP } from "spell/parser/spell"
+// Import directly:  these two helpers, not the rules' barrel
+import { overlayViewNamed, pageNamed } from "spell/parser/spell/rules/sites/sites.shared"
 
 /**
  * One spell project, e.g. `owen@spell/myProject`:  its files, and reading, compiling and saving them.
@@ -328,6 +330,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return reader.aloneHead(file.parseText, file.path)
   }
 
+  /** Does anything we can see, our files or our imports, declare `words` as a page or a dialog's view? */
+  hasPageOrView(words: string): boolean {
+    const { scope } = this
+    return !!scope && !!(pageNamed(scope, words) ?? overlayViewNamed(scope, words))
+  }
+
   /** Our spell file that holds the page of class `className`, alone:  what a site asks for by. */
   fileForPage(className: string): SP.SpellFile | undefined {
     return this.spellFiles.find((file) => {
@@ -590,7 +598,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /**
    * File for `target`'s source map, beside its output in our build folder, e.g. `Solitaire.spell.js.map` (epic
-   * `elemental-spell` P14):  each line of its code back to the `.spell` / `.spellml` line it came from.
+   * `elemental-spell` P14):  each line of its code back to the `.spell` line it came from.
    * - Written for a javascript-family target that runs (`P.JSWriter` and its subclasses):  see `P.SourceMarks`.
    *   - Never for a library (`ts/lib`):  its `.lib.ts` sits beside its source, committed, so a map there would
    *     write a `sourceMappingURL` into hand-checked code.
@@ -1267,10 +1275,13 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - A spell file we've parsed => `incremental` re-parses what changed, and each changed file gets its new `match`.
    *   - What it re-parses:  maybe just one indented body, else from the first changed line on, plus every later file.
    * - Otherwise, or if that throws, has ALL of our files `resetCompiled()` so they'll parse + compile again.
+   *   - So does a file that changed shape (`changedShape()`), its first or last tag typed or deleted.
    */
   updatedContentsFor(file: SP.AnySpellFile): void {
     const { incremental } = this
-    if (file instanceof SP.SpellFile && incremental?.has(file.path) && !incremental.isBroken) {
+    // a file that changed shape needs a new parser:  never carry lines from one shape's parse to the other's
+    const flipped = file instanceof SP.SpellFile && this.changedShape(file)
+    if (file instanceof SP.SpellFile && incremental?.has(file.path) && !incremental.isBroken && !flipped) {
       try {
         const changed = incremental.update(file.path, file.parseText)
         changed.forEach((parse) => {
@@ -1285,6 +1296,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     }
     this.incremental = undefined
     this.activeImports.forEach((item) => item.resetCompiled())
+  }
+
+  /** Did `file`'s new text change its shape from the one `incremental` parses it in (`SP.formOfText()`)? */
+  private changedShape(file: SP.SpellFile): boolean {
+    const known = this.incremental?.files.find((it) => it.path === file.path)
+    return !!known && ((known.parser as SP.SpellParser).form ?? "spell") !== file.form
   }
 
   /**

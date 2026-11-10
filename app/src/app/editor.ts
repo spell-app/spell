@@ -660,7 +660,7 @@ export class EditorStore extends Observable {
   /**
    * Draw the page the open file holds, when it's a notebook page (epic `notebook` P3, J3):
    * a component's project holds several (Usage, Examples, API), and starts only one by itself.
-   * - Its top-level page named for it (`counterNotebook` for `<spell-page "counter notebook" notebook>`) is started,
+   * - Its top-level page named for it (`counterNotebook` for `<page "counter notebook" notebook>`) is started,
    *   unless it's the one drawn already:  switching tabs draws the other page, with no restart.
    * - Nothing for any other file, or before the program has run.
    * - NEVER throws:  a failure is logged.
@@ -1018,7 +1018,7 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Is `file` a LOCKED page's (`<spell-page "x" locked>`, `<spell-notebook "x" locked>`;  epic `notebook` P3)?
+   * Is `file` a LOCKED page's (`<page "x" locked>`, `<notebook "x" locked>`;  epic `notebook` P3)?
    * - Then nothing ever saves it, for anyone:  every edit is a try-out, gone on reload or the editor's Reset.
    * - The ONE check that keeping (`keepEdit()`), saving (`saveFile()`) and so publishing (`publish()`) all ask.
    * - Read from the file's text as it is now (`NotebookPageCells.holdsLockedPage()`):

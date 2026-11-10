@@ -98,6 +98,15 @@ export const PARSER_MESSAGES = {
   /** A place named a key:  a browser program has no way to read one. */
   "key-needs-server-side":
     'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
+  /** `its key goes in its "..." header`, a name a header can't have:  won't compile. */
+  "key-goes-bad-header":
+    '"{name}" can\'t be a header\'s name:  it\'s one word of letters, digits and dashes, e.g. "X-Api-Key"',
+  /** `its key goes in the address as "..."`, a name a question can't have:  won't compile. */
+  "key-goes-bad-question":
+    '"{name}" can\'t be asked in an address:  it\'s one word of letters, digits, dashes and underscores, e.g. "api_key"',
+  /** A line says where a key goes, and no line names one. */
+  "key-goes-with-no-key":
+    'This says where its key goes, and no line names one:  add "- its key is the secret "COOKBOOK_KEY""',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
     "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- check it every 30 seconds\" under it",
@@ -127,6 +136,8 @@ export const PARSER_MESSAGES = {
   /** A sort key that waits:  won't compile. */
   "sort-key-waits":
     "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",
+  /** `if that fails:` in an action with nothing above it. */
+  "rider-needs-a-line-above": "This goes under the line it's about, as a read of a place",
   /** A rider outside a drawing:  won't compile. */
   "rider-only-in-a-drawing":
     "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
@@ -159,6 +170,13 @@ export const PARSER_MESSAGES = {
     'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps a decimal number as text, "12.50", which other apps read as text',
   /** An atmosphere account's address, or an account named under one, that isn't one. */
   "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** `to create a recipe is at "..."` (epic `data` T56). */
+  "operation-named-create":
+    'A {thing}\'s action can\'t be called "create":  that\'s what runs as each {thing} is made.  Call it something else, e.g. "to add a {thing} is at ..."',
+  /** `show them 0 at a time`. */
+  "page-size-a-whole-number": "A page holds a whole number of things, 1 or more",
+  /** An atmosphere space's address that isn't one. */
+  "atmosphere-not-a-space": '"{address}" isn\'t a space:  it looks like "at://did:plc:.../space/family"',
   /** A personal atmosphere account's address that isn't the start of a collection's name. */
   "atmosphere-not-a-corner":
     '"{address}" isn\'t a corner of an account:  it reads like a domain written backwards, e.g. "com.example.cookbook"',
@@ -171,9 +189,8 @@ export const PARSER_MESSAGES = {
   /** `personal` before an address, not a name:  a full address is one folder, not one per person (epic `atmosphere` P1). */
   "personal-folder-a-name":
     '"personal" makes one folder for each person, by a name:  write a name alone, e.g. personal "recipes", not "{address}"',
-  /** A site's line naming no page of the program (epic `mockup` P1):  `- it has a flim page at "/films"`. */
-  "site-part-not-a-page":
-    '"{part}" isn\'t one of this program\'s pages:  name a page it declares, e.g. a "film page" is a page',
+  /** A page's stories written any other way than `<story>` tags (epic `mockup` P17), e.g. the old `- [ ] words`. */
+  "stories-not-tags": "A page's stories are tags:  <story \"S1\">words</story>, one for each;  this isn't one:  {text}",
   /** A site's page whose address doesn't start with `/`. */
   "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
   /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */
@@ -398,6 +415,15 @@ export const PARSER_MESSAGES = {
   "value-line-outside-getter": 'A line of a getter\'s body:  put it under one, e.g. "the color of a card is:"',
   /** `set the length of the name to 3`:  `{what}` is `the-property` or `the-property-of-a-type`. */
   "cant-set-worked-out": "Can't set {what}:  spell works it out",
+  /** A quoted value that isn't one of a property's values, `- its lock is "banana"`;  or `- it is banana` (epic `language` P39). */
+  "not-one-of-its-values": "{what} can't be {value}:  it's one of {values}",
+  /** What a `not-one-of-its-values` message says for `- it is banana`, where no one property's meant. */
+  "it-itself": "It",
+  /** `- it is banana`, in a type with no property that has a list of values (epic `language` P39). */
+  "no-listed-values": "It can't be {value}:  it has no property with a list of values",
+  /** `- it is red`, when two of its properties list `red`:  which one it means (epic `language` P39). */
+  "listed-on-two-properties":
+    '{value} is a value of both its {first} and its {second}:  say which, "its {first} is {value}"',
   /** `set the pile of the card to x`, when a card belongs to one pile. */
   "cant-set-belongs-to": "Can't set {what}:  it's the {holder} holding it -- move it to a {holder} instead",
   "the-property": "the {property}",
@@ -478,12 +504,15 @@ export const PARSER_MESSAGES = {
   "spellx-where-member": "it goes among its template's members, beside the drawing",
   /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
   "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
+  /** `is a file at`:  what kind of file has to be said. */
+  "say-json-file":
+    'A place that\'s one file has to say what\'s in it:  write "is a json file at", or "is a csv file at"',
   /** A tag spellx knows, but can't read yet:  `{tag}` is `<menu>`. */
   "spellx-typed-body":
     'a property with type= is stored, and starts at one value on its tag\'s line:  <property "{name}" type="number">0</>',
   "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
-  /** A note by its old short word, `<property-editor>`, outside a drawing (epic `data` P31, Q27). */
-  "spellx-short-note": "{tag} is now {new}:  the short name is Spell UI's, as <button> is <ui-button>",
+  /** A note by an old word, `<spell-description>`, `<comment>`:  its one tag now, `<note>` (epic `language` P41). */
+  "spellx-old-note": "{tag} is now {new}:  one tag for every note",
 
   ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`

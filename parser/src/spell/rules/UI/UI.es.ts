@@ -96,11 +96,11 @@ UIEs.addRule(Print, {
 UIEs.addRule(
   Wording.specialize({
     ruleName: "shown_dates",
-    meanings: ["short", "long", "abbreviated", "timestamp", "plain", "reader"]
+    meanings: ["short", "long", "abbreviated", "date_and_time", "timestamp", "plain", "reader"]
   }),
   {
     syntax:
-      "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
+      "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(date_and_time:fechas y horas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
   }
 )
 UIEs.addRule(ShowDatesAs, {
@@ -110,6 +110,7 @@ UIEs.addRule(ShowDatesAs, {
       compileAs: "statement",
       tests: [
         ["las fechas se muestran como fechas cortas", 'core.showDatesAs("short")'],
+        ["las fechas se muestran como fechas y horas", 'core.showDatesAs("date and time")'],
         ["las fechas se muestran como las del lector", 'core.showDatesAs("reader")']
       ]
     }

@@ -56,6 +56,12 @@ describe("<for>", () => {
     expect(code).toContain("Scanning...")
   })
 
+  test("page-size says how many at a time", () => {
+    const { code, errors } = compiled(`\t\t<for its films paging="pages" page-size="12" />`)
+    expect(errors).toEqual([])
+    expect(code).toMatch(/pageSize:[^,]*12/)
+  })
+
   test("loading={no}", () => {
     const { code, errors } = compiled(`\t\t<for its films loading={no} />`)
     expect(errors).toEqual([])
@@ -96,6 +102,17 @@ describe("<for>", () => {
     )
     expect(errors).toEqual([])
     expect(code).toContain("failed: () =>")
+  })
+
+  test("<loading> and <empty> in a body are slots too, each drawing what it holds (epic `data` T127)", () => {
+    const { code, errors } = compiled(
+      `\t\t<for film in its films>\n\t\t\t<text>x</text>\n\t\t\t<loading><text>Waiting</text></loading>\n\t\t\t<empty><text>None yet</text></empty>\n\t\t</for>`
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("none: () =>")
+    expect(code).toContain("waiting")
+    expect(code).toContain("Waiting")
+    expect(code).toContain("None yet")
   })
 
   test("for each stays an accepted spelling", () => {

@@ -184,7 +184,7 @@ export class SpellStatement<
     if (!member.declarable) {
       return SpellStatement.refuse(match, language.parserMessage("cant-add-built-in-member", params))
     }
-    if (datatype && datatype !== member.datatype) {
+    if (datatype && datatype !== member.datatype && !member.anyDatatype) {
       const message = language.parserMessage("cant-retype-built-in-member", {
         ...params,
         datatype: language.wordFor(datatype),

@@ -109,11 +109,13 @@ export {
  */
 export function runApp(
   compiled: string,
-  { appRoot, layout, siteHost, ...options }: RunAppOptions
+  { appRoot, layout, siteHost, programVersion, ...options }: RunAppOptions
 ): Promise<string | undefined> {
+  core._programVersion = programVersion
   if (appRoot) core.appRoot = appRoot
   core.appLayout = !!layout
   core.siteHost = siteHost
+  core.projectFolder = options.projectId ? `/spaces/${encodeURI(options.projectId)}` : undefined
   return runCompiled(compiled, options)
 }
 
@@ -166,6 +168,11 @@ export type RunAppOptions = RunCompiledOptions & {
    * - None:  the site keeps its address itself, starting at `/`.
    */
   siteHost?: SiteHost
+  /**
+   * A mark of this program, for a page that fetched it:  a room asks a page left open across a new one to reload (epic `data` T5).
+   * - Left out, as in an editor:  nobody's asked to.
+   */
+  programVersion?: string
 }
 
 /**

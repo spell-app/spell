@@ -31,6 +31,12 @@ export const epicAwayLineVocabulary = {
         "Its Read mark goes under `away:<line>`."
     },
     {
+      name: "state",
+      kind: "string",
+      description:
+        "Which of the section's badges it counts in (`recent`, `progress`, `attention`):  its tick's colour, and what filters it."
+    },
+    {
       name: "working",
       kind: "boolean",
       description:

@@ -47,7 +47,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "show",
       usage: "<page> [--wait] [--timeout 8h]",
-      description: "show the page in this session's VS Code side bar (the Review tab);  --wait:  then wait",
+      description: "show the page in this session's VS Code side bar (the Details tab);  --wait:  then wait",
       example: "epic ask show seo/pick-layout --wait",
       flags: {
         "--wait": "then wait for the answer, as wait does",
@@ -436,7 +436,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       example: "epic worktree remove seo",
       flags: {
         "--force": "git's:  one with changes too",
-        "--branches": "and its branch in each repo, when merged (git branch -d)"
+        "--branches":
+          "and its branch in each repo, when merged (git branch -d;  a merged pull request counts, where main takes only those)"
       }
     },
     {
@@ -699,11 +700,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "show",
       usage: "<file> [--hash <id>] [--review]",
-      description: "show an .html page in the window's side bar:  Epic Docs, or with --review the Review tab",
+      description:
+        "show an .html page in the window's side bar, in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
       example: "epic window show epics/seo/seo.plan.html --review",
       flags: {
         "--hash <id>": "land on that id",
-        "--review": "in the Review tab"
+        "--review": "a page of no kind of its own:  in the Review tab"
       }
     },
     {
@@ -1048,11 +1050,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "open",
       usage: "[<page>] [--vs | --review]",
-      description: "show a page in Chrome, or in VS Code's side bar (--vs;  --review:  its Review tab)",
+      description:
+        "show a page in Chrome, or in VS Code's side bar (--vs), in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
       example: "epic pages open epics/seo/seo.plan.html --review",
       flags: {
         "--vs": "in VS Code's side bar",
-        "--review": "in the side bar's Review tab"
+        "--review": "in the side bar;  a page of no kind of its own:  in its Review tab"
       }
     },
     {
@@ -1241,7 +1244,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   docs: { "--json": "print them as JSON" },
   decisions: { "--json": "print them as JSON" },
   owns: { "--json": "print them as JSON" },
-  open: { "--review": "in the side bar's Review tab" },
+  open: { "--review": "kept for old scripts:  an epic page always shows in the Review tab" },
   lint: { "--no-browser": "skip the browser check", "--links": "fail on its links' problems too" },
 
   // an epic page:  phases
@@ -1271,7 +1274,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--html": "the title is HTML",
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again",
-    "--requested": "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
+    "--requested":
+      "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
@@ -1302,7 +1306,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   add: {
     "--details <html>": "its details",
     "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
-    "--requested": "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
+    "--requested":
+      "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
@@ -1405,12 +1410,24 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--content-repo <name>": "the epic repo's name on GitHub (else asked, or <repo>.epics)",
     "--remote <address>": "use this epic repo, made already",
     "--no-remote": "make no epic repo:  the plans stay on this machine",
-    "--public": "make the epic repo public, without asking (else asked, or private)",
+    "--public":
+      "make the epic repo public, without asking:  anyone who can reach your code host can read the plans (else " +
+      "asked, or private)",
+    "--local":
+      "set up on this machine only:  nothing committed, .gitignore left alone, the config and links in " +
+      ".git/info/exclude;  run again, it stays so",
     "--no-plugin": "don't install the epic plugin for Claude Code",
     "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
+    "--protected-base":
+      "the base branch takes only pull requests:  put the two files on a new branch, epic-setup, and open one",
     "--no-server": "don't start the epic server",
+    "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",
     "--json": "print what it did as JSON"
+  },
+  pr: {
+    "--title <title>": "the request's title (default:  its one commit's subject, else the branch's name)",
+    "--body-file <file>": "the request's description, from a file"
   },
   whoami: {
     "--rename": "keep the name, and write it over your old one wherever it says who wrote something",

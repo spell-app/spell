@@ -24,6 +24,11 @@
  * - `sideEffects`:  more files under `src/` the PUBLISHED package lists as side effects, beyond the checkout's own
  *   list (`core.ts`:  Spell UI's settings install as it loads, so one family alone, `spell/ui/ui-button`, works
  *   in a bundle;  the checkout leaves it out, as it re-chunks the app's build)
+ * - `optionalPeers`:  `dependencies` the tools don't need to run (Monaco, the Ink screens ...), published as optional
+ *   `peerDependencies`, so npm leaves them out (epic `epic-engine` P66);
+ *   a command that reaches one says what to install (`missingAddOnMessage()`)
+ * - `pinnedBy`:  a package the tools import that only another package depends on here, published at the version that
+ *   one pins (`"oxfmt": "vite-plus"`):  so the tools need no Vite+, and the two never disagree
  */
 export type PublishSettings = {
   exclude?: string[]
@@ -33,6 +38,8 @@ export type PublishSettings = {
   exports?: Record<string, string>
   bin?: Record<string, string>
   sideEffects?: string[]
+  optionalPeers?: string[]
+  pinnedBy?: Record<string, string>
 }
 
 /**

@@ -288,7 +288,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   }
 
   /** An item's `value`, else its text. */
-  private static valueOf(item: Element): string {
+  protected static valueOf(item: Element): string {
     const component = (item as E.DOMElement).component as ItemComponent | undefined
     return component?.value ?? item.textContent?.trim() ?? ""
   }
@@ -382,7 +382,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     this.thumb?.update()
     this.titleFit?.update()
     this.readFolded()
+    this.onItemsChanged()
   }
+
+  /** Its items, or which of them is chosen or shown, may have changed:  for a subclass that follows them. */
+  protected onItemsChanged() {}
 
   /** The chosen item's box (in its own shadow root), among the items this menu owns. */
   @E.untracked
@@ -485,20 +489,37 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** The elements in the box's default slot:  its row. */
   @E.untracked
-  private rowElements(): Element[] {
+  protected rowElements(): Element[] {
     return this.box?.querySelector<HTMLSlotElement>(DEFAULT_SLOT)?.assignedElements() ?? []
   }
 
   /** `element`'s component, when it's an item this menu fits:  its own, drawn with a title box, not hidden. */
   private fittedItem(element: Element): ItemComponent | undefined {
-    if (!this.itemsThatAsked.has(element) || (element as HTMLElement).hidden) return undefined
+    if ((element as HTMLElement).hidden) return undefined
+    const item = this.itemOf(element)
+    return item?.titleBox ? item : undefined
+  }
+
+  /** `element`'s component, when it's one of this menu's own items, drawn;  hidden or not. */
+  protected itemOf(element: Element): ItemComponent | undefined {
+    if (!this.itemsThatAsked.has(element)) return undefined
     const item = (element as E.DOMElement).component as ItemComponent | undefined
-    return item?.kind === UIT.ITEM && item.focusTarget && item.titleBox ? item : undefined
+    return item?.kind === UIT.ITEM && item.focusTarget ? item : undefined
+  }
+
+  /** `element` is hidden only to keep the row short, so its overflow menu still lists it. */
+  protected isPutAway(_element: Element): boolean {
+    return false
   }
 
   ////////////////
   // ## The overflow button and its menu
   ////////////////
+
+  /** It draws the overflow menu:  `shrinkable`;  a toolbar's `max-visible` too. */
+  protected get hasOverflowMenu(): boolean {
+    return this.isShrinking
+  }
 
   /** The items the overflow menu holds, a row each, read from the page's items (`readFolded()`). */
   @E.state({ equals: isSameFolded }) accessor folded: readonly FoldedItem[] = []
@@ -516,14 +537,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /** Read the overflow menu's rows from the fitted items, now. */
   @E.untracked
   private readFolded() {
-    if (!this.isShrinking) {
+    if (!this.hasOverflowMenu) {
       this.folded = []
       return
     }
     const rows: FoldedItem[] = []
     for (const element of this.rowElements()) {
-      const item = this.fittedItem(element)
-      if (!item) continue
+      if ((element as HTMLElement).hidden && !this.isPutAway(element)) continue
+      const item = this.itemOf(element)
+      // shrinkable:  an item with no words stays in the row, so it isn't a row here
+      if (!item || (this.isShrinking && !item.titleBox)) continue
       const text = item.titleText ?? ""
       rows.push({
         element,
@@ -555,6 +578,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** The overflow button, while drawn. */
   private overflowButton: HTMLButtonElement | undefined
+
+  /** What the overflow menu hangs from, and hands focus back to. */
+  protected get overflowOpener(): HTMLButtonElement | undefined {
+    return this.overflowButton
+  }
 
   /** The overflow menu's box, while drawn. */
   private overflowPanel: HTMLElement | undefined
@@ -613,7 +641,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   @E.untracked
   closeOverflow(refocus = false) {
     this.overflowMenu.close()
-    if (refocus) this.overflowButton?.focus()
+    if (refocus) this.overflowOpener?.focus()
   }
 
   /** Focus row `index` of the overflow menu, as it opens. */
@@ -623,7 +651,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** The overflow button's keys:  ↓ opens it, as Enter and Space do (a click). */
   @E.untracked
-  private readonly onOverflowButtonKey = (event: KeyboardEvent) => {
+  protected readonly onOverflowButtonKey = (event: KeyboardEvent) => {
     if (event.key !== UIT.Key.arrowDown) return
     event.preventDefault()
     this.openOverflow()
@@ -709,7 +737,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /** The overflow menu:  a popover in the top layer, hanging from its button, a row per folded item. */
   private overflowMenuBox(): JSX.Element {
     return (
-      <Show when={this.isShrinking && !isServer}>
+      <Show when={this.hasOverflowMenu && !isServer}>
         <div
           ref={(element: HTMLElement) => (this.overflowPanel = element)}
           id={this.overflowMenuId}
@@ -1008,7 +1036,7 @@ const ROWS = `:scope > .${ROW}`
 ////////////////
 
 /** What the menu reads from an item's component (`UIItem`, not imported:  another family). */
-type ItemComponent = {
+export type ItemComponent = {
   /** `kind` (its vocabulary getter):  `item`, `header` or `divider`;  only `item`s join the roving set */
   readonly kind?: string
   /** `value` (its vocabulary getter):  what `ui-select` reports for the item (default its text) */

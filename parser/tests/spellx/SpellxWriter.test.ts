@@ -127,7 +127,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     ])
     expect(spellx).toBe(
       [
-        '<spell-view "card">',
+        '<view "card">',
         '\t<property "suit" one-of="clubs, hearts" alias="is a (suit)" />',
         '\t<property "rank">1</>',
         '\t<action "turn it over" description="turns it">',
@@ -148,7 +148,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
       "play a new card"
     ])
     expect(spellx).toBe(
-      ['<spell-thing "card" />', "", "<spell>", "\tto play a card", "\t\tprint 1", "\tplay a new card", "</>", ""].join(
+      ['<thing "card" />', "", "<spell>", "\tto play a card", "\t\tprint 1", "\tplay a new card", "</>", ""].join(
         "\n"
       )
     )
@@ -165,7 +165,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     const spellx = converted("/Box.spell", lines)
     expect(spellx).toBe(
       [
-        '<spell-view "box">',
+        '<view "box">',
         '\t<property "label">"hi"</>',
         "\t<spell>",
         "\t\t- to draw it:",
@@ -202,7 +202,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
       "\t- para voltearla:",
       "\t\timprimir 1"
     ])
-    expect(spellx).toContain('<encanto-vista "carta">')
+    expect(spellx).toContain('<vista "carta">')
     expect(spellx).toContain('\t<propiedad "palo" uno-de="tréboles, corazones" />')
     expect(spellx).toContain('\t<acción "voltearla">')
   })

@@ -1,13 +1,15 @@
 import { P } from "spell/parser/parser"
+import { SX } from "spell/parser/spellx"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/places/FieldNames"
+import type { KeyGoes } from "spell/places/keyGoes"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { PROPORTION } from "spell/util/measures/Dimension"
 
-import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
-import { isSpellsOwnType } from "./PlaceShape"
+import type { CollectionDescription, FieldDescription, PlaceDescription, ServerTakes } from "./ingest.types"
+import { isSpellsOwnType, wordsFor } from "./PlaceShape"
 
 /** What each thing a field can hold is, in a type's line. */
 const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> = {
@@ -22,8 +24,18 @@ const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> =
   "list of numbers": "a list of numbers"
 }
 
+/** A one-file place, as a line says it:  the kind's `file` isn't a word Spell takes by itself (epic `language` P40). */
+const JSON_FILE_WORDS = "json file"
+
 /** A row's id, in a place that isn't told otherwise. */
 const USUAL_ID = "id"
+
+/** The line saying where a key goes. */
+function keyGoesLine(goes: KeyGoes): string {
+  return "header" in goes
+    ? `- its key goes in its "${goes.header}" header`
+    : `- its key goes in the address as "${goes.inAddress}"`
+}
 
 /** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */
 const MOST_AT_A_TIME = 5000
@@ -78,16 +90,17 @@ export type SpellParts = {
  * - Only what's said differently from the usual needs a line, except each collection's address, which shows what's there.
  */
 export function spellPartsFor(
-  { about, collections, checkEverySeconds, mostPerSecond }: PlaceDescription,
+  { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
 ): SpellParts {
-  const { name, kind, address, keySecret, keyIfSet } = about
+  const { name, kind, address, keySecret, keyIfSet, keyGoes } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
   const every = shown.map(([, collection]) => collection)
   const placeLines: SpellLine[] = []
-  if (withKey && keySecret) {
-    const ifSet = keyIfSet ? ", if it's set" : ""
-    placeLines.push({ key: "key", text: `- its key is the secret "${keySecret}"${ifSet}` })
+  // a data folder's, a file's, a room's key is the server's run token:  no line of a program says it
+  if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
+    placeLines.push({ key: "key", text: `- its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
+    if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"
@@ -126,8 +139,11 @@ export function spellPartsFor(
   if (mostPerSecond !== undefined) {
     placeLines.push({ key: "pace", text: `- it takes up to ${mostPerSecond} requests a second` })
   }
+  // what it was seen to do when it was asked, and what it says of itself:  asked of it, not done here
+  if (kind === "web server")
+    placeLines.push(...linesOfWhatItTakes(serverTakes, every, canDo.write, !!nextAt || paging.size > 0))
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
-  const namesLike = isSheet ? undefined : nameExampleOf(every)
+  const namesLike = kind === "web server" || kind === "graphql server" ? nameExampleOf(every) : undefined
   if (namesLike) placeLines.push({ key: "names", text: `- it writes names like "${namesLike}"` })
   // each collection its own search, when they don't share one:  GitHub's users and repositories
   const searchedApart = isSearchedApart(every)
@@ -185,8 +201,17 @@ export function spellPartsFor(
       placeLines.push({ key: `under:${collection}:${list}`, text: line })
     }
   }
+  // a server's own time fields are Spell's two times, so a thing read from one isn't stamped twice (epic `data` T57)
+  if (!isSheet) {
+    for (const [collection, description] of shown) {
+      for (const [time, field] of timeFieldsOf(description)) {
+        const text = `- ${articled(description.type)}'s ${time} is its "${field}"`
+        placeLines.push({ key: `time:${collection}:${time}`, text })
+      }
+    }
+  }
   return {
-    header: `${name} is ${articled(kind)} at "${address}":`,
+    header: `${name} is ${articled(kind === "file" ? JSON_FILE_WORDS : kind)} at "${address}":`,
     placeLines,
     types: [
       ...shown.map(([collection, description]) => typeLines(collection, description, name, collections)),
@@ -194,6 +219,86 @@ export function spellPartsFor(
       ...namedLinkTypes(shown, collections, name)
     ]
   }
+}
+
+/** The kinds whose program holds a key's name:  each other's key is its server's run token. */
+export const KINDS_WITH_KEY_LINES: ReadonlySet<string> = new Set(["web server", "graphql server", "airtable"])
+
+/** What a server calls Spell's two times, by its words, the usual ones first (epic `data` T57). */
+const TIME_WORDS: ReadonlyArray<readonly [string, readonly string[]]> = [
+  ["created", ["created at", "created time", "created on", "date created", "creation date", "inserted at"]],
+  [
+    "modified",
+    [
+      "updated at",
+      "updated time",
+      "updated on",
+      "updated",
+      "modified at",
+      "modified on",
+      "date modified",
+      "last modified",
+      "last modified time",
+      "last updated",
+      "edited",
+      "edited at"
+    ]
+  ]
+]
+
+/**
+ * Each of Spell's two times `description` holds in a date field of its own by a usual name:  the time, and what a line calls that field.
+ * - A field already called `created` or `modified` needs no line.
+ * - Only a field that's really a date:  a `created` text says nothing of when.
+ * - In its words, `"created at"`, which find `created_at` and `createdAt` alike (`FieldNames`, epic `data` J237).
+ *   - One word, or words two of the row's fields share:  the server's spelling, the only thing that says which.
+ */
+function timeFieldsOf({ fields }: CollectionDescription): Array<[string, string]> {
+  const dates = Object.entries(fields).filter(([, { type, leftOut }]) => type === "date" && !leftOut)
+  const wordsOfEach = Object.keys(fields).map(wordsFor)
+  return TIME_WORDS.flatMap(([time, words]) => {
+    if (time in fields) return []
+    const found = words.flatMap((each) => dates.filter(([name]) => wordsFor(name) === each)).at(0)
+    if (!found) return []
+    const inWords = wordsFor(found[0])
+    const isOnlyOne = wordsOfEach.filter((each) => each === inWords).length === 1
+    return [[time, isOnlyOne && inWords.includes(" ") ? inWords : found[0]] as [string, string]]
+  })
+}
+
+/**
+ * The lines saying what a web server was seen to do when it was asked (epic `data` T162), and that it's read only:
+ * - `its next page is asked for with "limit" and "offset"`, for a list that says nothing of paging
+ * - `it filters by cuisine and rating`, `it sorts by title with "_sort"`, `it gives only the fields named in "fields"`
+ * - `it is read only`, for one that says it takes only `GET`s
+ * - `hasPaging`:  it says its next page already, so a position would be asking twice
+ */
+function linesOfWhatItTakes(
+  takes: ServerTakes | undefined,
+  every: readonly CollectionDescription[],
+  write: string,
+  hasPaging: boolean
+): SpellLine[] {
+  const lines: SpellLine[] = []
+  const { filters, sorts, sortedWith, fieldsNamedIn, pagesWith } = takes ?? {}
+  // each is one word in a line:  two words are joined, `cook-time`
+  const wordsOf = (names: readonly string[]) => {
+    const named = every.flatMap(({ fields }) => names.flatMap((name) => fields[name]?.words ?? []))
+    return wordsJoined([...new Set(named)].map((words) => words.replace(/ /g, "-")))
+  }
+  if (pagesWith && !hasPaging) {
+    lines.push({
+      key: "pages",
+      text: `- its next page is asked for with "${pagesWith.limit}" and "${pagesWith.offset}"`
+    })
+  }
+  if (filters) lines.push({ key: "filters", text: `- it filters by ${wordsOf(filters)}` })
+  if (sorts) {
+    lines.push({ key: "sorts", text: `- it sorts by ${wordsOf(sorts)}${sortedWith ? ` with "${sortedWith}"` : ""}` })
+  }
+  if (fieldsNamedIn) lines.push({ key: "fields", text: `- it gives only the fields named in "${fieldsNamedIn}"` })
+  if (/read only/.test(write)) lines.push({ key: "read only", text: "- it is read only" })
+  return lines
 }
 
 /** `words` as a list in a line:  `latitude and longitude`, `a, b and c`. */
@@ -366,6 +471,7 @@ function namedLinkTypes(
 
 /**
  * What the source calls a field, when its words don't find it:  `, stored as "avg_ht"` on its own line.
+ * - Its words finding it is the rule for a line's named field too:  `its "created at"` finds `created_at` (`FieldNames`).
  * - `hair_color`, `hairColor` and `Hair Color` all find `its "hair color"` by its words (`FieldNames`):  nothing to say.
  */
 function storedAsFor(field: string, { words }: FieldDescription): string {
@@ -591,6 +697,11 @@ export function mergedSpell(
     merge.couldnt.push(`The place's line isn't as it was written, so nothing under it was changed:  ${before.header}`)
     return merge
   }
+  // it moved:  `spell place update --address`
+  if (after.header !== before.header) {
+    lines[placeAt] = after.header
+    merge.changed.push(`Moved:  ${after.header}`)
+  }
   // the place's lines
   mergeBlock({ lines, blockAt: placeAt, before: before.placeLines, after: after.placeLines, merge, own, usesOf })
   // each type, and a new one at the end
@@ -742,7 +853,7 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf }: Block
 
 /** The words a line is about:  a property's, or what a source's name maps to. */
 function wordsIn(line: string): string | undefined {
-  return /^- its "([^"]+)" is /.exec(line)?.[1] ?? /^- an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
+  return /^- (?:its|su) "([^"]+)" (?:is|es) /.exec(line)?.[1] ?? /^- an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
 }
 
 /** Where `text` is, in the block starting here:  `-1` when it isn't. */
@@ -816,4 +927,40 @@ function searchAddressOf(description: CollectionDescription): string | undefined
 /** `words`, more than one:  `name` => `names`, `class` => `classes`. */
 function pluralWords(words: string): string {
   return /(?:s|x|z|ch|sh)$/.test(words) ? `${words}es` : `${words}s`
+}
+
+/**
+ * Tag-shaped `text` as the plain Spell a merge reads (`mergedSpell()`), its lines as the tool writes them
+ * (epic `language` P40):
+ * - `SX.CodeSpellWriter`'s plain Spell, its `:` against the words, as written
+ * - a type with nothing in it, with the `:` it was written with
+ * - a description it put on a line of its own, `// an address` above `- its "url" is text`, back on the line's end,
+ *   where it was written, when that's one of the lines in `written`
+ * - `proseLines`:  which of its lines are prose between tags, for the way back (`SX.SpellxWriter`)
+ */
+export function plainSpellOf(
+  text: string,
+  path: string,
+  written: Iterable<string>
+): { text: string; proseLines: Set<number> } {
+  const known = new Set(written)
+  const plain = SX.CodeSpellWriter.writeWithProse(text, { path })
+  const lines = plain.text.split("\n").map((line) => line.replace(/ :$/, ":"))
+  const out: string[] = []
+  const prose = new Set<number>()
+  for (let at = 0; at < lines.length; at++) {
+    const comment = lines[at]!.match(/^(\t*)\/\/ (.*)$/)
+    const next = lines[at + 1]
+    const joined = comment && next?.startsWith(comment[1]!) ? `${next.trim()}  // ${comment[2]}` : undefined
+    if (joined && known.has(joined)) {
+      out.push(`${comment![1]}${joined}`)
+      at++
+      continue
+    }
+    if (plain.proseLines.has(at)) prose.add(out.length)
+    // a type with nothing in it yet, written with its `:`
+    const line = lines[at]!
+    out.push(!known.has(line.trim()) && known.has(`${line.trim()}:`) ? `${line}:` : line)
+  }
+  return { text: out.join("\n"), proseLines: prose }
 }

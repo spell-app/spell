@@ -61,6 +61,8 @@ export class ScopeVariable {
    * - See spell's `AssignmentStatement`.
    */
   declare autoDeclared: boolean | undefined
+  /** A saved type's `created` or `modified`, given by its place's line, not written:  a line that declares it takes it over. */
+  declare isSavedTime: boolean | undefined
   /**
    * `true` for the member naming the ONE list of a family holding an item,
    * e.g. `pile` on `Card` for `a card belongs to one pile`.
@@ -87,6 +89,14 @@ export class ScopeVariable {
    *   A root's constants are every program's, so `arriba` alone stays `arriba`.
    */
   declare valueOutputs: Record<string, string> | undefined
+  /**
+   * The words a property's value can be, however it got a list of them (epic `language` P39):
+   * a built-in table's, a built-in template's, or a project's own `one of`.
+   * - As said in its language:  Spanish's `candado` lists `bloqueado`;  what each compiles to is `valueOutputs`.
+   * - A subtype's own line about it (`- its lock is locked`) keeps the list on its record too.
+   * - SEE:  `P.TypeScope.propertiesListing()`.
+   */
+  declare listedValues: ReadonlyArray<string | number> | undefined
   /**
    * What a number property MEASURES, and in which unit:
    * `{ dimension: "Length", unit: "centimeter" }` for `its "height" is a length in cm` (epic `language` P23).
@@ -149,12 +159,16 @@ export type ScopeVariableProps = {
   asWritten?: string
   /** See `ScopeVariable.autoDeclared`. */
   autoDeclared?: boolean
+  /** See `ScopeVariable.isSavedTime`. */
+  isSavedTime?: boolean
   /** See `ScopeVariable.exclusive`. */
   exclusive?: boolean
   /** See `ScopeVariable.readAs`. */
   readAs?: string
   /** See `ScopeVariable.valueOutputs`. */
   valueOutputs?: Record<string, string>
+  /** See `ScopeVariable.listedValues`. */
+  listedValues?: ReadonlyArray<string | number>
   /** See `ScopeVariable.measure`. */
   measure?: P.Measure
   /** See `ScopeVariable.rules`. */
