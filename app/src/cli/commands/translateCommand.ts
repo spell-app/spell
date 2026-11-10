@@ -213,7 +213,7 @@ async function importsOf(project: SP.SpellProject, lang: string): Promise<Import
 async function uiVocabulary(lang: string): Promise<UIVocabulary | undefined> {
   let dictionaryFile: string
   try {
-    dictionaryFile = fileURLToPath(import.meta.resolve(`spell-ui/components/components.${lang}`))
+    dictionaryFile = fileURLToPath(import.meta.resolve(`spell/ui/components/components.${lang}.ts`))
   } catch {
     return undefined
   }
