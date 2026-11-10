@@ -23,7 +23,7 @@ describe("SpellLanguageService, spellx", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-"))
   const folder = resolve(dir, "Tiles")
   mkdirSync(folder)
-  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8")
+  const tileText = shortNotes(readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8"))
   writeFileSync(resolve(folder, "FlipTile.spellml"), tileText)
   writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`)
   const tileUri = pathToFileURL(resolve(folder, "FlipTile.spellml")).href
@@ -89,8 +89,8 @@ describe("SpellLanguageService, spellx", () => {
     expect(tokens).toContain(`4:11 "\\"side\\"" property declaration`)
     expect(tokens).toContain(`4:18 "one-of" property`)
     expect(tokens).toContain(`6:1 "/>" keyword`)
-    expect(tokens).toContain(`11:2 "<spell-description>" keyword`)
-    expect(tokens).toContain(`11:21 "Turns it over." comment`)
+    expect(tokens).toContain(`11:2 "<note>" keyword`)
+    expect(tokens).toContain(`11:8 "Turns it over." comment`)
     expect(tokens).toContain(`16:1 "</action>" keyword`)
     expect(tokens).toContain(`30:1 "<on" keyword`)
     expect(tokens).toContain(`31:0 "</spell-view>" keyword`)
@@ -246,7 +246,7 @@ describe("SpellLanguageService, a spellx file its project imports", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-import-"))
   const folder = resolve(dir, "Tiles")
   mkdirSync(folder)
-  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8")
+  const tileText = shortNotes(readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8"))
   writeFileSync(resolve(folder, "FlipTile.spellml"), tileText)
   writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`)
   const uri = pathToFileURL(resolve(folder, "FlipTile.spellml")).href
@@ -339,3 +339,11 @@ describe("SpellLanguageService, Spanish spellx", () => {
     expect(fixed.every((word) => /[áéíóú]/.test(word))).toBe(true)
   })
 })
+
+/**
+ * `text` with its notes written as Spell writes them now, `<note>` (epic `language` P41):
+ * the pair fixtures keep the old `<spell-description>`, which reads with a warning naming `<note>`.
+ */
+function shortNotes(text: string): string {
+  return text.replace(/<(\/?)spell-description>/g, "<$1note>")
+}

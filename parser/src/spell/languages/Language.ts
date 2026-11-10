@@ -811,7 +811,6 @@ export function spellxTemplateFlag(word: SpellxTemplateWord | undefined): string
   return typeof word === "object" ? word.flag : undefined
 }
 
-
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind =
   | "property"

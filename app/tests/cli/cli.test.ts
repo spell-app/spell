@@ -945,7 +945,7 @@ describe("spell translate (epic spanish P24-P26)", () => {
     expect(stdout).toMatch(/shape:  (\d+) of \1 statements/)
     expect(status).toBe(0)
     expect(readdirSync(out).filter((name) => /spell(ml)?$/.test(name))).toEqual(["Tags.es.spell"])
-    expect(readFileSync(resolve(out, "Tags.es.spell"), "utf8")).toContain('<encanto-cosa "carta">')
+    expect(readFileSync(resolve(out, "Tags.es.spell"), "utf8")).toContain('<cosa "carta">')
     expect(JSON.parse(readFileSync(resolve(out, SP.PROJECT_FILE), "utf8")).imports).toEqual([
       { path: "/Tags.es.spell", active: true }
     ])
@@ -1058,8 +1058,8 @@ describe("spell spellx convert", () => {
     const folder = tempProject("Deal", 'a "card" is a thing where:\n\t- its "rank" is 1\n')
     const dryRun = spell(["spellx", "convert", "--dry-run", "."], folder)
     expect(dryRun.status).toBe(0)
-    expect(dryRun.stdout).toBe('// Deal.spell\n<spell-thing "card">\n\t<property "rank">1</>\n</spell-thing>\n')
-    expect(readFileSync(resolve(folder, "Deal.spell"), "utf8")).not.toContain("<spell-thing")
+    expect(dryRun.stdout).toBe('// Deal.spell\n<thing "card">\n\t<property "rank">1</>\n</thing>\n')
+    expect(readFileSync(resolve(folder, "Deal.spell"), "utf8")).not.toContain("<thing")
 
     expect(spell(["spellx", "convert", "."], folder).stdout).toBe("Deal.spell\n")
     expect(readFileSync(resolve(folder, "Deal.spell"), "utf8")).toContain('<property "rank">1</>')

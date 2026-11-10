@@ -125,16 +125,9 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
       "play a new card"
     ])
     expect(spellx).toBe(
-      [
-        '<thing "card" />',
-        "",
-        "<spell>",
-        "\tto play a card",
-        "\t\tprint 1",
-        "\tplay a new card",
-        "</spell>",
-        ""
-      ].join("\n")
+      ['<thing "card" />', "", "<spell>", "\tto play a card", "\t\tprint 1", "\tplay a new card", "</spell>", ""].join(
+        "\n"
+      )
     )
   })
 

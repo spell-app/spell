@@ -68,8 +68,12 @@ type Program = {
 /** The built-in examples:  what people run, in the editor. */
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
-/** The lines a program starts with, up to its first type:  in tags, its first template (epic `language` P40). */
-const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) "|^<(?:spell|encanto)-)/m
+/**
+ * The lines a program starts with, up to its first type:  in tags, its first template (epic `language` P40),
+ * by its short word (epic `language` P41) or its old prefixed one.
+ */
+const PLACE_LINES =
+  /^[\s\S]*?(?=^(?:a|an|una) "|^<(?:(?:spell|encanto)-)?(?:view|thing|page|app|extend|vista|cosa|página|aplicación|extender)\b)/m
 
 /** `program` with its place's lines replaced;  in a file in tags, as a `<spell>` block. */
 function withPlace(program: Program, lines: string): Program {
