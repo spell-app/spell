@@ -149,7 +149,7 @@ export const spanishWords: SP.LanguageWords = {
 
   /**
    * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
-   * - Spell is `encanto` in Spanish (Q36):  `<encanto-vista>`.
+   * - Spell is `encanto` in Spanish (Q36):  `<vista>`.
    * - With their accents (Q49);  each also without, as a person may type it, which the editor upgrades.
    * - A template's short name is `alias` here, as in Spanish spell's `una cuenta bancaria alias cuenta`;
    *   what English calls an alias is a `frase` (J7).
@@ -171,7 +171,7 @@ export const spanishWords: SP.LanguageWords = {
       "plantilla-de-pagina": "page template",
       "plantilla-de-aplicación": "app template",
       "plantilla-de-aplicacion": "app template",
-      // una página que dibuja su cuerpo:  `<encanto-página cuaderno>` (épica `notebook` P1)
+      // una página que dibuja su cuerpo:  `<página cuaderno>` (épica `notebook` P1)
       cuaderno: { kind: "page", flag: "notebook" },
       // páginas entre las que la gente se mueve por su dirección (épica `mockup` P1)
       sitio: "site"
@@ -187,7 +187,7 @@ export const spanishWords: SP.LanguageWords = {
       menú: "menu",
       menu: "menu",
       grupo: "group",
-      // las partes de un sitio (épica `mockup` P1):  solo en un `<encanto-sitio>`
+      // las partes de un sitio (épica `mockup` P1):  solo en un `<sitio>`
       página: "page",
       pagina: "page",
       diálogo: "dialog",
@@ -202,7 +202,7 @@ export const spanishWords: SP.LanguageWords = {
       descripcion: "description",
       comentario: "comment",
       "editor-de-propiedades": "property editor",
-      // las historias de una página (épica `mockup` P6):  `<encanto-historias>`
+      // las historias de una página (épica `mockup` P6):  `<historias>`
       historias: "stories"
     },
     handlers: {

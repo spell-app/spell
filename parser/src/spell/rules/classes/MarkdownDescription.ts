@@ -45,7 +45,7 @@ const STORY_TAGS = /<(story|historia)\b[^>]*>[^]*?<\/\1>/g
  *
  *   - One tag a story (epic `mockup` P17):  its words, then two blank lines and its description, if it has one.
  *   - Spanish:  `<historia "H1" hecha>`.  Anything else in the block is refused, saying what to write.
- *   - spellx writes the block `<stories>`, or `<spell-stories>`, its twin this block.
+ *   - spellx writes the block `<stories>`, its twin this block.
  */
 export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionData> {
   @proto static alias = "statement"

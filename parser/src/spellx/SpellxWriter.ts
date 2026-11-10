@@ -9,13 +9,13 @@ import { SP } from "spell/parser/spell"
  * - Rule by rule, from the file's PARSE:  each line's statement says what it declares (`create_type`,
  *   `define_property_has`, `to_do_something` ...), and the language's twin words say how it's worded
  *   (`SP.SpellxTwinWords`), so a Spanish file is written in Spanish spellx too.
- *   - A template:  `<spell-view "card" template="two sided view">`, its kind by what it IS (a page, an app, a view,
+ *   - A template:  `<view "card" template="two sided view">`, its kind by what it IS (a page, an app, a view,
  *     a thing), its members inside it
  *   - a member:  `<property>`, `<alias>`, `<action>`, `<draw>`, `<event>`, `<test>`, `<on ...>` ...;
  *     a property's own aliases as its `alias=`, an action's details as its attributes, a lone comment line above a
  *     member as its `description=`
  *   - a body:  its lines as written, at the same depth
- *   - a page that draws prose or examples:  `<spell-page "x" notebook>`, its drawing its own body again
+ *   - a page that draws prose or examples:  `<page "x" notebook>`, its drawing its own body again
  *     (`pageDrawing()`;  epic `notebook` P6, T2):
  *     its `<markdown>` blocks as loose prose, its sections as `##` headings
  * - What has no tag (a file's functions, tests and starting code, a member written another way):
@@ -261,7 +261,7 @@ export class SpellxWriter {
     const attributes: string[] = []
     if (aka) attributes.push(this.attribute("aka", unquote(aka)!))
     if (superPhrase !== plainSuper) attributes.push(this.attribute("template", superPhrase))
-    // a page drawing prose and examples, as `<spell-page "x" notebook>` reads as:
+    // a page drawing prose and examples, as `<page "x" notebook>` reads as:
     // its flag back (epic `notebook` P1), and its drawing back as its own body (`pageDrawing()`, P6)
     const drawsBody = kind === "page" && !!body && this.drawsProseOrExamples(body)
     if (drawsBody) attributes.push(keyFor(this.words.attributes, SP.PAGE_DRAWS_BODY_FLAG))
@@ -414,7 +414,7 @@ export class SpellxWriter {
 
   /**
    * Does `body`, a page's, draw a `<markdown>` block or an `<example>`, so it's written with its flag again?
-   * - That's what a page that draws its body reads as (`<spell-page "x" notebook>`, epic `notebook` P1).
+   * - That's what a page that draws its body reads as (`<page "x" notebook>`, epic `notebook` P1).
    */
   private drawsProseOrExamples(body: P.BlockToken): boolean {
     return this.someMatch([body], (node) => PAGE_BODY_RULES.has(node.rule.name ?? ""))

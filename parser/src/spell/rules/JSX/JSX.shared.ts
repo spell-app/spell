@@ -157,6 +157,6 @@ export const MARKDOWN_TAG = "markdown"
 
 /**
  * The tag of a page's STORIES (epic `mockup` P6):  what the page must let people do, `<story>` tags, in its outline.
- * - `markdown_description` reads it, as the type's `static stories`;  spellx writes it `<spell-stories>`.
+ * - `markdown_description` reads it, as the type's `static stories`;  spellx writes it `<stories>`.
  */
 export const STORIES_TAG = "stories"

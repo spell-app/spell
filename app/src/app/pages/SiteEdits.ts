@@ -385,7 +385,7 @@ export class SiteEdits {
   }
 }
 
-/** A closing line at the file's left edge:  the end of a top-level tag, `</>` or `</site>` (or `</spell-site>`). */
+/** A closing line at the file's left edge:  the end of a top-level tag, `</>` or `</site>` (or its old spelling, `</spell-site>`). */
 const CLOSING_TAG = /^<\/(?:(?:(?:spell|encanto)-)?(?:site|sitio))?>/m
 
 /**

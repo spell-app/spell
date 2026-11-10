@@ -59,7 +59,7 @@ export class SourceEdits {
   /**
    * The tag opening at `opening` in `text`, read as written:  its name, attributes and where each one is.
    * - Reads both shapes alike, and any language:  it only looks at the shape of a tag.
-   * - A template tag's quoted name, `<spell-page "counter notebook">`, is its name's, never its attributes:
+   * - A template tag's quoted name, `<page "counter notebook">`, is its name's, never its attributes:
    *   a new attribute goes after it (`namedEnd`).
    * - `undefined` when no tag opens there.
    */
@@ -344,7 +344,7 @@ export type WrittenTag = {
   start: number
   /** offset just past its name */
   nameEnd: number
-  /** offset just past its name and its quoted name, if it has one (`<spell-page "x"`):  where a new attribute goes */
+  /** offset just past its name and its quoted name, if it has one (`<page "x"`):  where a new attribute goes */
   namedEnd: number
   /** offset just past its `>` */
   end: number

@@ -78,8 +78,11 @@ async function sourceFiles(session: CLI.CliSession, project: SP.SpellProject): P
   const spell = project.files.filter(
     (file): file is SP.SpellFile => file instanceof SP.SpellFile && SP.isSpellSourceName(file.path)
   )
-  const tagFiles = spell.filter((file) => file.form === "spellx")
   await session.parse(project)
+  // every file's text loaded first, a file turned off in the project too:  its shape is what its text says
+  // (`SP.formOfText()`, epic `language` P40), so unloaded it would read as plain
+  await Promise.all(spell.map((file) => file.load()))
+  const tagFiles = spell.filter((file) => file.form === "spellx")
   if (!tagFiles.length) return parsedFiles(project, spell)
 
   const scratch = mkdtempSync(join(tmpdir(), "spell-translate-"))

@@ -5,7 +5,7 @@ import { SiteEdits } from "./SiteEdits"
  * A page's STORIES, read from its file and written back (epic `mockup` P6, P17):  what the page must let people do,
  * kept with it for good, through the mockup and into the real site.
  * - Written in the page's own declaration, first in its body, one `<story>` tag each:
- *   - spellx:  `<stories>` ... `</stories>`, in Spanish `<encanto-historias>` ... `</>`
+ *   - spellx:  `<stories>` ... `</stories>`, in Spanish `<historias>` ... `</>`
  *   - code spell:  `<stories>` ... `</stories>`
  *   - both compile to the page's `static stories`;  the running page draws nothing for them.
  * - A story is one piece of text:  its words, then two blank lines and its description, if it has one.
