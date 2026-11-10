@@ -15,51 +15,51 @@
         "placeType": "OrgEvent",
         "collection": "events"
       },
-      "defined": "/OrgEvents.api.spell:512-740"
+      "defined": "/OrgEvents.api.spell:530-805"
     },
     {
       "property": "name",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:564-582"
+      "defined": "/OrgEvents.api.spell:599-620"
     },
     {
       "property": "organizers",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:586-610"
+      "defined": "/OrgEvents.api.spell:625-652"
     },
     {
       "property": "proposed",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:614-636"
+      "defined": "/OrgEvents.api.spell:657-682"
     },
     {
       "property": "stage",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:640-659"
+      "defined": "/OrgEvents.api.spell:687-709"
     },
     {
       "property": "stage_name",
       "asWritten": "stage name",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:663-687"
+      "defined": "/OrgEvents.api.spell:714-741"
     },
     {
       "property": "onward",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:691-711"
+      "defined": "/OrgEvents.api.spell:746-769"
     },
     {
       "property": "onward_name",
       "asWritten": "onward name",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:715-740"
+      "defined": "/OrgEvents.api.spell:774-802"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -82,27 +82,27 @@
         "placeType": "OrgEvent",
         "collection": "event_stages"
       },
-      "defined": "/OrgEvents.api.spell:742-870"
+      "defined": "/OrgEvents.api.spell:822-981"
     },
     {
       "property": "name",
       "of": "EventStage",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:800-818"
+      "defined": "/OrgEvents.api.spell:897-918"
     },
     {
       "property": "moves_to",
       "asWritten": "moves to",
       "of": "EventStage",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:822-844"
+      "defined": "/OrgEvents.api.spell:923-948"
     },
     {
       "property": "moved_by",
       "asWritten": "moved by",
       "of": "EventStage",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:848-870"
+      "defined": "/OrgEvents.api.spell:953-978"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -128,7 +128,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/OrgEvents.api.spell:429-510"
+      "defined": "/OrgEvents.api.spell:443-513"
     },
     {
       "type": "EventsPage",

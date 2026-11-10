@@ -15,25 +15,25 @@
         "placeType": "FamilyCookbook",
         "collection": "recipes"
       },
-      "defined": "/RecipeBox.api.spell:1105-1234"
+      "defined": "/RecipeBox.api.spell:1095-1261"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/RecipeBox.api.spell:1162-1181"
+      "defined": "/RecipeBox.api.spell:1170-1192"
     },
     {
       "property": "servings",
       "of": "Recipe",
       "datatype": "number",
-      "defined": "/RecipeBox.api.spell:1185-1211"
+      "defined": "/RecipeBox.api.spell:1197-1230"
     },
     {
       "property": "notes",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/RecipeBox.api.spell:1215-1234"
+      "defined": "/RecipeBox.api.spell:1236-1258"
     },
     {
       "syntax": "edit {thisArg:expression}",
@@ -69,7 +69,7 @@
         "name": "family_cookbook",
         "kind": "database on this device"
       },
-      "defined": "/RecipeBox.api.spell:1059-1103"
+      "defined": "/RecipeBox.api.spell:1074-1089"
     },
     {
       "type": "RecipeEditor",

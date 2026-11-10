@@ -20,25 +20,25 @@
         "placeType": "SignUpSheet",
         "collection": "volunteers"
       },
-      "defined": "/SignUpSheet.api.spell:1315-1442"
+      "defined": "/SignUpSheet.api.spell:1355-1514"
     },
     {
       "property": "person",
       "of": "Volunteer",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1377-1397"
+      "defined": "/SignUpSheet.api.spell:1435-1458"
     },
     {
       "property": "shift",
       "of": "Volunteer",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1401-1420"
+      "defined": "/SignUpSheet.api.spell:1463-1485"
     },
     {
       "property": "note",
       "of": "Volunteer",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1424-1442"
+      "defined": "/SignUpSheet.api.spell:1490-1511"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -61,25 +61,25 @@
         "placeType": "SignUpSheet",
         "collection": "attendees"
       },
-      "defined": "/SignUpSheet.api.spell:1618-1759"
+      "defined": "/SignUpSheet.api.spell:1705-1882"
     },
     {
       "property": "person",
       "of": "Attendee",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1680-1700"
+      "defined": "/SignUpSheet.api.spell:1784-1807"
     },
     {
       "property": "standing",
       "of": "Attendee",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1704-1726"
+      "defined": "/SignUpSheet.api.spell:1812-1837"
     },
     {
       "property": "invitations",
       "of": "Attendee",
       "datatype": "number",
-      "defined": "/SignUpSheet.api.spell:1730-1759"
+      "defined": "/SignUpSheet.api.spell:1842-1878"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -102,31 +102,31 @@
         "placeType": "SignUpSheet",
         "collection": "tickets"
       },
-      "defined": "/SignUpSheet.api.spell:1832-1981"
+      "defined": "/SignUpSheet.api.spell:1970-2155"
     },
     {
       "property": "person",
       "of": "Ticket",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1891-1911"
+      "defined": "/SignUpSheet.api.spell:2047-2070"
     },
     {
       "property": "guest",
       "of": "Ticket",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1915-1934"
+      "defined": "/SignUpSheet.api.spell:2075-2097"
     },
     {
       "property": "event",
       "of": "Ticket",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1938-1957"
+      "defined": "/SignUpSheet.api.spell:2102-2124"
     },
     {
       "property": "status",
       "of": "Ticket",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:1961-1981"
+      "defined": "/SignUpSheet.api.spell:2129-2152"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -149,43 +149,43 @@
         "placeType": "MyInbox",
         "collection": "messages"
       },
-      "defined": "/SignUpSheet.api.spell:2242-2430"
+      "defined": "/SignUpSheet.api.spell:2449-2681"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2293-2311"
+      "defined": "/SignUpSheet.api.spell:2518-2539"
     },
     {
       "property": "recipients",
       "of": "Message",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2315-2339"
+      "defined": "/SignUpSheet.api.spell:2544-2571"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2343-2363"
+      "defined": "/SignUpSheet.api.spell:2576-2599"
     },
     {
       "property": "page",
       "of": "Message",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2367-2385"
+      "defined": "/SignUpSheet.api.spell:2604-2625"
     },
     {
       "property": "title",
       "of": "Message",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2389-2408"
+      "defined": "/SignUpSheet.api.spell:2630-2652"
     },
     {
       "property": "line",
       "of": "Message",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2412-2430"
+      "defined": "/SignUpSheet.api.spell:2657-2678"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -208,19 +208,19 @@
         "placeType": "PublishedSheet",
         "collection": "published_volunteers"
       },
-      "defined": "/SignUpSheet.api.spell:2432-2549"
+      "defined": "/SignUpSheet.api.spell:2698-2843"
     },
     {
       "property": "person",
       "of": "PublishedVolunteer",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2506-2526"
+      "defined": "/SignUpSheet.api.spell:2790-2813"
     },
     {
       "property": "shift",
       "of": "PublishedVolunteer",
       "datatype": "text",
-      "defined": "/SignUpSheet.api.spell:2530-2549"
+      "defined": "/SignUpSheet.api.spell:2818-2840"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -246,7 +246,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/SignUpSheet.api.spell:684-1028"
+      "defined": "/SignUpSheet.api.spell:698-1031"
     },
     {
       "type": "PublishedSheet",
@@ -263,7 +263,7 @@
           }
         }
       },
-      "defined": "/SignUpSheet.api.spell:1117-1313"
+      "defined": "/SignUpSheet.api.spell:1144-1344"
     },
     {
       "type": "MyInbox",
@@ -276,7 +276,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/SignUpSheet.api.spell:2072-2144"
+      "defined": "/SignUpSheet.api.spell:2275-2336"
     },
     {
       "type": "SignUpPage",

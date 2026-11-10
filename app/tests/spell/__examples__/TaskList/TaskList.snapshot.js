@@ -141,18 +141,18 @@ export class BrowserTask extends Task {
   }
 
   // - it lives in browser storage
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 298, end: 325 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in browser storage
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 298, end: 325 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class BrowserKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 405, end: 443 }, readsFrom: ["browser_storage"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 478, end: 519 }, readsFrom: ["browser_storage"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(BrowserTask)
   }) }
@@ -191,18 +191,18 @@ export class ServerTask extends Task {
   }
 
   // - it lives in task files
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 466, end: 488 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task files
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 466, end: 488 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class ServerKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 540, end: 577 }, readsFrom: ["task_files"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 639, end: 679 }, readsFrom: ["task_files"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(ServerTask)
   }) }
@@ -247,18 +247,18 @@ export class SheetTask extends Task {
   }
 
   // - it lives in task sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 615, end: 637 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 615, end: 637 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class SheetKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 693, end: 729 }, readsFrom: ["task_sheet"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 786, end: 825 }, readsFrom: ["task_sheet"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SheetTask)
   }) }
@@ -300,7 +300,7 @@ export class SkyTask extends Task {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a sky task has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 563, end: 594 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 642, end: 673 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
@@ -311,19 +311,19 @@ export class SkyTask extends Task {
   }
 
   // - it lives in task sky
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 454, end: 474 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task sky
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 454, end: 474 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class SkyKeeper extends TaskKeeper {
   /** only your own:  everyone's tasks are in their own accounts */
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 695, end: 757 }, readsFrom: ["task_sky"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 735, end: 873 }, readsFrom: ["task_sky"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SkyTask, { filter: { owner: core.currentPerson().id } })
   }) }

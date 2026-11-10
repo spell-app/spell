@@ -9,15 +9,15 @@ core.heading("Reviews:  kept on this device")
 
 export class Review extends Thing {
   // - its "film title" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 321, end: 345 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 331, end: 358 } })
   accessor filmTitle!: string
 
   // - its "stars" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 349, end: 372 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 363, end: 393 } })
   accessor stars!: number
 
   // - its "words" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 376, end: 395 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 399, end: 421 } })
   accessor words!: string
 
   static savedIn = {
@@ -27,11 +27,11 @@ export class Review extends Thing {
   }
 
   // - it lives in galaxy reviews
-  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 293, end: 319 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in galaxy reviews
-  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 291, end: 317 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 293, end: 319 } })
   accessor modified!: any /* spell: type unknown */
 }
 

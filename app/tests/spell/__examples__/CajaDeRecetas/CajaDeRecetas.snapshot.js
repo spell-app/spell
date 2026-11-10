@@ -7,17 +7,17 @@ core.heading("Caja de recetas:  dónde se guardan las recetas")
 
 export class Receta extends Thing {
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 840, end: 860 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 854, end: 879 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   // sus "porciones" es un número
-  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 864, end: 892 } }) }
+  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 898, end: 926 } }) }
   get porciones() { return this.getProp("porciones") }
   set porciones(value) { this.setProp("porciones", value) }
 
   // sus "notas" es texto
-  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 896, end: 916 } }) }
+  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 931, end: 951 } }) }
   get notas() { return this.getProp("notas") }
   set notas(value) { this.setProp("notas", value) }
 
@@ -78,12 +78,12 @@ export class Receta extends Thing {
   }
 
   // vive en recetario familiar
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 814, end: 840 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en recetario familiar
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 814, end: 840 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }

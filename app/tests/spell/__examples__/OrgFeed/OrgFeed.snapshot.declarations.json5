@@ -14,37 +14,37 @@
         "placeType": "MyFeed",
         "collection": "posts"
       },
-      "defined": "/OrgFeed.api.spell:580-735"
+      "defined": "/OrgFeed.api.spell:598-793"
     },
     {
       "property": "text",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:627-645"
+      "defined": "/OrgFeed.api.spell:663-684"
     },
     {
       "property": "topic",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:649-668"
+      "defined": "/OrgFeed.api.spell:689-711"
     },
     {
       "property": "posted",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:672-692"
+      "defined": "/OrgFeed.api.spell:716-739"
     },
     {
       "property": "by",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:696-712"
+      "defined": "/OrgFeed.api.spell:744-763"
     },
     {
       "property": "space",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:716-735"
+      "defined": "/OrgFeed.api.spell:768-790"
     },
     {
       "property": "weight",
@@ -96,7 +96,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/OrgFeed.api.spell:392-492"
+      "defined": "/OrgFeed.api.spell:406-495"
     },
     {
       "type": "FeedPage",

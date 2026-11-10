@@ -32,26 +32,26 @@
         "placeType": "GalaxyReview",
         "collection": "reviews"
       },
-      "defined": "/StarWarsReviews.api.spell:265-395"
+      "defined": "/StarWarsReviews.api.spell:257-424"
     },
     {
       "property": "film_title",
       "asWritten": "film title",
       "of": "Review",
       "datatype": "text",
-      "defined": "/StarWarsReviews.api.spell:321-345"
+      "defined": "/StarWarsReviews.api.spell:331-358"
     },
     {
       "property": "stars",
       "of": "Review",
       "datatype": "number",
-      "defined": "/StarWarsReviews.api.spell:349-372"
+      "defined": "/StarWarsReviews.api.spell:363-393"
     },
     {
       "property": "words",
       "of": "Review",
       "datatype": "text",
-      "defined": "/StarWarsReviews.api.spell:376-395"
+      "defined": "/StarWarsReviews.api.spell:399-421"
     },
     {
       "type": "GalaxyReview",
@@ -60,7 +60,7 @@
         "name": "galaxy_reviews",
         "kind": "database on this device"
       },
-      "defined": "/StarWarsReviews.api.spell:220-263"
+      "defined": "/StarWarsReviews.api.spell:237-251"
     },
     {
       "type": "PageTop",

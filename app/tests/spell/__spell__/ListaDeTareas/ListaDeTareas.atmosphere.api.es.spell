@@ -1,0 +1,22 @@
+## Guardadas en tu cuenta de atmosphere
+// Las tareas son registros en tu propia cuenta de atmosphere, el AT Protocol de Bluesky, como los estados de Statusphere:
+// inicia sesión, y van contigo a cualquier aplicación que las lea.
+// Allí los registros son públicos:  cualquiera puede leerlos, así que no guardes nada privado en una tarea.
+cielo de tareas es una cuenta personal de atmosphere:
+	- las tareas del cielo están en "spaces.spell.examples.listadetareas.tarea"
+
+una "tarea del cielo" es una tarea:
+	- vive en cielo de tareas
+	- para tirarla:
+		quitar eso de las tareas del cielo
+
+// de quién es:  la cuenta en la que está, que un registro no puede decir
+una tarea del cielo tiene un dueño como texto
+
+un "guardián del cielo" es un guardián de tareas:
+	// solo las tuyas:  las tareas de cada uno están en su propia cuenta
+	- sus "tareas guardadas" es cada tarea del cielo donde su dueño es el id de esa persona
+	- para guardar una tarea nueva titulada (título como texto):
+		poner tarea a una nueva tarea del cielo con título = título
+		agregar tarea a las tareas del cielo
+		devolver tarea

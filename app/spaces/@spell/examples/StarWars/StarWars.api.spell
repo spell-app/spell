@@ -11,7 +11,7 @@
 // It's asked for as it runs, and kept only on the device of whoever's looking, until 5am;
 // the page says where it comes from.
 
-star wars is a web server at "https://swapi.py4e.com/api":
+<web-server "star wars" address="https://swapi.py4e.com/api">
 	- its id is its "url"
 	- its rows are its "results"
 	- its next page is its "next"
@@ -25,108 +25,145 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- species live at "/species/"
 	- vehicles live at "/vehicles/"
 	- starships live at "/starships/"
+</web-server>
 
-a "character" is a thing:
-	- it lives in star wars
-	- its "name" is text
-	- its "height" is a length in cm or "unknown"
-	- its "mass" is a weight in kg or "unknown"
-	- its "hair color" is text
-	- its "skin color" is text
-	- its "eye color" is text
-	- its "birth year" is text
-	- its "gender" is text
-	- its "homeworld" is a planet
-	- its "films" is a list of films
-	- its "species" is a list of species
-	- its "vehicles" is a list of vehicles
-	- its "starships" is a list of starships
-	- its "created" is a date
-	- its "edited" is a date
+<spell-thing "character">
+	<spell>
+		- it lives in star wars
+	</spell>
+	<property "name">text</>
+	<spell>
+		- its "height" is a length in cm or "unknown"
+		- its "mass" is a weight in kg or "unknown"
+	</spell>
+	<property "hair color">text</>
+	<property "skin color">text</>
+	<property "eye color">text</>
+	<property "birth year">text</>
+	<property "gender">text</>
+	<property "homeworld" type="planet" />
+	<property "films">a list of films</>
+	<property "species">a list of species</>
+	<property "vehicles">a list of vehicles</>
+	<property "starships">a list of starships</>
+	<property "created" type="date" />
+	<property "edited" type="date" />
+</spell-thing>
 
-a "planet" is a thing:
-	- it lives in star wars
-	- its "name" is text
-	- its "rotation period" is a number or "unknown"
-	- its "orbital period" is a number or "unknown"
-	- its "diameter" is a length in km
-	- its "climate" is text
-	- its "gravity" is text
-	- its "terrain" is text
-	- its "surface water" is a number or "unknown"
-	- its "population" is a number or "unknown"
-	- its "residents" is a list of characters
-	- its "films" is a list of films
-	- its "created" is a date
-	- its "edited" is a date
+<spell-thing "planet">
+	<spell>
+		- it lives in star wars
+	</spell>
+	<property "name">text</>
+	<spell>
+		- its "rotation period" is a number or "unknown"
+		- its "orbital period" is a number or "unknown"
+		- its "diameter" is a length in km
+	</spell>
+	<property "climate">text</>
+	<property "gravity">text</>
+	<property "terrain">text</>
+	<spell>
+		- its "surface water" is a number or "unknown"
+		- its "population" is a number or "unknown"
+	</spell>
+	<property "residents">a list of characters</>
+	<property "films">a list of films</>
+	<property "created" type="date" />
+	<property "edited" type="date" />
+</spell-thing>
 
-a "film" is a thing:
-	- it lives in star wars
-	- its "title" is text
-	- its "episode id" is a number
-	- its "opening crawl" is text
-	- its "director" is text
-	- its "producer" is text
-	- its "release date" is a date
-	- its "characters" is a list of characters
-	- its "planets" is a list of planets
-	- its "starships" is a list of starships
-	- its "vehicles" is a list of vehicles
-	- its "species" is a list of species
-	- its "created" is a date
-	- its "edited" is a date
+<spell-thing "film">
+	<spell>
+		- it lives in star wars
+	</spell>
+	<property "title">text</>
+	<property "episode id" type="number" />
+	<property "opening crawl">text</>
+	<property "director">text</>
+	<property "producer">text</>
+	<property "release date" type="date" />
+	<property "characters">a list of characters</>
+	<property "planets">a list of planets</>
+	<property "starships">a list of starships</>
+	<property "vehicles">a list of vehicles</>
+	<property "species">a list of species</>
+	<property "created" type="date" />
+	<property "edited" type="date" />
+</spell-thing>
 
-a "species" is a thing:
-	- it lives in star wars
-	- its "name" is text
-	- its "classification" is text
-	- its "designation" is text
-	- its "average height" is a number or "n/a" or "unknown"
-	- its "skin colors" is text
-	- its "hair colors" is text
-	- its "eye colors" is text
-	- its "average lifespan" is text
-	- its "homeworld" is a planet
-	- its "language" is text
-	- its "people" is a list of characters
-	- its "films" is a list of films
-	- its "created" is a date
-	- its "edited" is a date
+<spell-thing "species">
+	<spell>
+		- it lives in star wars
+	</spell>
+	<property "name">text</>
+	<property "classification">text</>
+	<property "designation">text</>
+	<spell>
+		- its "average height" is a number or "n/a" or "unknown"
+	</spell>
+	<property "skin colors">text</>
+	<property "hair colors">text</>
+	<property "eye colors">text</>
+	<property "average lifespan">text</>
+	<property "homeworld" type="planet" />
+	<property "language">text</>
+	<property "people">a list of characters</>
+	<property "films">a list of films</>
+	<property "created" type="date" />
+	<property "edited" type="date" />
+</spell-thing>
 
-a "vehicle" is a thing:
-	- it lives in star wars
-	- its "name" is text
-	- its "model" is text
-	- its "manufacturer" is text
-	- its "cost in credits" is a number or "unknown"
-	- its "length" is a number
-	- its "max atmosphering speed" is a number
-	- its "crew" is a number
-	- its "passengers" is a number
-	- its "cargo capacity" is a number or "none" or "unknown"
-	- its "consumables" is text
-	- its "vehicle class" is text
-	- its "pilots" is a list of characters
-	- its "films" is a list of films
-	- its "created" is a date
-	- its "edited" is a date
+<spell-thing "vehicle">
+	<spell>
+		- it lives in star wars
+	</spell>
+	<property "name">text</>
+	<property "model">text</>
+	<property "manufacturer">text</>
+	<spell>
+		- its "cost in credits" is a number or "unknown"
+	</spell>
+	<property "length" type="number" />
+	<property "max atmosphering speed" type="number" />
+	<property "crew" type="number" />
+	<property "passengers" type="number" />
+	<spell>
+		- its "cargo capacity" is a number or "none" or "unknown"
+	</spell>
+	<property "consumables">text</>
+	<property "vehicle class">text</>
+	<property "pilots">a list of characters</>
+	<property "films">a list of films</>
+	<property "created" type="date" />
+	<property "edited" type="date" />
+</spell-thing>
 
-a "starship" is a thing:
-	- it lives in star wars
-	- its "name" is text
-	- its "model" is text
-	- its "manufacturer" is text
-	- its "cost in credits" is a number or "unknown"
-	- its "length" is a number
-	- its "max atmosphering speed" is text
-	- its "crew" is text
-	- its "passengers" is a number or "n/a" or "unknown"
-	- its "cargo capacity" is a number or "unknown"
-	- its "consumables" is text
-	- its "hyperdrive rating" is a number or "unknown"
-	- its "mglt" is a number or "unknown"
-	- its "starship class" is text
-	- its "pilots" is a list of characters
-	- its "films" is a list of films
-	- its "created" is a date
-	- its "edited" is a date
+<spell-thing "starship">
+	<spell>
+		- it lives in star wars
+	</spell>
+	<property "name">text</>
+	<property "model">text</>
+	<property "manufacturer">text</>
+	<spell>
+		- its "cost in credits" is a number or "unknown"
+	</spell>
+	<property "length" type="number" />
+	<property "max atmosphering speed">text</>
+	<property "crew">text</>
+	<spell>
+		- its "passengers" is a number or "n/a" or "unknown"
+		- its "cargo capacity" is a number or "unknown"
+	</spell>
+	<property "consumables">text</>
+	<spell>
+		- its "hyperdrive rating" is a number or "unknown"
+		- its "mglt" is a number or "unknown"
+	</spell>
+	<property "starship class">text</>
+	<property "pilots">a list of characters</>
+	<property "films">a list of films</>
+	<property "created" type="date" />
+	<property "edited" type="date" />
+</spell-thing>

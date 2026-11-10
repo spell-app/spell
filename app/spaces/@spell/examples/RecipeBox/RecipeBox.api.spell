@@ -11,10 +11,13 @@
 //   family cookbook is an excel file at "recipes.xlsx"
 //   (the workbook beside this file, read only:  a spreadsheet reads Excel by the ".xlsx" ending, an excel file whatever it ends in)
 // What's drawn and done with them is in RecipeBox.spell.
-family cookbook is a database on this device
+<device-storage "family cookbook" />
 
-a "recipe" is a thing:
-	- it lives in family cookbook
-	- its "title" is text
-	- its "servings" is a number
-	- its "notes" is text
+<spell-thing "recipe">
+	<spell>
+		- it lives in family cookbook
+	</spell>
+	<property "title">text</>
+	<property "servings" type="number" />
+	<property "notes">text</>
+</spell-thing>

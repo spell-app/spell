@@ -16,31 +16,31 @@
         "placeType": "Chat",
         "collection": "messages"
       },
-      "defined": "/OrgChat.api.spell:959-1092"
+      "defined": "/OrgChat.api.spell:983-1157"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1006-1024"
+      "defined": "/OrgChat.api.spell:1048-1069"
     },
     {
       "property": "by",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1028-1044"
+      "defined": "/OrgChat.api.spell:1074-1093"
     },
     {
       "property": "sent",
       "of": "Message",
       "datatype": "date",
-      "defined": "/OrgChat.api.spell:1048-1068"
+      "defined": "/OrgChat.api.spell:1098-1125"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1072-1092"
+      "defined": "/OrgChat.api.spell:1131-1154"
     },
     {
       "property": "initials",
@@ -69,37 +69,37 @@
         "placeType": "MyThread",
         "collection": "threads"
       },
-      "defined": "/OrgChat.api.spell:1205-1372"
+      "defined": "/OrgChat.api.spell:1285-1492"
     },
     {
       "property": "name",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1257-1275"
+      "defined": "/OrgChat.api.spell:1355-1376"
     },
     {
       "property": "side",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1279-1297"
+      "defined": "/OrgChat.api.spell:1381-1402"
     },
     {
       "property": "topic",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1301-1320"
+      "defined": "/OrgChat.api.spell:1407-1429"
     },
     {
       "property": "link",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1324-1342"
+      "defined": "/OrgChat.api.spell:1434-1455"
     },
     {
       "property": "current",
       "of": "Thread",
       "datatype": "choice",
-      "defined": "/OrgChat.api.spell:1346-1372"
+      "defined": "/OrgChat.api.spell:1460-1489"
     },
     {
       "property": "mark",
@@ -115,7 +115,7 @@
         "kind": "room",
         "at": "/api/rooms/spaces/@rs/__thread"
       },
-      "defined": "/OrgChat.api.spell:738-770"
+      "defined": "/OrgChat.api.spell:745-773"
     },
     {
       "type": "MyThread",
@@ -128,7 +128,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/OrgChat.api.spell:771-847"
+      "defined": "/OrgChat.api.spell:791-856"
     },
     {
       "type": "ChatPage",

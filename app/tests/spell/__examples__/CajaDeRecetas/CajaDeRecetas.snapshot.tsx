@@ -8,15 +8,15 @@ core.heading("Caja de recetas:  dónde se guardan las recetas")
 
 export class Receta extends Thing {
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 840, end: 860 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 854, end: 879 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 864, end: 892 } })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 898, end: 926 } })
   accessor porciones!: number
 
   // sus "notas" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 896, end: 916 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 931, end: 951 } })
   accessor notas!: string
 
   /** Su pantalla de edición:  nada cambia hasta Guardar */
@@ -53,11 +53,11 @@ export class Receta extends Thing {
   }
 
   // vive en recetario familiar
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 814, end: 840 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en recetario familiar
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 810, end: 836 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 814, end: 840 } })
   accessor modificado!: any /* spell: type unknown */
 }
 

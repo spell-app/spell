@@ -16,55 +16,55 @@
         "placeType": "MyInbox",
         "collection": "messages"
       },
-      "defined": "/Inbox.api.spell:553-785"
+      "defined": "/Inbox.api.spell:571-855"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:604-622"
+      "defined": "/Inbox.api.spell:640-661"
     },
     {
       "property": "recipients",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:626-650"
+      "defined": "/Inbox.api.spell:666-693"
     },
     {
       "property": "from",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:654-672"
+      "defined": "/Inbox.api.spell:698-719"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:676-696"
+      "defined": "/Inbox.api.spell:724-747"
     },
     {
       "property": "sent",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:700-718"
+      "defined": "/Inbox.api.spell:752-773"
     },
     {
       "property": "page",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:722-740"
+      "defined": "/Inbox.api.spell:778-799"
     },
     {
       "property": "title",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:744-763"
+      "defined": "/Inbox.api.spell:804-826"
     },
     {
       "property": "line",
       "of": "Message",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:767-785"
+      "defined": "/Inbox.api.spell:831-852"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -87,13 +87,13 @@
         "placeType": "MyInbox",
         "collection": "mail_choices"
       },
-      "defined": "/Inbox.api.spell:965-1037"
+      "defined": "/Inbox.api.spell:1050-1146"
     },
     {
       "property": "how",
       "of": "MailChoice",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:1020-1037"
+      "defined": "/Inbox.api.spell:1123-1143"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -116,13 +116,13 @@
         "placeType": "MyInbox",
         "collection": "subscriptions"
       },
-      "defined": "/Inbox.api.spell:1152-1227"
+      "defined": "/Inbox.api.spell:1276-1375"
     },
     {
       "property": "space",
       "of": "Subscription",
       "datatype": "text",
-      "defined": "/Inbox.api.spell:1208-1227"
+      "defined": "/Inbox.api.spell:1350-1372"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -148,7 +148,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/Inbox.api.spell:383-455"
+      "defined": "/Inbox.api.spell:397-458"
     },
     {
       "type": "InboxPage",

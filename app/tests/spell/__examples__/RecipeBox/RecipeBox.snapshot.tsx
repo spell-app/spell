@@ -8,15 +8,15 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1162, end: 1181 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1170, end: 1192 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1185, end: 1211 } })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1197, end: 1230 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1215, end: 1234 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1236, end: 1258 } })
   accessor notes!: string
 
   /** Its Edit screen:  nothing changes until Save */

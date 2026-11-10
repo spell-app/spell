@@ -2,10 +2,15 @@
 // The next line keeps them in your own space on Spell's server:  sign in on any device, and they're there.
 // Until you sign in, they're kept in this browser, and the page says so;  once you do, they go up.
 // What's drawn and done with them is in FamilyCookbook.spell.
-family cookbook is saved in the cloud
+<spell>
+	family cookbook is saved in the cloud
+</spell>
 
-a "recipe" is a thing:
-	- it lives in family cookbook
-	- its "title" is text
-	- its "servings" is a number
-	- its "notes" is text
+<spell-thing "recipe">
+	<spell>
+		- it lives in family cookbook
+	</spell>
+	<property "title">text</>
+	<property "servings" type="number" />
+	<property "notes">text</>
+</spell-thing>

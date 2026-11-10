@@ -8,25 +8,34 @@
 // Its hours come as lists side by side, one of times and one of each measure:  each hour is read as one of each.
 // Each measure is in the unit its answer names, and shows in the reader's own:  a temperature in °F in the US.
 
-open meteo is a web server at "https://api.open-meteo.com":
+<web-server "open meteo" address="https://api.open-meteo.com">
 	- check it every 30 seconds
 	- it writes names like "generationtime_ms"
 	- forecasts live at "/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&timezone=auto&forecast_days=2"
 	- forecasts are asked for by their latitude and longitude
+</web-server>
 
-a "forecast" is a thing:
-	- it lives in open meteo
-	- its "latitude" is a number
-	- its "longitude" is a number
-	- its "generationtime ms" is a number
-	- its "utc offset seconds" is a number
-	- its "timezone" is text
-	- its "timezone abbreviation" is text
-	- its "elevation" is a number
-	- its "hours" is a list of hours, stored as "hourly"
+<spell-thing "forecast">
+	<spell>
+		- it lives in open meteo
+	</spell>
+	<property "latitude" type="number" />
+	<property "longitude" type="number" />
+	<property "generationtime ms" type="number" />
+	<property "utc offset seconds" type="number" />
+	<property "timezone">text</>
+	<property "timezone abbreviation">text</>
+	<property "elevation" type="number" />
+	<spell>
+		- its "hours" is a list of hours, stored as "hourly"
+	</spell>
+</spell-thing>
 
-an "hour" is a thing:
-	- its "time" is a date
-	- its "temperature" is a temperature in °C, stored as "temperature_2m"
-	- its "precipitation" is a length in mm
-	- its "wind speed" is a speed in km/h, stored as "wind_speed_10m"
+<spell-thing "hour">
+	<property "time" type="date" />
+	<spell>
+		- its "temperature" is a temperature in °C, stored as "temperature_2m"
+		- its "precipitation" is a length in mm
+		- its "wind speed" is a speed in km/h, stored as "wind_speed_10m"
+	</spell>
+</spell-thing>

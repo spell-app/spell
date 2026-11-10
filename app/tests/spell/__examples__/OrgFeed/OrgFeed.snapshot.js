@@ -8,27 +8,27 @@ core.heading("Feed:  what's new across your org")
 /** A post, as its space has it:  who wrote it, what about, when, and where it's from. */
 export class Post extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 627, end: 645 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 663, end: 684 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "topic" is text
-  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 649, end: 668 } }) }
+  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 689, end: 711 } }) }
   get topic() { return this.getProp("topic") }
   set topic(value) { this.setProp("topic", value) }
 
   // - its "posted" is text
-  static { this.declareProp("posted", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 672, end: 692 } }) }
+  static { this.declareProp("posted", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 716, end: 739 } }) }
   get posted() { return this.getProp("posted") }
   set posted(value) { this.setProp("posted", value) }
 
   // - its "by" is text
-  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 696, end: 712 } }) }
+  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 744, end: 763 } }) }
   get by() { return this.getProp("by") }
   set by(value) { this.setProp("by", value) }
 
   // - its "space" is text
-  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 716, end: 735 } }) }
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 768, end: 790 } }) }
   get space() { return this.getProp("space") }
   set space(value) { this.setProp("space", value) }
 
@@ -69,12 +69,12 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["text", "topic", "posted", "by", "space"] }
 
   // - it lives in my feed
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 632, end: 651 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my feed
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 604, end: 623 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 632, end: 651 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

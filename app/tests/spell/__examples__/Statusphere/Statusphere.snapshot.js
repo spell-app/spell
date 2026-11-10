@@ -17,7 +17,7 @@ export class Status extends Thing {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 561, end: 590 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 574, end: 603 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
@@ -46,12 +46,12 @@ export class Status extends Thing {
     times: ["created", "modified"], select: ["status", "createdAt", "owner", "created"] }
 
   // a status is saved in the status board
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 457, end: 494 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // a status is saved in the status board
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 457, end: 494 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

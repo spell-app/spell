@@ -158,11 +158,11 @@ export class BrowserTask extends Task {
   }
 
   // - it lives in browser storage
-  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 298, end: 325 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in browser storage
-  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 280, end: 307 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 298, end: 325 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -185,7 +185,7 @@ export class BrowserTaskElement extends SpellElement<BrowserTask> {
 core.useElement(BrowserTask, BrowserTaskElement)
 
 export class BrowserKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 405, end: 443 }, readsFrom: ["browser_storage"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 478, end: 519 }, readsFrom: ["browser_storage"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(BrowserTask)
   }) }
@@ -224,11 +224,11 @@ export class ServerTask extends Task {
   }
 
   // - it lives in task files
-  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 466, end: 488 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in task files
-  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 422, end: 444 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 466, end: 488 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -251,7 +251,7 @@ export class ServerTaskElement extends SpellElement<ServerTask> {
 core.useElement(ServerTask, ServerTaskElement)
 
 export class ServerKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 540, end: 577 }, readsFrom: ["task_files"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 639, end: 679 }, readsFrom: ["task_files"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(ServerTask)
   }) }
@@ -296,11 +296,11 @@ export class SheetTask extends Task {
   }
 
   // - it lives in task sheet
-  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 615, end: 637 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in task sheet
-  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 577, end: 599 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 615, end: 637 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -323,7 +323,7 @@ export class SheetTaskElement extends SpellElement<SheetTask> {
 core.useElement(SheetTask, SheetTaskElement)
 
 export class SheetKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 693, end: 729 }, readsFrom: ["task_sheet"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 786, end: 825 }, readsFrom: ["task_sheet"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SheetTask)
   }) }
@@ -365,7 +365,7 @@ export class SkyTask extends Task {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a sky task has an owner as text
-  @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 563, end: 594 } })
+  @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 642, end: 673 } })
   accessor owner!: string
 
   static savedIn = {
@@ -375,11 +375,11 @@ export class SkyTask extends Task {
   }
 
   // - it lives in task sky
-  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 454, end: 474 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in task sky
-  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 424, end: 444 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 454, end: 474 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -404,7 +404,7 @@ core.useElement(SkyTask, SkyTaskElement)
 
 export class SkyKeeper extends TaskKeeper {
   /** only your own:  everyone's tasks are in their own accounts */
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 695, end: 757 }, readsFrom: ["task_sky"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 735, end: 873 }, readsFrom: ["task_sky"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SkyTask, { filter: { owner: core.currentPerson().id } })
   }) }

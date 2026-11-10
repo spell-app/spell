@@ -9,11 +9,11 @@ core.heading("Org Admin:  where an org's roles are kept")
 /** The org itself, for the page's title and as a space to design. */
 export class OrgProfile extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 647, end: 665 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 682, end: 703 } })
   accessor name!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 669, end: 688 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 708, end: 730 } })
   accessor space!: string
 
   static savedIn = {
@@ -22,29 +22,29 @@ export class OrgProfile extends Thing {
     times: ["created", "modified"], select: ["name", "space"] }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 620, end: 643 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 647, end: 670 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 620, end: 643 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 647, end: 670 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Member extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 743, end: 763 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 821, end: 844 } })
   accessor person!: string
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 767, end: 785 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 849, end: 870 } })
   accessor name!: string
 
   // - its "role" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 789, end: 807 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 875, end: 896 } })
   accessor role!: string
 
   // - its "role name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 811, end: 834 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 901, end: 927 } })
   accessor roleName!: string
 
   static savedIn = {
@@ -54,21 +54,21 @@ export class Member extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 716, end: 739 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 786, end: 809 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 716, end: 739 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 786, end: 809 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Team extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 887, end: 905 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1016, end: 1037 } })
   accessor name!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 909, end: 928 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1042, end: 1064 } })
   accessor space!: string
 
   static savedIn = {
@@ -78,25 +78,25 @@ export class Team extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 860, end: 883 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 981, end: 1004 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 860, end: 883 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 981, end: 1004 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Project extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 984, end: 1002 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1156, end: 1177 } })
   accessor name!: string
 
   // - its "team" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1006, end: 1024 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1182, end: 1203 } })
   accessor team!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1028, end: 1047 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1208, end: 1230 } })
   accessor space!: string
 
   static savedIn = {
@@ -106,21 +106,21 @@ export class Project extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 957, end: 980 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1121, end: 1144 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 957, end: 980 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1121, end: 1144 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class OrgRole extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1105, end: 1123 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1323, end: 1344 } })
   accessor name!: string
 
   // - its "manages" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1127, end: 1148 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1349, end: 1373 } })
   accessor manages!: string
 
   static savedIn = {
@@ -129,45 +129,45 @@ export class OrgRole extends Thing {
     times: ["created", "modified"], select: ["name", "manages"] }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1078, end: 1101 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1288, end: 1311 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1078, end: 1101 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1288, end: 1311 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Term extends Thing {
   // - its "role" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1201, end: 1219 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1462, end: 1483 } })
   accessor role!: string
 
   // - its "holder" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1223, end: 1243 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1488, end: 1511 } })
   accessor holder!: string
 
   // - its "manages" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1247, end: 1268 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1516, end: 1540 } })
   accessor manages!: string
 
   // - its "role name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1272, end: 1295 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1545, end: 1571 } })
   accessor roleName!: string
 
   // - its "holder name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1299, end: 1324 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1576, end: 1604 } })
   accessor holderName!: string
 
   // - its "manages name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1328, end: 1354 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1609, end: 1638 } })
   accessor managesName!: string
 
   // - its "starts" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1358, end: 1378 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1643, end: 1666 } })
   accessor starts!: string
 
   // - its "ends" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1382, end: 1400 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1671, end: 1692 } })
   accessor ends!: string
 
   static savedIn = {
@@ -177,21 +177,21 @@ export class Term extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1174, end: 1197 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1427, end: 1450 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1174, end: 1197 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1427, end: 1450 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class ApprovedApp extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1462, end: 1480 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1789, end: 1810 } })
   accessor name!: string
 
   // - its "version" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1484, end: 1505 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1815, end: 1839 } })
   accessor version!: string
 
   static savedIn = {
@@ -201,26 +201,26 @@ export class ApprovedApp extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1435, end: 1458 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1754, end: 1777 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1435, end: 1458 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1754, end: 1777 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 /** A designer changes a space's pages and source, whatever their role there:  a Manager publishes them. */
 export class Designer extends Thing {
   // - its "person" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1666, end: 1686 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2036, end: 2059 } })
   accessor person!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1690, end: 1709 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2064, end: 2086 } })
   accessor space!: string
 
   // - its "person name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1713, end: 1738 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2091, end: 2119 } })
   accessor personName!: string
 
   static savedIn = {
@@ -230,26 +230,26 @@ export class Designer extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1639, end: 1662 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2001, end: 2024 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1639, end: 1662 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2001, end: 2024 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 /** An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers". */
 export class Stage extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1925, end: 1943 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2342, end: 2363 } })
   accessor name!: string
 
   // - its "moves to" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1947, end: 1969 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2368, end: 2393 } })
   accessor movesTo!: string
 
   // - its "moved by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 1973, end: 1995 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2398, end: 2423 } })
   accessor movedBy!: string
 
   static savedIn = {
@@ -259,33 +259,33 @@ export class Stage extends Thing {
   }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1898, end: 1921 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2307, end: 2330 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 1898, end: 1921 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2307, end: 2330 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class RoleChange extends Thing {
   // - its "at" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2055, end: 2071 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2519, end: 2538 } })
   accessor at!: string
 
   // - its "who" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2075, end: 2092 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2543, end: 2563 } })
   accessor who!: string
 
   // - its "did" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2096, end: 2113 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2568, end: 2588 } })
   accessor did!: string
 
   // - its "what" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2117, end: 2135 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2593, end: 2614 } })
   accessor what!: string
 
   // - its "why" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2139, end: 2156 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgAdmin.api.spell", start: 2619, end: 2639 } })
   accessor why!: string
 
   static savedIn = {
@@ -294,11 +294,11 @@ export class RoleChange extends Thing {
     times: ["created", "modified"], select: ["at", "who", "did", "what", "why"] }
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2028, end: 2051 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2484, end: 2507 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in admin roles
-  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2028, end: 2051 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgAdmin.api.spell", start: 2484, end: 2507 } })
   accessor modified!: any /* spell: type unknown */
 }
 

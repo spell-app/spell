@@ -9,19 +9,19 @@ core.heading("Chat:  every thread you can read, live")
 /** A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`. */
 export class Message extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1006, end: 1024 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1048, end: 1069 } })
   accessor text!: string
 
   // - its "by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1028, end: 1044 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1074, end: 1093 } })
   accessor by!: string
 
   // - its "sent" is a date
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1048, end: 1068 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1098, end: 1125 } })
   accessor sent!: Date
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1072, end: 1092 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1131, end: 1154 } })
   accessor thread!: string
 
   /** The first two letters of who sent it, for the circle beside their name */
@@ -53,34 +53,34 @@ export class Message extends Thing {
   }
 
   // - it lives in chat
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 986, end: 1002 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1020, end: 1036 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in chat
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 986, end: 1002 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1020, end: 1036 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 /** A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it. */
 export class Thread extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1257, end: 1275 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1355, end: 1376 } })
   accessor name!: string
 
   // - its "side" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1279, end: 1297 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1381, end: 1402 } })
   accessor side!: string
 
   // - its "topic" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1301, end: 1320 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1407, end: 1429 } })
   accessor topic!: string
 
   // - its "link" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1324, end: 1342 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1434, end: 1455 } })
   accessor link!: string
 
   // - its "current" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1346, end: 1372 } })
+  @prop({ type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1460, end: 1489 } })
   accessor current!: boolean
 
   /** Its icon:  a lock on the private ones */
@@ -96,11 +96,11 @@ export class Thread extends Thing {
     times: ["created", "modified"], select: ["name", "side", "topic", "link", "current"] }
 
   // - it lives in my threads
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1231, end: 1253 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1321, end: 1343 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my threads
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1231, end: 1253 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1321, end: 1343 } })
   accessor modified!: any /* spell: type unknown */
 }
 

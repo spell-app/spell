@@ -48,7 +48,7 @@
       "of": "Status",
       "group": "Statusphere:  where the statuses are kept",
       "datatype": "text",
-      "defined": "/Statusphere.api.spell:561-590"
+      "defined": "/Statusphere.api.spell:574-603"
     },
     {
       "property": "who",
@@ -82,7 +82,7 @@
           }
         }
       },
-      "defined": "/Statusphere.api.spell:322-455"
+      "defined": "/Statusphere.api.spell:333-443"
     },
     {
       "uiDefaults": {

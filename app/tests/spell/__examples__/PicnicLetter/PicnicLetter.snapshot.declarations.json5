@@ -16,19 +16,19 @@
         "placeType": "PublishedSheet",
         "collection": "listings"
       },
-      "defined": "/PicnicLetter.api.spell:569-674"
+      "defined": "/PicnicLetter.api.spell:587-720"
     },
     {
       "property": "person",
       "of": "Listing",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:631-651"
+      "defined": "/PicnicLetter.api.spell:667-690"
     },
     {
       "property": "shift",
       "of": "Listing",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:655-674"
+      "defined": "/PicnicLetter.api.spell:695-717"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -51,19 +51,19 @@
         "placeType": "MyInbox",
         "collection": "messages"
       },
-      "defined": "/PicnicLetter.api.spell:839-932"
+      "defined": "/PicnicLetter.api.spell:918-1039"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:890-908"
+      "defined": "/PicnicLetter.api.spell:987-1008"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:912-932"
+      "defined": "/PicnicLetter.api.spell:1013-1036"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -94,7 +94,7 @@
           }
         }
       },
-      "defined": "/PicnicLetter.api.spell:451-567"
+      "defined": "/PicnicLetter.api.spell:465-570"
     },
     {
       "type": "MyInbox",
@@ -107,7 +107,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/PicnicLetter.api.spell:765-837"
+      "defined": "/PicnicLetter.api.spell:840-901"
     },
     {
       "type": "PicnicLetter",
