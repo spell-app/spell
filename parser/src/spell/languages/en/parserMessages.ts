@@ -511,8 +511,8 @@ export const PARSER_MESSAGES = {
   "spellx-typed-body":
     'a property with type= is stored, and starts at one value on its tag\'s line:  <property "{name}" type="number">0</>',
   "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
-  /** A note by its old short word, `<property-editor>`, outside a drawing (epic `data` P31, Q27). */
-  "spellx-short-note": "{tag} is now {new}:  the short name is Spell UI's, as <button> is <ui-button>",
+  /** A note by an old word, `<spell-description>`, `<comment>`:  its one tag now, `<note>` (epic `language` P41). */
+  "spellx-old-note": "{tag} is now {new}:  one tag for every note",
 
   ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`

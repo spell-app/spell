@@ -104,7 +104,8 @@ export class PageStories {
   /** How a block is written, for `form`:  its tag, its closer, a story's tag and what says it's done. */
   private static wordsFor(form: "spellx" | "code", language: "en" | "es", tag: string | undefined): BlockWords {
     const isSpanish = tag ? /historias/.test(tag) : language === "es"
-    const opener = tag ?? (form === "spellx" && isSpanish ? "encanto-historias" : "stories")
+    // the short words, `<stories>`, `<historias>` (epic `language` P41)
+    const opener = tag ?? (isSpanish && form === "spellx" ? "historias" : "stories")
     return {
       opener,
       closer: isSpanish && form === "spellx" ? "</>" : `</${opener}>`,

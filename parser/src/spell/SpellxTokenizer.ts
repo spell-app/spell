@@ -11,9 +11,11 @@ import { SP } from "spell/parser/spell"
  *     so a tag line and its indented body are a line and its block, as an outline item and its body are (Q7)
  *   - a closer, `</>` or `</property>`, is a `SP.SpellxCloserToken`;  one ending a tag's own line too:
  *     `<alias "is a face card">if its rank is jack, queen or king</>`
- *   - a line a template holds that isn't a tag is PROSE (Q12), and so is a `<spell-description>`'s or
- *     `<spell-comment>`'s text (Q14):  each line one `SP.SpellxProseToken`, a comment as code spell writes it
- *   - a note carries the prefix (epic `data` P31):  the short `<comment>` in a drawing is Spell UI's markup
+ *   - a line a template holds that isn't a tag is PROSE (Q12), and so is a `<note>`'s text (Q14):
+ *     each line one `SP.SpellxProseToken`, a comment as code spell writes it
+ *   - in a drawing, a note's word is markup:  `<comment>` is Spell UI's, `<note>` a project's own view
+ * - A template's tag is its short word at a file's top level, `<page>`, `<thing>` (epic `language` P41);
+ *   the old spelling with the language's prefix, `<spell-page>`, still reads.
  * - Everything else is spell's own tokens:  each body's spell, a drawing's markup (`<ui-text>`).
  * - Which words make a tag is the file's language's (`SP.SpellxWords`), and where it is:
  *   - in a template:  its members (`<property>`, `<action>`, `<on ...>` ...), and any word spellx doesn't know,
@@ -254,7 +256,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     if (text.startsWith("</", start)) {
       const closer = this.readCloser(text, start)
-      // in a note, markup's own closer is its prose, `</ui-property-group>` in a `<spell-property-editor>`:
+      // in a note, markup's own closer is its prose, `</ui-property-group>` in a `<property-editor>`:
       // only `</>`, the note's own word or another spellx word's closes there
       const isProse =
         closer?.word &&
@@ -266,7 +268,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
       // an app's widget defaults, at the top (epic `language` P29):  markup, read as code spell reads it
       if (!this.frames.length && this.isDefaultsTag(text, start)) return undefined
-      const word = this.placeWordOr(this.tagWordAt(text, start), indent)
+      const word = this.tagWordHere(text, start, indent)
       if (this.isTagHere(word, indent)) return this.readTag(text, start, end, indent, lineEnd, word)
     }
     const owner = this.ownerOfLine(indent)
@@ -320,7 +322,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     const next = super.nextElementStart(text, from, end, indent)
     if (next >= end || !this.isLineStart(text, next) || !WORD_START.test(text[next + 1] ?? "")) return next
     const lineIndent = next - (text.lastIndexOf("\n", next - 1) + 1)
-    return this.isTagHere(this.placeWordOr(this.tagWordAt(text, next), lineIndent), lineIndent) ? end : next
+    return this.isTagHere(this.tagWordHere(text, next, lineIndent), lineIndent) ? end : next
   }
 
   /** Is `start` a line's first character that isn't a space or tab? */
@@ -351,6 +353,29 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
+   * What the tag at `start`, on a line `indent` in, says it is:  its word (`tagWordAt()`), and where it is.
+   * - At a file's top level, a template's short word is the template (epic `language` P41):
+   *   `<page>`, `<thing>`, `<extend>`, though `<page>` in a site is one of its parts, and `<page>` in a drawing Spell UI's.
+   * - At the top too, a place's word:  `<web-server>`, `<room>` (`placeWordOr()`).
+   */
+  private tagWordHere(text: string, start: number, indent: number): TagWord {
+    return this.placeWordOr(this.topTemplateOr(this.tagWordAt(text, start), indent), indent)
+  }
+
+  /**
+   * `word`, unless it's a template's short word and this is a file's top level:  `<page "home">`, `<thing "card">`
+   * (epic `language` P41).
+   * - Anywhere else it stays what it was:  `<page>` in a site is its part, and in a drawing it's markup.
+   */
+  private topTemplateOr(word: TagWord, indent: number): TagWord {
+    if (word.category === "template" || this.ownerOfTag(indent, word)) return word
+    const entry = this.words.templates[word.word.toLowerCase()]
+    const kind = SP.spellxTemplateKind(entry)
+    if (!kind) return word
+    return { ...word, category: "template", kind, flag: SP.spellxTemplateFlag(entry), isShortTemplate: true }
+  }
+
+  /**
    * What the tag at `start` says it is, by its word:  a template, a member, a note, a handler or a control.
    * - A handler's or control's word may be several (`otherwise if`):  the longest that fits wins,
    *   and `otherwise` takes no phrase, so `<otherwise it is red>` is no `<otherwise>`.
@@ -362,17 +387,18 @@ export class SpellxTokenizer extends P.Tokenizer {
     const lower = first.toLowerCase()
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     if (lower.startsWith(`${prefix}-`)) {
-      // `notebook` is a page with its flag:  `<spell-notebook>` is `<spell-page notebook>` (epic `notebook` P1)
+      // the old spelling, `<spell-page>` (before epic `language` P41):  still read, never written
+      // - `notebook` is a page with its flag:  `<spell-notebook>` is `<spell-page notebook>` (epic `notebook` P1)
       const entry = templates[lower.slice(prefix.length + 1)]
       const kind = SP.spellxTemplateKind(entry)
       if (kind) return { category: "template", kind, flag: SP.spellxTemplateFlag(entry), word: first, wordEnd }
-      // a note carries the prefix too, `<spell-description>` (epic `data` P31, Q27):  the short words are Spell UI's
+      // a note's old spelling too, `<spell-description>` (epic `data` P31, Q27):  read with a warning naming `<note>`
       const note = notes[lower.slice(prefix.length + 1)]
       if (note) return { category: "note", kind: note, word: first, wordEnd }
     }
     // a view written inside a page by its short word, `<view counter>` (epic `notebook` P2, Q6):
-    // the templates table read without its prefix, as a note's short word is
-    // - only `view`, as `<page>` is Spell UI's `<ui-page>`
+    // - only `view` here, as `<page>` in a drawing is Spell UI's `<ui-page>`;  at a file's top level every template's
+    //   short word is its template (`topTemplateOr()`, epic `language` P41)
     const short = SP.spellxTemplateKind(templates[lower])
     if (short && SHORT_TEMPLATE_KINDS.has(short))
       return { category: "template", kind: short, word: first, wordEnd, isShortTemplate: true }
@@ -381,7 +407,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     // markup drawn as written, `<ui-button>` (epic `elemental-spell` P16):  the web's word, in every language
     if (lower === HTML_WORD) return { category: "code", kind: "html", word: first, wordEnd }
     if (declarations[lower]) return { category: "declaration", kind: declarations[lower]!, word: first, wordEnd }
-    // the OLD short note, `<description>`:  a note, with a warning, except in a drawing (`isTagHere()`)
+    // a note's short word, `<note>`, and the old `<description>` (with a warning):  a note, except in a drawing (`isTagHere()`)
     if (notes[lower]) return { category: "note", kind: notes[lower]!, word: first, wordEnd, isShortNote: true }
     // the longest handler or control word written here
     const words: { end: number }[] = []
@@ -513,8 +539,7 @@ export class SpellxTokenizer extends P.Tokenizer {
 
     if (word.category === "note") {
       const note = word.kind as SP.SpellxNoteKind
-      // `<stories>`, the short way, is how a page's stories are written:  nothing else reads that word (epic `mockup` P17)
-      const warning = word.isShortNote && note !== "stories" ? this.shortNoteWarning(word) : undefined
+      const warning = this.oldNoteWarning(word)
       if (closerAtEnd) {
         const token = this.prose(text, start, lineEnd, text.slice(head.end, closerAtEnd.start).trim(), note)
         if (closerAtEnd.word && !this.isWordFor(closerAtEnd.word, word))
@@ -536,12 +561,19 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * The warning for a note written by its old short word, `<property-editor>` (epic `data` P31, Q27):
-   * its new tag, `<spell-property-editor>`.
+   * The warning for a note written by an old word, `<spell-description>`, `<comment>`:  its new tag, `<note>`
+   * (epic `language` P41).
+   * - None for `<note>` itself, nor for a property editor or a page's stories, which keep their words,
+   *   with the prefix or without.
    */
-  private shortNoteWarning(word: TagWord) {
-    const tag = `<${word.word}>`
-    return this.message("spellx-short-note", { tag, new: `<${this.words.prefix}-${word.word.toLowerCase()}>` })
+  private oldNoteWarning(word: TagWord): string | undefined {
+    if (word.kind !== "description" && word.kind !== "comment") return undefined
+    const { prefix, notes } = this.words
+    const lower = word.word.toLowerCase()
+    const written = lower.startsWith(`${prefix}-`) ? lower.slice(prefix.length + 1) : lower
+    const noteWord = keyFor(notes, "description")
+    if (written === noteWord) return undefined
+    return this.message("spellx-old-note", { tag: `<${word.word}>`, new: `<${noteWord}>` })
   }
 
   /** Errors for a tag where it can't go:  a member outside a template, a template inside one. */
@@ -552,9 +584,6 @@ export class SpellxTokenizer extends P.Tokenizer {
     // a page holds templates of its own, `<view counter>`, `<spell-view "counter">` (P16;  epic `notebook` P2, Q1)
     if (word.category === "template" && owner && !isPage(owner))
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
-    // the short `<view>` only inside a page:  at the top, `<spell-view>`
-    if (word.isShortTemplate && !owner)
-      return [this.message("spellx-unknown-word", { tag, suggestion: `<${this.words.prefix}-${word.word}>` })]
     if (word.category === "code" && owner && owner.category !== "template" && word.kind !== "html")
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
     if (
@@ -564,7 +593,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       word.category !== "place" &&
       !owner
     )
-      return [this.message("spellx-outside-template", { tag, template: `<${this.words.prefix}-view>` })]
+      return [this.message("spellx-outside-template", { tag, template: `<${keyFor(this.words.templates, "view")}>` })]
     return []
   }
 
@@ -573,9 +602,10 @@ export class SpellxTokenizer extends P.Tokenizer {
    * none that close, the words that go here:  a template's at the top, a member's in a template.
    */
   private unknownWordError(word: TagWord) {
-    const { prefix, templates, declarations, notes, handlers } = this.words
-    const templateWords = Object.keys(templates).map((it) => `${prefix}-${it}`)
-    const noteWords = Object.keys(notes).map((it) => `${prefix}-${it}`)
+    const { templates, declarations, notes, handlers } = this.words
+    // the words a writer uses:  short, `<page>`, `<note>` (epic `language` P41)
+    const templateWords = Object.keys(templates)
+    const noteWords = Object.keys(notes)
     const memberWords = [...Object.keys(declarations), ...noteWords, ...Object.keys(handlers)]
     const tag = `<${word.word}>`
     const suggestion = suggest(word.word, [...templateWords, ...memberWords])
@@ -1068,11 +1098,11 @@ export class SpellxTokenizer extends P.Tokenizer {
       case "code":
         return lower === prefix
       case "template": {
-        // with its prefix, or a short one's without (`</view>`)
+        // short, `</page>`, or with its old prefix, `</spell-page>` (epic `language` P41)
         const kind = lower.startsWith(`${prefix}-`)
           ? SP.spellxTemplateKind(templates[lower.slice(prefix.length + 1)])
           : SP.spellxTemplateKind(templates[lower])
-        return kind === tag.kind && (lower.startsWith(`${prefix}-`) || SHORT_TEMPLATE_KINDS.has(kind))
+        return kind === tag.kind
       }
       case "declaration":
         return declarations[lower] === tag.kind
@@ -1106,9 +1136,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     const lower = word.toLowerCase()
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     if (lower.startsWith(`${prefix}-`) && lower.slice(prefix.length + 1) in templates) return true
-    // a short template word, `</view>`
-    const short = SP.spellxTemplateKind(templates[lower])
-    if (short && SHORT_TEMPLATE_KINDS.has(short)) return true
+    // a template's short word, `</view>`, `</page>` (epic `language` P41)
+    if (SP.spellxTemplateKind(templates[lower])) return true
     // a note's word carries the prefix (epic `data` P31):  a short one, `</description>`, is markup's in a note
     if (lower.startsWith(`${prefix}-`) && lower.slice(prefix.length + 1) in notes) return true
     return [declarations, handlers, controls].some((table) =>
@@ -1204,14 +1233,15 @@ type TagWord = {
   word: string
   wordEnd: number
   /**
-   * Is it a note written by its OLD short word, `<property-editor>`, not `<spell-property-editor>` (epic `data` P31)?
-   * - Still a note where a note goes, with a warning naming its new tag;  but in a drawing it's markup,
-   *   Spell UI's `<ui-property-editor>`, as `<button>` is `<ui-button>`.
+   * Is it a note written by its short word, `<note>`, `<property-editor>`, not `<spell-property-editor>`?
+   * - A note where a note goes (the old `<description>` with a warning naming `<note>`);  but in a drawing it's
+   *   markup, Spell UI's `<ui-comment>` for `<comment>`, or a project's own view.
    */
   isShortNote?: boolean
   /**
    * Is it a template written by its SHORT word, without the prefix?
-   * - `<view counter>` inside a page (epic `notebook` P2, Q6).
+   * - At a file's top level, every template:  `<page "home">` (epic `language` P41)
+   * - Inside a page, a view:  `<view counter>` (epic `notebook` P2, Q6)
    */
   isShortTemplate?: boolean
   /** The flag a template's word brings, as if written:  `notebook` for `<spell-notebook>` (epic `notebook` P1). */
@@ -1378,8 +1408,9 @@ function isSite(frame: { category: string; kind: string } | undefined): boolean 
 }
 
 /**
- * The template kinds that may be written by their SHORT word, inside a page:  `<view counter>` (epic `notebook` P2).
- * - Only `view`:  `<page>` is Spell UI's `<ui-page>`, `<app>` and the rest have no place inside a page.
+ * The template kinds that may be written by their SHORT word inside a page:  `<view counter>` (epic `notebook` P2).
+ * - Only `view`:  `<page>` there is Spell UI's `<ui-page>`, `<app>` and the rest have no place inside a page.
+ * - At a file's top level, every template is written by its short word (epic `language` P41).
  */
 const SHORT_TEMPLATE_KINDS: ReadonlySet<string> = new Set(["view"])
 
@@ -1448,4 +1479,9 @@ function liftTemplates(body: P.BlockToken): Array<P.LineToken | P.BlockToken> {
 /** Is `item` a line holding only a closer, `</spell-view>`? */
 function isCloserLine(item: P.Token | undefined): boolean {
   return item instanceof P.LineToken && item.tokens.length === 1 && item.tokens[0] instanceof SP.SpellxCloserToken
+}
+
+/** The first word `table` gives `value`:  the one a writer uses, e.g. `note` for `description`;  `value` if none. */
+function keyFor(table: Record<string, unknown>, value: string): string {
+  return Object.keys(table).find((key) => table[key] === value) ?? value
 }

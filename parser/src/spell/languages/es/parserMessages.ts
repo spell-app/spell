@@ -341,7 +341,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "say-json-file":
     'Un lugar que es un solo archivo tiene que decir qué guarda:  escribe "es un archivo json en", o "es un archivo csv en"',
   "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
-  "spellx-short-note": "{tag} ahora es {new}:  el nombre corto es de Spell UI, como <botón> es <ui-button>",
+  "spellx-old-note": "{tag} ahora es {new}:  una etiqueta para cada nota",
 
   ////////////////
   // ## Long forms

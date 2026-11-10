@@ -9,7 +9,7 @@ import { CODE_SITE, SPELLX_SITE, declaresSite } from "spell/app/spaces/models/si
  *   step of its history (`RunSite.createPage()`).
  * - A site may be its routing alone, `X.site.spell`, each page in a file of its own (epic `mockup` P17):
  *   a page's name is then its title, and `<group>` lines head its board's sections.
- * - It reads both of Spell's forms:  spellx's `<spell-site>`, and code spell's `galaxy guide is a site:`.
+ * - It reads both of Spell's forms:  spellx's `<site>`, and code spell's `galaxy guide is a site:`.
  * - Static and instance-free on purpose:  it holds nothing, and every caller has its own text.
  ****************/
 export class SiteEdits {
@@ -98,11 +98,11 @@ export class SiteEdits {
   /**
    * `text`, a file declaring a site, with a page `name` added:
    * declared just before the site, and listed in it, last, at `address`.
-   * - spellx:  `<spell-page "tatooine page"/>`, then `<page "tatooine page" address="/planets/tatooine"/>`
+   * - spellx:  `<page "tatooine page"/>` at the top, then `<page "tatooine page" address="/planets/tatooine"/>` in the site
    * - code spell:  `a "tatooine page" is a page`, then `- it has a tatooine page at "/planets/tatooine"`
    * - Indented as the file is:  with tabs, or with what its site's first part is indented by.
    * - `listOnly`:  only its line in the site, for a site whose pages are each in a file of their own (`isRoutingOnly()`)
-   * - throws `TypeError` when `text` declares no site, or its `<spell-site>` closes on its own line (`<spell-site .../>`)
+   * - throws `TypeError` when `text` declares no site, or its `<site>` closes on its own line (`<site .../>`)
    */
   static withPageAdded(text: string, name: string, address: string, options: { listOnly?: boolean } = {}): string {
     const spellx = SPELLX_SITE.exec(text)
@@ -151,7 +151,7 @@ export class SiteEdits {
 
   /**
    * `text` with the part `name` taken out of its site, its pages under it with it, and each page's own declaration
-   * (`<spell-page "x">`, `a "x" is a page`), when this file has one.
+   * (`<page "x">`, `a "x" is a page`), when this file has one.
    * - A page from another project (the Spell UI site's notebooks) is only taken off the list:  its project stays.
    * - Asking first, when it has pages under it, is the caller's (`SiteWrites.removePart()`):  `partNamed()` says.
    */
@@ -231,7 +231,7 @@ export class SiteEdits {
 
   /**
    * Where page `name`'s own declaration is written in `text`, with its body:
-   * `<spell-page "x">...</>` or `a "x" is a page:` and its lines.
+   * `<page "x">...</>` or `a "x" is a page:` and its lines.
    * - none for a page `text` doesn't declare (another file's, another project's)
    */
   static declarationOf(text: string, name: string): TextSpan | undefined {
@@ -250,14 +250,14 @@ export class SiteEdits {
 
   /**
    * The thumbnail written on part `name`'s own page or view in `text`, if it's declared there.
-   * - `<spell-page "x" thumbnail="...">`, `<spell-view "x" thumbnail="...">`, or a line of its body,
+   * - `<page "x" thumbnail="...">`, `<view "x" thumbnail="...">` (or their old spellings), or a line of its body,
    *   `- its thumbnail is "..."`.
    * - A site's `button usage page` may be declared as `button usage`:  either name finds it.
    */
   static thumbnailOf(text: string, name: string): string | undefined {
     if (!text.includes("thumbnail")) return undefined
     for (const quoted of [name, name.replace(/ page$/, "")].map((each) => escapeRegExp(JSON.stringify(each)))) {
-      const tag = new RegExp(`^<spell-(?:page|view) ${quoted}[^\\n]*`, "m").exec(text)?.[0]
+      const tag = new RegExp(`^<${PAGE_OR_VIEW} ${quoted}[^\\n]*`, "m").exec(text)?.[0]
       if (tag) return ATTRIBUTE("thumbnail").exec(tag)?.[1]
       const body = new RegExp(`^an? ${quoted} is an? (?:page|view)[^\\n]*\\n((?:[ \\t]+[^\\n]*\\n)*)`, "m").exec(text)
       if (body) return /^[ \t]*- its thumbnail is "([^"]*)"/m.exec(body[1]!)?.[1]
@@ -333,7 +333,7 @@ export class SiteEdits {
     return without.slice(0, at) + reindent(moving, part.indent, there.indent) + without.slice(at)
   }
 
-  /** `text` with a page added to the `<spell-site>` opening at `start`. */
+  /** `text` with a page added to the `<site>` opening at `start`. */
   private static addedToSpellx(
     text: string,
     start: number,
@@ -343,12 +343,12 @@ export class SiteEdits {
   ): string {
     const close = CLOSING_TAG.exec(text.slice(start))
     if (!close) {
-      throw new TypeError("SiteEdits.withPageAdded():  its <spell-site> has no closing line;  write </> under it")
+      throw new TypeError("SiteEdits.withPageAdded():  its <site> has no closing line;  write </> under it")
     }
     const end = start + close.index
     const indent = /\n([ \t]+)</.exec(text.slice(start, end))?.[1] ?? "\t"
     const listed = `${indent}<page ${JSON.stringify(name)} address=${JSON.stringify(address)}/>\n`
-    const declared = listOnly ? "" : `<spell-page ${JSON.stringify(name)}/>\n\n`
+    const declared = listOnly ? "" : `<page ${JSON.stringify(name)}/>\n\n`
     return text.slice(0, start) + declared + text.slice(start, end) + listed + text.slice(end)
   }
 
@@ -385,8 +385,14 @@ export class SiteEdits {
   }
 }
 
-/** A closing line at the file's left edge:  the end of a top-level tag, `</>` or `</spell-site>`. */
-const CLOSING_TAG = /^<\/(?:spell-site)?>/m
+/** A closing line at the file's left edge:  the end of a top-level tag, `</>` or `</site>` (or `</spell-site>`). */
+const CLOSING_TAG = /^<\/(?:(?:(?:spell|encanto)-)?(?:site|sitio))?>/m
+
+/**
+ * A page's or view's tag word, in English and Spanish:  short (epic `language` P41), or with its old prefix.
+ * - Its Spanish words with their accents and without, as a person may type them.
+ */
+const PAGE_OR_VIEW = "(?:(?:spell|encanto)-)?(?:page|view|página|pagina|vista)"
 
 /** `a` or `an`, for `name`. */
 function articleFor(name: string): string {
@@ -475,7 +481,7 @@ function kindOfName(name: string): SitePartKind {
   return "page"
 }
 
-/** The parts of a spellx site, `<spell-site ...>` opening at `start`. */
+/** The parts of a spellx site, `<site ...>` opening at `start`. */
 function spellxPartsIn(text: string, start: number): SitePart[] {
   const top: SitePart[] = []
   const open: SitePart[] = []
@@ -483,7 +489,7 @@ function spellxPartsIn(text: string, start: number): SitePart[] {
   let isInComment = false
   for (const line of linesOf(text)) {
     if (line.start <= start) continue
-    if (/^<\/(?:spell-site)?>/.test(line.text)) break
+    if (CLOSING_TAG.test(line.text)) break
     const trimmed = line.text.trim()
     if (isInComment || trimmed.startsWith("<!--")) {
       isInComment = !trimmed.includes("-->")
@@ -637,7 +643,7 @@ function withPageClosedIfEmpty(text: string, name: string | undefined): string {
   return text.slice(0, page.line.start) + closed + text.slice(page.span.end)
 }
 
-/** `text` without page `name`'s own declaration, `<spell-page "x">` or `a "x" is a page`, and the blank line after it. */
+/** `text` without page `name`'s own declaration, `<page "x">` or `a "x" is a page`, and the blank line after it. */
 function withoutDeclaration(text: string, name: string): string {
   const declared = declarationOf(text, name)
   if (!declared) return text
@@ -672,7 +678,7 @@ function declarationOf(text: string, name: string): TextSpan | undefined {
   for (const line of lines.slice(at + 1)) {
     if (isTag) {
       end = line.end
-      if (/^<\/(?:spell-page|spell-view|encanto-página|encanto-vista)?>/.test(line.text)) break
+      if (new RegExp(`^<\\/(?:${PAGE_OR_VIEW})?>`).test(line.text)) break
     } else if (!line.text.trim() || /^[ \t]/.test(line.text)) end = line.end
     else break
   }
@@ -784,6 +790,12 @@ const GROUP_KEY = "#group "
 
 /** How a page's or view's own declaration starts, in each of Spell's forms and languages. */
 const DECLARATION_WORDS = [
+  "<page {name}",
+  "<view {name}",
+  "<página {name}",
+  "<pagina {name}",
+  "<vista {name}",
+  // their old spellings (before epic `language` P41)
   "<spell-page {name}",
   "<spell-view {name}",
   "<encanto-página {name}",

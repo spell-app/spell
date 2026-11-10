@@ -514,13 +514,19 @@ export type LanguageWords = {
  * - Several spellings may mean one thing, e.g. `página` and `pagina`:  the first is the one a writer uses.
  */
 export type SpellxWords = {
-  /** The first word of a template's tag:  `spell` in `<spell-view>`, `encanto` in `<encanto-vista>`. */
+  /**
+   * The language's word for Spell:  `spell`, Spanish's `encanto`.
+   * - The block of code spell is the word alone, `<spell>`.
+   * - Before epic `language` P41, every template's tag began with it and a dash, `<spell-view>`:
+   *   those spellings still read, and nothing writes them.
+   */
   prefix: string
   /**
-   * A template's word, after the prefix and its dash:  `view` in `<spell-view>`.
+   * A template's word, `view` in `<view>`:  at a file's top level (epic `language` P41), and `<view>` inside a page.
+   * - The old spelling, after the prefix and its dash, `<spell-view>`, still reads anywhere a template goes.
    * - A word may bring a FLAG too, a bare attribute it stands for (epic `notebook` P1):
    *   `notebook` is `{ kind: "page", flag: "notebook" }`,
-   *   so `<spell-notebook "x">` reads as `<spell-page "x" notebook>`.
+   *   so `<notebook "x">` reads as `<page "x" notebook>`.
    */
   templates: Record<string, SpellxTemplateWord>
   /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
@@ -528,10 +534,11 @@ export type SpellxWords = {
   /** The tags that say where a program's data lives, at a file's top level (epic `language` P40). */
   places: SpellxPlaceWord[]
   /**
-   * A tag holding prose about what it's in, its word after the prefix and its dash:
-   * `description` in `<spell-description>`, `comment` in `<spell-comment>` (epic `data` P31, Q27).
-   * - The prefix keeps the short words for Spell UI:  `<comment>` in a drawing is `<ui-comment>`.
-   * - The old short tag, `<description>`, is still a note outside a drawing, with a warning.
+   * A tag holding prose about what it's in:  `<note>` (epic `language` P41), `<property-editor>`, `<stories>`.
+   * - In a drawing each is markup:  `<comment>` there is Spell UI's `<ui-comment>`, `<note>` a project's own view.
+   * - The old note words still read where a note goes, with a warning naming `<note>`:
+   *   `<spell-description>`, `<spell-comment>` (epic `data` P31, Q27), and `<description>`, `<comment>`.
+   * - The first word for `description` is the one a writer uses:  `note`.
    */
   notes: Record<string, SpellxNoteKind>
   /** A tag whose head is a spell phrase, handling an event:  `on` in `<on mouse down>`. */
@@ -633,10 +640,10 @@ export type SpellxTwinWords = {
   template: string
   /** A template with a short name too, `aka=`:  its name as words, `{a words} {words} aka {aka} is ...`. */
   templateAka: string
-  /** A one-of-a-kind template, `<spell-app>` or `<spell-page>`:  `{words} is {a super} {super} :`. */
+  /** A one-of-a-kind template, `<app>` or `<page>`:  `{words} is {a super} {super} :`. */
   singleton: string
-  /** More of a type declared in another file, `<spell-more-of "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
-  moreOf: string
+  /** Adds to a type another file declares, `<extend "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
+  extend: string
   /** What each kind of template extends, when it names no `template=`:  `{ view: "view", "page template": "page" }`. */
   supers: Record<string, string>
   /** A property's twin, by what the tag holds. */
@@ -774,7 +781,7 @@ export type SpellxPageSectionWords = {
   defaults: Record<string, string | true>
 }
 
-/** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
+/** What a spellx template tag makes:  `<view>` a view's template, `<app>` an app ... */
 export type SpellxTemplateKind =
   | "view"
   | "thing"
@@ -783,7 +790,7 @@ export type SpellxTemplateKind =
   | "page template"
   | "app template"
   | "site"
-  | "more of"
+  | "extend"
 
 /**
  * A template word's meaning, in a language's `SpellxWords.templates`:
@@ -803,6 +810,7 @@ export function spellxTemplateKind(word: SpellxTemplateWord | undefined): Spellx
 export function spellxTemplateFlag(word: SpellxTemplateWord | undefined): string | undefined {
   return typeof word === "object" ? word.flag : undefined
 }
+
 
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind =

@@ -482,12 +482,12 @@ describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
     expect(readFileSync(resolve(warned, `Warned${SP.SPELL_SUFFIX}`), "utf8")).toBe(SOURCE)
   }, 30_000)
 
-  test("--fix:  <spell-page notebook>, its closer too;  <view> inside it;  the description in its example;  then a second run does nothing", () => {
+  test("--fix:  <page notebook>, its closer too;  <view> inside it;  the description in its example;  then a second run does nothing", () => {
     const fixing = tempProject("Pages", SOURCE, SP.SPELL_SUFFIX)
     const { status, stdout } = spell(["lint", ".", "--fix"], fixing)
     expect(stdout).toBe(
       [
-        "Pages.spell:1:2  fixed:  <spell-notebook> is <spell-page notebook>",
+        "Pages.spell:1:2  fixed:  <spell-notebook> is <page notebook>",
         "Pages.spell:2:3  fixed:  <spell-view> is <view> in a page",
         "Pages.spell:7:3  fixed:  the text before <example> is its description",
         ""
@@ -496,8 +496,8 @@ describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
     expect(status).toBe(0)
     const fixed = readFileSync(resolve(fixing, `Pages${SP.SPELL_SUFFIX}`), "utf8")
     expect(fixed).toBe(
-      SOURCE.replace('<spell-notebook "counter notebook"', '<spell-page "counter notebook" notebook')
-        .replace("</spell-notebook>", "</spell-page>")
+      SOURCE.replace('<spell-notebook "counter notebook"', '<page "counter notebook" notebook')
+        .replace("</spell-notebook>", "</page>")
         .replace("<spell-view", "<view")
         .replace("</spell-view>", "</view>")
         .replace(
@@ -509,12 +509,12 @@ describe("spell lint:  a page's old spellings (epic notebook P8)", () => {
     expect(readFileSync(resolve(fixing, `Pages${SP.SPELL_SUFFIX}`), "utf8")).toBe(fixed)
   }, 30_000)
 
-  test("--fix in Spanish:  <encanto-cuaderno> is <encanto-página cuaderno>", () => {
+  test("--fix in Spanish:  <encanto-cuaderno> is <página cuaderno>", () => {
     const source = '<encanto-cuaderno "cuaderno de contador">\n\tUn contador cuenta sus clics.\n</encanto-cuaderno>\n'
     const fixing = tempProject("Paginas", source, `.es${SP.SPELL_SUFFIX}`)
     expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
     expect(readFileSync(resolve(fixing, `Paginas.es${SP.SPELL_SUFFIX}`), "utf8")).toBe(
-      '<encanto-página "cuaderno de contador" cuaderno>\n\tUn contador cuenta sus clics.\n</encanto-página>\n'
+      '<página "cuaderno de contador" cuaderno>\n\tUn contador cuenta sus clics.\n</página>\n'
     )
   }, 30_000)
 })

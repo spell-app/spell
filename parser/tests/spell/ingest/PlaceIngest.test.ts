@@ -1136,7 +1136,7 @@ describe("looking again", () => {
     test("a new file is in tags, and compiles as the plain Spell does", async () => {
       const { start } = await updated((same) => same, {}, {}, TAGS)
       expect(start).toMatch(/^<web-server "stars" address="https:\/\/[^"]*">$/m)
-      expect(start).toContain('<spell-thing "person">')
+      expect(start).toContain('<thing "person">')
       const plain = (await updated((same) => same, {})).start
       const code = (contents: string) => compiledSpellProject([{ path: "/Stars.spell", contents }]).code
       expect(code(start).replace(/declaredAt: \{[^}]*\}/g, "")).toBe(code(plain).replace(/declaredAt: \{[^}]*\}/g, ""))
