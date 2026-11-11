@@ -60,7 +60,7 @@ const HUE = "--bubbly-hue"
 const PER_BLOCK = new Set([HUE, "--bubbly-pill", "--bubbly-input"])
 
 /** The parts of speech, each a hue of its own. */
-const PARTS_OF_SPEECH = ["thing", "action", "property", "plain"]
+const PARTS_OF_SPEECH = ["thing", "action", "property", "plain", "control"]
 
 /** Named colours the sheet uses. */
 const NAMED: Record<string, RGBA> = { white: [255, 255, 255, 1], black: [0, 0, 0, 1], transparent: [0, 0, 0, 0] }

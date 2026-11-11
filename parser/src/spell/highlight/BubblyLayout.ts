@@ -16,13 +16,13 @@ import type {
 /****************
  * ### `BubblyLayout`
  * Some Spell laid out in the BUBBLY LOOK, as data:  which lines are declarations (a head on a band, a body under it),
- * which are control lines (a bracket holding their steps), and what each stretch of a line is to a reader
+ * which are control lines (a light grey block holding their steps), and what each stretch of a line is to a reader
  * (what a person typed, a reference, a value ...).
  * - `BubblyLayout.of(text, parser)`:  a `BubblyDrawing`, offsets into `text`.
  * - From the parser's own reading of the code, alone, or its project's (`within`):
  *   - its coloured spans (`SP.SpellHighlighter.spans()`):  references, values, marks, comments
  *   - its parse as a block:  each line's rule, which `SP.BubblyPresentation` says how to present
- *     (a band or not, which parts are inputs, a bracket for a control line)
+ *     (a band or not, which parts are inputs, a block for a control line)
  *   - its indent:  what's under what, so a line that doesn't parse still sits where it should
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
@@ -36,7 +36,11 @@ export class BubblyLayout {
    *   compiler sees it (`card ranks` declared in another file), and nothing is parsed twice.
    *   - Only while that parse is of this very text (`isParseOf()`):  else, as a file just edited, it reads alone.
    */
-  static of(text: string, parser: SP.SpellParser = SP.spellParser, { within }: BubblyLayoutOptions = {}): BubblyDrawing {
+  static of(
+    text: string,
+    parser: SP.SpellParser = SP.spellParser,
+    { within }: BubblyLayoutOptions = {}
+  ): BubblyDrawing {
     const projects = within && BubblyLayout.isParseOf(within, text) ? within.match : undefined
     return new BubblyLayout(text, parser, projects).drawing
   }
@@ -191,7 +195,7 @@ export class BubblyLayout {
   }
 
   ////////////////
-  // ## The tree into blocks, brackets and lines
+  // ## The tree into blocks and lines
   ////////////////
 
   /**
@@ -223,12 +227,7 @@ export class BubblyLayout {
         continue
       }
       if (statement && row?.isControl && line.children.length) {
-        nodes.push({
-          kind: "bracket",
-          rule: statement.rule.name ?? "",
-          head: this.lineOf(line, { depth }),
-          body: this.layout(line.children, { depth: 0, level, inSteps })
-        })
+        nodes.push(this.control(line, statement, level, inSteps))
         continue
       }
       nodes.push(this.lineOf(line, { depth }))
@@ -259,6 +258,23 @@ export class BubblyLayout {
       }
     } finally {
       this.scopes.pop()
+    }
+  }
+
+  /**
+   * A control line with steps under it (`if`, `for each`):  a block in the light grey of control lines,
+   * its line plain on its band, its steps its body.
+   * - No scope of its own:  a name it introduces (a loop's `card`) is the enclosing declaration's.
+   */
+  private control(line: SourceLine, statement: P.Match, level: number, inSteps: boolean): BubblyBlock {
+    return {
+      kind: "block",
+      rule: statement.rule.name ?? "",
+      partOfSpeech: "control",
+      isGroup: false,
+      level,
+      head: this.lineOf(line, { depth: 0 }),
+      body: this.layout(line.children, { depth: 0, level: level + 1, inSteps })
     }
   }
 

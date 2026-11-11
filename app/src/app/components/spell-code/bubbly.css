@@ -1,7 +1,7 @@
 /*
  * The BUBBLY LOOK:  Spell drawn so what a person typed stands apart from Spell's own words.
  * - Each declaration's head on a band in its part of speech's colour, what was typed in white pills on it,
- *   its body in a bracket down its left, what it refers to in bold.
+ *   its body with a rail down its left, what it refers to in bold.
  * - Sizes are in pixels, for a 16px drawing:  tune it in the settings just below.
  * - Colours by part of speech:  things purple, actions green, properties amber, the rest grey (groups too);
  *   a band is its hue mixed over the paper.
@@ -44,6 +44,8 @@
   --bubbly-action: #2f9e5b;
   /* properties, aliases */
   --bubbly-property: #d4930d;
+  /* control lines with steps under them:  `if`, `for each`, `repeat`;  so light its band is barely grey (Owen) */
+  --bubbly-control: #b9bcc3;
   /* a block's own hue, until it says which part of speech it is */
   --bubbly-hue: var(--bubbly-plain);
 
@@ -106,9 +108,6 @@
   /* the quote marks lean to match the band */
   --bubbly-quote-rotation: 15deg;
 
-  /****** a control line's bracket:  `if`, `for each`, `repeat` holding their steps ******/
-  --bubbly-bracket-width: 2px;
-
   /****** the drawing's box ******/
   /* the system font:  Spell's default */
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -136,6 +135,9 @@
   }
   .bubbly-property {
     --bubbly-hue: var(--bubbly-property);
+  }
+  .bubbly-control {
+    --bubbly-hue: var(--bubbly-control);
   }
 
   /* worked out where the hue is set, so a nested block of another kind gets its own */
@@ -213,7 +215,7 @@
     max-width: none;
   }
 
-  /****** a declaration with a body:  its head on the band, a bracket down its body, a foot under it ******/
+  /****** a declaration with a body:  its head on the band, a rail down its body, a foot under it ******/
   .bubbly-block {
     display: grid;
     grid-template-columns: var(--bubbly-gutter) max-content;
@@ -286,21 +288,13 @@
     white-space: nowrap;
   }
 
-  /****** a control line (`if`, `for each`, `repeat`):  its line, then a bracket holding its steps ******/
-  .bubbly-bracket {
-    margin-left: calc(var(--bubbly-indent) / 2 - var(--bubbly-bracket-width) / 2);
-    padding-left: calc(var(--bubbly-indent) / 2);
-    border-left: var(--bubbly-bracket-width) solid var(--bubbly-faint);
-    border-bottom-left-radius: 4px;
-  }
-
   /****** a body's lines ******/
   .bubbly-line {
     white-space: nowrap;
     padding-left: calc(var(--bubbly-indent) * var(--bubbly-depth, 0));
   }
 
-  /* each line's indent within its body, beyond the bracket's:  `bubbly-indent-0` at the body's edge */
+  /* each line's indent within its body:  `bubbly-indent-0` at the body's edge */
   .bubbly-indent-1 {
     --bubbly-depth: 1;
   }
@@ -502,8 +496,7 @@
    *   the SECTION moves left, so a band's round left end isn't cut square.
    */
   > :is(ui-section.bubbly-section, .bubbly-block, .bubbly-pill),
-  .bubbly-body > :is(ui-section.bubbly-section, .bubbly-block, .bubbly-pill),
-  .bubbly-bracket > :is(.bubbly-block, .bubbly-pill) {
+  .bubbly-body > :is(ui-section.bubbly-section, .bubbly-block, .bubbly-pill) {
     margin-left: calc(-1 * var(--bubbly-line-inset));
   }
 
@@ -549,7 +542,7 @@
  * Monaco (`SpellBubbly`) draws the look on the editor's text as it's typed, with this sheet's names:
  * - the editor's box is a `.bubbly` (`bubbly-monaco`), so every variable and rule above reaches it
  * - each piece of text is marked with its classes (`bubbly-piece` and the page's, `bubbly-reference` ...)
- * - the shapes, a band, gutter, body and foot, a pill, a bracket, are elements with the page's classes, in a layer
+ * - the shapes, a band, gutter, body and foot, a pill, are elements with the page's classes, in a layer
  *   behind the text (`bubbly-layer`):  the code places them;  how they look is the rules above
  * - The rules here only fit those to an editor.  NEVER padding, margin or a width on the text itself:  the caret
  *   would land off its letters.  Room is injected text of its own (`bubbly-room`).
@@ -667,7 +660,7 @@
     margin: 0;
   }
   .bubbly-layer
-    :is(.bubbly-head, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input, .bubbly-bracket) {
+    :is(.bubbly-head, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input) {
     position: absolute;
     margin: 0;
     padding: 0;
@@ -695,10 +688,6 @@
   .bubbly-layer .bubbly-block > .bubbly-foot {
     margin-left: var(--bubbly-rail-corner);
   }
-  .bubbly-layer .bubbly-bracket {
-    width: 0;
-    translate: calc(-1 * var(--bubbly-bracket-width) / 2) 0;
-  }
 
   /* the code's own layers over the shapes:  the editor sits above the layer, see-through */
   .monaco-editor {
@@ -719,7 +708,7 @@
   color: var(--bubbly-ink);
 }
 
-/* no indent guides:  a control line's bracket, and each body's gutter, show what's under what */
+/* no indent guides:  each body's gutter shows what's under what */
 .bubbly-monaco .view-overlays .core-guide {
   display: none;
 }

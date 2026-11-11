@@ -15,8 +15,8 @@ import type { monaco } from "./monaco"
  *     caret off the letters
  *   - one mark spanning each shape, holding nothing but its place:  Monaco moves it as the text is edited,
  *     so the shapes follow typing before the look is laid out again (`SpellBubbly`)
- * - Shapes are a declaration's band, gutter, body and foot, a pill under what a person typed, a control line's
- *   bracket:  `SpellBubbly` places them from where Monaco draws each line and letter.
+ * - Shapes are a block's band, gutter, body and foot (a declaration's, a control line's), a pill under what a person
+ *   typed:  `SpellBubbly` places them from where Monaco draws each line and letter.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  ****************/
@@ -56,13 +56,6 @@ export class BubblyMarks {
           break
         case "line":
           this.line(node, into)
-          break
-        case "bracket":
-          this.line(node.head, into)
-          if (node.body.length) {
-            into.push({ kind: "bracket", place: this.place(node.head.start, endOf(node)) })
-            this.nodes(node.body, into)
-          }
           break
         case "block":
           this.block(node, into)
@@ -180,11 +173,11 @@ export class BubblyMarks {
 ////////////////
 
 /** A shape `SpellBubbly` draws under the text. */
-export type BubblyShape = BubblyBlockShape | BubblyInputShape | BubblyBracketShape
+export type BubblyShape = BubblyBlockShape | BubblyInputShape
 
 /**
- * A declaration:  its band, and when it has a body, its gutter, its body's paper and its foot (`bubbly-block`);
- * else its band alone (`bubbly-pill`).
+ * A declaration, or a control line with steps under it:  its band, and when it has a body, its gutter, its body's
+ * paper and its foot (`bubbly-block`);  else its band alone (`bubbly-pill`).
  */
 export type BubblyBlockShape = {
   kind: "block"
@@ -200,7 +193,7 @@ export type BubblyBlockShape = {
   hasBody: boolean
   /** whether its head starts or ends with a pill, and a quoted one */
   ends: { startsWithInput: boolean; endsWithInput: boolean; endsQuoted: boolean }
-  /** the pills on its head and its lines, its brackets, and the declarations in its body */
+  /** the pills on its head and its lines, and the blocks in its body */
   inside: BubblyShape[]
 }
 
@@ -213,13 +206,6 @@ export type BubblyInputShape = {
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
-}
-
-/** A control line's bracket down its steps (`bubbly-bracket`). */
-export type BubblyBracketShape = {
-  kind: "bracket"
-  /** the mark from its line's first letter to its last step's end */
-  place: number
 }
 
 /** Room injected before or after a mark. */
@@ -269,7 +255,6 @@ function endOf(node: SP.BubblyNode): number {
       return node.start
     case "line":
       return node.end
-    case "bracket":
     case "block": {
       const last = node.body.findLast((each) => each.kind !== "gap")
       return last ? endOf(last) : node.head.end
