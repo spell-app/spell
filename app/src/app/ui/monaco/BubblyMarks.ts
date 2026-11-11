@@ -101,6 +101,7 @@ export class BubblyMarks {
       else if (kind === "quote-close")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: room("quote", "after") })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
+      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${ON_BAND}`)
       else this.mark(start, end, BubblyHtml.classesFor(kind))
     }
   }
@@ -232,6 +233,9 @@ const NAME = "bubbly-name"
 
 /** A quoted input's own `"`:  see-through, its curly mark drawn over it. */
 const QUOTE_MARK = "bubbly-quote-mark"
+
+/** A comment at the end of a head, on its band:  the page's is inside the band's element, the editor's isn't. */
+const ON_BAND = "bubbly-on-band"
 
 /**
  * Room either side of a pill's words (`input`), or outside a quoted one's marks (`quote`):

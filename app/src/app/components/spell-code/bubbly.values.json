@@ -20,6 +20,10 @@
       "light": "#c0c0c3",
       "dark": "#5a5961"
     },
+    "--bubbly-band-comment": {
+      "light": "#3a3a448c",
+      "dark": "#dedde68c"
+    },
     "--bubbly-bold": {
       "light": "650",
       "dark": "650"

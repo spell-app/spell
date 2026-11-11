@@ -28,6 +28,8 @@
   --bubbly-bold-ink: light-dark(#1f1f26, #f6f5fb);
   /* marks (`<`, `:`, `,`) and comments:  faint on the paper;  on a band, faint on its colour */
   --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
+  /* a note at the end of a head, on its band */
+  --bubbly-band-comment: color-mix(in srgb, var(--bubbly-ink) 55%, transparent);
   /* a name's first mention, a name a head defines, a list's value */
   --bubbly-bold: 650;
   /* every later use of a name, and what's declared elsewhere:  lighter than a first mention */
@@ -303,6 +305,12 @@
   .bubbly-comment {
     color: var(--bubbly-faint);
     font-style: italic;
+  }
+
+  /* a note at the end of a head, on its band:  darker than a mark there, so it reads on the band's colour */
+  :is(.bubbly-head, .bubbly-pill) .bubbly-comment,
+  .bubbly-comment.bubbly-on-band {
+    color: var(--bubbly-band-comment);
   }
 
   /* a `#` heading */
