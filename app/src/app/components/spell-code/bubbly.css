@@ -103,7 +103,7 @@
   --bubbly-input-dark: #2b2a33;
   /* a quoted input's marks, just outside its white:  Times' bold curly quotes, which every machine has */
   --bubbly-quote-font: "Times New Roman", Times, serif;
-  --bubbly-quote-size: 20px;
+  --bubbly-quote-size: 18px;
   --bubbly-quote-room: 15px;
   /* the quote marks lean to match the band */
   --bubbly-quote-rotation: 15deg;
@@ -598,7 +598,7 @@
   .view-line .bubbly-quote-mark {
     color: transparent;
   }
-  .view-line .bubbly-quote-mark::after {
+  .bubbly-quote-mark::after {
     left: 50%;
     right: auto;
     bottom: auto;

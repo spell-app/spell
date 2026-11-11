@@ -153,8 +153,8 @@
       "dark": "\"Times New Roman\", Times, serif"
     },
     "--bubbly-quote-size": {
-      "light": "20px",
-      "dark": "20px"
+      "light": "18px",
+      "dark": "18px"
     },
     "--bubbly-quote-room": {
       "light": "15px",
