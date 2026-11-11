@@ -63,6 +63,7 @@ const {
   codeEnv,
   envCheckout,
   launchPlan,
+  launchRefusal,
   look,
   movedWindowFile,
   movedWorkspace,
@@ -815,6 +816,23 @@ test("stayAdvice():  stay when it's the window's only session;  else a window of
 
   // no bridge:  a new window can't open, so staying is all there is
   assert.equal(stayAdvice({ window: null, others: [{ pid: 302, cwd: "/repo" }] }).recommend, "stay")
+})
+
+test("launchRefusal():  a repo epic init never set up refuses;  a set-up one and no repo at all don't (I255)", () => {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "launch-refusal-")))
+  try {
+    const repo = join(dir, "plain")
+    mkdirSync(join(repo, ".git"), { recursive: true })
+    const refused = launchRefusal(join(repo))
+    assert.match(refused ?? "", /isn't set up for epics, so nothing was made/)
+    assert.match(refused ?? "", /\/isolate <name>/)
+    mkdirSync(join(repo, ".epic"))
+    writeFileSync(join(repo, ".epic", "config.json5"), "{}\n")
+    assert.equal(launchRefusal(repo), undefined)
+    assert.equal(launchRefusal(join(dir, "nowhere")), undefined)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 })
 
 test("launchPlan():  wake the epic's running session;  else a new one in its open window;  open it only when it's closed", () => {
