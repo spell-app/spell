@@ -332,7 +332,8 @@ export const spanishWords: SP.LanguageWords = {
       color: "color"
     },
     // la cabecera llana de una página (épica `language` P45):  `"api del botón" es una página cuaderno`
-    plainPage: /^"(?<name>[^"\n]+)"[ \t]+es[ \t]+una[ \t]+p[áa]gina(?<flags>(?:[ \t]+[\p{L}-]+)*?)(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
+    plainPage:
+      /^"(?<name>[^"\n]+)"[ \t]+es[ \t]+una[ \t]+p[áa]gina(?<flags>(?:[ \t]+[\p{L}-]+)*?)(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
       placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",

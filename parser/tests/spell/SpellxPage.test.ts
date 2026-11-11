@@ -61,7 +61,8 @@ describe("a spellx page that draws its body", () => {
   })
 
   test("written as code spell, in memory, it compiles to the same program", () => {
-    const written = SX.CodeSpellWriter.write(COUNTER, { shortcuts: "spelled out",
+    const written = SX.CodeSpellWriter.write(COUNTER, {
+      shortcuts: "spelled out",
       path: "/Counter.spell",
       // the project's own views, as the editor reads them off the parse
       componentTag: (word) =>
@@ -173,7 +174,8 @@ describe("a spellx page that draws its body", () => {
   describe("written as code spell and back, its drawing is its own body again", () => {
     /** `text` as code spell, its own views' tags as the editor reads them, then back as spellx. */
     const thereAndBack = (text: string, counterTag = "test-project-counter-notebook-counter") => {
-      const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out",
+      const written = SX.CodeSpellWriter.write(text, {
+        shortcuts: "spelled out",
         path: "/Counter.spell",
         componentTag: (word) => (word === "counter" ? counterTag : SP.ComponentPacks.tagFor(word, "en"))
       })

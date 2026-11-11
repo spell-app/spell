@@ -10,7 +10,7 @@ import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan }
  * - Moving, adding and deleting cells is the editor's drag and drop (`PartEdits`, epic `notebook` P5):
  *   a run of prose is found for it by `proseAt()`.
  * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its notebook, in order.
- *   The notebook:  `<spell-page "x" notebook>`, or its short spelling, `<spell-notebook "x">`.
+ *   The notebook:  `"x" is a notebook page` (epic `language` P45);  in tags, `<page "x" notebook>`, `<notebook "x">`.
  *   - `prose`:  a run of markdown;  a new cell at each `##` heading, which starts a section of the page
  *   - `heading`:  the page's title or a section's start, written as a tag rather than markdown (either works):
  *     - the title:  a top-level `<header level="1">`, its sub header (a `<header>` inside it) the line under it
@@ -301,7 +301,7 @@ export class NotebookPageCells {
 export type NotebookPageModel = {
   /** its name, `counter notebook` */
   name: string
-  /** is it locked, `<notebook "..." locked>`? */
+  /** is it locked, `"..." is a locked notebook page`? */
   locked: boolean
   /** the language's word for `locked`, when it's another's */
   lockWord?: string
@@ -457,7 +457,7 @@ const LEVEL_WORDS: ReadonlySet<string> = new Set(["level", "nivel"])
 /** `label`, in each language. */
 const LABEL_WORDS: ReadonlySet<string> = new Set(["label", "etiqueta"])
 
-/** The flag that makes a page a notebook, by its English name:  `<page "x" notebook>`. */
+/** The flag that makes a page a notebook, by its English name:  `"x" is a notebook page`. */
 const NOTEBOOK_FLAG = "notebook"
 
 /** What each `.spell` file's pages say, for the text it had:  `pagesIn()`. */

@@ -40,11 +40,13 @@ const DISABLED_ATTRIBUTE = "disabled"
  *   - `<h3 in="header">` => `h("h3", { slot: "header" })`, in `SpellJSXAttribute`
  *   - each language's words, in its word rules `spell_jsx_tag` and `spell_jsx_attribute`:
  *     `SPELL_TAG_WORDS`, `SPELL_ATTRIBUTE_WORDS`
- * - In a spellx file, a BARE name is a component's (epic `elemental-spell` P7, Q46):  `componentTagFor()`.
+ * - A BARE name is a component's (epic `elemental-spell` P7, Q46;  in plain Spell too since epic `language` P45, Q4 A):
+ *   `componentTagFor()`.
  *   - `<card>`:  one of the project's own views, `<solitaire-card>`;  else `<button>`:  a pack's, `<ui-button>`.
  *   - A view's slots can be filled there, `<card><text slot="front">Ace</text></card>`, each named as it compiles
  *     (P27):  see `withSlotNames()`.
- *   - No native HTML (Q46, C1):  `<div>` is an error unless a pack has it.
+ *   - No native HTML in a spellx file (Q46, C1):  `<div>` is an error unless a pack has it;
+ *     in plain Spell it's the web's own, as written.
  *   - Except in a `<spell>` chunk, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
  * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
  *   `<text><if it is done>✓<otherwise>{its title}</></text>`, the same in code spell and spellx.

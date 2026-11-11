@@ -33,7 +33,10 @@ describe("CodeSpellWriter", () => {
   })
 
   test.each(PAIRS)("%s.spellml, its shortcuts spelled out, compiles as %s.spell does", (name) => {
-    const written = SX.CodeSpellWriter.write(pair(`${name}.spellml`), { shortcuts: "spelled out", path: `/${name}.spellml` })
+    const written = SX.CodeSpellWriter.write(pair(`${name}.spellml`), {
+      shortcuts: "spelled out",
+      path: `/${name}.spellml`
+    })
     const fromSpellx = compiled(written, `/${name}.spell`)
     const twin = compiled(pair(`${name}.spell`), `/${name}.spell`)
     expect(fromSpellx.errors).toEqual([])
@@ -41,7 +44,10 @@ describe("CodeSpellWriter", () => {
   })
 
   test("a member is bulleted, its details and aliases under it, a closer gone", () => {
-    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), { shortcuts: "spelled out", path: "/FlipTile.spellml" })
+    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), {
+      shortcuts: "spelled out",
+      path: "/FlipTile.spellml"
+    })
     expect(written).toContain('a "flip tile" is a view:\n\t// A tile that shows one side at a time.\n')
     expect(written).toContain('\t- its "side" is one of up, down\n\t\t- it "is showing (side)"\n')
     expect(written).toContain("\t// Turns it over.\n\t- to flip it:\n\t\t- shortcut meta+F\n")
@@ -50,10 +56,14 @@ describe("CodeSpellWriter", () => {
   })
 
   test("a drawing's bare names are their components' tags, each `</>` naming what it closes", () => {
-    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), { shortcuts: "spelled out", path: "/FlipTile.spellml" })
+    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), {
+      shortcuts: "spelled out",
+      path: "/FlipTile.spellml"
+    })
     expect(written).toContain("\t- to draw its back:\n\t\t<ui-text>back</ui-text>\n")
     // the editor knows a project's own views:  its `componentTag`
-    const card = SX.CodeSpellWriter.write('<spell-view "board">\n\t<draw>\n\t\t<card />\n\t</>\n</spell-view>\n', { shortcuts: "spelled out",
+    const card = SX.CodeSpellWriter.write('<spell-view "board">\n\t<draw>\n\t\t<card />\n\t</>\n</spell-view>\n', {
+      shortcuts: "spelled out",
       componentTag: (word) => (word === "card" ? "game-card" : undefined)
     })
     expect(card).toContain("\t\t<game-card />")
@@ -62,7 +72,8 @@ describe("CodeSpellWriter", () => {
   test("the language's example word stays an example, though a pack has a component by that name (`<ui-example>`)", () => {
     const text =
       '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
-    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out",
+    const written = SX.CodeSpellWriter.write(text, {
+      shortcuts: "spelled out",
       componentTag: (word) => (word === "example" ? "ui-example" : word === "text" ? "ui-text" : undefined)
     })
     expect(written).toContain('\t\t<example "one">')
@@ -73,7 +84,8 @@ describe("CodeSpellWriter", () => {
   test("a paragraph's blank line stays:  its line break (Owen, 2026-10-27)", () => {
     const text =
       '<spell-view "note">\n\t<draw>\n\t\t<text paragraph>\n\t\t\tFirst line\n\n\t\t\tSecond line\n\t\t</>\n\t</>\n</spell-view>\n'
-    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out",
+    const written = SX.CodeSpellWriter.write(text, {
+      shortcuts: "spelled out",
       componentTag: (word) => (word === "text" ? "ui-text" : undefined)
     })
     expect(written).toContain("\t\t\tFirst line\n\n\t\t\tSecond line\n")
@@ -82,7 +94,8 @@ describe("CodeSpellWriter", () => {
   test("markup alone, an example's body:  its tags, at its own indent (P18)", () => {
     const body = '<card>\n\t<content>\n\t\t<avatar src="jenny.jpg"/> Jenny Hess\n\t</>\n</card>'
     const starts: number[] = []
-    const written = SX.CodeSpellWriter.writeMarkup(body, { shortcuts: "spelled out",
+    const written = SX.CodeSpellWriter.writeMarkup(body, {
+      shortcuts: "spelled out",
       componentTag: (word, start) => {
         starts.push(start)
         return `ui-${word}`
@@ -93,7 +106,9 @@ describe("CodeSpellWriter", () => {
     )
     // each element's start, in the markup itself
     expect(starts.sort((a, b) => a - b)).toEqual([0, body.indexOf("<content>"), body.indexOf("<avatar")])
-    expect(SX.CodeSpellWriter.writeMarkup("<button>Go</>", { shortcuts: "spelled out" })).toBe("<ui-button>Go</ui-button>")
+    expect(SX.CodeSpellWriter.writeMarkup("<button>Go</>", { shortcuts: "spelled out" })).toBe(
+      "<ui-button>Go</ui-button>"
+    )
   })
 
   test("a `<for>`'s riders:  under the loop, after its body, their markup as code spell writes it (epic `language` T79)", () => {
@@ -113,7 +128,8 @@ describe("CodeSpellWriter", () => {
       "</spell-thing>",
       ""
     ].join("\n")
-    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out",
+    const written = SX.CodeSpellWriter.write(text, {
+      shortcuts: "spelled out",
       componentTag: (word) => (["grid", "column", "text"].includes(word) ? `ui-${word}` : undefined)
     })
     expect(written).toContain(

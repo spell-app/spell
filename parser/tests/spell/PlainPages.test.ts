@@ -15,8 +15,20 @@ describe("a page in plain spell", () => {
   test.each([
     ["English", "/Counter.spell", COUNTER, '<notebook "counter notebook">', '"counter notebook" is a notebook page'],
     ["English, no flag", "/Counter.spell", COUNTER, '<page "counter notebook">', '"counter notebook" is a page'],
-    ["Spanish", "/Contador.es.spell", CONTADOR, '<cuaderno "cuaderno del contador">', '"cuaderno del contador" es una página cuaderno'],
-    ["Spanish, no flag", "/Contador.es.spell", CONTADOR, '<página "cuaderno del contador">', '"cuaderno del contador" es una página']
+    [
+      "Spanish",
+      "/Contador.es.spell",
+      CONTADOR,
+      '<cuaderno "cuaderno del contador">',
+      '"cuaderno del contador" es una página cuaderno'
+    ],
+    [
+      "Spanish, no flag",
+      "/Contador.es.spell",
+      CONTADOR,
+      '<página "cuaderno del contador">',
+      '"cuaderno del contador" es una página'
+    ]
   ])("%s:  compiles the same as its tag file", (_language, path, body, tag, plain) => {
     const tags = compiled(`${tag}\n${body}</>\n`, path)
     const written = compiled(`${plain}\n${body}`, path)
@@ -43,7 +55,9 @@ describe("a page in plain spell", () => {
   test("alone in its file:  its name is read from its head", () => {
     const english = SP.Language.forFile("/x.spell")
     const spanish = SP.Language.forFile("/x.es.spell")
-    expect(SP.alonePageName(`<!-- a comment -->\n"film page" is a notebook page\n\t# Film\n`, english)).toBe("film page")
+    expect(SP.alonePageName(`<!-- a comment -->\n"film page" is a notebook page\n\t# Film\n`, english)).toBe(
+      "film page"
+    )
     expect(SP.alonePageName(`"película" es una página\n\t# Película\n`, spanish)).toBe("película")
     expect(SP.alonePageName(`"one page" is a page\n\t# One\n"two page" is a page\n`, english)).toBeUndefined()
   })
@@ -73,7 +87,7 @@ describe("a drawing in plain spell takes the tag form's shortcuts", () => {
     const { code } = compiled(SHELF_PLAIN, "/Shelf.spell")
     expect(code).toContain('h("ui-segment",')
     expect(code).toContain('h("ui-header", "Films")')
-    expect(code).toContain("core.drawRead(() => this.films, (film) => h(\"ui-text\", () => film.title), { waiting:")
+    expect(code).toContain('core.drawRead(() => this.films, (film) => h("ui-text", () => film.title), { waiting:')
     expect(code).toContain('none: () => h("ui-text", "None")')
   })
 

@@ -1453,9 +1453,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     `for-each=` with `action=` reads as `its "x" is a menu of <list> , each running "..."` (epic `language` P19).
     An app tag's `menu-bar=` is a line ending its body, `- its menu bar is "game menu"` (`menu_bar`).
   - A tag spellx can't read yet is the line's error, `spellx-not-yet`, with its block.
-- A spellx DRAWING's markup (epic `elemental-spell` P7):
-  - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
-    name may hold any letter (`<botón>`).
+- A spellx DRAWING's markup (epic `elemental-spell` P7), and a plain one's too since epic `language` P45 (Q4 A):
+  - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for both of spell's tokenizers), and a tag's
+    name may hold any letter in spellx (`<botón>`).
   - A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
   - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
@@ -1463,11 +1463,18 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     imports Spell UI.
   - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a handler inside an element,
     `spellx-tag-in-markup` (C29).
+    - In plain Spell a bare name nobody has is the web's own element, as written (`<div>`, `<p>`, `<br>`):
+      plain drawings wrote those before they took the shortcuts.
+  - Never in a tag file's `<spell>` chunk, code spell as written (J83):  there `<button>` is the web's.
   - A `<for>` inside an element (epic `language` I19):  its text is read again as a drawing's own lines
     (`SpellxTokenizer.tokenizeDrawingLines()`) and parsed in place, its loop drawn as one of the element's children
     (`SpellJSX.parseLoop()`).
-    - Its head is a phrase to its `>`, as a chain tag's is (`SpellxTokenizer.matchJSXStartTag()`, epic `data` I93):
-      read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never joined it.
+    - Its head is a phrase to its `>`, as a chain tag's is (`Tokenizer.phraseHeadTags`, `for` and `para`;  epic `data`
+      I93):  read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never
+      joined it.
+    - In a plain file (epic `language` P45) its lines are read through the file's tag-form twin
+      (`SpellParser.twinFor(language, "spellx")`), and `BlockLine` twins a line that tokenizer read as a tag
+      (a `SP.SpellxTagToken` or closer at its start), whatever the scope's parser.
 - COMMENTS INSIDE MARKUP, in either form (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to
@@ -1504,6 +1511,25 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
 - A file's CHUNK TREE (`SX.SpellxView`, `spell/parser/spellx`) is built from these same tokens, for the editor, the
   notebook and agents:  no rules, nothing compiled (J30).
+
+## Pages in plain Spell:  `"button api" is a notebook page` (epic `language` P45)
+
+A page's head is a line of plain Spell, its body indented under it, as written in its tag:
+markup, `##` headings, prose lines, examples, code in `<spell>` blocks, its own views.
+
+- The head:  the page's quoted name, then `is a`, its flags, and `page`;  Spanish's `"x" es una página cuaderno`.
+  - Each language's pattern is its `SP.SpellxWords.plainPage`, its groups `name` and `flags`.
+  - Its flags are bare attributes in the language's words, `notebook` and `locked` alone (`PLAIN_PAGE_FLAGS`):
+    `"x" is a locked notebook page`;  any other word, and the line isn't a page's head.
+- It's read as its tag is:  the spellx tokenizer makes it the SAME `SP.SpellxTagToken` as `<page "x" notebook>`,
+  its tag marked `plain` (`readPlainPageHead()`).
+  - Only at a file's left edge;  another head there ends the page before it.
+  - Its indentation closes it:  no closer, and none is missing (`unclosed()` says nothing of a plain frame).
+  - So its body, its twin and what it compiles to are the tag page's, byte for byte.
+- Which form its file is:  a page's plain head at the left edge makes it a page file, read by the spellx parser
+  (`SP.formOfText()`, `PLAIN_PAGE_LINE`).
+- A page alone in its file is named by its head too (`SP.alonePageName()`).
+- The chunk tree marks its template `plain` (`SX.SpellxTemplate.plain`):  the notebook editor locks it by its words.
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 
