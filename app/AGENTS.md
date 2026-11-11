@@ -309,7 +309,8 @@ The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees
       the epic tools read the main checkout's, the kit's
   - its generated files, for `epic worktree merge-main`:  its own `.gitattributes`, and the kit's
     [generators list](../.epic/generators.json5), which lists every folder's
-  - its VS Code settings' `search.exclude` ([settings.json](.vscode/settings.json))
+  - its VS Code settings:  the kit's, [settings.json](../.vscode/settings.json) (epic `epic-engine` P73);
+    its own `.vscode/` keeps only the extension's run and build tasks
   - the parked sagas' tooling, `goals.zip`, at its root
 
 ## Commands
