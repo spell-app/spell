@@ -97,8 +97,8 @@
       "dark": "8px"
     },
     "--bubbly-pill-pad-left": {
-      "light": "12px",
-      "dark": "12px"
+      "light": "6.6px",
+      "dark": "6.6px"
     },
     "--bubbly-pill-pad-right": {
       "light": "10px",
