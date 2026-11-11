@@ -715,7 +715,7 @@ solitaire = Solitaire()
 core.describe_action(Solitaire, "turn_a_stock_card", {"title": "Turn A Stock Card", "undone_as": "Turn Card"})
 
 # Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["N"], "undone_as": "Restart The Game"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["N"], "undone_as": "Restart"})
 # Play every card that can go somewhere, until none can
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
 # Turn up a face-down card from a tableau, at random, onto the discards
@@ -1014,10 +1014,8 @@ solitaire-app {
     flex: 1 0 100%;
     justify-content: center;
   }
-  /* small enough that "Restart The Game" fits beside the others */
   .GameBar > *::part(item) {
-    padding-inline: 0.6em;
-    font-size: 0.85em;
+    padding-inline: 0.65em;
   }
   .GameBar > :not([slot]):nth-of-type(4)::part(item) {
     margin-left: 0.5em;

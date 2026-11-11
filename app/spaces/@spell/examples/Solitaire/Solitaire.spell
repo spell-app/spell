@@ -82,7 +82,7 @@ solitaire is an app
 
 	group "Game Play"
 		// Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-	to restart the game
+	to "restart the game" with title "Restart"
 		shortcut N
 		undoable
 		clear the score
