@@ -160,9 +160,9 @@
       "light": "2px",
       "dark": "2px"
     },
-    "--bubbly-dot-gap": {
-      "light": "3px",
-      "dark": "3px"
+    "--bubbly-dot-color": {
+      "light": "#3a3a444d",
+      "dark": "#dedde64d"
     },
     "--bubbly-depth": {
       "light": "1",

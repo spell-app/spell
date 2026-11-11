@@ -194,10 +194,9 @@
    */
   .bubbly-quantity,
   .bubbly-phrase {
-    --bubbly-dot-gap: 3px;
-    background: linear-gradient(to right, color-mix(in srgb, var(--bubbly-ink) 30%, transparent) 1px, transparent 1px)
-      left bottom / calc(1px + var(--bubbly-dot-gap)) 1px repeat-x;
-    padding-bottom: 2px;
+    --bubbly-dot-color: color-mix(in srgb, var(--bubbly-ink) 30%, transparent);
+    background: linear-gradient(to right, var(--bubbly-dot-color) 1px, transparent 1px) left bottom / 4px 1px repeat-x;
+    padding-bottom: 1px;
   }
 
   /*
