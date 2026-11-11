@@ -294,6 +294,10 @@ Examples are what people and agents copy, so each one shows the current way (Owe
   - Group names in Initial Caps (`group "Game Play"`);  a member made new without its `its`
     (`"stock" is a new stock pile with name "stock"`);  text joined with `&&` (`its rank && "of" && its suit`).
   - A handler's event on its own line, its steps under it.
+  - As the drawn-bubbly page writes it (epic `language` P48):  no colon before a body;  an ability on its type's
+    line (`a "card" is a draggable two sided view`);  a declaration's description the first comment inside it;
+    an action's title on its head line, only where it isn't its name in Initial Caps
+    (`to "say i knew it" with title "I knew it", icon "check"`).
   - A drawing names Spell UI's components bare, `<text>`, `</>` closing any element.
   - No HTML.  Minimal CSS.
 - Separate concerns:  API, UI and custom widgets each in their own files.

@@ -102,7 +102,7 @@ Even the people who own the spaces are written in Spell.
 This is what a person is, from [the people library](spaces/@spell/library/people/) the editor itself uses:
 
 ```spell
-a person is a thing:
+a person is a thing
 	it is saved in its own file
 	it has names as text
 	it has a nickname as text

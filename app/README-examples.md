@@ -1,11 +1,11 @@
 # The example apps, and ideas for yours
 
 ```spell
-// A column, built down from king to ace, red and black in turn
-a "tableau" is a pile:
+a "tableau" is a pile
+	// A column, built down from king to ace, red and black in turn
 	its "layout" is vertical
 	its cards are draggable when the card is face up
-	it is droppable when:
+	it is droppable when
 		if it is empty
 			return the card is a king
 		return its color is not the color of the card and its value is the value of the card + 1
@@ -162,7 +162,7 @@ a calculator has an operator as text
 ```
 
 ```spell
-to clear (a calculator):
+to clear (a calculator)
 	set its input to ""
 	set its output to ""
 	set its left to ""
@@ -298,8 +298,8 @@ Each is one file of Spell and a stylesheet, and each shows one thing the languag
 | [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for day in the days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
 
 ```spell
-// the same mark in all three squares wins
-to check the line from square (a as a number) through (b as a number) to (c as a number):
+to check the line from square (a as a number) through (b as a number) to (c as a number)
+	// the same mark in all three squares wins
 	set mark to the mark of square a of its board
 	if mark is "" return
 	if the mark of square b of its board is mark and the mark of square c of its board is mark
@@ -326,17 +326,15 @@ with `//` comments for a person to read.
 First, what a task IS:
 
 ```spell
-a "task" is a view:
-	it is selectable
-	it is draggable
-	// What to do
+a "task" is a draggable selectable view
 	its "title" is text
-	// Anything else about it
+		// What to do
 	its "notes" is text
+		// Anything else about it
 	its "priority" is one of low, normal or high
 	its "done" is yes or no
-	// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
 	its "order" is number
+		// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
 	it "is done" if its done is yes
 	it "is active" if it is not done
 ```
@@ -354,7 +352,7 @@ a form of its own, bound to the task.
 
 ```spell
 	// A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal
-	to draw it:
+	to draw it
 		<form value={it}>
 			<stack direction="horizontal" spacing="sm">
 				<icon name="grip vertical" color="grey" aria-label="Drag"/>
@@ -380,31 +378,31 @@ a form of its own, bound to the task.
 Then the list, which decides which tasks to show:
 
 ```spell
-a "checklist" is a viewable list of tasks:
-	// What it shows:  every task, the ones still to do, or the ones done
+a "checklist" is a viewable list of tasks
 	its "showing" is one of all, active or done
+		// What it shows:  every task, the ones still to do, or the ones done
 		it "is showing (showing)"
 
-	// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 	its items can be reordered immediately
-	// a drop has moved its tasks:  each keeps its new place
-	when a task is dropped on it:
+		// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
+	when a task is dropped on it
+		// a drop has moved its tasks:  each keeps its new place
 		keep the order
-	// each task, unless the filter hides it
-	to draw each item:
+	to draw each item
+		// each task, unless the filter hides it
 		if it is showing active and the task is done return nothing
 		if it is showing done and the task is active return nothing
 		return draw the task
-	// Its tasks one under the other;  while it's empty, a line saying so
-	to draw it:
+	to draw it
+		// Its tasks one under the other;  while it's empty, a line saying so
 		<stack spacing="xs">
 			<if it is empty>
 				<text color="grey">Nothing to do</text>
 			</if>
 			<children/>
 		</stack>
-	// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time
-	to keep the order:
+	to keep the order
+		// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time
 		for task, place in it
 			set the order of task to place
 ```
@@ -467,7 +465,7 @@ And last, the app:  `task list is an app`, with its checklist, the new task's fi
 
 ```spell
 	// The draft, as a new task at the end of the list;  the field empties
-	to add the draft:
+	to add the draft
 		if the draft is "" return
 		set title to the draft
 		set task to keep a new task titled title of the keeper
@@ -478,9 +476,7 @@ And last, the app:  `task list is an app`, with its checklist, the new task's fi
 
 	// Which tasks the list shows:  the toolbar ticks the one it's showing
 	group "Filter"
-	to show all:
-		titled "All"
-		icon "list"
+	to "show all" with title "All", icon "list"
 		selected when the checklist is showing all
 		set the showing of the checklist to all
 ```
@@ -549,14 +545,14 @@ Each place is an API file of its own, and the app never names one:  it asks its 
 ```spell
 browser storage is stored on this device
 
-a "browser task" is a task:
+a "browser task" is a task
 	it lives in browser storage
-	to throw it away:
+	to throw it away
 		remove it from the browser tasks
 
-a "browser keeper" is a task keeper:
+a "browser keeper" is a task keeper
 	its "kept tasks" is every browser task
-	to keep a new task titled (title as text):
+	to keep a new task titled (title as text)
 		set task to a new browser task with title = title
 		add task to the browser tasks
 		return task
@@ -586,17 +582,15 @@ _Task List in the editor:  the first task is ticked, because the program makes i
 its own `tarea`, in `Tarea.es.spell`, and the same four places, each a `guardián`.
 
 ```spell
-una "tarea" es una vista:
-	es seleccionable
-	es arrastrable
-	// Lo que hay que hacer
+una "tarea" es una vista seleccionable arrastrable
 	su "título" es texto
-	// Cualquier otra cosa sobre ella
+		// Lo que hay que hacer
 	su "nota" es texto
+		// Cualquier otra cosa sobre ella
 	su "prioridad" es uno de baja, normal o alta
 	su "hecha" es sí o no
-	// Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve
 	su "orden" es número
+		// Dónde está en su agenda, desde 1:  se guarda con ella, así que el orden en que la gente arrastra las tareas vuelve
 	"está hecha" si su hecha es sí
 	"está pendiente" si su hecha es no
 ```
@@ -618,7 +612,7 @@ Each is one line, and its rows' fields, in a file of its own:
 Star Wars' as `spell place ingest` wrote it, Wikipedia's by hand.
 
 ```spell
-star wars is a web server at "https://swapi.py4e.com/api":
+star wars is a web server at "https://swapi.py4e.com/api"
 	its id is its "url"
 	its rows are its "results"
 	its next page is its "next"
@@ -626,7 +620,7 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	check it once a day at 5am
 	keep a copy on this device
 
-wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
+wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1"
 	wiki pages live at "/page/summary"
 	a wiki page's id is its "pageid"
 ```
@@ -639,18 +633,18 @@ Say what a field links to, and reading it follows the link.
 What's inside a field is a thing of its own, read in words, `the source of its thumbnail`:
 
 ```spell
-a "character" is a thing:
+a "character" is a thing
 	it lives in star wars
 	its "height" is a number or "unknown"
 	its "hair color" is text
 	its "homeworld" is a planet
 	its "films" is a list of films
 
-a "wiki page" is a thing:
+a "wiki page" is a thing
 	it lives in wikipedia
 	its "thumbnail" is a thumbnail
 
-a "thumbnail" is a thing:
+a "thumbnail" is a thing
 	its "source" is text
 ```
 
@@ -694,14 +688,14 @@ So [Solitaire.spell](spaces/@spell/examples/Solitaire/Solitaire.spell) is only t
 the solitaire itself, how a click or a drag plays a card, and its kinds of pile, each saying what it may take or give up.
 
 ```spell
-solitaire is an app:
+solitaire is an app
 	its "score" is a number
-	// Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
 	its "hint" is text
+		// Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
 	"deck" is a new deck
 
-	// One of each, made with the solitaire
 	group "Piles"
+		// One of each, made with the solitaire
 	"stock" is a new stock pile with name "stock"
 	"discards" is a new discard pile with name "discards"
 	"clubs" is a new foundation with name "clubs", suit = clubs
@@ -729,7 +723,7 @@ solitaire is an app:
 The deal is a loop with a pause in it, so you watch it happen:
 
 ```spell
-to deal the cards:
+to deal the cards
 	for card in its deck
 		set start pile to the pile of the card
 		turn the card face down
@@ -800,10 +794,10 @@ Spell reads Spanish too, a file at a time, by its name:  `Solitario.es.spell` is
 its own `Carta`, `Mazo` and `Pila`, as Solitaire has its `Card`, `Deck` and `Pile`, so all of it reads in Spanish.
 
 ```spell
-// una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados
-una "columna" es una pila donde:
+una "columna" es una pila
+	// una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados
 	puede soltar una carta si: la carta está boca arriba
-	puede tomar una carta si:
+	puede tomar una carta si
 		si la columna está vacía
 			devolver la carta es un rey
 		devolver su color no es el color de la carta y su valor es el valor de la carta + 1
@@ -835,7 +829,7 @@ _Solitario open in the editor, dealt:  the same board, its menu in Spanish, draw
 
 ## A square:  empty, or holding an X or an O
 // "view" means each square shows itself on the page, here as a button
-a "square" is a view where:
+a "square" is a view
 	its "mark" is text
 	it "is empty" if its mark is ""
 ```

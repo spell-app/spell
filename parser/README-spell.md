@@ -1,9 +1,9 @@
 # Spell:  what the language can say
 
 ```spell
-a "card" is a view:
+a "card" is a view
 	its "suit" is one of clubs, diamonds, hearts or spades
-	its "color" is:
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 
@@ -120,7 +120,7 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 | The outline's line | The sentence | Both compile to |
 | --- | --- | --- |
 | `its "suit" is one of clubs, diamonds, hearts or spades` | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = [...]`, and a `suit` declared as one of them |
-| `its "color" is:`, then one value a line | `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` | `get color()`, worked out each time it's read |
+| `its "color" is`, then one value a line | `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` | `get color()`, worked out each time it's read |
 | `it "is a face card" if its rank is jack, queen or king` | `a card "is a face card" if its rank is one of jack, queen or king` | `get isAFaceCard()` |
 | `it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
 
@@ -153,9 +153,40 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
   a sentence names both.
 - A file may mix the two:
   in [Solitaire's game](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spell), one block of plain Spell holds its play, `to play a card`, a sentence,
-  and what a pile does while a card is dragged over it, an outline under `a pile:`.
+  and what a pile does while a card is dragged over it, an outline under `a pile`.
 - That the two compile the same is a test's job, [outline.test.ts](tests/spell/parserTests/outline.test.ts),
   not a hope.
+
+## A line, and what's under it
+
+A line with lines indented under it needs no colon:  what's under it is its body.
+
+```spell
+a "card" is a draggable two sided view, aka "playing card"
+	its score is a number, starting at -1
+	its "direction" is one of up or down, with default down
+	its "state" is
+		// Its short name:  Q♠↓ is the queen of spades, face down
+		return its rank && its suit
+	to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"
+		undoable
+		print "dealt"
+```
+
+- `a "card" is a draggable two sided view`:  an ability is a word before the template.
+  `clickable`, `selectable` and `droppable` are the others;  `it is draggable` under it says the same.
+- A declaration's description is the first comment inside its body, `// Its short name`:
+  hovered in an editor, and written above it in the code, `/** Its short name ... */`.
+  - A line with no body takes one holding just the comment:  `its "hint" is text`, then `// Said beside the score`.
+  - A comment right above a declaration still describes it, when nothing under it does.
+- The line that declares a thing can say more about it, after a comma:
+  - a template's short name, `, aka "playing card"`
+  - a property's start, `, starting at -1`, and a list's first value, `, with default down`
+  - an action's title, icon, shortcuts and undo, its name in quotes:  `to "deal the cards" with title "Deal", ...`
+  - The lines that say the same under it still read.
+- A colon still reads where one is written:  `a game:`, `its "color" is one of red, black:`.
+- Spanish, the same lines its own way:  `una "carta" es una vista reversible arrastrable`, `, alias "carta"`,
+  `, empezando en -1`, `, por defecto abajo`, `para "repartir las cartas" con título "Repartir", icono "carta", atajo "meta+N"`.
 
 ## The whole language, module by module
 
@@ -226,8 +257,9 @@ and the JavaScript they become.
 - After `a card is a thing`, "card" is a word every line knows, in every file of the project:
   each template a project declares is known before its first line is read, so a line may use one declared further down.
 - A stored property is declared with its choices;  a worked-out one is a getter, read when you ask for it.
-  - A worked-out one can have choices too:  `its "color" is one of red, black:`, its value lines indented under it,
+  - A worked-out one can have choices too:  `its "color" is one of red, black`, its value lines indented under it,
     then its aliases under those, each bulleted with `- ` so it reads as an alias, not a value.
+    - With nothing but its aliases or a comment under it, it's stored:  its value lines make it worked out.
 - A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
   - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
   - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for card rank in card ranks`.
@@ -295,12 +327,12 @@ Its first line is how you call it, with each blank's type in brackets:
   A worked-out property's body does the same.
 
   ```spell
-  a bill is a thing:
+  a bill is a thing
   	it has an amount as a number
-  	to double it:
+  	to double it
   		set twice to its amount * 2
   		twice + 1
-  	its "doubled" is:
+  	its "doubled" is
   		double it
   ```
 
@@ -334,14 +366,14 @@ Its first line is how you call it, with each blank's type in brackets:
 - A getter may wait too, with no new words:
 
   ```spell
-  a game is an app:
+  a game is an app
   	it has a score as a number
-  	its "total" is:
+  	its "total" is
   		pause for 1 sec
   		return the score + 1
-  	to go it:
+  	to go it
   		print the total
-  	to draw it:
+  	to draw it
   		<div>Total: {the total}</div>
   ```
 
@@ -357,8 +389,8 @@ Its first line is how you call it, with each blank's type in brackets:
 - To not wait, say so, in JavaScript, TypeScript and Python alike:
 
   ```spell
-  to deal in a burst:
-  	at the same time:
+  to deal in a burst
+  	at the same time
   		move the first card to the pile
   		move the second card to the pile
   	meanwhile load the scores
@@ -396,7 +428,7 @@ Its first line is how you call it, with each blank's type in brackets:
 - An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
 
   ```spell
-  	to turn it over:
+  	to turn it over
   		shortcut meta+T
   		enabled when it is face down
   		undoable as "Turn Card"
@@ -405,20 +437,24 @@ Its first line is how you call it, with each blank's type in brackets:
 
   - `shortcut` (once per key), `enabled when`, `selected when`, `undoable`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
-  - `titled "Compile and Run"` is its title in menus, key tooltips and the Inspector, where its words aren't it;
+  - Its title in menus, key tooltips and the Inspector is its words in Initial Caps:  `to turn it over` is Turn It Over.
+  - `titled "Compile and Run"` says another, where its words aren't it;
     a fill-in follows the program, `titled "Duplicate [the project name]…"`.
+  - Or its head line says it, its name in quotes:
+    `to "compile and run" with title "Run", icon "play", shortcut "meta+R"`, and `undoable` too.
+    The same action, whichever way it's said.
     - In another language:  its words there come from the program's names dictionary in that language,
       `spell translate`'s, written into a words file of titles (`Editor.es.js`), which a host hands the core
       (`core.useTitles()`).
   - They're the template's data, kept beside the class:
-    `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
+    `core.describeAction(Card, "turnOver", { title: "Turn It Over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.
   - Its shortcut runs it while it's enabled, from the focused thing up to the app;
     run any way, an action `undoable as "Turn Card"` is one undo step, and the app's undo then reads `Undo Turn Card`.
   - A template's MENU lists its actions, and the app's own `undo` and `redo`, `"-"` a line between groups:
 
     ```spell
-    solitaire is an app:
+    solitaire is an app
     	its "game" menu has actions "deal", "-", "undo" and "redo"
     	its menu bar is "game menu"
     ```
@@ -430,7 +466,7 @@ Its first line is how you call it, with each blank's type in brackets:
       a menu's own title comes last, `titled "File"`:
 
       ```spell
-      editor is an app:
+      editor is an app
       	its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
       	its "more examples" menu has its examples, each running "open (an example)"
       	its "bar" menu has menus "file" and "edit"
@@ -468,7 +504,7 @@ A property can say what it measures, and Spell converts it.
 The kinds of measure are dimensions, and their units are written in Spell.
 
 ```spell
-a person is a thing:
+a person is a thing
 	its "height" is a length in cm
 	its "mass" is a weight in kg
 
@@ -495,7 +531,7 @@ print 2' 3 1/2" in cm
 - A program declares its own the same way:
 
   ```spell
-  data size is a dimension:
+  data size is a dimension
   	its base is "byte", aka "B"
   	one "kilobyte", aka "KB", is 1000 B
   ```
@@ -511,7 +547,7 @@ the card at the top draws as `<solitaire-card>`.
 A project's stylesheet reaches inside it too, so `.card .title` styles what the card draws.
 
 ```spell
-a "tableau" is a pile where:
+a "tableau" is a pile
 	<css>
 		::slotted(:not(:last-child)) {
 			height: 2.6rem;
@@ -780,7 +816,7 @@ A SITE lists a program's pages, each at an address, and the dialogs and sidebars
 The pages never name their addresses:  the site does, so a page moves without its file changing.
 
 ```spell
-galaxy guide is a site at "owen@spell/galaxy":
+galaxy guide is a site at "owen@spell/galaxy"
 	it has a films page at "/films", named "Films"
 		it has a film page at "/films/:film"
 	it has a settings dialog
@@ -794,7 +830,7 @@ galaxy guide is a site at "owen@spell/galaxy":
 - A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
 
 ```spell
-galaxy guide is a site:
+galaxy guide is a site
 	it has a home page at "/", named "Home"
 	it has a system notices sidebar
 	it has an inbox page at "/my-inbox", named "My Inbox", live "https://example.com/inbox"
@@ -816,7 +852,7 @@ Every move names the page, never its address:
 A page says what it must let people do before it's laid out, first in its own declaration:
 
 ```spell
-film page is a page:
+film page is a page
 	<stories>
 		<story "S1" done>read the film's opening crawl</story>
 		<story "S2" done>
@@ -1225,24 +1261,24 @@ These guides need a checkout with the epic folder beside it, and the page server
 A program says once where its data lives, and which types live there, then writes what it writes for things in memory.
 
 ```spell
-family cookbook is a web server at "https://api.example.com/v1":
+family cookbook is a web server at "https://api.example.com/v1"
 	check it every 30 seconds
 
-a "recipe" is a thing:
+a "recipe" is a thing
 	it lives in family cookbook
 	its "title" is text
 
-recipe box is an app:
+recipe box is an app
 	its "search" is text
 	its "matches" is every recipe where its title includes the search, sorted by its title
-	to draw it:
+	to draw it
 		for recipe in the matches
 			draw the recipe
-		while waiting:
+		while waiting
 			<ui-loader/>
-		if there are none:
+		if there are none
 			<ui-text>No recipes yet.</ui-text>
-		if that fails:
+		if that fails
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 

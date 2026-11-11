@@ -1,9 +1,9 @@
 # Spell
 
 ```spell
-a "card" is a view:
+a "card" is a view
 	its "suit" is one of clubs, diamonds, hearts or spades
-	its "color" is:
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 

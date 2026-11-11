@@ -1,8 +1,8 @@
 # Output targets:  one program, three languages, the same output
 
 ```spell
-a "card" is a view:
-	- its "suit" is one of clubs, diamonds, hearts or spades
+a "card" is a view
+	its "suit" is one of clubs, diamonds, hearts or spades
 ```
 
 That second line, as JavaScript:
@@ -210,11 +210,11 @@ The editor keeps the people and orgs of its "You" panel as Spell,
 in [People.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/library/people/People.spell):
 
 ```spell
-a person is a thing:
-	- it is saved in its own file
-	- it has names as text
-	- it has a nickname as text
-	- its "emails" is a list of text
+a person is a thing
+	it is saved in its own file
+	it has names as text
+	it has a nickname as text
+	its "emails" is a list of text
 ```
 
 Its project file asks for `"targets": ["ts/lib"]`, and the compile writes

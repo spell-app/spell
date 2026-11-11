@@ -177,14 +177,14 @@ From [fileLanguage.test.ts](tests/spell/languages/fileLanguage.test.ts), an Engl
 ## File Player.spell
 a player is a thing
 a player has a score as a number
-to reset a player:
+to reset a player
 	set the score of the player to 0
 ```
 
 ```spell
 ## File Equipo.es.spell
 un equipo es una lista de players
-para preparar un equipo:
+para preparar un equipo
 	el p es un nuevo player
 	reset el p
 	agregar el p al equipo

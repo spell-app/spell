@@ -301,9 +301,9 @@ Declare a template a `view`, and each of its things draws as a custom element of
 Here's the card, every line of it;  in an app named `solitaire`, it draws as `<solitaire-card>`:
 
 ```spell
-a "card" is a view:
+a "card" is a view
 	its "suit" is one of clubs, diamonds, hearts or spades
-	its "color" is:
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 

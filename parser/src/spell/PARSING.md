@@ -859,6 +859,15 @@ A kind that says so is saved in a file of its own.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 
+### What's indented under a line
+
+- While `BlockLine.parse()` reads a line's statement, `SpellStatement.below` is the block indented under it
+  (epic `language` P48):  so a line with no colon at its end can say whether it takes that block as its body.
+  - `reopen_type`:  `a pile`, with code under it, re-opens the type.
+  - `property_value_getter`:  `its "color" is one of red, black`, with value lines under it, is worked out (T93).
+  - Rules read it through `SpellStatement.blockBelow()` / `hasCodeBelow()`, which note that they did:
+    the line's `data.readsBelow`, so `BlockLine.reparseBody()` re-parses the line whole when its body changes.
+
 ## A property's list of values:  `- it is locked` (epic `language` P39)
 
 A property with a list of values keeps it on its record, `P.ScopeVariable.listedValues`, however it got one:
@@ -885,12 +894,12 @@ a line of the built-in types table, a built-in template, or a project's own `one
   In them, `it` / `its` mean that type, e.g.
 
   ```spell
-  a card is a thing where:
-  	- it has a name as text
-  	- its "suit" is one of clubs, diamonds, hearts or spades
-  	- it "is a (suit)" for its suits
-  	- its "color" is red if its suit is either diamonds or hearts otherwise it is black
-  	- it belongs to a pile
+  a card is a thing
+  	it has a name as text
+  	its "suit" is one of clubs, diamonds, hearts or spades
+  	it "is a (suit)" for its suits
+  	its "color" is red if its suit is either diamonds or hearts otherwise it is black
+  	it belongs to a pile
   ```
 
   - It compiles EXACTLY as the same lines in the sentence style do (`a card has a name as text` ...).
@@ -911,7 +920,8 @@ a line of the built-in types table, a built-in template, or a project's own `one
 - Re-opening a type (P11):  `a game:`, then a body, adds to a type declared elsewhere, in the same file or a later one.
   - Its rule:  [`reopen_type`](rules/classes/ReopenType.ts), a `TypeDeclaration` with no class of its own.
     Its body's lines compile beside it, as the sentence style's would.
-  - The colon stays required:  a lone `a game` is a fragment.
+  - Its colon may be left out when code is indented under it (epic `language` P48):  `a game`, then its lines.
+    A lone `a game`, nothing under it, is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
     That's `TypeDeclaration.refuseTakenNames()`.
@@ -979,6 +989,16 @@ a line of the built-in types table, a built-in template, or a project's own `one
     - e.g. `one of ...`, `a number`, `yes or no`, `a list of people`
   - A declaration names them without quotes:  `Rule.declaredText()`.
     - `SubjectRule` also overrides it:  `card`, not `it`.
+- An ABILITY may be a word before the template, on the type's own line (epic `language` P48):
+  `a "card" is a draggable two sided view`, `a "pile" is a droppable viewable list of cards`.
+  - The same flag as `it is draggable` in its body:  `static draggable = true`, first among its body's statements
+    (`TypeDeclaration.abilitiesOf()`, which `Block.getAST()` asks for).
+  - `{ability:draggable_or_droppable}*`, so several:  `a clickable selectable thing`.
+  - Spanish's come after the template, as its adjectives do:  `una "carta" es una vista reversible arrastrable`,
+    `una "pila" es una lista visible soltable de cartas`.
+- A type's line may say its short name last (P48, Q6):  `a "playing card" is a thing, aka "card"`
+  (Spanish `, alias "carta"`);  a property's start and default too:  `its score is a number, starting at -1`,
+  `its direction is one of up or down, with default down` (Spanish `, empezando en`, `, por defecto`).
 - Bullets:  on ANY line, a starting `- ` is dropped before the statement is read.
   - That's `BlockLine.isBullet()`.
   - The `-` stays a token of the line's match, so editors see it.
@@ -1013,6 +1033,14 @@ a line of the built-in types table, a built-in template, or a project's own `one
       Its scope is a `MethodScope` whose `thingName` is `it`;  the rules that write the thing read it while parsing.
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
     `- undoable as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
+    - Or on its head line, its name quoted (epic `language` P48, Q6):
+      `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`, and `undoable`.
+      Each is an [`action_modifier`](rules/methods/ActionModifier.ts), after `with`, a comma or `and` between;
+      `ActionDetail.detailsOf()` reads them first, then the body's lines.
+      Its declaration names it without its quotes (`ToDoSomething.getDeclaration()`).
+    - Its title, said nowhere, is its words in Initial Caps (P48):  `to auto play` is `Auto Play`, written into
+      `core.describeAction()`;  the core's own fallback, for an action or menu described with nothing, is the same
+      (`wordsOf()`, `initialCaps()` from `spell/util`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
@@ -1230,9 +1258,13 @@ plain Spell.
 - A stored property's line said with `its` that stops short of its line isn't one (epic `data` I1):
   `- its "high cards" is cards in its cards where ...` reads `is cards` as well as a getter would, and outranks it.
   So `define_property_has` turns it down, and `property_value_getter` takes the whole line.
-- A worked-out value from a list of ITS OWN:  `- its "color" is one of red, black:`, then its value lines.
-  - `property_value_getter` with a `{specifier:outline_specifier_enum}` and a required `:`;  at `Priority.declaration`,
+- A worked-out value from a list of ITS OWN:  `its "color" is one of red, black`, then its value lines.
+  - `property_value_getter` with a `{specifier:outline_specifier_enum}`;  at `Priority.declaration`,
     so it beats `define_property_has`, which would read all but the colon.
+  - Its colon may be left out (epic `language` T93, P48):  then the line is worked out only when VALUE lines are
+    indented under it (`red if ...`, not a member's `it ...` line, not comments alone), and it outranks the stored
+    property's line, which reads the same words (`Priority.aboveDeclaration`).
+    - It asks `SpellStatement.blockBelow()` -- see "What's indented under a line", below.
   - Its list is declared as a stored property's (`DefinePropertyHas.declareEnumeration()`):  the class variable,
     the kind, the constants.  `static Colors = [...]`, then the getter.
   - Its BULLETED lines are its members, not its body:  `PropertyValueGetter.parseNestedBlock()` splits the block,
@@ -2367,8 +2399,17 @@ sidebars any of them opens.
   - So a statement's output doesn't depend on its depth.
 - A DECLARATION's docstring compiles as one `/** ... */`, in place of its `//` lines.
   - See `getDocComments()`, in [Block.ts](rules/Block.ts).
-  - The docstring:  the comment-only lines directly above it, else the comments on its own line
-    (one in code spell).
+  - Its description is the first line under it, when that's a comment (epic `language` P48):
+    `its "state" is`, then `// Its short name`, then its lines.
+    - Its body's first line:  `SpellStatement.parseNestedBlock()` marks the body `describes`, and its `getAST()`
+      leaves that line out, as it's written above the declaration.
+    - Else the first line of a block indented under it that no line took:  a line with its body on it
+      (`its "name" is its rank && "of" && its suit`), or one that takes none (`its "hint" is text`, `group "Names"`).
+      A block of comments alone under a line with an inline body is its description, never a second body
+      (`commitStatement()`).
+    - A group's description too (`groupOpenedBy()`), which its first member's declaration carries.
+  - Else, as before:  the comment-only lines directly above it, else the comments on its own line
+    (one in code spell).  So a file written before still compiles as it did.
   - It goes above the `SPELL: DECLARES` comment:  after any `/* SPELL: added rule ... */` notes the statement makes.
   - A `##` heading is part of it only if DIRECTLY above.
     One followed by a regular comment compiles as a `// ## heading` banner.

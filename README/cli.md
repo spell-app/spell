@@ -575,10 +575,10 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spell:19
+app/spaces/@spell/examples/Solitaire/Card.spell:18
 
 Spell
-    its "color" is one of red, black:
+    its "color" is one of red, black
       red if it is a diamond or it is a heart
       black otherwise
 ```

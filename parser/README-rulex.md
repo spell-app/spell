@@ -198,10 +198,10 @@ The card on [the kit's front page](https://github.com/spell-app/spell/blob/main/
 Here are the lines behind two of them:
 
 ```spell
-a "card" is a view:
-	- its "rank" is one of ace, 2 ... 10, jack, queen, king
-	- it "is a face card" if its rank is jack, queen or king
-	- it "is a (rank)"
+a "card" is a view
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	it "is a face card" if its rank is jack, queen or king
+	it "is a (rank)"
 ```
 
 _Four of the card's ten lines, the rest left out._

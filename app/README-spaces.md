@@ -500,14 +500,14 @@ People and organizations are things in Spell too, declared in Spell, in the peop
 Here is what an organization is, and what it means to belong to one:
 
 ```spell
-an org is a thing where:
-	- it is saved in its own file
-	- it has a name as text
-	- its "members" is a list of memberships
+an org is a thing
+	it is saved in its own file
+	it has a name as text
+	its "members" is a list of memberships
 
-a membership is a thing where:
-	- it has a person as a person
-	- its "role" is one of viewer, editor, manager, spell-admin, guest, member, admin
+a membership is a thing
+	it has a person as a person
+	its "role" is one of viewer, editor, manager, spell-admin, guest, member, admin
 ```
 
 _From [People.spell](spaces/@spell/library/people/People.spell), the whole people library:
