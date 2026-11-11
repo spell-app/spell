@@ -328,13 +328,6 @@
     .bubbly-group > .bubbly-head {
       border-top-left-radius: 0;
     }
-    /* ... and its rail, over its parent's, adds to it:  a darker purple, so the group shows on the rail (Owen) */
-    .bubbly-group > :is(.bubbly-gutter, .bubbly-foot) {
-      mix-blend-mode: multiply;
-    }
-    :where(.ui-dark) & .bubbly-group > :is(.bubbly-gutter, .bubbly-foot) {
-      mix-blend-mode: screen;
-    }
   }
 
   /****** a declaration with no body:  its band alone, every corner round ******/
