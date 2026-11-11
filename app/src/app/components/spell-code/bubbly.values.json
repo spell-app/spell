@@ -153,8 +153,8 @@
       "dark": "\"Times New Roman\", Times, serif"
     },
     "--bubbly-quote-size": {
-      "light": "26px",
-      "dark": "26px"
+      "light": "20px",
+      "dark": "20px"
     },
     "--bubbly-quote-room": {
       "light": "15px",
@@ -165,8 +165,8 @@
       "dark": "15deg"
     },
     "--bubbly-dot-color": {
-      "light": "#3a3a444d",
-      "dark": "#dedde64d"
+      "light": "#3a3a441a",
+      "dark": "#dedde61a"
     },
     "--bubbly-depth": {
       "light": "1",
