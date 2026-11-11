@@ -77,7 +77,7 @@ describe("BubblyMarks.of()", () => {
       "      input:  queen, king",
       "      input:  king",
       "    action:  to draw its front",
-      "      input:  front",
+      "      input:  draw its front",
       "      bracket:  if it is face up",
       '      input:  blue">{its rank}</text>'
     ])

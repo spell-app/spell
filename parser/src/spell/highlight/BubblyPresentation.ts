@@ -1,6 +1,16 @@
 import type { P } from "spell/parser/parser"
 import type { BubblyRulePresentation } from "./highlight.types"
 
+/** The rules of an action's parameters, `(a card)`, `(x as text)`, `a card`. */
+const METHOD_PARAMS = [
+  "bare_type_arg",
+  "type_method_arg",
+  "typed_method_arg",
+  "var_method_arg",
+  "valued_var_method_arg",
+  "with_props_arg"
+] as const
+
 /****************
  * ### `BubblyPresentation`
  * How each rule presents in the bubbly look:  ONE table, by rule name, read by everything that draws it.
@@ -27,6 +37,12 @@ export class BubblyPresentation {
     create_viewable_list_type: { head: "thing", inputs: ["quoted_type"] },
     create_one_of_a_kind: { head: "thing" },
     reopen_type: { head: "thing" },
+    // places and sites:  `family cookbook is saved in the cloud`, `galaxy guide is a site`
+    create_place: { head: "thing" },
+    saved_in_the_cloud: { head: "thing" },
+    stored_on_this_device: { head: "thing" },
+    projection_of: { head: "thing" },
+    create_site: { head: "thing" },
 
     // properties:  `its "rank" is one of ace, 2 ... 10`, `its "state" is`, `it "is a face card" if ...`
     define_property_has: { head: "property", inputs: ["quoted_member"], choices: ["identifier_list"] },
@@ -35,16 +51,24 @@ export class BubblyPresentation {
     quoted_property_formula: { head: "property", inputs: ["text"] },
     define_menu: { head: "property", inputs: ["quoted_member"] },
     belongs_to_one: { head: "property" },
+    // `it is droppable when ...`, `it has a films page at "/films"`
+    list_guard: { head: "property" },
+    site_page: { head: "property" },
 
-    // actions and handlers:  `to deal the cards`, `to draw its front`, `when its score changes`, `on click`
+    // actions and handlers:  `to deal the cards`, `to draw its front`, `when its score changes`, `on click`;
+    // an action's head:  everything after `to` is what a person typed, its parameters aside (Owen, 2026-11-11)
     to_do_something: {
       head: "action",
       headWhen: { group: "asTest", partOfSpeech: "plain" },
-      inputs: ["method_keyword"]
+      inputs: ["method_keyword"],
+      typedAfterLead: true,
+      params: METHOD_PARAMS
     },
-    draw_it: { head: "action", inputs: ["member_words"] },
+    draw_it: { head: "action", inputs: ["member_words", "draw_method"], typedAfterLead: true },
     on: { head: "action" },
     drag_handler: { head: "action" },
+    // what runs as a thing is made:  `when creating` Spell's words, its type a reference, `when creating a deck`
+    create_hook: { head: "action", plain: ["method_keyword"] },
 
     // the rest:  groups, settings
     define_group: { head: "plain", isGroup: true, inputs: ["text"] },
@@ -60,6 +84,10 @@ export class BubblyPresentation {
     else_if: { isControl: true },
     else: { isControl: true },
     repeat_n_times: { isControl: true },
+    list_iteration_named_for_list: { isControl: true },
+    while_waiting: { isControl: true },
+    if_that_fails: { isControl: true },
+    if_there_are_none: { isControl: true },
 
     ////////////////
     // ## In a step

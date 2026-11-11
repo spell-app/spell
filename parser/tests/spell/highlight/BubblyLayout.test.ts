@@ -78,10 +78,55 @@ describe("SP.BubblyLayout", () => {
       '"is a face card"',
       '"Drawing"',
       '"picture"',
-      "front",
+      "draw its front",
       '"blue"'
     ])
     expect(piecesOf(drawing, "choice")).toEqual(["ace", "2 ... 10", "jack", "queen", "king"])
+  })
+
+  it("draws everything after an action's `to` as what a person typed, its parameters aside", () => {
+    const heads = (text: string, parser?: SP.SpellParser) => {
+      const laidOut = SP.BubblyLayout.of(text, parser)
+      return blocksOf(laidOut.nodes)
+        .slice(1)
+        .map((block) => block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`))
+    }
+    const deck = [
+      'a "deck" is a list of cards',
+      "\tto test a new deck",
+      "\t\tprint 1",
+      "\tto draw it",
+      "\t\t<text>deck</text>",
+      "\tto move (a card) to (a pile)",
+      "\t\tprint 1"
+    ].join("\n")
+    expect(heads(deck)).toEqual([
+      ["words:to ", "input:test a new deck"],
+      ["words:to ", "input:draw it"],
+      [
+        "words:to ",
+        "input:move",
+        "words: (a ",
+        "first-mention:card",
+        "words:) ",
+        "input:to",
+        "words: (a ",
+        "first-mention:pile",
+        "words:)"
+      ]
+    ])
+  })
+
+  it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {
+    const deck = ['a "card" is a thing', 'a "deck" is a list of cards', "\twhen creating a deck", "\t\tprint 1"].join(
+      "\n"
+    )
+    const hook = blocksOf(SP.BubblyLayout.of(deck).nodes).find((block) => block.rule === "create_hook")!
+    expect(hook.partOfSpeech).toBe("action")
+    expect(hook.head.pieces.map((piece) => `${piece.kind}:${deck.slice(piece.start, piece.end)}`)).toEqual([
+      "words:when creating a ",
+      "first-mention:deck"
+    ])
   })
 
   it("draws references bold, a name's first mention apart from its later uses, and pronouns plain", () => {

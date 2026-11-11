@@ -310,10 +310,53 @@ export class BubblyLayout {
   }
 
   /** A head's inputs and choices, over what its spans said. */
-  private paintHead({ statement, row }: Head) {
+  private paintHead(head: Head) {
+    const { statement, row } = head
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
+    if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
+  }
+
+  /**
+   * An action head's words after its first, to the end of its last input, as ONE pill (`typedAfterLead`):
+   * each stretch between its parameters, its own spaces at either end left out.
+   */
+  private paintTyped({ statement, row, partOfSpeech }: Head) {
+    const { text } = this
+    const lead = /^\S+\s*/.exec(text.slice(statement.start!, statement.end!))
+    if (!lead) return
+    const inputs = descendantsNamed(statement, row.inputs)
+    // a test's words are all its name:  nothing in it is a parameter
+    const params =
+      partOfSpeech === "action" ? descendantsNamed(statement, row.params).map((param) => this.bracketed(param)) : []
+    const end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
+    let from = statement.start! + lead[0].length
+    for (const param of [...params.filter((each) => each.start < end), { start: end, end }].sort(
+      (a, b) => a.start - b.start
+    )) {
+      const words = text.slice(from, param.start)
+      const trimmed = words.trim()
+      if (trimmed) {
+        const at = from + words.indexOf(trimmed)
+        this.paintRange(at, at + trimmed.length, "input")
+      }
+      from = Math.max(from, param.end)
+    }
+  }
+
+  /** `param`'s stretch, with the brackets round it if it has them:  `(a card)`. */
+  private bracketed(param: P.Match): { start: number; end: number } {
+    const { text } = this
+    let start = param.start!
+    let end = param.end!
+    while (start > 0 && text[start - 1] === " ") start--
+    if (text[start - 1] === "(") start--
+    else start = param.start!
+    let after = end
+    while (text[after] === " ") after++
+    if (text[after] === ")") end = after + 1
+    return { start, end }
   }
 
   /** One of a list's values, a pill of its own:  its words, not the `,` or `or` its item may hold. */
