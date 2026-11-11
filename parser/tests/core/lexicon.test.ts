@@ -108,9 +108,9 @@ describe("spellTypeFor()", () => {
         '// Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records\' shape, as Spell says it.',
         '// - "status" holds at most 32 bytes:  Spell says lengths in letters',
         'a "status" is a thing:',
-        '\t- it is published as "xyz.statusphere.status"',
-        '\t- its "status" is required text, with maximum length 1',
-        '\t- its "created at" is a required date',
+        '\tit is published as "xyz.statusphere.status"',
+        '\tits "status" is required text, with maximum length 1',
+        '\tits "created at" is a required date',
         ""
       ].join("\n")
     )
@@ -138,12 +138,12 @@ describe("spellTypeFor()", () => {
       }
     }
     expect(spellTypeFor(fields).source.split("\n").slice(3, -1)).toEqual([
-      '\t- its "name" is required text, with maximum length 40',
-      '\t- its "nick" is text, with minimum length 2',
-      '\t- its "mood" is one of happy or sad',
-      '\t- its "count" is a required integer',
-      "\t- its name must be at least 2 letters long",
-      "\t- its mood must not be empty"
+      '\tits "name" is required text, with maximum length 40',
+      '\tits "nick" is text, with minimum length 2',
+      '\tits "mood" is one of happy or sad',
+      '\tits "count" is a required integer',
+      "\tits name must be at least 2 letters long",
+      "\tits mood must not be empty"
     ])
   })
 

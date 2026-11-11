@@ -9,7 +9,7 @@ import {
 } from "spell/app/spaces/models/starterProjects"
 
 /**
- * What a new project starts as:  each compiles as it is, and has a drawing to add things to.
+ * What a new project starts as:  each compiles as it is, in plain Spell, and has a drawing to add things to.
  */
 describe("the starter programs", () => {
   beforeAll(registerTestComponentPack)
@@ -19,7 +19,9 @@ describe("the starter programs", () => {
       const text = contents("A Title")
       const [file] = parseSpellProject([{ path: `/${fileName}`, contents: text }]).files
       expect(file!.errors).toEqual([])
-      expect(text).toContain("<ui-container>")
+      expect(text).toContain("<container>")
+      // plain Spell:  no tag at a line's start but its drawing's
+      expect(text).not.toMatch(/^<\w/m)
     })
   }
 })

@@ -109,7 +109,8 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   - `PlaceIngest` runs the steps;  `PlaceLook`, a look per kind of place (`PlaceLookOthers`, those of a room, a data folder or a file, an Airtable, an atmosphere account);
     `PlaceInLanguage` hands what it wrote to the `Translator`, for a file in another language;  `PoliteReader`, everything it sends, which can't write;
     `PlaceShape`, what rows show;  `PlaceReading`, what the agent reads in samples;  `PlaceSpell`, the Spell, and merging a later look,
-    into a file in either shape (a new one is written in tags, epic `language` P40).
+    into a file in either shape (a new one is written in plain Spell since epic `language` P46, each member bare;
+    in tags from P40 till then).
   - Everything else is handed in (`IngestSettings`):  `fetch`, `ClaudeRunner`, files, the question, the read through the Spell.
   - Imported by path, never through the barrel:  `spell/parser/spell/ingest/PlaceIngest`.
 - `highlight/`:  `SpellHighlighter`.

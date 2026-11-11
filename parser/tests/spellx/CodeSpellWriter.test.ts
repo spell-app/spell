@@ -28,7 +28,7 @@ describe("CodeSpellWriter", () => {
   // plain Spell reads a drawing's shortcuts too (epic `language` P45):  the writer keeps them as written
   test("a drawing's shortcuts kept as written:  `<text>back</>`, and it compiles the same", () => {
     const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), { path: "/FlipTile.spellml" })
-    expect(written).toMatch(/\t- to draw its back:\n\t\t<text>back<\/(text)?>\n/)
+    expect(written).toMatch(/\tto draw its back:\n\t\t<text>back<\/(text)?>\n/)
     expect(written).not.toContain("<ui-")
   })
 
@@ -43,15 +43,17 @@ describe("CodeSpellWriter", () => {
     expect(fromSpellx.code).toBe(twin.code)
   })
 
-  test("a member is bulleted, its details and aliases under it, a closer gone", () => {
+  // plain Spell writes a member bare (epic `language` P46):  no `- `, its details and aliases bare too
+  test("a member is bare, its details and aliases under it, a closer gone", () => {
     const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), {
       shortcuts: "spelled out",
       path: "/FlipTile.spellml"
     })
     expect(written).toContain('a "flip tile" is a view:\n\t// A tile that shows one side at a time.\n')
-    expect(written).toContain('\t- its "side" is one of up, down\n\t\t- it "is showing (side)"\n')
-    expect(written).toContain("\t// Turns it over.\n\t- to flip it:\n\t\t- shortcut meta+F\n")
-    expect(written).toContain("\t- on mouse down: flip it\n")
+    expect(written).toContain('\tits "side" is one of up, down\n\t\tit "is showing (side)"\n')
+    expect(written).toContain("\t// Turns it over.\n\tto flip it:\n\t\tshortcut meta+F\n")
+    expect(written).toContain("\ton mouse down: flip it\n")
+    expect(written).not.toMatch(/^\t+- /m)
     expect(written).not.toMatch(/<\/>|<\/action>|<\/spell-view>/)
   })
 
@@ -60,7 +62,7 @@ describe("CodeSpellWriter", () => {
       shortcuts: "spelled out",
       path: "/FlipTile.spellml"
     })
-    expect(written).toContain("\t- to draw its back:\n\t\t<ui-text>back</ui-text>\n")
+    expect(written).toContain("\tto draw its back:\n\t\t<ui-text>back</ui-text>\n")
     // the editor knows a project's own views:  its `componentTag`
     const card = SX.CodeSpellWriter.write('<spell-view "board">\n\t<draw>\n\t\t<card />\n\t</>\n</spell-view>\n', {
       shortcuts: "spelled out",

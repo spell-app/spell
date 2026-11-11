@@ -1455,7 +1455,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A tag spellx can't read yet is the line's error, `spellx-not-yet`, with its block.
 - A spellx DRAWING's markup (epic `elemental-spell` P7), and a plain one's too since epic `language` P45 (Q4 A):
   - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for both of spell's tokenizers), and a tag's
-    name may hold any letter in spellx (`<botón>`).
+    name may hold any letter (`<botón>`, `<área-texto>`):  in spellx, and in plain Spell since epic `language` P46
+    (`Tokenizer.JSX_TAG_START`), where Spanish names Spell UI's components bare too.
   - A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
   - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
@@ -1671,7 +1672,8 @@ markup, `##` headings, prose lines, examples, code in `<spell>` blocks, its own 
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
     - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file:
       a `.spell` view's drawing above its `<property>` tags too, through the file's skeleton.
-    - `SpellParser.declaredProperties()` scans:  a body's `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`;
+    - `SpellParser.declaredProperties()` scans:  a body's `it has a deck`, `its "suit" is ...`, `deck is a deck`,
+      one tab in, bare or bulleted (`- its "suit" is ...`;  bare since epic `language` P46);
       a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
     - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).

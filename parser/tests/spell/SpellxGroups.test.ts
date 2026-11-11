@@ -21,11 +21,9 @@ describe("spellx groups", () => {
     const spellx = compiled(CARD, "/Card.spell")
     expect(spellx.errors).toEqual([])
     const written = SX.CodeSpellWriter.write(CARD, { path: "/Card.spell" })
-    expect(written).toContain(
-      '\t// Face up or face down\n\t- group "direction"\n\t- its "direction" is one of up, down\n'
-    )
+    expect(written).toContain('\t// Face up or face down\n\tgroup "direction"\n\tits "direction" is one of up, down\n')
     // `flip` is written among the looks, but is the direction's:  its group opened above it, the looks' again below
-    expect(written).toContain('\t- group "direction"\n\t- to flip: set its direction to down\n\t- group "looks"\n')
+    expect(written).toContain('\tgroup "direction"\n\tto flip: set its direction to down\n\tgroup "looks"\n')
     const twin = compiled(written, "/Card.spell")
     expect(twin.errors).toEqual([])
     expect(twin.code).toBe(spellx.code)
@@ -38,7 +36,7 @@ describe("spellx groups", () => {
     expect(code).toContain("isFaceDirection(direction) {")
     expect(code).toContain("isASuit(suit) {")
     const written = SX.CodeSpellWriter.write(CARD, { path: "/Card.spell" })
-    expect(written).toContain('\t- its "suit" is one of clubs, diamonds, hearts or spades\n\t\t- it "is a (suit)"\n')
+    expect(written).toContain('\tits "suit" is one of clubs, diamonds, hearts or spades\n\t\tit "is a (suit)"\n')
   })
 
   test("each member joins the nearest group above it;  `group=` overrides", () => {
@@ -59,8 +57,8 @@ describe("spellx groups", () => {
     const text = [
       'a "card" is a view where:',
       "\t// Face up or face down",
-      '\t- group "direction"',
-      '\t- its "direction" is one of up, down',
+      '\tgroup "direction"',
+      '\tits "direction" is one of up, down',
       ""
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/Card.spell", contents: text }]).files
@@ -109,9 +107,7 @@ describe("spellx groups", () => {
     const spellx = compiled(text, "/Carta.es.spell")
     expect(spellx.errors).toEqual([])
     const written = SX.CodeSpellWriter.write(text, { path: "/Carta.es.spell" })
-    expect(written).toContain(
-      '\t- grupo "dirección"\n\t- para voltearla: poner su dirección a arriba\n\t- grupo "aspecto"\n'
-    )
+    expect(written).toContain('\tgrupo "dirección"\n\tpara voltearla: poner su dirección a arriba\n\tgrupo "aspecto"\n')
     const twin = compiled(written, "/Carta.es.spell")
     expect(twin.errors).toEqual([])
     expect(twin.code).toBe(spellx.code)

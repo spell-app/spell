@@ -690,7 +690,7 @@ export class SpellParser extends P.Parser {
   /**
    * Call `visit` with each line of `text` a declaration may be on, and the type it's about:
    * - a line at a file's top:  `subject` the type it declares or re-opens, if any, and no `bullet`
-   * - a line in that type's outline body, one tab in:  its text after the `-` as `bullet`
+   * - a line in that type's outline body, one tab in:  its text, after its `-` if it has one, as `bullet`
    * - A spellx file reads as its code-spell skeleton.
    */
   private eachDeclarationLine(
@@ -708,7 +708,8 @@ export class SpellParser extends P.Parser {
         visit(subject, line, undefined)
         continue
       }
-      const bullet = /^(?:\t| {2,4})-[ \t]+(.*)$/.exec(line)?.[1]
+      // a member one tab in, bulleted or bare (epic `language` P46):  `- its "suit" is ...`, `its "suit" is ...`
+      const bullet = /^(?:\t| {2,4})(?:-[ \t]+)?(?![ \t]|\/\/)(.+)$/.exec(line)?.[1]
       if (bullet) visit(subject, line, bullet)
     }
   }

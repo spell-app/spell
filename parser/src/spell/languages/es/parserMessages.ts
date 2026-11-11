@@ -71,17 +71,17 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "key-goes-bad-question":
     '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
   "key-goes-with-no-key":
-    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "- su clave es el secreto "CLAVE_RECETARIO""',
+    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "su clave es el secreto "CLAVE_RECETARIO""',
   "place-cant-announce":
-    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "se revisa cada 30 segundos" debajo',
   "change-not-saved":
-    '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "- se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
+    '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
   "someone-else-needs-a-type":
-    'Di qué cambia:  esto va debajo de un tipo guardado, p. ej. "- cuando otra persona la cambia:" debajo de una receta',
+    'Di qué cambia:  esto va debajo de un tipo guardado, p. ej. "cuando otra persona la cambia:" debajo de una receta',
   "someone-else-alone":
     "Nadie más puede cambiar lo que se guarda aquí:  esto nunca se ejecutaría.  Hace falta un lugar que otras personas compartan",
   "someone-else-not-told":
-    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "se revisa cada 30 segundos" debajo',
   "people-here-only-you":
     "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala",
   "operation-outside-place":
@@ -104,13 +104,13 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "no-save-step":
     '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
   "no-such-data-word":
-    'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "- vive en x", y luego "cada receta donde ..." los lee',
+    'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
   "place-cloud-is":
     '{place} se guarda en el espacio propio de cada persona en el servidor de Encanto, su carpeta "{folder}":  hasta que inicie sesión, en su navegador',
   "place-cloud-name-it":
-    'Nombra el lugar primero, y luego di que se guarda ahí:  "recetario familiar se guarda en la nube", y luego "- vive en recetario familiar"',
+    'Nombra el lugar primero, y luego di que se guarda ahí:  "recetario familiar se guarda en la nube", y luego "vive en recetario familiar"',
   "atmosphere-public":
     "Todo lo que se guarda en esta {kind} es público:  cualquiera puede leerlo, y queda ahí para siempre.  No guardes nada privado aquí",
   "atmosphere-your-own":
@@ -158,9 +158,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "airtable-calls-count":
     "Cada página de 100 filas es una petición, y todos los que usan esta base comparten 5 por segundo.  El plan gratuito de Airtable además se detiene en 1.000 peticiones al mes, que revisar cada 30 segundos gasta en unas 8 horas",
   "airtable-no-id-column":
-    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "- su id es su "id encanto"" debajo',
+    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "su id es su "id encanto"" debajo',
   "airtable-needs-key":
-    'Airtable no responde a nadie sin una clave:  agrega "- su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
+    'Airtable no responde a nadie sin una clave:  agrega "su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "where-field-unknown":
     '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
@@ -173,7 +173,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Un apóstrofo solo sigue a una palabra que acaba en "s", como en "the cards\' names":  escribe "{owner}\'s {property}"',
   "possessive-declaration-plural":
     'Escribe "{aType}\'s {property} is ...":  una declaración habla de uno solo, {aType}',
-  "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
+  "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":
     "Bajo una propiedad van solo sus reglas y sus frases:  esta línea funciona igual, pero escríbela después de la propiedad, no debajo",
@@ -247,7 +247,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "searched-only":
     'Las cosas de "{thing}" solo se encuentran buscándolas, sin una lista de todas:  búscalas por lo que dice su "{field}"',
   "matching-needs-search":
-    'Las cosas de "{thing}" no se encuentran así:  solo un lugar que busca en todo cada cosa, "- busca en todo con ..."',
+    'Las cosas de "{thing}" no se encuentran así:  solo un lugar que busca en todo cada cosa, "busca en todo con ..."',
   "asked-by-only":
     'Las cosas de "{thing}" solo se piden por su {fields}, sin una lista de todas:  di cada uno, "donde su ... es ..."',
   "found-only-by-name":

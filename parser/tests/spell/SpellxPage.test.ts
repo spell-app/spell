@@ -68,7 +68,7 @@ describe("a spellx page that draws its body", () => {
       componentTag: (word) =>
         word === "counter" ? "test-project-counter-notebook-counter" : SP.ComponentPacks.tagFor(word, "en")
     })
-    expect(written).toContain("counter notebook is a page:\n\t- to draw it:\n\t\t<markdown>\n")
+    expect(written).toContain("counter notebook is a page:\n\tto draw it:\n\t\t<markdown>\n")
     // each `##` heading's section, written out, what follows it inside
     expect(written).toContain(
       '\t\t<ui-section label="Try it" sticky="stack" collapsible dividing level="2">\n' +

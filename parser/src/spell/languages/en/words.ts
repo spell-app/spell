@@ -455,7 +455,7 @@ export const englishWords: SP.LanguageWords = {
      * - Not a value kind's `- "suits" as one of ...`:  `as` only after `has`.
      */
     propertyListDeclaration:
-      /^[ \t]+-[ \t]+(?:(?:its[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)|(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+as)[ \t]+(?:one[ \t]+of|either)\b/iu,
+      /^[ \t]+(?:-[ \t]+)?(?:(?:its[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)|(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+as)[ \t]+(?:one[ \t]+of|either)\b/iu,
     /** A body's line declaring a property, its words in group `has` or `is`:  `it has a deck as a deck`, `its "suit" is a suit`. */
     propertyLine:
       /^(?:(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<has>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)|(?:its[ \t]+)?["']?(?<is>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)\b)/iu,

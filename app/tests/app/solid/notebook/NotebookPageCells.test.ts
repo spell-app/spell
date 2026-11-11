@@ -198,6 +198,19 @@ describe("NotebookPageCells", () => {
     )
   })
 
+  // epic `language` J76:  the lock agrees with `página`;  both words still read
+  test("in Spanish on a plain head, locked is written bloqueada, and taken off again", () => {
+    const text = '"cuaderno" es una página cuaderno\n\t# Hola\n'
+    const spanish = NotebookPageCells.of(text, "/Cuaderno.es.spell")!
+    const locked = SourceEdits.applied(text, NotebookPageCells.lockEdits(text, spanish, true))
+    expect(locked.split("\n")[0]).toBe('"cuaderno" es una página cuaderno bloqueada')
+    const lockedModel = NotebookPageCells.of(locked, "/Cuaderno.es.spell")!
+    expect(lockedModel.locked).toBe(true)
+    expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, lockedModel, false))).toBe(text)
+    const old = '"cuaderno" es una página cuaderno bloqueado\n\t# Hola\n'
+    expect(NotebookPageCells.of(old, "/Cuaderno.es.spell")!.locked).toBe(true)
+  })
+
   test("what a file's pages say:  its notebook's name, and whether a page is locked, read again as its text changes", () => {
     const file = { path: "/Counter.spell", contents: COUNTER } as unknown as SP.SpellFile
     expect(NotebookPageCells.holdsNotebook(file)).toBe(true)

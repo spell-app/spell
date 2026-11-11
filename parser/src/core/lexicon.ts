@@ -7,7 +7,7 @@
  * // => { lexicon: 1, id: "space.spell.owen.recipes.recipe", defs: { main: { type: "record", key: "any", ... } } }
  *
  * spellTypeFor(statusphereLexicon)
- * // => `a "status" is a thing:\n\t- it is published as "xyz.statusphere.status"\n\t- its "status" is required text, ...`
+ * // => `a "status" is a thing:\n\tit is published as "xyz.statusphere.status"\n\tits "status" is required text, ...`
  * ```
  *
  * - The Spell declaration stays the one description of a type:
@@ -250,7 +250,7 @@ export type SpellTypeFromLexicon = {
  * Lexicon `document`'s record as a Spell type:  the declaration a person would have written for it.
  * - Its words come from its name's last part:  `xyz.statusphere.status` => `status`.
  * - Each field's come from its key:  `createdAt` => `created at`, which compiles back to `createdAt`.
- * - `- it is published as "<its id>"`:  so its records are that app's, and Spell's warnings watch the round trip.
+ * - `it is published as "<its id>"`:  so its records are that app's, and Spell's warnings watch the round trip.
  * - A field Spell can't hold yet (a blob, a reference to another record, an object of its own):
  *   left out, and said in `notes`;  its records keep it, as an atmosphere account writes a record whole.
  * - English:  a Spanish program's field names in a record are still an open point (the Spaces guide).
@@ -278,7 +278,7 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
       continue
     }
     const { said, inline } = spellLineOf(kind, field, required.has(key))
-    lines.push(`\t- its "${words}" is ${said}`)
+    lines.push(`\tits "${words}" is ${said}`)
     rules.push(...spellRulesOf(words, field, required.has(key), inline))
     if (field.type === "string" && field.maxLength !== undefined) {
       notes.push(`"${key}" holds at most ${field.maxLength} bytes:  Spell says lengths in letters`)
@@ -291,7 +291,7 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
   const source = [
     ...header,
     `a "${typeWords}" is a thing:`,
-    `\t- it is published as "${document.id}"`,
+    `\tit is published as "${document.id}"`,
     ...lines,
     ...rules,
     ""
@@ -361,7 +361,7 @@ const REQUIRED_KINDS = new Set(["text", "a date", "a number", "an integer"])
 /** The rule lines `field` asks for, on the property called `words`:  what its line didn't say (`inline`). */
 function spellRulesOf(words: string, field: LexiconField, isRequired: boolean, inline: SaidInline): string[] {
   const rules: string[] = []
-  const must = (rule: string) => rules.push(`\t- its ${words} must ${rule}`)
+  const must = (rule: string) => rules.push(`\tits ${words} must ${rule}`)
   if (isRequired && !inline.required) must("not be empty")
   const letters = (count: number) => `${count} letter${count === 1 ? "" : "s"}`
   if (field.minGraphemes !== undefined && inline.length !== "minGraphemes") {

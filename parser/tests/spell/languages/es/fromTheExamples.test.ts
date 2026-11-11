@@ -123,7 +123,7 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
   )
 
   // T64
-  test("a drawing Show as Code Spell writes, `- para dibujar eso:`, compiles as its spellml does:  `eso` is the thing", () => {
+  test("a drawing Show as Code Spell writes, `para dibujar eso:`, compiles as its spellml does:  `eso` is the thing", () => {
     const spellml = [
       '<encanto-vista "tarea">',
       '\t<propiedad "título">texto</>',
@@ -135,7 +135,7 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
       "</encanto-vista>"
     ]
     const codeSpell = SX.CodeSpellWriter.write(spellml.join("\n"), { path: "/prueba.es.spell" })
-    expect(codeSpell).toContain("- para dibujar eso:")
+    expect(codeSpell).toContain("\tpara dibujar eso:")
     const written = compiledText(codeSpell.split("\n"), { path: "/prueba.es.spell" })
     expect(written.errors).toEqual([])
     expect(written.code).toContain('h("formulario", { value: this }')

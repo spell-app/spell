@@ -39,9 +39,13 @@ export class NotebookPageCells {
     if (!notebook) return undefined
     const cells = notebook.children.flatMap((node) => NotebookPageCells.cellsFor(text, node, "top"))
     const locked = notebook.attributes.some((attribute) => attribute.name === "locked")
-    // the file's language's word for `locked`, `bloqueado`
-    const words = file.language.words.spellx?.attributes ?? {}
-    const lockWord = Object.entries(words).find(([, english]) => english === "locked")?.[0]
+    // the file's language's word for `locked`, `bloqueado`;  on a plain head, the one agreeing with its page's word,
+    // `una página bloqueada` (epic `language` J76)
+    const spellx = file.language.words.spellx
+    const words = spellx?.attributes ?? {}
+    const lockWord =
+      (notebook.plain ? spellx?.plainPageLocked : undefined) ??
+      Object.entries(words).find(([, english]) => english === "locked")?.[0]
     return { name: notebook.name ?? "", locked, lockWord, notebook, cells, language: file.language.lang }
   }
 
@@ -474,5 +478,5 @@ const PAGES_READ = new WeakMap<SP.AnySpellFile, PagesRead>()
  */
 type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean; drawsBody: boolean }
 
-/** The word that locks a notebook, `locked`;  a Spanish file's own, `bloqueado` (`lockWord`). */
+/** The word that locks a notebook, `locked`;  a Spanish file's own, `bloqueado` (`bloqueada` on a plain head;  `lockWord`). */
 const LOCKED = "locked"

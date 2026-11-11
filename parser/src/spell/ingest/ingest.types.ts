@@ -108,7 +108,7 @@ export type IngestSettings = {
   /** Reads through the Spell. */
   readThrough: ReadThrough
   /**
-   * The shape a new file is written in (epic `language` P40):  `tags`, the default, or `plain` Spell.
+   * The shape a new file is written in:  `plain` Spell, the default since epic `language` P46, or `tags` (P40).
    * - A file already written keeps its own shape, whatever this says.
    */
   shape?: "tags" | "plain"

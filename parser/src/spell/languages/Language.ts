@@ -576,6 +576,13 @@ export type SpellxWords = {
    * - None:  this language's pages are written only in tags.
    */
   plainPage?: RegExp
+  /**
+   * The word a writer puts on a page's plain head to lock it, agreeing with the page's word (epic `language` J76):
+   * Spanish's `bloqueada`, for `una página bloqueada`.
+   * - Every word for `locked` still reads;  this is only what's written.
+   * - None:  the tag's word, `locked`.
+   */
+  plainPageLocked?: string
 }
 
 /**

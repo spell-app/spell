@@ -6,7 +6,8 @@ import { SP } from "spell/parser/spell"
  * `CodeSpellWriter.write(text)` => the `.spell` text it reads as, for people to look at ("Show as .spell").
  * - Written line by line from each tag's TWIN, the very line spell's rules parse it as (`SP.SpellxTwin`):
  *   - a template's tag:  its twin, `a "flip tile" is a view :`
- *   - a member's:  its twin, bulleted and one tab in, `- its "side" is one of up, down`
+ *   - a member's:  its twin, one tab in, bare as plain Spell writes it (epic `language` P46),
+ *     `its "side" is one of up, down`;  only a member under a worked-out property's body keeps its `- `
  *   - a body's tags (notes, controls):  their twins, as written there
  *   - every other line (a body's spell, a drawing's markup):  as written
  *   - a description:  its comment lines just above its twin, the docstring code spell writes;  prose:  comments
@@ -56,7 +57,8 @@ export class CodeSpellWriter {
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     writer.writeItems(root?.tokens ?? [], 0, "file")
     while (writer.lines.at(-1) === "") writer.lines.pop()
-    return { text: `${writer.lines.join("\n")}\n`, proseLines: writer.proseLines }
+    const lines = withoutBullets(writer.lines)
+    return { text: `${lines.join("\n")}\n`, proseLines: writer.proseLines }
   }
 
   /**
@@ -411,6 +413,41 @@ function isStoriesBlock(token: P.Token | undefined): token is P.JSXElementToken 
     token.raw === token.children[0].raw
   )
 }
+
+/**
+ * `lines` with each member's outline bullet, `- `, gone (epic `language` P46):  plain Spell writes a member bare.
+ * - A member under a WORKED-OUT property's body keeps it:  there a bare line would be one of its value's lines,
+ *   `its "color" is one of red, black:` / `red if it is a heart` / `- it "is a (color)"`.
+ * - Every line's index stays the same, so `proseLines` still holds.
+ */
+function withoutBullets(lines: string[]): string[] {
+  const depthOf = (line: string) => /^\t*/.exec(line)![0].length
+  const isCode = (line: string) => !!line.trim() && !line.trim().startsWith("//")
+  return lines.map((line, index) => {
+    const bullet = /^(\t*)- /.exec(line)
+    if (!bullet) return line
+    const depth = bullet[1]!.length
+    // the line whose body it's in:  the nearest code line above it, further out
+    let parent = index - 1
+    while (parent >= 0 && !(isCode(lines[parent]!) && depthOf(lines[parent]!) < depth)) parent--
+    const head = parent >= 0 ? lines[parent]!.trim().replace(/^- /, "") : ""
+    if (PROPERTY_LINE.test(head) && head.endsWith(":")) {
+      // its body's other lines:  any of them bare code means it's worked out
+      let at = parent + 1
+      let workedOut = false
+      for (; at < lines.length; at++) {
+        const each = lines[at]!
+        if (isCode(each) && depthOf(each) <= depthOf(lines[parent]!)) break
+        if (isCode(each) && depthOf(each) === depth && !each.trim().startsWith("- ")) workedOut = true
+      }
+      if (workedOut) return line
+    }
+    return bullet[1] + line.slice(bullet[0].length)
+  })
+}
+
+/** A property's declaring line:  `its "color" is ...`, `su "color" es ...`. */
+const PROPERTY_LINE = /^(its|su|sus)\s+"/u
 
 /** A `//` comment line, `indent` in:  `// text`, or `//` alone. */
 function lineComment(indent: string, text: string): string {

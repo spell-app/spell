@@ -95,9 +95,7 @@ async function sourceFiles(session: CLI.CliSession, project: SP.SpellProject): P
       await file.parse()
       const { text, proseLines } = SX.CodeSpellWriter.writeWithProse(file.contents ?? "", {
         path: file.path,
-        componentTag: SP.ComponentTags.of(file).componentTag,
-        // its way back to tags finds each bare name by its tag (`SX.SpellxWriter`)
-        shortcuts: "spelled out"
+        componentTag: SP.ComponentTags.of(file).componentTag
       })
       const path = file.path.slice(project.projectId.length)
       const plain = plainPathFor(path)

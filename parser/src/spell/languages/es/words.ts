@@ -334,6 +334,8 @@ export const spanishWords: SP.LanguageWords = {
     // la cabecera llana de una página (épica `language` P45):  `"api del botón" es una página cuaderno`
     plainPage:
       /^"(?<name>[^"\n]+)"[ \t]+es[ \t]+una[ \t]+p[áa]gina(?<flags>(?:[ \t]+[\p{L}-]+)*?)(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
+    // y su candado, en femenino como `página`:  `"x" es una página bloqueada` (épica `language` J76)
+    plainPageLocked: "bloqueada",
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
       placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",
@@ -539,7 +541,7 @@ export const spanishWords: SP.LanguageWords = {
      * - Not a value kind's `- "palos" como uno de ...`:  `como` only after `tiene`.
      */
     propertyListDeclaration:
-      /^[ \t]+-[ \t]+(?:(?:sus?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)|tiene[ \t]+(?:un[oa]?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+como)[ \t]+(?:un[oa][ \t]+de|o[ \t]+bien)\b/iu,
+      /^[ \t]+(?:-[ \t]+)?(?:(?:sus?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)|tiene[ \t]+(?:un[oa]?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+como)[ \t]+(?:un[oa][ \t]+de|o[ \t]+bien)\b/iu,
     /** A body's line declaring a property, its words in group `has` or `is`:  `tiene un mazo como un mazo`, `su "palo" es un palo`. */
     propertyLine:
       /^(?:tiene[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<has>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)|(?:sus?[ \t]+)?["']?(?<is>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)\b)/iu,

@@ -191,9 +191,27 @@ export function propertyCodePlace(place: SP.SpellDeclarationPlace, lines: readon
     }
     if (/\/>\s*$/.test(line) && place.endLine === place.line) return undefined
   }
+  // plain Spell (epic `language` P46):  its body only when its line opens one, `its "color" is one of red, black:`;
+  // else the Spell after its `is` on its line, `its "name" is its rank && "of" && its suit`;  a `one of` has none
+  if (opened < 0 && !/^\s*</.test(line.slice(place.column)) && !line.trimEnd().endsWith(":")) {
+    if (PLAIN_ONE_OF.test(line.slice(place.column))) return undefined
+    const value = /"\s+(?:is|es)\s+/u.exec(line.slice(place.column))
+    if (!value) return undefined
+    const column = place.column + value.index + value[0].length
+    return {
+      path: place.path,
+      from: place.line + 1,
+      to: place.line + 1,
+      column: column + 1,
+      endColumn: line.trimEnd().length + 1
+    }
+  }
   if (place.endLine <= place.line) return undefined
   return codePlaceOf(place, lines)
 }
+
+/** A plain property's list of values, after its words:  `is one of ace, 2 ... 10, jack`, `es uno de ...`. */
+const PLAIN_ONE_OF = /"\s+(?:is\s+one\s+of|es\s+un[oa]\s+de)\s+([^:\n]+?)\s*:?\s*$/u
 
 /** Where a tag that starts at `from` on `line` ends, its `>`, outside quotes:  -1 if not on that line. */
 function tagEndAfter(line: string, from: number): number {
@@ -209,7 +227,8 @@ function tagEndAfter(line: string, from: number): number {
 }
 
 /**
- * A property's values, as its `one-of` says them (`<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`):
+ * A property's values, as its `one-of` says them (`<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`),
+ * or its plain line (`its "rank" is one of ace, 2 ... 10, jack, queen, king`):
  * each as written (`2 ... 10` stays one), with where the list is in its file, to write it back (`oneOfWritten()`).
  * - `undefined`:  it has no `one-of` on its line.
  */
@@ -218,9 +237,10 @@ export function oneOfAt(
   lines: readonly string[]
 ): { values: string[]; line: number; from: number; to: number; isOr: boolean } | undefined {
   const line = lines[place.line] ?? ""
-  const found = /\bone-of="([^"]*)"/.exec(line.slice(place.column))
+  // its tag's `one-of="..."`, or plain Spell's `is one of ...` (epic `language` P46)
+  const found = /\bone-of="([^"]*)"/.exec(line.slice(place.column)) ?? PLAIN_ONE_OF.exec(line.slice(place.column))
   if (!found) return undefined
-  const from = place.column + found.index + found[0].indexOf('"') + 1
+  const from = place.column + found.index + found[0].lastIndexOf(found[1]!)
   const values = found[1]!
     .split(/\s*,\s*|\s+or\s+/)
     .map((value) => value.trim())
@@ -270,10 +290,18 @@ function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boo
   return codeColumnOf(place, lines) !== undefined || place.endLine > place.line || place.kind !== "ability"
 }
 
-/** Is `place` an ability its type's tag says with a bare attribute, `<view "card" draggable>`? */
+/**
+ * Is `place` a bare ability, one with no condition:  its type's tag's attribute, `<view "card" draggable>`,
+ * or its line in plain Spell, `it is draggable` (epic `language` P46)?
+ */
 function isOnTypeTag(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
-  return place.kind === "ability" && !!spellxTemplateTagOf(lines[place.line] ?? "")
+  if (place.kind !== "ability") return false
+  const line = lines[place.line] ?? ""
+  return !!spellxTemplateTagOf(line) || BARE_ABILITY_LINE.test(line)
 }
+
+/** A bare ability's own line, in plain Spell:  `it is draggable`, `es arrastrable`. */
+const BARE_ABILITY_LINE = /^\s*(?:-\s+)?(?:it\s+is|es|está)\s+\p{L}+\s*$/u
 
 /** A bare ability's word, as its attribute says it:  `it is draggable` => `draggable`. */
 function bareAbility(name: string): string {
@@ -481,7 +509,8 @@ export type SourceFile = { path: string; text: string }
 
 /**
  * Where a new event `words` (`on double click`) goes in the first type of `typeNames` written in `files`, and its code:
- * - under an outline header for it (`a card:`):  `- on double click:` after its last line, at its rows' indent
+ * - under a plain line for it (`a "card" is a view:`, `a card:`):  `on double click:` after its last line, at its
+ *   rows' indent, bare as plain Spell writes a member (epic `language` P46)
  * - else inside its tag:  `<on double click>`, an empty line, `</on>`, just before the tag's end
  * - `at`:  its offset in the file's text, where `code` is inserted;
  *   `undefined` when the type isn't written in `files`.
@@ -503,11 +532,11 @@ export function newEventIn(
     const header = ranges.find(([first]) => !lines[first]!.trim().startsWith("<"))
     if (!header) continue
     const [first, last] = header
-    const row = lines.slice(first + 1, last + 1).find((line) => /^\s*- /.test(line))
+    const row = lines.slice(first + 1, last + 1).find((line) => line.trim() && !line.trim().startsWith("//"))
     const indent = row ? /^\s*/.exec(row)![0] : `${/^\s*/.exec(lines[first]!)![0]}\t`
     let end = last
     while (end > first && !lines[end]!.trim()) end--
-    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}- ${words}:` }
+    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}${words}:` }
   }
   for (const { file, lines, offsetOfLine, ranges } of read) {
     const tag = ranges[0]
@@ -525,8 +554,8 @@ function letters(text: string): string {
 
 /**
  * The 0-based line ranges, both ends in, where type `name` is written in `text`:
- * each template's tag for it, `<view "name"> ... </view>` (or the old `<spell-view>`), and each outline header for it
- * (`a card:`) with the lines under it.
+ * each template's tag for it, `<view "name"> ... </view>` (or the old `<spell-view>`), and each plain line for it with
+ * the lines under it:  its declaration (`a "card" is a view:`, `solitaire is an app:`), or an outline header (`a card:`).
  */
 function typeLineRanges(text: string, name: string): [number, number][] {
   const ranges: [number, number][] = []
@@ -536,8 +565,9 @@ function typeLineRanges(text: string, name: string): [number, number][] {
     ranges.push([lineOf(start), lineOf(close < 0 ? text.length : close)])
   }
   const lines = text.split("\n")
+  const named = `"?${escapeForRegExp(name)}"?`
   const header = new RegExp(
-    `^(\\s*)(?:an?|una?)\\s+"?${escapeForRegExp(name)}"?(?:\\s.*\\b(?:where|donde))?\\s*:\\s*$`,
+    `^(\\s*)(?:(?:an?|una?)\\s+)?${named}(?:\\s+(?:is|es)\\s+.+|\\s.*\\b(?:where|donde))?\\s*:\\s*$`,
     "i"
   )
   lines.forEach((line, index) => {

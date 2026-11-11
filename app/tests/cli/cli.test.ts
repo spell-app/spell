@@ -937,7 +937,8 @@ describe("spell translate (epic spanish P24-P26)", () => {
     expect(lines[7]).toBe("\tno es un rey debería ser sí")
   })
 
-  test("a tag file comes back as tags, its project file naming it, lint clean (language I68)", () => {
+  // written plain since epic `language` P46
+  test("a tag file comes back plain, its project file naming it, lint clean (language I68)", () => {
     const folder = tempProject("Tags", GAME_TAGS, SP.SPELL_SUFFIX)
     writeFileSync(resolve(folder, "Tags.es.names.json5"), JSON.stringify(NAMES))
     const out = resolve(TEMP, "JuegoEnTags")
@@ -945,7 +946,9 @@ describe("spell translate (epic spanish P24-P26)", () => {
     expect(stdout).toMatch(/shape:  (\d+) of \1 statements/)
     expect(status).toBe(0)
     expect(readdirSync(out).filter((name) => /spell(ml)?$/.test(name))).toEqual(["Tags.es.spell"])
-    expect(readFileSync(resolve(out, "Tags.es.spell"), "utf8")).toContain('<cosa "carta">')
+    const plain = readFileSync(resolve(out, "Tags.es.spell"), "utf8")
+    expect(plain).not.toContain('<cosa "carta">')
+    expect(plain).toMatch(/^una "carta" es una cosa/m)
     expect(JSON.parse(readFileSync(resolve(out, SP.PROJECT_FILE), "utf8")).imports).toEqual([
       { path: "/Tags.es.spell", active: true }
     ])

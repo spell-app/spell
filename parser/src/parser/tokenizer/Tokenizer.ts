@@ -445,9 +445,11 @@ export class Tokenizer {
    * Regex matching JSX opening tag head: `<TagName` plus either self-close `/>`, plain `>`, or trailing
    * whitespace before attributes.
    * - Capture groups: tag name, then end bit (`/>`, `>` or whitespace).
+   * - Its name in any language's letters, `<botón>`, `<área-texto>` (epic `language` P46):
+   *   plain Spell names Spell UI's components bare, in Spanish too.
    */
   get JSX_TAG_START() {
-    return /^<([A-Za-z][\w-.]*)(\s*\/>|\s*>|\s+)/
+    return /^<(\p{L}[\p{L}\p{N}_.-]*)(\s*\/>|\s*>|\s+)/u
   }
   /** Regex matching the end of a JSX tag after attributes -- optional whitespace then `/>` or `>`. */
   get JSX_TAG_START_END() {
@@ -843,7 +845,7 @@ export class Tokenizer {
     const offset = text.slice(start, end).search(/\S/)
     if (offset === -1) return undefined
     const at = start + offset
-    const endTag = /^<\/([\w.-]*)>/.exec(text.slice(at, end))
+    const endTag = /^<\/([\p{L}\p{N}_.-]*)>/u.exec(text.slice(at, end))
     const startsItsLine = /^[ \t]*$/.test(text.slice(text.lastIndexOf("\n", at - 1) + 1, at))
     if (endTag && (endTag[1] === "" || startsItsLine || this.openJSXTags.includes(endTag[1]!))) return undefined
     const newline = text.indexOf("\n", at)

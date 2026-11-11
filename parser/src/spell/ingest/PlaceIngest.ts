@@ -148,7 +148,7 @@ export class PlaceIngest {
     await this.finish(description)
     const spell = spellTextOf(partsInLanguageOf(file, spellPartsFor(description))).trimEnd()
     // in tags, but under a plain file's own lines:  one file, one shape
-    const isPlain = existing.trim() ? SP.formOfText(existing, file) === "spell" : this.settings.shape === "plain"
+    const isPlain = existing.trim() ? SP.formOfText(existing, file) === "spell" : this.settings.shape !== "tags"
     const shown = isPlain ? spell : tagsOf(spell, file).trimEnd()
     const text = existing.trim() ? `${existing.trimEnd()}\n\n${shown}\n` : `${shown}\n`
     const descriptionPath = descriptionPathFor(file)
@@ -629,7 +629,7 @@ function noteKeepingACopy(description: PlaceDescription, text: string): void {
   const onlyReads = /read only|offers none/i.test(description.canDo.write)
   if ((kind !== "web server" && kind !== "graphql server") || !onlyReads || KEEPS_A_COPY.test(text)) return
   description.notes.push(
-    "It only reads, so a program could keep what it read on this device, and open with it the next time:  add `- keep a copy on this device`."
+    "It only reads, so a program could keep what it read on this device, and open with it the next time:  add `keep a copy on this device`."
   )
 }
 
@@ -694,7 +694,9 @@ export function descriptionFromDisk({
   ...rest
 }: PlaceDescriptionOnDisk): PlaceDescription {
   const each = Object.entries(collections).map(([name, collection]) => [name, { ...allCollections, ...collection }])
-  return { ...rest, collections: Object.fromEntries(each) } as PlaceDescription
+  // the lines it wrote, each bare:  an older version bulleted them, `- its "url" is text` (epic `language` P46)
+  const spell = rest.spell?.map((line) => line.replace(/^(\t*)- /, "$1"))
+  return { ...rest, ...(spell ? { spell } : {}), collections: Object.fromEntries(each) } as PlaceDescription
 }
 
 /** The class a type's words compile to:  `life form` => `LifeForm`. */
@@ -815,7 +817,8 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
 function isUsed(words: string, text: string, others: readonly string[], own: ReadonlySet<string>): boolean {
   const pattern = new RegExp(`\\b${words.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i")
   const uses = (line: string) => pattern.test(line.replace(/\/\/.*$/, ""))
-  const hereUses = text.split("\n").some((line) => !own.has(line.trim()) && uses(line))
+  // a line an older version bulleted, `- its "mass" is a number`, is its own too (epic `language` P46)
+  const hereUses = text.split("\n").some((line) => !own.has(line.trim().replace(/^- /, "")) && uses(line))
   return hereUses || others.some((other) => other.split("\n").some(uses))
 }
 
@@ -988,7 +991,7 @@ function whatSpellCantSay({ about, collections, serverTakes }: PlaceDescription)
   }
   if (about.kind === "web server" && !serverTakes?.filters && !serverTakes?.sorts) {
     said.add(
-      "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `- it filters by cuisine` or `- it sorts by title`."
+      "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `it filters by cuisine` or `it sorts by title`."
     )
   }
   return [...said]

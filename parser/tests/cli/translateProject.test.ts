@@ -622,35 +622,26 @@ describe("a tag file (language I68)", () => {
     writeFileSync(join(folder, "Cartas", "Cards.es.names.json5"), names())
   })
 
-  test("comes back as tags in the other language, prose as prose, and the project file names it", async () => {
+  // epic `language` P46:  a translation is written plain, a tag file's too
+  test("comes back as plain Spell in the other language, its prose as comments, and the project file names it", async () => {
     const source = { ...tagSource(), checker: tagChecker() }
     await translateProject(source, options(), fakeClaude().run, glossary())
     const out = join(folder, "Cartas")
     expect(readdirSync(out)).toContain("Carta.es.spell")
     expect(readdirSync(out)).not.toContain("Card.spell")
-    const tags = readFileSync(join(out, "Carta.es.spell"), "utf8")
-    expect(tags).toContain('<cosa "carta">')
-    expect(tags).toContain("# The card\nA card has a color and a label.\n")
-    expect(tags).not.toContain("// # The card")
+    const plain = readFileSync(join(out, "Carta.es.spell"), "utf8")
+    expect(plain).not.toContain('<cosa "carta">')
+    expect(plain).toMatch(/^una "carta" es una cosa/m)
+    expect(plain).toContain("# The card\n// A card has a color and a label.\n")
     expect(JSON5.parse(readFileSync(join(out, "__project.json5"), "utf8")).imports).toEqual([
       { path: "/Carta.es.spell", active: true }
     ])
   })
 
-  test("as tags with more problems than plain:  stays plain, and says so", async () => {
-    const problem: LineProblem = { path: "/Carta.es.spell", line: 3, message: "tags broke it", source: "lint" }
-    const source = { ...tagSource(), checker: tagChecker([problem]) }
-    await translateProject(source, options(), fakeClaude().run, glossary())
-    const out = join(folder, "Cartas")
-    expect(readdirSync(out)).toContain("Carta.es.spell")
-    expect(JSON5.parse(readFileSync(join(out, "__project.json5"), "utf8")).imports[0].path).toBe("/Carta.es.spell")
-    expect(vi.mocked(CLI.err).mock.calls.join("\n")).toContain("written as plain .spell files")
-  })
-
-  test("with no checker to parse it:  stays plain, and says so", async () => {
+  test("with no checker to parse it:  written plain all the same", async () => {
     await translateProject(tagSource(), options(), fakeClaude().run, glossary())
     expect(readdirSync(join(folder, "Cartas"))).toContain("Carta.es.spell")
-    expect(vi.mocked(CLI.err).mock.calls.join("\n")).toContain("nothing parsed them")
+    expect(readFileSync(join(folder, "Cartas", "Carta.es.spell"), "utf8")).not.toMatch(/^<\w/m)
   })
 
   test("--update reads a tag translation back as its plain lines:  nothing to write again", async () => {
