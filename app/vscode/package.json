@@ -94,6 +94,11 @@
           "default": "",
           "description": "Folder of the spell-app checkout whose language server to run:  spell-app itself, the kit folder holding it, or any folder inside one.  Empty:  the window's own checkout."
         },
+        "spell.bubblyLook": {
+          "type": "boolean",
+          "default": true,
+          "description": "Draw Spell files in the bubbly look:  references bold, marks and comments faint, a pill round what you typed.  Off:  colours alone, as the language server sends them."
+        },
         "spell.compileOnSave": {
           "type": "boolean",
           "default": false,

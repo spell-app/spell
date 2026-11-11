@@ -1,7 +1,7 @@
 /**
  * Shared types for the spell language server.
  */
-import type { Diagnostic, DocumentSymbol } from "vscode-languageserver"
+import type { Diagnostic, DocumentSymbol, Range } from "vscode-languageserver"
 
 import { indented } from "spell/util/string"
 import type { P } from "spell/parser/parser"
@@ -259,6 +259,24 @@ export type SetDescriptionParams = {
   file?: boolean
   /** New docstring, as markdown:  one comment line per line, `#` lines as headings.  Empty removes it. */
   text: string
+}
+
+/**
+ * One stretch of a spell file in the BUBBLY LOOK, as `spell/bubbly` answers (epic `language` P51):
+ * an `SP.BubblyStretch`, its offsets turned into the file's lines and characters.
+ * - VS Code's extension decorates its own editor from them:  weights, ink, a pill round what a person typed.
+ */
+export type BubblyRange = {
+  /** where it is */
+  range: Range
+  /** what it is to a reader */
+  kind: SP.BubblyStretchKind
+  /** on a declaration's band of this part of speech:  every stretch of a head */
+  partOfSpeech?: SP.BubblyPartOfSpeech
+  /** a quoted input's words, its `"` marks apart */
+  isQuoted?: boolean
+  /** the name its head defines */
+  isName?: boolean
 }
 
 /**

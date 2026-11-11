@@ -61,7 +61,7 @@ describe("SpellKeywords", () => {
     })
 
     test("statements start with each language's words;  the little words are anywhere", () => {
-      const [control, operator] = LSP.SpellKeywords.grammarKeywords([SP.english, SP.spanish]).patterns.map(
+      const [control, , , operator] = LSP.SpellKeywords.grammarKeywords([SP.english, SP.spanish]).patterns.map(
         ({ match }) => new RegExp(match, "u")
       )
       expect(control!.exec("\tsi la carta es roja")?.[1]).toBe("si")
@@ -71,6 +71,35 @@ describe("SpellKeywords", () => {
       expect(operator!.exec("su palo es o bien")?.[1]).toBe("es")
       // a word inside a dashed name isn't one
       expect(operator!.test("está-preparado")).toBe(false)
+    })
+
+    test("what a line says about itself after its words, P48's (epic `language` T105), English and Spanish", () => {
+      const [, runs, words] = LSP.SpellKeywords.grammarKeywords([SP.english, SP.spanish]).patterns.map(
+        ({ match }) => new RegExp(match, "gu")
+      )
+      const found = (pattern: RegExp, line: string) => [...line.matchAll(pattern)].map(([, phrase]) => phrase)
+      expect(found(runs!, 'to "flip it" with title "Flip", icon "card", shortcut "meta+F", undoable')).toEqual([
+        "with title"
+      ])
+      expect(found(words!, 'to "flip it" with title "Flip", icon "card", shortcut "meta+F", undoable')).toEqual([
+        "icon",
+        "shortcut",
+        "undoable"
+      ])
+      expect(found(runs!, 'its "flips" is a number, starting at 0')).toEqual(["starting at"])
+      expect(found(runs!, "its direction is one of up or down, with default down")).toEqual(["with default"])
+      expect(found(words!, 'a "playing card" is a thing, aka "card"')).toEqual(["aka"])
+      expect(found(runs!, 'para "voltearla" con título "Voltear", icono "carta"')).toEqual(["con título"])
+      expect(found(words!, 'para "voltearla" con título "Voltear", icono "carta", atajo "meta+V", deshacible')).toEqual(
+        ["icono", "atajo", "deshacible"]
+      )
+      expect(found(words!, 'una "carta de juego" es una cosa, alias "carta"')).toEqual(["alias"])
+      expect(found(runs!, "su puntuación es un número, empezando en 0, por defecto 0")).toEqual([
+        "empezando en",
+        "por defecto"
+      ])
+      // one word only after a comma:  a name may say it
+      expect(found(words!, "set its icon to the title")).toEqual([])
     })
   })
 
