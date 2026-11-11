@@ -4268,7 +4268,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/classes/TypeDeclaration.ts",
-          "line": 28,
+          "line": 29,
           "purpose": "A statement declaring a type -- which may take an OUTLINE body: `a card is a thing where:`, then indented lines all about cards, e.g. `- it has a deck` (epic page `outline-spell`).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -4742,7 +4742,7 @@
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
               "example": "a card is a thing",
               "outputs": {
                 "js": {
@@ -4757,7 +4757,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
               "example": "a \"card\" is a thing",
               "outputs": {
                 "js": {
@@ -4783,7 +4783,7 @@
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) {superType:type} {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
               "example": "solitaire is an app",
               "outputs": {
                 "js": {
@@ -4824,7 +4824,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) list of {instanceType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* list of {instanceType:type} {with_nested_statements}?",
               "example": "a deck is a list of cards",
               "outputs": {
                 "js": {
@@ -4839,7 +4839,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) list of {instanceType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* list of {instanceType:type} {with_nested_statements}?",
               "example": "a \"deck\" is a list of cards",
               "outputs": {
                 "js": {
@@ -4865,7 +4865,7 @@
           "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) viewable list of {instanceType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* viewable list of {instanceType:type} {with_nested_statements}?",
               "example": "a pile is a viewable list of cards",
               "outputs": {
                 "js": {
@@ -4880,7 +4880,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) viewable list of {instanceType:type} {with_nested_statements}?"
+              "syntax": "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* viewable list of {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -5497,7 +5497,7 @@
           "purpose": "The `type_specifier`s again, without their `as`, for an outline body's `its \"suit\" is ...`.",
           "syntaxes": [
             {
-              "syntax": "(either|one of) {enumeration:identifier_list}",
+              "syntax": "(either|one of) {enumeration:identifier_list} ((,)? with default ({start:text}|{start:number}|{word:identifier}))?",
               "example": "one of clubs, diamonds, hearts, spades",
               "outputs": {
                 "js": {
@@ -5512,7 +5512,7 @@
               }
             },
             {
-              "syntax": "{enumeration:identifier_list}",
+              "syntax": "{enumeration:identifier_list} ((,)? with default ({start:text}|{start:number}|{word:identifier}))?",
               "example": "up or down",
               "outputs": {
                 "js": {
@@ -5579,7 +5579,7 @@
               }
             },
             {
-              "syntax": "(a|an) {datatype:singular_type} starting at {start:expression}",
+              "syntax": "(a|an) {datatype:singular_type} (,)? starting at {start:expression}",
               "example": "a number starting at 0",
               "outputs": {
                 "js": {
@@ -5829,25 +5829,25 @@
               "syntax": "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} : {expression_body}?"
+              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} :? {expression_body}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier_enum} : {expression_body}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier_enum} :? {expression_body}?"
             },
             {
-              "syntax": "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
+              "syntax": "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} :? {expression_body}?"
             },
             {
               "syntax": "(a|an) {type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
             },
             {
-              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} :? {expression_body}?"
             },
             {
               "syntax": "{type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
             },
             {
-              "syntax": "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} :? {expression_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5891,13 +5891,13 @@
               "example": "a game is an app where:\n\t- to deal:\n\t\t- undoable as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
               "outputs": {
                 "js": {
-                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\ncore.describeAction(Game, \"deal\", { title: \"deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\ncore.describeAction(Game, \"deal\", { title: \"Deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
                 },
                 "ts": {
-                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n\n  turnTheTopCardOver() {\n    return this.currentThing?.turnTheTopCardOver()\n  }\n\n  deal() {\n    return this.currentThing?.deal()\n  }\n}\ncore.useElement(Game, GameElement)\ncore.describeAction(Game, \"deal\", { title: \"deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n\n  turnTheTopCardOver() {\n    return this.currentThing?.turnTheTopCardOver()\n  }\n\n  deal() {\n    return this.currentThing?.deal()\n  }\n}\ncore.useElement(Game, GameElement)\ncore.describeAction(Game, \"deal\", { title: \"Deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
                 },
                 "py": {
-                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\n    def turn_the_top_card_over(self) -> None:\n        core.notify(2)\n\n    def deal(self) -> None:\n        core.notify(1)\n\ncore.describe_action(Game, \"deal\", {\"title\": \"deal\", \"undone_as\": \"Deal\"})\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"turn_the_top_card_over\", \"-\", \"undo\", \"redo\"]})"
+                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\n    def turn_the_top_card_over(self) -> None:\n        core.notify(2)\n\n    def deal(self) -> None:\n        core.notify(1)\n\ncore.describe_action(Game, \"deal\", {\"title\": \"Deal\", \"undone_as\": \"Deal\"})\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"turn_the_top_card_over\", \"-\", \"undo\", \"redo\"]})"
                 }
               }
             },
@@ -6271,11 +6271,11 @@
           "ruleNames": ["reopen_type"],
           "internal": false,
           "file": "src/spell/rules/classes/ReopenType.ts",
-          "line": 25,
+          "line": 26,
           "purpose": "Adds to a type declared elsewhere, in the outline style -- `a game:`, then bullets about games (epic page `outline-spell`, P11).",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type} {with_nested_statements}"
+              "syntax": "(a|an) {type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -9798,7 +9798,7 @@
           "ruleNames": ["to_do_something"],
           "internal": false,
           "file": "src/spell/rules/methods/ToDoSomething.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "Defines a new method/statement: e.g. `to foo the bar`, `to create a card`, `to create (a card)`, `to notify (message)`.",
           "syntaxes": [
             {
@@ -9815,6 +9815,9 @@
                   "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> None:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
                 }
               }
+            },
+            {
+              "syntax": "to {signature:quoted_method_signature} {modifiers:action_modifiers}? :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -9908,7 +9911,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 30,
+          "line": 31,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -9916,13 +9919,13 @@
               "example": "a card is a thing where:\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\t- shortcut meta+T\n\t\t- shortcut F2\n\t\t- enabled when its direction is down\n\t\t- selected when its direction is up\n\t\t- undoable as \"Turn Card\"\n\t\t- icon \"rotate\"\n\t\tset its direction to up",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends Thing {\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"turn it over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
+                  "code": "export class Card extends Thing {\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "ts": {
-                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"turn it over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
+                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "py": {
-                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"Turn It Over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
                 }
               }
             },
@@ -10088,6 +10091,43 @@
           "line": 19,
           "purpose": "Method signature surrounded by quotes.",
           "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "ActionModifier",
+          "ruleNames": ["action_modifier"],
+          "internal": false,
+          "file": "src/spell/rules/methods/ActionModifier.ts",
+          "line": 13,
+          "purpose": "One thing an action's HEAD line says about it, after `with` (epic `language` P48, Q6): `to \"deal the cards\" with title \"Deal\", icon \"card\", shortcut \"meta+N\"`.",
+          "syntaxes": [
+            {
+              "syntax": "title {title:text}"
+            },
+            {
+              "syntax": "icon {icon:text}"
+            },
+            {
+              "syntax": "shortcut {keys:text}"
+            },
+            {
+              "syntax": "(undoable:undoable)"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "ActionModifiers",
+          "ruleNames": ["action_modifiers"],
+          "internal": false,
+          "file": "src/spell/rules/methods/ActionModifier.ts",
+          "line": 24,
+          "purpose": "The things an action's head line says, after its quoted name -- see `action_modifier`.",
+          "syntaxes": [
+            {
+              "syntax": "with [{action_modifier} (,|and)]"
+            }
+          ],
           "aliases": []
         },
         {

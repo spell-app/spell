@@ -75,7 +75,7 @@ describe("a place server's kinds, and a room", { timeout: 30_000 }, () => {
       keySecret: "SERVER_TOKEN",
       keyGoes: { header: "x-server-token" }
     })
-    expect(spell).toContain(`cookbook is a data folder at "${place("recipes")}":`)
+    expect(spell).toContain(`cookbook is a data folder at "${place("recipes")}"`)
     expect(spell).toContain(`it lives in cookbook`)
     expect(spell).toContain(`check it every 30 seconds`)
     // a run's token is no line of a program
@@ -109,8 +109,8 @@ describe("a place server's kinds, and a room", { timeout: 30_000 }, () => {
     const address = `${servers.url.replace("http", "ws")}/api/rooms/recipes`
     const { description, spell } = await ingest.add({ address, into: "/Room.spell", keySecret: "SERVER_TOKEN" })
     expect(description.about).toMatchObject({ kind: "room", address, name: "recipes room" })
-    expect(spell).toContain(`recipes room is a room at "${address}":`)
-    expect(spell).toContain(`a "recipe" is a thing:`)
+    expect(spell).toContain(`recipes room is a room at "${address}"`)
+    expect(spell).toContain(`a "recipe" is a thing`)
     expect(spell).toContain(`its "title" is text`)
     expect(description.canDo.live).toMatch(/says what changed/)
     expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
@@ -144,7 +144,7 @@ describe("an airtable", { timeout: 30_000 }, () => {
     const { ingest } = realIngest({ fetch: toStub, keyNamed: () => AIRTABLE_STUB_TOKEN })
     const { description, spell } = await ingest.add({ address: stub.base, into: "/Air.spell", keySecret: "AIRTABLE" })
     expect(description.about).toMatchObject({ kind: "airtable", name: "airtable base" })
-    expect(spell).toContain(`airtable base is an airtable at "${stub.base}":`)
+    expect(spell).toContain(`airtable base is an airtable at "${stub.base}"`)
     expect(spell).toContain(`its key is the secret "AIRTABLE"`)
     expect(spell).toContain(`recipes live at "Recipes"`)
     expect(spell).toContain(`its "dish name" is text`)
@@ -181,7 +181,7 @@ describe("an atmosphere account", { timeout: 30_000 }, () => {
     const { ingest } = realIngest()
     const { description, spell } = await ingest.add({ address: DID, into: "/At.spell" })
     expect(description.about).toMatchObject({ kind: "atmosphere account", name: "alice" })
-    expect(spell).toContain(`alice is an atmosphere account at "${DID}":`)
+    expect(spell).toContain(`alice is an atmosphere account at "${DID}"`)
     expect(spell).toContain(`recipes live at "com.example.recipe"`)
     expect(spell).toContain(`its "title" is text`)
     expect(spell).not.toContain("$type")

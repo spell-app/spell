@@ -167,7 +167,7 @@ describe("SpellDeclarations.importScope()", () => {
     test("a type, its properties and constants:  `declaredAt` -- in the project's own files", () => {
       const card = imports.types.get("Card", "LOCAL_ONLY")!
       expect(card.declaredAt?.path).toBe(`${projectId}/Card.spell`)
-      expect(sourceAt(card.declaredAt)).toMatch(/^a "card" is a two sided view:\n/)
+      expect(sourceAt(card.declaredAt)).toMatch(/^a "card" is a draggable two sided view\n/)
       // its suit, its list of suits and each suit:  all made by one statement, its line and its alias's under it
       const suits = /^its "suit" is one of clubs, diamonds, hearts or spades\n\t\tit "is a \(suit\)"$/
       expect(sourceAt(card.variables.get("suit", "LOCAL_ONLY")?.declaredAt)).toMatch(suits)

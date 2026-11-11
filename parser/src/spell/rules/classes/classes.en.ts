@@ -170,7 +170,8 @@ classes.addRule(WithNestedStatements, {
 })
 
 classes.addRule(CreateType, {
-  syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?",
+  syntax:
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -278,7 +279,8 @@ classes.addRule(CreateType, {
 })
 
 classes.addRule(CreateType, {
-  syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?",
+  syntax:
+    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
@@ -300,7 +302,8 @@ classes.addRule(DimensionUnit, {
 })
 
 classes.addRule(CreateOneOfAKind, {
-  syntax: "{type:type_words} is (a|an) {superType:type} {with_nested_statements}?",
+  syntax:
+    "{type:type_words} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -356,7 +359,7 @@ classes.addRule(CreateListType, {
 // TODO: "{plural_type} are a list of ..."
 classes.addRule(CreateListType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) list of {instanceType:type} {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* list of {instanceType:type} {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -382,7 +385,8 @@ classes.addRule(CreateListType, {
 })
 
 classes.addRule(CreateListType, {
-  syntax: "(a|an) {type:quoted_type} is (a|an) list of {instanceType:type} {with_nested_statements}?",
+  syntax:
+    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* list of {instanceType:type} {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -408,12 +412,12 @@ classes.addRule(CreateListType, {
 })
 
 classes.addRule(ReopenType, {
-  syntax: "(a|an) {type} {with_nested_statements}"
+  syntax: "(a|an) {type} {with_nested_statements}?"
 })
 
 classes.addRule(CreateViewableListType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) viewable list of {instanceType:type} {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* viewable list of {instanceType:type} {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -482,7 +486,8 @@ classes.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `a "pile" is a viewable list of cards where:`
 classes.addRule(CreateViewableListType, {
-  syntax: "(a|an) {type:quoted_type} is (a|an) viewable list of {instanceType:type} {with_nested_statements}?"
+  syntax:
+    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* viewable list of {instanceType:type} {with_nested_statements}?"
 })
 
 classes.addRule(CSSBlock, {
@@ -1594,7 +1599,8 @@ classes.addRule(DefinePropertyHas, {
 })
 
 classes.addRule(OutlineSpecifierEnum, {
-  syntax: "(either|one of) {enumeration:identifier_list}",
+  syntax:
+    "(either|one of) {enumeration:identifier_list} ((,)? with default ({start:text}|{start:number}|{word:identifier}))?",
   tests: [
     {
       tests: [["one of clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]']]
@@ -1603,7 +1609,7 @@ classes.addRule(OutlineSpecifierEnum, {
 })
 
 classes.addRule(OutlineSpecifierEnum, {
-  syntax: "{enumeration:identifier_list}",
+  syntax: "{enumeration:identifier_list} ((,)? with default ({start:text}|{start:number}|{word:identifier}))?",
   tests: [
     {
       tests: [
@@ -1629,7 +1635,7 @@ classes.addRule(OutlineSpecifierDatatype, {
 
 // a stored value and where it starts:  `its "count" is a number starting at 0`, `<property "count" type="number">0</>`
 classes.addRule(OutlineSpecifierDatatype, {
-  syntax: "(a|an) {datatype:singular_type} starting at {start:expression}",
+  syntax: "(a|an) {datatype:singular_type} (,)? starting at {start:expression}",
   tests: [{ tests: [["a number starting at 0", "number"]] }]
 })
 
@@ -1942,19 +1948,19 @@ classes.addRule(PropertyValueGetter, {
 // a worked-out value from a list of its own (epic `elemental-spell` P5):
 // `- its "color" is one of red, black:`, then its value lines -- and its aliases, bulleted, under them
 classes.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} : {expression_body}?"
+  syntax: "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier_enum} :? {expression_body}?"
 })
 
 // ... and with the subject left out:  `- "color" is one of red, black:`
 classes.addRule(PropertyValueGetter, {
   syntax:
-    "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier_enum} : {expression_body}?"
+    "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier_enum} :? {expression_body}?"
 })
 
 // ... and in the sentence style (Q20):  `the color of a card is one of red, black:`
 classes.addRule(PropertyValueGetter, {
   syntax:
-    "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
+    "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} :? {expression_body}?"
 })
 
 // ... and as a possessive (epic `language` T24):
@@ -2021,7 +2027,7 @@ classes.addRule(PropertyValueGetter, {
 
 classes.addRule(PropertyValueGetter, {
   syntax:
-    "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+    "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} :? {expression_body}?"
 })
 
 // ... a plural with no article (T26):  `cards' value is ...`, the same getter as `a card's value is ...`,
@@ -2066,7 +2072,7 @@ classes.addRule(PropertyValueGetter, {
 
 classes.addRule(PropertyValueGetter, {
   syntax:
-    "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+    "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} :? {expression_body}?"
 })
 
 // quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`
@@ -2199,7 +2205,7 @@ classes.addRule(DefineMenu, {
             "    core.notify(1)",
             "  }",
             "}",
-            'core.describeAction(Game, "deal", { title: "deal", undoneAs: "Deal" })',
+            'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ],
@@ -2234,7 +2240,7 @@ classes.addRule(DefineMenu, {
             "  }",
             "}",
             "core.useElement(Game, GameElement)",
-            'core.describeAction(Game, "deal", { title: "deal", undoneAs: "Deal" })',
+            'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ]

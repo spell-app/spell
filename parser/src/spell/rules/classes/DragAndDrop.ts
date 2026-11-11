@@ -108,7 +108,16 @@ export class DragAndDrop extends SpellStatement<"type|what|is?|body?"> {
 
   /** The flag the line sets, by what its words mean:  `draggable` for `can be dragged` and `is draggable`. */
   static flagOf(match: P.MatchFor<DragAndDrop>): Ability {
-    return FLAGS[Wording.meaningOf(match.groups.what) as keyof typeof FLAGS]
+    return DragAndDrop.flagFor(match.groups.what)
+  }
+
+  /**
+   * The flag an ability's word sets, `draggable_or_droppable`'s match:  `draggable` for `draggable` (`arrastrable`).
+   * - Also a type's head line's, `a "card" is a draggable two sided view` (epic `language` P48):
+   *   `TypeDeclaration.abilitiesOf()`.
+   */
+  static flagFor(word: P.Match): Ability {
+    return FLAGS[Wording.meaningOf(word) as keyof typeof FLAGS]
   }
 }
 

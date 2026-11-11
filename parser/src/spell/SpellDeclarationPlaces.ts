@@ -61,6 +61,8 @@ export class SpellDeclarationPlaces {
       const place = SpellDeclarationPlaces.placeOf(item, statement, { ...into, of, subject })
       if (place) {
         into.places.push(place)
+        // its abilities, said on its line:  `a "card" is a draggable two sided view` (epic `language` P48)
+        if (place.kind === "type") into.places.push(...abilitiesOn(statement, place))
         const owner = place.kind === "type" ? place.name : place.of
         if (owner) {
           const names = into.named.get(owner) ?? new Set<string>()
@@ -182,6 +184,25 @@ function wordsOf(statement: P.Match): string {
   const body = statement.data.body as P.Match | undefined
   const bodyText = body?.inputText.split("\n")[0]?.trim()
   return (bodyText && text.endsWith(bodyText) ? text.slice(0, -bodyText.length) : text).replace(/[:\s]+$/, "").trim()
+}
+
+/**
+ * The abilities type declaration `statement` says on its own line, each a place on that line, named by its word:
+ * `draggable` for `a "card" is a draggable two sided view` (epic `language` P48).
+ */
+function abilitiesOn(statement: P.Match, type: SP.SpellDeclarationPlace): SP.SpellDeclarationPlace[] {
+  const { ability } = statement.groups as { ability?: P.Match | P.Match[] }
+  const said = ability === undefined ? [] : Array.isArray(ability) ? ability : [ability]
+  const words = said.flatMap((each) => each.inputText.trim().split(/\s+/)).filter(Boolean)
+  return words.map((word) => ({
+    kind: "ability" as const,
+    name: word,
+    of: type.name,
+    path: type.path,
+    line: type.line,
+    column: type.column,
+    endLine: type.line
+  }))
 }
 
 /** `props` without the keys whose value is `undefined`. */

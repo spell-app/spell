@@ -46,8 +46,10 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
     const alias = phrase.split(" ")
     if (!Wording.reads(scope, "is_or_is_not", alias[0] ?? "")) return undefined
     if (match.groups.sources) return QuotedPropertyFormula.resolveSources(match)
-    // more after the phrase, e.g. `it "is face up" if ...`:  not ours, a `quoted_type_expression`
+    // more after the phrase, e.g. `it "is face up" if ...`:  not ours, a `quoted_type_expression`;
+    // so is a phrase with no blank and code under it, its body (epic `language` P48):  `it "is real"`, then its lines
     if (tokens.slice(match.length).join("").trim()) return undefined
+    if (!phrase.includes("(") && SpellStatement.hasCodeBelow()) return undefined
     const language = SP.Language.of(scope)
     if (!phrase.includes("(")) {
       return SpellStatement.refuse(match, language.parserMessage("phrase-without-blank", { phrase }))

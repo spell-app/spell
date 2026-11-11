@@ -190,9 +190,10 @@ export function propertyCodePlace(place: SP.SpellDeclarationPlace, lines: readon
     }
     if (/\/>\s*$/.test(line) && place.endLine === place.line) return undefined
   }
-  // plain Spell (epic `language` P46):  its body only when its line opens one, `its "color" is one of red, black:`;
-  // else the Spell after its `is` on its line, `its "name" is its rank && "of" && its suit`;  a `one of` has none
-  if (opened < 0 && !/^\s*</.test(line.slice(place.column)) && !line.trimEnd().endsWith(":")) {
+  // plain Spell (epic `language` P46):  its body only when its line opens one, `its "color" is one of red, black:`,
+  // or code is under it with no colon (P48);  else the Spell after its `is` on its line,
+  // `its "name" is its rank && "of" && its suit`;  a `one of` has none
+  if (opened < 0 && !/^\s*</.test(line.slice(place.column)) && !opensBody(place, lines)) {
     if (PLAIN_ONE_OF.test(line.slice(place.column))) return undefined
     const value = /"\s+(?:is|es)\s+/u.exec(line.slice(place.column))
     if (!value) return undefined
@@ -208,6 +209,24 @@ export function propertyCodePlace(place: SP.SpellDeclarationPlace, lines: readon
   if (place.endLine <= place.line) return undefined
   return codePlaceOf(place, lines)
 }
+
+/**
+ * Does the property at `place` open a body, its code:  a colon ending its line (`its "state" is:`), or code under it
+ * with none (epic `language` P48, `its "state" is`, then its lines)?
+ * - A comment under it is its description, not code;  under a `one of`, its members' lines (`it "is a (rank)"`) aren't
+ *   either:  only its value lines (`red if it is a heart`) make it worked out.
+ */
+function opensBody(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
+  const line = lines[place.line] ?? ""
+  if (line.trimEnd().endsWith(":")) return true
+  const under = lines.slice(place.line + 1, place.endLine + 1).map((it) => it.trim())
+  const code = under.filter((it) => it && !it.startsWith("//") && !it.startsWith("#"))
+  if (!PLAIN_ONE_OF.test(line.slice(place.column))) return code.length > 0
+  return code.some((it) => !MEMBER_LINE.test(it))
+}
+
+/** A member's line under a property, not its value:  `it "is a (rank)"`, `- it must ...`, Spanish's `"es un (rango)"`. */
+const MEMBER_LINE = /^(?:-\s+|it\b|its\b|su\b|sus\b|"|es\b|está\b)/u
 
 /** A plain property's list of values, after its words:  `is one of ace, 2 ... 10, jack`, `es uno de ...`. */
 const PLAIN_ONE_OF = /"\s+(?:is\s+one\s+of|es\s+un[oa]\s+de)\s+([^:\n]+?)\s*:?\s*$/u
@@ -291,10 +310,13 @@ function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boo
 
 /**
  * Is `place` a bare ability, one with no condition:  its type's tag's attribute, `<view "card" draggable>`,
- * or its line in plain Spell, `it is draggable` (epic `language` P46)?
+ * its line in plain Spell, `it is draggable` (epic `language` P46), or its word on its type's line,
+ * `a "card" is a draggable two sided view` (P48)?
  */
 function isOnTypeTag(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
   if (place.kind !== "ability") return false
+  // said on its type's own line, a word before its template:  `draggable` (epic `language` P48)
+  if (!/\s/.test(place.name)) return true
   const line = lines[place.line] ?? ""
   return BARE_ABILITY_LINE.test(line)
 }
@@ -371,8 +393,10 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
   }
   let last = place.endLine
   if (last > place.line && /^\s*<\//.test(lines[last] ?? "")) last--
+  // its body's first line, a comment, is its description, not its code (epic `language` P48)
+  const first = place.line + 1 < last && /^\s*\/\//.test(lines[place.line + 1] ?? "") ? place.line + 1 : place.line
   return last > place.line
-    ? { path: place.path, from: place.line + 2, to: last + 1 }
+    ? { path: place.path, from: first + 2, to: last + 1 }
     : { path: place.path, from: place.line + 1, to: place.line + 1 }
 }
 

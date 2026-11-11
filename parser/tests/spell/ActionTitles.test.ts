@@ -26,7 +26,7 @@ describe("an action's title", () => {
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('core.describeAction(Editor, "compileAndRun", { title: "Compile and Run" })')
     expect(file!.compiled).toContain("get duplicateTitle() {")
-    expect(file!.compiled).toContain('{ title: "duplicate it", titleFrom: "duplicateTitle" }')
+    expect(file!.compiled).toContain('{ title: "Duplicate It", titleFrom: "duplicateTitle" }')
   })
 
   test("Spanish:  `- titulada`", () => {

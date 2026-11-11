@@ -176,8 +176,8 @@ const TAG_WITH_PREFIX = /<(\/?)[a-z]+-([a-z][\w-]*)/g
 
 /** A new view of a page's own, in each language a page is written in:  `Palette.addNewView()`. */
 const NEW_VIEWS: Record<string, string> = {
-  en: 'a "new view" is a view:\n\tto draw it: <text>A new view</text>',
-  es: 'una "nueva vista" es una vista:\n\tpara dibujarla: <texto>Una vista nueva</texto>'
+  en: 'a "new view" is a view\n\tto draw it: <text>A new view</text>',
+  es: 'una "nueva vista" es una vista\n\tpara dibujarla: <texto>Una vista nueva</texto>'
 }
 
 /** The preference that remembers whether it's kept open. */

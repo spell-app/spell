@@ -187,7 +187,7 @@ describe("a Python spell app, in a real browser", () => {
     const page = await opened()
     const before = page.received.length
     // its button is the toolbar's:  an action's item box, its title inside
-    await page.page.locator("ui-toolbar [part=item]", { hasText: "Auto play" }).click()
+    await page.page.locator("ui-toolbar [part=item]", { hasText: "Auto Play" }).click()
     await page.page.waitForTimeout(3000)
     const frames = page.received.slice(before).map((frame) => JSON.stringify(frame).length)
     process.stderr.write(`AutoPlay's frames:  ${frames.length}, of ${frames.join(", ")} characters\n`)

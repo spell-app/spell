@@ -290,7 +290,7 @@ export function spellTypeFor(document: LexiconDocument): SpellTypeFromLexicon {
   ]
   const source = [
     ...header,
-    `a "${typeWords}" is a thing:`,
+    `a "${typeWords}" is a thing`,
     `\tit is published as "${document.id}"`,
     ...lines,
     ...rules,

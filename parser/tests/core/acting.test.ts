@@ -209,7 +209,7 @@ describe("core.menuOf()", () => {
     warn.mockRestore()
     const [file, edit] = bar
     if (file?.kind !== "menu" || edit?.kind !== "menu") throw new Error("expected menus")
-    expect([file.title, edit.title]).toEqual(["File", "edit menu"])
+    expect([file.title, edit.title]).toEqual(["File", "Edit Menu"])
     const [, , more] = file.items
     if (more?.kind !== "menu") throw new Error("expected a sub-menu")
     expect(more.items.map((item) => (item.kind === "action" ? item.title : "-"))).toEqual(["Solitaire", "Cards"])

@@ -117,7 +117,7 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
   return { ingest, asked, ...disk }
 }
 
-const STARS_SPELL = `stars is a web server at "${API}":
+const STARS_SPELL = `stars is a web server at "${API}"
 	its id is its "url"
 	check it every 30 seconds
 	it is read only
@@ -125,7 +125,7 @@ const STARS_SPELL = `stars is a web server at "${API}":
 	people live at "/people"
 	planets live at "/planets"
 
-a "person" is a thing:
+a "person" is a thing
 	it lives in stars
 	its "name" is text
 	its "height" is a number or "unknown"
@@ -135,7 +135,7 @@ a "person" is a thing:
 	its "films" is a list of text  // each an address
 	its "created" is a date
 
-a "planet" is a thing:
+a "planet" is a thing
 	it lives in stars
 	its "name" is text
 	its "population" is a number`
@@ -514,10 +514,8 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "currencies" is a list of currencies`)
     expect(spell).toContain(`its "languages" is a list of languages`)
     expect(spell).toContain(`its "native" is a list of natives`)
-    expect(spell).toMatch(
-      /a "currency" is a thing:\n\tits "code" is text\n\tits "name" is text\n\tits "symbol" is text/
-    )
-    expect(spell).toMatch(/a "language" is a thing:\n\tits "code" is text\n\tits "name" is text/)
+    expect(spell).toMatch(/a "currency" is a thing\n\tits "code" is text\n\tits "name" is text\n\tits "symbol" is text/)
+    expect(spell).toMatch(/a "language" is a thing\n\tits "code" is text\n\tits "name" is text/)
     expect(spell).not.toMatch(/"EUR"|"fra" is|"nld" is/)
     // a thing's few fields, the same in every row, are its fields
     expect(spell).toContain(`its "lat" is a number`)
@@ -597,7 +595,7 @@ describe("adding a source", () => {
     // a plain address inside a row says so, as one at the top does
     expect(spell).toContain(`its "chart" is text  // an address`)
     // ONE type for the whole place
-    expect(spell.match(/^a "poke api name" is a thing:/gm)).toHaveLength(1)
+    expect(spell.match(/^a "poke api name" is a thing$/gm)).toHaveLength(1)
     expect(spell).toContain(`\tits "name" is text\n\tits "address" is text, stored as "url"  // never read`)
     // read through it, the pair is held whole:  its name, and its address still there
     const { core } = await import("spell/parser/core")
@@ -628,7 +626,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "cost in credits" is a number\n`)
     expect(spell).toContain(`it writes names like "cost_in_credits"`)
     expect(spell).toContain(`its "parts" is a part`)
-    expect(spell).toContain(`a "part" is a thing:`)
+    expect(spell).toContain(`a "part" is a thing`)
     expect(spell).toContain(`its "width" is a number`)
     expect(spell).not.toMatch(/its "[^"\n]*\./)
     expect(description.spellCantSay.join("\n")).not.toMatch(/parts/)
@@ -638,7 +636,7 @@ describe("adding a source", () => {
     const routes = { [API]: { dates: `${API}/dates` }, [`${API}/dates`]: [{ id: 1, name: "Opening night" }] }
     const { ingest } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/C.spell", name: "cast" })
-    expect(spell).toContain(`a "cast date" is a thing:`)
+    expect(spell).toContain(`a "cast date" is a thing`)
     expect(spell).toContain(`cast dates live at "/dates"`)
   })
 
@@ -646,7 +644,7 @@ describe("adding a source", () => {
     const routes = { [API]: { characters: `${API}/characters` }, [`${API}/characters`]: [{ id: 1, name: "Rey" }] }
     const { ingest } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/C.spell", name: "cast" })
-    expect(spell).toContain(`a "character" is a thing:`)
+    expect(spell).toContain(`a "character" is a thing`)
     expect(spell).toContain(`characters live at "/characters"`)
   })
 
@@ -781,7 +779,7 @@ describe("which file", () => {
     const { spell, wrote } = await ingest.add({ address: API, into: "/Stars.api.es.spell", name: "stars" })
     expect(wrote).toBe(true)
     console.log(spell)
-    expect(spell).toMatch(/^stars es un servidor web en "https:\/\/stars\.test\/api":/)
+    expect(spell).toMatch(/^stars es un servidor web en "https:\/\/stars\.test\/api"$/m)
     expect(spell).toContain(`su "name" es texto`)
     // the English it wrote is what the description keeps
     expect(descriptions.get("/Stars.api.es.json5")!.spell[0]).toMatch(/is a web server at/)
@@ -918,7 +916,7 @@ describe("GitHub's way (epic `data` P28)", () => {
     const { spell, description } = await ingest.add(ASK)
     expect(spell).toContain(`its optional key is the secret "GH_KEY"`)
     expect(spell).toContain(`its next page is in its "Link" header`)
-    expect(spell).toContain(`a "user" is a thing:`)
+    expect(spell).toContain(`a "user" is a thing`)
     expect(spell).toContain(`a user's id is its "login"`)
     expect(spell).not.toMatch(/"\+1"|its "1"/)
     expect(description.notes.join("\n")).toMatch(/Left out reaction's "\+1"/)
@@ -1213,10 +1211,10 @@ describe("looking again", () => {
       [`${API}/moons`]: [{ id: 1, name: "Endor" }],
       [`${API}/planets`]: undefined
     })
-    expect(text).toContain(`a "moon" is a thing:`)
+    expect(text).toContain(`a "moon" is a thing`)
     expect(text).toContain(`\tmoons live at "/moons"`)
     expect(result.changes.join("\n")).toMatch(/New collection:  moons/)
-    expect(text).toContain(`a "planet" is a thing:`)
+    expect(text).toContain(`a "planet" is a thing`)
     expect(result.couldntChange.join("\n")).toMatch(/"planets" is gone from the source/)
   })
 
@@ -1323,7 +1321,7 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
       name: "box"
     })
     expect(description.about.kind).toBe("graphql server")
-    expect(spell).toContain(`a "recipe" is a thing:`)
+    expect(spell).toContain(`a "recipe" is a thing`)
     expect(description.canDo.write).toMatch(/addRecipe, changeRecipe, removeRecipe.*Never tried/)
     expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
   })

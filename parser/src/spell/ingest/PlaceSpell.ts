@@ -210,7 +210,7 @@ export function spellPartsFor(
     }
   }
   return {
-    header: `${name} is ${articled(kind === "file" ? JSON_FILE_WORDS : kind)} at "${address}":`,
+    header: `${name} is ${articled(kind === "file" ? JSON_FILE_WORDS : kind)} at "${address}"`,
     placeLines,
     types: [
       ...shown.map(([collection, description]) => typeLines(collection, description, name, collections)),
@@ -404,7 +404,7 @@ function typesInside(
           }
         ]
       })
-      const header = `${articled(words).replace(words, `"${words}"`)} is a thing:`
+      const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
       types.set(words, { collection, header, lines, isInside: true, insideFields: inside })
       add(collection, words, inside)
     }
@@ -454,7 +454,7 @@ function namedLinkTypes(
   return [
     {
       collection: shown[0]![0],
-      header: `${articled(words).replace(words, `"${words}"`)} is a thing:`,
+      header: `${articled(words).replace(words, `"${words}"`)} is a thing`,
       lines: [
         { key: `inside:${words}:name`, text: `its "name" is text` },
         {
@@ -510,7 +510,7 @@ function typeLines(
   }
   return {
     collection,
-    header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing:`,
+    header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing`,
     lines
   }
 }
@@ -649,6 +649,14 @@ export function placesIn(text: string): Array<{ name: string; address: string }>
 /** A place's line, as far as saying which it is:  in either language. */
 const PLACE_LINE = /^([^\s"/][^"\n]*?) (?:is|es) (?:an?|una?) [^"\n]+? (?:at|from|en|desde) "([^"\n]+)"/gm
 
+/**
+ * The same header line, a colon at its end or not:  an older look wrote `a "person" is a thing:`, today's
+ * `a "person" is a thing` (epic `language` P48).
+ */
+function sameHeader(line: string, header: string): boolean {
+  return line.replace(/:\s*$/, "") === header.replace(/:\s*$/, "")
+}
+
 /** The same address, whatever ends it. */
 function sameAddress(a: string, b: string): boolean {
   return a.replace(/\/+$/, "") === b.replace(/\/+$/, "")
@@ -691,13 +699,13 @@ export function mergedSpell(
   const merge: SpellMerge = { text, changed: [], couldnt: [] }
   const lines = text.split("\n")
   const own = new Set(allLines(before).map((line) => line.text))
-  const placeAt = lines.findIndex((line) => line === before.header)
+  const placeAt = lines.findIndex((line) => sameHeader(line, before.header))
   if (placeAt < 0) {
     merge.couldnt.push(`The place's line isn't as it was written, so nothing under it was changed:  ${before.header}`)
     return merge
   }
   // it moved:  `spell place update --address`
-  if (after.header !== before.header) {
+  if (!sameHeader(after.header, before.header)) {
     lines[placeAt] = after.header
     merge.changed.push(`Moved:  ${after.header}`)
   }
@@ -717,7 +725,7 @@ export function mergedSpell(
       )
       continue
     }
-    const blockAt = lines.findIndex((line) => line === was.header)
+    const blockAt = lines.findIndex((line) => sameHeader(line, was.header))
     if (blockAt < 0) {
       merge.couldnt.push(`"${was.header}" isn't in the file as it was written, so its lines weren't changed.`)
       continue

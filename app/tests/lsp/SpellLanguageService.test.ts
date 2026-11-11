@@ -589,10 +589,11 @@ describe("SpellLanguageService", () => {
         await typed("set y t", (items) => expect(labels(items)).toContain("to"))
       })
 
-      test("`a thingy is a ` => types, and ONLY types", async () => {
+      test("`a thingy is a ` => types, else only an ability before one, or `list` and `viewable` (epic `language` P48)", async () => {
         await typed("a thingy is a ", (items) => {
           expect(labels(items)).toEqual(expect.arrayContaining(["card", "deck", "pile"]))
-          expect(items.every(({ kind }) => kind === CompletionItemKind.Class)).toBe(true)
+          const others = items.filter(({ kind }) => kind !== CompletionItemKind.Class).map(({ label }) => label)
+          expect(others.sort()).toEqual(["clickable", "draggable", "droppable", "list", "selectable", "viewable"])
         })
       })
 

@@ -318,7 +318,7 @@ export const spanishWords: SP.LanguageWords = {
      * - The kind ends at `donde`, `con`, a `:` or the line's end.
      */
     kindDeclaration:
-      /^[ \t]*(?:-[ \t]+)?(un[oa]?[ \t]+)?(?!(?:sus?|el|la|los|las|un[oa]?)[ \t])["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+alias[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+es[ \t]+un[oa]?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:donde\b|con\b|:|$))/gimu,
+      /^[ \t]*(?:-[ \t]+)?(un[oa]?[ \t]+)?(?!(?:sus?|el|la|los|las|un[oa]?)[ \t])["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+alias[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+es[ \t]+un[oa]?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:donde\b|con\b|:|,|$))/gimu,
     /** A line declaring a value kind, its PLURAL name captured:  `- "palos" como uno de ...`. */
     valueKindDeclaration:
       /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+como[ \t]+(?:uno[ \t]+de|o[ \t]+bien)\b/gimu,
@@ -343,10 +343,11 @@ export const spanishWords: SP.LanguageWords = {
      * - Not a loop, which starts `para cada` too:  `para cada carta en el mazo:`.
      */
     methodLine: /^(?:para(?![ \t]+cada\b)|(?:crear[ \t]+)?animaci[oó]n)[ \t]/iu,
-    /** A line re-opening a type, its name captured:  `una carta:`, `un solitario donde:`. */
+    /** A line re-opening a type, its name captured:  `una carta:`, `un solitario donde:`, `una pila` (P48). */
     placeDeclaration:
       /^(?!(?:un[oa]?|el|la|los|las|su|sus)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+es[ \t]+un[oa]?[ \t].*[ \t](?:en|desde)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
-    reopenedType: /^un[oa]?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:donde[ \t]*)?:[ \t]*$/iu
+    reopenedType:
+      /^un[oa]?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:(?:donde[ \t]*)?:)?[ \t]*$/iu
   }
 }
 

@@ -189,7 +189,7 @@ describe("a place that moved (T77)", () => {
     const before = disk.texts.get("/K.spell")!
     const { fetch } = kitchenServer({ address: NEW_HOME })
     const { changes, description } = await ingestOn(fetch, disk).ingest.update("/K.spell", { movedTo: NEW_HOME })
-    expect(changes).toEqual([`Moved:  kitchen is a web server at "${NEW_HOME}":`])
+    expect(changes).toEqual([`Moved:  kitchen is a web server at "${NEW_HOME}"`])
     expect(disk.texts.get("/K.spell")).toBe(before.replace(API, NEW_HOME))
     expect(description.about.address).toBe(NEW_HOME)
     expect((descriptionFromDisk(disk.descriptions.get("/K.json5")!) as PlaceDescription).about.address).toBe(NEW_HOME)
@@ -199,7 +199,7 @@ describe("a place that moved (T77)", () => {
     const disk = memoryFiles()
     const { ingest } = ingestOn(kitchenServer().fetch, disk)
     await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
-    disk.texts.set("/K.spell", disk.texts.get("/K.spell")!.replace(`at "${API}":`, `from "${API}":`))
+    disk.texts.set("/K.spell", disk.texts.get("/K.spell")!.replace(`at "${API}"`, `from "${API}":`))
     const { couldntChange } = await ingestOn(kitchenServer({ address: NEW_HOME }).fetch, disk).ingest.update(
       "/K.spell",
       {

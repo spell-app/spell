@@ -6,6 +6,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { SpellType } from "spell/parser/spell/rules/types/SpellType"
+import { DragAndDrop } from "./DragAndDrop"
 
 /**
  * A statement declaring a type -- which may take an OUTLINE body:
@@ -173,6 +174,29 @@ export class TypeDeclaration<
         match,
         `core.defineElement(this, ${args.map((arg) => JSON.stringify(arg)).join(", ")})`
       )
+    })
+  }
+
+  /**
+   * The flags of the abilities `match` names before its template, e.g. `static draggable = true` for
+   * `a "card" is a draggable two sided view` (epic `language` P48):  what `it is draggable` in its body sets.
+   * - Each a class member, as that line's is:  `Block.getAST()` puts them first in our body's statements,
+   *   so `SP.hoistClassMembers()` moves them into the class.
+   * - Spanish's come after its template:  `una "carta" es una vista reversible arrastrable`.
+   */
+  abilitiesOf(match: P.Match): P.ASTPatchedMember[] {
+    const { ability, type } = match.groups as { ability?: P.Match | P.Match[]; type: P.Match }
+    // one word, or several (`a clickable selectable view`):  a repeat's match, each word one of its own
+    const words = (ability === undefined ? [] : Array.isArray(ability) ? ability : [ability]).flatMap((each) =>
+      each.rule instanceof P.Repeat ? each.matched.filter((word): word is P.Match => word instanceof P.Match) : [each]
+    )
+    return words.map((word) => {
+      const flag = new P.ASTStaticDefinition(match, {
+        type: P.matchAST<P.ASTTypeExpression>(type),
+        name: DragAndDrop.flagFor(word),
+        value: new P.ASTBooleanLiteral(match, true)
+      })
+      return new P.ASTPatchedMember(match, { member: flag })
     })
   }
 

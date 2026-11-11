@@ -509,6 +509,17 @@ export class BlockToken extends Token<string, BlockTokenProps> {
   toString() {
     return this.tokens.join("\n")
   }
+
+  /**
+   * Characters the block covers in the source:  to its last line's end, newline and all.
+   * - NOT its `raw`'s length:  `toString()` joins lines that keep their own newlines with another one, so it runs
+   *   one character long per line, and a block of a few lines reached into the line after it
+   *   (`matchForOffset()` then found the block, not that line:  epic `language` P48).
+   */
+  get length() {
+    const last = this.tokens.at(-1)
+    return last ? last.next - this.start : super.length
+  }
 }
 /** Extra `record` props for `BlockToken`. */
 export type BlockTokenProps = Prettify<P.TokenProps<string>> & {

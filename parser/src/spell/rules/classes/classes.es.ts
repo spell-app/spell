@@ -235,7 +235,7 @@ classesEs.addRule(WithNestedStatements, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -298,7 +298,7 @@ classesEs.addRule(CreateType, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     { compileAs: "statement", tests: [['una "card" es una cosa', "export class Card extends Thing {}"]] },
     { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] }
@@ -323,7 +323,7 @@ classesEs.addRule(DimensionUnit, {
 })
 
 classesEs.addRule(CreateOneOfAKind, {
-  syntax: `{type:type_words} es ${A} {superType:type} {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -377,7 +377,7 @@ classesEs.addRule(CreateListType, {
 })
 
 classesEs.addRule(CreateListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -403,7 +403,7 @@ classesEs.addRule(CreateListType, {
 })
 
 classesEs.addRule(CreateListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:quoted_type} es ${A} lista {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -429,11 +429,11 @@ classesEs.addRule(CreateListType, {
 })
 
 classesEs.addRule(ReopenType, {
-  syntax: `${A} {type} {with_nested_statements}`
+  syntax: `${A} {type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -466,7 +466,7 @@ classesEs.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `una "pila" es una lista visible de cartas donde:`
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`
+  syntax: `${A} {type:quoted_type} es ${A} lista visible {ability:draggable_or_droppable}* ${OF} {instanceType:type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CSSBlock, {
@@ -1645,7 +1645,8 @@ classesEs.addRule(DefinePropertyHas, {
 })
 
 classesEs.addRule(OutlineSpecifierEnum, {
-  syntax: "(o bien|uno de|una de) {enumeration:identifier_list}",
+  syntax:
+    "(o bien|uno de|una de) {enumeration:identifier_list} ((,)? por defecto ({start:text}|{start:number}|{word:identifier}))?",
   tests: [
     {
       tests: [["uno de clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]']]
@@ -1654,7 +1655,7 @@ classesEs.addRule(OutlineSpecifierEnum, {
 })
 
 classesEs.addRule(OutlineSpecifierEnum, {
-  syntax: "{enumeration:identifier_list}",
+  syntax: "{enumeration:identifier_list} ((,)? por defecto ({start:text}|{start:number}|{word:identifier}))?",
   tests: [
     {
       tests: [
@@ -1680,7 +1681,7 @@ classesEs.addRule(OutlineSpecifierDatatype, {
 
 // a stored value and where it starts:  `su "cuenta" es un número empezando en 0`
 classesEs.addRule(OutlineSpecifierDatatype, {
-  syntax: `${A} {datatype:singular_type} empezando en {start:expression}`,
+  syntax: `${A} {datatype:singular_type} (,)? empezando en {start:expression}`,
   tests: [{ tests: [["un número empezando en 0", "number"]] }]
 })
 
@@ -1968,17 +1969,17 @@ classesEs.addRule(PropertyValueGetter, {
 // un valor calculado de una lista propia (épica `elemental-spell` P5):
 // `- su "color" es uno de rojo, negro:`, luego sus líneas de valor -- y sus frases, con viñeta, debajo
 classesEs.addRule(PropertyValueGetter, {
-  syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
+  syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} :? {expression_body}?`
 })
 
 // ... y sin el sujeto:  `- "color" es uno de rojo, negro:`
 classesEs.addRule(PropertyValueGetter, {
-  syntax: `{type:subject_implied} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} : {expression_body}?`
+  syntax: `{type:subject_implied} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier_enum} :? {expression_body}?`
 })
 
 // ... y en el estilo de oraciones (Q20):  `el color de una carta es uno de rojo, negro:`
 classesEs.addRule(PropertyValueGetter, {
-  syntax: `${THE} {property:member_words} ${OF} ${A} {type:known_type} es {specifier:outline_specifier_enum} : {expression_body}?`
+  syntax: `${THE} {property:member_words} ${OF} ${A} {type:known_type} es {specifier:outline_specifier_enum} :? {expression_body}?`
 })
 
 // NOTE:  no possessive (epic `language` T24):  English's `a card's value is ...` is `el valor de una carta es ...`

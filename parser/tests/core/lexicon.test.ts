@@ -107,7 +107,7 @@ describe("spellTypeFor()", () => {
       [
         '// Read in from the Lexicon "xyz.statusphere.status" (spell space lexicon read):  its records\' shape, as Spell says it.',
         '// - "status" holds at most 32 bytes:  Spell says lengths in letters',
-        'a "status" is a thing:',
+        'a "status" is a thing',
         '\tit is published as "xyz.statusphere.status"',
         '\tits "status" is required text, with maximum length 1',
         '\tits "created at" is a required date',

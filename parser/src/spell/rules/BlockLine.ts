@@ -60,6 +60,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     let lineBodyMark: P.JournalMark | undefined
     let fromBody: string | undefined
     let bodyErrorsAt: number | undefined
+    // a rule read what's indented under the line, to say what the line is -- see `SpellStatement.below`
+    let readsBelow = false
     if (!(written instanceof P.LineToken)) {
       console.warn("BlockLine.parse(): got non-line", written)
       return undefined
@@ -120,7 +122,19 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       const unparsed = tokens.slice(start, end)
       // an outline's bullet, e.g. `- it has a deck`:  kept as a token, never part of the statement
       if (BlockLine.isBullet(unparsed)) matched.push(unparsed.shift()!)
-      let statement = scope.parser?.parse(unparsed, "statement", scope)
+      // what's indented under it, for a line with no colon that takes it as its body (epic `language` P48)
+      const outerBelow = SpellStatement.below
+      const outerReadBelow = SpellStatement.readBelow
+      SpellStatement.below = nextItem instanceof P.BlockToken ? nextItem : undefined
+      SpellStatement.readBelow = false
+      let statement: P.Match | undefined
+      try {
+        statement = scope.parser?.parse(unparsed, "statement", scope)
+      } finally {
+        readsBelow = SpellStatement.readBelow
+        SpellStatement.below = outerBelow
+        SpellStatement.readBelow = outerReadBelow
+      }
       // a statement its rule refused, saying why -- see `SpellStatement.refuse()`:  an error, never committed
       if (statement?.is(ParseError)) {
         errors.push(statement)
@@ -195,6 +209,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     if (bodyErrorsAt !== undefined) result.data.bodyErrorsAt = bodyErrorsAt
     if (lineBodyMark) result.data.bodyMark = lineBodyMark
     if (fromBody !== undefined) result.data.fromBody = fromBody
+    if (readsBelow) result.data.readsBelow = true
     return result
   }
 
@@ -239,6 +254,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   reparseBody(line: P.MatchFor<this>, blockToken: P.BlockToken): P.Match | undefined {
     const { statement, bodyErrorsAt } = line.data
     if (!statement || !(statement.rule instanceof SpellStatement) || bodyErrorsAt === undefined) return undefined
+    // what the line IS depends on what's under it, e.g. a property worked out by the lines under it (P48)
+    if (line.data.readsBelow) return undefined
     const oldBody = statement.rule.getBody(statement)
     if (!oldBody?.is(Block) || line.tokens[1] !== oldBody.tokens[0]) return undefined
     if (statement.nestedScope === statement.scope || P.IncrementalParse.changesGlobalScope(oldBody)) return undefined
