@@ -407,40 +407,36 @@ and copied into the extension when it's built.
 
 ## The settings the repos ship
 
-One folder of editor settings, spell-app's `.vscode/`.
-spell-ui adds a single setting;  the kit, spell-parser and spell-epic ship none.
+The kit's root `.vscode/` holds the editor settings, so every window reads them:
+the kit's window and every epic's window are rooted at the kit, and VS Code reads a folder's `.vscode/` only when
+that folder is one of the window's top-level folders.
 
 | File | What it holds |
 | --- | --- |
-| spell-app's [extensions.json](https://github.com/spell-app/spell/blob/main/app/.vscode/extensions.json) | Oxc recommended;  Prettier and ESLint (`esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`) marked unwanted |
-| spell-app's [settings.json](https://github.com/spell-app/spell/blob/main/app/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  what search skips |
+| the kit's [extensions.json](https://github.com/spell-app/spell/blob/main/.vscode/extensions.json) | Oxc recommended;  Prettier and ESLint (`esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`) marked unwanted |
+| the kit's [settings.json](https://github.com/spell-app/spell/blob/main/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  what search skips;  a link in the Markdown preview opens its file |
 | spell-app's [launch.json](https://github.com/spell-app/spell/blob/main/app/.vscode/launch.json) | "Run Spell Extension", on F5:  a new window running the extension from `vscode/`, open on the Solitaire example |
 | spell-app's [tasks.json](https://github.com/spell-app/spell/blob/main/app/.vscode/tasks.json) | "Build Spell Extension", which F5 runs first:  `yarn install && yarn build` in `vscode/` |
-| spell-ui's [settings.json](https://github.com/spell-app/spell/blob/main/ui/.vscode/settings.json) | a link in the Markdown preview opens its file in the editor |
 
-**The catch:  VS Code reads a folder's `.vscode/` only when that folder is one of the window's top-level folders.**
-The kit's window and every epic's window are rooted at the kit, which ships none:
-there, your own settings decide what formats on save.
-
-- The HTML and CSS data don't depend on that:  the extension carries them, in every window.
-
-For spell-app's settings and its F5, open spell-app in a window of its own, `code ~/www/spell/app`;
-its Claude panel then lists only the sessions started there.
+- The HTML and CSS data don't depend on any of them:  the extension carries them, in every window.
+- spell-app's F5 is still its own folder's:  open spell-app in a window of its own, `code ~/www/spell/app`;
+  its Claude panel then lists only the sessions started there.
 
 <details>
-<summary>Every setting in spell-app's settings.json</summary>
+<summary>Every setting in the kit's settings.json</summary>
 
 | Setting | What it does |
 | --- | --- |
 | `oxc.enable`, `oxc.lint.run: "onType"` | oxlint, through the Oxc extension, as you type |
-| `oxc.disableNestedConfig`, `oxc.fmt.disableNestedConfig` | read only the window's root `vite.config.ts`, as `vp check` does |
+| (no `oxc.disableNestedConfig`) | the Oxc extension reads the nearest `vite.config.ts`:  each big folder's holds its own lint rules and its formatter's ignore list, as its `yarn format` reads it |
 | `oxc.unusedDisableDirectives: "warn"` | a stale `// oxlint-disable` shows in the editor, not only in CI, as the lint script's `--report-unused-disable-directives` would |
 | `editor.defaultFormatter: "oxc.oxc-vscode"`, `editor.formatOnSave` | oxfmt on save, for every file and pinned for each language:  TypeScript, TSX, JavaScript, JSX, JSON, JSONC, CSS, Less, YAML |
 | (no Markdown) | the format settings skip `**/*.md`:  the `AGENTS.md` files and the READMEs are wrapped by hand |
 | `files.associations`:  `*.json5` as `jsonc` | VS Code has no JSON5 mode, and checks a file against a schema only in its JSON modes |
-| `json.schemas` | a person's `__me.json5` and an org's `__org.json5`, checked against the people library's types;  `spell compile` writes `Person.schema.json` and `Org.schema.json` into the build folder, so they're missing until it has run |
-| `search.exclude` | Quick Open and Find in Files skip `__snapshots__/`, `_assets/` (the icons), `_data/`, `graphify-out/`, `app/static/semantic-ui-css/` and `yarn.lock`;  Explorer still shows them |
+| `json.schemas` | a person's `__me.json5` and an org's `__org.json5`, checked against the people library's types;  `spell compile` writes `Person.schema.json` and `Org.schema.json` into app's build folder, so they're missing until it has run |
+| `search.exclude` | Quick Open and Find in Files skip `__snapshots__/`, `_assets/` (the icons), `_data/`, `graphify-out/`, `app/app/static/semantic-ui-css/` and `yarn.lock`;  Explorer still shows them |
 | `js/ts.experimental.useTsgo: false` | the editor's TypeScript stays the JavaScript one, not the native preview |
+| `markdown.preview.openMarkdownLinks: "inEditor"` | a link in the Markdown preview opens its file in the editor |
 | `vetur.validation.script: false` | a leftover, for Vue's Vetur extension |
 
 </details>

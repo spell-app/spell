@@ -110,5 +110,9 @@
   // - The session-start hook applies them in the background;  `epic worktree patch --all` does it everywhere now.
   // - `copy`:  main's file, put in each checkout that doesn't track it yet, git-excluded there;  once the branch merges
   //   main it tracks the file, and the patch does nothing there.  `run`:  a command, run once in each checkout.
-  "checkoutPatches": []
+  "checkoutPatches": [
+    // The kit's VS Code settings, so a save formats with oxfmt in every window (epic `epic-engine` P73).
+    { "id": "vscode-settings", "copy": ".vscode/settings.json" },
+    { "id": "vscode-extensions", "copy": ".vscode/extensions.json" }
+  ]
 }
